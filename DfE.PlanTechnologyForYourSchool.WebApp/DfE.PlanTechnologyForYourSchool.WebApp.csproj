@@ -7,4 +7,8 @@
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="GovUk.Frontend.AspNetCore" Version="1.0.0-beta3" />
+    </ItemGroup>
+
 </Project>
