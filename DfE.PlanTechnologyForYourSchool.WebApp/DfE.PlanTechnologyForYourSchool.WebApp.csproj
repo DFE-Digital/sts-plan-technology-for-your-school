@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="GovUk.Frontend.AspNetCore" Version="1.0.0-beta3" />
+      <PackageReference Include="GovUk.Frontend.AspNetCore" Version="1.0.0-beta4" />
     </ItemGroup>
 
 </Project>
