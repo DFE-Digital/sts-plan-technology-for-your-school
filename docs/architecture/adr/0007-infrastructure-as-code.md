@@ -1,6 +1,13 @@
-# Template
+---
+type: adr
+title: Infrastructure As Code
+created: 2022-11-16
+status: Accepted
+---
 
-* Status: accepted
+# Infrastructure As Code
+
+* **Status**: Accepted
 
 ## Context and Problem Statement
 

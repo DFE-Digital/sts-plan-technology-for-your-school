@@ -1,6 +1,13 @@
-# Template
+---
+type: adr
+title: Authentication Provider
+status: Accepted
+created: 2022-11-16
+---
 
-* Status: accepted
+# Authentication Provider
+
+* **Status**: Accepted
 
 ## Context and Problem Statement
 

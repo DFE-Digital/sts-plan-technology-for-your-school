@@ -1,6 +1,14 @@
-# Template
+---
+title: Source Repository Hosting
+type: adr
+summary: Where should the solution's source code be stored?
+status: Accepted
+created: 2022-11-16
+---
 
-* Status: accepted
+# Source Repository Hosting
+
+* **Status**: Accepted
 
 ## Context and Problem Statement
 

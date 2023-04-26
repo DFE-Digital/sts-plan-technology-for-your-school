@@ -1,6 +1,12 @@
-# Template
+---
+title: Content Management
+type: adr
+created: 2022-11-16
+---
 
-* Status: accepted
+# Content Management
+
+* **Status**: Accepted
 
 ## Context and Problem Statement
 

@@ -1,6 +1,14 @@
-# Template
+---
+title: Application Framework
+summary: Which .NET framework should be used for the project?
+status: Accepted
+created: 2022-11-16
+type: adr
+---
 
-* Status: accepted
+# Application Framework
+
+* **Status**: Accepted
 
 ## Context and Problem Statement
 

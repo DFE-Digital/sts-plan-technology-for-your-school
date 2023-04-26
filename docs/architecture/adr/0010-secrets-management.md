@@ -1,6 +1,12 @@
-# Template
+---
+type: adr
+title: Secrets Management
+created: 2022-11-16
+---
 
-* Status: accepted
+# Secrets Management
+
+* **Status**: Accepted
 
 ## Context and Problem Statement
 
