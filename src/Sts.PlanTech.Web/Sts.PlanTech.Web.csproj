@@ -11,4 +11,9 @@
       <PackageReference Include="GovUk.Frontend.AspNetCore" Version="1.0.0-beta4" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Update="Properties\launchSettings.json">
+        <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+      </Content>
+    </ItemGroup>
 </Project>
