@@ -6,7 +6,7 @@ riderModule.iml
 .idea/
 .DS_Store
 
-### Dotnet vvv from https://github.com/microsoft/dotnet/blob/main/.gitignore
+### Dotnet from https://github.com/microsoft/dotnet/blob/main/.gitignore
 
 # User-specific files
 *.suo
