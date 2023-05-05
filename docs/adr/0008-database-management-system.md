@@ -1,6 +1,13 @@
-# Template
+---
+title: Database Management System
+type: adr
+status: Accepted
+created: 2022-11-16
+---
 
-* Status: accepted
+# Database Management System
+
+* **Status**: Accepted
 
 ## Context and Problem Statement
 

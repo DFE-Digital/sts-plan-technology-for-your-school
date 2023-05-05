@@ -1,6 +1,14 @@
-# Template
+---
+type: adr
+title: Deployment Tooling
+summary: How to ensure new versions of the application are consistently packaged, tested and deployed?
+created: 2022-11-16
+status: Accepted
+---
 
-* Status: accepted
+# Deployment Tooling
+
+* **Status**: Accepted
 
 ## Context and Problem Statement
 

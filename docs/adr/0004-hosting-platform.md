@@ -1,10 +1,17 @@
-# Template
+---
+title: Hosting Platform
+type: adr
+summary: Within the DfE there are a choice of hosting platforms (e.g. Azure, AWS) that could be used; which one should be used within this project, and why?
+created: 2022-11-16
+---
 
-* Status: accepted
+# Hosting Platform
+
+* **Status**: Accepted
 
 ## Context and Problem Statement
 
-Within the DfE there are a choice of web frameworks that are used for the implementation of software including .NET and Ruby on Rails. Which framework should we use for this project?
+Within the DfE there are a choice of hosting platforms (e.g. Azure, GOV.UK PaaS) that could be used; which one should be used within this project, and why?
 
 ## Decision Drivers
 

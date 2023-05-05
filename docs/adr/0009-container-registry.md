@@ -1,6 +1,12 @@
-# Template
+---
+title: Container Registry
+status: Accepted
+created: 2023-04-26
+type: adr
+---
+# Container Registry
 
-* Status: accepted
+* **Status**: Accepted
 
 ## Context and Problem Statement
 
