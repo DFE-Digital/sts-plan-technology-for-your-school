@@ -1,4 +1,4 @@
-namespace DfE.PlanTechnologyForYourSchool.WebApp.Models;
+namespace PlanTechnologyForYourSchool.WebApp.Models;
 
 public class ErrorViewModel
 {

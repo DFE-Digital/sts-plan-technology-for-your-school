@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using DfE.PlanTechnologyForYourSchool.WebApp.Models;
+using PlanTechnologyForYourSchool.WebApp.Models;
 
-namespace DfE.PlanTechnologyForYourSchool.WebApp.Controllers;
+namespace PlanTechnologyForYourSchool.WebApp.Controllers;
 
 public class HomeController : Controller
 {
