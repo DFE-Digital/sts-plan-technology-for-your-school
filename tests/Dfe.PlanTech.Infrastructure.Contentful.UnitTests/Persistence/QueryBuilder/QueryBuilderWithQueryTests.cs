@@ -2,7 +2,7 @@ using Sts.PlanTech.Infrastructure.Contentful.Persistence;
 using Sts.PlanTech.Infrastructure.Persistence.Querying;
 using Contentful.Core.Search;
 
-namespace Sts.PlanTech.Infrastructure.Contentful.Tests;
+namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests;
 
 public class QueryBuilderWithQueryTests
 {

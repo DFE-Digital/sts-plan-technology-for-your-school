@@ -1,6 +1,6 @@
 using Sts.PlanTech.Infrastructure.Contentful.Persistence;
 
-namespace Sts.PlanTech.Infrastructure.Contentful.Tests;
+namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests;
 
 public class QueryBuilderByContentTypeTests
 {
