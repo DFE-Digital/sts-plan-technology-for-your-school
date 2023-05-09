@@ -1,10 +1,10 @@
 ---
-title: Container Registry
+title: 0009 - Container Registry
 status: Accepted
 created: 2023-04-26
 type: adr
 ---
-# Container Registry
+# 0009 - Container Registry
 
 * **Status**: Accepted
 

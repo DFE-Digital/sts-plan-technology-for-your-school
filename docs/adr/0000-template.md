@@ -1,6 +1,5 @@
 ---
-title: ADR Title
-summary: ADR Summary
+title: 0000 - ADR Title
 status: { Accepted | Rejected | Proposed | Deprecated | Superseded }
 created: yyyy-MM-dd
 type: adr
@@ -11,9 +10,9 @@ type: adr
 #tags: []
 ---
 
-# ADR Title
+# 0000 - ADR Title
 
-* **Status**: Current ADR Status
+* **Status**: proposed/accepted/deprecated
 
 ## Context and Problem Statement
 
