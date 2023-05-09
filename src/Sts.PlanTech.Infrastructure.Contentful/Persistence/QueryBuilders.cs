@@ -32,7 +32,7 @@ public static class QueryBuilders
     {
         ContentQueryEquals equals => equals.AddToQuery(queryBuilder),
         ContentQueryIncludes includes => includes.AddToQuery(queryBuilder),
-        _ => throw new Exception($"Could not find correct query builder for ${query.GetType()}")
+        _ => throw new ArgumentException($"Could not find correct query builder for ${query.GetType()}")
     };
 
     public static QueryBuilder<T> WithQueries<T>(this QueryBuilder<T> queryBuilder, IEnumerable<ContentQuery> queries)

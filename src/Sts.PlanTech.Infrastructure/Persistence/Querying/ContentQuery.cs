@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Sts.PlanTech.Infrastructure.Persistence.Querying;
 
-namespace Sts.PlanTech.Infrastructure.Persistence
+namespace Sts.PlanTech.Infrastructure.Persistence.Querying
 {
     public class ContentQuery
     {

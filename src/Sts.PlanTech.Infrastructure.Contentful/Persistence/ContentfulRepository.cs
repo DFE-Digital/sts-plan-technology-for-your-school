@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Contentful.Core;
 using Contentful.Core.Search;
 using Sts.PlanTech.Infrastructure.Persistence;
+using Sts.PlanTech.Infrastructure.Persistence.Querying;
 
 namespace Sts.PlanTech.Infrastructure.Contentful.Persistence;
 
