@@ -9,15 +9,22 @@ public class QueryBuilderWithQueryTests
     private const string TEST_VALUE = "TestValue";
     private const string TEST_FIELD = "TestField";
 
+    private readonly ContentQueryIncludes INCLUDES = new ContentQueryIncludes()
+    {
+        Value = new[] { TEST_VALUE, "OtherTestValue" },
+        Field = TEST_FIELD
+    };
+
+    private readonly ContentQueryEquals EQUALS = new ContentQueryEquals()
+    {
+        Value = TEST_VALUE,
+        Field = TEST_FIELD
+    };
     [Fact]
     public void Should_Call_ContentQueryEquals_When_ClassIs_ContentQueryEquals()
     {
 
-        var query = new ContentQueryEquals()
-        {
-            Value = TEST_VALUE,
-            Field = TEST_FIELD
-        };
+        var query = EQUALS;
 
         var queryBuilder = new QueryBuilder<TestClass>();
 
@@ -25,27 +32,23 @@ public class QueryBuilderWithQueryTests
 
         var queryString = queryBuilder.Build();
 
-        Assert.True(queryString.Contains($"{TEST_FIELD}={TEST_VALUE}"));
+        string expected = GetExpectedStringForEquals(query);
+        Assert.Contains(expected, queryString);
     }
 
     [Fact]
     public void Should_Call_ContentQueryIncludes_When_ClassIs_ContentQueryIncludes()
     {
 
-        var query = new ContentQueryIncludes()
-        {
-            Value = new[] { TEST_VALUE, "OtherTestValue" },
-            Field = TEST_FIELD
-        };
-
+        var query = INCLUDES;
         var queryBuilder = new QueryBuilder<TestClass>();
 
         queryBuilder.WithQuery(query);
 
         var queryString = queryBuilder.Build();
 
-        var expected = $"{TEST_FIELD}[in]={string.Join("%2C", query.Value)}";
-        Assert.True(queryString.Contains(expected), $"Expected \"{expected}\" but received \"{queryString}\"");
+        string expected = GetExpectedStringForIncludes(query);
+        Assert.Contains(expected, queryString);
     }
 
     [Fact]
@@ -60,4 +63,26 @@ public class QueryBuilderWithQueryTests
 
         Assert.Throws<ArgumentException>(() => queryBuilder.WithQuery(query));
     }
+
+    [Fact]
+    public void Should_Add_Multiple_Queries()
+    {
+        var queries = new ContentQuery[] { EQUALS, INCLUDES };
+
+        var queryBuilder = new QueryBuilder<TestClass>();
+        queryBuilder.WithQueries(queries);
+        var queryString = queryBuilder.Build();
+
+        string expectedEqualsString = GetExpectedStringForEquals(EQUALS);
+        string expectedIncludesString = GetExpectedStringForIncludes(INCLUDES);
+        
+        Assert.Contains(expectedEqualsString, queryString);
+        Assert.Contains(expectedIncludesString, queryString);
+    }
+    
+    private static string GetExpectedStringForIncludes(ContentQueryIncludes query)
+    => $"{query.Field}[in]={string.Join("%2C", query.Value)}";
+
+    private static string GetExpectedStringForEquals(ContentQueryEquals query)
+    => $"{query.Field}={query.Value}";
 }
