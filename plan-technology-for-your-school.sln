@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sts.PlanTech.Domain", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sts.PlanTech.Application", "src\Sts.PlanTech.Application\Sts.PlanTech.Application.csproj", "{875D2F0D-9DC8-434E-A4C8-FEDF0655EEA6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{33DA2E55-0921-4BEA-A7F4-96CC77F09928}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.Infrastructure.Contentful.Tests", "tests\Dfe.PlanTech.Infrastructure.Contentful.UnitTests\Dfe.PlanTech.Infrastructure.Contentful.Tests.csproj", "{88CB59E5-2DF4-40E6-BB64-27467CCEA9E0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,11 +43,16 @@ Global
 		{875D2F0D-9DC8-434E-A4C8-FEDF0655EEA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{875D2F0D-9DC8-434E-A4C8-FEDF0655EEA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{875D2F0D-9DC8-434E-A4C8-FEDF0655EEA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88CB59E5-2DF4-40E6-BB64-27467CCEA9E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88CB59E5-2DF4-40E6-BB64-27467CCEA9E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88CB59E5-2DF4-40E6-BB64-27467CCEA9E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88CB59E5-2DF4-40E6-BB64-27467CCEA9E0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{6D818081-5336-4FB3-95EE-5895D2436DD3} = {20FD2D0C-81CA-4337-B00D-9CB0BB36FE46}
 		{F4755013-090F-4B63-B304-07F52EE96312} = {20FD2D0C-81CA-4337-B00D-9CB0BB36FE46}
 		{DC6DE60C-2094-4A40-B62C-EC74BF27BDF1} = {20FD2D0C-81CA-4337-B00D-9CB0BB36FE46}
 		{875D2F0D-9DC8-434E-A4C8-FEDF0655EEA6} = {20FD2D0C-81CA-4337-B00D-9CB0BB36FE46}
+		{88CB59E5-2DF4-40E6-BB64-27467CCEA9E0} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
 	EndGlobalSection
 EndGlobal
