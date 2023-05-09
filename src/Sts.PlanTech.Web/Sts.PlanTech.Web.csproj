@@ -11,4 +11,10 @@
       <PackageReference Include="GovUk.Frontend.AspNetCore" Version="1.0.0-beta4" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Sts.PlanTech.Application\Sts.PlanTech.Application.csproj" />
+      <ProjectReference Include="..\Sts.PlanTech.Domain\Sts.PlanTech.Domain.csproj" />
+      <ProjectReference Include="..\Sts.PlanTech.Infrastructure.Contentful\Sts.PlanTech.Infrastructure.Contentful.csproj" />
+    </ItemGroup>
+
 </Project>
