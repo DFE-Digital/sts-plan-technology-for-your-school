@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Sts.PlanTech.Domain.Entities;
 using Sts.PlanTech.Infrastructure.Persistence;
-
+using Sts.PlanTech.Infrastructure.Persistence.Querying;
 
 namespace Sts.PlanTech.Application.Questionnaire.Queries;
 
