@@ -6,13 +6,13 @@ public class TemplateTest
     public void Should_Do_Something_When_True()
     {
         // Arrange.
-        int A = 1;
-        int Expected = 3;
+        int a = 1;
+        int expected = 3;
 
         // Act.
-        int Actual = A + 2;
+        int actual = a + 2;
 
         // Assert.
-        Assert.Equal(Expected, Actual);
+        Assert.Equal(expected, actual);
     }
 }
