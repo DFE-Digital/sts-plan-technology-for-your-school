@@ -8,7 +8,7 @@ Web application to help schools plan a technology roadmap
 
 ## Running Locally
 
-- The startup project is [./src/Sts.PlanTech.Web](./src/Sts.PlanTech.Web)
+- The startup project is [./src/Dfe.PlanTech.Web](./src/Dfe.PlanTech.Web)
 
 ## More Information
 

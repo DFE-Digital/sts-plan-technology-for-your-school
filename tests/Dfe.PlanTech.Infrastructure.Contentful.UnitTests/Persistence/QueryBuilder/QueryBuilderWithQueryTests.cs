@@ -1,5 +1,5 @@
-using Sts.PlanTech.Infrastructure.Contentful.Persistence;
-using Sts.PlanTech.Infrastructure.Persistence.Querying;
+using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
+using Dfe.PlanTech.Infrastructure.Persistence.Querying;
 using Contentful.Core.Search;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests;
