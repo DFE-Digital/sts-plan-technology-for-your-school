@@ -17,7 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{33DA2E55
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.Infrastructure.Contentful.UnitTests", "tests\Dfe.PlanTech.Infrastructure.Contentful.UnitTests\Dfe.PlanTech.Infrastructure.Contentful.UnitTests.csproj", "{88CB59E5-2DF4-40E6-BB64-27467CCEA9E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sts.PlanTech.Application.Tests", "src\Sts.PlanTech.Application.Tests\Sts.PlanTech.Application.Tests.csproj", "{7DF5B814-3477-45E0-8C19-B36C55F67BCA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.Application.Tests", "src\Dfe.PlanTech.Application.Tests\Dfe.PlanTech.Application.Tests.csproj", "{7DF5B814-3477-45E0-8C19-B36C55F67BCA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
