@@ -1,4 +1,4 @@
-using Sts.PlanTech.Infrastructure.Contentful.Persistence;
+using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests;
 

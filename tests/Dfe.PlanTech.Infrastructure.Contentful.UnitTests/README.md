@@ -2,7 +2,7 @@
 
 ## Overview
 
-Project containing Unit Tests for the [Dfe.PlanTech.Infrastructure.Contentful](../../src/Sts.PlanTech.Infrastructure.Contentful/) project
+Project containing Unit Tests for the [Dfe.PlanTech.Infrastructure.Contentful](../../src/Dfe.PlanTech.Infrastructure.Contentful/) project
 
 ## Packages
 
@@ -22,6 +22,7 @@ To run the tests and generate unit coverage, run ``` dotnet test --collect:"XPla
 #### Generating HTML Reports
 
 Run the following command from the project root folder:
+
 ```shell
 reportgenerator
 -reports:"TestResults\{guid}\coverage.cobertura.xml"
@@ -36,5 +37,10 @@ Where "guid" is the relevant folder GUID from the generated tests. Alternatively
 ---
 
 ## Additional Info
+
+- Warning CS8625 (nullability warning) has been disabled in the csproj file. This is due to tests that *intentionally* violate this, to ensure that they are handled correctly by the receiving method.
+
+- 
+### Further Reading
 
 - [Microsoft's "Use Code Coverage for unit testing"](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-code-coverage)

@@ -2,8 +2,8 @@ using Contentful.Core;
 using Contentful.Core.Models;
 using Contentful.Core.Search;
 using Moq;
-using Sts.PlanTech.Infrastructure.Contentful.Persistence;
-using Sts.PlanTech.Infrastructure.Persistence;
+using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
+using Dfe.PlanTech.Infrastructure.Persistence;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
 {
