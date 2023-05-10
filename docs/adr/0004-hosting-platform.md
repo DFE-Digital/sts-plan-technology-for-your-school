@@ -1,11 +1,4 @@
----
-title: Hosting Platform
-type: adr
-summary: Within the DfE there are a choice of hosting platforms (e.g. Azure, AWS) that could be used; which one should be used within this project, and why?
-created: 2022-11-16
----
-
-# Hosting Platform
+# 0004 - Hosting Platform
 
 * **Status**: Accepted
 

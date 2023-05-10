@@ -1,11 +1,4 @@
----
-title: Database Management System
-type: adr
-status: Accepted
-created: 2022-11-16
----
-
-# Database Management System
+# 0008 - Database Management System
 
 * **Status**: Accepted
 

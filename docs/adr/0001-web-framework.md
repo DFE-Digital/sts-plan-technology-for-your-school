@@ -1,11 +1,4 @@
----
-title: Web Framework Language
-type: adr
-status: Accepted
-summary: Which web framework should we use for this project?
-created: 2022-11-16
----
-# Web Framework Language
+# 0001 - Web Framework Language
 
 * **Status**: Accepted
 

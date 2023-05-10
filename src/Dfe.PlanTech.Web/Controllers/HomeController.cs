@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Sts.PlanTech.Web.Models;
+using Dfe.PlanTech.Web.Models;
 
-namespace Sts.PlanTech.Web.Controllers;
+namespace Dfe.PlanTech.Web.Controllers;
 
 public class HomeController : Controller
 {

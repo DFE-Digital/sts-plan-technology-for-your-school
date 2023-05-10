@@ -1,4 +1,4 @@
-namespace Sts.PlanTech.Web.Models;
+namespace Dfe.PlanTech.Web.Models;
 
 public class ErrorViewModel
 {
