@@ -1,10 +1,3 @@
----
-title: 0012 - Authentication Provider
-type: adr
-status: Accepted
-created: 2022-11-16
----
-
 # 0012 - Authentication Provider
 
 * **Status**: Accepted

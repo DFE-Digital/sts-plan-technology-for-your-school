@@ -1,10 +1,3 @@
----
-title: 0011 - Content Management
-type: adr
-created: 2022-11-16
-status: Accepted
----
-
 # 0011 - Content Management
 
 * **Status**: Accepted

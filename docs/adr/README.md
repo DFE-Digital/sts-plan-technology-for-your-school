@@ -24,3 +24,4 @@ General information about architectural decision records is available at <https:
 | [0010 - Secrets Management](./0010-secrets-management.md)               | Accepted |
 | [0011 - Content Management](./0011-content-management.md)               | Accepted |
 | [0012 - Authentication Provider](./0012-authentication-provider.md)     | Accepted |
+| [0013 - Sofdtware Architecture](./0013-software-architecture.md)        | Proposed |

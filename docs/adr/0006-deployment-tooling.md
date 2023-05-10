@@ -1,11 +1,3 @@
----
-title: 0006 - Deployment Tooling
-type: adr
-summary: How to ensure new versions of the application are consistently packaged, tested and deployed?
-created: 2022-11-16
-status: Accepted
----
-
 # 0006 - Deployment Tooling
 
 * **Status**: Accepted

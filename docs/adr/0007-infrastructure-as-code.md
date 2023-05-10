@@ -1,10 +1,3 @@
----
-title: 0007 - Infrastructure As Code
-type: adr
-created: 2022-11-16
-status: Accepted
----
-
 # 0007 - Infrastructure As Code
 
 * **Status**: Accepted
