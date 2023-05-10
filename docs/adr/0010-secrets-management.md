@@ -1,10 +1,4 @@
----
-type: adr
-title: Secrets Management
-created: 2022-11-16
----
-
-# Secrets Management
+# 0010 - Secrets Management
 
 * **Status**: Accepted
 
