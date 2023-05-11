@@ -23,6 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Sts.PlanTech.Web\Sts.PlanTech.Web.csproj" />
+    <ProjectReference Include="..\Dfe.PlanTech.Web\Dfe.PlanTech.Web.csproj" />
   </ItemGroup>
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace Sts.PlanTech.Application.Tests;
+﻿namespace Dfe.PlanTech.Application.Tests;
 
 public class TemplateTest
 {
