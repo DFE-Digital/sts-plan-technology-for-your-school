@@ -1,11 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Contentful.Core;
-using Contentful.Core.Search;
-using Dfe.PlanTech.Infrastructure.Persistence;
-using Dfe.PlanTech.Infrastructure.Persistence.Querying;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 
@@ -23,7 +17,7 @@ public class ContentfulRepository : IContentRepository
         _client = client ?? throw new ArgumentNullException(nameof(client));
     }
 
-    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IEnumerable<ContentQuery>? queries = null, CancellationToken cancellationToken = default(CancellationToken))
+    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IEnumerable<IContentQuery>? queries = null, CancellationToken cancellationToken = default)
     {
         var queryBuilder = QueryBuilders.ByContentType<TEntity>(entityTypeId);
 
@@ -32,17 +26,17 @@ public class ContentfulRepository : IContentRepository
             queryBuilder.WithQueries(queries);
         }
 
-        var entries = await _client.GetEntries<TEntity>(queryBuilder, cancellationToken);
+        var entries = await _client.GetEntries(queryBuilder, cancellationToken);
 
         if (entries == null) return Enumerable.Empty<TEntity>();
 
         return entries;
     }
 
-    public Task<IEnumerable<TEntity>> GetEntities<TEntity>(IEnumerable<ContentQuery>? queries = null, CancellationToken cancellationToken = default)
+    public Task<IEnumerable<TEntity>> GetEntities<TEntity>(IEnumerable<IContentQuery>? queries = null, CancellationToken cancellationToken = default)
         => GetEntities<TEntity>(typeof(TEntity).Name.ToLower(), queries, cancellationToken);
 
-    public async Task<TEntity?> GetEntityById<TEntity>(string id, CancellationToken cancellationToken = default(CancellationToken))
+    public async Task<TEntity?> GetEntityById<TEntity>(string id, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
 

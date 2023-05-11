@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Contentful.Core.Search;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Persistence.Queries;
-using Dfe.PlanTech.Infrastructure.Persistence;
-using Dfe.PlanTech.Infrastructure.Persistence.Querying;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 
@@ -27,7 +23,7 @@ public static class QueryBuilders
         return queryBuilder;
     }
 
-    public static QueryBuilder<T> WithQuery<T>(this QueryBuilder<T> queryBuilder, ContentQuery query) =>
+    public static QueryBuilder<T> WithQuery<T>(this QueryBuilder<T> queryBuilder, IContentQuery query) =>
     query switch
     {
         ContentQueryEquals equals => equals.AddToQuery(queryBuilder),
@@ -35,7 +31,7 @@ public static class QueryBuilders
         _ => throw new ArgumentException($"Could not find correct query builder for ${query.GetType()}")
     };
 
-    public static QueryBuilder<T> WithQueries<T>(this QueryBuilder<T> queryBuilder, IEnumerable<ContentQuery> queries)
+    public static QueryBuilder<T> WithQueries<T>(this QueryBuilder<T> queryBuilder, IEnumerable<IContentQuery> queries)
     {
         foreach (var query in queries)
         {
