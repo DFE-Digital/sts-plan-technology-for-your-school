@@ -1,10 +1,15 @@
 using GovUk.Frontend.AspNetCore;
+using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
+using Dfe.PlanTech.Application.Questionnaire.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddGovUkFrontend();
+
+builder.Services.SetupContentfulClient(builder.Configuration, "Contentful");
+builder.Services.AddQuestionnaireCommandsAndQueries();
 
 var app = builder.Build();
 
