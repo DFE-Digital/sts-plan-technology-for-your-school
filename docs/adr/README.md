@@ -28,3 +28,5 @@ General information about architectural decision records is available at <https:
 | [0014 - Executing Unit Tests](./0014-executing-unit-tests.md)                   | Proposed |
 | [0015 - Tool For UI Testing](./0015-tool-for-ui-testing.md)                     | Proposed |
 | [0016 - Tools For Building Unit Tests](./0016-tools-for-building-unit-tests.md) | Proposed |
+| [0019 - Contentful Integration](./0019-contentful-integration.md)               | Proposed |
+| [0020 - GitHub Actions](./0020-github-actions.md)                               | Proposed |
