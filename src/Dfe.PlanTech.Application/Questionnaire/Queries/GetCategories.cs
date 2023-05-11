@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Application.Questionnaire.Queries;
 /// <summary>
 /// Gets categories from CMS
 /// </summary>
-public class GetCategoriesQuery 
+public class GetCategoriesQuery : IInfrastructureQuery
 {
     private readonly IContentRepository _repository;
 
