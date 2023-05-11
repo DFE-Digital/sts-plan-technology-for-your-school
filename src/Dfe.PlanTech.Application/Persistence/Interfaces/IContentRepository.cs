@@ -1,5 +1,8 @@
 namespace Dfe.PlanTech.Application.Persistence.Interfaces;
 
+/// <summary>
+/// Abstraction around repositories used for retrieving Content
+/// </summary>
 public interface IContentRepository
 {
     /// <summary>
