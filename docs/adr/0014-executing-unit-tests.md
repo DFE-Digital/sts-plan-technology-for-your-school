@@ -1,6 +1,6 @@
 # 0014 - Executing Unit Tests
 
-* **Status**: proposed
+* **Status**: accepted
 
 ## Context and Problem Statement
 What unit test runner should be adopted within the PTFYS that integrates well into Visual Studio, can be executed within pipeline, performs well and is open source and actively developed?
