@@ -1,25 +1,20 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Dfe.PlanTech.Domain.Entities;
-using Dfe.PlanTech.Infrastructure.Persistence;
-using Dfe.PlanTech.Infrastructure.Persistence.Querying;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Application.Questionnaire.Queries;
 
 /// <summary>
 /// Gets categories from CMS
 /// </summary>
-public class GetCategories
+public class GetCategoriesQuery 
 {
     private readonly IContentRepository _repository;
 
-    public GetCategories(IContentRepository repository)
+    public GetCategoriesQuery(IContentRepository repository)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
     }
 
-    public Task<IEnumerable<Category>> Get(IEnumerable<ContentQuery>? queries = null, CancellationToken cancellationToken = default(CancellationToken))
+    public Task<IEnumerable<Category>> Get(IEnumerable<IContentQuery>? queries = null, CancellationToken cancellationToken = default)
         => _repository.GetEntities<Category>(queries, cancellationToken);
 }

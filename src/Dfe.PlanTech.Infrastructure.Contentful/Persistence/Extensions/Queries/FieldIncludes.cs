@@ -1,6 +1,5 @@
 using Contentful.Core.Search;
-using Dfe.PlanTech.Infrastructure.Persistence;
-using Dfe.PlanTech.Infrastructure.Persistence.Querying;
+using Dfe.PlanTech.Infrastructure.Application.Models;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Persistence.Queries;
 

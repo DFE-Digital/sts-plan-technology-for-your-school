@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 
@@ -19,7 +15,7 @@ namespace Dfe.PlanTech.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromServices] GetCategories query)
+        public async Task<IActionResult> Get([FromServices] GetCategoriesQuery query)
         {
             try
             {

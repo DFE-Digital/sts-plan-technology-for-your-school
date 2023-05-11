@@ -26,7 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Dfe.PlanTech.Infrastructure.Contentful\Dfe.PlanTech.Infrastructure.Contentful.csproj" />
-    <ProjectReference Include="..\..\src\Dfe.PlanTech.Infrastructure\Dfe.PlanTech.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Dfe.PlanTech.Application\Dfe.PlanTech.Application.csproj" />
   </ItemGroup>
 
 
