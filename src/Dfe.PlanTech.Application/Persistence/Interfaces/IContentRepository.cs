@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Dfe.PlanTech.Infrastructure.Persistence.Querying;
+namespace Dfe.PlanTech.Application.Persistence.Interfaces;
 
-namespace Dfe.PlanTech.Infrastructure.Persistence;
-
+/// <summary>
+/// Abstraction around repositories used for retrieving Content
+/// </summary>
 public interface IContentRepository
 {
     /// <summary>
@@ -15,7 +12,7 @@ public interface IContentRepository
     /// <param name="cancellationToken"></param>
     /// <typeparam name="TEntity"></typeparam>
     /// <returns></returns>
-    Task<TEntity?> GetEntityById<TEntity>(string id, CancellationToken cancellationToken = default(CancellationToken));
+    Task<TEntity?> GetEntityById<TEntity>(string id, CancellationToken cancellationToken = default);
     
     /// <summary>
     /// Get all entities of the specified type.
@@ -25,7 +22,7 @@ public interface IContentRepository
     /// <param name="cancellationToken"></param>
     /// <typeparam name="TEntity"></typeparam>
     /// <returns></returns>
-    Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IEnumerable<ContentQuery>? queries = null, CancellationToken cancellationToken = default(CancellationToken));
+    Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IEnumerable<IContentQuery>? queries = null, CancellationToken cancellationToken = default);
     
     /// <summary>
     /// Get all entities of the specified type, using the name of the generic parameter's type as the entity type id (to lower case).
@@ -35,5 +32,5 @@ public interface IContentRepository
     /// <param name="cancellationToken"></param>
     /// <typeparam name="TEntity"></typeparam>
     /// <returns></returns>
-    Task<IEnumerable<TEntity>> GetEntities<TEntity>(IEnumerable<ContentQuery>? queries = null,  CancellationToken cancellationToken = default(CancellationToken));
+    Task<IEnumerable<TEntity>> GetEntities<TEntity>(IEnumerable<IContentQuery>? queries = null,  CancellationToken cancellationToken = default);
 }

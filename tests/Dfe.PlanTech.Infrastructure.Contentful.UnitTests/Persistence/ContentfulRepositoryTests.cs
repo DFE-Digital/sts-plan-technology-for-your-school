@@ -3,15 +3,15 @@ using Contentful.Core.Models;
 using Contentful.Core.Search;
 using Moq;
 using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
-using Dfe.PlanTech.Infrastructure.Persistence;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
 {
     public class ContentfulRepositoryTests
     {
-        private Mock<IContentfulClient> _clientMock = new Mock<IContentfulClient>();
+        private readonly Mock<IContentfulClient> _clientMock = new();
 
-        private List<TestClass> _mockData = new() {
+        private readonly List<TestClass> _mockData = new() {
             new TestClass(), new TestClass("testId"), new TestClass("anotherId"), new TestClass("abcd1234")
         };
 
@@ -20,18 +20,21 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
             _clientMock.Setup(client => client.GetEntries<TestClass>(It.IsAny<QueryBuilder<TestClass>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((QueryBuilder<TestClass> query, CancellationToken token) =>
             {
-                var collection = new ContentfulCollection<TestClass>();
-                collection.Items = _mockData;
+                var collection = new ContentfulCollection<TestClass>
+                {
+                    Items = _mockData
+                };
 
                 return collection;
             });
             
             _clientMock.Setup(client => client.GetEntries<OtherTestClass>(It.IsAny<QueryBuilder<OtherTestClass>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((QueryBuilder<OtherTestClass> query, CancellationToken token) => {
-                var collection = new ContentfulCollection<OtherTestClass>();
-                
-                collection.Items = Enumerable.Empty<OtherTestClass>();
-                
+                var collection = new ContentfulCollection<OtherTestClass>
+                {
+                    Items = Enumerable.Empty<OtherTestClass>()
+                };
+
                 return collection;
             });
 

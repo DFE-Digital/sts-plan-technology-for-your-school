@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
-using Dfe.PlanTech.Infrastructure.Persistence.Querying;
 using Contentful.Core.Search;
+using Dfe.PlanTech.Infrastructure.Application.Models;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests;
 
@@ -9,13 +9,13 @@ public class QueryBuilderWithQueryTests
     private const string TEST_VALUE = "TestValue";
     private const string TEST_FIELD = "TestField";
 
-    private readonly ContentQueryIncludes INCLUDES = new ContentQueryIncludes()
+    private readonly ContentQueryIncludes INCLUDES = new()
     {
         Value = new[] { TEST_VALUE, "OtherTestValue" },
         Field = TEST_FIELD
     };
 
-    private readonly ContentQueryEquals EQUALS = new ContentQueryEquals()
+    private readonly ContentQueryEquals EQUALS = new()
     {
         Value = TEST_VALUE,
         Field = TEST_FIELD

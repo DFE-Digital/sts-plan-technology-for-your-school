@@ -2,13 +2,13 @@
 
 ## Folder Structure
 
-| Path        | Purpose                       |
-| ----------- | ----------------------------- |
-| ./src       | Project source code           |
-| ./tests     | Test projects                 |
-| ./pipelines | DevOps files / GitHub Actions |
-| ./docs      | Documentation                 |
-| ./terraform | Terraform code                |
+| Path                | Purpose                          |
+| ------------------- | -------------------------------- |
+| ./.github/workflows | GitHub Action/Workflow YML Files |
+| ./docs              | Documentation                    |
+| ./src               | Project source code              |
+| ./terraform         | Terraform code                   |
+| ./tests             | Test projects                    |
 
 ## Code Conventions
 
