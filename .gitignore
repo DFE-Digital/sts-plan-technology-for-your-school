@@ -476,3 +476,7 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk 
+
+# Draw.io files
+*.bkp
+*.dtmp
