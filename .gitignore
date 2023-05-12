@@ -13,6 +13,9 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
+# Local settings.
+src/Dfe.PlanTech.Web/Properties/launchSettings.json
+
 # Mono auto generated files
 mono_crash.*
 
