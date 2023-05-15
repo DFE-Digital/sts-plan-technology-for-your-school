@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -23,6 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Dfe.PlanTech.Web\Dfe.PlanTech.Web.csproj" />
+    <ProjectReference Include="..\..\src\Dfe.PlanTech.Web\Dfe.PlanTech.Web.csproj" />
   </ItemGroup>
 </Project>
