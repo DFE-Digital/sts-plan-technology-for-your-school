@@ -3,7 +3,7 @@
 * **Status**: accepted
 
 ## Context and Problem Statement
-How Where should be the agreed naming convention for the .Net projects?  This also impacts the namespace naming convention.
+What should be the agreed naming convention for the .Net projects?  This also impacts the namespace naming convention.
 
 ## Decision Drivers
 * SLT Lead Tech (Mamood Suyltan) wanting consistency across DfE projects
