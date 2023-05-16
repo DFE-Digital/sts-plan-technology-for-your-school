@@ -1,4 +1,4 @@
-# 0020 - GitHub Actions
+# 0020 - GitHub Actions Locations
 
 * **Status**: proposed
 

@@ -31,6 +31,5 @@ General information about architectural decision records is available at <https:
 | [0017 - Unit Test Project Name And Location](./0017-unit-test-project-name-and-location.md)         | Accepted |
 | [0018 - Project And Namespace Naming Convention](./0018-project-and-namespace-naming-convention.md) | Accepted |
 | [0019 - Contentful Integration](./0019-contentful-integration.md)                                   | Proposed |
-| [0020 - GitHub Actions](./0020-github-actions.md)                                                   | Proposed |
+| [0020 - GitHub Actions Locations](./0020-github-actions-locations.md)                               | Proposed |
 | [0021 - Deploy Changes To SQL Database](./0021-deploy-database-schema-changes.md)                   | Proposed |
-
