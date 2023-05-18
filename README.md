@@ -3,7 +3,7 @@
 Web application to help schools plan a technology roadmap
 
 ![.NET Pipeline](https://img.shields.io/github/actions/workflow/status/DFE-Digital/plan-technology-for-your-school/BuildAndTest.yml?label=.NET%20Build)
-![Docker pipeline](https://img.shields.io/github/actions/workflow/status/DFE-Digital/plan-technology-for-your-school/BuildDockerfile?label=Dockerimage)
+![Docker pipeline](https://img.shields.io/github/actions/workflow/status/DFE-Digital/plan-technology-for-your-school/BuildDockerfile.yml?label=Dockerimage)
 
 ## Requirements
 
