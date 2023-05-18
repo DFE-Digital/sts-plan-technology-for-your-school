@@ -20,4 +20,4 @@ How should database schema changes be deployed?
 
 ## Decision Outcome
 
-The team will be using DBUp for database upgrades as this is already used by other DfE projects and is the standard used by the Data team and Data Analyst could in the future be give the SQL generation tasks.
+The team will be using DBUp for database upgrades as this is already used by other DfE projects and is the standard used by the Data team and Data Analyst could in the future be give the SQL generation tasks.  This was requested by SLT Lead Tech (Mamood Suyltan).
