@@ -32,5 +32,5 @@ General information about architectural decision records is available at <https:
 | [0018 - Project And Namespace Naming Convention](./0018-project-and-namespace-naming-convention.md) | Accepted |
 | [0019 - Contentful Integration](./0019-contentful-integration.md)                                   | Proposed |
 | [0020 - GitHub Actions](./0020-github-actions.md)                                                   | Proposed |
-| [0021 - Deploy Changes To SQL Database](./0021-deploy-database-schema-changes.md)                   | Proposed |
+| [0021 - Deploy Changes To SQL Database](./0021-deploy-database-schema-changes.md)                   | Accepted |
 
