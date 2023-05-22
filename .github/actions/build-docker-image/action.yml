@@ -1,0 +1,9 @@
+name: Build Docker Image
+
+runs:
+  using: composite
+
+  steps:
+    - name: Build Docker image
+      shell: bash
+      run: docker build ./src/ --file  ./src/Dfe.PlanTech.Web/Dockerfile --tag dfe-digital_plan-tech:$(date +%s)
