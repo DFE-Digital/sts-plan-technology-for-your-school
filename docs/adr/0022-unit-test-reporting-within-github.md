@@ -1,6 +1,6 @@
 # 0021 - Deploy Database Schema Changes
 
-* **Status**: proposed
+* **Status**: accepted
 
 ## Context and Problem Statement
 
@@ -20,3 +20,4 @@ How can developers easily review unit test results within GitHub
 
 ## Decision Outcome
 
+We'll implement **Test Reporter** as this provides a detailed report and can be configured to show only errors when it is reporting on many unit tests.
