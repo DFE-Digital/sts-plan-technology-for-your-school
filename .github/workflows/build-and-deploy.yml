@@ -1,0 +1,19 @@
+name: Build And Deploy
+
+on: [pull_request]
+
+env:
+  DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
+
+jobs:
+  build-test-app:  
+    name: Build and test     
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+      - name: Build web app  
+        uses: ./.github/actions/build-web-app
+        with:
+          dotnet_version: ${{ env.DOTNET_VERSION }}  
