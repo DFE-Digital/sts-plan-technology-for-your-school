@@ -2,23 +2,21 @@ name: Validate Pull Request
 
 on: [pull_request]
 
+env:
+  DOTNET_VERSION: '7.0.x'
+
 jobs:
   build-test-app:  
-    name: Build using .net core ${{ matrix.dotnet-version }}          
+    name: Build using .net core $DOTNET_VERSION          
     runs-on: ubuntu-latest
-    strategy: 
-      matrix:
-        dotnet-version: [ '7.0.x' ]
-        include: 
-          - dotnet-version: '7.0.x'
-          - release-dir: 'net7.0'
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
       - name: Build web app
         uses: ./.github/actions/build-web-app
         with:
-          dotnet-version: ${{ matrix.dotnet-version }}
+          dotnet-version: $DOTNET_VERSION
       - name: Run unit tests
         uses: ./.github/actions/run-unit-tests
  
