@@ -33,3 +33,4 @@ General information about architectural decision records is available at <https:
 | [0019 - Contentful Integration](./0019-contentful-integration.md)                                   | Proposed |
 | [0020 - GitHub Actions](./0020-github-actions.md)                                                   | Proposed |
 | [0021 - Deploy Changes To SQL Database](./0021-deploy-database-schema-changes.md)                   | Accepted |
+| [0021 - Unit Test Reporting Within GitHub](./0022-unit-test-reporting-within-github.md)             | Proposed |
