@@ -1,11 +1,8 @@
 name: Validate Pull Request
 
 on:
-    #pull_request:
-    #  branches: [ "main" ]
-    push:
-        paths:
-          - 'feat/156893-ps-terraform-setup/**'
+    pull_request:
+      branches: [ "feat/156893-ps-terraform-setup/**" ]
 
 jobs:
     build:            
