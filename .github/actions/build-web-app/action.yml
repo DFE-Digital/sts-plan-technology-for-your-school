@@ -1,4 +1,5 @@
 name: Build Web App
+description: Sets up .Net for specified version and builds application
 
 inputs:
   dotnet_version:
