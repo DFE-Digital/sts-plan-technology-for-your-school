@@ -1,0 +1,19 @@
+name: Validate Pull Request
+
+on:
+    pull_request:
+      branches: [ "main" ]
+
+jobs:
+    build:            
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                dotnet-version: [ '7.0.x' ]
+        steps:
+            - name: Check out repository
+              uses: actions/checkout@v3
+            - name: Build web app
+              uses: ./.github/actions/build-web-app
+              with:
+                dotnet-version: ${{ matrix.dotnet-version }}

@@ -1,0 +1,19 @@
+name: Build Web App
+
+inputs:
+  dotnet-version:
+    required: true
+    type: string
+
+runs:
+  using: composite
+
+  steps:
+    - name: Setup .NET Core SDK ${{ inputs.dotnet-version }}
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ matrix.dotnet-version }}
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
