@@ -3,7 +3,8 @@ name: Validate Pull Request
 on: [pull_request]
 
 jobs:
-  build:            
+  build:  
+    name: Build using .net core ${{ matrix.dotnet-version }}          
     runs-on: ubuntu-latest
     strategy: 
       matrix:
