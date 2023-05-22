@@ -16,7 +16,7 @@ jobs:
       - name: Build web app  
         uses: ./.github/actions/build-web-app
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}  
+          dotnet_version: ${{ env.DOTNET_VERSION }}  
       - name: Run unit tests
         uses: ./.github/actions/run-unit-tests
  
