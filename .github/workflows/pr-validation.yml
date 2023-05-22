@@ -7,13 +7,13 @@ env:
 
 jobs:
   build-test-app:  
-    name: Build using .net core ${{ env.DOTNET_VERSION }}         
+    name: Build and test     
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
-      - name: Build web app
+      - name: Build web app  
         uses: ./.github/actions/build-web-app
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}  
