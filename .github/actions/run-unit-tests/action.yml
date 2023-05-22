@@ -1,0 +1,9 @@
+name: Run Unit Tests
+
+runs:
+  using: composite
+
+  steps:
+    - name: Test
+      shell: bash
+      run: dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage"
