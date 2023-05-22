@@ -21,5 +21,12 @@ jobs:
           dotnet-version: ${{ matrix.dotnet-version }}
       - name: Run unit tests
         uses: ./.github/actions/run-unit-tests
+ 
+  build-docker-image:
+    name: Build docker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
       - name: Build docker image
-        uses: ./.github/actions/build-docker-image  
+        uses: ./.github/actions/build-docker-image 
