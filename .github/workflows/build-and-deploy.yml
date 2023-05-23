@@ -10,7 +10,7 @@ env:
   ARM_CLIENT_ID: ${{ secrets.AZ_CLIENT_ID }}
   ARM_CLIENT_SECRET: ${{ secrets.AZ_CLIENT_SECRET }}
 
-  TF_STAORAGE_ACCOUNT_NAME: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
+  TF_STORAGE_ACCOUNT_NAME: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
   TF_CONTAINER_NAME: ${{ secrets.TF_BACKEND_CONTAINER_NAME }}
   TF_KEY: ${{ secrets.TF_BACKEND_KEY }}
 
@@ -34,7 +34,7 @@ jobs:
 
       - name: Terraform init
         run: |
-          terraform init 
+          terraform init \
             -backend-config="storage_account_name=s190d01plantechterraform"  \
             -backend-config="container_name=state"  \
             -backend-config="key=terraform.tfstate"
