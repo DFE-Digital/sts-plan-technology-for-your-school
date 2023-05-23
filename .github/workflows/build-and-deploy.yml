@@ -39,15 +39,12 @@ jobs:
         uses: docker://hashicorp/terraform:1.4.5
         with:
           entrypoint: terraform
-          args: init
-          working-directory: ${{ env.TF_WORKING_DIRECTORY }}
-
+          args: -chdir=terraform init
+          
       # - name: Build web app  
       #   uses: ./.github/actions/build-web-app
       #   with:
       #     dotnet_version: ${{ env.DOTNET_VERSION }}  
-
-
 
       # - name: Setup Terraform
       #   uses: hashicorp/setup-terraform@v2
