@@ -48,7 +48,7 @@ jobs:
             -backend-config="key=${{ env.TF_BACKEND_KEY }}"
         working-directory: ./terraform
 
-      - name: Terraform plan
+      - name: Terraform plan 
         run: |
-          terraform plan
+          terraform plan -lock=false
         working-directory: ./terraform
