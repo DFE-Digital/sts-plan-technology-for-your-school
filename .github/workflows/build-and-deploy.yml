@@ -63,7 +63,7 @@ jobs:
           args: -chdir=terraform plan -no-color
 
       - name: Access Terraform output
-        run: echo "Terraform output= ${{ toJSON(steps.validate) }}"
+        run: echo "Terraform output= ${{ toJSON(steps.plan) }}"
 
       # - name: Access Terraform output
       #   run: echo "Terraform output = ${{ steps.init.outputs }}"
