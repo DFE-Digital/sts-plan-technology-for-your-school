@@ -63,15 +63,13 @@ jobs:
           args: -chdir=terraform plan -no-color -out=terraform.plan
 
       - name: Read Terraform plan output
-        run: |
-          terraform_plan_output=$(cat terraform.plan)
-          echo "##[set-env name=TERRAFORM_PLAN_OUTPUT]$terraform_plan_output"
+        run: echo "::set-output name=terraform_plan_output::$(cat terraform.plan)"
         working-directory: ${{ env.TF_WORKING_DIRECTORY }}
 
       - name: Access Terraform output
         run: echo "Terraform output= ${{ env.TERRAFORM_PLAN_OUTPUT }}"
         working-directory: ${{ env.TF_WORKING_DIRECTORY }}
-        
+
       # - name: Access Terraform output
       #   run: echo "Terraform output = ${{ steps.init.outputs }}"
 
