@@ -9,7 +9,9 @@ jobs:
   build-test-app:  
     name: Build and test     
     runs-on: ubuntu-latest
-
+    # defaults:
+    #   run:
+        
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
@@ -24,3 +26,4 @@ jobs:
 
       - name: Terraform init
         run: terraform init
+        working-directory: ./terraform
