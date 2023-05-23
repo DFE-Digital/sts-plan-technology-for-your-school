@@ -62,6 +62,9 @@ jobs:
         with: 
           args: -chdir=terraform plan -no-color
 
+      - name: Access Terraform output
+        run: echo "Terraform output: ${{ steps.init.outputs.terraform_output }}"
+        
       # - name: Build web app  
       #   uses: ./.github/actions/build-web-app
       #   with:
@@ -121,7 +124,7 @@ jobs:
             <details><summary>Validation Output</summary>
       
             \`\`\`\n
-            ${{ steps.validate.outputs.stdout }}
+            ${{ steps.validate.outputs }}
             \`\`\`
       
             </details>
