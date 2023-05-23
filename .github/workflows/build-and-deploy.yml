@@ -10,9 +10,9 @@ env:
   ARM_CLIENT_ID: ${{ secrets.AZ_CLIENT_ID }}
   ARM_CLIENT_SECRET: ${{ secrets.AZ_CLIENT_SECRET }}
 
-  TF_STAORAGE_ACCOUNT_NAME: ${{ secrets.TF_STORAGE_ACCOUNT_NAME }}
-  TF_CONTAINER_NAME: ${{ secrets.TF_CONTAINER_NAME }}
-  TF_KEY: ${{ secrets.TF_KEY }}
+  TF_STAORAGE_ACCOUNT_NAME: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
+  TF_CONTAINER_NAME: ${{ secrets.TF_BACKEND_CONTAINER_NAME }}
+  TF_KEY: ${{ secrets.TF_BACKEND_KEY }}
 
 jobs:
   build-test-app:  
