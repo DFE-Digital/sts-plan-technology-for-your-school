@@ -62,8 +62,14 @@ jobs:
         with: 
           args: -chdir=terraform plan -no-color
 
+      - name: Store Terraform output
+        run: echo "::set-output name=terraform_output::$(terraform output -json)"
+
       - name: Access Terraform output
-        run: echo "Terraform output = ${{ steps.init.outputs.terraform_output }}"
+        run: echo "Terraform output= ${{ steps.plan.outputs.terraform_output }}"
+
+      # - name: Access Terraform output
+      #   run: echo "Terraform output = ${{ steps.init.outputs }}"
 
       # - name: Build web app  
       #   uses: ./.github/actions/build-web-app
@@ -103,7 +109,7 @@ jobs:
         uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
         env:
-          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+          PLAN: "terraform\n${{ steps.plan.outputs }}"
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
