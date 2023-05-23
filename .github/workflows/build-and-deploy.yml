@@ -40,6 +40,7 @@ jobs:
         with:
           entrypoint: terraform
           args: init
+          working-directory: ${{ env.TF_WORKING_DIRECTORY }}
 
       # - name: Build web app  
       #   uses: ./.github/actions/build-web-app
