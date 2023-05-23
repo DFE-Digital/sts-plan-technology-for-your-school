@@ -40,7 +40,7 @@ jobs:
         with:
           working-directory: ./terraform
           entrypoint: terraform
-          args: >
+          args: |
             init
               -backend-config="resource_group_name=${{ env.TF_BACKEND_RESOURCE_GROUP }}" \
               -backend-config="storage_account_name=${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}" \
