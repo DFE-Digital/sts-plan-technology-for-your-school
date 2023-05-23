@@ -17,3 +17,10 @@ jobs:
         uses: ./.github/actions/build-web-app
         with:
           dotnet_version: ${{ env.DOTNET_VERSION }}  
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+
+      - name: Terraform init
+        run: terraform init

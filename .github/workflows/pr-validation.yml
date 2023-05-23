@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 env:
-  DOTNET_VERSION: 7.0.x
+  DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
 
 jobs:
   build-test-app:  
