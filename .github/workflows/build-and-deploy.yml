@@ -15,7 +15,7 @@ env:
   TF_BACKEND_KEY: ${{ secrets.TF_BACKEND_KEY }}
   TF_BACKEND_RESOURCE_GROUP: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
 
-  TF_VAR_dfe_project_name: ${{ secrets.DFE_PROJECT_NAME }}
+  TF_VAR_dfe_project_name: ${{ vars.DFE_PROJECT_NAME }}
   TF_VAR_az_environment: ${{ secrets.AZ_ENVIRONMENT }}
   TF_VAR_az_location: ${{ vars.AZ_LOCATION }}
   TF_VAR_az_tag_environment: ${{ vars.AZ_TAG_ENVIRONMENT }}
