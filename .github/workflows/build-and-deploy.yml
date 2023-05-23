@@ -47,6 +47,7 @@ jobs:
         continue-on-error: true
 
       - name: Terraform init
+        id: init
         run: |
           terraform init \
             -backend-config="resource_group_name=${{ env.TF_BACKEND_RESOURCE_GROUP }}"  \
@@ -60,6 +61,7 @@ jobs:
         run: terraform validate -no-color
 
       - name: Terraform plan 
+        id: plan
         run: terraform plan -no-color
         working-directory: ./terraform
 
