@@ -39,7 +39,14 @@ jobs:
         uses: docker://hashicorp/terraform:1.4.5
         with:
           entrypoint: terraform
-          args: -chdir=terraform init
+          args: |
+            -chdir=terraform 
+            init
+            -backend-config="resource_group_name=${{ env.TF_BACKEND_RESOURCE_GROUP }}"
+            -backend-config="storage_account_name=${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}"
+            -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}"
+            -backend-config="key=${{ env.TF_BACKEND_KEY }}"
+            
           
       # - name: Build web app  
       #   uses: ./.github/actions/build-web-app
