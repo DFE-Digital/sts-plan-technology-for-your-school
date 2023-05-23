@@ -60,10 +60,15 @@ jobs:
         id: plan
         uses: docker://hashicorp/terraform:1.4.5
         with: 
-          args: -attach=stdout -chdir=terraform plan -no-color
+          args: -out=terraform.plan -chdir=terraform plan -no-color
+
+      - name: Read Terraform plan output
+        run: |
+          terraform_plan_output=$(cat terraform.plan)
+          echo "##[set-env name=TERRAFORM_PLAN_OUTPUT]$terraform_plan_output"
 
       - name: Access Terraform output
-        run: echo "Terraform output= ${{ toJSON(steps.plan) }}"
+        run: echo "Terraform output= ${{ env.TERRAFORM_PLAN_OUTPUT }}"
 
       # - name: Access Terraform output
       #   run: echo "Terraform output = ${{ steps.init.outputs }}"
