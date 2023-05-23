@@ -15,6 +15,12 @@ env:
   TF_BACKEND_KEY: ${{ secrets.TF_BACKEND_KEY }}
   TF_BACKEND_RESOURCE_GROUP: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
 
+  DFE_PROJECT_NAME: ${{ secrets.DFE_PROJECT_NAME }}
+  AZ_ENVIRONMENT: ${{ secrets.AZ_ENVIRONMENT }}
+  AZ_LOCATION: ${{ vars.AZ_LOCATION }}
+  AZ_TAG_ENVIRONMENT: ${{ vars.AZ_TAG_ENVIRONMENT }}
+  AZ_TAG_PRODUCT: ${{ vars.AZ_TAG_PRODUCT }}
+
 jobs:
   build-test-app:  
     name: Build and test     
