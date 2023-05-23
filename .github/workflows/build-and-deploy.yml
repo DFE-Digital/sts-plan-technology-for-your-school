@@ -60,7 +60,7 @@ jobs:
         id: plan
         uses: docker://hashicorp/terraform:1.4.5
         with: 
-          args: -attach stdout -chdir=terraform plan -no-color
+          args: -attach=stdout -chdir=terraform plan -no-color
 
       - name: Access Terraform output
         run: echo "Terraform output= ${{ toJSON(steps.plan) }}"
