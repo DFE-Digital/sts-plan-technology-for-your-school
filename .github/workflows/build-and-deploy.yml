@@ -60,7 +60,7 @@ jobs:
         id: plan
         uses: docker://hashicorp/terraform:1.4.5
         with: 
-          args: -chdir=terraform plan -no-color -out=terraform.plan
+          args: -chdir=terraform plan -no-color -json -out=terraform.plan
 
       - name: Read Terraform plan output
         run: echo $(cat terraform.plan)
