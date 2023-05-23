@@ -62,11 +62,8 @@ jobs:
         with: 
           args: -chdir=terraform plan -no-color
 
-      - name: Store Terraform output
-        run: echo "::set-output name=terraform_output::$(terraform output -json)"
-
       - name: Access Terraform output
-        run: echo "Terraform output= ${{ steps.validate.outputs }}"
+        run: echo "Terraform output= ${{ toJSON(steps.validate.outputs) }}"
 
       # - name: Access Terraform output
       #   run: echo "Terraform output = ${{ steps.init.outputs }}"
