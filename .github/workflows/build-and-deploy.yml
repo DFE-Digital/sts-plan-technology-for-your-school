@@ -66,7 +66,7 @@ jobs:
         run: echo "::set-output name=terraform_output::$(terraform output -json)"
 
       - name: Access Terraform output
-        run: echo "Terraform output= ${{ steps.plan.outputs.terraform_output }}"
+        run: echo "Terraform output= ${{ steps.validate.outputs }}"
 
       # - name: Access Terraform output
       #   run: echo "Terraform output = ${{ steps.init.outputs }}"
