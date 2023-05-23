@@ -22,23 +22,3 @@ variable "az_tag_product" {
   description = ""
   type        = string
 }
-
-variable "tf_state_container_name" {
-  description = ""
-  type        = string
-}
-
-variable "tf_state_container_name" {
-  description = ""
-  type        = string
-}
-
-variable "tf_state_key" {
-  description = ""
-  type        = string
-}
-
-variable "tf_state_storage_account_name" {
-  description = ""
-  type        = string
-}
