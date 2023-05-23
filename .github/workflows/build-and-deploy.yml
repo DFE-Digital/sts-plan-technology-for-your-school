@@ -41,3 +41,8 @@ jobs:
             -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}"  \
             -backend-config="key=${{ env.TF_BACKEND_KEY }}"
         working-directory: ./terraform
+
+      - name: Terraform plan
+        run: |
+          terraform plan
+        working-directory: ./terraform
