@@ -4,6 +4,10 @@ on: [pull_request]
 
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
+  ARM_TENANT_ID: ${{ vars.AZ_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ vars.AZ_SUBSCRIPTION_ID }}
+  ARM_CLIENT_ID: ${{ vars.AZ_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ vars.AZ_CLIENT_SECRET }}
 
 jobs:
   build-test-app:  
