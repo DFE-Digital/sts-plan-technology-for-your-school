@@ -41,7 +41,7 @@ jobs:
           working-directory: ./terraform
           entrypoint: terraform
           args: |
-            init
+            init \
               -backend-config="resource_group_name=${{ env.TF_BACKEND_RESOURCE_GROUP }}" \
               -backend-config="storage_account_name=${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}" \
               -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
