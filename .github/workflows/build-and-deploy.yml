@@ -66,10 +66,12 @@ jobs:
         run: |
           terraform_plan_output=$(cat terraform.plan)
           echo "##[set-env name=TERRAFORM_PLAN_OUTPUT]$terraform_plan_output"
+        working-directory: ${{ env.TF_WORKING_DIRECTORY }}
 
       - name: Access Terraform output
         run: echo "Terraform output= ${{ env.TERRAFORM_PLAN_OUTPUT }}"
-
+        working-directory: ${{ env.TF_WORKING_DIRECTORY }}
+        
       # - name: Access Terraform output
       #   run: echo "Terraform output = ${{ steps.init.outputs }}"
 
