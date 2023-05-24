@@ -1,10 +1,9 @@
 name: Terraform PR Check
 
-on:
-  push:
-    branches: [ "main" ]
+on: 
   pull_request:
-    branches: [ "main" ]
+    paths: 
+      - 'terraform/**'
 
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}

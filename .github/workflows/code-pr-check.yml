@@ -3,8 +3,12 @@ name: Code PR Check
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - 'docs/**'
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - 'docs/**'
 
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
