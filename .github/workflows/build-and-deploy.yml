@@ -35,77 +35,46 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Run Terraform fmt
-        id: fmt
-        uses: docker://hashicorp/terraform:1.4.5
-        with: 
-          args: -chdir=terraform fmt -check
-        continue-on-error: true
-
-      - name: Run Terraform init
-        id: init
-        uses: docker://hashicorp/terraform:1.4.5
-        with:
-          working-directory: ./terraform
-          entrypoint: terraform
-          args: -chdir=terraform init -backend-config="resource_group_name=${{ env.TF_BACKEND_RESOURCE_GROUP }}" -backend-config="storage_account_name=${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}" -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" -backend-config="key=${{ env.TF_BACKEND_KEY }}"
-        
-      - name: Run Terraform validate
-        id: validate
-        uses: docker://hashicorp/terraform:1.4.5
-        with: 
-          args: -chdir=terraform validate -no-color
-
-      - name: Run Terraform plan
-        id: plan
-        uses: docker://hashicorp/terraform:1.4.5
-        with: 
-          args: -chdir=terraform plan -no-color
-
-      - name: Read Terraform plan output
-        run: echo $(cat terraform.plan)
+      - name: Access Terraform output
+        run: echo "Terraform output= ${{ env.TERRAFORM_PLAN_OUTPUT }}"
         working-directory: ${{ env.TF_WORKING_DIRECTORY }}
 
-      # - name: Access Terraform output
-      #   run: echo "Terraform output= ${{ env.TERRAFORM_PLAN_OUTPUT }}"
-      #   working-directory: ${{ env.TF_WORKING_DIRECTORY }}
+      - name: Access Terraform output
+        run: echo "Terraform output = ${{ steps.init.outputs }}"
 
-      # - name: Access Terraform output
-      #   run: echo "Terraform output = ${{ steps.init.outputs }}"
+      - name: Build web app  
+        uses: ./.github/actions/build-web-app
+        with:
+          dotnet_version: ${{ env.DOTNET_VERSION }}  
 
-      # - name: Build web app  
-      #   uses: ./.github/actions/build-web-app
-      #   with:
-      #     dotnet_version: ${{ env.DOTNET_VERSION }}  
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.4.5
 
-      # - name: Setup Terraform
-      #   uses: hashicorp/setup-terraform@v2
-      #     with:
-      #       terraform_version: 1.4.5
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
 
-      # - name: Terraform fmt
-      #   id: fmt
-      #   run: terraform fmt -check
-      #   continue-on-error: true
+      - name: Terraform init
+        id: init
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ env.TF_BACKEND_RESOURCE_GROUP }}"  \
+            -backend-config="storage_account_name=${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}"  \
+            -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}"  \
+            -backend-config="key=${{ env.TF_BACKEND_KEY }}"
+        working-directory: ${{ env.TF_WORKING_DIRECTORY }}
 
-      # - name: Terraform init
-      #   id: init
-      #   run: |
-      #     terraform init \
-      #       -backend-config="resource_group_name=${{ env.TF_BACKEND_RESOURCE_GROUP }}"  \
-      #       -backend-config="storage_account_name=${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}"  \
-      #       -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}"  \
-      #       -backend-config="key=${{ env.TF_BACKEND_KEY }}"
-      #   working-directory: ${{ env.TF_WORKING_DIRECTORY }}
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
 
-      # - name: Terraform Validate
-      #   id: validate
-      #   run: terraform validate -no-color
-
-      # - name: Terraform plan 
-      #   id: plan
-      #   run: terraform plan -no-color
-      #   working-directory: ${{ env.TF_WORKING_DIRECTORY }}
+      - name: Terraform plan 
+        id: plan
+        run: terraform plan -no-color
+        working-directory: ${{ env.TF_WORKING_DIRECTORY }}
 
       - name: Update PR with Terraform results
         uses: actions/github-script@v6
