@@ -28,8 +28,8 @@ jobs:
     name: Build and test     
     runs-on: ubuntu-latest
 
-    permissions:
-      pull-requests: write
+    # permissions:
+    #   pull-requests: write
 
     steps:
       - name: Check out repository
@@ -80,7 +80,7 @@ jobs:
         uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
         env:
-          PLAN: "terraform\n${{ steps.plan.outputs }}"
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -101,7 +101,7 @@ jobs:
             <details><summary>Validation Output</summary>
       
             \`\`\`\n
-            ${{ steps.validate.outputs }}
+            ${{ steps.validate.outputs.stdout }}
             \`\`\`
       
             </details>
