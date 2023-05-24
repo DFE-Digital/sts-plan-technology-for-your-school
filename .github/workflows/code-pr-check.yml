@@ -1,4 +1,4 @@
-name: Validate Pull Request
+name: Code PR Check 
 
 on:
   push:
@@ -17,10 +17,12 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
+
       - name: Build web app  
         uses: ./.github/actions/build-web-app
         with:
           dotnet_version: ${{ env.DOTNET_VERSION }}  
+
       - name: Run unit tests
         uses: ./.github/actions/run-unit-tests
  
