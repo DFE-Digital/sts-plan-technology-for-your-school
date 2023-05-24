@@ -1,4 +1,4 @@
-# 0021 - Deploy Database Schema Changes
+# 0022 - Deploy Database Schema Changes
 
 * **Status**: accepted
 

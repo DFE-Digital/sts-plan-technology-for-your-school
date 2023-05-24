@@ -1,0 +1,100 @@
+name: Post Terraform Results
+description: Updates the PR with the Terraform results
+
+inputs:
+  github_token:
+    required: true
+    type: string
+  plan_stdout:
+    required: true
+    type: string  
+  plan_outcome:
+    required: true
+    type: string
+  fmt_outcome:
+    required: true
+    type: string
+  init_outcome:
+    required: true
+    type: string
+  validate_outcome:
+    required: true
+    type: string
+  validate_stdout:
+    required: true
+    type: string
+  github_actor:
+    required: true
+    type: string
+  github_event_name:
+    required: true
+    type: string
+  tf_working_directory:
+    required: true
+    type: string
+  github_workflow:
+    required: true
+    type: string
+
+runs:
+  using: composite
+
+  steps:
+    - name: Update PR with Terraform results
+      uses: actions/github-script@v6
+      if: github.event_name == 'pull_request'
+      env:
+        PLAN: "terraform\n${{ inputs.plan_stdout }}"
+      with:
+        github-token: ${{ inputs.github_token }}
+        script: |
+          // 1. Retrieve existing bot comments for the PR
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          })
+          const botComment = comments.find(comment => {
+            return comment.user.type === 'Bot' && comment.body.includes('Terraform Format and Style')
+          })
+    
+          // 2. Prepare format of the comment
+          const output = `#### Terraform Format and Style 🖌\`${{ inputs.fmt_outcome }}\`
+          #### Terraform Initialization ⚙️\`${{ inputs.init_outcome }}\`
+          #### Terraform Validation 🤖\`${{ inputs.validate_outcome }}\`
+          <details><summary>Validation Output</summary>
+    
+          \`\`\`\n
+          ${{ inputs.validate_stdout }}
+          \`\`\`
+    
+          </details>
+    
+          #### Terraform Plan 📖\`${{ inputs.plan_outcome }}\`
+    
+          <details><summary>Show Plan</summary>
+    
+          \`\`\`\n
+          ${process.env.PLAN}
+          \`\`\`
+    
+          </details>
+    
+          *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.TF_WORKING_DIRECTORY }}\`, Workflow: \`${{ github.workflow }}\`*`;
+    
+          // 3. If we have a comment, update it, otherwise create a new one
+          if (botComment) {
+            github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body: output
+            })
+          } else {
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+          }

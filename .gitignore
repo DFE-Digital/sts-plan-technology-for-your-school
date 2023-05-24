@@ -483,3 +483,7 @@ $RECYCLE.BIN/
 # Draw.io files
 *.bkp
 *.dtmp
+
+# Terraform
+.terraform/
+.terraform.lock.hcl

@@ -1,0 +1,115 @@
+name: Terraform PR Check
+
+on: 
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - 'terraform/**'
+      - '.github/**'
+  pull_request:
+    paths: 
+      - 'terraform/**'
+      - '.github/**'
+
+env:
+  DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
+
+  ARM_TENANT_ID: ${{ secrets.AZ_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+  ARM_CLIENT_ID: ${{ secrets.AZ_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ secrets.AZ_CLIENT_SECRET }}
+
+  TF_BACKEND_STORAGE_ACCOUNT_NAME: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
+  TF_BACKEND_CONTAINER_NAME: ${{ secrets.TF_BACKEND_CONTAINER_NAME }}
+  TF_BACKEND_KEY: ${{ secrets.TF_BACKEND_KEY }}
+  TF_BACKEND_RESOURCE_GROUP: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
+
+  TF_VAR_dfe_project_name: ${{ vars.DFE_PROJECT_NAME }}
+  TF_VAR_az_environment: ${{ secrets.AZ_ENVIRONMENT }}
+  TF_VAR_az_location: ${{ vars.AZ_LOCATION }}
+  TF_VAR_az_tag_environment: ${{ vars.AZ_TAG_ENVIRONMENT }}
+  TF_VAR_az_tag_product: ${{ vars.AZ_TAG_PRODUCT }}
+
+jobs:
+  validate-terraform-plan:  
+    name: Validate Terraform Plan 
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.4.5
+
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
+
+      - name: Terraform init
+        id: init
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ env.TF_BACKEND_RESOURCE_GROUP }}"  \
+            -backend-config="storage_account_name=${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}"  \
+            -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}"  \
+            -backend-config="key=${{ env.TF_BACKEND_KEY }}"
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+      - name: Terraform plan 
+        id: plan
+        run: terraform plan -no-color
+
+      - name: Update PR with Terraform results  
+        uses: ./.github/actions/post-terraform-results
+        if: github.event_name == 'pull_request'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          plan_stdout: ${{ steps.plan.outputs.stdout }}
+          plan_outcome: ${{ steps.plan.outcome }}
+          fmt_outcome: ${{ steps.fmt.outcome }}
+          init_outcome: ${{ steps.init.outcome }}
+          validate_outcome: ${{ steps.validate.outcome }}
+          validate_stdout: ${{ steps.validate.outputs.stdout }}
+          github_actor: ${{ github.actor }}
+          github_event_name: ${{ github.event_name }}
+          tf_working_directory: ${{ env.TF_WORKING_DIRECTORY }}
+          github_workflow: ${{ github.workflow }}
+
+  terraform-lint:
+    name: Terraform Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v3
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v3
+        with:
+          tflint_version: v0.44.1
+
+      - name: Run TFLint
+        run: tflint -f compact
+
+  tfsec-pr-commenter:
+    name: tfsec Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v3
+
+      - name: tfsec
+        uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
+        with:
+          github_token: ${{ github.token }}

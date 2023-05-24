@@ -1,13 +1,19 @@
-name: Validate Pull Request
+name: Code PR Check 
 
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - 'docs/**'
+      - 'terraform/**'
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - 'docs/**'
+      - 'terraform/**'
 
 env:
-  DOTNET_VERSION: 7.0.x
+  DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
 
 jobs:
   build-test-app:  
@@ -17,10 +23,12 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
+
       - name: Build web app  
         uses: ./.github/actions/build-web-app
         with:
           dotnet_version: ${{ env.DOTNET_VERSION }}  
+
       - name: Run unit tests
         uses: ./.github/actions/run-unit-tests
  
@@ -28,7 +36,8 @@ jobs:
     name: Build docker image
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
+      - name: Clone repo
         uses: actions/checkout@v3
+
       - name: Build docker image
         uses: ./.github/actions/build-docker-image 

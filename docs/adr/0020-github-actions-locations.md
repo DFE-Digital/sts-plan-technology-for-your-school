@@ -1,6 +1,6 @@
 # 0020 - GitHub Actions Locations
 
-* **Status**: proposed
+* **Status**: accepted
 
 ## Context and Problem Statement
 
@@ -45,4 +45,6 @@ Where do we store our GitHub action workflow files, and how do we manage these?
 
 ## Decision Outcome
 
-TBD.
+GitHub Workflows must reside within the `.github/workflows` directory as described within the article [Workflow syntax for GitHub Actions](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions).  
+
+Also it is advised that the reusable Actions are located within the `.github/actions` directory as discussed within the [About custom actions](https://docs.github.com/en/actions/creating-actions/about-custom-actions#choosing-a-location-for-your-action) article.
