@@ -1,9 +1,15 @@
 name: Terraform PR Check
 
 on: 
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - 'terraform/**'
+      - '.github/**'
   pull_request:
     paths: 
       - 'terraform/**'
+      - '.github/**'
 
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
