@@ -53,4 +53,12 @@ public class GetPageQueryTests
 
         Assert.Equal(LANDING_PAGE_SLUG, result.Slug);
     }
+
+    [Fact]
+    public async Task Should_ThrowException_When_SlugNotFound()
+    {
+        var query = new GetPageQuery(_repoMock.Object);
+
+        await Assert.ThrowsAsync<Exception>(async () => await query.GetPageBySlug("NOT A REAL SLUG"));
+    }
 }
