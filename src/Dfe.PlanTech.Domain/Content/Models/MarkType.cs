@@ -1,6 +1,6 @@
 namespace Dfe.PlanTech.Domain.Content.Models;
 
-public enum Marks
+public enum MarkType
 {
     Unknown,
     Underline,

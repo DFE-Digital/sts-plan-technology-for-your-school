@@ -2,6 +2,9 @@ using System.Text;
 
 namespace Dfe.PlanTech.Domain.Content.Models;
 
+/// <summary>
+/// Content for a 'RichText' field in Contentful
+/// </summary>
 public class RichTextContent : ContentComponent
 {
     /// <summary>

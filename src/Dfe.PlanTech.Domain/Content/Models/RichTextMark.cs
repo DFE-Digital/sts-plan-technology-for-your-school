@@ -7,4 +7,6 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 public class RichTextMark
 {
     public string Type { get; init; } = "";
+
+    public MarkType MarkType => Enum.TryParse(Type, true, out MarkType markType) ? markType : MarkType.Unknown;
 }
