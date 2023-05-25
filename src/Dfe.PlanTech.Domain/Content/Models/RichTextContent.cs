@@ -31,6 +31,8 @@ public class RichTextContent : ContentComponent
 
     public RichTextContent[] Content { get; init; } = Array.Empty<RichTextContent>();
 
+    public RichTextData? Data { get; init;}
+    
     /// <summary>
     /// Strips non-ASCII (i.e. UTF) characters from Value field
     /// </summary>
