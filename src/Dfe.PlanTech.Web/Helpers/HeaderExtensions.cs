@@ -5,12 +5,17 @@ namespace Dfe.PlanTech.Web.Helpers;
 
 public static class HeaderExtensions
 {
+    public const string SMALL = "govuk-heading-s";
+    public const string MEDIUM = "govuk-heading-m";
+    public const string LARGE = "govuk-heading-l";
+    public const string EXTRALARGE = "govuk-heading-xl";
+
     public static string GetClassForSize(this Header header) => header.Size switch
     {
-        HeaderSize.Small => "govuk-heading-s",
-        HeaderSize.Medium => "govuk-heading-m",
-        HeaderSize.Large => "govuk-heading-l",
-        HeaderSize.ExtraLarge => "govuk-heading-xl",
-        _ => "govuk-heading-s"
+        HeaderSize.Small => SMALL,
+        HeaderSize.Medium => MEDIUM,
+        HeaderSize.Large => LARGE,
+        HeaderSize.ExtraLarge => EXTRALARGE,
+        _ => throw new Exception($"Could not find header size for {header.Size}")
     };
 }
