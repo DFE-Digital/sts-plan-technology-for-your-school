@@ -19,7 +19,7 @@ public class PagesController : Controller
     {
         var page = await getPageQuery.GetPageBySlug(nameof(Pages.Landing));
 
-        return View("Page", page);
+        return View("LandingPage", page);
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

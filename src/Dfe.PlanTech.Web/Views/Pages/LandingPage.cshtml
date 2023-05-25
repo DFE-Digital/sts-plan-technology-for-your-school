@@ -1,0 +1,9 @@
+@model Dfe.PlanTech.Domain.Content.Models.Page;
+
+@{ await Html.RenderPartialAsync("Page", Model); }
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <govuk-button-link href="https://NEXT-PAGE" is-start-button="true">Go to DfE Sign-in</govuk-button-link>
+    </div>
+</div>
