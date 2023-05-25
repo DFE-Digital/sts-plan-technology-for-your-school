@@ -1,0 +1,5 @@
+dfe_project_name = "plantech"
+az_environment = ""
+az_location = ""
+az_tag_environment = "Dev"
+az_tag_product = "Plan Technology for your School"

@@ -2,8 +2,8 @@
 
 Web application to help schools plan a technology roadmap
 
-![.NET Pipeline](https://img.shields.io/github/actions/workflow/status/DFE-Digital/plan-technology-for-your-school/BuildAndTest.yml?label=.NET%20Build)
-![Docker pipeline](https://img.shields.io/github/actions/workflow/status/DFE-Digital/plan-technology-for-your-school/BuildDockerfile.yml?label=Dockerimage)
+[![Code PR Check](https://github.com/DFE-Digital/plan-technology-for-your-school/actions/workflows/code-pr-check.yml/badge.svg)](https://github.com/DFE-Digital/plan-technology-for-your-school/actions/workflows/code-pr-check.yml)
+[![Terraform PR Check](https://github.com/DFE-Digital/plan-technology-for-your-school/actions/workflows/terraform-pr-check.yml/badge.svg?branch=main)](https://github.com/DFE-Digital/plan-technology-for-your-school/actions/workflows/terraform-pr-check.yml)
 
 ## Requirements
 
@@ -13,6 +13,9 @@ Web application to help schools plan a technology roadmap
 
 - The startup project is [./src/Dfe.PlanTech.Web](./src/Dfe.PlanTech.Web)
 
-## More Information
+## Documentation 
 
-[Documentation Main](./docs/README.md)
+- [Conventions](./docs/conventions.md)
+- [Architecture Decision Records](./docs/adr/readme.md)
+- [GitHub Workflows](./.github/readme.md)
+- [Terraform](./terraform/readme.md)
