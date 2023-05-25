@@ -15,6 +15,7 @@ public class ContentfulRepository : IContentRepository
     public ContentfulRepository(IContentfulClient client)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
+        _client.ContentTypeResolver = new EntityResolver();
     }
 
     public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IEnumerable<IContentQuery>? queries = null, CancellationToken cancellationToken = default)

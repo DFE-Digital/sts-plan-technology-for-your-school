@@ -1,0 +1,7 @@
+@model Dfe.PlanTech.Domain.Content.Models.RichTextContent;
+
+@{
+    foreach(var content in Model.Content){
+        await Html.RenderPartialAsync("RichText/Content", content);
+    }
+}

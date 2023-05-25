@@ -1,0 +1,12 @@
+@model Dfe.PlanTech.Domain.Content.Models.RichTextContent;
+
+@foreach(var content in Model.Content){
+    if(content.NodeType == "list-item")
+    {
+        <li>@{await Html.RenderPartialAsync("RichText/Content", content);}</li>
+    }
+    else
+    {
+        await Html.RenderPartialAsync("RichText/Content", content);
+    }
+}

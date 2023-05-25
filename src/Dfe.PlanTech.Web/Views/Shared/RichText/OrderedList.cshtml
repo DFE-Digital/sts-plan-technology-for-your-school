@@ -1,0 +1,5 @@
+@model Dfe.PlanTech.Domain.Content.Models.RichTextContent;
+
+<ol class="govuk-list govuk-list--number">
+    @{ await Html.RenderPartialAsync("RichText/ListItem", Model); }
+</ol>
