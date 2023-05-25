@@ -487,3 +487,4 @@ $RECYCLE.BIN/
 # Terraform
 .terraform/
 .terraform.lock.hcl
+*.tfvars
