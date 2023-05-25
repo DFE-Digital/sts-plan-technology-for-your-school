@@ -13,7 +13,7 @@ public interface IContentRepository
     /// <typeparam name="TEntity"></typeparam>
     /// <returns></returns>
     Task<TEntity?> GetEntityById<TEntity>(string id, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Get all entities of the specified type.
     /// </summary>
@@ -23,7 +23,7 @@ public interface IContentRepository
     /// <typeparam name="TEntity"></typeparam>
     /// <returns></returns>
     Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IEnumerable<IContentQuery>? queries = null, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Get all entities of the specified type, using the name of the generic parameter's type as the entity type id (to lower case).
     /// E.g. if the TEntity is a class called "Category", then it uses "category"
@@ -32,5 +32,5 @@ public interface IContentRepository
     /// <param name="cancellationToken"></param>
     /// <typeparam name="TEntity"></typeparam>
     /// <returns></returns>
-    Task<IEnumerable<TEntity>> GetEntities<TEntity>(IEnumerable<IContentQuery>? queries = null,  CancellationToken cancellationToken = default);
+    Task<IEnumerable<TEntity>> GetEntities<TEntity>(IEnumerable<IContentQuery>? queries = null, CancellationToken cancellationToken = default);
 }
