@@ -21,6 +21,9 @@
         </div>
     </header>
 }
+@section BeforeContent{
+    @{ await Html.RenderPartialAsync("BetaHeader"); }
+}
 
 @RenderBody()
 
