@@ -1,6 +1,7 @@
 @model Dfe.PlanTech.Domain.Content.Models.Page;
 
-<div>
-    <p>@Model.InternalName</p>
-    <p>@Model.Slug</p>
-</div>
+@{
+    if(Model.Title != null){
+        await Html.RenderPartialAsync("Components/Title", Model.Title);
+    }
+}
