@@ -27,13 +27,9 @@ public class ContentfulRepository : IContentRepository
             queryBuilder.WithQueries(queries);
         }
 
-        var query = queryBuilder.Build();
-
         var entries = await _client.GetEntries(queryBuilder, cancellationToken);
 
-        if (entries == null) return Enumerable.Empty<TEntity>();
-
-        return entries;
+        return entries ?? Enumerable.Empty<TEntity>();
     }
 
     public Task<IEnumerable<TEntity>> GetEntities<TEntity>(IEnumerable<IContentQuery>? queries = null, CancellationToken cancellationToken = default)

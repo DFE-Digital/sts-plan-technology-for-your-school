@@ -8,7 +8,7 @@
     }
     
     case TextBody textBody: {
-        await Html.RenderPartialAsync("RichText/Content", textBody.RichText);
+        <rich-text content=@textBody.RichText></rich-text>
         break;
     }
 

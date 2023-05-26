@@ -1,6 +1,5 @@
 namespace Dfe.PlanTech.Domain.Content.Models;
 
-
 /// <summary>
 /// Data for a RichText section
 /// </summary>

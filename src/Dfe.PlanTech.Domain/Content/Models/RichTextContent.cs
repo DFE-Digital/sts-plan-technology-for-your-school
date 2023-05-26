@@ -1,11 +1,12 @@
 using System.Text;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Content.Models;
 
 /// <summary>
 /// Content for a 'RichText' field in Contentful
 /// </summary>
-public class RichTextContent : ContentComponent
+public class RichTextContent : ContentComponent, IRichTextContent
 {
     /// <summary>
     /// Actual value of this node.
@@ -27,12 +28,12 @@ public class RichTextContent : ContentComponent
     /// </summary>
     /// <typeparam name="NodeTypes"></typeparam>
     public RichTextNodeType MappedNodeType
-     => Enum.GetValues<RichTextNodeType>().FirstOrDefault(value => nameof(value).ToLower() == NodeType.Replace("-", ""));
+     => Enum.GetValues<RichTextNodeType>().FirstOrDefault(value => value.ToString().ToLower() == NodeType.Replace("-", ""));
 
     public RichTextContent[] Content { get; init; } = Array.Empty<RichTextContent>();
 
-    public RichTextData? Data { get; init;}
-    
+    public RichTextData? Data { get; init; }
+
     /// <summary>
     /// Strips non-ASCII (i.e. UTF) characters from Value field
     /// </summary>

@@ -1,6 +1,6 @@
-using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 using Contentful.Core.Search;
 using Dfe.PlanTech.Infrastructure.Application.Models;
+using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests;
 
@@ -20,10 +20,10 @@ public class QueryBuilderWithQueryTests
         Value = TEST_VALUE,
         Field = TEST_FIELD
     };
+
     [Fact]
     public void Should_Call_ContentQueryEquals_When_ClassIs_ContentQueryEquals()
     {
-
         var query = EQUALS;
 
         var queryBuilder = new QueryBuilder<TestClass>();
@@ -39,7 +39,6 @@ public class QueryBuilderWithQueryTests
     [Fact]
     public void Should_Call_ContentQueryIncludes_When_ClassIs_ContentQueryIncludes()
     {
-
         var query = INCLUDES;
         var queryBuilder = new QueryBuilder<TestClass>();
 
@@ -75,11 +74,11 @@ public class QueryBuilderWithQueryTests
 
         string expectedEqualsString = GetExpectedStringForEquals(EQUALS);
         string expectedIncludesString = GetExpectedStringForIncludes(INCLUDES);
-        
+
         Assert.Contains(expectedEqualsString, queryString);
         Assert.Contains(expectedIncludesString, queryString);
     }
-    
+
     private static string GetExpectedStringForIncludes(ContentQueryIncludes query)
     => $"{query.Field}[in]={string.Join("%2C", query.Value)}";
 

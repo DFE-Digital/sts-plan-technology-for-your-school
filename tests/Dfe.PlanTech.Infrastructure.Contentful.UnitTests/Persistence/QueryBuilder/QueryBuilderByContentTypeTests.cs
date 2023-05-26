@@ -9,7 +9,7 @@ public class QueryBuilderByContentTypeTests
     [Fact]
     public void Should_Create_When_String()
     {
-        var contentTypeId = TEST_CONTENT_TYPE;
+        const string contentTypeId = TEST_CONTENT_TYPE;
 
         var queryBuilder = QueryBuilders.ByContentType<TestClass>(contentTypeId);
 
@@ -19,7 +19,7 @@ public class QueryBuilderByContentTypeTests
     [Fact]
     public void Should_Create_Have_ContentType_Fulter_When_String()
     {
-        var contentTypeId = TEST_CONTENT_TYPE;
+        const string contentTypeId = TEST_CONTENT_TYPE;
 
         var queryBuilder = QueryBuilders.ByContentType<TestClass>(contentTypeId);
 
