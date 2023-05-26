@@ -24,15 +24,15 @@ env:
   TF_BACKEND_KEY: ${{ secrets.TF_BACKEND_KEY }}
   TF_BACKEND_RESOURCE_GROUP: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
 
-  TF_VAR_dfe_project_name: ${{ vars.DFE_PROJECT_NAME }}
-  TF_VAR_az_environment: ${{ secrets.AZ_ENVIRONMENT }}
-  TF_VAR_az_location: ${{ vars.AZ_LOCATION }}
+  TF_VAR_project_name: ${{ vars.DFE_PROJECT_NAME }}
+  TF_VAR_environment: ${{ secrets.AZ_ENVIRONMENT }}
+  TF_VAR_azure_location: ${{ vars.AZ_LOCATION }}
   TF_VAR_az_tag_environment: ${{ vars.AZ_TAG_ENVIRONMENT }}
   TF_VAR_az_tag_product: ${{ vars.AZ_TAG_PRODUCT }}
 
 jobs:
-  validate-terraform-plan:  
-    name: Validate Terraform Plan 
+  validate-terraform:  
+    name: Validate Terraform 
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -45,11 +45,6 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.4.5
-
-      - name: Terraform fmt
-        id: fmt
-        run: terraform fmt -check
-        continue-on-error: true
 
       - name: Terraform init
         id: init
@@ -67,6 +62,10 @@ jobs:
       - name: Terraform plan 
         id: plan
         run: terraform plan -no-color
+
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -check -diff
 
       - name: Update PR with Terraform results  
         uses: ./.github/actions/post-terraform-results
@@ -113,3 +112,21 @@ jobs:
         uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
         with:
           github_token: ${{ github.token }}
+
+  terraform-docs-validation:
+    name: Terraform Docs validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Generate Terraform docs
+        uses: terraform-docs/gh-actions@v1.0.0
+        with:
+          working-dir: terraform
+          config-file: .terraform-docs.yml
+          output-file: terraform-configuration.md
+          output-method: inject
+          fail-on-diff: true
