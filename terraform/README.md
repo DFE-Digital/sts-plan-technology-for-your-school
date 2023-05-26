@@ -11,6 +11,7 @@ The following article discusses developer tools and how to run the **Terraform**
     - [Setting environment variables](#setting-environment-variables)
     - [Terraform Init](#terraform-init)
     - [Terraform Plan](#terraform-plan)
+    - [Terraform Format](#terraform-format)
   - [Terraform Documentation](#terraform-documentation)
 
 ## Developer tools
@@ -67,6 +68,12 @@ To run the plan command, first rename the `terraform.tfvars.example` file to `te
 Run the following command to execute the Plan commande: 
 
 `terraform plan -var-file="terraform.tfvars"`
+
+### Terraform Format
+
+Any changes to the Terraform configuration should be formatted correctly.  This can be done by running the following command:
+
+`terraform fmt`
 
 ## Terraform Documentation
 
