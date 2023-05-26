@@ -1,14 +1,14 @@
-variable "dfe_project_name" {
+variable "project_name" {
   description = ""
   type        = string
 }
 
-variable "az_environment" {
+variable "environment" {
   description = "Environment name. Will be used along with `project_name` as a prefix for all resources."
   type        = string
 }
 
-variable "az_location" {
+variable "azure_location" {
   description = ""
   type        = string
 }
