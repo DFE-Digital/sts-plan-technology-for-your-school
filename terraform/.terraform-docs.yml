@@ -22,7 +22,5 @@ output:
   mode: inject
   template: |-
         <!-- BEGIN_TF_DOCS -->
-        # Terraform Module Configuration
-
         {{ .Content }}
         <!-- END_TF_DOCS -->

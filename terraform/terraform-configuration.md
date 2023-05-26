@@ -1,6 +1,6 @@
-<!-- BEGIN_TF_DOCS -->
 # Terraform Module Configuration
 
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
