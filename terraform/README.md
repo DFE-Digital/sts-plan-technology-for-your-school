@@ -74,4 +74,4 @@ When the Terraform configuration is updated, the module documentation will need 
 
 `terraform-docs markdown .` 
 
-This will generate the `terraform-documentation.md` markdown file.
+This will generate the `terraform-configuration.md` markdown file.
