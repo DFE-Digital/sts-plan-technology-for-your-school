@@ -1,0 +1,14 @@
+name: Run Cypress E2E tests
+description: Run E2E tests using Cypress
+
+runs:
+  using: composite
+
+  steps:
+    - name: Build and test project
+      uses: cypress-io/github-action@v5
+      with:
+        working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
+        build: npm run build
+        start: npm start
+        browser: chrome

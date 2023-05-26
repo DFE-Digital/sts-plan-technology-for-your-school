@@ -31,6 +31,9 @@ jobs:
 
       - name: Run unit tests
         uses: ./.github/actions/run-unit-tests
+      
+      - name: Run UI tests
+        uses: ./.github/actions/run-e2e-tests
  
   build-docker-image:
     name: Build docker image
