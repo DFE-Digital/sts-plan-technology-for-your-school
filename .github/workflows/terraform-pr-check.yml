@@ -1,15 +1,16 @@
 name: Terraform PR Check
 
-on: 
-  push:
-    branches: [ "main" ]
-    paths-ignore:
-      - 'terraform/**'
-      - '.github/**'
-  pull_request:
-    paths: 
-      - 'terraform/**'
-      - '.github/**'
+on: [pull_request]
+# on: 
+#   push:
+#     branches: [ "main" ]
+#     paths-ignore:
+#       - 'terraform/**'
+#       - '.github/**'
+#   pull_request:
+#     paths: 
+#       - 'terraform/**'
+#       - '.github/**'
 
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
@@ -31,8 +32,8 @@ env:
   TF_VAR_az_tag_product: ${{ vars.AZ_TAG_PRODUCT }}
 
 jobs:
-  validate-terraform-plan:  
-    name: Validate Terraform Plan 
+  validate-terraform:  
+    name: Validate Terraform 
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -112,3 +113,22 @@ jobs:
         uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
         with:
           github_token: ${{ github.token }}
+
+  terraform-docs-validation:
+    name: Terraform Docs validation
+    needs: validate-terraform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+        # with:
+        #   ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Generate Terraform docs
+        uses: terraform-docs/gh-actions@v1.0.0
+        with:
+          working-dir: terraform
+          config-file: .terraform-docs.yml
+          output-file: README.md
+          output-method: inject
+          fail-on-diff: true
