@@ -1,6 +1,8 @@
-using GovUk.Frontend.AspNetCore;
-using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Application.Helpers;
+using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers;
+using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Options;
+using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
+using GovUk.Frontend.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +11,20 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddGovUkFrontend();
 
 builder.Services.SetupContentfulClient(builder.Configuration, "Contentful");
+
+builder.Services.AddScoped((_) => new TextRendererOptions(new List<MarkOptions>() {
+    new MarkOptions(){
+        Mark = "bold",
+        HtmlTag = "span",
+        Classes = "govuk-body govuk-!-font-weight-bold",
+    }
+}));
+
+builder.Services.AddScoped((_) => new ParagraphRendererOptions()
+{
+    Classes = "govuk-body",
+});
+
 builder.Services.AddCQRSServices();
 
 var app = builder.Build();
