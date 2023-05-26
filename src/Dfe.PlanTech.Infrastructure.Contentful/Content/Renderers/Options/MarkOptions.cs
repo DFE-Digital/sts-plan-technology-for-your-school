@@ -1,6 +1,9 @@
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Options;
 
-public class MarkOptions
+/// <summary>
+/// Class for mapping a "Mark" (e.g. bold, or underline, etc.) from Contentful API response, for Rich Text, to an appropriate tag
+/// </summary>
+public class MarkOption
 {
     /// <summary>
     /// What mark this options is for (e.g. "bold" or "underline")

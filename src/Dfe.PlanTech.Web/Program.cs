@@ -12,8 +12,8 @@ builder.Services.AddGovUkFrontend();
 
 builder.Services.SetupContentfulClient(builder.Configuration, "Contentful");
 
-builder.Services.AddScoped((_) => new TextRendererOptions(new List<MarkOptions>() {
-    new MarkOptions(){
+builder.Services.AddScoped((_) => new TextRendererOptions(new List<MarkOption>() {
+    new MarkOption(){
         Mark = "bold",
         HtmlTag = "span",
         Classes = "govuk-body govuk-!-font-weight-bold",

@@ -18,24 +18,43 @@ public class TextRenderer : BaseRichTextContentPartRender
 
     public override StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection richTextRenderer, StringBuilder stringBuilder)
     {
-        var marks = content.Marks.Select(_textRendererOptions.GetHtmlForMark).ToArray();
+        var markOptions = content.Marks.Select(_textRendererOptions.GetMatchingOptionForMark).Where(option => option != null).ToArray();
 
-        foreach (var mark in marks)
+        if (markOptions.Length == 0)
         {
-            stringBuilder.Append('<');
-            stringBuilder.Append(mark);
-            stringBuilder.Append('>');
+            //TODO: Log missing mark options
+            return stringBuilder;
         }
+
+        AppendOpenTags(stringBuilder, markOptions!);
 
         stringBuilder.Append(content.Value);
 
-        foreach (var mark in marks)
-        {
-            stringBuilder.Append("</");
-            stringBuilder.Append(mark);
-            stringBuilder.Append('>');
-        }
+        AppendCloseTags(stringBuilder, markOptions!);
 
         return stringBuilder;
+    }
+
+    private static void AppendCloseTags(StringBuilder stringBuilder, IEnumerable<MarkOption> markOptions)
+    {
+        foreach (var mark in markOptions)
+        {
+            stringBuilder.Append("</");
+            stringBuilder.Append(mark.HtmlTag);
+            stringBuilder.Append('>');
+        }
+    }
+
+    private void AppendOpenTags(StringBuilder stringBuilder, IEnumerable<MarkOption> markOptions)
+    {
+        foreach (var mark in markOptions)
+        {
+            stringBuilder.Append('<');
+            foreach (var htmlPart in _textRendererOptions.GetOpenTagHtml(mark))
+            {
+                stringBuilder.Append(htmlPart);
+            }
+            stringBuilder.Append('>');
+        }
     }
 }
