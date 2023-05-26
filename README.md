@@ -17,5 +17,5 @@ Web application to help schools plan a technology roadmap
 
 - [Conventions](./docs/conventions.md)
 - [Architecture Decision Records](./docs/adr/readme.md)
-- [GitHub Workflows](./.github/readme.md)
+- [GitHub Workflows](./docs/github-workflows.md)
 - [Terraform](./terraform/readme.md)
