@@ -1,9 +1,6 @@
 ---
 formatter: "markdown table"
 version: "~> 0.16"
-# sections:
-#   hide:
-#     - modules
 settings:
   anchor: true
   default: true
@@ -21,9 +18,11 @@ sort:
   enabled: true
   by: name
 output:
-  file: README-TEST.md
+  file: terraform-module-configuration.md
   mode: inject
   template: |-
         <!-- BEGIN_TF_DOCS -->
+        # Terraform Module Configuration
+        
         {{ .Content }}
         <!-- END_TF_DOCS -->

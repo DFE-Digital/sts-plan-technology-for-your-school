@@ -1,5 +1,7 @@
 # Terraform
 
+The following article discusses developer tools and how to run the **Terraform** and **Teraform-Docs** tools. [Terraform Module Configuration](./terraform-module-configuration.md) page contains a detailed view of the Terraform configuration.
+
 ## Contents
 
 - [Terraform](#terraform)
@@ -9,6 +11,7 @@
     - [Setting environment variables](#setting-environment-variables)
     - [Terraform Init](#terraform-init)
     - [Terraform Plan](#terraform-plan)
+  - [Terraform Documentation](#terraform-documentation)
 
 ## Developer tools
 
@@ -20,6 +23,9 @@ The following tools are recommended/required to work with Terraform locally
   * MacOS: 
     * Xcode: `xcode-select --install` 
     * Terraform: `brew tap hashicorp/tap`  
+* Install Terraform-Docs
+  * MacOS:
+    * `brew install terraform-docs`
 * Optionally Install Azure CLI 
   * MacOS
     * `brew update && brew install azure-cli`
@@ -61,3 +67,11 @@ To run the plan command, first rename the `terraform.tfvars.example` file to `te
 Run the following command to execute the Plan commande: 
 
 `terraform plan -var-file="terraform.tfvars"`
+
+## Terraform Documentation
+
+When the Terraform configuration is updated, the module documentation will need to be re-generated, to do this run the following command within a terminal window:
+
+`terraform-docs markdown .` 
+
+This will generate the `terraform-documentation.md` markdown file.
