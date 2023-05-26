@@ -1,6 +1,6 @@
 # Terraform
 
-The following article discusses developer tools and how to run the **Terraform** and **Teraform-Docs** tools. [Terraform Module Configuration](./terraform-module-configuration.md) page contains a detailed view of the Terraform configuration.
+The following article discusses developer tools and how to run the **Terraform** and **Teraform-Docs** tools. [Terraform Configuration](./terraform-configuration.md) page contains a detailed view of the Terraform configuration.
 
 ## Contents
 

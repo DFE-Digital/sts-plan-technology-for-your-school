@@ -18,11 +18,11 @@ sort:
   enabled: true
   by: name
 output:
-  file: terraform-module-configuration.md
+  file: terraform-configuration.md
   mode: inject
   template: |-
         <!-- BEGIN_TF_DOCS -->
         # Terraform Module Configuration
-        
+
         {{ .Content }}
         <!-- END_TF_DOCS -->
