@@ -9,6 +9,4 @@ runs:
       uses: cypress-io/github-action@v5
       with:
         working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
-        build: npm run build
-        start: npm start
         browser: chrome
