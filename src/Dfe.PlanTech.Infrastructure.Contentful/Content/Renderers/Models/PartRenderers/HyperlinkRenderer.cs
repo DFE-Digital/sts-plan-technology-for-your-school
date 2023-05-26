@@ -1,9 +1,11 @@
 using System.Text;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Interfaces;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Options;
 
-namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.PartRenderers;
+namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
+
 public class HyperlinkRenderer : RichTextContentRender
 {
     private readonly HyperlinkRendererOptions _options;

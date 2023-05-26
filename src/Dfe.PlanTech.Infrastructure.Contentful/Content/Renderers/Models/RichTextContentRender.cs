@@ -1,9 +1,9 @@
 using System.Text;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers;
+using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Interfaces;
 
-namespace Dfe.PlanTech.Infrastructure.Contentful.Content;
+namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 
 public abstract class RichTextContentRender : IRichTextContentPartRenderer
 {

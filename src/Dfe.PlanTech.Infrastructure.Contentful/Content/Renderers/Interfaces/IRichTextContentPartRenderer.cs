@@ -1,7 +1,7 @@
 using System.Text;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 
-namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers;
+namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Interfaces;
 
 public interface IRichTextContentPartRenderer
 {

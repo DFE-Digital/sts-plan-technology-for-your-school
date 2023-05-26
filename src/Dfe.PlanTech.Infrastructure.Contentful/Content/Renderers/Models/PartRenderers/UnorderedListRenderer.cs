@@ -2,22 +2,23 @@
 using System.Text;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Interfaces;
 
-namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.PartRenderers;
+namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 
-public class OrderedListRenderer : RichTextContentRender
+public class UnorderedListRenderer : RichTextContentRender
 {
-    public OrderedListRenderer() : base(RichTextNodeType.OrderedList)
+    public UnorderedListRenderer() : base(RichTextNodeType.UnorderedList)
     {
     }
 
     public override StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection renderers, StringBuilder stringBuilder)
     {
-        stringBuilder.Append("<ol>");
+        stringBuilder.Append("<ul>");
 
         RenderChildren(content, renderers, stringBuilder);
 
-        stringBuilder.Append("</ol>");
+        stringBuilder.Append("</ul>");
 
         return stringBuilder;
     }
