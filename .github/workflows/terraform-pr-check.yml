@@ -116,7 +116,6 @@ jobs:
 
   terraform-docs-validation:
     name: Terraform Docs validation
-    needs: validate-terraform
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -129,6 +128,4 @@ jobs:
         with:
           working-dir: terraform
           config-file: .terraform-docs.yml
-          output-file: README.md
-          output-method: inject
           fail-on-diff: true
