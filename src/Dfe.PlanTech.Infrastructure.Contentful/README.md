@@ -15,14 +15,21 @@ Contentful:SpaceId = "<space_id>",
 
 //OPTIONAL
 Contentful:UsePreviewApi = true OR false
+Contentful:Environment = "<environment>">
 ```
 
 These are found under Settings -> API Keys.
 
 Note: This assumes you setup the services using the section name "Contentful". E.g.:
 
-```csharp
+`csharp
 builder.Services.SetupContentfulClient(builder.Configuration, "Contentful");
-```
+`
 
 Note: Depending on the OS, you will not be able to set an env variable with a colon - use double underscores instead. E.g. ```Contentful:DeliveryApiKey``` would become ```Contentful__DeliveryApiKey```
+
+### Dotnet User-Secrets
+
+It is advised to use [dotnet user-secrets](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-7.0&tabs=windows) to do the above for development.
+
+E.g. `dotnet user-secrets set Contentful:SpaceId SPACEID`
