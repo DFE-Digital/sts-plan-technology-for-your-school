@@ -6,7 +6,7 @@ using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Options;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 
-public class HyperlinkRenderer : RichTextContentRender
+public class HyperlinkRenderer : BaseRichTextContentPartRender
 {
     private readonly HyperlinkRendererOptions _options;
 
@@ -31,7 +31,7 @@ public class HyperlinkRenderer : RichTextContentRender
             _options.AddClasses(stringBuilder);
         }
 
-        stringBuilder.Append('>');
+        stringBuilder.Append("\">");
 
         RenderChildren(content, renderers, stringBuilder);
 

@@ -6,7 +6,7 @@ using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Options;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 
-public class ParagraphRenderer : RichTextContentRender
+public class ParagraphRenderer : BaseRichTextContentPartRender
 {
     private readonly ParagraphRendererOptions _options;
     public ParagraphRenderer(ParagraphRendererOptions options) : base(RichTextNodeType.Paragraph)

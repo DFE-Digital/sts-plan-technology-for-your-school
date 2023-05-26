@@ -6,7 +6,7 @@ using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Interfaces;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 
-public class ListItemRenderer : RichTextContentRender
+public class ListItemRenderer : BaseRichTextContentPartRender
 {
     public ListItemRenderer() : base(RichTextNodeType.ListItem)
     {

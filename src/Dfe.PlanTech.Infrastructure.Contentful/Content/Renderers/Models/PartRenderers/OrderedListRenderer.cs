@@ -6,7 +6,7 @@ using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Interfaces;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 
-public class OrderedListRenderer : RichTextContentRender
+public class OrderedListRenderer : BaseRichTextContentPartRender
 {
     public OrderedListRenderer() : base(RichTextNodeType.OrderedList)
     {

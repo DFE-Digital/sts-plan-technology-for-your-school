@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Domain.Content.Models;
 
-namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers;
+namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Options;
 
 public class TextRendererOptions
 {
@@ -23,11 +23,4 @@ public class TextRendererOptions
 
         return $"{matchingOption.HtmlTag}{(matchingOption.Classes != null ? $" class=\"{matchingOption.Classes}\"" : "")}";
     }
-}
-
-public class MarkOptions
-{
-    public required string Mark { get; init; }
-    public required string HtmlTag { get; init; }
-    public string? Classes { get; init; }
 }
