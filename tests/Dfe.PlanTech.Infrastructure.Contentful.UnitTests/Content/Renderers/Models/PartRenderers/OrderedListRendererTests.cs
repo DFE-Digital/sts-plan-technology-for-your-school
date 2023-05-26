@@ -5,12 +5,12 @@ using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRender
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
 
-public class ListItemRendererTests
+public class OrderedListRendererTests
 {
-    private const string NODE_TYPE = "list-item";
+    private const string NODE_TYPE = "ordered-list";
 
     [Fact]
-    public void Should_Accept_When_ContentIsListItem()
+    public void Should_Accept_When_ContentIs_OrderedList()
     {
         const string listItemValue = "List item one";
 
@@ -20,7 +20,7 @@ public class ListItemRendererTests
             Value = listItemValue,
         };
 
-        var renderer = new ListItemRenderer();
+        var renderer = new OrderedListRenderer();
 
         var accepted = renderer.Accepts(content);
 
@@ -28,7 +28,7 @@ public class ListItemRendererTests
     }
 
     [Fact]
-    public void Should_Reject_When_Not_ListItem()
+    public void Should_Reject_When_NotHyperlink()
     {
         var content = new RichTextContent()
         {
@@ -36,7 +36,7 @@ public class ListItemRendererTests
             Value = "paragraph text"
         };
 
-        var renderer = new ListItemRenderer();
+        var renderer = new OrderedListRenderer();
 
         var accepted = renderer.Accepts(content);
 
@@ -44,9 +44,9 @@ public class ListItemRendererTests
     }
 
     [Fact]
-    public void Should_CreateListItem_When_PassedValidData()
+    public void Should_CreateOrderedList_When_PassedValidData()
     {
-        var renderer = new ListItemRenderer();
+        var renderer = new OrderedListRenderer();
         var rendererCollection = new RichTextRenderer(new[] { renderer });
 
         const string listItemValue = "List item one";
@@ -61,6 +61,6 @@ public class ListItemRendererTests
 
         var html = result.ToString();
 
-        Assert.Equal("<li></li>", html);
+        Assert.Equal("<ol></ol>", html);
     }
 }

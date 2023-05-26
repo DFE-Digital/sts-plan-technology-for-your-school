@@ -5,22 +5,22 @@ using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRender
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
 
-public class ListItemRendererTests
+public class UnorderedListRendererTests
 {
-    private const string NODE_TYPE = "list-item";
+    private const string NODE_TYPE = "unordered-list";
 
     [Fact]
-    public void Should_Accept_When_ContentIsListItem()
+    public void Should_Accept_When_ContentIs_UnorderedList()
     {
-        const string listItemValue = "List item one";
+        const string value = "List item one";
 
         var content = new RichTextContent()
         {
             NodeType = NODE_TYPE,
-            Value = listItemValue,
+            Value = value,
         };
 
-        var renderer = new ListItemRenderer();
+        var renderer = new UnorderedListRenderer();
 
         var accepted = renderer.Accepts(content);
 
@@ -28,7 +28,7 @@ public class ListItemRendererTests
     }
 
     [Fact]
-    public void Should_Reject_When_Not_ListItem()
+    public void Should_Reject_When_Not_UnorderedList()
     {
         var content = new RichTextContent()
         {
@@ -36,7 +36,7 @@ public class ListItemRendererTests
             Value = "paragraph text"
         };
 
-        var renderer = new ListItemRenderer();
+        var renderer = new UnorderedListRenderer();
 
         var accepted = renderer.Accepts(content);
 
@@ -44,23 +44,23 @@ public class ListItemRendererTests
     }
 
     [Fact]
-    public void Should_CreateListItem_When_PassedValidData()
+    public void Should_CreateUnorderedList_When_PassedValidData()
     {
-        var renderer = new ListItemRenderer();
+        var renderer = new UnorderedListRenderer();
         var rendererCollection = new RichTextRenderer(new[] { renderer });
 
-        const string listItemValue = "List item one";
+        const string value = "List item one";
 
         var content = new RichTextContent()
         {
             NodeType = NODE_TYPE,
-            Value = listItemValue,
+            Value = value,
         };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
 
         var html = result.ToString();
 
-        Assert.Equal("<li></li>", html);
+        Assert.Equal("<ul></ul>", html);
     }
 }
