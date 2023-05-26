@@ -25,6 +25,11 @@ builder.Services.AddScoped((_) => new ParagraphRendererOptions()
     Classes = "govuk-body",
 });
 
+builder.Services.AddScoped((_) => new HyperlinkRendererOptions()
+{
+    Classes = "govuk-link",
+});
+
 builder.Services.AddCQRSServices();
 
 var app = builder.Build();

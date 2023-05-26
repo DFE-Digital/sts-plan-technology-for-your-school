@@ -8,5 +8,6 @@ public enum RichTextNodeType
     UnorderedList,
     Text,
     Document,
-    Hyperlink
+    Hyperlink,
+    OrderedList
 }

@@ -13,7 +13,7 @@ public class ParagraphRenderer : RichTextContentRender
         _options = options;
     }
 
-    public override StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection richTextRenderer, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection renderers, StringBuilder stringBuilder)
     {
         if (_options.Classes == null)
         {
@@ -21,23 +21,12 @@ public class ParagraphRenderer : RichTextContentRender
         }
         else
         {
-            stringBuilder.Append("<p class=\"");
-            stringBuilder.Append(_options.Classes);
+            stringBuilder.Append("<p");
+            _options.AddClasses(stringBuilder);
             stringBuilder.Append("\">");
         }
 
-        foreach (var subContent in content.Content)
-        {
-            var renderer = richTextRenderer.GetRendererForContent(subContent);
-
-            if (renderer == null)
-            {
-                //TODO: Add logging for missing content type
-                continue;
-            }
-
-            renderer.AddHtml(subContent, richTextRenderer, stringBuilder);
-        }
+        RenderChildren(content, renderers, stringBuilder);
 
         stringBuilder.Append("</p>");
         return stringBuilder;
