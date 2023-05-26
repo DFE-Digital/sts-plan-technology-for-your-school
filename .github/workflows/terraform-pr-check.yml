@@ -128,4 +128,6 @@ jobs:
         with:
           working-dir: terraform
           config-file: .terraform-docs.yml
+          output-file: terraform-configuration.md
+          output-method: inject
           fail-on-diff: true
