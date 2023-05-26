@@ -11,16 +11,19 @@ public class GetPageQuery : ContentRetriever
     {
     }
 
+    /// <summary>
+    /// Fetches page from <see chref="IContentRepository"/> by slug
+    /// </summary>
+    /// <param name="slug">Slug for the Page</param>
+    /// <returns>Page matching slug</returns>
     public async Task<Page> GetPageBySlug(string slug)
     {
         var filters = new[] { new ContentQueryEquals() { Field = "fields.slug", Value = slug } };
 
         var pages = await repository.GetEntities<Page>(filters);
 
-        var page = pages.FirstOrDefault();
-
-        if (page == null) throw new Exception($"Could not find page with slug {slug}");
-
+        var page = pages.FirstOrDefault() ?? throw new Exception($"Could not find page with slug {slug}");
+        
         return page;
     }
 }
