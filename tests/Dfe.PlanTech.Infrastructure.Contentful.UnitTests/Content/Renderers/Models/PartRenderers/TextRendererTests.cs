@@ -115,4 +115,37 @@ public class TextRendererTests
 
         Assert.Equal($"<{htmlTagForBold} class=\"{testClasses}\">{value}</{htmlTagForBold}>", html);
     }
+    
+    
+    [Fact]
+    public void Should_RenderText_When_HasNoMarks()
+    {
+        const string boldType = "bold";
+        const string htmlTagForBold = "strong";
+        const string testClasses = "testing-classes";
+
+        var boldMarkOption = new MarkOption()
+        {
+            Mark = boldType,
+            HtmlTag = htmlTagForBold,
+            Classes = testClasses
+        };
+
+        var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>() { boldMarkOption }));
+        var rendererCollection = new RichTextRenderer(new[] { renderer });
+
+        const string value = "Paragraph text";
+
+        var content = new RichTextContent()
+        {
+            NodeType = NODE_TYPE,
+            Value = value,
+        };
+
+        var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
+
+        var html = result.ToString();
+
+        Assert.Equal(value, html);
+    }
 }
