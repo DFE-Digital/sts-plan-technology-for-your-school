@@ -127,5 +127,4 @@ public class HyperlinkRendererTests
 
         Assert.Contains($"class=\"{testClasses}\"", html);
     }
-
 }

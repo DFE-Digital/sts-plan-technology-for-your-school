@@ -12,7 +12,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Mod
 public class RichTextRendererTests
 {
     private readonly RichTextRenderer _renderer;
-    private readonly Mock<IRichTextContentPartRenderer> _partRenderer = new Mock<IRichTextContentPartRenderer>();
+    private readonly Mock<IRichTextContentPartRenderer> _partRenderer = new();
 
     public RichTextRendererTests()
     {
@@ -20,7 +20,7 @@ public class RichTextRendererTests
                     .Returns((IRichTextContent content) => content.NodeType == "paragraph");
 
         _partRenderer.Setup(partRenderer => partRenderer.AddHtml(It.IsAny<IRichTextContent>(), It.IsAny<IRichTextContentPartRendererCollection>(), It.IsAny<StringBuilder>()))
-                    .Returns((IRichTextContent content, IRichTextContentPartRendererCollection collection, StringBuilder stringBuilder) =>
+                    .Returns((IRichTextContent content, IRichTextContentPartRendererCollection _, StringBuilder stringBuilder) =>
                     {
                         stringBuilder.Append(content.Value);
 
@@ -52,7 +52,7 @@ public class RichTextRendererTests
     [Fact]
     public void Should_CreateHtml_When_PassedContent()
     {
-        var testHtml = "testing";
+        const string testHtml = "testing";
 
         var content = new RichTextContent()
         {
@@ -70,5 +70,4 @@ public class RichTextRendererTests
 
         Assert.Equal(testHtml, html);
     }
-
 }

@@ -1,9 +1,9 @@
 using Contentful.Core;
 using Contentful.Core.Models;
 using Contentful.Core.Search;
-using Moq;
-using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
+using Moq;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
 {
@@ -27,9 +27,10 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
 
                 return collection;
             });
-            
+
             _clientMock.Setup(client => client.GetEntries<OtherTestClass>(It.IsAny<QueryBuilder<OtherTestClass>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((QueryBuilder<OtherTestClass> query, CancellationToken token) => {
+            .ReturnsAsync((QueryBuilder<OtherTestClass> query, CancellationToken token) =>
+            {
                 var collection = new ContentfulCollection<OtherTestClass>
                 {
                     Items = Enumerable.Empty<OtherTestClass>()
@@ -67,7 +68,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
 
             Assert.NotNull(result);
         }
-        
+
         [Fact]
         public async Task GetEntities_Should_ReturnItems_When_ClassMatches()
         {
@@ -78,8 +79,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
             Assert.NotNull(result);
             Assert.Equal(result, _mockData);
         }
-        
-        
+
         [Fact]
         public async Task GetEntities_Should_ReturnEmptyIEnumerable_When_NoDataFound()
         {
@@ -102,7 +102,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
             Assert.NotNull(result);
             Assert.Equal(result.Id, testId);
         }
-        
+
         [Fact]
         public async Task GetEntityById_Should_ThrowException_When_IdIsNull()
         {
@@ -110,7 +110,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
 
             await Assert.ThrowsAsync<ArgumentNullException>(() => repository.GetEntityById<TestClass>(null));
         }
-        
+
         [Fact]
         public async Task GetEntityById_Should_ThrowException_When_IdIsEmpty()
         {
@@ -128,6 +128,5 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
 
             Assert.Null(result);
         }
-
     }
 }

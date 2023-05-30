@@ -21,7 +21,7 @@ public class TextRendererTests
             Value = value,
         };
 
-        var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>() { }));
+        var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>()));
 
         var accepted = renderer.Accepts(content);
 
@@ -37,7 +37,7 @@ public class TextRendererTests
             Value = "hyperlink"
         };
 
-        var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>() { }));
+        var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>()));
 
         var accepted = renderer.Accepts(content);
 
@@ -115,8 +115,7 @@ public class TextRendererTests
 
         Assert.Equal($"<{htmlTagForBold} class=\"{testClasses}\">{value}</{htmlTagForBold}>", html);
     }
-    
-    
+
     [Fact]
     public void Should_RenderText_When_HasNoMarks()
     {

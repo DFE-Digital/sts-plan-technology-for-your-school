@@ -65,7 +65,6 @@ public class ParagraphRendererTests
         Assert.Equal("<p></p>", html);
     }
 
-
     [Fact]
     public void Should_Create_Paragraph_WithClass__When_PassedValidData()
     {
