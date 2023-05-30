@@ -22,6 +22,14 @@ public class PagesController : Controller
         return View("LandingPage", page);
     }
 
+    [HttpGet("self-assessment")]
+    public async Task<IActionResult> SelfAssessment([FromServices] GetPageQuery getPageQuery)
+    {
+        var page = await getPageQuery.GetPageBySlug(nameof(Pages.SelfAssessment));
+
+        return View("Page", page);
+    }
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
