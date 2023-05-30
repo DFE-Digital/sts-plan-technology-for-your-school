@@ -41,7 +41,6 @@ public static class QueryBuilders
         return queryBuilder;
     }
 
-
     public static QueryBuilder<T> WithQueries<T>(this QueryBuilder<T> queryBuilder, IGetEntitiesOptions options)
     {
         if (options.Queries != null)
@@ -52,12 +51,15 @@ public static class QueryBuilders
         return queryBuilder;
     }
 
-
-    public static QueryBuilder<T> BuildQueryBuilder<T>(string contentTypeId, IGetEntitiesOptions options)
+    public static QueryBuilder<T> BuildQueryBuilder<T>(string contentTypeId, IGetEntitiesOptions? options)
     {
         var queryBuilder = ByContentType<T>(contentTypeId);
-        queryBuilder = queryBuilder.WithInclude(options);
-        queryBuilder = queryBuilder.WithQueries(options);
+
+        if (options != null)
+        {
+            queryBuilder = queryBuilder.WithInclude(options);
+            queryBuilder = queryBuilder.WithQueries(options);
+        }
 
         return queryBuilder;
     }

@@ -20,10 +20,8 @@ public class GetEntitiesOptions : IGetEntitiesOptions
         Queries = queries;
     }
 
-
     public GetEntitiesOptions()
     {
-
     }
 
     public IEnumerable<IContentQuery>? Queries { get; init; }

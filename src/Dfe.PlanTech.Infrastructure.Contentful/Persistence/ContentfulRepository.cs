@@ -3,7 +3,6 @@ using Dfe.PlanTech.Application.Persistence.Interfaces;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 
-
 /// <summary>
 /// Encapsulates ContentfulClient functionality, whilst abstracting through the IEntityRepository interface
 /// </summary>
@@ -18,7 +17,7 @@ public class ContentfulRepository : IContentRepository
         _client.ContentTypeResolver = new EntityResolver();
     }
 
-    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IGetEntitiesOptions options, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IGetEntitiesOptions? options, CancellationToken cancellationToken = default)
     {
         var queryBuilder = QueryBuilders.BuildQueryBuilder<TEntity>(entityTypeId, options);
 
@@ -26,6 +25,9 @@ public class ContentfulRepository : IContentRepository
 
         return entries ?? Enumerable.Empty<TEntity>();
     }
+
+    public Task<IEnumerable<TEntity>> GetEntities<TEntity>(CancellationToken cancellationToken = default)
+    => GetEntities<TEntity>(typeof(TEntity).Name.ToLower(), null, cancellationToken);
 
     public Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default)
         => GetEntities<TEntity>(typeof(TEntity).Name.ToLower(), options, cancellationToken);
