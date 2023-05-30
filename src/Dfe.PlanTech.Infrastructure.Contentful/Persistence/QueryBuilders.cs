@@ -40,4 +40,31 @@ public static class QueryBuilders
 
         return queryBuilder;
     }
+
+
+    public static QueryBuilder<T> WithQueries<T>(this QueryBuilder<T> queryBuilder, IGetEntitiesOptions options)
+    {
+        if (options.Queries != null)
+        {
+            queryBuilder = queryBuilder.WithQueries(options.Queries);
+        }
+
+        return queryBuilder;
+    }
+
+
+    public static QueryBuilder<T> BuildQueryBuilder<T>(string contentTypeId, IGetEntitiesOptions options)
+    {
+        var queryBuilder = ByContentType<T>(contentTypeId);
+        queryBuilder = queryBuilder.WithInclude(options);
+        queryBuilder = queryBuilder.WithQueries(options);
+
+        return queryBuilder;
+    }
+
+    public static QueryBuilder<T> WithInclude<T>(this QueryBuilder<T> queryBuilder, IGetEntitiesOptions options)
+    {
+        queryBuilder.Include(options.Include);
+        return queryBuilder;
+    }
 }

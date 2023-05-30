@@ -25,14 +25,17 @@ public class GetPageQueryTests
 
     public GetPageQueryTests()
     {
-        _repoMock.Setup(client => client.GetEntities<Page>(It.IsAny<IEnumerable<IContentQuery>>(), It.IsAny<CancellationToken>()))
-        .ReturnsAsync((IEnumerable<IContentQuery> queries, CancellationToken token) =>
+        _repoMock.Setup(client => client.GetEntities<Page>(It.IsAny<IGetEntitiesOptions>(), It.IsAny<CancellationToken>()))
+        .ReturnsAsync((IGetEntitiesOptions options, CancellationToken token) =>
         {
-            foreach (var query in queries)
+            if (options.Queries != null)
             {
-                if (query is ContentQueryEquals equalsQuery && query.Field == "fields.slug")
+                foreach (var query in options.Queries)
                 {
-                    return _mockData.Where(page => page.Slug == equalsQuery.Value);
+                    if (query is ContentQueryEquals equalsQuery && query.Field == "fields.slug")
+                    {
+                        return _mockData.Where(page => page.Slug == equalsQuery.Value);
+                    }
                 }
             }
 

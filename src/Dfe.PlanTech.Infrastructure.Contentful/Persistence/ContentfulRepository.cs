@@ -18,22 +18,17 @@ public class ContentfulRepository : IContentRepository
         _client.ContentTypeResolver = new EntityResolver();
     }
 
-    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IEnumerable<IContentQuery>? queries = null, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IGetEntitiesOptions options, CancellationToken cancellationToken = default)
     {
-        var queryBuilder = QueryBuilders.ByContentType<TEntity>(entityTypeId);
-
-        if (queries != null)
-        {
-            queryBuilder.WithQueries(queries);
-        }
+        var queryBuilder = QueryBuilders.BuildQueryBuilder<TEntity>(entityTypeId, options);
 
         var entries = await _client.GetEntries(queryBuilder, cancellationToken);
 
         return entries ?? Enumerable.Empty<TEntity>();
     }
 
-    public Task<IEnumerable<TEntity>> GetEntities<TEntity>(IEnumerable<IContentQuery>? queries = null, CancellationToken cancellationToken = default)
-        => GetEntities<TEntity>(typeof(TEntity).Name.ToLower(), queries, cancellationToken);
+    public Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default)
+        => GetEntities<TEntity>(typeof(TEntity).Name.ToLower(), options, cancellationToken);
 
     public async Task<TEntity?> GetEntityById<TEntity>(string id, CancellationToken cancellationToken = default)
     {

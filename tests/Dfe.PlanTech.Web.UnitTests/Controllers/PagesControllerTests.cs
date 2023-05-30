@@ -38,13 +38,17 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public async Task Should_ReturnLandingPage_When_IndexRouteLoaded()
         {
             var contentRepositoryMock = new Mock<IContentRepository>();
-            contentRepositoryMock.Setup(repo => repo.GetEntities<Page>(It.IsAny<IEnumerable<IContentQuery>>(), It.IsAny<CancellationToken>())).ReturnsAsync((IEnumerable<IContentQuery> queries, CancellationToken cancellationToken) =>
+            contentRepositoryMock.Setup(repo => repo.GetEntities<Page>(It.IsAny<IGetEntitiesOptions>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((IGetEntitiesOptions options, CancellationToken cancellationToken) =>
             {
-                foreach (var query in queries)
+                if (options.Queries != null)
                 {
-                    if (query is ContentQueryEquals equalsQuery && query.Field == "fields.slug")
+                    foreach (var query in options.Queries)
                     {
-                        return _pages.Where(page => page.Slug == equalsQuery.Value);
+                        if (query is ContentQueryEquals equalsQuery && query.Field == "fields.slug")
+                        {
+                            return _pages.Where(page => page.Slug == equalsQuery.Value);
+                        }
                     }
                 }
 
