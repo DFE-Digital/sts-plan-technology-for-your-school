@@ -1,5 +1,6 @@
 @using Dfe.PlanTech.Domain.Content.Models;
 @model Dfe.PlanTech.Domain.Content.Models.ContentComponent;
+@using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 @{switch(Model){
     case Header header: {
@@ -9,6 +10,11 @@
     
     case TextBody textBody: {
         <rich-text content=@textBody.RichText></rich-text>
+        break;
+    }
+    
+    case Category category: {
+        await Html.RenderPartialAsync("Questionnaire/Category", category);
         break;
     }
 

@@ -1,10 +1,11 @@
+using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Content.Models;
+
 namespace Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
-public interface ICategory
+public interface ICategory : IContentComponent
 {
-    string Name { get; }
-    
-    string Title { get; }
-    
-    List<IQuestion> Questions { get; }
+    Header Header { get; }
+
+    IContentComponent[] Content { get; }
 }

@@ -1,0 +1,12 @@
+@model Dfe.PlanTech.Domain.Questionnaire.Interfaces.ICategory;
+
+@{
+    await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Header);
+}
+
+@{
+    foreach(var content in Model.Content){
+        await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+    }
+}
+
