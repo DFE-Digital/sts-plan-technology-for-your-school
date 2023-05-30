@@ -20,12 +20,6 @@ public class TextRenderer : BaseRichTextContentPartRender
     {
         var markOptions = content.Marks.Select(_textRendererOptions.GetMatchingOptionForMark).Where(option => option != null).ToArray();
 
-        if (markOptions.Length == 0)
-        {
-            //TODO: Log missing mark options
-            return stringBuilder;
-        }
-
         AppendOpenTags(stringBuilder, markOptions!);
 
         stringBuilder.Append(content.Value);
