@@ -54,7 +54,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var mockLogger = new Mock<ILogger<PagesController>>();
             var controller = new PagesController(mockLogger.Object);
 
-            var result = await controller.Index(new GetPageQuery(contentRepositoryMock.Object));
+            var result = await controller.GetByRoute("/", new GetPageQuery(contentRepositoryMock.Object));
 
             Assert.IsType<ViewResult>(result);
 
