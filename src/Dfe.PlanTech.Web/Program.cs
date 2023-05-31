@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddGovUkFrontend();
 
-builder.Services.SetupContentfulClient(builder.Configuration, "Contentful");
+// builder.Services.SetupContentfulClient(builder.Configuration, "Contentful");
 
 builder.Services.AddScoped((_) => new TextRendererOptions(new List<MarkOption>() {
     new MarkOption(){
