@@ -7,5 +7,5 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 /// </summary>
 public interface ISection : IContentComponent
 {
-    string Name { get; init; }
+    public string Name { get; init; }
 }

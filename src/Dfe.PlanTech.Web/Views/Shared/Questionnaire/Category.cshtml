@@ -1,3 +1,4 @@
+@using Dfe.PlanTech.Web.TagHelpers.TaskList;
 @model Dfe.PlanTech.Domain.Questionnaire.Interfaces.ICategory;
 
 @{
@@ -9,4 +10,28 @@
         await Html.RenderPartialAsync("Components/PageComponentFactory", content);
     }
 }
+
+<task-list>
+    @foreach (var categorySection in Model.Sections)
+    {
+        <task-list-item>
+            <task-list-item-name>
+                <a asp-controller="Questionnaire" asp-action="Question" class="govuk-link">
+                    @categorySection.Name
+                </a>
+            </task-list-item-name>
+            
+            @{
+             //   var tagColour = section.IsCompleted ? TagColour.Default : TagColour.Grey;
+                //var tagText = section.IsCompleted ? "COMPLETE" : "NOT STARTED";
+                var tagColour = TagColour.Default;
+                var tagText = "COMPLETE";
+            }
+            
+            <task-list-tag colour=@tagColour>
+                @tagText
+            </task-list-tag>
+        </task-list-item>
+    }
+</task-list>
 
