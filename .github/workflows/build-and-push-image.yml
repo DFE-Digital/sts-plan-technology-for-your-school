@@ -64,7 +64,7 @@ jobs:
       - name: Build and push docker image
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ./src/
           file: ./src/Dfe.PlanTech.Web/Dockerfile
           build-args: COMMIT_SHA=${{ needs.set-env.outputs.checked-out-sha }}
           tags: |
