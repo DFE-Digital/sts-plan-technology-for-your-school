@@ -23,10 +23,10 @@ public class PagesController : Controller
     }
 
     [HttpGet("self-assessment")]
-    public async Task<IActionResult> SelfAssessment([FromServices] GetPageQuery getPageQuery)
+    public async Task<IActionResult> SelfAssessment([FromServices] GetCategoriesPageQuery getPageQuery)
     {
         var page = await getPageQuery.GetPageBySlug(nameof(Pages.SelfAssessment));
-
+        
         return View("Page", page);
     }
 
