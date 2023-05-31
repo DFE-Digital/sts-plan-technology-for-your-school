@@ -13,6 +13,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 {
     public class PagesControllerTests
     {
+        private const string INDEX_SLUG = "/";
+        private const string INDEX_TITLE = "Index";
+
         private readonly List<Page> _pages = new() {
             new Page()
             {
@@ -31,14 +34,23 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                     Text = "Other Page Title"
                 },
                 Content = Array.Empty<IContentComponent>()
+            },
+            new Page(){
+                Slug = INDEX_SLUG,
+                Title = new Title(){
+                    Text = INDEX_TITLE,
+                },
+                Content = Array.Empty<IContentComponent>()
             }
         };
 
-        [Fact]
-        public async Task Should_ReturnLandingPage_When_IndexRouteLoaded()
+        private readonly PagesController _controller;
+        private readonly GetPageQuery _query;
+
+        public PagesControllerTests()
         {
-            var contentRepositoryMock = new Mock<IContentRepository>();
-            contentRepositoryMock.Setup(repo => repo.GetEntities<Page>(It.IsAny<IEnumerable<IContentQuery>>(), It.IsAny<CancellationToken>())).ReturnsAsync((IEnumerable<IContentQuery> queries, CancellationToken cancellationToken) =>
+            var repositoryMock = new Mock<IContentRepository>();
+            repositoryMock.Setup(repo => repo.GetEntities<Page>(It.IsAny<IEnumerable<IContentQuery>>(), It.IsAny<CancellationToken>())).ReturnsAsync((IEnumerable<IContentQuery> queries, CancellationToken cancellationToken) =>
             {
                 foreach (var query in queries)
                 {
@@ -52,9 +64,15 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             });
 
             var mockLogger = new Mock<ILogger<PagesController>>();
-            var controller = new PagesController(mockLogger.Object);
+            _controller = new PagesController(mockLogger.Object);
 
-            var result = await controller.GetByRoute("/", new GetPageQuery(contentRepositoryMock.Object));
+            _query = new GetPageQuery(repositoryMock.Object);
+        }
+
+        [Fact]
+        public async Task Should_ReturnLandingPage_When_IndexRouteLoaded()
+        {
+            var result = await _controller.GetByRoute(INDEX_SLUG, _query);
 
             Assert.IsType<ViewResult>(result);
 
@@ -65,8 +83,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.IsType<Page>(model);
 
             var asPage = model as Page;
-            Assert.Equal("Landing", asPage!.Slug);
-            Assert.Contains("Landing Page", asPage!.Title!.Text);
+            Assert.Equal(INDEX_SLUG, asPage!.Slug);
+            Assert.Contains(INDEX_TITLE, asPage!.Title!.Text);
+        }
+
+        [Fact]
+        public async Task Should_ThrowError_When_NoRouteFound()
+        {
+            await Assert.ThrowsAnyAsync<Exception>(() => _controller.GetByRoute("NOT A VALID ROUTE", _query));
         }
     }
 }
