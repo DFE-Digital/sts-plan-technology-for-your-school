@@ -23,8 +23,8 @@ variable "az_tag_product" {
   type        = string
 }
 
-variable "restrict_container_apps_to_cdn_inbound_only" {
-  description = "Restricts access to the Container Apps by creating a network security group that only allows 'AzureFrontDoor.Backend' inbound, and attaches it to the subnet of the container app environment."
-  type        = bool
-  default     = true
-}
+# variable "restrict_container_apps_to_cdn_inbound_only" {
+#   description = "Restricts access to the Container Apps by creating a network security group that only allows 'AzureFrontDoor.Backend' inbound, and attaches it to the subnet of the container app environment."
+#   type        = bool
+#   default     = true
+# }

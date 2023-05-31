@@ -10,4 +10,6 @@ module "main_hosting" {
   image_name                = "plan-tech-app"
 
   enable_cdn_frontdoor = true
+
+  restrict_container_apps_to_cdn_inbound_only = false
 }
