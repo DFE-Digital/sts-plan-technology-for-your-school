@@ -20,6 +20,7 @@
     </ItemGroup>
     <ItemGroup>
       <PackageReference Include="GovUk.Frontend.AspNetCore" Version="1.0.0" />
+      <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.21.0" />
     </ItemGroup>
 
 </Project>

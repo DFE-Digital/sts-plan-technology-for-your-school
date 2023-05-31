@@ -17,7 +17,7 @@ public class PagesController : Controller
 
     public async Task<IActionResult> Index([FromServices] GetPageQuery getPageQuery)
     {
-        //ar page = await getPageQuery.GetPageBySlug(nameof(Pages.Landing));
+        //var page = await getPageQuery.GetPageBySlug(nameof(Pages.Landing));
 
         return View("LandingPage", new Domain.Content.Models.Page() );
     }

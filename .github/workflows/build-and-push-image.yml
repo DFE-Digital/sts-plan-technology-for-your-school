@@ -130,7 +130,7 @@ jobs:
               --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP }} \
               --image ${{ secrets.AZ_ACR_URL }}/${{ env.DOCKER_IMAGE }}:${{ needs.set-env.outputs.release }} \
               --output none \
-              --env-vars Contentful__DeliveryApiKey=secretref:contentful--deliveryapikey \
-              --env-vars Contentful__PreviewApiKey=secretref:contentful__previewapiKey \
-              --env-vars Contentful__SpaceId=secretref:contentful__spaceid \
-              --env-vars Contentful__Environment=secretref:contentful__environment
+              --set-env-vars Contentful__DeliveryApiKey=secretref:contentful--deliveryapikey \
+              --set-env-vars Contentful__PreviewApiKey=secretref:contentful--previewapiKey \
+              --set-env-vars Contentful__SpaceId=secretref:contentful--spaceid \
+              --set-env-vars Contentful__Environment=secretref:contentful--environment
