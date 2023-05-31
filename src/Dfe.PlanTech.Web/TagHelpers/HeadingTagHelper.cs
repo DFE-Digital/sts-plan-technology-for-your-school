@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Helpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
@@ -33,12 +29,19 @@ public class HeaderTagHelper : TagHelper
             _logger.LogWarning($"Could not find {nameof(Header.Tag)} for {nameof(Header)}");
         }
 
+        var html = GetHtml();
+
+        output.Content.SetHtmlContent(html);
+    }
+
+    public string GetHtml()
+    {
         var stringBuilder = new StringBuilder();
         AppendOpenTag(stringBuilder);
-        stringBuilder.Append(Header.Text);
+        stringBuilder.Append(Header!.Text);
         AppendCloseTag(stringBuilder);
 
-        output.Content.SetHtmlContent(stringBuilder.ToString());
+        return stringBuilder.ToString();
     }
 
     private StringBuilder AppendCloseTag(StringBuilder stringBuilder)
