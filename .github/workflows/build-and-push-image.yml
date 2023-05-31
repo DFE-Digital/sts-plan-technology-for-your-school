@@ -65,7 +65,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: Dockerfile
+          file: ./src/Dfe.PlanTech.Web/Dockerfile
           build-args: COMMIT_SHA=${{ needs.set-env.outputs.checked-out-sha }}
           tags: |
             ${{ secrets.AZ_ACR_URL }}/${{ env.DOCKER_IMAGE }}:${{ needs.set-env.outputs.branch }}
