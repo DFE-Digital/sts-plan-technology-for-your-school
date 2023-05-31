@@ -73,3 +73,60 @@ jobs:
             ${{ secrets.AZ_ACR_URL }}/${{ env.DOCKER_IMAGE }}:sha-${{ needs.set-env.outputs.checked-out-sha }}
             ${{ secrets.AZ_ACR_URL }}/${{ env.DOCKER_IMAGE }}:latest
           push: true
+
+  create-tag:
+    name: Tag and release
+    needs: set-env
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Create tag
+        run: |
+          git tag ${{ needs.set-env.outputs.release }}
+          git push origin ${{ needs.set-env.outputs.release }}
+
+      - name: Create release
+        uses: "actions/github-script@v6"
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          script: |
+            try {
+              await github.rest.repos.createRelease({
+                draft: ${{ needs.set-env.outputs.environment == 'staging' }},
+                generate_release_notes: true,
+                name: "${{ needs.set-env.outputs.release }}",
+                owner: context.repo.owner,
+                prerelease: ${{ needs.set-env.outputs.environment == 'staging' }},
+                repo: context.repo.repo,
+                tag_name: "${{ needs.set-env.outputs.release }}",
+              });
+            } catch (error) {
+              core.setFailed(error.message);
+            }
+
+  deploy-image:
+    name: Deploy to ${{ needs.set-env.outputs.environment }} (${{ needs.set-env.outputs.release }})
+    needs: [ build-and-push-image, set-env ]
+    runs-on: ubuntu-22.04
+    environment: ${{ needs.set-env.outputs.environment }}
+    steps:
+      - name: Azure login with ACA credentials
+        uses: azure/login@v1
+        with:
+          creds: '{"clientId":"${{ secrets.AZ_CLIENT_ID }}","clientSecret":"${{ secrets.AZ_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZ_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.AZ_TENANT_ID }}"}'
+
+      - name: Update Azure Container Apps Revision
+        uses: azure/CLI@v1
+        id: azure
+        with:
+          azcliversion: 2.45.0
+          inlineScript: |
+            az config set extension.use_dynamic_install=yes_without_prompt
+            az containerapp update \
+              --name ${{ secrets.AZ_ACA_NAME }} \
+              --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP }} \
+              --image ${{ secrets.AZ_ACR_URL }}/${{ env.DOCKER_IMAGE }}:${{ needs.set-env.outputs.release }} \
+              --output none
