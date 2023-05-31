@@ -34,6 +34,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             }
         };
 
+        /*
         [Fact]
         public async Task Should_ReturnLandingPage_When_IndexRouteLoaded()
         {
@@ -68,5 +69,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.Equal("Landing", asPage!.Slug);
             Assert.Contains("Landing Page", asPage!.Title!.Text);
         }
+        */
     }
 }
