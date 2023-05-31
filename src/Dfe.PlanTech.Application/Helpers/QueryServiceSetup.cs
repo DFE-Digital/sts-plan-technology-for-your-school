@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,11 +7,13 @@ namespace Dfe.PlanTech.Application.Helpers;
 /// <summary>
 /// Adds CQRS classes to application
 /// </summary>
-/// <param name="services"></param>
-/// <returns></returns>
-
 public static class CQRSServicesSetup
 {
+    /// <summary>
+    /// Adds CQRS commands/queries as services
+    /// </summary>
+    /// <param name="services">IServiceCollection from dependency injection</param>
+    /// <returns>Services (so methods can be chained easily)</returns>
     public static IServiceCollection AddCQRSServices(this IServiceCollection services)
     {
         var queries = Assembly.GetExecutingAssembly().GetTypes().Where(IsConcreteQueryClass);
@@ -35,5 +33,4 @@ public static class CQRSServicesSetup
     /// <returns></returns>
     private static bool IsConcreteQueryClass(Type type)
     => !type.IsAbstract && !type.IsInterface && type.GetInterface(nameof(IInfrastructureQuery)) != null;
-
 }

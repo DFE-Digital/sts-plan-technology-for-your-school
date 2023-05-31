@@ -1,4 +1,4 @@
-describe("template spec", () => {
+describe("beta header", () => {
   const url = Cypress.env("URL");
 
   const expectedFeedbackLink = "https://feedback";

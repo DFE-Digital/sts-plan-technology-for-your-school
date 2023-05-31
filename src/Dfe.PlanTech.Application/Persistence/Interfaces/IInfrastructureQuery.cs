@@ -5,5 +5,4 @@ namespace Dfe.PlanTech.Application.Persistence.Interfaces;
 /// </summary>
 public interface IInfrastructureQuery
 {
-
 }

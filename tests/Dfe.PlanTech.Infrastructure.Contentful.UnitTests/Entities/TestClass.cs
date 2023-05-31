@@ -8,6 +8,6 @@ public class TestClass
     {
         Id = id;
     }
-    
+
     public string? Id { get; set; }
 }

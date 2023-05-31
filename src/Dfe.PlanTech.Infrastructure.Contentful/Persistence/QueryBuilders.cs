@@ -37,7 +37,7 @@ public static class QueryBuilders
         {
             queryBuilder.WithQuery(query);
         }
-        
+
         return queryBuilder;
     }
 }

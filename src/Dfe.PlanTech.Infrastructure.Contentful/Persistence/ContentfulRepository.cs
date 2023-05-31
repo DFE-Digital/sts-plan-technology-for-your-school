@@ -15,6 +15,7 @@ public class ContentfulRepository : IContentRepository
     public ContentfulRepository(IContentfulClient client)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
+        _client.ContentTypeResolver = new EntityResolver();
     }
 
     public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IEnumerable<IContentQuery>? queries = null, CancellationToken cancellationToken = default)
@@ -28,9 +29,7 @@ public class ContentfulRepository : IContentRepository
 
         var entries = await _client.GetEntries(queryBuilder, cancellationToken);
 
-        if (entries == null) return Enumerable.Empty<TEntity>();
-
-        return entries;
+        return entries ?? Enumerable.Empty<TEntity>();
     }
 
     public Task<IEnumerable<TEntity>> GetEntities<TEntity>(IEnumerable<IContentQuery>? queries = null, CancellationToken cancellationToken = default)

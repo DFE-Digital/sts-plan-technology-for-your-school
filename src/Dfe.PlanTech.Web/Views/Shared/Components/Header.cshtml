@@ -1,0 +1,30 @@
+@using Dfe.PlanTech.Web.Helpers;
+@using Dfe.PlanTech.Domain.Content.Enums;
+
+@model Dfe.PlanTech.Domain.Content.Models.Header;
+
+@{
+    var headerClass = Model.GetClassForSize();
+    switch(Model.Tag){
+        case HeaderTag.H1:
+        {
+            <h1 class=@headerClass>@Model.Text</h1>
+            break;
+        }
+        case HeaderTag.H2:
+        {
+            <h2 class=@headerClass>@Model.Text</h2>
+           break;
+        }
+        case HeaderTag.H3:
+        {
+            <h3 class=@headerClass>@Model.Text</h3>
+           break;
+        }
+        default:
+        {
+            <p>Error!</p>
+            break;
+        }
+    }
+}
