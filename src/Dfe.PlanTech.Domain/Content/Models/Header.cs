@@ -10,7 +10,7 @@ public class Header : ContentComponent
     /// <summary>
     /// The text to display
     /// </summary>
-    public string Text { get; init; } = null!;
+    public string Text { get; set; } = null!;
 
     /// <summary>
     /// What tag should be used for header (e.g. H1, H2, etc.)
@@ -21,4 +21,12 @@ public class Header : ContentComponent
     /// Actual size of header to use (for accessibility)
     /// </summary>
     public HeaderSize Size { get; init; }
+    
+    public void WithText(string text){
+        if(string.IsNullOrEmpty(text)){
+            throw new ArgumentNullException($"{nameof(text)} cannot be null");
+        }
+        
+        Text = text;
+    }
 }
