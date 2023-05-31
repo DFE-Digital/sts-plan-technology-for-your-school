@@ -129,4 +129,8 @@ jobs:
               --name ${{ secrets.AZ_ACA_NAME }} \
               --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP }} \
               --image ${{ secrets.AZ_ACR_URL }}/${{ env.DOCKER_IMAGE }}:${{ needs.set-env.outputs.release }} \
-              --output none
+              --output none \
+              --env-vars Contentful__DeliveryApiKey=secretref:contentful--deliveryapikey \
+              --env-vars Contentful__PreviewApiKey=secretref:contentful__previewapiKey \
+              --env-vars Contentful__SpaceId=secretref:contentful__spaceid \
+              --env-vars Contentful__Environment=secretref:contentful__environment
