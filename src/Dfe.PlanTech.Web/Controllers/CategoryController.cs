@@ -3,6 +3,7 @@ using Dfe.PlanTech.Application.Questionnaire.Queries;
 
 namespace Dfe.PlanTech.Web.Controllers
 {
+    /*
     [ApiController]
     [Route("api/{controller}")]
     public class CategoryController
@@ -30,4 +31,5 @@ namespace Dfe.PlanTech.Web.Controllers
             }
         }
     }
+    */
 }
