@@ -24,9 +24,9 @@ To run the tests and generate unit coverage, run ``` dotnet test --collect:"XPla
 Run the following command from the project root folder:
 
 ```shell
-reportgenerator
--reports:"TestResults\{guid}\coverage.cobertura.xml"
--targetdir:"coveragereport"
+reportgenerator \
+-reports:"TestResults/{guid}/coverage.cobertura.xml" \
+-targetdir:"coveragereport" \
 -reporttypes:Html
 ```
 
