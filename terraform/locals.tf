@@ -7,4 +7,6 @@ locals {
     "Service Offering" = var.az_tag_product,
     "Product"          = var.az_tag_product
   }
+
+  restrict_container_apps_to_cdn_inbound_only = var.restrict_container_apps_to_cdn_inbound_only
 }
