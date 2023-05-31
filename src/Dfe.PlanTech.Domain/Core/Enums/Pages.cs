@@ -1,9 +1,9 @@
-using System.ComponentModel.DataAnnotations;
 
 namespace Dfe.PlanTech.Domain.Core.Enums;
 
-public enum Pages
+public static class Pages
 {
-    Landing,
-    SelfAssessment
+    public const string Landing = "Landing";
+    
+    public const string SelfAssessment = "self-assessment";
 }

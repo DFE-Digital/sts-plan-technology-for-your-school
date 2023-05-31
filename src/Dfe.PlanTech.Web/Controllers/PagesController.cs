@@ -17,15 +17,15 @@ public class PagesController : Controller
 
     public async Task<IActionResult> Index([FromServices] GetPageQuery getPageQuery)
     {
-        var page = await getPageQuery.GetPageBySlug(nameof(Pages.Landing));
+        var page = await getPageQuery.GetPageBySlug(Pages.Landing);
 
         return View("LandingPage", page);
     }
 
-    [HttpGet("self-assessment")]
+    [HttpGet(Pages.SelfAssessment)]
     public async Task<IActionResult> SelfAssessment([FromServices] GetPageQuery getPageQuery)
     {
-        var page = await getPageQuery.GetPageBySlug(nameof(Pages.SelfAssessment));
+        var page = await getPageQuery.GetPageBySlug(Pages.SelfAssessment);
 
         return View("Page", page);
     }
