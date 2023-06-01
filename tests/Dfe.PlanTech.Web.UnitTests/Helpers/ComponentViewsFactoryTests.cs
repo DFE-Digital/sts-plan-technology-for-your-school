@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Helpers;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Helpers;
@@ -11,9 +12,11 @@ public class ComponentViewsFactoryTests
     {
         var header = new Header();
 
-        var viewName = ComponentViewsFactory.GetViewForType(header);
+        var factory = new ComponentViewsFactory(new NullLogger<ComponentViewsFactory>());
+        var success = factory.TryGetViewForType(header, out string? viewPath);
 
-        Assert.Contains(header.GetType().Name, viewName);
-        Assert.Contains("Components", viewName);
+        Assert.True(success);
+        Assert.Contains(header.GetType().Name, viewPath);
+        Assert.Contains("Components", viewPath);
     }
 }

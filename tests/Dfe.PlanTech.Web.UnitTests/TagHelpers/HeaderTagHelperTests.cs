@@ -23,7 +23,7 @@ public class HeaderTagHelperTests
         var loggerMock = new Mock<ILogger<HeaderTagHelper>>();
         var tagHelper = new HeaderTagHelper(loggerMock.Object)
         {
-            Header = header
+            Model = header
         };
 
         var html = tagHelper.GetHtml();
@@ -46,7 +46,7 @@ public class HeaderTagHelperTests
         var loggerMock = new Mock<ILogger<HeaderTagHelper>>();
         var tagHelper = new HeaderTagHelper(loggerMock.Object)
         {
-            Header = header
+            Model = header
         };
 
         var html = tagHelper.GetHtml();
@@ -69,7 +69,7 @@ public class HeaderTagHelperTests
         var loggerMock = new Mock<ILogger<HeaderTagHelper>>();
         var tagHelper = new HeaderTagHelper(loggerMock.Object)
         {
-            Header = header
+            Model = header
         };
 
         var html = tagHelper.GetHtml();
@@ -92,14 +92,14 @@ public class HeaderTagHelperTests
         var loggerMock = new Mock<ILogger<HeaderTagHelper>>();
         var tagHelper = new HeaderTagHelper(loggerMock.Object)
         {
-            Header = header
+            Model = header
         };
 
         var html = tagHelper.GetHtml();
 
         var expectedClass = header.GetClassForSize();
 
-        Assert.Contains($" class=\"{expectedClass}>", html);
+        Assert.Contains($" class=\"{expectedClass}\">", html);
     }
 
     [Fact]
@@ -115,14 +115,14 @@ public class HeaderTagHelperTests
         var loggerMock = new Mock<ILogger<HeaderTagHelper>>();
         var tagHelper = new HeaderTagHelper(loggerMock.Object)
         {
-            Header = header
+            Model = header
         };
 
         var html = tagHelper.GetHtml();
 
         var expectedClass = header.GetClassForSize();
 
-        Assert.Contains($" class=\"{expectedClass}>", html);
+        Assert.Contains($" class=\"{expectedClass}\">", html);
     }
 
     [Fact]
@@ -138,14 +138,14 @@ public class HeaderTagHelperTests
         var loggerMock = new Mock<ILogger<HeaderTagHelper>>();
         var tagHelper = new HeaderTagHelper(loggerMock.Object)
         {
-            Header = header
+            Model = header
         };
 
         var html = tagHelper.GetHtml();
 
         var expectedClass = header.GetClassForSize();
 
-        Assert.Contains($" class=\"{expectedClass}>", html);
+        Assert.Contains($" class=\"{expectedClass}\">", html);
     }
 
     [Fact]
@@ -161,13 +161,13 @@ public class HeaderTagHelperTests
         var loggerMock = new Mock<ILogger<HeaderTagHelper>>();
         var tagHelper = new HeaderTagHelper(loggerMock.Object)
         {
-            Header = header
+            Model = header
         };
 
         var html = tagHelper.GetHtml();
 
         var expectedClass = header.GetClassForSize();
 
-        Assert.Contains($" class=\"{expectedClass}>", html);
+        Assert.Contains($" class=\"{expectedClass}\">", html);
     }
 }
