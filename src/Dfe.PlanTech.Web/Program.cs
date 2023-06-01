@@ -33,13 +33,6 @@ builder.Services.AddScoped((_) => new HyperlinkRendererOptions()
     Classes = "govuk-link",
 });
 
-builder.Services.AddScoped((_) => new ComponentViewsFactoryOptions()
-{
-    ComponentViewPaths = new[] {
-        "Components/"
-    }
-});
-
 builder.Services.AddScoped<ComponentViewsFactory>();
 
 builder.Services.AddCQRSServices();

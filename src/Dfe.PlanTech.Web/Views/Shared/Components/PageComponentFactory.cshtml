@@ -1,13 +1,9 @@
-@using Dfe.PlanTech.Domain.Content.Models;
-@using Dfe.PlanTech.Domain.Content.Models.Buttons;
-@using Dfe.PlanTech.Web.Helpers;
-
 @inject ComponentViewsFactory ComponentViewsFactory;
 
 @model Dfe.PlanTech.Domain.Content.Models.ContentComponent;
 
 @{
-    if(ComponentViewsFactory.TryGetViewForType(Model, out string path)){
-            await Html.RenderPartialAsync(path, Model);
+    if(ComponentViewsFactory.TryGetViewForType(Model, out string? path) && !string.IsNullOrEmpty(path)){
+        await Html.RenderPartialAsync(path, Model);
     }
 }

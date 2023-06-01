@@ -9,7 +9,7 @@ public class HeaderTagHelper : TagHelper
 {
     private readonly ILogger<HeaderTagHelper> _logger;
 
-    public Header? Header { get; init; }
+    public Header? Model { get; set; }
 
     public HeaderTagHelper(ILogger<HeaderTagHelper> logger)
     {
@@ -18,15 +18,15 @@ public class HeaderTagHelper : TagHelper
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
-        if (Header == null)
+        if (Model == null)
         {
-            _logger.LogWarning($"Missing {nameof(Header)}");
+            _logger.LogWarning($"Missing {nameof(Model)}");
             return;
         }
 
-        if (Header.Tag == Domain.Content.Enums.HeaderTag.Unknown)
+        if (Model.Tag == Domain.Content.Enums.HeaderTag.Unknown)
         {
-            _logger.LogWarning($"Could not find {nameof(Header.Tag)} for {nameof(Header)}");
+            _logger.LogWarning($"Could not find {nameof(Model.Tag)} for {nameof(Model)}");
         }
 
         var html = GetHtml();
@@ -38,7 +38,7 @@ public class HeaderTagHelper : TagHelper
     {
         var stringBuilder = new StringBuilder();
         AppendOpenTag(stringBuilder);
-        stringBuilder.Append(Header!.Text);
+        stringBuilder.Append(Model!.Text);
         AppendCloseTag(stringBuilder);
 
         return stringBuilder.ToString();
@@ -47,7 +47,7 @@ public class HeaderTagHelper : TagHelper
     private StringBuilder AppendCloseTag(StringBuilder stringBuilder)
     {
         stringBuilder.Append("</");
-        stringBuilder.Append(Header!.Tag.ToString());
+        stringBuilder.Append(Model!.Tag.ToString());
         stringBuilder.Append('>');
 
         return stringBuilder;
@@ -56,10 +56,10 @@ public class HeaderTagHelper : TagHelper
     private StringBuilder AppendOpenTag(StringBuilder stringBuilder)
     {
         stringBuilder.Append('<');
-        stringBuilder.Append(Header!.Tag.ToString());
+        stringBuilder.Append(Model!.Tag.ToString());
         stringBuilder.Append(" class=\"");
-        stringBuilder.Append(Header.GetClassForSize());
-        stringBuilder.Append('>');
+        stringBuilder.Append(Model.GetClassForSize());
+        stringBuilder.Append("\">");
 
         return stringBuilder;
     }
