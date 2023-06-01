@@ -7,4 +7,6 @@ locals {
     "Service Offering" = var.az_tag_product,
     "Product"          = var.az_tag_product
   }
+
+  input_cdn_frontdoor_origin_host_header_override = var.input_cdn_frontdoor_origin_host_header_override
 }
