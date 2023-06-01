@@ -6,6 +6,6 @@ module "main_hosting" {
   azure_location = local.azure_location
   tags           = local.tags
 
-  enable_container_registry = false
-  image_name                = "my-app"
+  enable_container_registry = true
+  image_name                = "plan-tech"
 }

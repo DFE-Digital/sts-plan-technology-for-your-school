@@ -14,6 +14,7 @@ public interface IContentRepository
     /// <returns></returns>
     Task<TEntity?> GetEntityById<TEntity>(string id, CancellationToken cancellationToken = default);
 
+
     /// <summary>
     /// Get all entities of the specified type.
     /// </summary>
@@ -33,7 +34,7 @@ public interface IContentRepository
     /// <typeparam name="TEntity"></typeparam>
     /// <returns></returns>
     Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Get entities without filtering
     /// </summary>
