@@ -1,5 +1,7 @@
 using Contentful.Core;
+using Contentful.Core.Configuration;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 
@@ -12,10 +14,10 @@ public class ContentfulRepository : IContentRepository
 {
     private readonly IContentfulClient _client;
 
-    public ContentfulRepository(IContentfulClient client)
+    public ContentfulRepository(ILoggerFactory loggerFactory, IContentfulClient client)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
-        _client.ContentTypeResolver = new EntityResolver();
+        _client.ContentTypeResolver = new EntityResolver(loggerFactory.CreateLogger<IContentTypeResolver>());
     }
 
     public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IEnumerable<IContentQuery>? queries = null, CancellationToken cancellationToken = default)
