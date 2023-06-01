@@ -131,6 +131,6 @@ jobs:
               --image ${{ secrets.AZ_ACR_URL }}/${{ env.DOCKER_IMAGE }}:${{ needs.set-env.outputs.release }} \
               --output none \
               --set-env-vars Contentful__DeliveryApiKey=secretref:contentful--deliveryapikey \
-              --set-env-vars Contentful__PreviewApiKey=secretref:contentful--previewapiKey \
+              --set-env-vars Contentful__PreviewApiKey=secretref:contentful--previewapikey \
               --set-env-vars Contentful__SpaceId=secretref:contentful--spaceid \
               --set-env-vars Contentful__Environment=secretref:contentful--environment
