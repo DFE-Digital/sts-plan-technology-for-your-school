@@ -33,7 +33,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 Content = Array.Empty<IContentComponent>()
             }
         };
-        
+
         [Fact]
         public async Task Should_ReturnLandingPage_When_IndexRouteLoaded()
         {
