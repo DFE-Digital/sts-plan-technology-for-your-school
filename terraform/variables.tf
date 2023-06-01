@@ -23,7 +23,7 @@ variable "az_tag_product" {
   type        = string
 }
 
-variable "input_cdn_frontdoor_origin_host_header_override" {
+variable "cdn_frontdoor_origin_host_header_override" {
   description = "Override the frontdoor origin host header"
   type        = string
 }

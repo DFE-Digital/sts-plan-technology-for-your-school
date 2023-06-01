@@ -10,4 +10,6 @@ module "main_hosting" {
   image_name                = "plan-tech-app"
 
   enable_cdn_frontdoor = true
+
+  cdn_frontdoor_origin_host_header_override = local.cdn_frontdoor_origin_host_header_override
 }
