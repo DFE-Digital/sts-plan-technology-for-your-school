@@ -1,19 +1,9 @@
 @using Dfe.PlanTech.Domain.Content.Models;
+@using Dfe.PlanTech.Domain.Content.Models.Buttons;
+@using Dfe.PlanTech.Web.Helpers;
+
 @model Dfe.PlanTech.Domain.Content.Models.ContentComponent;
 
-@{switch(Model){
-    case Header header: {
-        await Html.RenderPartialAsync("Components/Header", header);
-        break;
-    }
-    
-    case TextBody textBody: {
-        <rich-text content=@textBody.RichText></rich-text>
-        break;
-    }
-
-    default:{
-        <p>No content type found for @Model.GetType()</p>
-        break;
-    }
-}}
+@{
+    await Html.RenderPartialAsync(ComponentViewsFactory.GetViewForType(Model), Model);
+}

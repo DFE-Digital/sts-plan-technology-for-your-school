@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Domain.Core.Enums;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,11 +14,15 @@ public class PagesController : Controller
         _logger = logger;
     }
 
-    public async Task<IActionResult> Index([FromServices] GetPageQuery getPageQuery)
+    [HttpGet("/{route?}")]
+    public async Task<IActionResult> GetByRoute(string? route, [FromServices] GetPageQuery query)
     {
-        var page = await getPageQuery.GetPageBySlug(nameof(Pages.Landing));
+        var slug = string.IsNullOrEmpty(route) ? Request.Path.Value : route;
 
-        return View("LandingPage", page);
+        var page = await query.GetPageBySlug(slug);
+
+        return View("Page", page);
+
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
