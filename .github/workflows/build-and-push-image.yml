@@ -2,8 +2,7 @@ name: Build & deploy to environment
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
 
   workflow_dispatch:
     inputs:
