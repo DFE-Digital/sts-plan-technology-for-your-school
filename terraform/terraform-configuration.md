@@ -29,6 +29,7 @@ No resources.
 | <a name="input_az_tag_environment"></a> [az\_tag\_environment](#input\_az\_tag\_environment) | n/a | `string` | n/a | yes |
 | <a name="input_az_tag_product"></a> [az\_tag\_product](#input\_az\_tag\_product) | n/a | `string` | n/a | yes |
 | <a name="input_azure_location"></a> [azure\_location](#input\_azure\_location) | n/a | `string` | n/a | yes |
+| <a name="input_cdn_frontdoor_origin_host_header_override"></a> [cdn\_frontdoor\_origin\_host\_header\_override](#input\_cdn\_frontdoor\_origin\_host\_header\_override) | Override the frontdoor origin host header | `string` | n/a | yes |
 | <a name="input_environment"></a> [environment](#input\_environment) | Environment name. Will be used along with `project_name` as a prefix for all resources. | `string` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | n/a | `string` | n/a | yes |
 
