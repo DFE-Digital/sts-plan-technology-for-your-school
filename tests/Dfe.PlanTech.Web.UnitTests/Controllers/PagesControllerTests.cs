@@ -50,13 +50,16 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public PagesControllerTests()
         {
             var repositoryMock = new Mock<IContentRepository>();
-            repositoryMock.Setup(repo => repo.GetEntities<Page>(It.IsAny<IEnumerable<IContentQuery>>(), It.IsAny<CancellationToken>())).ReturnsAsync((IEnumerable<IContentQuery> queries, CancellationToken cancellationToken) =>
+            repositoryMock.Setup(repo => repo.GetEntities<Page>(It.IsAny<IGetEntitiesOptions>(), It.IsAny<CancellationToken>())).ReturnsAsync((IGetEntitiesOptions options, CancellationToken _) =>
             {
-                foreach (var query in queries)
+                if (options?.Queries != null)
                 {
-                    if (query is ContentQueryEquals equalsQuery && query.Field == "fields.slug")
+                    foreach (var query in options.Queries)
                     {
-                        return _pages.Where(page => page.Slug == equalsQuery.Value);
+                        if (query is ContentQueryEquals equalsQuery && query.Field == "fields.slug")
+                        {
+                            return _pages.Where(page => page.Slug == equalsQuery.Value);
+                        }
                     }
                 }
 

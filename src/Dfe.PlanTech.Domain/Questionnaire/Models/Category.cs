@@ -1,15 +1,14 @@
+using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-public class Category : ICategory
+public class Category : ContentComponent, ICategory
 {
-    public string Name { get; set; } = null!;
+    public Header Header { get; set; } = null!;
 
-    public string Title { get; set; } = null!;
+    public IContentComponent[] Content { get; set; } = Array.Empty<IContentComponent>();
 
-    //This should be "Document" type from Contentful, as is Rich Text
-    public object? Description { get; set; }
-
-    public List<IQuestion> Questions { get; set; } = new List<IQuestion>();
+    public ISection[] Sections { get; set; } = Array.Empty<ISection>();
 }

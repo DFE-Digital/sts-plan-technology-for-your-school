@@ -13,7 +13,6 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 
 public static class ContentfulSetup
 {
-
     /// <summary>
     /// Sets up the necessary services for Contentful.
     /// </summary>
