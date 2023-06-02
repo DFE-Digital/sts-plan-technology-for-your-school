@@ -2,6 +2,7 @@ using Dfe.PlanTech.Application.Helpers;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Options;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
+using Dfe.PlanTech.Web.Helpers;
 using GovUk.Frontend.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,6 +32,8 @@ builder.Services.AddScoped((_) => new HyperlinkRendererOptions()
 {
     Classes = "govuk-link",
 });
+
+builder.Services.AddScoped<ComponentViewsFactory>();
 
 builder.Services.AddCQRSServices();
 
