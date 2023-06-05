@@ -12,9 +12,13 @@ The following article discusses developer tools and how to run the **Terraform**
     - [Authenticating using Service Principle](#authenticating-using-service-principle)
     - [Terraform Init](#terraform-init)
     - [Terraform Plan](#terraform-plan)
+    - [Terraform Plan](#terraform-plan-1)
     - [Terraform Validate](#terraform-validate)
     - [Terraform Format](#terraform-format)
   - [Terraform Documentation](#terraform-documentation)
+  - [Troubleshooting](#troubleshooting)
+    - [Logging](#logging)
+    - [Output variables](#output-variables)
 
 ## Developer tools
 
@@ -59,7 +63,7 @@ When you make changes to the Terraform Config, ensure you run the following as t
 
 This section discusses how to set-up and run Terraform locally on a development machine.
 
-⚠️ do not update the example Terraform configuration files with sensitive information and commit to repo ⚠️ 
+⚠️ Avoid committing any updates to the repository that include sensitive information in the example Terraform configuration files ⚠️
 
 ### Authenticating using Service Principle
 The Terraform configuration can be executed using an Azure Service Principle.  To do this you'll need to set the following environment variables:
@@ -99,6 +103,12 @@ Run the following command to execute the Plan commande:
 
 `terraform plan -var-file="terraform.tfvars"`
 
+### Terraform Plan
+
+Use the apply command to apply the changes to the Azure environment.
+
+`terraform plan -var-file="terraform.tfvars"`
+
 ### Terraform Validate
 
 The terraform validate command validates the configuration files.
@@ -118,3 +128,23 @@ When the Terraform configuration is updated, the module documentation will need 
 `terraform-docs markdown .` 
 
 This will generate the `terraform-configuration.md` markdown file.
+
+## Troubleshooting
+
+### Logging
+To help troubleshoot Terraform, you can turn on [Terraform logging](https://developer.hashicorp.com/terraform/tutorials/configuration-language/troubleshooting-workflow#enable-terraform-logging) which can be directed to a file.
+
+To turn on logging create the following environment variable with either DEBUG or TRACE
+
+`export TF_LOG=DEBUG`
+
+To direct the output to a file, set the following environment variable. Terraform appends to the log file so consider deleting it before running terraform. 
+
+`export TF_LOG_PATH=terraform.log`
+
+### Output variables
+Another useful tip for debugging Terraform is to utilise output variables, refer to the [Output Data from Terraform](https://developer.hashicorp.com/terraform/tutorials/configuration-language/outputs) article.  
+
+The values of output variables are included within the log file so they can be reviewed.  
+
+⚠️ Avoid committing any updates to the Terraform configuration files that include output variables for debugging purposes ⚠️
