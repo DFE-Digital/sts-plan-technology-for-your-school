@@ -10,3 +10,25 @@
     }
 }
 
+<task-list>
+    @foreach (var categorySection in Model.Sections)
+    {
+        <task-list-item>
+            <task-list-item-name>
+                <a href=@catgorySection.Name class="govuk-link">
+                    @categorySection.Name
+                </a>
+            </task-list-item-name>
+            
+            @{
+                var tagColour = TagColour.Grey;
+                var tagText = "NOT STARTED";
+            }
+            
+            <task-list-tag colour=@tagColour>
+                @tagText
+            </task-list-tag>
+        </task-list-item>
+    }
+</task-list>
+
