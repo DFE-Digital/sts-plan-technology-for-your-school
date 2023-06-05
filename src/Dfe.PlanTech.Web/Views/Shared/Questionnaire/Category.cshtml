@@ -14,17 +14,15 @@
 <task-list>
     @foreach (var categorySection in Model.Sections)
     {
+        var tagColour = TagColour.Grey;
+        var tagText = "NOT STARTED";
+
         <task-list-item>
             <task-list-item-name>
                 <a href=@categorySection.Name class="govuk-link">
                     @categorySection.Name
                 </a>
             </task-list-item-name>
-            
-            @{
-                var tagColour = TagColour.Grey;
-                var tagText = "NOT STARTED";
-            }
             
             <task-list-tag colour=@tagColour>
                 @tagText
