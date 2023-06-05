@@ -7,9 +7,9 @@ public abstract class BaseTaskListTagHelper : TagHelper
     [HtmlAttributeName("class")]
     public string? Classes { get; set; }
 
-    public required string Class { get; init; }
+    public string Class { get; init; } = null!;
 
-    public required string TagName { get; init; }
+    public string TagName { get; init; } = null!;
 
     protected BaseTaskListTagHelper(string? classes, string @class, string tagName)
     {
