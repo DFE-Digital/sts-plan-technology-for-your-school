@@ -1,5 +1,12 @@
-﻿@{
+﻿@inject GovUk.Frontend.AspNetCore.PageTemplateHelper PageTemplateHelper
+
+@{
     Layout = "_GovUkPageTemplate";
+}
+
+@section Head {
+    @PageTemplateHelper.GenerateStyleImports()
+    <link rel="stylesheet" href="~/css/app-task-list.css">
 }
 
 @section Header {

@@ -1,3 +1,4 @@
+@using Dfe.PlanTech.Web.TagHelpers.TaskList
 @model Dfe.PlanTech.Domain.Questionnaire.Interfaces.ICategory;
 
 @{
@@ -10,3 +11,22 @@
     }
 }
 
+<task-list>
+    @foreach (var categorySection in Model.Sections)
+    {
+        var tagColour = TagColour.Grey;
+        var tagText = "NOT STARTED";
+
+        <task-list-item>
+            <task-list-item-name>
+                <a href=@categorySection.Name class="govuk-link">
+                    @categorySection.Name
+                </a>
+            </task-list-item-name>
+            
+            <task-list-tag colour=@tagColour>
+                @tagText
+            </task-list-tag>
+        </task-list-item>
+    }
+</task-list>
