@@ -5,7 +5,9 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 public interface ICategory : IContentComponent
 {
-    Header Header { get; }
+    public Header Header { get; }
 
-    IContentComponent[] Content { get; }
+    public IContentComponent[] Content { get; }
+    
+    public ISection[] Sections { get; }
 }
