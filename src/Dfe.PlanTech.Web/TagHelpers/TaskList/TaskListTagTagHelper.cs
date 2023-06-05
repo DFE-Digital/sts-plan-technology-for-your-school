@@ -33,7 +33,7 @@ public class TaskListTagTagHelper : BaseTaskListTagHelper
     {
         if (!string.IsNullOrEmpty(Classes))
         {
-            stringBuilder.Append(" ");
+            stringBuilder.Append(' ');
             stringBuilder.Append(Classes);
         }
     }
