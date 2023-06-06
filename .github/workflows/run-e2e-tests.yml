@@ -21,4 +21,4 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout and run E2E tests
-              uses: ./.github/actions/build-docker-image 
+              uses: ./.github/actions/run-e2e-tests
