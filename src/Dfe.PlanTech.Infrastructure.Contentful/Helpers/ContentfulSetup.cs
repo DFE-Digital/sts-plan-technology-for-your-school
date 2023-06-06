@@ -8,6 +8,8 @@ using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRender
 using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Polly;
+using Polly.Extensions.Http;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 
@@ -26,7 +28,9 @@ public static class ContentfulSetup
         var options = configuration.GetSection(section).Get<ContentfulOptions>() ?? throw new KeyNotFoundException(nameof(ContentfulOptions));
 
         services.AddSingleton(options);
-        services.AddHttpClient<ContentfulClient>();
+
+        SetupHttpClient(services);
+
         services.AddScoped<IContentfulClient, ContentfulClient>();
         services.AddScoped<IContentRepository, ContentfulRepository>();
 
@@ -52,6 +56,20 @@ public static class ContentfulSetup
         return services;
     }
 
+    private static void SetupHttpClient(IServiceCollection services)
+    {
+        services.AddHttpClient<ContentfulClient>()
+                .SetHandlerLifetime(TimeSpan.FromMinutes(5))
+                .AddPolicyHandler(GetRetryPolicy());
+    }
+
     private static Func<Type, bool> IsContentRenderer(Type contentRendererType)
-    => type => type.IsClass && !type.IsAbstract && type.IsSubclassOf(contentRendererType);
+        => type => type.IsClass && !type.IsAbstract && type.IsSubclassOf(contentRendererType);
+
+    private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+        => HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound)
+                .WaitAndRetryAsync(6, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+
 }
