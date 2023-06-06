@@ -4,10 +4,7 @@ description: Run E2E tests using Cypress
 runs:
   using: composite
 
-  steps:
-    - name: Checkout repo
-      uses: actions/checkout@v2
-      
+  steps:      
     - name: Build and test project
       uses: cypress-io/github-action@v5
       with:
