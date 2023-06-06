@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Dfe.PlanTech.Domain.Content.Models
+﻿namespace Dfe.PlanTech.Domain.Content.Models
 {
     /// <summary>
     /// Model for DropDown type.

@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Application.Helpers;
-using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers;
 using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Web.Helpers;
