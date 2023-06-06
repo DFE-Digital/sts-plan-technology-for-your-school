@@ -1,5 +1,5 @@
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Interfaces;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Dfe.PlanTech.Web.TagHelpers.RichText;

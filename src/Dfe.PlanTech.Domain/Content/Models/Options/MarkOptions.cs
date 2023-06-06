@@ -1,4 +1,4 @@
-namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Options;
+namespace Dfe.PlanTech.Domain.Content.Models.Options;
 
 /// <summary>
 /// Class for mapping a "Mark" (e.g. bold, or underline, etc.) from Contentful API response, for Rich Text, to an appropriate tag
