@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Domain.Content.Interfaces;
 
-namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Interfaces;
+namespace Dfe.PlanTech.Domain.Content.Interfaces;
 
 public interface IRichTextRenderer
 {

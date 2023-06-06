@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Options;
+namespace Dfe.PlanTech.Domain.Content.Models.Options;
 
 public class RichTextPartRendererOptions
 {

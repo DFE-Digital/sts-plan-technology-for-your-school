@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Domain.Content.Models;
 
-namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Options;
+namespace Dfe.PlanTech.Domain.Content.Models.Options;
 
 public class TextRendererOptions
 {
