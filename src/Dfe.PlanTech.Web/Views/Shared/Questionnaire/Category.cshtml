@@ -19,7 +19,7 @@
 
         <task-list-item>
             <task-list-item-name>
-                <a asp-controller="Pages" asp-action="Get" class="govuk-link">
+                <a asp-controller="Questions" asp-action="GetQuestionById" asp-route-id=@categorySection.FirstQuestionId class="govuk-link">
                     @categorySection.Name
                 </a>
             </task-list-item-name>

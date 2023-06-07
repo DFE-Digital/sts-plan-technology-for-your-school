@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
@@ -7,5 +8,9 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 /// </summary>
 public interface ISection : IContentComponent
 {
-    string Name { get; init; }
+    public string Name { get; }
+
+    public Question[] Questions { get; }
+
+    public string FirstQuestionId { get; }
 }

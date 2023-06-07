@@ -9,4 +9,8 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 public class Section : ContentComponent, ISection
 {
     public string Name { get; init; } = null!;
+
+    public Question[] Questions { get; init; } = Array.Empty<Question>();
+
+    public string FirstQuestionId => Questions.Select(question => question.Sys.Id).FirstOrDefault() ?? "";
 }
