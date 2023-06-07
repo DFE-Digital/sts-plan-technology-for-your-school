@@ -1,10 +1,12 @@
 ﻿using System.Diagnostics;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Web.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
+[Authorize]
 public class PagesController : Controller
 {
     private readonly ILogger<PagesController> _logger;

@@ -1,10 +1,17 @@
 using Dfe.PlanTech.Application.Helpers;
 using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
+using Dfe.PlanTech.Infrastructure.SignIn;
 using Dfe.PlanTech.Web.Helpers;
 using GovUk.Frontend.AspNetCore;
+using Microsoft.IdentityModel.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
+
+#if DEBUG
+//TODO: Remove!
+IdentityModelEventSource.ShowPII = true;
+#endif 
 
 builder.Services.AddApplicationInsightsTelemetry();
 
@@ -35,6 +42,8 @@ builder.Services.AddScoped((_) => new HyperlinkRendererOptions()
 builder.Services.AddScoped<ComponentViewsFactory>();
 
 builder.Services.AddCQRSServices();
+
+builder.Services.AddDfeSignIn(builder.Configuration);
 
 var app = builder.Build();
 
