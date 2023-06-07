@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,6 +23,18 @@ public class PagesController : Controller
         var page = await query.GetPageBySlug(slug);
 
         return View("Page", page);
+    }
+
+    [HttpGet("/question/{id?}")]
+    public async Task<IActionResult> GetQuestionById(string id, [FromServices] GetQuestionQuery query)
+    {
+        if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
+
+        var question = await query.GetQuestionById(id);
+
+        if (question == null) throw new KeyNotFoundException($"Could not find question with id {id}");
+
+        return View("Question", question);
     }
 
     /// <summary>
