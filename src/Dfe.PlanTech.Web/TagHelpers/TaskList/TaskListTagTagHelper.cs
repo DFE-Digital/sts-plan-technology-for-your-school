@@ -43,6 +43,8 @@ public class TaskListTagTagHelper : BaseTaskListTagHelper
         var tagColour = TagColour;
         if (tagColour != TagColour.Default)
         {
+            stringBuilder.Append(' ');
+            stringBuilder.Append(_class);
             stringBuilder.Append("--");
             stringBuilder.Append(tagColour.ToString().ToLower());
         }

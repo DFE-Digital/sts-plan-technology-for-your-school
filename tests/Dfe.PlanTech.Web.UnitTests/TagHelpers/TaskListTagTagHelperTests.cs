@@ -40,7 +40,7 @@ namespace Dfe.PlanTech.Web.UnitTests.TagHelpers
 
             var htmlString = output.ToHtmlString();
 
-            Assert.Contains($"class=\"govuk-tag--{colour.ToLower()}\"", htmlString);
+            Assert.Contains($"class=\"govuk-tag govuk-tag--{colour.ToLower()}\"", htmlString);
         }
 
         [Fact]
