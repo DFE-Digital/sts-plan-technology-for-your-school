@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace Dfe.PlanTech.Domain.SignIn.Models;
 
-public sealed class DfeSignInConfiguration
+public sealed class DfeSignInConfiguration : IDfeSignInConfiguration
 {
     /// <inheritdoc/>
     public string Authority { get; set; } = null!;
