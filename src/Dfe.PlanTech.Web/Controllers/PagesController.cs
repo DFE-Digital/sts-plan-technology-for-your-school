@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
