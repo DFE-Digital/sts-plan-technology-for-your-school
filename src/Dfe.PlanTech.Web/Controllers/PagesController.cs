@@ -25,18 +25,6 @@ public class PagesController : Controller
         return View("Page", page);
     }
 
-    [HttpGet("/question/{id?}")]
-    public async Task<IActionResult> GetQuestionById(string id, [FromServices] GetQuestionQuery query)
-    {
-        if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
-
-        var question = await query.GetQuestionById(id);
-
-        if (question == null) throw new KeyNotFoundException($"Could not find question with id {id}");
-
-        return View("Question", question);
-    }
-
     /// <summary>
     /// Returns either the entire slug for the URL (if not null/empty), or "/"
     /// </summary>

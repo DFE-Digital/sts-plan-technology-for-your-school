@@ -4,7 +4,6 @@ using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 
-
 namespace Dfe.PlanTech.Application.Questionnaire.Queries;
 
 public class GetQuestionQuery : ContentRetriever

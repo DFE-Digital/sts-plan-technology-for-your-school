@@ -54,6 +54,10 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapControllerRoute(
+    name: "questionsController",
+    pattern: "question/{action=GetQuestionById}/{id?}");
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Pages}/{action=GetByRoute}/{id?}");
 
