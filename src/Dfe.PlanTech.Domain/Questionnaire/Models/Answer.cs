@@ -9,4 +9,6 @@ public class Answer : ContentComponent
     /// </summary>
     /// <value></value>
     public string Text { get; init; } = null!;
+
+    public Question? NextQuestion { get; init; }
 }

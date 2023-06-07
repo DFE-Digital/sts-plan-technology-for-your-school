@@ -1,8 +1,10 @@
 using Dfe.PlanTech.Application.Questionnaire.Queries;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
+[Route("/question")]
 public class QuestionsController : Controller
 {
     private readonly ILogger<QuestionsController> _logger;
@@ -12,7 +14,7 @@ public class QuestionsController : Controller
         _logger = logger;
     }
 
-    [HttpGet("/question/{id?}")]
+    [HttpGet("{id?}")]
     public async Task<IActionResult> GetQuestionById(string id, [FromServices] GetQuestionQuery query)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
@@ -22,6 +24,16 @@ public class QuestionsController : Controller
         if (question == null) throw new KeyNotFoundException($"Could not find question with id {id}");
 
         return View("Question", question);
+    }
+
+    [HttpPost("SubmitAnswer")]
+    public async Task<IActionResult> SubmitAnswer(SubmitAnswerDto submitAnswerDto)
+    {
+        if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
+
+        if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("GetByRoute", "Pages", new { route = "self-assessment" });
+
+        return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.NextQuestionId });
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

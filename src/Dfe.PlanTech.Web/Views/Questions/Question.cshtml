@@ -1,8 +1,8 @@
 @model Dfe.PlanTech.Domain.Questionnaire.Models.Question
 
-<form asp-controller="Questionnaire" asp-action="SubmitAnswer" method="post">
+<form asp-controller="Questions" asp-action="SubmitAnswer" method="post">
     <input id="QuestionId" hidden value=@Model.Sys.Id  name="QuestionId" />
-    <govuk-radios name="AnswerId">
+    <govuk-radios name="NextQuestionId">
         <govuk-radios-fieldset>
             <govuk-radios-fieldset-legend is-page-heading="true" class="govuk-fieldset__legend--l">
                 @Model.Text
@@ -14,7 +14,8 @@
             
             @{
                 foreach(var answer in Model.Answers){
-                    <govuk-radios-item value=@answer.Sys.Id>@answer.Text</govuk-radios-item>
+                    var nextQuestionId = answer.NextQuestion?.Sys.Id ?? "";
+                    <govuk-radios-item value=@nextQuestionId>@answer.Text</govuk-radios-item>
                 }
             }
             
