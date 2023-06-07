@@ -17,13 +17,18 @@ public class PagesController : Controller
     [HttpGet("/{route?}")]
     public async Task<IActionResult> GetByRoute(string? route, [FromServices] GetPageQuery query)
     {
-        var slug = string.IsNullOrEmpty(route) ? Request.Path.Value : route;
+        string slug = GetSlug(route);
 
         var page = await query.GetPageBySlug(slug);
 
         return View("Page", page);
-
     }
+
+    /// <summary>
+    /// Returns either the entire slug for the URL (if not null/empty), or "/"
+    /// </summary>
+    /// <param name="route">Route slug from route binding</param>
+    private string GetSlug(string? route) => (string.IsNullOrEmpty(route) ? Request.Path.Value : route) ?? "/";
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
