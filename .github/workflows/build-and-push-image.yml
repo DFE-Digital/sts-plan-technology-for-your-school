@@ -135,10 +135,3 @@ jobs:
                              Contentful__PreviewApiKey=secretref:contentful--previewapikey \
                              Contentful__SpaceId=secretref:contentful--spaceid \
                              Contentful__Environment=secretref:contentful--environment
-                             
-  build-docker-image:
-    name: Run E2E tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout and run E2E tests
-        uses: ./.github/actions/run-e2e-tests
