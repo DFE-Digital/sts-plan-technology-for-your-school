@@ -3,7 +3,7 @@ name: Build & deploy to environment
 on:
   push:
     branches: [ "main" ]
-
+  
   workflow_dispatch:
     inputs:
       environment:
@@ -135,3 +135,12 @@ jobs:
                              Contentful__PreviewApiKey=secretref:contentful--previewapikey \
                              Contentful__SpaceId=secretref:contentful--spaceid \
                              Contentful__Environment=secretref:contentful--environment
+                             
+  run-tests:
+    name: Run E2e Tests
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Cypress tests
+        uses: ./.github/actions/run-e2e-tests
+        with:
+          url: https://s190d01-plantechcdnendpoint-hph5ghgcevddhfe4.z01.azurefd.net/

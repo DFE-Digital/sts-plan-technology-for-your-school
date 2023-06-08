@@ -14,7 +14,6 @@ on:
 
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
-  TESTING_URL: http://localhost:5001
   
 jobs:
   build-test-app:  
@@ -32,13 +31,3 @@ jobs:
 
       - name: Run unit tests
         uses: ./.github/actions/run-unit-tests
- 
-      - name: Run Web project
-        shell: bash
-        run: dotnet run --urls ${{ env.TESTING_URL }}
-        working-directory: ./src/Dfe.PlanTech.Web/
-  
-      - name: Run E2E tests
-        uses: ./.github/actions/run-e2e-tests
-        with:
-           url: ${{ env.TESTING_URL }} 
