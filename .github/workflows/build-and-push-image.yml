@@ -17,6 +17,7 @@ concurrency:
 env:
   DOCKER_IMAGE: plan-tech-app
   NODE_VERSION: 18.x
+  PLANTECH_URL: https://s190d01-plantechcdnendpoint-hph5ghgcevddhfe4.z01.azurefd.net/
 
 jobs:
   set-env:
@@ -138,9 +139,11 @@ jobs:
 
   run-tests:
     name: Run E2E Tests
+    needs: [ set-env, deploy-image ]
     runs-on: ubuntu-22.04
+    if: ${{ needs.set-env.outputs.environment }} == 'dev'
     steps:
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests
         with:
-          url: https://s190d01-plantechcdnendpoint-hph5ghgcevddhfe4.z01.azurefd.net/
+          url: ${{ env.PLANTECH_URL }}
