@@ -29,8 +29,4 @@ describe("beta header", () => {
       .and("have.attr", "href")
       .and("include", expectedFeedbackLink);
   });
-
-  it("should fail", () => {
-    cy.get(`div.not-a-real-selector a.not-a-real-link`).should("exist");
-  });
 });
