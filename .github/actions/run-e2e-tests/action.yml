@@ -6,8 +6,6 @@ inputs:
     required: true
     type: string
 
-env: 
-  PROJECT_PATH: ./tests/Dfe.PlanTech.Web.E2ETests/
 runs:
   using: composite
 
@@ -15,12 +13,12 @@ runs:
     - name: Create Cypress config
       shell: bash
       run: echo "{ \"URL\" :\"${{ inputs.url }}\" }" > cypress.env.json
-      working-directory: ${{ env.PROJECT_PATH }}
+      working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
 
     - name: Build and test project
       uses: cypress-io/github-action@v5
       with:
-        working-directory:  ${{ env.PROJECT_PATH }}
+        working-directory:  ./tests/Dfe.PlanTech.Web.E2ETests/
         browser: chrome
       
     - name: Store screenshots on test failure
@@ -29,7 +27,7 @@ runs:
       with:
         name: cypress-screenshots
         path: cypress/screenshots
-        working-directory:  ${{ env.PROJECT_PATH }}
+        working-directory:  ./tests/Dfe.PlanTech.Web.E2ETests/
           
     - name: Store videos
       uses: actions/upload-artifact@v3
@@ -37,4 +35,4 @@ runs:
       with:
         name: cypress-videos
         path: cypress/videos
-        working-directory:  ${{ env.PROJECT_PATH }}
+        working-directory:  ./tests/Dfe.PlanTech.Web.E2ETests/
