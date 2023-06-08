@@ -12,7 +12,7 @@ builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.AddControllersWithViews();
 builder.Services.AddGovUkFrontend();
 
-builder.Services.SetupContentfulClient(builder.Configuration, "Contentful");
+builder.Services.SetupContentfulClient(builder.Configuration, "Contentful", HttpClientPolicyExtensions.AddRetryPolicy);
 
 builder.Services.AddScoped((_) => new TextRendererOptions(new List<MarkOption>() {
     new MarkOption(){
