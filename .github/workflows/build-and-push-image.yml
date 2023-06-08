@@ -135,9 +135,9 @@ jobs:
                              Contentful__PreviewApiKey=secretref:contentful--previewapikey \
                              Contentful__SpaceId=secretref:contentful--spaceid \
                              Contentful__Environment=secretref:contentful--environment
-                             
+
   run-tests:
-    name: Run E2e Tests
+    name: Run E2E Tests
     runs-on: ubuntu-22.04
     steps:
       - name: Cypress tests
