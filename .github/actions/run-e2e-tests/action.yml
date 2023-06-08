@@ -1,6 +1,9 @@
 name: Run Cypress E2E tests
 description: Run E2E tests using Cypress
 
+env:
+  PROJECT_PATH: ./tests/Dfe.PlanTech.Web.E2ETests/
+
 runs:
   using: composite
 
@@ -8,7 +11,7 @@ runs:
     - name: Build and test project
       uses: cypress-io/github-action@v5
       with:
-        working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
+        working-directory: ${{ env.PROJECT_PATH }}
         browser: chrome
         config: baseUrl=https://s190d01-plantechcdnendpoint-hph5ghgcevddhfe4.z01.azurefd.net/
       
@@ -17,11 +20,11 @@ runs:
       if: failure()
       with:
         name: cypress-screenshots
-        path: UI/cypress/screenshots
+        path: ${{ env.PROJECT_PATH }}cypress/screenshots
           
     - name: Store videos
       uses: actions/upload-artifact@v3
       if: always()
       with:
         name: cypress-videos
-        path: UI/cypress/videos
+        path: ${{ env.PROJECT_PATH }}cypress/videos
