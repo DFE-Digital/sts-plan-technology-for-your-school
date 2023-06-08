@@ -1,0 +1,26 @@
+@model Dfe.PlanTech.Domain.Questionnaire.Models.Question
+
+<form asp-controller="Questions" asp-action="SubmitAnswer" method="post">
+    <input id="QuestionId" hidden value=@Model.Sys.Id  name="QuestionId" />
+    <govuk-radios name="NextQuestionId">
+        <govuk-radios-fieldset>
+            <govuk-radios-fieldset-legend is-page-heading="true" class="govuk-fieldset__legend--l">
+                @Model.Text
+            </govuk-radios-fieldset-legend>
+            
+            @if(!string.IsNullOrEmpty(Model.HelpText)){
+                <govuk-radios-hint>@Model.HelpText</govuk-radios-hint>
+            }
+            
+            @{
+                foreach(var answer in Model.Answers){
+                    var nextQuestionId = answer.NextQuestion?.Sys.Id ?? "";
+                    <govuk-radios-item value=@nextQuestionId>@answer.Text</govuk-radios-item>
+                }
+            }
+            
+        </govuk-radios-fieldset>
+    </govuk-radios>
+
+    <govuk-button type="submit">Save and continue</govuk-button>
+</form>
