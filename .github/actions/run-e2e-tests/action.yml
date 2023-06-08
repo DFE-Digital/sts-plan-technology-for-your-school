@@ -26,13 +26,11 @@ runs:
       if: failure()
       with:
         name: cypress-screenshots
-        path: cypress/screenshots
-        working-directory:  ./tests/Dfe.PlanTech.Web.E2ETests/
+        path: ./tests/Dfe.PlanTech.Web.E2ETests/cypress/screenshots
           
     - name: Store videos
       uses: actions/upload-artifact@v3
       if: always()
       with:
         name: cypress-videos
-        path: cypress/videos
-        working-directory:  ./tests/Dfe.PlanTech.Web.E2ETests/
+        path: ./tests/Dfe.PlanTech.Web.E2ETests/cypress/videos
