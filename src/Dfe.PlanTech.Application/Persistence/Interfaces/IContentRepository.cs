@@ -6,14 +6,14 @@ namespace Dfe.PlanTech.Application.Persistence.Interfaces;
 public interface IContentRepository
 {
     /// <summary>
-    /// Get entity by Id
+    /// Get an entity by Id
     /// </summary>
     /// <param name="id"></param>
+    /// <param name="include">Depth of references to include</param>
     /// <param name="cancellationToken"></param>
     /// <typeparam name="TEntity"></typeparam>
     /// <returns></returns>
-    Task<TEntity?> GetEntityById<TEntity>(string id, CancellationToken cancellationToken = default);
-
+    Task<TEntity?> GetEntityById<TEntity>(string id, int include = 2, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get all entities of the specified type.

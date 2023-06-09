@@ -57,9 +57,16 @@ public static class QueryBuilders
 
         if (options != null)
         {
-            queryBuilder = queryBuilder.WithInclude(options);
-            queryBuilder = queryBuilder.WithQueries(options);
+            queryBuilder = queryBuilder.WithOptions(options);
         }
+
+        return queryBuilder;
+    }
+
+    public static QueryBuilder<T> WithOptions<T>(this QueryBuilder<T> queryBuilder, IGetEntitiesOptions options)
+    {
+        queryBuilder = queryBuilder.WithInclude(options);
+        queryBuilder = queryBuilder.WithQueries(options);
 
         return queryBuilder;
     }
