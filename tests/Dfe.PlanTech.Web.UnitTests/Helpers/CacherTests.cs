@@ -10,7 +10,6 @@ public class CacherTests
 {
     private readonly IMemoryCache _memoryCache = new MemoryCache(new MemoryCacheOptions());
 
-
     [Fact]
     public void Get_Should_FetchFromCache_When_Exists()
     {
