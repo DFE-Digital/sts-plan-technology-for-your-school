@@ -17,7 +17,6 @@ concurrency:
 env:
   DOCKER_IMAGE: plan-tech-app
   NODE_VERSION: 18.x
-  PLANTECH_URL: https://s190d01-plantechcdnendpoint-hph5ghgcevddhfe4.z01.azurefd.net/
 
 jobs:
   set-env:
@@ -146,4 +145,4 @@ jobs:
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests
         with:
-          url: ${{ env.PLANTECH_URL }}
+          url: ${{ secrets.AZ_FRONTDOOR_URL }}
