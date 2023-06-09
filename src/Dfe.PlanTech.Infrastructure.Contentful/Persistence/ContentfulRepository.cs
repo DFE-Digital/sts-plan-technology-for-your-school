@@ -1,6 +1,9 @@
 using Contentful.Core;
 using Contentful.Core.Configuration;
+using Contentful.Core.Search;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Persistence.Models;
+using Dfe.PlanTech.Infrastructure.Application.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Persistence;
@@ -34,12 +37,27 @@ public class ContentfulRepository : IContentRepository
     public Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default)
         => GetEntities<TEntity>(typeof(TEntity).Name.ToLower(), options, cancellationToken);
 
-    public async Task<TEntity?> GetEntityById<TEntity>(string id, CancellationToken cancellationToken = default)
+    public async Task<TEntity?> GetEntityById<TEntity>(string id, int include = 2, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
 
-        var entry = await _client.GetEntry<TEntity>(id, null, null, cancellationToken);
+        //There exists a "GetEntry" option for the Contentful client, however the "Include"
+        //option doesn't seem to have any effect there - it only seems to return the main parent entry
+        //with links to children. This was proving rather useless, so I have used the "GetEntries" option here
+        //instead.
+        var options = new GetEntitiesOptions(include, new[] {
+            new ContentQueryEquals(){
+                Field = "sys.id",
+                Value = id
+        }});
 
-        return entry.Result;
+        var entities = (await GetEntities<TEntity>(options, cancellationToken)).ToList();
+
+        if (entities.Count > 1)
+        {
+            throw new Exception($"Found more than 1 entity with id {id}");
+        }
+
+        return entities.FirstOrDefault();
     }
 }
