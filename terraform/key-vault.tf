@@ -19,11 +19,11 @@ resource "azurerm_key_vault" "vault" {
   soft_delete_retention_days = 90
 
   access_policy {
-    tenant_id =  data.azurerm_client_config.current.tenant_id
-    object_id =  local.current_user_id
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = local.current_user_id
 
     secret_permissions = ["Set"]
-	key_permissions = ["List", "Create", "Delete", "Get", "Purge", "Recover", "Update", "GetRotationPolicy", "SetRotationPolicy"]
+    key_permissions    = ["List", "Create", "Delete", "Get", "Purge", "Recover", "Update", "GetRotationPolicy", "SetRotationPolicy"]
   }
 }
 
