@@ -3,7 +3,7 @@ name: Build & deploy to environment
 on:
   push:
     branches: [ "main" ]
-
+  
   workflow_dispatch:
     inputs:
       environment:
@@ -135,3 +135,14 @@ jobs:
                              Contentful__PreviewApiKey=secretref:contentful--previewapikey \
                              Contentful__SpaceId=secretref:contentful--spaceid \
                              Contentful__Environment=secretref:contentful--environment
+
+  run-tests:
+    name: Run E2E Tests
+    needs: [ set-env, deploy-image ]
+    runs-on: ubuntu-22.04
+    if: ${{ needs.set-env.outputs.environment }} == 'dev'
+    steps:
+      - name: Cypress tests
+        uses: ./.github/actions/run-e2e-tests
+        with:
+          url: ${{ secrets.AZ_FRONTDOOR_URL }}

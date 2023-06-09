@@ -14,10 +14,10 @@ on:
 
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
-
+  
 jobs:
   build-test-app:  
-    name: Build and test     
+    name: Build and run unit tests
     runs-on: ubuntu-latest
 
     steps:
@@ -31,13 +31,3 @@ jobs:
 
       - name: Run unit tests
         uses: ./.github/actions/run-unit-tests
- 
-  build-docker-image:
-    name: Build docker image
-    runs-on: ubuntu-latest
-    steps:
-      - name: Clone repo
-        uses: actions/checkout@v3
-
-      - name: Build docker image
-        uses: ./.github/actions/build-docker-image 
