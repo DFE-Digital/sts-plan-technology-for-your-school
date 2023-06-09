@@ -5,6 +5,7 @@ using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Web.Helpers;
+using Dfe.PlanTech.Web.Middleware;
 using GovUk.Frontend.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -69,6 +70,8 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+
+app.UseMiddleware<UrlHistoryMiddleware>();
 
 app.MapControllerRoute(
     name: "questionsController",

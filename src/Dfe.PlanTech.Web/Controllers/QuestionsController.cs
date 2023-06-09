@@ -1,5 +1,8 @@
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Web.Middleware;
+using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
@@ -22,7 +25,7 @@ public class QuestionsController : Controller
     /// <param name="query"></param>
     /// <exception cref="ArgumentNullException">Throws exception when Id is null or empty</exception>
     /// <returns></returns>
-    public async Task<IActionResult> GetQuestionById(string id, [FromServices] GetQuestionQuery query)
+    public async Task<IActionResult> GetQuestionById(string id, [FromServices] GetQuestionQuery query, [FromServices] ICacher cacher)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
 
@@ -30,7 +33,20 @@ public class QuestionsController : Controller
 
         if (question == null) throw new KeyNotFoundException($"Could not find question with id {id}");
 
-        return View("Question", question);
+        var pageHistory = cacher.Get<Stack<string>>(UrlHistoryMiddleware.CACHE_KEY);
+
+        if (!pageHistory.TryPeek(out string? lastVisitedPage))
+        {
+            lastVisitedPage = "";
+        }
+
+        var viewModel = new QuestionViewModel()
+        {
+            Question = question,
+            BackUrl = lastVisitedPage
+        };
+
+        return View("Question", viewModel);
     }
 
     [HttpPost("SubmitAnswer")]
