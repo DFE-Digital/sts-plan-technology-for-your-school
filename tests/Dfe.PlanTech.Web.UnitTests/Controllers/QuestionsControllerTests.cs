@@ -93,7 +93,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
 
         [Fact]
-        public async Task Should_ReturnQuestionPage_When_FetchingQuestionById()
+        public async Task Should_ReturnQuestionPage_When_FetchingQuestionWithValidId()
         {
             var id = "Question1";
 
@@ -117,5 +117,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionById(null!, _query));
         }
+        
+        [Fact]
+        public async Task Should_ThrowException_When_IdIsNotFound()
+        {
+            await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetQuestionById("not a real question id", _query));
+        }
+
     }
 }

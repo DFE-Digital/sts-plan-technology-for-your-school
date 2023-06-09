@@ -10,10 +10,10 @@ public class GetQuestionQuery : ContentRetriever
     {
     }
 
-    public async Task<Question> GetQuestionById(string id)
+    public async Task<Question?> GetQuestionById(string id)
     {
         var question = await repository.GetEntityById<Question>(id, 3);
 
-        return question ?? throw new Exception($"Could not find question with id {id}");
+        return question;
     }
 }
