@@ -1,3 +1,4 @@
+using Contentful.Core.Models;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -93,7 +94,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
 
         [Fact]
-        public async Task Should_ReturnQuestionPage_When_FetchingQuestionWithValidId()
+        public async Task GetQuestionById_Should_ReturnQuestionPage_When_FetchingQuestionWithValidId()
         {
             var id = "Question1";
 
@@ -111,18 +112,64 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.NotNull(question);
             Assert.Equal("Question One", question.Text);
         }
-        
+
         [Fact]
-        public async Task Should_ThrowException_When_IdIsNull()
+        public async Task GetQuestionById_Should_ThrowException_When_IdIsNull()
         {
             await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionById(null!, _query));
         }
-        
+
         [Fact]
-        public async Task Should_ThrowException_When_IdIsNotFound()
+        public async Task GetQuestionById_Should_ThrowException_When_IdIsNotFound()
         {
             await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetQuestionById("not a real question id", _query));
         }
 
+        [Fact]
+        public async Task SubmitAnswer_Should_ThrowException_When_NullArgument()
+        {
+            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.SubmitAnswer(null!));
+        }
+
+        [Fact]
+        public async Task SubmitAnswer_Should_RedirectToNextQuestion_When_NextQuestionId_Exists()
+        {
+            var submitAnswerDto = new SubmitAnswerDto(){
+                NextQuestionId = "Question2"
+            };
+
+            var result = await _controller.SubmitAnswer(submitAnswerDto);
+
+            Assert.IsType<RedirectToActionResult>(result);
+
+            var redirectToActionResult = result as RedirectToActionResult;
+
+            Assert.NotNull(redirectToActionResult);
+            Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
+            Assert.NotNull(redirectToActionResult.RouteValues);
+            
+            var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "id");
+            Assert.Equal(submitAnswerDto.NextQuestionId, id.Value);
+        }
+
+        [Fact]
+        public async Task SubmitAnswer_Should_RedirectToSelfAssessment_When_NextQuestionId_IsNull()
+        {
+            var submitAnswerDto = new SubmitAnswerDto();
+
+            var result = await _controller.SubmitAnswer(submitAnswerDto);
+
+            Assert.IsType<RedirectToActionResult>(result);
+
+            var redirectToActionResult = result as RedirectToActionResult;
+
+            Assert.NotNull(redirectToActionResult);
+            Assert.Equal("Pages", redirectToActionResult.ControllerName);
+            Assert.Equal("GetByRoute", redirectToActionResult.ActionName);
+            Assert.NotNull(redirectToActionResult.RouteValues);
+            
+            var route = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "route");
+            Assert.Equal("self-assessment", route.Value);
+        }
     }
 }
