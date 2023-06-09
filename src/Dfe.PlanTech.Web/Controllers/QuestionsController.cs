@@ -15,6 +15,13 @@ public class QuestionsController : Controller
     }
 
     [HttpGet("{id?}")]
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="query"></param>
+    /// <exception cref="ArgumentNullException">Throws exception when Id is null or empty</exception>
+    /// <returns></returns>
     public async Task<IActionResult> GetQuestionById(string id, [FromServices] GetQuestionQuery query)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));

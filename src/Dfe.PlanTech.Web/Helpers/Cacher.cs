@@ -1,12 +1,13 @@
-using Microsoft.Extensions.Caching.Memory;
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Interfaces;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Dfe.PlanTech.Web.Helpers;
 
 /// <summary>
 /// Retrieves + stores values in IMemoryCache
 /// </summary>
-public class Cacher
+public class Cacher : ICacher
 {
     private readonly ICacheOptions _options;
 
@@ -32,6 +33,13 @@ public class Cacher
         return value;
     }
 
+    public T? Get<T>(string key)
+    {
+        _memoryCache.TryGetValue(key, out T? value);
+
+        return value;
+    }
+
     public T? Get<T>(string key, Func<T> getFromService) => Get(key, getFromService, _options.DefaultTimeToLive);
 
     public async Task<T?> GetAsync<T>(string key, Func<Task<T>> getFromService, TimeSpan timeToLive)
@@ -48,8 +56,7 @@ public class Cacher
         return value;
     }
 
-    public Task<T?> GetAsync<T>(string key, Func<Task<T>> getFromService)
-    => GetAsync(key, getFromService, _options.DefaultTimeToLive);
+    public Task<T?> GetAsync<T>(string key, Func<Task<T>> getFromService) => GetAsync(key, getFromService, _options.DefaultTimeToLive);
 
     public void Set<T>(string key, TimeSpan timeToLive, T? value)
     {
