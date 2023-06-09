@@ -1,8 +1,6 @@
 describe("landing page", () => {
   const url = Cypress.env("URL");
 
-  const expectedFeedbackLink = "https://feedback";
-
   beforeEach(() => {
     cy.visit(url);
   });
