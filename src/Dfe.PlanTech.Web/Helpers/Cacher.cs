@@ -1,12 +1,13 @@
-using Microsoft.Extensions.Caching.Memory;
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Interfaces;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Dfe.PlanTech.Web.Helpers;
 
 /// <summary>
 /// Retrieves + stores values in IMemoryCache
 /// </summary>
-public class Cacher
+public class Cacher : ICacher
 {
     private readonly ICacheOptions _options;
 
