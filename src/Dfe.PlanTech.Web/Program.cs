@@ -1,6 +1,8 @@
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Helpers;
-using Dfe.PlanTech.Domain.Content.Models.Options;
+using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
+using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Web.Helpers;
 using GovUk.Frontend.AspNetCore;
@@ -37,7 +39,6 @@ builder.Services.AddScoped<ComponentViewsFactory>();
 
 builder.Services.AddCQRSServices();
 
-builder.Services.Configure<CacheOptions>(builder.Configuration.GetSection("Caching"));
 
 builder.Services.AddDistributedMemoryCache();
 
@@ -48,6 +49,9 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
     options.Cookie.Name = ".Dfe.PlanTech";
 });
+
+builder.Services.AddSingleton<ICacheOptions>((services) => new CacheOptions());
+builder.Services.AddScoped<ICacher, Cacher>();
 
 var app = builder.Build();
 

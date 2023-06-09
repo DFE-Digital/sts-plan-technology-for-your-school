@@ -33,6 +33,13 @@ public class Cacher : ICacher
         return value;
     }
 
+    public T? Get<T>(string key)
+    {
+        _memoryCache.TryGetValue(key, out T? value);
+
+        return value;
+    }
+
     public T? Get<T>(string key, Func<T> getFromService) => Get(key, getFromService, _options.DefaultTimeToLive);
 
     public async Task<T?> GetAsync<T>(string key, Func<Task<T>> getFromService, TimeSpan timeToLive)

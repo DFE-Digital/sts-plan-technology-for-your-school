@@ -6,6 +6,8 @@ public interface ICacher
 
     public T? Get<T>(string key, Func<T> getFromService);
 
+    public T? Get<T>(string key);
+
     public Task<T?> GetAsync<T>(string key, Func<Task<T>> getFromService, TimeSpan timeToLive);
     
     public Task<T?> GetAsync<T>(string key, Func<Task<T>> getFromService);
