@@ -31,12 +31,11 @@
                 </a>
             </div>
         </div>
-        
-        @RenderSection("Header", required: false)
     </header>
 }
 @section BeforeContent{
     @{ await Html.RenderPartialAsync("BetaHeader"); }
+    @RenderSection("BeforeContent", required: false)
 }
 
 @RenderBody()
