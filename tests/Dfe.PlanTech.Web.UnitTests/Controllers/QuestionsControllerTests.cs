@@ -153,7 +153,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public async Task SubmitAnswer_Should_RedirectToSelfAssessment_When_NextQuestionId_IsNull()
+        public async Task SubmitAnswer_Should_RedirectTo_CheckYourAnswers_When_NextQuestionId_IsNull()
         {
             var submitAnswerDto = new SubmitAnswerDto();
 
@@ -164,12 +164,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var redirectToActionResult = result as RedirectToActionResult;
 
             Assert.NotNull(redirectToActionResult);
-            Assert.Equal("Pages", redirectToActionResult.ControllerName);
-            Assert.Equal("GetByRoute", redirectToActionResult.ActionName);
-            Assert.NotNull(redirectToActionResult.RouteValues);
-            
-            var route = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "route");
-            Assert.Equal("self-assessment", route.Value);
+            Assert.Equal("CheckYourAnswers", redirectToActionResult.ActionName);
         }
     }
 }
