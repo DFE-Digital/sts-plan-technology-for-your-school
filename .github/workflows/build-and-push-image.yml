@@ -2,7 +2,12 @@ name: Build & deploy to environment
 
 on:
   push:
+    branches: [ "main" ]    
+  pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - 'docs/**'
+      - 'terraform/**'
     
   workflow_dispatch:
     inputs:
