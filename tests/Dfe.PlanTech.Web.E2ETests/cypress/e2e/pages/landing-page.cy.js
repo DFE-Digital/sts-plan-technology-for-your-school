@@ -30,4 +30,14 @@ describe("landing page", () => {
   it("should have list items", () => {
     cy.get("ul li").should("exist").and("have.length.of.at.least", 4);
   });
+
+  it("should have button", () => {
+    cy.get("a.govuk-button--start.govuk-button").should("exist");
+  });
+
+  it("should link to self-assessment page", () => {
+    cy.get("a.govuk-button--start.govuk-button").click();
+
+    cy.location("pathname").should("match", /\/self-assessment$/);
+  });
 });
