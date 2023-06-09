@@ -56,8 +56,7 @@ public class Cacher : ICacher
         return value;
     }
 
-    public Task<T?> GetAsync<T>(string key, Func<Task<T>> getFromService)
-    => GetAsync(key, getFromService, _options.DefaultTimeToLive);
+    public Task<T?> GetAsync<T>(string key, Func<Task<T>> getFromService) => GetAsync(key, getFromService, _options.DefaultTimeToLive);
 
     public void Set<T>(string key, TimeSpan timeToLive, T? value)
     {
