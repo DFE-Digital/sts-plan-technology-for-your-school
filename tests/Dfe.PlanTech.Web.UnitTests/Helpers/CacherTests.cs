@@ -60,13 +60,28 @@ public class CacherTests
         Assert.NotNull(result);
         Assert.Equal(testObject, result);
         Assert.True(service.GetHasBeenCalled);
-        
+
         var memoryCacheValue = _memoryCache.Get(testKey);
-        
+
         Assert.NotNull(memoryCacheValue);
         Assert.Equal(testObject, memoryCacheValue);
     }
 
+    [Fact]
+    public void Set_Should_SaveInCache()
+    {
+        var testKey = "Testing";
+        var testObject = "Test value";
+        
+        var cacher = new Cacher(new CacheOptions(), _memoryCache);
+        
+        cacher.Set(testKey, TimeSpan.FromMinutes(60), testObject);
+        
+        var cachedResult = _memoryCache.Get<string>(testKey);
+        
+        Assert.NotNull(cachedResult);
+        Assert.Equal(testObject, cachedResult);
+    }
 }
 
 public class TestService
