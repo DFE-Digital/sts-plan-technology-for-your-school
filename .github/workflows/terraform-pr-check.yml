@@ -125,9 +125,6 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Save previous config
-        run: mv terraform-configuration.md terraform-configuration-prev.md || true
-
       - name: Generate Terraform docs
         uses: terraform-docs/gh-actions@v1.0.0
         with:
@@ -136,6 +133,3 @@ jobs:
           output-file: terraform-configuration.md
           output-method: inject
           fail-on-diff: false
-
-      - name: Print Diff
-        run: git diff --no-index --color=always terraform-configuration-prev.md terraform-configuration.md || true
