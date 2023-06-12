@@ -35,7 +35,9 @@ public class QuestionsController : Controller
 
         var pageHistory = cacher.Get<Stack<string>>(UrlHistoryMiddleware.CACHE_KEY)!;
 
-        if (!pageHistory.TryPeek(out string? lastVisitedPage))
+        string lastVisitedPage = "";
+        
+        if (pageHistory != null && !pageHistory.TryPeek(out lastVisitedPage))
         {
             lastVisitedPage = "";
         }

@@ -8,6 +8,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
+using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -113,12 +114,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var model = viewResult!.Model;
 
-            Assert.IsType<Question>(model);
+            Assert.IsType<QuestionViewModel>(model);
 
-            var question = model as Question;
+            var question = model as QuestionViewModel;
 
             Assert.NotNull(question);
-            Assert.Equal("Question One", question.Text);
+            Assert.Equal("Question One", question.Question.Text);
         }
 
         [Fact]
