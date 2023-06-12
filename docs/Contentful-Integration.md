@@ -14,12 +14,20 @@ Any class that is mapped to a view should inherit the [ContentComponent](../src/
 
 To display this class on the page, either a full view should be created (e.g. the [Page view](../src/Dfe.PlanTech.Web/Views/Shared/Page.cshtml)), or a partial view (e.g. the [Header partial view](../src/Dfe.PlanTech.Web/Views/Shared/Components/Header.cshtml)).
 
-### Partial Views
+### Partial Views, Classes, Components, etc.
 
-When creating a partial view, for dynamic page generation, the content type should be added to the [PageComponentFactory](../src/Dfe.PlanTech.Web/Views/Shared/Components/PageComponentFactory.cshtml) view.
+- Each `Content Type` in Contentful should have a matching class for it.
+  - The `Content Type Id` should match the class name. E.g. for a Content Type with Id `header` there should be a class called `Header`
+  
+![Example class to header](./assets/contentful/content-type-id-to-class.png)
 
-_Note: This factory should likely be switched out to be a separate class, which can receive the different views via DI_
+- Each class should have a matching view, in the `/Views/Shared` folder. The view should match the name of the class.
+  - E.g. a `Header` class has a `Header.cshtml` view located under `/Views/Shared/Components/Header.cshtml`
+  
+![Example view](./assets/contentful/content-example-view.png)
 
+- There is a [ComponentViewsFactory](../src/Dfe.PlanTech.Web/Helpers/ComponentViewsFactory.cs) for finding/loading/displaying the views for each component
+- As hinted at above, it gets the type name of the model that it is trying to be created, and attempts to find a matching view for it within the `Views/Shared` location. 
 ### Example Architecture
 
 ```mermaid

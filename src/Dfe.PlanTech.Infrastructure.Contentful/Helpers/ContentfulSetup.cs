@@ -19,18 +19,21 @@ public static class ContentfulSetup
     /// <param name="services"></param>
     /// <param name="configuration"></param>
     /// <param name="section"></param>
+    /// <param name="setupClient">Action to setup ContentfulClient (e.g. retry policy)</param>
     /// <see cref="IContentfulClient"/>
     /// <see cref="ContentfulClient"/>
-    public static IServiceCollection SetupContentfulClient(this IServiceCollection services, IConfiguration configuration, string section)
+    public static IServiceCollection SetupContentfulClient(this IServiceCollection services, IConfiguration configuration, string section, Action<IHttpClientBuilder> setupClient)
     {
         var options = configuration.GetSection(section).Get<ContentfulOptions>() ?? throw new KeyNotFoundException(nameof(ContentfulOptions));
 
         services.AddSingleton(options);
-        services.AddHttpClient<ContentfulClient>();
+
         services.AddScoped<IContentfulClient, ContentfulClient>();
         services.AddScoped<IContentRepository, ContentfulRepository>();
 
         services.SetupRichTextRenderer();
+
+        setupClient(services.AddHttpClient<ContentfulClient>());
 
         return services;
     }
@@ -53,5 +56,5 @@ public static class ContentfulSetup
     }
 
     private static Func<Type, bool> IsContentRenderer(Type contentRendererType)
-    => type => type.IsClass && !type.IsAbstract && type.IsSubclassOf(contentRendererType);
+        => type => type.IsClass && !type.IsAbstract && type.IsSubclassOf(contentRendererType);
 }

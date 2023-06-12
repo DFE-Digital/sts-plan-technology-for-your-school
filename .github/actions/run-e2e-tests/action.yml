@@ -1,0 +1,36 @@
+name: Run Cypress E2E tests
+description: Run E2E tests using Cypress
+
+inputs:
+  url:
+    required: true
+    type: string
+
+runs:
+  using: composite
+
+  steps:
+    - name: Create Cypress config
+      shell: bash
+      run: echo "{ \"URL\" :\"${{ inputs.url }}\" }" > cypress.env.json
+      working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
+
+    - name: Build and test project
+      uses: cypress-io/github-action@v5
+      with:
+        working-directory:  ./tests/Dfe.PlanTech.Web.E2ETests/
+        browser: chrome
+      
+    - name: Store screenshots on test failure
+      uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: cypress-screenshots
+        path: ./tests/Dfe.PlanTech.Web.E2ETests/cypress/screenshots
+          
+    - name: Store videos
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: cypress-videos
+        path: ./tests/Dfe.PlanTech.Web.E2ETests/cypress/videos

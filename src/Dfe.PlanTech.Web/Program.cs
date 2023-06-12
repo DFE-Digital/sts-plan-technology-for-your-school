@@ -1,8 +1,13 @@
+using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Helpers;
+using Dfe.PlanTech.Domain.Caching.Interfaces;
+using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Infrastructure.SignIn;
 using Dfe.PlanTech.Web.Helpers;
+using Dfe.PlanTech.Web.Middleware;
 using GovUk.Frontend.AspNetCore;
 using Microsoft.IdentityModel.Logging;
 
@@ -19,7 +24,7 @@ builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.AddControllersWithViews();
 builder.Services.AddGovUkFrontend();
 
-builder.Services.SetupContentfulClient(builder.Configuration, "Contentful");
+builder.Services.SetupContentfulClient(builder.Configuration, "Contentful", HttpClientPolicyExtensions.AddRetryPolicy);
 
 builder.Services.AddScoped((_) => new TextRendererOptions(new List<MarkOption>() {
     new MarkOption(){
@@ -43,6 +48,21 @@ builder.Services.AddScoped<ComponentViewsFactory>();
 
 builder.Services.AddCQRSServices();
 
+
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromSeconds(10);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.Name = ".Dfe.PlanTech";
+});
+
+builder.Services.AddSingleton<ICacheOptions>((services) => new CacheOptions());
+builder.Services.AddTransient<ICacher, Cacher>();
+builder.Services.AddTransient<IUrlHistory, UrlHistory>();
+
 builder.Services.AddDfeSignIn(builder.Configuration);
 
 var app = builder.Build();
@@ -61,6 +81,12 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+
+app.UseMiddleware<UrlHistoryMiddleware>();
+
+app.MapControllerRoute(
+    name: "questionsController",
+    pattern: "question/{action=GetQuestionById}/{id?}");
 
 app.MapControllerRoute(
     name: "default",

@@ -35,6 +35,7 @@
 }
 @section BeforeContent{
     @{ await Html.RenderPartialAsync("BetaHeader"); }
+    @RenderSection("BeforeContent", required: false)
 }
 
 @RenderBody()
