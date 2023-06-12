@@ -2,7 +2,7 @@ using Dfe.PlanTech.Application.Caching.Interfaces;
 
 namespace Dfe.PlanTech.Application.Core;
 
-public class UrlHistory
+public class UrlHistory : IUrlHistory
 {
     public const string CACHE_KEY = "URL_HISTORY";
 

@@ -1,12 +1,13 @@
 ﻿using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Core;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
 public class PagesController : BaseController<PagesController>
 {
-    public PagesController(ICacher cacher, ILogger<PagesController> logger) : base(cacher, logger)
+    public PagesController(ILogger<PagesController> logger, IUrlHistory history) : base(logger, history)
     {
     }
 

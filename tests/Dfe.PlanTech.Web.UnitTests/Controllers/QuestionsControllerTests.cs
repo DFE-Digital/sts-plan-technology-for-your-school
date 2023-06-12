@@ -1,5 +1,6 @@
 using Contentful.Core.Models;
 using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Domain.Caching.Models;
@@ -71,7 +72,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private readonly GetQuestionQuery _query;
 
         private readonly ICacher _cacher;
-        
+
         public QuestionsControllerTests()
         {
             var repositoryMock = new Mock<IContentRepository>();
@@ -95,12 +96,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                           .ReturnsAsync((string id, int include, CancellationToken _) => _questions.FirstOrDefault(question => question.Sys.Id == id));
 
             var mockLogger = new Mock<ILogger<QuestionsController>>();
-            
-            var mockCacher = new Mock<ICacher>();
-            
-            _controller = new QuestionsController(mockCacher.Object, mockLogger.Object);
+
+            var historyMock = new Mock<IUrlHistory>();
+
+            _controller = new QuestionsController(mockLogger.Object, historyMock.Object);
             _query = new GetQuestionQuery(repositoryMock.Object);
-            
+
             _cacher = new Cacher(new CacheOptions(), new MemoryCache(new MemoryCacheOptions()));
         }
 
@@ -146,7 +147,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task SubmitAnswer_Should_RedirectToNextQuestion_When_NextQuestionId_Exists()
         {
-            var submitAnswerDto = new SubmitAnswerDto(){
+            var submitAnswerDto = new SubmitAnswerDto()
+            {
                 NextQuestionId = "Question2"
             };
 
@@ -159,7 +161,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.NotNull(redirectToActionResult);
             Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
             Assert.NotNull(redirectToActionResult.RouteValues);
-            
+
             var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "id");
             Assert.Equal(submitAnswerDto.NextQuestionId, id.Value);
         }
@@ -179,7 +181,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.Equal("Pages", redirectToActionResult.ControllerName);
             Assert.Equal("GetByRoute", redirectToActionResult.ActionName);
             Assert.NotNull(redirectToActionResult.RouteValues);
-            
+
             var route = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "route");
             Assert.Equal("self-assessment", route.Value);
         }

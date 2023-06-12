@@ -15,7 +15,7 @@ public class UrlHistoryMiddleware
         _next = next;
     }
 
-    public async Task InvokeAsync(HttpContext httpContext, UrlHistory history)
+    public async Task InvokeAsync(HttpContext httpContext, IUrlHistory history)
     {
         var targetUrl = httpContext.Request.Host + httpContext.Request.Path;
 
@@ -44,7 +44,7 @@ public class UrlHistoryMiddleware
     /// <summary>
     /// Double check we're not adding duplicate history (i.e. refresh, submit, etc.) - if not, add to history.
     /// </summary>
-    private static void TryAddHistory(HttpContext httpContext, UrlHistory history, string? lastVisitedHistory)
+    private static void TryAddHistory(HttpContext httpContext, IUrlHistory history, string? lastVisitedHistory)
     {
         var lastUrl = httpContext.Request.Headers["Referer"].ToString();
 

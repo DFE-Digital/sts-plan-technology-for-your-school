@@ -54,7 +54,7 @@ builder.Services.AddSession(options =>
 
 builder.Services.AddSingleton<ICacheOptions>((services) => new CacheOptions());
 builder.Services.AddTransient<ICacher, Cacher>();
-builder.Services.AddTransient<UrlHistory>();
+builder.Services.AddTransient<IUrlHistory, UrlHistory>();
 
 var app = builder.Build();
 

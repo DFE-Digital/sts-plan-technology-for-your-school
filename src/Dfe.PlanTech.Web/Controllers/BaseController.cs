@@ -8,13 +8,13 @@ namespace Dfe.PlanTech.Web.Controllers;
 
 public class BaseController<TConcreteController> : Controller
 {
-    protected readonly ICacher cacher;
     protected readonly ILogger<TConcreteController> logger;
+    protected readonly IUrlHistory history;
 
-    public BaseController(ICacher cacher, ILogger<TConcreteController> logger)
+    public BaseController(ILogger<TConcreteController> logger, IUrlHistory history)
     {
-        this.cacher = cacher;
         this.logger = logger;
+        this.history = history;
     }
 
     /// <summary>
@@ -23,9 +23,8 @@ public class BaseController<TConcreteController> : Controller
     /// <returns></returns>
     protected string GetLastVisitedUrl()
     {
-        var history = new UrlHistory(cacher);
         var pageHistory = history.History;
-        
+
         if (pageHistory != null && pageHistory.TryPeek(out string? lastVisitedPage))
         {
             return lastVisitedPage ?? "";
@@ -33,7 +32,7 @@ public class BaseController<TConcreteController> : Controller
 
         return "";
     }
-    
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
