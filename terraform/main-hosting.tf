@@ -7,7 +7,14 @@ module "main_hosting" {
   tags           = local.tags
 
   enable_container_registry = true
-  image_name                = "plan-tech-app"
+  image_name                = local.container_app_image_name
+  container_secret_environment_variables = {
+    "managedidentity__clientid" = azurerm_user_assigned_identity.managed_identity.client_id,
+    "contentful__deliveryapikey" = "rShyhJ2FI1oo5HpWFbXOO0zyr6X-uCkUrLvF_qgwidY",
+    "contentful__previewapikey" = "So9qXGp7CerLUYNJGkeHO42G7fBMIzig92Hb4xyOrGQ",
+    "contentful__spaceid" = "py5afvqdlxgo",
+    "contentful__environment" = "dev",
+  }  
 
   enable_cdn_frontdoor = true
 
