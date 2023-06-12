@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Interfaces;
@@ -49,6 +50,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
         public PagesControllerTests()
         {
+            var cacherMock = new Mock<ICacher>();
+            
             var repositoryMock = new Mock<IContentRepository>();
             repositoryMock.Setup(repo => repo.GetEntities<Page>(It.IsAny<IGetEntitiesOptions>(), It.IsAny<CancellationToken>())).ReturnsAsync((IGetEntitiesOptions options, CancellationToken _) =>
             {
@@ -67,7 +70,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             });
 
             var mockLogger = new Mock<ILogger<PagesController>>();
-            _controller = new PagesController(mockLogger.Object);
+            _controller = new PagesController(cacherMock.Object, mockLogger.Object);
 
             _query = new GetPageQuery(repositoryMock.Object);
         }

@@ -95,7 +95,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                           .ReturnsAsync((string id, int include, CancellationToken _) => _questions.FirstOrDefault(question => question.Sys.Id == id));
 
             var mockLogger = new Mock<ILogger<QuestionsController>>();
-            _controller = new QuestionsController(mockLogger.Object);
+            
+            var mockCacher = new Mock<ICacher>();
+            
+            _controller = new QuestionsController(mockCacher.Object, mockLogger.Object);
             _query = new GetQuestionQuery(repositoryMock.Object);
             
             _cacher = new Cacher(new CacheOptions(), new MemoryCache(new MemoryCacheOptions()));
@@ -107,7 +110,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var id = "Question1";
 
-            var result = await _controller.GetQuestionById(id, _query, _cacher);
+            var result = await _controller.GetQuestionById(id, _query);
             Assert.IsType<ViewResult>(result);
 
             var viewResult = result as ViewResult;
@@ -125,13 +128,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task GetQuestionById_Should_ThrowException_When_IdIsNull()
         {
-            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionById(null!, _query, _cacher));
+            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionById(null!, _query));
         }
 
         [Fact]
         public async Task GetQuestionById_Should_ThrowException_When_IdIsNotFound()
         {
-            await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetQuestionById("not a real question id", _query, _cacher));
+            await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetQuestionById("not a real question id", _query));
         }
 
         [Fact]
