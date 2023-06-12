@@ -1,17 +1,14 @@
-﻿using System.Diagnostics;
+﻿using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Web.Models;
+using Dfe.PlanTech.Application.Core;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
-public class PagesController : Controller
+public class PagesController : BaseController<PagesController>
 {
-    private readonly ILogger<PagesController> _logger;
-
-    public PagesController(ILogger<PagesController> logger)
+    public PagesController(ILogger<PagesController> logger, IUrlHistory history) : base(logger, history)
     {
-        _logger = logger;
     }
 
     [HttpGet("/{route?}")]
@@ -29,10 +26,4 @@ public class PagesController : Controller
     /// </summary>
     /// <param name="route">Route slug from route binding</param>
     private string GetSlug(string? route) => (string.IsNullOrEmpty(route) ? Request.Path.Value : route) ?? "/";
-
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-    }
 }

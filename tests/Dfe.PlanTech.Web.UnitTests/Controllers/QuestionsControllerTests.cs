@@ -1,11 +1,16 @@
-using Contentful.Core.Models;
+using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
+using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Web.Controllers;
+using Dfe.PlanTech.Web.Helpers;
+using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -65,6 +70,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private readonly QuestionsController _controller;
         private readonly GetQuestionQuery _query;
 
+        private readonly ICacher _cacher;
+
         public QuestionsControllerTests()
         {
             var repositoryMock = new Mock<IContentRepository>();
@@ -88,8 +95,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                           .ReturnsAsync((string id, int include, CancellationToken _) => _questions.FirstOrDefault(question => question.Sys.Id == id));
 
             var mockLogger = new Mock<ILogger<QuestionsController>>();
-            _controller = new QuestionsController(mockLogger.Object);
+
+            var historyMock = new Mock<IUrlHistory>();
+
+            _controller = new QuestionsController(mockLogger.Object, historyMock.Object);
             _query = new GetQuestionQuery(repositoryMock.Object);
+
+            _cacher = new Cacher(new CacheOptions(), new MemoryCache(new MemoryCacheOptions()));
         }
 
 
@@ -105,12 +117,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var model = viewResult!.Model;
 
-            Assert.IsType<Question>(model);
+            Assert.IsType<QuestionViewModel>(model);
 
-            var question = model as Question;
+            var question = model as QuestionViewModel;
 
             Assert.NotNull(question);
-            Assert.Equal("Question One", question.Text);
+            Assert.Equal("Question One", question.Question.Text);
         }
 
         [Fact]
@@ -134,7 +146,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task SubmitAnswer_Should_RedirectToNextQuestion_When_NextQuestionId_Exists()
         {
-            var submitAnswerDto = new SubmitAnswerDto(){
+            var submitAnswerDto = new SubmitAnswerDto()
+            {
                 NextQuestionId = "Question2"
             };
 
@@ -147,7 +160,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.NotNull(redirectToActionResult);
             Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
             Assert.NotNull(redirectToActionResult.RouteValues);
-            
             var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "id");
             Assert.Equal(submitAnswerDto.NextQuestionId, id.Value);
         }
