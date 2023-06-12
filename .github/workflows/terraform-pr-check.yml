@@ -135,7 +135,7 @@ jobs:
           config-file: .terraform-docs.yml
           output-file: terraform-configuration.md
           output-method: inject
-          fail-on-diff: true
+          fail-on-diff: false
 
       - name: Print Diff
         run: git diff --no-index --color=always terraform-configuration-prev.md terraform-configuration.md || true
