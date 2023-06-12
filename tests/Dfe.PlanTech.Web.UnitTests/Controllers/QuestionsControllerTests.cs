@@ -1,4 +1,3 @@
-using Contentful.Core.Models;
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
@@ -161,13 +160,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.NotNull(redirectToActionResult);
             Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
             Assert.NotNull(redirectToActionResult.RouteValues);
-
             var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "id");
             Assert.Equal(submitAnswerDto.NextQuestionId, id.Value);
         }
 
         [Fact]
-        public async Task SubmitAnswer_Should_RedirectToSelfAssessment_When_NextQuestionId_IsNull()
+        public async Task SubmitAnswer_Should_RedirectTo_CheckYourAnswers_When_NextQuestionId_IsNull()
         {
             var submitAnswerDto = new SubmitAnswerDto();
 
@@ -178,12 +176,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var redirectToActionResult = result as RedirectToActionResult;
 
             Assert.NotNull(redirectToActionResult);
-            Assert.Equal("Pages", redirectToActionResult.ControllerName);
-            Assert.Equal("GetByRoute", redirectToActionResult.ActionName);
-            Assert.NotNull(redirectToActionResult.RouteValues);
-
-            var route = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "route");
-            Assert.Equal("self-assessment", route.Value);
+            Assert.Equal("CheckYourAnswers", redirectToActionResult.ActionName);
         }
     }
 }
