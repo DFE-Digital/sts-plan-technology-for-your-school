@@ -15,7 +15,7 @@ public class UrlHistoryMiddleware
 
     public async Task InvokeAsync(HttpContext httpContext, ICacher cacher)
     {
-        var pageHistory = cacher.Get<Stack<string>>(CACHE_KEY, () => new Stack<string>());
+        var pageHistory = cacher.Get(CACHE_KEY, () => new Stack<string>())!;
 
         var targetUrl = httpContext.Request.Host + httpContext.Request.Path;
 

@@ -1,11 +1,15 @@
 using Contentful.Core.Models;
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
+using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Web.Controllers;
+using Dfe.PlanTech.Web.Helpers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -65,6 +69,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private readonly QuestionsController _controller;
         private readonly GetQuestionQuery _query;
 
+        private readonly ICacher _cacher;
+        
         public QuestionsControllerTests()
         {
             var repositoryMock = new Mock<IContentRepository>();
@@ -90,6 +96,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var mockLogger = new Mock<ILogger<QuestionsController>>();
             _controller = new QuestionsController(mockLogger.Object);
             _query = new GetQuestionQuery(repositoryMock.Object);
+            
+            _cacher = new Cacher(new CacheOptions(), new MemoryCache(new MemoryCacheOptions()));
         }
 
 
@@ -98,7 +106,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var id = "Question1";
 
-            var result = await _controller.GetQuestionById(id, _query);
+            var result = await _controller.GetQuestionById(id, _query, _cacher);
             Assert.IsType<ViewResult>(result);
 
             var viewResult = result as ViewResult;
@@ -116,13 +124,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task GetQuestionById_Should_ThrowException_When_IdIsNull()
         {
-            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionById(null!, _query));
+            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionById(null!, _query, _cacher));
         }
 
         [Fact]
         public async Task GetQuestionById_Should_ThrowException_When_IdIsNotFound()
         {
-            await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetQuestionById("not a real question id", _query));
+            await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetQuestionById("not a real question id", _query, _cacher));
         }
 
         [Fact]
