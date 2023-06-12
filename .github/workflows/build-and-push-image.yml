@@ -2,8 +2,8 @@ name: Build & deploy to environment
 
 on:
   push:
-    branches: [ "main" ]
-  
+    branches: [ "main" ]    
+    
   workflow_dispatch:
     inputs:
       environment:
@@ -142,6 +142,10 @@ jobs:
     runs-on: ubuntu-22.04
     if: ${{ needs.set-env.outputs.environment }} == 'dev'
     steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests
         with:

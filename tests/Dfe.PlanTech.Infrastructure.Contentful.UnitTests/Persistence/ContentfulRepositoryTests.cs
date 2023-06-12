@@ -1,3 +1,4 @@
+using System.Web;
 using Contentful.Core;
 using Contentful.Core.Models;
 using Contentful.Core.Search;
@@ -17,16 +18,24 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
             new TestClass(), new TestClass("testId"), new TestClass("anotherId"), new TestClass("abcd1234")
         };
 
-        private readonly ILoggerFactory _loggerFactory;
-
         public ContentfulRepositoryTests()
         {
-            _clientMock.Setup(client => client.GetEntries<TestClass>(It.IsAny<QueryBuilder<TestClass>>(), It.IsAny<CancellationToken>()))
+            _clientMock.Setup(client => client.GetEntries(It.IsAny<QueryBuilder<TestClass>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((QueryBuilder<TestClass> query, CancellationToken token) =>
             {
+                var queryString = query.Build();
+                var parsedQueryString = HttpUtility.ParseQueryString(queryString);
+                var sysId = parsedQueryString.Get("sys.id");
+
+                var items = _mockData.AsEnumerable();
+                
+                if(sysId != null){
+                    items = items.Where(testData => testData.Id == sysId);
+                }
+                                
                 var collection = new ContentfulCollection<TestClass>
                 {
-                    Items = _mockData
+                    Items = items
                 };
 
                 return collection;
@@ -133,6 +142,5 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
 
             Assert.Null(result);
         }
-
     }
 }
