@@ -1,6 +1,6 @@
 const PARENT_SELECTOR = "details.govuk-details";
 
-describe("expandable section", () => {
+describe("dropdown", () => {
   const url = Cypress.env("URL");
 
   beforeEach(() => {
