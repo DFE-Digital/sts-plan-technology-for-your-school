@@ -38,9 +38,15 @@ public class QuestionsController : Controller
     {
         if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
 
-        if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("GetByRoute", "Pages", new { route = "self-assessment" });
+        if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("CheckYourAnswers");
 
         return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.NextQuestionId });
+    }
+
+    [HttpGet("check-answers")]
+    public async Task<IActionResult> CheckYourAnswers()
+    {
+        return View("CheckYourAnswers");
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
