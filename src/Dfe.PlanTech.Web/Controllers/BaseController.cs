@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Dfe.PlanTech.Application.Caching.Interfaces;
-using Dfe.PlanTech.Web.Middleware;
+using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,7 +23,9 @@ public class BaseController<TConcreteController> : Controller
     /// <returns></returns>
     protected string GetLastVisitedUrl()
     {
-        var pageHistory = cacher.Get<Stack<string>>(UrlHistoryMiddleware.CACHE_KEY)!;
+        var history = new UrlHistory(cacher);
+        var pageHistory = history.History;
+        
         if (pageHistory != null && pageHistory.TryPeek(out string? lastVisitedPage))
         {
             return lastVisitedPage ?? "";

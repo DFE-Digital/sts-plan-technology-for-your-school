@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Helpers;
 using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
@@ -52,7 +53,8 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddSingleton<ICacheOptions>((services) => new CacheOptions());
-builder.Services.AddScoped<ICacher, Cacher>();
+builder.Services.AddTransient<ICacher, Cacher>();
+builder.Services.AddTransient<UrlHistory>();
 
 var app = builder.Build();
 

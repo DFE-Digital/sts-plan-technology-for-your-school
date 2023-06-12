@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Helpers;
@@ -27,7 +28,7 @@ public class UrlHistoryMiddlewareTests
         history.Push(URL_SECOND);
         history.Push(URL_THIRD);
 
-        _cacher.Set(UrlHistoryMiddleware.CACHE_KEY, TimeSpan.FromHours(1), history);
+        _cacher.Set(UrlHistory.CACHE_KEY, TimeSpan.FromHours(1), history);
     }
 
     [Fact]
@@ -43,9 +44,10 @@ public class UrlHistoryMiddlewareTests
         var nextDelegateMock = new Mock<RequestDelegate>();
         var urlHistory = new UrlHistoryMiddleware(nextDelegateMock.Object);
 
-        urlHistory.InvokeAsync(contextMock.Object, _cacher);
+        var history = new UrlHistory(_cacher);
+        urlHistory.InvokeAsync(contextMock.Object, history);
 
-        var historyCache = _cacher.Get<Stack<string>>(UrlHistoryMiddleware.CACHE_KEY)!;
+        var historyCache = history.History;
         Assert.Equal(2, historyCache.Count);
         Assert.Equal(URL_SECOND, historyCache.Peek());
     }
@@ -66,9 +68,10 @@ public class UrlHistoryMiddlewareTests
         var nextDelegateMock = new Mock<RequestDelegate>();
         var urlHistory = new UrlHistoryMiddleware(nextDelegateMock.Object);
 
-        urlHistory.InvokeAsync(contextMock.Object, _cacher);
+        var history = new UrlHistory(_cacher);
+        urlHistory.InvokeAsync(contextMock.Object, history);
 
-        var historyCache = _cacher.Get<Stack<string>>(UrlHistoryMiddleware.CACHE_KEY)!;
+        var historyCache = history.History;
 
         Assert.Equal(4, historyCache.Count);
         Assert.Equal("www.website.com/four", historyCache.Peek());

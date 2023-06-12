@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Application.Core;
 
 namespace Dfe.PlanTech.Web.Middleware;
 
@@ -7,8 +8,6 @@ namespace Dfe.PlanTech.Web.Middleware;
 /// </summary>
 public class UrlHistoryMiddleware
 {
-    public const string CACHE_KEY = "UrlHistory";
-
     private readonly RequestDelegate _next;
 
     public UrlHistoryMiddleware(RequestDelegate next)
@@ -16,25 +15,25 @@ public class UrlHistoryMiddleware
         _next = next;
     }
 
-    public async Task InvokeAsync(HttpContext httpContext, ICacher cacher)
+    public async Task InvokeAsync(HttpContext httpContext, UrlHistory history)
     {
-        var pageHistory = cacher.Get(CACHE_KEY, () => new Stack<string>())!;
-
         var targetUrl = httpContext.Request.Host + httpContext.Request.Path;
 
-        bool navigatingBackwards = pageHistory.TryPeek(out string? lastVisitedHistory) && !string.IsNullOrEmpty(lastVisitedHistory) && lastVisitedHistory.Contains(targetUrl);
+        var lastVisitedHistory = history.LastVisitedUrl;
+
+        bool navigatingBackwards = !string.IsNullOrEmpty(lastVisitedHistory) && lastVisitedHistory.Contains(targetUrl);
 
         switch (navigatingBackwards)
         {
             case true:
                 {
-                    pageHistory.Pop();
+                    history.RemoveLastUrl();
                     break;
                 }
 
             case false:
                 {
-                    TryAddHistory(httpContext, cacher, pageHistory, lastVisitedHistory);
+                    TryAddHistory(httpContext, history, lastVisitedHistory);
                     break;
                 }
         }
@@ -45,7 +44,7 @@ public class UrlHistoryMiddleware
     /// <summary>
     /// Double check we're not adding duplicate history (i.e. refresh, submit, etc.) - if not, add to history.
     /// </summary>
-    private static void TryAddHistory(HttpContext httpContext, ICacher cacher, Stack<string> pageHistory, string? lastVisitedHistory)
+    private static void TryAddHistory(HttpContext httpContext, UrlHistory history, string? lastVisitedHistory)
     {
         var lastUrl = httpContext.Request.Headers["Referer"].ToString();
 
@@ -58,8 +57,7 @@ public class UrlHistoryMiddleware
 
         if (!isDuplicateUrl)
         {
-            pageHistory.Push(lastUrl);
-            cacher.Set(CACHE_KEY, TimeSpan.FromHours(1), pageHistory);
+            history.AddUrlToHistory(lastUrl);
         }
     }
 }
