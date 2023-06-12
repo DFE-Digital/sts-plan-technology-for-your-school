@@ -81,5 +81,8 @@ do
   sleep 5
 done
 
+#########################################
+# Assign user identity to container app #
+#########################################
+echo "Updating container app with user managed identity ..."
 az containerapp identity assign -n "$CONTAINER_APP_NAME" -g "$RESOURCE_GROUP_NAME" --user-assigned "$USER_IDENTITY_NAME"
-echo "Updated container app with user managed identity"
