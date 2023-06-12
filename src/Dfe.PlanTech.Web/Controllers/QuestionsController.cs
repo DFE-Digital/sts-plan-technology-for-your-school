@@ -33,7 +33,7 @@ public class QuestionsController : Controller
 
         if (question == null) throw new KeyNotFoundException($"Could not find question with id {id}");
 
-        var pageHistory = cacher.Get<Stack<string>>(UrlHistoryMiddleware.CACHE_KEY);
+        var pageHistory = cacher.Get<Stack<string>>(UrlHistoryMiddleware.CACHE_KEY)!;
 
         if (!pageHistory.TryPeek(out string? lastVisitedPage))
         {

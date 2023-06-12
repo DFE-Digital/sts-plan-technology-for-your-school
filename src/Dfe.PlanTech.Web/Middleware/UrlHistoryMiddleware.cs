@@ -54,7 +54,7 @@ public class UrlHistoryMiddleware
             return;
         }
 
-        bool isDuplicateUrl = pageHistory.TryPeek(out lastVisitedHistory) && !string.IsNullOrEmpty(lastVisitedHistory) && lastVisitedHistory.Equals(lastUrl);
+        bool isDuplicateUrl = !string.IsNullOrEmpty(lastVisitedHistory) && lastVisitedHistory.Equals(lastUrl);
 
         if (!isDuplicateUrl)
         {
