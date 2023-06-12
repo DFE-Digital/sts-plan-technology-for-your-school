@@ -10,7 +10,7 @@ module "main_hosting" {
   image_name                = local.container_app_image_name
   container_secret_environment_variables = {
     "managedidentity__clientid" = azurerm_user_assigned_identity.user_assigned_identity.client_id,
-  }  
+  }
 
   enable_cdn_frontdoor = true
 
