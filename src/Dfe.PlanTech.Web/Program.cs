@@ -1,7 +1,12 @@
+using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Helpers;
+using Dfe.PlanTech.Domain.Caching.Interfaces;
+using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Web.Helpers;
+using Dfe.PlanTech.Web.Middleware;
 using GovUk.Frontend.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,6 +41,21 @@ builder.Services.AddScoped<ComponentViewsFactory>();
 
 builder.Services.AddCQRSServices();
 
+
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromSeconds(10);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.Name = ".Dfe.PlanTech";
+});
+
+builder.Services.AddSingleton<ICacheOptions>((services) => new CacheOptions());
+builder.Services.AddTransient<ICacher, Cacher>();
+builder.Services.AddTransient<IUrlHistory, UrlHistory>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -52,6 +72,8 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+
+app.UseMiddleware<UrlHistoryMiddleware>();
 
 app.MapControllerRoute(
     name: "questionsController",

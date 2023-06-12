@@ -1,6 +1,6 @@
 # 0023 - Deploy Database Schema Changes
 
-* **Status**: accepted
+* **Status**: proposed
 
 ## Context and Problem Statement
 

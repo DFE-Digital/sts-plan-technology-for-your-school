@@ -1,17 +1,16 @@
+using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
 [Route("/question")]
-public class QuestionsController : Controller
+public class QuestionsController : BaseController<QuestionsController>
 {
-    private readonly ILogger<QuestionsController> _logger;
-
-    public QuestionsController(ILogger<QuestionsController> logger)
+    public QuestionsController(ILogger<QuestionsController> logger, IUrlHistory history) : base(logger, history)
     {
-        _logger = logger;
     }
 
     [HttpGet("{id?}")]
@@ -26,11 +25,15 @@ public class QuestionsController : Controller
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
 
-        var question = await query.GetQuestionById(id);
+        var question = await query.GetQuestionById(id) ?? throw new KeyNotFoundException($"Could not find question with id {id}");
+        
+        var viewModel = new QuestionViewModel()
+        {
+            Question = question,
+            BackUrl = GetLastVisitedUrl()
+        };
 
-        if (question == null) throw new KeyNotFoundException($"Could not find question with id {id}");
-
-        return View("Question", question);
+        return View("Question", viewModel);
     }
 
     [HttpPost("SubmitAnswer")]
@@ -38,14 +41,14 @@ public class QuestionsController : Controller
     {
         if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
 
-        if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("GetByRoute", "Pages", new { route = "self-assessment" });
+        if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("CheckYourAnswers");
 
         return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.NextQuestionId });
     }
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
+    [HttpGet("check-answers")]
+    public async Task<IActionResult> CheckYourAnswers()
     {
-        return View("Error!");
+        return View("CheckYourAnswers");
     }
 }
