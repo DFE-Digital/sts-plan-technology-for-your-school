@@ -1,9 +1,6 @@
 ---
 formatter: "markdown table"
 version: "~> 0.16"
-sections:
-  hide:
-    - providers
 settings:
   anchor: true
   default: true
