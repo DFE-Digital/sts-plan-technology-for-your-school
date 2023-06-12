@@ -25,10 +25,7 @@ public class QuestionsController : BaseController<QuestionsController>
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
 
-        var question = await query.GetQuestionById(id);
-
-        if (question == null) throw new KeyNotFoundException($"Could not find question with id {id}");
-
+        var question = await query.GetQuestionById(id) ?? throw new KeyNotFoundException($"Could not find question with id {id}");
         var viewModel = new QuestionViewModel()
         {
             Question = question,
