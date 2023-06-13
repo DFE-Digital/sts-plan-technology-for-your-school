@@ -8,14 +8,11 @@
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.4.5 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 3.52.0 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | >= 3.2.1 |
-| <a name="requirement_null"></a> [null](#requirement\_null) | >= 3.2.1 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.60.0 |
-| <a name="provider_null"></a> [null](#provider\_null) | 3.2.1 |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.60.0 |
 | <a name="provider_null"></a> [null](#provider\_null) | 3.2.1 |
 
@@ -30,6 +27,13 @@
 | Name | Type |
 |------|------|
 | [azurerm_key_vault.vault](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault) | resource |
+| [azurerm_key_vault_access_policy.vault_access_policy_mi](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_access_policy) | resource |
+| [azurerm_key_vault_access_policy.vault_access_policy_tf](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_access_policy) | resource |
+| [azurerm_key_vault_secret.vault_secret_contentful_deliveryapikey](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.vault_secret_contentful_environment](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.vault_secret_contentful_previewapikey](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.vault_secret_contentful_spaceid](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.vault_secret_database_connectionstring](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
 | [azurerm_user_assigned_identity.user_assigned_identity](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/user_assigned_identity) | resource |
 | [null_resource.keyvault-assign-identity](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) | data source |
@@ -39,11 +43,13 @@
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_az_sql_admin_password"></a> [az\_sql\_admin\_password](#input\_az\_sql\_admin\_password) | Azure SQL admin password | `string` | n/a | yes |
+| <a name="input_az_sql_admin_userid_postfix"></a> [az\_sql\_admin\_userid\_postfix](#input\_az\_sql\_admin\_userid\_postfix) | Azure SQL admin userid postfix, used with `project_name` and `environment` to build userid | `string` | n/a | yes |
 | <a name="input_az_tag_environment"></a> [az\_tag\_environment](#input\_az\_tag\_environment) | Environment tag to be applied to all resources | `string` | n/a | yes |
 | <a name="input_az_tag_product"></a> [az\_tag\_product](#input\_az\_tag\_product) | Product tag to be applied to all resources | `string` | n/a | yes |
 | <a name="input_azure_location"></a> [azure\_location](#input\_azure\_location) | Recourse location | `string` | n/a | yes |
 | <a name="input_cdn_frontdoor_origin_host_header_override"></a> [cdn\_frontdoor\_origin\_host\_header\_override](#input\_cdn\_frontdoor\_origin\_host\_header\_override) | Override the frontdoor origin host header | `string` | n/a | yes |
 | <a name="input_environment"></a> [environment](#input\_environment) | Environment name, used along with `project_name` as a prefix for all resources | `string` | n/a | yes |
+| <a name="input_msi_id"></a> [msi\_id](#input\_msi\_id) | The Managed Service Identity ID. If this value isn't null (the default), 'data.azurerm\_client\_config.current.object\_id' will be set to this value. | `string` | `null` | no |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | project name, used along with `environment` as a prefix for all resources | `string` | n/a | yes |
 
 ## Outputs
