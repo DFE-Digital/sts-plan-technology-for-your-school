@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.TagHelpers;
 
-public class HeaderTagHelperTests
+public class HeaderComponentTagHelperTests
 {
     [Fact]
     public void Should_RenderH1Tag_When_H1()
@@ -20,8 +20,8 @@ public class HeaderTagHelperTests
             Size = HeaderSize.Small
         };
 
-        var loggerMock = new Mock<ILogger<HeaderTagHelper>>();
-        var tagHelper = new HeaderTagHelper(loggerMock.Object)
+        var loggerMock = new Mock<ILogger<HeaderComponentTagHelper>>();
+        var tagHelper = new HeaderComponentTagHelper(loggerMock.Object)
         {
             Model = header
         };
@@ -43,8 +43,8 @@ public class HeaderTagHelperTests
             Size = HeaderSize.Small
         };
 
-        var loggerMock = new Mock<ILogger<HeaderTagHelper>>();
-        var tagHelper = new HeaderTagHelper(loggerMock.Object)
+        var loggerMock = new Mock<ILogger<HeaderComponentTagHelper>>();
+        var tagHelper = new HeaderComponentTagHelper(loggerMock.Object)
         {
             Model = header
         };
@@ -66,8 +66,8 @@ public class HeaderTagHelperTests
             Size = HeaderSize.Small
         };
 
-        var loggerMock = new Mock<ILogger<HeaderTagHelper>>();
-        var tagHelper = new HeaderTagHelper(loggerMock.Object)
+        var loggerMock = new Mock<ILogger<HeaderComponentTagHelper>>();
+        var tagHelper = new HeaderComponentTagHelper(loggerMock.Object)
         {
             Model = header
         };
@@ -89,8 +89,8 @@ public class HeaderTagHelperTests
             Size = HeaderSize.Small
         };
 
-        var loggerMock = new Mock<ILogger<HeaderTagHelper>>();
-        var tagHelper = new HeaderTagHelper(loggerMock.Object)
+        var loggerMock = new Mock<ILogger<HeaderComponentTagHelper>>();
+        var tagHelper = new HeaderComponentTagHelper(loggerMock.Object)
         {
             Model = header
         };
@@ -112,8 +112,8 @@ public class HeaderTagHelperTests
             Size = HeaderSize.Medium
         };
 
-        var loggerMock = new Mock<ILogger<HeaderTagHelper>>();
-        var tagHelper = new HeaderTagHelper(loggerMock.Object)
+        var loggerMock = new Mock<ILogger<HeaderComponentTagHelper>>();
+        var tagHelper = new HeaderComponentTagHelper(loggerMock.Object)
         {
             Model = header
         };
@@ -135,8 +135,8 @@ public class HeaderTagHelperTests
             Size = HeaderSize.Large
         };
 
-        var loggerMock = new Mock<ILogger<HeaderTagHelper>>();
-        var tagHelper = new HeaderTagHelper(loggerMock.Object)
+        var loggerMock = new Mock<ILogger<HeaderComponentTagHelper>>();
+        var tagHelper = new HeaderComponentTagHelper(loggerMock.Object)
         {
             Model = header
         };
@@ -158,8 +158,8 @@ public class HeaderTagHelperTests
             Size = HeaderSize.ExtraLarge
         };
 
-        var loggerMock = new Mock<ILogger<HeaderTagHelper>>();
-        var tagHelper = new HeaderTagHelper(loggerMock.Object)
+        var loggerMock = new Mock<ILogger<HeaderComponentTagHelper>>();
+        var tagHelper = new HeaderComponentTagHelper(loggerMock.Object)
         {
             Model = header
         };
