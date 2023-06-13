@@ -5,6 +5,7 @@ using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 using Dfe.PlanTech.Domain.Content.Models.Options;
 using Moq;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Models;
 
@@ -29,10 +30,10 @@ public class RichTextRendererTests
 
         var partRenderers = new List<IRichTextContentPartRenderer>(){
             _partRenderer.Object,
-            new HyperlinkRenderer(new HyperlinkRendererOptions())
+            new HyperlinkRenderer(new HyperlinkRendererOptions(), new NullLogger<HyperlinkRenderer>())
         };
 
-        _renderer = new RichTextRenderer(partRenderers);
+        _renderer = new RichTextRenderer(partRenderers, new NullLogger<RichTextRenderer>());
     }
 
     [Fact]
