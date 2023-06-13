@@ -13,15 +13,15 @@ public class UrlHistory : IUrlHistory
         _cacher = cacher ?? throw new ArgumentNullException(nameof(cacher));
     }
 
-    public Stack<string> History => _cacher.Get(CACHE_KEY, () => new Stack<string>())!;
+    public Stack<Uri> History => _cacher.Get(CACHE_KEY, () => new Stack<Uri>())!;
 
-    public string? LastVisitedUrl
+    public Uri? LastVisitedUrl
     {
         get
         {
             var history = History;
 
-            if (History != null && history.TryPeek(out string? lastVisitedPage))
+            if (History != null && history.TryPeek(out Uri? lastVisitedPage))
             {
                 return lastVisitedPage;
             }
@@ -30,12 +30,12 @@ public class UrlHistory : IUrlHistory
         }
     }
 
-    public void AddUrlToHistory(string url)
+    public void AddUrlToHistory(Uri url)
     {
         var history = History;
         var lastVisitedUrl = LastVisitedUrl;
 
-        bool isDuplicateUrl = !string.IsNullOrEmpty(lastVisitedUrl) && lastVisitedUrl.Equals(url);
+        bool isDuplicateUrl = lastVisitedUrl != null && lastVisitedUrl.Equals(url);
 
         if (isDuplicateUrl)
         {
@@ -49,12 +49,12 @@ public class UrlHistory : IUrlHistory
     public void RemoveLastUrl()
     {
         var history = History;
-        history.TryPop(out string? _);
+        history.TryPop(out Uri? _);
 
         SaveHistory(history);
     }
 
-    private void SaveHistory(Stack<string> history)
+    private void SaveHistory(Stack<Uri> history)
     {
         _cacher.Set(CACHE_KEY, TimeSpan.FromHours(1), history);
     }
