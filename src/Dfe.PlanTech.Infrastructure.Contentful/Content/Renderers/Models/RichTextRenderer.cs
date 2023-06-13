@@ -1,16 +1,17 @@
 using System.Text;
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 
 /// <summary>
 /// Parent class to render <see chref="IRichTextContent"/> RichTextContent
 /// </summary>
-public class RichTextRenderer : IRichTextRenderer, IRichTextContentPartRendererCollection
+public class RichTextRenderer : BaseRichTextRenderer<RichTextRenderer>, IRichTextRenderer, IRichTextContentPartRendererCollection
 {
     private readonly List<IRichTextContentPartRenderer> _renderers;
 
-    public RichTextRenderer(IEnumerable<IRichTextContentPartRenderer> renderers)
+    public RichTextRenderer(IEnumerable<IRichTextContentPartRenderer> renderers, ILogger<RichTextRenderer> logger) : base(logger)
     {
         _renderers = renderers.ToList();
     }
@@ -32,18 +33,7 @@ public class RichTextRenderer : IRichTextRenderer, IRichTextContentPartRendererC
     {
         var stringBuilder = new StringBuilder();
 
-        foreach (var subContent in content.Content)
-        {
-            var renderer = GetRendererForContent(subContent);
-
-            if (renderer == null)
-            {
-                //TODO: Log missing content type
-                continue;
-            }
-
-            renderer.AddHtml(subContent, this, stringBuilder);
-        }
+        RenderChildren(content, this, stringBuilder);
 
         return stringBuilder.ToString();
     }

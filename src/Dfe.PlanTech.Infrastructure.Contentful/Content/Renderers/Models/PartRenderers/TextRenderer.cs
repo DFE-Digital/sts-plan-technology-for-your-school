@@ -3,14 +3,15 @@ using System.Text;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Options;
+using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 
-public class TextRenderer : BaseRichTextContentPartRender
+public class TextRenderer : BaseRichTextContentPartRender<TextRenderer>
 {
     private readonly TextRendererOptions _textRendererOptions;
 
-    public TextRenderer(TextRendererOptions textRendererOptions) : base(RichTextNodeType.Text)
+    public TextRenderer(TextRendererOptions textRendererOptions, ILogger<TextRenderer> logger) : base(RichTextNodeType.Text, logger)
     {
         _textRendererOptions = textRendererOptions;
     }

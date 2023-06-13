@@ -4,7 +4,6 @@ using Contentful.Core.Configuration;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
-using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,7 +39,7 @@ public static class ContentfulSetup
 
     public static IServiceCollection SetupRichTextRenderer(this IServiceCollection services)
     {
-        var contentRendererType = typeof(BaseRichTextContentPartRender);
+        var contentRendererType = typeof(IRichTextContentPartRenderer);
         var richTextPartRenderers = contentRendererType.Assembly.GetTypes()
                                                                 .Where(IsContentRenderer(contentRendererType));
 
@@ -56,5 +55,5 @@ public static class ContentfulSetup
     }
 
     private static Func<Type, bool> IsContentRenderer(Type contentRendererType)
-        => type => type.IsClass && !type.IsAbstract && type.IsSubclassOf(contentRendererType);
+        => type => type.IsClass && !type.IsAbstract && type.GetInterfaces().Contains(contentRendererType);
 }

@@ -2,14 +2,15 @@ using System.Text;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Options;
+using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 
-public class HyperlinkRenderer : BaseRichTextContentPartRender
+public class HyperlinkRenderer : BaseRichTextContentPartRender<HyperlinkRenderer>
 {
     private readonly HyperlinkRendererOptions _options;
 
-    public HyperlinkRenderer(HyperlinkRendererOptions options) : base(RichTextNodeType.Hyperlink)
+    public HyperlinkRenderer(HyperlinkRendererOptions options, ILogger<HyperlinkRenderer> logger) : base(RichTextNodeType.Hyperlink, logger)
     {
         _options = options;
     }

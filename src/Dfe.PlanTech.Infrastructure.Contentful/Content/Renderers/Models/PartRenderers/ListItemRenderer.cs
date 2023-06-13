@@ -2,12 +2,13 @@
 using System.Text;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 
-public class ListItemRenderer : BaseRichTextContentPartRender
+public class ListItemRenderer : BaseRichTextContentPartRender<ListItemRenderer>
 {
-    public ListItemRenderer() : base(RichTextNodeType.ListItem)
+    public ListItemRenderer(ILogger<ListItemRenderer> logger) : base(RichTextNodeType.ListItem, logger)
     {
     }
 

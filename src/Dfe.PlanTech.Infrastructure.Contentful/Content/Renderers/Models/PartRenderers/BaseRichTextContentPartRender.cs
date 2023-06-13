@@ -1,14 +1,15 @@
 using System.Text;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 
-public abstract class BaseRichTextContentPartRender : IRichTextContentPartRenderer
+public abstract class BaseRichTextContentPartRender<TConcreteRenderer> : BaseRichTextRenderer<TConcreteRenderer>, IRichTextContentPartRenderer
 {
     private readonly RichTextNodeType _nodeType;
 
-    protected BaseRichTextContentPartRender(RichTextNodeType nodeType)
+    protected BaseRichTextContentPartRender(RichTextNodeType nodeType, ILogger<TConcreteRenderer> logger) : base(logger)
     {
         _nodeType = nodeType;
     }
@@ -16,22 +17,4 @@ public abstract class BaseRichTextContentPartRender : IRichTextContentPartRender
     public bool Accepts(IRichTextContent content) => content.MappedNodeType == _nodeType;
 
     public abstract StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection richTextRendererCollection, StringBuilder stringBuilder);
-
-    public StringBuilder RenderChildren(IRichTextContent content, IRichTextContentPartRendererCollection renderers, StringBuilder stringBuilder)
-    {
-        foreach (var subContent in content.Content)
-        {
-            var renderer = renderers.GetRendererForContent(subContent);
-
-            if (renderer == null)
-            {
-                //TODO: Add logging for missing content type
-                continue;
-            }
-
-            renderer.AddHtml(subContent, renderers, stringBuilder);
-        }
-
-        return stringBuilder;
-    }
 }

@@ -2,13 +2,14 @@ using System.Text;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Options;
+using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 
-public class ParagraphRenderer : BaseRichTextContentPartRender
+public class ParagraphRenderer : BaseRichTextContentPartRender<ParagraphRenderer>
 {
     private readonly ParagraphRendererOptions _options;
-    public ParagraphRenderer(ParagraphRendererOptions options) : base(RichTextNodeType.Paragraph)
+    public ParagraphRenderer(ParagraphRendererOptions options, ILogger<ParagraphRenderer> logger) : base(RichTextNodeType.Paragraph, logger)
     {
         _options = options;
     }
