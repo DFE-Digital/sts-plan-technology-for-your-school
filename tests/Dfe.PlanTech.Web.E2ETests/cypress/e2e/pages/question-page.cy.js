@@ -47,4 +47,11 @@ describe("landing page", () => {
       .should("not.include", FIRST_QUESTION)
       .and("include", "/question");
   });
+
+  it("should have back button", () => {
+    cy.get("a.govuk-back-link")
+      .should("exist")
+      .invoke("text")
+      .should("equal", "Back");
+  });
 });
