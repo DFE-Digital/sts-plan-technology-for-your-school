@@ -30,7 +30,7 @@ resource "azurerm_key_vault_secret" "vault_secret_contentful_deliveryapikey" {
   key_vault_id = azurerm_key_vault.vault.id
   name         = "contentful--deliveryapikey"
   value        = "temp value"
-  depends_on = [ azurerm_key_vault_access_policy.vault_access_policy_tf]
+  depends_on   = [azurerm_key_vault_access_policy.vault_access_policy_tf]
 
   lifecycle {
     ignore_changes = [
@@ -43,7 +43,7 @@ resource "azurerm_key_vault_secret" "vault_secret_contentful_previewapikey" {
   key_vault_id = azurerm_key_vault.vault.id
   name         = "contentful--previewapikey"
   value        = "temp value"
-  depends_on = [ azurerm_key_vault_access_policy.vault_access_policy_tf]
+  depends_on   = [azurerm_key_vault_access_policy.vault_access_policy_tf]
 
   lifecycle {
     ignore_changes = [
@@ -56,7 +56,7 @@ resource "azurerm_key_vault_secret" "vault_secret_contentful_spaceid" {
   key_vault_id = azurerm_key_vault.vault.id
   name         = "contentful--spaceid"
   value        = "temp value"
-  depends_on = [ azurerm_key_vault_access_policy.vault_access_policy_tf]
+  depends_on   = [azurerm_key_vault_access_policy.vault_access_policy_tf]
 
   lifecycle {
     ignore_changes = [
@@ -69,7 +69,7 @@ resource "azurerm_key_vault_secret" "vault_secret_contentful_environment" {
   key_vault_id = azurerm_key_vault.vault.id
   name         = "contentful--environment"
   value        = "temp value"
-  depends_on = [ azurerm_key_vault_access_policy.vault_access_policy_tf]
+  depends_on   = [azurerm_key_vault_access_policy.vault_access_policy_tf]
 
   lifecycle {
     ignore_changes = [
