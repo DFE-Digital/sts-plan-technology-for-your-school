@@ -3,6 +3,7 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 using Dfe.PlanTech.Domain.Content.Models.Options;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
 
@@ -26,7 +27,7 @@ public class HyperlinkRendererTests
             }
         };
 
-        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
+        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions(), new NullLogger<HyperlinkRenderer>());
 
         var accepted = renderer.Accepts(content);
 
@@ -42,7 +43,7 @@ public class HyperlinkRendererTests
             Value = "paragraph text"
         };
 
-        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
+        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions(), new NullLogger<HyperlinkRenderer>());
 
         var accepted = renderer.Accepts(content);
 
@@ -52,8 +53,8 @@ public class HyperlinkRendererTests
     [Fact]
     public void Should_CreateLink_When_PassedValidData()
     {
-        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
-        var rendererCollection = new RichTextRenderer(new[] { renderer });
+        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions(),new NullLogger<HyperlinkRenderer>());
+        var rendererCollection = new RichTextRenderer(new[] { renderer }, new NullLogger<RichTextRenderer>());
 
         const string linkText = "Click Here";
         const string url = "https://www.test-url.com";
@@ -79,8 +80,8 @@ public class HyperlinkRendererTests
     [Fact]
     public void Should_NotAddLink_When_MissingURI()
     {
-        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
-        var rendererCollection = new RichTextRenderer(new[] { renderer });
+        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions(), new NullLogger<HyperlinkRenderer>());
+        var rendererCollection = new RichTextRenderer(new[] { renderer }, new NullLogger<RichTextRenderer>());
 
         const string linkText = "Click Here";
 
@@ -102,8 +103,8 @@ public class HyperlinkRendererTests
     {
         const string testClasses = "testing-classes";
 
-        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions() { Classes = testClasses });
-        var rendererCollection = new RichTextRenderer(new[] { renderer });
+        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions() { Classes = testClasses },new NullLogger<HyperlinkRenderer>());
+        var rendererCollection = new RichTextRenderer(new[] { renderer },new NullLogger<RichTextRenderer>());
 
         const string linkText = "Click Here";
         const string url = "https://www.test-url.com";
