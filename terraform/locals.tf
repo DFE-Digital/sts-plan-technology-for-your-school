@@ -2,7 +2,7 @@ locals {
   ###########
   # General #
   ###########
-  current_user_id = coalesce(var.msi_id, data.azurerm_client_config.current.object_id)
+  current_user_id     = coalesce(var.msi_id, data.azurerm_client_config.current.object_id)
   project_name        = var.project_name
   environment         = var.environment
   azure_location      = var.azure_location
@@ -33,7 +33,9 @@ locals {
   #############
   # Azure SQL #
   #############
-  az_sql_admin_password = var.az_sql_admin_password
+  az_sql_admin_password    = var.az_sql_admin_password
+  az_sql_admin_userid      = "${local.resource_prefix}-${var.az_sql_admin_userid_postfix}"
+  az_sql_connection_string = "Server=tcp:${local.resource_prefix}.database.windows.net,1433;Initial Catalog=${local.resource_prefix}-sqldb;Persist Security Info=False;User ID=${local.az_sql_admin_userid};Password=${local.az_sql_admin_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
 
   ###########
   # Scripts #
