@@ -68,7 +68,7 @@ public class UrlHistoryMiddleware
 
     private static Uri GetRequestUri(HttpContext httpContext)
     {
-        var fullPath = httpContext.Request.IsHttps ? "https://" : "http://" + httpContext.Request.Host + httpContext.Request.Path + httpContext.Request.Query;
+        var fullPath = httpContext.Request.IsHttps ? "https://" : "http://" + httpContext.Request.Host + httpContext.Request.Path;
 
         return new Uri(fullPath);
     }
