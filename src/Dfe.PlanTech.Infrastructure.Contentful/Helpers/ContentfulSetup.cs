@@ -1,4 +1,5 @@
 
+using System.Reflection;
 using Contentful.Core;
 using Contentful.Core.Configuration;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
@@ -40,8 +41,7 @@ public static class ContentfulSetup
     public static IServiceCollection SetupRichTextRenderer(this IServiceCollection services)
     {
         var contentRendererType = typeof(IRichTextContentPartRenderer);
-        var richTextPartRenderers = contentRendererType.Assembly.GetTypes()
-                                                                .Where(IsContentRenderer(contentRendererType));
+        var richTextPartRenderers = Assembly.GetExecutingAssembly().GetTypes().Where(IsContentRenderer(contentRendererType));
 
         services.AddScoped<IRichTextRenderer, RichTextRenderer>();
         services.AddScoped<IRichTextContentPartRendererCollection, RichTextRenderer>();

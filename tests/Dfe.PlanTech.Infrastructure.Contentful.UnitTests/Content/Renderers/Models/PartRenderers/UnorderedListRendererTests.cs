@@ -2,6 +2,7 @@ using System.Text;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
 
@@ -20,7 +21,7 @@ public class UnorderedListRendererTests
             Value = value,
         };
 
-        var renderer = new UnorderedListRenderer();
+        var renderer = new UnorderedListRenderer(new NullLogger<UnorderedListRenderer>());
 
         var accepted = renderer.Accepts(content);
 
@@ -36,7 +37,7 @@ public class UnorderedListRendererTests
             Value = "paragraph text"
         };
 
-        var renderer = new UnorderedListRenderer();
+        var renderer = new UnorderedListRenderer(new NullLogger<UnorderedListRenderer>());
 
         var accepted = renderer.Accepts(content);
 
@@ -46,8 +47,8 @@ public class UnorderedListRendererTests
     [Fact]
     public void Should_CreateUnorderedList_When_PassedValidData()
     {
-        var renderer = new UnorderedListRenderer();
-        var rendererCollection = new RichTextRenderer(new[] { renderer });
+        var renderer = new UnorderedListRenderer(new NullLogger<UnorderedListRenderer>());
+        var rendererCollection = new RichTextRenderer(new[] { renderer }, new NullLogger<RichTextRenderer>());
 
         const string value = "List item one";
 

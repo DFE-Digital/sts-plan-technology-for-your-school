@@ -3,6 +3,7 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 using Dfe.PlanTech.Domain.Content.Models.Options;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
 
@@ -21,7 +22,7 @@ public class TextRendererTests
             Value = value,
         };
 
-        var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>() { }));
+        var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>() { }),new NullLogger<TextRenderer>());
 
         var accepted = renderer.Accepts(content);
 
@@ -37,7 +38,7 @@ public class TextRendererTests
             Value = "hyperlink"
         };
 
-        var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>() { }));
+        var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>() { }),new NullLogger<TextRenderer>());
 
         var accepted = renderer.Accepts(content);
 
@@ -56,8 +57,8 @@ public class TextRendererTests
             HtmlTag = htmlTagForBold,
         };
 
-        var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>() { boldMarkOption }));
-        var rendererCollection = new RichTextRenderer(new[] { renderer });
+        var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>() { boldMarkOption }),new NullLogger<TextRenderer>());
+        var rendererCollection = new RichTextRenderer(new[] { renderer },new NullLogger<RichTextRenderer>());
 
         const string value = "Paragraph text";
 
@@ -93,8 +94,8 @@ public class TextRendererTests
             Classes = testClasses
         };
 
-        var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>() { boldMarkOption }));
-        var rendererCollection = new RichTextRenderer(new[] { renderer });
+        var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>() { boldMarkOption }),new NullLogger<TextRenderer>());
+        var rendererCollection = new RichTextRenderer(new[] { renderer },new NullLogger<RichTextRenderer>());
 
         const string value = "Paragraph text";
 
@@ -131,8 +132,8 @@ public class TextRendererTests
             Classes = testClasses
         };
 
-        var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>() { boldMarkOption }));
-        var rendererCollection = new RichTextRenderer(new[] { renderer });
+        var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>() { boldMarkOption }),new NullLogger<TextRenderer>());
+        var rendererCollection = new RichTextRenderer(new[] { renderer },new NullLogger<RichTextRenderer>());
 
         const string value = "Paragraph text";
 

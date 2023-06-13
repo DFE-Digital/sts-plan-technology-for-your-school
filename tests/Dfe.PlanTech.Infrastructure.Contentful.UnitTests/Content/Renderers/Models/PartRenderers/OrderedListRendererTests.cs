@@ -2,6 +2,7 @@ using System.Text;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
 
@@ -20,7 +21,7 @@ public class OrderedListRendererTests
             Value = listItemValue,
         };
 
-        var renderer = new OrderedListRenderer();
+        var renderer = new OrderedListRenderer(new NullLogger<OrderedListRenderer>());
 
         var accepted = renderer.Accepts(content);
 
@@ -36,7 +37,7 @@ public class OrderedListRendererTests
             Value = "paragraph text"
         };
 
-        var renderer = new OrderedListRenderer();
+        var renderer = new OrderedListRenderer(new NullLogger<OrderedListRenderer>());
 
         var accepted = renderer.Accepts(content);
 
@@ -46,8 +47,8 @@ public class OrderedListRendererTests
     [Fact]
     public void Should_CreateOrderedList_When_PassedValidData()
     {
-        var renderer = new OrderedListRenderer();
-        var rendererCollection = new RichTextRenderer(new[] { renderer });
+        var renderer = new OrderedListRenderer(new NullLogger<OrderedListRenderer>());
+        var rendererCollection = new RichTextRenderer(new[] { renderer }, new NullLogger<RichTextRenderer>());
 
         const string listItemValue = "List item one";
 

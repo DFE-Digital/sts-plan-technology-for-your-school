@@ -3,6 +3,7 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 using Dfe.PlanTech.Domain.Content.Models.Options;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
 
@@ -21,7 +22,7 @@ public class ParagraphRendererTests
             Value = value,
         };
 
-        var renderer = new ParagraphRenderer(new ParagraphRendererOptions());
+        var renderer = new ParagraphRenderer(new ParagraphRendererOptions(), new NullLogger<ParagraphRenderer>());
 
         var accepted = renderer.Accepts(content);
 
@@ -37,7 +38,7 @@ public class ParagraphRendererTests
             Value = "hyperlink"
         };
 
-        var renderer = new ParagraphRenderer(new ParagraphRendererOptions());
+        var renderer = new ParagraphRenderer(new ParagraphRendererOptions(), new NullLogger<ParagraphRenderer>());
 
         var accepted = renderer.Accepts(content);
 
@@ -47,8 +48,8 @@ public class ParagraphRendererTests
     [Fact]
     public void Should_Create_Paragraph_When_PassedValidData()
     {
-        var renderer = new ParagraphRenderer(new ParagraphRendererOptions());
-        var rendererCollection = new RichTextRenderer(new[] { renderer });
+        var renderer = new ParagraphRenderer(new ParagraphRendererOptions(), new NullLogger<ParagraphRenderer>());
+        var rendererCollection = new RichTextRenderer(new[] { renderer }, new NullLogger<RichTextRenderer>());
 
         const string value = "Paragraph text";
 
@@ -70,8 +71,8 @@ public class ParagraphRendererTests
     public void Should_Create_Paragraph_WithClass__When_PassedValidData()
     {
         const string classes = "testing-classes";
-        var renderer = new ParagraphRenderer(new ParagraphRendererOptions() { Classes = classes });
-        var rendererCollection = new RichTextRenderer(new[] { renderer });
+        var renderer = new ParagraphRenderer(new ParagraphRendererOptions() { Classes = classes }, new NullLogger<ParagraphRenderer>());
+        var rendererCollection = new RichTextRenderer(new[] { renderer }, new NullLogger<RichTextRenderer>());
 
         const string value = "Paragraph text";
 
