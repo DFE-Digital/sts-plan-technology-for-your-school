@@ -6,18 +6,18 @@ namespace Dfe.PlanTech.Application.UnitTests.Core;
 
 public class UrlHistoryTests
 {
-    private Stack<string> history = new Stack<string>();
+    private Stack<Uri> history = new();
 
     private readonly ICacher cacher;
 
     public UrlHistoryTests()
     {
         var cacherMock = new Mock<ICacher>();
-        cacherMock.Setup(cacher => cacher.Get<Stack<string>>(UrlHistory.CACHE_KEY)).Returns(history);
+        cacherMock.Setup(cacher => cacher.Get<Stack<Uri>>(UrlHistory.CACHE_KEY)).Returns(history);
 
-        cacherMock.Setup(cacher => cacher.Get<Stack<string>>(UrlHistory.CACHE_KEY, It.IsAny<Func<Stack<string>>>())).Returns(history);
-        cacherMock.Setup(cacher => cacher.Set<Stack<string>>(UrlHistory.CACHE_KEY, It.IsAny<TimeSpan>(), It.IsAny<Stack<string>>()))
-                .Callback((string key, TimeSpan timeSpan, Stack<string> stack) =>
+        cacherMock.Setup(cacher => cacher.Get(UrlHistory.CACHE_KEY, It.IsAny<Func<Stack<Uri>>>())).Returns(history);
+        cacherMock.Setup(cacher => cacher.Set(UrlHistory.CACHE_KEY, It.IsAny<TimeSpan>(), It.IsAny<Stack<Uri>>()))
+                .Callback((string key, TimeSpan timeSpan, Stack<Uri> stack) =>
                 {
                     history = stack;
                 });
@@ -28,7 +28,7 @@ public class UrlHistoryTests
     [Fact]
     public void Should_Add_Url_ToStack()
     {
-        var url = "www.testurl.com";
+        var url = new Uri("https://www.testurl.com");
 
         var urlHistory = new UrlHistory(cacher);
         urlHistory.AddUrlToHistory(url);
@@ -41,15 +41,15 @@ public class UrlHistoryTests
     [Fact]
     public void Should_Remove_Url_FromStack()
     {
-        var firstUrl = "www.first.com";
-        var secondUrl = "www.second.com";
+        var firstUrl = new Uri("https://www.first.com");
+        var secondUrl = new Uri("https://www.second.com");
 
         var urlHistory = new UrlHistory(cacher);
         urlHistory.AddUrlToHistory(firstUrl);
         urlHistory.AddUrlToHistory(secondUrl);
-        
+
         urlHistory.RemoveLastUrl();
-        
+
         Assert.Equal(history.First(), firstUrl);
     }
 }

@@ -30,7 +30,7 @@ public class QuestionsController : BaseController<QuestionsController>
         var viewModel = new QuestionViewModel()
         {
             Question = question,
-            BackUrl = GetLastVisitedUrl()
+            BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment"
         };
 
         return View("Question", viewModel);
