@@ -21,7 +21,7 @@ public abstract class BaseRichTextRenderer<TConcreteRenderer>
 
             if (renderer == null)
             {
-                logger.LogWarning("Could not find renderer for {subContent}", subContent);
+                logger.LogError("Could not find renderer for {subContent}", subContent);
                 continue;
             }
 
