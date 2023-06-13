@@ -37,7 +37,7 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
     [HttpPost("SubmitAnswer")]
-    public async Task<IActionResult> SubmitAnswer(SubmitAnswerDto submitAnswerDto)
+    public IActionResult SubmitAnswer(SubmitAnswerDto submitAnswerDto)
     {
         if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
 
@@ -47,7 +47,7 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
     [HttpGet("check-answers")]
-    public async Task<IActionResult> CheckYourAnswers()
+    public IActionResult CheckYourAnswers()
     {
         return View("CheckYourAnswers");
     }
