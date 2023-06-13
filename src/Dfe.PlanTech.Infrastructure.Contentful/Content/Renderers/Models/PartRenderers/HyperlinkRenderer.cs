@@ -19,7 +19,7 @@ public class HyperlinkRenderer : BaseRichTextContentPartRender<HyperlinkRenderer
     {
         if (string.IsNullOrEmpty(content.Data?.Uri))
         {
-            //TODO: Log missing data;
+            logger.LogError("Missing URI for hyperlink {content}", content);
             return stringBuilder;
         }
 
