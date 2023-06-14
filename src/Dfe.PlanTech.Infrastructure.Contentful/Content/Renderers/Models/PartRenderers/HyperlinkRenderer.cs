@@ -32,7 +32,7 @@ public class HyperlinkRenderer : BaseRichTextContentPartRender
 
         stringBuilder.Append("\">");
 
-        RenderChildren(content, renderers, stringBuilder);
+        renderers.RenderChildren(content, stringBuilder);
 
         stringBuilder.Append(content.Value);
 

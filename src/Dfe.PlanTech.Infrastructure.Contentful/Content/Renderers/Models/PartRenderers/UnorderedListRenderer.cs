@@ -15,7 +15,7 @@ public class UnorderedListRenderer : BaseRichTextContentPartRender
     {
         stringBuilder.Append("<ul>");
 
-        RenderChildren(content, renderers, stringBuilder);
+        renderers.RenderChildren(content, stringBuilder);
 
         stringBuilder.Append("</ul>");
 
