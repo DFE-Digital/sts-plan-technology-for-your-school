@@ -26,6 +26,7 @@ public class QuestionsController : BaseController<QuestionsController>
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
         
+        //TODO: Create class for section caching
         if(section != null){
             cacher.Set("CurrentSection", TimeSpan.FromMinutes(10), section);
         }
@@ -35,7 +36,7 @@ public class QuestionsController : BaseController<QuestionsController>
         var viewModel = new QuestionViewModel()
         {
             Question = question,
-            BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment"
+            BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment" //TODO: Move this link to content model
         };
 
         return View("Question", viewModel);

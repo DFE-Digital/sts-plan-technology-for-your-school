@@ -18,6 +18,7 @@ public class PagesController : BaseController<PagesController>
 
         var page = await query.GetPageBySlug(slug, cancellationToken);
 
+        //TODO: Create class for section caching -> create instance of class in GetPage Query -> pass loaded page to object -> load title there
         if(page.DisplayTopicTitle){
             var currentSection = cacher.Get<string>("CurrentSection");
             page.CurrentSectionTitle = currentSection;
