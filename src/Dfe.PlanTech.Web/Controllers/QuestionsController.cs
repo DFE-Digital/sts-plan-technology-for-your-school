@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -21,9 +22,13 @@ public class QuestionsController : BaseController<QuestionsController>
     /// <param name="query"></param>
     /// <exception cref="ArgumentNullException">Throws exception when Id is null or empty</exception>
     /// <returns></returns>
-    public async Task<IActionResult> GetQuestionById(string id, CancellationToken cancellationToken, [FromServices] GetQuestionQuery query)
+    public async Task<IActionResult> GetQuestionById(string id, string? section, CancellationToken cancellationToken, [FromServices] GetQuestionQuery query, [FromServices] ICacher cacher)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
+        
+        if(section != null){
+            cacher.Set("CurrentSection", TimeSpan.FromMinutes(10), section);
+        }
 
         var question = await query.GetQuestionById(id, cancellationToken) ?? throw new KeyNotFoundException($"Could not find question with id {id}");
         
@@ -41,7 +46,7 @@ public class QuestionsController : BaseController<QuestionsController>
     {
         if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
 
-        if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("GetByRoute", "Pages", new { slug = "check-answers" });
+        if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("GetByRoute", "Pages", new { route = "check-answers" });
 
         return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.NextQuestionId });
     }

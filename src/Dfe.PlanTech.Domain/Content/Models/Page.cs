@@ -10,6 +10,8 @@ public class Page : ContentComponent
 
     public bool DisplayTopicTitle { get; init; }
     
+    public string? CurrentSectionTitle { get; set; }
+    
     public Title? Title { get; init; }
 
     public IContentComponent[] Content { get; init; } = Array.Empty<IContentComponent>();

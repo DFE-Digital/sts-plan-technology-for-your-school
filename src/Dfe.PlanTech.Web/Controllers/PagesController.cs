@@ -12,12 +12,17 @@ public class PagesController : BaseController<PagesController>
     }
 
     [HttpGet("/{route?}")]
-    public async Task<IActionResult> GetByRoute(string? route, CancellationToken cancellationToken, [FromServices] GetPageQuery query)
+    public async Task<IActionResult> GetByRoute(string? route, CancellationToken cancellationToken, [FromServices] GetPageQuery query, [FromServices] ICacher cacher)
     {
         string slug = GetSlug(route);
 
         var page = await query.GetPageBySlug(slug, cancellationToken);
 
+        if(page.DisplayTopicTitle){
+            var currentSection = cacher.Get<string>("CurrentSection");
+            page.CurrentSectionTitle = currentSection;
+        }
+        
         return View("Page", page);
     }
 
