@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -10,8 +10,11 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("/question")]
 public class QuestionsController : BaseController<QuestionsController>
 {
-    public QuestionsController(ILogger<QuestionsController> logger, IUrlHistory history) : base(logger, history)
+    private readonly SectionCacher _sectionCacher;
+    
+    public QuestionsController(SectionCacher sectionCacher, ILogger<QuestionsController> logger, IUrlHistory history) : base(logger, history)
     {
+        _sectionCacher = sectionCacher;
     }
 
     [HttpGet("{id?}")]
@@ -22,13 +25,12 @@ public class QuestionsController : BaseController<QuestionsController>
     /// <param name="query"></param>
     /// <exception cref="ArgumentNullException">Throws exception when Id is null or empty</exception>
     /// <returns></returns>
-    public async Task<IActionResult> GetQuestionById(string id, string? section, CancellationToken cancellationToken, [FromServices] GetQuestionQuery query, [FromServices] ICacher cacher)
+    public async Task<IActionResult> GetQuestionById(string id, string? section, CancellationToken cancellationToken, [FromServices] GetQuestionQuery query)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
         
-        //TODO: Create class for section caching
         if(section != null){
-            cacher.Set("CurrentSection", TimeSpan.FromMinutes(10), section);
+            _sectionCacher.SetCurrentSection(section);
         }
 
         var question = await query.GetQuestionById(id, cancellationToken) ?? throw new KeyNotFoundException($"Could not find question with id {id}");
