@@ -1,9 +1,10 @@
 using System.Text;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
-using Dfe.PlanTech.Domain.Content.Models.Options;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Models;
@@ -32,7 +33,7 @@ public class RichTextRendererTests
             new HyperlinkRenderer(new HyperlinkRendererOptions())
         };
 
-        _renderer = new RichTextRenderer(partRenderers);
+        _renderer = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), partRenderers);
     }
 
     [Fact]

@@ -3,6 +3,8 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 using Dfe.PlanTech.Domain.Content.Models.Options;
+using Microsoft.Extensions.Logging.Abstractions;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
 
@@ -48,7 +50,7 @@ public class ParagraphRendererTests
     public void Should_Create_Paragraph_When_PassedValidData()
     {
         var renderer = new ParagraphRenderer(new ParagraphRendererOptions());
-        var rendererCollection = new RichTextRenderer(new[] { renderer });
+        var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), new[] { renderer });
 
         const string value = "Paragraph text";
 
@@ -71,7 +73,7 @@ public class ParagraphRendererTests
     {
         const string classes = "testing-classes";
         var renderer = new ParagraphRenderer(new ParagraphRendererOptions() { Classes = classes });
-        var rendererCollection = new RichTextRenderer(new[] { renderer });
+        var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), new[] { renderer });
 
         const string value = "Paragraph text";
 

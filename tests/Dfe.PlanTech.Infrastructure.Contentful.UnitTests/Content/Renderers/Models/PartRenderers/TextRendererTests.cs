@@ -3,6 +3,8 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 using Dfe.PlanTech.Domain.Content.Models.Options;
+using Microsoft.Extensions.Logging.Abstractions;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
 
@@ -57,7 +59,7 @@ public class TextRendererTests
         };
 
         var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>() { boldMarkOption }));
-        var rendererCollection = new RichTextRenderer(new[] { renderer });
+        var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), new[] { renderer });
 
         const string value = "Paragraph text";
 
@@ -94,7 +96,7 @@ public class TextRendererTests
         };
 
         var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>() { boldMarkOption }));
-        var rendererCollection = new RichTextRenderer(new[] { renderer });
+        var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), new[] { renderer });
 
         const string value = "Paragraph text";
 
@@ -132,7 +134,7 @@ public class TextRendererTests
         };
 
         var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>() { boldMarkOption }));
-        var rendererCollection = new RichTextRenderer(new[] { renderer });
+        var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), new[] { renderer });
 
         const string value = "Paragraph text";
 
