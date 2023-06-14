@@ -19,13 +19,4 @@ public interface IRichTextContentPartRenderer
     /// <param name="stringBuilder"></param>
     /// <returns></returns>
     public StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder);
-
-    /// <summary>
-    /// Render child content
-    /// </summary>
-    /// <param name="content"></param>
-    /// <param name="renderers"></param>
-    /// <param name="stringBuilder"></param>
-    /// <returns></returns>
-    StringBuilder RenderChildren(IRichTextContent content, IRichTextContentPartRendererCollection renderers, StringBuilder stringBuilder);
 }

@@ -15,7 +15,7 @@ public class OrderedListRenderer : BaseRichTextContentPartRender
     {
         stringBuilder.Append("<ol>");
 
-        RenderChildren(content, renderers, stringBuilder);
+        renderers.RenderChildren(content, stringBuilder);
 
         stringBuilder.Append("</ol>");
 

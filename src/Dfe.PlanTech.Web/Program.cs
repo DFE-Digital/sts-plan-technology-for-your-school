@@ -19,13 +19,18 @@ builder.Services.AddGovUkFrontend();
 
 builder.Services.SetupContentfulClient(builder.Configuration, "Contentful", HttpClientPolicyExtensions.AddRetryPolicy);
 
-builder.Services.AddScoped((_) => new TextRendererOptions(new List<MarkOption>() {
-    new MarkOption(){
-        Mark = "bold",
-        HtmlTag = "span",
-        Classes = "govuk-body govuk-!-font-weight-bold",
-    }
-}));
+builder.Services.AddScoped((services) =>
+{
+    var logger = services.GetRequiredService<ILogger<TextRendererOptions>>();
+
+    return new TextRendererOptions(logger, new List<MarkOption>() {
+        new MarkOption(){
+            Mark = "bold",
+            HtmlTag = "span",
+            Classes = "govuk-body govuk-!-font-weight-bold",
+        }
+    });
+});
 
 builder.Services.AddScoped((_) => new ParagraphRendererOptions()
 {

@@ -1,7 +1,9 @@
 using System.Text;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
 
@@ -47,7 +49,7 @@ public class UnorderedListRendererTests
     public void Should_CreateUnorderedList_When_PassedValidData()
     {
         var renderer = new UnorderedListRenderer();
-        var rendererCollection = new RichTextRenderer(new[] { renderer });
+        var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), new[] { renderer });
 
         const string value = "List item one";
 
