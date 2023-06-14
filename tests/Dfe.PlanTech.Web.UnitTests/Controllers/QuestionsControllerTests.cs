@@ -138,7 +138,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public async Task SubmitAnswer_Should_ThrowException_When_NullArgument()
+        public void SubmitAnswer_Should_ThrowException_When_NullArgument()
         {
             Assert.ThrowsAny<ArgumentNullException>(() => _controller.SubmitAnswer(null!));
         }
