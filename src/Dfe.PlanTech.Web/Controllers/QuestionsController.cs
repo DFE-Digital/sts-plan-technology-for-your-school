@@ -41,14 +41,8 @@ public class QuestionsController : BaseController<QuestionsController>
     {
         if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
 
-        if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("CheckYourAnswers");
+        if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("GetByRoute", "Pages", new { slug = "check-answers" });
 
         return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.NextQuestionId });
-    }
-
-    [HttpGet("check-answers")]
-    public IActionResult CheckYourAnswers()
-    {
-        return View("CheckYourAnswers");
     }
 }
