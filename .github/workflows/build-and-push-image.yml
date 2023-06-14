@@ -130,11 +130,7 @@ jobs:
               --name ${{ secrets.AZ_ACA_NAME }} \
               --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP }} \
               --image ${{ secrets.AZ_ACR_URL }}/${{ env.DOCKER_IMAGE }}:${{ needs.set-env.outputs.release }} \
-              --output none \
-              --set-env-vars Contentful__DeliveryApiKey=secretref:contentful--deliveryapikey \
-                             Contentful__PreviewApiKey=secretref:contentful--previewapikey \
-                             Contentful__SpaceId=secretref:contentful--spaceid \
-                             Contentful__Environment=secretref:contentful--environment
+              --output none
 
   run-tests:
     name: Run E2E Tests
