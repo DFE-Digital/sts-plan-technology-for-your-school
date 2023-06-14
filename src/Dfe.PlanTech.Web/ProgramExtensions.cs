@@ -14,13 +14,17 @@ public static class ProgramExtensions
     {
         services.SetupContentfulClient(configuration, "Contentful", HttpClientPolicyExtensions.AddRetryPolicy);
 
-        services.AddScoped((_) => new TextRendererOptions(new List<MarkOption>() {
-            new MarkOption(){
-                Mark = "bold",
-                HtmlTag = "span",
-                Classes = "govuk-body govuk-!-font-weight-bold",
-            }
-        }));
+        services.AddScoped((services) =>
+        {
+            var logger = services.GetRequiredService<ILogger<TextRendererOptions>>();
+
+            return new TextRendererOptions(logger, new List<MarkOption>() {
+                new MarkOption(){
+                    Mark = "bold",
+                    HtmlTag = "span",
+                    Classes = "govuk-body govuk-!-font-weight-bold",
+                }});
+        });
 
         services.AddScoped((_) => new ParagraphRendererOptions()
         {

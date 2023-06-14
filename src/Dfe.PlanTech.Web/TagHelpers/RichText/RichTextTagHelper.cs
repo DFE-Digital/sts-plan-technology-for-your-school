@@ -6,12 +6,14 @@ namespace Dfe.PlanTech.Web.TagHelpers.RichText;
 
 public class RichTextTagHelper : TagHelper
 {
+    private readonly ILogger<RichTextTagHelper> _logger;
     private readonly IRichTextRenderer _richTextRenderer;
 
     public RichTextContent? Content { get; set; }
 
-    public RichTextTagHelper(IRichTextRenderer richTextRenderer)
+    public RichTextTagHelper(ILogger<RichTextTagHelper> logger, IRichTextRenderer richTextRenderer)
     {
+        _logger = logger;
         _richTextRenderer = richTextRenderer;
     }
 
@@ -19,7 +21,7 @@ public class RichTextTagHelper : TagHelper
     {
         if (Content == null)
         {
-            //TODO: Log missing rich text;
+            _logger.LogWarning("Missing content");
             return;
         }
 
