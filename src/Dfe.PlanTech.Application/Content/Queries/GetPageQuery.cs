@@ -17,10 +17,10 @@ public class GetPageQuery : ContentRetriever
     /// </summary>
     /// <param name="slug">Slug for the Page</param>
     /// <returns>Page matching slug</returns>
-    public async Task<Page> GetPageBySlug(string slug)
+    public async Task<Page> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
     {
         var options = new GetEntitiesOptions(3, new[] { new ContentQueryEquals() { Field = "fields.slug", Value = slug } });
-        var pages = await repository.GetEntities<Page>(options);
+        var pages = await repository.GetEntities<Page>(options, cancellationToken);
 
         var page = pages.FirstOrDefault() ?? throw new Exception($"Could not find page with slug {slug}");
 

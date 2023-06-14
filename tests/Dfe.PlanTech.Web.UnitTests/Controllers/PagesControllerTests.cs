@@ -80,7 +80,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task Should_ReturnLandingPage_When_IndexRouteLoaded()
         {
-            var result = await _controller.GetByRoute(INDEX_SLUG, _query);
+            var result = await _controller.GetByRoute(INDEX_SLUG, CancellationToken.None, _query);
 
             Assert.IsType<ViewResult>(result);
 
@@ -98,7 +98,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task Should_ThrowError_When_NoRouteFound()
         {
-            await Assert.ThrowsAnyAsync<Exception>(() => _controller.GetByRoute("NOT A VALID ROUTE", _query));
+            await Assert.ThrowsAnyAsync<Exception>(() => _controller.GetByRoute("NOT A VALID ROUTE", CancellationToken.None, _query));
         }
     }
 }
