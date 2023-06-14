@@ -12,6 +12,8 @@ public class RichTextRenderer : IRichTextRenderer, IRichTextContentPartRendererC
     private readonly ILogger<IRichTextRenderer> _logger;
     private readonly List<IRichTextContentPartRenderer> _renderers;
 
+    public ILogger Logger => _logger;
+    
     public RichTextRenderer(ILogger<IRichTextRenderer> logger, IEnumerable<IRichTextContentPartRenderer> renderers)
     {
         _logger = logger;
