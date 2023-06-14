@@ -1,9 +1,9 @@
-namespace Dfe.PlanTech.Application.Core;
+namespace Dfe.PlanTech.Application.Caching.Interfaces;
 
 /// <summary>
 /// For tracking user's URL history
 /// </summary>
-public interface IUrlHistory
+public interface IUrlHistoryCacher
 {
     /// <summary>
     /// Users history

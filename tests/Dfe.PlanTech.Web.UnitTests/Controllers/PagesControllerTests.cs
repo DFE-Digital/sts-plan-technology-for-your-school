@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
@@ -70,11 +71,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             });
 
             var mockLogger = new Mock<ILogger<PagesController>>();
-            var historyMock = new Mock<IUrlHistory>();
+            var historyMock = new Mock<IUrlHistoryCacher>();
+            var sectionMock = new Mock<ISectionCacher>();
 
             _controller = new PagesController(mockLogger.Object, historyMock.Object);
 
-            _query = new GetPageQuery(repositoryMock.Object);
+            _query = new GetPageQuery(repositoryMock.Object, sectionMock.Object);
         }
 
         [Fact]

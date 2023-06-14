@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
@@ -9,9 +10,9 @@ namespace Dfe.PlanTech.Application.Content.Queries;
 
 public class GetPageQuery : ContentRetriever
 {
-    private readonly SectionCacher _sectionCacher;
+    private readonly ISectionCacher _sectionCacher;
     
-    public GetPageQuery(IContentRepository repository, SectionCacher sectionCacher) : base(repository)
+    public GetPageQuery(IContentRepository repository, ISectionCacher sectionCacher) : base(repository)
     {
         _sectionCacher = sectionCacher;
     }

@@ -7,12 +7,12 @@ namespace Dfe.PlanTech.Web.Controllers;
 
 public class PagesController : BaseController<PagesController>
 {
-    public PagesController(ILogger<PagesController> logger, IUrlHistory history) : base(logger, history)
+    public PagesController(ILogger<PagesController> logger, IUrlHistoryCacher history) : base(logger, history)
     {
     }
 
     [HttpGet("/{route?}")]
-    public async Task<IActionResult> GetByRoute(string? route, CancellationToken cancellationToken, [FromServices] GetPageQuery query, [FromServices] ICacher cacher)
+    public async Task<IActionResult> GetByRoute(string? route, CancellationToken cancellationToken, [FromServices] GetPageQuery query)
     {
         string slug = GetSlug(route);
 

@@ -3,7 +3,7 @@ using Dfe.PlanTech.Domain.Content.Models;
 
 namespace Dfe.PlanTech.Application.Caching.Models;
 
-public class SectionCacher
+public class SectionCacher : ISectionCacher
 {
     public const string CACHE_KEY = "CurrentSection";
     

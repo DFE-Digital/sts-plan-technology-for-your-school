@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Core;
 using Moq;
 
@@ -13,10 +14,10 @@ public class UrlHistoryTests
     public UrlHistoryTests()
     {
         var cacherMock = new Mock<ICacher>();
-        cacherMock.Setup(cacher => cacher.Get<Stack<Uri>>(UrlHistory.CACHE_KEY)).Returns(history);
+        cacherMock.Setup(cacher => cacher.Get<Stack<Uri>>(UrlHistoryCacher.CACHE_KEY)).Returns(history);
 
-        cacherMock.Setup(cacher => cacher.Get(UrlHistory.CACHE_KEY, It.IsAny<Func<Stack<Uri>>>())).Returns(history);
-        cacherMock.Setup(cacher => cacher.Set(UrlHistory.CACHE_KEY, It.IsAny<TimeSpan>(), It.IsAny<Stack<Uri>>()))
+        cacherMock.Setup(cacher => cacher.Get(UrlHistoryCacher.CACHE_KEY, It.IsAny<Func<Stack<Uri>>>())).Returns(history);
+        cacherMock.Setup(cacher => cacher.Set(UrlHistoryCacher.CACHE_KEY, It.IsAny<TimeSpan>(), It.IsAny<Stack<Uri>>()))
                 .Callback((string key, TimeSpan timeSpan, Stack<Uri> stack) =>
                 {
                     history = stack;
@@ -30,7 +31,7 @@ public class UrlHistoryTests
     {
         var url = new Uri("https://www.testurl.com");
 
-        var urlHistory = new UrlHistory(cacher);
+        var urlHistory = new UrlHistoryCacher(cacher);
         urlHistory.AddUrlToHistory(url);
 
         var history = urlHistory.History;
@@ -44,7 +45,7 @@ public class UrlHistoryTests
         var firstUrl = new Uri("https://www.first.com");
         var secondUrl = new Uri("https://www.second.com");
 
-        var urlHistory = new UrlHistory(cacher);
+        var urlHistory = new UrlHistoryCacher(cacher);
         urlHistory.AddUrlToHistory(firstUrl);
         urlHistory.AddUrlToHistory(secondUrl);
 

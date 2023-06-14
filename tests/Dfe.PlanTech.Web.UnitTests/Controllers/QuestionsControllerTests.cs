@@ -1,5 +1,5 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
-using Dfe.PlanTech.Application.Core;
+using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Domain.Caching.Models;
@@ -94,11 +94,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             repositoryMock.Setup(repo => repo.GetEntityById<Question>(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
                           .ReturnsAsync((string id, int include, CancellationToken _) => _questions.FirstOrDefault(question => question.Sys.Id == id));
 
-            var mockLogger = new Mock<ILogger<QuestionsController>>();
+            var loggerMock = new Mock<ILogger<QuestionsController>>();
 
-            var historyMock = new Mock<IUrlHistory>();
-
-            _controller = new QuestionsController(mockLogger.Object, historyMock.Object);
+            var historyMock = new Mock<IUrlHistoryCacher>();
+            var sectionMock = new Mock<ISectionCacher>();
+            _controller = new QuestionsController(sectionMock.Object, loggerMock.Object, historyMock.Object);
             _query = new GetQuestionQuery(repositoryMock.Object);
 
             _cacher = new Cacher(new CacheOptions(), new MemoryCache(new MemoryCacheOptions()));
@@ -110,7 +110,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var id = "Question1";
 
-            var result = await _controller.GetQuestionById(id, CancellationToken.None, _query);
+            var result = await _controller.GetQuestionById(id, null, CancellationToken.None, _query);
             Assert.IsType<ViewResult>(result);
 
             var viewResult = result as ViewResult;
@@ -128,13 +128,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task GetQuestionById_Should_ThrowException_When_IdIsNull()
         {
-            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionById(null!, CancellationToken.None, _query));
+            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionById(null!, null, CancellationToken.None, _query));
         }
 
         [Fact]
         public async Task GetQuestionById_Should_ThrowException_When_IdIsNotFound()
         {
-            await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetQuestionById("not a real question id", CancellationToken.None,  _query));
+            await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetQuestionById("not a real question id", null, CancellationToken.None, _query));
         }
 
         [Fact]
@@ -176,7 +176,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var redirectToActionResult = result as RedirectToActionResult;
 
             Assert.NotNull(redirectToActionResult);
-            Assert.Equal("CheckYourAnswers", redirectToActionResult.ActionName);
+            
+            Assert.Equal("Pages", redirectToActionResult.ControllerName);
+            Assert.Equal("GetByRoute", redirectToActionResult.ActionName);
+            Assert.NotNull(redirectToActionResult.RouteValues);
+            Assert.Equal("check-answers", redirectToActionResult.RouteValues["route"]);
         }
     }
 }

@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Web.Helpers;
@@ -28,11 +29,11 @@ public class UrlHistoryMiddlewareTests
         history.Push(URL_SECOND);
         history.Push(URL_THIRD);
 
-        _cacher.Set(UrlHistory.CACHE_KEY, TimeSpan.FromHours(1), history);
+        _cacher.Set(UrlHistoryCacher.CACHE_KEY, TimeSpan.FromHours(1), history);
     }
 
     [Fact]
-    public void Should_PopHistory_When_Navigating_Backwards()
+    public async Task Should_PopHistory_When_Navigating_Backwards()
     {
         var requestMock = new Mock<HttpRequest>();
         requestMock.SetupGet(request => request.Host).Returns(new HostString("www.website.com"));
@@ -44,8 +45,8 @@ public class UrlHistoryMiddlewareTests
         var nextDelegateMock = new Mock<RequestDelegate>();
         var urlHistory = new UrlHistoryMiddleware(nextDelegateMock.Object);
 
-        var history = new UrlHistory(_cacher);
-        urlHistory.InvokeAsync(contextMock.Object, history);
+        var history = new UrlHistoryCacher(_cacher);
+        await urlHistory.InvokeAsync(contextMock.Object, history);
 
         var historyCache = history.History;
         Assert.Equal(2, historyCache.Count);
@@ -53,7 +54,7 @@ public class UrlHistoryMiddlewareTests
     }
 
     [Fact]
-    public void Should_AddToHistory_When_Navigating_ToNewPage()
+    public async Task Should_AddToHistory_When_Navigating_ToNewPage()
     {
         var requestMock = new Mock<HttpRequest>();
         requestMock.SetupGet(request => request.IsHttps).Returns(false);
@@ -69,8 +70,8 @@ public class UrlHistoryMiddlewareTests
         var nextDelegateMock = new Mock<RequestDelegate>();
         var urlHistory = new UrlHistoryMiddleware(nextDelegateMock.Object);
 
-        var history = new UrlHistory(_cacher);
-        urlHistory.InvokeAsync(contextMock.Object, history);
+        var history = new UrlHistoryCacher(_cacher);
+        await urlHistory.InvokeAsync(contextMock.Object, history);
 
         var historyCache = history.History;
 

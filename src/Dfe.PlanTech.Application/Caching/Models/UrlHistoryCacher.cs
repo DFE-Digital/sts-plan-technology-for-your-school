@@ -1,14 +1,14 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 
-namespace Dfe.PlanTech.Application.Core;
+namespace Dfe.PlanTech.Application.Caching.Models;
 
-public class UrlHistory : IUrlHistory
+public class UrlHistoryCacher : IUrlHistoryCacher
 {
     public const string CACHE_KEY = "URL_HISTORY";
 
     private readonly ICacher _cacher;
 
-    public UrlHistory(ICacher cacher)
+    public UrlHistoryCacher(ICacher cacher)
     {
         _cacher = cacher ?? throw new ArgumentNullException(nameof(cacher));
     }

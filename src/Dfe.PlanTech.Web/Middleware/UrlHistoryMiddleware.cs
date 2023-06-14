@@ -15,7 +15,7 @@ public class UrlHistoryMiddleware
         _next = next;
     }
 
-    public async Task InvokeAsync(HttpContext httpContext, IUrlHistory history)
+    public async Task InvokeAsync(HttpContext httpContext, IUrlHistoryCacher history)
     {
         Uri targetUrl = GetRequestUri(httpContext);
 
@@ -44,7 +44,7 @@ public class UrlHistoryMiddleware
     /// <summary>
     /// Double check we're not adding duplicate history (i.e. refresh, submit, etc.) - if not, add to history.
     /// </summary>
-    private static void TryAddHistory(HttpContext httpContext, IUrlHistory history, Uri? lastVisitedHistory)
+    private static void TryAddHistory(HttpContext httpContext, IUrlHistoryCacher history, Uri? lastVisitedHistory)
     {
         if (!TryGetRefererUri(httpContext, out Uri? refererUri) || refererUri == null)
         {

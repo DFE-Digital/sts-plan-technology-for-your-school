@@ -1,5 +1,4 @@
-using Dfe.PlanTech.Application.Caching.Models;
-using Dfe.PlanTech.Application.Core;
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
@@ -10,9 +9,9 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("/question")]
 public class QuestionsController : BaseController<QuestionsController>
 {
-    private readonly SectionCacher _sectionCacher;
+    private readonly ISectionCacher _sectionCacher;
     
-    public QuestionsController(SectionCacher sectionCacher, ILogger<QuestionsController> logger, IUrlHistory history) : base(logger, history)
+    public QuestionsController(ISectionCacher sectionCacher, ILogger<QuestionsController> logger, IUrlHistoryCacher history) : base(logger, history)
     {
         _sectionCacher = sectionCacher;
     }

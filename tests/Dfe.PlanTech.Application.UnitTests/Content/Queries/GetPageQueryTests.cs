@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -10,6 +11,7 @@ public class GetPageQueryTests
 {
     private const string LANDING_PAGE_SLUG = "LandingPage";
     private readonly Mock<IContentRepository> _repoMock = new();
+    private readonly Mock<ISectionCacher> _sectionMock = new();
 
     private readonly List<Page> _mockData = new() {
         new Page(){
@@ -46,7 +48,7 @@ public class GetPageQueryTests
     [Fact]
     public async Task Should_Retrieve_Page_By_Slug()
     {
-        var query = new GetPageQuery(_repoMock.Object);
+        var query = new GetPageQuery(_repoMock.Object, _sectionMock.Object);
 
         var result = await query.GetPageBySlug(LANDING_PAGE_SLUG);
 
@@ -60,7 +62,7 @@ public class GetPageQueryTests
     [Fact]
     public async Task Should_ThrowException_When_SlugNotFound()
     {
-        var query = new GetPageQuery(_repoMock.Object);
+        var query = new GetPageQuery(_repoMock.Object, _sectionMock.Object);
 
         await Assert.ThrowsAsync<Exception>(async () => await query.GetPageBySlug("NOT A REAL SLUG"));
     }
