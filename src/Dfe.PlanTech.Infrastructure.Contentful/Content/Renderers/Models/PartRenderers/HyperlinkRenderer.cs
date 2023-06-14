@@ -1,7 +1,8 @@
-using System.Text;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Options;
+using Microsoft.Extensions.Logging;
+using System.Text;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 
@@ -18,7 +19,7 @@ public class HyperlinkRenderer : BaseRichTextContentPartRender
     {
         if (string.IsNullOrEmpty(content.Data?.Uri))
         {
-            //TODO: Log missing data;
+            renderers.Logger.LogError("{this} has no Uri", this);
             return stringBuilder;
         }
 
@@ -32,7 +33,7 @@ public class HyperlinkRenderer : BaseRichTextContentPartRender
 
         stringBuilder.Append("\">");
 
-        RenderChildren(content, renderers, stringBuilder);
+        renderers.RenderChildren(content, stringBuilder);
 
         stringBuilder.Append(content.Value);
 

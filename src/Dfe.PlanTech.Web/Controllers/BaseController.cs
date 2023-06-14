@@ -17,22 +17,6 @@ public class BaseController<TConcreteController> : Controller
         this.history = history;
     }
 
-    /// <summary>
-    /// Gets last Visited URL for user from <see chref="UrlHistoryMiddleware"/>
-    /// </summary>
-    /// <returns></returns>
-    protected string GetLastVisitedUrl()
-    {
-        var pageHistory = history.History;
-
-        if (pageHistory != null && pageHistory.TryPeek(out string? lastVisitedPage))
-        {
-            return lastVisitedPage ?? "";
-        }
-
-        return "";
-    }
-
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

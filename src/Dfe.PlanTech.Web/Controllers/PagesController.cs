@@ -14,11 +14,11 @@ public class PagesController : BaseController<PagesController>
     }
 
     [HttpGet("/{route?}")]
-    public async Task<IActionResult> GetByRoute(string? route, [FromServices] GetPageQuery query)
+    public async Task<IActionResult> GetByRoute(string? route, CancellationToken cancellationToken, [FromServices] GetPageQuery query)
     {
         string slug = GetSlug(route);
 
-        var page = await query.GetPageBySlug(slug);
+        var page = await query.GetPageBySlug(slug, cancellationToken);
 
         return View("Page", page);
     }

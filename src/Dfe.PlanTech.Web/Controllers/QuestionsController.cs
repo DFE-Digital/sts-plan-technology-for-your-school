@@ -21,23 +21,23 @@ public class QuestionsController : BaseController<QuestionsController>
     /// <param name="query"></param>
     /// <exception cref="ArgumentNullException">Throws exception when Id is null or empty</exception>
     /// <returns></returns>
-    public async Task<IActionResult> GetQuestionById(string id, [FromServices] GetQuestionQuery query)
+    public async Task<IActionResult> GetQuestionById(string id, CancellationToken cancellationToken, [FromServices] GetQuestionQuery query)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
 
-        var question = await query.GetQuestionById(id) ?? throw new KeyNotFoundException($"Could not find question with id {id}");
+        var question = await query.GetQuestionById(id, cancellationToken) ?? throw new KeyNotFoundException($"Could not find question with id {id}");
         
         var viewModel = new QuestionViewModel()
         {
             Question = question,
-            BackUrl = GetLastVisitedUrl()
+            BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment"
         };
 
         return View("Question", viewModel);
     }
 
     [HttpPost("SubmitAnswer")]
-    public async Task<IActionResult> SubmitAnswer(SubmitAnswerDto submitAnswerDto)
+    public IActionResult SubmitAnswer(SubmitAnswerDto submitAnswerDto)
     {
         if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
 
@@ -47,7 +47,7 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
     [HttpGet("check-answers")]
-    public async Task<IActionResult> CheckYourAnswers()
+    public IActionResult CheckYourAnswers()
     {
         return View("CheckYourAnswers");
     }

@@ -110,7 +110,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var id = "Question1";
 
-            var result = await _controller.GetQuestionById(id, _query);
+            var result = await _controller.GetQuestionById(id, CancellationToken.None, _query);
             Assert.IsType<ViewResult>(result);
 
             var viewResult = result as ViewResult;
@@ -128,30 +128,30 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task GetQuestionById_Should_ThrowException_When_IdIsNull()
         {
-            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionById(null!, _query));
+            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionById(null!, CancellationToken.None, _query));
         }
 
         [Fact]
         public async Task GetQuestionById_Should_ThrowException_When_IdIsNotFound()
         {
-            await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetQuestionById("not a real question id", _query));
+            await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetQuestionById("not a real question id", CancellationToken.None,  _query));
         }
 
         [Fact]
-        public async Task SubmitAnswer_Should_ThrowException_When_NullArgument()
+        public void SubmitAnswer_Should_ThrowException_When_NullArgument()
         {
-            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.SubmitAnswer(null!));
+            Assert.ThrowsAny<ArgumentNullException>(() => _controller.SubmitAnswer(null!));
         }
 
         [Fact]
-        public async Task SubmitAnswer_Should_RedirectToNextQuestion_When_NextQuestionId_Exists()
+        public void SubmitAnswer_Should_RedirectToNextQuestion_When_NextQuestionId_Exists()
         {
             var submitAnswerDto = new SubmitAnswerDto()
             {
                 NextQuestionId = "Question2"
             };
 
-            var result = await _controller.SubmitAnswer(submitAnswerDto);
+            var result = _controller.SubmitAnswer(submitAnswerDto);
 
             Assert.IsType<RedirectToActionResult>(result);
 
@@ -165,11 +165,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public async Task SubmitAnswer_Should_RedirectTo_CheckYourAnswers_When_NextQuestionId_IsNull()
+        public void SubmitAnswer_Should_RedirectTo_CheckYourAnswers_When_NextQuestionId_IsNull()
         {
             var submitAnswerDto = new SubmitAnswerDto();
 
-            var result = await _controller.SubmitAnswer(submitAnswerDto);
+            var result = _controller.SubmitAnswer(submitAnswerDto);
 
             Assert.IsType<RedirectToActionResult>(result);
 

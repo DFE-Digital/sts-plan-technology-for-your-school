@@ -10,9 +10,9 @@ public class GetQuestionQuery : ContentRetriever
     {
     }
 
-    public async Task<Question?> GetQuestionById(string id)
+    public async Task<Question?> GetQuestionById(string id, CancellationToken cancellationToken = default)
     {
-        var question = await repository.GetEntityById<Question>(id, 3);
+        var question = await repository.GetEntityById<Question>(id, 3, cancellationToken);
 
         return question;
     }

@@ -1,7 +1,6 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Domain.Caching.Models;
-using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using Microsoft.AspNetCore.Http;
@@ -13,9 +12,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware;
 
 public class UrlHistoryMiddlewareTests
 {
-    private const string URL_FIRST = "www.website.com/one";
-    private const string URL_SECOND = "www.website.com/two";
-    private const string URL_THIRD = "www.website.com/three";
+    private readonly Uri URL_FIRST = new("https://www.website.com/one");
+    private readonly Uri URL_SECOND = new("https://www.website.com/two");
+    private readonly Uri URL_THIRD = new("https://www.website.com/three");
+    private readonly Uri URL_FOURTH = new("https://www.website.com/four");
 
     private readonly ICacher _cacher;
 
@@ -23,7 +23,7 @@ public class UrlHistoryMiddlewareTests
     {
         _cacher = new Cacher(new CacheOptions(), new MemoryCache(new MemoryCacheOptions()));
 
-        var history = new Stack<string>();
+        var history = new Stack<Uri>();
         history.Push(URL_FIRST);
         history.Push(URL_SECOND);
         history.Push(URL_THIRD);
@@ -56,10 +56,11 @@ public class UrlHistoryMiddlewareTests
     public void Should_AddToHistory_When_Navigating_ToNewPage()
     {
         var requestMock = new Mock<HttpRequest>();
-        requestMock.SetupGet(request => request.Host).Returns(new HostString("www.website.com"));
-        requestMock.SetupGet(request => request.Path).Returns("/five");
+        requestMock.SetupGet(request => request.IsHttps).Returns(false);
+        requestMock.SetupGet(request => request.Host).Returns(new HostString(URL_FOURTH.Host));
+        requestMock.SetupGet(request => request.Path).Returns(URL_FOURTH.PathAndQuery);
         requestMock.SetupGet(request => request.Headers).Returns(new HeaderDictionary(){
-            { "Referer", "www.website.com/four" }
+            { "Referer", URL_FOURTH.ToString() }
         });
 
         var contextMock = new Mock<HttpContext>();
@@ -73,7 +74,7 @@ public class UrlHistoryMiddlewareTests
 
         var historyCache = history.History;
 
+        Assert.Equal(URL_FOURTH, historyCache.Peek());
         Assert.Equal(4, historyCache.Count);
-        Assert.Equal("www.website.com/four", historyCache.Peek());
     }
 }

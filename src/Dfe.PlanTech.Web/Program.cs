@@ -1,22 +1,11 @@
-using Dfe.PlanTech.Application.Caching.Interfaces;
-using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Helpers;
-using Dfe.PlanTech.Domain.Caching.Interfaces;
-using Dfe.PlanTech.Domain.Caching.Models;
-using Dfe.PlanTech.Domain.Content.Models.Options;
-using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
+using Dfe.PlanTech.Web;
 using Dfe.PlanTech.Infrastructure.SignIn;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using GovUk.Frontend.AspNetCore;
-using Microsoft.IdentityModel.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
-
-#if DEBUG
-//TODO: Remove!
-IdentityModelEventSource.ShowPII = true;
-#endif 
 
 builder.Services.AddApplicationInsightsTelemetry();
 
@@ -24,46 +13,11 @@ builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.AddControllersWithViews();
 builder.Services.AddGovUkFrontend();
 
-builder.Services.SetupContentfulClient(builder.Configuration, "Contentful", HttpClientPolicyExtensions.AddRetryPolicy);
-
-builder.Services.AddScoped((_) => new TextRendererOptions(new List<MarkOption>() {
-    new MarkOption(){
-        Mark = "bold",
-        HtmlTag = "span",
-        Classes = "govuk-body govuk-!-font-weight-bold",
-    }
-}));
-
-builder.Services.AddScoped((_) => new ParagraphRendererOptions()
-{
-    Classes = "govuk-body",
-});
-
-builder.Services.AddScoped((_) => new HyperlinkRendererOptions()
-{
-    Classes = "govuk-link",
-});
-
-builder.Services.AddScoped<ComponentViewsFactory>();
-
+builder.Services.AddCaching();
 builder.Services.AddCQRSServices();
-
-
-builder.Services.AddDistributedMemoryCache();
-
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromSeconds(10);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-    options.Cookie.Name = ".Dfe.PlanTech";
-});
-
-builder.Services.AddSingleton<ICacheOptions>((services) => new CacheOptions());
-builder.Services.AddTransient<ICacher, Cacher>();
-builder.Services.AddTransient<IUrlHistory, UrlHistory>();
-
+builder.Services.AddContentfulServices(builder.Configuration);
 builder.Services.AddDfeSignIn(builder.Configuration);
+builder.Services.AddScoped<ComponentViewsFactory>();
 
 var app = builder.Build();
 

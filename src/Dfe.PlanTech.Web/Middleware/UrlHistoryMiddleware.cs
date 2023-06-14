@@ -17,11 +17,11 @@ public class UrlHistoryMiddleware
 
     public async Task InvokeAsync(HttpContext httpContext, IUrlHistory history)
     {
-        var targetUrl = httpContext.Request.Host + httpContext.Request.Path;
+        Uri targetUrl = GetRequestUri(httpContext);
 
-        var lastVisitedHistory = history.LastVisitedUrl;
+        var lastUrl = history.LastVisitedUrl;
 
-        bool navigatingBackwards = !string.IsNullOrEmpty(lastVisitedHistory) && lastVisitedHistory.Contains(targetUrl);
+        bool navigatingBackwards = UrlsMatch(lastUrl, targetUrl);
 
         switch (navigatingBackwards)
         {
@@ -33,7 +33,7 @@ public class UrlHistoryMiddleware
 
             case false:
                 {
-                    TryAddHistory(httpContext, history, lastVisitedHistory);
+                    TryAddHistory(httpContext, history, lastUrl);
                     break;
                 }
         }
@@ -44,20 +44,46 @@ public class UrlHistoryMiddleware
     /// <summary>
     /// Double check we're not adding duplicate history (i.e. refresh, submit, etc.) - if not, add to history.
     /// </summary>
-    private static void TryAddHistory(HttpContext httpContext, IUrlHistory history, string? lastVisitedHistory)
+    private static void TryAddHistory(HttpContext httpContext, IUrlHistory history, Uri? lastVisitedHistory)
+    {
+        if (!TryGetRefererUri(httpContext, out Uri? refererUri) || refererUri == null)
+        {
+            return;
+        }
+        bool isDuplicateUrl = UrlsMatch(lastVisitedHistory, refererUri);
+
+        if (!isDuplicateUrl)
+        {
+            history.AddUrlToHistory(refererUri);
+        }
+    }
+
+    /// <summary>
+    /// Checks to ensure the PathAndQuery of both URIs are equal
+    /// </summary>
+    /// <param name="lastUrl"></param>
+    /// <param name="otherUrl"></param>
+    /// <returns></returns>
+    private static bool UrlsMatch(Uri? lastUrl, Uri otherUrl) => lastUrl != null && lastUrl.PathAndQuery.Equals(otherUrl.PathAndQuery);
+
+    private static Uri GetRequestUri(HttpContext httpContext)
+    {
+        var fullPath = httpContext.Request.IsHttps ? "https://" : "http://" + httpContext.Request.Host + httpContext.Request.Path;
+
+        return new Uri(fullPath);
+    }
+
+    private static bool TryGetRefererUri(HttpContext httpContext, out Uri? refererUri)
     {
         var lastUrl = httpContext.Request.Headers["Referer"].ToString();
 
         if (string.IsNullOrEmpty(lastUrl))
         {
-            return;
+            refererUri = null;
+            return false;
         }
 
-        bool isDuplicateUrl = !string.IsNullOrEmpty(lastVisitedHistory) && lastVisitedHistory.Equals(lastUrl);
-
-        if (!isDuplicateUrl)
-        {
-            history.AddUrlToHistory(lastUrl);
-        }
+        refererUri = new Uri(lastUrl);
+        return true;
     }
 }

@@ -16,22 +16,4 @@ public abstract class BaseRichTextContentPartRender : IRichTextContentPartRender
     public bool Accepts(IRichTextContent content) => content.MappedNodeType == _nodeType;
 
     public abstract StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection richTextRendererCollection, StringBuilder stringBuilder);
-
-    public StringBuilder RenderChildren(IRichTextContent content, IRichTextContentPartRendererCollection renderers, StringBuilder stringBuilder)
-    {
-        foreach (var subContent in content.Content)
-        {
-            var renderer = renderers.GetRendererForContent(subContent);
-
-            if (renderer == null)
-            {
-                //TODO: Add logging for missing content type
-                continue;
-            }
-
-            renderer.AddHtml(subContent, renderers, stringBuilder);
-        }
-
-        return stringBuilder;
-    }
 }
