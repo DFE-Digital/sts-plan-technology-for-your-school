@@ -10,6 +10,11 @@ namespace Dfe.PlanTech.Infrastructure.SignIn;
 
 public static class DfeOpenIdConnectEvents
 {
+    /// <summary>
+    /// Runs once a user's token is validated; adds a user's role claims from DFE Public API
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
     public static async Task OnTokenValidated(TokenValidatedContext context)
     {
         var config = context.HttpContext.RequestServices.GetRequiredService<IDfeSignInConfiguration>();
