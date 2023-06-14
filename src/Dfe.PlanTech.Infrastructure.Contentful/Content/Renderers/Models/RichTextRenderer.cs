@@ -1,5 +1,6 @@
 using System.Text;
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 
@@ -8,12 +9,40 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 /// </summary>
 public class RichTextRenderer : IRichTextRenderer, IRichTextContentPartRendererCollection
 {
+    private readonly ILogger<IRichTextRenderer> _logger;
     private readonly List<IRichTextContentPartRenderer> _renderers;
 
-    public RichTextRenderer(IEnumerable<IRichTextContentPartRenderer> renderers)
+    public RichTextRenderer(ILogger<IRichTextRenderer> logger, IEnumerable<IRichTextContentPartRenderer> renderers)
     {
+        _logger = logger;
         _renderers = renderers.ToList();
     }
+
+    public string ToHtml(IRichTextContent content)
+    {
+        var stringBuilder = new StringBuilder();
+
+        RenderChildren(content, stringBuilder);
+
+        return stringBuilder.ToString();
+    }
+
+    public void RenderChildren(IRichTextContent content, StringBuilder stringBuilder)
+    {
+        foreach (var subContent in content.Content)
+        {
+            var renderer = GetRendererForContent(subContent);
+
+            if (renderer == null)
+            {
+                _logger.LogWarning("Could not find renderer for {subContent}", subContent);
+                continue;
+            }
+
+            renderer.AddHtml(subContent, this, stringBuilder);
+        }
+    }
+
 
     /// <summary>
     /// Finds matching renderer for the given content, based on the content's node type
@@ -22,29 +51,4 @@ public class RichTextRenderer : IRichTextRenderer, IRichTextContentPartRendererC
     /// <returns>Matching part renderer for content (or null if not found)</returns>
     public IRichTextContentPartRenderer? GetRendererForContent(IRichTextContent content)
     => _renderers.FirstOrDefault(renderer => renderer.Accepts(content));
-
-    /// <summary>
-    /// Converts content to HTML string
-    /// </summary>
-    /// <param name="content">Content to convert</param>
-    /// <returns>Content converted to HTML string (including tags, classes, etc.)</returns>
-    public string ToHtml(IRichTextContent content)
-    {
-        var stringBuilder = new StringBuilder();
-
-        foreach (var subContent in content.Content)
-        {
-            var renderer = GetRendererForContent(subContent);
-
-            if (renderer == null)
-            {
-                //TODO: Log missing content type
-                continue;
-            }
-
-            renderer.AddHtml(subContent, this, stringBuilder);
-        }
-
-        return stringBuilder.ToString();
-    }
 }
