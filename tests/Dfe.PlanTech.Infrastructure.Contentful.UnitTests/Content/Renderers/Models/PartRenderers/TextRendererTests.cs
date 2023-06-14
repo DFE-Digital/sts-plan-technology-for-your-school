@@ -23,7 +23,7 @@ public class TextRendererTests
             Value = value,
         };
 
-        var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>() { }));
+        var renderer = new TextRenderer(new TextRendererOptions(new NullLogger<TextRendererOptions>(), new List<MarkOption>() { }));
 
         var accepted = renderer.Accepts(content);
 
@@ -39,7 +39,7 @@ public class TextRendererTests
             Value = "hyperlink"
         };
 
-        var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>() { }));
+        var renderer = new TextRenderer(new TextRendererOptions(new NullLogger<TextRendererOptions>(), new List<MarkOption>() { }));
 
         var accepted = renderer.Accepts(content);
 
@@ -58,7 +58,7 @@ public class TextRendererTests
             HtmlTag = htmlTagForBold,
         };
 
-        var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>() { boldMarkOption }));
+        var renderer = new TextRenderer(new TextRendererOptions(new NullLogger<TextRendererOptions>(), new List<MarkOption>() { boldMarkOption }));
         var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), new[] { renderer });
 
         const string value = "Paragraph text";
@@ -95,7 +95,7 @@ public class TextRendererTests
             Classes = testClasses
         };
 
-        var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>() { boldMarkOption }));
+        var renderer = new TextRenderer(new TextRendererOptions(new NullLogger<TextRendererOptions>(), new List<MarkOption>() { boldMarkOption }));
         var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), new[] { renderer });
 
         const string value = "Paragraph text";
@@ -117,8 +117,8 @@ public class TextRendererTests
 
         Assert.Equal($"<{htmlTagForBold} class=\"{testClasses}\">{value}</{htmlTagForBold}>", html);
     }
-    
-    
+
+
     [Fact]
     public void Should_RenderText_When_HasNoMarks()
     {
@@ -133,7 +133,7 @@ public class TextRendererTests
             Classes = testClasses
         };
 
-        var renderer = new TextRenderer(new TextRendererOptions(new List<MarkOption>() { boldMarkOption }));
+        var renderer = new TextRenderer(new TextRendererOptions(new NullLogger<TextRendererOptions>(), new List<MarkOption>() { boldMarkOption }));
         var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), new[] { renderer });
 
         const string value = "Paragraph text";
