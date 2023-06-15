@@ -1,0 +1,15 @@
+using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Domain.Caching.Models;
+
+namespace Dfe.PlanTech.Application.Caching.Models;
+
+public class QuestionnaireCacher
+{
+    private const string CACHE_KEY = "QuestionnaireCache";
+
+    private readonly ICacher _cacher;
+
+    public QuestionnaireCache? Cached => _cacher.Get(CACHE_KEY, () => new QuestionnaireCache());
+
+    public void SaveCache(QuestionnaireCache cache) => _cacher.Set(CACHE_KEY, TimeSpan.FromHours(1), cache);
+}
