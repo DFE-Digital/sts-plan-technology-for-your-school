@@ -1,5 +1,5 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
-using Dfe.PlanTech.Application.Core;
+using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models.Options;
@@ -54,7 +54,8 @@ public static class ProgramExtensions
         services.AddSingleton<ICacheOptions>((services) => new CacheOptions());
         services.AddTransient<ICacher, Cacher>();
         services.AddTransient<IUrlHistory, UrlHistory>();
-
+        services.AddTransient<IQuestionnaireCacher, QuestionnaireCacher>();
+        
         return services;
     }
 }

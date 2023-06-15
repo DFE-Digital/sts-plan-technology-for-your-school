@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 
-namespace Dfe.PlanTech.Application.Core;
+namespace Dfe.PlanTech.Application.Caching.Models;
 
 public class UrlHistory : IUrlHistory
 {

@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Application.Core;
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
@@ -20,14 +20,15 @@ public class QuestionsController : BaseController<QuestionsController>
     /// 
     /// </summary>
     /// <param name="id"></param>
+    /// <param name="section">Name of current section (if starting new)</param>
     /// <param name="query"></param>
     /// <exception cref="ArgumentNullException">Throws exception when Id is null or empty</exception>
     /// <returns></returns>
-    public async Task<IActionResult> GetQuestionById(string id, CancellationToken cancellationToken, [FromServices] GetQuestionQuery query)
+    public async Task<IActionResult> GetQuestionById(string id, string? section, CancellationToken cancellationToken, [FromServices] GetQuestionQuery query)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
 
-        var question = await query.GetQuestionById(id, cancellationToken) ?? throw new KeyNotFoundException($"Could not find question with id {id}");
+        var question = await query.GetQuestionById(id, section, cancellationToken) ?? throw new KeyNotFoundException($"Could not find question with id {id}");
         
         var viewModel = new QuestionViewModel()
         {
@@ -43,14 +44,8 @@ public class QuestionsController : BaseController<QuestionsController>
     {
         if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
 
-        if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("CheckYourAnswers");
+        if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("GetByRoute", "Pages", new { route = "check-answers" });
 
         return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.NextQuestionId });
-    }
-
-    [HttpGet("check-answers")]
-    public IActionResult CheckYourAnswers()
-    {
-        return View("CheckYourAnswers");
     }
 }

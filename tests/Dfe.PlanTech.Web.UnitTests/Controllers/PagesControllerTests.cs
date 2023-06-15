@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -43,15 +42,27 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                     Text = INDEX_TITLE,
                 },
                 Content = Array.Empty<IContentComponent>()
-            }
-        };
+                }
+            };
 
         private readonly PagesController _controller;
         private readonly GetPageQuery _query;
+        private readonly Mock<IQuestionnaireCacher> _questionnaireCacherMock = new Mock<IQuestionnaireCacher>();
 
         public PagesControllerTests()
         {
+            Mock<IContentRepository> repositoryMock = SetupRepositoryMock();
 
+            var mockLogger = new Mock<ILogger<PagesController>>();
+            var historyMock = new Mock<IUrlHistory>();
+
+            _controller = new PagesController(mockLogger.Object, historyMock.Object);
+
+            _query = new GetPageQuery(_questionnaireCacherMock.Object, repositoryMock.Object);
+        }
+
+        private Mock<IContentRepository> SetupRepositoryMock()
+        {
             var repositoryMock = new Mock<IContentRepository>();
             repositoryMock.Setup(repo => repo.GetEntities<Page>(It.IsAny<IGetEntitiesOptions>(), It.IsAny<CancellationToken>())).ReturnsAsync((IGetEntitiesOptions options, CancellationToken _) =>
             {
@@ -68,13 +79,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
                 return Array.Empty<Page>();
             });
-
-            var mockLogger = new Mock<ILogger<PagesController>>();
-            var historyMock = new Mock<IUrlHistory>();
-
-            _controller = new PagesController(mockLogger.Object, historyMock.Object);
-
-            _query = new GetPageQuery(repositoryMock.Object);
+            return repositoryMock;
         }
 
         [Fact]

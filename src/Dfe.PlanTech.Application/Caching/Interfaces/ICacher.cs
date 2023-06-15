@@ -64,4 +64,12 @@ public interface ICacher
     /// <param name="timeToLive"></param>
     /// <returns></returns>
     public void Set<T>(string key, TimeSpan timeToLive, T? value);
+
+    /// <summary>
+    /// Sets value in cache using default time to live options
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="value"></param>
+    /// <typeparam name="T"></typeparam>
+    public void Set<T>(string key, T? value);
 }

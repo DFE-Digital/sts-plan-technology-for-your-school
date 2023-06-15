@@ -6,6 +6,6 @@ resource "null_resource" "keyvault-assign-identity" {
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
-    command     = local.keyvault-assign-identity
+    command     = local.keyvault-assign-identity_command
   }
 }
