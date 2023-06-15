@@ -4,10 +4,9 @@ using Dfe.PlanTech.Infrastructure.SignIn;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using GovUk.Frontend.AspNetCore;
-using Microsoft.IdentityModel.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
-IdentityModelEventSource.ShowPII = true;
+
 builder.Services.AddApplicationInsightsTelemetry();
 
 // Add services to the container.
