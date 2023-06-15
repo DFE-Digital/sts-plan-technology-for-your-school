@@ -26,10 +26,12 @@ describe("dropdown", () => {
 
       cy.get("form button.govuk-button").click();
 
+      let encodedHref = decodeURIComponent(href);
+
       cy.get("a.govuk-back-link")
         .should("exist")
         .and("have.attr", "href")
-        .and("equal", href);
+        .and("equal", encodedHref);
     });
   });
 
@@ -43,10 +45,12 @@ describe("dropdown", () => {
 
       cy.get("form button.govuk-button").click();
 
+      let encodedHref = decodeURIComponent(href);
+
       cy.get("a.govuk-back-link")
         .should("exist")
         .and("have.attr", "href")
-        .and("equal", href);
+        .and("equal", encodedHref);
 
       cy.get("a.govuk-back-link").click();
 
