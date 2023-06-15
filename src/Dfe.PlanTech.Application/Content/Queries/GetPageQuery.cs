@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
@@ -8,8 +9,11 @@ namespace Dfe.PlanTech.Application.Content.Queries;
 
 public class GetPageQuery : ContentRetriever
 {
-    public GetPageQuery(IContentRepository repository) : base(repository)
+    private readonly IQuestionnaireCacher _cacher;
+
+    public GetPageQuery(IQuestionnaireCacher cacher, IContentRepository repository) : base(repository)
     {
+        _cacher = cacher;
     }
 
     /// <summary>
@@ -23,6 +27,11 @@ public class GetPageQuery : ContentRetriever
         var pages = await repository.GetEntities<Page>(options, cancellationToken);
 
         var page = pages.FirstOrDefault() ?? throw new Exception($"Could not find page with slug {slug}");
+
+        if(page.DisplayTopicTitle){
+            var cached = _cacher.Cached!;
+            page.SectionTitle = cached.CurrentSectionTitle;
+        }
 
         return page;
     }

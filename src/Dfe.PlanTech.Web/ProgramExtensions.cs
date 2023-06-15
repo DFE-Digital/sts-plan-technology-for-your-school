@@ -54,7 +54,8 @@ public static class ProgramExtensions
         services.AddSingleton<ICacheOptions>((services) => new CacheOptions());
         services.AddTransient<ICacher, Cacher>();
         services.AddTransient<IUrlHistory, UrlHistory>();
-
+        services.AddTransient<IQuestionnaireCacher, QuestionnaireCacher>();
+        
         return services;
     }
 }
