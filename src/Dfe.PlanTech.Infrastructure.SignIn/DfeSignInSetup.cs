@@ -19,6 +19,8 @@ public static class DfeSignInSetup
         .AddOpenIdConnect(options => ConfigureOpenIdConnect(options, config))
         .AddCookie(options => ConfigureCookie(options, config));
 
+        services.AddScoped<IDfeSignInConfiguration>((services) => config);
+
         return services;
     }
 
