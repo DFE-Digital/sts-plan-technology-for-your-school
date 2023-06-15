@@ -48,12 +48,6 @@ public static class DfeSignInSetup
         options.Authority = config.Authority;
         options.MetadataAddress = config.MetaDataUrl;
 
-        //DUE TO NOT USING CORRECT METADATA + AUTHORITY VALUES
-        //TODO: Remove once using correct DFE Sign in configuration
-#if DEBUG
-        options.RequireHttpsMetadata = false;
-#endif
-
         options.CallbackPath = new PathString(config.CallbackUrl);
         options.SignedOutRedirectUri = new PathString(config.SignoutRedirectUrl);
         options.SignedOutCallbackPath = new PathString(config.SignoutCallbackUrl);
