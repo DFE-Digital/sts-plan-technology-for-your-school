@@ -64,4 +64,12 @@ public class Cacher : ICacher
 
         _memoryCache.Set(key, value, cacheEntryOptions);
     }
+
+    public void Set<T>(string key, T? value)
+    {
+        var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(_options.DefaultTimeToLive);
+
+        _memoryCache.Set(key, value, cacheEntryOptions);
+    }
+
 }

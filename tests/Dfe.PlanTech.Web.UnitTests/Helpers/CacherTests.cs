@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Web.Helpers;
 using Microsoft.Extensions.Caching.Memory;
@@ -71,15 +72,37 @@ public class CacherTests
     {
         var testKey = "Testing";
         var testObject = "Test value";
-        
+
         var cacher = new Cacher(new CacheOptions(), _memoryCache);
-        
+
         cacher.Set(testKey, TimeSpan.FromMinutes(60), testObject);
-        
+
         var cachedResult = _memoryCache.Get<string>(testKey);
-        
+
         Assert.NotNull(cachedResult);
         Assert.Equal(testObject, cachedResult);
+    }
+
+    [Fact]
+    public void Set_Should_Save_Using_Default_CacheOptions()
+    {
+        var cacheOptionsMock = new Mock<ICacheOptions>();
+        cacheOptionsMock.SetupGet(cacheOptions => cacheOptions.DefaultTimeToLive)
+                        .Returns(TimeSpan.FromMinutes(60))
+                        .Verifiable();
+
+        var testKey = "Testing";
+        var testObject = "Test value";
+
+        var cacher = new Cacher(cacheOptionsMock.Object, _memoryCache);
+
+        cacher.Set(testKey, testObject);
+
+        var cachedResult = _memoryCache.Get<string>(testKey);
+
+        Assert.NotNull(cachedResult);
+        Assert.Equal(testObject, cachedResult);
+        cacheOptionsMock.VerifyGet(cacheOptions => cacheOptions.DefaultTimeToLive);
     }
 }
 
