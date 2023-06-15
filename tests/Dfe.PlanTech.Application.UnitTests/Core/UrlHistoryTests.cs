@@ -1,5 +1,5 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
-using Dfe.PlanTech.Application.Core;
+using Dfe.PlanTech.Application.Caching.Models;
 using Moq;
 
 namespace Dfe.PlanTech.Application.UnitTests.Core;
