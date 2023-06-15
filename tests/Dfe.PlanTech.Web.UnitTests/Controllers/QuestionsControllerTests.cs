@@ -68,10 +68,34 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
         private readonly QuestionsController _controller;
         private readonly GetQuestionQuery _query;
+        private readonly Mock<IQuestionnaireCacher> _questionnaireCacherMock;
 
         private readonly ICacher _cacher;
 
         public QuestionsControllerTests()
+        {
+            Mock<IContentRepository> repositoryMock = MockRepository();
+            _questionnaireCacherMock = MockQuestionnaireCacher();
+
+            var mockLogger = new Mock<ILogger<QuestionsController>>();
+
+            var historyMock = new Mock<IUrlHistory>();
+            _controller = new QuestionsController(mockLogger.Object, historyMock.Object);
+            _query = new GetQuestionQuery(_questionnaireCacherMock.Object, repositoryMock.Object);
+
+            _cacher = new Cacher(new CacheOptions(), new MemoryCache(new MemoryCacheOptions()));
+        }
+
+        private Mock<IQuestionnaireCacher> MockQuestionnaireCacher()
+        {
+            var mock = new Mock<IQuestionnaireCacher>();
+            mock.Setup(questionnaireCache => questionnaireCache.Cached).Returns(new QuestionnaireCache()).Verifiable();
+            mock.Setup(questionnaireCache => questionnaireCache.SaveCache(It.IsAny<QuestionnaireCache>())).Verifiable();
+
+            return mock;
+        }
+
+        private Mock<IContentRepository> MockRepository()
         {
             var repositoryMock = new Mock<IContentRepository>();
             repositoryMock.Setup(repo => repo.GetEntities<Question>(It.IsAny<IGetEntitiesOptions>(), It.IsAny<CancellationToken>())).ReturnsAsync((IGetEntitiesOptions options, CancellationToken _) =>
@@ -92,24 +116,15 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             repositoryMock.Setup(repo => repo.GetEntityById<Question>(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
                           .ReturnsAsync((string id, int include, CancellationToken _) => _questions.FirstOrDefault(question => question.Sys.Id == id));
-
-            var mockLogger = new Mock<ILogger<QuestionsController>>();
-
-            var historyMock = new Mock<IUrlHistory>();
-
-            _controller = new QuestionsController(mockLogger.Object, historyMock.Object);
-            _query = new GetQuestionQuery(repositoryMock.Object);
-
-            _cacher = new Cacher(new CacheOptions(), new MemoryCache(new MemoryCacheOptions()));
+            return repositoryMock;
         }
-
 
         [Fact]
         public async Task GetQuestionById_Should_ReturnQuestionPage_When_FetchingQuestionWithValidId()
         {
             var id = "Question1";
 
-            var result = await _controller.GetQuestionById(id, CancellationToken.None, _query);
+            var result = await _controller.GetQuestionById(id, null, CancellationToken.None, _query);
             Assert.IsType<ViewResult>(result);
 
             var viewResult = result as ViewResult;
@@ -127,13 +142,34 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task GetQuestionById_Should_ThrowException_When_IdIsNull()
         {
-            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionById(null!, CancellationToken.None, _query));
+            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionById(null!, null, CancellationToken.None, _query));
         }
 
         [Fact]
         public async Task GetQuestionById_Should_ThrowException_When_IdIsNotFound()
         {
-            await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetQuestionById("not a real question id", CancellationToken.None,  _query));
+            await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetQuestionById("not a real question id", null, CancellationToken.None, _query));
+        }
+
+        [Fact]
+        public async Task GetQuestionById_Should_SaveSectionTitle_When_NotNull()
+        {
+            var id = "Question1";
+            var sectionTitle = "Section title";
+
+            await _controller.GetQuestionById(id, sectionTitle, CancellationToken.None, _query);
+
+            _questionnaireCacherMock.Verify();
+        }
+
+        [Fact]
+        public async Task GetQuestionById_Should_NotSaveSectionTitle_When_Null()
+        {
+            var id = "Question1";
+            var result = await _controller.GetQuestionById(id, null, CancellationToken.None, _query);
+            
+            _questionnaireCacherMock.Verify(cache => cache.Cached, Times.Never);
+            _questionnaireCacherMock.Verify(cache => cache.SaveCache(It.IsAny<QuestionnaireCache>()), Times.Never);
         }
 
         [Fact]
