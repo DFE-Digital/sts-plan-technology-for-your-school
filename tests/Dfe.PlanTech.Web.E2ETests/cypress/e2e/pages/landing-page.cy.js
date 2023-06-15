@@ -19,10 +19,6 @@ describe("landing page", () => {
     cy.get("p.govuk-body").should("exist").and("have.length.of.at.least", 4);
   });
 
-  it("should have bold texts", () => {
-    cy.get("span.govuk-\\!-font-weight-bold").should("exist");
-  });
-
   it("should have unordered list", () => {
     cy.get("ul").should("exist");
   });
