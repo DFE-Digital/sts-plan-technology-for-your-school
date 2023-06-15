@@ -211,7 +211,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var redirectToActionResult = result as RedirectToActionResult;
 
             Assert.NotNull(redirectToActionResult);
-            Assert.Equal("CheckYourAnswers", redirectToActionResult.ActionName);
+            Assert.Equal("Pages", redirectToActionResult.ControllerName);
+            Assert.Equal("GetByRoute", redirectToActionResult.ActionName);
+            Assert.NotNull(redirectToActionResult.RouteValues);
+            Assert.Equal("check-answers", redirectToActionResult.RouteValues["route"]);
         }
     }
 }
