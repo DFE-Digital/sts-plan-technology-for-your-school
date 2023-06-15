@@ -18,14 +18,15 @@ public class QuestionsController : BaseController<QuestionsController>
     /// 
     /// </summary>
     /// <param name="id"></param>
+    /// <param name="section">Name of current section (if starting new)</param>
     /// <param name="query"></param>
     /// <exception cref="ArgumentNullException">Throws exception when Id is null or empty</exception>
     /// <returns></returns>
-    public async Task<IActionResult> GetQuestionById(string id, CancellationToken cancellationToken, [FromServices] GetQuestionQuery query)
+    public async Task<IActionResult> GetQuestionById(string id, string? section, CancellationToken cancellationToken, [FromServices] GetQuestionQuery query)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
 
-        var question = await query.GetQuestionById(id, cancellationToken) ?? throw new KeyNotFoundException($"Could not find question with id {id}");
+        var question = await query.GetQuestionById(id, section, cancellationToken) ?? throw new KeyNotFoundException($"Could not find question with id {id}");
         
         var viewModel = new QuestionViewModel()
         {
