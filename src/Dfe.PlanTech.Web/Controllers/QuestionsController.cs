@@ -2,10 +2,12 @@ using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
+[Authorize]
 [Route("/question")]
 public class QuestionsController : BaseController<QuestionsController>
 {

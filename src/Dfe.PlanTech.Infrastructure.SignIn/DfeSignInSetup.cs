@@ -19,7 +19,7 @@ public static class DfeSignInSetup
         .AddOpenIdConnect(options => ConfigureOpenIdConnect(options, config))
         .AddCookie(options => ConfigureCookie(options, config));
 
-        services.AddScoped<IDfeSignInConfiguration>((services) => config);
+        services.AddScoped((services) => config);
 
         return services;
     }
@@ -34,6 +34,7 @@ public static class DfeSignInSetup
     private static void ConfigureCookie(CookieAuthenticationOptions options, IDfeSignInConfiguration config)
     {
         options.Cookie.Name = config.CookieName;
+        options.Cookie.SameSite = SameSiteMode.Lax;
         options.ExpireTimeSpan = TimeSpan.FromMinutes(config.CookieExpireTimeSpanInMinutes);
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         options.SlidingExpiration = config.SlidingExpiration;

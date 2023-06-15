@@ -6,15 +6,23 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
-[Authorize]
 public class PagesController : BaseController<PagesController>
 {
     public PagesController(ILogger<PagesController> logger, IUrlHistory history) : base(logger, history)
     {
     }
 
+    [HttpGet("/")]
+    public async Task<IActionResult> Index(CancellationToken cancellationToken, [FromServices] GetPageQuery query)
+    {
+        var page = await query.GetPageBySlug("/", cancellationToken);
+
+        return View("Page", page);
+    }
+
+    [Authorize]
     [HttpGet("/{route?}")]
-    public async Task<IActionResult> GetByRoute(string? route, CancellationToken cancellationToken, [FromServices] GetPageQuery query)
+    public async Task<IActionResult> GetByRoute(string route, CancellationToken cancellationToken, [FromServices] GetPageQuery query)
     {
         string slug = GetSlug(route);
 
