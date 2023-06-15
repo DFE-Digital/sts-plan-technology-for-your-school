@@ -1,6 +1,7 @@
 ﻿using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Core;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
@@ -11,8 +12,17 @@ public class PagesController : BaseController<PagesController>
     {
     }
 
+    [HttpGet("/")]
+    public async Task<IActionResult> Index(CancellationToken cancellationToken, [FromServices] GetPageQuery query)
+    {
+        var page = await query.GetPageBySlug("/", cancellationToken);
+
+        return View("Page", page);
+    }
+
+    [Authorize]
     [HttpGet("/{route?}")]
-    public async Task<IActionResult> GetByRoute(string? route, CancellationToken cancellationToken, [FromServices] GetPageQuery query)
+    public async Task<IActionResult> GetByRoute(string route, CancellationToken cancellationToken, [FromServices] GetPageQuery query)
     {
         string slug = GetSlug(route);
 

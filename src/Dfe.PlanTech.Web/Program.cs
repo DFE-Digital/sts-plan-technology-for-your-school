@@ -1,6 +1,7 @@
 using Azure.Identity;
 using Dfe.PlanTech.Application.Helpers;
 using Dfe.PlanTech.Web;
+using Dfe.PlanTech.Infrastructure.SignIn;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using GovUk.Frontend.AspNetCore;
@@ -20,7 +21,11 @@ new DefaultAzureCredential());
 builder.Services.AddCaching();
 builder.Services.AddCQRSServices();
 builder.Services.AddContentfulServices(builder.Configuration);
+builder.Services.AddDfeSignIn(builder.Configuration);
 builder.Services.AddScoped<ComponentViewsFactory>();
+
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication();
 
 var app = builder.Build();
 
@@ -37,6 +42,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseMiddleware<UrlHistoryMiddleware>();
