@@ -19,33 +19,45 @@ public class UrlHistoryMiddleware
 
     public async Task InvokeAsync(HttpContext httpContext, IUrlHistory history)
     {
-        Uri targetUrl = GetRequestUri(httpContext);
-
-        var lastUrl = history.LastVisitedUrl;
-
-        bool navigatingBackwards = UrlsMatch(lastUrl, targetUrl);
-
-        _logger.LogTrace("Navigating to {targetUrl} from {lastUrl}. Navigating backwards is {navigatingBackwards}",
-                        lastUrl,
-                        targetUrl,
-                        navigatingBackwards);
-
-        switch (navigatingBackwards)
-        {
-            case true:
-                {
-                    history.RemoveLastUrl();
-                    break;
-                }
-
-            case false:
-                {
-                    TryAddHistory(httpContext, history, lastUrl);
-                    break;
-                }
-        }
+        ProcessRequestUri(httpContext, history);
 
         await _next(httpContext);
+    }
+
+    private void ProcessRequestUri(HttpContext httpContext, IUrlHistory history)
+    {
+        try
+        {
+            Uri targetUrl = GetRequestUri(httpContext);
+
+            var lastUrl = history.LastVisitedUrl;
+
+            bool navigatingBackwards = UrlsMatch(lastUrl, targetUrl);
+
+            _logger.LogTrace("Navigating to {targetUrl} from {lastUrl}. Navigating backwards is {navigatingBackwards}",
+                            lastUrl,
+                            targetUrl,
+                            navigatingBackwards);
+
+            switch (navigatingBackwards)
+            {
+                case true:
+                    {
+                        history.RemoveLastUrl();
+                        break;
+                    }
+
+                case false:
+                    {
+                        TryAddHistory(httpContext, history, lastUrl);
+                        break;
+                    }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error processing {host} and {path} - {message}", httpContext.Request.Host, httpContext.Request.Path, ex.Message);
+        }
     }
 
     /// <summary>
