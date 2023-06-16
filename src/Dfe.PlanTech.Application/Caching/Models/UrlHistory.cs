@@ -33,15 +33,6 @@ public class UrlHistory : IUrlHistory
     public void AddUrlToHistory(Uri url)
     {
         var history = History;
-        var lastVisitedUrl = LastVisitedUrl;
-
-        bool isDuplicateUrl = lastVisitedUrl != null && lastVisitedUrl.Equals(url);
-
-        if (isDuplicateUrl)
-        {
-            return;
-        }
-
         history.Push(url);
         SaveHistory(history);
     }
@@ -58,5 +49,4 @@ public class UrlHistory : IUrlHistory
     {
         _cacher.Set(CACHE_KEY, TimeSpan.FromHours(1), history);
     }
-
 }

@@ -49,4 +49,6 @@ public sealed class DfeSignInConfiguration : IDfeSignInConfiguration
 
     /// <inheritdoc/>
     public bool DiscoverRolesWithPublicApi { get; set; } = false;
+
+    public string FrontDoorUrl { get; init; } = null!;
 }
