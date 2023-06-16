@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
-using Dfe.PlanTech.Application.Core;
 
 namespace Dfe.PlanTech.Web.Middleware;
 
@@ -28,7 +27,7 @@ public class UrlHistoryMiddleware
     {
         try
         {
-            Uri targetUrl = GetRequestUri(httpContext);
+            Uri targetUrl = GetRequestUri(httpContext.Request);
 
             var lastUrl = history.LastVisitedUrl;
 
@@ -54,7 +53,7 @@ public class UrlHistoryMiddleware
                     }
             }
         }
-        catch (Exception ex)
+        catch (UriFormatException ex)
         {
             _logger.LogError("Error processing {host} and {path} - {message}", httpContext.Request.Host, httpContext.Request.Path, ex.Message);
         }
@@ -88,9 +87,9 @@ public class UrlHistoryMiddleware
     /// <returns></returns>
     private static bool UrlsMatch(Uri? lastUrl, Uri otherUrl) => lastUrl != null && lastUrl.LocalPath.Equals(otherUrl.LocalPath);
 
-    private static Uri GetRequestUri(HttpContext httpContext)
+    private static Uri GetRequestUri(HttpRequest request)
     {
-        var fullPath = httpContext.Request.IsHttps ? "https://" : "http://" + httpContext.Request.Host + httpContext.Request.Path;
+        var fullPath = string.Format("{0}://{1}{2}{3}", request.Scheme, request.Host, request.Path, request.QueryString);
 
         return new Uri(fullPath);
     }
