@@ -6,6 +6,7 @@ using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
@@ -43,7 +44,8 @@ public class UrlHistoryMiddlewareTests
         contextMock.Setup(context => context.Request).Returns(() => requestMock.Object);
 
         var nextDelegateMock = new Mock<RequestDelegate>();
-        var urlHistory = new UrlHistoryMiddleware(nextDelegateMock.Object);
+
+        var urlHistory = new UrlHistoryMiddleware(new NullLogger<UrlHistoryMiddleware>(), nextDelegateMock.Object);
 
         var history = new UrlHistory(_cacher);
         await urlHistory.InvokeAsync(contextMock.Object, history);
@@ -68,7 +70,7 @@ public class UrlHistoryMiddlewareTests
         contextMock.Setup(context => context.Request).Returns(() => requestMock.Object);
 
         var nextDelegateMock = new Mock<RequestDelegate>();
-        var urlHistory = new UrlHistoryMiddleware(nextDelegateMock.Object);
+        var urlHistory = new UrlHistoryMiddleware(new NullLogger<UrlHistoryMiddleware>(), nextDelegateMock.Object);
 
         var history = new UrlHistory(_cacher);
         await urlHistory.InvokeAsync(contextMock.Object, history);
