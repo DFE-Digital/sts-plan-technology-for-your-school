@@ -64,7 +64,8 @@ public static class DfeSignInSetup
 
         options.Events = new OpenIdConnectEvents()
         {
-            OnTokenValidated = DfeOpenIdConnectEvents.OnTokenValidated
+            OnTokenValidated = DfeOpenIdConnectEvents.OnTokenValidated,
+            OnRedirectToIdentityProvider = DfeOpenIdConnectEvents.OnRedirectToIdentityProvider
         };
     }
 

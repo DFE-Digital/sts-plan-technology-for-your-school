@@ -25,6 +25,13 @@ public static class DfeOpenIdConnectEvents
         }
     }
 
+    public static async Task OnRedirectToIdentityProvider(RedirectContext context)
+    {
+        var config = context.HttpContext.RequestServices.GetRequiredService<IDfeSignInConfiguration>();
+
+        context.ProtocolMessage.RedirectUri = $"{config.FrontDoorUrl}{config.CallbackUrl}";
+    }
+
     private static async Task AddRoleClaimsFromDfePublicApi(TokenValidatedContext context)
     {
         var dfePublicApi = context.HttpContext.RequestServices.GetRequiredService<IDfePublicApi>();

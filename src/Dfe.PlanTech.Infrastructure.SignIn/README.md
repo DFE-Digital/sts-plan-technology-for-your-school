@@ -14,12 +14,13 @@ Project containing code for integrating with DFE Sign-in
 
 You will need to set the following variables to match the ones set in the DFE Sign-in environment:
 
-```
-DfeSignIn:Authority
-DfeSignIn:MetadataUrl
-DfeSignIn:ClientId
-DfeSignIn:ClientSecret
-```
+| Env variable           | Description                                  | Example                   |
+| ---------------------- | -------------------------------------------- | ------------------------- |
+| DfeSignIn:Authority    |                                              |                           |
+| DfeSignIn:MetadataUrl  |                                              |                           |
+| DfeSignIn:ClientId     |                                              |                           |
+| DfeSignIn:ClientSecret |                                              |                           |
+| DfeSignIn:FrontDoorUrl | The resulting path for the app on front-door | https://dev.plan-tech.com |
 
 These should be set in the `Azure KeyVault` for deployed instances, or `dotnet user-secrets` for local testing.
 
