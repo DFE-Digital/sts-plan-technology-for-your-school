@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
-using Dfe.PlanTech.Application.Core;
 
 namespace Dfe.PlanTech.Web.Middleware;
 
@@ -19,33 +18,39 @@ public class UrlHistoryMiddleware
 
     public async Task InvokeAsync(HttpContext httpContext, IUrlHistory history)
     {
-        Uri targetUrl = GetRequestUri(httpContext);
-
-        var lastUrl = history.LastVisitedUrl;
-
-        bool navigatingBackwards = UrlsMatch(lastUrl, targetUrl);
-
-        _logger.LogTrace("Navigating to {targetUrl} from {lastUrl}. Navigating backwards is {navigatingBackwards}",
-                        lastUrl,
-                        targetUrl,
-                        navigatingBackwards);
-
-        switch (navigatingBackwards)
-        {
-            case true:
-                {
-                    history.RemoveLastUrl();
-                    break;
-                }
-
-            case false:
-                {
-                    TryAddHistory(httpContext, history, lastUrl);
-                    break;
-                }
-        }
+        ProcessRequestUri(httpContext, history);
 
         await _next(httpContext);
+    }
+
+    private void ProcessRequestUri(HttpContext httpContext, IUrlHistory history)
+    {
+        if (TryGetRequestUri(httpContext.Request, out Uri? targetUrl) && targetUrl != null)
+        {
+            var lastUrl = history.LastVisitedUrl;
+
+            bool navigatingBackwards = UrlsMatch(lastUrl, targetUrl);
+
+            _logger.LogTrace("Navigating to {targetUrl} from {lastUrl}. Navigating backwards is {navigatingBackwards}",
+                            lastUrl,
+                            targetUrl,
+                            navigatingBackwards);
+
+            switch (navigatingBackwards)
+            {
+                case true:
+                    {
+                        history.RemoveLastUrl();
+                        break;
+                    }
+
+                case false:
+                    {
+                        TryAddHistory(httpContext, history, lastUrl);
+                        break;
+                    }
+            }
+        }
     }
 
     /// <summary>
@@ -76,11 +81,26 @@ public class UrlHistoryMiddleware
     /// <returns></returns>
     private static bool UrlsMatch(Uri? lastUrl, Uri otherUrl) => lastUrl != null && lastUrl.LocalPath.Equals(otherUrl.LocalPath);
 
-    private static Uri GetRequestUri(HttpContext httpContext)
+    /// <summary>
+    /// Creates a Uri from the request fields
+    /// </summary>
+    /// <param name="lastUrl"></param>
+    /// <param name="otherUrl"></param>
+    /// <returns></returns>
+    private bool TryGetRequestUri(HttpRequest request, out Uri? requestUri)
     {
-        var fullPath = httpContext.Request.IsHttps ? "https://" : "http://" + httpContext.Request.Host + httpContext.Request.Path;
-
-        return new Uri(fullPath);
+        try
+        {
+            var fullPath = string.Format("{0}://{1}{2}{3}", request.Scheme, request.Host, request.Path, request.QueryString);
+            requestUri = new Uri(fullPath);
+            return true;
+        }
+        catch (UriFormatException ex)
+        {
+            _logger.LogError("Error processing {host} and {path} - {message}", request.Host, request.Path, ex.Message);
+            requestUri = null;
+            return false;
+        }
     }
 
     private static bool TryGetRefererUri(HttpContext httpContext, out Uri? refererUri)

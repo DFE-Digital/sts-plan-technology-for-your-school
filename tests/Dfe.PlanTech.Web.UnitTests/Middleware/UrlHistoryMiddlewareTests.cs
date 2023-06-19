@@ -37,6 +37,8 @@ public class UrlHistoryMiddlewareTests
     public async Task Should_PopHistory_When_Navigating_Backwards()
     {
         var requestMock = new Mock<HttpRequest>();
+        
+        requestMock.SetupGet(request => request.Scheme).Returns("https");
         requestMock.SetupGet(request => request.Host).Returns(new HostString("www.website.com"));
         requestMock.SetupGet(request => request.Path).Returns("/three");
 
@@ -59,7 +61,7 @@ public class UrlHistoryMiddlewareTests
     public async Task Should_AddToHistory_When_Navigating_ToNewPage()
     {
         var requestMock = new Mock<HttpRequest>();
-        requestMock.SetupGet(request => request.IsHttps).Returns(false);
+        requestMock.SetupGet(request => request.Scheme).Returns("https");
         requestMock.SetupGet(request => request.Host).Returns(new HostString(URL_FOURTH.Host));
         requestMock.SetupGet(request => request.Path).Returns(URL_FOURTH.PathAndQuery);
         requestMock.SetupGet(request => request.Headers).Returns(new HeaderDictionary(){
