@@ -1,26 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "/Users/martinsanders/dfe/dev/plan-technology-for-your-school/src/Dfe.PlanTech.DatabaseUpgrader/Dfe.PlanTech.DatabaseUpgrader.csproj": {}
+    "/Users/petershipstone/git/plan-technology-for-your-school/src/Dfe.PlanTech.DatabaseUpgrader/Dfe.PlanTech.DatabaseUpgrader.csproj": {}
   },
   "projects": {
-    "/Users/martinsanders/dfe/dev/plan-technology-for-your-school/src/Dfe.PlanTech.DatabaseUpgrader/Dfe.PlanTech.DatabaseUpgrader.csproj": {
+    "/Users/petershipstone/git/plan-technology-for-your-school/src/Dfe.PlanTech.DatabaseUpgrader/Dfe.PlanTech.DatabaseUpgrader.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/martinsanders/dfe/dev/plan-technology-for-your-school/src/Dfe.PlanTech.DatabaseUpgrader/Dfe.PlanTech.DatabaseUpgrader.csproj",
+        "projectUniqueName": "/Users/petershipstone/git/plan-technology-for-your-school/src/Dfe.PlanTech.DatabaseUpgrader/Dfe.PlanTech.DatabaseUpgrader.csproj",
         "projectName": "Dfe.PlanTech.DatabaseUpgrader",
-        "projectPath": "/Users/martinsanders/dfe/dev/plan-technology-for-your-school/src/Dfe.PlanTech.DatabaseUpgrader/Dfe.PlanTech.DatabaseUpgrader.csproj",
-        "packagesPath": "/Users/martinsanders/.nuget/packages/",
-        "outputPath": "/Users/martinsanders/dfe/dev/plan-technology-for-your-school/src/Dfe.PlanTech.DatabaseUpgrader/obj/",
+        "projectPath": "/Users/petershipstone/git/plan-technology-for-your-school/src/Dfe.PlanTech.DatabaseUpgrader/Dfe.PlanTech.DatabaseUpgrader.csproj",
+        "packagesPath": "/Users/petershipstone/.nuget/packages/",
+        "outputPath": "/Users/petershipstone/git/plan-technology-for-your-school/src/Dfe.PlanTech.DatabaseUpgrader/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/martinsanders/.nuget/NuGet/NuGet.Config"
+          "/Users/petershipstone/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net7.0"
         ],
         "sources": {
-          "/usr/local/share/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -60,7 +59,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.302/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.203/RuntimeIdentifierGraph.json"
         }
       }
     }
