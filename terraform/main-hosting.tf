@@ -15,7 +15,8 @@ module "main_hosting" {
   enable_container_registry = true
   image_name                = local.container_app_image_name
   container_secret_environment_variables = {
-    "managedidentity__clientid" = azurerm_user_assigned_identity.user_assigned_identity.client_id,
+    "AZURE_CLIENT_ID" = azurerm_user_assigned_identity.user_assigned_identity.client_id,
+    "KeyVaultName"    = local.kv_name
   }
 
   ##############
