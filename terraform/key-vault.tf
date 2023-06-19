@@ -10,7 +10,7 @@ resource "azurerm_key_vault" "vault" {
 
   network_acls {
     bypass                     = "AzureServices"
-    virtual_network_subnet_ids = local.subnet_name
+    virtual_network_subnet_ids = [local.subnet_name]
   }
 }
 
