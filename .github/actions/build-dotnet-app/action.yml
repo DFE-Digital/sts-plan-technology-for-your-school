@@ -5,7 +5,9 @@ inputs:
   dotnet_version:
     required: true
     type: string
-
+  solution-filename:
+    required: true
+    type: string
 runs:
   using: composite
 
@@ -19,4 +21,4 @@ runs:
       run: dotnet restore
     - name: Build
       shell: bash
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build ${{ inputs.solution-filename }} --configuration Release --no-restore

@@ -28,6 +28,7 @@ jobs:
         uses: ./.github/actions/build-web-app
         with:
           dotnet_version: ${{ env.DOTNET_VERSION }}  
+          solution_filename: plan-technology-for-your-school.sln
 
       - name: Run unit tests
         uses: ./.github/actions/run-unit-tests
