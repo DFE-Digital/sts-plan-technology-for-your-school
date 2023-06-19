@@ -11,7 +11,7 @@ The service receives the MSSQL connection string as a command line argument. The
 An example of the command line argument passed in would be:
 
 ```
-"Server=[server]; Database=[database]; User ID=[username]; Password=[passwoord"
+"Server=[server]; Database=[database]; User ID=[username]; Password=[password"
 ```
 
 ## MSSQL scripts.
