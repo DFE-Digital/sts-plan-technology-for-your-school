@@ -14,6 +14,7 @@ internal class Program
         if (args == null || !args.Any())
         {
             DisplayError("Please supply a connection string.");
+            return ERROR_RESULT;
         }
 
         var connectionString = args[0];
