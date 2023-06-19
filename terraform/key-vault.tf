@@ -90,19 +90,3 @@ resource "azurerm_key_vault_secret" "vault_secret_database_connectionstring" {
     ]
   }
 }
-
-resource "azurerm_subnet" "keyvault_subnet" {
-  name                 = "${local.resource_prefix}keyvault"
-  virtual_network_name = local.virtual_network.name
-  resource_group_name  = local.resource_group.name
-  address_prefixes     = [local.redis_cache_subnet_cidr]
-}
-
-resource "azurerm_subnet_route_table_association" "redis_cache_subnet" {
-  count = local.launch_in_vnet ? (
-    local.redis_cache_sku == "Premium" ? 1 : 0
-  ) : 0
-
-  subnet_id      = azurerm_subnet.redis_cache_subnet[0].id
-  route_table_id = azurerm_route_table.default[0].id
-}
