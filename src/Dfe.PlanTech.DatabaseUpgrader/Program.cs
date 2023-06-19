@@ -7,29 +7,33 @@ using System.Reflection;
 /// Prototype DPUP.
 /// </summary>
 
-const string connectionString = "";
-
-var upgrader =
-    DeployChanges.To
-        .SqlDatabase(connectionString)
-        .WithScriptsEmbeddedInAssembly(Assembly.GetExecutingAssembly())
-        .WithScriptsFromFileSystem("/Users/martinsanders/dbup/dbupapp/dbupapp/Scripts")
-        .LogToConsole()
-        .Build();
-
-    var result = upgrader.PerformUpgrade();
-
-    if (!result.Successful)
+internal class Program
+{
+    private static int Main(string[] args)
     {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine(result.Error);
-        Console.ResetColor();
-#if DEBUG
-        Console.ReadLine();
-#endif                
-        return -1;
-    }
-    Console.WriteLine("Success!");
-    Console.WriteLine(result);
-    return 0;
+        const string connectionString = "";
 
+        var upgrader =
+            DeployChanges.To
+                .SqlDatabase(connectionString)
+                .WithScriptsEmbeddedInAssembly(Assembly.GetExecutingAssembly())
+                .LogToConsole()
+                .Build();
+
+        var result = upgrader.PerformUpgrade();
+
+        if (!result.Successful)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(result.Error);
+            Console.ResetColor();
+#if DEBUG
+            Console.ReadLine();
+#endif
+            return -1;
+        }
+        Console.WriteLine("Success!");
+        Console.WriteLine(result);
+        return 0;
+    }
+}
