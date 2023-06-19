@@ -35,15 +35,15 @@ jobs:
         with:
           solution_filename: plan-technology-for-your-school.sln
 
-  build-test-database-upgrader:  
-    name: Build and run unit tests
+  build-database-upgrader:  
+    name: Build database upgrader
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Build web app  
+      - name: Build database upgrader  
         uses: ./.github/actions/build-dotnet-app
         with:
           dotnet_version: ${{ env.DOTNET_VERSION }}  
