@@ -79,7 +79,7 @@ jobs:
             }
 
   upgrade-database:
-    name: Upgrade datavase
+    name: Upgrade database
     needs: set-env
     runs-on: ubuntu-22.04
     environment: ${{ needs.set-env.outputs.environment }}
@@ -90,7 +90,7 @@ jobs:
 
   build-and-push-image:
     name: Build and push to ACR
-    needs: upgrade-database
+    needs: [set-env, upgrade-database]
     runs-on: ubuntu-22.04
     environment: ${{ needs.set-env.outputs.environment }}
     steps:
