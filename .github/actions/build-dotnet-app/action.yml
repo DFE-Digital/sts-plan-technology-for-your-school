@@ -5,7 +5,10 @@ inputs:
   dotnet_version:
     required: true
     type: string
-
+  solution_filename:
+    required: true
+    type: string
+    
 runs:
   using: composite
 
@@ -16,7 +19,7 @@ runs:
         dotnet-version: ${{ inputs.dotnet_version }}
     - name: Install dependencies
       shell: bash
-      run: dotnet restore
+      run: dotnet restore ${{ inputs.solution_filename }}
     - name: Build
       shell: bash
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build ${{ inputs.solution_filename }} --configuration Release --no-restore
