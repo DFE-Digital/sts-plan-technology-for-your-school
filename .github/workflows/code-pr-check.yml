@@ -32,3 +32,5 @@ jobs:
 
       - name: Run unit tests
         uses: ./.github/actions/run-unit-tests
+        with:
+          solution_filename: plan-technology-for-your-school.sln

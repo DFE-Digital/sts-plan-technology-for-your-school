@@ -8,6 +8,7 @@ inputs:
   solution_filename:
     required: true
     type: string
+    
 runs:
   using: composite
 
