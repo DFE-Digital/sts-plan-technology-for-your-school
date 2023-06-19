@@ -1,12 +1,19 @@
 resource "azurerm_key_vault" "vault" {
-  name                       = local.kv_name
-  location                   = local.azure_location
-  resource_group_name        = "${local.environment}${local.project_name}"
-  tenant_id                  = data.azurerm_client_config.current.tenant_id
-  sku_name                   = "standard"
-  soft_delete_retention_days = 90
-  enable_rbac_authorization  = false
-  tags                       = local.tags
+  name                          = local.kv_name
+  location                      = local.azure_location
+  resource_group_name           = "${local.environment}${local.project_name}"
+  tenant_id                     = data.azurerm_client_config.current.tenant_id
+  sku_name                      = "standard"
+  soft_delete_retention_days    = 90
+  enable_rbac_authorization     = false
+  public_network_access_enabled = false
+  tags                          = local.tags
+
+  network_acls {
+    bypass                     = "AzureServices"
+    default_action             = "Deny"
+    virtual_network_subnet_ids = [local.subnet_name]
+  }
 }
 
 resource "azurerm_key_vault_access_policy" "vault_access_policy_tf" {
