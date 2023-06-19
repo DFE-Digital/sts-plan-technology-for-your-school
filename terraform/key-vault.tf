@@ -6,6 +6,7 @@ resource "azurerm_key_vault" "vault" {
   sku_name                   = "standard"
   soft_delete_retention_days = 90
   enable_rbac_authorization  = false
+  tags                       = local.tags
 }
 
 resource "azurerm_key_vault_access_policy" "vault_access_policy_tf" {
