@@ -25,10 +25,8 @@ public class UrlHistoryMiddleware
 
     private void ProcessRequestUri(HttpContext httpContext, IUrlHistory history)
     {
-        try
+        if (TryGetRequestUri(httpContext.Request, out Uri? targetUrl) && targetUrl != null)
         {
-            Uri targetUrl = GetRequestUri(httpContext.Request);
-
             var lastUrl = history.LastVisitedUrl;
 
             bool navigatingBackwards = UrlsMatch(lastUrl, targetUrl);
@@ -52,10 +50,6 @@ public class UrlHistoryMiddleware
                         break;
                     }
             }
-        }
-        catch (UriFormatException ex)
-        {
-            _logger.LogError("Error processing {host} and {path} - {message}", httpContext.Request.Host, httpContext.Request.Path, ex.Message);
         }
     }
 
@@ -87,11 +81,26 @@ public class UrlHistoryMiddleware
     /// <returns></returns>
     private static bool UrlsMatch(Uri? lastUrl, Uri otherUrl) => lastUrl != null && lastUrl.LocalPath.Equals(otherUrl.LocalPath);
 
-    private static Uri GetRequestUri(HttpRequest request)
+    /// <summary>
+    /// Creates a Uri from the request fields
+    /// </summary>
+    /// <param name="lastUrl"></param>
+    /// <param name="otherUrl"></param>
+    /// <returns></returns>
+    private bool TryGetRequestUri(HttpRequest request, out Uri? requestUri)
     {
-        var fullPath = string.Format("{0}://{1}{2}{3}", request.Scheme, request.Host, request.Path, request.QueryString);
-
-        return new Uri(fullPath);
+        try
+        {
+            var fullPath = string.Format("{0}://{1}{2}{3}", request.Scheme, request.Host, request.Path, request.QueryString);
+            requestUri = new Uri(fullPath);
+            return true;
+        }
+        catch (UriFormatException ex)
+        {
+            _logger.LogError("Error processing {host} and {path} - {message}", request.Host, request.Path, ex.Message);
+            requestUri = null;
+            return false;
+        }
     }
 
     private static bool TryGetRefererUri(HttpContext httpContext, out Uri? refererUri)
