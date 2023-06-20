@@ -1,0 +1,20 @@
+name: Run Database Upgrader
+description: Builds and runs the PlanTech database upgrader app
+
+inputs:
+  dotnet_version:
+    required: true
+    type: string
+  solution_filename:
+    required: true
+    type: string
+
+runs:
+  using: composite
+
+  steps:
+    - name: Build database upgrader  
+      uses: ../build-dotnet-app
+      with:
+        dotnet_version: ${{ env.DOTNET_VERSION }}  
+        solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
