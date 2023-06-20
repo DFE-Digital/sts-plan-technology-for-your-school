@@ -20,4 +20,5 @@ runs:
         solution_filename: ${{ inputs.solution_filename }} 
 
     - name: Run database upgrader
+      shell: bash
       run: dotnet ./build/Dfe.PlanTech.DatabaseUpgrader.dll
