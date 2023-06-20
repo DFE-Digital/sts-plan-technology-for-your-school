@@ -47,4 +47,4 @@ jobs:
         uses: ./.github/actions/build-dotnet-app
         with:
           dotnet_version: ${{ env.DOTNET_VERSION }}  
-          solution_filename: plan-technology-for-your-school.sln
+          solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
