@@ -99,8 +99,10 @@ jobs:
       - name: Build and run database upgrader
         uses: ./.github/actions/build-and-run-database-upgrader
         with:
-          dotnet_version: ${{ vars.DOTNET_VERSION }}  
-          solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
+          dotnet_version: ${{ vars.DOTNET_VERSION }}
+          dfe_service_id: ${{ secrets.DFE_SERVICE_ID }}
+          dfe_project_name: ${{ secrets.DFE_PROJECT_NAME }}
+          az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
 
   build-and-push-image:
     name: Build and push to ACR
