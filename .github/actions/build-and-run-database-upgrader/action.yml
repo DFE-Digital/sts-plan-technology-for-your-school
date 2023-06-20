@@ -29,12 +29,12 @@ runs:
         solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
 
     - name: Get Workflow runner IP
-      id: ip
+      shell: bash
       run: |
         echo "RUNNER_IP=$(curl -s https://api.ipify.org?format=json | jq -r '.ip')" >> $GITHUB_ENV
-      shell: bash
-
+      
     - name: Update Firewall
+      shell: bash
       run: |
         az sql server firewall-rule create -g ${{ inputs.az_resource_group_name }} -s ${{ inputs.az_sql_database_server_name }} -n db-upgrader --start-ip-address ${{ env.RUNNER_IP }} --end-ip-address ${{ env.RUNNER_IP }}
 
