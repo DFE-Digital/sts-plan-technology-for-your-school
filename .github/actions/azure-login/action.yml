@@ -1,0 +1,16 @@
+name: Azure Login
+description: Login to Azure using service principle
+
+inputs:
+  secret:
+    required: true
+    type: string
+
+runs:
+  using: composite
+
+  steps:
+    - name: Azure login with ACA credentials
+      uses: azure/login@v1
+      with:
+        creds: '{"clientId":"${{ inputs.secret }}","clientSecret":"${{ secrets.AZ_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZ_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.AZ_TENANT_ID }}"}'

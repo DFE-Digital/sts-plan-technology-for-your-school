@@ -1,4 +1,4 @@
-name: Build Web App
+name: Build DotNet App
 description: Sets up .Net for specified version and builds application
 
 inputs:
@@ -8,7 +8,7 @@ inputs:
   solution_filename:
     required: true
     type: string
-    
+
 runs:
   using: composite
 
