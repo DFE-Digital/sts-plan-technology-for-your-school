@@ -25,7 +25,7 @@ runs:
     - name: Get connection string
       shell: bash
       run: |
-        echo "CONNECTION_STRING=$(az keyvault secret show --name my-secret --vault-name ${{ env.KEYVAULT_NAME }} --query value -o tsv)" >> $GITHUB_ENV
+        echo "CONNECTION_STRING=$(az keyvault secret show --name my-secret --vault-name ${{ inputs.az_keyvault_name }} --query value -o tsv)" >> $GITHUB_ENV
 
     - name: Run database upgrader
       shell: bash
