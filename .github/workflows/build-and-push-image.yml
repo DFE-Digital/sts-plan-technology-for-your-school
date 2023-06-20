@@ -79,7 +79,7 @@ jobs:
             }
 
   upgrade-database:
-    name: Upgrade database
+    name: Upgrade ${{ needs.set-env.outputs.environment }} database
     needs: set-env
     runs-on: ubuntu-22.04
     environment: ${{ needs.set-env.outputs.environment }}
