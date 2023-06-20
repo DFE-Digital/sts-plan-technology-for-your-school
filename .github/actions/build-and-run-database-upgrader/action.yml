@@ -16,5 +16,5 @@ runs:
     - name: Build database upgrader  
       uses: ../build-dotnet-app
       with:
-        dotnet_version: ${{ env.DOTNET_VERSION }}  
-        solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
+        dotnet_version: ${{ inputs.DOTNET_VERSION }}  
+        solution_filename: ${{ inputs.solution_filename }} 
