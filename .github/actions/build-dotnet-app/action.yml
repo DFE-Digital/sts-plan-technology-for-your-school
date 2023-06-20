@@ -22,4 +22,4 @@ runs:
       run: dotnet restore ${{ inputs.solution_filename }}
     - name: Build
       shell: bash
-      run: dotnet build ${{ inputs.solution_filename }} --configuration Release --no-restore
+      run: dotnet build ${{ inputs.solution_filename }} --configuration Release --no-restore --output ./build
