@@ -16,7 +16,7 @@ inputs:
     type: string  
 
 env:
-  KEYVAULT_NAME: ${{ inputs.dfe_service_id }}-${{ inputs.dfe_project_name }}-kv
+  KEYVAULT_NAME: ${{ env.INPUT_DFE_SERVICE_ID }}-${{ env.INPUT_DFE_PROJECT_NAME }}-kv
   # CONNECTION_STRING: Server=tcp:${{ locals.sql_server }}.database.windows.net,1433;Initial Catalog=${{ locals.sql_database }}-sqldb;Persist Security Info=False;User ID=${{ locals.sql_user_id }};Password=${{ locals.password }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
 
 runs:
