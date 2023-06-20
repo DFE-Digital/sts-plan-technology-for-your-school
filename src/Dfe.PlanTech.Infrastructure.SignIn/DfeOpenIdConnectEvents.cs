@@ -25,6 +25,11 @@ public static class DfeOpenIdConnectEvents
         }
     }
 
+    /// <summary>
+    /// Re-writes the login callback URI
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
     public static Task OnRedirectToIdentityProvider(RedirectContext context)
     {
         var config = context.HttpContext.RequestServices.GetRequiredService<IDfeSignInConfiguration>();
@@ -34,6 +39,28 @@ public static class DfeOpenIdConnectEvents
         return Task.FromResult(0);
     }
 
+    /// <summary>
+    /// Re-writes the signout redirect URI
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
+    public static Task OnRedirectToIdentityProviderForSignOut(RedirectContext context)
+    {
+        var config = context.HttpContext.RequestServices.GetRequiredService<IDfeSignInConfiguration>();
+
+        if (context.ProtocolMessage != null)
+        {
+            context.ProtocolMessage.PostLogoutRedirectUri =$"{config.FrontDoorUrl}{config.SignoutRedirectUrl}";
+        }
+
+        return Task.FromResult(0);
+    }
+
+    /// <summary>
+    /// Retrieves claims for user from DFE and assigns them to user identity
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
     private static async Task AddRoleClaimsFromDfePublicApi(TokenValidatedContext context)
     {
         var dfePublicApi = context.HttpContext.RequestServices.GetRequiredService<IDfePublicApi>();
