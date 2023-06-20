@@ -14,10 +14,10 @@ inputs:
   az_keyvault_database_connectionstring_name:
     required: true
     type: string  
-    
+
 env:
   KEYVAULT_NAME: ${{ inputs.dfe_service_id }}-${{ inputs.dfe_project_name }}-kv
-  CONNECTION_STRING: Server=tcp:${{ locals.sql_server }}.database.windows.net,1433;Initial Catalog=${{ locals.sql_database }}-sqldb;Persist Security Info=False;User ID=${{ locals.sql_user_id }};Password=${{ locals.password }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+  # CONNECTION_STRING: Server=tcp:${{ locals.sql_server }}.database.windows.net,1433;Initial Catalog=${{ locals.sql_database }}-sqldb;Persist Security Info=False;User ID=${{ locals.sql_user_id }};Password=${{ locals.password }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
 
 runs:
   using: composite
@@ -32,7 +32,7 @@ runs:
     - name: Get connection string
       shell: bash
       run: |
-        echo "MY_SECRET=$(az keyvault secret show --name my-secret --vault-name ${{ env.KEYVAULT_NAME }} --query value -o tsv)" >> $GITHUB_ENV
+        echo "CONNECTION_STRING=$(az keyvault secret show --name my-secret --vault-name ${{ env.KEYVAULT_NAME }} --query value -o tsv)" >> $GITHUB_ENV
 
     - name: Run database upgrader
       shell: bash
