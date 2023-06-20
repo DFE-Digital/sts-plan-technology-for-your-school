@@ -14,7 +14,7 @@ runs:
 
   steps:
     - name: Build database upgrader  
-      uses: ../build-dotnet-app
+      uses: ./.github/actions/build-dotnet-app
       with:
         dotnet_version: ${{ inputs.DOTNET_VERSION }}  
         solution_filename: ${{ inputs.solution_filename }} 
