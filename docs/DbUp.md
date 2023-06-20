@@ -14,6 +14,9 @@ An example of the command line argument passed in would be:
 "Server=[server]; Database=[database]; User ID=[username]; Password=[password"
 ```
 
+## SQL Transactions
+DbUp has been configured to run in single transaction mode which means if one script fails then all changes will be rolled back.  There are limitations to this, for more details please refer to the following [Microsoft Article](https://learn.microsoft.com/en-us/sql/t-sql/language-elements/transactions-sql-data-warehouse?view=aps-pdw-2016-au7#limitations-and-restrictions).
+
 ## MSSQL scripts.
 The Scripts folder contains a folder for each year, which contains the MSSQL scripts for that year. The naming convention for a MSSQL scripts is [year]_[time]_ScriptName.sql. The scripts are executed in ascending order, so it's important to make sure that the year and time of the script name reflects the intended order of execution.
 
