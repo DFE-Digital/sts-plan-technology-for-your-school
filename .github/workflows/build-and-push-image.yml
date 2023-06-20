@@ -99,7 +99,7 @@ jobs:
       - name: Build and run database upgrader
         uses: ./.github/actions/build-and-run-database-upgrader
         with:
-          dotnet_version: ${{ env.DOTNET_VERSION }}  
+          dotnet_version: ${{ vars.DOTNET_VERSION }}  
           solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
 
   build-and-push-image:
