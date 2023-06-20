@@ -11,6 +11,12 @@ inputs:
   az_keyvault_database_connectionstring_name:
     required: true
     type: string  
+  az_sql_database_server_name:
+    required: true
+    type: string  
+  az_resource_group_name:
+    required: true
+    type: string 
 
 runs:
   using: composite
@@ -21,6 +27,16 @@ runs:
       with:
         dotnet_version: ${{ inputs.dotnet_version }}  
         solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
+
+    - name: Get Workflow runner IP
+      id: ip
+      run: |
+        echo "RUNNER_IP=$(curl -s https://api.ipify.org?format=json | jq -r '.ip')" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Update Firewall
+      run: |
+        az sql server firewall-rule create -g ${{ inputs.az_resource_group_name }} -s ${{ inputs.az_sql_database_server_name }} -n db-upgrader --start-ip-address ${{ env.RUNNER_IP }} --end-ip-address ${{ env.RUNNER_IP }}
 
     - name: Get connection string
       shell: bash
