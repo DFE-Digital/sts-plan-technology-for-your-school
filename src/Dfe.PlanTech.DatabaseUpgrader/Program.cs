@@ -2,6 +2,7 @@
 using System.Reflection;
 using Polly;
 using Polly.Timeout;
+using Polly.Retry;
 
 /// <summary>
 /// PlanTech Database Upgrader.
@@ -21,15 +22,8 @@ internal class Program
 
         var connectionString = args[0];
 
-        var retryPolicy = Policy.Handle<Exception>().WaitAndRetry(
-            new[]
-            {
-                TimeSpan.FromMinutes(1),
-                TimeSpan.FromMinutes(1),
-                TimeSpan.FromMinutes(1)
-            });
-
-        var result = SUCCESS_RESULT;
+        var result = false;
+        var retryPolicy = SetupRetryPolicy();
 
         try
         {
@@ -37,8 +31,8 @@ internal class Program
         }
         catch (Exception ex)
         {
-            Console.WriteLine("An exception has occurred whilst migrating the database.");
-            Console.WriteLine($"Exception Message: {ex.Message}");
+            DisplayError("An exception occurred whilst migrating the database.");
+            DisplayError(ex.Message, ex);
         }
 
         return result ? SUCCESS_RESULT : ERROR_RESULT;
@@ -56,13 +50,25 @@ internal class Program
 
         if (!result.Successful)
         {
+            DisplayError("The database migration was not successful.");
             DisplayError(result.Error.Message, result.Error);
             return false;
         }
 
-        DisplaySuccess("Success!");
+        DisplaySuccess("Successx");
 
         return true;
+    }
+
+    private static RetryPolicy SetupRetryPolicy()
+    {
+        return Policy.Handle<Exception>().WaitAndRetry(
+            new[]
+            {
+                TimeSpan.FromMinutes(1),
+                TimeSpan.FromMinutes(2),
+                TimeSpan.FromMinutes(3)
+            });
     }
 
     private static void DisplaySuccess(string successMessage)
@@ -76,10 +82,12 @@ internal class Program
     {
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine(errorMessage);
+
         if (exception != null)
         {
             Console.WriteLine(exception.StackTrace);
         }
+
         Console.ResetColor();
     }
 }
