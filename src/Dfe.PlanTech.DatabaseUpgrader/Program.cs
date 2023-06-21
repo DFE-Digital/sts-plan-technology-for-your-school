@@ -1,5 +1,7 @@
 ﻿using DbUp;
 using System.Reflection;
+using Polly;
+using Polly.Timeout;
 
 /// <summary>
 /// PlanTech Database Upgrader.
@@ -19,7 +21,25 @@ internal class Program
 
         var connectionString = args[0];
 
-        var result = MigrateDatabase(connectionString);
+        var retryPolicy = Policy.Handle<Exception>().WaitAndRetry(
+            new[]
+            {
+                TimeSpan.FromMinutes(1),
+                TimeSpan.FromMinutes(1),
+                TimeSpan.FromMinutes(1)
+            });
+
+        var result = SUCCESS_RESULT;
+
+        try
+        {
+            result = retryPolicy.Execute(() => MigrateDatabase(connectionString));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An exception has occurred whilst migrating the database.");
+            Console.WriteLine($"Exception Message: {ex.Message}");
+        }
 
         return result ? SUCCESS_RESULT : ERROR_RESULT;
     }
