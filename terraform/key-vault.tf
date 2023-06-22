@@ -9,6 +9,15 @@ resource "azurerm_key_vault" "vault" {
   tags                       = local.tags
 }
 
+resource "azurerm_key_vault_access_policy" "vault_access_policy_tf" {
+  key_vault_id = azurerm_key_vault.vault.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = local.current_user_id
+
+  secret_permissions = ["List", "Get", "Set"]
+  key_permissions    = ["List", "Get", "Create"]
+}
+
 resource "azurerm_key_vault_access_policy" "vault_access_policy_mi" {
   key_vault_id = azurerm_key_vault.vault.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
@@ -16,16 +25,6 @@ resource "azurerm_key_vault_access_policy" "vault_access_policy_mi" {
 
   secret_permissions = ["List", "Get"]
   key_permissions    = ["List", "Get"]
-}
-
-resource "azurerm_key_vault_access_policy" "vault_access_policy_tf" {
-  key_vault_id = azurerm_key_vault.vault.id
-  tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = local.current_user_id
-  depends_on = [ azurerm_key_vault_access_policy.vault_access_policy_mi ]
-
-  secret_permissions = ["List", "Get", "Set"]
-  key_permissions    = ["List", "Get", "Create"]
 }
 
 resource "azurerm_key_vault_secret" "vault_secret_contentful_deliveryapikey" {
