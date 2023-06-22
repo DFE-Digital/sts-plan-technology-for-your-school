@@ -1,5 +1,5 @@
 resource "null_resource" "keyvault-assign-identity" {
-  depends_on = [module.main_hosting]
+  depends_on = [azurerm_key_vault.vault]
   triggers = {
     managed_identity_id = azurerm_user_assigned_identity.user_assigned_identity.id
   }
