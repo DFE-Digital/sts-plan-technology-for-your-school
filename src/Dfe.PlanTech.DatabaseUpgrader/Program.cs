@@ -57,7 +57,7 @@ internal class Program
             return false;
         }
 
-        DisplaySuccess("Successx");
+        DisplaySuccess("Success");
 
         return true;
     }
