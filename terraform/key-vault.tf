@@ -22,6 +22,7 @@ resource "azurerm_key_vault_access_policy" "vault_access_policy_mi" {
   key_vault_id = azurerm_key_vault.vault.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
   object_id    = azurerm_user_assigned_identity.user_assigned_identity.principal_id
+  depends_on   = [azurerm_key_vault_access_policy.vault_access_policy_tf]
 
   secret_permissions = ["List", "Get"]
   key_permissions    = ["List", "Get"]
