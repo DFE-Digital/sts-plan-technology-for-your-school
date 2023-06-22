@@ -44,6 +44,8 @@ internal class Program
             .SqlDatabase(connectionString)
             .WithScriptsEmbeddedInAssembly(Assembly.GetExecutingAssembly())
             .LogToConsole()
+            .LogScriptOutput()
+            .WithTransaction()
             .Build();
 
         var result = upgrader.PerformUpgrade();
