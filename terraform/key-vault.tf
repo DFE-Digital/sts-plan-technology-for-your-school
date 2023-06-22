@@ -6,14 +6,7 @@ resource "azurerm_key_vault" "vault" {
   sku_name                      = "standard"
   soft_delete_retention_days    = 90
   enable_rbac_authorization     = false
-  public_network_access_enabled = false
   tags                          = local.tags
-
-  network_acls {
-    bypass                     = "AzureServices"
-    default_action             = "Deny"
-    virtual_network_subnet_ids = [local.subnet_name]
-  }
 }
 
 resource "azurerm_key_vault_access_policy" "vault_access_policy_tf" {
