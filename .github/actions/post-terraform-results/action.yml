@@ -72,14 +72,6 @@ runs:
     
           #### Terraform Plan 📖\`${{ inputs.plan_outcome }}\`
     
-          <details><summary>Show Plan</summary>
-    
-          \`\`\`\n
-          ${process.env.PLAN}
-          \`\`\`
-    
-          </details>
-    
           *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.TF_WORKING_DIRECTORY }}\`, Workflow: \`${{ github.workflow }}\`*`;
     
           // 3. If we have a comment, update it, otherwise create a new one
