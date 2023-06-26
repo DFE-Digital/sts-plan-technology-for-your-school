@@ -57,7 +57,7 @@ jobs:
       - name: Set GitHub Runner IP to TF Var
         shell: bash
         run: |
-          export TF_VAR_github_ip=$GITHUB_ENV
+          echo "TF_VAR_github_ip=${{env.RUNNER_IP}}" >> $GITHUB_ENV
 
       - name: Terraform init
         id: init
