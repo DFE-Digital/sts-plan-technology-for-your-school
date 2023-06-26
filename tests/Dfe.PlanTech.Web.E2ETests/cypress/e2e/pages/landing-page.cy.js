@@ -31,9 +31,15 @@ describe("landing page", () => {
     cy.get("a.govuk-button--start.govuk-button").should("exist");
   });
 
-  it("should link to self-assessment page", () => {
+  it("should re-direct to login page", () => {
     cy.get("a.govuk-button--start.govuk-button").click();
 
-    cy.location("pathname").should("match", /\/self-assessment$/);
+    cy.location("href").should("be.null");
+
+    const expectedUrl = Cypress.env("DSiUrl");
+    
+    cy.origin(expectedUrl, { args: { expectedUrl } }, ({ expectedUrl }) => {
+      cy.location("href").should("include", expectedUrl);
+    });
   });
 });
