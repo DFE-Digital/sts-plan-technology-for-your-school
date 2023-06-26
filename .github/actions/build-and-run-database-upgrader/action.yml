@@ -5,15 +5,6 @@ inputs:
   dotnet_version:
     required: true
     type: string
-  # az_devops_project_url:
-  #   required: true
-  #   type: string
-  # az_devops_pipeline_name:
-  #   required: true
-  #   type: string
-  # az_devops_pat:
-  #   required: true
-  #   type: string
   az_keyvault_name:
     required: true
     type: string  
@@ -37,11 +28,11 @@ runs:
         dotnet_version: ${{ inputs.dotnet_version }}  
         solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
 
-    - name: Get Workflow IP Address
+    - name: Get workflow IP address
       id: whats-my-ip
       uses: ./.github/actions/whats-my-ip-address
       
-    - name: Open Azure Firewalls
+    - name: Add Azure firewall rules
       shell: bash
       run: |
         az sql server firewall-rule create --resource-group ${{ inputs.az_resource_group_name }} --server ${{ inputs.az_sql_database_server_name }} --name db-upgrader --start-ip-address ${{ steps.whats-my-ip.outputs.ip }} --end-ip-address ${{ steps.whats-my-ip.outputs.ip }}
@@ -56,16 +47,9 @@ runs:
       shell: bash
       run: dotnet ./build/Dfe.PlanTech.DatabaseUpgrader.dll "${{ env.CONNECTION_STRING }}"
 
-    - name: Close Azure Firewalls
+    - name: Remove Azure firewall rules
       shell: bash
       if: always()
       run: |
         az sql server firewall-rule delete --resource-group ${{ inputs.az_resource_group_name }} --server ${{ inputs.az_sql_database_server_name }} --name db-upgrader
         az keyvault network-rule remove --resource-group ${{ inputs.az_resource_group_name }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
-
-    # - name: Azure Pipelines Action
-    #   uses: Azure/pipelines@v1
-    #   with:
-    #     azure-devops-project-url: ${{ inputs.az_devops_project_url }}
-    #     azure-pipeline-name: ${{ inputs.az_devops_pipeline_name }}
-    #     azure-devops-token: ${{ inputs.az_devops_pat }}
