@@ -45,8 +45,8 @@ runs:
     - name: Open Azure Firewalls
       shell: bash
       run: |
-        az sql server firewall-rule create --resource-group ${{ inputs.az_resource_group_name }} --server ${{ inputs.az_sql_database_server_name }} -name db-upgrader --start-ip-address ${{ env.RUNNER_IP }} --end-ip-address ${{ env.RUNNER_IP }}
-        az keyvault network-rule add --resource-group ${{ inputs.az_resource_group_name }} --name ${{ inputs.az_keyvault_name }} --ip-address 94.14.144.130
+        az sql server firewall-rule create --resource-group ${{ inputs.az_resource_group_name }} --server ${{ inputs.az_sql_database_server_name }} --name db-upgrader --start-ip-address ${{ env.RUNNER_IP }} --end-ip-address ${{ env.RUNNER_IP }}
+        az keyvault network-rule add --resource-group ${{ inputs.az_resource_group_name }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ env.RUNNER_IP }}
 
     - name: Get connection string
       shell: bash
