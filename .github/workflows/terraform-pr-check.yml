@@ -102,7 +102,7 @@ jobs:
         with:
           ip_address: ${{ env.RUNNER_IP }}
           keyvault_name: ${{ secrets.AZ_ACA_RESOURCE_GROUP	}}-kv
-          azure_credentials: ${{ secrets.secrets.azure-aca-credentials}}
+          azure_credentials: ${{ secrets.azure-aca-credentials}}
 
   terraform-lint:
     name: Terraform Lint
