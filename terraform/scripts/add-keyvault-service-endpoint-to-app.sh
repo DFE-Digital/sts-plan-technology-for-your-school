@@ -12,6 +12,7 @@ usage() {
   echo "  -v               - Virtual Network resource name"
   echo "  -c               - Container App name"
   echo "  -k               - Keyvault Name"
+  echo "  -i               - GitHub Runner IP Address"
 
   exit 1
 }
@@ -27,7 +28,7 @@ then
 fi
 
 # Get commandline arguments
-while getopts "n:g:v:c:k:h" opt; do
+while getopts "n:g:v:c:k:i:h" opt; do
   case $opt in
     n)
       SUBNET_NAME=$OPTARG
@@ -44,6 +45,9 @@ while getopts "n:g:v:c:k:h" opt; do
     k)
       KEYVAULT_NAME=$OPTARG
       ;;
+    i)
+      IP_ADDRESS=$OPTARG
+      ;;
     h)
       usage
       exit;;
@@ -58,7 +62,9 @@ if [[
   -z "$SUBNET_NAME" ||
   -z "$RESOURCE_GROUP_NAME" ||
   -z "$VNET_NAME" ||
-  -z "$CONTAINER_NAME"
+  -z "$CONTAINER_NAME" ||
+  -z "$KEYVAULT_NAME" ||
+  -z "$IP_ADDRESS"
 ]]; then
   usage
 fi
@@ -96,3 +102,4 @@ done
 echo "Adding Microsoft.KeyVault Service Endpoint to Subnet..."
 az network vnet subnet update -n "$SUBNET_NAME" -g "$RESOURCE_GROUP_NAME" --vnet-name "$VNET_NAME" --service-endpoints Microsoft.KeyVault
 az keyvault network-rule add --name $KEYVAULT_NAME --resource-group $RESOURCE_GROUP_NAME --vnet-name $VNET_NAME --subnet $SUBNET_NAME
+az keyvault network-rule add --name $KEYVAULT_NAME --ip-address $IP_ADDRESS
