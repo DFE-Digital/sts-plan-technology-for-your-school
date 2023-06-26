@@ -72,7 +72,7 @@ runs:
       shell: bash
       if: always()
       run: |
-        az sql server firewall-rule delete --resource-group ${{ inputs.az_resource_group_name }} --server ${{ inputs.az_sql_database_server_name }} -name db-upgrader
+        az sql server firewall-rule delete --resource-group ${{ inputs.az_resource_group_name }} --server ${{ inputs.az_sql_database_server_name }} --name db-upgrader
         az keyvault network-rule remove --resource-group ${{ inputs.az_resource_group_name }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ env.RUNNER_IP }}
 
     # - name: Azure Pipelines Action
