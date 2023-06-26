@@ -4,54 +4,67 @@ describe("landing page", () => {
   const url = Cypress.env("URL") + FIRST_QUESTION;
 
   beforeEach(() => {
-    cy.visit(url);
+    cy.loginWithEnv(url);
   });
 
   it("should contain form", () => {
-    cy.get("form").should("exist");
+    cy.origin(Cypress.env("URL"), () => {
+      cy.get("form").should("exist");
+    });
   });
 
   it("should contain heading", () => {
-    cy.get("form h1.govuk-fieldset__heading").should("exist");
+    cy.origin(Cypress.env("URL"), () => {
+      cy.get("form h1.govuk-fieldset__heading").should("exist");
 
-    cy.get("form h1.govuk-fieldset__heading")
-      .invoke("text")
-      .should("have.length.greaterThan", 1);
+      cy.get("form h1.govuk-fieldset__heading")
+        .invoke("text")
+        .should("have.length.greaterThan", 1);
+    });
   });
 
   it("should contain answers", () => {
-    cy.get("form div.govuk-radios div.govuk-radios__item")
-      .should("exist")
-      .and("have.length.greaterThan", 1)
-      .each((item) => {
-        cy.wrap(item)
-          .get("label")
-          .should("exist")
-          .invoke("text")
-          .should("have.length.greaterThan", 1);
-      });
+    cy.origin(Cypress.env("URL"), () => {
+      cy.get("form div.govuk-radios div.govuk-radios__item")
+        .should("exist")
+        .and("have.length.greaterThan", 1)
+        .each((item) => {
+          cy.wrap(item)
+            .get("label")
+            .should("exist")
+            .invoke("text")
+            .should("have.length.greaterThan", 1);
+        });
+    });
   });
 
   it("should have submit button", () => {
-    cy.get("form button.govuk-button").should("exist");
+    cy.origin(Cypress.env("URL"), () => {
+      cy.get("form button.govuk-button").should("exist");
+    });
   });
 
   it("should navigate to next page on submit", () => {
-    cy.get("form div.govuk-radios div.govuk-radios__item input")
-      .first()
-      .click();
+    cy.origin(Cypress.env("URL"), (FIRST_QUESTION) => {
 
-    cy.get("form button.govuk-button").click();
+      cy.get("form div.govuk-radios div.govuk-radios__item input")
+        .first()
+        .click();
 
-    cy.location("pathname", { timeout: 60000 })
-      .should("not.include", FIRST_QUESTION)
-      .and("include", "/question");
+      cy.get("form button.govuk-button").click();
+
+      cy.location("pathname", { timeout: 60000 })
+        .should("not.include", FIRST_QUESTION)
+        .and("include", "/question");
+    });
   });
 
   it("should have back button", () => {
-    cy.get("a.govuk-back-link")
-      .should("exist")
-      .invoke("text")
-      .should("equal", "Back");
+    cy.origin(Cypress.env("URL"), () => {
+      cy.get("a.govuk-back-link")
+        .should("exist")
+        .invoke("text")
+        .should("equal", "Back");
+    });
   });
 });
