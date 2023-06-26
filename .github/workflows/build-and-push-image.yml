@@ -91,10 +91,13 @@ jobs:
       - name: Azure CLI Login  
         uses: ./.github/actions/azure-login
         with:
-          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
-          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
-          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+          az_devops_project_url: ${{ secrets.AZ_DEVOPS_PROJECT_URL }}
+          az_devops_pipeline_name: ${{ secrets.AZ_DEVOPS_PIPELINE_NAME }}
+          az_devops_pat: ${{ secrets.AZ_DEVOPS_PAT }}
+          # az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          # az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          # az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+          # az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
       - name: Build and run database upgrader
         uses: ./.github/actions/build-and-run-database-upgrader
