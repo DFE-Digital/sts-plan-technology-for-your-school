@@ -95,5 +95,4 @@ done
 #########################################
 echo "Adding Microsoft.KeyVault Service Endpoint to Subnet..."
 az network vnet subnet update -n "$SUBNET_NAME" -g "$RESOURCE_GROUP_NAME" --vnet-name "$VNET_NAME" --service-endpoints Microsoft.KeyVault
-az keyvault update --name $KEYVAULT_NAME --resource-group $RESOURCE_GROUP_NAME --public-network-access Disabled
 az keyvault network-rule add --name $KEYVAULT_NAME --resource-group $RESOURCE_GROUP_NAME --vnet-name $VNET_NAME --subnet $SUBNET_NAME
