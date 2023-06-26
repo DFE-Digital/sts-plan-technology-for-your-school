@@ -37,27 +37,15 @@ runs:
         dotnet_version: ${{ inputs.dotnet_version }}  
         solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
 
-    - name: Get Workflow runner IP
-      shell: bash
-      run: |
-        echo "RUNNER_IP=$(curl -s 'https://api.ipify.org?format=json' | jq -r '.ip')" >> $GITHUB_ENV
-        
-    - name: Validate IP
-      shell: bash
-      run: |
-        if ! [[ $RUNNER_IP =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-          echo "RUNNER_IP is not set to a valid IP address"
-          echo "Runner IP: $RUNNER_IP"
-          exit 1
-        else
-          echo "Runner IP: $RUNNER_IP"
-        fi
-
+    - name: Get Workflow IP Address
+      id: whats-my-ip
+      uses: ./.github/actions/build-dotnet-app
+      
     - name: Open Azure Firewalls
       shell: bash
       run: |
-        az sql server firewall-rule create --resource-group ${{ inputs.az_resource_group_name }} --server ${{ inputs.az_sql_database_server_name }} --name db-upgrader --start-ip-address ${{ env.RUNNER_IP }} --end-ip-address ${{ env.RUNNER_IP }}
-        az keyvault network-rule add --resource-group ${{ inputs.az_resource_group_name }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ env.RUNNER_IP }}
+        az sql server firewall-rule create --resource-group ${{ inputs.az_resource_group_name }} --server ${{ inputs.az_sql_database_server_name }} --name db-upgrader --start-ip-address ${{ steps.whats-my-ip.outputs.ip }} --end-ip-address ${{ steps.whats-my-ip.outputs.ip }}
+        az keyvault network-rule add --resource-group ${{ inputs.az_resource_group_name }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
 
     - name: Get connection string
       shell: bash
@@ -73,7 +61,7 @@ runs:
       if: always()
       run: |
         az sql server firewall-rule delete --resource-group ${{ inputs.az_resource_group_name }} --server ${{ inputs.az_sql_database_server_name }} --name db-upgrader
-        az keyvault network-rule remove --resource-group ${{ inputs.az_resource_group_name }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ env.RUNNER_IP }}
+        az keyvault network-rule remove --resource-group ${{ inputs.az_resource_group_name }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
 
     # - name: Azure Pipelines Action
     #   uses: Azure/pipelines@v1
