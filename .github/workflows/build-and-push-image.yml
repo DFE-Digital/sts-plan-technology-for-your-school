@@ -146,3 +146,6 @@ jobs:
         uses: ./.github/actions/run-e2e-tests
         with:
           url: ${{ secrets.AZ_FRONTDOOR_URL }}
+          dsi_url: ${{ secrets.DSI_URL }}
+          dsi_username: ${{ secrets.DSI_USERNAME }}
+          dsi_password: ${{ secrets.DSI_PASSWORD }}
