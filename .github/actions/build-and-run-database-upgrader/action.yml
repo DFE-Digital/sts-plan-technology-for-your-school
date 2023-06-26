@@ -39,7 +39,7 @@ runs:
 
     - name: Get Workflow IP Address
       id: whats-my-ip
-      uses: ./.github/actions/build-dotnet-app
+      uses: ./.github/actions/whats-my-ip-address
       
     - name: Open Azure Firewalls
       shell: bash
