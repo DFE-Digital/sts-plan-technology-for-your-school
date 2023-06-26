@@ -51,7 +51,7 @@ locals {
   ##########
   # GitHub #
   ##########
-  github_runner_ip = local.github_ip
+  github_runner_ip = var.github_ip
 
   ###########
   # Scripts #
