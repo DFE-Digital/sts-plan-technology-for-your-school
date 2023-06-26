@@ -51,6 +51,14 @@ jobs:
         with:
           terraform_version: 1.4.5
 
+      - name: Get GitHub Runner IP
+        uses: ./.github/actions/get-github-runner-ip
+
+      - name: Set GitHub Runner IP to TF Var
+        shell: bash
+        run: |
+          export TF_VAR_github_ip=$GITHUB_ENV
+
       - name: Terraform init
         id: init
         run: |
