@@ -43,7 +43,10 @@ runs:
         echo "RUNNER_IP=$(curl -s 'https://api.ipify.org?format=json' | jq -r '.ip')" >> $GITHUB_ENV
         if ! [[ $RUNNER_IP =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
           echo "RUNNER_IP is not set to a valid IP address"
+          echo "Runner IP: $RUNNER_IP"
           exit 1
+        else
+          echo "Runner IP: $RUNNER_IP"
         fi
 
     - name: Open Azure Firewalls
