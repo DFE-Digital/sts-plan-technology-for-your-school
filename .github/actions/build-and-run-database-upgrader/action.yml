@@ -40,7 +40,7 @@ runs:
     - name: Get Workflow runner IP
       shell: bash
       run: |
-        echo "RUNNER_IP=$(curl -s https://api.ipify.org?format=json | jq -r '.ip')" >> $GITHUB_ENV
+        echo "RUNNER_IP=$(curl -s 'https://api.ipify.org?format=json' | jq -r '.ip')" >> $GITHUB_ENV
       
     - name: Update Firewall
       shell: bash
