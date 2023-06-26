@@ -103,6 +103,7 @@ jobs:
           az_devops_project_url: ${{ secrets.AZ_DEVOPS_PROJECT_URL }}
           az_devops_pipeline_name: ${{ secrets.AZ_DEVOPS_PIPELINE_NAME }}
           az_devops_pat: ${{ secrets.AZ_DEVOPS_PAT }}
+          azure-pipeline-variables:  '{"variable1": "value1", "variable2": "${{ secrets.AZ_DEVOPS_PIPELINE_NAME }}"}'
           # az_keyvault_name: ${{ secrets.DFE_SERVICE_ID }}-${{ secrets.DFE_PROJECT_NAME }}-kv
           # az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
           # az_sql_database_server_name: ${{ secrets.DFE_SERVICE_ID }}-${{ secrets.DFE_PROJECT_NAME }}
