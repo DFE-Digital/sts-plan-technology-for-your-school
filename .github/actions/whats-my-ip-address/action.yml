@@ -9,7 +9,7 @@ runs:
       shell: bash
       id: whats-my-ip
       run: |
-        echo "ip::$(curl -s https://api.ipify.org?format=json | jq -r '.ip')" >> $GITHUB_OUTPUT 
+        echo "ip=$(curl -s https://api.ipify.org?format=json | jq -r '.ip')" >> $GITHUB_OUTPUT 
 
     - name: Validate IP
       shell: bash
