@@ -1,0 +1,29 @@
+name: Remove IP from KV
+description: Removes given IP Address from Azure KeyVault whitelist
+
+inputs:
+  azure_credentials:
+    required: true
+    type: string
+  ip_address:
+    required: true
+    type: string
+  keyvault_name:
+    required: true
+    type: string
+
+runs:
+  using: composite
+  steps:
+      - name: Azure login with ACA credentials
+        uses: azure/login@v1
+        with:
+          creds: ${{ inputs.azure_credentials }}
+
+      - name: Update Azure Container Apps Revision
+        uses: azure/CLI@v1
+        id: azure
+        with:
+          azcliversion: 2.45.0
+          inlineScript: |
+            az keyvault network-rule remove --name ${{ inputs.keyvault_name }} --ip-address ${{ inputs.ip_address }}

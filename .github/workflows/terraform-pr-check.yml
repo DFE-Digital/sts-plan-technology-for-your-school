@@ -96,6 +96,14 @@ jobs:
           tf_working_directory: ${{ env.TF_WORKING_DIRECTORY }}
           github_workflow: ${{ github.workflow }}
 
+      - name: Remove IP Address from Azure KV
+        uses: ./.github/actions/remove-ip-from-kv
+        if: always()
+        with:
+          ip_address: ${{ env.RUNNER_IP }}
+          keyvault_name: ${{ secrets.AZ_ACA_RESOURCE_GROUP	}}-kv
+          azure_credentials: ${{ secrets.secrets.azure-aca-credentials}}
+
   terraform-lint:
     name: Terraform Lint
     runs-on: ubuntu-latest
