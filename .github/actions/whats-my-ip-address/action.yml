@@ -1,6 +1,11 @@
 name: Whats My Ip Address
 description: Gets the workflow runner ip address
 
+outputs:
+  ip:
+    description: The workflow runner's ip address
+    value: ${{ steps.whats-my-ip.outputs.ip }}
+
 runs:
   using: composite
 
