@@ -47,12 +47,7 @@ locals {
   # Azure KeyVault #
   ##################
   kv_name = "${local.environment}${local.project_name}-kv"
-
-  ##########
-  # GitHub #
-  ##########
-  github_runner_ip = var.github_ip
-
+  
   ###########
   # Scripts #
   ###########
