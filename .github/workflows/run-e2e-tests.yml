@@ -1,0 +1,28 @@
+name: Build & deploy to environment
+
+on:
+  push:
+    branches: [ "main" ]    
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  DOCKER_IMAGE: plan-tech-app
+  NODE_VERSION: 18.x
+
+jobs:
+  run-tests:
+    name: Run E2E Tests
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Cypress tests
+        uses: ./.github/actions/run-e2e-tests
+        with:
+          url: ${{ secrets.AZ_FRONTDOOR_URL }}
+          dsi_url: ${{ secrets.DSI_URL }}
+          dsi_username: ${{ secrets.DSI_USERNAME }}
+          dsi_password: ${{ secrets.DSI_PASSWORD }}
