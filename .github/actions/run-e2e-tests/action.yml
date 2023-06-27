@@ -23,10 +23,10 @@ runs:
       shell: bash
       run: |
         cp cypress.env.json.example cypress.env.json
-        sed -i "" "s/URL_VALUE/${{inputs.url}}/" cypress.env.json
-        sed -i "" "s/DSI_URL/${{inputs.dsi_url}}/" cypress.env.json
-        sed -i "" "s/DSI_USERNAME/${{inputs.dsi_username}}/" cypress.env.json
-        sed -i "" "s/DSI_PASSWORD/${{inputs.dsi_password}}/" cypress.env.json 
+        sed -i "s/URL_VALUE/${{inputs.url}}/" cypress.env.json
+        sed -i "s/DSI_URL/${{inputs.dsi_url}}/" cypress.env.json
+        sed -i "s/DSI_USERNAME/${{inputs.dsi_username}}/" cypress.env.json
+        sed -i "s/DSI_PASSWORD/${{inputs.dsi_password}}/" cypress.env.json 
       working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
 
     - name: Build and test project
