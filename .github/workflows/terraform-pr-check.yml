@@ -54,10 +54,10 @@ jobs:
           terraform_version: 1.4.5
 
       - name: Get GitHub Runner IP
+        id: whats-my-ip
         uses: ./.github/actions/whats-my-ip-address
 
       - name: Set GitHub Runner IP to TF Var
-        id: whats-my-ip
         shell: bash
         run: |
           echo "TF_VAR_github_ip=${{ needs.whats-my-ip.outputs.ip}}" >> $GITHUB_ENV
