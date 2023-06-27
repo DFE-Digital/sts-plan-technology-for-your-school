@@ -183,6 +183,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var submitAnswerDto = new SubmitAnswerDto()
             {
+                QuestionId = "Question1",
+                ChosenAnswerId = "Answer1",
                 NextQuestionId = "Question2"
             };
 
@@ -202,7 +204,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public void SubmitAnswer_Should_RedirectTo_CheckYourAnswers_When_NextQuestionId_IsNull()
         {
-            var submitAnswerDto = new SubmitAnswerDto();
+            var submitAnswerDto = new SubmitAnswerDto()
+            {
+                QuestionId = "Question1",
+                ChosenAnswerId = "Answer1"
+            };
 
             var result = _controller.SubmitAnswer(submitAnswerDto);
 
@@ -215,6 +221,55 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.Equal("GetByRoute", redirectToActionResult.ActionName);
             Assert.NotNull(redirectToActionResult.RouteValues);
             Assert.Equal("check-answers", redirectToActionResult.RouteValues["route"]);
+        }
+
+        [Fact]
+        public void SubmitAnswer_Should_RedirectTo_SameQuestion_When_ChosenAnswerId_IsNull()
+        {
+            var submitAnswerDto = new SubmitAnswerDto()
+            {
+                QuestionId = "Question1",
+                ChosenAnswerId = null!,
+                NextQuestionId = "Question2"
+            };
+
+            _controller.ModelState.AddModelError("ChosenAnswerId", "Required");
+
+            var result = _controller.SubmitAnswer(submitAnswerDto);
+
+            Assert.IsType<RedirectToActionResult>(result);
+
+            var redirectToActionResult = result as RedirectToActionResult;
+
+            Assert.NotNull(redirectToActionResult);
+            Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
+            Assert.NotNull(redirectToActionResult.RouteValues);
+            var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "id");
+            Assert.Equal(submitAnswerDto.QuestionId, id.Value);
+        }
+
+        [Fact]
+        public void SubmitAnswer_Should_RedirectTo_SameQuestion_When_NextQuestionId_And_ChosenAnswerId_IsNull()
+        {
+            var submitAnswerDto = new SubmitAnswerDto()
+            {
+                QuestionId = "Question1",
+                ChosenAnswerId = null!
+            };
+
+            _controller.ModelState.AddModelError("ChosenAnswerId", "Required");
+
+            var result = _controller.SubmitAnswer(submitAnswerDto);
+
+            Assert.IsType<RedirectToActionResult>(result);
+
+            var redirectToActionResult = result as RedirectToActionResult;
+
+            Assert.NotNull(redirectToActionResult);
+            Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
+            Assert.NotNull(redirectToActionResult.RouteValues);
+            var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "id");
+            Assert.Equal(submitAnswerDto.QuestionId, id.Value);
         }
     }
 }

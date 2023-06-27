@@ -29,7 +29,7 @@ public class QuestionsController : BaseController<QuestionsController>
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
 
         var question = await query.GetQuestionById(id, section, cancellationToken) ?? throw new KeyNotFoundException($"Could not find question with id {id}");
-        
+
         var viewModel = new QuestionViewModel()
         {
             Question = question,
@@ -43,6 +43,8 @@ public class QuestionsController : BaseController<QuestionsController>
     public IActionResult SubmitAnswer(SubmitAnswerDto submitAnswerDto)
     {
         if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
+
+        if (!ModelState.IsValid) return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.QuestionId });
 
         if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("GetByRoute", "Pages", new { route = "check-answers" });
 

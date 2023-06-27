@@ -5,24 +5,29 @@
 }
 
 <form asp-controller="Questions" asp-action="SubmitAnswer" method="post">
-    <input id="QuestionId" hidden value=@Model.Question.Sys.Id  name="QuestionId" />
-    <govuk-radios name="NextQuestionId">
+    <input id="QuestionId" hidden value=@Model.Question.Sys.Id name="QuestionId" />
+    <input id="NextQuestionId" hidden value=@Model.Question.Answers[0].NextQuestion?.Sys.Id ?? ""
+        name="NextQuestionId" />
+
+    <govuk-radios name="ChosenAnswerId">
         <govuk-radios-fieldset>
             <govuk-radios-fieldset-legend is-page-heading="true" class="govuk-fieldset__legend--l">
                 @Model.Question.Text
             </govuk-radios-fieldset-legend>
-            
-            @if(!string.IsNullOrEmpty(Model.Question.HelpText)){
+
+            @if (!string.IsNullOrEmpty(Model.Question.HelpText))
+            {
                 <govuk-radios-hint>@Model.Question.HelpText</govuk-radios-hint>
             }
-            
+
             @{
-                foreach(var answer in Model.Question.Answers){
-                    var nextQuestionId = answer.NextQuestion?.Sys.Id ?? "";
-                    <govuk-radios-item value=@nextQuestionId>@answer.Text</govuk-radios-item>
+                foreach (var answer in Model.Question.Answers)
+                {
+                    var chosenAnswerId = answer.Sys.Id ?? "";
+                    <govuk-radios-item value=@chosenAnswerId>@answer.Text</govuk-radios-item>
                 }
             }
-            
+
         </govuk-radios-fieldset>
     </govuk-radios>
 
