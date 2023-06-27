@@ -144,6 +144,10 @@ jobs:
     runs-on: ubuntu-22.04
     environment: ${{ needs.set-env.outputs.environment }}
     steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+
       - name: Azure CLI Login  
         uses: ./.github/actions/azure-login
         with:
