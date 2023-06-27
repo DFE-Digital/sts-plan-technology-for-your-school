@@ -68,7 +68,7 @@ describe("landing page", () => {
     });
   });
 
-  it("should navigate back button that navigates to last question once submitted", () => {
+  it("should have back button that navigates to last question once submitted", () => {
     cy.origin(Cypress.env("URL"), { args: { FIRST_QUESTION } }, ({ FIRST_QUESTION }) => {
       cy.get("form div.govuk-radios div.govuk-radios__item input")
         .first()
