@@ -22,11 +22,7 @@ runs:
     - name: Create Cypress config
       shell: bash
       run: |
-        cp cypress.env.json.example cypress.env.json
-        sed -i 's/URL_VALUE/${{inputs.url}}/g' cypress.env.json
-        sed -i 's/DSI_URL/${{inputs.dsi_url}}/g' cypress.env.json
-        sed -i 's/DSI_USERNAME/${{inputs.dsi_username}}/g' cypress.env.json
-        sed -i 's/DSI_PASSWORD/${{inputs.dsi_password}}/g' cypress.env.json 
+        echo "{\"URL\": \"${{inputs.url}}\", \"DSiUrl\": \"${{inputs.dsi_url}}\", \"Username\": \"${{inputs.dsi_username}}\", \"Password\": \"${{inputs.dsi_password}}\" }" >cypress.env.json 
       working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
 
     - name: Build and test project
