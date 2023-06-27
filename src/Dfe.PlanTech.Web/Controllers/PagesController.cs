@@ -1,6 +1,7 @@
 ﻿using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Application.Core;
+using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,7 +18,9 @@ public class PagesController : BaseController<PagesController>
     {
         var page = await query.GetPageBySlug("/", cancellationToken);
 
-        return View("Page", page);
+        var viewModel = CreatePageModel(page);
+
+        return View("Page", viewModel);
     }
 
     [Authorize]
@@ -28,7 +31,18 @@ public class PagesController : BaseController<PagesController>
 
         var page = await query.GetPageBySlug(slug, cancellationToken);
 
-        return View("Page", page);
+        var viewModel = CreatePageModel(page);
+
+        return View("Page", viewModel);
+    }
+
+    private PageViewModel CreatePageModel(Page page)
+    {
+        return new PageViewModel()
+        {
+            Page = page,
+            BackUrl = history.LastVisitedUrl?.ToString() ?? "/"
+        };
     }
 
     /// <summary>

@@ -14,10 +14,6 @@ builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.AddControllersWithViews();
 builder.Services.AddGovUkFrontend();
 
-builder.Configuration.AddAzureKeyVault(
-new Uri($"https://{builder.Configuration["KeyVaultName"]}.vault.azure.net/"),
-new DefaultAzureCredential());
-
 builder.Services.AddCaching();
 builder.Services.AddCQRSServices();
 builder.Services.AddContentfulServices(builder.Configuration);
