@@ -45,36 +45,6 @@ jobs:
           echo "release=${RELEASE}" >> $GITHUB_OUTPUT
           echo "checked-out-sha=${CHECKED_OUT_SHA}" >> $GITHUB_OUTPUT
 
-  build-and-push-image:
-    name: Build and push to ACR
-    needs: set-env
-    runs-on: ubuntu-22.04
-    environment: ${{ needs.set-env.outputs.environment }}
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.ref }}
-
-      - name: Azure Container Registry login
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.AZ_CLIENT_ID }}
-          password: ${{ secrets.AZ_CLIENT_SECRET }}
-          registry: ${{ secrets.AZ_ACR_URL }}
-
-      - name: Build and push docker image
-        uses: docker/build-push-action@v3
-        with:
-          context: ./src/
-          file: ./src/Dfe.PlanTech.Web/Dockerfile
-          build-args: COMMIT_SHA=${{ needs.set-env.outputs.checked-out-sha }}
-          tags: |
-            ${{ secrets.AZ_ACR_URL }}/${{ env.DOCKER_IMAGE }}:${{ needs.set-env.outputs.branch }}
-            ${{ secrets.AZ_ACR_URL }}/${{ env.DOCKER_IMAGE }}:${{ needs.set-env.outputs.release }}
-            ${{ secrets.AZ_ACR_URL }}/${{ env.DOCKER_IMAGE }}:sha-${{ needs.set-env.outputs.checked-out-sha }}
-            ${{ secrets.AZ_ACR_URL }}/${{ env.DOCKER_IMAGE }}:latest
-          push: true
-
   create-tag:
     name: Tag and release
     needs: set-env
@@ -108,44 +78,107 @@ jobs:
               core.setFailed(error.message);
             }
 
-  deploy-image:
-    name: Deploy to ${{ needs.set-env.outputs.environment }} (${{ needs.set-env.outputs.release }})
-    needs: [ build-and-push-image, set-env ]
+  upgrade-database:
+    name: Upgrade ${{ needs.set-env.outputs.environment }} database
+    needs: set-env
     runs-on: ubuntu-22.04
     environment: ${{ needs.set-env.outputs.environment }}
-    steps:
-      - name: Azure login with ACA credentials
-        uses: azure/login@v1
-        with:
-          creds: '{"clientId":"${{ secrets.AZ_CLIENT_ID }}","clientSecret":"${{ secrets.AZ_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZ_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.AZ_TENANT_ID }}"}'
-
-      - name: Update Azure Container Apps Revision
-        uses: azure/CLI@v1
-        id: azure
-        with:
-          azcliversion: 2.45.0
-          inlineScript: |
-            az config set extension.use_dynamic_install=yes_without_prompt
-            az containerapp update \
-              --name ${{ secrets.AZ_ACA_NAME }} \
-              --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP }} \
-              --image ${{ secrets.AZ_ACR_URL }}/${{ env.DOCKER_IMAGE }}:${{ needs.set-env.outputs.release }} \
-              --output none
-
-  run-tests:
-    name: Run E2E Tests
-    needs: [ set-env, deploy-image ]
-    runs-on: ubuntu-22.04
-    if: ${{ needs.set-env.outputs.environment }} == 'dev'
     steps:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.ref }}
-
-      - name: Cypress tests
-        uses: ./.github/actions/run-e2e-tests
+      
+      - name: Azure CLI Login  
+        uses: ./.github/actions/azure-login
         with:
-          url: ${{ secrets.AZ_FRONTDOOR_URL }}
-          dsi_url: ${{ secrets.DSI_URL }}
-          dsi_username: ${{ secrets.DSI_USERNAME }}
-          dsi_password: ${{ secrets.DSI_PASSWORD }}
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+
+      - name: Build and run database upgrader
+        uses: ./.github/actions/build-and-run-database-upgrader
+        with:
+          dotnet_version: ${{ vars.DOTNET_VERSION }}
+          # az_devops_project_url: ${{ secrets.AZ_DEVOPS_PROJECT_URL }}
+          # az_devops_pipeline_name: ${{ secrets.AZ_DEVOPS_PIPELINE_NAME }}
+          # az_devops_pat: ${{ secrets.AZ_DEVOPS_PAT }}
+          az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
+          az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
+          az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+          az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+
+  # build-and-push-image:
+  #   name: Build and push to ACR
+  #   needs: [set-env, upgrade-database]
+  #   runs-on: ubuntu-22.04
+  #   environment: ${{ needs.set-env.outputs.environment }}
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         ref: ${{ github.ref }}
+
+  #     - name: Azure Container Registry login
+  #       uses: docker/login-action@v2
+  #       with:
+  #         username: ${{ secrets.AZ_CLIENT_ID }}
+  #         password: ${{ secrets.AZ_CLIENT_SECRET }}
+  #         registry: ${{ secrets.AZ_ACR_URL }}
+
+  #     - name: Build and push docker image
+  #       uses: docker/build-push-action@v3
+  #       with:
+  #         context: ./src/
+  #         file: ./src/Dfe.PlanTech.Web/Dockerfile
+  #         build-args: COMMIT_SHA=${{ needs.set-env.outputs.checked-out-sha }}
+  #         tags: |
+  #           ${{ secrets.AZ_ACR_URL }}/${{ env.DOCKER_IMAGE }}:${{ needs.set-env.outputs.branch }}
+  #           ${{ secrets.AZ_ACR_URL }}/${{ env.DOCKER_IMAGE }}:${{ needs.set-env.outputs.release }}
+  #           ${{ secrets.AZ_ACR_URL }}/${{ env.DOCKER_IMAGE }}:sha-${{ needs.set-env.outputs.checked-out-sha }}
+  #           ${{ secrets.AZ_ACR_URL }}/${{ env.DOCKER_IMAGE }}:latest
+  #         push: true            
+
+  # deploy-image:
+  #   name: Deploy to ${{ needs.set-env.outputs.environment }} (${{ needs.set-env.outputs.release }})
+  #   needs: [ build-and-push-image, set-env ]
+  #   runs-on: ubuntu-22.04
+  #   environment: ${{ needs.set-env.outputs.environment }}
+  #   steps:
+  #     - name: Azure CLI Login  
+  #       uses: ./.github/actions/azure-login
+  #       with:
+  #         az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+  #         az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+  #         az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+  #         az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+
+  #     - name: Update Azure Container Apps Revision
+  #       uses: azure/CLI@v1
+  #       id: azure
+  #       with:
+  #         azcliversion: 2.45.0
+  #         inlineScript: |
+  #           az config set extension.use_dynamic_install=yes_without_prompt
+  #           az containerapp update \
+  #             --name ${{ secrets.AZ_ACA_NAME }} \
+  #             --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP }} \
+  #             --image ${{ secrets.AZ_ACR_URL }}/${{ env.DOCKER_IMAGE }}:${{ needs.set-env.outputs.release }} \
+  #             --output none
+
+  # run-tests:
+  #   name: Run E2E Tests
+  #   needs: [ set-env, deploy-image ]
+  #   runs-on: ubuntu-22.04
+  #   if: ${{ needs.set-env.outputs.environment }} == 'dev'
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         ref: ${{ github.ref }}
+
+  #     - name: Cypress tests
+  #       uses: ./.github/actions/run-e2e-tests
+  #       with:
+  #         url: ${{ secrets.AZ_FRONTDOOR_URL }}
+  #         dsi_url: ${{ secrets.DSI_URL }}
+  #         dsi_username: ${{ secrets.DSI_USERNAME }}
+  #         dsi_password: ${{ secrets.DSI_PASSWORD }}

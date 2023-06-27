@@ -1,0 +1,25 @@
+name: Azure CLI Login
+description: Login to Azure using service principle
+
+inputs:
+  az_tenant_id:
+    required: true
+    type: string
+  az_subscription_id:
+    required: true
+    type: string
+  az_client_id:
+    required: true
+    type: string
+  az_client_secret:
+    required: true
+    type: string
+
+runs:
+  using: composite
+
+  steps:
+    - name: Azure login with ACA credentials
+      uses: azure/login@v1
+      with:
+        creds: '{"clientId":"${{ inputs.az_client_id }}","clientSecret":"${{ inputs.az_client_secret }}","subscriptionId":"${{ inputs.az_subscription_id }}","tenantId":"${{ inputs.az_tenant_id }}"}'

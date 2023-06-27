@@ -1,0 +1,55 @@
+name: Run Database Upgrader
+description: Builds and runs the PlanTech database upgrader app
+
+inputs:
+  dotnet_version:
+    required: true
+    type: string
+  az_keyvault_name:
+    required: true
+    type: string  
+  az_keyvault_database_connectionstring_name:
+    required: true
+    type: string  
+  az_sql_database_server_name:
+    required: true
+    type: string  
+  az_resource_group_name:
+    required: true
+    type: string 
+
+runs:
+  using: composite
+
+  steps:
+    - name: Build database upgrader  
+      uses: ./.github/actions/build-dotnet-app
+      with:
+        dotnet_version: ${{ inputs.dotnet_version }}  
+        solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
+
+    - name: Get workflow IP address
+      id: whats-my-ip
+      uses: ./.github/actions/whats-my-ip-address
+      
+    - name: Add Azure firewall rules
+      shell: bash
+      run: |
+        az sql server firewall-rule create --resource-group ${{ inputs.az_resource_group_name }} --server ${{ inputs.az_sql_database_server_name }} --name db-upgrader --start-ip-address ${{ steps.whats-my-ip.outputs.ip }} --end-ip-address ${{ steps.whats-my-ip.outputs.ip }}
+        az keyvault network-rule add --resource-group ${{ inputs.az_resource_group_name }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
+
+    - name: Get connection string
+      shell: bash
+      run: |
+        echo "CONNECTION_STRING=$(az keyvault secret show --name ${{ inputs.az_keyvault_database_connectionstring_name }} --vault-name ${{ inputs.az_keyvault_name }} --query value -o tsv)" >> $GITHUB_ENV
+
+    - name: Run database upgrader
+      shell: bash
+      run: dotnet ./build/Dfe.PlanTech.DatabaseUpgrader.dll "${{ env.CONNECTION_STRING }}"
+
+    - name: Remove Azure firewall rules
+      shell: bash
+      if: always()
+      run: |
+        az sql server firewall-rule delete --resource-group ${{ inputs.az_resource_group_name }} --server ${{ inputs.az_sql_database_server_name }} --name db-upgrader
+        az keyvault network-rule remove --resource-group ${{ inputs.az_resource_group_name }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
