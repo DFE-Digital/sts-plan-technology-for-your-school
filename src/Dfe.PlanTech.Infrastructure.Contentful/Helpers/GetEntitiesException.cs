@@ -3,9 +3,9 @@
 namespace Dfe.PlanTech.Infrastructure.Contentful.Helpers
 {
     [Serializable]
-    internal class ExceptionHelper : Exception
+    public class GetEntitiesException : Exception
     {
-        public ExceptionHelper(string? message) : base(message)
+        public GetEntitiesException(string? message) : base(message)
         {
         }
     }

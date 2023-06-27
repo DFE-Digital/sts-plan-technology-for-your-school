@@ -56,7 +56,7 @@ public class ContentfulRepository : IContentRepository
 
         if (entities.Count > 1)
         {
-            throw new ExceptionHelper($"Found more than 1 entity with id {id}");
+            throw new GetEntitiesException($"Found more than 1 entity with id {id}");
         }
 
         return entities.FirstOrDefault();
