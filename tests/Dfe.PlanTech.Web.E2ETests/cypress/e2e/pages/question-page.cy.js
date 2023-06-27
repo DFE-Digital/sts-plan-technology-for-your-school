@@ -45,7 +45,7 @@ describe("landing page", () => {
   });
 
   it("should navigate to next page on submit", () => {
-    cy.origin(Cypress.env("URL"), (FIRST_QUESTION) => {
+    cy.origin(Cypress.env("URL"), { args: { FIRST_QUESTION } }, ({ FIRST_QUESTION }) => {
 
       cy.get("form div.govuk-radios div.govuk-radios__item input")
         .first()
@@ -67,4 +67,24 @@ describe("landing page", () => {
         .should("equal", "Back");
     });
   });
+
+  it("should navigate back button that navigates to last question once submitted", () => {
+    cy.origin(Cypress.env("URL"), { args: { FIRST_QUESTION } }, ({ FIRST_QUESTION }) => {
+      cy.get("form div.govuk-radios div.govuk-radios__item input")
+        .first()
+        .click();
+
+      cy.get("form button.govuk-button").click();
+
+      cy.location("pathname", { timeout: 60000 })
+        .should("not.include", FIRST_QUESTION)
+        .and("include", "/question");
+
+      cy.get("a.govuk-back-link")
+        .should("exist")
+        .and("have.attr", "href")
+        .and("include", FIRST_QUESTION);
+    });
+  });
+
 });
