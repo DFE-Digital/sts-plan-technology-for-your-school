@@ -2,7 +2,7 @@ resource "null_resource" "keyvault-add-vnet-restriction" {
   depends_on = [module.main_hosting]
 
   triggers = {
-    ip_address = local.github_runner_ip
+    managed_identity_id = azurerm_user_assigned_identity.user_assigned_identity.id
   }
 
   provisioner "local-exec" {
