@@ -19,6 +19,8 @@ env:
   ARM_CLIENT_ID: ${{ secrets.AZ_CLIENT_ID }}
   ARM_CLIENT_SECRET: ${{ secrets.AZ_CLIENT_SECRET }}
 
+  AZ_KEYVAULT_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP	}}-kv
+  
   TF_BACKEND_STORAGE_ACCOUNT_NAME: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
   TF_BACKEND_CONTAINER_NAME: ${{ secrets.TF_BACKEND_CONTAINER_NAME }}
   TF_BACKEND_KEY: ${{ secrets.TF_BACKEND_KEY }}
@@ -55,9 +57,10 @@ jobs:
         uses: ./.github/actions/whats-my-ip-address
 
       - name: Set GitHub Runner IP to TF Var
+        id: whats-my-ip
         shell: bash
         run: |
-          echo "TF_VAR_github_ip=${{env.ip}}" >> $GITHUB_ENV
+          echo "TF_VAR_github_ip=${{steps.whats-my-ip.outputs.ip}}" >> $GITHUB_ENV
 
       - name: Login with AZ
         uses: ./.github/actions/azure-login
@@ -69,11 +72,10 @@ jobs:
 
       - name: Add Runner to KV whitelist
         uses: azure/CLI@v1
-        id: azure
         with:
           azcliversion: 2.45.0
           inlineScript: |
-            az keyvault network-rule add --name ${{ secrets.AZ_ACA_RESOURCE_GROUP	}}-kv --ip-address ${{ env.IP }}
+            az keyvault network-rule add --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
         
       - name: Terraform init
         id: init
@@ -111,15 +113,14 @@ jobs:
           github_event_name: ${{ github.event_name }}
           tf_working_directory: ${{ env.TF_WORKING_DIRECTORY }}
           github_workflow: ${{ github.workflow }}
-
-      - name: Remove IP Address from Azure KV
-        uses: ./.github/actions/remove-ip-from-kv
-        if: always()
+      
+      - name: Add Runner to KV whitelist
+        uses: azure/CLI@v1
         with:
-          ip_address: ${{ env.IP }}
-          keyvault_name: ${{ secrets.AZ_ACA_RESOURCE_GROUP	}}-kv
-          azure_credentials: '{"clientId":"${{ secrets.AZ_CLIENT_ID }}","clientSecret":"${{ secrets.AZ_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZ_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.AZ_TENANT_ID }}"}'
-
+          azcliversion: 2.45.0
+          inlineScript: |
+            az keyvault network-rule remove --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
+  
   terraform-lint:
     name: Terraform Lint
     runs-on: ubuntu-latest
