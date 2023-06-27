@@ -168,9 +168,10 @@ jobs:
           config-file: .terraform-docs.yml
           output-file: terraform-configuration.md
           output-method: inject
-          fail-on-diff: false
+          fail-on-diff: true
       
       - name: Upload terraform-configuration.md artifact
+        if: always()
         uses: actions/upload-artifact@v2
         with:
           name: terraform-configuration
