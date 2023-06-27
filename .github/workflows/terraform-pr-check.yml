@@ -114,7 +114,7 @@ jobs:
           tf_working_directory: ${{ env.TF_WORKING_DIRECTORY }}
           github_workflow: ${{ github.workflow }}
       
-      - name: Add Runner to KV whitelist
+      - name: Remove Runner to KV whitelist
         uses: azure/CLI@v1
         if: always()
         with:
