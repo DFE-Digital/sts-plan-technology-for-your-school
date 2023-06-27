@@ -116,6 +116,7 @@ jobs:
       
       - name: Add Runner to KV whitelist
         uses: azure/CLI@v1
+        if: always()
         with:
           azcliversion: 2.45.0
           inlineScript: |
