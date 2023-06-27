@@ -47,7 +47,7 @@ locals {
   # Azure KeyVault #
   ##################
   kv_name = "${local.environment}${local.project_name}-kv"
-  
+
   ###########
   # Scripts #
   ###########
