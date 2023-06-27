@@ -57,5 +57,5 @@ locals {
   # Scripts #
   ###########
   keyvault-assign-identity_command      = "timeout 15m ${path.module}/scripts/assign-user-identity-to-key-vault.sh -n \"${local.container_app_name}\" -g \"${local.resource_group_name}\" -u \"${local.user_identity_name}\""
-  keyvault-add-vnet-restriction_command = "timeout 15m ${path.module}/scripts/add-keyvault-service-endpoint-to-app.sh -c \"${local.container_app_name}\" -g \"${local.resource_group_name}\" -v \"${local.vnet_name}\" -n \"${local.subnet_name}\" -k \"${local.kv_name}\" -i \"${local.github_runner_ip}\""
+  keyvault-add-vnet-restriction_command = "timeout 15m ${path.module}/scripts/add-keyvault-service-endpoint-to-app.sh -c \"${local.container_app_name}\" -g \"${local.resource_group_name}\" -v \"${local.vnet_name}\" -n \"${local.subnet_name}\" -k \"${local.kv_name}\""
 }

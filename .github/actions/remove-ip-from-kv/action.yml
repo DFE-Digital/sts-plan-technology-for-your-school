@@ -15,12 +15,7 @@ inputs:
 runs:
   using: composite
   steps:
-      - name: Azure login with ACA credentials
-        uses: azure/login@v1
-        with:
-          creds: ${{ inputs.azure_credentials }}
-
-      - name: Update Azure Container Apps Revision
+      - name: Remove runner ip from whitelist
         uses: azure/CLI@v1
         id: azure
         with:

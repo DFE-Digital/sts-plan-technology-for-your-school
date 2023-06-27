@@ -55,11 +55,3 @@ variable "az_sql_admin_userid_postfix" {
   description = "Azure SQL admin userid postfix, used with `project_name` and `environment` to build userid"
   type        = string
 }
-
-##########
-# GitHub #
-##########
-variable "github_ip" {
-  description = "IP Address of the executing GitHub Runner"
-  type        = string
-}

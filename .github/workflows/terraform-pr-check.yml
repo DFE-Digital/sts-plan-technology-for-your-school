@@ -52,13 +52,29 @@ jobs:
           terraform_version: 1.4.5
 
       - name: Get GitHub Runner IP
-        uses: ./.github/actions/get-github-runner-ip
+        uses: ./.github/actions/whats-my-ip-address
 
       - name: Set GitHub Runner IP to TF Var
         shell: bash
         run: |
-          echo "TF_VAR_github_ip=${{env.RUNNER_IP}}" >> $GITHUB_ENV
+          echo "TF_VAR_github_ip=${{env.IP}}" >> $GITHUB_ENV
 
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+
+      - name: Add Runner to KV whitelist
+        uses: azure/CLI@v1
+        id: azure
+        with:
+          azcliversion: 2.45.0
+          inlineScript: |
+            az keyvault network-rule remove --name ${{ secrets.AZ_ACA_RESOURCE_GROUP	}}-kv --ip-address ${{ env.IP }}
+        
       - name: Terraform init
         id: init
         run: |

@@ -1,0 +1,27 @@
+name: Whats My Ip Address
+description: Gets the workflow runner ip address
+
+outputs:
+  ip:
+    description: The workflow runner's ip address
+    value: ${{ steps.whats-my-ip.outputs.ip }}
+
+runs:
+  using: composite
+
+  steps:
+    - name: Get Workflow runner IP
+      shell: bash
+      id: whats-my-ip
+      run: |
+        echo "ip=$(curl -s https://api.ipify.org?format=json | jq -r '.ip')" >> $GITHUB_OUTPUT 
+    - name: Validate IP
+      shell: bash
+      run: |
+        if ! [[ ${{ steps.whats-my-ip.outputs.ip }} =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "Invalid IP address detected"
+          echo "Whats My IP Address: ${{ steps.whats-my-ip.outputs.ip }}"
+          exit 1
+        else
+          echo "Whats My IP Address: ${{ steps.whats-my-ip.outputs.ip }}"
+        fi 
