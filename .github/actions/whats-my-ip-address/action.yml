@@ -15,6 +15,7 @@ runs:
       id: whats-my-ip
       run: |
         echo "ip=$(curl -s https://api.ipify.org?format=json | jq -r '.ip')" >> $GITHUB_OUTPUT 
+
     - name: Validate IP
       shell: bash
       run: |
@@ -24,4 +25,4 @@ runs:
           exit 1
         else
           echo "Whats My IP Address: ${{ steps.whats-my-ip.outputs.ip }}"
-        fi 
+        fi
