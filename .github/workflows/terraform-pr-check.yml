@@ -169,3 +169,9 @@ jobs:
           output-file: terraform-configuration.md
           output-method: inject
           fail-on-diff: false
+      
+      - name: Upload terraform-configuration.md artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: terraform-configuration
+          path: terraform/terraform-configuration.md
