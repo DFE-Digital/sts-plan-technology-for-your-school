@@ -2,9 +2,8 @@ name: Build & deploy to environment
 
 on:
   push:
-    branches: [ "main" ]    
   pull_request:
-    branches: [ "main" ]
+    types: [edited]
 
 env:
   DOCKER_IMAGE: plan-tech-app
