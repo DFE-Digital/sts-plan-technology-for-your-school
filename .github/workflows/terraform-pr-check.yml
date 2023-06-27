@@ -60,7 +60,7 @@ jobs:
       - name: Set GitHub Runner IP to TF Var
         shell: bash
         run: |
-          echo "TF_VAR_github_ip=${{ needs.whats-my-ip.outputs.ip}}" >> $GITHUB_ENV
+          echo "TF_VAR_github_ip=${{ steps.whats-my-ip.outputs.ip}}" >> $GITHUB_ENV
 
       - name: Login with AZ
         uses: ./.github/actions/azure-login
@@ -75,7 +75,7 @@ jobs:
         with:
           azcliversion: 2.45.0
           inlineScript: |
-            az keyvault network-rule add --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ needs.whats-my-ip.outputs.ip }}
+            az keyvault network-rule add --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
         
       - name: Terraform init
         id: init
@@ -119,7 +119,7 @@ jobs:
         with:
           azcliversion: 2.45.0
           inlineScript: |
-            az keyvault network-rule remove --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ needs.whats-my-ip.outputs.ip }}
+            az keyvault network-rule remove --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
   
   terraform-lint:
     name: Terraform Lint
