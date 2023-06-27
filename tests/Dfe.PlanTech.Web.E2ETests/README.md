@@ -12,3 +12,12 @@ Created using [Cypress](https://cypress.io)
 2. Populate the variables within it
 3. Install the necessary packages by running `npm install`
 4. Run Cypress by running `npx cypress open`
+
+### Variables
+
+| Name     | Description                                  |
+| -------- | -------------------------------------------- |
+| URL      | URL to run tests on (e.g. www.plan-tech.com) |
+| DSiUrl   | URL for DFE Sign-in Interactions             |
+| Username | DFE Sign-in Username                         |
+| Password | DFE Sign-in Password                         |
