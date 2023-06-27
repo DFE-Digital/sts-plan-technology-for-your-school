@@ -31,7 +31,7 @@ jobs:
     - name: Install dotnet coverage
       run: dotnet tool install --global dotnet-coverage
     - name: Restore dependencies
-      run: dotnet restore "Dfe.PlanTech.Web.csproj"
+      run: dotnet restore
     - name: Build, Test and Analyze
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
