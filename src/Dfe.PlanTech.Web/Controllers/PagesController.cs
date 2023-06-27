@@ -13,7 +13,7 @@ public class PagesController : BaseController<PagesController>
     }
 
     [HttpGet("/")]
-    public async Task<IActionResult> Index(CancellationToken cancellationToken, [FromServices] GetPageQuery query)
+    public async Task<IActionResult> Index([FromServices] GetPageQuery query, CancellationToken cancellationToken)
     {
         var page = await query.GetPageBySlug("/", cancellationToken);
 
@@ -22,7 +22,7 @@ public class PagesController : BaseController<PagesController>
 
     [Authorize]
     [HttpGet("/{route?}")]
-    public async Task<IActionResult> GetByRoute(string route, CancellationToken cancellationToken, [FromServices] GetPageQuery query)
+    public async Task<IActionResult> GetByRoute(string route, [FromServices] GetPageQuery query, CancellationToken cancellationToken)
     {
         string slug = GetSlug(route);
 
