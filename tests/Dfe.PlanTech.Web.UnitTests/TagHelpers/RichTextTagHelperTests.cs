@@ -17,7 +17,6 @@ public class RichTextTagHelperTests
     [Fact]
     public async Task Should_LogWarning_When_Content_Is_Null()
     {
-        string? logMessage = null;
         string content = "rich text tag";
 
         var loggerMock = new Mock<ILogger<RichTextTagHelper>>();
