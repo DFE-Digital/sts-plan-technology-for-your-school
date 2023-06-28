@@ -16,6 +16,11 @@ runs:
       run: |
         # Resolving IP Address
 
+        # Function for unbuffered echo
+        function unbuffered_echo {
+            stdbuf -o 0 echo "$1"
+        }
+
         # Maximum number of tries
         max_tries=5
 
@@ -31,16 +36,16 @@ runs:
 
             # If the request was successful, print the IP and exit
             if [[ $ip =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-                stdbuf -o0 echo "IP Address: $ip"
+                unbuffered_echo "IP Address: $ip"
                 echo "ip=$ip" >> $GITHUB_OUTPUT 
                 exit 0
             fi
 
             # If the request failed, wait and then try again
-            stdbuf -o0 echo "Attempt $try failed, retrying in $delay seconds..."
+            unbuffered_echo "Attempt $try failed, retrying in $delay seconds..."
             sleep $delay
         done
 
         # If we reach this point, all attempts have failed
-        stdbuf -o0 echo "Failed to retrieve IP after $max_tries attempts."
+        unbuffered_echo "Failed to retrieve IP after $max_tries attempts."
         exit 1
