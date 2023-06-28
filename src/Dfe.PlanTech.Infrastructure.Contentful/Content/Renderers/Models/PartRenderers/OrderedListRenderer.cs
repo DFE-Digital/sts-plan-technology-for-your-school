@@ -11,11 +11,11 @@ public class OrderedListRenderer : BaseRichTextContentPartRender
     {
     }
 
-    public override StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection renderers, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
         stringBuilder.Append("<ol>");
 
-        renderers.RenderChildren(content, stringBuilder);
+        rendererCollection.RenderChildren(content, stringBuilder);
 
         stringBuilder.Append("</ol>");
 

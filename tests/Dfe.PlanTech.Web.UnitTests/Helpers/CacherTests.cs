@@ -104,6 +104,71 @@ public class CacherTests
         Assert.Equal(testObject, cachedResult);
         cacheOptionsMock.VerifyGet(cacheOptions => cacheOptions.DefaultTimeToLive);
     }
+
+    [Fact]
+    public async Task GetAsync_Should_Return_CachedValue_When_Cache_Exists()
+    {
+        var testKey = "Testing";
+        var testObject = "Test value";
+
+        _memoryCache.Set(testKey, testObject);
+
+        var cacher = new Cacher(new CacheOptions(), _memoryCache);
+
+        var result = await cacher.GetAsync(testKey, () => Task.FromResult("new value"), TimeSpan.MaxValue);
+
+        Assert.NotNull(result);
+        Assert.Equal(testObject, result);
+    }
+
+    [Fact]
+    public async Task GetAsync_Should_Return_NewValue_When_Cache_NotFound()
+    {
+        var testKey = "Testing";
+        var newValue = "new value";
+
+        var cacher = new Cacher(new CacheOptions(), _memoryCache);
+
+        var result = await cacher.GetAsync(testKey, () => Task.FromResult(newValue), TimeSpan.MaxValue);
+
+        Assert.NotNull(result);
+        Assert.Equal(newValue, result);
+    }
+
+    [Fact]
+    public async Task GetAsync_Should_Set_NewValue_When_Cache_NotFound()
+    {
+        var testKey = "Testing";
+        var newValue = "new value";
+
+        var cacher = new Cacher(new CacheOptions(), _memoryCache);
+
+        var result = await cacher.GetAsync(testKey, () => Task.FromResult(newValue), TimeSpan.MaxValue);
+
+        var cachedResult = _memoryCache.Get(testKey);
+
+        Assert.NotNull(cachedResult);
+        Assert.Equal(newValue, cachedResult);
+    }
+
+    [Fact]
+    public async Task GetAsync_Should_Set_Use_DefaultCacheValues_When_Not_Supplied()
+    {
+        var testKey = "Testing";
+        var newValue = "new value";
+
+        var cacheOptionsMock = new Mock<ICacheOptions>();
+        cacheOptionsMock.Setup(options => options.DefaultTimeToLive).Returns(TimeSpan.FromSeconds(1)).Verifiable();
+
+        var cacher = new Cacher(cacheOptionsMock.Object, _memoryCache);
+
+        var result = await cacher.GetAsync(testKey, () => Task.FromResult(newValue));
+
+        var cachedResult = _memoryCache.Get(testKey);
+
+        cacheOptionsMock.Verify(options => options.DefaultTimeToLive);
+    }
+
 }
 
 public class TestService

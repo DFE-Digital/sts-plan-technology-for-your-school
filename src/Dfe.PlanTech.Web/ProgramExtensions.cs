@@ -5,9 +5,11 @@ using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Web.Helpers;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Web;
 
+[ExcludeFromCodeCoverage]
 public static class ProgramExtensions
 {
     public static IServiceCollection AddContentfulServices(this IServiceCollection services, IConfiguration configuration)

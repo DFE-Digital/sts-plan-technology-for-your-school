@@ -19,4 +19,20 @@ public class ComponentViewsFactoryTests
         Assert.Contains(header.GetType().Name, viewPath);
         Assert.Contains("Components", viewPath);
     }
+
+    [Fact]
+    public void TryGetViewForType_Should_Return_False_When_No_View_Found()
+    {
+        var testClass = new NotARealClass();
+
+        var factory = new ComponentViewsFactory(new NullLogger<ComponentViewsFactory>());
+        var success = factory.TryGetViewForType(testClass, out string? viewPath);
+
+        Assert.False(success);
+        Assert.Null(viewPath);
+    }
+}
+
+public class NotARealClass{
+
 }

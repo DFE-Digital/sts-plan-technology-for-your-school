@@ -15,11 +15,11 @@ public class HyperlinkRenderer : BaseRichTextContentPartRender
         _options = options;
     }
 
-    public override StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection renderers, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
         if (string.IsNullOrEmpty(content.Data?.Uri))
         {
-            renderers.Logger.LogError("{this} has no Uri", this);
+            rendererCollection.Logger.LogError("{this} has no Uri", this);
             return stringBuilder;
         }
 
@@ -33,7 +33,7 @@ public class HyperlinkRenderer : BaseRichTextContentPartRender
 
         stringBuilder.Append("\">");
 
-        renderers.RenderChildren(content, stringBuilder);
+        rendererCollection.RenderChildren(content, stringBuilder);
 
         stringBuilder.Append(content.Value);
 
