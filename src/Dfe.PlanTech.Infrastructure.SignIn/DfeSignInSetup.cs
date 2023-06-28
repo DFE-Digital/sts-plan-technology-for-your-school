@@ -8,9 +8,11 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Infrastructure.SignIn;
 
+[ExcludeFromCodeCoverage]
 public static class DfeSignInSetup
 {
     public static IServiceCollection AddDfeSignIn(this IServiceCollection services, IConfiguration configuration)
