@@ -134,7 +134,7 @@ This will generate the `terraform-configuration.md` markdown file.
 
 ### KeyVault Firewall Error
 
-When running locally you see an error simular to the following:
+When running locally you see an error similar to the following:
 
 > Making Read request on Azure KeyVault Secret.  Client address is not authorized and caller is not a trusted service. Client address: 123.456.789.123.
 
