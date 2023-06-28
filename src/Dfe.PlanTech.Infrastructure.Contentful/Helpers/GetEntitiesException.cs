@@ -7,7 +7,6 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Helpers
     {
         public GetEntitiesException()
         {
-            
         }
 
         public GetEntitiesException(string? message) : base(message)
@@ -17,6 +16,10 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Helpers
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
+        }
+
+        protected GetEntitiesException(SerializationInfo info, StreamingContext context)
+        {
         }
     }
 }
