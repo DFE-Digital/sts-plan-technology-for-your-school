@@ -8,7 +8,6 @@ WORKDIR /src
 COPY Dfe.PlanTech.Application .
 COPY Dfe.PlanTech.DatabaseUpgrader . 
 COPY Dfe.PlanTech.Domain . 
-COPY Dfe.PlanTech.Infrastructure . 
 COPY Dfe.PlanTech.Infrastructure.Contentful . 
 COPY Dfe.PlanTech.Infrastructure.SignIn . 
 COPY Dfe.PlanTech.Web . 
