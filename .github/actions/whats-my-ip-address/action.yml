@@ -29,7 +29,8 @@ runs:
 
         for try in $(seq $max_tries); do
             # Make a GET request to the API
-            response=$(curl -s https://api.ipify.org?format=json)
+            response=$(curl --fail -s https://api.ipify.org?format=json)
+            unbuffered_echo "Response: $response"
 
             # Extract the IP address from the JSON response 
             ip=$(echo $response | jq -r '.ip')
