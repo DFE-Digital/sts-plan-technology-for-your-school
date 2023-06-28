@@ -8,9 +8,11 @@ using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRender
 using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 
+[ExcludeFromCodeCoverage]
 public static class ContentfulSetup
 {
     /// <summary>
