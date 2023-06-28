@@ -17,6 +17,7 @@ The following article discusses developer tools and how to run the **Terraform**
     - [Terraform Format](#terraform-format)
   - [Terraform Documentation](#terraform-documentation)
   - [Troubleshooting](#troubleshooting)
+    - [KeyVault Firewall Error](#keyvault-firewall-error)
     - [Logging](#logging)
     - [Output variables](#output-variables)
 
@@ -130,6 +131,14 @@ When the Terraform configuration is updated, the module documentation will need 
 This will generate the `terraform-configuration.md` markdown file.
 
 ## Troubleshooting
+
+### KeyVault Firewall Error
+
+When running locally you see an error simular to the following:
+
+> Making Read request on Azure KeyVault Secret.  Client address is not authorized and caller is not a trusted service. Client address: 123.456.789.123.
+
+To resolve this, you need to update the KeyVault Firewall to grant your IP access. 
 
 ### Logging
 To help troubleshoot Terraform, you can turn on [Terraform logging](https://developer.hashicorp.com/terraform/tutorials/configuration-language/troubleshooting-workflow#enable-terraform-logging) which can be directed to a file.
