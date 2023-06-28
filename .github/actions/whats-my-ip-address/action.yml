@@ -32,7 +32,8 @@ runs:
         
         for try in $(seq $max_tries); do
             # Make a GET request to the API
-            response=$(curl --fail -m $curl_timeout -s https://api.ipify.org?format=json)
+            response=$(curl --fail -m $curl_timeout -s https://api.ipify.org?format=json || true)
+            curl_exit_code=$?
             unbuffered_echo "Response: $response"
         
             # Extract the IP address from the JSON response 
