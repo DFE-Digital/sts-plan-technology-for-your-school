@@ -98,6 +98,15 @@ jobs:
         id: fmt
         run: terraform fmt -check -diff
 
+      - name: Validate Terraform docs
+        uses: terraform-docs/gh-actions@v1.0.0
+        with:
+          working-dir: terraform
+          config-file: .terraform-docs.yml
+          output-file: terraform-configuration.md
+          output-method: inject
+          fail-on-diff: true
+
       - name: Update PR with Terraform results  
         uses: ./.github/actions/post-terraform-results
         if: github.event_name == 'pull_request'
@@ -151,21 +160,3 @@ jobs:
         uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
         with:
           github_token: ${{ github.token }}
-
-  terraform-docs-validation:
-    name: Terraform Docs validation
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-
-      - name: Generate Terraform docs
-        uses: terraform-docs/gh-actions@v1.0.0
-        with:
-          working-dir: terraform
-          config-file: .terraform-docs.yml
-          output-file: terraform-configuration.md
-          output-method: inject
-          fail-on-diff: false
