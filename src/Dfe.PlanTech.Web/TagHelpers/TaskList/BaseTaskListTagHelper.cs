@@ -11,13 +11,6 @@ public abstract class BaseTaskListTagHelper : TagHelper
 
     public string TagName { get; init; } = null!;
 
-    protected BaseTaskListTagHelper(string? classes, string @class, string tagName)
-    {
-        Classes = classes;
-        Class = @class;
-        TagName = tagName;
-    }
-
     protected BaseTaskListTagHelper()
     {
     }

@@ -2,6 +2,7 @@ using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.TagHelpers;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -170,4 +171,71 @@ public class HeaderComponentTagHelperTests
 
         Assert.Contains($" class=\"{expectedClass}\">", html);
     }
+
+    [Fact]
+    public async Task Should_LogWarning_When_Model_Is_Null()
+    {
+        var content = "content";
+
+        var loggerMock = new Mock<ILogger<HeaderComponentTagHelper>>();
+        loggerMock.Setup(LoggerMock.LogMethod<HeaderComponentTagHelper>()).Verifiable();
+
+        var tagHelper = new HeaderComponentTagHelper(loggerMock.Object)
+        {
+        };
+
+        var context = new TagHelperContext(tagName: "header",
+                                            allAttributes: new TagHelperAttributeList(),
+                                            items: new Dictionary<object, object>(),
+                                            uniqueId: "header-test");
+
+        var output = new TagHelperOutput("header-tag",
+                                        attributes: new TagHelperAttributeList(),
+                                        getChildContentAsync: (useCachedResult, encoder) =>
+                                        {
+                                            var tagHelperContent = new DefaultTagHelperContent();
+                                            tagHelperContent.SetContent(content);
+                                            return Task.FromResult<TagHelperContent>(tagHelperContent);
+                                        });
+
+        await tagHelper.ProcessAsync(context, output);
+
+        loggerMock.Verify();
+    }
+
+    [Fact]
+    public async Task Should_LogWarning_When_HeaderTag_Is_Unknown()
+    {
+        var content = "content";
+
+        var loggerMock = new Mock<ILogger<HeaderComponentTagHelper>>();
+        loggerMock.Setup(LoggerMock.LogMethod<HeaderComponentTagHelper>()).Verifiable();
+
+        var tagHelper = new HeaderComponentTagHelper(loggerMock.Object)
+        {
+            Model = new Header()
+            {
+                Tag = HeaderTag.Unknown
+            }
+        };
+
+        var context = new TagHelperContext(tagName: "header",
+                                            allAttributes: new TagHelperAttributeList(),
+                                            items: new Dictionary<object, object>(),
+                                            uniqueId: "header-test");
+
+        var output = new TagHelperOutput("header-tag",
+                                        attributes: new TagHelperAttributeList(),
+                                        getChildContentAsync: (useCachedResult, encoder) =>
+                                        {
+                                            var tagHelperContent = new DefaultTagHelperContent();
+                                            tagHelperContent.SetContent(content);
+                                            return Task.FromResult<TagHelperContent>(tagHelperContent);
+                                        });
+
+        await Assert.ThrowsAnyAsync<Exception>(() => tagHelper.ProcessAsync(context, output));
+
+        loggerMock.Verify();
+    }
+
 }
