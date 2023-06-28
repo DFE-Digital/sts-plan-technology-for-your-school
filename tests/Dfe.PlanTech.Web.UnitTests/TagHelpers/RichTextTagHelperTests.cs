@@ -21,7 +21,7 @@ public class RichTextTagHelperTests
         string content = "rich text tag";
 
         var loggerMock = new Mock<ILogger<RichTextTagHelper>>();
-        loggerMock.Setup(LogMethod())
+        loggerMock.Setup(LoggerMock.LogMethod<RichTextTagHelper>())
                     .Verifiable();
 
         var richTextRendererMock = new Mock<IRichTextRenderer>();
@@ -44,14 +44,7 @@ public class RichTextTagHelperTests
 
         await richTextTagHelper.ProcessAsync(context, output);
 
-        loggerMock.Verify(LogMethod());
-
-        static System.Linq.Expressions.Expression<Action<ILogger<RichTextTagHelper>>> LogMethod()
-            => logger => logger.Log(LogLevel.Warning,
-                                    It.IsAny<EventId>(),
-                                    It.IsAny<It.IsAnyType>(),
-                                    It.IsAny<Exception>(),
-                                    It.IsAny<Func<It.IsAnyType, Exception?, string>>());
+        loggerMock.Verify(LoggerMock.LogMethod<RichTextTagHelper>());
     }
 
     [Fact]
