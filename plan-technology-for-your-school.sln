@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.Web.UnitTests"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.Infrastructure.SignIn", "src\Dfe.PlanTech.Infrastructure.SignIn\Dfe.PlanTech.Infrastructure.SignIn.csproj", "{20203658-B19C-4640-B2FA-68826D040D28}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.Infrastructure.SignIn.UnitTests", "tests\Dfe.PlanTech.Infrastructure.SignIn.UnitTests\Dfe.PlanTech.Infrastructure.SignIn.UnitTests.csproj", "{E14020A7-B71E-4850-B562-C734590F8C2F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,10 @@ Global
 		{20203658-B19C-4640-B2FA-68826D040D28}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20203658-B19C-4640-B2FA-68826D040D28}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{20203658-B19C-4640-B2FA-68826D040D28}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E14020A7-B71E-4850-B562-C734590F8C2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E14020A7-B71E-4850-B562-C734590F8C2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E14020A7-B71E-4850-B562-C734590F8C2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E14020A7-B71E-4850-B562-C734590F8C2F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F4755013-090F-4B63-B304-07F52EE96312} = {20FD2D0C-81CA-4337-B00D-9CB0BB36FE46}
@@ -69,5 +75,6 @@ Global
 		{8F225B88-DF70-4F37-9D2F-1A129A8308B8} = {20FD2D0C-81CA-4337-B00D-9CB0BB36FE46}
 		{E8C0EF01-5716-410C-A90D-DD5E4DCCDC3C} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
 		{20203658-B19C-4640-B2FA-68826D040D28} = {20FD2D0C-81CA-4337-B00D-9CB0BB36FE46}
+		{E14020A7-B71E-4850-B562-C734590F8C2F} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
 	EndGlobalSection
 EndGlobal
