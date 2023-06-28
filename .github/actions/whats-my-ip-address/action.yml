@@ -14,15 +14,32 @@ runs:
       shell: bash
       id: whats-my-ip
       run: |
-        echo "ip=$(curl -s https://api.ipify.org?format=json | jq -r '.ip')" >> $GITHUB_OUTPUT 
 
-    - name: Validate IP
-      shell: bash
-      run: |
-        if ! [[ ${{ steps.whats-my-ip.outputs.ip }} =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-          echo "Invalid IP address detected"
-          echo "Whats My IP Address: ${{ steps.whats-my-ip.outputs.ip }}"
-          exit 1
-        else
-          echo "Whats My IP Address: ${{ steps.whats-my-ip.outputs.ip }}"
-        fi
+        # Maximum number of tries
+        max_tries=5
+
+        # Delay between tries in seconds
+        delay=5
+
+        for try in $(seq $max_tries); do
+            # Make a GET request to the API
+            response=$(curl -s https://api.ipify.org?format=json)
+
+            # Extract the IP address from the JSON response 
+            ip=$(echo $response | jq -r '.ip')
+
+            # If the request was successful, print the IP and exit
+            if [[ $ip =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                echo "IP Address: $ip"
+                echo "ip=$ip" >> $GITHUB_OUTPUT 
+                exit 0
+            fi
+
+            # If the request failed, wait and then try again
+            echo "Attempt $try failed, retrying in $delay seconds..."
+            sleep $delay
+        done
+
+        # If we reach this point, all attempts have failed
+        echo "Failed to retrieve IP after $max_tries attempts."
+        exit 1
