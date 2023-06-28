@@ -13,6 +13,14 @@ namespace Dfe.PlanTech.Web.UnitTests.TagHelpers
     public class TaskListTagTagHelperTests
     {
         [Fact]
+        public void Should_Set_Variables(){
+            var tagHelper = new TaskListTagTagHelper();
+
+            Assert.NotNull(tagHelper.Class);
+            Assert.NotNull(tagHelper.TagName);
+        }
+        
+        [Fact]
         public void Should_Create_CorrectColour_When_ValidColour()
         {
             var colour = "Grey";
