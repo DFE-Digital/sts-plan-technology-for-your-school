@@ -4,6 +4,7 @@ using Contentful.Core.Search;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
+using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Persistence;
@@ -55,7 +56,7 @@ public class ContentfulRepository : IContentRepository
 
         if (entities.Count > 1)
         {
-            throw new Exception($"Found more than 1 entity with id {id}");
+            throw new GetEntitiesException($"Found more than 1 entity with id {id}");
         }
 
         return entities.FirstOrDefault();

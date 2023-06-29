@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Encodings.Web;
-using System.Threading.Tasks;
 using Dfe.PlanTech.Web.TagHelpers.TaskList;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Moq;
@@ -12,6 +7,14 @@ namespace Dfe.PlanTech.Web.UnitTests.TagHelpers
 {
     public class TaskListTagTagHelperTests
     {
+        [Fact]
+        public void Should_Set_Variables(){
+            var tagHelper = new TaskListTagTagHelper();
+
+            Assert.NotNull(tagHelper.Class);
+            Assert.NotNull(tagHelper.TagName);
+        }
+        
         [Fact]
         public void Should_Create_CorrectColour_When_ValidColour()
         {

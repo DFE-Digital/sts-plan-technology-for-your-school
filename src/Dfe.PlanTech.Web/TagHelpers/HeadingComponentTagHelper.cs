@@ -44,23 +44,19 @@ public class HeaderComponentTagHelper : TagHelper
         return stringBuilder.ToString();
     }
 
-    private StringBuilder AppendCloseTag(StringBuilder stringBuilder)
+    private void AppendCloseTag(StringBuilder stringBuilder)
     {
         stringBuilder.Append("</");
         stringBuilder.Append(Model!.Tag.ToString());
         stringBuilder.Append('>');
-
-        return stringBuilder;
     }
 
-    private StringBuilder AppendOpenTag(StringBuilder stringBuilder)
+    private void AppendOpenTag(StringBuilder stringBuilder)
     {
         stringBuilder.Append('<');
         stringBuilder.Append(Model!.Tag.ToString());
         stringBuilder.Append(" class=\"");
         stringBuilder.Append(Model.GetClassForSize());
         stringBuilder.Append("\">");
-
-        return stringBuilder;
     }
 }

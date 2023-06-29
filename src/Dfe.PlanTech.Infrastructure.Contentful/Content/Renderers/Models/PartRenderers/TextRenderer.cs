@@ -15,7 +15,7 @@ public class TextRenderer : BaseRichTextContentPartRender
         _textRendererOptions = textRendererOptions;
     }
 
-    public override StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection richTextRenderer, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
         var markOptions = content.Marks.Select(_textRendererOptions.GetMatchingOptionForMark).Where(option => option != null).ToArray();
 

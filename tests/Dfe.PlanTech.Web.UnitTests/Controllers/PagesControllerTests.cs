@@ -5,6 +5,7 @@ using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Web.Controllers;
+using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -85,7 +86,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task Should_ReturnLandingPage_When_IndexRouteLoaded()
         {
-            var result = await _controller.GetByRoute(INDEX_SLUG, CancellationToken.None, _query);
+            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None);
 
             Assert.IsType<ViewResult>(result);
 
@@ -93,17 +94,35 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var model = viewResult!.Model;
 
-            Assert.IsType<Page>(model);
+            Assert.IsType<PageViewModel>(model);
 
-            var asPage = model as Page;
-            Assert.Equal(INDEX_SLUG, asPage!.Slug);
-            Assert.Contains(INDEX_TITLE, asPage!.Title!.Text);
+            var asPage = model as PageViewModel;
+            Assert.Equal(INDEX_SLUG, asPage!.Page.Slug);
+            Assert.Contains(INDEX_TITLE, asPage!.Page.Title!.Text);
+        }
+
+        [Fact]
+        public async Task Should_Return_Page_On_Index_Route()
+        {
+            var result = await _controller.Index(_query, CancellationToken.None);
+
+            Assert.IsType<ViewResult>(result);
+
+            var viewResult = result as ViewResult;
+
+            var model = viewResult!.Model;
+
+            Assert.IsType<PageViewModel>(model);
+
+            var asPage = model as PageViewModel;
+            Assert.Equal(INDEX_SLUG, asPage!.Page.Slug);
+            Assert.Contains(INDEX_TITLE, asPage!.Page.Title!.Text);
         }
 
         [Fact]
         public async Task Should_ThrowError_When_NoRouteFound()
         {
-            await Assert.ThrowsAnyAsync<Exception>(() => _controller.GetByRoute("NOT A VALID ROUTE", CancellationToken.None, _query));
+            await Assert.ThrowsAnyAsync<Exception>(() => _controller.GetByRoute("NOT A VALID ROUTE", _query, CancellationToken.None));
         }
     }
 }

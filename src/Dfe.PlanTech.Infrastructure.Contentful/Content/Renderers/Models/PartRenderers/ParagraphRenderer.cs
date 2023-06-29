@@ -13,7 +13,7 @@ public class ParagraphRenderer : BaseRichTextContentPartRender
         _options = options;
     }
 
-    public override StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection renderers, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
         if (_options.Classes == null)
         {
@@ -26,7 +26,7 @@ public class ParagraphRenderer : BaseRichTextContentPartRender
             stringBuilder.Append("\">");
         }
 
-        renderers.RenderChildren(content, stringBuilder);
+        rendererCollection.RenderChildren(content, stringBuilder);
 
         stringBuilder.Append("</p>");
         return stringBuilder;

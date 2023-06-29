@@ -8,6 +8,8 @@ public class Page : ContentComponent
 
     public string Slug { get; init; } = null!;
 
+    public bool DisplayBackButton { get; init; }
+
     public bool DisplayTopicTitle { get; init;}
     
     public string? SectionTitle { get; set; }

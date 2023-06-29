@@ -13,4 +13,6 @@ public class Section : ContentComponent, ISection
     public Question[] Questions { get; init; } = Array.Empty<Question>();
 
     public string FirstQuestionId => Questions.Select(question => question.Sys.Id).FirstOrDefault() ?? "";
+
+    public Page InterstitialPage { get; init; } = null!;
 }
