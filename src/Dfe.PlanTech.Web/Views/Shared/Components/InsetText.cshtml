@@ -1,7 +1,3 @@
 @model Dfe.PlanTech.Domain.Content.Models.InsetText;
 
-<govuk-inset-text>
-    @{
-        await Html.RenderPartialAsync("Components/TextBody", Model.Text);
-    }
-</govuk-inset-text>
+<govuk-inset-text>@Model.Text</govuk-inset-text>
