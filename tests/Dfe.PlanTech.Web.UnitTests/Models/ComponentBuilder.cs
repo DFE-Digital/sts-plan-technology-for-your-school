@@ -50,6 +50,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             LinkToEntry = BuildButton()
         };
 
+        public InsetText BuildInsetText() => new()
+        {
+            Text = "Inset Text"
+        };
+        
         private static ISection[] BuildSections()
         {
             return new ISection[]
