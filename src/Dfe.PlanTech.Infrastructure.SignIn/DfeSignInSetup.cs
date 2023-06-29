@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Domain.SignIn.Models;
+using Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -75,7 +76,7 @@ public static class DfeSignInSetup
 
         options.Events = new OpenIdConnectEvents()
         {
-            OnTokenValidated = DfeOpenIdConnectEvents.OnTokenValidated,
+            OnTokenValidated = OnTokenValidatedEvent.OnTokenValidated,
             OnRedirectToIdentityProvider = DfeOpenIdConnectEvents.OnRedirectToIdentityProvider,
             OnRedirectToIdentityProviderForSignOut = DfeOpenIdConnectEvents.OnRedirectToIdentityProviderForSignOut
         };
