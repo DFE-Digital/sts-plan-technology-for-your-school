@@ -1,16 +1,14 @@
-﻿using System;
-namespace Dfe.PlanTech.Domain.Users.Models
+﻿namespace Dfe.PlanTech.Domain.Users.Models
 {
 	public class User
 	{
-		public User()
-		{
-		}
+        public int Id { get; set; }
 
-        public int UserId { get; set; }
-        public string DfeSigninRef { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime DateLastUpdated { get; set; }
+        public string DfeSignInRef { get; set; } = null!;
+
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
+
+        public DateTime? DateLastUpdated { get; set; }
     }
 }
 

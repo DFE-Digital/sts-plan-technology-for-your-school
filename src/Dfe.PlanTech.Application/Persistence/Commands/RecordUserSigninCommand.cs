@@ -1,6 +1,5 @@
-﻿using System;
-using System.Reflection.Emit;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
+﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Persistence.Queries;
 using Dfe.PlanTech.Domain.Users.Models;
 
 namespace Dfe.PlanTech.Application.Persistence.Commands
@@ -14,10 +13,19 @@ namespace Dfe.PlanTech.Application.Persistence.Commands
             _db = db;
         }
 
-        public async Task RecordSignIn(CreateUserDTO createUserDTO)
+        public async Task RecordSignIn(RecordUserSignInDto recordUserSignInDto)
         {
-            var user = new User() { DfeSigninRef = createUserDTO.DfeSigninRef, UserId = createUserDTO.UserId };
-            await _db.AddUserAsync(user);
+            //Check user exists already
+            var getUserIdQuery = new GetUserIdQuery(_db);
+
+            var existingUserId = await getUserIdQuery.GetUserId(recordUserSignInDto.DfeSignInRef);
+
+            if(existingUserId == null){
+                var CreateUserCommand = new CreateUserCommand(_db);
+                existingUserId = await CreateUserCommand.CreateUser(recordUserSignInDto);
+            }
+
+            //RECORD SIGN IN
         }
     }
 }
