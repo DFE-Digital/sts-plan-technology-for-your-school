@@ -8,11 +8,9 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("auth")]
 public class AuthController : Controller
 {
-    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(ILogger<AuthController> logger)
+    public AuthController()
     {
-        _logger = logger;
     }
 
     [Authorize]

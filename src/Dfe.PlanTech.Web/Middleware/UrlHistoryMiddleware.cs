@@ -7,6 +7,8 @@ namespace Dfe.PlanTech.Web.Middleware;
 /// </summary>
 public class UrlHistoryMiddleware
 {
+    public const string REFERER_HEADER_KEY = "Referer";
+
     private readonly ILogger<UrlHistoryMiddleware> _logger;
     private readonly RequestDelegate _next;
 
@@ -105,7 +107,13 @@ public class UrlHistoryMiddleware
 
     private static bool TryGetRefererUri(HttpContext httpContext, out Uri? refererUri)
     {
-        var lastUrl = httpContext.Request.Headers["Referer"].ToString();
+        if (!httpContext.Request.Headers.ContainsKey(REFERER_HEADER_KEY))
+        {
+            refererUri = null;
+            return false;
+        }
+
+        var lastUrl = httpContext.Request.Headers[REFERER_HEADER_KEY].ToString();
 
         if (string.IsNullOrEmpty(lastUrl))
         {
