@@ -53,5 +53,15 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             Assert.Equal("Answer", actual.Sections[0].Questions[0].Answers[0].Text);
         }
 
+
+        [Fact]
+        public void Should_Render_ButtonWithEntryReference()
+        {
+            var actual = _componentBuilder.BuildButtonWithEntryReference();
+            Assert.True(actual != null);
+            Assert.Equal("Submit", actual.Button.Value);
+            Assert.False(actual.Button.IsStartButton);
+            Assert.NotNull(actual.LinkToEntry);
+        }
     }
 }

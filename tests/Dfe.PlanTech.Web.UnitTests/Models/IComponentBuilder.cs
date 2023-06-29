@@ -7,6 +7,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
     public interface IComponentBuilder
     {
         ButtonWithLink BuildButtonWithLink();
+        ButtonWithEntryReference BuildButtonWithEntryReference();
         Category BuildCategory();
         ComponentDropDown BuildDropDownComponent();
         TextBody BuildTextBody();
