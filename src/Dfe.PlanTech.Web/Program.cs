@@ -27,6 +27,8 @@ builder.Services.AddContentfulServices(builder.Configuration);
 builder.Services.AddDfeSignIn(builder.Configuration);
 builder.Services.AddScoped<ComponentViewsFactory>();
 
+builder.Services.AddDatabase(builder.Configuration);
+
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication();
 
