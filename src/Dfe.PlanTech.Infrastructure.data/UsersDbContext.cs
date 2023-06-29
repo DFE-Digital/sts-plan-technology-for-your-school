@@ -31,6 +31,7 @@ public class UsersDbContext : DbContext, IUsersDbContext
             builder.HasKey(user => user.Id);
             builder.Property(user => user.Id).ValueGeneratedOnAdd();
             builder.Property(user => user.DateCreated).ValueGeneratedOnAdd();
+            builder.Property(user => user.DfeSignInRef).HasMaxLength(30);
         });
     }
 
