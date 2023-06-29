@@ -1,23 +1,29 @@
 ﻿using DbUp;
+using DbUp.Engine;
 using System.Reflection;
 using Polly;
 using Polly.Timeout;
 using Polly.Retry;
+using DbUp.Helpers;
+using System.IO;
 
 /// <summary>
 /// PlanTech Database Upgrader.
 /// </summary>
 internal class Program
 {
-    const int ERROR_RESULT = -1;
-    const int SUCCESS_RESULT = 0;
+    private const int ErrorResult = -1;
+    private const int SuccessResult = 0;
+
+    private const string ScriptsNamespace = "Dfe.PlanTech.DatabaseUpgrader.Scripts";
+    private const string StoredProcsNamespace = "Dfe.PlanTech.DatabaseUpgrader.StoredProcs";
 
     private static int Main(string[] args)
     {
         if (args == null || !args.Any())
         {
             DisplayError("Please supply a connection string.");
-            return ERROR_RESULT;
+            return ErrorResult;
         }
 
         var connectionString = args[0];
@@ -35,19 +41,47 @@ internal class Program
             DisplayError(ex.Message, ex);
         }
 
-        return result ? SUCCESS_RESULT : ERROR_RESULT;
+        return result ? SuccessResult : ErrorResult;
     }
 
     private static bool MigrateDatabase(string connectionString)
     {
-        var upgrader = DeployChanges.To
+        var scriptsUpgrader = DeployChanges.To
             .SqlDatabase(connectionString)
-            .WithScriptsEmbeddedInAssembly(Assembly.GetExecutingAssembly())
+            .WithScriptsEmbeddedInAssembly(
+                Assembly.GetExecutingAssembly(),
+                scriptNamespace => {
+                    return scriptNamespace.StartsWith(ScriptsNamespace);
+                })
             .LogToConsole()
             .LogScriptOutput()
             .WithTransaction()
             .Build();
 
+        var storedProcUpgrader = DeployChanges.To
+            .SqlDatabase(connectionString)
+            .JournalTo(new NullJournal())
+            .WithScriptsEmbeddedInAssembly(
+                Assembly.GetExecutingAssembly(),
+                scriptNamespace => {
+                    return scriptNamespace.StartsWith(StoredProcsNamespace);
+                })
+            .LogToConsole()
+            .LogScriptOutput()
+            .WithTransaction()
+            .Build();
+
+        if(!Execute(scriptsUpgrader) ||
+           !Execute(storedProcUpgrader))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool Execute(UpgradeEngine upgrader)
+    {
         var result = upgrader.PerformUpgrade();
 
         if (!result.Successful)
@@ -56,8 +90,6 @@ internal class Program
             DisplayError(result.Error.Message, result.Error);
             return false;
         }
-
-        DisplaySuccess("Success");
 
         return true;
     }
