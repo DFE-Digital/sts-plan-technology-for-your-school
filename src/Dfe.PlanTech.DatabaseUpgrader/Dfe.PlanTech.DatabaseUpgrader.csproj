@@ -1,27 +1,27 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
- <PropertyGroup>
+  <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
- </PropertyGroup>
+  </PropertyGroup>
 
- <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <WarningLevel>4</WarningLevel>
- </PropertyGroup>
- <ItemGroup>
+  </PropertyGroup>
+  <ItemGroup>
     <PackageReference Include="dbup" Version="5.0.8" />
     <PackageReference Include="Polly" Version="7.2.4" />
- </ItemGroup>
- <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="Scripts\" />
     <None Remove="Scripts\*.sql" />
- </ItemGroup>
- <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
     <Folder Include="Scripts\" />
- </ItemGroup>
- <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="**\*.sql" />
- </ItemGroup>
+  </ItemGroup>
 </Project>
