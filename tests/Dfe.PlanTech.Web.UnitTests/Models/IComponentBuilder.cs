@@ -10,6 +10,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         ButtonWithEntryReference BuildButtonWithEntryReference();
         Category BuildCategory();
         ComponentDropDown BuildDropDownComponent();
+        InsetText BuildInsetText();
         TextBody BuildTextBody();
     }
 }
