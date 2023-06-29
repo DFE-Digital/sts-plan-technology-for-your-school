@@ -1,9 +1,9 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Users.Models;
 
-namespace Dfe.PlanTech.Application.Persistence.Commands;
+namespace Dfe.PlanTech.Application.Users.Commands;
 
-public class CreateUserCommand
+public class CreateUserCommand : ICreateUserCommand
 {
     private readonly IUsersDbContext _db;
 

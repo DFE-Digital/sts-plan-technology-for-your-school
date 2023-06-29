@@ -1,11 +1,12 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Users.Interfaces;
 
-namespace Dfe.PlanTech.Application.Persistence.Queries;
+namespace Dfe.PlanTech.Application.Users.Queries;
 
 /// <summary>
 /// Query to find a user's Id
 /// </summary>
-public class GetUserIdQuery
+public class GetUserIdQuery : IGetUserIdQuery
 {
     private readonly IUsersDbContext _db;
 
