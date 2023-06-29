@@ -15,13 +15,15 @@
     <PackageReference Include="Polly" Version="7.2.4" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="Scripts\" />
-    <None Remove="Scripts\*.sql" />
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Scripts\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="**\*.sql" />
+    <EmbeddedResource Include="Scripts\**\*.sql" />
+  </ItemGroup>  
+  <ItemGroup>
+    <Folder Include="StoredProcs\" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="StoredProcs\*.sql" />
+  </ItemGroup>  
 </Project>
