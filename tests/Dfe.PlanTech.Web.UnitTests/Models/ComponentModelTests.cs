@@ -63,5 +63,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             Assert.False(actual.Button.IsStartButton);
             Assert.NotNull(actual.LinkToEntry);
         }
+
+        [Fact]
+        public void Should_Render_InsetText(){
+            var actual = _componentBuilder.BuildInsetText();
+            
+            Assert.True(actual != null);
+            Assert.Equal("Inset Text", actual.Text);
+        }
     }
 }
