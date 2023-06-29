@@ -1,7 +1,9 @@
 using System.Security.Claims;
 using Dfe.PlanTech.Application.SignIn.Interfaces;
+using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.SignIn.Enums;
 using Dfe.PlanTech.Domain.SignIn.Models;
+using Dfe.PlanTech.Domain.Users.Models;
 using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +19,20 @@ public static class DfeOpenIdConnectEvents
     /// <returns></returns>
     public static async Task OnTokenValidated(TokenValidatedContext context)
     {
+        if (context.Principal?.Identity == null || !context.Principal.Identity.IsAuthenticated)
+        {
+            context.Fail("User is not authenticated.");
+            return;
+        }
+
+        var userId = context.Principal.GetUserId();
+        var recordUserSignInCommand = context.HttpContext.RequestServices.GetRequiredService<IRecordUserSignInCommand>();
+
+        await recordUserSignInCommand.RecordSignIn(new RecordUserSignInDto()
+        {
+            DfeSignInRef = userId
+        });
+
         var config = context.HttpContext.RequestServices.GetRequiredService<IDfeSignInConfiguration>();
 
         if (config.DiscoverRolesWithPublicApi)
@@ -50,7 +66,7 @@ public static class DfeOpenIdConnectEvents
 
         if (context.ProtocolMessage != null)
         {
-            context.ProtocolMessage.PostLogoutRedirectUri =$"{config.FrontDoorUrl}{config.SignoutRedirectUrl}";
+            context.ProtocolMessage.PostLogoutRedirectUri = $"{config.FrontDoorUrl}{config.SignoutRedirectUrl}";
         }
 
         return Task.FromResult(0);
