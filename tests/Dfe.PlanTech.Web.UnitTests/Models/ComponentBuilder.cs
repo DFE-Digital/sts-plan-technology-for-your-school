@@ -43,6 +43,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             };
         }
 
+        public ButtonWithEntryReference BuildButtonWithEntryReference()
+        => new()
+        {
+            Button = BuildButton(),
+            LinkToEntry = BuildButton()
+        };
+
         private static ISection[] BuildSections()
         {
             return new ISection[]
