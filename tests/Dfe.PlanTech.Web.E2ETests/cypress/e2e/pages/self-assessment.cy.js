@@ -27,12 +27,12 @@ describe("landing page", () => {
     });
   });
 
-  it("each section should link to a question", () => {
+  it("each section should link to a page", () => {
     cy.origin(Cypress.env("URL"), () => {
       cy.get("ul.app-task-list__items > li a").each((link) => {
         cy.wrap(link)
           .should("have.attr", "href")
-          .and("match", /\/question/);
+          .and("not.be.null");
       });
     });
   });

@@ -19,7 +19,7 @@
 
         <task-list-item>
             <task-list-item-name>
-                <a asp-controller="Questions" asp-action="GetQuestionById" asp-route-id=@categorySection.FirstQuestionId asp-route-section=@categorySection.Name class="govuk-link">
+                <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route=@categorySection.InterstitialPage.Slug class="govuk-link">
                     @categorySection.Name
                 </a>
             </task-list-item-name>
