@@ -1,19 +1,11 @@
-@model Dfe.PlanTech.Domain.Content.Models.Page;
+@model Dfe.PlanTech.Web.Models.PageViewModel;
+@section BeforeContent {
+    @if (Model.Page.DisplayBackButton)
+    {
+        await Html.RenderPartialAsync("BackButton", Model);
+    }
+}
 
-<div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
-        @{
-            if(Model.DisplayTopicTitle){
-                <span class="govuk-caption-xl">@Model.SectionTitle</span>
-            }
-
-            if(Model.Title != null){
-                await Html.RenderPartialAsync("Components/Title", Model.Title);
-            }
- 
-            foreach(var content in Model.Content){
-                await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-            }
-        }
-    </div>
-</div>
+@{
+    await Html.RenderPartialAsync("Components/Page", Model.Page);
+}
