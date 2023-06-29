@@ -16,10 +16,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Scripts\" />
+    <None Remove="Scripts\2023\20230628_165908_InitalDBCreation.sql" />
     <None Remove="Scripts\*.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Scripts\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="**\*.sql" />

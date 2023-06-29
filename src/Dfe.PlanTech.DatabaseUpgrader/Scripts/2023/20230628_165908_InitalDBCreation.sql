@@ -1,15 +1,4 @@
-﻿--Create Database--
- IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'PTFYS')
-  BEGIN
-    CREATE DATABASE [PTFYS]
-
-
-    END
-    GO
-       USE [PTFYS]
-    GO
-
-BEGIN TRAN
+﻿BEGIN TRAN
 	
 --Establishment Table--
 CREATE TABLE [dbo].[establishment](
@@ -17,7 +6,7 @@ CREATE TABLE [dbo].[establishment](
 	[establishmentRef] [nvarchar](50) NOT NULL,
 	[establishmentType] [nvarchar](50) NOT NULL,
 	[orgName] [nvarchar](50) NOT NULL,
-	[dateCreated] [datetime] NOT NULL,
+	[dateCreated] [datetime] NOT NULL DEFAULT (GETUTCDATE()),
 	[dateLastUpdated] [datetime] NULL,
  CONSTRAINT [PK_establishment1] PRIMARY KEY CLUSTERED ( [id] ASC)
 )
@@ -26,7 +15,7 @@ CREATE TABLE [dbo].[establishment](
 CREATE TABLE [dbo].[user](
 	[id] [int] IDENTITY(1,1) NOT NULL,
 	[dfeSignInRef] [nvarchar](30) NOT NULL,
-	[dateCreated] [datetime] NOT NULL,
+	[dateCreated] [datetime] NOT NULL DEFAULT (GETUTCDATE()),
 	[dateLastUpdated] [datetime] NULL,
  CONSTRAINT [PK_user] PRIMARY KEY CLUSTERED ([id] ASC)
 )
@@ -60,7 +49,7 @@ CREATE TABLE [dbo].[submission](
 	[sectionName] [nvarchar](50) NULL,
 	[maturity] [nvarchar](20) NULL,
 	[recomendationId] [int] NULL,
-	[dateCreated] [datetime] NOT NULL,
+	[dateCreated] [datetime] NOT NULL DEFAULT (GETUTCDATE()),
 	[dateLastUpdated] [datetime] NULL,
 	[dateCompleted] [datetime] NULL,
  CONSTRAINT [PK_submission] PRIMARY KEY CLUSTERED ([id] ASC)
@@ -77,7 +66,7 @@ CREATE TABLE [dbo].[question](
 	[id] [int] IDENTITY(1,1) NOT NULL,
 	[questionText] [nvarchar](max) NULL,
 	[contentfulRef] [nvarchar](50) NOT NULL,
-	[dateCreated] [datetime] NOT NULL,
+	[dateCreated] [datetime] NOT NULL DEFAULT (GETUTCDATE()),
  CONSTRAINT [PK_question] PRIMARY KEY CLUSTERED ([id] ASC)
 )
 
@@ -86,7 +75,7 @@ CREATE TABLE [dbo].[answer](
 	[id] [int] IDENTITY(1,1) NOT NULL,
 	[answerText] [nvarchar](max) NOT NULL,
 	[contentfulRef] [nvarchar](50) NOT NULL,
-	[dateCreated] [datetime] NOT NULL,
+	[dateCreated] [datetime] NOT NULL DEFAULT (GETUTCDATE()),
  CONSTRAINT [PK_answer] PRIMARY KEY CLUSTERED ([id] ASC)
 )
 
@@ -98,7 +87,7 @@ CREATE TABLE [dbo].[response](
 	[questionId] [int] NOT NULL,
 	[answerId] [int] NOT NULL,
 	[maturity] [nvarchar](20) NOT NULL,
-	[dateCreated] [datetime] NOT NULL,
+	[dateCreated] [datetime] NOT NULL DEFAULT (GETUTCDATE()),
 	[dateLastUpdated] [datetime] NULL,
  CONSTRAINT [PK_response] PRIMARY KEY CLUSTERED ([id] ASC)
 )
