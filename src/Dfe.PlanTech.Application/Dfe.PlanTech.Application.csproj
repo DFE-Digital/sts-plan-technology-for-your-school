@@ -8,6 +8,12 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Persistence\Commands\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Persistence\Commands\" />
+  </ItemGroup>
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
