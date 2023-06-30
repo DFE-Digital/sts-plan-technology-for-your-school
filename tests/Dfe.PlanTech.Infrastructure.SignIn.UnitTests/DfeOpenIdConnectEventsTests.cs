@@ -3,6 +3,7 @@ using System.Text.Json;
 using Dfe.PlanTech.Application.SignIn.Interfaces;
 using Dfe.PlanTech.Domain.SignIn.Enums;
 using Dfe.PlanTech.Domain.SignIn.Models;
+using Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
@@ -41,7 +42,7 @@ public class DfeOpenIdConnectEventsTests
                                                 claimsPrincipalMock.Object,
                                                 new AuthenticationProperties());
 
-        await DfeOpenIdConnectEvents.OnTokenValidated(context);
+        await OnTokenValidatedEvent.OnTokenValidated(context);
 
         Assert.True(wasCalled);
     }
@@ -118,7 +119,7 @@ public class DfeOpenIdConnectEventsTests
                                                 claimsPrincipal,
                                                 new AuthenticationProperties());
 
-        await DfeOpenIdConnectEvents.OnTokenValidated(context);
+        await OnTokenValidatedEvent.OnTokenValidated(context);
 
         //Assert Service called
         dfePublicApiMock.Verify(api => api.GetUserAccessToService(userId.ToString(), orgId.ToString()));
@@ -178,7 +179,7 @@ public class DfeOpenIdConnectEventsTests
                                                 claimsPrincipalMock.Object,
                                                 new AuthenticationProperties());
 
-        await DfeOpenIdConnectEvents.OnTokenValidated(context);
+        await OnTokenValidatedEvent.OnTokenValidated(context);
 
         Assert.False(wasCalled);
     }
