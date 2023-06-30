@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text.Json;
 using Dfe.PlanTech.Application.SignIn.Interfaces;
+using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.SignIn.Enums;
 using Dfe.PlanTech.Domain.SignIn.Models;
 using Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;
@@ -71,6 +72,7 @@ public class DfeOpenIdConnectEventsTests
         };
 
         var dfePublicApiMock = new Mock<IDfePublicApi>();
+        var commandMock = new Mock<IRecordUserSignInCommand>();
         var userAccessToService = new UserAccessToService()
         {
             UserId = userId,
@@ -112,6 +114,7 @@ public class DfeOpenIdConnectEventsTests
         var contextMock = new Mock<HttpContext>();
         contextMock.Setup(context => context.RequestServices.GetService(typeof(IDfeSignInConfiguration))).Returns(config);
         contextMock.Setup(context => context.RequestServices.GetService(typeof(IDfePublicApi))).Returns(dfePublicApiMock.Object);
+        contextMock.Setup(context => context.RequestServices.GetService(typeof(IRecordUserSignInCommand))).Returns(commandMock.Object);
 
         var context = new TokenValidatedContext(contextMock.Object,
                                                 new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
@@ -165,7 +168,7 @@ public class DfeOpenIdConnectEventsTests
         var claimsPrincipalMock = new Mock<ClaimsPrincipal>();
         claimsPrincipalMock.SetupGet(principal => principal.Identity).Returns(() =>
         {
-            wasCalled = true;
+            wasCalled = false;
             return null;
         });
 
