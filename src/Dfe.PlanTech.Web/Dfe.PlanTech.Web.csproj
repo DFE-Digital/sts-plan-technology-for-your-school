@@ -14,12 +14,11 @@
       </Content>
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\..\..\..\Plan Technology\plan-technology-for-your-school\src\Dfe.PlanTech.Infrastructure.data\Dfe.PlanTech.Infrastructure.Data.csproj" />
       <ProjectReference Include="..\Dfe.PlanTech.Application\Dfe.PlanTech.Application.csproj" />
       <ProjectReference Include="..\Dfe.PlanTech.Domain\Dfe.PlanTech.Domain.csproj" />
       <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.Contentful\Dfe.PlanTech.Infrastructure.Contentful.csproj" />
-      <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.SignIn\Dfe.PlanTech.Infrastructure.SignIn.csproj" />
       <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.Data\Dfe.PlanTech.Infrastructure.Data.csproj" />
+      <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.SignIn\Dfe.PlanTech.Infrastructure.SignIn.csproj" />
     </ItemGroup>
     <ItemGroup>
       <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.2.2" />
