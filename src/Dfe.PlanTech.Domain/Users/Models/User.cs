@@ -9,4 +9,6 @@ public class User
     public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
     public DateTime? DateLastUpdated { get; set; }
+
+    public ICollection<SignIn.Models.SignIn> SignIns { get; set; } = default!;
 }
