@@ -20,20 +20,20 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
         }
 
 
-        //[Fact]
-        //public async Task RecordSignIn_(int expectedUserId)
-        //{
-        //    //Arrange
-        //    var strut = CreateStrut();
-        //    mockDb.Setup(x => x.AddUser(It.IsAny<User>()));
-        //    mockDb.Setup(x => x.SaveChangesAsync()).ReturnsAsync(expectedUserId);
-        //    var recordUserSignInDto = new RecordUserSignInDto { DfeSignInRef = new Guid().ToString() };
+        [Fact]
+        public async Task RecordSignIn_UpdatesSignInDetailsAnd_ReturnsId(int expectedUserId)
+        {
+            //Arrange
+            var strut = CreateStrut();
+            mockDb.Setup(x => x.AddUser(It.IsAny<User>()));
+            mockDb.Setup(x => x.SaveChangesAsync()).ReturnsAsync(expectedUserId);
+            var recordUserSignInDto = new RecordUserSignInDto { DfeSignInRef = new Guid().ToString() };
 
-        //    //Act
-        //    var result = await strut.CreateUser(recordUserSignInDto);
+            //Act
+            var result = await strut.CreateUser(recordUserSignInDto);
 
-        //    //Assert
-        //    Assert.Equal(expectedUserId, result);
-        //}
+            //Assert
+            Assert.Equal(expectedUserId, result);
+        }
     }
 }

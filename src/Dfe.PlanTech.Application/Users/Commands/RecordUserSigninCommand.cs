@@ -29,7 +29,6 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
             existingUserId = await getUserIdQuery.GetUserId(recordUserSignInDto.DfeSignInRef);
         }
 
-        //TODO - RECORD SIGN IN
         var signInId = await AddSignInDetails(MapToSignIn(existingUserId));
         return signInId;
     }
