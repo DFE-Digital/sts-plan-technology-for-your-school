@@ -3,7 +3,7 @@ using Dfe.PlanTech.Application.Users.Commands;
 using Dfe.PlanTech.Domain.Users.Models;
 using Moq;
 
-namespace Dfe.PlanTech.Application.UnitTests.Users
+namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
 {
     public class CreateUserCommandTests
     {
