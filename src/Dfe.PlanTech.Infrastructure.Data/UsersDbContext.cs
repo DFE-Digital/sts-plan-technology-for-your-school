@@ -1,10 +1,12 @@
-﻿using System.Linq.Expressions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Users.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
+[ExcludeFromCodeCoverage]
 public class UsersDbContext : DbContext, IUsersDbContext
 {
     public DbSet<User> Users { get; set; } = null!;

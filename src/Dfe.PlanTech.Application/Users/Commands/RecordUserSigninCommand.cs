@@ -24,9 +24,9 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
         if (existingUserId == null)
         {
             var CreateUserCommand = new CreateUserCommand(_db);
-            existingUserId = await CreateUserCommand.CreateUser(recordUserSignInDto);
+            await CreateUserCommand.CreateUser(recordUserSignInDto);
         }
 
-        //RECORD SIGN IN
+        //TODO - RECORD SIGN IN
     }
 }
