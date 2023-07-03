@@ -33,7 +33,7 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
         return signInId;
     }
 
-    private Domain.SignIn.Models.SignIn MapToSignIn(int? userId)
+    private static Domain.SignIn.Models.SignIn MapToSignIn(int? userId)
     {
         return new Domain.SignIn.Models.SignIn
         {
