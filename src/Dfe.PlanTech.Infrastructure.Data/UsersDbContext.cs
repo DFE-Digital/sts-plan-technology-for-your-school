@@ -48,7 +48,7 @@ public class UsersDbContext : DbContext, IUsersDbContext
             .IsRequired();
 
             //When dealing with Establishment add mapping here and remove following lines
-            builder.Property(signinId => signinId.EstablishmentId).HasDefaultValue(0);
+            builder.Property(signinId => signinId.EstablishmentId).HasDefaultValue(1);
             //////
         });
     }

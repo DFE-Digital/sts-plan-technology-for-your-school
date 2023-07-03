@@ -38,7 +38,9 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
     {
         return new Domain.SignIn.Models.SignIn
         {
-            UserId = Convert.ToUInt16(userId)
+            UserId = Convert.ToUInt16(userId),
+            EstablishmentId = 1, //Replace with value
+            SignInDateTime = DateTime.UtcNow
         };
     }
 
