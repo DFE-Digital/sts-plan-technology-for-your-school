@@ -1,9 +1,8 @@
 namespace Dfe.PlanTech.Domain.Answers.Models;
 
 using System.ComponentModel.DataAnnotations;
-using Dfe.PlanTech.Domain.Content.Models;
 
-public class Answer : ContentComponent
+public class Answer
 {
     [Required]
     public int Id { get; init; }

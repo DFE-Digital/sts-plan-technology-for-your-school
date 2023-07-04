@@ -1,6 +1,8 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Submission.Commands;
+using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Application.Users.Commands;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Application.Users.Queries;
@@ -74,6 +76,12 @@ public static class ProgramExtensions
         services.AddTransient<IGetUserIdQuery, GetUserIdQuery>();
         services.AddTransient<ICreateUserCommand, CreateUserCommand>();
         services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
+
+        // TODO: Refactor DbContext to only have one, e.g., "IPlanTechDbContext"
+        services.AddDbContext<IAnswersDbContext, AnswersDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("Database")));
+
+        services.AddTransient<ICreateAnswerCommand, CreateAnswerCommand>();
+        services.AddTransient<IRecordAnswerCommand, RecordAnswerCommand>();
 
         return services;
     }
