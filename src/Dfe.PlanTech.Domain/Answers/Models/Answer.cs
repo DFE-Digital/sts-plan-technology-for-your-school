@@ -3,7 +3,7 @@ namespace Dfe.PlanTech.Domain.Answers.Models;
 using System.ComponentModel.DataAnnotations;
 using Dfe.PlanTech.Domain.Content.Models;
 
-public class AnswerDto : ContentComponent
+public class Answer : ContentComponent
 {
     [Required]
     public int Id { get; init; }

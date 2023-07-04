@@ -22,7 +22,7 @@ public class CreateAnswerCommand : ICreateAnswerCommand
     /// </returns>
     public async Task<int> CreateAnswer(RecordAnswerDto recordAnswerDto)
     {
-        _db.AddAnswer(new AnswerDto() { AnswerText = recordAnswerDto.AnswerText, ContentfulRef = recordAnswerDto.ContentfulRef });
+        _db.AddAnswer(new Answer() { AnswerText = recordAnswerDto.AnswerText, ContentfulRef = recordAnswerDto.ContentfulRef });
         return await _db.SaveChangesAsync();
     }
 }

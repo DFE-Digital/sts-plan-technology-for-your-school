@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Infrastructure.Data;
 [ExcludeFromCodeCoverage]
 public class AnswersDbContext : DbContext, IAnswersDbContext
 {
-    public DbSet<AnswerDto> Answers { get; set; } = null!;
+    public DbSet<Answer> Answers { get; set; } = null!;
 
     public AnswersDbContext() { }
     public AnswersDbContext(DbContextOptions<AnswersDbContext> options) : base(options) { }
@@ -19,7 +19,7 @@ public class AnswersDbContext : DbContext, IAnswersDbContext
         foreach (var entity in modelBuilder.Model.GetEntityTypes()) entity.SetTableName(entity.DisplayName());
 
         // Setup Answer Table
-        modelBuilder.Entity<AnswerDto>(builder =>
+        modelBuilder.Entity<Answer>(builder =>
         {
             builder.HasKey(answer => answer.Id);
             builder.Property(answer => answer.Id).ValueGeneratedOnAdd();
@@ -30,7 +30,7 @@ public class AnswersDbContext : DbContext, IAnswersDbContext
 
     }
 
-    public void AddAnswer(AnswerDto answer) => Answers.Add(answer);
+    public void AddAnswer(Answer answer) => Answers.Add(answer);
 
     public Task<int> SaveChangesAsync() => base.SaveChangesAsync();
 }
