@@ -73,7 +73,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
         {
             //Arrange
             var strut = CreateStrut();
-            User user = null;
+            User user = null!;
             mockUserQuery.Setup(x => x.GetUserId(It.IsAny<string>())).ReturnsAsync(1);
             mockDb.Setup(x => x.GetUserBy(It.IsAny<Expression<Func<User, bool>>>())).ReturnsAsync(user);
             mockDb.Setup(x => x.AddSignIn(It.IsAny<Domain.SignIn.Models.SignIn>()));
