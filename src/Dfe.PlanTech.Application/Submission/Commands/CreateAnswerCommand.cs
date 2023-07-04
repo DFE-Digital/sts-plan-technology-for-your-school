@@ -6,9 +6,9 @@ namespace Dfe.PlanTech.Application.Submission.Commands;
 
 public class CreateAnswerCommand : ICreateAnswerCommand
 {
-    private readonly IAnswersDbContext _db;
+    private readonly IPlanTechDbContext _db;
 
-    public CreateAnswerCommand(IAnswersDbContext db)
+    public CreateAnswerCommand(IPlanTechDbContext db)
     {
         _db = db;
     }

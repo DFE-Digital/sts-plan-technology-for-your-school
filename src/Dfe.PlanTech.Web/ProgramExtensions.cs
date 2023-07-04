@@ -71,14 +71,12 @@ public static class ProgramExtensions
 
     public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<IUsersDbContext, UsersDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("Database")));
+        services.AddDbContext<IPlanTechDbContext, PlanTechDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("Database")));
 
         services.AddTransient<IGetUserIdQuery, GetUserIdQuery>();
         services.AddTransient<ICreateUserCommand, CreateUserCommand>();
         services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
 
-        // TODO: Refactor DbContext to only have one, e.g., "IPlanTechDbContext"
-        services.AddDbContext<IAnswersDbContext, AnswersDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("Database")));
 
         services.AddTransient<ICreateAnswerCommand, CreateAnswerCommand>();
         services.AddTransient<IRecordAnswerCommand, RecordAnswerCommand>();

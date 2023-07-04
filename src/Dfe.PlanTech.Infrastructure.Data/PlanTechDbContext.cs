@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Domain.Answers.Models;
 using Dfe.PlanTech.Domain.SignIn.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 using Microsoft.EntityFrameworkCore;
@@ -8,19 +9,17 @@ using Microsoft.EntityFrameworkCore;
 namespace Dfe.PlanTech.Infrastructure.Data;
 
 [ExcludeFromCodeCoverage]
-public class UsersDbContext : DbContext, IUsersDbContext
+public class PlanTechDbContext : DbContext, IPlanTechDbContext
 {
     public DbSet<User> Users { get; set; } = null!;
 
     public DbSet<SignIn> SignIn { get; set; } = null!;
 
-    public UsersDbContext()
-    {
-    }
+    public DbSet<Answer> Answers { get; set; } = null!;
 
-    public UsersDbContext(DbContextOptions<UsersDbContext> options) : base(options)
-    {
-    }
+    public PlanTechDbContext() { }
+
+    public PlanTechDbContext(DbContextOptions<PlanTechDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,7 +29,7 @@ public class UsersDbContext : DbContext, IUsersDbContext
             entity.SetTableName(entity.DisplayName());
         }
 
-        //Setup user table
+        //Setup User Table
         modelBuilder.Entity<User>(builder =>
         {
             builder.HasKey(user => user.Id);
@@ -39,6 +38,7 @@ public class UsersDbContext : DbContext, IUsersDbContext
             builder.Property(user => user.DfeSignInRef).HasMaxLength(30);
         });
 
+        // Setup SignIn Table
         modelBuilder.Entity<SignIn>(builder =>
         {
             builder.HasKey(signinId => signinId.Id);
@@ -51,6 +51,16 @@ public class UsersDbContext : DbContext, IUsersDbContext
             builder.Property(signinId => signinId.EstablishmentId).HasDefaultValue(1);
             //////
         });
+
+        // Setup Answer Table
+        modelBuilder.Entity<Answer>(builder =>
+        {
+            builder.HasKey(answer => answer.Id);
+            builder.Property(answer => answer.Id).ValueGeneratedOnAdd();
+            builder.Property(answer => answer.AnswerText).HasMaxLength(4000); // NVARCHAR Max Length
+            builder.Property(answer => answer.ContentfulRef).HasMaxLength(50);
+            builder.Property(answer => answer.DateCreated).ValueGeneratedOnAdd();
+        });
     }
 
     public IQueryable<User> GetUsers => Users;
@@ -58,6 +68,8 @@ public class UsersDbContext : DbContext, IUsersDbContext
 
     public void AddUser(User user) => Users.Add(user);
     public void AddSignIn(SignIn signIn) => SignIn.Add(signIn);
+
+    public void AddAnswer(Answer answer) => Answers.Add(answer);
 
     public Task<int> SaveChangesAsync() => base.SaveChangesAsync();
 

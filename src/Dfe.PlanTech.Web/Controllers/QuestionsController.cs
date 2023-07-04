@@ -1,5 +1,7 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
+using Dfe.PlanTech.Application.Submission.Interfaces;
+using Dfe.PlanTech.Domain.Answers.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -40,14 +42,17 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
     [HttpPost("SubmitAnswer")]
-    public IActionResult SubmitAnswer(SubmitAnswerDto submitAnswerDto)
+    public async Task<IActionResult> SubmitAnswer(SubmitAnswerDto submitAnswerDto)
     {
         if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
 
         if (!ModelState.IsValid) return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.QuestionId });
 
-        if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("GetByRoute", "Pages", new { route = "check-answers" });
+        // TODO: Figure out how to get the actual AnswerText and ContentfulRef
+        var recordAnswerCommand = HttpContext.RequestServices.GetRequiredService<IRecordAnswerCommand>();
+        await recordAnswerCommand.RecordAnswer(new RecordAnswerDto() { AnswerText = "Answer", ContentfulRef = "ABC123" });
 
-        return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.NextQuestionId });
+        if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("GetByRoute", "Pages", new { route = "check-answers" });
+        else return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.NextQuestionId });
     }
 }

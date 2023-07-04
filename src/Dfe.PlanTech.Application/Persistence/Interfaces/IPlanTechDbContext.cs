@@ -1,15 +1,19 @@
-﻿using Dfe.PlanTech.Domain.Users.Models;
+﻿using Dfe.PlanTech.Domain.Answers.Models;
+using Dfe.PlanTech.Domain.Users.Models;
 using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Application.Persistence.Interfaces;
 
-public interface IUsersDbContext
+public interface IPlanTechDbContext
 {
+    // User Table & SignIn Table
     IQueryable<User> GetUsers { get; }
     IQueryable<Domain.SignIn.Models.SignIn> SignIns { get; }
-
     public void AddUser(User user);
     public void AddSignIn(Domain.SignIn.Models.SignIn signIn);
+
+    // Answer Table
+    public void AddAnswer(Answer answer);
 
     public Task<int> SaveChangesAsync();
 

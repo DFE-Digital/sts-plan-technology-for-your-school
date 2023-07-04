@@ -5,9 +5,9 @@ namespace Dfe.PlanTech.Application.Users.Commands;
 
 public class CreateUserCommand : ICreateUserCommand
 {
-    private readonly IUsersDbContext _db;
+    private readonly IPlanTechDbContext _db;
 
-    public CreateUserCommand(IUsersDbContext db)
+    public CreateUserCommand(IPlanTechDbContext db)
     {
         _db = db;
     }

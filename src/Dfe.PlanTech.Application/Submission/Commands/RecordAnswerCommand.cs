@@ -6,10 +6,10 @@ namespace Dfe.PlanTech.Application.Submission.Commands;
 
 public class RecordAnswerCommand : IRecordAnswerCommand
 {
-    private readonly IAnswersDbContext _db;
+    private readonly IPlanTechDbContext _db;
     private readonly ICreateAnswerCommand _createAnswerCommand;
 
-    public RecordAnswerCommand(IAnswersDbContext db, ICreateAnswerCommand createAnswerCommand)
+    public RecordAnswerCommand(IPlanTechDbContext db, ICreateAnswerCommand createAnswerCommand)
     {
         _db = db;
         _createAnswerCommand = createAnswerCommand;

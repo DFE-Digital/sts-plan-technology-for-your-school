@@ -14,7 +14,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Queries
 {
     public class GetUserIdQueryTests
     {
-        public Mock<IUsersDbContext> mockDb = new Mock<IUsersDbContext>();
+        public Mock<IPlanTechDbContext> mockDb = new Mock<IPlanTechDbContext>();
 
         public GetUserIdQuery CreateStrut()
         {
