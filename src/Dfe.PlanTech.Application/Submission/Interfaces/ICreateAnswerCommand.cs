@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Domain.Answers.Models;
 
-namespace Dfe.PlanTech.Application.Persistence.Interfaces;
+namespace Dfe.PlanTech.Application.Submission.Interfaces;
 
 public interface ICreateAnswerCommand
 {
