@@ -35,7 +35,7 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
     private static Domain.SignIn.Models.SignIn MapToSignIn(int? userId, int establishmentId = 1)
     {
         if (userId is null || userId == 0)
-            throw new ArgumentNullException("User id cannot be null", "userId");
+            throw new ArgumentNullException("userId", "User id cannot be null");
 
         return new Domain.SignIn.Models.SignIn
         {
