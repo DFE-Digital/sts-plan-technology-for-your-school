@@ -10,4 +10,12 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Users\" />
+    <None Remove="Users\Models\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Users\" />
+    <Folder Include="Users\Models\" />
+  </ItemGroup>
 </Project>

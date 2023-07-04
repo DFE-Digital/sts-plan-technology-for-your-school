@@ -1,8 +1,10 @@
 using System.Security.Claims;
 using System.Text.Json;
 using Dfe.PlanTech.Application.SignIn.Interfaces;
+using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.SignIn.Enums;
 using Dfe.PlanTech.Domain.SignIn.Models;
+using Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
@@ -41,7 +43,7 @@ public class DfeOpenIdConnectEventsTests
                                                 claimsPrincipalMock.Object,
                                                 new AuthenticationProperties());
 
-        await DfeOpenIdConnectEvents.OnTokenValidated(context);
+        await OnTokenValidatedEvent.OnTokenValidated(context);
 
         Assert.True(wasCalled);
     }
@@ -70,6 +72,7 @@ public class DfeOpenIdConnectEventsTests
         };
 
         var dfePublicApiMock = new Mock<IDfePublicApi>();
+        var commandMock = new Mock<IRecordUserSignInCommand>();
         var userAccessToService = new UserAccessToService()
         {
             UserId = userId,
@@ -111,6 +114,7 @@ public class DfeOpenIdConnectEventsTests
         var contextMock = new Mock<HttpContext>();
         contextMock.Setup(context => context.RequestServices.GetService(typeof(IDfeSignInConfiguration))).Returns(config);
         contextMock.Setup(context => context.RequestServices.GetService(typeof(IDfePublicApi))).Returns(dfePublicApiMock.Object);
+        contextMock.Setup(context => context.RequestServices.GetService(typeof(IRecordUserSignInCommand))).Returns(commandMock.Object);
 
         var context = new TokenValidatedContext(contextMock.Object,
                                                 new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
@@ -118,7 +122,7 @@ public class DfeOpenIdConnectEventsTests
                                                 claimsPrincipal,
                                                 new AuthenticationProperties());
 
-        await DfeOpenIdConnectEvents.OnTokenValidated(context);
+        await OnTokenValidatedEvent.OnTokenValidated(context);
 
         //Assert Service called
         dfePublicApiMock.Verify(api => api.GetUserAccessToService(userId.ToString(), orgId.ToString()));
@@ -164,7 +168,7 @@ public class DfeOpenIdConnectEventsTests
         var claimsPrincipalMock = new Mock<ClaimsPrincipal>();
         claimsPrincipalMock.SetupGet(principal => principal.Identity).Returns(() =>
         {
-            wasCalled = true;
+            wasCalled = false;
             return null;
         });
 
@@ -178,7 +182,7 @@ public class DfeOpenIdConnectEventsTests
                                                 claimsPrincipalMock.Object,
                                                 new AuthenticationProperties());
 
-        await DfeOpenIdConnectEvents.OnTokenValidated(context);
+        await OnTokenValidatedEvent.OnTokenValidated(context);
 
         Assert.False(wasCalled);
     }
