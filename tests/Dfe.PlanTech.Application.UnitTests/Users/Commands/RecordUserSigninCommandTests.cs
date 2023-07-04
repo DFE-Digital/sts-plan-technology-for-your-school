@@ -61,5 +61,31 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
             Assert.Equal(1, result);
             mockDb.Verify(x => x.SaveChangesAsync(), Times.Once);
         }
+
+        [Fact]
+        public async Task RecordSignIn_ThrowsException_WhenUserIsNull()
+        {
+            //Arrange
+            var strut = CreateStrut();
+            User user = null;
+            mockUserQuery.Setup(x => x.GetUserId(It.IsAny<string>())).ReturnsAsync(1);
+            mockDb.Setup(x => x.GetUserBy(It.IsAny<Expression<Func<User, bool>>>())).ReturnsAsync(user);
+            mockDb.Setup(x => x.AddSignIn(It.IsAny<Domain.SignIn.Models.SignIn>()));
+            var recordUserSignInDto = new RecordUserSignInDto { DfeSignInRef = new Guid().ToString() };
+            int result = 0;
+
+            try
+            {
+                //Act
+                result = await strut.RecordSignIn(recordUserSignInDto);
+            }
+            catch (ArgumentNullException ex)
+            {
+                //Assert
+                Assert.Contains("User id cannot be null", ex.Message);
+            }
+
+            mockDb.Verify(x => x.SaveChangesAsync(), Times.Never);
+        }
     }
 }
