@@ -23,11 +23,17 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
         public async Task RecordSignInForNewUser_AddsUser_UpdatesSignInDetailsAnd_ReturnsId()
         {
             //Arrange
+            var guid = Guid.NewGuid().ToString();
+            var user = new User { 
+                Id= 1,
+                DfeSignInRef = guid
+            };
             var strut = CreateStrut();
             mockUserQuery.Setup(x => x.GetUserId(It.IsAny<string>())).ReturnsAsync(1);
+            mockDb.Setup(x => x.GetUserBy(It.IsAny<Expression<Func<User, bool>>>())).ReturnsAsync(user);
             mockDb.Setup(x => x.AddSignIn(It.IsAny<Domain.SignIn.Models.SignIn>()));
             mockDb.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
-            var recordUserSignInDto = new RecordUserSignInDto { DfeSignInRef = new Guid().ToString() };
+            var recordUserSignInDto = new RecordUserSignInDto { DfeSignInRef = guid };
 
             //Act
             var result = await strut.RecordSignIn(recordUserSignInDto);
