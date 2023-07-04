@@ -3,12 +3,7 @@ using Dfe.PlanTech.Application.Users.Commands;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Users.Models;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
 {
@@ -16,10 +11,11 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
     {
         public Mock<IUsersDbContext> mockDb = new Mock<IUsersDbContext>();
         public Mock<IGetUserIdQuery> mockUserQuery = new Mock<IGetUserIdQuery>();
+        public Mock<ICreateUserCommand> mockCreateUserCommand= new Mock<ICreateUserCommand>();
 
         public RecordUserSignInCommand CreateStrut()
         {
-            return new RecordUserSignInCommand(mockDb.Object);
+            return new RecordUserSignInCommand(mockDb.Object, mockCreateUserCommand.Object);
         }
 
 
@@ -38,7 +34,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
 
             //Assert
             Assert.Equal(1, result);
-            mockDb.Verify(x => x.SaveChangesAsync(), Times.Exactly(2));
+            mockDb.Verify(x => x.SaveChangesAsync(), Times.Once);
         }
 
         [Fact]

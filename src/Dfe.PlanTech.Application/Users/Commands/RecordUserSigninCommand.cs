@@ -9,36 +9,38 @@ namespace Dfe.PlanTech.Application.Users.Commands;
 public class RecordUserSignInCommand : IRecordUserSignInCommand
 {
     private readonly IUsersDbContext _db;
+    private readonly ICreateUserCommand _createUserCommand;
 
-    public RecordUserSignInCommand(IUsersDbContext db)
+    public RecordUserSignInCommand(IUsersDbContext db, ICreateUserCommand createUserCommand)
     {
         _db = db;
+        _createUserCommand = createUserCommand;
     }
 
     public async Task<int> RecordSignIn(RecordUserSignInDto recordUserSignInDto)
     {
         //Check user exists already
         var getUserIdQuery = new GetUserIdQuery(_db);
-
         var existingUserId = await getUserIdQuery.GetUserId(recordUserSignInDto.DfeSignInRef);
 
         if (existingUserId == null)
         {
-            var CreateUserCommand = new CreateUserCommand(_db);
-            await CreateUserCommand.CreateUser(recordUserSignInDto);
-            existingUserId = await getUserIdQuery.GetUserId(recordUserSignInDto.DfeSignInRef);
+            existingUserId = await _createUserCommand.CreateUser(recordUserSignInDto);
         }
 
         var signInId = await AddSignInDetails(MapToSignIn(existingUserId));
         return signInId;
     }
 
-    private static Domain.SignIn.Models.SignIn MapToSignIn(int? userId)
+    private static Domain.SignIn.Models.SignIn MapToSignIn(int? userId, int establishmentId = 1)
     {
+        if (userId is null)
+            throw new ArgumentNullException("User id cannot be null");
+
         return new Domain.SignIn.Models.SignIn
         {
             UserId = Convert.ToUInt16(userId),
-            EstablishmentId = 1, //Replace with value
+            EstablishmentId = establishmentId,
             SignInDateTime = DateTime.UtcNow
         };
     }
