@@ -21,7 +21,8 @@ public class CreateUserCommand : ICreateUserCommand
     {
         var user = new User()
         {
-            DfeSignInRef = createUserDTO.DfeSignInRef
+            DfeSignInRef = createUserDTO.DfeSignInRef,
+            DateCreated = DateTime.UtcNow
         };
 
         _db.AddUser(user);
