@@ -4,9 +4,11 @@ using Dfe.PlanTech.Application.Users.Queries;
 using Dfe.PlanTech.Domain.SignIn.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Application.Users.Commands;
 
+[ExcludeFromCodeCoverage]
 public class RecordUserSignInCommand : IRecordUserSignInCommand
 {
     private readonly IUsersDbContext _db;
