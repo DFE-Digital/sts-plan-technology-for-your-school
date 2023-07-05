@@ -13,9 +13,7 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("/question")]
 public class QuestionsController : BaseController<QuestionsController>
 {
-    public QuestionsController(ILogger<QuestionsController> logger, IUrlHistory history) : base(logger, history)
-    {
-    }
+    public QuestionsController(ILogger<QuestionsController> logger, IUrlHistory history) : base(logger, history) { }
 
     [HttpGet("{id?}")]
     /// <summary>
@@ -41,6 +39,18 @@ public class QuestionsController : BaseController<QuestionsController>
         return View("Question", viewModel);
     }
 
+    private async Task<Question> _GetQuestion(string id, string? section, [FromServices] GetQuestionQuery query, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
+        return await query.GetQuestionById(id, section, cancellationToken) ?? throw new KeyNotFoundException($"Could not find question with id {id}");
+    }
+
+    private async Task _RecordAnswer(RecordAnswerDto recordAnswerDto)
+    {
+        IRecordAnswerCommand recordAnswerCommand = HttpContext.RequestServices.GetRequiredService<IRecordAnswerCommand>();
+        await recordAnswerCommand.RecordAnswer(recordAnswerDto);
+    }
+
     [HttpPost("SubmitAnswer")]
     public async Task<IActionResult> SubmitAnswer(SubmitAnswerDto submitAnswerDto)
     {
@@ -48,9 +58,10 @@ public class QuestionsController : BaseController<QuestionsController>
 
         if (!ModelState.IsValid) return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.QuestionId });
 
+        //var question = await  _GetQuestion(submitAnswerDto.QuestionId, null);
+
         // TODO: Figure out how to get the actual AnswerText and ContentfulRef
-        var recordAnswerCommand = HttpContext.RequestServices.GetRequiredService<IRecordAnswerCommand>();
-        await recordAnswerCommand.RecordAnswer(new RecordAnswerDto() { AnswerText = "Answer", ContentfulRef = "ABC123" });
+        // await _RecordAnswer(new RecordAnswerDto() { AnswerText = "Answer", ContentfulRef = submitAnswerDto.ChosenAnswerId });
 
         if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("GetByRoute", "Pages", new { route = "check-answers" });
         else return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.NextQuestionId });

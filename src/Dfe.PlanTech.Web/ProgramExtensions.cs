@@ -77,7 +77,6 @@ public static class ProgramExtensions
         services.AddTransient<ICreateUserCommand, CreateUserCommand>();
         services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
 
-
         services.AddTransient<ICreateAnswerCommand, CreateAnswerCommand>();
         services.AddTransient<IRecordAnswerCommand, RecordAnswerCommand>();
 
