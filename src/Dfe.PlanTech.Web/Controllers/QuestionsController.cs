@@ -15,6 +15,12 @@ public class QuestionsController : BaseController<QuestionsController>
 {
     public QuestionsController(ILogger<QuestionsController> logger, IUrlHistory history) : base(logger, history) { }
 
+    private async Task<Question> _GetQuestion(string id, string? section, [FromServices] GetQuestionQuery query, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
+        return await query.GetQuestionById(id, section, cancellationToken) ?? throw new KeyNotFoundException($"Could not find question with id {id}");
+    }
+
     [HttpGet("{id?}")]
     /// <summary>
     /// 
@@ -28,7 +34,7 @@ public class QuestionsController : BaseController<QuestionsController>
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
 
-        var question = await query.GetQuestionById(id, section, cancellationToken) ?? throw new KeyNotFoundException($"Could not find question with id {id}");
+        var question = await _GetQuestion(id, section, query, cancellationToken);
 
         var viewModel = new QuestionViewModel()
         {
@@ -39,14 +45,15 @@ public class QuestionsController : BaseController<QuestionsController>
         return View("Question", viewModel);
     }
 
-    private async Task<Question> _GetQuestion(string id, string? section, [FromServices] GetQuestionQuery query, CancellationToken cancellationToken)
+    private async Task<String?> _GetAnswerTextById(String id)
     {
-        if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
-        return await query.GetQuestionById(id, section, cancellationToken) ?? throw new KeyNotFoundException($"Could not find question with id {id}");
+        var question = await _GetQuestion(id, null, HttpContext.RequestServices.GetRequiredService<GetQuestionQuery>(), CancellationToken.None);
+        return question.Answers.Where(answer => answer.Sys?.Id == id).ToString();
     }
 
     private async Task _RecordAnswer(RecordAnswerDto recordAnswerDto)
     {
+        if (recordAnswerDto.AnswerText == null) throw new ArgumentNullException(nameof(recordAnswerDto.AnswerText));
         IRecordAnswerCommand recordAnswerCommand = HttpContext.RequestServices.GetRequiredService<IRecordAnswerCommand>();
         await recordAnswerCommand.RecordAnswer(recordAnswerDto);
     }
@@ -58,10 +65,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
         if (!ModelState.IsValid) return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.QuestionId });
 
-        //var question = await  _GetQuestion(submitAnswerDto.QuestionId, null);
-
-        // TODO: Figure out how to get the actual AnswerText and ContentfulRef
-        // await _RecordAnswer(new RecordAnswerDto() { AnswerText = "Answer", ContentfulRef = submitAnswerDto.ChosenAnswerId });
+        await _RecordAnswer(new RecordAnswerDto() { AnswerText = await _GetAnswerTextById(submitAnswerDto.QuestionId), ContentfulRef = submitAnswerDto.ChosenAnswerId });
 
         if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("GetByRoute", "Pages", new { route = "check-answers" });
         else return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.NextQuestionId });
