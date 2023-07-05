@@ -45,10 +45,14 @@ public class QuestionsController : BaseController<QuestionsController>
         return View("Question", viewModel);
     }
 
-    private async Task<String?> _GetAnswerTextById(String id)
+    private async Task<String?> _GetAnswerTextById(String questionId, String chosenAnswerId)
     {
-        var question = await _GetQuestion(id, null, HttpContext.RequestServices.GetRequiredService<GetQuestionQuery>(), CancellationToken.None);
-        return question.Answers.Where(answer => answer.Sys?.Id == id).ToString();
+        var question = await _GetQuestion(questionId, null, HttpContext.RequestServices.GetRequiredService<GetQuestionQuery>(), CancellationToken.None);
+        foreach (var answer in question.Answers)
+        {
+            if (answer.Sys?.Id == chosenAnswerId) return answer.Text;
+        }
+        return null;
     }
 
     private async Task _RecordAnswer(RecordAnswerDto recordAnswerDto)
@@ -65,7 +69,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
         if (!ModelState.IsValid) return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.QuestionId });
 
-        await _RecordAnswer(new RecordAnswerDto() { AnswerText = await _GetAnswerTextById(submitAnswerDto.QuestionId), ContentfulRef = submitAnswerDto.ChosenAnswerId });
+        await _RecordAnswer(new RecordAnswerDto() { AnswerText = await _GetAnswerTextById(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId), ContentfulRef = submitAnswerDto.ChosenAnswerId });
 
         if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("GetByRoute", "Pages", new { route = "check-answers" });
         else return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.NextQuestionId });
