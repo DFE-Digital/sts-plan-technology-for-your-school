@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Domain.Answers.Models;
+﻿using Dfe.PlanTech.Domain.Questions.Models;
+using Dfe.PlanTech.Domain.Answers.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 using System.Linq.Expressions;
 
@@ -11,6 +12,9 @@ public interface IPlanTechDbContext
     IQueryable<Domain.SignIn.Models.SignIn> SignIns { get; }
     public void AddUser(User user);
     public void AddSignIn(Domain.SignIn.Models.SignIn signIn);
+
+    // Question Table
+    public void AddQuestion(Question question);
 
     // Answer Table
     public void AddAnswer(Answer answer);
