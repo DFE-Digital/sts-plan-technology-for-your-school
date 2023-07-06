@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Domain.Questions.Models;
 using Dfe.PlanTech.Domain.Answers.Models;
 using Dfe.PlanTech.Domain.SignIn.Models;
 using Dfe.PlanTech.Domain.Users.Models;
@@ -14,6 +15,8 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public DbSet<User> Users { get; set; } = null!;
 
     public DbSet<SignIn> SignIn { get; set; } = null!;
+
+    public DbSet<Question> Questions { get; set; } = null!;
 
     public DbSet<Answer> Answers { get; set; } = null!;
 
@@ -52,6 +55,16 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
             //////
         });
 
+        // Setup Question Table
+        modelBuilder.Entity<Question>(builder =>
+        {
+            builder.HasKey(question => question.Id);
+            builder.Property(question => question.Id).ValueGeneratedOnAdd();
+            builder.Property(question => question.QuestionText).HasMaxLength(4000); // NVARCHAR Max Length
+            builder.Property(question => question.ContentfulRef).HasMaxLength(50);
+            builder.Property(question => question.DateCreated).ValueGeneratedOnAdd();
+        });
+
         // Setup Answer Table
         modelBuilder.Entity<Answer>(builder =>
         {
@@ -68,6 +81,8 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
 
     public void AddUser(User user) => Users.Add(user);
     public void AddSignIn(SignIn signIn) => SignIn.Add(signIn);
+
+    public void AddQuestion(Question question) => Questions.Add(question);
 
     public void AddAnswer(Answer answer) => Answers.Add(answer);
 
