@@ -14,12 +14,26 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("/question")]
 public class QuestionsController : BaseController<QuestionsController>
 {
-    public QuestionsController(ILogger<QuestionsController> logger, IUrlHistory history) : base(logger, history) { }
+    private readonly GetQuestionQuery _getQuestionQuery;
+    private readonly IRecordQuestionCommand _recordQuestionCommand;
+    private readonly IRecordAnswerCommand _recordAnswerCommand;
 
-    private async Task<Domain.Questionnaire.Models.Question> _GetQuestion(string id, string? section, [FromServices] GetQuestionQuery query, CancellationToken cancellationToken)
+    public QuestionsController(
+        ILogger<QuestionsController> logger,
+        IUrlHistory history,
+        [FromServices] GetQuestionQuery getQuestionQuery,
+        [FromServices] IRecordQuestionCommand recordQuestionCommand,
+        [FromServices] IRecordAnswerCommand recordAnswerCommand) : base(logger, history)
+    {
+        _getQuestionQuery = getQuestionQuery;
+        _recordQuestionCommand = recordQuestionCommand;
+        _recordAnswerCommand = recordAnswerCommand;
+    }
+
+    private async Task<Domain.Questionnaire.Models.Question> _GetQuestion(string id, string? section, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
-        return await query.GetQuestionById(id, section, cancellationToken) ?? throw new KeyNotFoundException($"Could not find question with id {id}");
+        return await _getQuestionQuery.GetQuestionById(id, section, cancellationToken) ?? throw new KeyNotFoundException($"Could not find question with id {id}");
     }
 
     [HttpGet("{id?}")]
@@ -31,11 +45,11 @@ public class QuestionsController : BaseController<QuestionsController>
     /// <param name="query"></param>
     /// <exception cref="ArgumentNullException">Throws exception when Id is null or empty</exception>
     /// <returns></returns>
-    public async Task<IActionResult> GetQuestionById(string id, string? section, [FromServices] GetQuestionQuery query, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetQuestionById(string id, string? section, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
 
-        var question = await _GetQuestion(id, section, query, cancellationToken);
+        var question = await _GetQuestion(id, section, cancellationToken);
 
         var viewModel = new QuestionViewModel()
         {
@@ -48,13 +62,13 @@ public class QuestionsController : BaseController<QuestionsController>
 
     private async Task<String?> _GetQuestionTextById(String questionId)
     {
-        var question = await _GetQuestion(questionId, null, HttpContext.RequestServices.GetRequiredService<GetQuestionQuery>(), CancellationToken.None);
+        var question = await _GetQuestion(questionId, null, CancellationToken.None);
         return question.Text;
     }
 
     private async Task<String?> _GetAnswerTextById(String questionId, String chosenAnswerId)
     {
-        var question = await _GetQuestion(questionId, null, HttpContext.RequestServices.GetRequiredService<GetQuestionQuery>(), CancellationToken.None);
+        var question = await _GetQuestion(questionId, null, CancellationToken.None);
         foreach (var answer in question.Answers)
         {
             if (answer.Sys?.Id == chosenAnswerId) return answer.Text;
@@ -65,15 +79,13 @@ public class QuestionsController : BaseController<QuestionsController>
     private async Task _RecordQuestion(RecordQuestionDto recordQuestionDto)
     {
         if (recordQuestionDto.QuestionText == null) throw new ArgumentNullException(nameof(recordQuestionDto.QuestionText));
-        IRecordQuestionCommand recordQuestionCommand = HttpContext.RequestServices.GetRequiredService<IRecordQuestionCommand>();
-        await recordQuestionCommand.RecordQuestion(recordQuestionDto);
+        await _recordQuestionCommand.RecordQuestion(recordQuestionDto);
     }
 
     private async Task _RecordAnswer(RecordAnswerDto recordAnswerDto)
     {
         if (recordAnswerDto.AnswerText == null) throw new ArgumentNullException(nameof(recordAnswerDto.AnswerText));
-        IRecordAnswerCommand recordAnswerCommand = HttpContext.RequestServices.GetRequiredService<IRecordAnswerCommand>();
-        await recordAnswerCommand.RecordAnswer(recordAnswerDto);
+        await _recordAnswerCommand.RecordAnswer(recordAnswerDto);
     }
 
     [HttpPost("SubmitAnswer")]
