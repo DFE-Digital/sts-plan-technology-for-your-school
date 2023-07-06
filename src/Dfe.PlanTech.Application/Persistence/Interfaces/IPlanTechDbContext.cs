@@ -15,6 +15,9 @@ public interface IPlanTechDbContext
     // Answer Table
     public void AddAnswer(Answer answer);
 
+    // Submission Table
+    public void AddSubmission(Domain.Submissions.Models.Submission submission);
+
     public Task<int> SaveChangesAsync();
 
     Task<User?> GetUserBy(Expression<Func<User, bool>> predicate);

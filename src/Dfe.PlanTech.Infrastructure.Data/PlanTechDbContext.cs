@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Answers.Models;
 using Dfe.PlanTech.Domain.SignIn.Models;
+using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +17,8 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public DbSet<SignIn> SignIn { get; set; } = null!;
 
     public DbSet<Answer> Answers { get; set; } = null!;
+
+    public DbSet<Submission> Submissions { get; set; } = null!;
 
     public PlanTechDbContext() { }
 
@@ -70,6 +73,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public void AddSignIn(SignIn signIn) => SignIn.Add(signIn);
 
     public void AddAnswer(Answer answer) => Answers.Add(answer);
+    public void AddSubmission(Submission submission) => Submissions.Add(submission);
 
     public Task<int> SaveChangesAsync() => base.SaveChangesAsync();
 
