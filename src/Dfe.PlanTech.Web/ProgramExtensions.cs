@@ -77,4 +77,13 @@ public static class ProgramExtensions
 
         return services;
     }
+
+    public static IServiceCollection AddGoogleTagManager(this IServiceCollection services, IConfiguration configuration)
+    {
+        var config = new DfeGTMConfiguration();
+        configuration.GetSection("GTM").Bind(config);
+        services.AddSingleton((services) => config);
+
+        return services;
+    }
 }
