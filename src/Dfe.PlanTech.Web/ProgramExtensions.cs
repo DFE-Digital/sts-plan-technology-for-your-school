@@ -80,7 +80,7 @@ public static class ProgramExtensions
 
     public static IServiceCollection AddGoogleTagManager(this IServiceCollection services, IConfiguration configuration)
     {
-        var config = new DfeGTMConfiguration();
+        var config = new DfeGtmConfiguration();
         configuration.GetSection("GTM").Bind(config);
         services.AddSingleton((services) => config);
 

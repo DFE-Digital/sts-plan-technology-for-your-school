@@ -61,7 +61,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var mockLogger = new Mock<ILogger<PagesController>>();
             var historyMock = new Mock<IUrlHistory>();
 
-            var config = new DfeGTMConfiguration()
+            var config = new DfeGtmConfiguration()
             {
                 Head = "Test Head",
                 Body = "Test Body"
