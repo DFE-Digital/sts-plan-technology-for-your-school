@@ -15,4 +15,6 @@ public class Question : ContentComponent
     public string? HelpText { get; init; }
 
     public Answer[] Answers { get; init; } = Array.Empty<Answer>();
+
+    public string Param { get; init; } = null!;
 }

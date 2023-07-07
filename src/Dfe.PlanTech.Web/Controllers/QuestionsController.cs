@@ -34,6 +34,10 @@ public class QuestionsController : BaseController<QuestionsController>
     public async Task<IActionResult> GetQuestionById(string id, string? section, [FromServices] GetQuestionQuery query, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
+        string parameters = string.Empty;
+
+        if (TempData.ContainsKey("param"))
+            parameters = TempData["Param"].ToString();
 
         var question = await _GetQuestion(id, section, query, cancellationToken);
 

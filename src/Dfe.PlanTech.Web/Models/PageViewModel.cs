@@ -5,4 +5,6 @@ namespace Dfe.PlanTech.Web.Models;
 public class PageViewModel : BaseViewModel
 {
     public required Page Page { get; init; }
+
+    public string Param { get; set; } = null!;
 }

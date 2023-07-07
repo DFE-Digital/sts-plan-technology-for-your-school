@@ -18,30 +18,32 @@ public class PagesController : BaseController<PagesController>
     {
         var page = await query.GetPageBySlug("/", cancellationToken);
 
-        var viewModel = CreatePageModel(page);
+        var viewModel = CreatePageModel(page, null);
 
         return View("Page", viewModel);
     }
 
     [Authorize]
     [HttpGet("/{route?}")]
-    public async Task<IActionResult> GetByRoute(string route, [FromServices] GetPageQuery query, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetByRoute(string route, string param, [FromServices] GetPageQuery query, CancellationToken cancellationToken)
     {
         string slug = GetSlug(route);
+        TempData["Param"] = param;
 
         var page = await query.GetPageBySlug(slug, cancellationToken);
 
-        var viewModel = CreatePageModel(page);
+        var viewModel = CreatePageModel(page, param);
 
         return View("Page", viewModel);
     }
 
-    private PageViewModel CreatePageModel(Page page)
+    private PageViewModel CreatePageModel(Page page, string param)
     {
         return new PageViewModel()
         {
             Page = page,
-            BackUrl = history.LastVisitedUrl?.ToString() ?? "/"
+            BackUrl = history.LastVisitedUrl?.ToString() ?? "/",
+            Param = param
         };
     }
 
