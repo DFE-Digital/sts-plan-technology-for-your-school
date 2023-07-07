@@ -32,3 +32,4 @@ module "main_hosting" {
   mssql_database_name         = "${local.resource_prefix}-sqldb"
   mssql_server_admin_password = local.az_sql_admin_password
 }
+
