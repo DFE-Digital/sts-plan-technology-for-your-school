@@ -5,6 +5,7 @@ using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
+using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -59,9 +60,16 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var mockLogger = new Mock<ILogger<PagesController>>();
             var historyMock = new Mock<IUrlHistory>();
-            var inMemorySettings = new Dictionary<string, string> {
-                {"GTM:Head", "Test Head"},
-                {"GTM:Body", "Test Body"},
+
+            var config = new DfeGTMConfiguration()
+            {
+                Head = "Test Head",
+                Body = "Test Body"
+            };
+
+            var inMemorySettings = new Dictionary<string, string?> {
+                {"GTM:Head", config.Head},
+                {"GTM:Body", config.Body},
             };
 
             IConfiguration configuration = new ConfigurationBuilder()

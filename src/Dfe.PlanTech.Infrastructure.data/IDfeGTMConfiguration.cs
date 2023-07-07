@@ -1,4 +1,4 @@
-﻿namespace Dfe.PlanTech.Web
+﻿namespace Dfe.PlanTech.Infrastructure.Data
 {
     public interface IDfeGTMConfiguration
     {
