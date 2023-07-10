@@ -118,7 +118,7 @@ public class QuestionsController : BaseController<QuestionsController>
         return question.Text;
     }
 
-    private async Task<string?> _GetAnswerTextById(String questionId, String chosenAnswerId)
+    private async Task<string?> _GetAnswerTextById(string questionId, string chosenAnswerId)
     {
         var question = await _GetQuestion(questionId, null, CancellationToken.None);
         foreach (var answer in question.Answers)
@@ -128,10 +128,10 @@ public class QuestionsController : BaseController<QuestionsController>
         return null;
     }
 
-    private async Task<String?> _GetMaturityForAnswer(String questionId, String chosenAnswerId)
+    private async Task<string?> _GetMaturityForAnswer(string questionId, string chosenAnswerId)
     {
         var question = await _GetQuestion(questionId, null, CancellationToken.None);
-        return question.Answers.Where(x => x.Sys?.Id == chosenAnswerId).SingleOrDefault().Maturity;
+        return question.Answers.SingleOrDefault(x => x.Sys?.Id == chosenAnswerId).Maturity;
     }
     private async Task<int> _RecordQuestion(RecordQuestionDto recordQuestionDto)
     {
