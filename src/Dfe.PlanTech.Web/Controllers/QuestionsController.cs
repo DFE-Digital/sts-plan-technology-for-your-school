@@ -129,8 +129,11 @@ public class QuestionsController : BaseController<QuestionsController>
         return null;
     }
 
-    private async Task<string?> _GetMaturityForAnswer(string questionId, string chosenAnswerId)
+    private async Task<string> _GetMaturityForAnswer(string questionId, string chosenAnswerId)
     {
+        if (string.IsNullOrEmpty(questionId) || string.IsNullOrEmpty(chosenAnswerId))
+            return string.Empty;
+
         var question = await _GetQuestion(questionId, null, CancellationToken.None);
         return question.Answers.SingleOrDefault(x => x.Sys?.Id == chosenAnswerId).Maturity;
     }
