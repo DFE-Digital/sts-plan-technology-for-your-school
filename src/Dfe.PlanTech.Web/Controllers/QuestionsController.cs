@@ -55,10 +55,9 @@ public class QuestionsController : BaseController<QuestionsController>
     public async Task<IActionResult> GetQuestionById(string id, string? section, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
-        string parameters = null!;
+        object parameters = null!;
 
-        if (TempData.ContainsKey("param"))
-          parameters = TempData["Param"].ToString();
+        TempData.TryGetValue("param", out parameters);
 
         var question = await _GetQuestion(id, section, cancellationToken);
 
@@ -66,7 +65,7 @@ public class QuestionsController : BaseController<QuestionsController>
         {
             Question = question,
             BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment",
-            Params = parameters,
+            Params = parameters != null ? parameters?.ToString() : null,
         };
 
         return View("Question", viewModel);
@@ -97,7 +96,7 @@ public class QuestionsController : BaseController<QuestionsController>
         else return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.NextQuestionId });
     }
 
-    private Params? ParseParameters(string parameters)
+    private static Params? ParseParameters(string parameters)
     {
         if (string.IsNullOrEmpty(parameters))
             return null;
