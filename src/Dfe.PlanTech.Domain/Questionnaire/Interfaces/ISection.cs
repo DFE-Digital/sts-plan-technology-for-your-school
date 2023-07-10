@@ -16,4 +16,6 @@ public interface ISection : IContentComponent
     public string FirstQuestionId { get; }
 
     public Page InterstitialPage { get; }
+
+    public Sys Sys { get; }
 }

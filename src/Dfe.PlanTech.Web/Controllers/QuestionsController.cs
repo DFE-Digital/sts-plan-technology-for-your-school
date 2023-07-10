@@ -7,6 +7,12 @@ using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Dfe.PlanTech.Domain.Submissions.Models;
+using Dfe.PlanTech.Application.Response.Interface;
+using Dfe.PlanTech.Domain.Responses.Models;
+using Polly;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
@@ -17,17 +23,23 @@ public class QuestionsController : BaseController<QuestionsController>
     private readonly GetQuestionQuery _getQuestionQuery;
     private readonly IRecordQuestionCommand _recordQuestionCommand;
     private readonly IRecordAnswerCommand _recordAnswerCommand;
+    private readonly ICreateSubmissionCommand _createSubmissionCommand;
+    private readonly ICreateResponseCommand _createResponseCommand;
 
     public QuestionsController(
         ILogger<QuestionsController> logger,
         IUrlHistory history,
         [FromServices] GetQuestionQuery getQuestionQuery,
         [FromServices] IRecordQuestionCommand recordQuestionCommand,
-        [FromServices] IRecordAnswerCommand recordAnswerCommand) : base(logger, history)
+        [FromServices] IRecordAnswerCommand recordAnswerCommand,
+        [FromServices] ICreateSubmissionCommand createSubmissionCommand,
+        [FromServices] ICreateResponseCommand createResponseCommand) : base(logger, history)
     {
         _getQuestionQuery = getQuestionQuery;
         _recordQuestionCommand = recordQuestionCommand;
         _recordAnswerCommand = recordAnswerCommand;
+        _createSubmissionCommand = createSubmissionCommand;
+        _createResponseCommand = createResponseCommand;
     }
 
     private async Task<Domain.Questionnaire.Models.Question> _GetQuestion(string id, string? section, CancellationToken cancellationToken)
@@ -48,20 +60,38 @@ public class QuestionsController : BaseController<QuestionsController>
     public async Task<IActionResult> GetQuestionById(string id, string? section, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
-        string parameters = string.Empty;
+        string parameters = null!;
 
         if (TempData.ContainsKey("param"))
-            parameters = TempData["Param"].ToString();
+          parameters = TempData["Param"].ToString();
 
         var question = await _GetQuestion(id, section, cancellationToken);
 
         var viewModel = new QuestionViewModel()
         {
             Question = question,
-            BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment"
+            BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment",
+            Params = parameters,
         };
 
         return View("Question", viewModel);
+    }
+
+    private Params? ParseParameters(string parameters)
+    {
+        if (string.IsNullOrEmpty(parameters))
+            return null;
+
+        var splitParams = parameters.Split('+');
+
+        if (splitParams is null)
+            return null;
+
+        return new Params 
+        {
+            SectionName = splitParams.Length > 0 ? parameters[0].ToString() : string.Empty,
+            SectionId = splitParams.Length > 1 ? splitParams[1].ToString() : string.Empty,
+        };
     }
 
     private async Task<String?> _GetQuestionTextById(String questionId)
@@ -80,16 +110,28 @@ public class QuestionsController : BaseController<QuestionsController>
         return null;
     }
 
-    private async Task _RecordQuestion(RecordQuestionDto recordQuestionDto)
+    private async Task<int> _RecordQuestion(RecordQuestionDto recordQuestionDto)
     {
         if (recordQuestionDto.QuestionText == null) throw new ArgumentNullException(nameof(recordQuestionDto.QuestionText));
-        await _recordQuestionCommand.RecordQuestion(recordQuestionDto);
+        return await _recordQuestionCommand.RecordQuestion(recordQuestionDto);
     }
 
-    private async Task _RecordAnswer(RecordAnswerDto recordAnswerDto)
+    private async Task<int> _RecordAnswer(RecordAnswerDto recordAnswerDto)
     {
         if (recordAnswerDto.AnswerText == null) throw new ArgumentNullException(nameof(recordAnswerDto.AnswerText));
-        await _recordAnswerCommand.RecordAnswer(recordAnswerDto);
+        return await _recordAnswerCommand.RecordAnswer(recordAnswerDto);
+    }
+
+    private async Task<int> _RecordSubmission(Submission submission)
+    {
+        if (submission == null) throw new ArgumentNullException(nameof(submission));
+        return await _createSubmissionCommand.CreateSubmission(submission);
+    }
+
+    private async Task _RecordResponse(RecordResponseDto recordResponseDto)
+    {
+        if (recordResponseDto == null) throw new ArgumentNullException(nameof(recordResponseDto));
+        await _createResponseCommand.CreateResponse(recordResponseDto);
     }
 
     [HttpPost("SubmitAnswer")]
@@ -98,9 +140,15 @@ public class QuestionsController : BaseController<QuestionsController>
         if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
 
         if (!ModelState.IsValid) return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.QuestionId });
+        Params param = new Params();
 
-        await _RecordQuestion(new RecordQuestionDto() { QuestionText = await _GetQuestionTextById(submitAnswerDto.QuestionId), ContentfulRef = submitAnswerDto.QuestionId });
-        await _RecordAnswer(new RecordAnswerDto() { AnswerText = await _GetAnswerTextById(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId), ContentfulRef = submitAnswerDto.ChosenAnswerId });
+        if (!string.IsNullOrEmpty(submitAnswerDto.Params))
+           param = ParseParameters(submitAnswerDto.Params);
+
+        var questionId = await _RecordQuestion(new RecordQuestionDto() { QuestionText = await _GetQuestionTextById(submitAnswerDto.QuestionId), ContentfulRef = submitAnswerDto.QuestionId });
+        var answerId = await _RecordAnswer(new RecordAnswerDto() { AnswerText = await _GetAnswerTextById(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId), ContentfulRef = submitAnswerDto.ChosenAnswerId });
+        var submissionId = await _RecordSubmission(new Submission() { EastablishmentId = 1, SectionId = Convert.ToInt16(param.SectionId), SectionName = param.SectionName });
+        // await _RecordResponse(new RecordResponseDto() { AnswerId = answerId, QuestionId = questionId, SubmissionId = submissionId, Maturity = await _GetMaturityForAnswer(submitAnswerDto.ChosenAnswerId) });
 
         if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("GetByRoute", "Pages", new { route = "check-answers" });
         else return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.NextQuestionId });

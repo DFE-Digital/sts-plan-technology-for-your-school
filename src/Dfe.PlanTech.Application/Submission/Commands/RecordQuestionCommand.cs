@@ -15,9 +15,9 @@ public class RecordQuestionCommand : IRecordQuestionCommand
         _createQuestionCommand = createQuestionCommand;
     }
 
-    public async Task RecordQuestion(RecordQuestionDto recordQuestionDto)
+    public async Task<int> RecordQuestion(RecordQuestionDto recordQuestionDto)
     {
         CreateQuestionCommand createQuestionCommand = new CreateQuestionCommand(_db);
-        await createQuestionCommand.CreateQuestion(recordQuestionDto);
+        return await createQuestionCommand.CreateQuestion(recordQuestionDto);
     }
 }

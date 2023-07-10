@@ -1,6 +1,8 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
+using Dfe.PlanTech.Application.Response.Commands;
+using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Application.Submission.Commands;
 using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
@@ -97,8 +99,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             ICreateAnswerCommand createAnswerCommand = new CreateAnswerCommand(databaseMock.Object);
             IRecordAnswerCommand recordAnswerCommand = new RecordAnswerCommand(databaseMock.Object, createAnswerCommand);
+            ICreateResponseCommand createResponseCommand = new CreateResponseCommand(databaseMock.Object);
+            ICreateSubmissionCommand createSubmissionCommand = new CreateSubmissionCommand(databaseMock.Object);
 
-            _controller = new QuestionsController(mockLogger.Object, historyMock.Object, query, recordQuestionCommand, recordAnswerCommand);
+            _controller = new QuestionsController(mockLogger.Object, historyMock.Object, query, recordQuestionCommand, recordAnswerCommand, createSubmissionCommand, createResponseCommand);
 
             _cacher = new Cacher(new CacheOptions(), new MemoryCache(new MemoryCacheOptions()));
         }

@@ -19,7 +19,7 @@
             }
         case Question question:
             {
-                <govuk-button-link asp-controller="Questions" asp-action="GetQuestionById" asp-route-section=@question.Param asp-route-id=@question.Sys.Id
+                <govuk-button-link asp-controller="Questions" asp-action="GetQuestionById" asp-route-param=@question.Param asp-route-id=@question.Sys.Id
                     class="govuk-link">@Model.Button.Value</govuk-button-link>
                 break;
             }

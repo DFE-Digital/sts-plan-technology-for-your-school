@@ -2,6 +2,7 @@
 using Dfe.PlanTech.Domain.Answers.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 using System.Linq.Expressions;
+using Dfe.PlanTech.Domain.Responses.Models;
 
 namespace Dfe.PlanTech.Application.Persistence.Interfaces;
 
@@ -21,6 +22,9 @@ public interface IPlanTechDbContext
 
     // Submission Table
     public void AddSubmission(Domain.Submissions.Models.Submission submission);
+
+    // Response Table
+    public void AddResponse(Domain.Responses.Models.Response response);
 
     public Task<int> SaveChangesAsync();
 

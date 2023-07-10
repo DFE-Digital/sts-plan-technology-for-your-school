@@ -15,9 +15,9 @@ public class RecordAnswerCommand : IRecordAnswerCommand
         _createAnswerCommand = createAnswerCommand;
     }
 
-    public async Task RecordAnswer(RecordAnswerDto recordAnswerDto)
+    public async Task<int> RecordAnswer(RecordAnswerDto recordAnswerDto)
     {
         CreateAnswerCommand createAnswerCommand = new CreateAnswerCommand(_db);
-        await createAnswerCommand.CreateAnswer(recordAnswerDto);
+        return await createAnswerCommand.CreateAnswer(recordAnswerDto);
     }
 }

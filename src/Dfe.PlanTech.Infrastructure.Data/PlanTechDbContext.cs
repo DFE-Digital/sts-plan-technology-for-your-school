@@ -7,6 +7,7 @@ using Dfe.PlanTech.Domain.SignIn.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 using Microsoft.EntityFrameworkCore;
+using Dfe.PlanTech.Domain.Responses.Models;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
@@ -22,6 +23,8 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public DbSet<Answer> Answers { get; set; } = null!;
 
     public DbSet<Submission> Submissions { get; set; } = null!;
+
+    public DbSet<Response> Responses { get; set; } = null!;
 
     public PlanTechDbContext() { }
 
@@ -89,6 +92,8 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
 
     public void AddAnswer(Answer answer) => Answers.Add(answer);
     public void AddSubmission(Submission submission) => Submissions.Add(submission);
+
+    public void AddResponse(Response response) => Responses.Add(response);
 
     public Task<int> SaveChangesAsync() => base.SaveChangesAsync();
 

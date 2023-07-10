@@ -4,5 +4,5 @@ namespace Dfe.PlanTech.Application.Submission.Interfaces;
 
 public interface IRecordAnswerCommand
 {
-    Task RecordAnswer(RecordAnswerDto recordAnswerDto);
+    Task<int> RecordAnswer(RecordAnswerDto recordAnswerDto);
 }

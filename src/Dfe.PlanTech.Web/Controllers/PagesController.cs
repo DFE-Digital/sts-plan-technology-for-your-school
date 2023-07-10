@@ -28,7 +28,8 @@ public class PagesController : BaseController<PagesController>
     public async Task<IActionResult> GetByRoute(string route, string param, [FromServices] GetPageQuery query, CancellationToken cancellationToken)
     {
         string slug = GetSlug(route);
-        TempData["Param"] = param;
+        if (!string.IsNullOrEmpty(param))
+            TempData["Param"] = param;
 
         var page = await query.GetPageBySlug(slug, cancellationToken);
 

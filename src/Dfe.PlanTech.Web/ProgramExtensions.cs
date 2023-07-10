@@ -1,6 +1,8 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Response.Commands;
+using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Application.Submission.Commands;
 using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Application.Users.Commands;
@@ -83,6 +85,7 @@ public static class ProgramExtensions
         services.AddTransient<ICreateAnswerCommand, CreateAnswerCommand>();
         services.AddTransient<IRecordAnswerCommand, RecordAnswerCommand>();
         services.AddTransient<ICreateSubmissionCommand, CreateSubmissionCommand>();
+        services.AddTransient<ICreateResponseCommand, CreateResponseCommand>();
 
         return services;
     }
