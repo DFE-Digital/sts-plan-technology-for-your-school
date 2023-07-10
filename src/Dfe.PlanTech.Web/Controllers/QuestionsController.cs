@@ -136,7 +136,7 @@ public class QuestionsController : BaseController<QuestionsController>
     }
     private async Task<int> _RecordQuestion(RecordQuestionDto recordQuestionDto)
     {
-        if (recordQuestionDto.QuestionText == null) throw new ArgumentNullException(nameof(recordQuestionDto.QuestionText));
+        if (recordQuestionDto.QuestionText == null) throw new ArgumentNullException(nameof(recordQuestionDto));
         return await _recordQuestionCommand.RecordQuestion(recordQuestionDto);
     }
 
@@ -148,7 +148,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
     private async Task<int> _RecordAnswer(RecordAnswerDto recordAnswerDto)
     {
-        if (recordAnswerDto.AnswerText == null) throw new ArgumentNullException(nameof(recordAnswerDto.AnswerText));
+        if (recordAnswerDto.AnswerText == null) throw new ArgumentNullException(nameof(recordAnswerDto));
         return await _recordAnswerCommand.RecordAnswer(recordAnswerDto);
     }
 
