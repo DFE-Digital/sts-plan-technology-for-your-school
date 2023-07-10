@@ -6,6 +6,7 @@ using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Application.Submission.Commands;
 using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Application.Users.Commands;
+using Dfe.PlanTech.Application.Users.Helper;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Application.Users.Queries;
 using Dfe.PlanTech.Domain.Caching.Interfaces;
@@ -63,10 +64,12 @@ public static class ProgramExtensions
             options.Cookie.Name = ".Dfe.PlanTech";
         });
 
+        services.AddHttpContextAccessor();
         services.AddSingleton<ICacheOptions>((services) => new CacheOptions());
         services.AddTransient<ICacher, Cacher>();
         services.AddTransient<IUrlHistory, UrlHistory>();
         services.AddTransient<IQuestionnaireCacher, QuestionnaireCacher>();
+        services.AddTransient<IUser, UserHelper>();
 
         return services;
     }

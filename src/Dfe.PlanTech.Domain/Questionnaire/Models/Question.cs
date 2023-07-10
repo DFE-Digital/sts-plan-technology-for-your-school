@@ -17,4 +17,5 @@ public class Question : ContentComponent
     public Answer[] Answers { get; init; } = Array.Empty<Answer>();
 
     public string Param { get; init; } = null!;
+
 }

@@ -1,18 +1,16 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
+using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Application.Submission.Interfaces;
+using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Answers.Models;
-using Dfe.PlanTech.Domain.Questions.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Questions.Models;
+using Dfe.PlanTech.Domain.Responses.Models;
+using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Dfe.PlanTech.Domain.Submissions.Models;
-using Dfe.PlanTech.Application.Response.Interface;
-using Dfe.PlanTech.Domain.Responses.Models;
-using Polly;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
@@ -25,6 +23,7 @@ public class QuestionsController : BaseController<QuestionsController>
     private readonly IRecordAnswerCommand _recordAnswerCommand;
     private readonly ICreateSubmissionCommand _createSubmissionCommand;
     private readonly ICreateResponseCommand _createResponseCommand;
+    private readonly IUser _user;
 
     public QuestionsController(
         ILogger<QuestionsController> logger,
@@ -33,19 +32,15 @@ public class QuestionsController : BaseController<QuestionsController>
         [FromServices] IRecordQuestionCommand recordQuestionCommand,
         [FromServices] IRecordAnswerCommand recordAnswerCommand,
         [FromServices] ICreateSubmissionCommand createSubmissionCommand,
-        [FromServices] ICreateResponseCommand createResponseCommand) : base(logger, history)
+        [FromServices] ICreateResponseCommand createResponseCommand,
+        IUser user) : base(logger, history)
     {
         _getQuestionQuery = getQuestionQuery;
         _recordQuestionCommand = recordQuestionCommand;
         _recordAnswerCommand = recordAnswerCommand;
         _createSubmissionCommand = createSubmissionCommand;
         _createResponseCommand = createResponseCommand;
-    }
-
-    private async Task<Domain.Questionnaire.Models.Question> _GetQuestion(string id, string? section, CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
-        return await _getQuestionQuery.GetQuestionById(id, section, cancellationToken) ?? throw new KeyNotFoundException($"Could not find question with id {id}");
+        _user = user;
     }
 
     [HttpGet("{id?}")]
@@ -77,6 +72,29 @@ public class QuestionsController : BaseController<QuestionsController>
         return View("Question", viewModel);
     }
 
+    [HttpPost("SubmitAnswer")]
+    public async Task<IActionResult> SubmitAnswer(SubmitAnswerDto submitAnswerDto)
+    {
+        if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
+
+        if (!ModelState.IsValid) return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.QuestionId });
+        Params param = new Params();
+
+        var userId = Convert.ToUInt16(await _user.GetCurrentUserId());
+        var establishmentId = Convert.ToUInt16(await _user.GetEstablishmentId());
+
+        if (!string.IsNullOrEmpty(submitAnswerDto.Params))
+           param = ParseParameters(submitAnswerDto.Params);
+
+        var questionId = await _RecordQuestion(new RecordQuestionDto() { QuestionText = await _GetQuestionTextById(submitAnswerDto.QuestionId), ContentfulRef = submitAnswerDto.QuestionId });
+        var answerId = await _RecordAnswer(new RecordAnswerDto() { AnswerText = await _GetAnswerTextById(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId), ContentfulRef = submitAnswerDto.ChosenAnswerId });
+        var submissionId = await _RecordSubmission(new Submission() { EastablishmentId = establishmentId, SectionId = param.SectionId, SectionName = param.SectionName });
+        await _RecordResponse(new RecordResponseDto() { AnswerId = answerId, QuestionId = questionId, SubmissionId = submissionId, UserId = userId, Maturity = await _GetMaturityForAnswer(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId) });
+
+        if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("GetByRoute", "Pages", new { route = "check-answers" });
+        else return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.NextQuestionId });
+    }
+
     private Params? ParseParameters(string parameters)
     {
         if (string.IsNullOrEmpty(parameters))
@@ -87,20 +105,20 @@ public class QuestionsController : BaseController<QuestionsController>
         if (splitParams is null)
             return null;
 
-        return new Params 
+        return new Params
         {
             SectionName = splitParams.Length > 0 ? parameters[0].ToString() : string.Empty,
             SectionId = splitParams.Length > 1 ? splitParams[1].ToString() : string.Empty,
         };
     }
 
-    private async Task<String?> _GetQuestionTextById(String questionId)
+    private async Task<string?> _GetQuestionTextById(String questionId)
     {
         var question = await _GetQuestion(questionId, null, CancellationToken.None);
         return question.Text;
     }
 
-    private async Task<String?> _GetAnswerTextById(String questionId, String chosenAnswerId)
+    private async Task<string?> _GetAnswerTextById(String questionId, String chosenAnswerId)
     {
         var question = await _GetQuestion(questionId, null, CancellationToken.None);
         foreach (var answer in question.Answers)
@@ -110,10 +128,21 @@ public class QuestionsController : BaseController<QuestionsController>
         return null;
     }
 
+    private async Task<String?> _GetMaturityForAnswer(String questionId, String chosenAnswerId)
+    {
+        var question = await _GetQuestion(questionId, null, CancellationToken.None);
+        return question.Answers.Where(x => x.Sys?.Id == chosenAnswerId).SingleOrDefault().Maturity;
+    }
     private async Task<int> _RecordQuestion(RecordQuestionDto recordQuestionDto)
     {
         if (recordQuestionDto.QuestionText == null) throw new ArgumentNullException(nameof(recordQuestionDto.QuestionText));
         return await _recordQuestionCommand.RecordQuestion(recordQuestionDto);
+    }
+
+    private async Task<Domain.Questionnaire.Models.Question> _GetQuestion(string id, string? section, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
+        return await _getQuestionQuery.GetQuestionById(id, section, cancellationToken) ?? throw new KeyNotFoundException($"Could not find question with id {id}");
     }
 
     private async Task<int> _RecordAnswer(RecordAnswerDto recordAnswerDto)
@@ -132,25 +161,5 @@ public class QuestionsController : BaseController<QuestionsController>
     {
         if (recordResponseDto == null) throw new ArgumentNullException(nameof(recordResponseDto));
         await _createResponseCommand.CreateResponse(recordResponseDto);
-    }
-
-    [HttpPost("SubmitAnswer")]
-    public async Task<IActionResult> SubmitAnswer(SubmitAnswerDto submitAnswerDto)
-    {
-        if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
-
-        if (!ModelState.IsValid) return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.QuestionId });
-        Params param = new Params();
-
-        if (!string.IsNullOrEmpty(submitAnswerDto.Params))
-           param = ParseParameters(submitAnswerDto.Params);
-
-        var questionId = await _RecordQuestion(new RecordQuestionDto() { QuestionText = await _GetQuestionTextById(submitAnswerDto.QuestionId), ContentfulRef = submitAnswerDto.QuestionId });
-        var answerId = await _RecordAnswer(new RecordAnswerDto() { AnswerText = await _GetAnswerTextById(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId), ContentfulRef = submitAnswerDto.ChosenAnswerId });
-        var submissionId = await _RecordSubmission(new Submission() { EastablishmentId = 1, SectionId = Convert.ToInt16(param.SectionId), SectionName = param.SectionName });
-        // await _RecordResponse(new RecordResponseDto() { AnswerId = answerId, QuestionId = questionId, SubmissionId = submissionId, Maturity = await _GetMaturityForAnswer(submitAnswerDto.ChosenAnswerId) });
-
-        if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("GetByRoute", "Pages", new { route = "check-answers" });
-        else return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.NextQuestionId });
     }
 }

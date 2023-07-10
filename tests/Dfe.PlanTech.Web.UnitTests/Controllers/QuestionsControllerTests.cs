@@ -102,7 +102,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             ICreateResponseCommand createResponseCommand = new CreateResponseCommand(databaseMock.Object);
             ICreateSubmissionCommand createSubmissionCommand = new CreateSubmissionCommand(databaseMock.Object);
 
-            _controller = new QuestionsController(mockLogger.Object, historyMock.Object, query, recordQuestionCommand, recordAnswerCommand, createSubmissionCommand, createResponseCommand);
+            _controller = new QuestionsController(mockLogger.Object, historyMock.Object, query, recordQuestionCommand, recordAnswerCommand, createSubmissionCommand, createResponseCommand, null);
 
             _cacher = new Cacher(new CacheOptions(), new MemoryCache(new MemoryCacheOptions()));
         }
