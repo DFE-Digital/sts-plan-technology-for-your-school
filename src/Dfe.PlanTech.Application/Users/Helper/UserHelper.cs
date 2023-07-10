@@ -19,7 +19,7 @@ namespace Dfe.PlanTech.Application.Users.Helper
         public async Task<int?> GetCurrentUserId()
         {
             var claims = _httpContextAccessor.HttpContext.User.Claims.ToList();
-            var userId = claims.Where(x => x.Type.Contains("nameidentifier")).FirstOrDefault().Value;
+            var userId = claims?.FirstOrDefault(x => x.Type.Contains("nameidentifier"))?.Value;
 
             var getUserIdQuery = new GetUserIdQuery(_db);
             return await getUserIdQuery.GetUserId(userId);

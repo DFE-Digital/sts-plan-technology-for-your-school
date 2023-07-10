@@ -18,7 +18,7 @@ public class PagesController : BaseController<PagesController>
     {
         var page = await query.GetPageBySlug("/", cancellationToken);
 
-        var viewModel = CreatePageModel(page, null);
+        var viewModel = CreatePageModel(page);
 
         return View("Page", viewModel);
     }
@@ -38,7 +38,7 @@ public class PagesController : BaseController<PagesController>
         return View("Page", viewModel);
     }
 
-    private PageViewModel CreatePageModel(Page page, string param)
+    private PageViewModel CreatePageModel(Page page, string param = null!)
     {
         return new PageViewModel()
         {

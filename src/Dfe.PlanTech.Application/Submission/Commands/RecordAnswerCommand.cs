@@ -7,12 +7,10 @@ namespace Dfe.PlanTech.Application.Submission.Commands;
 public class RecordAnswerCommand : IRecordAnswerCommand
 {
     private readonly IPlanTechDbContext _db;
-    private readonly ICreateAnswerCommand _createAnswerCommand;
 
-    public RecordAnswerCommand(IPlanTechDbContext db, ICreateAnswerCommand createAnswerCommand)
+    public RecordAnswerCommand(IPlanTechDbContext db)
     {
         _db = db;
-        _createAnswerCommand = createAnswerCommand;
     }
 
     public async Task<int> RecordAnswer(RecordAnswerDto recordAnswerDto)

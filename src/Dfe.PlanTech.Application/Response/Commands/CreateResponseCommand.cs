@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Application.Response.Commands
 {
     public class CreateResponseCommand : ICreateResponseCommand
     {
-        public IPlanTechDbContext _db;
+        private readonly IPlanTechDbContext _db;
 
         public CreateResponseCommand(IPlanTechDbContext db)
         {
