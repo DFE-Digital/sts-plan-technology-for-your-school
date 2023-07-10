@@ -28,11 +28,8 @@ namespace Dfe.PlanTech.Application.Users.Helper
             return await getUserIdQuery.GetUserId(userId);
         }
 
-        public async Task<int?> GetEstablishmentId()
+        public int GetEstablishmentId()
         {
-            //var establishment = claims.Where(x => x.Type.Contains("organisation")).FirstOrDefault().Value;
-            //var test = establishment.Replace(@"\", "").Trim('"');
-            //var establishmentparse = JsonSerializer.Deserialize<Establishment>(test);
             return 1;
         }
     }

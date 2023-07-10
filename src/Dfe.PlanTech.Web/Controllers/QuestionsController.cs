@@ -81,10 +81,12 @@ public class QuestionsController : BaseController<QuestionsController>
         Params param = new Params();
 
         var userId = Convert.ToUInt16(await _user.GetCurrentUserId());
-        var establishmentId = Convert.ToUInt16(await _user.GetEstablishmentId());
+        var establishmentId = _user.GetEstablishmentId();
 
         if (!string.IsNullOrEmpty(submitAnswerDto.Params))
-           param = ParseParameters(submitAnswerDto.Params);
+        {
+            param = ParseParameters(submitAnswerDto.Params);
+        }
 
         var questionId = await _RecordQuestion(new RecordQuestionDto() { QuestionText = await _GetQuestionTextById(submitAnswerDto.QuestionId), ContentfulRef = submitAnswerDto.QuestionId });
         var answerId = await _RecordAnswer(new RecordAnswerDto() { AnswerText = await _GetAnswerTextById(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId), ContentfulRef = submitAnswerDto.ChosenAnswerId });
