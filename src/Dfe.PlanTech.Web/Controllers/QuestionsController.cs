@@ -84,7 +84,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
         if (!string.IsNullOrEmpty(submitAnswerDto.Params))
         {
-            param = ParseParameters(submitAnswerDto.Params);
+            param = ParseParameters(submitAnswerDto.Params) ?? null!;
         }
 
         var questionId = await _RecordQuestion(new RecordQuestionDto() { QuestionText = await _GetQuestionTextById(submitAnswerDto.QuestionId), ContentfulRef = submitAnswerDto.QuestionId });
