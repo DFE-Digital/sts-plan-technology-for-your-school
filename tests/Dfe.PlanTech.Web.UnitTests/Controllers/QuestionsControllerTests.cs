@@ -99,10 +99,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             GetQuestionQuery query = new GetQuestionQuery(_questionnaireCacherMock.Object, repositoryMock.Object);
 
             ICreateQuestionCommand createQuestionCommand = new CreateQuestionCommand(databaseMock.Object);
-            IRecordQuestionCommand recordQuestionCommand = new RecordQuestionCommand(databaseMock.Object, createQuestionCommand);
+            IRecordQuestionCommand recordQuestionCommand = new RecordQuestionCommand(databaseMock.Object);
 
             ICreateAnswerCommand createAnswerCommand = new CreateAnswerCommand(databaseMock.Object);
-            IRecordAnswerCommand recordAnswerCommand = new RecordAnswerCommand(databaseMock.Object, createAnswerCommand);
+            IRecordAnswerCommand recordAnswerCommand = new RecordAnswerCommand(databaseMock.Object);
             ICreateResponseCommand createResponseCommand = new CreateResponseCommand(databaseMock.Object);
             ICreateSubmissionCommand createSubmissionCommand = new CreateSubmissionCommand(databaseMock.Object);
 
