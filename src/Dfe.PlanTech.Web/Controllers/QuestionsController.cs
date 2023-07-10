@@ -135,7 +135,8 @@ public class QuestionsController : BaseController<QuestionsController>
             return string.Empty;
 
         var question = await _GetQuestion(questionId, null, CancellationToken.None);
-        return question.Answers.SingleOrDefault(x => x.Sys?.Id == chosenAnswerId).Maturity;
+
+        return question.Answers.FirstOrDefault(x => x.Sys?.Id == chosenAnswerId).Maturity;
     }
     private async Task<int> _RecordQuestion(RecordQuestionDto recordQuestionDto)
     {
