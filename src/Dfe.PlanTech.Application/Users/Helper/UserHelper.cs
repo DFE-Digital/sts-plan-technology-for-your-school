@@ -10,7 +10,7 @@ namespace Dfe.PlanTech.Application.Users.Helper
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IPlanTechDbContext _db;
 
-        public UserHelper(IHttpContextAccessor httpContextAccessor, IPlanTechDbContext db) 
+        public UserHelper(IHttpContextAccessor httpContextAccessor, IPlanTechDbContext db)
         {
             _httpContextAccessor = httpContextAccessor;
             _db = db;
