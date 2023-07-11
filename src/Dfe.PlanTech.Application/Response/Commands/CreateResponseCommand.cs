@@ -15,16 +15,19 @@ namespace Dfe.PlanTech.Application.Response.Commands
 
         public async Task<int> CreateResponse(RecordResponseDto recordResponseDto)
         {
-            _db.AddResponse(
-                new Domain.Responses.Models.Response() 
-                { 
-                    UserId = recordResponseDto.UserId,
-                    SubmissionId = recordResponseDto.SubmissionId,
-                    QuestionId= recordResponseDto.QuestionId,
-                    AnswerId= recordResponseDto.AnswerId,
-                    Maturity = recordResponseDto.Maturity,
-                });
-            return await _db.SaveChangesAsync();
+            var response = new Domain.Responses.Models.Response()
+            {
+                UserId = recordResponseDto.UserId,
+                SubmissionId = recordResponseDto.SubmissionId,
+                QuestionId = recordResponseDto.QuestionId,
+                AnswerId = recordResponseDto.AnswerId,
+                Maturity = recordResponseDto.Maturity,
+                DateCreated = DateTime.UtcNow
+            };
+
+            _db.AddResponse(response);
+            await _db.SaveChangesAsync();
+            return response.Id;
         }
     }
 }

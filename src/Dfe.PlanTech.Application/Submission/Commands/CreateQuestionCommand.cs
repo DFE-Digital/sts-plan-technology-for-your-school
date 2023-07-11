@@ -22,7 +22,9 @@ public class CreateQuestionCommand : ICreateQuestionCommand
     /// </returns>
     public async Task<int> CreateQuestion(RecordQuestionDto recordQuestionDto)
     {
-        _db.AddQuestion(new Question() { QuestionText = recordQuestionDto.QuestionText, ContentfulRef = recordQuestionDto.ContentfulRef });
-        return await _db.SaveChangesAsync();
+        var question = new Question() { QuestionText = recordQuestionDto.QuestionText, ContentfulRef = recordQuestionDto.ContentfulRef };
+        _db.AddQuestion(question);
+        await _db.SaveChangesAsync();
+        return question.Id;
     }
 }

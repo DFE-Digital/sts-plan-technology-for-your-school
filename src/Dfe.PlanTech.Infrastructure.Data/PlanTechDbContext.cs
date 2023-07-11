@@ -8,6 +8,7 @@ using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 using Microsoft.EntityFrameworkCore;
 using Dfe.PlanTech.Domain.Responses.Models;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
@@ -79,6 +80,18 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
             builder.Property(answer => answer.AnswerText).HasMaxLength(4000); // NVARCHAR Max Length
             builder.Property(answer => answer.ContentfulRef).HasMaxLength(50);
             builder.Property(answer => answer.DateCreated).ValueGeneratedOnAdd();
+        });
+
+        modelBuilder.Entity<Submission>(builder =>
+        {
+            builder.HasKey(submission => submission.Id);
+            builder.Property(submission => submission.DateCreated).HasColumnType("datetime").HasDefaultValue();
+        });
+
+        modelBuilder.Entity<Response>(builder =>
+        {
+            builder.HasKey(response => response.Id);
+            builder.Property(response => response.DateCreated).HasColumnType("datetime").HasDefaultValue();
         });
     }
 

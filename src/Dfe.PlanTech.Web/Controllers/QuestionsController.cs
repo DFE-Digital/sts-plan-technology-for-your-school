@@ -85,6 +85,7 @@ public class QuestionsController : BaseController<QuestionsController>
         if (!string.IsNullOrEmpty(submitAnswerDto.Params))
         {
             param = ParseParameters(submitAnswerDto.Params) ?? null!;
+            TempData["param"] = submitAnswerDto.Params;
         }
 
         var questionId = await _RecordQuestion(new RecordQuestionDto() { QuestionText = await _GetQuestionTextById(submitAnswerDto.QuestionId), ContentfulRef = submitAnswerDto.QuestionId });
@@ -108,7 +109,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
         return new Params
         {
-            SectionName = splitParams.Length > 0 ? parameters[0].ToString() : string.Empty,
+            SectionName = splitParams.Length > 0 ? splitParams[0].ToString() : string.Empty,
             SectionId = splitParams.Length > 1 ? splitParams[1].ToString() : string.Empty,
         };
     }

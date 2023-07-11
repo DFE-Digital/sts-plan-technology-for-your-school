@@ -1,4 +1,6 @@
-﻿namespace Dfe.PlanTech.Domain.Submissions.Models
+﻿using System.Data.SqlTypes;
+
+namespace Dfe.PlanTech.Domain.Submissions.Models
 {
     public class Submission
     {
@@ -16,10 +18,10 @@
 
         public int RecomendationId { get; set; }
 
-        public DateTime DateCreated { get; set; }
+        public DateTime? DateCreated { get; set; }
 
-        public DateTime DateLastUpdated { get; set; }
+        //public DateTime DateLastUpdated { get; set; }
 
-        public DateTime DateCompleted { get; set; }
+        //public DateTime DateCompleted { get; set; }
     }
 }

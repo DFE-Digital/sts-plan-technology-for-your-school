@@ -11,5 +11,7 @@
         public int AnswerId { get; set; }
 
         public string Maturity { get; set; } = null!;
+
+        public DateTime? DateCreated { get; set; }
     }
 }

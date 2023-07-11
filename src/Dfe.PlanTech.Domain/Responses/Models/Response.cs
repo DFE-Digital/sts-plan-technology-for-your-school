@@ -14,7 +14,7 @@
 
         public string Maturity { get; set; } = null!;
 
-        public DateTime DateCreated { get; set; }
+        public DateTime? DateCreated { get; set; }
 
-        public DateTime DateLastUpdated { get; set; }
+        public DateTime? DateLastUpdated { get; set; }
     }
