@@ -19,22 +19,22 @@ namespace Dfe.PlanTech.Application.Submission.Commands
         /// <returns>
         /// The answer ID
         /// </returns>
-        public async Task<int> CreateSubmission(Domain.Submissions.Models.Submission submissionParam)
+        public async Task<int> CreateSubmission(Domain.Submissions.Models.Submission submission)
         {
-            var submission = new Domain.Submissions.Models.Submission()
+            var submissionEntity = new Domain.Submissions.Models.Submission()
             {
-                EstablishmentId = submissionParam.EstablishmentId,
+                EstablishmentId = submission.EstablishmentId,
                 Completed = false,
-                SectionId = submissionParam.SectionId,
-                SectionName = submissionParam.SectionName,
-                Maturity = submissionParam.Maturity,
-                RecomendationId = submissionParam.RecomendationId,
+                SectionId = submission.SectionId,
+                SectionName = submission.SectionName,
+                Maturity = submission.Maturity,
+                RecomendationId = submission.RecomendationId,
                 DateCreated = DateTime.UtcNow,
             };
 
-            _db.AddSubmission(submission);
+            _db.AddSubmission(submissionEntity);
             await _db.SaveChangesAsync();
-            return submission.Id;
+            return submissionEntity.Id;
         }
     }
 }

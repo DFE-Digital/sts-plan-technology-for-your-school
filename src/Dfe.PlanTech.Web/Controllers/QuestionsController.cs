@@ -139,7 +139,8 @@ public class QuestionsController : BaseController<QuestionsController>
 
         var answer = question.Answers.FirstOrDefault(x => x.Sys?.Id == chosenAnswerId);
         if (answer is null)
-            throw new Exception(nameof(answer));
+            return string.Empty;
+
         return answer.Maturity;
     }
     private async Task<int> _RecordQuestion(RecordQuestionDto recordQuestionDto)
