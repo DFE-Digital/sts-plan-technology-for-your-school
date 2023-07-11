@@ -1,6 +1,4 @@
-﻿using System.Data.SqlTypes;
-
-namespace Dfe.PlanTech.Domain.Submissions.Models
+﻿namespace Dfe.PlanTech.Domain.Submissions.Models
 {
     public class Submission
     {
@@ -20,8 +18,8 @@ namespace Dfe.PlanTech.Domain.Submissions.Models
 
         public DateTime? DateCreated { get; set; }
 
-        //public DateTime DateLastUpdated { get; set; }
+        public DateTime DateLastUpdated { get; set; }
 
-        //public DateTime DateCompleted { get; set; }
+        public DateTime DateCompleted { get; set; }
     }
 }
