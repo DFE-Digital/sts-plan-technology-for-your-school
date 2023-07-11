@@ -21,14 +21,14 @@ namespace Dfe.PlanTech.Application.Submission.Commands
         /// </returns>
         public async Task<int> CreateSubmission(Domain.Submissions.Models.Submission submission)
         {
-            _db.AddSubmission(new Domain.Submissions.Models.Submission() 
+            _db.AddSubmission(new Domain.Submissions.Models.Submission()
             {
-                EastablishmentId = submission.EastablishmentId, 
+                EstablishmentId = submission.EstablishmentId,
                 Completed = false,
                 SectionId = submission.SectionId,
-                SectionName= submission.SectionName,
-                Maturity= submission.Maturity,
-                RecomendationId= submission.RecomendationId
+                SectionName = submission.SectionName,
+                Maturity = submission.Maturity,
+                RecomendationId = submission.RecomendationId
             });
 
             return await _db.SaveChangesAsync();

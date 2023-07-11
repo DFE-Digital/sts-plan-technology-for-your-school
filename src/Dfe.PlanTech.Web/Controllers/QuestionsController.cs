@@ -89,7 +89,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
         var questionId = await _RecordQuestion(new RecordQuestionDto() { QuestionText = await _GetQuestionTextById(submitAnswerDto.QuestionId), ContentfulRef = submitAnswerDto.QuestionId });
         var answerId = await _RecordAnswer(new RecordAnswerDto() { AnswerText = await _GetAnswerTextById(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId), ContentfulRef = submitAnswerDto.ChosenAnswerId });
-        var submissionId = await _RecordSubmission(new Submission() { EastablishmentId = establishmentId, SectionId = param.SectionId, SectionName = param.SectionName });
+        var submissionId = await _RecordSubmission(new Submission() { EstablishmentId = establishmentId, SectionId = param.SectionId, SectionName = param.SectionName });
         await _RecordResponse(new RecordResponseDto() { AnswerId = answerId, QuestionId = questionId, SubmissionId = submissionId, UserId = userId, Maturity = await _GetMaturityForAnswer(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId) });
 
         if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("GetByRoute", "Pages", new { route = "check-answers" });

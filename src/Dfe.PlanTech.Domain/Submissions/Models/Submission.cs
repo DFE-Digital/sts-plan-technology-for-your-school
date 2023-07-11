@@ -4,7 +4,7 @@
     {
         public int Id { get; set; }
 
-        public int EastablishmentId { get; set; }
+        public int EstablishmentId { get; set; }
 
         public bool Completed { get; set; }
 
