@@ -18,8 +18,8 @@
 
         public DateTime? DateCreated { get; set; }
 
-        public DateTime DateLastUpdated { get; set; }
+        public DateTime? DateLastUpdated { get; set; }
 
-        public DateTime DateCompleted { get; set; }
+        public DateTime? DateCompleted { get; set; }
     }
 }
