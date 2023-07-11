@@ -110,7 +110,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var tempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
             tempData["param"] = "admin";
 
-            _controller = new QuestionsController(mockLogger.Object, historyMock.Object, query, recordQuestionCommand, recordAnswerCommand, createSubmissionCommand, createResponseCommand, user.Object) { 
+            _controller = new QuestionsController(mockLogger.Object, historyMock.Object, query, recordQuestionCommand, recordAnswerCommand, createSubmissionCommand, createResponseCommand, user.Object)
+            {
                 TempData = tempData
             };
 
@@ -301,6 +302,30 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.NotNull(redirectToActionResult.RouteValues);
             var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "id");
             Assert.Equal(submitAnswerDto.QuestionId, id.Value);
+        }
+
+        [Fact]
+        public async void SubmitAnswer_Params_Should_Parse_When_Params_IsNotNull()
+        {
+            var submitAnswerDto = new SubmitAnswerDto()
+            {
+                QuestionId = "Question1",
+                ChosenAnswerId = "Answer1",
+                NextQuestionId = "Question2",
+                Params = "SectionName+SectionId"
+            };
+
+            var result = await _controller.SubmitAnswer(submitAnswerDto);
+
+            Assert.IsType<RedirectToActionResult>(result);
+
+            var redirectToActionResult = result as RedirectToActionResult;
+
+            Assert.NotNull(redirectToActionResult);
+            Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
+            Assert.NotNull(redirectToActionResult.RouteValues);
+            var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "id");
+            Assert.Equal(submitAnswerDto.NextQuestionId, id.Value);
         }
     }
 }
