@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Moq;
 using Xunit;
 
+namespace Dfe.PlanTech.Web.UnitTests.Helpers;
 public class UserHelperTests
 {
     private readonly UserHelper _userHelper;
