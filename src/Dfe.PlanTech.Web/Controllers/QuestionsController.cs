@@ -55,7 +55,7 @@ public class QuestionsController : BaseController<QuestionsController>
     public async Task<IActionResult> GetQuestionById(string id, string? section, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
-        object parameters = null!;
+        object? parameters;
 
         TempData.TryGetValue("param", out parameters);
 
@@ -65,7 +65,7 @@ public class QuestionsController : BaseController<QuestionsController>
         {
             Question = question,
             BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment",
-            Params = parameters != null ? parameters?.ToString() : null,
+            Params = parameters != null ? parameters.ToString() : null,
         };
 
         return View("Question", viewModel);
