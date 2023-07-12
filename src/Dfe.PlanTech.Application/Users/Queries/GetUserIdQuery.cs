@@ -8,9 +8,9 @@ namespace Dfe.PlanTech.Application.Users.Queries;
 /// </summary>
 public class GetUserIdQuery : IGetUserIdQuery
 {
-    private readonly IUsersDbContext _db;
+    private readonly IPlanTechDbContext _db;
 
-    public GetUserIdQuery(IUsersDbContext db)
+    public GetUserIdQuery(IPlanTechDbContext db)
     {
         _db = db;
     }

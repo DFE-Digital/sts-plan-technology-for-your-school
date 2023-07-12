@@ -7,10 +7,10 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
 {
     public class CreateUserCommandTests
     {
-        public Mock<IUsersDbContext> mockDb = new Mock<IUsersDbContext>();
+        public Mock<IPlanTechDbContext> mockDb = new Mock<IPlanTechDbContext>();
 
-        public CreateUserCommand CreateStrut() 
-        { 
+        public CreateUserCommand CreateStrut()
+        {
             return new CreateUserCommand(mockDb.Object);
         }
 
@@ -18,7 +18,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
         [InlineData(3)]
         [InlineData(4)]
         [InlineData(30)]
-        public async Task CreateUserReturnsIdOfNewlyCreatedUser(int expectedUserId) 
+        public async Task CreateUserReturnsIdOfNewlyCreatedUser(int expectedUserId)
         {
             //Arrange
             var strut = CreateStrut();

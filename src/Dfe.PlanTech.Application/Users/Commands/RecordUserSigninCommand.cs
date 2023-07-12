@@ -1,17 +1,16 @@
 ﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Application.Users.Queries;
-using Dfe.PlanTech.Domain.SignIn.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 
 namespace Dfe.PlanTech.Application.Users.Commands;
 
 public class RecordUserSignInCommand : IRecordUserSignInCommand
 {
-    private readonly IUsersDbContext _db;
+    private readonly IPlanTechDbContext _db;
     private readonly ICreateUserCommand _createUserCommand;
 
-    public RecordUserSignInCommand(IUsersDbContext db, ICreateUserCommand createUserCommand)
+    public RecordUserSignInCommand(IPlanTechDbContext db, ICreateUserCommand createUserCommand)
     {
         _db = db;
         _createUserCommand = createUserCommand;
@@ -45,7 +44,8 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
         };
     }
 
-    private async Task<int> AddSignInDetails(Domain.SignIn.Models.SignIn signIn) {
+    private async Task<int> AddSignInDetails(Domain.SignIn.Models.SignIn signIn)
+    {
         _db.AddSignIn(signIn);
         var signInId = await _db.SaveChangesAsync();
 
