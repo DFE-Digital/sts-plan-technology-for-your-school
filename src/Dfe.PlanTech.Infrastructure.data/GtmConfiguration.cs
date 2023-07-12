@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics.CodeAnalysis;
 
-namespace Dfe.PlanTech.Infrastructure.Data
+namespace Dfe.PlanTech.Infrastructure.Data;
+[ExcludeFromCodeCoverage]
+public sealed class GtmConfiguration
 {
-    public class GtmConfiguration : IGtmConfiguration
-    {
-        public string Head { get; set; } = null!;
-        public string Body { get; set; } = null!;
-    }
+    public string Head { get; set; } = null!;
+    public string Body { get; set; } = null!;
 }
