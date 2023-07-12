@@ -1,7 +1,12 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Response.Commands;
+using Dfe.PlanTech.Application.Response.Interface;
+using Dfe.PlanTech.Application.Submission.Commands;
+using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Application.Users.Commands;
+using Dfe.PlanTech.Application.Users.Helper;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Application.Users.Queries;
 using Dfe.PlanTech.Domain.Caching.Interfaces;
@@ -59,21 +64,31 @@ public static class ProgramExtensions
             options.Cookie.Name = ".Dfe.PlanTech";
         });
 
+        services.AddHttpContextAccessor();
         services.AddSingleton<ICacheOptions>((services) => new CacheOptions());
         services.AddTransient<ICacher, Cacher>();
         services.AddTransient<IUrlHistory, UrlHistory>();
         services.AddTransient<IQuestionnaireCacher, QuestionnaireCacher>();
+        services.AddTransient<IUser, UserHelper>();
 
         return services;
     }
 
     public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<IUsersDbContext, UsersDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("Database")));
+        services.AddDbContext<IPlanTechDbContext, PlanTechDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("Database")));
 
         services.AddTransient<IGetUserIdQuery, GetUserIdQuery>();
         services.AddTransient<ICreateUserCommand, CreateUserCommand>();
         services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
+
+        services.AddTransient<ICreateQuestionCommand, CreateQuestionCommand>();
+        services.AddTransient<IRecordQuestionCommand, RecordQuestionCommand>();
+
+        services.AddTransient<ICreateAnswerCommand, CreateAnswerCommand>();
+        services.AddTransient<IRecordAnswerCommand, RecordAnswerCommand>();
+        services.AddTransient<ICreateSubmissionCommand, CreateSubmissionCommand>();
+        services.AddTransient<ICreateResponseCommand, CreateResponseCommand>();
 
         return services;
     }

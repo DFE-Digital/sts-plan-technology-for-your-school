@@ -11,4 +11,6 @@ public class Answer : ContentComponent
     public string Text { get; init; } = null!;
 
     public Question? NextQuestion { get; init; }
+
+    public string Maturity { get; init; } = null!;
 }

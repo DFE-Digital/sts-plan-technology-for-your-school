@@ -14,6 +14,8 @@ public class Page : ContentComponent
     
     public string? SectionTitle { get; set; }
 
+    public string? Param { get; set; }
+
     public Title? Title { get; init; }
 
     public IContentComponent[] Content { get; init; } = Array.Empty<IContentComponent>();

@@ -9,9 +9,9 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
 {
     public class RecordUserSigninCommandTests
     {
-        public Mock<IUsersDbContext> mockDb = new Mock<IUsersDbContext>();
+        public Mock<IPlanTechDbContext> mockDb = new Mock<IPlanTechDbContext>();
         public Mock<IGetUserIdQuery> mockUserQuery = new Mock<IGetUserIdQuery>();
-        public Mock<ICreateUserCommand> mockCreateUserCommand= new Mock<ICreateUserCommand>();
+        public Mock<ICreateUserCommand> mockCreateUserCommand = new Mock<ICreateUserCommand>();
 
         public RecordUserSignInCommand CreateStrut()
         {
@@ -24,8 +24,9 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
         {
             //Arrange
             var guid = Guid.NewGuid().ToString();
-            var user = new User { 
-                Id= 1,
+            var user = new User
+            {
+                Id = 1,
                 DfeSignInRef = guid
             };
             var strut = CreateStrut();
@@ -52,7 +53,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
             {
                 Id = 1,
                 DfeSignInRef = Guid.NewGuid().ToString(),
-                DateCreated= DateTime.UtcNow,
+                DateCreated = DateTime.UtcNow,
             };
             mockUserQuery.Setup(x => x.GetUserId(It.IsAny<string>())).ReturnsAsync(1);
             mockDb.Setup(x => x.GetUserBy(It.IsAny<Expression<Func<User, bool>>>())).ReturnsAsync(user);

@@ -1,0 +1,33 @@
+﻿using Dfe.PlanTech.Domain.Questions.Models;
+using Dfe.PlanTech.Domain.Answers.Models;
+using Dfe.PlanTech.Domain.Users.Models;
+using System.Linq.Expressions;
+using Dfe.PlanTech.Domain.Responses.Models;
+
+namespace Dfe.PlanTech.Application.Persistence.Interfaces;
+
+public interface IPlanTechDbContext
+{
+    // User Table & SignIn Table
+    IQueryable<User> GetUsers { get; }
+    IQueryable<Domain.SignIn.Models.SignIn> SignIns { get; }
+    public void AddUser(User user);
+    public void AddSignIn(Domain.SignIn.Models.SignIn signIn);
+
+    // Question Table
+    public void AddQuestion(Question question);
+
+    // Answer Table
+    public void AddAnswer(Answer answer);
+
+    // Submission Table
+    public void AddSubmission(Domain.Submissions.Models.Submission submission);
+
+    // Response Table
+    public void AddResponse(Domain.Responses.Models.Response response);
+
+    public Task<int> SaveChangesAsync();
+
+    Task<User?> GetUserBy(Expression<Func<User, bool>> predicate);
+}
+
