@@ -1,0 +1,9 @@
+@model Dfe.PlanTech.Web.Models.CheckYourAnswersViewModel
+
+@section BeforeContent {
+    <govuk-back-link href=@Model.BackUrl />
+}
+
+<form asp-controller="CheckAnswers" asp-action="ConfirmCheckAnswers" method="post">
+    <govuk-button type="submit">Save and Submit</govuk-button>
+</form>
