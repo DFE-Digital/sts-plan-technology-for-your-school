@@ -46,7 +46,7 @@ public class PagesController : BaseController<PagesController>
         return new PageViewModel()
         {
             Page = page,
-            Param = param
+            Param = param,
             GTMHead = Config.GetValue<string>("GTM:Head") ?? "",
             GTMBody = Config.GetValue<string>("GTM:Body") ?? "",
             BackUrl = history.LastVisitedUrl?.ToString() ?? "/"
