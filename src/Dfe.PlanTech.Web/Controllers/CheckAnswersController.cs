@@ -37,6 +37,13 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     public async Task<IActionResult> ConfirmCheckAnswers(int submissionId)
     {
         var calculateMaturity = await _calculateMaturityCommand.CalculateMaturityAsync(submissionId);
+
+        if (calculateMaturity > 1)
+        {
+            return RedirectToAction("Pages", "Index");
+        }
+
+        // show error message
         return null;
     }
 }
