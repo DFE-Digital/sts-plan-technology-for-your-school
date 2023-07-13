@@ -95,7 +95,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
         });
     }
 
-    
+
     public IQueryable<User> GetUsers => Users;
     public IQueryable<SignIn> SignIns => SignIn;
 
@@ -103,11 +103,13 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public void AddSignIn(SignIn signIn) => SignIn.Add(signIn);
 
     public void AddQuestion(Question question) => Questions.Add(question);
+    public Task<Question?> GetQuestionBy(int questionId) => Questions.FirstOrDefaultAsync(question => question.Id == questionId);
 
     public void AddAnswer(Answer answer) => Answers.Add(answer);
     public void AddSubmission(Submission submission) => Submissions.Add(submission);
 
     public void AddResponse(Response response) => Responses.Add(response);
+    public async Task<Response[]?> GetResponseListBy(int submissionId) => await Responses.Where(response => response.SubmissionId == submissionId).ToArrayAsync();
 
     public Task<int> SaveChangesAsync() => base.SaveChangesAsync();
 

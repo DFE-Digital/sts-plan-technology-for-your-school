@@ -18,6 +18,8 @@ public interface IPlanTechDbContext
     // Question Table
     public void AddQuestion(Question question);
 
+    public Task<Question?> GetQuestionBy(int questionId);
+
     // Answer Table
     public void AddAnswer(Answer answer);
 
@@ -31,7 +33,8 @@ public interface IPlanTechDbContext
 
     Task<int> CallStoredProcedureWithReturnInt(string sprocName, List<SqlParameter> parms);
 
-
     Task<User?> GetUserBy(Expression<Func<User, bool>> predicate);
+
+    Task<Domain.Responses.Models.Response[]?> GetResponseListBy(int submissionId);
 }
 
