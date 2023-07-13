@@ -1,7 +1,9 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Application.Submission.Interface;
 using Dfe.PlanTech.Application.Submission.Interfaces;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Responses.Models;
 using Dfe.PlanTech.Web.Models;
@@ -18,17 +20,20 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     private readonly IGetResponseQuery _getResponseQuery;
     private readonly IGetQuestionQuery _getQuestionQuery;
     private readonly IGetAnswerQuery _getAnswerQuery;
+    private readonly GetPageQuery _getPageQuery;
 
     public CheckAnswersController(ILogger<CheckAnswersController> logger, IUrlHistory history,
                                   [FromServices] ICalculateMaturityCommand calculateMaturityCommand,
                                   [FromServices] IGetResponseQuery getResponseQuery,
                                   [FromServices] IGetQuestionQuery getQuestionQuery,
-                                  [FromServices] IGetAnswerQuery getAnswerQuery) : base(logger, history)
+                                  [FromServices] IGetAnswerQuery getAnswerQuery,
+                                  [FromServices] GetPageQuery getPageQuery) : base(logger, history)
     {
         _calculateMaturityCommand = calculateMaturityCommand;
         _getResponseQuery = getResponseQuery;
         _getQuestionQuery = getQuestionQuery;
         _getAnswerQuery = getAnswerQuery;
+        _getPageQuery = getPageQuery;
     }
 
     private async Task<Response[]?> _GetResponseList(int submissionId)
@@ -68,6 +73,11 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
         return checkAnswerDto;
     }
 
+    private async Task<Page> _GetCheckAnswerContent()
+    {
+        return await _getPageQuery.GetPageBySlug("check-answers", CancellationToken.None);
+    }
+
     [HttpGet]
     public async Task<IActionResult> CheckAnswersPage(int submissionId)
     {
@@ -75,10 +85,14 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
         if (responseList == null) throw new ArgumentNullException(nameof(responseList));
 
+        Page checkAnswerPageContent = await _GetCheckAnswerContent();
+
         CheckAnswersViewModel checkAnswersViewModel = new CheckAnswersViewModel()
         {
-            CheckAnswerDto = await _GetCheckAnswerDto(responseList),
             BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment",
+            Title = checkAnswerPageContent.Title ?? throw new ArgumentNullException(nameof(checkAnswerPageContent.Title)),
+            CheckAnswerDto = await _GetCheckAnswerDto(responseList),
+            Content = checkAnswerPageContent.Content,
             SubmissionId = submissionId
         };
 
