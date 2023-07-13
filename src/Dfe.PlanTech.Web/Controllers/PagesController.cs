@@ -9,8 +9,11 @@ namespace Dfe.PlanTech.Web.Controllers;
 
 public class PagesController : BaseController<PagesController>
 {
-    public PagesController(ILogger<PagesController> logger, IUrlHistory history) : base(logger, history)
+    public IConfiguration Config { get; }
+
+    public PagesController(ILogger<PagesController> logger, IUrlHistory history, IConfiguration config) : base(logger, history)
     {
+        Config = config ?? throw new ArgumentNullException(nameof(config));
     }
 
     [HttpGet("/")]
@@ -43,8 +46,10 @@ public class PagesController : BaseController<PagesController>
         return new PageViewModel()
         {
             Page = page,
-            BackUrl = history.LastVisitedUrl?.ToString() ?? "/",
-            Param = param
+            Param = param,
+            GTMHead = Config.GetValue<string>("GTM:Head") ?? "",
+            GTMBody = Config.GetValue<string>("GTM:Body") ?? "",
+            BackUrl = history.LastVisitedUrl?.ToString() ?? "/"
         };
     }
 

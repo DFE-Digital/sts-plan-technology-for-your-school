@@ -6,6 +6,14 @@
     }
 }
 
+@section Head {
+    @Html.Raw(Model.GTMHead)
+}
+
+@section Header {
+    @Html.Raw(Model.GTMBody)
+}
+
 @{
     await Html.RenderPartialAsync("Components/Page", Model.Page);
 }

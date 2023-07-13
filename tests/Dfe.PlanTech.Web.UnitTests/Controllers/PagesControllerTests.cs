@@ -5,11 +5,14 @@ using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Web.Controllers;
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
+using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
 
 namespace Dfe.PlanTech.Web.UnitTests.Controllers
 {
@@ -57,7 +60,22 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var mockLogger = new Mock<ILogger<PagesController>>();
             var historyMock = new Mock<IUrlHistory>();
 
-            _controller = new PagesController(mockLogger.Object, historyMock.Object);
+            var config = new GtmConfiguration()
+            {
+                Head = "Test Head",
+                Body = "Test Body"
+            };
+
+            var inMemorySettings = new Dictionary<string, string?> {
+                {"GTM:Head", config.Head},
+                {"GTM:Body", config.Body},
+            };
+
+            IConfiguration configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(initialData: inMemorySettings)
+                .Build();
+
+            _controller = new PagesController(mockLogger.Object, historyMock.Object, configuration);
 
             _query = new GetPageQuery(_questionnaireCacherMock.Object, repositoryMock.Object);
         }
@@ -98,6 +116,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var asPage = model as PageViewModel;
             Assert.Equal(INDEX_SLUG, asPage!.Page.Slug);
+            Assert.Equal("Test Head", asPage!.GTMHead);
+            Assert.Equal("Test Body", asPage!.GTMBody);
             Assert.Contains(INDEX_TITLE, asPage!.Page.Title!.Text);
         }
 
