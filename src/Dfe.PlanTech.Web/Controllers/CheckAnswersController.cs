@@ -1,6 +1,8 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Responses.Models;
+using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +16,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     private readonly ICalculateMaturityCommand _calculateMaturityCommand;
 
     public CheckAnswersController(ILogger<CheckAnswersController> logger, IUrlHistory history,
-                                  [FromServices] ICalculateMaturityCommand calculateMaturityCommand) : base(logger, history) 
+                                  [FromServices] ICalculateMaturityCommand calculateMaturityCommand) : base(logger, history)
     {
         _calculateMaturityCommand = calculateMaturityCommand;
     }
@@ -22,11 +24,10 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     [HttpGet]
     public IActionResult CheckAnswersPage(int submissionId)
     {
-        Question[] questions = Array.Empty<Question>();
+        //Response[] responses = await _GetResponses(_GetEstablishmentId(), sectionId);
 
-        CheckYourAnswersViewModel checkYourAnswersViewModel = new CheckYourAnswersViewModel()
+        CheckAnswersViewModel checkYourAnswersViewModel = new CheckAnswersViewModel()
         {
-            Questions = questions,
             BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment",
             SubmissionId = submissionId
         };
