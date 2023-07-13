@@ -23,7 +23,4 @@
   <ItemGroup>
     <EmbeddedResource Include="StoredProcs\*.sql" />
   </ItemGroup>
-  <ItemGroup>
-    <None Remove="Scripts\2023\20230713_167773_ModifyCalculateMaturitySproc.sql" />
-  </ItemGroup>  
 </Project>
