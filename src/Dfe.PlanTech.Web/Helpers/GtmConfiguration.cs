@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace Dfe.PlanTech.Infrastructure.Data;
-[ExcludeFromCodeCoverage]
+namespace Dfe.PlanTech.Web.Helpers;
+
 public sealed class GtmConfiguration
 {
     public string Head { get; set; } = null!;
