@@ -52,7 +52,7 @@ public class QuestionsController : BaseController<QuestionsController>
     /// <param name="query"></param>
     /// <exception cref="ArgumentNullException">Throws exception when Id is null or empty</exception>
     /// <returns></returns>
-    public async Task<IActionResult> GetQuestionById(string id, string? section, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetQuestionById(string id, string? section, int? submissionId, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
         object? parameters;
@@ -66,6 +66,7 @@ public class QuestionsController : BaseController<QuestionsController>
             Question = question,
             BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment",
             Params = parameters != null ? parameters.ToString() : null,
+            SubmissionId = submissionId,
         };
 
         return View("Question", viewModel);
@@ -74,6 +75,7 @@ public class QuestionsController : BaseController<QuestionsController>
     [HttpPost("SubmitAnswer")]
     public async Task<IActionResult> SubmitAnswer(SubmitAnswerDto submitAnswerDto)
     {
+        int submissionId;
         if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
 
         if (!ModelState.IsValid) return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.QuestionId });
@@ -90,12 +92,21 @@ public class QuestionsController : BaseController<QuestionsController>
 
         var questionId = await _RecordQuestion(new RecordQuestionDto() { QuestionText = await _GetQuestionTextById(submitAnswerDto.QuestionId), ContentfulRef = submitAnswerDto.QuestionId });
         var answerId = await _RecordAnswer(new RecordAnswerDto() { AnswerText = await _GetAnswerTextById(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId), ContentfulRef = submitAnswerDto.ChosenAnswerId });
-        var submissionId = await _RecordSubmission(new Submission() { EstablishmentId = establishmentId, SectionId = param.SectionId, SectionName = param.SectionName });
+
+        if (submitAnswerDto.SubmissionId is null || submitAnswerDto.SubmissionId == 0)
+        {
+            submissionId = await _RecordSubmission(new Submission() { EstablishmentId = establishmentId, SectionId = param.SectionId, SectionName = param.SectionName });
+        }
+        else
+        {
+            submissionId = Convert.ToUInt16(submitAnswerDto.SubmissionId);
+        }
+
         await _RecordResponse(new RecordResponseDto() { AnswerId = answerId, QuestionId = questionId, SubmissionId = submissionId, UserId = userId, Maturity = await _GetMaturityForAnswer(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId) });
 
         //if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("GetByRoute", "Pages", new { route = "check-answers" });
-        if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("CheckAnswersPage", "CheckAnswers");
-        else return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.NextQuestionId });
+        if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { submissionId = submissionId });
+        else return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.NextQuestionId, submissionId = submissionId });
     }
 
     private static Params? ParseParameters(string parameters)

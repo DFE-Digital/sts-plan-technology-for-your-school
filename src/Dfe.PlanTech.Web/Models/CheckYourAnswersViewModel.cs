@@ -7,4 +7,6 @@ public class CheckYourAnswersViewModel : BaseViewModel
 {
     [Required]
     public Question[] Questions { get; init; } = Array.Empty<Question>();
+
+    public int? SubmissionId { get; init; }
 }

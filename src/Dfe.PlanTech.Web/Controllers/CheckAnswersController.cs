@@ -20,14 +20,15 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     }
 
     [HttpGet]
-    public IActionResult CheckAnswersPage()
+    public IActionResult CheckAnswersPage(int submissionId)
     {
         Question[] questions = Array.Empty<Question>();
 
         CheckYourAnswersViewModel checkYourAnswersViewModel = new CheckYourAnswersViewModel()
         {
             Questions = questions,
-            BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment"
+            BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment",
+            SubmissionId = submissionId
         };
 
         return View("CheckYourAnswers", checkYourAnswersViewModel);
@@ -43,7 +44,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
             return RedirectToAction("Pages", "Index");
         }
 
-        // show error message
+        // TODO Show error message.
         return null;
     }
 }

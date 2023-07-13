@@ -5,5 +5,6 @@
 }
 
 <form asp-controller="CheckAnswers" asp-action="ConfirmCheckAnswers" method="post">
+    <input id="SubmissionId" hidden value="@Model.SubmissionId" name="SubmissionId" />
     <govuk-button type="submit">Save and Submit</govuk-button>
 </form>
