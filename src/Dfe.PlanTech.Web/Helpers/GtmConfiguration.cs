@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace Dfe.PlanTech.Web.Helpers;
+﻿namespace Dfe.PlanTech.Web.Helpers;
 
 public sealed class GtmConfiguration
 {
