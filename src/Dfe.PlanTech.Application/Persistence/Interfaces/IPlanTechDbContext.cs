@@ -17,11 +17,11 @@ public interface IPlanTechDbContext
 
     // Question Table
     public void AddQuestion(Question question);
-
     public Task<Question?> GetQuestionBy(int questionId);
 
     // Answer Table
     public void AddAnswer(Answer answer);
+    public Task<Answer?> GetAnswerBy(int answerId);
 
     // Submission Table
     public void AddSubmission(Domain.Submissions.Models.Submission submission);

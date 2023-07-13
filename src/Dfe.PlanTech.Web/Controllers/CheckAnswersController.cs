@@ -17,15 +17,18 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     private readonly ICalculateMaturityCommand _calculateMaturityCommand;
     private readonly IGetResponseQuery _getResponseQuery;
     private readonly IGetQuestionQuery _getQuestionQuery;
+    private readonly IGetAnswerQuery _getAnswerQuery;
 
     public CheckAnswersController(ILogger<CheckAnswersController> logger, IUrlHistory history,
                                   [FromServices] ICalculateMaturityCommand calculateMaturityCommand,
                                   [FromServices] IGetResponseQuery getResponseQuery,
-                                  [FromServices] IGetQuestionQuery getQuestionQuery) : base(logger, history)
+                                  [FromServices] IGetQuestionQuery getQuestionQuery,
+                                  [FromServices] IGetAnswerQuery getAnswerQuery) : base(logger, history)
     {
         _calculateMaturityCommand = calculateMaturityCommand;
         _getResponseQuery = getResponseQuery;
         _getQuestionQuery = getQuestionQuery;
+        _getAnswerQuery = getAnswerQuery;
     }
 
     private async Task<Response[]?> _GetResponseList(int submissionId)
@@ -40,7 +43,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
     private async Task<string?> _GetResponseAnswerText(int answerId)
     {
-        throw new NotImplementedException();
+        return (await _getAnswerQuery.GetAnswerBy(answerId))?.AnswerText;
     }
 
     private async Task<CheckAnswerDto> _GetCheckAnswerDto(Response[] responseList)

@@ -91,11 +91,14 @@ public static class ProgramExtensions
 
         services.AddTransient<ICreateAnswerCommand, CreateAnswerCommand>();
         services.AddTransient<IRecordAnswerCommand, RecordAnswerCommand>();
-        services.AddTransient<ICreateSubmissionCommand, CreateSubmissionCommand>();
-        services.AddTransient<ICreateResponseCommand, CreateResponseCommand>();
-        services.AddTransient<ICalculateMaturityCommand, CalculateMaturityCommand>();
+        services.AddTransient<IGetAnswerQuery, GetAnswerQuery>();
 
+        services.AddTransient<ICreateSubmissionCommand, CreateSubmissionCommand>();
+
+        services.AddTransient<ICreateResponseCommand, CreateResponseCommand>();
         services.AddTransient<IGetResponseQuery, GetResponseQuery>();
+
+        services.AddTransient<ICalculateMaturityCommand, CalculateMaturityCommand>();
 
         return services;
     }
