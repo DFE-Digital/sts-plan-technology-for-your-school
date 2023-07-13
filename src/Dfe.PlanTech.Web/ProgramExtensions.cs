@@ -89,6 +89,7 @@ public static class ProgramExtensions
         services.AddTransient<IRecordAnswerCommand, RecordAnswerCommand>();
         services.AddTransient<ICreateSubmissionCommand, CreateSubmissionCommand>();
         services.AddTransient<ICreateResponseCommand, CreateResponseCommand>();
+        services.AddTransient<ICalculateMaturityCommand, CalculateMaturityCommand>();
 
         return services;
     }

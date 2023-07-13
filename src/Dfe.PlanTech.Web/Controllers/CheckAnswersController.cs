@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +11,13 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("/check-answers")]
 public class CheckAnswersController : BaseController<CheckAnswersController>
 {
-    public CheckAnswersController(ILogger<CheckAnswersController> logger, IUrlHistory history) : base(logger, history) { }
+    private readonly ICalculateMaturityCommand _calculateMaturityCommand;
+
+    public CheckAnswersController(ILogger<CheckAnswersController> logger, IUrlHistory history,
+                                  [FromServices] ICalculateMaturityCommand calculateMaturityCommand) : base(logger, history) 
+    {
+        _calculateMaturityCommand = calculateMaturityCommand;
+    }
 
     [HttpGet]
     public IActionResult CheckAnswersPage()
@@ -27,8 +34,9 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     }
 
     [HttpPost("ConfirmCheckAnswers")]
-    public IActionResult ConfirmCheckAnswers()
+    public async Task<IActionResult> ConfirmCheckAnswers(int submissionId)
     {
-        throw new NotImplementedException();
+        var calculateMaturity = await _calculateMaturityCommand.CalculateMaturityAsync(submissionId);
+        return null;
     }
 }
