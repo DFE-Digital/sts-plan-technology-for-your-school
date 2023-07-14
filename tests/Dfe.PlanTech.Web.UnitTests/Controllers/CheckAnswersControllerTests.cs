@@ -6,6 +6,7 @@ using Dfe.PlanTech.Application.Response.Queries;
 using Dfe.PlanTech.Application.Submission.Commands;
 using Dfe.PlanTech.Application.Submission.Interface;
 using Dfe.PlanTech.Application.Submission.Interfaces;
+using Dfe.PlanTech.Application.Submission.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Responses.Models;
@@ -25,8 +26,6 @@ public class CheckAnswersControllerTests
 
     private readonly Mock<IPlanTechDbContext> _planTechDbContextMock;
 
-    private readonly Mock<IGetQuestionQuery> _getQuestionQueryMock;
-    private readonly Mock<IGetAnswerQuery> _getAnswerQueryMock;
     private readonly Mock<IContentRepository> _contentRepositoryMock;
 
     private Page[] _pages = new Page[]
@@ -54,8 +53,8 @@ public class CheckAnswersControllerTests
 
         ICalculateMaturityCommand calculateMaturityCommand = new CalculateMaturityCommand(_planTechDbContextMock.Object);
         IGetResponseQuery getResponseQuery = new GetResponseQuery(_planTechDbContextMock.Object);
-        _getQuestionQueryMock = new Mock<IGetQuestionQuery>();
-        _getAnswerQueryMock = new Mock<IGetAnswerQuery>();
+        IGetQuestionQuery getQuestionQuery = new GetQuestionQuery(_planTechDbContextMock.Object);
+        IGetAnswerQuery getAnswerQuery = new GetAnswerQuery(_planTechDbContextMock.Object);
         GetPageQuery getPageQuery = new GetPageQuery(questionnaireCacherMock.Object, _contentRepositoryMock.Object);
 
         _checkAnswersController = new CheckAnswersController
@@ -64,8 +63,8 @@ public class CheckAnswersControllerTests
             urlHistoryMock.Object,
             calculateMaturityCommand,
             getResponseQuery,
-            _getQuestionQueryMock.Object,
-            _getAnswerQueryMock.Object,
+            getQuestionQuery,
+            getAnswerQuery,
             getPageQuery
         );
     }
@@ -104,8 +103,8 @@ public class CheckAnswersControllerTests
         };
 
         _planTechDbContextMock.Setup(m => m.GetResponseListBy(SubmissionId)).ReturnsAsync(responseList);
-        _getQuestionQueryMock.Setup(m => m.GetQuestionBy(1)).ReturnsAsync(new Domain.Questions.Models.Question() { QuestionText = "Question Text" });
-        _getAnswerQueryMock.Setup(m => m.GetAnswerBy(1)).ReturnsAsync(new Domain.Answers.Models.Answer() { AnswerText = "Answer Text" });
+        _planTechDbContextMock.Setup(m => m.GetQuestionBy(1)).ReturnsAsync(new Domain.Questions.Models.Question() { QuestionText = "Question Text" });
+        _planTechDbContextMock.Setup(m => m.GetAnswerBy(1)).ReturnsAsync(new Domain.Answers.Models.Answer() { AnswerText = "Answer Text" });
 
         var result = await _checkAnswersController.CheckAnswersPage(SubmissionId);
 
@@ -165,7 +164,7 @@ public class CheckAnswersControllerTests
         };
 
         _planTechDbContextMock.Setup(m => m.GetResponseListBy(SubmissionId)).ReturnsAsync(responseList);
-        _getQuestionQueryMock.Setup(m => m.GetQuestionBy(1)).ReturnsAsync(new Domain.Questions.Models.Question() { QuestionText = null });
+        _planTechDbContextMock.Setup(m => m.GetQuestionBy(1)).ReturnsAsync(new Domain.Questions.Models.Question() { QuestionText = null });
 
         await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId));
     }
@@ -184,8 +183,8 @@ public class CheckAnswersControllerTests
         };
 
         _planTechDbContextMock.Setup(m => m.GetResponseListBy(SubmissionId)).ReturnsAsync(responseList);
-        _getQuestionQueryMock.Setup(m => m.GetQuestionBy(1)).ReturnsAsync(new Domain.Questions.Models.Question() { QuestionText = "Question Text" });
-        _getAnswerQueryMock.Setup(m => m.GetAnswerBy(1)).ReturnsAsync(new Domain.Answers.Models.Answer() { AnswerText = null });
+        _planTechDbContextMock.Setup(m => m.GetQuestionBy(1)).ReturnsAsync(new Domain.Questions.Models.Question() { QuestionText = "Question Text" });
+        _planTechDbContextMock.Setup(m => m.GetAnswerBy(1)).ReturnsAsync(new Domain.Answers.Models.Answer() { AnswerText = null });
 
         await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId));
     }
