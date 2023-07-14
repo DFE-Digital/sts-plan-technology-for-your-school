@@ -83,7 +83,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     {
         Response[]? responseList = await _GetResponseList(submissionId);
 
-        if (responseList == null) throw new NullReferenceException(nameof(responseList));
+        if (responseList == null) throw new Exception("Null Value: " + nameof(responseList));
 
         Page checkAnswerPageContent = await _GetCheckAnswerContent();
 
