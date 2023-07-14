@@ -148,7 +148,7 @@ public class CheckAnswersControllerTests
 
         _planTechDbContextMock.Setup(m => m.GetResponseListBy(SubmissionId)).ReturnsAsync(responseList);
 
-        await Assert.ThrowsAnyAsync<Exception>(() => _checkAnswersController.CheckAnswersPage(SubmissionId));
+        await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId));
     }
 
     [Fact]
