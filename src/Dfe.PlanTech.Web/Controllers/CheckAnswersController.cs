@@ -53,15 +53,15 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
     private async Task<CheckAnswerDto> _GetCheckAnswerDto(Response[] responseList)
     {
-        CheckAnswerDto checkAnswerDto = new CheckAnswerDto() { QuestionAnswerList = new QuestionWithAnswer[responseList.Count()] };
+        CheckAnswerDto checkAnswerDto = new CheckAnswerDto() { QuestionAnswerList = new QuestionWithAnswer[responseList.Length] };
 
-        for (int i = 0; i < checkAnswerDto.QuestionAnswerList.Count(); i++)
+        for (int i = 0; i < checkAnswerDto.QuestionAnswerList.Length; i++)
         {
             string? questionText = await _GetResponseQuestionText(responseList[i].QuestionId);
-            if (questionText == null) throw new ArgumentNullException(nameof(questionText));
+            if (questionText == null) throw new NullReferenceException(nameof(questionText));
 
             string? answerText = await _GetResponseAnswerText(responseList[i].AnswerId);
-            if (answerText == null) throw new ArgumentNullException(nameof(answerText));
+            if (answerText == null) throw new NullReferenceException(nameof(answerText));
 
             checkAnswerDto.QuestionAnswerList[i] = new QuestionWithAnswer()
             {
@@ -83,14 +83,14 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     {
         Response[]? responseList = await _GetResponseList(submissionId);
 
-        if (responseList == null) throw new ArgumentNullException(nameof(responseList));
+        if (responseList == null) throw new NullReferenceException(nameof(responseList));
 
         Page checkAnswerPageContent = await _GetCheckAnswerContent();
 
         CheckAnswersViewModel checkAnswersViewModel = new CheckAnswersViewModel()
         {
             BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment",
-            Title = checkAnswerPageContent.Title ?? throw new ArgumentNullException(nameof(checkAnswerPageContent.Title)),
+            Title = checkAnswerPageContent.Title ?? throw new NullReferenceException(nameof(checkAnswerPageContent.Title)),
             CheckAnswerDto = await _GetCheckAnswerDto(responseList),
             Content = checkAnswerPageContent.Content,
             SubmissionId = submissionId

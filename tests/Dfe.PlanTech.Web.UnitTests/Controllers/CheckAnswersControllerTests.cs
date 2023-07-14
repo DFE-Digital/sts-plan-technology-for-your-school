@@ -148,7 +148,7 @@ public class CheckAnswersControllerTests
 
         _planTechDbContextMock.Setup(m => m.GetResponseListBy(SubmissionId)).ReturnsAsync(responseList);
 
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId));
+        await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId));
     }
 
     [Fact]
@@ -167,7 +167,7 @@ public class CheckAnswersControllerTests
         _planTechDbContextMock.Setup(m => m.GetResponseListBy(SubmissionId)).ReturnsAsync(responseList);
         _getQuestionQueryMock.Setup(m => m.GetQuestionBy(1)).ReturnsAsync(new Domain.Questions.Models.Question() { QuestionText = null });
 
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId));
+        await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId));
     }
 
     [Fact]
@@ -187,6 +187,6 @@ public class CheckAnswersControllerTests
         _getQuestionQueryMock.Setup(m => m.GetQuestionBy(1)).ReturnsAsync(new Domain.Questions.Models.Question() { QuestionText = "Question Text" });
         _getAnswerQueryMock.Setup(m => m.GetAnswerBy(1)).ReturnsAsync(new Domain.Answers.Models.Answer() { AnswerText = null });
 
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId));
+        await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId));
     }
 }
