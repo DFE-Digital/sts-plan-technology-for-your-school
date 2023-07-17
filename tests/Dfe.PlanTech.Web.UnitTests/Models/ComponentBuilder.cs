@@ -14,7 +14,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             {
                 Header = new Header { Text = "Category" },
                 Content = BuildContent(),
-                Sections = BuildSections()
+                Sections = BuildSections(),
+                SectionStatuses = GetSectionStatuses()
             };
         }
         public TextBody BuildTextBody()
@@ -111,6 +112,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
                 Value = "Submit",
                 IsStartButton = false,
             };
+        }
+
+        private static IDictionary<string, string> GetSectionStatuses()
+        {
+            return new Dictionary<string, string> { { "3XQEHYfvEQkQwdrihDGagJ", "Completed" } };
         }
     }
 }

@@ -11,4 +11,6 @@ public class Category : ContentComponent, ICategory
     public IContentComponent[] Content { get; set; } = Array.Empty<IContentComponent>();
 
     public ISection[] Sections { get; set; } = Array.Empty<ISection>();
+
+    public IDictionary<string, string> SectionStatuses { get; set; } = new Dictionary<string, string>();
 }

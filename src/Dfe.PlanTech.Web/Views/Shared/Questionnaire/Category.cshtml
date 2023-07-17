@@ -1,6 +1,11 @@
+@using Dfe.PlanTech.Application.Submission.Interfaces;
 @using Dfe.PlanTech.Web.TagHelpers.TaskList
 @model Dfe.PlanTech.Domain.Questionnaire.Interfaces.ICategory;
+@inject IGetSubmissionStatusesQuery query
 
+@{
+    Model.SectionStatuses = await query.GetSectionSubmissionStatuses();
+}
 @{
     await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Header);
 }
@@ -16,6 +21,22 @@
     {
         var tagColour = TagColour.Grey;
         var tagText = "NOT STARTED";
+        Model.SectionStatuses.TryGetValue(categorySection.Sys.Id, out string value);
+
+        switch(value)
+        {
+            case "Started":
+                tagColour = TagColour.Green;
+                tagText = "STARTED";
+                break;
+            case "Completed":
+                tagColour = TagColour.DarkBlue;
+                tagText = "COMPLETE";
+                break;
+            case "Not Started":
+            default:
+                break;
+        }
 
         <task-list-item>
             <task-list-item-name>

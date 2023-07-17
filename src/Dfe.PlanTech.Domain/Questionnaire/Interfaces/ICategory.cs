@@ -10,4 +10,6 @@ public interface ICategory : IContentComponent
     public IContentComponent[] Content { get; }
     
     public ISection[] Sections { get; }
+
+    public IDictionary<string, string> SectionStatuses { get; set; }
 }

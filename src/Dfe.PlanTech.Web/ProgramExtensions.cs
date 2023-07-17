@@ -5,6 +5,7 @@ using Dfe.PlanTech.Application.Response.Commands;
 using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Application.Submission.Commands;
 using Dfe.PlanTech.Application.Submission.Interfaces;
+using Dfe.PlanTech.Application.Submission.Queries;
 using Dfe.PlanTech.Application.Users.Commands;
 using Dfe.PlanTech.Application.Users.Helper;
 using Dfe.PlanTech.Application.Users.Interfaces;
@@ -89,6 +90,7 @@ public static class ProgramExtensions
         services.AddTransient<IRecordAnswerCommand, RecordAnswerCommand>();
         services.AddTransient<ICreateSubmissionCommand, CreateSubmissionCommand>();
         services.AddTransient<ICreateResponseCommand, CreateResponseCommand>();
+        services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
 
         return services;
     }
