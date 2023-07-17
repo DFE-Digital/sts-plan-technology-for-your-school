@@ -131,3 +131,22 @@
     margin-bottom: 0;
   }
 }
+
+#checkYourAnswers-page .spacer {
+    content: ' ' !important;
+    display: block !important;
+}
+
+@media (min-width: 40.0625em) {
+    #checkYourAnswers-page .govuk-summary-list__key {
+        width: 100%;
+    }
+
+    #checkYourAnswers-page .govuk-summary-list__actions {
+        width: 0;
+    }
+}
+
+#checkYourAnswers-page dl.govuk-summary-list.govuk-\!-margin-bottom-9 {
+    border-top: 1px solid #b1b4b6;
+}

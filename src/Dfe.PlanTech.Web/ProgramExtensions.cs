@@ -3,8 +3,11 @@ using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Response.Commands;
 using Dfe.PlanTech.Application.Response.Interface;
+using Dfe.PlanTech.Application.Response.Queries;
 using Dfe.PlanTech.Application.Submission.Commands;
+using Dfe.PlanTech.Application.Submission.Interface;
 using Dfe.PlanTech.Application.Submission.Interfaces;
+using Dfe.PlanTech.Application.Submission.Queries;
 using Dfe.PlanTech.Application.Users.Commands;
 using Dfe.PlanTech.Application.Users.Helper;
 using Dfe.PlanTech.Application.Users.Interfaces;
@@ -84,11 +87,18 @@ public static class ProgramExtensions
 
         services.AddTransient<ICreateQuestionCommand, CreateQuestionCommand>();
         services.AddTransient<IRecordQuestionCommand, RecordQuestionCommand>();
+        services.AddTransient<IGetQuestionQuery, GetQuestionQuery>();
 
         services.AddTransient<ICreateAnswerCommand, CreateAnswerCommand>();
         services.AddTransient<IRecordAnswerCommand, RecordAnswerCommand>();
+        services.AddTransient<IGetAnswerQuery, GetAnswerQuery>();
+
         services.AddTransient<ICreateSubmissionCommand, CreateSubmissionCommand>();
+
         services.AddTransient<ICreateResponseCommand, CreateResponseCommand>();
+        services.AddTransient<IGetResponseQuery, GetResponseQuery>();
+
+        services.AddTransient<ICalculateMaturityCommand, CalculateMaturityCommand>();
 
         return services;
     }

@@ -3,6 +3,7 @@ using Dfe.PlanTech.Domain.Answers.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 using System.Linq.Expressions;
 using Dfe.PlanTech.Domain.Responses.Models;
+using Microsoft.Data.SqlClient;
 
 namespace Dfe.PlanTech.Application.Persistence.Interfaces;
 
@@ -16,9 +17,11 @@ public interface IPlanTechDbContext
 
     // Question Table
     public void AddQuestion(Question question);
+    public Task<Question?> GetQuestionBy(int questionId);
 
     // Answer Table
     public void AddAnswer(Answer answer);
+    public Task<Answer?> GetAnswerBy(int answerId);
 
     // Submission Table
     public void AddSubmission(Domain.Submissions.Models.Submission submission);
@@ -28,6 +31,10 @@ public interface IPlanTechDbContext
 
     public Task<int> SaveChangesAsync();
 
+    Task<int> CallStoredProcedureWithReturnInt(string sprocName, List<SqlParameter> parms);
+
     Task<User?> GetUserBy(Expression<Func<User, bool>> predicate);
+
+    Task<Domain.Responses.Models.Response[]?> GetResponseListBy(int submissionId);
 }
 

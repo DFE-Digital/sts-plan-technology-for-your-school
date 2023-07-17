@@ -13,4 +13,6 @@ public class SubmitAnswerDto
     public string? NextQuestionId { get; init; }
 
     public string? Params { get; init; } = null!;
+
+    public int? SubmissionId { get; init; }
 }
