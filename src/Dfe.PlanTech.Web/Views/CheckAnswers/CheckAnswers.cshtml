@@ -1,0 +1,44 @@
+@model Dfe.PlanTech.Web.Models.CheckAnswersViewModel
+
+@section BeforeContent {
+    <govuk-back-link href=@Model.BackUrl />
+}
+
+<div class="govuk-width-container" id="checkYourAnswers-page">
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds-from-desktop">
+                <h3 class="govuk-body-l">@Model.SectionName</h3>
+                @{
+                    await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Title);
+                }
+                <dl class="govuk-summary-list govuk-!-margin-bottom-9">
+                    @foreach (var questionWithAnswer in Model.CheckAnswerDto.QuestionAnswerList)
+                    {
+                        <div class="govuk-summary-list__row">
+                            <dt class="govuk-summary-list__key spacer">
+                                @questionWithAnswer.QuestionText
+                            </dt>
+                            <dd class="govuk-summary-list__value spacer">
+                                @questionWithAnswer.AnswerText
+                            </dd>
+                            <dd class="govuk-summary-list__actions spacer">
+                                <a class="govuk-link" href="#">
+                                    Change<span class="govuk-visually-hidden"> name</span>
+                                </a>
+                            </dd>
+                        </div>
+                    }
+                </dl>
+                <form asp-controller="CheckAnswers" asp-action="ConfirmCheckAnswers" method="post">
+                    @{
+                        foreach (var content in Model.Content)
+                        {
+                            await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+                        }
+                    }
+                </form>
+            </div>
+        </div>
+    </main>
+</div>

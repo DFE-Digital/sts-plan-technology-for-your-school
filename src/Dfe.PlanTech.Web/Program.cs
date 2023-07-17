@@ -60,6 +60,11 @@ app.MapControllerRoute(
     pattern: "question/{action=GetQuestionById}/{id?}");
 
 app.MapControllerRoute(
+    name: "checkAnswersController",
+    pattern: "check-answers/"
+);
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Pages}/{action=GetByRoute}/{id?}");
 

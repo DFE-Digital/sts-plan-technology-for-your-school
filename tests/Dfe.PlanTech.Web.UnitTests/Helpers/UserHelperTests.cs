@@ -30,7 +30,7 @@ public class UserHelperTests
     }
 
     [Fact]
-    public async Task GetCurrentUserId_Returns_Correct_Id_When_UserExists_InDatabase() // TODO: More descriptive name
+    public async Task GetCurrentUserId_Returns_Correct_Id_When_UserExists_InDatabase()
     {
         _planTechDbContextMock.Setup(m => m.GetUserBy(userModel => userModel.DfeSignInRef == "1")).ReturnsAsync(new User() { Id = 1 });
 

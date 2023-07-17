@@ -1,14 +1,14 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Domain.Questions.Models;
+﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Answers.Models;
+using Dfe.PlanTech.Domain.Questions.Models;
+using Dfe.PlanTech.Domain.Responses.Models;
 using Dfe.PlanTech.Domain.SignIn.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Dfe.PlanTech.Domain.Responses.Models;
-using System.Security.Cryptography.X509Certificates;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
@@ -102,13 +102,19 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public void AddSignIn(SignIn signIn) => SignIn.Add(signIn);
 
     public void AddQuestion(Question question) => Questions.Add(question);
+    public Task<Question?> GetQuestionBy(int questionId) => Questions.FirstOrDefaultAsync(question => question.Id == questionId);
 
     public void AddAnswer(Answer answer) => Answers.Add(answer);
+    public Task<Answer?> GetAnswerBy(int answerId) => Answers.FirstOrDefaultAsync(answer => answer.Id == answerId);
+
     public void AddSubmission(Submission submission) => Submissions.Add(submission);
 
     public void AddResponse(Response response) => Responses.Add(response);
+    public async Task<Response[]?> GetResponseListBy(int submissionId) => await Responses.Where(response => response.SubmissionId == submissionId).ToArrayAsync();
 
     public Task<int> SaveChangesAsync() => base.SaveChangesAsync();
 
     public Task<User?> GetUserBy(Expression<Func<User, bool>> predicate) => Users.FirstOrDefaultAsync(predicate);
+
+    public Task<int> CallStoredProcedureWithReturnInt(string sprocName, List<SqlParameter> parms) => base.Database.ExecuteSqlRawAsync(sprocName, parms);
 }

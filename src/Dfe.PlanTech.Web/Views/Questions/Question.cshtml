@@ -9,6 +9,7 @@
     <input id="NextQuestionId" hidden value=@Model.Question.Answers[0].NextQuestion?.Sys.Id ?? ""
         name="NextQuestionId" />
     <input id="Params" hidden value="@Model.Params" name="Params" />
+    <input id="SubmissionId" hidden value="@Model.SubmissionId" name="SubmissionId" />
 
     <govuk-radios name="ChosenAnswerId">
         <govuk-radios-fieldset>

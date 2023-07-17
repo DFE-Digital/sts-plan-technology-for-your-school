@@ -7,4 +7,6 @@ public class QuestionViewModel : BaseViewModel
     public required Question Question { get; init; }
 
     public string? Params { get; init; } = null!;
+
+    public int? SubmissionId { get; init; }
 }
