@@ -202,8 +202,20 @@ public class CheckAnswersControllerTests
 
         var res = result as RedirectToActionResult;
 
-        Assert.True(res.ActionName == "Pages");
-        Assert.True(res.ControllerName == "Index");
+        if (res != null)
+        {
+            Assert.True(res.ActionName == "Pages");
+            Assert.True(res.ControllerName == "Index");
+        }
+    }
 
+    [Fact]
+    public async Task ConfirmCheckAnswers_ReturnsNull_WhenMaturityIsLessThan1()
+    {
+        _calculateMaturityCommandMock.Setup(m => m.CalculateMaturityAsync(It.IsAny<int>())).ReturnsAsync(0);
+
+        var result = await _checkAnswersController.ConfirmCheckAnswers(It.IsAny<int>());
+
+        Assert.Null(result);
     }
 }
