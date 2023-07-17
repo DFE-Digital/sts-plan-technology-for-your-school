@@ -39,6 +39,7 @@ public class CheckAnswersControllerTests
     };
 
     private const int SubmissionId = 1;
+    private const string sectionName = "Section Name";
 
     public CheckAnswersControllerTests()
     {
@@ -106,7 +107,7 @@ public class CheckAnswersControllerTests
         _planTechDbContextMock.Setup(m => m.GetQuestionBy(1)).ReturnsAsync(new Domain.Questions.Models.Question() { QuestionText = "Question Text" });
         _planTechDbContextMock.Setup(m => m.GetAnswerBy(1)).ReturnsAsync(new Domain.Answers.Models.Answer() { AnswerText = "Answer Text" });
 
-        var result = await _checkAnswersController.CheckAnswersPage(SubmissionId);
+        var result = await _checkAnswersController.CheckAnswersPage(SubmissionId, sectionName);
 
         Assert.IsType<ViewResult>(result);
 
@@ -147,7 +148,7 @@ public class CheckAnswersControllerTests
 
         _planTechDbContextMock.Setup(m => m.GetResponseListBy(SubmissionId)).ReturnsAsync(responseList);
 
-        await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId));
+        await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId, sectionName));
     }
 
     [Fact]
@@ -166,7 +167,7 @@ public class CheckAnswersControllerTests
         _planTechDbContextMock.Setup(m => m.GetResponseListBy(SubmissionId)).ReturnsAsync(responseList);
         _planTechDbContextMock.Setup(m => m.GetQuestionBy(1)).ReturnsAsync(new Domain.Questions.Models.Question() { QuestionText = null });
 
-        await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId));
+        await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId, sectionName));
     }
 
     [Fact]
@@ -186,6 +187,6 @@ public class CheckAnswersControllerTests
         _planTechDbContextMock.Setup(m => m.GetQuestionBy(1)).ReturnsAsync(new Domain.Questions.Models.Question() { QuestionText = "Question Text" });
         _planTechDbContextMock.Setup(m => m.GetAnswerBy(1)).ReturnsAsync(new Domain.Answers.Models.Answer() { AnswerText = null });
 
-        await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId));
+        await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId, sectionName));
     }
 }

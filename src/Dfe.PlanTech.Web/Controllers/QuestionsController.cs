@@ -104,7 +104,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
         await _RecordResponse(new RecordResponseDto() { AnswerId = answerId, QuestionId = questionId, SubmissionId = submissionId, UserId = userId, Maturity = await _GetMaturityForAnswer(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId) });
 
-        if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { submissionId = submissionId });
+        if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { submissionId = submissionId, sectionName = param.SectionName });
         else return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.NextQuestionId, submissionId = submissionId });
     }
 
