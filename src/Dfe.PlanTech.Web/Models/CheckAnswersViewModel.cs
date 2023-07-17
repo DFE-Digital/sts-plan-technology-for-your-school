@@ -12,6 +12,9 @@ public class CheckAnswersViewModel : BaseViewModel
     public Title Title { get; init; } = null!;
 
     [Required]
+    public string SectionName { get; init; } = null!;
+
+    [Required]
     public CheckAnswerDto CheckAnswerDto { get; init; } = null!;
 
     [Required]

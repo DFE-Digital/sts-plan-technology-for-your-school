@@ -76,7 +76,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     }
 
     [HttpGet]
-    public async Task<IActionResult> CheckAnswersPage(int submissionId)
+    public async Task<IActionResult> CheckAnswersPage(int submissionId, string sectionName)
     {
         Response[]? responseList = await _GetResponseList(submissionId);
 
@@ -86,6 +86,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
         {
             BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment",
             Title = checkAnswerPageContent.Title ?? throw new NullReferenceException(nameof(checkAnswerPageContent.Title)),
+            SectionName = sectionName,
             CheckAnswerDto = await _GetCheckAnswerDto(responseList ?? throw new NullReferenceException(nameof(responseList))),
             Content = checkAnswerPageContent.Content,
             SubmissionId = submissionId
