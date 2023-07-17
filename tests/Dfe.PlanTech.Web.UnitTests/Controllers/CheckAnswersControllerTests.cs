@@ -28,6 +28,8 @@ public class CheckAnswersControllerTests
 
     private readonly Mock<IContentRepository> _contentRepositoryMock;
 
+    private readonly Mock<ICalculateMaturityCommand> _calculateMaturityCommandMock;
+
     private Page[] _pages = new Page[]
     {
         new Page()
@@ -52,7 +54,7 @@ public class CheckAnswersControllerTests
         Mock<IQuestionnaireCacher> questionnaireCacherMock = new Mock<IQuestionnaireCacher>();
         _contentRepositoryMock = SetupRepositoryMock();
 
-        ICalculateMaturityCommand calculateMaturityCommand = new CalculateMaturityCommand(_planTechDbContextMock.Object);
+        _calculateMaturityCommandMock = new Mock<ICalculateMaturityCommand>();
         IGetResponseQuery getResponseQuery = new GetResponseQuery(_planTechDbContextMock.Object);
         IGetQuestionQuery getQuestionQuery = new GetQuestionQuery(_planTechDbContextMock.Object);
         IGetAnswerQuery getAnswerQuery = new GetAnswerQuery(_planTechDbContextMock.Object);
@@ -62,7 +64,7 @@ public class CheckAnswersControllerTests
         (
             loggerMock.Object,
             urlHistoryMock.Object,
-            calculateMaturityCommand,
+            _calculateMaturityCommandMock.Object,
             getResponseQuery,
             getQuestionQuery,
             getAnswerQuery,
@@ -188,5 +190,33 @@ public class CheckAnswersControllerTests
         _planTechDbContextMock.Setup(m => m.GetAnswerBy(1)).ReturnsAsync(new Domain.Answers.Models.Answer() { AnswerText = null });
 
         await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId, sectionName));
+    }
+
+    [Fact]
+    public async Task ConfirmCheckAnswers_RedirectsToSelfAssessment_WhenMaturityIsLargerThan1() 
+    {
+        _calculateMaturityCommandMock.Setup(m => m.CalculateMaturityAsync(It.IsAny<int>())).ReturnsAsync(2);
+
+        var result = await _checkAnswersController.ConfirmCheckAnswers(It.IsAny<int>());
+
+        Assert.IsType<RedirectToActionResult>(result);
+
+        var res = result as RedirectToActionResult;
+
+        if (res != null)
+        {
+            Assert.True(res.ActionName == "Pages");
+            Assert.True(res.ControllerName == "Index");
+        }
+    }
+
+    [Fact]
+    public async Task ConfirmCheckAnswers_ReturnsNull_WhenMaturityIsLessThan1()
+    {
+        _calculateMaturityCommandMock.Setup(m => m.CalculateMaturityAsync(It.IsAny<int>())).ReturnsAsync(0);
+
+        var result = await _checkAnswersController.ConfirmCheckAnswers(It.IsAny<int>());
+
+        Assert.Null(result);
     }
 }
