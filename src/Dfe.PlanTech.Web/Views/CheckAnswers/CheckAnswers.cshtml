@@ -23,8 +23,10 @@
                                 @questionWithAnswer.AnswerText
                             </dd>
                             <dd class="govuk-summary-list__actions spacer">
-                                <a class="govuk-link" href="#">
-                                    Change<span class="govuk-visually-hidden"> name</span>
+                                <a class="govuk-link" asp-controller="CheckAnswers" asp-action="ChangeAnswer"
+                                    asp-route-questionRef="@questionWithAnswer.QuestionRef"
+                                    asp-route-answerRef="@questionWithAnswer.AnswerRef">
+                                    Change<span class="govuk-visually-hidden">name</span>
                                 </a>
                             </dd>
                         </div>
