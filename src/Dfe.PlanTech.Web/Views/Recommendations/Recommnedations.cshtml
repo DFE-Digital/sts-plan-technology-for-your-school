@@ -1,0 +1,13 @@
+@using Dfe.PlanTech.Domain.Content.Models.Buttons;
+
+@{
+    var buttonWithLinkModel = new ButtonWithLink(){
+        Href = "/self-assessment",
+        Button = new Button(){
+            IsStartButton = false,
+            Value = "Back to Self Assessment"
+        }
+    };
+
+    await Html.RenderPartialAsync("Components/ButtonWithLink", buttonWithLinkModel);
+}
