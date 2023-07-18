@@ -57,7 +57,7 @@ app.UseMiddleware<UrlHistoryMiddleware>();
 
 app.MapControllerRoute(
     name: "questionsController",
-    pattern: "{controller=Question}/{action=GetQuestionById}/{id?}");
+    pattern: "question/{action=GetQuestionById}/{id?}");
 
 app.MapControllerRoute(
     name: "checkAnswersController",
@@ -68,11 +68,6 @@ app.MapControllerRoute(
     name: "checkAnswersController",
     pattern: "change-answer/"
 );
-
-// app.MapControllerRoute(
-//     name: "checkAnswersController",
-//     pattern: "{controller=CheckAnswers}/{action=ChangeAnswer}/{questionRef+answerRef}"
-// );
 
 app.MapControllerRoute(
     name: "default",

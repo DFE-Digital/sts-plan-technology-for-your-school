@@ -20,6 +20,10 @@ using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Controllers;
 
+// TODO: Add QuestionRef and AnswerRef to CheckAnswersPage_RedirectsTo_View_When_CheckAnswersViewModel_IsPopulated
+// TODO: Add exception testing for QuestionRef and AnswerRef if they are null
+// TODO: Add test(s) for ChangeAnswer(..)
+
 public class CheckAnswersControllerTests
 {
     private readonly CheckAnswersController _checkAnswersController;
@@ -193,7 +197,7 @@ public class CheckAnswersControllerTests
     }
 
     [Fact]
-    public async Task ConfirmCheckAnswers_RedirectsToSelfAssessment_WhenMaturityIsLargerThan1() 
+    public async Task ConfirmCheckAnswers_RedirectsToSelfAssessment_WhenMaturityIsLargerThan1()
     {
         _calculateMaturityCommandMock.Setup(m => m.CalculateMaturityAsync(It.IsAny<int>())).ReturnsAsync(2);
 
