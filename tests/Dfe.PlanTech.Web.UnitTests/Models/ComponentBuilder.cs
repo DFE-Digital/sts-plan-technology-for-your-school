@@ -15,7 +15,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
                 Header = new Header { Text = "Category" },
                 Content = BuildContent(),
                 Sections = BuildSections(),
-                SectionStatuses = GetSectionStatuses()
             };
         }
         public TextBody BuildTextBody()

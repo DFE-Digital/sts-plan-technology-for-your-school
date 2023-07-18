@@ -4,7 +4,7 @@
 @inject IGetSubmissionStatusesQuery query
 
 @{
-    Model.SectionStatuses = await query.GetSectionSubmissionStatuses();
+    Model.SectionStatuses = query.GetSectionSubmissionStatuses(Model.Sections);
 }
 @{
     await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Header);
@@ -21,21 +21,17 @@
     {
         var tagColour = TagColour.Grey;
         var tagText = "NOT STARTED";
-        Model.SectionStatuses.TryGetValue(categorySection.Sys.Id, out string value);
+        var exists = Model.SectionStatuses.FirstOrDefault(x => x.SectionId == categorySection.Sys.Id);
 
-        switch(value)
+        if (exists != null && exists!.Completed == 1)
         {
-            case "Started":
-                tagColour = TagColour.Green;
-                tagText = "STARTED";
-                break;
-            case "Completed":
-                tagColour = TagColour.DarkBlue;
-                tagText = "COMPLETE";
-                break;
-            case "Not Started":
-            default:
-                break;
+            tagColour = TagColour.DarkBlue;
+            tagText = "COMPLETE";
+        }
+        else if (exists != null && exists!.Completed == 0)
+        {
+            tagColour = TagColour.Green;
+            tagText = "STARTED";
         }
 
         <task-list-item>

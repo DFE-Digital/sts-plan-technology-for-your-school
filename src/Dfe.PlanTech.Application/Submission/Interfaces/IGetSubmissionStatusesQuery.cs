@@ -1,7 +1,10 @@
-﻿namespace Dfe.PlanTech.Application.Submission.Interfaces
+﻿using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.Submissions.Models;
+
+namespace Dfe.PlanTech.Application.Submission.Interfaces
 {
     public interface IGetSubmissionStatusesQuery
     {
-        Task<IDictionary<string, string>> GetSectionSubmissionStatuses();
+        IList<SectionStatuses> GetSectionSubmissionStatuses(ISection[] sections);
     }
 }

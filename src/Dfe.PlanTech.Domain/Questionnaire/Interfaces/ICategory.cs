@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Submissions.Models;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
@@ -11,5 +12,5 @@ public interface ICategory : IContentComponent
     
     public ISection[] Sections { get; }
 
-    public IDictionary<string, string> SectionStatuses { get; set; }
+    public IList<SectionStatuses> SectionStatuses { get; set; }
 }

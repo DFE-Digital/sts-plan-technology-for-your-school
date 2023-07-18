@@ -1,5 +1,7 @@
 ﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Submission.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.Submissions.Models;
 
 namespace Dfe.PlanTech.Application.Submission.Queries
 {
@@ -12,10 +14,12 @@ namespace Dfe.PlanTech.Application.Submission.Queries
             _db = db;
         }
 
-        public async Task<IDictionary<string, string>> GetSectionSubmissionStatuses()
+        public IList<SectionStatuses> GetSectionSubmissionStatuses(ISection[] sections)
         {
-            return new Dictionary<string, string> { { "3XQEHYfvEQkQwdrihDGagJ", "Completed" }, { "2gH0ajGDWUeubWuR5llzsS", "Started" } };
+           string sectionStringify = string.Empty;
+           sectionStringify = string.Join(',', sections.Select(x => x.Sys.Id).ToList());
 
+           return _db.GetSectionStatuses(sectionStringify).ToList();
         }
     }
 }
