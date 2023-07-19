@@ -205,8 +205,8 @@ public class CheckAnswersControllerTests
 
         if (res != null)
         {
-            Assert.True(res.ActionName == "Pages");
-            Assert.True(res.ControllerName == "Index");
+            Assert.True(res.ActionName == "GetByRoute");
+            Assert.True(res.ControllerName == "Pages");
         }
     }
 
