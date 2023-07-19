@@ -1,9 +1,9 @@
-﻿using Dfe.PlanTech.Domain.Questions.Models;
-using Dfe.PlanTech.Domain.Answers.Models;
+﻿using Dfe.PlanTech.Domain.Answers.Models;
+using Dfe.PlanTech.Domain.Questions.Models;
+using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Models;
-using System.Linq.Expressions;
-using Dfe.PlanTech.Domain.Responses.Models;
 using Microsoft.Data.SqlClient;
+using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Application.Persistence.Interfaces;
 
@@ -32,6 +32,8 @@ public interface IPlanTechDbContext
     public Task<int> SaveChangesAsync();
 
     Task<int> CallStoredProcedureWithReturnInt(string sprocName, List<SqlParameter> parms);
+
+    IQueryable<SectionStatuses> GetSectionStatuses(string sectionIds);
 
     Task<User?> GetUserBy(Expression<Func<User, bool>> predicate);
 
