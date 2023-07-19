@@ -65,6 +65,16 @@ app.MapControllerRoute(
 );
 
 app.MapControllerRoute(
+    name: "checkAnswersController",
+    pattern: "change-answer/"
+);
+
+app.MapControllerRoute(
+    name: "checkAnswersController",
+    pattern: "confirm-check-answers/"
+);
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Pages}/{action=GetByRoute}/{id?}");
 

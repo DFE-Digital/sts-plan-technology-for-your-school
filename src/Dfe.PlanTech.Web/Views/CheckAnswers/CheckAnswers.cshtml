@@ -23,20 +23,25 @@
                                 @questionWithAnswer.AnswerText
                             </dd>
                             <dd class="govuk-summary-list__actions spacer">
-                                <a class="govuk-link" href="#">
-                                    Change<span class="govuk-visually-hidden"> name</span>
+                                <a class="govuk-link" asp-controller="CheckAnswers" asp-action="ChangeAnswer"
+                                    asp-route-questionRef="@questionWithAnswer.QuestionRef"
+                                    asp-route-answerRef="@questionWithAnswer.AnswerRef"
+                                    asp-route-submissionId="@Model.SubmissionId">
+                                    Change<span class="govuk-visually-hidden">name</span>
                                 </a>
                             </dd>
                         </div>
                     }
                 </dl>
                 <form asp-controller="CheckAnswers" asp-action="ConfirmCheckAnswers" method="post">
+                    <input type="hidden" name="submissionId" value="@Model.SubmissionId" />
                     @{
                         foreach (var content in Model.Content)
                         {
                             await Html.RenderPartialAsync("Components/PageComponentFactory", content);
                         }
                     }
+                    <govuk-button type="submit">Save and Submit</govuk-button>
                 </form>
             </div>
         </div>
