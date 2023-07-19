@@ -5,6 +5,7 @@
 
 @{
     Model.SectionStatuses = query.GetSectionSubmissionStatuses(Model.Sections);
+    var completedCount = Model.SectionStatuses.Where(x => x.Completed == 1).ToList().Count;
 }
 @{
     await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Header);
@@ -17,6 +18,8 @@
 }
 
 <task-list>
+    <h3 class="govuk-heading-s govuk-!-margin-bottom-2">Progress</h3>
+    <p class="govuk-body govuk-!-margin-bottom-5">You have completed <strong>@completedCount of 5</strong> sections.</p>
     @foreach (var categorySection in Model.Sections)
     {
         var tagColour = TagColour.Grey;
