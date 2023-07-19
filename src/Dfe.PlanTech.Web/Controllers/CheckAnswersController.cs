@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Routing;
 namespace Dfe.PlanTech.Web.Controllers;
 
 [Authorize]
-[Route("/check-answers")]
 public class CheckAnswersController : BaseController<CheckAnswersController>
 {
     private readonly ICalculateMaturityCommand _calculateMaturityCommand;
@@ -42,14 +41,14 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
         return await _getResponseQuery.GetResponseListBy(submissionId);
     }
 
-    private async Task<string?> _GetResponseQuestionText(int questionId)
+    private async Task<Domain.Questions.Models.Question?> _GetResponseQuestion(int questionId)
     {
-        return (await _getQuestionQuery.GetQuestionBy(questionId))?.QuestionText;
+        return await _getQuestionQuery.GetQuestionBy(questionId);
     }
 
-    private async Task<string?> _GetResponseAnswerText(int answerId)
+    private async Task<Domain.Answers.Models.Answer?> _GetResponseAnswer(int answerId)
     {
-        return (await _getAnswerQuery.GetAnswerBy(answerId))?.AnswerText;
+        return await _getAnswerQuery.GetAnswerBy(answerId);
     }
 
     private async Task<CheckAnswerDto> _GetCheckAnswerDto(Response[] responseList)
@@ -58,12 +57,19 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
         for (int i = 0; i < checkAnswerDto.QuestionAnswerList.Length; i++)
         {
-            string questionText = await _GetResponseQuestionText(responseList[i].QuestionId) ?? throw new NullReferenceException(nameof(questionText));
-            string answerText = await _GetResponseAnswerText(responseList[i].AnswerId) ?? throw new NullReferenceException(nameof(answerText));
+            var question = await _GetResponseQuestion(responseList[i].QuestionId);
+            string questionContentfulRef = question?.ContentfulRef ?? throw new NullReferenceException(nameof(question.ContentfulRef));
+            string questionText = question?.QuestionText ?? throw new NullReferenceException(nameof(questionText));
+
+            var answer = await _GetResponseAnswer(responseList[i].AnswerId);
+            string answerContentfulRef = answer?.ContentfulRef ?? throw new NullReferenceException(nameof(answer.ContentfulRef));
+            string answerText = answer?.AnswerText ?? throw new NullReferenceException(nameof(answerText));
 
             checkAnswerDto.QuestionAnswerList[i] = new QuestionWithAnswer()
             {
+                QuestionRef = questionContentfulRef,
                 QuestionText = questionText,
+                AnswerRef = answerContentfulRef,
                 AnswerText = answerText
             };
         }
@@ -77,6 +83,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     }
 
     [HttpGet]
+    [Route("check-answers")]
     public async Task<IActionResult> CheckAnswersPage(int submissionId, string sectionName)
     {
         Response[]? responseList = await _GetResponseList(submissionId);
@@ -96,6 +103,13 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
         return View("CheckAnswers", checkAnswersViewModel);
     }
 
+    [HttpGet]
+    [Route("change-answer")]
+    public IActionResult ChangeAnswer(string questionRef, string answerRef, int submissionId)
+    {
+        return RedirectToAction("GetQuestionById", "Questions", new { id = questionRef, answerRef = answerRef, submissionId = submissionId });
+    }
+
     [HttpPost("ConfirmCheckAnswers")]
     public async Task<IActionResult> ConfirmCheckAnswers(int submissionId)
     {
@@ -103,7 +117,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
         if (calculateMaturity > 1)
         {
-            return RedirectToAction("GetByRoute", "Pages", new { route = "self-assessment"});
+            return RedirectToAction("GetByRoute", "Pages", new { route = "self-assessment" });
         }
 
         // TODO Show error message.

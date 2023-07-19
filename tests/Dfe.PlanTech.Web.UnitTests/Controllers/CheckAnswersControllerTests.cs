@@ -106,8 +106,8 @@ public class CheckAnswersControllerTests
         };
 
         _planTechDbContextMock.Setup(m => m.GetResponseListBy(SubmissionId)).ReturnsAsync(responseList);
-        _planTechDbContextMock.Setup(m => m.GetQuestionBy(1)).ReturnsAsync(new Domain.Questions.Models.Question() { QuestionText = "Question Text" });
-        _planTechDbContextMock.Setup(m => m.GetAnswerBy(1)).ReturnsAsync(new Domain.Answers.Models.Answer() { AnswerText = "Answer Text" });
+        _planTechDbContextMock.Setup(m => m.GetQuestionBy(1)).ReturnsAsync(new Domain.Questions.Models.Question() { ContentfulRef = "QuestionRef", QuestionText = "Question Text" });
+        _planTechDbContextMock.Setup(m => m.GetAnswerBy(1)).ReturnsAsync(new Domain.Answers.Models.Answer() { ContentfulRef = "AnswerRef", AnswerText = "Answer Text" });
 
         var result = await _checkAnswersController.CheckAnswersPage(SubmissionId, sectionName);
 
@@ -139,8 +139,31 @@ public class CheckAnswersControllerTests
         var checkAnswerDto = checkAnswersViewModel.CheckAnswerDto;
 
         Assert.NotNull(checkAnswerDto);
+        Assert.Equal("QuestionRef", checkAnswerDto.QuestionAnswerList[0].QuestionRef);
         Assert.Equal("Question Text", checkAnswerDto.QuestionAnswerList[0].QuestionText);
+        Assert.Equal("AnswerRef", checkAnswerDto.QuestionAnswerList[0].AnswerRef);
         Assert.Equal("Answer Text", checkAnswerDto.QuestionAnswerList[0].AnswerText);
+    }
+
+    [Fact]
+    public void CheckAnswersPage_RedirectsTo_View_When_ChangeAnswer_IsCalled()
+    {
+        Domain.Questions.Models.Question question = new Domain.Questions.Models.Question() { ContentfulRef = "QuestionRef", QuestionText = "Question Text" };
+        Domain.Answers.Models.Answer answer = new Domain.Answers.Models.Answer() { ContentfulRef = "Answer", AnswerText = "Question Text" };
+
+        var result = _checkAnswersController.ChangeAnswer(question.ContentfulRef, answer.ContentfulRef, SubmissionId);
+
+        Assert.IsType<RedirectToActionResult>(result);
+
+        var redirectToActionResult = result as RedirectToActionResult;
+
+        Assert.NotNull(redirectToActionResult);
+        Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
+        Assert.NotNull(redirectToActionResult.RouteValues);
+        var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "id");
+        Assert.Equal(question.ContentfulRef, id.Value);
+        var answerRef = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "answerRef");
+        Assert.Equal(answer.ContentfulRef, answerRef.Value);
     }
 
     [Fact]
@@ -193,7 +216,7 @@ public class CheckAnswersControllerTests
     }
 
     [Fact]
-    public async Task ConfirmCheckAnswers_RedirectsToSelfAssessment_WhenMaturityIsLargerThan1() 
+    public async Task ConfirmCheckAnswers_RedirectsToSelfAssessment_WhenMaturityIsLargerThan1()
     {
         _calculateMaturityCommandMock.Setup(m => m.CalculateMaturityAsync(It.IsAny<int>())).ReturnsAsync(2);
 

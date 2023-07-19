@@ -52,7 +52,7 @@ public class QuestionsController : BaseController<QuestionsController>
     /// <param name="query"></param>
     /// <exception cref="ArgumentNullException">Throws exception when Id is null or empty</exception>
     /// <returns></returns>
-    public async Task<IActionResult> GetQuestionById(string id, string? section, int? submissionId, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetQuestionById(string id, string? section, int? submissionId, string? answerRef, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
         object? parameters;
@@ -64,6 +64,7 @@ public class QuestionsController : BaseController<QuestionsController>
         var viewModel = new QuestionViewModel()
         {
             Question = question,
+            AnswerRef = answerRef,
             BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment",
             Params = parameters != null ? parameters.ToString() : null,
             SubmissionId = submissionId,
