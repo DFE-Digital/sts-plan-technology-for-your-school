@@ -20,9 +20,6 @@ using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Controllers;
 
-// TODO: Add exception testing for QuestionRef and AnswerRef if they are null
-// TODO: Add test(s) for ChangeAnswer(..)
-
 public class CheckAnswersControllerTests
 {
     private readonly CheckAnswersController _checkAnswersController;
@@ -146,6 +143,27 @@ public class CheckAnswersControllerTests
         Assert.Equal("Question Text", checkAnswerDto.QuestionAnswerList[0].QuestionText);
         Assert.Equal("AnswerRef", checkAnswerDto.QuestionAnswerList[0].AnswerRef);
         Assert.Equal("Answer Text", checkAnswerDto.QuestionAnswerList[0].AnswerText);
+    }
+
+    [Fact]
+    public void CheckAnswersPage_RedirectsTo_View_When_ChangeAnswer_IsCalled()
+    {
+        Domain.Questions.Models.Question question = new Domain.Questions.Models.Question() { ContentfulRef = "QuestionRef", QuestionText = "Question Text" };
+        Domain.Answers.Models.Answer answer = new Domain.Answers.Models.Answer() { ContentfulRef = "Answer", AnswerText = "Question Text" };
+
+        var result = _checkAnswersController.ChangeAnswer(question.ContentfulRef, answer.ContentfulRef);
+
+        Assert.IsType<RedirectToActionResult>(result);
+
+        var redirectToActionResult = result as RedirectToActionResult;
+
+        Assert.NotNull(redirectToActionResult);
+        Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
+        Assert.NotNull(redirectToActionResult.RouteValues);
+        var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "id");
+        Assert.Equal(question.ContentfulRef, id.Value);
+        var answerRef = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "answerRef");
+        Assert.Equal(answer.ContentfulRef, answerRef.Value);
     }
 
     [Fact]
