@@ -20,7 +20,6 @@ using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Controllers;
 
-// TODO: Add QuestionRef and AnswerRef to CheckAnswersPage_RedirectsTo_View_When_CheckAnswersViewModel_IsPopulated
 // TODO: Add exception testing for QuestionRef and AnswerRef if they are null
 // TODO: Add test(s) for ChangeAnswer(..)
 
@@ -110,8 +109,8 @@ public class CheckAnswersControllerTests
         };
 
         _planTechDbContextMock.Setup(m => m.GetResponseListBy(SubmissionId)).ReturnsAsync(responseList);
-        _planTechDbContextMock.Setup(m => m.GetQuestionBy(1)).ReturnsAsync(new Domain.Questions.Models.Question() { QuestionText = "Question Text" });
-        _planTechDbContextMock.Setup(m => m.GetAnswerBy(1)).ReturnsAsync(new Domain.Answers.Models.Answer() { AnswerText = "Answer Text" });
+        _planTechDbContextMock.Setup(m => m.GetQuestionBy(1)).ReturnsAsync(new Domain.Questions.Models.Question() { ContentfulRef = "QuestionRef", QuestionText = "Question Text" });
+        _planTechDbContextMock.Setup(m => m.GetAnswerBy(1)).ReturnsAsync(new Domain.Answers.Models.Answer() { ContentfulRef = "AnswerRef", AnswerText = "Answer Text" });
 
         var result = await _checkAnswersController.CheckAnswersPage(SubmissionId, sectionName);
 
@@ -143,7 +142,9 @@ public class CheckAnswersControllerTests
         var checkAnswerDto = checkAnswersViewModel.CheckAnswerDto;
 
         Assert.NotNull(checkAnswerDto);
+        Assert.Equal("QuestionRef", checkAnswerDto.QuestionAnswerList[0].QuestionRef);
         Assert.Equal("Question Text", checkAnswerDto.QuestionAnswerList[0].QuestionText);
+        Assert.Equal("AnswerRef", checkAnswerDto.QuestionAnswerList[0].AnswerRef);
         Assert.Equal("Answer Text", checkAnswerDto.QuestionAnswerList[0].AnswerText);
     }
 
