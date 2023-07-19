@@ -106,7 +106,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     [Route("change-answer")]
     public IActionResult ChangeAnswer(string questionRef, string answerRef)
     {
-        return RedirectToAction("GetQuestionById", "Questions", new { id = questionRef });
+        return RedirectToAction("GetQuestionById", "Questions", new { id = questionRef, answerRef = answerRef });
     }
 
     [HttpPost("ConfirmCheckAnswers")]

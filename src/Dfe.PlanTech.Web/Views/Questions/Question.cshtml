@@ -26,7 +26,15 @@
                 foreach (var answer in Model.Question.Answers)
                 {
                     var chosenAnswerId = answer.Sys.Id ?? "";
-                    <govuk-radios-item value=@chosenAnswerId>@answer.Text</govuk-radios-item>
+
+                    if (Model.AnswerRef != null && Model.AnswerRef.Equals(chosenAnswerId))
+                    {
+                        <govuk-radios-item value=@chosenAnswerId checked="true">@answer.Text</govuk-radios-item>
+                    }
+                    else
+                    {
+                        <govuk-radios-item value=@chosenAnswerId>@answer.Text</govuk-radios-item>
+                    }
                 }
             }
 
