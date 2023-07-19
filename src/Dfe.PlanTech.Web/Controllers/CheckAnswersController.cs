@@ -9,6 +9,7 @@ using Dfe.PlanTech.Domain.Responses.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
@@ -102,7 +103,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
         if (calculateMaturity > 1)
         {
-            return RedirectToAction("Pages", "Index");
+            return RedirectToAction("GetByRoute", "Pages", new { route = "self-assessment"});
         }
 
         // TODO Show error message.
