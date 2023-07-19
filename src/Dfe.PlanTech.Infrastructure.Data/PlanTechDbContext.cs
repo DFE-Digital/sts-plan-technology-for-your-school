@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
+﻿using Dfe.PlanTech.Application.Constants;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Answers.Models;
 using Dfe.PlanTech.Domain.Questions.Models;
 using Dfe.PlanTech.Domain.Responses.Models;
@@ -26,6 +27,8 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public DbSet<Submission> Submissions { get; set; } = null!;
 
     public DbSet<Response> Responses { get; set; } = null!;
+
+    public DbSet<SectionStatuses> sectionStatusesSp { get; set; } = null!;
 
     public PlanTechDbContext() { }
 
@@ -93,10 +96,16 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
             builder.HasKey(response => response.Id);
             builder.Property(response => response.DateCreated).HasColumnType("datetime").HasDefaultValue();
         });
+
+        modelBuilder.Entity<SectionStatuses>(builder =>
+        {
+            builder.HasNoKey();
+        });
     }
 
     public IQueryable<User> GetUsers => Users;
     public IQueryable<SignIn> SignIns => SignIn;
+    public IQueryable<SectionStatuses> GetSectionStatuses(string sectionIds) => sectionStatusesSp.FromSqlInterpolated($"{DatabaseConstants.GetSectionStatuses} {sectionIds}");
 
     public void AddUser(User user) => Users.Add(user);
     public void AddSignIn(SignIn signIn) => SignIn.Add(signIn);

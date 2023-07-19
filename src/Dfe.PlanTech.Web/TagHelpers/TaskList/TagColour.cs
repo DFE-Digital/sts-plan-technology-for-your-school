@@ -7,5 +7,6 @@ public enum TagColour
     Grey,
     Red,
     Green,
-    Yellow
+    Yellow,
+    DarkBlue,
 }

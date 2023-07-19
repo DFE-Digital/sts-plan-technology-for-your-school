@@ -99,6 +99,7 @@ public static class ProgramExtensions
         services.AddTransient<IGetResponseQuery, GetResponseQuery>();
 
         services.AddTransient<ICalculateMaturityCommand, CalculateMaturityCommand>();
+        services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
 
         return services;
     }
