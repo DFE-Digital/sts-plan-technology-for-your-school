@@ -105,9 +105,9 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
     [HttpGet]
     [Route("change-answer")]
-    public IActionResult ChangeAnswer(string questionRef, string answerRef)
+    public IActionResult ChangeAnswer(string questionRef, string answerRef, int submissionId)
     {
-        return RedirectToAction("GetQuestionById", "Questions", new { id = questionRef, answerRef = answerRef });
+        return RedirectToAction("GetQuestionById", "Questions", new { id = questionRef, answerRef = answerRef, submissionId = submissionId });
     }
 
     [HttpPost("ConfirmCheckAnswers")]
@@ -117,7 +117,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
         if (calculateMaturity > 1)
         {
-            return RedirectToAction("GetByRoute", "Pages", new { route = "self-assessment"});
+            return RedirectToAction("GetByRoute", "Pages", new { route = "self-assessment" });
         }
 
         // TODO Show error message.

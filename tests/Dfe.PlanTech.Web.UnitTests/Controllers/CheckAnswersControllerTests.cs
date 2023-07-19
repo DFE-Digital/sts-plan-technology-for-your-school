@@ -151,7 +151,7 @@ public class CheckAnswersControllerTests
         Domain.Questions.Models.Question question = new Domain.Questions.Models.Question() { ContentfulRef = "QuestionRef", QuestionText = "Question Text" };
         Domain.Answers.Models.Answer answer = new Domain.Answers.Models.Answer() { ContentfulRef = "Answer", AnswerText = "Question Text" };
 
-        var result = _checkAnswersController.ChangeAnswer(question.ContentfulRef, answer.ContentfulRef);
+        var result = _checkAnswersController.ChangeAnswer(question.ContentfulRef, answer.ContentfulRef, SubmissionId);
 
         Assert.IsType<RedirectToActionResult>(result);
 
