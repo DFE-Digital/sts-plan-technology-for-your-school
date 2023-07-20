@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Response.Interface;
+using Dfe.PlanTech.Application.Submission.Interface;
 using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Answers.Models;
@@ -18,28 +19,34 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("/question")]
 public class QuestionsController : BaseController<QuestionsController>
 {
-    private readonly GetQuestionQuery _getQuestionQuery;
+    private readonly GetQuestionQuery _getQuestionnaireQuery;
+    private readonly IGetQuestionQuery _getQuestionQuery;
     private readonly IRecordQuestionCommand _recordQuestionCommand;
     private readonly IRecordAnswerCommand _recordAnswerCommand;
     private readonly ICreateSubmissionCommand _createSubmissionCommand;
     private readonly ICreateResponseCommand _createResponseCommand;
+    private readonly IGetResponseQuery _getResponseQuery;
     private readonly IUser _user;
 
     public QuestionsController(
         ILogger<QuestionsController> logger,
         IUrlHistory history,
-        [FromServices] GetQuestionQuery getQuestionQuery,
+        [FromServices] GetQuestionQuery getQuestionnaireQuery,
+        [FromServices] IGetQuestionQuery getQuestionQuery,
         [FromServices] IRecordQuestionCommand recordQuestionCommand,
         [FromServices] IRecordAnswerCommand recordAnswerCommand,
         [FromServices] ICreateSubmissionCommand createSubmissionCommand,
         [FromServices] ICreateResponseCommand createResponseCommand,
+        [FromServices] IGetResponseQuery getResponseQuery,
         IUser user) : base(logger, history)
     {
+        _getQuestionnaireQuery = getQuestionnaireQuery;
         _getQuestionQuery = getQuestionQuery;
         _recordQuestionCommand = recordQuestionCommand;
         _recordAnswerCommand = recordAnswerCommand;
         _createSubmissionCommand = createSubmissionCommand;
         _createResponseCommand = createResponseCommand;
+        _getResponseQuery = getResponseQuery;
         _user = user;
     }
 
@@ -105,8 +112,21 @@ public class QuestionsController : BaseController<QuestionsController>
 
         await _RecordResponse(new RecordResponseDto() { AnswerId = answerId, QuestionId = questionId, SubmissionId = submissionId, UserId = userId, Maturity = await _GetMaturityForAnswer(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId) });
 
-        if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId)) return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { submissionId = submissionId, sectionName = param.SectionName });
+        if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId) || await _NextQuestionIsAnswered(submissionId, submitAnswerDto.NextQuestionId)) return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { submissionId = submissionId, sectionName = param.SectionName });
         else return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.NextQuestionId, submissionId = submissionId });
+    }
+
+    private async Task<bool> _NextQuestionIsAnswered(int submissionId, string nextQuestionId)
+    {
+        Response[]? responseList = await _GetResponseList(submissionId) ?? throw new NullReferenceException(nameof(responseList));
+
+        foreach (Response response in responseList)
+        {
+            Domain.Questions.Models.Question? question = await _GetResponseQuestion(response.QuestionId) ?? throw new NullReferenceException(nameof(question));
+            if (question.ContentfulRef.Equals(nextQuestionId)) return true;
+        }
+
+        return false;
     }
 
     private static Params? ParseParameters(string parameters)
@@ -124,6 +144,16 @@ public class QuestionsController : BaseController<QuestionsController>
             SectionName = splitParams.Length > 0 ? splitParams[0].ToString() : string.Empty,
             SectionId = splitParams.Length > 1 ? splitParams[1].ToString() : string.Empty,
         };
+    }
+
+    private async Task<Response[]?> _GetResponseList(int submissionId)
+    {
+        return await _getResponseQuery.GetResponseListBy(submissionId);
+    }
+
+    private async Task<Domain.Questions.Models.Question?> _GetResponseQuestion(int questionId)
+    {
+        return await _getQuestionQuery.GetQuestionBy(questionId);
     }
 
     private async Task<string?> _GetQuestionTextById(String questionId)
@@ -164,7 +194,7 @@ public class QuestionsController : BaseController<QuestionsController>
     private async Task<Domain.Questionnaire.Models.Question> _GetQuestion(string id, string? section, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
-        return await _getQuestionQuery.GetQuestionById(id, section, cancellationToken) ?? throw new KeyNotFoundException($"Could not find question with id {id}");
+        return await _getQuestionnaireQuery.GetQuestionById(id, section, cancellationToken) ?? throw new KeyNotFoundException($"Could not find question with id {id}");
     }
 
     private async Task<int> _RecordAnswer(RecordAnswerDto recordAnswerDto)
