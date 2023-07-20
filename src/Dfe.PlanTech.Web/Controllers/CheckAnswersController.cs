@@ -111,7 +111,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     }
 
     [HttpPost("ConfirmCheckAnswers")]
-    public async Task<IActionResult> ConfirmCheckAnswers(int submissionId, String sectionName)
+    public async Task<IActionResult> ConfirmCheckAnswers(int submissionId, string sectionName)
     {
         var calculateMaturity = await _calculateMaturityCommand.CalculateMaturityAsync(submissionId);
 
