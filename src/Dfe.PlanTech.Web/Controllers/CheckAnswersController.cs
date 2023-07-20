@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Response.Interface;
@@ -35,56 +36,90 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
         _getPageQuery = getPageQuery;
     }
 
-    private async Task<Response[]?> _GetResponseList(int submissionId)
-    {
-        return await _getResponseQuery.GetResponseListBy(submissionId);
-    }
+    // private async Task<List<Response>> _TrimResponseList(Response[] responseArr)
+    // {
+    //     List<Response> responseList = new List<Response>();
 
-    private async Task<Domain.Questions.Models.Question?> _GetResponseQuestion(int questionId)
-    {
-        return await _getQuestionQuery.GetQuestionBy(questionId);
-    }
+    //     Dictionary<string, int> indexMap = new Dictionary<string, int>();
+    //     Dictionary<string, DateTime> dateTimeMap = new Dictionary<string, DateTime>();
 
-    private async Task<Domain.Answers.Models.Answer?> _GetResponseAnswer(int answerId)
+    //     int index = 0;
+
+    //     foreach (Response response in responseArr)
+    //     {
+    //         Domain.Questions.Models.Question question = await _GetResponseQuestion(response.QuestionId) ?? throw new NullReferenceException(nameof(question));
+
+    //         if (indexMap.ContainsKey(question.ContentfulRef))
+    //         {
+    //             if (DateTime.Compare(question.DateCreated, dateTimeMap[question.ContentfulRef]) > 0)
+    //             {
+    //                 responseList[indexMap[question.ContentfulRef]] = response;
+    //                 dateTimeMap[question.ContentfulRef] = question.DateCreated;
+    //             }
+    //         }
+    //         else
+    //         {
+    //             responseList.Add(response);
+    //             indexMap.Add(question.ContentfulRef, index++);
+    //             dateTimeMap.Add(question.ContentfulRef, question.DateCreated);
+    //         }
+    //     }
+    //     return responseList;
+    // }
+
+    private QuestionWithAnswer _CreateQuestionWithAnswer(string questionRef, string questionText, string answerRef, string answerText)
     {
-        return await _getAnswerQuery.GetAnswerBy(answerId);
+        return new QuestionWithAnswer()
+        {
+            QuestionRef = questionRef,
+            QuestionText = questionText,
+            AnswerRef = answerRef,
+            AnswerText = answerText
+        };
     }
 
     private async Task<CheckAnswerDto> _GetCheckAnswerDto(Response[] responseList)
     {
-        CheckAnswerDto checkAnswerDto = new CheckAnswerDto() { QuestionAnswerList = new QuestionWithAnswer[responseList.Length] };
+        CheckAnswerDto checkAnswerDto = new CheckAnswerDto();
 
-        for (int i = 0; i < checkAnswerDto.QuestionAnswerList.Length; i++)
+        Dictionary<string, int> indexMap = new Dictionary<string, int>();
+        Dictionary<string, DateTime> dateTimeMap = new Dictionary<string, DateTime>();
+
+        int index = 0;
+
+        foreach (Response response in responseList)
         {
-            var question = await _GetResponseQuestion(responseList[i].QuestionId);
+            var question = await _GetResponseQuestion(response.QuestionId);
             string questionContentfulRef = question?.ContentfulRef ?? throw new NullReferenceException(nameof(question.ContentfulRef));
             string questionText = question?.QuestionText ?? throw new NullReferenceException(nameof(questionText));
 
-            var answer = await _GetResponseAnswer(responseList[i].AnswerId);
+            var answer = await _GetResponseAnswer(response.AnswerId);
             string answerContentfulRef = answer?.ContentfulRef ?? throw new NullReferenceException(nameof(answer.ContentfulRef));
             string answerText = answer?.AnswerText ?? throw new NullReferenceException(nameof(answerText));
 
-            checkAnswerDto.QuestionAnswerList[i] = new QuestionWithAnswer()
+            if (dateTimeMap.ContainsKey(questionContentfulRef))
             {
-                QuestionRef = questionContentfulRef,
-                QuestionText = questionText,
-                AnswerRef = answerContentfulRef,
-                AnswerText = answerText
-            };
+                if (DateTime.Compare(question.DateCreated, dateTimeMap[questionContentfulRef]) > 0)
+                {
+                    checkAnswerDto.QuestionAnswerList[indexMap[questionContentfulRef]] = _CreateQuestionWithAnswer(questionContentfulRef, questionText, answerContentfulRef, answerText);
+                }
+            }
+            else
+            {
+                checkAnswerDto.QuestionAnswerList.Add(_CreateQuestionWithAnswer(questionContentfulRef, questionText, answerContentfulRef, answerText));
+                dateTimeMap.Add(questionContentfulRef, question.DateCreated);
+                indexMap.Add(questionContentfulRef, index++);
+            }
         }
 
         return checkAnswerDto;
-    }
-
-    private async Task<Page> _GetCheckAnswerContent()
-    {
-        return await _getPageQuery.GetPageBySlug("check-answers", CancellationToken.None);
     }
 
     [HttpGet]
     [Route("check-answers")]
     public async Task<IActionResult> CheckAnswersPage(int submissionId, string sectionName)
     {
+        //List<Response> responseList = await _TrimResponseList(await _GetResponseList(submissionId) ?? throw new NullReferenceException(nameof(responseList)));
         Response[]? responseList = await _GetResponseList(submissionId);
 
         Page checkAnswerPageContent = await _GetCheckAnswerContent();
@@ -121,5 +156,25 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
         // TODO Show error message.
         return null;
+    }
+
+    private async Task<Response[]?> _GetResponseList(int submissionId)
+    {
+        return await _getResponseQuery.GetResponseListBy(submissionId);
+    }
+
+    private async Task<Domain.Questions.Models.Question?> _GetResponseQuestion(int questionId)
+    {
+        return await _getQuestionQuery.GetQuestionBy(questionId);
+    }
+
+    private async Task<Domain.Answers.Models.Answer?> _GetResponseAnswer(int answerId)
+    {
+        return await _getAnswerQuery.GetAnswerBy(answerId);
+    }
+
+    private async Task<Page> _GetCheckAnswerContent()
+    {
+        return await _getPageQuery.GetPageBySlug("check-answers", CancellationToken.None);
     }
 }
