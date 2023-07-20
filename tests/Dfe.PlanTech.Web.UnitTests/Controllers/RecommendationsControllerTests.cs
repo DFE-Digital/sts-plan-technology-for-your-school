@@ -12,8 +12,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers;
 public class RecommendationsControllerTests
 {
     private readonly RecommendationsController _recommendationsController;
-    private readonly Mock<IPlanTechDbContext> _planTechDbContextMock;
-    private object _calculateMaturityCommandMock;
 
     public RecommendationsControllerTests()
     {
@@ -25,7 +23,7 @@ public class RecommendationsControllerTests
     [Fact]
     public async Task RecommendationsPage_Displays_BackButton()
     {
-        var result = _recommendationsController.GetRecommendationPage();
+        var result = await _recommendationsController.GetRecommendationPage();
         Assert.IsType<ViewResult>(result);
     }
 }
