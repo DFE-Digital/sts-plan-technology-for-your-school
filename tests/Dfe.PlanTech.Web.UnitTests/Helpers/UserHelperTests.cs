@@ -12,11 +12,13 @@ public class UserHelperTests
     private readonly UserHelper _userHelper;
     private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
     private readonly Mock<IPlanTechDbContext> _planTechDbContextMock;
+    private readonly Mock<ICreateEstablishmentCommand> _createEstablishmentCommandMock;
 
     public UserHelperTests()
     {
         _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
         _planTechDbContextMock = new Mock<IPlanTechDbContext>();
+        _createEstablishmentCommandMock = new Mock<ICreateEstablishmentCommand>();
 
         var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
         {
@@ -26,7 +28,7 @@ public class UserHelperTests
 
         _httpContextAccessorMock.Setup(m => m.HttpContext).Returns(new DefaultHttpContext() { User = user });
 
-        _userHelper = new UserHelper(_httpContextAccessorMock.Object, _planTechDbContextMock.Object);
+        _userHelper = new UserHelper(_httpContextAccessorMock.Object, _planTechDbContextMock.Object, _createEstablishmentCommandMock.Object);
     }
 
     [Fact]

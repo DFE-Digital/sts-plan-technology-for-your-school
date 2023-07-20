@@ -4,6 +4,7 @@ using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 using Microsoft.Data.SqlClient;
 using System.Linq.Expressions;
+using Dfe.PlanTech.Domain.Establishments.Models;
 
 namespace Dfe.PlanTech.Application.Persistence.Interfaces;
 
@@ -26,6 +27,8 @@ public interface IPlanTechDbContext
     // Submission Table
     public void AddSubmission(Domain.Submissions.Models.Submission submission);
 
+    public void AddEstablishment(Domain.Establishments.Models.Establishment establishment);
+
     // Response Table
     public void AddResponse(Domain.Responses.Models.Response response);
 
@@ -36,6 +39,8 @@ public interface IPlanTechDbContext
     IQueryable<SectionStatuses> GetSectionStatuses(string sectionIds);
 
     Task<User?> GetUserBy(Expression<Func<User, bool>> predicate);
+    
+    Task<Establishment?> GetEstablishmentBy(Expression<Func<Establishment, bool>> predicate);
 
     Task<Domain.Responses.Models.Response[]?> GetResponseListBy(int submissionId);
 }

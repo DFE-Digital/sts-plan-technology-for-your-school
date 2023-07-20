@@ -1,6 +1,7 @@
 ﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Application.Users.Queries;
+using Dfe.PlanTech.Domain.Establishments.Models;
 using Microsoft.AspNetCore.Http;
 
 namespace Dfe.PlanTech.Application.Users.Helper
@@ -9,11 +10,13 @@ namespace Dfe.PlanTech.Application.Users.Helper
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IPlanTechDbContext _db;
+        private readonly ICreateEstablishmentCommand _createEstablishmentCommand;
 
-        public UserHelper(IHttpContextAccessor httpContextAccessor, IPlanTechDbContext db)
+        public UserHelper(IHttpContextAccessor httpContextAccessor, IPlanTechDbContext db, ICreateEstablishmentCommand createEstablishmentCommand)
         {
             _httpContextAccessor = httpContextAccessor;
             _db = db;
+            _createEstablishmentCommand = createEstablishmentCommand;
         }
 
         public async Task<int?> GetCurrentUserId()
@@ -28,9 +31,39 @@ namespace Dfe.PlanTech.Application.Users.Helper
             return await getUserIdQuery.GetUserId(userId);
         }
 
-        public int GetEstablishmentId()
+        public async Task<int?> GetEstablishmentId()
         {
-            return 1;
+            var getEstablishmentIdQuery = new GetEstablishmentIdQuery(_db);
+
+            var existingEstablishmentId = await getEstablishmentIdQuery.GetEstablishmentId(getOrganisationData().EstablishmentRef);
+            
+            if (existingEstablishmentId == null)
+            { 
+                await SetEstablishment();
+                return await getEstablishmentIdQuery.GetEstablishmentId(getOrganisationData().EstablishmentRef);
+            }
+
+            return existingEstablishmentId;
+        }
+
+        public async Task<int> SetEstablishment()
+        {
+            var establishmentDto = getOrganisationData();
+
+            var establishmentId = await _createEstablishmentCommand.CreateEstablishment(establishmentDto);
+
+            return establishmentId;
+        }
+
+        private EstablishmentDto getOrganisationData()
+        {
+            //TODO: Grab this from claims later.
+            return new EstablishmentDto()
+            {
+                EstablishmentRef = "131",
+                EstablishmentType = "Community school",
+                OrgName = "School name",
+            };
         }
     }
 }
