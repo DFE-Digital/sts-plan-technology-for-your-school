@@ -107,19 +107,24 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public IQueryable<SignIn> SignIns => SignIn;
     public IQueryable<SectionStatuses> GetSectionStatuses(string sectionIds) => sectionStatusesSp.FromSqlInterpolated($"{DatabaseConstants.GetSectionStatuses} {sectionIds}");
 
+    public IQueryable<Question> GetQuestions => Questions;
+    public IQueryable<Answer> GetAnswers => Answers;
+    public IQueryable<Response> GetResponses => Responses;
+
     public void AddUser(User user) => Users.Add(user);
     public void AddSignIn(SignIn signIn) => SignIn.Add(signIn);
 
     public void AddQuestion(Question question) => Questions.Add(question);
-    public Task<Question?> GetQuestionBy(int questionId) => Questions.FirstOrDefaultAsync(question => question.Id == questionId);
+    public Task<Question?> GetQuestion(Expression<Func<Question, bool>> predicate) => GetQuestions.FirstOrDefaultAsync(predicate);
 
     public void AddAnswer(Answer answer) => Answers.Add(answer);
-    public Task<Answer?> GetAnswerBy(int answerId) => Answers.FirstOrDefaultAsync(answer => answer.Id == answerId);
+    public Task<Answer?> GetAnswer(Expression<Func<Answer, bool>> predicate) => GetAnswers.FirstOrDefaultAsync(predicate);
 
     public void AddSubmission(Submission submission) => Submissions.Add(submission);
 
     public void AddResponse(Response response) => Responses.Add(response);
-    public async Task<Response[]?> GetResponseListBy(int submissionId) => await Responses.Where(response => response.SubmissionId == submissionId).ToArrayAsync();
+    public Task<Response?> GetResponse(Expression<Func<Response, bool>> predicate) => GetResponses.FirstOrDefaultAsync(predicate);
+    public async Task<Response[]?> GetResponseList(Expression<Func<Response, bool>> predicate) => await GetResponses.Where(predicate).ToArrayAsync();
 
     public Task<int> SaveChangesAsync() => base.SaveChangesAsync();
 

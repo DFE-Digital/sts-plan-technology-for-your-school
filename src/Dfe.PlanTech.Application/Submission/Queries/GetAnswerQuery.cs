@@ -14,6 +14,6 @@ public class GetAnswerQuery : IGetAnswerQuery
     }
     public Task<Answer?> GetAnswerBy(int answerId)
     {
-        return _db.GetAnswerBy(answerId);
+        return _db.GetAnswer(answer => answer.Id == answerId);
     }
 }

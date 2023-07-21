@@ -12,8 +12,9 @@ public class GetQuestionQuery : IGetQuestionQuery
     {
         _db = db;
     }
+
     public Task<Question?> GetQuestionBy(int questionId)
     {
-        return _db.GetQuestionBy(questionId);
+        return _db.GetQuestion(question => question.Id == questionId);
     }
 }
