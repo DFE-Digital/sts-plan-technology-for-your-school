@@ -57,7 +57,7 @@ namespace Dfe.PlanTech.Application.Users.Helper
             return establishmentId;
         }
 
-        private EstablishmentDto? _GetOrganisationData()
+        private EstablishmentDto _GetOrganisationData()
         {
             
             var claims = _httpContextAccessor.HttpContext.User.Claims.ToList();
@@ -66,6 +66,8 @@ namespace Dfe.PlanTech.Application.Users.Helper
             orgDetails ??= "{}";
             var establishment = JsonSerializer.Deserialize<EstablishmentDto>(orgDetails);
 
+            establishment ??= new EstablishmentDto();
+           
             return establishment;
         }
     }
