@@ -13,11 +13,8 @@ on:
 
 jobs:
   validate-terraform:  
-    name: Validate Terraform 
+    name: Validate Terraform Test
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{env.TF_WORKING_DIRECTORY}}
     steps:
       - name: Validate Terraform docs
         uses: terraform-docs/gh-actions@v1.0.0
