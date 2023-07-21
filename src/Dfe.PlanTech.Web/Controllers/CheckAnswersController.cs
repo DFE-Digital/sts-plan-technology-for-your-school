@@ -115,13 +115,8 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     {
         var calculateMaturity = await _calculateMaturityCommand.CalculateMaturityAsync(submissionId);
 
-        if (calculateMaturity > 1)
-        {
-            TempData["SectionName"] = sectionName;
-            return RedirectToAction("GetByRoute", "Pages", new { route = "self-assessment" });
-        }
-
-        // TODO Show error message.
-        return null;
+        TempData["SectionName"] = sectionName;
+        return RedirectToAction("GetByRoute", "Pages", new { route = "self-assessment" });
+            
     }
 }
