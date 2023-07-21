@@ -55,29 +55,32 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         => new()
         {
             Page = BuildPage(),
-            DisplayName = "Testing Recommendation",
-            InternalName = "testing-recommendation",
+            DisplayName = $"Testing Recommendation - {maturity}",
+            InternalName = $"testing-recommendation-{maturity}",
             Maturity = maturity
         };
-        
+
         public InsetText BuildInsetText() => new()
         {
             Text = "Inset Text"
         };
         
-        private static ISection[] BuildSections()
-        {
-            return new ISection[]
+        public ISection[] BuildSections()
+         => new ISection[]
             {
                 new Section
                 {
                     Name = "Section",
                     Questions = BuildQuestion(),
+                    Recommendations = new RecommendationPage[] {
+                        BuildRecommendationsPage(Maturity.Low),
+                        BuildRecommendationsPage(Maturity.Medium),
+                        BuildRecommendationsPage(Maturity.High)
+                    }
                 }
             };
-        }
 
-        private static Question[] BuildQuestion()
+        private Question[] BuildQuestion()
         {
             return new Question[]
             {
@@ -90,7 +93,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             };
         }
 
-        private static Answer[] BuildAnswer()
+        private Answer[] BuildAnswer()
         {
             return new Answer[]
             {

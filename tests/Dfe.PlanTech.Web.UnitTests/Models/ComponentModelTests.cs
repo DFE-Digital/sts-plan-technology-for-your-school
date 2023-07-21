@@ -66,15 +66,17 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         }
 
         [Fact]
-        public void Should_Render_InsetText(){
+        public void Should_Render_InsetText()
+        {
             var actual = _componentBuilder.BuildInsetText();
-            
+
             Assert.True(actual != null);
             Assert.Equal("Inset Text", actual.Text);
         }
 
         [Fact]
-        public void Should_Render_RecommendationPage(){
+        public void Should_Render_RecommendationPage()
+        {
             var maturity = Maturity.Low;
             var recommendationPage = _componentBuilder.BuildRecommendationsPage(maturity);
 
@@ -84,5 +86,28 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             Assert.NotNull(recommendationPage.DisplayName);
             Assert.Equal(maturity, recommendationPage.Maturity);
         }
+
+        [Fact]
+        public void Section_Should_Return_Correct_Maturity()
+        {
+            var maturity = Maturity.Low;
+            var section = _componentBuilder.BuildSections().First();
+
+            var lowMaturityRecommendation = section.GetRecommendationForMaturity(maturity);
+
+            Assert.NotNull(lowMaturityRecommendation);
+            Assert.Equal(maturity, lowMaturityRecommendation.Maturity);
+        }
+
+        [Fact]
+        public void Section_Should_Error_If_Maturity_Not_Found()
+        {
+            var maturity = Maturity.Unknown;
+            var section = _componentBuilder.BuildSections().First();
+            var exceptionType = typeof(KeyNotFoundException);
+            
+            Assert.Throws(exceptionType, () => section.GetRecommendationForMaturity(maturity));
+        }
+
     }
 }

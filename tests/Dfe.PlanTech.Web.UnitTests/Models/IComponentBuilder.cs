@@ -1,6 +1,7 @@
 ﻿using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Dfe.PlanTech.Domain.Questionnaire.Enums;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Web.UnitTests.Models
@@ -14,5 +15,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         InsetText BuildInsetText();
         TextBody BuildTextBody();
         RecommendationPage BuildRecommendationsPage(Maturity maturity = Maturity.Unknown);
+        ISection[] BuildSections();
     }
 }
