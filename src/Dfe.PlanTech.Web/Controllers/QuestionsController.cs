@@ -112,8 +112,22 @@ public class QuestionsController : BaseController<QuestionsController>
 
         await _RecordResponse(new RecordResponseDto() { AnswerId = answerId, QuestionId = questionId, SubmissionId = submissionId, UserId = userId, Maturity = await _GetMaturityForAnswer(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId) });
 
-        if (string.IsNullOrEmpty(submitAnswerDto.NextQuestionId) || await _NextQuestionIsAnswered(submissionId, submitAnswerDto.NextQuestionId)) return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { submissionId = submissionId, sectionName = param.SectionName });
-        else return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.NextQuestionId, submissionId = submissionId });
+        string? nextQuestionId = await _GetNextQuestionId(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId);
+
+        if (string.IsNullOrEmpty(nextQuestionId) || await _NextQuestionIsAnswered(submissionId, nextQuestionId)) return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { submissionId = submissionId, sectionName = param.SectionName });
+        else return RedirectToAction("GetQuestionById", new { id = nextQuestionId, submissionId = submissionId });
+    }
+
+    private async Task<string?> _GetNextQuestionId(string questionId, string chosenAnswerId)
+    {
+        Domain.Questionnaire.Models.Question? question = await _GetQuestion(questionId, null, CancellationToken.None);
+
+        foreach (Domain.Questionnaire.Models.Answer answer in question.Answers)
+        {
+            if (answer.Sys.Id.Equals(chosenAnswerId)) return answer.NextQuestion?.Sys.Id ?? null;
+        }
+
+        return null;
     }
 
     private async Task<bool> _NextQuestionIsAnswered(int submissionId, string nextQuestionId)

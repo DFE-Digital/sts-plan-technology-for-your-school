@@ -10,8 +10,6 @@ public class SubmitAnswerDto
     [Required]
     public string ChosenAnswerId { get; init; } = null!;
 
-    public string? NextQuestionId { get; init; }
-
     public string? Params { get; init; } = null!;
 
     public int? SubmissionId { get; init; }
