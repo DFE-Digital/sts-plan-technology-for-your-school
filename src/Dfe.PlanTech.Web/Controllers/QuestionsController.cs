@@ -86,7 +86,7 @@ public class QuestionsController : BaseController<QuestionsController>
         int submissionId;
         if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
 
-        if (!ModelState.IsValid) return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.QuestionId });
+        if (!ModelState.IsValid) return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.QuestionId, submissionId = submitAnswerDto.SubmissionId });
         Params param = new Params();
 
         var userId = Convert.ToUInt16(await _user.GetCurrentUserId());
