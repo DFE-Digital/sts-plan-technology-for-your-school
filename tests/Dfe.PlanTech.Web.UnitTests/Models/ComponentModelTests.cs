@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using Dfe.PlanTech.Domain.Questionnaire.Enums;
+using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Models
 {
@@ -70,6 +71,18 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             
             Assert.True(actual != null);
             Assert.Equal("Inset Text", actual.Text);
+        }
+
+        [Fact]
+        public void Should_Render_RecommendationPage(){
+            var maturity = Maturity.Low;
+            var recommendationPage = _componentBuilder.BuildRecommendationsPage(maturity);
+
+            Assert.NotNull(recommendationPage);
+            Assert.NotNull(recommendationPage.Page);
+            Assert.NotNull(recommendationPage.InternalName);
+            Assert.NotNull(recommendationPage.DisplayName);
+            Assert.Equal(maturity, recommendationPage.Maturity);
         }
     }
 }
