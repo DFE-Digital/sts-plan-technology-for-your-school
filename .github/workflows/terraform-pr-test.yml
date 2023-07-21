@@ -29,5 +29,12 @@ jobs:
         with:
           working-dir: terraform
           config-file: .terraform-docs.yml
-          output-method: print
+          output-file: terraform-configuration.md
+          output-method: inject
           fail-on-diff: true
+
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v3
+        with:
+            name: terraform-config
+            path: terraform/terraform-configuration.md
