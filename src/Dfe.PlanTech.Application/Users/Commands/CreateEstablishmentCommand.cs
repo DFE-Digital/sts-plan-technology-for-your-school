@@ -22,7 +22,7 @@ public class CreateEstablishmentCommand : ICreateEstablishmentCommand
         var establishment = new Establishment()
         {
             EstablishmentRef = establishmentDto.EstablishmentRef,
-            EstablishmentType = establishmentDto.EstablishmentType,
+            EstablishmentType = establishmentDto.Type.Name,
             OrgName = establishmentDto.OrgName,
         };
 

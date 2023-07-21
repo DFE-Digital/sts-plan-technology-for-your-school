@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Helper;
+using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 using Microsoft.AspNetCore.Http;
 using Moq;
@@ -24,6 +25,7 @@ public class UserHelperTests
         {
             new Claim(ClaimTypes.Name, "test"),
             new Claim(ClaimTypes.NameIdentifier, "1"),
+            new Claim("organisation", "{\n  \"ukprn\" : \"131\",\n  \"type\" : {\n      \"name\" : \"Type name\"\n  },\n  \"name\" : \"Organisation name\"\n}"),
             }, "mock"));
 
         _httpContextAccessorMock.Setup(m => m.HttpContext).Returns(new DefaultHttpContext() { User = user });
@@ -44,12 +46,30 @@ public class UserHelperTests
     }
 
     [Fact]
-    public void GetEstablishmentId_Returns_Correct_Id()
+    public async Task GetEstablishmentId_Returns_Correct_Id_When_Establishment_Exists_In_DB()
     {
-        var result = _userHelper.GetEstablishmentId();
+        _planTechDbContextMock.Setup(m => m.GetEstablishmentBy(establishment => establishment.EstablishmentRef == "131")).ReturnsAsync(new Establishment() { Id = 1 });
+
+        var result = await _userHelper.GetEstablishmentId();
 
         Assert.IsType<int>(result);
 
         Assert.Equal(1, result);
     }
+
+
+    [Fact]
+    public async Task GetEstablishmentId_Returns_Correct_Id_When_Establishment_Does_Not_Exists_In_DB()
+    {
+        _planTechDbContextMock
+            .SetupSequence(m => m.GetEstablishmentBy(establishment => establishment.EstablishmentRef == "131"))
+            .ReturnsAsync(() => { return null; })
+            .ReturnsAsync(new Establishment() { Id = 17 });
+        
+        var result = await _userHelper.GetEstablishmentId();
+
+        Assert.IsType<int>(result);
+
+        Assert.Equal(17, result);
+    } 
 }

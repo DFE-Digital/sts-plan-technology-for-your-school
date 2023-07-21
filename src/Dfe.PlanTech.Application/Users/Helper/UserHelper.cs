@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
+﻿using System.Text.Json;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Application.Users.Queries;
 using Dfe.PlanTech.Domain.Establishments.Models;
@@ -35,12 +36,13 @@ namespace Dfe.PlanTech.Application.Users.Helper
         {
             var getEstablishmentIdQuery = new GetEstablishmentIdQuery(_db);
 
-            var existingEstablishmentId = await getEstablishmentIdQuery.GetEstablishmentId(getOrganisationData().EstablishmentRef);
+            var existingEstablishmentId = await getEstablishmentIdQuery.GetEstablishmentId(_GetOrganisationData().EstablishmentRef);
             
             if (existingEstablishmentId == null)
             { 
                 await SetEstablishment();
-                return await getEstablishmentIdQuery.GetEstablishmentId(getOrganisationData().EstablishmentRef);
+                var newEstablishmentId =  await getEstablishmentIdQuery.GetEstablishmentId(_GetOrganisationData().EstablishmentRef);
+                return newEstablishmentId;
             }
 
             return existingEstablishmentId;
@@ -48,22 +50,23 @@ namespace Dfe.PlanTech.Application.Users.Helper
 
         public async Task<int> SetEstablishment()
         {
-            var establishmentDto = getOrganisationData();
+            var establishmentDto = _GetOrganisationData();
 
             var establishmentId = await _createEstablishmentCommand.CreateEstablishment(establishmentDto);
 
             return establishmentId;
         }
 
-        private EstablishmentDto getOrganisationData()
+        private EstablishmentDto _GetOrganisationData()
         {
-            //TODO: Grab this from claims later.
-            return new EstablishmentDto()
-            {
-                EstablishmentRef = "131",
-                EstablishmentType = "Community school",
-                OrgName = "School name",
-            };
+            
+            var claims = _httpContextAccessor.HttpContext.User.Claims.ToList();
+            var orgDetails = claims?.Find(x => x.Type.Contains("organisation"))?.Value;
+            
+            orgDetails ??= "{}";
+            var establishment = JsonSerializer.Deserialize<EstablishmentDto>(orgDetails);
+
+            return establishment;
         }
     }
 }
