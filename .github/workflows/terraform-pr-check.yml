@@ -45,9 +45,18 @@ jobs:
       run:
         working-directory: ${{env.TF_WORKING_DIRECTORY}}
     steps:
-      - name: Clone repo
+      - name: Clone repo for pull request
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+        if: github.event_name == 'pull_request'
 
+      - name: Clone repo for push
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref_name }}
+        if: github.event_name == 'push'
+        
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
@@ -105,7 +114,7 @@ jobs:
           config-file: .terraform-docs.yml
           output-file: terraform-configuration.md
           output-method: inject
-          fail-on-diff: true
+          git-push: "true"
 
       - name: Update PR with Terraform results  
         uses: ./.github/actions/post-terraform-results
