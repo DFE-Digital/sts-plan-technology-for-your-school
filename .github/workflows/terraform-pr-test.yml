@@ -16,6 +16,14 @@ jobs:
     name: Validate Terraform Test
     runs-on: ubuntu-latest
     steps:
+      - name: Clone repo
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.4.5
+    
       - name: Validate Terraform docs
         uses: terraform-docs/gh-actions@v1.0.0
         with:
