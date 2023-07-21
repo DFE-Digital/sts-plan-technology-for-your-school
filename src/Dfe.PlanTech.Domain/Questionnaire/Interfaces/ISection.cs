@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Interfaces;
@@ -18,4 +19,8 @@ public interface ISection : IContentComponent
     public Page InterstitialPage { get; }
 
     public Sys Sys { get; }
+
+    public RecommendationPage[] Recommendations { get; }
+
+    public RecommendationPage GetRecommendationForMaturity(Maturity maturity);
 }
