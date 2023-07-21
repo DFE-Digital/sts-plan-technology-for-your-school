@@ -36,13 +36,17 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
         _getPageQuery = getPageQuery;
     }
 
-    private QuestionWithAnswer _CreateQuestionWithAnswer(string questionRef, string questionText, string answerRef, string answerText)
+    private async Task<QuestionWithAnswer> _CreateQuestionWithAnswer(string questionRef, string questionText, int answerId)
     {
+        var answer = await _GetResponseAnswer(answerId);
+        string answerContentfulRef = answer?.ContentfulRef ?? throw new NullReferenceException(nameof(answer.ContentfulRef));
+        string answerText = answer?.AnswerText ?? throw new NullReferenceException(nameof(answerText));
+
         return new QuestionWithAnswer()
         {
             QuestionRef = questionRef,
             QuestionText = questionText,
-            AnswerRef = answerRef,
+            AnswerRef = answerContentfulRef,
             AnswerText = answerText
         };
     }
@@ -62,20 +66,16 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
             string questionContentfulRef = question?.ContentfulRef ?? throw new NullReferenceException(nameof(question.ContentfulRef));
             string questionText = question?.QuestionText ?? throw new NullReferenceException(nameof(questionText));
 
-            var answer = await _GetResponseAnswer(response.AnswerId);
-            string answerContentfulRef = answer?.ContentfulRef ?? throw new NullReferenceException(nameof(answer.ContentfulRef));
-            string answerText = answer?.AnswerText ?? throw new NullReferenceException(nameof(answerText));
-
             if (dateTimeMap.ContainsKey(questionContentfulRef))
             {
                 if (DateTime.Compare(question.DateCreated, dateTimeMap[questionContentfulRef]) > 0)
                 {
-                    checkAnswerDto.QuestionAnswerList[indexMap[questionContentfulRef]] = _CreateQuestionWithAnswer(questionContentfulRef, questionText, answerContentfulRef, answerText);
+                    checkAnswerDto.QuestionAnswerList[indexMap[questionContentfulRef]] = await _CreateQuestionWithAnswer(questionContentfulRef, questionText, response.AnswerId);
                 }
             }
             else
             {
-                checkAnswerDto.QuestionAnswerList.Add(_CreateQuestionWithAnswer(questionContentfulRef, questionText, answerContentfulRef, answerText));
+                checkAnswerDto.QuestionAnswerList.Add(await _CreateQuestionWithAnswer(questionContentfulRef, questionText, response.AnswerId));
                 dateTimeMap.Add(questionContentfulRef, question.DateCreated);
                 indexMap.Add(questionContentfulRef, index++);
             }
