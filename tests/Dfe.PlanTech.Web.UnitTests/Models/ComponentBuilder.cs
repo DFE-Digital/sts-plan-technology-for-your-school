@@ -1,6 +1,7 @@
 ﻿using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
+using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 
@@ -50,24 +51,36 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             LinkToEntry = BuildButton()
         };
 
+        public RecommendationPage BuildRecommendationsPage(Maturity maturity = Maturity.Unknown)
+        => new()
+        {
+            Page = BuildPage(),
+            DisplayName = $"Testing Recommendation - {maturity}",
+            InternalName = $"testing-recommendation-{maturity}",
+            Maturity = maturity
+        };
+
         public InsetText BuildInsetText() => new()
         {
             Text = "Inset Text"
         };
         
-        private static ISection[] BuildSections()
-        {
-            return new ISection[]
+        public ISection[] BuildSections()
+         => new ISection[]
             {
                 new Section
                 {
                     Name = "Section",
                     Questions = BuildQuestion(),
+                    Recommendations = new RecommendationPage[] {
+                        BuildRecommendationsPage(Maturity.Low),
+                        BuildRecommendationsPage(Maturity.Medium),
+                        BuildRecommendationsPage(Maturity.High)
+                    }
                 }
             };
-        }
 
-        private static Question[] BuildQuestion()
+        private Question[] BuildQuestion()
         {
             return new Question[]
             {
@@ -80,7 +93,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             };
         }
 
-        private static Answer[] BuildAnswer()
+        private Answer[] BuildAnswer()
         {
             return new Answer[]
             {
@@ -117,5 +130,20 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         {
             return new Dictionary<string, string> { { "3XQEHYfvEQkQwdrihDGagJ", "Completed" } };
         }
+
+        private static Page BuildPage(string? param = null)
+        => new() {
+            InternalName = "Internal Name",
+            Slug = "testing-page",
+            SectionTitle = "Section Title",
+            Param = param,
+            Title = BuildTitle(),
+            Content = Array.Empty<IContentComponent>()
+        };
+
+        private static Title BuildTitle(string text = "Testing Title")
+        => new() {
+            Text = text
+        };
     }
 }
