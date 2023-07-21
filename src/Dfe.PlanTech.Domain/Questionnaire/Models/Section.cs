@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -17,4 +18,10 @@ public class Section : ContentComponent, ISection
     public Page InterstitialPage { get; init; } = null!;
 
     public new Sys Sys { get; init; } = null!;
+
+    public RecommendationPage[] Recommendations { get; init; } = Array.Empty<RecommendationPage>();
+
+    public RecommendationPage GetRecommendationForMaturity(Maturity maturity)
+     => Recommendations.FirstOrDefault(recommendation => recommendation.Maturity == maturity) ??
+        throw new KeyNotFoundException($"Could not find recommendation with maturity {maturity}");
 }
