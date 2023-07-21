@@ -36,37 +36,6 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
         _getPageQuery = getPageQuery;
     }
 
-    // private async Task<List<Response>> _TrimResponseList(Response[] responseArr)
-    // {
-    //     List<Response> responseList = new List<Response>();
-
-    //     Dictionary<string, int> indexMap = new Dictionary<string, int>();
-    //     Dictionary<string, DateTime> dateTimeMap = new Dictionary<string, DateTime>();
-
-    //     int index = 0;
-
-    //     foreach (Response response in responseArr)
-    //     {
-    //         Domain.Questions.Models.Question question = await _GetResponseQuestion(response.QuestionId) ?? throw new NullReferenceException(nameof(question));
-
-    //         if (indexMap.ContainsKey(question.ContentfulRef))
-    //         {
-    //             if (DateTime.Compare(question.DateCreated, dateTimeMap[question.ContentfulRef]) > 0)
-    //             {
-    //                 responseList[indexMap[question.ContentfulRef]] = response;
-    //                 dateTimeMap[question.ContentfulRef] = question.DateCreated;
-    //             }
-    //         }
-    //         else
-    //         {
-    //             responseList.Add(response);
-    //             indexMap.Add(question.ContentfulRef, index++);
-    //             dateTimeMap.Add(question.ContentfulRef, question.DateCreated);
-    //         }
-    //     }
-    //     return responseList;
-    // }
-
     private QuestionWithAnswer _CreateQuestionWithAnswer(string questionRef, string questionText, string answerRef, string answerText)
     {
         return new QuestionWithAnswer()
@@ -119,7 +88,6 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     [Route("check-answers")]
     public async Task<IActionResult> CheckAnswersPage(int submissionId, string sectionName)
     {
-        //List<Response> responseList = await _TrimResponseList(await _GetResponseList(submissionId) ?? throw new NullReferenceException(nameof(responseList)));
         Response[]? responseList = await _GetResponseList(submissionId);
 
         Page checkAnswerPageContent = await _GetCheckAnswerContent();
