@@ -105,7 +105,7 @@ jobs:
           config-file: .terraform-docs.yml
           output-file: terraform-configuration.md
           output-method: inject
-          fail-on-diff: true
+          git-push: true
 
       - name: Update PR with Terraform results  
         uses: ./.github/actions/post-terraform-results
