@@ -1,6 +1,8 @@
 name: Terraform PR Check
 
-on: 
+on:
+  push:
+    branches: [ "main" ]
   pull_request:
     paths: 
       - 'terraform/**'
