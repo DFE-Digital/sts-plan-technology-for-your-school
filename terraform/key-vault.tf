@@ -81,7 +81,7 @@ resource "azurerm_key_vault_secret" "vault_secret_contentful_environment" {
 
 resource "azurerm_key_vault_secret" "vault_secret_database_connectionstring" {
   key_vault_id = azurerm_key_vault.vault.id
-  name         = "connectionstring--database"
+  name         = "connectionstrings--database"
   value        = local.az_sql_connection_string
   depends_on   = [azurerm_key_vault_access_policy.vault_access_policy_tf, null_resource.keyvault-add-vnet-restriction]
 
