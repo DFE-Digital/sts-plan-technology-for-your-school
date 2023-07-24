@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Application.Submission.Interface;
 using Dfe.PlanTech.Application.Submission.Interfaces;
@@ -16,6 +17,7 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Authorize]
 public class CheckAnswersController : BaseController<CheckAnswersController>
 {
+    private readonly GetQuestionQuery _getQuestionnaireQuery;
     private readonly ICalculateMaturityCommand _calculateMaturityCommand;
     private readonly IGetResponseQuery _getResponseQuery;
     private readonly IGetQuestionQuery _getQuestionQuery;
@@ -23,12 +25,14 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     private readonly GetPageQuery _getPageQuery;
 
     public CheckAnswersController(ILogger<CheckAnswersController> logger, IUrlHistory history,
+                                  [FromServices] GetQuestionQuery getQuestionnaireQuery,
                                   [FromServices] ICalculateMaturityCommand calculateMaturityCommand,
                                   [FromServices] IGetResponseQuery getResponseQuery,
                                   [FromServices] IGetQuestionQuery getQuestionQuery,
                                   [FromServices] IGetAnswerQuery getAnswerQuery,
                                   [FromServices] GetPageQuery getPageQuery) : base(logger, history)
     {
+        _getQuestionnaireQuery = getQuestionnaireQuery;
         _calculateMaturityCommand = calculateMaturityCommand;
         _getResponseQuery = getResponseQuery;
         _getQuestionQuery = getQuestionQuery;
@@ -49,6 +53,28 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
             AnswerRef = answerContentfulRef,
             AnswerText = answerText
         };
+    }
+
+    private async Task<CheckAnswerDto> _RemoveDetachedQuestions(CheckAnswerDto checkAnswerDto)
+    {
+        int questionAnswerListCount = checkAnswerDto.QuestionAnswerList.Count();
+        if (questionAnswerListCount <= 1) return checkAnswerDto;
+
+        Dictionary<string, bool> isDetachedMap = new Dictionary<string, bool>();
+
+        for (int i = 0; i < questionAnswerListCount; i++) isDetachedMap.Add(checkAnswerDto.QuestionAnswerList[i].QuestionRef, i == 0 ? false : true);
+
+        foreach (QuestionWithAnswer questionWithAnswer in checkAnswerDto.QuestionAnswerList)
+        {
+            Domain.Questionnaire.Models.Answer answer = await _GetAnswer(questionWithAnswer.QuestionRef, questionWithAnswer.AnswerRef) ?? throw new NullReferenceException(nameof(answer));
+            string? nextQuestionId = answer.NextQuestion?.Sys.Id;
+            if (nextQuestionId == null) continue;
+            if (isDetachedMap.ContainsKey(nextQuestionId)) isDetachedMap[nextQuestionId] = false;
+        }
+
+        checkAnswerDto.QuestionAnswerList.RemoveAll(questionWithAnswer => isDetachedMap[questionWithAnswer.QuestionRef]);
+
+        return checkAnswerDto;
     }
 
     private async Task<CheckAnswerDto> _GetCheckAnswerDto(Response[] responseList)
@@ -81,7 +107,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
             }
         }
 
-        return checkAnswerDto;
+        return await _RemoveDetachedQuestions(checkAnswerDto);
     }
 
     [HttpGet]
@@ -139,6 +165,12 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     private async Task<Domain.Answers.Models.Answer?> _GetResponseAnswer(int answerId)
     {
         return await _getAnswerQuery.GetAnswerBy(answerId);
+    }
+
+    private async Task<Domain.Questionnaire.Models.Answer?> _GetAnswer(string questionRef, string answerRef)
+    {
+        if (string.IsNullOrEmpty(questionRef)) throw new ArgumentNullException(nameof(questionRef));
+        return (await _getQuestionnaireQuery.GetQuestionById(questionRef, null, CancellationToken.None) ?? throw new KeyNotFoundException($"Could not find answer with id {answerRef}")).Answers.First(answer => answer.Sys.Id.Equals(answerRef));
     }
 
     private async Task<Page> _GetCheckAnswerContent()
