@@ -75,6 +75,26 @@ public class UserHelperTests
         Assert.IsType<int>(result);
 
         Assert.Equal(17, result);
-    } 
+    }
+
+    [Fact]
+    public async Task GetEstablishmentId_Throw_Exception_When_Reference_Is_Not_Present()
+    {
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+        {
+            new Claim(ClaimTypes.Name, "test"),
+            new Claim(ClaimTypes.NameIdentifier, "1"),
+            new Claim("organisation", "{\n  \"type\" : {\n      \"name\" : \"Type name\"\n  },\n  \"name\" : \"Organisation name\"\n}"),
+        }, "mock"));
+
+        _httpContextAccessorMock.Setup(m => m.HttpContext).Returns(new DefaultHttpContext() { User = user });
+
+        var userHelperWithMissingOrgData = new UserHelper(_httpContextAccessorMock.Object, _planTechDbContextMock.Object, _createEstablishmentCommandMock.Object);
+        
+          
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () => await userHelperWithMissingOrgData.GetEstablishmentId());
+
+        Assert.Equal("Establishment reference cannot be null", exception.Message);
+    }
     
 }
