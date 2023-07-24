@@ -38,4 +38,3 @@ public interface IPlanTechDbContext
 
     Task<User?> GetUserBy(Expression<Func<User, bool>> predicate);
 }
-
