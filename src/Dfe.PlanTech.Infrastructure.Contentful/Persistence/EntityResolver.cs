@@ -13,7 +13,7 @@ public class EntityResolver : IContentTypeResolver
 {
     private readonly ILogger<IContentTypeResolver> _logger;
 
-    public Dictionary<string, Type> _types = typeof(IContentComponent).Assembly.GetTypes()
+    private readonly Dictionary<string, Type> _types = typeof(IContentComponent).Assembly.GetTypes()
                                                                         .Where(type => type.IsAssignableTo(typeof(IContentComponent)))
                                                                         .ToDictionary(type => type.Name.ToLower());
 
