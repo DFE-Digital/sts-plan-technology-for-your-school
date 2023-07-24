@@ -73,12 +73,12 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
     /// Record SignIn in database
     /// </summary>
     /// <param name="signIn"></param>
-    /// <returns></returns>
+    /// <returns>Id of created SignIn</returns>
     private async Task<int> AddSignInDetails(Domain.SignIn.Models.SignIn signIn)
     {
         _db.AddSignIn(signIn);
-        var signInId = await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
-        return signInId;
+        return signIn.Id;
     }
 }
