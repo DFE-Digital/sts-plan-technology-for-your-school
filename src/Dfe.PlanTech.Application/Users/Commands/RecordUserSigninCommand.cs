@@ -2,7 +2,6 @@
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Application.Users.Queries;
 using Dfe.PlanTech.Domain.Users.Models;
-
 namespace Dfe.PlanTech.Application.Users.Commands;
 
 public class RecordUserSignInCommand : IRecordUserSignInCommand
@@ -18,22 +17,48 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
 
     public async Task<int> RecordSignIn(RecordUserSignInDto recordUserSignInDto)
     {
-        //Check user exists already
-        var getUserIdQuery = new GetUserIdQuery(_db);
-        var existingUserId = await getUserIdQuery.GetUserId(recordUserSignInDto.DfeSignInRef);
+        var signIn = await CreateSignIn(recordUserSignInDto);
 
-        if (existingUserId == null)
-        {
-            existingUserId = await _createUserCommand.CreateUser(recordUserSignInDto);
-        }
+        var signInId = await AddSignInDetails(signIn);
 
-        var signInId = await AddSignInDetails(MapToSignIn(existingUserId));
         return signInId;
     }
 
-    private static Domain.SignIn.Models.SignIn MapToSignIn(int? userId, int establishmentId = 1)
+    /// <summary>
+    /// Creates SignIn row
+    /// </summary>
+    /// <param name="recordUserSignInDto"></param>
+    /// <returns></returns>
+    private async Task<Domain.SignIn.Models.SignIn> CreateSignIn(RecordUserSignInDto recordUserSignInDto)
     {
-        if (userId is null || userId == 0)
+        var getUserIdQuery = new GetUserIdQuery(_db);
+        int userId = await GetUserId(recordUserSignInDto, getUserIdQuery);
+        var signIn = MapToSignIn(userId);
+
+        return signIn;
+    }
+
+    /// <summary>
+    /// Gets existing ID for user, or creates a new user in database if non existing
+    /// </summary>
+    /// <param name="recordUserSignInDto"></param>
+    /// <param name="getUserIdQuery"></param>
+    /// <returns></returns>
+    private async Task<int> GetUserId(RecordUserSignInDto recordUserSignInDto, GetUserIdQuery getUserIdQuery)
+    {
+        var existingUserId = await getUserIdQuery.GetUserId(recordUserSignInDto.DfeSignInRef);
+
+        if (existingUserId != null)
+        {
+            return existingUserId.Value;
+        }
+
+        return await _createUserCommand.CreateUser(recordUserSignInDto);
+    }
+
+    private static Domain.SignIn.Models.SignIn MapToSignIn(int userId, int establishmentId = 1)
+    {
+        if (userId == 0)
             throw new ArgumentNullException(nameof(userId), "User id cannot be null");
 
         return new Domain.SignIn.Models.SignIn
@@ -44,6 +69,11 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
         };
     }
 
+    /// <summary>
+    /// Record SignIn in database
+    /// </summary>
+    /// <param name="signIn"></param>
+    /// <returns></returns>
     private async Task<int> AddSignInDetails(Domain.SignIn.Models.SignIn signIn)
     {
         _db.AddSignIn(signIn);
