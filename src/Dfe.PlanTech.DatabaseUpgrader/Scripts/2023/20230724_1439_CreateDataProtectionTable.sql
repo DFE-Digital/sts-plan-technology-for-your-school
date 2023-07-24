@@ -1,8 +1,8 @@
 BEGIN TRAN
 
---Establishment Table--
+--DataProtectionKeys Table--
 CREATE TABLE [dbo].[DataProtectionKeys](
-	[Id] [int] PK IDENTITY(1,1) NOT NULL,
+	[Id] [int] IDENTITY(1,1) NOT NULL,
 	[FriendlyName] [nvarchar](MAX) NULL,
 	[Xml] [nvarchar](MAX) NOT NULL
 )
