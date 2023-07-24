@@ -55,3 +55,11 @@ variable "az_sql_admin_userid_postfix" {
   description = "Azure SQL admin userid postfix, used with `project_name` and `environment` to build userid"
   type        = string
 }
+
+#######################
+# Azure App Container #
+#######################
+variable "az_app_kestrel_endpoint" {
+  description = "Endpoint for Kestrel setup"
+  type        = string
+}

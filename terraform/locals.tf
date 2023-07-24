@@ -19,6 +19,7 @@ locals {
   #################
   container_app_image_name = "plan-tech-app"
   container_app_name       = "${local.resource_prefix}-${local.container_app_image_name}"
+  kestrel_endpoint = var.kestrel_endpoint
 
   ##############
   # Front Door #

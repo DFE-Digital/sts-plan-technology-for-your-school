@@ -19,6 +19,11 @@ module "main_hosting" {
     "KeyVaultName"    = local.kv_name
   }
 
+  container_environment_variables = {
+    "Kestrel__Endpoints__Https__Url" = local.kestrel_endpoint,
+    "ASPNETCORE_FORWARDEDHEADERS_ENABLED" = "true"
+  }
+
   ##############
   # Front Door #
   ##############
