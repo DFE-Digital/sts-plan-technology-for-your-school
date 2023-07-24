@@ -81,7 +81,7 @@ resource "azurerm_key_vault_secret" "vault_secret_contentful_environment" {
 
 resource "azurerm_key_vault_secret" "vault_secret_database_connectionstring" {
   key_vault_id = azurerm_key_vault.vault.id
-  name         = "database--connectionstring"
+  name         = "connectionstring--database"
   value        = local.az_sql_connection_string
   depends_on   = [azurerm_key_vault_access_policy.vault_access_policy_tf, null_resource.keyvault-add-vnet-restriction]
 
@@ -90,4 +90,13 @@ resource "azurerm_key_vault_secret" "vault_secret_database_connectionstring" {
       value,
     ]
   }
+}
+
+resource "azurerm_key_vault_key" "key" {
+  name         = "dataprotection"
+  key_vault_id = azurerm_key_vault.vault.id
+
+  key_type = var.key_type
+  key_size = var.key_size
+  key_opts = var.key_ops
 }

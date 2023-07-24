@@ -55,3 +55,28 @@ variable "az_sql_admin_userid_postfix" {
   description = "Azure SQL admin userid postfix, used with `project_name` and `environment` to build userid"
   type        = string
 }
+
+############
+# KeyVault #
+############
+variable "key_type" {
+  description = "The JsonWebKeyType of the key to be created."
+  default     = "RSA"
+  type        = string
+  validation {
+    condition     = contains(["EC", "EC-HSM", "RSA", "RSA-HSM"], var.key_type)
+    error_message = "The key_type must be one of the following: EC, EC-HSM, RSA, RSA-HSM."
+  }
+}
+
+variable "key_ops" {
+  type        = list(string)
+  description = "The permitted JSON web key operations of the key to be created."
+  default     = ["decrypt", "encrypt", "sign", "unwrapKey", "verify", "wrapKey"]
+}
+
+variable "key_size" {
+  type        = number
+  description = "The size in bits of the key to be created."
+  default     = 2048
+}
