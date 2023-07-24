@@ -9,7 +9,6 @@ using Dfe.PlanTech.Domain.Responses.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 
 namespace Dfe.PlanTech.Web.Controllers;
 

@@ -1,12 +1,12 @@
-using System.Text;
 using Microsoft.Extensions.Logging;
+using System.Text;
 
 namespace Dfe.PlanTech.Domain.Content.Interfaces;
 
 public interface IRichTextContentPartRendererCollection
 {
     public ILogger Logger { get; }
-    
+
     public IRichTextContentPartRenderer? GetRendererForContent(IRichTextContent content);
 
     /// <summary>
