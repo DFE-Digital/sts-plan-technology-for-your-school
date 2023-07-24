@@ -94,5 +94,27 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
 
             mockDb.Verify(x => x.SaveChangesAsync(), Times.Never);
         }
+
+        [Fact]
+        public async Task Should_CreateUser_When_User_Not_Found()
+        {
+            int createdUserId = 5000;
+
+            var recordUserSignInCommand = CreateStrut();
+
+            var user = new User();
+
+            mockDb.Setup(x => x.GetUserBy(It.IsAny<Expression<Func<User, bool>>>())).ReturnsAsync(() => null);
+
+            mockCreateUserCommand.Setup(createUserCommand => createUserCommand.CreateUser(It.IsAny<RecordUserSignInDto>()))
+                                .ReturnsAsync(createdUserId)
+                                .Verifiable();
+
+            var recordUserSignInDto = new RecordUserSignInDto { DfeSignInRef = new Guid().ToString() };
+
+            var result = await recordUserSignInCommand.RecordSignIn(recordUserSignInDto);
+
+            mockCreateUserCommand.Verify();
+        }
     }
 }
