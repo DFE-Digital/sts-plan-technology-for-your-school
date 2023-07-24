@@ -1,5 +1,6 @@
 ﻿using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Recommendation.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -28,11 +29,13 @@ public class PagesController : BaseController<PagesController>
 
     [Authorize]
     [HttpGet("/{route?}")]
-    public async Task<IActionResult> GetByRoute(string route, string param, [FromServices] GetPageQuery query, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetByRoute(string route, string param, [FromServices] GetPageQuery query, [FromServices] GetRecommendationQuery recQuery, CancellationToken cancellationToken)
     {
         string slug = GetSlug(route);
         if (!string.IsNullOrEmpty(param))
             TempData["Param"] = param;
+
+        var test = await recQuery.GetRecommendations(slug);
 
         var page = await query.GetPageBySlug(slug, cancellationToken);
 

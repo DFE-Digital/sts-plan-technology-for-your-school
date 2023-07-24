@@ -6,6 +6,7 @@
 @{
     Model.SectionStatuses = query.GetSectionSubmissionStatuses(Model.Sections);
     var completedCount = Model.SectionStatuses.Where(x => x.Completed == 1).ToList().Count;
+    Model.Completed = completedCount;
 }
 @{
     await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Header);
@@ -51,7 +52,4 @@
     }
 </task-list>
 
-<task-list>
-    <h2 class="govuk-heading-l">Recommendations</h2>
-    <p class="govuk-body">You’ll get recommendations once you have answered at least one section from the self-assessment</p>
-</task-list>
+<partial name="HomeRecommendations" model="Model"/>

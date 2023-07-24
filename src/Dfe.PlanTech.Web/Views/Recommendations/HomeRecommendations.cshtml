@@ -1,0 +1,23 @@
+﻿@model Dfe.PlanTech.Domain.Questionnaire.Interfaces.ICategory;
+
+<task-list>
+    <h2 class="govuk-heading-l">Recommendations</h2>
+
+    @if (Model.Completed == 0)
+    {
+        <p class="govuk-body">You’ll get recommendations once you have answered at least one section from the self-assessment</p>
+    } 
+    else 
+    {
+        @foreach(var section in Model.Sections)
+        {
+            var submission = Model.SectionStatuses.FirstOrDefault(x => x.SectionId == section.Sys.Id && x.Completed == 1);
+
+            if (submission is null)
+                continue;
+
+            var recommendation = section.GetRecommendationForMaturity(submission.Maturity);  
+            //show list
+        }
+    }
+</task-list>

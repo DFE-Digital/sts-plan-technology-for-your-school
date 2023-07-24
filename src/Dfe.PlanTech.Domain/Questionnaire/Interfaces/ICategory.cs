@@ -13,4 +13,6 @@ public interface ICategory : IContentComponent
     public ISection[] Sections { get; }
 
     public IList<SectionStatuses> SectionStatuses { get; set; }
+
+    public int Completed { get; set; }
 }
