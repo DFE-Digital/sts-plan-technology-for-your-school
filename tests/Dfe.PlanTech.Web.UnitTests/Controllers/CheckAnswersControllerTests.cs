@@ -1,12 +1,11 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Application.Response.Queries;
-using Dfe.PlanTech.Application.Submission.Commands;
 using Dfe.PlanTech.Application.Submission.Interface;
 using Dfe.PlanTech.Application.Submission.Interfaces;
-using Dfe.PlanTech.Application.Submission.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Responses.Models;
@@ -54,16 +53,18 @@ public class CheckAnswersControllerTests
         Mock<IQuestionnaireCacher> questionnaireCacherMock = new Mock<IQuestionnaireCacher>();
         _contentRepositoryMock = SetupRepositoryMock();
 
+        GetQuestionQuery getQuestionnaireQuery = new GetQuestionQuery(questionnaireCacherMock.Object, _contentRepositoryMock.Object);
         _calculateMaturityCommandMock = new Mock<ICalculateMaturityCommand>();
         IGetResponseQuery getResponseQuery = new GetResponseQuery(_planTechDbContextMock.Object);
-        IGetQuestionQuery getQuestionQuery = new GetQuestionQuery(_planTechDbContextMock.Object);
-        IGetAnswerQuery getAnswerQuery = new GetAnswerQuery(_planTechDbContextMock.Object);
+        IGetQuestionQuery getQuestionQuery = new Application.Submission.Queries.GetQuestionQuery(_planTechDbContextMock.Object);
+        IGetAnswerQuery getAnswerQuery = new Application.Submission.Queries.GetAnswerQuery(_planTechDbContextMock.Object);
         GetPageQuery getPageQuery = new GetPageQuery(questionnaireCacherMock.Object, _contentRepositoryMock.Object);
 
         _checkAnswersController = new CheckAnswersController
         (
             loggerMock.Object,
             urlHistoryMock.Object,
+            getQuestionnaireQuery,
             _calculateMaturityCommandMock.Object,
             getResponseQuery,
             getQuestionQuery,
@@ -105,9 +106,9 @@ public class CheckAnswersControllerTests
             }
         };
 
-        _planTechDbContextMock.Setup(m => m.GetResponseListBy(SubmissionId)).ReturnsAsync(responseList);
-        _planTechDbContextMock.Setup(m => m.GetQuestionBy(1)).ReturnsAsync(new Domain.Questions.Models.Question() { ContentfulRef = "QuestionRef", QuestionText = "Question Text" });
-        _planTechDbContextMock.Setup(m => m.GetAnswerBy(1)).ReturnsAsync(new Domain.Answers.Models.Answer() { ContentfulRef = "AnswerRef", AnswerText = "Answer Text" });
+        _planTechDbContextMock.Setup(m => m.GetResponseList(response => response.SubmissionId == SubmissionId)).ReturnsAsync(responseList);
+        _planTechDbContextMock.Setup(m => m.GetQuestion(question => question.Id == 1)).ReturnsAsync(new Domain.Questions.Models.Question() { ContentfulRef = "QuestionRef", QuestionText = "Question Text" });
+        _planTechDbContextMock.Setup(m => m.GetAnswer(answer => answer.Id == 1)).ReturnsAsync(new Domain.Answers.Models.Answer() { ContentfulRef = "AnswerRef", AnswerText = "Answer Text" });
 
         var result = await _checkAnswersController.CheckAnswersPage(SubmissionId, sectionName);
 
@@ -171,7 +172,7 @@ public class CheckAnswersControllerTests
     {
         Response[]? responseList = null;
 
-        _planTechDbContextMock.Setup(m => m.GetResponseListBy(SubmissionId)).ReturnsAsync(responseList);
+        _planTechDbContextMock.Setup(m => m.GetResponseList(response => response.SubmissionId == SubmissionId)).ReturnsAsync(responseList);
 
         await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId, sectionName));
     }
@@ -189,8 +190,8 @@ public class CheckAnswersControllerTests
             }
         };
 
-        _planTechDbContextMock.Setup(m => m.GetResponseListBy(SubmissionId)).ReturnsAsync(responseList);
-        _planTechDbContextMock.Setup(m => m.GetQuestionBy(1)).ReturnsAsync(new Domain.Questions.Models.Question() { QuestionText = null });
+        _planTechDbContextMock.Setup(m => m.GetResponseList(response => response.SubmissionId == SubmissionId)).ReturnsAsync(responseList);
+        _planTechDbContextMock.Setup(m => m.GetQuestion(question => question.Id == 1)).ReturnsAsync(new Domain.Questions.Models.Question() { QuestionText = null });
 
         await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId, sectionName));
     }
@@ -208,9 +209,9 @@ public class CheckAnswersControllerTests
             }
         };
 
-        _planTechDbContextMock.Setup(m => m.GetResponseListBy(SubmissionId)).ReturnsAsync(responseList);
-        _planTechDbContextMock.Setup(m => m.GetQuestionBy(1)).ReturnsAsync(new Domain.Questions.Models.Question() { QuestionText = "Question Text" });
-        _planTechDbContextMock.Setup(m => m.GetAnswerBy(1)).ReturnsAsync(new Domain.Answers.Models.Answer() { AnswerText = null });
+        _planTechDbContextMock.Setup(m => m.GetResponseList(response => response.SubmissionId == SubmissionId)).ReturnsAsync(responseList);
+        _planTechDbContextMock.Setup(m => m.GetQuestion(question => question.Id == 1)).ReturnsAsync(new Domain.Questions.Models.Question() { QuestionText = "Question Text" });
+        _planTechDbContextMock.Setup(m => m.GetAnswer(answer => answer.Id == 1)).ReturnsAsync(new Domain.Answers.Models.Answer() { AnswerText = null });
 
         await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId, sectionName));
     }
