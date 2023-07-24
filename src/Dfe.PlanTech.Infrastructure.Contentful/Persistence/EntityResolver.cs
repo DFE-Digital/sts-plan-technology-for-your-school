@@ -11,6 +11,8 @@ namespace Dfe.PlanTech.Infrastructure.Contentful;
 /// </summary>
 public class EntityResolver : IContentTypeResolver
 {
+    public Dictionary<string, Type> Types => _types;
+
     private readonly ILogger<IContentTypeResolver> _logger;
 
     private readonly Dictionary<string, Type> _types = typeof(IContentComponent).Assembly.GetTypes()
