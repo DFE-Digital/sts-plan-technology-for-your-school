@@ -36,12 +36,16 @@ namespace Dfe.PlanTech.Application.Users.Helper
         {
             var getEstablishmentIdQuery = new GetEstablishmentIdQuery(_db);
 
-            var existingEstablishmentId = await getEstablishmentIdQuery.GetEstablishmentId(_GetOrganisationData().EstablishmentRef);
+            var establishmentDto = _GetOrganisationData();
+
+            var reference = establishmentDto.Urn != null ? establishmentDto.Urn : establishmentDto.Ukprn;
+
+            var existingEstablishmentId = await getEstablishmentIdQuery.GetEstablishmentId(reference);
             
             if (existingEstablishmentId == null)
             { 
                 await SetEstablishment();
-                var newEstablishmentId =  await getEstablishmentIdQuery.GetEstablishmentId(_GetOrganisationData().EstablishmentRef);
+                var newEstablishmentId =  await getEstablishmentIdQuery.GetEstablishmentId(reference);
                 return newEstablishmentId;
             }
 

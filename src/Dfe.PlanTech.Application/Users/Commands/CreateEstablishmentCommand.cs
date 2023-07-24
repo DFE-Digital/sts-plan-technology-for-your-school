@@ -21,7 +21,7 @@ public class CreateEstablishmentCommand : ICreateEstablishmentCommand
     {
         var establishment = new Establishment()
         {
-            EstablishmentRef = establishmentDto.EstablishmentRef,
+            EstablishmentRef = establishmentDto.Urn != null ? establishmentDto.Urn : establishmentDto.Ukprn,
             EstablishmentType = establishmentDto.Type.Name,
             OrgName = establishmentDto.OrgName,
         };

@@ -6,7 +6,10 @@ namespace Dfe.PlanTech.Domain.Establishments.Models;
 public class EstablishmentDto
 {
     [JsonPropertyName("ukprn")]
-    public string EstablishmentRef { get; set; } = null!;
+    public string Ukprn { get; set; } = null!;
+    
+    [JsonPropertyName("urn")]
+    public string Urn { get; set; } = null!;
 
     [JsonPropertyName("type")]
     public EstablishmentTypeDto Type { get; set; } = new EstablishmentTypeDto();

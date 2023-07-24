@@ -51,7 +51,9 @@ public class UserHelperTests
         _planTechDbContextMock.Setup(m => m.GetEstablishmentBy(establishment => establishment.EstablishmentRef == "131")).ReturnsAsync(new Establishment() { Id = 1 });
 
         var result = await _userHelper.GetEstablishmentId();
-
+        
+        _createEstablishmentCommandMock.Verify(x => x.CreateEstablishment(It.IsAny<EstablishmentDto>()), Times.Never);
+        
         Assert.IsType<int>(result);
 
         Assert.Equal(1, result);
@@ -67,9 +69,12 @@ public class UserHelperTests
             .ReturnsAsync(new Establishment() { Id = 17 });
         
         var result = await _userHelper.GetEstablishmentId();
+        
+        _createEstablishmentCommandMock.Verify(x => x.CreateEstablishment(It.IsAny<EstablishmentDto>()), Times.Once);
 
         Assert.IsType<int>(result);
 
         Assert.Equal(17, result);
     } 
+    
 }
