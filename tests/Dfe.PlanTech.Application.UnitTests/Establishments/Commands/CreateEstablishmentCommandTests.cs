@@ -17,7 +17,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
         [Theory]
         [InlineData(1)]
         [InlineData(100)]
-        public async Task CreateUserReturnsIdOfNewlyCreateEstablishmentWithUkprn(int expectedEstablishmentId)
+        public async Task CreateEstablishmentReturnsIdOfNewlyCreateEstablishmentWithUkprn(int expectedEstablishmentId)
         {
             //Arrange
             var strut = CreateStrut();
@@ -35,7 +35,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
         [Theory]
         [InlineData(3)]
         [InlineData(300)]
-        public async Task CreateUserReturnsIdOfNewlyCreateEstablishmentWithUrn(int expectedEstablishmentId)
+        public async Task CreateEstablishmentReturnsIdOfNewlyCreateEstablishmentWithUrn(int expectedEstablishmentId)
         {
             //Arrange
             var strut = CreateStrut();
@@ -49,5 +49,18 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
             //Assert
             Assert.Equal(expectedEstablishmentId, result);
         }
+        
+        
+        [Fact]
+        public async Task CreateEstablishmentDoesThrowsExceptionWhenUrnAndUkprnAreNotPresent()
+        {
+            var strut = CreateStrut();
+            var establishmentDto = new EstablishmentDto() { Urn = null, Ukprn = null};
+            
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () => await strut.CreateEstablishment(establishmentDto));
+
+            Assert.Equal("Both Urn and Ukprn cannot be null.", exception.Message);
+        }
+        
     }
 }

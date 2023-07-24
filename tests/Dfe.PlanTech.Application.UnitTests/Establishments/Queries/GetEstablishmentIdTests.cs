@@ -20,7 +20,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishment.Queries
         [InlineData(1)]
         [InlineData(2)]
         [InlineData(3)]
-        public async Task GetUserId_Returns_TheCorrectUserId(int establishmentId)
+        public async Task GetEstablishmentId_Returns_TheCorrectEstablishmentId(int establishmentId)
         {
             //Arrange
             var strut = CreateStrut();
