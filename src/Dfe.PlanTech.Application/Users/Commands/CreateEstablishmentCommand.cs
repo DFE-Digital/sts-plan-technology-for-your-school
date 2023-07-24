@@ -21,7 +21,7 @@ public class CreateEstablishmentCommand : ICreateEstablishmentCommand
     {
         if (establishmentDto.Urn == null && establishmentDto.Ukprn == null)
         {
-            throw new ArgumentNullException("Both Urn and Ukprn cannot be null.");
+            throw new InvalidOperationException("Both Urn and Ukprn cannot be null.");
         }
         
         var establishment = new Establishment()
