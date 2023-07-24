@@ -38,8 +38,11 @@ namespace Dfe.PlanTech.Application.Users.Helper
 
             var establishmentDto = _GetOrganisationData();
 
-            var reference = establishmentDto.Urn != null ? establishmentDto.Urn : establishmentDto.Ukprn;
+            var reference = establishmentDto.Urn ?? establishmentDto.Ukprn;
 
+            if (reference is null)
+                throw new ArgumentNullException("Establishment reference cannot be null");
+            
             var existingEstablishmentId = await getEstablishmentIdQuery.GetEstablishmentId(reference);
             
             if (existingEstablishmentId == null)
