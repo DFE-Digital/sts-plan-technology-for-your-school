@@ -62,7 +62,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
         Dictionary<string, bool> isDetachedMap = new Dictionary<string, bool>();
 
-        for (int i = 0; i < questionAnswerListCount; i++) isDetachedMap.Add(checkAnswerDto.QuestionAnswerList[i].QuestionRef, i == 0 ? false : true);
+        for (int i = 0; i < questionAnswerListCount; i++) isDetachedMap.Add(checkAnswerDto.QuestionAnswerList[i].QuestionRef, i != 0);
 
         foreach (QuestionWithAnswer questionWithAnswer in checkAnswerDto.QuestionAnswerList)
         {
