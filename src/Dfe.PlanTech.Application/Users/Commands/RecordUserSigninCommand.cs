@@ -31,8 +31,7 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
     /// <returns></returns>
     private async Task<Domain.SignIn.Models.SignIn> CreateSignIn(RecordUserSignInDto recordUserSignInDto)
     {
-        var getUserIdQuery = new GetUserIdQuery(_db);
-        int userId = await GetUserId(recordUserSignInDto, getUserIdQuery);
+        int userId = await GetUserId(recordUserSignInDto);
         var signIn = MapToSignIn(userId);
 
         return signIn;
@@ -44,8 +43,9 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
     /// <param name="recordUserSignInDto"></param>
     /// <param name="getUserIdQuery"></param>
     /// <returns></returns>
-    private async Task<int> GetUserId(RecordUserSignInDto recordUserSignInDto, GetUserIdQuery getUserIdQuery)
+    private async Task<int> GetUserId(RecordUserSignInDto recordUserSignInDto)
     {
+        var getUserIdQuery = new GetUserIdQuery(_db);
         var existingUserId = await getUserIdQuery.GetUserId(recordUserSignInDto.DfeSignInRef);
 
         if (existingUserId != null)
