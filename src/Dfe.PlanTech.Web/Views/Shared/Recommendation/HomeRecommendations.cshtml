@@ -1,0 +1,14 @@
+﻿@model Dfe.PlanTech.Domain.Questionnaire.Interfaces.ICategory;
+
+<task-list>
+    <h2 class="govuk-heading-l">Recommendations</h2>
+
+    @if (Model.Completed == 0)
+    {
+        <p class="govuk-body">You’ll get recommendations once you have answered at least one section from the self-assessment</p>
+    } 
+    else 
+    {
+        <partial name="Recommendations.cshtml" model="@Model" />
+    }
+</task-list>
