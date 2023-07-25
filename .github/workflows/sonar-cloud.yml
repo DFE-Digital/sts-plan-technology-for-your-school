@@ -10,7 +10,8 @@ on:
       - 'tests/**'
 
 jobs:
-  build:
+  sonar-cloud:
+    name: Run SonarCloud checks + coverage
     runs-on: ubuntu-latest
 
     steps:
