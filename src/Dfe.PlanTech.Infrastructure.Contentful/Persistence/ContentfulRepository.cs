@@ -1,6 +1,5 @@
 using Contentful.Core;
 using Contentful.Core.Configuration;
-using Contentful.Core.Search;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;

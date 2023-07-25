@@ -1,9 +1,9 @@
-﻿using System.Text.Json;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
+﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Application.Users.Queries;
 using Dfe.PlanTech.Domain.Establishments.Models;
 using Microsoft.AspNetCore.Http;
+using System.Text.Json;
 
 namespace Dfe.PlanTech.Application.Users.Helper
 {
@@ -42,13 +42,13 @@ namespace Dfe.PlanTech.Application.Users.Helper
 
             if (reference is null)
                 throw new InvalidOperationException("Establishment reference cannot be null");
-            
+
             var existingEstablishmentId = await getEstablishmentIdQuery.GetEstablishmentId(reference);
-            
+
             if (existingEstablishmentId == null)
-            { 
+            {
                 await SetEstablishment();
-                var newEstablishmentId =  await getEstablishmentIdQuery.GetEstablishmentId(reference);
+                var newEstablishmentId = await getEstablishmentIdQuery.GetEstablishmentId(reference);
                 return newEstablishmentId;
             }
 
@@ -66,15 +66,15 @@ namespace Dfe.PlanTech.Application.Users.Helper
 
         private EstablishmentDto _GetOrganisationData()
         {
-            
+
             var claims = _httpContextAccessor.HttpContext.User.Claims.ToList();
             var orgDetails = claims?.Find(x => x.Type.Contains("organisation"))?.Value;
-            
+
             orgDetails ??= "{}";
             var establishment = JsonSerializer.Deserialize<EstablishmentDto>(orgDetails);
 
             establishment ??= new EstablishmentDto();
-           
+
             return establishment;
         }
     }

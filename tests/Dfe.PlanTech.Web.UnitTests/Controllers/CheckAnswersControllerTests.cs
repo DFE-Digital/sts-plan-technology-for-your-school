@@ -64,7 +64,7 @@ public class CheckAnswersControllerTests
         GetPageQuery getPageQuery = new GetPageQuery(questionnaireCacherMock.Object, _contentRepositoryMock.Object);
 
         Mock<ITempDataDictionary> tempDataMock = new Mock<ITempDataDictionary>();
-        
+
         _checkAnswersController = new CheckAnswersController
         (
             loggerMock.Object,
@@ -354,5 +354,5 @@ public class CheckAnswersControllerTests
             Assert.True(res.ControllerName == "Pages");
         }
     }
-    
+
 }

@@ -24,12 +24,12 @@ public class CreateEstablishmentCommand : ICreateEstablishmentCommand
             throw new InvalidOperationException("Establishment dto cannot be null.");
         }
 
-        
+
         if (establishmentDto.Urn == null && establishmentDto.Ukprn == null)
         {
             throw new InvalidOperationException("Both Urn and Ukprn cannot be null.");
         }
-        
+
         var establishment = new Establishment()
         {
             EstablishmentRef = establishmentDto.Urn ?? establishmentDto.Ukprn!,

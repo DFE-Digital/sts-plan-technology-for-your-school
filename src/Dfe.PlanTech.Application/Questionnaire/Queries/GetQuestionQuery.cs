@@ -28,7 +28,7 @@ public class GetQuestionQuery : ContentRetriever
         {
             UpdateSectionTitle(section);
         }
-        
+
         return GetQuestionById(id, cancellationToken);
     }
 

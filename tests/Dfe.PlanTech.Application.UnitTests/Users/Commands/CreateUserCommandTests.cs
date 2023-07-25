@@ -26,7 +26,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
 
             mockDb.Setup(x => x.AddUser(It.IsAny<User>()))
                     .Callback((User user) => createdUser = user);
-                    
+
             mockDb.Setup(x => x.SaveChangesAsync()).Callback(() =>
             {
                 if (createdUser != null)

@@ -10,8 +10,8 @@ public class Page : ContentComponent
 
     public bool DisplayBackButton { get; init; }
 
-    public bool DisplayTopicTitle { get; init;}
-    
+    public bool DisplayTopicTitle { get; init; }
+
     public string? SectionTitle { get; set; }
 
     public string? Param { get; set; }

@@ -72,7 +72,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
         TempData["SectionName"] = sectionName;
         return RedirectToAction("GetByRoute", "Pages", new { route = "self-assessment" });
-            
+
     }
 
     private async Task<Response[]?> _GetResponseList(int submissionId)
