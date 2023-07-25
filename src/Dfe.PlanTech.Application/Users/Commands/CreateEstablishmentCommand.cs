@@ -21,13 +21,13 @@ public class CreateEstablishmentCommand : ICreateEstablishmentCommand
     {
         if (establishmentDto == null)
         {
-            throw new ArgumentNullException(nameof(establishmentDto),"Establishment dto cannot be null.");
+            throw new NullReferenceException("Establishment dto cannot be null.");
         }
 
         
         if (establishmentDto.Urn == null && establishmentDto.Ukprn == null)
         {
-            throw new ArgumentNullException(nameof(establishmentDto.Urn),"Both Urn and Ukprn cannot be null.");
+            throw new NullReferenceException("Both Urn and Ukprn cannot be null.");
         }
         
         var establishment = new Establishment()
