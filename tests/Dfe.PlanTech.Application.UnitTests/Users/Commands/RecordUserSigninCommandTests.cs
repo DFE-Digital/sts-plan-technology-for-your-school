@@ -20,9 +20,12 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
 
 
         [Fact]
-        public async Task RecordSignInForNewUser_AddsUser_UpdatesSignInDetailsAnd_ReturnsId()
+        public async Task RecordSignInForExistingUser_UpdatesSignInDetailsAnd_ReturnsId()
         {
             //Arrange
+            Domain.SignIn.Models.SignIn? createdSignIn = null;
+            int signInId = 1;
+
             var guid = Guid.NewGuid().ToString();
             var user = new User
             {
@@ -32,41 +35,70 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
             var strut = CreateStrut();
             mockUserQuery.Setup(x => x.GetUserId(It.IsAny<string>())).ReturnsAsync(1);
             mockDb.Setup(x => x.GetUserBy(It.IsAny<Expression<Func<User, bool>>>())).ReturnsAsync(user);
-            mockDb.Setup(x => x.AddSignIn(It.IsAny<Domain.SignIn.Models.SignIn>()));
-            mockDb.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+            mockDb.Setup(x => x.AddSignIn(It.IsAny<Domain.SignIn.Models.SignIn>()))
+                    .Callback((Domain.SignIn.Models.SignIn signIn) => createdSignIn = signIn);
+            mockDb.Setup(x => x.SaveChangesAsync()).Callback(() =>
+            {
+                if (createdSignIn != null)
+                {
+                    createdSignIn.Id = signInId;
+                }
+            });
             var recordUserSignInDto = new RecordUserSignInDto { DfeSignInRef = guid };
 
             //Act
             var result = await strut.RecordSignIn(recordUserSignInDto);
 
             //Assert
-            Assert.Equal(1, result);
+            Assert.Equal(signInId, result);
             mockDb.Verify(x => x.SaveChangesAsync(), Times.Once);
         }
 
-        [Fact]
-        public async Task RecordSignInForExistingUser_UpdatesSignInDetailsAnd_ReturnsId()
+        [Theory]
+        [InlineData(1)]
+        [InlineData(50)]
+        [InlineData(2402)]
+        public async Task RecordSignInForNewUser_AddsUser_UpdatesSignInDetailsAnd_ReturnsId(int userId)
         {
-            //Arrange
-            var strut = CreateStrut();
-            var user = new User
+            User? createdUser = null;
+            Domain.SignIn.Models.SignIn? createdSignIn = null;
+            int signInId = 1;
+
+            mockDb.Setup(x => x.GetUserBy(It.IsAny<Expression<Func<User, bool>>>()))
+                    .ReturnsAsync(() => null);
+
+            mockDb.Setup(db => db.AddUser(It.IsAny<User>()))
+                    .Callback((User user) => createdUser = user);
+
+            mockDb.Setup(db => db.AddSignIn(It.IsAny<Domain.SignIn.Models.SignIn>()))
+                    .Callback((Domain.SignIn.Models.SignIn signIn) => createdSignIn = signIn);
+
+            mockDb.Setup(db => db.SaveChangesAsync()).Callback(() =>
             {
-                Id = 1,
-                DfeSignInRef = Guid.NewGuid().ToString(),
-                DateCreated = DateTime.UtcNow,
-            };
-            mockUserQuery.Setup(x => x.GetUserId(It.IsAny<string>())).ReturnsAsync(1);
-            mockDb.Setup(x => x.GetUserBy(It.IsAny<Expression<Func<User, bool>>>())).ReturnsAsync(user);
-            mockDb.Setup(x => x.AddSignIn(It.IsAny<Domain.SignIn.Models.SignIn>()));
-            mockDb.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+                if (createdUser != null)
+                {
+                    createdUser.Id = userId;
+                }
+
+                if (createdSignIn != null)
+                {
+                    createdSignIn.Id = signInId;
+                }
+            });
+
+            var createUserCommand = new CreateUserCommand(mockDb.Object);
+
             var recordUserSignInDto = new RecordUserSignInDto { DfeSignInRef = new Guid().ToString() };
 
-            //Act
-            var result = await strut.RecordSignIn(recordUserSignInDto);
+            var recordUserSignInCommand = new RecordUserSignInCommand(mockDb.Object, createUserCommand);
+            var result = await recordUserSignInCommand.RecordSignIn(recordUserSignInDto);
 
-            //Assert
-            Assert.Equal(1, result);
-            mockDb.Verify(x => x.SaveChangesAsync(), Times.Once);
+            mockCreateUserCommand.Verify();
+
+            Assert.Equal(userId, createdUser?.Id);
+
+            Assert.Equal(signInId, createdSignIn?.Id);
+            mockDb.Verify(x => x.SaveChangesAsync(), Times.Exactly(2));
         }
 
         [Fact]
