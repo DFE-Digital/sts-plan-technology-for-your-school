@@ -20,7 +20,7 @@
     {
         if (Model.Page.Slug == "self-assessment")
         {
-            string? sectionName = TempData["SectionName"] as string;
+            var sectionName = TempData["SectionName"] as string;
             <div class="govuk-notification-banner govuk-notification-banner--success" role="alert"
                  aria-labelledby="govuk-notification-banner-title"
                  data-module="govuk-notification-banner">

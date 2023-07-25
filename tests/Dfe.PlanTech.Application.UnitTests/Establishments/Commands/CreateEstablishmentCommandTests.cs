@@ -57,9 +57,9 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
             var strut = CreateStrut();
             var establishmentDto = new EstablishmentDto() { Urn = null, Ukprn = null};
             
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () => await strut.CreateEstablishment(establishmentDto));
+            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () => await strut.CreateEstablishment(establishmentDto));
 
-            Assert.Equal("Both Urn and Ukprn cannot be null.", exception.Message);
+            Assert.Equal("Both Urn and Ukprn cannot be null. (Parameter 'Urn')", exception.Message);
         }
         
     }

@@ -41,7 +41,7 @@ namespace Dfe.PlanTech.Application.Users.Helper
             var reference = establishmentDto.Urn ?? establishmentDto.Ukprn;
 
             if (reference is null)
-                throw new InvalidOperationException("Establishment reference cannot be null");
+                throw new ArgumentNullException(nameof(reference),"Establishment reference cannot be null");
             
             var existingEstablishmentId = await getEstablishmentIdQuery.GetEstablishmentId(reference);
             
