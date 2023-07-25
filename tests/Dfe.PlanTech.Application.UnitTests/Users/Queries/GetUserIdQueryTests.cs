@@ -1,14 +1,8 @@
 ﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Application.Users.Commands;
 using Dfe.PlanTech.Application.Users.Queries;
 using Dfe.PlanTech.Domain.Users.Models;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Dfe.PlanTech.Application.UnitTests.Users.Queries
 {

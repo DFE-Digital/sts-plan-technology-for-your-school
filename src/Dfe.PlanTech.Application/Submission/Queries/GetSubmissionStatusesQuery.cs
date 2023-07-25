@@ -16,10 +16,10 @@ namespace Dfe.PlanTech.Application.Submission.Queries
 
         public IList<SectionStatuses> GetSectionSubmissionStatuses(ISection[] sections)
         {
-           string sectionStringify = string.Empty;
-           sectionStringify = string.Join(',', sections.Select(x => x.Sys.Id).ToList());
+            string sectionStringify = string.Empty;
+            sectionStringify = string.Join(',', sections.Select(x => x.Sys.Id).ToList());
 
-           return _db.GetSectionStatuses(sectionStringify).ToList();
+            return _db.GetSectionStatuses(sectionStringify).ToList();
         }
     }
 }

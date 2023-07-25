@@ -1,10 +1,10 @@
 ﻿using Dfe.PlanTech.Domain.Answers.Models;
+using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.Questions.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 using Microsoft.Data.SqlClient;
 using System.Linq.Expressions;
-using Dfe.PlanTech.Domain.Establishments.Models;
 
 namespace Dfe.PlanTech.Application.Persistence.Interfaces;
 
@@ -39,7 +39,7 @@ public interface IPlanTechDbContext
     IQueryable<SectionStatuses> GetSectionStatuses(string sectionIds);
 
     Task<User?> GetUserBy(Expression<Func<User, bool>> predicate);
-    
+
     Task<Establishment?> GetEstablishmentBy(Expression<Func<Establishment, bool>> predicate);
 
     Task<Domain.Responses.Models.Response[]?> GetResponseListBy(int submissionId);
