@@ -92,7 +92,7 @@ public class UserHelperTests
         var userHelperWithMissingOrgData = new UserHelper(_httpContextAccessorMock.Object, _planTechDbContextMock.Object, _createEstablishmentCommandMock.Object);
         
           
-        var exception = await Assert.ThrowsAsync<NullReferenceException>(async () => await userHelperWithMissingOrgData.GetEstablishmentId());
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () => await userHelperWithMissingOrgData.GetEstablishmentId());
 
         Assert.Equal("Establishment reference cannot be null", exception.Message);
     }
