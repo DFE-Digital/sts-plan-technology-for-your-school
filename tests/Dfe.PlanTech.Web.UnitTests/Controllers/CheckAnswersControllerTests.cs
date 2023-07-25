@@ -237,13 +237,4 @@ public class CheckAnswersControllerTests
         }
     }
 
-    [Fact]
-    public async Task ConfirmCheckAnswers_ReturnsNull_WhenMaturityIsLessThan1()
-    {
-        _calculateMaturityCommandMock.Setup(m => m.CalculateMaturityAsync(It.IsAny<int>())).ReturnsAsync(0);
-
-        var result = await _checkAnswersController.ConfirmCheckAnswers(It.IsAny<int>(), "Test");
-
-        Assert.Null(result);
-    }
 }

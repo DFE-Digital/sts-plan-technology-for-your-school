@@ -1,6 +1,7 @@
 ﻿using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Answers.Models;
+using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.Questions.Models;
 using Dfe.PlanTech.Domain.Responses.Models;
 using Dfe.PlanTech.Domain.SignIn.Models;
@@ -17,6 +18,8 @@ namespace Dfe.PlanTech.Infrastructure.Data;
 public class PlanTechDbContext : DbContext, IPlanTechDbContext
 {
     public DbSet<User> Users { get; set; } = null!;
+
+    public DbSet<Establishment> Establishments { get; set; } = null!;
 
     public DbSet<SignIn> SignIn { get; set; } = null!;
 
@@ -108,6 +111,9 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public IQueryable<SectionStatuses> GetSectionStatuses(string sectionIds) => sectionStatusesSp.FromSqlInterpolated($"{DatabaseConstants.GetSectionStatuses} {sectionIds}");
 
     public void AddUser(User user) => Users.Add(user);
+
+    public void AddEstablishment(Establishment establishment) => Establishments.Add(establishment);
+
     public void AddSignIn(SignIn signIn) => SignIn.Add(signIn);
 
     public void AddQuestion(Question question) => Questions.Add(question);
@@ -124,6 +130,8 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public Task<int> SaveChangesAsync() => base.SaveChangesAsync();
 
     public Task<User?> GetUserBy(Expression<Func<User, bool>> predicate) => Users.FirstOrDefaultAsync(predicate);
+
+    public Task<Establishment?> GetEstablishmentBy(Expression<Func<Establishment, bool>> predicate) => Establishments.FirstOrDefaultAsync(predicate);
 
     public Task<int> CallStoredProcedureWithReturnInt(string sprocName, List<SqlParameter> parms) => base.Database.ExecuteSqlRawAsync(sprocName, parms);
 }

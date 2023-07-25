@@ -1,10 +1,13 @@
 using Azure.Identity;
 using Dfe.PlanTech.Application.Helpers;
+using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.SignIn;
 using Dfe.PlanTech.Web;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using GovUk.Frontend.AspNetCore;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,9 +20,15 @@ builder.Services.AddGovUkFrontend();
 
 if (builder.Environment.IsProduction())
 {
-    builder.Configuration.AddAzureKeyVault(
-    new Uri($"https://{builder.Configuration["KeyVaultName"]}.vault.azure.net/"),
-    new DefaultAzureCredential());
+    var keyVaultUri = $"https://{builder.Configuration["KeyVaultName"]}.vault.azure.net/";
+    var azureCredentials = new DefaultAzureCredential();
+
+    builder.Configuration.AddAzureKeyVault(new Uri(keyVaultUri), azureCredentials);
+
+    builder.Services.AddDbContext<DataProtectionDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Database")));
+    builder.Services.AddDataProtection()
+                        .PersistKeysToDbContext<DataProtectionDbContext>()
+                        .ProtectKeysWithAzureKeyVault(new Uri(keyVaultUri + "keys/dataprotection"), azureCredentials);
 }
 
 builder.Services.AddCaching();
@@ -35,6 +44,8 @@ builder.Services.AddAuthentication();
 
 var app = builder.Build();
 
+app.UseForwardedHeaders();
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -45,8 +56,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
-app.UseForwardedHeaders();
 
 app.UseRouting();
 

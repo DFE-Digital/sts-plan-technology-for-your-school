@@ -11,9 +11,11 @@ namespace Dfe.PlanTech.Infrastructure.Contentful;
 /// </summary>
 public class EntityResolver : IContentTypeResolver
 {
+    public Dictionary<string, Type> Types => _types;
+
     private readonly ILogger<IContentTypeResolver> _logger;
 
-    public Dictionary<string, Type> _types = typeof(IContentComponent).Assembly.GetTypes()
+    private readonly Dictionary<string, Type> _types = typeof(IContentComponent).Assembly.GetTypes()
                                                                         .Where(type => type.IsAssignableTo(typeof(IContentComponent)))
                                                                         .ToDictionary(type => type.Name.ToLower());
 
