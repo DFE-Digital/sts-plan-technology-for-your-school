@@ -122,9 +122,7 @@ public class QuestionsController : BaseController<QuestionsController>
     {
         Domain.Questionnaire.Models.Question? question = await _GetQuestion(questionId, null, CancellationToken.None);
 
-        foreach (Domain.Questionnaire.Models.Answer answer in question.Answers.Where(answer => answer.Sys.Id.Equals(chosenAnswerId))) return answer.NextQuestion?.Sys.Id ?? null;
-
-        return null;
+        return question.Answers.First(answer => answer.Sys.Id.Equals(chosenAnswerId)).NextQuestion?.Sys.Id ?? null;
     }
 
     private async Task<bool> _NextQuestionIsAnswered(int submissionId, string nextQuestionId)
