@@ -122,10 +122,7 @@ public class QuestionsController : BaseController<QuestionsController>
     {
         Domain.Questionnaire.Models.Question? question = await _GetQuestion(questionId, null, CancellationToken.None);
 
-        foreach (Domain.Questionnaire.Models.Answer answer in question.Answers)
-        {
-            if (answer.Sys.Id.Equals(chosenAnswerId)) return answer.NextQuestion?.Sys.Id ?? null;
-        }
+        foreach (Domain.Questionnaire.Models.Answer answer in question.Answers.Where(answer => answer.Sys.Id.Equals(chosenAnswerId))) return answer.NextQuestion?.Sys.Id ?? null;
 
         return null;
     }

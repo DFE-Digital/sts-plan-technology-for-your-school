@@ -70,7 +70,7 @@ namespace Dfe.PlanTech.Application.Response.Commands
 
         private async Task<CheckAnswerDto> _RemoveDetachedQuestions(CheckAnswerDto checkAnswerDto)
         {
-            int questionAnswerListCount = checkAnswerDto.QuestionAnswerList.Count();
+            int questionAnswerListCount = checkAnswerDto.QuestionAnswerList.Count;
             if (questionAnswerListCount <= 1) return checkAnswerDto;
 
             Dictionary<string, bool> isDetachedMap = new Dictionary<string, bool>();
