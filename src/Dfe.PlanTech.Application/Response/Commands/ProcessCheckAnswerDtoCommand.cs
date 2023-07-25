@@ -37,7 +37,7 @@ namespace Dfe.PlanTech.Application.Response.Commands
 
                 if (dateTimeMap.ContainsKey(questionContentfulRef))
                 {
-                    if (DateTime.Compare(question.DateCreated, dateTimeMap[questionContentfulRef]) > 0)
+                    if (DateTime.Compare(response.DateCreated, dateTimeMap[questionContentfulRef]) > 0)
                     {
                         checkAnswerDto.QuestionAnswerList[indexMap[questionContentfulRef]] = await _CreateQuestionWithAnswer(questionContentfulRef, questionText, response.AnswerId);
                     }
@@ -45,7 +45,7 @@ namespace Dfe.PlanTech.Application.Response.Commands
                 else
                 {
                     checkAnswerDto.QuestionAnswerList.Add(await _CreateQuestionWithAnswer(questionContentfulRef, questionText, response.AnswerId));
-                    dateTimeMap.Add(questionContentfulRef, question.DateCreated);
+                    dateTimeMap.Add(questionContentfulRef, response.DateCreated);
                     indexMap.Add(questionContentfulRef, index++);
                 }
             }

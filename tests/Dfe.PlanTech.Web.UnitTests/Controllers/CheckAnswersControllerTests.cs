@@ -27,6 +27,8 @@ public class CheckAnswersControllerTests
 
     private readonly Mock<IContentRepository> _contentRepositoryMock;
 
+    private readonly Mock<GetQuestionQuery> _getQuestionnaireQueryMock;
+
     private readonly Mock<ICalculateMaturityCommand> _calculateMaturityCommandMock;
 
     private Page[] _pages = new Page[]
@@ -53,7 +55,7 @@ public class CheckAnswersControllerTests
         Mock<IQuestionnaireCacher> questionnaireCacherMock = new Mock<IQuestionnaireCacher>();
         _contentRepositoryMock = SetupRepositoryMock();
 
-        GetQuestionQuery getQuestionnaireQuery = new GetQuestionQuery(questionnaireCacherMock.Object, _contentRepositoryMock.Object);
+        _getQuestionnaireQueryMock = new Mock<GetQuestionQuery>(questionnaireCacherMock.Object, _contentRepositoryMock.Object);
         _calculateMaturityCommandMock = new Mock<ICalculateMaturityCommand>();
         IGetResponseQuery getResponseQuery = new GetResponseQuery(_planTechDbContextMock.Object);
         IGetQuestionQuery getQuestionQuery = new Application.Submission.Queries.GetQuestionQuery(_planTechDbContextMock.Object);
@@ -64,7 +66,7 @@ public class CheckAnswersControllerTests
         (
             loggerMock.Object,
             urlHistoryMock.Object,
-            getQuestionnaireQuery,
+            _getQuestionnaireQueryMock.Object,
             _calculateMaturityCommandMock.Object,
             getResponseQuery,
             getQuestionQuery,
@@ -144,6 +146,120 @@ public class CheckAnswersControllerTests
         Assert.Equal("Question Text", checkAnswerDto.QuestionAnswerList[0].QuestionText);
         Assert.Equal("AnswerRef", checkAnswerDto.QuestionAnswerList[0].AnswerRef);
         Assert.Equal("Answer Text", checkAnswerDto.QuestionAnswerList[0].AnswerText);
+    }
+
+    [Fact]
+    public async Task CheckAnswersPage_LatestResponse_IsUsed_WhenAnswer_IsChanged()
+    {
+
+        Response[]? responseList = new Response[]
+        {
+            new Response()
+            {
+                SubmissionId = SubmissionId,
+                QuestionId = 1,
+                AnswerId = 1,
+                DateCreated = new DateTime(2000, 01, 01, 00, 00, 04)
+            },
+            new Response()
+            {
+                SubmissionId = SubmissionId,
+                QuestionId = 2,
+                AnswerId = 1,
+                DateCreated = new DateTime(2000, 01, 01, 00, 00, 08)
+            },
+            new Response()
+            {
+                SubmissionId = SubmissionId,
+                QuestionId = 1,
+                AnswerId = 2,
+                DateCreated = new DateTime(2000, 01, 01, 00, 00, 16)
+            }
+        };
+
+        Question questionOne = new Question()
+        {
+            Sys = new SystemDetails() { Id = "QuestionRef-1" },
+            Answers = new Answer[]
+            {
+                new Answer()
+                {
+                    Sys = new SystemDetails() { Id = "AnswerRef-1" },
+                    NextQuestion = new Question()
+                    {
+                        Sys = new SystemDetails() { Id = "QuestionRef-2" }
+                    }
+                },
+                new Answer()
+                {
+                    Sys = new SystemDetails() { Id = "AnswerRef-2" },
+                    NextQuestion = new Question()
+                    {
+                        Sys = new SystemDetails() { Id = "QuestionRef-2" }
+                    }
+                }
+            }
+        };
+
+
+        Question questionTwo = new Question()
+        {
+            Sys = new SystemDetails() { Id = "QuestionRef-2" },
+            Answers = new Answer[]
+            {
+                new Answer()
+                {
+                    Sys = new SystemDetails() { Id = "AnswerRef-1" },
+                    NextQuestion = null
+                }
+            }
+        };
+
+        _contentRepositoryMock.Setup(m => m.GetEntityById<Question>("QuestionRef-1", 3, CancellationToken.None)).ReturnsAsync(questionOne);
+        _contentRepositoryMock.Setup(m => m.GetEntityById<Question>("QuestionRef-2", 3, CancellationToken.None)).ReturnsAsync(questionTwo);
+
+        _planTechDbContextMock.Setup(m => m.GetResponseList(response => response.SubmissionId == SubmissionId)).ReturnsAsync(responseList);
+
+        _planTechDbContextMock.Setup(m => m.GetQuestion(question => question.Id == 1)).ReturnsAsync(new Domain.Questions.Models.Question() { ContentfulRef = "QuestionRef-1", QuestionText = "Question Text 1" });
+        _planTechDbContextMock.Setup(m => m.GetQuestion(question => question.Id == 2)).ReturnsAsync(new Domain.Questions.Models.Question() { ContentfulRef = "QuestionRef-2", QuestionText = "Question Text 2" });
+
+        _planTechDbContextMock.Setup(m => m.GetAnswer(answer => answer.Id == 1)).ReturnsAsync(new Domain.Answers.Models.Answer() { ContentfulRef = "AnswerRef-1", AnswerText = "Answer Text 1" });
+        _planTechDbContextMock.Setup(m => m.GetAnswer(answer => answer.Id == 2)).ReturnsAsync(new Domain.Answers.Models.Answer() { ContentfulRef = "AnswerRef-2", AnswerText = "Answer Text 2" });
+
+        var result = await _checkAnswersController.CheckAnswersPage(SubmissionId, sectionName);
+
+        Assert.IsType<ViewResult>(result);
+
+        var viewResult = result as ViewResult;
+
+        Assert.NotNull(viewResult);
+        Assert.Equal("CheckAnswers", viewResult.ViewName);
+
+        Assert.IsType<CheckAnswersViewModel>(viewResult.Model);
+
+        var checkAnswersViewModel = viewResult.Model as CheckAnswersViewModel;
+
+        Assert.NotNull(checkAnswersViewModel);
+        Assert.Equal("self-assessment", checkAnswersViewModel.BackUrl);
+        Assert.Equal("Title Text", checkAnswersViewModel.Title.Text);
+        Assert.Equal(SubmissionId, checkAnswersViewModel.SubmissionId);
+
+        Assert.IsType<Header>(checkAnswersViewModel.Content[0]);
+
+        var content = checkAnswersViewModel.Content[0] as Header;
+
+        Assert.NotNull(content);
+        Assert.Equal("Header Text", content.Text);
+
+        Assert.IsType<CheckAnswerDto>(checkAnswersViewModel.CheckAnswerDto);
+
+        var checkAnswerDto = checkAnswersViewModel.CheckAnswerDto;
+
+        Assert.NotNull(checkAnswerDto);
+        Assert.Equal("QuestionRef-1", checkAnswerDto.QuestionAnswerList[0].QuestionRef);
+        Assert.Equal("Question Text 1", checkAnswerDto.QuestionAnswerList[0].QuestionText);
+        Assert.Equal("AnswerRef-2", checkAnswerDto.QuestionAnswerList[0].AnswerRef);
+        Assert.Equal("Answer Text 2", checkAnswerDto.QuestionAnswerList[0].AnswerText);
     }
 
     [Fact]

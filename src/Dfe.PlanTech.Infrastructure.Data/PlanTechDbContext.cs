@@ -94,7 +94,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
         modelBuilder.Entity<Response>(builder =>
         {
             builder.HasKey(response => response.Id);
-            builder.Property(response => response.DateCreated).HasColumnType("datetime").HasDefaultValue();
+            builder.Property(response => response.DateCreated).HasColumnType("datetime").ValueGeneratedOnAdd();
         });
 
         modelBuilder.Entity<SectionStatuses>(builder =>

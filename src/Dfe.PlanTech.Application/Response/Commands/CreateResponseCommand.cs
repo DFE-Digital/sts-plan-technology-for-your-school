@@ -22,7 +22,6 @@ namespace Dfe.PlanTech.Application.Response.Commands
                 QuestionId = recordResponseDto.QuestionId,
                 AnswerId = recordResponseDto.AnswerId,
                 Maturity = recordResponseDto.Maturity,
-                DateCreated = DateTime.UtcNow
             };
 
             _db.AddResponse(response);
