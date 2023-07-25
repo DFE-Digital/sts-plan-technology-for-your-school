@@ -1,11 +1,15 @@
 name: Concept Workflow to harden pipeline
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
-      - "*"
+      - "feat/pipeline-hardening"
+  workflow_dispatch:
+    inputs:
+      option:
+        description: 'Choose an option'
+        required: true
+        default: 'option1'
+        options: ['tst', 'staging', 'production']
 
 jobs:
   set-env:
@@ -44,12 +48,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: deploy-image
     if: github.event_name == 'workflow_dispatch'
-    inputs:
-      option:
-        description: 'Choose an option'
-        required: true
-        default: 'option1'
-        options: ['tst', 'staging', 'production']
     steps:
       - name: Conditional Step
         run: |
