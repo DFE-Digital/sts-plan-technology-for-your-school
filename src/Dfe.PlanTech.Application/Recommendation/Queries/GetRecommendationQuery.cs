@@ -1,6 +1,7 @@
 ﻿using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.AspNetCore.Http.Extensions;
 
@@ -12,7 +13,8 @@ namespace Dfe.PlanTech.Application.Recommendation.Queries
 
         public async Task<IEnumerable<RecommendationPage>> GetRecommendations()
         {
-            return await repository.GetEntities<RecommendationPage>();
+            var options = new GetEntitiesOptions();
+            return await repository.GetEntities<RecommendationPage>("recommendationPage", options);
         }
     }
 }

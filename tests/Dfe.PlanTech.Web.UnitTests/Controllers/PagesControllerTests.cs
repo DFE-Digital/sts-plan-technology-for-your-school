@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Recommendation.Queries;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
@@ -51,6 +52,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
         private readonly PagesController _controller;
         private readonly GetPageQuery _query;
+        private readonly GetRecommendationQuery _recommendationQuery;
         private readonly Mock<IQuestionnaireCacher> _questionnaireCacherMock = new Mock<IQuestionnaireCacher>();
 
         public PagesControllerTests()
@@ -78,6 +80,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _controller = new PagesController(mockLogger.Object, historyMock.Object, configuration);
 
             _query = new GetPageQuery(_questionnaireCacherMock.Object, repositoryMock.Object);
+            _recommendationQuery = new GetRecommendationQuery(repositoryMock.Object);
         }
 
         private Mock<IContentRepository> SetupRepositoryMock()
@@ -104,7 +107,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task Should_ReturnLandingPage_When_IndexRouteLoaded()
         {
-            var result = await _controller.GetByRoute(INDEX_SLUG, It.IsAny<string>(), _query, CancellationToken.None);
+            var result = await _controller.GetByRoute(INDEX_SLUG, It.IsAny<string>(), _query,_recommendationQuery, CancellationToken.None);
 
             Assert.IsType<ViewResult>(result);
 
@@ -142,7 +145,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task Should_ThrowError_When_NoRouteFound()
         {
-            await Assert.ThrowsAnyAsync<Exception>(() => _controller.GetByRoute("NOT A VALID ROUTE", It.IsAny<string>(), _query, CancellationToken.None));
+            await Assert.ThrowsAnyAsync<Exception>(() => _controller.GetByRoute("NOT A VALID ROUTE", It.IsAny<string>(), _query, _recommendationQuery, CancellationToken.None));
         }
     }
 }

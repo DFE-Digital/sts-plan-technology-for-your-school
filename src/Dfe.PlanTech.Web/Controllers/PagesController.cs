@@ -35,10 +35,8 @@ public class PagesController : BaseController<PagesController>
         if (!string.IsNullOrEmpty(param))
             TempData["Param"] = param;
 
-        var test = await recQuery.GetRecommendations(slug);
-
         var page = await query.GetPageBySlug(slug, cancellationToken);
-
+        
         var viewModel = CreatePageModel(page, param);
 
         return View("Page", viewModel);
