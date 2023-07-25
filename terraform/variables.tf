@@ -56,6 +56,14 @@ variable "az_sql_admin_userid_postfix" {
   type        = string
 }
 
+#######################
+# Azure App Container #
+#######################
+variable "az_app_kestrel_endpoint" {
+  description = "Endpoint for Kestrel setup"
+  type        = string
+}
+
 ############
 # KeyVault #
 ############
