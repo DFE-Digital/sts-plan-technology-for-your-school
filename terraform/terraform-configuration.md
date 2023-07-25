@@ -45,6 +45,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_az_app_kestrel_endpoint"></a> [az\_app\_kestrel\_endpoint](#input\_az\_app\_kestrel\_endpoint) | Endpoint for Kestrel setup | `string` | n/a | yes |
 | <a name="input_az_sql_admin_password"></a> [az\_sql\_admin\_password](#input\_az\_sql\_admin\_password) | Azure SQL admin password | `string` | n/a | yes |
 | <a name="input_az_sql_admin_userid_postfix"></a> [az\_sql\_admin\_userid\_postfix](#input\_az\_sql\_admin\_userid\_postfix) | Azure SQL admin userid postfix, used with `project_name` and `environment` to build userid | `string` | n/a | yes |
 | <a name="input_az_tag_environment"></a> [az\_tag\_environment](#input\_az\_tag\_environment) | Environment tag to be applied to all resources | `string` | n/a | yes |
