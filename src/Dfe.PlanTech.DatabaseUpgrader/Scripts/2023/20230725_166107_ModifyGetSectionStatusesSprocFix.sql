@@ -2,7 +2,7 @@ ALTER PROCEDURE GetSectionStatuses @splitStringVal nvarchar(255)
 AS
 DECLARE @val NVARCHAR(50)
 CREATE TABLE #splitTable(val nvarchar(50))
-CREATE TABLE #ReturnTable(sectionId nvarchar(50), completed int)
+CREATE TABLE #ReturnTable(sectionId nvarchar(50), completed int, maturity nvarchar(20), dateCreated datetime)
 
 INSERT INTO #splitTable
 SELECT * FROM STRING_SPLIT(@splitStringVal, ',')
