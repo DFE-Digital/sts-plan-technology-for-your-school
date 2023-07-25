@@ -90,7 +90,7 @@ public class QuestionsController : BaseController<QuestionsController>
         Params param = new Params();
 
         var userId = Convert.ToUInt16(await _user.GetCurrentUserId());
-        var establishmentId = _user.GetEstablishmentId();
+        var establishmentId = Convert.ToUInt16(await _user.GetEstablishmentId());
 
         if (!string.IsNullOrEmpty(submitAnswerDto.Params))
         {

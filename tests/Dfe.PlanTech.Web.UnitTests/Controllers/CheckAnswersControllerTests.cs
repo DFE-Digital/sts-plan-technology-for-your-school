@@ -13,6 +13,7 @@ using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -62,6 +63,8 @@ public class CheckAnswersControllerTests
         IGetAnswerQuery getAnswerQuery = new Application.Submission.Queries.GetAnswerQuery(_planTechDbContextMock.Object);
         GetPageQuery getPageQuery = new GetPageQuery(questionnaireCacherMock.Object, _contentRepositoryMock.Object);
 
+        Mock<ITempDataDictionary> tempDataMock = new Mock<ITempDataDictionary>();
+        
         _checkAnswersController = new CheckAnswersController
         (
             loggerMock.Object,
@@ -73,6 +76,8 @@ public class CheckAnswersControllerTests
             getAnswerQuery,
             getPageQuery
         );
+
+        _checkAnswersController.TempData = tempDataMock.Object;
     }
 
     private Mock<IContentRepository> SetupRepositoryMock()
@@ -337,7 +342,7 @@ public class CheckAnswersControllerTests
     {
         _calculateMaturityCommandMock.Setup(m => m.CalculateMaturityAsync(It.IsAny<int>())).ReturnsAsync(2);
 
-        var result = await _checkAnswersController.ConfirmCheckAnswers(It.IsAny<int>());
+        var result = await _checkAnswersController.ConfirmCheckAnswers(It.IsAny<int>(), "Test");
 
         Assert.IsType<RedirectToActionResult>(result);
 
@@ -349,14 +354,5 @@ public class CheckAnswersControllerTests
             Assert.True(res.ControllerName == "Pages");
         }
     }
-
-    [Fact]
-    public async Task ConfirmCheckAnswers_ReturnsNull_WhenMaturityIsLessThan1()
-    {
-        _calculateMaturityCommandMock.Setup(m => m.CalculateMaturityAsync(It.IsAny<int>())).ReturnsAsync(0);
-
-        var result = await _checkAnswersController.ConfirmCheckAnswers(It.IsAny<int>());
-
-        Assert.Null(result);
-    }
+    
 }

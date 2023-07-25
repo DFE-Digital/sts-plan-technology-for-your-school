@@ -10,6 +10,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
+using Dfe.PlanTech.Domain.Establishments.Models;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
@@ -17,6 +18,8 @@ namespace Dfe.PlanTech.Infrastructure.Data;
 public class PlanTechDbContext : DbContext, IPlanTechDbContext
 {
     public DbSet<User> Users { get; set; } = null!;
+    
+    public DbSet<Establishment> Establishments { get; set; } = null!;
 
     public DbSet<SignIn> SignIn { get; set; } = null!;
 
@@ -112,6 +115,9 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public IQueryable<Response> GetResponses => Responses;
 
     public void AddUser(User user) => Users.Add(user);
+
+    public void AddEstablishment(Establishment establishment) => Establishments.Add(establishment);
+
     public void AddSignIn(SignIn signIn) => SignIn.Add(signIn);
 
     public void AddQuestion(Question question) => Questions.Add(question);
@@ -129,6 +135,8 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public Task<int> SaveChangesAsync() => base.SaveChangesAsync();
 
     public Task<User?> GetUserBy(Expression<Func<User, bool>> predicate) => Users.FirstOrDefaultAsync(predicate);
+    
+    public Task<Establishment?> GetEstablishmentBy(Expression<Func<Establishment, bool>> predicate) => Establishments.FirstOrDefaultAsync(predicate);
 
     public Task<int> CallStoredProcedureWithReturnInt(string sprocName, List<SqlParameter> parms) => base.Database.ExecuteSqlRawAsync(sprocName, parms);
 }

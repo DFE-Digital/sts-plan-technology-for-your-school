@@ -66,17 +66,13 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     }
 
     [HttpPost("ConfirmCheckAnswers")]
-    public async Task<IActionResult> ConfirmCheckAnswers(int submissionId)
+    public async Task<IActionResult> ConfirmCheckAnswers(int submissionId, string sectionName)
     {
-        var calculateMaturity = await _calculateMaturityCommand.CalculateMaturityAsync(submissionId);
+        await _calculateMaturityCommand.CalculateMaturityAsync(submissionId);
 
-        if (calculateMaturity > 1)
-        {
-            return RedirectToAction("GetByRoute", "Pages", new { route = "self-assessment" });
-        }
-
-        // TODO Show error message.
-        return null;
+        TempData["SectionName"] = sectionName;
+        return RedirectToAction("GetByRoute", "Pages", new { route = "self-assessment" });
+            
     }
 
     private async Task<Response[]?> _GetResponseList(int submissionId)

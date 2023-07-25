@@ -1,3 +1,4 @@
+@using Microsoft.EntityFrameworkCore
 @model Dfe.PlanTech.Web.Models.PageViewModel;
 @section BeforeContent {
     @if (Model.Page.DisplayBackButton)
@@ -15,5 +16,27 @@
 }
 
 @{
+    if (TempData.ContainsKey("SectionName"))
+    {
+        if (Model.Page.Slug == "self-assessment")
+        {
+            var sectionName = TempData["SectionName"] as string;
+            <div class="govuk-notification-banner govuk-notification-banner--success" role="alert"
+                 aria-labelledby="govuk-notification-banner-title"
+                 data-module="govuk-notification-banner">
+                <div class="govuk-notification-banner__header">
+                    <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                        Success
+                    </h2>
+                </div>
+                <div class="govuk-notification-banner__content">
+                    <h3 class="govuk-notification-banner__heading">
+                        You have one new recommendation for @sectionName
+                    </h3>
+                </div>
+            </div>
+        }
+    }
+    
     await Html.RenderPartialAsync("Components/Page", Model.Page);
 }
