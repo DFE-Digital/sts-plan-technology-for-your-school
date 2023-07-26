@@ -21,18 +21,7 @@ namespace Dfe.PlanTech.Application.Submission.Commands
         {
             int userId = await _getSubmitAnswerQueries.GetUserId();
 
-            int submissionId;
-
-            if (submitAnswerDto.SubmissionId == null || submitAnswerDto.SubmissionId == 0)
-            {
-                submissionId = await _recordSubmitAnswerCommands.RecordSubmission(new Domain.Submissions.Models.Submission()
-                {
-                    EstablishmentId = await _getSubmitAnswerQueries.GetEstablishmentId(),
-                    SectionId = sectionId,
-                    SectionName = sectionName
-                });
-            }
-            else submissionId = Convert.ToUInt16(submitAnswerDto.SubmissionId);
+            int submissionId = await _GetSubmissionId(submitAnswerDto.SubmissionId, sectionId, sectionName);
 
             int questionId = await _recordSubmitAnswerCommands.RecordQuestion(new RecordQuestionDto()
             {
@@ -83,6 +72,20 @@ namespace Dfe.PlanTech.Application.Submission.Commands
         public async Task<Domain.Questionnaire.Models.Question> GetQuestionnaireQuestion(string questionId, string? section, CancellationToken cancellationToken)
         {
             return await _getSubmitAnswerQueries.GetQuestionnaireQuestion(questionId, section, cancellationToken);
+        }
+
+        private async Task<int> _GetSubmissionId(int? submissionId, string sectionId, string sectionName)
+        {
+            if (submissionId == null || submissionId == 0)
+            {
+                return await _recordSubmitAnswerCommands.RecordSubmission(new Domain.Submissions.Models.Submission()
+                {
+                    EstablishmentId = await _getSubmitAnswerQueries.GetEstablishmentId(),
+                    SectionId = sectionId,
+                    SectionName = sectionName
+                });
+            }
+            else return Convert.ToUInt16(submissionId);
         }
 
         private async Task<string?> _GetQuestionTextById(string questionId)
