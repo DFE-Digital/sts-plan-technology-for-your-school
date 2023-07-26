@@ -10,7 +10,7 @@ jobs:
       max-parallel: 1
       fail-fast: true
       matrix:
-        target: ['dev', 'tst']
+        target: [dev, tst]
     uses: ./.github/workflows/build-and-deploy.yml
     with:
       environment: ${ { matrix.target } }
