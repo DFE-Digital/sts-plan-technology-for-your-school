@@ -6,7 +6,6 @@ on:
 
 jobs:
   deploy-to-environments:
-    needs: build
     strategy:
       max-parallel: 1
       fail-fast: true
