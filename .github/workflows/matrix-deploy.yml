@@ -1,0 +1,18 @@
+name: Build & deploy to environment
+
+on:
+  push:
+    branches: [ "feat/pipeline-hardening" ]
+
+jobs:
+  deploy-to-environments:
+    needs: build
+    strategy:
+      max-parallel: 1
+      fail-fast: true
+      matrix:
+        target: [dev, tst]
+    uses: ./.github/workflows/build-and-deploy.yml
+    with:
+      environment: ${ { matrix.target } }
+    secrets: inherit
