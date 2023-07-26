@@ -52,6 +52,6 @@ locals {
   ###########
   # Scripts #
   ###########
-  container_app-assign-identity      = "timeout 15m ${path.module}/scripts/assign-user-identity-to-app.sh -n \"${local.container_app_name}\" -g \"${local.resource_group_name}\" -u \"${local.user_identity_name}\""
+  container_app-assign-identity         = "timeout 15m ${path.module}/scripts/assign-user-identity-to-app.sh -n \"${local.container_app_name}\" -g \"${local.resource_group_name}\" -u \"${local.user_identity_name}\""
   keyvault-add-vnet-restriction_command = "timeout 15m ${path.module}/scripts/add-keyvault-service-endpoint-to-app.sh -c \"${local.container_app_name}\" -g \"${local.resource_group_name}\" -v \"${local.vnet_name}\" -n \"${local.subnet_name}\" -k \"${local.kv_name}\""
 }

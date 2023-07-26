@@ -2,7 +2,7 @@ resource "null_resource" "keyvault-add-vnet-restriction" {
   depends_on = [module.main_hosting]
 
   triggers = {
-    always_run = "${timestamp()}"
+    always_run = timestamp()
   }
   
   provisioner "local-exec" {

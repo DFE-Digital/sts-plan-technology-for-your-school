@@ -2,7 +2,7 @@ resource "null_resource" "app-assign-identity" {
   depends_on = [module.main_hosting]
 
   triggers = {
-    always_run = "${timestamp()}"
+    always_run = timestamp()
   }
   
   provisioner "local-exec" {
