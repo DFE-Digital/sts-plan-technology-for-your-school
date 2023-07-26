@@ -9,5 +9,11 @@ namespace Dfe.PlanTech.Domain.Submissions.Models
 
         [JsonProperty("completed")]
         public int Completed { get; set; }
+
+        [JsonProperty("maturity")]
+        public string? Maturity { get; set; }
+
+        [JsonProperty("dateCreated")]
+        public DateTime DateCreated { get; set; }
     }
 }

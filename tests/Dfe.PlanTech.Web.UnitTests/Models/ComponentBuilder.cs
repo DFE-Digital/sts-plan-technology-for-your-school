@@ -57,7 +57,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             Page = BuildPage(),
             DisplayName = $"Testing Recommendation - {maturity}",
             InternalName = $"testing-recommendation-{maturity}",
-            Maturity = maturity
+            Maturity = maturity,
         };
 
         public InsetText BuildInsetText() => new()
