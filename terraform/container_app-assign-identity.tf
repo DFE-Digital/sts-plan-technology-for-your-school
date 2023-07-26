@@ -1,4 +1,4 @@
-resource "null_resource" "keyvault-assign-identity" {
+resource "null_resource" "app-assign-identity" {
   depends_on = [module.main_hosting]
 
   triggers = {
@@ -7,6 +7,6 @@ resource "null_resource" "keyvault-assign-identity" {
   
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
-    command     = local.keyvault-assign-identity_command
+    command     = local.container_app-assign-identity
   }
 }
