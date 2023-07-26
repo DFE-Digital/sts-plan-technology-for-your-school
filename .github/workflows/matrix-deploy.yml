@@ -1,9 +1,10 @@
 name: Build & deploy to environment
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "feat/pipeline-hardening" ]
-  workflow_dispatch:
+  
 
 jobs:
   deploy-to-environments:
