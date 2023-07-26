@@ -4,6 +4,6 @@
     {
         Task<int?> GetCurrentUserId();
 
-        int GetEstablishmentId();
+        Task<int?> GetEstablishmentId();
     }
 }

@@ -1,9 +1,9 @@
-using System.Text.Json.Serialization;
 using Dfe.PlanTech.Domain.SignIn.Enums;
+using System.Text.Json.Serialization;
 
 namespace Dfe.PlanTech.Domain.SignIn.Models;
 
-  public sealed class Organisation
+public sealed class Organisation
 {
     public Guid Id { get; set; }
 

@@ -1,12 +1,11 @@
-using System.Web;
 using Contentful.Core;
 using Contentful.Core.Models;
 using Contentful.Core.Search;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using System.Web;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
 {
@@ -28,11 +27,12 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
                 var sysId = parsedQueryString.Get("sys.id");
 
                 var items = _mockData.AsEnumerable();
-                
-                if(sysId != null){
+
+                if (sysId != null)
+                {
                     items = items.Where(testData => testData.Id == sysId);
                 }
-                                
+
                 var collection = new ContentfulCollection<TestClass>
                 {
                     Items = items

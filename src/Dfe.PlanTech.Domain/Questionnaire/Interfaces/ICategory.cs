@@ -10,7 +10,7 @@ public interface ICategory : IContentComponent
     public Header Header { get; }
 
     public IContentComponent[] Content { get; }
-    
+
     public ISection[] Sections { get; }
 
     public IList<SectionStatuses> SectionStatuses { get; set; }

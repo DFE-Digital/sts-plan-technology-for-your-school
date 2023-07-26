@@ -11,14 +11,14 @@ namespace Dfe.PlanTech.Application.Submission.Commands
 
         public CalculateMaturityCommand(IPlanTechDbContext db)
         {
-            _db = db;    
+            _db = db;
         }
 
         public async Task<int> CalculateMaturityAsync(int submissionId)
         {
             var sprocName = DatabaseConstants.CalculateMaturitySproc;
             var parms = new List<SqlParameter>
-            { 
+            {
                 new SqlParameter { ParameterName = DatabaseConstants.CalculateMaturitySprocParam, Value = submissionId, Direction = System.Data.ParameterDirection.Input }
             };
 

@@ -1,11 +1,12 @@
-using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Text.Encodings.Web;
 
 namespace Dfe.PlanTech.Infrastructure.SignIn.UnitTests;
 
-public class DummyAuthHandlerOptions : AuthenticationSchemeOptions{
+public class DummyAuthHandlerOptions : AuthenticationSchemeOptions
+{
 
 }
 public class DummyAuthHandler : AuthenticationHandler<DummyAuthHandlerOptions>

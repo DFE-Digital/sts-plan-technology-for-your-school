@@ -1,5 +1,5 @@
-using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Html;
+using System.Text.Encodings.Web;
 
 namespace Dfe.PlanTech.Web.UnitTests;
 
