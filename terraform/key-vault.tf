@@ -103,6 +103,6 @@ resource "azurerm_key_vault_key" "data_protection_key" {
   tags = local.tags
 
   lifecycle {
-    ignore_changes  = all
+    ignore_changes = all
   }
 }

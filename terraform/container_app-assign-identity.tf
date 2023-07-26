@@ -4,7 +4,7 @@ resource "null_resource" "app-assign-identity" {
   triggers = {
     always_run = timestamp()
   }
-  
+
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command     = local.container_app-assign-identity
