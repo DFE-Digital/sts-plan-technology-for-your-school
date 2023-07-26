@@ -2,6 +2,7 @@ using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
+using Dfe.PlanTech.Application.Response.Commands;
 using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Application.Response.Queries;
 using Dfe.PlanTech.Application.Submission.Interface;
@@ -64,16 +65,16 @@ public class CheckAnswersControllerTests
         GetPageQuery getPageQuery = new GetPageQuery(questionnaireCacherMock.Object, _contentRepositoryMock.Object);
 
         Mock<ITempDataDictionary> tempDataMock = new Mock<ITempDataDictionary>();
-        
+
+        ProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand = new ProcessCheckAnswerDtoCommand(getQuestionQuery, getAnswerQuery, _getQuestionnaireQueryMock.Object);
+
         _checkAnswersController = new CheckAnswersController
         (
             loggerMock.Object,
             urlHistoryMock.Object,
-            _getQuestionnaireQueryMock.Object,
+            processCheckAnswerDtoCommand,
             _calculateMaturityCommandMock.Object,
             getResponseQuery,
-            getQuestionQuery,
-            getAnswerQuery,
             getPageQuery
         );
 
@@ -354,5 +355,5 @@ public class CheckAnswersControllerTests
             Assert.True(res.ControllerName == "Pages");
         }
     }
-    
+
 }

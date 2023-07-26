@@ -1,9 +1,7 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Response.Commands;
 using Dfe.PlanTech.Application.Response.Interface;
-using Dfe.PlanTech.Application.Submission.Interface;
 using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Responses.Models;
@@ -24,14 +22,12 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     public CheckAnswersController(
         ILogger<CheckAnswersController> logger,
         IUrlHistory history,
-        [FromServices] GetQuestionQuery getQuestionnaireQuery,
+        [FromServices] ProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand,
         [FromServices] ICalculateMaturityCommand calculateMaturityCommand,
         [FromServices] IGetResponseQuery getResponseQuery,
-        [FromServices] IGetQuestionQuery getQuestionQuery,
-        [FromServices] IGetAnswerQuery getAnswerQuery,
         [FromServices] GetPageQuery getPageQuery) : base(logger, history)
     {
-        _processCheckAnswerDtoCommand = new ProcessCheckAnswerDtoCommand(getQuestionQuery, getAnswerQuery, getQuestionnaireQuery);
+        _processCheckAnswerDtoCommand = processCheckAnswerDtoCommand;
         _calculateMaturityCommand = calculateMaturityCommand;
         _getResponseQuery = getResponseQuery;
         _getPageQuery = getPageQuery;
@@ -72,7 +68,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
         TempData["SectionName"] = sectionName;
         return RedirectToAction("GetByRoute", "Pages", new { route = "self-assessment" });
-            
+
     }
 
     private async Task<Response[]?> _GetResponseList(int submissionId)
