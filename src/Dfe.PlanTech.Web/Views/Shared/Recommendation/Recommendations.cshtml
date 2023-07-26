@@ -14,7 +14,7 @@
         <task-list-item>
             <task-list-item-name>
                 <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@recommendation?.Page?.Slug" class="govuk-link">
-                @recommendation.DisplayName
+                @recommendation?.DisplayName
                 </a>
             </task-list-item-name>
         </task-list-item>
