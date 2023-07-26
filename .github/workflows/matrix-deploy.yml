@@ -3,6 +3,7 @@ name: Build & deploy to environment
 on:
   push:
     branches: [ "feat/pipeline-hardening" ]
+  workflow_dispatch:
 
 jobs:
   deploy-to-environments:
@@ -10,8 +11,40 @@ jobs:
       max-parallel: 1
       fail-fast: true
       matrix:
-        target: [dev, tst]
+        target: [ dev ]
     uses: ./.github/workflows/build-and-deploy.yml
     with:
       environment: ${{ matrix.target }}
     secrets: inherit
+    
+  deploy-to-staging:
+    needs: deploy-to-environments
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    strategy:
+      max-parallel: 1
+      fail-fast: true
+      matrix:
+         target: [ staging ]
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo "will deploy to staging here"
+#    uses: ./.github/workflows/build-and-deploy.yml
+#    with:
+#      environment: ${{ matrix.target }}
+#    secrets: inherit
+      
+  deploy-to-prod:
+    needs: deploy-to-staging
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    strategy:
+      max-parallel: 1
+      fail-fast: true
+      matrix:
+        target: [ prod ]
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo "will deploy to prod here"
+#    uses: ./.github/workflows/build-and-deploy.yml
+#    with:
+#      environment: ${{ matrix.target }}
+#    secrets: inherit
