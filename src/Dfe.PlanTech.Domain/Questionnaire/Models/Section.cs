@@ -27,6 +27,9 @@ public class Section : ContentComponent, ISection
 
     public RecommendationPage GetRecommendationForMaturity(string maturity)
     {
+        if (maturity is null)
+            maturity = string.Empty;
+
         Enum.TryParse(maturity, out Maturity maturityResponse);
 
         return GetRecommendationForMaturity(maturityResponse);

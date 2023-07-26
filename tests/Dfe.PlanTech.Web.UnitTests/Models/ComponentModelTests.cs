@@ -100,6 +100,18 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         }
 
         [Fact]
+        public void Section_Should_Return_Correct_Maturity_When_Maturity_Is_A_String()
+        {
+            var maturity = "Low";
+            var section = _componentBuilder.BuildSections().First();
+
+            var lowMaturityRecommendation = section.GetRecommendationForMaturity(maturity);
+
+            Assert.NotNull(lowMaturityRecommendation);
+            Assert.Equal(Maturity.Low, lowMaturityRecommendation.Maturity);
+        }
+
+        [Fact]
         public void Section_Should_Error_If_Maturity_Not_Found()
         {
             var maturity = Maturity.Unknown;
