@@ -108,7 +108,7 @@ namespace Dfe.PlanTech.Application.Submission.Commands
 
             var question = await _getSubmitAnswerQueries.GetQuestionnaireQuestion(questionId, null, CancellationToken.None);
 
-            var answer = question.Answers.FirstOrDefault(x => x.Sys?.Id == chosenAnswerId);
+            var answer = Array.Find(question.Answers, x => x.Sys?.Id == chosenAnswerId) ?? null;
 
             return answer != null ? answer.Maturity : string.Empty;
         }
