@@ -122,7 +122,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
 
             try
             {
+                // @SONAR_STOP@
                 var lowMaturityRecommendation = section.GetRecommendationForMaturity(maturity);
+                // @SONAR_START@
 
                 Assert.NotNull(lowMaturityRecommendation);
                 Assert.Equal(Maturity.Low, lowMaturityRecommendation.Maturity);
