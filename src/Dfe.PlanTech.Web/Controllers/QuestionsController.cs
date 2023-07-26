@@ -27,8 +27,8 @@ public class QuestionsController : BaseController<QuestionsController>
         string? section,
         int? submissionId,
         string? answerRef,
-        CancellationToken cancellationToken,
-        [FromServices] SubmitAnswerCommand submitAnswerCommand)
+        [FromServices] SubmitAnswerCommand submitAnswerCommand,
+        CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
         object? parameters;
