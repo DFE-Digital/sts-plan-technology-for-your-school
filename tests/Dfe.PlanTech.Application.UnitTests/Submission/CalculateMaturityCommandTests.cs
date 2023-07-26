@@ -1,13 +1,7 @@
 ﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Submission.Commands;
-using Dfe.PlanTech.Application.Submission.Interfaces;
 using Microsoft.Data.SqlClient;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Dfe.PlanTech.Application.UnitTests.Submission
 {

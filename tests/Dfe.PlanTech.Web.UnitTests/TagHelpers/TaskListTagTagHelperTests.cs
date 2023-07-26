@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Web.TagHelpers.TaskList;
 using Microsoft.AspNetCore.Razor.TagHelpers;
-using Moq;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.TagHelpers
@@ -8,13 +7,14 @@ namespace Dfe.PlanTech.Web.UnitTests.TagHelpers
     public class TaskListTagTagHelperTests
     {
         [Fact]
-        public void Should_Set_Variables(){
+        public void Should_Set_Variables()
+        {
             var tagHelper = new TaskListTagTagHelper();
 
             Assert.NotNull(tagHelper.Class);
             Assert.NotNull(tagHelper.TagName);
         }
-        
+
         [Fact]
         public void Should_Create_CorrectColour_When_ValidColour()
         {

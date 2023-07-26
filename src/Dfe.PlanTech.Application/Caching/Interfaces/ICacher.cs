@@ -44,7 +44,7 @@ public interface ICacher
     /// <param name="timeToLive"></param>
     /// <returns></returns>
     public Task<T?> GetAsync<T>(string key, Func<Task<T>> getFromService, TimeSpan timeToLive);
-    
+
     /// <summary>
     /// Tries to get from Cache, if not found gets from service and sets cache to match. Uses default time to live from options.
     /// </summary>
@@ -54,7 +54,7 @@ public interface ICacher
     /// <param name="timeToLive"></param>
     /// <returns></returns>
     public Task<T?> GetAsync<T>(string key, Func<Task<T>> getFromService);
-    
+
     /// <summary>
     /// Set value in cache
     /// </summary>

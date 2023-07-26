@@ -1,10 +1,4 @@
-using System.Security.Claims;
-using Dfe.PlanTech.Application.SignIn.Interfaces;
-using Dfe.PlanTech.Application.Users.Interfaces;
-using Dfe.PlanTech.Domain.SignIn.Enums;
 using Dfe.PlanTech.Domain.SignIn.Models;
-using Dfe.PlanTech.Domain.Users.Models;
-using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
 

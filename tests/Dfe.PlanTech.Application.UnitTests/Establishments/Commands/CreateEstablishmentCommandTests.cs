@@ -23,7 +23,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
             var strut = CreateStrut();
             mockDb.Setup(x => x.AddEstablishment(It.IsAny<Domain.Establishments.Models.Establishment>()));
             mockDb.Setup(x => x.SaveChangesAsync()).ReturnsAsync(expectedEstablishmentId);
-            var establishmentDto = new EstablishmentDto() { Urn = null, Ukprn = new Guid().ToString()};
+            var establishmentDto = new EstablishmentDto() { Urn = null, Ukprn = new Guid().ToString() };
 
             //Act
             var result = await strut.CreateEstablishment(establishmentDto);
@@ -31,7 +31,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
             //Assert
             Assert.Equal(expectedEstablishmentId, result);
         }
-        
+
         [Theory]
         [InlineData(3)]
         [InlineData(300)]
@@ -41,7 +41,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
             var strut = CreateStrut();
             mockDb.Setup(x => x.AddEstablishment(It.IsAny<Domain.Establishments.Models.Establishment>()));
             mockDb.Setup(x => x.SaveChangesAsync()).ReturnsAsync(expectedEstablishmentId);
-            var establishmentDto = new EstablishmentDto() { Urn = new Guid().ToString(), Ukprn = null};
+            var establishmentDto = new EstablishmentDto() { Urn = new Guid().ToString(), Ukprn = null };
 
             //Act
             var result = await strut.CreateEstablishment(establishmentDto);
@@ -49,18 +49,18 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
             //Assert
             Assert.Equal(expectedEstablishmentId, result);
         }
-        
-        
+
+
         [Fact]
         public async Task CreateEstablishmentDoesThrowsExceptionWhenUrnAndUkprnAreNotPresent()
         {
             var strut = CreateStrut();
-            var establishmentDto = new EstablishmentDto() { Urn = null, Ukprn = null};
-            
+            var establishmentDto = new EstablishmentDto() { Urn = null, Ukprn = null };
+
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () => await strut.CreateEstablishment(establishmentDto));
 
             Assert.Equal("Both Urn and Ukprn cannot be null.", exception.Message);
         }
-        
+
     }
 }
