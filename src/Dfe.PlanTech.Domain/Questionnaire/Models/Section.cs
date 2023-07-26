@@ -30,7 +30,7 @@ public class Section : ContentComponent, ISection
         if (maturity is null)
             maturity = string.Empty;
 
-        var _ = Enum.TryParse(maturity, out Maturity maturityResponse);
+        Enum.TryParse(maturity, out Maturity maturityResponse);
 
         return GetRecommendationForMaturity(maturityResponse);
     }

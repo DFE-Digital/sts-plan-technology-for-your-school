@@ -119,18 +119,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             string? maturity = null;
             string exceptionText = "Could not find recommendation with maturity Unknown";
             var section = _componentBuilder.BuildSections().First();
+            var exceptionType = typeof(KeyNotFoundException);
 
-            try
-            {
-                var lowMaturityRecommendation = section.GetRecommendationForMaturity(maturity);
+            Assert.Throws(exceptionType, () => section.GetRecommendationForMaturity(maturity));
 
-                Assert.NotNull(lowMaturityRecommendation);
-                Assert.Equal(Maturity.Low, lowMaturityRecommendation.Maturity);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                Assert.Equal(exceptionText, ex.Message);
-            }
         }
 
         [Fact]
