@@ -13,5 +13,5 @@ jobs:
         target: [dev, tst]
     uses: ./.github/workflows/build-and-deploy.yml
     with:
-      environment: ${ { matrix.target } }
+      environment: ${{ matrix.target }}
     secrets: inherit
