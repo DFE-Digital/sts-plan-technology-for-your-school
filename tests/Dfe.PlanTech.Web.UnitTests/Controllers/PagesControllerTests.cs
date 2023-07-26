@@ -1,7 +1,6 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Application.Recommendation.Queries;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
@@ -52,7 +51,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
         private readonly PagesController _controller;
         private readonly GetPageQuery _query;
-        private readonly GetRecommendationQuery _recommendationQuery;
         private readonly Mock<IQuestionnaireCacher> _questionnaireCacherMock = new Mock<IQuestionnaireCacher>();
 
         public PagesControllerTests()
@@ -80,7 +78,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _controller = new PagesController(mockLogger.Object, historyMock.Object, configuration);
 
             _query = new GetPageQuery(_questionnaireCacherMock.Object, repositoryMock.Object);
-            _recommendationQuery = new GetRecommendationQuery(repositoryMock.Object);
         }
 
         private Mock<IContentRepository> SetupRepositoryMock()
