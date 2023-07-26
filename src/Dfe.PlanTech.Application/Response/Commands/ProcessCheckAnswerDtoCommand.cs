@@ -28,6 +28,18 @@ namespace Dfe.PlanTech.Application.Response.Commands
             _calculateMaturityCommand = calculateMaturityCommand;
         }
 
+        public async Task<CheckAnswerDto> ProcessCheckAnswerDto(int submissionId)
+        {
+            CheckAnswerDto checkAnswerDto = await _GetCheckAnswerDto(submissionId);
+            checkAnswerDto = await _RemoveDetachedQuestions(checkAnswerDto);
+            return checkAnswerDto;
+        }
+
+        public async Task CalculateMaturityAsync(int submissionId)
+        {
+            await _calculateMaturityCommand.CalculateMaturityAsync(submissionId);
+        }
+
         private async Task<CheckAnswerDto> _GetCheckAnswerDto(int submissionId)
         {
             var responseList = await _GetResponseList(submissionId);
@@ -98,18 +110,6 @@ namespace Dfe.PlanTech.Application.Response.Commands
             checkAnswerDto.QuestionAnswerList.RemoveAll(questionWithAnswer => isDetachedMap[questionWithAnswer.QuestionRef]);
 
             return checkAnswerDto;
-        }
-
-        public async Task<CheckAnswerDto> ProcessCheckAnswerDto(int submissionId)
-        {
-            CheckAnswerDto checkAnswerDto = await _GetCheckAnswerDto(submissionId);
-            checkAnswerDto = await _RemoveDetachedQuestions(checkAnswerDto);
-            return checkAnswerDto;
-        }
-
-        public async Task CalculateMaturityAsync(int submissionId)
-        {
-            await _calculateMaturityCommand.CalculateMaturityAsync(submissionId);
         }
 
         private async Task<Domain.Questions.Models.Question?> _GetResponseQuestion(int questionId)
