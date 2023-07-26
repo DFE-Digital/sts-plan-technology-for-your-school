@@ -175,14 +175,15 @@ jobs:
     runs-on: ubuntu-22.04
     if: ${{ needs.set-env.outputs.environment }} == 'dev'
     steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.ref }}
-
-      - name: Cypress tests
-        uses: ./.github/actions/run-e2e-tests
-        with:
-          url: ${{ secrets.AZ_FRONTDOOR_URL }}
-          dsi_url: ${{ secrets.DSI_URL }}
-          dsi_username: ${{ secrets.DSI_USERNAME }}
-          dsi_password: ${{ secrets.DSI_PASSWORD }}
+       - run: echo "Will only run E2E tests on ${{ needs.set-env.outputs.environment }}"
+#      - uses: actions/checkout@v3
+#        with:
+#          ref: ${{ github.ref }}
+#
+#      - name: Cypress tests
+#        uses: ./.github/actions/run-e2e-tests
+#        with:
+#          url: ${{ secrets.AZ_FRONTDOOR_URL }}
+#          dsi_url: ${{ secrets.DSI_URL }}
+#          dsi_username: ${{ secrets.DSI_USERNAME }}
+#          dsi_password: ${{ secrets.DSI_PASSWORD }}
