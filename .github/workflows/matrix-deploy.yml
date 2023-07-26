@@ -20,11 +20,6 @@ jobs:
   deploy-to-staging:
     needs: deploy-to-environments
     if: ${{ github.event_name == 'workflow_dispatch' }}
-    strategy:
-      max-parallel: 1
-      fail-fast: true
-      matrix:
-         target: [ staging ]
     runs-on: ubuntu-22.04
     steps:
       - run: echo "will deploy to staging here"
@@ -36,11 +31,6 @@ jobs:
   deploy-to-prod:
     needs: deploy-to-staging
     if: ${{ github.event_name == 'workflow_dispatch' }}
-    strategy:
-      max-parallel: 1
-      fail-fast: true
-      matrix:
-        target: [ prod ]
     runs-on: ubuntu-22.04
     steps:
       - run: echo "will deploy to prod here"
