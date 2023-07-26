@@ -3,7 +3,6 @@ using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Application.Response.Queries;
-using Dfe.PlanTech.Application.Submission.Commands;
 using Dfe.PlanTech.Application.Submission.Interface;
 using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Application.Submission.Queries;
@@ -62,7 +61,7 @@ public class CheckAnswersControllerTests
         GetPageQuery getPageQuery = new GetPageQuery(questionnaireCacherMock.Object, _contentRepositoryMock.Object);
 
         Mock<ITempDataDictionary> tempDataMock = new Mock<ITempDataDictionary>();
-        
+
         _checkAnswersController = new CheckAnswersController
         (
             loggerMock.Object,
@@ -238,13 +237,4 @@ public class CheckAnswersControllerTests
         }
     }
 
-    [Fact]
-    public async Task ConfirmCheckAnswers_ReturnsNull_WhenMaturityIsLessThan1()
-    {
-        _calculateMaturityCommandMock.Setup(m => m.CalculateMaturityAsync(It.IsAny<int>())).ReturnsAsync(0);
-
-        var result = await _checkAnswersController.ConfirmCheckAnswers(It.IsAny<int>(), "Test");
-
-        Assert.Null(result);
-    }
 }

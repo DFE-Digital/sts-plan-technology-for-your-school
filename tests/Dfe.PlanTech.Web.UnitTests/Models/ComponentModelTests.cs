@@ -118,7 +118,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             var maturity = Maturity.Unknown;
             var section = _componentBuilder.BuildSections().First();
             var exceptionType = typeof(KeyNotFoundException);
-            
+
             Assert.Throws(exceptionType, () => section.GetRecommendationForMaturity(maturity));
         }
 

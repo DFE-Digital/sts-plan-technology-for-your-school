@@ -9,18 +9,18 @@ public interface IUrlHistory
     /// Users history
     /// </summary>
     public Stack<Uri> History { get; }
-    
+
     /// <summary>
     /// The last URL a user visited (or null if none)
     /// </summary>
     public Uri? LastVisitedUrl { get; }
-    
+
     /// <summary>
     /// Adds the URL to user history and save
     /// </summary>
     /// <param name="url"></param>
     public void AddUrlToHistory(Uri url);
-    
+
     /// <summary>
     /// Remove last visited URL from history
     /// </summary>

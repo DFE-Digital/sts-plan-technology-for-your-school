@@ -27,9 +27,9 @@ public class CreateUserCommand : ICreateUserCommand
 
         _db.AddUser(user);
 
-        var userId = await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
-        return userId;
+        return user.Id;
     }
 }
 

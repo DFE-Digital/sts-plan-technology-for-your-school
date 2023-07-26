@@ -9,7 +9,6 @@ using Dfe.PlanTech.Domain.Responses.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
@@ -113,15 +112,10 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     [HttpPost("ConfirmCheckAnswers")]
     public async Task<IActionResult> ConfirmCheckAnswers(int submissionId, string sectionName)
     {
-        var calculateMaturity = await _calculateMaturityCommand.CalculateMaturityAsync(submissionId);
+        await _calculateMaturityCommand.CalculateMaturityAsync(submissionId);
 
-        if (calculateMaturity > 1)
-        {
-            TempData["SectionName"] = sectionName;
-            return RedirectToAction("GetByRoute", "Pages", new { route = "self-assessment" });
-        }
+        TempData["SectionName"] = sectionName;
+        return RedirectToAction("GetByRoute", "Pages", new { route = "self-assessment" });
 
-        // TODO Show error message.
-        return null;
     }
 }

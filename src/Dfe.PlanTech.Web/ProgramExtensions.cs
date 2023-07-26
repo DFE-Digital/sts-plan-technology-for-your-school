@@ -83,6 +83,7 @@ public static class ProgramExtensions
 
         services.AddTransient<IGetUserIdQuery, GetUserIdQuery>();
         services.AddTransient<ICreateUserCommand, CreateUserCommand>();
+        services.AddTransient<ICreateEstablishmentCommand, CreateEstablishmentCommand>();
         services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
 
         services.AddTransient<ICreateQuestionCommand, CreateQuestionCommand>();

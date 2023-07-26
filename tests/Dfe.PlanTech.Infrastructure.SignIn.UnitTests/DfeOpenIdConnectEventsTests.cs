@@ -1,5 +1,3 @@
-using System.Security.Claims;
-using System.Text.Json;
 using Dfe.PlanTech.Application.SignIn.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.SignIn.Enums;
@@ -10,6 +8,8 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Moq;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace Dfe.PlanTech.Infrastructure.SignIn.UnitTests;
 
@@ -142,7 +142,7 @@ public class DfeOpenIdConnectEventsTests
         var roleIdClaim = addedIdentity.Claims.FirstOrDefault(c => c.Type == ClaimConstants.RoleId);
         Assert.NotNull(roleIdClaim);
         Assert.Equal(expectedRole.Id.ToString(), roleIdClaim.Value);
-        
+
         var roleNameClaim = addedIdentity.Claims.FirstOrDefault(c => c.Type == ClaimConstants.RoleName);
         Assert.NotNull(roleNameClaim);
         Assert.Equal(expectedRole.Name, roleNameClaim.Value);

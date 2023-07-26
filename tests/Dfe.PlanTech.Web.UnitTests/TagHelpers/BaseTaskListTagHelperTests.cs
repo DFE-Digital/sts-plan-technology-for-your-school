@@ -24,7 +24,7 @@ public class BaseTaskListTagHelperTests
         var attribute = tagHelper.CreateClasses();
 
         var expected = $"{Constants.CLASS} {classes}";
-        
+
         Assert.Equal(expected, attribute);
     }
 }

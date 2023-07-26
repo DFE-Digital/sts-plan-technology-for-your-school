@@ -22,8 +22,20 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
         {
             //Arrange
             var strut = CreateStrut();
-            mockDb.Setup(x => x.AddUser(It.IsAny<User>()));
-            mockDb.Setup(x => x.SaveChangesAsync()).ReturnsAsync(expectedUserId);
+            User? createdUser = null;
+
+            mockDb.Setup(x => x.AddUser(It.IsAny<User>()))
+                    .Callback((User user) => createdUser = user);
+
+            mockDb.Setup(x => x.SaveChangesAsync()).Callback(() =>
+            {
+                if (createdUser != null)
+                {
+                    createdUser.Id = expectedUserId;
+                }
+            });
+
+
             var recordUserSignInDto = new RecordUserSignInDto { DfeSignInRef = new Guid().ToString() };
 
             //Act
