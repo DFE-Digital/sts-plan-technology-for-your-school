@@ -23,6 +23,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers;
 
 public class CheckAnswersControllerTests
 {
+    private readonly ProcessCheckAnswerDtoCommand _processCheckAnswerDtoCommand;
+
+    private readonly GetPageQuery _getPageQuery;
+
     private readonly CheckAnswersController _checkAnswersController;
 
     private readonly Mock<IPlanTechDbContext> _planTechDbContextMock;
@@ -62,20 +66,21 @@ public class CheckAnswersControllerTests
         IGetResponseQuery getResponseQuery = new GetResponseQuery(_planTechDbContextMock.Object);
         IGetQuestionQuery getQuestionQuery = new Application.Submission.Queries.GetQuestionQuery(_planTechDbContextMock.Object);
         IGetAnswerQuery getAnswerQuery = new Application.Submission.Queries.GetAnswerQuery(_planTechDbContextMock.Object);
-        GetPageQuery getPageQuery = new GetPageQuery(questionnaireCacherMock.Object, _contentRepositoryMock.Object);
+        _getPageQuery = new GetPageQuery(questionnaireCacherMock.Object, _contentRepositoryMock.Object);
 
         Mock<ITempDataDictionary> tempDataMock = new Mock<ITempDataDictionary>();
 
-        ProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand = new ProcessCheckAnswerDtoCommand(getQuestionQuery, getAnswerQuery, _getQuestionnaireQueryMock.Object);
+        _processCheckAnswerDtoCommand = new ProcessCheckAnswerDtoCommand(
+            getQuestionQuery,
+            getAnswerQuery,
+            _getQuestionnaireQueryMock.Object,
+            getResponseQuery,
+            _calculateMaturityCommandMock.Object);
 
         _checkAnswersController = new CheckAnswersController
         (
             loggerMock.Object,
-            urlHistoryMock.Object,
-            processCheckAnswerDtoCommand,
-            _calculateMaturityCommandMock.Object,
-            getResponseQuery,
-            getPageQuery
+            urlHistoryMock.Object
         );
 
         _checkAnswersController.TempData = tempDataMock.Object;
@@ -118,7 +123,7 @@ public class CheckAnswersControllerTests
         _planTechDbContextMock.Setup(m => m.GetQuestion(question => question.Id == 1)).ReturnsAsync(new Domain.Questions.Models.Question() { ContentfulRef = "QuestionRef", QuestionText = "Question Text" });
         _planTechDbContextMock.Setup(m => m.GetAnswer(answer => answer.Id == 1)).ReturnsAsync(new Domain.Answers.Models.Answer() { ContentfulRef = "AnswerRef", AnswerText = "Answer Text" });
 
-        var result = await _checkAnswersController.CheckAnswersPage(SubmissionId, sectionName);
+        var result = await _checkAnswersController.CheckAnswersPage(SubmissionId, sectionName, _processCheckAnswerDtoCommand, _getPageQuery);
 
         Assert.IsType<ViewResult>(result);
 
@@ -232,7 +237,7 @@ public class CheckAnswersControllerTests
         _planTechDbContextMock.Setup(m => m.GetAnswer(answer => answer.Id == 1)).ReturnsAsync(new Domain.Answers.Models.Answer() { ContentfulRef = "AnswerRef-1", AnswerText = "Answer Text 1" });
         _planTechDbContextMock.Setup(m => m.GetAnswer(answer => answer.Id == 2)).ReturnsAsync(new Domain.Answers.Models.Answer() { ContentfulRef = "AnswerRef-2", AnswerText = "Answer Text 2" });
 
-        var result = await _checkAnswersController.CheckAnswersPage(SubmissionId, sectionName);
+        var result = await _checkAnswersController.CheckAnswersPage(SubmissionId, sectionName, _processCheckAnswerDtoCommand, _getPageQuery);
 
         Assert.IsType<ViewResult>(result);
 
@@ -296,7 +301,7 @@ public class CheckAnswersControllerTests
 
         _planTechDbContextMock.Setup(m => m.GetResponseList(response => response.SubmissionId == SubmissionId)).ReturnsAsync(responseList);
 
-        await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId, sectionName));
+        await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId, sectionName, _processCheckAnswerDtoCommand, _getPageQuery));
     }
 
     [Fact]
@@ -315,7 +320,7 @@ public class CheckAnswersControllerTests
         _planTechDbContextMock.Setup(m => m.GetResponseList(response => response.SubmissionId == SubmissionId)).ReturnsAsync(responseList);
         _planTechDbContextMock.Setup(m => m.GetQuestion(question => question.Id == 1)).ReturnsAsync(new Domain.Questions.Models.Question() { QuestionText = null });
 
-        await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId, sectionName));
+        await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId, sectionName, _processCheckAnswerDtoCommand, _getPageQuery));
     }
 
     [Fact]
@@ -335,7 +340,7 @@ public class CheckAnswersControllerTests
         _planTechDbContextMock.Setup(m => m.GetQuestion(question => question.Id == 1)).ReturnsAsync(new Domain.Questions.Models.Question() { QuestionText = "Question Text" });
         _planTechDbContextMock.Setup(m => m.GetAnswer(answer => answer.Id == 1)).ReturnsAsync(new Domain.Answers.Models.Answer() { AnswerText = null });
 
-        await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId, sectionName));
+        await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId, sectionName, _processCheckAnswerDtoCommand, _getPageQuery));
     }
 
     [Fact]
@@ -343,7 +348,7 @@ public class CheckAnswersControllerTests
     {
         _calculateMaturityCommandMock.Setup(m => m.CalculateMaturityAsync(It.IsAny<int>())).ReturnsAsync(2);
 
-        var result = await _checkAnswersController.ConfirmCheckAnswers(It.IsAny<int>(), "Test");
+        var result = await _checkAnswersController.ConfirmCheckAnswers(It.IsAny<int>(), "Test", _processCheckAnswerDtoCommand);
 
         Assert.IsType<RedirectToActionResult>(result);
 

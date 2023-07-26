@@ -1,5 +1,7 @@
 using Dfe.PlanTech.Application.Questionnaire.Queries;
+using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Application.Submission.Interface;
+using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Application.Response.Commands
@@ -9,19 +11,27 @@ namespace Dfe.PlanTech.Application.Response.Commands
         private readonly IGetQuestionQuery _getQuestionQuery;
         private readonly IGetAnswerQuery _getAnswerQuery;
         private readonly GetQuestionQuery _getQuestionnaireQuery;
+        private readonly IGetResponseQuery _getResponseQuery;
+        private readonly ICalculateMaturityCommand _calculateMaturityCommand;
 
         public ProcessCheckAnswerDtoCommand(
             IGetQuestionQuery getQuestionQuery,
             IGetAnswerQuery getAnswerQuery,
-            GetQuestionQuery getQuestionnaireQuery)
+            GetQuestionQuery getQuestionnaireQuery,
+            IGetResponseQuery getResponseQuery,
+            ICalculateMaturityCommand calculateMaturityCommand)
         {
             _getQuestionQuery = getQuestionQuery;
             _getAnswerQuery = getAnswerQuery;
             _getQuestionnaireQuery = getQuestionnaireQuery;
+            _getResponseQuery = getResponseQuery;
+            _calculateMaturityCommand = calculateMaturityCommand;
         }
 
-        private async Task<CheckAnswerDto> _GetCheckAnswerDto(Dfe.PlanTech.Domain.Responses.Models.Response[] responseList)
+        private async Task<CheckAnswerDto> _GetCheckAnswerDto(int submissionId)
         {
+            var responseList = await _GetResponseList(submissionId);
+
             CheckAnswerDto checkAnswerDto = new CheckAnswerDto();
 
             Dictionary<string, int> indexMap = new Dictionary<string, int>();
@@ -29,7 +39,7 @@ namespace Dfe.PlanTech.Application.Response.Commands
 
             int index = 0;
 
-            foreach (Dfe.PlanTech.Domain.Responses.Models.Response response in responseList)
+            foreach (Dfe.PlanTech.Domain.Responses.Models.Response response in responseList ?? throw new NullReferenceException(nameof(responseList)))
             {
                 var question = await _GetResponseQuestion(response.QuestionId);
                 string questionContentfulRef = question?.ContentfulRef ?? throw new NullReferenceException(nameof(question.ContentfulRef));
@@ -90,11 +100,16 @@ namespace Dfe.PlanTech.Application.Response.Commands
             return checkAnswerDto;
         }
 
-        public async Task<CheckAnswerDto> ProcessCheckAnswerDto(Dfe.PlanTech.Domain.Responses.Models.Response[] responseList)
+        public async Task<CheckAnswerDto> ProcessCheckAnswerDto(int submissionId)
         {
-            CheckAnswerDto checkAnswerDto = await _GetCheckAnswerDto(responseList);
+            CheckAnswerDto checkAnswerDto = await _GetCheckAnswerDto(submissionId);
             checkAnswerDto = await _RemoveDetachedQuestions(checkAnswerDto);
             return checkAnswerDto;
+        }
+
+        public async Task CalculateMaturityAsync(int submissionId)
+        {
+            await _calculateMaturityCommand.CalculateMaturityAsync(submissionId);
         }
 
         private async Task<Domain.Questions.Models.Question?> _GetResponseQuestion(int questionId)
@@ -111,6 +126,11 @@ namespace Dfe.PlanTech.Application.Response.Commands
         {
             if (string.IsNullOrEmpty(questionRef)) throw new ArgumentNullException(nameof(questionRef));
             return (await _getQuestionnaireQuery.GetQuestionById(questionRef, null, CancellationToken.None) ?? throw new KeyNotFoundException($"Could not find answer with id {answerRef}")).Answers.First(answer => answer.Sys.Id.Equals(answerRef));
+        }
+
+        private async Task<Domain.Responses.Models.Response[]?> _GetResponseList(int submissionId)
+        {
+            return await _getResponseQuery.GetResponseListBy(submissionId);
         }
     }
 }
