@@ -14,5 +14,6 @@ public class Category : ContentComponent, ICategory
     public ISection[] Sections { get; set; } = Array.Empty<ISection>();
 
     public IList<SectionStatuses> SectionStatuses { get; set; } = new List<SectionStatuses>();
+
     public int Completed { get; set; }
 }

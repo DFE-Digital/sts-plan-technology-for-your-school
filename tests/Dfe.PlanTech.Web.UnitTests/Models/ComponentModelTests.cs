@@ -52,6 +52,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             Assert.Equal("Help Text", actual.Sections[0].Questions[0].HelpText);
             Assert.True(actual.Sections[0].Questions[0].Answers[0] != null);
             Assert.Equal("Answer", actual.Sections[0].Questions[0].Answers[0].Text);
+            Assert.True(actual.Completed == 0);
         }
 
 
