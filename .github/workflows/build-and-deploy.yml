@@ -32,8 +32,8 @@ jobs:
         run: |
           GIT_REF=${{ github.ref }}
           GIT_BRANCH=${GIT_REF##*/}
-          INPUT=${{ github.event.inputs.environment }}
-          ENVIRONMENT=${{ github.event.inputs.environment }}
+          INPUT=${{ inputs.environment }}
+          ENVIRONMENT=${{ inputs.environment }}
           RELEASE=${ENVIRONMENT,,}-`date +%Y-%m-%d`.${{ github.run_number }}
           CHECKED_OUT_SHA="$(git log -1 '--format=format:%H')"
           echo "environment=${ENVIRONMENT,,}" >> $GITHUB_OUTPUT
