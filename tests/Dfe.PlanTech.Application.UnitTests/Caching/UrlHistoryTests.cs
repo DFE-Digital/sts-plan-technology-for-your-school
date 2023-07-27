@@ -13,16 +13,22 @@ public class UrlHistoryTests
 
     private readonly ICacher cacher;
     private readonly IHttpContextAccessor _httpContextAccessor;
+
     public UrlHistoryTests()
     {
-        var usernameClaim = new Claim(UrlHistory.CLAIM_TYPE, "testing@test.com");
+        var usernameClaim = new Claim(BaseCacher.USER_CLAIM, "testing@test.com");
 
-        var httpContextMock = new Mock<IHttpContextAccessor>();
-        httpContextMock.Setup(httpContextMock => httpContextMock.HttpContext.User.Claims).Returns(() => new[] {
-            usernameClaim
+        var httpContextAccessortMock = new Mock<IHttpContextAccessor>();
+        httpContextAccessortMock.Setup(httpContextMock => httpContextMock.HttpContext.User).Returns(() =>
+        {
+            var claims = new[] { new Claim(BaseCacher.USER_CLAIM, "test@testing.com") };
+            var claimsIdentity = new ClaimsIdentity(claims, "Any");
+            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+            return claimsPrincipal;
         });
 
-        _httpContextAccessor = httpContextMock.Object;
+        _httpContextAccessor = httpContextAccessortMock.Object;
 
         var cacherMock = new Mock<ICacher>();
         cacherMock.Setup(cacher => cacher.GetAsync<Stack<Uri>>(It.IsAny<string>())).ReturnsAsync(history);

@@ -47,9 +47,14 @@ public class UrlHistoryMiddlewareTests
         var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
 
         httpContextAccessorMock.Setup(httpContextMock => httpContextMock.HttpContext).Returns(() => _httpContextMock.Object);
-        _httpContextMock.Setup(httpContextMock => httpContextMock.User).Returns(() => new ClaimsPrincipal(new ClaimsIdentity(new[] {
-            new Claim(UrlHistory.CLAIM_TYPE, "test@testing.com")
-        })));
+        _httpContextMock.Setup(httpContextMock => httpContextMock.User).Returns(() =>
+        {
+            var claims = new[] { new Claim(BaseCacher.USER_CLAIM, "test@testing.com") };
+            var claimsIdentity = new ClaimsIdentity(claims, "Any");
+            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+            return claimsPrincipal;
+        });
 
         _httpContextAccessor = httpContextAccessorMock.Object;
 
