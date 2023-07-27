@@ -1,5 +1,8 @@
+using System.Security.Claims;
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
+using Dfe.PlanTech.Domain.SignIn.Enums;
+using Microsoft.AspNetCore.Http;
 using Moq;
 
 namespace Dfe.PlanTech.Application.UnitTests.Core;
@@ -9,14 +12,23 @@ public class UrlHistoryTests
     private Stack<Uri> history = new();
 
     private readonly ICacher cacher;
-
+    private readonly IHttpContextAccessor _httpContextAccessor;
     public UrlHistoryTests()
     {
-        var cacherMock = new Mock<ICacher>();
-        cacherMock.Setup(cacher => cacher.GetAsync<Stack<Uri>>(UrlHistory.CACHE_KEY)).ReturnsAsync(history);
+        var usernameClaim = new Claim(UrlHistory.CLAIM_TYPE, "testing@test.com");
 
-        cacherMock.Setup(cacher => cacher.GetAsync(UrlHistory.CACHE_KEY, It.IsAny<Func<Stack<Uri>>>(), It.IsAny<TimeSpan?>())).ReturnsAsync(history);
-        cacherMock.Setup(cacher => cacher.SetAsync(UrlHistory.CACHE_KEY, It.IsAny<Stack<Uri>>(), It.IsAny<TimeSpan?>()))
+        var httpContextMock = new Mock<IHttpContextAccessor>();
+        httpContextMock.Setup(httpContextMock => httpContextMock.HttpContext.User.Claims).Returns(() => new[] {
+            usernameClaim
+        });
+
+        _httpContextAccessor = httpContextMock.Object;
+
+        var cacherMock = new Mock<ICacher>();
+        cacherMock.Setup(cacher => cacher.GetAsync<Stack<Uri>>(It.IsAny<string>())).ReturnsAsync(history);
+
+        cacherMock.Setup(cacher => cacher.GetAsync(It.IsAny<string>(), It.IsAny<Func<Stack<Uri>>>(), It.IsAny<TimeSpan?>())).ReturnsAsync(history);
+        cacherMock.Setup(cacher => cacher.SetAsync(It.IsAny<string>(), It.IsAny<Stack<Uri>>(), It.IsAny<TimeSpan?>()))
                 .Callback((string key, Stack<Uri> stack, TimeSpan? timeSpan) =>
                 {
                     history = stack;
@@ -30,7 +42,7 @@ public class UrlHistoryTests
     {
         var url = new Uri("https://www.testurl.com");
 
-        var urlHistory = new UrlHistory(cacher);
+        var urlHistory = new UrlHistory(cacher, _httpContextAccessor);
         await urlHistory.AddUrlToHistory(url);
 
         var history = await urlHistory.History;
@@ -44,7 +56,7 @@ public class UrlHistoryTests
         var firstUrl = new Uri("https://www.first.com");
         var secondUrl = new Uri("https://www.second.com");
 
-        var urlHistory = new UrlHistory(cacher);
+        var urlHistory = new UrlHistory(cacher, _httpContextAccessor);
         await urlHistory.AddUrlToHistory(firstUrl);
         await urlHistory.AddUrlToHistory(secondUrl);
 

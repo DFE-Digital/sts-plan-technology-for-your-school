@@ -28,31 +28,33 @@ public class UrlHistoryMiddleware
 
     private async Task ProcessRequestUri(HttpContext httpContext, IUrlHistory history)
     {
-        if (TryGetRequestUri(httpContext.Request, out Uri? targetUrl) && targetUrl != null)
+        //If not logged in, don't bother
+        if (httpContext.User == null || !httpContext.User.Claims.Any()) return;
+
+        if (!TryGetRequestUri(httpContext.Request, out Uri? targetUrl) || targetUrl == null) return;
+
+        var lastUrl = await history.GetLastVisitedUrl();
+
+        bool navigatingBackwards = UrlsMatch(lastUrl, targetUrl);
+
+        _logger.LogTrace("Navigating to {targetUrl} from {lastUrl}. Navigating backwards is {navigatingBackwards}",
+                        lastUrl,
+                        targetUrl,
+                        navigatingBackwards);
+
+        switch (navigatingBackwards)
         {
-            var lastUrl = await history.GetLastVisitedUrl();
+            case true:
+                {
+                    await history.RemoveLastUrl();
+                    break;
+                }
 
-            bool navigatingBackwards = UrlsMatch(lastUrl, targetUrl);
-
-            _logger.LogTrace("Navigating to {targetUrl} from {lastUrl}. Navigating backwards is {navigatingBackwards}",
-                            lastUrl,
-                            targetUrl,
-                            navigatingBackwards);
-
-            switch (navigatingBackwards)
-            {
-                case true:
-                    {
-                        await history.RemoveLastUrl();
-                        break;
-                    }
-
-                case false:
-                    {
-                        await TryAddHistory(httpContext, history, lastUrl);
-                        break;
-                    }
-            }
+            case false:
+                {
+                    await TryAddHistory(httpContext, history, lastUrl);
+                    break;
+                }
         }
     }
 

@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Converters;
@@ -11,6 +10,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Moq;
+using System.Security.Claims;
+using System.Text.Json;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Middleware;
@@ -23,10 +24,15 @@ public class UrlHistoryMiddlewareTests
     private readonly Uri URL_FOURTH = new("https://www.website.com/four");
 
     private readonly ICacher _cacher;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly Mock<HttpContext> _httpContextMock = new();
+
     private readonly IDistributedCache _cache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
 
     public UrlHistoryMiddlewareTests()
     {
+        var userEmail = "test@testing.com";
+
         var jsonOptions = new JsonSerializerOptions();
         jsonOptions.Converters.Add(new JsonConverterFactoryForStackOfT());
         _cacher = new Cacher(_cache, jsonOptions);
@@ -36,7 +42,17 @@ public class UrlHistoryMiddlewareTests
         history.Push(URL_SECOND);
         history.Push(URL_THIRD);
 
-        _cacher.SetAsync(UrlHistory.CACHE_KEY, history);
+        _cacher.SetAsync(UrlHistory.CACHE_KEY + ":" + userEmail, history);
+
+        var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+
+        httpContextAccessorMock.Setup(httpContextMock => httpContextMock.HttpContext).Returns(() => _httpContextMock.Object);
+        _httpContextMock.Setup(httpContextMock => httpContextMock.User).Returns(() => new ClaimsPrincipal(new ClaimsIdentity(new[] {
+            new Claim(UrlHistory.CLAIM_TYPE, "test@testing.com")
+        })));
+
+        _httpContextAccessor = httpContextAccessorMock.Object;
+
     }
 
     [Fact]
@@ -44,15 +60,14 @@ public class UrlHistoryMiddlewareTests
     {
         Mock<HttpRequest> requestMock = SetupHttpRequestMock("https", "www.website.com", "/three", URL_FOURTH.ToString());
 
-        var contextMock = new Mock<HttpContext>();
-        contextMock.Setup(context => context.Request).Returns(() => requestMock.Object);
+        _httpContextMock.Setup(context => context.Request).Returns(() => requestMock.Object);
 
         var nextDelegateMock = new Mock<RequestDelegate>();
 
         var urlHistory = new UrlHistoryMiddleware(new NullLogger<UrlHistoryMiddleware>(), nextDelegateMock.Object);
 
-        var history = new UrlHistory(_cacher);
-        await urlHistory.InvokeAsync(contextMock.Object, history);
+        var history = new UrlHistory(_cacher, _httpContextAccessor);
+        await urlHistory.InvokeAsync(_httpContextMock.Object, history);
 
         var historyCache = await history.History;
 
@@ -65,14 +80,13 @@ public class UrlHistoryMiddlewareTests
     {
         var requestMock = SetupHttpRequestMock("https", URL_FOURTH.Host, URL_FOURTH.PathAndQuery, URL_FOURTH.ToString());
 
-        var contextMock = new Mock<HttpContext>();
-        contextMock.Setup(context => context.Request).Returns(() => requestMock.Object);
+        _httpContextMock.Setup(context => context.Request).Returns(() => requestMock.Object);
 
         var nextDelegateMock = new Mock<RequestDelegate>();
         var urlHistory = new UrlHistoryMiddleware(new NullLogger<UrlHistoryMiddleware>(), nextDelegateMock.Object);
 
-        var history = new UrlHistory(_cacher);
-        await urlHistory.InvokeAsync(contextMock.Object, history);
+        var history = new UrlHistory(_cacher, _httpContextAccessor);
+        await urlHistory.InvokeAsync(_httpContextMock.Object, history);
 
         var historyCache = await history.History;
 
@@ -85,14 +99,13 @@ public class UrlHistoryMiddlewareTests
     {
         var requestMock = SetupHttpRequestMock("notarealscheme", "notarealhost", "/", null);
 
-        var contextMock = new Mock<HttpContext>();
-        contextMock.Setup(context => context.Request).Returns(() => requestMock.Object);
+        _httpContextMock.Setup(context => context.Request).Returns(() => requestMock.Object);
 
         var nextDelegateMock = new Mock<RequestDelegate>();
         var urlHistory = new UrlHistoryMiddleware(new NullLogger<UrlHistoryMiddleware>(), nextDelegateMock.Object);
 
-        var history = new UrlHistory(_cacher);
-        await urlHistory.InvokeAsync(contextMock.Object, history);
+        var history = new UrlHistory(_cacher, _httpContextAccessor);
+        await urlHistory.InvokeAsync(_httpContextMock.Object, history);
 
         var historyCache = await history.History;
 
@@ -104,14 +117,13 @@ public class UrlHistoryMiddlewareTests
     {
         var requestMock = SetupHttpRequestMock("", "", "/", URL_FOURTH.ToString());
 
-        var contextMock = new Mock<HttpContext>();
-        contextMock.Setup(context => context.Request).Returns(() => requestMock.Object);
+        _httpContextMock.Setup(context => context.Request).Returns(() => requestMock.Object);
 
         var nextDelegateMock = new Mock<RequestDelegate>();
         var urlHistory = new UrlHistoryMiddleware(new NullLogger<UrlHistoryMiddleware>(), nextDelegateMock.Object);
 
-        var history = new UrlHistory(_cacher);
-        await urlHistory.InvokeAsync(contextMock.Object, history);
+        var history = new UrlHistory(_cacher, _httpContextAccessor);
+        await urlHistory.InvokeAsync(_httpContextMock.Object, history);
 
         var historyCache = await history.History;
 
@@ -122,8 +134,8 @@ public class UrlHistoryMiddlewareTests
     public async Task Should_Log_Error_When_Uri_Parsing_Error()
     {
         var requestMock = SetupHttpRequestMock("", "", "/", URL_FOURTH.ToString());
-        var contextMock = new Mock<HttpContext>();
-        contextMock.Setup(context => context.Request).Returns(() => requestMock.Object);
+
+        _httpContextMock.Setup(context => context.Request).Returns(() => requestMock.Object);
 
         var nextDelegateMock = new Mock<RequestDelegate>();
 
@@ -137,8 +149,8 @@ public class UrlHistoryMiddlewareTests
 
         var urlHistory = new UrlHistoryMiddleware(loggerMock.Object, nextDelegateMock.Object);
 
-        var history = new UrlHistory(_cacher);
-        await urlHistory.InvokeAsync(contextMock.Object, history);
+        var history = new UrlHistory(_cacher, _httpContextAccessor);
+        await urlHistory.InvokeAsync(_httpContextMock.Object, history);
 
         var historyCache = history.History;
 
@@ -150,7 +162,7 @@ public class UrlHistoryMiddlewareTests
     }
 
 
-    private Mock<HttpRequest> SetupHttpRequestMock(string scheme, string host, string path, string? referer)
+    private static Mock<HttpRequest> SetupHttpRequestMock(string scheme, string host, string path, string? referer)
     {
         var requestMock = new Mock<HttpRequest>();
 
