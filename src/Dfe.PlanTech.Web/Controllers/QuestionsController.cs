@@ -65,8 +65,8 @@ public class QuestionsController : BaseController<QuestionsController>
         {
             Question = question,
             AnswerRef = answerRef,
-            BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment",
-            Params = parameters != null ? parameters.ToString() : null,
+            BackUrl = await GetBackUrl(),
+            Params = parameters?.ToString(),
             SubmissionId = submissionId,
         };
 

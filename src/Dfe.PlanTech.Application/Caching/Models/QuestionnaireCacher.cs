@@ -8,13 +8,15 @@ public class QuestionnaireCacher : IQuestionnaireCacher
     private const string CACHE_KEY = "QuestionnaireCache";
 
     private readonly ICacher _cacher;
+    private readonly Func<QuestionnaireCache> CreateNewCache = () => new QuestionnaireCache();
 
     public QuestionnaireCacher(ICacher cacher)
     {
         _cacher = cacher;
     }
 
-    public QuestionnaireCache? Cached => _cacher.Get(CACHE_KEY, () => new QuestionnaireCache());
+    public Task<QuestionnaireCache?> Cached => _cacher.GetAsync(CACHE_KEY, CreateNewCache);
 
-    public void SaveCache(QuestionnaireCache cache) => _cacher.Set(CACHE_KEY, TimeSpan.FromHours(1), cache);
+    public Task SaveCache(QuestionnaireCache cache) => _cacher.SetAsync(CACHE_KEY, cache);
+
 }

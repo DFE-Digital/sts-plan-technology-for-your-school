@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Dfe.PlanTech.Application.Caching.Interfaces;
 
 namespace Dfe.PlanTech.Web.Middleware;
@@ -20,16 +21,16 @@ public class UrlHistoryMiddleware
 
     public async Task InvokeAsync(HttpContext httpContext, IUrlHistory history)
     {
-        ProcessRequestUri(httpContext, history);
+        await ProcessRequestUri(httpContext, history);
 
         await _next(httpContext);
     }
 
-    private void ProcessRequestUri(HttpContext httpContext, IUrlHistory history)
+    private async Task ProcessRequestUri(HttpContext httpContext, IUrlHistory history)
     {
         if (TryGetRequestUri(httpContext.Request, out Uri? targetUrl) && targetUrl != null)
         {
-            var lastUrl = history.LastVisitedUrl;
+            var lastUrl = await history.GetLastVisitedUrl();
 
             bool navigatingBackwards = UrlsMatch(lastUrl, targetUrl);
 
@@ -42,13 +43,13 @@ public class UrlHistoryMiddleware
             {
                 case true:
                     {
-                        history.RemoveLastUrl();
+                        await history.RemoveLastUrl();
                         break;
                     }
 
                 case false:
                     {
-                        TryAddHistory(httpContext, history, lastUrl);
+                        await TryAddHistory(httpContext, history, lastUrl);
                         break;
                     }
             }
@@ -58,7 +59,7 @@ public class UrlHistoryMiddleware
     /// <summary>
     /// Double check we're not adding duplicate history (i.e. refresh, submit, etc.) - if not, add to history.
     /// </summary>
-    private void TryAddHistory(HttpContext httpContext, IUrlHistory history, Uri? lastVisitedHistory)
+    private async Task TryAddHistory(HttpContext httpContext, IUrlHistory history, Uri? lastVisitedHistory)
     {
         if (!TryGetRefererUri(httpContext, out Uri? refererUri) || refererUri == null)
         {
@@ -71,7 +72,7 @@ public class UrlHistoryMiddleware
 
         if (!isDuplicateUrl)
         {
-            history.AddUrlToHistory(refererUri);
+            await history.AddUrlToHistory(refererUri);
         }
     }
 

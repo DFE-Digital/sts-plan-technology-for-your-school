@@ -89,9 +89,10 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
         Page checkAnswerPageContent = await _GetCheckAnswerContent();
 
-        CheckAnswersViewModel checkAnswersViewModel = new CheckAnswersViewModel()
+
+        CheckAnswersViewModel checkAnswersViewModel = new()
         {
-            BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment",
+            BackUrl = await GetBackUrl(),
             Title = checkAnswerPageContent.Title ?? throw new NullReferenceException(nameof(checkAnswerPageContent.Title)),
             SectionName = sectionName,
             CheckAnswerDto = await _GetCheckAnswerDto(responseList ?? throw new NullReferenceException(nameof(responseList))),

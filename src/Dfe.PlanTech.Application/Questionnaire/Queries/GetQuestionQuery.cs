@@ -22,21 +22,21 @@ public class GetQuestionQuery : ContentRetriever
         return question;
     }
 
-    public Task<Question?> GetQuestionById(string id, string? section, CancellationToken cancellationToken = default)
+    public async Task<Question?> GetQuestionById(string id, string? section, CancellationToken cancellationToken = default)
     {
         if (section != null)
         {
-            UpdateSectionTitle(section);
+            await UpdateSectionTitle(section);
         }
 
-        return GetQuestionById(id, cancellationToken);
+        return await GetQuestionById(id, cancellationToken);
     }
 
-    private void UpdateSectionTitle(string section)
+    private async Task UpdateSectionTitle(string section)
     {
-        var cached = _cacher.Cached ?? new QuestionnaireCache();
+        var cached = (await _cacher.Cached) ?? new QuestionnaireCache();
         cached = cached with { CurrentSectionTitle = section };
 
-        _cacher.SaveCache(cached);
+        await _cacher.SaveCache(cached);
     }
 }

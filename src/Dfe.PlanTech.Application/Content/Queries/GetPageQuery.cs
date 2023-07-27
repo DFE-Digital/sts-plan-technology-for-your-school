@@ -28,10 +28,11 @@ public class GetPageQuery : ContentRetriever
 
         var page = pages.FirstOrDefault() ?? throw new Exception($"Could not find page with slug {slug}");
 
+
         if (page.DisplayTopicTitle)
         {
-            var cached = _cacher.Cached!;
-            page.SectionTitle = cached.CurrentSectionTitle;
+            var cached = await _cacher.Cached;
+            page.SectionTitle = cached!.CurrentSectionTitle;
         }
 
         return page;

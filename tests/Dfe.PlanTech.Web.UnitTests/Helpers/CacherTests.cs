@@ -1,49 +1,51 @@
-using Dfe.PlanTech.Domain.Caching.Interfaces;
+using System.Text.Json;
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Web.Helpers;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
-using Moq;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Helpers;
 
 public class CacherTests
 {
-    private readonly IMemoryCache _memoryCache = new MemoryCache(new MemoryCacheOptions());
+    private readonly IDistributedCache _cache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
 
     [Fact]
-    public void Get_Should_FetchFromCache_When_Exists()
+    public async Task Get_Should_FetchFromCache_When_Exists()
     {
         var testKey = "Testing";
         var testObject = "Test value";
 
-        _memoryCache.Set(testKey, testObject);
+        await _cache.SetStringAsync(testKey, ConvertAndSerialise(testObject));
 
-        var cacher = new Cacher(new CacheOptions(), _memoryCache);
+        ICacher cacher = new Cacher(_cache);
 
-        var result = cacher.Get<string>(testKey);
+        var result = await cacher.GetAsync<string>(testKey);
 
         Assert.NotNull(result);
         Assert.Equal(testObject, result);
     }
 
     [Fact]
-    public void Get_Should_ReturnNull_When_NotFound()
+    public async Task Get_Should_ReturnNull_When_NotFound()
     {
         var testKey = "Testing";
         var testObject = "Test value";
 
-        _memoryCache.Set(testKey, testObject);
+        await _cache.SetStringAsync(testKey, ConvertAndSerialise(testObject));
 
-        var cacher = new Cacher(new CacheOptions(), _memoryCache);
+        ICacher cacher = new Cacher(_cache);
 
-        var result = cacher.Get<string>("doesn't exist");
+        var result = await cacher.GetAsync<string>("doesn't exist");
 
         Assert.Null(result);
     }
 
     [Fact]
-    public void Get_Should_SetValueFromService_When_NotExistingInCache()
+    public async Task Get_Should_SetValueFromService_When_NotExistingInCache()
     {
         var testKey = "Testing";
         var testObject = "Test value";
@@ -53,56 +55,38 @@ public class CacherTests
             Value = testObject
         };
 
-        var cacher = new Cacher(new CacheOptions(), _memoryCache);
+        ICacher cacher = new Cacher(_cache);
 
-        var result = cacher.Get<string>(testKey, () => service.Value);
+        var result = await cacher.GetAsync(testKey, () => service.Value);
 
         Assert.NotNull(result);
         Assert.Equal(testObject, result);
         Assert.True(service.GetHasBeenCalled);
 
-        var memoryCacheValue = _memoryCache.Get(testKey);
-
+        var memoryCacheValue = await _cache.GetStringAsync(testKey);
         Assert.NotNull(memoryCacheValue);
-        Assert.Equal(testObject, memoryCacheValue);
+
+        var asCachedItem = Deserialise<string>(memoryCacheValue!);
+        Assert.NotNull(asCachedItem);
+        Assert.Equal(testObject, asCachedItem.Item);
     }
 
     [Fact]
-    public void Set_Should_SaveInCache()
+    public async Task Set_Should_SaveInCache()
     {
         var testKey = "Testing";
         var testObject = "Test value";
 
-        var cacher = new Cacher(new CacheOptions(), _memoryCache);
+        ICacher cacher = new Cacher(_cache);
 
-        cacher.Set(testKey, TimeSpan.FromMinutes(60), testObject);
+        await cacher.SetAsync(testKey, testObject);
 
-        var cachedResult = _memoryCache.Get<string>(testKey);
-
-        Assert.NotNull(cachedResult);
-        Assert.Equal(testObject, cachedResult);
-    }
-
-    [Fact]
-    public void Set_Should_Save_Using_Default_CacheOptions()
-    {
-        var cacheOptionsMock = new Mock<ICacheOptions>();
-        cacheOptionsMock.SetupGet(cacheOptions => cacheOptions.DefaultTimeToLive)
-                        .Returns(TimeSpan.FromMinutes(60))
-                        .Verifiable();
-
-        var testKey = "Testing";
-        var testObject = "Test value";
-
-        var cacher = new Cacher(cacheOptionsMock.Object, _memoryCache);
-
-        cacher.Set(testKey, testObject);
-
-        var cachedResult = _memoryCache.Get<string>(testKey);
+        var cachedResult = await _cache.GetStringAsync(testKey);
 
         Assert.NotNull(cachedResult);
-        Assert.Equal(testObject, cachedResult);
-        cacheOptionsMock.VerifyGet(cacheOptions => cacheOptions.DefaultTimeToLive);
+
+        var asCachedItem = Deserialise<string>(cachedResult!);
+        Assert.Equal(testObject, asCachedItem.Item);
     }
 
     [Fact]
@@ -111,11 +95,11 @@ public class CacherTests
         var testKey = "Testing";
         var testObject = "Test value";
 
-        _memoryCache.Set(testKey, testObject);
+        await _cache.SetStringAsync(testKey, ConvertAndSerialise(testObject));
 
-        var cacher = new Cacher(new CacheOptions(), _memoryCache);
+        ICacher cacher = new Cacher(_cache);
 
-        var result = await cacher.GetAsync(testKey, () => Task.FromResult("new value"), TimeSpan.MaxValue);
+        var result = await cacher.GetAsync(testKey, () => Task.FromResult("new value"));
 
         Assert.NotNull(result);
         Assert.Equal(testObject, result);
@@ -127,9 +111,9 @@ public class CacherTests
         var testKey = "Testing";
         var newValue = "new value";
 
-        var cacher = new Cacher(new CacheOptions(), _memoryCache);
+        ICacher cacher = new Cacher(_cache);
 
-        var result = await cacher.GetAsync(testKey, () => Task.FromResult(newValue), TimeSpan.MaxValue);
+        var result = await cacher.GetAsync(testKey, () => Task.FromResult(newValue), TimeSpan.FromHours(1));
 
         Assert.NotNull(result);
         Assert.Equal(newValue, result);
@@ -141,34 +125,36 @@ public class CacherTests
         var testKey = "Testing";
         var newValue = "new value";
 
-        var cacher = new Cacher(new CacheOptions(), _memoryCache);
+        ICacher cacher = new Cacher(_cache);
 
-        var result = await cacher.GetAsync(testKey, () => Task.FromResult(newValue), TimeSpan.MaxValue);
+        var result = await cacher.GetAsync(testKey, () => Task.FromResult(newValue), TimeSpan.FromHours(1));
 
-        var cachedResult = _memoryCache.Get(testKey);
-
+        var cachedResult = await _cache.GetStringAsync(testKey);
         Assert.NotNull(cachedResult);
-        Assert.Equal(newValue, cachedResult);
+
+        var asCachedItem = Deserialise<string>(cachedResult);
+        
+        Assert.Equal(newValue, asCachedItem.Item);
     }
 
     [Fact]
-    public async Task GetAsync_Should_Set_Use_DefaultCacheValues_When_Not_Supplied()
+    public async Task GetAsync_Should_SerialiseObject()
     {
         var testKey = "Testing";
-        var newValue = "new value";
+        TestClass newValue = new("Test string", 124, null);
 
-        var cacheOptionsMock = new Mock<ICacheOptions>();
-        cacheOptionsMock.Setup(options => options.DefaultTimeToLive).Returns(TimeSpan.FromSeconds(1)).Verifiable();
-
-        var cacher = new Cacher(cacheOptionsMock.Object, _memoryCache);
+        ICacher cacher = new Cacher(_cache);
 
         var result = await cacher.GetAsync(testKey, () => Task.FromResult(newValue));
 
-        var cachedResult = _memoryCache.Get(testKey);
-
-        cacheOptionsMock.Verify(options => options.DefaultTimeToLive);
+        Assert.Equivalent(newValue, result);
     }
 
+    private CachedItem<T?> ConvertToCachedItem<T>(T? value) => new(value);
+    private string Serialise<T>(T? value) => JsonSerializer.Serialize(value);
+    private string ConvertAndSerialise<T>(T? value) => Serialise(ConvertToCachedItem(value));
+    private CachedItem<T?> Deserialise<T>(string value) => JsonSerializer.Deserialize<CachedItem<T?>>(value) ??
+                                                           throw new Exception("Invalid JSON");
 }
 
 public class TestService
@@ -193,3 +179,5 @@ public class TestService
         }
     }
 }
+
+public record TestClass(string? StringValue, int? IntValue, bool? BoolValue);

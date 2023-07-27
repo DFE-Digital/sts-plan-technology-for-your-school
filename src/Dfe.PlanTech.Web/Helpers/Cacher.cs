@@ -1,6 +1,7 @@
+using System.Text.Json;
 using Dfe.PlanTech.Application.Caching.Interfaces;
-using Dfe.PlanTech.Domain.Caching.Interfaces;
-using Microsoft.Extensions.Caching.Memory;
+using Dfe.PlanTech.Domain.Caching.Models;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace Dfe.PlanTech.Web.Helpers;
 
@@ -9,67 +10,102 @@ namespace Dfe.PlanTech.Web.Helpers;
 /// </summary>
 public class Cacher : ICacher
 {
-    private readonly ICacheOptions _options;
+    private readonly IDistributedCache _cache;
+    private readonly JsonSerializerOptions _jsonOptions;
 
-    private readonly IMemoryCache _memoryCache;
-
-    public Cacher(ICacheOptions options, IMemoryCache memoryCache)
+    public Cacher(IDistributedCache distributedCache)
     {
-        _options = options ?? throw new ArgumentNullException(nameof(options));
-        _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
+        _cache = distributedCache ?? throw new ArgumentNullException(nameof(distributedCache));
+        _jsonOptions = new JsonSerializerOptions();
     }
 
-    public T? Get<T>(string key, Func<T> getFromService, TimeSpan timeToLive)
+    public Cacher(IDistributedCache distributedCache, JsonSerializerOptions jsonOptions)
     {
-        if (_memoryCache.TryGetValue(key, out T? value))
+        _cache = distributedCache ?? throw new ArgumentNullException(nameof(distributedCache));
+        _jsonOptions = jsonOptions;
+    }
+
+
+    public async Task<T?> GetAsync<T>(string key, Func<Task<T>> getFromService, TimeSpan? timeToLive = null)
+    {
+        var fromCache = await GetAsync<T>(key);
+
+        if (fromCache != null)
         {
-            return value;
+            return fromCache;
         }
 
-        value = getFromService();
+        var fromService = await getFromService();
 
-        Set(key, timeToLive, value);
+        await SetAsync(key, fromService, timeToLive);
 
-        return value;
+        return fromService;
     }
 
-    public T? Get<T>(string key)
+
+    public async Task<T?> GetAsync<T>(string key, Func<T> getFromService, TimeSpan? timeToLive = null)
     {
-        _memoryCache.TryGetValue(key, out T? value);
+        var fromCache = await GetAsync<T>(key);
 
-        return value;
-    }
-
-    public T? Get<T>(string key, Func<T> getFromService) => Get(key, getFromService, _options.DefaultTimeToLive);
-
-    public async Task<T?> GetAsync<T>(string key, Func<Task<T>> getFromService, TimeSpan timeToLive)
-    {
-        if (_memoryCache.TryGetValue(key, out T? value))
+        if (fromCache != null)
         {
-            return value;
+            return fromCache;
         }
 
-        value = await getFromService();
+        var fromService = getFromService();
 
-        Set(key, timeToLive, value);
+        await SetAsync(key, fromService, timeToLive);
 
-        return value;
+        return fromService;
     }
 
-    public Task<T?> GetAsync<T>(string key, Func<Task<T>> getFromService) => GetAsync(key, getFromService, _options.DefaultTimeToLive);
-
-    public void Set<T>(string key, TimeSpan timeToLive, T? value)
+    public async Task<T?> GetAsync<T>(string key)
     {
-        var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(timeToLive);
+        var cachedItem = await _cache.GetStringAsync(key);
 
-        _memoryCache.Set(key, value, cacheEntryOptions);
+        if (string.IsNullOrEmpty(cachedItem))
+            return default;
+
+        var deserialised = JsonSerializer.Deserialize<CachedItem<T>>(cachedItem, _jsonOptions) ??
+                            throw new InvalidCastException($"Expected type of {typeof(CachedItem<T>)} but could not serialise");
+
+        return deserialised.Item;
     }
 
-    public void Set<T>(string key, T? value)
+
+
+    public async Task SetAsync<T>(string key, T? value, TimeSpan? timeToLive = null)
     {
-        var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(_options.DefaultTimeToLive);
+        if (value == null)
+        {
+            await _cache.RemoveAsync(key);
+            return;
+        }
 
-        _memoryCache.Set(key, value, cacheEntryOptions);
+        var cachedItem = new CachedItem<T>()
+        {
+            Item = value
+        };
+
+        string? asString = JsonSerializer.Serialize(cachedItem, _jsonOptions);
+
+        if (timeToLive != null)
+        {
+            await SetWithOptionsAsync(key, timeToLive, asString);
+        }
+        else
+        {
+            await _cache.SetStringAsync(key, asString);
+        }
     }
 
+    private async Task SetWithOptionsAsync(string key, TimeSpan? timeToLive, string asString)
+    {
+        var options = new DistributedCacheEntryOptions()
+        {
+            AbsoluteExpirationRelativeToNow = timeToLive
+        };
+
+        await _cache.SetStringAsync(key, asString, options);
+    }
 }

@@ -60,7 +60,7 @@ public class GetPageQueryTests
 
     private void SetupQuestionnaireCacher()
     {
-        _questionnaireCacherMock.Setup(questionnaire => questionnaire.Cached).Returns(new QuestionnaireCache()
+        _questionnaireCacherMock.Setup(questionnaire => questionnaire.Cached).ReturnsAsync(new QuestionnaireCache()
         {
             CurrentSectionTitle = SECTION_TITLE
         });

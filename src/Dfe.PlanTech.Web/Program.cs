@@ -36,6 +36,7 @@ builder.Services.AddCQRSServices();
 builder.Services.AddContentfulServices(builder.Configuration);
 builder.Services.AddDfeSignIn(builder.Configuration);
 builder.Services.AddScoped<ComponentViewsFactory>();
+builder.Services.AddJsonOptions();
 
 builder.Services.AddDatabase(builder.Configuration);
 

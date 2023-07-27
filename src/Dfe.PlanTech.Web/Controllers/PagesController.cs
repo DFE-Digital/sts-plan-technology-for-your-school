@@ -21,7 +21,7 @@ public class PagesController : BaseController<PagesController>
     {
         var page = await query.GetPageBySlug("/", cancellationToken);
 
-        var viewModel = CreatePageModel(page);
+        var viewModel = await CreatePageModel(page);
 
         return View("Page", viewModel);
     }
@@ -35,23 +35,21 @@ public class PagesController : BaseController<PagesController>
             TempData["Param"] = param;
 
         var page = await query.GetPageBySlug(slug, cancellationToken);
-        
-        var viewModel = CreatePageModel(page, param);
+
+        var viewModel = await CreatePageModel(page, param);
 
         return View("Page", viewModel);
     }
 
-    private PageViewModel CreatePageModel(Page page, string param = null!)
+    private async Task<PageViewModel> CreatePageModel(Page page, string param = null!)
+    => new()
     {
-        return new PageViewModel()
-        {
-            Page = page,
-            Param = param,
-            GTMHead = Config.GetValue<string>("GTM:Head") ?? "",
-            GTMBody = Config.GetValue<string>("GTM:Body") ?? "",
-            BackUrl = history.LastVisitedUrl?.ToString() ?? "/"
-        };
-    }
+        Page = page,
+        Param = param,
+        GTMHead = Config.GetValue<string>("GTM:Head") ?? "",
+        GTMBody = Config.GetValue<string>("GTM:Body") ?? "",
+        BackUrl = (await history.GetLastVisitedUrl())?.ToString() ?? "/"
+    };
 
     /// <summary>
     /// Returns either the entire slug for the URL (if not null/empty), or "/"

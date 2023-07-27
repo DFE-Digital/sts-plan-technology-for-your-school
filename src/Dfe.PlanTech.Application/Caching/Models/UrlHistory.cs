@@ -13,40 +13,34 @@ public class UrlHistory : IUrlHistory
         _cacher = cacher ?? throw new ArgumentNullException(nameof(cacher));
     }
 
-    public Stack<Uri> History => _cacher.Get(CACHE_KEY, () => new Stack<Uri>())!;
+    public Task<Stack<Uri>> History => _cacher.GetAsync(CACHE_KEY, () => new Stack<Uri>())!;
 
-    public Uri? LastVisitedUrl
+    public async Task<Uri?> GetLastVisitedUrl()
     {
-        get
+        var history = await History;
+
+        if (History != null && history.TryPeek(out Uri? lastVisitedPage))
         {
-            var history = History;
-
-            if (History != null && history.TryPeek(out Uri? lastVisitedPage))
-            {
-                return lastVisitedPage;
-            }
-
-            return null;
+            return lastVisitedPage;
         }
+
+        return null;
     }
 
-    public void AddUrlToHistory(Uri url)
+    public async Task AddUrlToHistory(Uri url)
     {
-        var history = History;
+        var history = await History;
         history.Push(url);
-        SaveHistory(history);
+        await SaveHistory(history);
     }
 
-    public void RemoveLastUrl()
+    public async Task RemoveLastUrl()
     {
-        var history = History;
+        var history = await History;
         history.TryPop(out Uri? _);
 
-        SaveHistory(history);
+        await SaveHistory(history);
     }
 
-    private void SaveHistory(Stack<Uri> history)
-    {
-        _cacher.Set(CACHE_KEY, TimeSpan.FromHours(1), history);
-    }
+    private Task SaveHistory(Stack<Uri> history) => _cacher.SetAsync(CACHE_KEY, history);
 }

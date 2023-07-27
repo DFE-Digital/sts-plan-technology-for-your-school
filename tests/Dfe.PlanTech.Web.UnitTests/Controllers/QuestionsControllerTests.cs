@@ -16,8 +16,10 @@ using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -85,6 +87,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private readonly Mock<IQuestionnaireCacher> _questionnaireCacherMock;
 
         private readonly ICacher _cacher;
+        private readonly IDistributedCache _cache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
 
         public QuestionsControllerTests()
         {
@@ -98,10 +101,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             GetQuestionQuery query = new GetQuestionQuery(_questionnaireCacherMock.Object, repositoryMock.Object);
 
-            ICreateQuestionCommand createQuestionCommand = new CreateQuestionCommand(databaseMock.Object);
             IRecordQuestionCommand recordQuestionCommand = new RecordQuestionCommand(databaseMock.Object);
 
-            ICreateAnswerCommand createAnswerCommand = new CreateAnswerCommand(databaseMock.Object);
             IRecordAnswerCommand recordAnswerCommand = new RecordAnswerCommand(databaseMock.Object);
             ICreateResponseCommand createResponseCommand = new CreateResponseCommand(databaseMock.Object);
             ICreateSubmissionCommand createSubmissionCommand = new CreateSubmissionCommand(databaseMock.Object);
@@ -115,13 +116,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 TempData = tempData
             };
 
-            _cacher = new Cacher(new CacheOptions(), new MemoryCache(new MemoryCacheOptions()));
+            _cacher = new Cacher(_cache);
         }
 
         private static Mock<IQuestionnaireCacher> MockQuestionnaireCacher()
         {
             var mock = new Mock<IQuestionnaireCacher>();
-            mock.Setup(questionnaireCache => questionnaireCache.Cached).Returns(new QuestionnaireCache()).Verifiable();
+            mock.Setup(questionnaireCache => questionnaireCache.Cached).ReturnsAsync(new QuestionnaireCache()).Verifiable();
             mock.Setup(questionnaireCache => questionnaireCache.SaveCache(It.IsAny<QuestionnaireCache>())).Verifiable();
 
             return mock;

@@ -5,24 +5,26 @@ namespace Dfe.PlanTech.Application.Caching.Interfaces;
 /// </summary>
 public interface IUrlHistory
 {
+    public const string DEFAULT_PAGE = "self-assessment";
+    
     /// <summary>
     /// Users history
     /// </summary>
-    public Stack<Uri> History { get; }
+    public Task<Stack<Uri>> History { get; }
 
     /// <summary>
     /// The last URL a user visited (or null if none)
     /// </summary>
-    public Uri? LastVisitedUrl { get; }
+    public Task<Uri?> GetLastVisitedUrl();
 
     /// <summary>
     /// Adds the URL to user history and save
     /// </summary>
     /// <param name="url"></param>
-    public void AddUrlToHistory(Uri url);
+    public Task AddUrlToHistory(Uri url);
 
     /// <summary>
     /// Remove last visited URL from history
     /// </summary>
-    public void RemoveLastUrl();
+    public Task RemoveLastUrl();
 }

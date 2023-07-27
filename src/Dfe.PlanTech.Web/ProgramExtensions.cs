@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
+using Dfe.PlanTech.Application.Converters;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Response.Commands;
 using Dfe.PlanTech.Application.Response.Interface;
@@ -20,6 +21,7 @@ using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Web.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 
 namespace Dfe.PlanTech.Web;
 
@@ -65,6 +67,13 @@ public static class ProgramExtensions
             options.ConnectionString = configuration.GetConnectionString("Database");
             options.SchemaName = CACHE_SCHEMA;
             options.TableName = CACHE_TABLE_NAME;
+
+            var timeToLiveConfig = configuration["Caching:TimeToLiveInMinutes"];
+
+            if (!string.IsNullOrEmpty(timeToLiveConfig) && int.TryParse(timeToLiveConfig, out int timeToLive))
+            {
+                options.DefaultSlidingExpiration = TimeSpan.FromMinutes(timeToLive);
+            }
         });
 
         services.AddSession(options =>
@@ -76,7 +85,6 @@ public static class ProgramExtensions
         });
 
         services.AddHttpContextAccessor();
-        services.AddSingleton<ICacheOptions>((services) => new CacheOptions());
         services.AddTransient<ICacher, Cacher>();
         services.AddTransient<IUrlHistory, UrlHistory>();
         services.AddTransient<IQuestionnaireCacher, QuestionnaireCacher>();
@@ -118,6 +126,19 @@ public static class ProgramExtensions
         var config = new GtmConfiguration();
         configuration.GetSection("GTM").Bind(config);
         services.AddSingleton((services) => config);
+
+        return services;
+    }
+
+    public static IServiceCollection AddJsonOptions(this IServiceCollection services)
+    {
+        services.AddScoped(_ =>
+        {
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new JsonConverterFactoryForStackOfT());
+
+            return options;
+        });
 
         return services;
     }

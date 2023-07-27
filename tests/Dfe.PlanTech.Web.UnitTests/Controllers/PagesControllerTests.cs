@@ -57,8 +57,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             Mock<IContentRepository> repositoryMock = SetupRepositoryMock();
 
+            var history = new Stack<Uri>(new[] { new Uri("http://www.test.com") });
+
             var mockLogger = new Mock<ILogger<PagesController>>();
             var historyMock = new Mock<IUrlHistory>();
+            historyMock.Setup(history => history.History).ReturnsAsync(() => history);
 
             var config = new GtmConfiguration()
             {
