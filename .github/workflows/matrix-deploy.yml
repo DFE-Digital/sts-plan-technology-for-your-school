@@ -2,6 +2,13 @@ name: Build & deploy to environment
 
 on:
   workflow_dispatch:
+    inputs:
+      name:
+        type: choice
+        description: Manual publish to which environment
+        options:
+          - Staging
+          - Production
   push:
     branches: [ "feat/pipeline-hardening" ]
   
@@ -12,7 +19,7 @@ jobs:
       max-parallel: 1
       fail-fast: true
       matrix:
-        target: [ dev ]
+        target: [ dev, tst ]
     uses: ./.github/workflows/build-and-deploy.yml
     with:
       environment: ${{ matrix.target }}
@@ -23,19 +30,19 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-22.04
     steps:
-      - run: echo "will deploy to staging here"
+      - run: echo "will deploy to staging on manual dispatch trigger here"
 #    uses: ./.github/workflows/build-and-deploy.yml
 #    with:
-#      environment: ${{ matrix.target }}
+#      environment: Staging
 #    secrets: inherit
       
   deploy-to-prod:
     needs: deploy-to-staging
-    if: ${{ github.event_name == 'workflow_dispatch' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.name == 'Production' }}
     runs-on: ubuntu-22.04
     steps:
-      - run: echo "will deploy to prod here"
+      - run: echo "will deploy to prod on manual dispatch when Production choice is selected"
 #    uses: ./.github/workflows/build-and-deploy.yml
 #    with:
-#      environment: ${{ matrix.target }}
+#      environment: Production
 #    secrets: inherit
