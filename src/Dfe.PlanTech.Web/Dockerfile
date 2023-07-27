@@ -2,7 +2,7 @@
 WORKDIR /
 EXPOSE 80
 RUN apt-get update
-RUN apt-get -y install libcap2-bin
+RUN apt-get -y --no-install-recommends install libcap2-bin
 RUN apt-get clean
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
