@@ -1,9 +1,7 @@
 name: Build & deploy to environment
 
 on:
-  push:
-    branches: [ "main" ]    
-    
+#  Removed trigger on push as this will now be replaced by matrix-deploy.yml    
   workflow_dispatch:
     inputs:
       environment:

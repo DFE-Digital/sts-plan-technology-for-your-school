@@ -10,7 +10,7 @@ on:
           - Staging
           - Production
   push:
-    branches: [ "feat/pipeline-hardening" ]
+    branches: [ "main" ]
   
 
 jobs:
@@ -19,30 +19,23 @@ jobs:
       max-parallel: 1
       fail-fast: true
       matrix:
-        target: [ dev ]
+        target: [ dev, tst ]
     uses: ./.github/workflows/build-and-deploy.yml
     with:
       environment: ${{ matrix.target }}
     secrets: inherit
     
+#  Once we have setup the Staging and Production Environment we can reconfigure the jobs below to call the build-and-deploy workflow with the correct envs.
   deploy-to-staging:
     needs: deploy-to-environments
     if: ${{ github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-22.04
     steps:
       - run: echo "will deploy to staging on manual dispatch trigger here"
-#    uses: ./.github/workflows/build-and-deploy.yml
-#    with:
-#      environment: Staging
-#    secrets: inherit
-      
+
   deploy-to-prod:
     needs: deploy-to-staging
     if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.name == 'Production' }}
     runs-on: ubuntu-22.04
     steps:
       - run: echo "will deploy to prod on manual dispatch when Production choice is selected"
-#    uses: ./.github/workflows/build-and-deploy.yml
-#    with:
-#      environment: Production
-#    secrets: inherit
