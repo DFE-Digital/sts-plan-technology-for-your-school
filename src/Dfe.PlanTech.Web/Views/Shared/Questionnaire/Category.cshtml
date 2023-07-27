@@ -20,7 +20,7 @@
 
 <task-list>
     <h3 class="govuk-heading-s govuk-!-margin-bottom-2">Progress</h3>
-    <p class="govuk-body govuk-!-margin-bottom-5">You have completed <strong>@completedCount of 5</strong> sections.</p>
+    <p class="govuk-body govuk-!-margin-bottom-5">You have completed <strong>@completedCount of @Model.Sections.Count()</strong> sections.</p>
     @foreach (var categorySection in Model.Sections)
     {
         var tagColour = TagColour.Grey;
