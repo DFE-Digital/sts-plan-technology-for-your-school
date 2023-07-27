@@ -57,14 +57,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             Page = BuildPage(),
             DisplayName = $"Testing Recommendation - {maturity}",
             InternalName = $"testing-recommendation-{maturity}",
-            Maturity = maturity
+            Maturity = maturity,
         };
 
         public InsetText BuildInsetText() => new()
         {
             Text = "Inset Text"
         };
-        
+
         public ISection[] BuildSections()
          => new ISection[]
             {
@@ -132,7 +132,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         }
 
         private static Page BuildPage(string? param = null)
-        => new() {
+        => new()
+        {
             InternalName = "Internal Name",
             Slug = "testing-page",
             SectionTitle = "Section Title",
@@ -142,7 +143,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         };
 
         private static Title BuildTitle(string text = "Testing Title")
-        => new() {
+        => new()
+        {
             Text = text
         };
     }

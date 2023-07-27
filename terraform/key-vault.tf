@@ -24,7 +24,7 @@ resource "azurerm_key_vault_access_policy" "vault_access_policy_mi" {
   object_id    = azurerm_user_assigned_identity.user_assigned_identity.principal_id
 
   secret_permissions = ["List", "Get"]
-  key_permissions    = ["List", "Get"]
+  key_permissions    = ["List", "Get", "WrapKey", "UnwrapKey"]
 }
 
 resource "azurerm_key_vault_secret" "vault_secret_contentful_deliveryapikey" {
@@ -92,7 +92,7 @@ resource "azurerm_key_vault_secret" "vault_secret_database_connectionstring" {
   }
 }
 
-resource "azurerm_key_vault_key" "key" {
+resource "azurerm_key_vault_key" "data_protection_key" {
   name         = "dataprotection"
   key_vault_id = azurerm_key_vault.vault.id
 

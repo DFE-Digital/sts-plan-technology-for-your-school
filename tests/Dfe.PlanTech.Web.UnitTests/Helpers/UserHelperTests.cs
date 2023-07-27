@@ -1,10 +1,10 @@
-using System.Security.Claims;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Helper;
 using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 using Microsoft.AspNetCore.Http;
 using Moq;
+using System.Security.Claims;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Helpers;
@@ -51,9 +51,9 @@ public class UserHelperTests
         _planTechDbContextMock.Setup(m => m.GetEstablishmentBy(establishment => establishment.EstablishmentRef == "131")).ReturnsAsync(new Establishment() { Id = 1 });
 
         var result = await _userHelper.GetEstablishmentId();
-        
+
         _createEstablishmentCommandMock.Verify(x => x.CreateEstablishment(It.IsAny<EstablishmentDto>()), Times.Never);
-        
+
         Assert.IsType<int>(result);
 
         Assert.Equal(1, result);
@@ -67,9 +67,9 @@ public class UserHelperTests
             .SetupSequence(m => m.GetEstablishmentBy(establishment => establishment.EstablishmentRef == "131"))
             .ReturnsAsync(() => { return null; })
             .ReturnsAsync(new Establishment() { Id = 17 });
-        
+
         var result = await _userHelper.GetEstablishmentId();
-        
+
         _createEstablishmentCommandMock.Verify(x => x.CreateEstablishment(It.IsAny<EstablishmentDto>()), Times.Once);
 
         Assert.IsType<int>(result);
@@ -90,11 +90,11 @@ public class UserHelperTests
         _httpContextAccessorMock.Setup(m => m.HttpContext).Returns(new DefaultHttpContext() { User = user });
 
         var userHelperWithMissingOrgData = new UserHelper(_httpContextAccessorMock.Object, _planTechDbContextMock.Object, _createEstablishmentCommandMock.Object);
-        
-          
+
+
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () => await userHelperWithMissingOrgData.GetEstablishmentId());
 
         Assert.Equal("Establishment reference cannot be null", exception.Message);
     }
-    
+
 }

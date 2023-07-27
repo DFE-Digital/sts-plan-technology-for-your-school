@@ -1,8 +1,8 @@
-using System.Security.Claims;
-using System.Text.Json;
 using Dfe.PlanTech.Domain.SignIn.Enums;
 using Dfe.PlanTech.Domain.SignIn.Models;
 using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace Dfe.PlanTech.Infrastructure.SignIn.UnitTests;
 
@@ -86,7 +86,7 @@ public class UserClaimsExtensionsTests
     {
         var organisation = new Organisation()
         {
-            Id = Guid. NewGuid()
+            Id = Guid.NewGuid()
         };
 
         var organisationJson = JsonSerializer.Serialize(organisation);

@@ -32,7 +32,7 @@ public static class DfeSignInSetup
             options.KnownNetworks.Clear();
             options.KnownProxies.Clear();
         });
-        
+
         return services;
     }
 

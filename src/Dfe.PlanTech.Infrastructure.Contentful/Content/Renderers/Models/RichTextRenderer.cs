@@ -1,6 +1,6 @@
-using System.Text;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Microsoft.Extensions.Logging;
+using System.Text;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 
@@ -13,7 +13,7 @@ public class RichTextRenderer : IRichTextRenderer, IRichTextContentPartRendererC
     private readonly List<IRichTextContentPartRenderer> _renderers;
 
     public ILogger Logger => _logger;
-    
+
     public RichTextRenderer(ILogger<IRichTextRenderer> logger, IEnumerable<IRichTextContentPartRenderer> renderers)
     {
         _logger = logger;

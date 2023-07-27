@@ -23,12 +23,13 @@ public class GetPageQuery : ContentRetriever
     /// <returns>Page matching slug</returns>
     public async Task<Page> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
     {
-        var options = new GetEntitiesOptions(3, new[] { new ContentQueryEquals() { Field = "fields.slug", Value = slug } });
+        var options = new GetEntitiesOptions(4, new[] { new ContentQueryEquals() { Field = "fields.slug", Value = slug } });
         var pages = await repository.GetEntities<Page>(options, cancellationToken);
 
         var page = pages.FirstOrDefault() ?? throw new Exception($"Could not find page with slug {slug}");
 
-        if(page.DisplayTopicTitle){
+        if (page.DisplayTopicTitle)
+        {
             var cached = _cacher.Cached!;
             page.SectionTitle = cached.CurrentSectionTitle;
         }

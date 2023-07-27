@@ -35,7 +35,7 @@ public class PagesController : BaseController<PagesController>
             TempData["Param"] = param;
 
         var page = await query.GetPageBySlug(slug, cancellationToken);
-
+        
         var viewModel = CreatePageModel(page, param);
 
         return View("Page", viewModel);

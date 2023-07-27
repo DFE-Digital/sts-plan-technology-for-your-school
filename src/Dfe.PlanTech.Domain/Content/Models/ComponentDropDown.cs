@@ -4,7 +4,7 @@
     /// Model for DropDown type.
     /// </summary>
 	public class ComponentDropDown : ContentComponent
-	{
+    {
         /// <summary>
         /// The title to display.
         /// </summary>

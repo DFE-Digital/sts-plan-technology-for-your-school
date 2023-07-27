@@ -24,4 +24,14 @@ public class Section : ContentComponent, ISection
     public RecommendationPage GetRecommendationForMaturity(Maturity maturity)
      => Recommendations.FirstOrDefault(recommendation => recommendation.Maturity == maturity) ??
         throw new KeyNotFoundException($"Could not find recommendation with maturity {maturity}");
+
+    public RecommendationPage GetRecommendationForMaturity(string maturity)
+    {
+        if (maturity is null)
+            maturity = string.Empty;
+
+        Enum.TryParse(maturity, out Maturity maturityResponse);
+
+        return GetRecommendationForMaturity(maturityResponse);
+    }
 }

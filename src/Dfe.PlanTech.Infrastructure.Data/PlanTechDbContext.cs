@@ -1,6 +1,7 @@
 ﻿using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Answers.Models;
+using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.Questions.Models;
 using Dfe.PlanTech.Domain.Responses.Models;
 using Dfe.PlanTech.Domain.SignIn.Models;
@@ -10,7 +11,6 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
-using Dfe.PlanTech.Domain.Establishments.Models;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
@@ -18,7 +18,7 @@ namespace Dfe.PlanTech.Infrastructure.Data;
 public class PlanTechDbContext : DbContext, IPlanTechDbContext
 {
     public DbSet<User> Users { get; set; } = null!;
-    
+
     public DbSet<Establishment> Establishments { get; set; } = null!;
 
     public DbSet<SignIn> SignIn { get; set; } = null!;
@@ -130,7 +130,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public Task<int> SaveChangesAsync() => base.SaveChangesAsync();
 
     public Task<User?> GetUserBy(Expression<Func<User, bool>> predicate) => Users.FirstOrDefaultAsync(predicate);
-    
+
     public Task<Establishment?> GetEstablishmentBy(Expression<Func<Establishment, bool>> predicate) => Establishments.FirstOrDefaultAsync(predicate);
 
     public Task<int> CallStoredProcedureWithReturnInt(string sprocName, List<SqlParameter> parms) => base.Database.ExecuteSqlRawAsync(sprocName, parms);
