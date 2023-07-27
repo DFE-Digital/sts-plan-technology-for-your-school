@@ -1,4 +1,4 @@
-name: Build & deploy to environment
+name: Multi stage build & deploy 
 
 on:
   workflow_dispatch:
