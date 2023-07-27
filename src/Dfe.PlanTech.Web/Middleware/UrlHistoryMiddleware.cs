@@ -29,7 +29,7 @@ public class UrlHistoryMiddleware
     private async Task ProcessRequestUri(HttpContext httpContext, IUrlHistory history)
     {
         //If not logged in, don't bother
-        if (httpContext.User == null || !httpContext.User.Claims.Any()) return;
+        if (!history.UserIsAuthenticated) return;
 
         if (!TryGetRequestUri(httpContext.Request, out Uri? targetUrl) || targetUrl == null) return;
 

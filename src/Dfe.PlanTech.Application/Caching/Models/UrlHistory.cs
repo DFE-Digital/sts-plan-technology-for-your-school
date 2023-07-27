@@ -1,5 +1,5 @@
+using System.Security.Claims;
 using Dfe.PlanTech.Application.Caching.Interfaces;
-using Dfe.PlanTech.Domain.SignIn.Enums;
 using Microsoft.AspNetCore.Http;
 
 namespace Dfe.PlanTech.Application.Caching.Models;
@@ -7,7 +7,7 @@ namespace Dfe.PlanTech.Application.Caching.Models;
 public class UrlHistory : IUrlHistory
 {
     public const string CACHE_KEY = "URL_HISTORY";
-    public const string CLAIM_TYPE = ClaimConstants.VerifiedEmail;
+    public const string CLAIM_TYPE = ClaimTypes.Email;
 
     private readonly ICacher _cacher;
     private readonly IHttpContextAccessor _httpContextAccessor;
@@ -22,6 +22,8 @@ public class UrlHistory : IUrlHistory
 
     public async Task<Uri?> GetLastVisitedUrl()
     {
+        if(!UserIsAuthenticated) return null;
+
         var history = await History;
 
         if (History != null && history.TryPeek(out Uri? lastVisitedPage))
@@ -34,6 +36,8 @@ public class UrlHistory : IUrlHistory
 
     public async Task AddUrlToHistory(Uri url)
     {
+        if(!UserIsAuthenticated) return;
+
         var history = await History;
         history.Push(url);
         await SaveHistory(history);
@@ -41,11 +45,15 @@ public class UrlHistory : IUrlHistory
 
     public async Task RemoveLastUrl()
     {
+        if(!UserIsAuthenticated) return;
+        
         var history = await History;
         history.TryPop(out Uri? _);
 
         await SaveHistory(history);
     }
+
+    public bool UserIsAuthenticated => _httpContextAccessor.HttpContext.User?.Identity?.IsAuthenticated == true;
 
     private Task SaveHistory(Stack<Uri> history) => _cacher.SetAsync(GetKeyForUser(), history);
 

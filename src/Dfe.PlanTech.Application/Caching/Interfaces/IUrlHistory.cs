@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Application.Caching.Interfaces;
 public interface IUrlHistory
 {
     public const string DEFAULT_PAGE = "self-assessment";
-    
+
     /// <summary>
     /// Users history
     /// </summary>
@@ -27,4 +27,6 @@ public interface IUrlHistory
     /// Remove last visited URL from history
     /// </summary>
     public Task RemoveLastUrl();
+
+    public bool UserIsAuthenticated { get; }
 }
