@@ -31,7 +31,7 @@ if (builder.Environment.IsProduction())
                         .ProtectKeysWithAzureKeyVault(new Uri(keyVaultUri + "keys/dataprotection"), azureCredentials);
 }
 
-builder.Services.AddCaching();
+builder.Services.AddCaching(builder.Configuration);
 builder.Services.AddCQRSServices();
 builder.Services.AddContentfulServices(builder.Configuration);
 builder.Services.AddDfeSignIn(builder.Configuration);

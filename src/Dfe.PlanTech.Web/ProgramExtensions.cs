@@ -26,6 +26,9 @@ namespace Dfe.PlanTech.Web;
 [ExcludeFromCodeCoverage]
 public static class ProgramExtensions
 {
+    private const string CACHE_TABLE_NAME = "MemoryCache";
+    private const string CACHE_SCHEMA = "dbo";
+
     public static IServiceCollection AddContentfulServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.SetupContentfulClient(configuration, "Contentful", HttpClientPolicyExtensions.AddRetryPolicy);
@@ -55,9 +58,14 @@ public static class ProgramExtensions
         return services;
     }
 
-    public static IServiceCollection AddCaching(this IServiceCollection services)
+    public static IServiceCollection AddCaching(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDistributedMemoryCache();
+        services.AddDistributedSqlServerCache(options =>
+        {
+            options.ConnectionString = configuration.GetConnectionString("Database");
+            options.SchemaName = CACHE_SCHEMA;
+            options.TableName = CACHE_TABLE_NAME;
+        });
 
         services.AddSession(options =>
         {
