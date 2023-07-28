@@ -93,14 +93,4 @@ export class BrowserHistory {
     shouldClearHistory() {
         return window.location.pathname == "/" || window.location.pathname == DEFAULT_ROUTE;
     }
-
-    getIndexOfHrefInHistory() {
-        for (let x = this.history.length - 1; x >= 0 && x >= this.history.length - 2; x--) {
-            if (window.location.href == this.history[index]) {
-                return x;
-            }
-        }
-
-        return -1;
-    }
 }
