@@ -15,4 +15,7 @@ public class QuestionWithAnswer
 
     [Required]
     public string AnswerText { get; init; } = null!;
+
+    [Required]
+    public DateTime? DateCreated { get; init; } = null!;
 }

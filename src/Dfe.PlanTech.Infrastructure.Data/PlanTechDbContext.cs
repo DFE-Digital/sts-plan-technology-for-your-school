@@ -110,24 +110,23 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public IQueryable<SignIn> SignIns => SignIn;
     public IQueryable<SectionStatuses> GetSectionStatuses(string sectionIds) => sectionStatusesSp.FromSqlInterpolated($"{DatabaseConstants.GetSectionStatuses} {sectionIds}");
 
-    public IQueryable<Question> GetQuestions => Questions;
-    public IQueryable<Answer> GetAnswers => Answers;
-    public IQueryable<Response> GetResponses => Responses;
-
     public void AddUser(User user) => Users.Add(user);
 
     public void AddEstablishment(Establishment establishment) => Establishments.Add(establishment);
 
     public void AddSignIn(SignIn signIn) => SignIn.Add(signIn);
 
+    public IQueryable<Question> GetQuestions => Questions;
     public void AddQuestion(Question question) => Questions.Add(question);
     public Task<Question?> GetQuestion(Expression<Func<Question, bool>> predicate) => GetQuestions.FirstOrDefaultAsync(predicate);
 
+    public IQueryable<Answer> GetAnswers => Answers;
     public void AddAnswer(Answer answer) => Answers.Add(answer);
     public Task<Answer?> GetAnswer(Expression<Func<Answer, bool>> predicate) => GetAnswers.FirstOrDefaultAsync(predicate);
 
     public void AddSubmission(Submission submission) => Submissions.Add(submission);
 
+    public IQueryable<Response> GetResponses => Responses;
     public void AddResponse(Response response) => Responses.Add(response);
     public Task<Response?> GetResponse(Expression<Func<Response, bool>> predicate) => GetResponses.FirstOrDefaultAsync(predicate);
     public async Task<Response[]?> GetResponseList(Expression<Func<Response, bool>> predicate) => await GetResponses.Where(predicate).ToArrayAsync();
@@ -139,4 +138,8 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public Task<Establishment?> GetEstablishmentBy(Expression<Func<Establishment, bool>> predicate) => Establishments.FirstOrDefaultAsync(predicate);
 
     public Task<int> CallStoredProcedureWithReturnInt(string sprocName, List<SqlParameter> parms) => base.Database.ExecuteSqlRawAsync(sprocName, parms);
+
+    public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable) => queryable.FirstOrDefaultAsync();
+
+    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable) => queryable.ToListAsync();
 }

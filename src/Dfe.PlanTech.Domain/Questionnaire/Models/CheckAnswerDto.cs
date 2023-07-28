@@ -5,5 +5,5 @@ using System.ComponentModel.DataAnnotations;
 public class CheckAnswerDto
 {
     [Required]
-    public List<QuestionWithAnswer> QuestionAnswerList { get; private set; } = new List<QuestionWithAnswer>();
+    public List<QuestionWithAnswer> QuestionAnswerList { get; init; } = new List<QuestionWithAnswer>();
 }

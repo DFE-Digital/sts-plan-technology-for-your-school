@@ -30,6 +30,7 @@ public interface IPlanTechDbContext
     public void AddEstablishment(Domain.Establishments.Models.Establishment establishment);
 
     // Response Table
+    IQueryable<Domain.Responses.Models.Response> GetResponses { get; }
     public void AddResponse(Domain.Responses.Models.Response response);
     public Task<Domain.Responses.Models.Response[]?> GetResponseList(Expression<Func<Domain.Responses.Models.Response, bool>> predicate);
 
@@ -42,4 +43,8 @@ public interface IPlanTechDbContext
     Task<User?> GetUserBy(Expression<Func<User, bool>> predicate);
 
     Task<Establishment?> GetEstablishmentBy(Expression<Func<Establishment, bool>> predicate);
+
+    Task<List<T>> ToListAsync<T>(IQueryable<T> queryable);
+
+    Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable);
 }

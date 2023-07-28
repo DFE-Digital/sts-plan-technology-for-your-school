@@ -17,6 +17,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     [Route("check-answers")]
     public async Task<IActionResult> CheckAnswersPage(
         int submissionId,
+        string sectionId,
         string sectionName,
         [FromServices] ProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand,
         [FromServices] GetPageQuery getPageQuery)
@@ -28,7 +29,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
             BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment",
             Title = checkAnswerPageContent.Title ?? throw new NullReferenceException(nameof(checkAnswerPageContent.Title)),
             SectionName = sectionName,
-            CheckAnswerDto = await processCheckAnswerDtoCommand.ProcessCheckAnswerDto(submissionId),
+            CheckAnswerDto = await processCheckAnswerDtoCommand.ProcessCheckAnswerDto(submissionId, sectionId),
             Content = checkAnswerPageContent.Content,
             SubmissionId = submissionId
         };
