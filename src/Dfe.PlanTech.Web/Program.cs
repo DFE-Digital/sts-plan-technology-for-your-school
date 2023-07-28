@@ -62,8 +62,6 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseMiddleware<UrlHistoryMiddleware>();
-
 app.MapControllerRoute(
     name: "questionsController",
     pattern: "question/{action=GetQuestionById}/{id?}");
