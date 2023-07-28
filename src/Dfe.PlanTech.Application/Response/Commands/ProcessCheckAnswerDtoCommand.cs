@@ -56,7 +56,7 @@ namespace Dfe.PlanTech.Application.Response.Commands
             while (node != null)
             {
                 checkAnswerDto.QuestionAnswerList.Add(questionWithAnswerMap[node.Sys.Id]);
-                node = node.Answers.Where(answer => answer.Sys.Id.Equals(questionWithAnswerMap[node.Sys.Id].AnswerRef)).First().NextQuestion;
+                node = node.Answers.Where(answer => answer.Sys.Id.Equals(questionWithAnswerMap[node.Sys.Id].AnswerRef)).FirstOrDefault()?.NextQuestion;
             }
 
             return checkAnswerDto;
