@@ -38,6 +38,7 @@ readdirSync(dfeDir).forEach(file => {
   cpSync(dfeDir + "/" + file, "./out/assets/images/" + file);
 })
 
+//GOVUK
 const govukDir = "./node_modules/govuk-frontend/govuk/assets/";
 const targetFolders = ["images", "fonts"];
 const ignoreFiles = ["favicon.ico"];
