@@ -26,15 +26,15 @@ namespace Dfe.PlanTech.Application.Submission.Commands
             _createResponseCommand = createResponseCommand;
         }
 
-        public async Task<int> RecordQuestion(RecordQuestionDto recordQuestionDto)
+        public async Task<int?> RecordQuestion(RecordQuestionDto recordQuestionDto)
         {
-            if (recordQuestionDto.QuestionText == null) throw new NullReferenceException(nameof(recordQuestionDto));
+            if (recordQuestionDto.QuestionText == null) return null;
             return await _recordQuestionCommand.RecordQuestion(recordQuestionDto);
         }
 
-        public async Task<int> RecordAnswer(RecordAnswerDto recordAnswerDto)
+        public async Task<int?> RecordAnswer(RecordAnswerDto recordAnswerDto)
         {
-            if (recordAnswerDto.AnswerText == null) throw new NullReferenceException(nameof(recordAnswerDto));
+            if (recordAnswerDto.AnswerText == null) return null;
             return await _recordAnswerCommand.RecordAnswer(recordAnswerDto);
         }
 

@@ -23,13 +23,13 @@ namespace Dfe.PlanTech.Application.Submission.Commands
 
             int submissionId = await _GetSubmissionId(submitAnswerDto.SubmissionId, sectionId, sectionName);
 
-            int questionId = await _recordSubmitAnswerCommands.RecordQuestion(new RecordQuestionDto()
+            int? questionId = await _recordSubmitAnswerCommands.RecordQuestion(new RecordQuestionDto()
             {
                 QuestionText = await _GetQuestionTextById(submitAnswerDto.QuestionId),
                 ContentfulRef = submitAnswerDto.QuestionId
             });
 
-            int answerId = await _recordSubmitAnswerCommands.RecordAnswer(new RecordAnswerDto()
+            int? answerId = await _recordSubmitAnswerCommands.RecordAnswer(new RecordAnswerDto()
             {
                 AnswerText = await _GetAnswerTextById(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId),
                 ContentfulRef = submitAnswerDto.ChosenAnswerId
@@ -41,8 +41,8 @@ namespace Dfe.PlanTech.Application.Submission.Commands
             {
                 UserId = userId,
                 SubmissionId = submissionId,
-                QuestionId = questionId,
-                AnswerId = answerId,
+                QuestionId = questionId ?? throw new NullReferenceException(nameof(questionId)),
+                AnswerId = answerId ?? throw new NullReferenceException(nameof(answerId)),
                 Maturity = maturity
             });
 
