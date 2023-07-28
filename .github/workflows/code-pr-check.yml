@@ -48,3 +48,21 @@ jobs:
         with:
           dotnet_version: ${{ env.DOTNET_VERSION }}  
           solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
+
+  run-javascript-tests:
+    runs-on: ubuntu-latest
+    name: Run javascript tests
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "latest"
+
+      - name: Install Dependencies
+        run: npm install
+
+      # Finally, run our tests
+      - name: Run the tests
+        run: npm test
