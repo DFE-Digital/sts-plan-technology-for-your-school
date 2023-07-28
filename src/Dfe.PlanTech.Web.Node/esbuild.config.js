@@ -61,8 +61,6 @@ const folders = ["css", "assets", "js"];
 for (const folder of folders) {
   const path = `./out/${folder}`;
 
-  readdirSync(path).forEach(file => {
-    cpSync(`${path}/${file}`, `${targetDir}/${folder}/${file}`, { recursive: true, overwrite: true});
-  })
+  cpSync(path, `${targetDir}/${folder}`, { recursive: true, overwrite: true });
 }
 
