@@ -1,9 +1,10 @@
 @model Dfe.PlanTech.Web.Models.QuestionViewModel
 
 @section BeforeContent {
-    <govuk-back-link href=@Model.BackUrl />
+    @{
+        await Html.RenderPartialAsync("BackButton");
+    }
 }
-
 <form asp-controller="Questions" asp-action="SubmitAnswer" method="post">
     <input id="QuestionId" hidden value=@Model.Question.Sys.Id name="QuestionId" />
     <input id="NextQuestionId" hidden value=@Model.Question.Answers[0].NextQuestion?.Sys.Id ?? ""
