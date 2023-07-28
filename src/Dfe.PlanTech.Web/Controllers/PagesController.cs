@@ -11,7 +11,7 @@ public class PagesController : BaseController<PagesController>
 {
     public IConfiguration Config { get; }
 
-    public PagesController(ILogger<PagesController> logger, IUrlHistory history, IConfiguration config) : base(logger, history)
+    public PagesController(ILogger<PagesController> logger, IConfiguration config) : base(logger)
     {
         Config = config ?? throw new ArgumentNullException(nameof(config));
     }
@@ -49,7 +49,6 @@ public class PagesController : BaseController<PagesController>
             Param = param,
             GTMHead = Config.GetValue<string>("GTM:Head") ?? "",
             GTMBody = Config.GetValue<string>("GTM:Body") ?? "",
-            BackUrl = history.LastVisitedUrl?.ToString() ?? "/"
         };
     }
 

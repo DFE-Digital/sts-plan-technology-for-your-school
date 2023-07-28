@@ -27,13 +27,12 @@ public class QuestionsController : BaseController<QuestionsController>
 
     public QuestionsController(
         ILogger<QuestionsController> logger,
-        IUrlHistory history,
         [FromServices] GetQuestionQuery getQuestionQuery,
         [FromServices] IRecordQuestionCommand recordQuestionCommand,
         [FromServices] IRecordAnswerCommand recordAnswerCommand,
         [FromServices] ICreateSubmissionCommand createSubmissionCommand,
         [FromServices] ICreateResponseCommand createResponseCommand,
-        IUser user) : base(logger, history)
+        IUser user) : base(logger)
     {
         _getQuestionQuery = getQuestionQuery;
         _recordQuestionCommand = recordQuestionCommand;
@@ -65,7 +64,6 @@ public class QuestionsController : BaseController<QuestionsController>
         {
             Question = question,
             AnswerRef = answerRef,
-            BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment",
             Params = parameters != null ? parameters.ToString() : null,
             SubmissionId = submissionId,
         };
