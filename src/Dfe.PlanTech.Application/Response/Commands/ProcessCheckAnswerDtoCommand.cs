@@ -51,12 +51,12 @@ namespace Dfe.PlanTech.Application.Response.Commands
 
             Section section = await _GetSection(sectionId) ?? throw new NullReferenceException(nameof(section));
 
-            Question? node = section.Questions.Where(question => question.Sys.Id.Equals(section.FirstQuestionId)).First();
+            Question? node = section.Questions.FirstOrDefault(question => question.Sys.Id.Equals(section.FirstQuestionId));
 
             while (node != null)
             {
                 checkAnswerDto.QuestionAnswerList.Add(questionWithAnswerMap[node.Sys.Id]);
-                node = node.Answers.Where(answer => answer.Sys.Id.Equals(questionWithAnswerMap[node.Sys.Id].AnswerRef)).FirstOrDefault()?.NextQuestion;
+                node = node.Answers.FirstOrDefault(answer => answer.Sys.Id.Equals(questionWithAnswerMap[node.Sys.Id].AnswerRef))?.NextQuestion;
             }
 
             return checkAnswerDto;
