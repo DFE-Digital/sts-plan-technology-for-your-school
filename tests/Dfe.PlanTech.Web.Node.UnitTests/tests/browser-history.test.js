@@ -1,4 +1,4 @@
-import { BrowserHistory } from "../../../src/Dfe.PlanTech.Web/wwwroot/js/browser-history";
+import { BrowserHistory } from "../../../src/Dfe.PlanTech.Web.Node/scripts/browser-history";
 
 let windowSpy;
 
