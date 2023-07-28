@@ -9,7 +9,7 @@ await esbuild.build({
   minify: true,
   sourcemap: true,
   target: ['chrome58', 'firefox57', 'safari11', 'edge16'],
-  outfile: 'out/scripts/app.js',
+  outfile: 'out/js/app.js',
 })
 
 //Builds SASS
@@ -23,7 +23,7 @@ await esbuild.build({
   plugins: [sassPlugin({
     loader: { ".woff2": "file", ".png": "file" },
   })],
-  outfile: 'out/styles/application.css'
+  outfile: 'out/css/application.css'
 });
 
 //Copy assets
@@ -52,5 +52,17 @@ for (const folder of targetFolders) {
 
     cpSync(`${path}/${file}`, `./out/assets/${folder}/${file}`);
   })
-  
 }
+
+//Copy to Dfe.PlanTech.Web
+const targetDir = "../Dfe.PlanTech.Web/wwwroot";
+const folders = ["css", "assets", "js"];
+
+for (const folder of folders) {
+  const path = `./out/${folder}`;
+
+  readdirSync(path).forEach(file => {
+    cpSync(`${path}/${file}`, `${targetDir}/${folder}/${file}`, { recursive: true, overwrite: true});
+  })
+}
+
