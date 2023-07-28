@@ -22,14 +22,17 @@ class BrowserHistory {
         this.amendBackButton();
 
         if (!this.ifNavigatingBackwardsRemoveUrl()) {
-            this.tryAddUrl();
+            this.addUrl();
+        }
+        else {
+            this.amendBackButton();
         }
     }
 
     /**
      * Adds current window href to history
      */
-    tryAddUrl() {
+    addUrl() {
         this.history.push(window.location.href);
         this.saveHistory();
     }
@@ -47,6 +50,7 @@ class BrowserHistory {
 
         this.history = this.history.slice(0, indexOfHrefInHistory);
         this.saveHistory();
+
         return true;
     }
 
