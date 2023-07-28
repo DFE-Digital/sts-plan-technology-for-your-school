@@ -1,6 +1,8 @@
 import * as esbuild from 'esbuild';
 import { sassPlugin } from 'esbuild-sass-plugin';
+import { cpSync, readdirSync } from 'fs';
 
+//Build JS
 await esbuild.build({
   entryPoints: ['scripts/app.mjs'],
   bundle: true,
@@ -10,6 +12,7 @@ await esbuild.build({
   outfile: 'out/scripts/app.js',
 })
 
+//Builds SASS
 await esbuild.build({
   entryPoints: ['styles/scss/application.scss'],
   bundle: true,
@@ -22,3 +25,32 @@ await esbuild.build({
   })],
   outfile: 'out/styles/application.css'
 });
+
+//Copy assets
+//DFE
+const dfeDir = "./node_modules/dfe-frontend-alpha/packages/assets";
+readdirSync(dfeDir).forEach(file => {
+  if (file.indexOf(".png") == -1)
+  {
+    return;
+  }
+
+  cpSync(dfeDir + "/" + file, "./out/assets/images/" + file);
+})
+
+const govukDir = "./node_modules/govuk-frontend/govuk/assets/";
+const targetFolders = ["images", "fonts"];
+const ignoreFiles = ["favicon.ico"];
+
+for (const folder of targetFolders) {
+  const path = govukDir + folder;
+
+  readdirSync(path).forEach(file => {
+    if (ignoreFiles.some(ignoreFile => ignoreFile == file)) {
+      return;
+    }
+
+    cpSync(`${path}/${file}`, `./out/assets/${folder}/${file}`);
+  })
+  
+}
