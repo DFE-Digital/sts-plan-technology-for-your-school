@@ -91,6 +91,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
        };
 
+        private readonly Mock<IPlanTechDbContext> _databaseMock;
         private readonly QuestionsController _controller;
         private readonly SubmitAnswerCommand _submitAnswerCommand;
         private readonly Mock<IQuestionnaireCacher> _questionnaireCacherMock;
@@ -103,20 +104,20 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var mockLogger = new Mock<ILogger<QuestionsController>>();
             var historyMock = new Mock<IUrlHistory>();
-            var databaseMock = new Mock<IPlanTechDbContext>();
+            _databaseMock = new Mock<IPlanTechDbContext>();
             var user = new Mock<IUser>();
 
             var getQuestionnaireQuery = new Application.Questionnaire.Queries.GetQuestionQuery(_questionnaireCacherMock.Object, repositoryMock.Object);
 
-            ICreateQuestionCommand createQuestionCommand = new CreateQuestionCommand(databaseMock.Object);
-            IRecordQuestionCommand recordQuestionCommand = new RecordQuestionCommand(databaseMock.Object);
+            ICreateQuestionCommand createQuestionCommand = new CreateQuestionCommand(_databaseMock.Object);
+            IRecordQuestionCommand recordQuestionCommand = new RecordQuestionCommand(_databaseMock.Object);
 
-            IGetQuestionQuery getQuestionQuery = new Application.Submission.Queries.GetQuestionQuery(databaseMock.Object);
-            ICreateAnswerCommand createAnswerCommand = new CreateAnswerCommand(databaseMock.Object);
-            IRecordAnswerCommand recordAnswerCommand = new RecordAnswerCommand(databaseMock.Object);
-            ICreateResponseCommand createResponseCommand = new CreateResponseCommand(databaseMock.Object);
-            IGetResponseQuery getResponseQuery = new GetResponseQuery(databaseMock.Object);
-            ICreateSubmissionCommand createSubmissionCommand = new CreateSubmissionCommand(databaseMock.Object);
+            IGetQuestionQuery getQuestionQuery = new Application.Submission.Queries.GetQuestionQuery(_databaseMock.Object);
+            ICreateAnswerCommand createAnswerCommand = new CreateAnswerCommand(_databaseMock.Object);
+            IRecordAnswerCommand recordAnswerCommand = new RecordAnswerCommand(_databaseMock.Object);
+            ICreateResponseCommand createResponseCommand = new CreateResponseCommand(_databaseMock.Object);
+            IGetResponseQuery getResponseQuery = new GetResponseQuery(_databaseMock.Object);
+            ICreateSubmissionCommand createSubmissionCommand = new CreateSubmissionCommand(_databaseMock.Object);
 
             var httpContext = new DefaultHttpContext();
             var tempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
@@ -255,6 +256,48 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 ChosenAnswerId = "Answer1",
                 SubmissionId = 1
             };
+
+            var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
+
+            Assert.IsType<RedirectToActionResult>(result);
+
+            var redirectToActionResult = result as RedirectToActionResult;
+
+            Assert.NotNull(redirectToActionResult);
+            Assert.Equal("CheckAnswers", redirectToActionResult.ControllerName);
+            Assert.Equal("CheckAnswersPage", redirectToActionResult.ActionName);
+            Assert.NotNull(redirectToActionResult.RouteValues);
+            var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "submissionId");
+            Assert.Equal(submitAnswerDto.SubmissionId, id.Value);
+        }
+
+        [Fact]
+        public async void SubmitAnswer_Should_RedirectTo_CheckAnswers_When_NextQuestionIsAnswered()
+        {
+            var submitAnswerDto = new SubmitAnswerDto()
+            {
+                QuestionId = "Question1",
+                ChosenAnswerId = "Answer1",
+                SubmissionId = 1
+            };
+
+            Domain.Questions.Models.Question question = new Domain.Questions.Models.Question()
+            {
+                Id = 1,
+                ContentfulRef = "Question2"
+            };
+
+            _databaseMock.Setup(m => m.GetQuestion(question => question.Id == 1)).ReturnsAsync(question);
+
+            _databaseMock.Setup(m => m.GetResponseList(response => response.SubmissionId == 1)).ReturnsAsync(
+                new Domain.Responses.Models.Response[]
+                {
+                    new Domain.Responses.Models.Response()
+                    {
+                        QuestionId = 1,
+                        Question = question
+                    }
+                });
 
             var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
 
