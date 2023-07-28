@@ -15,9 +15,26 @@ Uses ASP .NET Core MVC.
 - Dfe.PlanTech.Application
 - Dfe.PlanTech.Domain
 - Dfe.PlanTech.Infrastructure.Contentful
+- Dfe.PlanTech.Infrastructure.Data
+- Dfe.PlanTech.Infrastructure.SignIn
 
-## Packages
+## C# Packages
 
 | Name                                                                                  | Purpose                            |
 | ------------------------------------------------------------------------------------- | ---------------------------------- |
 | [GovUk.Frontend.AspNetCore](https://github.com/DFE-Digital/govuk-frontend-aspnetcore) | Front-end framework for components |
+
+## Javascript + Styling Compiling
+
+- Uses NodeJS, with [Gulp](https://gulpjs.com/), to compile Styles and Scripts
+
+### NodeJS Packages Used
+
+| Name                                                                   | Purpose                                            |
+| ---------------------------------------------------------------------- | -------------------------------------------------- |
+| [Gulp](https://gulpjs.com/)                                            | Compiling/minifying/combining/etc. SCSS + JS files |
+| [govuk-frontend](https://www.npmjs.com/package/govuk-frontend)         | Gov.UK SCSS                                        |
+| [dfe-frontend-alpha](https://www.npmjs.com/package/dfe-frontend-alpha) | DFE SCSS overrides                                 |
+| [gulp-csso](https://www.npmjs.com/package/gulp-csso)                   | CSS minification                                   |
+| [gulp-sass](https://www.npmjs.com/package/gulp-sass)                   | SASS compiling                                     |
+| [gulp-sourcemaps](https://www.npmjs.com/package/gulp-sourcemaps)       | Sourcemaps creation                                |
