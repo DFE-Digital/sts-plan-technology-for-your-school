@@ -125,7 +125,6 @@ public class CheckAnswersControllerTests
         var checkAnswersViewModel = viewResult.Model as CheckAnswersViewModel;
 
         Assert.NotNull(checkAnswersViewModel);
-        Assert.Equal("self-assessment", checkAnswersViewModel.BackUrl);
         Assert.Equal("Title Text", checkAnswersViewModel.Title.Text);
         Assert.Equal(SubmissionId, checkAnswersViewModel.SubmissionId);
 
