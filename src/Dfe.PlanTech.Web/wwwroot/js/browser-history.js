@@ -1,11 +1,11 @@
 const STORAGE_KEY = "BrowserHistory";
-const DEFAULT_ROUTE = "/self-assessment";
+export const DEFAULT_ROUTE = "/self-assessment";
 const BACK_BUTTON_ID = "back-button-link";
 
 /**
  * Tracks a users browser history, stores it in local storage, and amends the back button link (if existing on page)
  */
-class BrowserHistory {
+export class BrowserHistory {
     history = [];
 
     get lastUrl() {
