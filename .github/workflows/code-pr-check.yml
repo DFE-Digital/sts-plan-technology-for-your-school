@@ -52,6 +52,8 @@ jobs:
   run-javascript-tests:
     runs-on: ubuntu-latest
     name: Run javascript tests
+    env:
+      ProjectPath: ./tests/Dfe.PlanTech.Web.Javascript.UnitTests
     steps:
       - uses: actions/checkout@v3
 
@@ -61,10 +63,17 @@ jobs:
           node-version: "latest"
 
       - name: Install Dependencies
-        working-directory: ./tests/Dfe.PlanTech.Web.Javascript.UnitTests
+        working-directory: $ProjectPath
         run: npm install
 
-      # Finally, run our tests
       - name: Run the tests
-        working-directory: ./tests/Dfe.PlanTech.Web.Javascript.UnitTests
+        working-directory: $ProjectPath
         run: npm test
+
+      - name: Test report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()    # run this step even if previous step failed
+        with:
+          name: JEST Tests            # Name of the check run which will be created
+          path: $ProjectPath/junit.xml    # Path to test results
+          reporter: jest-junit        # Format of test results
