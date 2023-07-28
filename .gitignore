@@ -492,4 +492,4 @@ $RECYCLE.BIN/
 
 # Jest
 coverage/
-jsunit.xml
+junit.xml
