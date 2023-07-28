@@ -19,9 +19,8 @@ export class BrowserHistory {
     constructor() {
         this.history = this.getHistory();
 
-        this.amendBackButton();
-
         if (!this.ifNavigatingBackwardsRemoveUrl()) {
+            this.amendBackButton();
             this.addUrl();
         }
         else {
