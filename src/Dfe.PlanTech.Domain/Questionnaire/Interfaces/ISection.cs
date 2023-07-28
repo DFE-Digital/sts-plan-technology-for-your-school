@@ -23,4 +23,6 @@ public interface ISection : IContentComponent
     public RecommendationPage[] Recommendations { get; }
 
     public RecommendationPage GetRecommendationForMaturity(Maturity maturity);
+
+    public RecommendationPage GetRecommendationForMaturity(string maturity);
 }

@@ -36,7 +36,4 @@
     <ItemGroup>
       <None Remove="Views\Recommendations\" />
     </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Views\Recommendations\" />
-    </ItemGroup>
 </Project>

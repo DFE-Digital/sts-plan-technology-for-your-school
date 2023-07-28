@@ -1,0 +1,23 @@
+﻿@using Dfe.PlanTech.Web.TagHelpers.TaskList
+@model Dfe.PlanTech.Domain.Questionnaire.Interfaces.ICategory;
+
+<task-list>
+    @foreach(var section in Model.Sections)
+    {
+        var submission = Model.SectionStatuses.FirstOrDefault(x => x.SectionId == section.Sys.Id && x.Completed == 1);
+
+        if (submission is null)
+            continue;
+        
+        var recommendation = section.GetRecommendationForMaturity(submission.Maturity);  
+
+        <task-list-item>
+            <task-list-item-name>
+                <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@recommendation?.Page?.Slug" class="govuk-link">
+                @recommendation?.DisplayName
+                </a>
+            </task-list-item-name>
+        </task-list-item>
+    }
+
+</task-list>
