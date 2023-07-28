@@ -27,6 +27,7 @@ Uses ASP .NET Core MVC.
 ## Javascript + Styling Compiling
 
 - Uses NodeJS, with [Gulp](https://gulpjs.com/), to compile Styles and Scripts
+- Scripts are located in the `/Scripts` folder and CSS/SASS are located in the `/Styles` folder
 
 ### NodeJS Packages Used
 
