@@ -61,8 +61,10 @@ jobs:
           node-version: "latest"
 
       - name: Install Dependencies
+        working-directory: tests/Dfe.PlanTech.Web.Javascript.UnitTests
         run: npm install
 
       # Finally, run our tests
       - name: Run the tests
+        working-directory: tests/Dfe.PlanTech.Web.Javascript.UnitTests
         run: npm test
