@@ -92,7 +92,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _questionnaireCacherMock = MockQuestionnaireCacher();
 
             var mockLogger = new Mock<ILogger<QuestionsController>>();
-            var historyMock = new Mock<IUrlHistory>();
             var databaseMock = new Mock<IPlanTechDbContext>();
             var user = new Mock<IUser>();
 
@@ -110,7 +109,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var tempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
             tempData["param"] = "admin";
 
-            _controller = new QuestionsController(mockLogger.Object, historyMock.Object, query, recordQuestionCommand, recordAnswerCommand, createSubmissionCommand, createResponseCommand, user.Object)
+            _controller = new QuestionsController(mockLogger.Object, query, recordQuestionCommand, recordAnswerCommand, createSubmissionCommand, createResponseCommand, user.Object)
             {
                 TempData = tempData
             };
