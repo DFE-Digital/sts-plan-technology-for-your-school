@@ -36,7 +36,7 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
-        dotnet-sonarscanner begin /k:"DFE-Digital_plan-technology-for-your-school" /o:"dfe-digital" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.coverage.exclusions=src/**/Program.cs,src/Dfe.PlanTech.Web/wwwroot/**
+        dotnet-sonarscanner begin /k:"DFE-Digital_plan-technology-for-your-school" /o:"dfe-digital" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.coverage.exclusions=src/**/Program.cs,src/Dfe.PlanTech.Web/wwwroot/**,src/Dfe.PlanTech.Web/gulpfile.js
         dotnet build "plan-technology-for-your-school.sln" --no-restore
         dotnet-coverage collect "dotnet test plan-technology-for-your-school.sln" -f xml -o "coverage.xml" -s "coverage.settings.xml"
         dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
