@@ -2,19 +2,19 @@
   "name": "dfe.plantech.web",
   "version": "1.0.0",
   "description": "DFE PlanTech Web Application",
+  "type": "module",
   "scripts": {
-    "gulp": "gulp"
+    "gulp": "gulp",
+    "build": "node esbuild.config.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "dfe-frontend-alpha": "^0.1.8",
+    "esbuild": "0.18.17",
+    "esbuild-sass-plugin": "^2.10.0",
     "govuk-frontend": "^4.7.0",
-    "gulp": "^4.0.2",
-    "gulp-csso": "^4.0.1",
-    "gulp-sass": "^5.1.0",
-    "gulp-sourcemaps": "^3.0.0",
     "sass": "^1.64.1"
   }
 }

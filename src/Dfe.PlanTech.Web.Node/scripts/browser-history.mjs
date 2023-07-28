@@ -104,5 +104,3 @@ export class BrowserHistory {
         return -1;
     }
 }
-
-const history = new BrowserHistory();
