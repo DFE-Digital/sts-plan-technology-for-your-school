@@ -47,7 +47,6 @@ public class CheckAnswersControllerTests
     {
 
         Mock<ILogger<CheckAnswersController>> loggerMock = new Mock<ILogger<CheckAnswersController>>();
-        Mock<IUrlHistory> urlHistoryMock = new Mock<IUrlHistory>();
 
         _planTechDbContextMock = new Mock<IPlanTechDbContext>();
 
@@ -65,7 +64,6 @@ public class CheckAnswersControllerTests
         _checkAnswersController = new CheckAnswersController
         (
             loggerMock.Object,
-            urlHistoryMock.Object,
             _calculateMaturityCommandMock.Object,
             getResponseQuery,
             getQuestionQuery,
