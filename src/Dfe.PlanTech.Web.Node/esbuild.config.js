@@ -4,7 +4,7 @@ import { cpSync, readdirSync } from 'fs';
 
 //Build JS
 await esbuild.build({
-  entryPoints: ['scripts/app.mjs'],
+  entryPoints: ['scripts/app.js'],
   bundle: true,
   minify: true,
   sourcemap: true,
