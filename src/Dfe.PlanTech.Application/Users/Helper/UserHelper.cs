@@ -32,7 +32,7 @@ namespace Dfe.PlanTech.Application.Users.Helper
             return await getUserIdQuery.GetUserId(userId);
         }
 
-        public async Task<int?> GetEstablishmentId()
+        public async Task<int> GetEstablishmentId()
         {
             var getEstablishmentIdQuery = new GetEstablishmentIdQuery(_db);
 
@@ -41,7 +41,7 @@ namespace Dfe.PlanTech.Application.Users.Helper
             var reference = establishmentDto.Urn ?? establishmentDto.Ukprn;
 
             if (reference is null)
-                throw new InvalidOperationException("Establishment reference cannot be null");
+                return 1;
 
             var existingEstablishmentId = await getEstablishmentIdQuery.GetEstablishmentId(reference);
 
@@ -49,10 +49,10 @@ namespace Dfe.PlanTech.Application.Users.Helper
             {
                 await SetEstablishment();
                 var newEstablishmentId = await getEstablishmentIdQuery.GetEstablishmentId(reference);
-                return newEstablishmentId;
+                return newEstablishmentId is null ? 1 : Convert.ToUInt16(newEstablishmentId);
             }
 
-            return existingEstablishmentId;
+            return Convert.ToInt16(existingEstablishmentId);
         }
 
         public async Task<int> SetEstablishment()

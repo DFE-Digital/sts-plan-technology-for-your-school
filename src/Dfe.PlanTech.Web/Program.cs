@@ -84,14 +84,13 @@ app.MapControllerRoute(
 );
 
 app.MapControllerRoute(
-    pattern: "{controller=Pages}/{action=GetByRoute}/{id?}",
-    name: "default"
-);
-
-
-app.MapControllerRoute(
     name: "recommendationsController",
     pattern: "recommendations/"
+);
+
+app.MapControllerRoute(
+    pattern: "{controller=Pages}/{action=GetByRoute}/{id?}",
+    name: "default"
 );
 
 app.Run();

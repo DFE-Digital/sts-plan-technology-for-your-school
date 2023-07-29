@@ -8,11 +8,13 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
 {
     private readonly IPlanTechDbContext _db;
     private readonly ICreateUserCommand _createUserCommand;
+    private readonly IUser _user;
 
-    public RecordUserSignInCommand(IPlanTechDbContext db, ICreateUserCommand createUserCommand)
+    public RecordUserSignInCommand(IPlanTechDbContext db, ICreateUserCommand createUserCommand, IUser user)
     {
         _db = db;
         _createUserCommand = createUserCommand;
+        _user = user;
     }
 
     public async Task<int> RecordSignIn(RecordUserSignInDto recordUserSignInDto)
@@ -32,7 +34,8 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
     private async Task<Domain.SignIn.Models.SignIn> CreateSignIn(RecordUserSignInDto recordUserSignInDto)
     {
         int userId = await GetUserId(recordUserSignInDto);
-        var signIn = MapToSignIn(userId);
+        var establishmentId = await _user.GetEstablishmentId();
+        var signIn = MapToSignIn(userId, establishmentId);
 
         return signIn;
     }
