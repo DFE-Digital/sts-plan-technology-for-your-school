@@ -55,9 +55,7 @@ if (!app.Environment.IsDevelopment())
 }
 else 
 {
-    app.UseExceptionHandler("/Error-development");
     app.UseDeveloperExceptionPage();
-
 }
 
 app.UseHttpsRedirection();
