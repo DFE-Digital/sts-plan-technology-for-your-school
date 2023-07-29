@@ -19,6 +19,7 @@ public class PagesController : BaseController<PagesController>
     [HttpGet("/")]
     public async Task<IActionResult> Index([FromServices] GetPageQuery query, CancellationToken cancellationToken)
     {
+        throw new Exception("what the hell");
         var page = await query.GetPageBySlug("/", cancellationToken);
 
         var viewModel = CreatePageModel(page);
