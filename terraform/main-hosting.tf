@@ -21,6 +21,7 @@ module "main_hosting" {
   }
 
   container_environment_variables = {
+    "Kestrel__Endpoints__Http__Url"       = local.kestrel_endpoint,
     "ASPNETCORE_FORWARDEDHEADERS_ENABLED" = "true"
   }
 
