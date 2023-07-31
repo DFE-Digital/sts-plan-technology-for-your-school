@@ -80,3 +80,11 @@ variable "key_size" {
   description = "The size in bits of the key to be created."
   default     = 2048
 }
+
+#######################
+# Azure App Container #
+#######################
+variable "az_app_kestrel_endpoint" {
+  description = "Endpoint for Kestrel setup"
+  type        = string
+}
