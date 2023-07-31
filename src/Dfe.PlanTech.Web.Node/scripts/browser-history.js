@@ -38,7 +38,7 @@ export class BrowserHistory {
 
     /**
      * Checks to see if we are navigating backwards, if so removes URL(s) from history
-     * @returns {boolean} Whether we are naavigating backwards or not
+     * @returns {boolean} Whether we are navigating backwards or not
      */
     ifNavigatingBackwardsRemoveUrl() {
         const indexOfHrefInHistory = this.history.findIndex(url => url === window.location.href);
