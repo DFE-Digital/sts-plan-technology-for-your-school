@@ -124,10 +124,42 @@ describe("BrowserHistory tests", () => {
 
         const browserHistory = new BrowserHistory();
         const history = browserHistory.history;
-
-        expect(history).toHaveLength(1);
+        expect(history).toHaveLength(2);
         expect(history[0]).toEqual(`${protocol}://${hostName}/${pathNames[0]}`);
     });
+
+    test("doesn't add to history if identical", () => {
+        const pathNames = ['first-url', 'second-url', 'third-url'];
+        const protocol = "http";
+        const hostName = "www.plan-tech.com";
+
+        for (const path of pathNames) {
+            const href = `${protocol}://${hostName}/${path}`;
+            setWindowSpyLocation({
+                href: href,
+                pathname: path,
+                hostname: hostName,
+                protocol
+            });
+
+            const history = new BrowserHistory();
+            expect(history).toBeTruthy();
+        }
+
+        const href = `${protocol}://${hostName}/${pathNames[2]}`;
+        setWindowSpyLocation({
+            href: href,
+            pathname: pathNames[2],
+            hostname: hostName,
+            protocol
+        });
+
+        const browserHistory = new BrowserHistory();
+        const history = browserHistory.history;
+        expect(history).toHaveLength(3);
+        expect(history[0]).toEqual(`${protocol}://${hostName}/${pathNames[0]}`);
+    });
+
 
     test('sets back link href', () => {
         document.body.innerHTML = `<a id="${BACK_BUTTON_ID}">Back</A>`;

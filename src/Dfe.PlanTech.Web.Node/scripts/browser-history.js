@@ -19,19 +19,20 @@ export class BrowserHistory {
     constructor() {
         this.history = this.getHistory();
 
-        if (!this.ifNavigatingBackwardsRemoveUrl()) {
-            this.amendBackButton();
-            this.addUrl();
-        }
-        else {
-            this.amendBackButton();
-        }
+        this.ifNavigatingBackwardsRemoveUrl();
+        this.amendBackButton();
+        this.tryAddUrl();
     }
 
     /**
      * Adds current window href to history
      */
-    addUrl() {
+    tryAddUrl() {
+        const lastHref = this.history.length > 0 ? this.history[this.history.length - 1] : "";
+        if (window.location.href == lastHref) {
+            return;
+        }
+        
         this.history.push(window.location.href);
         this.saveHistory();
     }
@@ -41,15 +42,24 @@ export class BrowserHistory {
      * @returns {boolean} Whether we are navigating backwards or not
      */
     ifNavigatingBackwardsRemoveUrl() {
-        const indexOfHrefInHistory = this.history.findIndex(url => url === window.location.href);
-
-        if (indexOfHrefInHistory == -1 || indexOfHrefInHistory < this.history.length - 2) {
+        if (this.history.length == 0) {
             return false;
         }
 
-        this.history = this.history.slice(0, indexOfHrefInHistory);
-        this.saveHistory();
+        const lastIndex = this.history.length - 2;
 
+        if (lastIndex < 0) {
+            return false;
+        }
+
+        const navigatingBackwards = this.history[lastIndex] == window.location.href;
+
+        if (!navigatingBackwards) {
+            return false;
+        }
+
+        this.history = this.history.slice(0, lastIndex);
+        this.saveHistory();
         return true;
     }
 
