@@ -1,10 +1,12 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Response.Commands;
 using Dfe.PlanTech.Application.Response.Interface;
+using Dfe.PlanTech.Application.Response.Queries;
 using Dfe.PlanTech.Application.Submission.Commands;
+using Dfe.PlanTech.Application.Submission.Interface;
 using Dfe.PlanTech.Application.Submission.Interfaces;
+using Dfe.PlanTech.Application.Submission.Queries;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -36,18 +38,22 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                Answers = new[] {
                    new Answer(){
                        Sys = new SystemDetails() { Id = "Answer1" },
+                       NextQuestion = new Question() { Sys = new SystemDetails() { Id = "Question2" } },
                        Text = "Question 1 - Answer 1"
                    },
                    new Answer(){
                        Sys = new SystemDetails() { Id = "Answer2" },
+                       NextQuestion = new Question() { Sys = new SystemDetails() { Id = "Question2" } },
                        Text = "Question 1 - Answer 2"
                    },
                    new Answer(){
                        Sys = new SystemDetails() { Id = "Answer3" },
+                       NextQuestion = new Question() { Sys = new SystemDetails() { Id = "Question2" } },
                        Text = "Question 1 - Answer 3"
                    },
                    new Answer(){
                        Sys = new SystemDetails() { Id = "Answer4" },
+                       NextQuestion = new Question() { Sys = new SystemDetails() { Id = "Question2" } },
                        Text = "Question 1 - Answer 4"
                    }
                }
@@ -62,18 +68,22 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                Answers = new[] {
                    new Answer(){
                        Sys = new SystemDetails() { Id = "Answer1" },
+                       NextQuestion = null,
                        Text = "Question 2 - Answer 1"
                    },
                    new Answer(){
                        Sys = new SystemDetails() { Id = "Answer2" },
+                       NextQuestion = null,
                        Text = "Question 2 - Answer 2"
                    },
                    new Answer(){
                        Sys = new SystemDetails() { Id = "Answer3" },
+                       NextQuestion = null,
                        Text = "Question 2 - Answer 3"
                    },
                    new Answer(){
                        Sys = new SystemDetails() { Id = "Answer4" },
+                       NextQuestion = null,
                        Text = "Question 2 - Answer 4"
                    }
                }
@@ -81,9 +91,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
        };
 
+        private readonly Mock<IPlanTechDbContext> _databaseMock;
         private readonly QuestionsController _controller;
+        private readonly SubmitAnswerCommand _submitAnswerCommand;
         private readonly Mock<IQuestionnaireCacher> _questionnaireCacherMock;
-
         private readonly ICacher _cacher;
 
         public QuestionsControllerTests()
@@ -92,27 +103,31 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _questionnaireCacherMock = MockQuestionnaireCacher();
 
             var mockLogger = new Mock<ILogger<QuestionsController>>();
-            var databaseMock = new Mock<IPlanTechDbContext>();
+            _databaseMock = new Mock<IPlanTechDbContext>();
             var user = new Mock<IUser>();
 
-            GetQuestionQuery query = new GetQuestionQuery(_questionnaireCacherMock.Object, repositoryMock.Object);
+            var getQuestionnaireQuery = new Application.Questionnaire.Queries.GetQuestionQuery(_questionnaireCacherMock.Object, repositoryMock.Object);
 
-            ICreateQuestionCommand createQuestionCommand = new CreateQuestionCommand(databaseMock.Object);
-            IRecordQuestionCommand recordQuestionCommand = new RecordQuestionCommand(databaseMock.Object);
+            ICreateQuestionCommand createQuestionCommand = new CreateQuestionCommand(_databaseMock.Object);
+            IRecordQuestionCommand recordQuestionCommand = new RecordQuestionCommand(_databaseMock.Object);
 
-            ICreateAnswerCommand createAnswerCommand = new CreateAnswerCommand(databaseMock.Object);
-            IRecordAnswerCommand recordAnswerCommand = new RecordAnswerCommand(databaseMock.Object);
-            ICreateResponseCommand createResponseCommand = new CreateResponseCommand(databaseMock.Object);
-            ICreateSubmissionCommand createSubmissionCommand = new CreateSubmissionCommand(databaseMock.Object);
+            IGetQuestionQuery getQuestionQuery = new Application.Submission.Queries.GetQuestionQuery(_databaseMock.Object);
+            ICreateAnswerCommand createAnswerCommand = new CreateAnswerCommand(_databaseMock.Object);
+            IRecordAnswerCommand recordAnswerCommand = new RecordAnswerCommand(_databaseMock.Object);
+            ICreateResponseCommand createResponseCommand = new CreateResponseCommand(_databaseMock.Object);
+            IGetResponseQuery getResponseQuery = new GetResponseQuery(_databaseMock.Object);
+            ICreateSubmissionCommand createSubmissionCommand = new CreateSubmissionCommand(_databaseMock.Object);
 
             var httpContext = new DefaultHttpContext();
             var tempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
             tempData["param"] = "admin";
 
-            _controller = new QuestionsController(mockLogger.Object, query, recordQuestionCommand, recordAnswerCommand, createSubmissionCommand, createResponseCommand, user.Object)
-            {
-                TempData = tempData
-            };
+            GetSubmitAnswerQueries getSubmitAnswerQueries = new GetSubmitAnswerQueries(getQuestionQuery, getResponseQuery, getQuestionnaireQuery, user.Object);
+            RecordSubmitAnswerCommands recordSubmitAnswerCommands = new RecordSubmitAnswerCommands(recordQuestionCommand, recordAnswerCommand, createSubmissionCommand, createResponseCommand);
+
+            _submitAnswerCommand = new SubmitAnswerCommand(getSubmitAnswerQueries, recordSubmitAnswerCommands);
+
+            _controller = new QuestionsController(mockLogger.Object) { TempData = tempData };
 
             _cacher = new Cacher(new CacheOptions(), new MemoryCache(new MemoryCacheOptions()));
         }
@@ -155,7 +170,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var id = "Question1";
 
-            var result = await _controller.GetQuestionById(id, null, null, null, CancellationToken.None);
+            var result = await _controller.GetQuestionById(id, null, null, null, _submitAnswerCommand, CancellationToken.None);
             Assert.IsType<ViewResult>(result);
 
             var viewResult = result as ViewResult;
@@ -173,13 +188,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task GetQuestionById_Should_ThrowException_When_IdIsNull()
         {
-            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionById(null!, null, null, null, CancellationToken.None));
+            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionById(null!, null, null, null, _submitAnswerCommand, CancellationToken.None));
         }
 
         [Fact]
         public async Task GetQuestionById_Should_ThrowException_When_IdIsNotFound()
         {
-            await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetQuestionById("not a real question id", null, null, null, CancellationToken.None));
+            await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetQuestionById("not a real question id", null, null, null, _submitAnswerCommand, CancellationToken.None));
         }
 
         [Fact]
@@ -188,7 +203,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var id = "Question1";
             var sectionTitle = "Section title";
 
-            await _controller.GetQuestionById(id, sectionTitle, null, null, CancellationToken.None);
+            await _controller.GetQuestionById(id, sectionTitle, null, null, _submitAnswerCommand, CancellationToken.None);
 
             _questionnaireCacherMock.Verify();
         }
@@ -197,7 +212,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public async Task GetQuestionById_Should_NotSaveSectionTitle_When_Null()
         {
             var id = "Question1";
-            var result = await _controller.GetQuestionById(id, null, null, null, CancellationToken.None);
+            var result = await _controller.GetQuestionById(id, null, null, null, _submitAnswerCommand, CancellationToken.None);
 
             _questionnaireCacherMock.Verify(cache => cache.Cached, Times.Never);
             _questionnaireCacherMock.Verify(cache => cache.SaveCache(It.IsAny<QuestionnaireCache>()), Times.Never);
@@ -206,7 +221,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public void SubmitAnswer_Should_ThrowException_When_NullArgument()
         {
-            Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.SubmitAnswer(null!));
+            Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.SubmitAnswer(null!, _submitAnswerCommand));
         }
 
         [Fact]
@@ -216,10 +231,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 QuestionId = "Question1",
                 ChosenAnswerId = "Answer1",
-                NextQuestionId = "Question2"
             };
 
-            var result = await _controller.SubmitAnswer(submitAnswerDto);
+            var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
 
             Assert.IsType<RedirectToActionResult>(result);
 
@@ -229,11 +243,35 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
             Assert.NotNull(redirectToActionResult.RouteValues);
             var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "id");
-            Assert.Equal(submitAnswerDto.NextQuestionId, id.Value);
+            Assert.Equal("Question2", id.Value);
         }
 
         [Fact]
         public async void SubmitAnswer_Should_RedirectTo_CheckAnswers_When_NextQuestionId_IsNull()
+        {
+            var submitAnswerDto = new SubmitAnswerDto()
+            {
+                QuestionId = "Question2",
+                ChosenAnswerId = "Answer1",
+                SubmissionId = 1
+            };
+
+            var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
+
+            Assert.IsType<RedirectToActionResult>(result);
+
+            var redirectToActionResult = result as RedirectToActionResult;
+
+            Assert.NotNull(redirectToActionResult);
+            Assert.Equal("CheckAnswers", redirectToActionResult.ControllerName);
+            Assert.Equal("CheckAnswersPage", redirectToActionResult.ActionName);
+            Assert.NotNull(redirectToActionResult.RouteValues);
+            var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "submissionId");
+            Assert.Equal(submitAnswerDto.SubmissionId, id.Value);
+        }
+
+        [Fact]
+        public async void SubmitAnswer_Should_RedirectTo_CheckAnswers_When_NextQuestionIsAnswered()
         {
             var submitAnswerDto = new SubmitAnswerDto()
             {
@@ -242,7 +280,25 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 SubmissionId = 1
             };
 
-            var result = await _controller.SubmitAnswer(submitAnswerDto);
+            Domain.Questions.Models.Question question = new Domain.Questions.Models.Question()
+            {
+                Id = 1,
+                ContentfulRef = "Question2"
+            };
+
+            _databaseMock.Setup(m => m.GetQuestion(question => question.Id == 1)).ReturnsAsync(question);
+
+            _databaseMock.Setup(m => m.GetResponseList(response => response.SubmissionId == 1)).ReturnsAsync(
+                new Domain.Responses.Models.Response[]
+                {
+                    new Domain.Responses.Models.Response()
+                    {
+                        QuestionId = 1,
+                        Question = question
+                    }
+                });
+
+            var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
 
             Assert.IsType<RedirectToActionResult>(result);
 
@@ -263,12 +319,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 QuestionId = "Question1",
                 ChosenAnswerId = null!,
-                NextQuestionId = "Question2"
             };
 
             _controller.ModelState.AddModelError("ChosenAnswerId", "Required");
 
-            var result = await _controller.SubmitAnswer(submitAnswerDto);
+            var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
 
             Assert.IsType<RedirectToActionResult>(result);
 
@@ -292,7 +347,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             _controller.ModelState.AddModelError("ChosenAnswerId", "Required");
 
-            var result = await _controller.SubmitAnswer(submitAnswerDto);
+            var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
 
             Assert.IsType<RedirectToActionResult>(result);
 
@@ -312,11 +367,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 QuestionId = "Question1",
                 ChosenAnswerId = "Answer1",
-                NextQuestionId = "Question2",
                 Params = "SectionName+SectionId"
             };
 
-            var result = await _controller.SubmitAnswer(submitAnswerDto);
+            var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
 
             Assert.IsType<RedirectToActionResult>(result);
 
@@ -326,7 +380,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
             Assert.NotNull(redirectToActionResult.RouteValues);
             var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "id");
-            Assert.Equal(submitAnswerDto.NextQuestionId, id.Value);
+            Assert.Equal("Question2", id.Value);
         }
     }
 }

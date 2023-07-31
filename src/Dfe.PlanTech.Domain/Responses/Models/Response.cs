@@ -1,4 +1,7 @@
-﻿namespace Dfe.PlanTech.Domain.Responses.Models;
+﻿using Dfe.PlanTech.Domain.Questions.Models;
+using Dfe.PlanTech.Domain.Answers.Models;
+
+namespace Dfe.PlanTech.Domain.Responses.Models;
 
 public class Response
 {
@@ -10,11 +13,15 @@ public class Response
 
     public int QuestionId { get; set; }
 
+    public Question Question { get; set; } = null!;
+
     public int AnswerId { get; set; }
+
+    public Answer Answer { get; set; } = null!;
 
     public string Maturity { get; set; } = null!;
 
-    public DateTime? DateCreated { get; set; }
+    public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
     public DateTime? DateLastUpdated { get; set; }
 }

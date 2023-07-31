@@ -1,5 +1,4 @@
-﻿using Dfe.PlanTech.Application.Caching.Interfaces;
-using Dfe.PlanTech.Application.Content.Queries;
+﻿using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -35,7 +34,7 @@ public class PagesController : BaseController<PagesController>
             TempData["Param"] = param;
 
         var page = await query.GetPageBySlug(slug, cancellationToken);
-        
+
         var viewModel = CreatePageModel(page, param);
 
         return View("Page", viewModel);

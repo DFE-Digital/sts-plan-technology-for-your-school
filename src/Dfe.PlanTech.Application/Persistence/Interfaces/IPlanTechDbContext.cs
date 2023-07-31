@@ -18,11 +18,11 @@ public interface IPlanTechDbContext
 
     // Question Table
     public void AddQuestion(Question question);
-    public Task<Question?> GetQuestionBy(int questionId);
+    public Task<Question?> GetQuestion(Expression<Func<Question, bool>> predicate);
 
     // Answer Table
     public void AddAnswer(Answer answer);
-    public Task<Answer?> GetAnswerBy(int answerId);
+    public Task<Answer?> GetAnswer(Expression<Func<Answer, bool>> predicate);
 
     // Submission Table
     public void AddSubmission(Domain.Submissions.Models.Submission submission);
@@ -30,7 +30,9 @@ public interface IPlanTechDbContext
     public void AddEstablishment(Domain.Establishments.Models.Establishment establishment);
 
     // Response Table
+    IQueryable<Domain.Responses.Models.Response> GetResponses { get; }
     public void AddResponse(Domain.Responses.Models.Response response);
+    public Task<Domain.Responses.Models.Response[]?> GetResponseList(Expression<Func<Domain.Responses.Models.Response, bool>> predicate);
 
     public Task<int> SaveChangesAsync();
 
@@ -42,6 +44,7 @@ public interface IPlanTechDbContext
 
     Task<Establishment?> GetEstablishmentBy(Expression<Func<Establishment, bool>> predicate);
 
-    Task<Domain.Responses.Models.Response[]?> GetResponseListBy(int submissionId);
-}
+    Task<List<T>> ToListAsync<T>(IQueryable<T> queryable);
 
+    Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable);
+}

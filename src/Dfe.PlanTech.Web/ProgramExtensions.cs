@@ -97,9 +97,18 @@ public static class ProgramExtensions
 
         services.AddTransient<ICreateResponseCommand, CreateResponseCommand>();
         services.AddTransient<IGetResponseQuery, GetResponseQuery>();
+        services.AddTransient<IGetLatestResponseListForSubmissionQuery, GetLatestResponseListForSubmissionQuery>();
 
         services.AddTransient<ICalculateMaturityCommand, CalculateMaturityCommand>();
         services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
+
+        services.AddTransient<ProcessCheckAnswerDtoCommand>();
+
+        services.AddTransient<GetSubmitAnswerQueries>();
+        services.AddTransient<RecordSubmitAnswerCommands>();
+        services.AddTransient<SubmitAnswerCommand>();
+
+        services.AddTransient<Application.Questionnaire.Queries.GetSectionQuery>();
 
         return services;
     }

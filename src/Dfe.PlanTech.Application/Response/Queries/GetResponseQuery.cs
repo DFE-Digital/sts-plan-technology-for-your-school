@@ -20,6 +20,6 @@ public class GetResponseQuery : IGetResponseQuery
     /// <returns></returns>
     public Task<Domain.Responses.Models.Response[]?> GetResponseListBy(int submissionId)
     {
-        return _db.GetResponseListBy(submissionId);
+        return _db.GetResponseList(response => response.SubmissionId == submissionId);
     }
 }

@@ -7,8 +7,6 @@
 }
 <form asp-controller="Questions" asp-action="SubmitAnswer" method="post">
     <input id="QuestionId" hidden value=@Model.Question.Sys.Id name="QuestionId" />
-    <input id="NextQuestionId" hidden value=@Model.Question.Answers[0].NextQuestion?.Sys.Id ?? ""
-        name="NextQuestionId" />
     <input id="Params" hidden value="@Model.Params" name="Params" />
     <input id="SubmissionId" hidden value="@Model.SubmissionId" name="SubmissionId" />
 
