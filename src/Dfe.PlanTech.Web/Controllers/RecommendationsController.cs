@@ -9,14 +9,13 @@ namespace Dfe.PlanTech.Web.Controllers
     [Route("/recommendations")]
     public class RecommendationsController : BaseController<RecommendationsController>
     {
-        public RecommendationsController(ILogger<RecommendationsController> logger, IUrlHistory history) : base(logger, history) { }
+        public RecommendationsController(ILogger<RecommendationsController> logger) : base(logger) { }
 
         [HttpGet]
         public Task<IActionResult> GetRecommendationPage()
         {
             RecommendationsViewModel recommendationViewModel = new RecommendationsViewModel()
             {
-                BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment",
             };
             return Task.FromResult<IActionResult>(View("Recommendations", recommendationViewModel));
         }

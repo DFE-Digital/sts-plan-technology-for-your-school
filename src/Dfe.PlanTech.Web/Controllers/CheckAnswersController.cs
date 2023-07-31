@@ -21,12 +21,12 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     private readonly IGetAnswerQuery _getAnswerQuery;
     private readonly GetPageQuery _getPageQuery;
 
-    public CheckAnswersController(ILogger<CheckAnswersController> logger, IUrlHistory history,
+    public CheckAnswersController(ILogger<CheckAnswersController> logger,
                                   [FromServices] ICalculateMaturityCommand calculateMaturityCommand,
                                   [FromServices] IGetResponseQuery getResponseQuery,
                                   [FromServices] IGetQuestionQuery getQuestionQuery,
                                   [FromServices] IGetAnswerQuery getAnswerQuery,
-                                  [FromServices] GetPageQuery getPageQuery) : base(logger, history)
+                                  [FromServices] GetPageQuery getPageQuery) : base(logger)
     {
         _calculateMaturityCommand = calculateMaturityCommand;
         _getResponseQuery = getResponseQuery;
@@ -91,7 +91,6 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
         CheckAnswersViewModel checkAnswersViewModel = new CheckAnswersViewModel()
         {
-            BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment",
             Title = checkAnswerPageContent.Title ?? throw new NullReferenceException(nameof(checkAnswerPageContent.Title)),
             SectionName = sectionName,
             CheckAnswerDto = await _GetCheckAnswerDto(responseList ?? throw new NullReferenceException(nameof(responseList))),
