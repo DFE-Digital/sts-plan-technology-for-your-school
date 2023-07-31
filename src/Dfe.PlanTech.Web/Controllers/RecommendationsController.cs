@@ -1,5 +1,4 @@
-﻿using Dfe.PlanTech.Application.Caching.Interfaces;
-using Dfe.PlanTech.Web.Models;
+﻿using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
