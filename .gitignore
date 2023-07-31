@@ -489,3 +489,7 @@ $RECYCLE.BIN/
 .terraform/
 .terraform.lock.hcl
 *.tfvars
+
+# Jest
+coverage/
+junit.xml
