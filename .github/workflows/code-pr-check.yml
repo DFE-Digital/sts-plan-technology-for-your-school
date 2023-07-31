@@ -52,9 +52,7 @@ jobs:
   run-javascript-tests:
     runs-on: ubuntu-latest
     name: Run javascript tests
-    defaults:
-      run:
-        working-directory: ./tests/Dfe.PlanTech.Web.Node.UnitTests
+
     steps:
       - uses: actions/checkout@v3
 
