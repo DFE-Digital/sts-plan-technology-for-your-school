@@ -30,13 +30,12 @@ await esbuild.build({
 //DFE
 const dfeDir = "./node_modules/dfe-frontend-alpha/packages/assets";
 readdirSync(dfeDir).forEach(file => {
-  if (file.indexOf(".png") == -1)
-  {
+  if (file.indexOf(".png") == -1) {
     return;
   }
 
-  cpSync(dfeDir + "/" + file, "./out/assets/images/" + file);
-})
+  cpSync(dfeDir + "/" + file, "./out/assets/images/" + file, { overwrite: true });
+});
 
 //GOVUK
 const govukDir = "./node_modules/govuk-frontend/govuk/assets/";
@@ -51,7 +50,7 @@ for (const folder of targetFolders) {
       return;
     }
 
-    cpSync(`${path}/${file}`, `./out/assets/${folder}/${file}`);
+    cpSync(`${path}/${file}`, `./out/assets/${folder}/${file}`, { overwrite: true });
   })
 }
 
