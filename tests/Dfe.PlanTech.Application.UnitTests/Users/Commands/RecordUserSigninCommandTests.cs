@@ -12,10 +12,11 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
         public Mock<IPlanTechDbContext> mockDb = new Mock<IPlanTechDbContext>();
         public Mock<IGetUserIdQuery> mockUserQuery = new Mock<IGetUserIdQuery>();
         public Mock<ICreateUserCommand> mockCreateUserCommand = new Mock<ICreateUserCommand>();
+        public Mock<IUser> mockUser = new Mock<IUser>();
 
         public RecordUserSignInCommand CreateStrut()
         {
-            return new RecordUserSignInCommand(mockDb.Object, mockCreateUserCommand.Object);
+            return new RecordUserSignInCommand(mockDb.Object, mockCreateUserCommand.Object, mockUser.Object);
         }
 
 
@@ -90,7 +91,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
 
             var recordUserSignInDto = new RecordUserSignInDto { DfeSignInRef = new Guid().ToString() };
 
-            var recordUserSignInCommand = new RecordUserSignInCommand(mockDb.Object, createUserCommand);
+            var recordUserSignInCommand = new RecordUserSignInCommand(mockDb.Object, createUserCommand, mockUser.Object);
             var result = await recordUserSignInCommand.RecordSignIn(recordUserSignInDto);
 
             mockCreateUserCommand.Verify();
