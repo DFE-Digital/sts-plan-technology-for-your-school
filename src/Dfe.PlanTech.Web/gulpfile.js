@@ -1,7 +1,7 @@
 /// <binding ProjectOpened='js:watch, sass-to-min-css:watch' />
 "use strict";
 
-var gulp = require("gulp"),
+let gulp = require("gulp"),
     sass = require('gulp-sass')(require('sass')),
     sourcemaps = require('gulp-sourcemaps'),
     csso = require('gulp-csso');
