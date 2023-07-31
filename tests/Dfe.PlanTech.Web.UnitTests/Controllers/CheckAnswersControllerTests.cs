@@ -64,7 +64,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public CheckAnswersControllerTests()
         {
             Mock<ILogger<CheckAnswersController>> loggerMock = new Mock<ILogger<CheckAnswersController>>();
-            Mock<IUrlHistory> urlHistoryMock = new Mock<IUrlHistory>();
 
             Mock<IQuestionnaireCacher> questionnaireCacherMock = new Mock<IQuestionnaireCacher>();
             _contentRepositoryMock = SetupRepositoryMock();
@@ -79,7 +78,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             _processCheckAnswerDtoCommand = new ProcessCheckAnswerDtoCommand(getSectionQueryMock.Object, _getLatestResponseListForSubmissionQueryMock.Object, _calculateMaturityCommandMock.Object);
 
-            _checkAnswersController = new CheckAnswersController(loggerMock.Object, urlHistoryMock.Object);
+            _checkAnswersController = new CheckAnswersController(loggerMock.Object);
 
             _checkAnswersController.TempData = tempDataMock.Object;
         }
@@ -162,7 +161,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var checkAnswersViewModel = viewResult.Model as CheckAnswersViewModel;
 
             Assert.NotNull(checkAnswersViewModel);
-            Assert.Equal("self-assessment", checkAnswersViewModel.BackUrl);
             Assert.Equal("Title Text", checkAnswersViewModel.Title.Text);
             Assert.Equal(SubmissionId, checkAnswersViewModel.SubmissionId);
 

@@ -11,7 +11,7 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("/question")]
 public class QuestionsController : BaseController<QuestionsController>
 {
-    public QuestionsController(ILogger<QuestionsController> logger, IUrlHistory history) : base(logger, history) { }
+    public QuestionsController(ILogger<QuestionsController> logger) : base(logger) { }
 
     [HttpGet("{id?}")]
     /// <summary>
@@ -41,7 +41,6 @@ public class QuestionsController : BaseController<QuestionsController>
         {
             Question = question,
             AnswerRef = answerRef,
-            BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment",
             Params = parameters != null ? parameters.ToString() : null,
             SubmissionId = submissionId,
         };

@@ -11,7 +11,7 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Authorize]
 public class CheckAnswersController : BaseController<CheckAnswersController>
 {
-    public CheckAnswersController(ILogger<CheckAnswersController> logger, IUrlHistory history) : base(logger, history) { }
+    public CheckAnswersController(ILogger<CheckAnswersController> logger) : base(logger) { }
 
     [HttpGet]
     [Route("check-answers")]
@@ -26,7 +26,6 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
         CheckAnswersViewModel checkAnswersViewModel = new CheckAnswersViewModel()
         {
-            BackUrl = history.LastVisitedUrl?.ToString() ?? "self-assessment",
             Title = checkAnswerPageContent.Title ?? throw new NullReferenceException(nameof(checkAnswerPageContent.Title)),
             SectionName = sectionName,
             CheckAnswerDto = await processCheckAnswerDtoCommand.ProcessCheckAnswerDto(submissionId, sectionId),

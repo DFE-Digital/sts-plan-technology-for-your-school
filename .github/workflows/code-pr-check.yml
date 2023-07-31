@@ -48,3 +48,31 @@ jobs:
         with:
           dotnet_version: ${{ env.DOTNET_VERSION }}  
           solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
+
+  run-javascript-tests:
+    runs-on: ubuntu-latest
+    name: Run javascript tests
+    defaults:
+      run:
+        working-directory: ./tests/Dfe.PlanTech.Web.Javascript.UnitTests
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "latest"
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run the tests
+        run: npm test
+
+      - name: Test report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()    # run this step even if previous step failed
+        with:
+          name: JEST Tests            # Name of the check run which will be created
+          path: ./tests/Dfe.PlanTech.Web.Javascript.UnitTests/junit.xml    # Path to test results
+          reporter: jest-junit        # Format of test results

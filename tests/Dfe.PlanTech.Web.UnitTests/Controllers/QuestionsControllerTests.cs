@@ -103,7 +103,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _questionnaireCacherMock = MockQuestionnaireCacher();
 
             var mockLogger = new Mock<ILogger<QuestionsController>>();
-            var historyMock = new Mock<IUrlHistory>();
             _databaseMock = new Mock<IPlanTechDbContext>();
             var user = new Mock<IUser>();
 
@@ -128,7 +127,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             _submitAnswerCommand = new SubmitAnswerCommand(getSubmitAnswerQueries, recordSubmitAnswerCommands);
 
-            _controller = new QuestionsController(mockLogger.Object, historyMock.Object) { TempData = tempData };
+            _controller = new QuestionsController(mockLogger.Object) { TempData = tempData };
 
             _cacher = new Cacher(new CacheOptions(), new MemoryCache(new MemoryCacheOptions()));
         }

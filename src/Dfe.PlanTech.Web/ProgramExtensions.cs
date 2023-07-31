@@ -70,7 +70,6 @@ public static class ProgramExtensions
         services.AddHttpContextAccessor();
         services.AddSingleton<ICacheOptions>((services) => new CacheOptions());
         services.AddTransient<ICacher, Cacher>();
-        services.AddTransient<IUrlHistory, UrlHistory>();
         services.AddTransient<IQuestionnaireCacher, QuestionnaireCacher>();
         services.AddTransient<IUser, UserHelper>();
 
