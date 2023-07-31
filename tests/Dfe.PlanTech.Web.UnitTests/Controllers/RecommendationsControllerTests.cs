@@ -15,8 +15,7 @@ public class RecommendationsControllerTests
     public RecommendationsControllerTests()
     {
         Mock<ILogger<RecommendationsController>> loggerMock = new Mock<ILogger<RecommendationsController>>();
-        Mock<IUrlHistory> urlHistoryMock = new Mock<IUrlHistory>();
-        _recommendationsController = new RecommendationsController(loggerMock.Object, urlHistoryMock.Object);
+        _recommendationsController = new RecommendationsController(loggerMock.Object);
     }
 
     [Fact]

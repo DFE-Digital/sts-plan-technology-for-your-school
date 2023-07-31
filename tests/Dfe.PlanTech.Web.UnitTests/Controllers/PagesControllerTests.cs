@@ -58,7 +58,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Mock<IContentRepository> repositoryMock = SetupRepositoryMock();
 
             var mockLogger = new Mock<ILogger<PagesController>>();
-            var historyMock = new Mock<IUrlHistory>();
 
             var config = new GtmConfiguration()
             {
@@ -75,7 +74,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 .AddInMemoryCollection(initialData: inMemorySettings)
                 .Build();
 
-            _controller = new PagesController(mockLogger.Object, historyMock.Object, configuration);
+            _controller = new PagesController(mockLogger.Object, configuration);
 
             _query = new GetPageQuery(_questionnaireCacherMock.Object, repositoryMock.Object);
         }

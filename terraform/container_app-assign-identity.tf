@@ -1,4 +1,4 @@
-resource "null_resource" "keyvault-add-vnet-restriction" {
+resource "null_resource" "app-assign-identity" {
   depends_on = [module.main_hosting]
 
   triggers = {
@@ -7,6 +7,6 @@ resource "null_resource" "keyvault-add-vnet-restriction" {
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
-    command     = local.keyvault-add-vnet-restriction_command
+    command     = local.container_app-assign-identity
   }
 }

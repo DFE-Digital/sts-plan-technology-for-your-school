@@ -8,12 +8,10 @@ namespace Dfe.PlanTech.Web.Controllers;
 public class BaseController<TConcreteController> : Controller
 {
     protected readonly ILogger<TConcreteController> logger;
-    protected readonly IUrlHistory history;
 
-    public BaseController(ILogger<TConcreteController> logger, IUrlHistory history)
+    public BaseController(ILogger<TConcreteController> logger)
     {
         this.logger = logger;
-        this.history = history;
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
