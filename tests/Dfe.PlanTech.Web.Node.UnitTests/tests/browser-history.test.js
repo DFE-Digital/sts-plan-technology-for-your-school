@@ -1,4 +1,4 @@
-import { BrowserHistory } from "../../../src/Dfe.PlanTech.Web/wwwroot/js/browser-history";
+import { BrowserHistory, DEFAULT_ROUTE, BACK_BUTTON_ID } from "../../../src/Dfe.PlanTech.Web.Node/scripts/browser-history";
 
 let windowSpy;
 
@@ -24,6 +24,34 @@ describe("BrowserHistory tests", () => {
 
         expect(history).toBeTruthy();
     });
+
+    test("returns last visited url", () => {
+        const href = 'http://www.plan-tech.com/';
+        setWindowSpyLocation({
+            href,
+            pathname: "/",
+            hostname: "www.plan-tech.com",
+            protocol: "http"
+        });
+
+        const history = new BrowserHistory();
+
+        expect(history).toBeTruthy();
+        expect(history.lastUrl).toEqual(href);
+    });
+
+
+
+    test("returns default route if no history", () => {
+        const history = new BrowserHistory();
+
+        expect(history).toBeTruthy();
+
+        history.clearHistory();
+
+        expect(history.lastUrl).toEqual(DEFAULT_ROUTE);
+    });
+
 
     test("saves url to history", () => {
         const href = 'http://www.plan-tech.com/';
@@ -96,9 +124,72 @@ describe("BrowserHistory tests", () => {
 
         const browserHistory = new BrowserHistory();
         const history = browserHistory.history;
-
-        expect(history).toHaveLength(1);
+        expect(history).toHaveLength(2);
         expect(history[0]).toEqual(`${protocol}://${hostName}/${pathNames[0]}`);
+    });
+
+    test("doesn't add to history if identical", () => {
+        const pathNames = ['first-url', 'second-url', 'third-url'];
+        const protocol = "http";
+        const hostName = "www.plan-tech.com";
+
+        for (const path of pathNames) {
+            const href = `${protocol}://${hostName}/${path}`;
+            setWindowSpyLocation({
+                href: href,
+                pathname: path,
+                hostname: hostName,
+                protocol
+            });
+
+            const history = new BrowserHistory();
+            expect(history).toBeTruthy();
+        }
+
+        const href = `${protocol}://${hostName}/${pathNames[2]}`;
+        setWindowSpyLocation({
+            href: href,
+            pathname: pathNames[2],
+            hostname: hostName,
+            protocol
+        });
+
+        const browserHistory = new BrowserHistory();
+        const history = browserHistory.history;
+        expect(history).toHaveLength(3);
+        expect(history[0]).toEqual(`${protocol}://${hostName}/${pathNames[0]}`);
+    });
+
+
+    test('sets back link href', () => {
+        document.body.innerHTML = `<a id="${BACK_BUTTON_ID}">Back</A>`;
+
+        const href = 'http://www.plan-tech.com/test';
+        setWindowSpyLocation({
+            href,
+            pathname: "/test",
+            hostname: "www.plan-tech.com",
+            protocol: "http"
+        });
+
+        new BrowserHistory();
+
+        const link = document.getElementById(BACK_BUTTON_ID);
+
+        let hrefValue = link.getAttribute("href");
+
+        expect(hrefValue).toBeTruthy();
+        expect(hrefValue).toEqual(DEFAULT_ROUTE);
+        setWindowSpyLocation({
+            href: href + 'hi',
+            pathname: "/testhi",
+            hostname: "www.plan-tech.com",
+            protocol: "http"
+        });
+
+        new BrowserHistory();
+        hrefValue = link.getAttribute("href");
+        expect(hrefValue).toEqual(href);
     });
 
     /**

@@ -52,9 +52,7 @@ jobs:
   run-javascript-tests:
     runs-on: ubuntu-latest
     name: Run javascript tests
-    defaults:
-      run:
-        working-directory: ./tests/Dfe.PlanTech.Web.Javascript.UnitTests
+
     steps:
       - uses: actions/checkout@v3
 
@@ -74,5 +72,5 @@ jobs:
         if: success() || failure()    # run this step even if previous step failed
         with:
           name: JEST Tests            # Name of the check run which will be created
-          path: ./tests/Dfe.PlanTech.Web.Javascript.UnitTests/junit.xml    # Path to test results
+          path: ./junit.xml    # Path to test results
           reporter: jest-junit        # Format of test results

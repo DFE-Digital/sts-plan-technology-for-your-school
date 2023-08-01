@@ -1,5 +1,5 @@
-﻿using Dfe.PlanTech.Domain.Questions.Models;
-using Dfe.PlanTech.Domain.Answers.Models;
+﻿using Dfe.PlanTech.Domain.Answers.Models;
+using Dfe.PlanTech.Domain.Questions.Models;
 
 namespace Dfe.PlanTech.Domain.Responses.Models;
 

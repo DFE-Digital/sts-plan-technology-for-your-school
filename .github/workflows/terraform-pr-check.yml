@@ -1,6 +1,11 @@
 name: Terraform PR Check
 
 on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: environment
+        description: Choose an environment to apply tf changes.
   push:
     branches: [ "main" ]
   pull_request:
@@ -97,6 +102,11 @@ jobs:
       - name: Terraform fmt
         id: fmt
         run: terraform fmt -check -diff
+        
+      - name: Apply Terraform changes (Optional)
+        id: apply
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: terraform apply -auto-approve
 
       - name: Validate Terraform docs
         uses: terraform-docs/gh-actions@v1.0.0

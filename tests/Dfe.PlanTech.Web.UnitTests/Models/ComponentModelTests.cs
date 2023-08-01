@@ -1,5 +1,4 @@
-﻿using Contentful.Core.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Enums;
+﻿using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Models
@@ -119,11 +118,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             string? maturity = null;
             var section = _componentBuilder.BuildSections().First();
             var exceptionType = typeof(KeyNotFoundException);
-
+          
             #pragma warning disable CS8604 // Possible null reference argument.
             Assert.Throws(exceptionType, () => section.GetRecommendationForMaturity(maturity));
             #pragma warning restore CS8604 // Possible null reference argument.
-
         }
 
         [Fact]
