@@ -24,6 +24,9 @@ jobs:
               uses: actions/setup-node@v3
               with:
                 node-version: "latest"
+            
+            - name: Setup Contentful CLI
+              run: npm install -g contentful-cli
                 
             - name: Install packages
               run: npm install
