@@ -42,12 +42,12 @@ public static class ProgramExtensions
                 }});
         });
 
-        services.AddScoped((_) => new RichTextPartRendererOptions()
+        services.AddScoped((_) => new ParagraphRendererOptions()
         {
             Classes = "govuk-body",
         });
 
-        services.AddScoped((_) => new RichTextPartRendererOptions()
+        services.AddScoped((_) => new HyperlinkRendererOptions()
         {
             Classes = "govuk-link",
         });
