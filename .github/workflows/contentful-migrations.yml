@@ -6,7 +6,7 @@ on:
     workflow_dispatch:
     pull_request:
         branches: [ "main" ]
-        
+
 jobs:
     migrate-models:
         runs-on: ubuntu-latest
@@ -24,7 +24,10 @@ jobs:
               uses: actions/setup-node@v3
               with:
                 node-version: "latest"
-
+                
+            - name: Install packages
+              run: npm install
+                
             - name: Migrate from dev to test
               run: |
                 node app.js --se dev --te test --space-id ${{ secrets.CON_SPACE_ID }}
