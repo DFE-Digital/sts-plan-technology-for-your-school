@@ -13,7 +13,7 @@ namespace Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;
 public static class OnUserInformationReceivedEvent
 {
     /// <summary>
-    /// Runs once a user's token is validated; adds a user's role claims from DFE Public API
+    /// Runs once a user's info comes back from backend server - records sign in and adds a user's role claims from DFE Public API
     /// </summary>
     /// <param name="context"></param>
     /// <returns></returns>

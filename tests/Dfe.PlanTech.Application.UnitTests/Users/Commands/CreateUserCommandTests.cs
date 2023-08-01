@@ -1,5 +1,6 @@
 ﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Commands;
+using Dfe.PlanTech.Domain.SignIn.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 using Moq;
 
@@ -36,7 +37,18 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
             });
 
 
-            var recordUserSignInDto = new RecordUserSignInDto { DfeSignInRef = new Guid().ToString() };
+            var recordUserSignInDto = new RecordUserSignInDto
+            {
+                DfeSignInRef = new Guid().ToString(),
+                Organisation = new Organisation()
+                {
+                    Ukprn = "Ukprn",
+                    Type = new IdWithName()
+                    {
+                        Name = "School",
+                        Id = "Id"
+                    }
+        } };
 
             //Act
             var result = await strut.CreateUser(recordUserSignInDto);
