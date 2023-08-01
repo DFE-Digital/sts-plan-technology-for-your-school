@@ -3,7 +3,10 @@ name: Migrate Contentful changes
 on:
     schedule:
       - cron: '59 23 * * *'  
-
+    workflow_dispatch:
+    pull_request:
+        branches: [ "main" ]
+        
 jobs:
     migrate-models:
         runs-on: ubuntu-latest
