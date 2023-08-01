@@ -1,0 +1,34 @@
+name: Migrate Contentful changes
+
+on:
+    schedule:
+      - cron: '59 23 * * *'  
+
+jobs:
+    migrate-models:
+        runs-on: ubuntu-latest
+        name: Migrate Content Models
+        
+        defaults:
+            run:
+              shell: bash
+              working-directory: ./src/Dfe.PlanTech.Infrastructure.Contentful.Migrations/
+          
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v3
+              with:
+                node-version: "latest"
+
+            - name: Migrate from dev to test
+              run: |
+                node app.js --se dev --te test --space-id ${{ secrets.CON_SPACE_ID }}
+        
+            - name: Upload migration files
+              uses: actions/upload-artifact@v3
+              with:
+                name: dev-to-test-migrations
+                path: |
+                    ./src/Dfe.PlanTech.Infrastructure.Contentful.Migrations/migrations/*.js
