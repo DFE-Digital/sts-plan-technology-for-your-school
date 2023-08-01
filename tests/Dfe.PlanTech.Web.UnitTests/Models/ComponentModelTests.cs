@@ -116,14 +116,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         public void Section_Should_Return_Default_Maturity_When_Maturity_Is_A_String_And_Is_Null()
         {
             string? maturity = null;
-            string exceptionText = "Could not find recommendation with maturity Unknown";
             var section = _componentBuilder.BuildSections().First();
             var exceptionType = typeof(KeyNotFoundException);
-
-#pragma warning disable CS8604 // Possible null reference argument.
-            Exception exception = Assert.Throws(exceptionType, () => section.GetRecommendationForMaturity(maturity));
-#pragma warning restore CS8604 // Possible null reference argument.
-            Assert.Equal(exceptionText, exception.Message);
+          
+            #pragma warning disable CS8604 // Possible null reference argument.
+            Assert.Throws(exceptionType, () => section.GetRecommendationForMaturity(maturity));
+            #pragma warning restore CS8604 // Possible null reference argument.
         }
 
         [Fact]

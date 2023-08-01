@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Dfe.PlanTech.Web.Models;
 
-public class CheckAnswersViewModel : BaseViewModel
+public class CheckAnswersViewModel
 {
 
     [Required]
