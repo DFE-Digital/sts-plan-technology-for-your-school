@@ -1,15 +1,16 @@
-﻿@using Dfe.PlanTech.Web.TagHelpers.TaskList
-@model Dfe.PlanTech.Domain.Questionnaire.Interfaces.ICategory;
+﻿@model Dfe.PlanTech.Domain.Questionnaire.Interfaces.ICategory;
 
 <task-list>
     @foreach(var section in Model.Sections)
     {
-        var submission = Model.SectionStatuses.FirstOrDefault(x => x.SectionId == section.Sys.Id && x.Completed == 1);
+        var sectionMaturtiy = Model.SectionStatuses.Where(sectionStatus => sectionStatus.SectionId == section.Sys.Id && sectionStatus.Completed == 1)
+                                                .Select(sectionStatus => sectionStatus.Maturity)
+                                                .FirstOrDefault();
 
-        if (submission is null)
+        if (string.IsNullOrEmpty(sectionMaturtiy))
             continue;
         
-        var recommendation = section.GetRecommendationForMaturity(submission.Maturity);  
+        var recommendation = section.GetRecommendationForMaturity(sectionMaturtiy);  
 
         <task-list-item>
             <task-list-item-name>
