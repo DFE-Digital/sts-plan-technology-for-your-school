@@ -1,20 +1,24 @@
 ﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
-using Dfe.PlanTech.Application.Users.Queries;
+using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 namespace Dfe.PlanTech.Application.Users.Commands;
 
 public class RecordUserSignInCommand : IRecordUserSignInCommand
 {
     private readonly IPlanTechDbContext _db;
+    private readonly ICreateEstablishmentCommand _createEstablishmentCommand;
     private readonly ICreateUserCommand _createUserCommand;
-    private readonly IUser _user;
+    private readonly IGetEstablishmentIdQuery _getEstablishmentIdQuery;
+    private readonly IGetUserIdQuery _getUserIdQuery;
 
-    public RecordUserSignInCommand(IPlanTechDbContext db, ICreateUserCommand createUserCommand, IUser user)
+    public RecordUserSignInCommand(IPlanTechDbContext db, ICreateEstablishmentCommand createEstablishmentCommand, ICreateUserCommand createUserCommand, IGetEstablishmentIdQuery getEstablishmentIdQuery, IGetUserIdQuery getUserIdQuery)
     {
         _db = db;
+        _createEstablishmentCommand = createEstablishmentCommand;
         _createUserCommand = createUserCommand;
-        _user = user;
+        _getEstablishmentIdQuery = getEstablishmentIdQuery;
+        _getUserIdQuery = getUserIdQuery;
     }
 
     public async Task<int> RecordSignIn(RecordUserSignInDto recordUserSignInDto)
@@ -34,7 +38,7 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
     private async Task<Domain.SignIn.Models.SignIn> CreateSignIn(RecordUserSignInDto recordUserSignInDto)
     {
         int userId = await GetUserId(recordUserSignInDto);
-        var establishmentId = await _user.GetEstablishmentId();
+        var establishmentId = await GetEstablishmentId(recordUserSignInDto);
         var signIn = MapToSignIn(userId, establishmentId);
 
         return signIn;
@@ -44,12 +48,10 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
     /// Gets existing ID for user, or creates a new user in database if non existing
     /// </summary>
     /// <param name="recordUserSignInDto"></param>
-    /// <param name="getUserIdQuery"></param>
     /// <returns></returns>
     private async Task<int> GetUserId(RecordUserSignInDto recordUserSignInDto)
     {
-        var getUserIdQuery = new GetUserIdQuery(_db);
-        var existingUserId = await getUserIdQuery.GetUserId(recordUserSignInDto.DfeSignInRef);
+        var existingUserId = await _getUserIdQuery.GetUserId(recordUserSignInDto.DfeSignInRef);
 
         if (existingUserId != null)
         {
@@ -59,6 +61,32 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
         return await _createUserCommand.CreateUser(recordUserSignInDto);
     }
 
+    /// <summary>
+    /// Gets existing ID for user, or creates a new establishment in database if non existing
+    /// </summary>
+    /// <param name="recordUserSignInDto"></param>
+    /// <returns></returns>
+    private async Task<int> GetEstablishmentId(RecordUserSignInDto recordUserSignInDto)
+    {
+        var existingEstablishmentId = await _getEstablishmentIdQuery.GetEstablishmentId(recordUserSignInDto.Organisation.Reference);
+
+        if (existingEstablishmentId != null)
+        {
+            return existingEstablishmentId.Value;
+        }
+
+        return await _createEstablishmentCommand.CreateEstablishment(new EstablishmentDto()
+        {
+            Ukprn = recordUserSignInDto.Organisation.Ukprn,
+            Urn = recordUserSignInDto.Organisation.Urn,
+            Type = new EstablishmentTypeDto()
+            {
+                Name = recordUserSignInDto.Organisation.Type.Name
+            },
+            OrgName = recordUserSignInDto.Organisation.Name
+        });
+    }
+
     private static Domain.SignIn.Models.SignIn MapToSignIn(int userId, int establishmentId = 1)
     {
         if (userId == 0)
@@ -66,7 +94,7 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
 
         return new Domain.SignIn.Models.SignIn
         {
-            UserId = Convert.ToUInt16(userId),
+            UserId = userId,
             EstablishmentId = establishmentId,
             SignInDateTime = DateTime.UtcNow
         };
