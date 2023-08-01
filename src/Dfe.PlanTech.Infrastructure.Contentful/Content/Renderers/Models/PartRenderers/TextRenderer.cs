@@ -43,7 +43,7 @@ public class TextRenderer : BaseRichTextContentPartRender
         foreach (var mark in markOptions)
         {
             stringBuilder.Append('<');
-            foreach (var htmlPart in _textRendererOptions.GetOpenTagHtml(mark))
+            foreach (var htmlPart in TextRendererOptions.GetOpenTagHtml(mark))
             {
                 stringBuilder.Append(htmlPart);
             }

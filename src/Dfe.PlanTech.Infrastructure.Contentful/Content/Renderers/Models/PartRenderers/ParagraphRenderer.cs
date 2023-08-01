@@ -7,8 +7,8 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRe
 
 public class ParagraphRenderer : BaseRichTextContentPartRender
 {
-    private readonly ParagraphRendererOptions _options;
-    public ParagraphRenderer(ParagraphRendererOptions options) : base(RichTextNodeType.Paragraph)
+    private readonly RichTextPartRendererOptions _options;
+    public ParagraphRenderer(RichTextPartRendererOptions options) : base(RichTextNodeType.Paragraph)
     {
         _options = options;
     }

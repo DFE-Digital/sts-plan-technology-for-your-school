@@ -8,9 +8,9 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRe
 
 public class HyperlinkRenderer : BaseRichTextContentPartRender
 {
-    private readonly HyperlinkRendererOptions _options;
+    private readonly RichTextPartRendererOptions _options;
 
-    public HyperlinkRenderer(HyperlinkRendererOptions options) : base(RichTextNodeType.Hyperlink)
+    public HyperlinkRenderer(RichTextPartRendererOptions options) : base(RichTextNodeType.Hyperlink)
     {
         _options = options;
     }

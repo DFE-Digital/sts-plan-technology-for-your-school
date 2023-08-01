@@ -28,7 +28,7 @@ public class HyperlinkRendererTests
             }
         };
 
-        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
+        var renderer = new HyperlinkRenderer(new RichTextPartRendererOptions());
 
         var accepted = renderer.Accepts(content);
 
@@ -44,7 +44,7 @@ public class HyperlinkRendererTests
             Value = "paragraph text"
         };
 
-        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
+        var renderer = new HyperlinkRenderer(new RichTextPartRendererOptions());
 
         var accepted = renderer.Accepts(content);
 
@@ -54,7 +54,7 @@ public class HyperlinkRendererTests
     [Fact]
     public void Should_CreateLink_When_PassedValidData()
     {
-        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
+        var renderer = new HyperlinkRenderer(new RichTextPartRendererOptions());
         var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), new[] { renderer });
 
         const string linkText = "Click Here";
@@ -81,7 +81,7 @@ public class HyperlinkRendererTests
     [Fact]
     public void Should_NotAddLink_When_MissingURI()
     {
-        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
+        var renderer = new HyperlinkRenderer(new RichTextPartRendererOptions());
         var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), new[] { renderer });
 
         const string linkText = "Click Here";
@@ -104,7 +104,7 @@ public class HyperlinkRendererTests
     {
         const string testClasses = "testing-classes";
 
-        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions() { Classes = testClasses });
+        var renderer = new HyperlinkRenderer(new RichTextPartRendererOptions() { Classes = testClasses });
         var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), new[] { renderer });
 
         const string linkText = "Click Here";
