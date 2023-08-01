@@ -22,7 +22,7 @@ export function run({ environment, spaceId, migrationFile, verbose }) {
         }
     }
     catch (error) {
-        console.log(`Error running migration ${migrationFile}`, error.stderr?.toString() ?? error.stdout?.toString() ?? error);
+        console.log(`Error running migration ${migrationFile}`, getError(error));
     }
 
 }
@@ -71,6 +71,10 @@ export function create({ source, target, verbose }) {
         return result;
     }
     catch (error) {
-        console.log(`Error creating migrations for ${source} to ${target}`, error.stderr?.toString() ?? error.stdout?.toString() ?? error);
+        console.error(`Error creating migrations for ${source} to ${target}`, getError(error));
     }
+}
+
+function getError(error) {
+    return error.stderr?.toString() ?? error.stdout?.toString() ?? error;
 }
