@@ -2,8 +2,7 @@ name: Run E2E Tests
 
 on:
     pull_request:
-        types: [ opened, synchronize, reopened ]
-
+        
 jobs:
   run-e2e-tests:
     name: Run E2E Tests
