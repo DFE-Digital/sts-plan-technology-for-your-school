@@ -41,7 +41,8 @@ jobs:
       - name: Run project
         shell: bash
         run: |
-          export ASPNETCORE_ENVIRONMENT=Production
+          ASPNETCORE_ENVIRONMENT=Production
+          KeyVaultName=${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
           dotnet run --project ${{ env.PROJECT_PATH }} --configuration Release
 
       - name: Cypress tests
