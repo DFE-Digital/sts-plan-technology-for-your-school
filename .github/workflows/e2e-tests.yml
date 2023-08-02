@@ -52,7 +52,7 @@ jobs:
         run: |
           export ASPNETCORE_ENVIRONMENT=Production
           export KeyVaultName=${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
-          dotnet ./src/Dfe.PlanTech.Web//bin/Release/net7.0/Dfe.PlanTech.Web.dll
+          dotnet ./src/Dfe.PlanTech.Web/bin/Release/net7.0/Dfe.PlanTech.Web.dll
 
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests
