@@ -50,6 +50,7 @@ jobs:
   validate-terraform:  
     name: Validate Terraform 
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
     defaults:
       run:
         working-directory: ${{env.TF_WORKING_DIRECTORY}}
