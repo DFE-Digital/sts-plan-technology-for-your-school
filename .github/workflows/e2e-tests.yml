@@ -41,3 +41,12 @@ jobs:
       - name: Run project
         shell: bash
         run: dotnet run ${{ env.PROJECT_PATH }}
+
+      - name: Cypress tests
+        uses: ./.github/actions/run-e2e-tests
+        with:
+          url: https://localhost:8080
+          dsi_url: ${{ secrets.DSI_URL }}
+          dsi_username: ${{ secrets.DSI_USERNAME }}
+          dsi_password: ${{ secrets.DSI_PASSWORD }}
+      
