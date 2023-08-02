@@ -23,7 +23,7 @@ jobs:
   validate-terraform:  
     name: Validate Terraform 
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || 'test' }}
+    environment: ${{ inputs.environment || 'tst' }}
     env:
       DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
     
@@ -48,7 +48,7 @@ jobs:
       TF_VAR_cdn_frontdoor_origin_host_header_override: ${{secrets.AZ_CDN_FRONTDOOR_ORIGIN_HOST_HEADER_OVERRIDE}}
       TF_VAR_az_sql_admin_password: ${{secrets.AZ_SQL_ADMIN_PASSWORD}}
       TF_VAR_az_sql_admin_userid_postfix: ${{secrets.AZ_SQL_ADMIN_USERID_POSTFIX}}    
-      
+
       TF_WORKING_DIRECTORY: terraform
     defaults:
       run:
