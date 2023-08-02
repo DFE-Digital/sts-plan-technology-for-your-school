@@ -38,6 +38,15 @@ jobs:
         shell: bash
         run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release --no-restore --output ./build
 
+      - name: Get workflow IP address
+        id: whats-my-ip
+        uses: ./.github/actions/whats-my-ip-address
+  
+      - name: Add Azure firewall rules
+        shell: bash
+        run: |
+          az keyvault network-rule add --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
+  
       - name: Run project
         shell: bash
         run: |
@@ -52,4 +61,10 @@ jobs:
           dsi_url: ${{ secrets.DSI_URL }}
           dsi_username: ${{ secrets.DSI_USERNAME }}
           dsi_password: ${{ secrets.DSI_PASSWORD }}
+      
+      - name: Add Azure firewall rules
+        shell: bash
+        run: |
+          az keyvault network-rule remove --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
+  
       
