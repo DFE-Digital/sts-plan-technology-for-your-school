@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-22.04
     env:
         PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj 
+        KEYVAULT_NAME: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
+        RESOURCE_GROUP: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -45,13 +47,13 @@ jobs:
       - name: Add Azure firewall rules
         shell: bash
         run: |
-          az keyvault network-rule add --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
+          az keyvault network-rule add --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
   
       - name: Run project
         shell: bash
         run: |
           export ASPNETCORE_ENVIRONMENT=Production
-          export KeyVaultName=${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
+          export KeyVaultName=${{ env.KEYVAULT_NAME }}
           dotnet ./src/Dfe.PlanTech.Web/bin/Release/net7.0/Dfe.PlanTech.Web.dll
 
       - name: Cypress tests
@@ -62,9 +64,9 @@ jobs:
           dsi_username: ${{ secrets.DSI_USERNAME }}
           dsi_password: ${{ secrets.DSI_PASSWORD }}
       
-      - name: Add Azure firewall rules
+      - name: Remove Azure firewall rules
         shell: bash
         run: |
-          az keyvault network-rule remove --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
+          az keyvault network-rule remove --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
   
       
