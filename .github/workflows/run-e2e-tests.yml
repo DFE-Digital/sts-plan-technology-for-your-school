@@ -2,8 +2,10 @@ name: Run E2E Tests
 
 on:
   pull_request:
-    branches: [ "main" ]
-
+    paths: 
+      - 'terraform/**'
+      - '.github/**'
+            
 jobs:
   run-e2e-tests:
     name: Run E2E Tests
@@ -27,7 +29,6 @@ jobs:
         uses: actions/setup-dotnet@v2
         with:
             dotnet-version: 7.0.x
-    
     
       - name: Install dependencies
         shell: bash
