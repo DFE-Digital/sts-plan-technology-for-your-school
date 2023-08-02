@@ -1,11 +1,9 @@
-name: Build & deploy to environment
+name: Run E2E Tests
 
 on:
     pull_request:
         types: [ opened, synchronize, reopened ]
-        paths: 
-            - 'src/**'
-            - 'tests/**'    
+
 jobs:
   run-e2e-tests:
     name: Run E2E Tests
