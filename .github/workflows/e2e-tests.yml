@@ -40,7 +40,9 @@ jobs:
 
       - name: Run project
         shell: bash
-        run: dotnet run --project ${{ env.PROJECT_PATH }} --configuration Release
+        run: |
+          export ASPNETCORE_ENVIRONMENT=Production
+          dotnet run --project ${{ env.PROJECT_PATH }} --configuration Release dotnet run --project ${{ env.PROJECT_PATH }} --configuration Release
 
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests
