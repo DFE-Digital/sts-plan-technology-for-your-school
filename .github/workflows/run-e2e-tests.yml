@@ -1,0 +1,44 @@
+name: Build & deploy to environment
+
+on:
+    pull_request:
+        types: [ opened, synchronize, reopened ]
+        paths: 
+            - 'src/**'
+            - 'tests/**'    
+jobs:
+  run-e2e-tests:
+    name: Run E2E Tests
+    runs-on: ubuntu-22.04
+    env:
+        PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj 
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Azure CLI Login
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+            dotnet-version: 7.0.x
+    
+    
+      - name: Install dependencies
+        shell: bash
+        run: dotnet restore ${{ env.PROJECT_PATH }}
+
+      - name: Build project
+        shell: bash
+        run: dotnet build ${{ env.PROJECT_PATH }} -configuration Release --no-restore --output ./build
+
+      - name: Run project
+        shell: bash
+        run: dotnet run ${{ env.PROJECT_PATH }}
