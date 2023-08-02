@@ -19,38 +19,37 @@ on:
       - 'terraform/**'
       - '.github/**'
 
-env:
-  DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
-
-  ARM_TENANT_ID: ${{ secrets.AZ_TENANT_ID }}
-  ARM_SUBSCRIPTION_ID: ${{ secrets.AZ_SUBSCRIPTION_ID }}
-  ARM_CLIENT_ID: ${{ secrets.AZ_CLIENT_ID }}
-  ARM_CLIENT_SECRET: ${{ secrets.AZ_CLIENT_SECRET }}
-
-  AZ_KEYVAULT_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP	}}-kv
-  
-  TF_BACKEND_STORAGE_ACCOUNT_NAME: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
-  TF_BACKEND_CONTAINER_NAME: ${{ secrets.TF_BACKEND_CONTAINER_NAME }}
-  TF_BACKEND_KEY: ${{ secrets.TF_BACKEND_KEY }}
-  TF_BACKEND_RESOURCE_GROUP: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
-
-  TF_VAR_project_name: ${{ secrets.DFE_PROJECT_NAME }}
-  TF_VAR_environment: ${{ secrets.AZ_ENVIRONMENT }}
-  TF_VAR_azure_location: ${{ vars.AZ_LOCATION }}
-  TF_VAR_az_app_kestrel_endpoint: ${{ vars.KESTRELENDPOINT }}
-  TF_VAR_az_tag_environment: ${{ vars.AZ_TAG_ENVIRONMENT }}
-  TF_VAR_az_tag_product: ${{ vars.AZ_TAG_PRODUCT }}
-  TF_VAR_cdn_frontdoor_origin_host_header_override: ${{secrets.AZ_CDN_FRONTDOOR_ORIGIN_HOST_HEADER_OVERRIDE}}
-  TF_VAR_az_sql_admin_password: ${{secrets.AZ_SQL_ADMIN_PASSWORD}}
-  TF_VAR_az_sql_admin_userid_postfix: ${{secrets.AZ_SQL_ADMIN_USERID_POSTFIX}}
-
-  TF_WORKING_DIRECTORY: terraform
-
 jobs:
   validate-terraform:  
     name: Validate Terraform 
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'test' }}
+    env:
+      DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
+    
+      ARM_TENANT_ID: ${{ secrets.AZ_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+      ARM_CLIENT_ID: ${{ secrets.AZ_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZ_CLIENT_SECRET }}
+    
+      AZ_KEYVAULT_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP	}}-kv
+      
+      TF_BACKEND_STORAGE_ACCOUNT_NAME: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
+      TF_BACKEND_CONTAINER_NAME: ${{ secrets.TF_BACKEND_CONTAINER_NAME }}
+      TF_BACKEND_KEY: ${{ secrets.TF_BACKEND_KEY }}
+      TF_BACKEND_RESOURCE_GROUP: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
+    
+      TF_VAR_project_name: ${{ secrets.DFE_PROJECT_NAME }}
+      TF_VAR_environment: ${{ secrets.AZ_ENVIRONMENT }}
+      TF_VAR_azure_location: ${{ vars.AZ_LOCATION }}
+      TF_VAR_az_app_kestrel_endpoint: ${{ vars.KESTRELENDPOINT }}
+      TF_VAR_az_tag_environment: ${{ vars.AZ_TAG_ENVIRONMENT }}
+      TF_VAR_az_tag_product: ${{ vars.AZ_TAG_PRODUCT }}
+      TF_VAR_cdn_frontdoor_origin_host_header_override: ${{secrets.AZ_CDN_FRONTDOOR_ORIGIN_HOST_HEADER_OVERRIDE}}
+      TF_VAR_az_sql_admin_password: ${{secrets.AZ_SQL_ADMIN_PASSWORD}}
+      TF_VAR_az_sql_admin_userid_postfix: ${{secrets.AZ_SQL_ADMIN_USERID_POSTFIX}}    
+      
+      TF_WORKING_DIRECTORY: terraform
     defaults:
       run:
         working-directory: ${{env.TF_WORKING_DIRECTORY}}
