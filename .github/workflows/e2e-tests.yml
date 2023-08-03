@@ -62,6 +62,7 @@ jobs:
         run: |
           export ASPNETCORE_ENVIRONMENT=Production
           export KeyVaultName=${{ env.KEYVAULT_NAME }}
+          export Kestrel__Endpoints__Https__Url=https://*:8080
           dotnet ./build/Dfe.PlanTech.Web.dll &
 
       - name: Cypress tests
