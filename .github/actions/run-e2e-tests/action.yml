@@ -42,7 +42,7 @@ runs:
     - name: Run the tests
       shell: bash
       working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
-      run: npx cypress run --e2e --config chromeWebSecurity=false
+      run: npx cypress run --e2e --config chromeWebSecurity=false --browser chromium
 
     - name: Store screenshots on test failure
       uses: actions/upload-artifact@v3

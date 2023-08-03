@@ -35,11 +35,11 @@ jobs:
         with:
             dotnet-version: 7.0.x
           
-      - name: Install certutil
+      - name: Install certutil & chromium
         shell: bash
         run: |
           sudo apt-get update -y  
-          sudo apt-get install -y libnss3-tools
+          sudo apt-get install -y libnss3-tools chromium-browser
 
       - name: Create trusted HTTPS cert
         shell: bash
@@ -56,7 +56,6 @@ jobs:
           # Cleanup
           rm localhost.crt
         
-
       - name: Install dependencies
         shell: bash
         run: dotnet restore ${{ env.PROJECT_PATH }}
