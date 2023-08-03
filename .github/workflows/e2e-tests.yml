@@ -53,7 +53,7 @@ jobs:
           ip_address: ${{ steps.whats-my-ip.outputs.ip }}
           verb: "add"
           az_keyvault_name: ${{ env.KEYVAULT_NAME }}
-          az_ip_name: ${{ env.SQL_IP_NAME }}
+          az_ip_name: ${{ env.SQL_IP_NA ME }}
           az_resource_group: ${{ env.RESOURCE_GROUP}}
           az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
 
@@ -64,12 +64,6 @@ jobs:
           export KeyVaultName=${{ env.KEYVAULT_NAME }}
           export Kestrel__Endpoints__Https__Url=https://*:8081
           dotnet ./build/Dfe.PlanTech.Web.dll &
-          sleep 10 &&
-          curl -- insecure https://localhost:8081
-
-      - name: Double check curl output
-        shell: bash
-        run: curl -- insecure https://localhost:8081
 
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests
