@@ -26,7 +26,6 @@ runs:
     - name: Build and test project
       uses: cypress-io/github-action@v5
       with:
-        start: ${{ inputs.start }}
         config: url=${{ inputs.url }},DSiUrl=${{ inputs.dsi_url }},Username=${{ inputs.dsi_username }},Password=${{ inputs.dsi_password }}
         project:  ./tests/Dfe.PlanTech.Web.E2ETests/
         wait-on: 'https://localhost:8081'
