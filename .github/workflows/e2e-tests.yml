@@ -35,9 +35,21 @@ jobs:
         with:
             dotnet-version: 7.0.x
           
-      - name: Clean + create https cert
+      - name: Create trusted HTTPS cert
         shell: bash
-        run: dotnet dev-certs https --clean && dotnet dev-certs https --trust --check
+        run: |
+          dotnet dev-certs https -ep localhost.crt --format PEM
+
+          # Trust Edge/Chrome
+          certutil -d sql:$HOME/.pki/nssdb -A -t "P,," -n localhost -i ./localhost.crt
+          certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n localhost -i ./localhost.crt
+          
+          # Trust dotnet-to-dotnet (.pem extension is important here)
+          sudo cp localhost.crt /usr/lib/ssl/certs/aspnetcore-https-localhost.pem
+          
+          # Cleanup
+          rm localhost.crt
+        
 
       - name: Install dependencies
         shell: bash
