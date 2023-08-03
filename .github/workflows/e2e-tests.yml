@@ -35,26 +35,9 @@ jobs:
         with:
             dotnet-version: 7.0.x
           
-      - name: Install certutil & chromium
+      - name: Trust cert
         shell: bash
-        run: |
-          sudo apt-get update -y  
-          sudo apt-get install -y libnss3-tools chromium-browser
-
-      - name: Create trusted HTTPS cert
-        shell: bash
-        run: |
-          dotnet dev-certs https -ep localhost.crt --format PEM
-
-          # Trust Edge/Chrome
-          certutil -d sql:$HOME/.pki/nssdb -A -t "P,," -n localhost -i ./localhost.crt
-          certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n localhost -i ./localhost.crt
-          
-          # Trust dotnet-to-dotnet (.pem extension is important here)
-          sudo cp localhost.crt /usr/lib/ssl/certs/aspnetcore-https-localhost.pem
-          
-          # Cleanup
-          rm localhost.crt
+        run: sudo chmod 644 /usr/local/share/ca-certificates/aspnet/https.crt 
         
       - name: Install dependencies
         shell: bash
