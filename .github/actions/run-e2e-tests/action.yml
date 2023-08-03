@@ -14,19 +14,34 @@ inputs:
   dsi_password:
     required: true
     type: string
+  start:
+    required: false
+    type: string
+    description: Start command for Cypress
 
 runs:
   using: composite
+  defaults:
+    run:
+      working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
 
   steps:
-    - name: Build and test project
-      uses: cypress-io/github-action@v5
+    - name: Create Cypress config
+      shell: bash
+      run: |
+        echo "{\"URL\": \"${{inputs.url}}\", \"DSiUrl\": \"${{inputs.dsi_url}}\", \"Username\": \"${{inputs.dsi_username}}\", \"Password\": \"${{inputs.dsi_password}}\" }" >cypress.env.json 
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
       with:
-        config: url=${{ inputs.url }},DSiUrl=${{ inputs.dsi_url }},Username=${{ inputs.dsi_username }},Password=${{ inputs.dsi_password }}
-        project:  ./tests/Dfe.PlanTech.Web.E2ETests/
-        wait-on: 'https://localhost:8081'
-        browser: chrome
-      
+        node-version: "latest"
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Run the tests
+      run: npx cypress run --e2e 
+
     - name: Store screenshots on test failure
       uses: actions/upload-artifact@v3
       if: failure()
