@@ -61,17 +61,13 @@ jobs:
           az_resource_group: ${{ env.RESOURCE_GROUP}}
           az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
 
-      - name: Run project
+      - name: Build docker image
         shell: bash
-        run: |
-          export ASPNETCORE_ENVIRONMENT=Production
-          export KeyVaultName=${{ env.KEYVAULT_NAME }}
-          export Kestrel__Endpoints__Https__Url=https://*:8081
-          dotnet ./build/Dfe.PlanTech.Web.dll
+        run: docker build -f ./src/Dfe.PlanTech.Web/Dockerfile -t plan-tech:latest ./
 
-      - name: Test server up
+      - name: Run docker image
         shell: bash
-        run: curl -v https://localhost:8081
+        run: docker run --publish 8081:8081 -e ASPNETCORE_ENVIRONMENT=Production -e KeyVaultName=s190d01-plantech-kv -e Kestrel__Endpoints__Https__Url="https://*:8081" -d plan-tech:latest
 
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests

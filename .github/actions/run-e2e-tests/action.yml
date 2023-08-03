@@ -14,10 +14,6 @@ inputs:
   dsi_password:
     required: true
     type: string
-  start:
-    required: false
-    type: string
-    description: Start command for Cypress
 
 runs:
   using: composite
