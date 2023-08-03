@@ -38,8 +38,8 @@ jobs:
       - name: Install certutil
         shell: bash
         run: |
-          apt-get update       
-          apt-get install libnss3-tools
+          sudo apt-get update -y  
+          sudo apt-get install -y libnss3-tools
 
       - name: Create trusted HTTPS cert
         shell: bash
