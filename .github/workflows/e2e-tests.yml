@@ -63,7 +63,9 @@ jobs:
           export ASPNETCORE_ENVIRONMENT=Production
           export KeyVaultName=${{ env.KEYVAULT_NAME }}
           export Kestrel__Endpoints__Https__Url=https://*:8081
-          dotnet ./build/Dfe.PlanTech.Web.dll
+          dotnet ./build/Dfe.PlanTech.Web.dll &
+          sleep 10 &&
+          curl https://localhost:8081
 
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests
