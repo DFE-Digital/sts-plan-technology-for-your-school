@@ -11,16 +11,16 @@ inputs:
     options:
       - "add"
       - "remove"
-  resource_group:
+  az_resource_group:
     required: true
     type: string
-  keyvault_name:
+  az_keyvault_name:
     required: true
     type: string
-  name:
+  az_ip_name:
     type: string
     default: "github_action"
-  sql_database_server_name:
+  az_sql_database_server_name:
     required: true
     type: string
 
@@ -31,12 +31,12 @@ runs:
       if: ${{ inputs.verb == 'add' }}
       shell: bash
       run: |
-        az keyvault network-rule add --resource-group ${{ inputs.resource_group }} --name ${{ inputs.keyvault_name }} --ip-address ${{ inputs.ip_address }}
-        az sql server firewall-rule create --resource-group ${{ inputs.resource_group }} --server ${{ inputs.az_sql_database_server_name }} --name ${{ inputs.name }} --start-ip-address ${{ inputs.ip_address }} --end-ip-address ${{ inputs.ip_address }}
+        az keyvault network-rule add --resource-group ${{ inputs.az_resource_group }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ inputs.ip_address }}
+        az sql server firewall-rule create --resource-group ${{ inputs.az_resource_group }} --server ${{ inputs.az_sql_database_server_name }} --name ${{ inputs.az_ip_name }} --start-ip-address ${{ inputs.ip_address }} --end-ip-address ${{ inputs.ip_address }}
     
     - name: Remove from whitelist
       if: ${{ inputs.verb == 'remove' }}
       shell: bash
       run: |
-        az keyvault network-rule remove --resource-group ${{ inputs.resource_group }} --name ${{ inputs.keyvault_name }} --ip-address ${{ inputs.ip_address }}
-        az sql server firewall-rule delete --resource-group ${{ inputs.resource_group }} --server ${{ inputs.az_sql_database_server_name }} --name ${{ inputs.name }}
+        az keyvault network-rule remove --resource-group ${{ inputs.az_resource_group }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ inputs.ip_address }}
+        az sql server firewall-rule delete --resource-group ${{ inputs.az_resource_group }} --server ${{ inputs.az_sql_database_server_name }} --name ${{ inputs.az_ip_name }}

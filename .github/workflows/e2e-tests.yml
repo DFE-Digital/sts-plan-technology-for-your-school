@@ -48,12 +48,12 @@ jobs:
       - name: Add Azure firewall rules
         uses: ./.github/actions/azure-ip-whitelist
         with:
-          resource_group: ${{ env.RESOURCE_GROUP}}
           ip_address: ${{ steps.whats-my-ip.outputs.ip }}
           verb: "add"
-          keyvault_name: ${{ env.KEYVAULT_NAME }}
-          name: ${{ env.SQL_IP_NAME }}
-          sql_database_server_name: ${{ env.RESOURCE_GROUP }}
+          az_keyvault_name: ${{ env.KEYVAULT_NAME }}
+          az_ip_name: ${{ env.SQL_IP_NAME }}
+          az_resource_group: ${{ env.RESOURCE_GROUP}}
+          az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
 
       - name: Run project
         shell: bash
