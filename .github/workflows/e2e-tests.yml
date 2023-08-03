@@ -14,6 +14,7 @@ jobs:
         PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj 
         KEYVAULT_NAME: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
         RESOURCE_GROUP: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+        SQL_IP_NAME: e2e-tests-pr
     steps:
       - uses: actions/checkout@v3
         with:
@@ -45,10 +46,15 @@ jobs:
         uses: ./.github/actions/whats-my-ip-address
   
       - name: Add Azure firewall rules
-        shell: bash
-        run: |
-          az keyvault network-rule add --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
-  
+        uses: ./.github/actions/azure-ip-whitelist
+        with:
+          resource_group: ${{ env.RESOURCE_GROUP}}
+          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+          verb: "add"
+          keyvault_name: ${{ env.KEYVAULT_NAME }}
+          name: ${{ env.SQL_IP_NAME }}
+          sql_database_server_name: ${{ env.RESOURCE_GROUP }}
+
       - name: Run project
         shell: bash
         run: |
@@ -65,8 +71,13 @@ jobs:
           dsi_password: ${{ secrets.DSI_PASSWORD }}
       
       - name: Remove Azure firewall rules
-        shell: bash
-        run: |
-          az keyvault network-rule remove --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
+        uses: ./.github/actions/azure-ip-whitelist
+        with:
+          resource_group: ${{ env.RESOURCE_GROUP}}
+          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+          verb: "remove"
+          keyvault_name: ${{ env.KEYVAULT_NAME }}
+          name: ${{ env.SQL_IP_NAME }}
+          sql_database_server_name: ${{ env.RESOURCE_GROUP }}
   
-      
+  
