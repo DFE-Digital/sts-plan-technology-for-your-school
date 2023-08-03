@@ -33,10 +33,16 @@ runs:
       working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
       run: npm install
 
+    - name: Create Cypress config
+      shell: bash
+      run: |
+        echo "{\"URL\": \"${{inputs.url}}\", \"DSiUrl\": \"${{inputs.dsi_url}}\", \"Username\": \"${{inputs.dsi_username}}\", \"Password\": \"${{inputs.dsi_password}}\" }" >cypress.env.json 
+      working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
+
     - name: Run the tests
       shell: bash
       working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
-      run: npx cypress run --e2e --env URL=${{inputs.url}},DSiUrl=${{inputs.dsi_url}},Username=${{inputs.dsi_username}},Password=${{inputs.dsi_password}}
+      run: npx cypress run --e2e
 
     - name: Store screenshots on test failure
       uses: actions/upload-artifact@v3
