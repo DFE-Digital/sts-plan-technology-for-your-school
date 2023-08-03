@@ -61,17 +61,17 @@ jobs:
           az_resource_group: ${{ env.RESOURCE_GROUP}}
           az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
 
-      - name: Run project
+      - name: Export env variables
         shell: bash
         run: |
           export ASPNETCORE_ENVIRONMENT=Production
           export KeyVaultName=${{ env.KEYVAULT_NAME }}
           export Kestrel__Endpoints__Https__Url=https://*:8081
-          dotnet ./build/Dfe.PlanTech.Web.dll &
 
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests
         with:
+          start: dotnet ./build/Dfe.PlanTech.Web.dll
           url: https://localhost:8081
           dsi_url: ${{ secrets.DSI_URL }}
           dsi_username: ${{ secrets.DSI_USERNAME }}
