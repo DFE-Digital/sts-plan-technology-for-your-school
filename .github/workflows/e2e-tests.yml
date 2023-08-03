@@ -69,6 +69,10 @@ jobs:
           export Kestrel__Endpoints__Https__Url=https://*:8081
           dotnet ./build/Dfe.PlanTech.Web.dll &
 
+      - name: test curl
+        shell: bash
+        run: curl https://localhost:8081
+        
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests
         with:
