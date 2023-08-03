@@ -29,11 +29,24 @@ jobs:
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
           az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
-  
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+            dotnet-version: 7.0.x
+          
+      - name: Install dependencies
+        shell: bash
+        run: dotnet restore ${{ env.PROJECT_PATH }}
+
+      - name: Build project
+        shell: bash
+        run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release --no-restore --output ./build
+
       - name: Get workflow IP address
         id: whats-my-ip
         uses: ./.github/actions/whats-my-ip-address
-    
+  
       - name: Add Azure firewall rules
         uses: ./.github/actions/azure-ip-whitelist
         with:
@@ -44,19 +57,13 @@ jobs:
           az_resource_group: ${{ env.RESOURCE_GROUP}}
           az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
 
-      - name: Build docker image
-        shell: bash
-        run: docker build -f ./src/Dfe.PlanTech.Web/Dockerfile -t plan-tech:latest ./
-
-      - name: Generate dev https cert
+      - name: Run project
         shell: bash
         run: |
-          dotnet dev-certs https -ep ${HOME}/.aspnet/https/aspnetapp.pfx -p https_password
-          dotnet dev-certs https --trust
-
-      - name: Run docker image
-        shell: bash
-        run: docker run --publish 8081:8081 -e ASPNETCORE_ENVIRONMENT=Production -e KeyVaultName=s190d01-plantech-kv -e ASPNETCORE_URLS="https://+;http://+" -e ASPNETCORE_HTTPS_PORT=8001 -e ASPNETCORE_Kestrel__Certificates__Default__Password="https_password" -e ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx -v ${HOME}/.aspnet/https:/https/ plan-tech:latest
+          export ASPNETCORE_ENVIRONMENT=Production
+          export KeyVaultName=${{ env.KEYVAULT_NAME }}
+          export Kestrel__Endpoints__Https__Url=https://*:8081
+          dotnet ./build/Dfe.PlanTech.Web.dll
 
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests
