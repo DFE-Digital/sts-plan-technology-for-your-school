@@ -25,12 +25,13 @@ public interface IPlanTechDbContext
     public Task<Answer?> GetAnswer(Expression<Func<Answer, bool>> predicate);
 
     // Submission Table
+    public IQueryable<Domain.Submissions.Models.Submission> GetSubmissions { get; }
     public void AddSubmission(Domain.Submissions.Models.Submission submission);
 
     public void AddEstablishment(Domain.Establishments.Models.Establishment establishment);
 
     // Response Table
-    IQueryable<Domain.Responses.Models.Response> GetResponses { get; }
+    public IQueryable<Domain.Responses.Models.Response> GetResponses { get; }
     public void AddResponse(Domain.Responses.Models.Response response);
     public Task<Domain.Responses.Models.Response[]?> GetResponseList(Expression<Func<Domain.Responses.Models.Response, bool>> predicate);
 

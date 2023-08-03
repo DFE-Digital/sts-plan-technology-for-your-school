@@ -124,6 +124,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public void AddAnswer(Answer answer) => Answers.Add(answer);
     public Task<Answer?> GetAnswer(Expression<Func<Answer, bool>> predicate) => GetAnswers.FirstOrDefaultAsync(predicate);
 
+    public IQueryable<Submission> GetSubmissions => Submissions;
     public void AddSubmission(Submission submission) => Submissions.Add(submission);
 
     public IQueryable<Response> GetResponses => Responses;

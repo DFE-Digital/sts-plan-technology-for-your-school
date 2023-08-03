@@ -34,7 +34,21 @@ public class QuestionsController : BaseController<QuestionsController>
 
         TempData.TryGetValue("param", out parameters);
 
-        var question = await submitAnswerCommand.GetQuestionnaireQuestion(id, section, cancellationToken);
+        Question? question = null;
+
+        if (submissionId == null)
+        {
+            Params? param = _ParseParameters(parameters?.ToString());
+            var submission = await submitAnswerCommand.GetOngoingSubmission(param?.SectionId ?? throw new NullReferenceException(nameof(param.SectionId)));
+            if (submission != null && !submission.Completed)
+            {
+                submissionId = submission.Id;
+                question = await submitAnswerCommand.GetNextUnansweredQuestion(submission);
+                if (question == null) return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { submissionId = submissionId, sectionId = param?.SectionId, sectionName = param?.SectionName });
+            }
+        }
+
+        if (question == null) question = await submitAnswerCommand.GetQuestionnaireQuestion(id, section, cancellationToken);
 
         var viewModel = new QuestionViewModel()
         {
@@ -68,7 +82,7 @@ public class QuestionsController : BaseController<QuestionsController>
         else return RedirectToAction("GetQuestionById", new { id = nextQuestionId, submissionId = submissionId });
     }
 
-    private static Params? _ParseParameters(string parameters)
+    private static Params? _ParseParameters(string? parameters)
     {
         if (string.IsNullOrEmpty(parameters))
             return null;

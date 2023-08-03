@@ -30,5 +30,20 @@ namespace Dfe.PlanTech.Application.Response.Queries
 
             return await _db.ToListAsync(responseListByDate);
         }
+
+        public async Task<List<QuestionWithAnswer>> GetResponseListByDateCreated(int submissionId)
+        {
+            var responseListByDate = _db.GetResponses
+                            .Where(response => response.SubmissionId == submissionId)
+                            .Select(response => new QuestionWithAnswer()
+                            {
+                                QuestionRef = response.Question.ContentfulRef,
+                                AnswerRef = response.Answer.ContentfulRef,
+                                DateCreated = response.DateCreated
+                            })
+                            .OrderByDescending(questionWithAnswer => questionWithAnswer.DateCreated);
+
+            return await _db.ToListAsync(responseListByDate);
+        }
     }
 }
