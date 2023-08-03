@@ -61,15 +61,30 @@ jobs:
           az_resource_group: ${{ env.RESOURCE_GROUP}}
           az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
 
-      - name: Cypress tests
-        uses: ./.github/actions/run-e2e-tests
+      - name: Build and test project
+        uses: cypress-io/github-action@v5
         with:
-          start: export ASPNETCORE_ENVIRONMENT=Production && export KeyVaultName=${{ env.KEYVAULT_NAME }} && export Kestrel__Endpoints__Https__Url=https://*:8081 && dotnet ./build/Dfe.PlanTech.Web.dll
-          url: https://localhost:8081
-          dsi_url: ${{ secrets.DSI_URL }}
-          dsi_username: ${{ secrets.DSI_USERNAME }}
-          dsi_password: ${{ secrets.DSI_PASSWORD }}
-      
+          start: dotnet ./build/Dfe.PlanTech.Web.dll
+          config: url=https://localhost:8081,DSiUrl=${{ secrets.DSI_URL }},Username=${{ secrets.DSI_USERNAME }},Password=${{ secrets.DSI_PASSWORD }}
+          project:  ./tests/Dfe.PlanTech.Web.E2ETests/
+          wait-on: 'https://localhost:8081'
+          browser: chrome
+          env: ASPNETCORE_ENVIRONMENT=Production,KeyVaultName=${{ env.KEYVAULT_NAME }},Kestrel__Endpoints__Https__Url=https://*:8081
+        
+      - name: Store screenshots on test failure
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: ./tests/Dfe.PlanTech.Web.E2ETests/cypress/screenshots
+            
+      - name: Store videos
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: cypress-videos
+          path: ./tests/Dfe.PlanTech.Web.E2ETests/cypress/videos
+          
       - name: Remove Azure firewall rules
         if: always()
         uses: ./.github/actions/azure-ip-whitelist
