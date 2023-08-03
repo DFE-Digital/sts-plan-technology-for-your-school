@@ -35,13 +35,17 @@ jobs:
         with:
             dotnet-version: 7.0.x
           
+      - name: Clean + create https cert
+        shell: bash
+        run: dotnet dev-certs https --clean && dotnet dev-certs https --trust --check
+
       - name: Install dependencies
         shell: bash
         run: dotnet restore ${{ env.PROJECT_PATH }}
 
       - name: Build project
         shell: bash
-        run: dotnet build ${{ env.PROJECT_PATH }} --configuration Debug --no-restore --output ./build
+        run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release --no-restore --output ./build
 
       - name: Get workflow IP address
         id: whats-my-ip
@@ -60,7 +64,7 @@ jobs:
       - name: Run project
         shell: bash
         run: |
-          export ASPNETCORE_ENVIRONMENT=Development
+          export ASPNETCORE_ENVIRONMENT=Production
           export KeyVaultName=${{ env.KEYVAULT_NAME }}
           export Kestrel__Endpoints__Https__Url=https://*:8081
           dotnet ./build/Dfe.PlanTech.Web.dll &
