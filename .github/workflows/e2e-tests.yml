@@ -53,7 +53,7 @@ jobs:
           ip_address: ${{ steps.whats-my-ip.outputs.ip }}
           verb: "add"
           az_keyvault_name: ${{ env.KEYVAULT_NAME }}
-          az_ip_name: ${{ env.SQL_IP_NA ME }}
+          az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.RESOURCE_GROUP}}
           az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
 
