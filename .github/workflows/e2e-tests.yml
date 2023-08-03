@@ -35,6 +35,12 @@ jobs:
         with:
             dotnet-version: 7.0.x
           
+      - name: Install certutil
+        shell: bash
+        run: |
+          apt-get update       
+          apt-get install libnss3-tools
+
       - name: Create trusted HTTPS cert
         shell: bash
         run: |
