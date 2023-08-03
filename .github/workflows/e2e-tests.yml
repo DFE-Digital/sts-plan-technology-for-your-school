@@ -34,6 +34,10 @@ jobs:
         uses: actions/setup-dotnet@v2
         with:
             dotnet-version: 7.0.x
+
+      - name: Trust dev HTTPS cert
+        shell: bash
+        run: dotnet dev-certs https --trust
     
       - name: Install dependencies
         shell: bash
