@@ -23,17 +23,13 @@ runs:
   using: composite
 
   steps:
-    - name: Create Cypress config
-      shell: bash
-      run: |
-        echo "{\"URL\": \"${{inputs.url}}\", \"DSiUrl\": \"${{inputs.dsi_url}}\", \"Username\": \"${{inputs.dsi_username}}\", \"Password\": \"${{inputs.dsi_password}}\" }" >cypress.env.json 
-      working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
-
     - name: Build and test project
       uses: cypress-io/github-action@v5
       with:
         start: ${{ inputs.start }}
-        working-directory:  ./tests/Dfe.PlanTech.Web.E2ETests/
+        config: url=${{ inputs.url }},DSiUrl=${{ inputs.dsi_url }},Username=${{ inputs.dsi_username }},Password=${{ inputs.dsi_password }}
+        project:  ./tests/Dfe.PlanTech.Web.E2ETests/
+        wait-on: 'https://localhost:8081'
         browser: chrome
       
     - name: Store screenshots on test failure
