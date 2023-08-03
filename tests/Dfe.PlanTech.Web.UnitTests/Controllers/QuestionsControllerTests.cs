@@ -116,16 +116,18 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             IRecordAnswerCommand recordAnswerCommand = new RecordAnswerCommand(_databaseMock.Object);
             ICreateResponseCommand createResponseCommand = new CreateResponseCommand(_databaseMock.Object);
             IGetResponseQuery getResponseQuery = new GetResponseQuery(_databaseMock.Object);
+            IGetSubmissionQuery getSubmissionQuery = new GetSubmissionQuery(_databaseMock.Object);
             ICreateSubmissionCommand createSubmissionCommand = new CreateSubmissionCommand(_databaseMock.Object);
+            IGetLatestResponseListForSubmissionQuery getLatestResponseListForSubmissionQuery = new GetLatestResponseListForSubmissionQuery(_databaseMock.Object);
 
             var httpContext = new DefaultHttpContext();
             var tempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
             tempData["param"] = "admin";
 
-            GetSubmitAnswerQueries getSubmitAnswerQueries = new GetSubmitAnswerQueries(getQuestionQuery, getResponseQuery, getQuestionnaireQuery, user.Object);
+            GetSubmitAnswerQueries getSubmitAnswerQueries = new GetSubmitAnswerQueries(getQuestionQuery, getResponseQuery, getSubmissionQuery, getQuestionnaireQuery, user.Object);
             RecordSubmitAnswerCommands recordSubmitAnswerCommands = new RecordSubmitAnswerCommands(recordQuestionCommand, recordAnswerCommand, createSubmissionCommand, createResponseCommand);
 
-            _submitAnswerCommand = new SubmitAnswerCommand(getSubmitAnswerQueries, recordSubmitAnswerCommands);
+            _submitAnswerCommand = new SubmitAnswerCommand(getSubmitAnswerQueries, recordSubmitAnswerCommands, getLatestResponseListForSubmissionQuery);
 
             _controller = new QuestionsController(mockLogger.Object) { TempData = tempData };
 
