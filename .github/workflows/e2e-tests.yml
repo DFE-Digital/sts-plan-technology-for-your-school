@@ -10,11 +10,13 @@ jobs:
   run-e2e-tests:
     name: Run E2E Tests
     runs-on: ubuntu-22.04
+
     env:
         PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj 
         KEYVAULT_NAME: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
         RESOURCE_GROUP: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
         SQL_IP_NAME: e2e-tests-pr
+
     steps:
       - uses: actions/checkout@v3
         with:
@@ -71,6 +73,7 @@ jobs:
           dsi_password: ${{ secrets.DSI_PASSWORD }}
       
       - name: Remove Azure firewall rules
+        if: always()
         uses: ./.github/actions/azure-ip-whitelist
         with:
           resource_group: ${{ env.RESOURCE_GROUP}}
