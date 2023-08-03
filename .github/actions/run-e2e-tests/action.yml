@@ -21,10 +21,6 @@ inputs:
 
 runs:
   using: composite
-  defaults:
-    run:
-      shell: bash
-      working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
 
   steps:
     - name: Setup Node.js
@@ -33,9 +29,13 @@ runs:
         node-version: "latest"
 
     - name: Install Dependencies
+      shell: bash
+      working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
       run: npm install
 
     - name: Run the tests
+      shell: bash
+      working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
       run: npx cypress run --e2e --env URL=${{inputs.url}},DSiUrl=${{inputs.dsi_url}},Username=${{inputs.dsi_username}},Password=${{inputs.dsi_password}}
 
     - name: Store screenshots on test failure
