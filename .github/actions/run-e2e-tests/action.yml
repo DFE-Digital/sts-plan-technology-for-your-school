@@ -23,14 +23,10 @@ runs:
   using: composite
   defaults:
     run:
+      shell: bash
       working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
 
   steps:
-    - name: Create Cypress config
-      shell: bash
-      run: |
-        echo "{\"URL\": \"${{inputs.url}}\", \"DSiUrl\": \"${{inputs.dsi_url}}\", \"Username\": \"${{inputs.dsi_username}}\", \"Password\": \"${{inputs.dsi_password}}\" }" >cypress.env.json 
-
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
@@ -40,7 +36,7 @@ runs:
       run: npm install
 
     - name: Run the tests
-      run: npx cypress run --e2e 
+      run: npx cypress run --e2e --env URL=${{inputs.url}},DSiUrl=${{inputs.dsi_url}},Username=${{inputs.dsi_username}},Password=${{inputs.dsi_password}}
 
     - name: Store screenshots on test failure
       uses: actions/upload-artifact@v3
