@@ -29,6 +29,8 @@ namespace Dfe.PlanTech.Web.Controllers
         private void CreateCookie(string key, string value)
         {
             CookieOptions cookieOptions = new CookieOptions();
+            cookieOptions.Secure = true;
+            cookieOptions.HttpOnly= false;
             cookieOptions.Expires = new DateTimeOffset(DateTime.Now.AddYears(1));
             HttpContext.Response.Cookies.Append(key, value, cookieOptions);
         }
