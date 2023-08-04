@@ -25,7 +25,7 @@ public class TextRendererOptions
         return matchingOption;
     }
 
-    public IEnumerable<string> GetOpenTagHtml(MarkOption option)
+    public static IEnumerable<string> GetOpenTagHtml(MarkOption option)
     {
         yield return option.HtmlTag;
 

@@ -4,7 +4,6 @@ using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.SignIn;
 using Dfe.PlanTech.Web;
 using Dfe.PlanTech.Web.Helpers;
-using Dfe.PlanTech.Web.Middleware;
 using GovUk.Frontend.AspNetCore;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;

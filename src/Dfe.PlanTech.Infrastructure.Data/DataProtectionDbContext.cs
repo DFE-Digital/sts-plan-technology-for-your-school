@@ -15,5 +15,5 @@ public class DataProtectionDbContext : DbContext, IDataProtectionKeyContext
     {
     }
 
-    public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
+    public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
 }

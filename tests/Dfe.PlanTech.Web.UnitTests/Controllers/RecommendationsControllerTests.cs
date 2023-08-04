@@ -1,6 +1,4 @@
-﻿
-using Dfe.PlanTech.Application.Caching.Interfaces;
-using Dfe.PlanTech.Web.Controllers;
+﻿using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;

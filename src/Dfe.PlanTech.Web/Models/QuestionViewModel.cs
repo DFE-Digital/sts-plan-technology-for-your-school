@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Dfe.PlanTech.Web.Models;
 
-public class QuestionViewModel : BaseViewModel
+public class QuestionViewModel
 {
     [Required]
     public Question Question { get; init; } = null!;

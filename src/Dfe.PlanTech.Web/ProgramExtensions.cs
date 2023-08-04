@@ -109,6 +109,8 @@ public static class ProgramExtensions
         services.AddTransient<RecordSubmitAnswerCommands>();
         services.AddTransient<SubmitAnswerCommand>();
 
+        services.AddTransient<IGetEstablishmentIdQuery, GetEstablishmentIdQuery>();
+
         services.AddTransient<Application.Questionnaire.Queries.GetSectionQuery>();
 
         return services;

@@ -16,7 +16,7 @@ public class UserClaimsExtensionsTests
         var identity = new ClaimsIdentity(new[] { new Claim(ClaimConstants.NameIdentifier, expectedUserId) });
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        var userId = UserClaimsExtensions.GetUserId(claimsPrincipal);
+        var userId = UserClaimsExtensions.GetUserId(claimsPrincipal.Claims);
 
         Assert.Equal(expectedUserId, userId);
     }
@@ -27,7 +27,7 @@ public class UserClaimsExtensionsTests
         var identity = new ClaimsIdentity(Array.Empty<Claim>());
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        Assert.ThrowsAny<Exception>(() => UserClaimsExtensions.GetUserId(claimsPrincipal));
+        Assert.ThrowsAny<Exception>(() => UserClaimsExtensions.GetUserId(claimsPrincipal.Claims));
     }
 
 
@@ -49,7 +49,7 @@ public class UserClaimsExtensionsTests
         var identity = new ClaimsIdentity(Array.Empty<Claim>());
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        var organisation = UserClaimsExtensions.GetOrganisation(claimsPrincipal);
+        var organisation = UserClaimsExtensions.GetOrganisation(claimsPrincipal.Claims);
 
         Assert.Null(organisation);
     }
@@ -60,7 +60,7 @@ public class UserClaimsExtensionsTests
         var identity = new ClaimsIdentity(new[] { new Claim(ClaimConstants.Organisation, "not a real claim") });
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        Assert.ThrowsAny<Exception>(() => UserClaimsExtensions.GetOrganisation(claimsPrincipal));
+        Assert.ThrowsAny<Exception>(() => UserClaimsExtensions.GetOrganisation(claimsPrincipal.Claims));
     }
 
     [Fact]
@@ -76,7 +76,7 @@ public class UserClaimsExtensionsTests
         var identity = new ClaimsIdentity(new[] { new Claim(ClaimConstants.Organisation, organisationJson) });
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        var foundOrganisation = UserClaimsExtensions.GetOrganisation(claimsPrincipal);
+        var foundOrganisation = UserClaimsExtensions.GetOrganisation(claimsPrincipal.Claims);
 
         Assert.Null(foundOrganisation);
     }
@@ -94,7 +94,7 @@ public class UserClaimsExtensionsTests
         var identity = new ClaimsIdentity(new[] { new Claim(ClaimConstants.Organisation, organisationJson) });
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        var foundOrganisation = UserClaimsExtensions.GetOrganisation(claimsPrincipal);
+        var foundOrganisation = UserClaimsExtensions.GetOrganisation(claimsPrincipal.Claims);
 
         Assert.NotNull(foundOrganisation);
         Assert.Equal(organisation.Id, foundOrganisation.Id);

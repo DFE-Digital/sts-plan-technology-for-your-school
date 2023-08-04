@@ -14,7 +14,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Submission.Queries
         public void GetSectionSubmissionStatuses_ReturnsListOfStatuses()
         {
             var expectedStatuses = new List<SectionStatuses>() { new SectionStatuses { Completed = 1, SectionId = "1", Maturity = "Low", DateCreated = DateTime.UtcNow } }.AsQueryable();
-            var sections = new Section[1] { new Section { Sys = new Sys { Id = "1"} } };
+            var sections = new Section[1] { new Section { Sys = new Sys { Id = "1" } } };
             mockDb.Setup(x => x.GetSectionStatuses(It.IsAny<string>())).Returns(expectedStatuses);
 
             var result = CreateStrut().GetSectionSubmissionStatuses(sections);

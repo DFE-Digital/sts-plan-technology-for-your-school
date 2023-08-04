@@ -7,14 +7,19 @@ namespace Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 
 public static class UserClaimsExtensions
 {
-    public static string GetUserId(this ClaimsPrincipal principal)
+    private static readonly JsonSerializerOptions _jsonSerialiserOptions = new JsonSerializerOptions()
     {
-        if (principal == null)
+        PropertyNameCaseInsensitive = true
+    };
+
+    public static string GetUserId(this IEnumerable<Claim> claims)
+    {
+        if (claims == null)
         {
-            throw new ArgumentNullException(nameof(principal));
+            throw new ArgumentNullException(nameof(claims));
         }
 
-        return principal.Claims
+        return claims
             .Where(c => c.Type.Contains(ClaimConstants.NameIdentifier))
             .Select(c => c.Value)
             .Single();
@@ -30,14 +35,14 @@ public static class UserClaimsExtensions
     /// <exception cref="ArgumentNullException">
     /// If <paramref name="principal"/> is <c>null</c>
     /// </exception>
-    public static Organisation? GetOrganisation(this ClaimsPrincipal principal)
+    public static Organisation? GetOrganisation(this IEnumerable<Claim> claims)
     {
-        if (principal == null)
+        if (claims == null)
         {
-            throw new ArgumentNullException(nameof(principal));
+            throw new ArgumentNullException(nameof(claims));
         }
 
-        var organisationJson = principal.Claims.Where(c => c.Type == ClaimConstants.Organisation)
+        var organisationJson = claims.Where(c => c.Type == ClaimConstants.Organisation)
             .Select(c => c.Value)
             .FirstOrDefault();
 
@@ -46,7 +51,7 @@ public static class UserClaimsExtensions
             return null;
         }
 
-        var organisation = JsonSerializer.Deserialize<Organisation>(organisationJson);
+        var organisation = JsonSerializer.Deserialize<Organisation>(organisationJson, _jsonSerialiserOptions);
 
         if (organisation?.Id == Guid.Empty)
         {
