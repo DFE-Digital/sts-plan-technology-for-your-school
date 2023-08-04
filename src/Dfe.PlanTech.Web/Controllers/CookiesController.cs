@@ -44,8 +44,15 @@ public class CookiesController : BaseController<CookiesController>
             Expires = DateTime.Now.AddYears(1)
         };
         
-        httpContext.Response.Cookies.Append("acceptAnalyticCookiesPreference", userPreference, cookieOptions);
-        
+        if (userPreference == "yes")
+        {
+            httpContext.Response.Cookies.Append("PlanTech-CookieAccepted", "accepted", cookieOptions);
+        }
+        else
+        {
+            httpContext.Response.Cookies.Append("PlanTech-CookieAccepted", "rejected", cookieOptions);
+        }
+
         TempData["UserPreferenceRecorded"] = true;
         
         return RedirectToAction("GetByRoute", "Pages", new { route = "cookies" });
