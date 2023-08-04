@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Dfe.PlanTech.Web.Controllers
 {
@@ -9,17 +10,20 @@ namespace Dfe.PlanTech.Web.Controllers
         public IActionResult Accept()
         {
             CreateCookie("PlanTech-CookieAccepted", "Accepted");
-            var host = HttpContext.Request.Host.Value;
-            //return Redirect(host);
-            return RedirectToAction("/", "Pages");
+            return RedirectToPlaceOfOrigin();
         }
 
         [HttpPost("hidebanner")]
         public IActionResult HideBanner()
         {
             CreateCookie("PlanTech-HideCookieBanner", "Hidden");
-            var host = HttpContext.Request.Host.Value;
-            return Redirect(host);
+            return RedirectToPlaceOfOrigin();
+        }
+
+        private IActionResult RedirectToPlaceOfOrigin()
+        {
+            var returnUrl = Request.Headers["Referer"].ToString();
+            return Redirect(returnUrl);
         }
 
         private void CreateCookie(string key, string value)
