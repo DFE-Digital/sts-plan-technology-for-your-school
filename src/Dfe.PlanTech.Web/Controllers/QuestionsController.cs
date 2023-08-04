@@ -42,17 +42,16 @@ public class QuestionsController : BaseController<QuestionsController>
             var submission = await submitAnswerCommand.GetOngoingSubmission(param?.SectionId ?? throw new NullReferenceException(nameof(param.SectionId)));
             if (submission != null && !submission.Completed)
             {
+                question = await submitAnswerCommand.GetNextUnansweredQuestion(submission.Id);
+                if (question == null) return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { submissionId = submission.Id, sectionId = param?.SectionId, sectionName = param?.SectionName });
+
                 submissionId = submission.Id;
-                question = await submitAnswerCommand.GetNextUnansweredQuestion(submission);
-                if (question == null) return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { submissionId = submissionId, sectionId = param?.SectionId, sectionName = param?.SectionName });
             }
         }
 
-        if (question == null) question = await submitAnswerCommand.GetQuestionnaireQuestion(id, section, cancellationToken);
-
         var viewModel = new QuestionViewModel()
         {
-            Question = question,
+            Question = question ?? await submitAnswerCommand.GetQuestionnaireQuestion(id, section, cancellationToken),
             AnswerRef = answerRef,
             Params = parameters != null ? parameters.ToString() : null,
             SubmissionId = submissionId,

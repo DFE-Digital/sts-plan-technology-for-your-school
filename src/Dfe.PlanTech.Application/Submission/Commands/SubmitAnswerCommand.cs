@@ -73,9 +73,9 @@ namespace Dfe.PlanTech.Application.Submission.Commands
             return false;
         }
 
-        public async Task<Domain.Questionnaire.Models.Question?> GetNextUnansweredQuestion(Domain.Submissions.Models.Submission submission)
+        public async Task<Domain.Questionnaire.Models.Question?> GetNextUnansweredQuestion(int submissionId)
         {
-            List<QuestionWithAnswer> questionWithAnswerList = await _getLatestResponseListForSubmissionQuery.GetResponseListByDateCreated(submission.Id);
+            List<QuestionWithAnswer> questionWithAnswerList = await _getLatestResponseListForSubmissionQuery.GetResponseListByDateCreated(submissionId);
 
             QuestionWithAnswer latestQuestionWithAnswer = questionWithAnswerList[0];
 
