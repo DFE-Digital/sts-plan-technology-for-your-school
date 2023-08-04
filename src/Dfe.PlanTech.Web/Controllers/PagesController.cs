@@ -42,12 +42,17 @@ public class PagesController : BaseController<PagesController>
 
     private PageViewModel CreatePageModel(Page page, string param = null!)
     {
+        bool userOptedOut = GetUserOptOutPreference();
+        
+        string gtmHead = userOptedOut ? "" : Config.GetValue<string>("GTM:Head") ?? "";
+        string gtmBody = userOptedOut ? "" : Config.GetValue<string>("GTM:Body") ?? "";
+
         return new PageViewModel()
         {
             Page = page,
             Param = param,
-            GTMHead = Config.GetValue<string>("GTM:Head") ?? "",
-            GTMBody = Config.GetValue<string>("GTM:Body") ?? "",
+            GTMHead = gtmHead,
+            GTMBody = gtmBody,
         };
     }
 
@@ -56,4 +61,12 @@ public class PagesController : BaseController<PagesController>
     /// </summary>
     /// <param name="route">Route slug from route binding</param>
     private string GetSlug(string? route) => (string.IsNullOrEmpty(route) ? Request.Path.Value : route) ?? "/";
+    
+    
+    private bool GetUserOptOutPreference()
+    {
+        string optOutValue = Request.Cookies["acceptAnalyticCookiesPreference"];
+
+        return optOutValue == "no";
+    }
 }

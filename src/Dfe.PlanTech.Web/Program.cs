@@ -85,11 +85,6 @@ app.MapControllerRoute(
 );
 
 app.MapControllerRoute(
-    name: "cookiesController",
-    pattern: "cookies/"
-);
-
-app.MapControllerRoute(
     pattern: "{controller=Pages}/{action=GetByRoute}/{id?}",
     name: "default"
 );
