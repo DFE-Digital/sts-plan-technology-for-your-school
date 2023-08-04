@@ -30,7 +30,7 @@ namespace Dfe.PlanTech.Web.Controllers
         {
             CookieOptions cookieOptions = new CookieOptions();
             cookieOptions.Secure = true;
-            cookieOptions.HttpOnly= false;
+            cookieOptions.HttpOnly= true;
             cookieOptions.Expires = new DateTimeOffset(DateTime.Now.AddYears(1));
             HttpContext.Response.Cookies.Append(key, value, cookieOptions);
         }
