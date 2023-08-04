@@ -32,7 +32,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var strut = CreateStrut();
             var httpContext = new DefaultHttpContext();
             httpContext.Request.Headers["Referer"] = url;
-            httpContext.Request.Cookies = MockRequestCookieCollection("PlanTech-HideCookieBanner", "Hidden");
 
             strut.ControllerContext = new ControllerContext
             {
@@ -45,7 +44,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             //Assert
             Assert.IsType<RedirectResult>(result);
             Assert.Equal(url, result.Url);
-         //   Assert.Equal(strut.ControllerContext.HttpContext);
         }
 
         [Theory]
