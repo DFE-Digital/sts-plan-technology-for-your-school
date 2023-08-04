@@ -12,13 +12,13 @@ namespace Dfe.PlanTech.Application.Submission.Commands
     {
         private readonly GetSubmitAnswerQueries _getSubmitAnswerQueries;
         private readonly RecordSubmitAnswerCommands _recordSubmitAnswerCommands;
-        private readonly IGetLatestResponseListForSubmissionQuery _getLatestResponseLisForSubmissionQuery;
+        private readonly IGetLatestResponseListForSubmissionQuery _getLatestResponseListForSubmissionQuery;
 
         public SubmitAnswerCommand(GetSubmitAnswerQueries getSubmitAnswerQueries, RecordSubmitAnswerCommands recordSubmitAnswerCommands, IGetLatestResponseListForSubmissionQuery getLatestResponseListForSubmissionQuery)
         {
             _getSubmitAnswerQueries = getSubmitAnswerQueries;
             _recordSubmitAnswerCommands = recordSubmitAnswerCommands;
-            _getLatestResponseLisForSubmissionQuery = getLatestResponseListForSubmissionQuery;
+            _getLatestResponseListForSubmissionQuery = getLatestResponseListForSubmissionQuery;
         }
 
         public async Task<int> SubmitAnswer(SubmitAnswerDto submitAnswerDto, string sectionId, string sectionName)
@@ -75,7 +75,7 @@ namespace Dfe.PlanTech.Application.Submission.Commands
 
         public async Task<Domain.Questionnaire.Models.Question?> GetNextUnansweredQuestion(Domain.Submissions.Models.Submission submission)
         {
-            List<QuestionWithAnswer> questionWithAnswerList = await _getLatestResponseLisForSubmissionQuery.GetResponseListByDateCreated(submission.Id);
+            List<QuestionWithAnswer> questionWithAnswerList = await _getLatestResponseListForSubmissionQuery.GetResponseListByDateCreated(submission.Id);
 
             QuestionWithAnswer latestQuestionWithAnswer = questionWithAnswerList.First();
 
