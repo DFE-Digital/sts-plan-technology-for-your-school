@@ -2,23 +2,15 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
-using Polly;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Controllers
 {
     public class CookieControllerTests
     {
-        public CookiesController CreateStrut()
+        public static CookiesController CreateStrut()
         {
             return new CookiesController();
         }
