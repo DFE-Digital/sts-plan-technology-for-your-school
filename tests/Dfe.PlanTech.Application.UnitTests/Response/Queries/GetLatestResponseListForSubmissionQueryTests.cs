@@ -138,7 +138,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Response.Queries
             _planTechDbContextMock.Setup(m => m.GetResponses).Returns(responseList.AsQueryable());
             _planTechDbContextMock.Setup(m => m.ToListAsync(It.IsAny<IQueryable<QuestionWithAnswer>>())).ReturnsAsync(questionWithAnswerList);
 
-            var result = await _getLatestResponseListForSubmissionQuery.GetLatestResponseListForSubmissionBy(1);
+            var result = await _getLatestResponseListForSubmissionQuery.GetResponseListByDateCreated(1);
 
             Assert.IsType<List<QuestionWithAnswer>>(result);
             Assert.Equal(questionWithAnswerList, result);
