@@ -77,11 +77,11 @@ namespace Dfe.PlanTech.Application.Submission.Commands
         {
             List<QuestionWithAnswer> questionWithAnswerList = await _getLatestResponseListForSubmissionQuery.GetResponseListByDateCreated(submission.Id);
 
-            QuestionWithAnswer latestQuestionWithAnswer = questionWithAnswerList.First();
+            QuestionWithAnswer latestQuestionWithAnswer = questionWithAnswerList[0];
 
             var question = await _getSubmitAnswerQueries.GetQuestionnaireQuestion(latestQuestionWithAnswer.QuestionRef, null, CancellationToken.None);
 
-            var nextQuestion = question.Answers.FirstOrDefault(answer => answer.Sys.Id.Equals(latestQuestionWithAnswer.AnswerRef))?.NextQuestion;
+            var nextQuestion = Array.Find(question.Answers, answer => answer.Sys.Id.Equals(latestQuestionWithAnswer.AnswerRef))?.NextQuestion;
 
             if (nextQuestion == null) return null;
 
