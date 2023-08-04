@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Application.Submission.Queries;
 using Dfe.PlanTech.Domain.Answers.Models;
