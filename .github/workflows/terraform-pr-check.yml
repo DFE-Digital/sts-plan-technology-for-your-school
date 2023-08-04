@@ -10,8 +10,8 @@ on:
         type: choice
         description: Specify if you would like to apply changes or not.
         options:
-          - Yes
-          - No
+          - "Yes"
+          - "No"
   push:
     branches: [ "main" ]
   pull_request:
@@ -50,6 +50,7 @@ jobs:
   validate-terraform:  
     name: Validate Terraform 
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'dev' }}
     defaults:
       run:
         working-directory: ${{env.TF_WORKING_DIRECTORY}}

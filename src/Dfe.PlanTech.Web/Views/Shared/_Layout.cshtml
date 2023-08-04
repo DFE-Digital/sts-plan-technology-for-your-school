@@ -9,8 +9,10 @@
     Layout = "_GovUkPageTemplate";
 }
 
+
 @section Header {
     @{
+        await Html.RenderPartialAsync("_CookieBanner");
         await Html.RenderPartialAsync("_Header");
     }
 @RenderSection("Header", false)
