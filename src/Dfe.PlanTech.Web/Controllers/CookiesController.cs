@@ -9,14 +9,14 @@ namespace Dfe.PlanTech.Web.Controllers
         [HttpPost("accept")]
         public IActionResult Accept()
         {
-            CreateCookie("PlanTech-CookieAccepted", "Accepted");
+            CreateCookie("cookies_preferences_set", "true");
             return RedirectToPlaceOfOrigin();
         }
 
         [HttpPost("hidebanner")]
         public IActionResult HideBanner()
         {
-            CreateCookie("PlanTech-HideCookieBanner", "Hidden");
+            CreateCookie("cookies_preferences_hidden", "true");
             return RedirectToPlaceOfOrigin();
         }
 
