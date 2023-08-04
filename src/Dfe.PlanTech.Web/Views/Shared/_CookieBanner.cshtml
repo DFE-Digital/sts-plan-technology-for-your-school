@@ -1,10 +1,10 @@
 ﻿@{
     bool accepted = false, hidden = false;
 
-    var acceptedCookie = ViewContext.HttpContext.Request.Cookies["PlanTech-CookieAccepted"];
-    if (acceptedCookie is not null && acceptedCookie.Equals("Accepted")) { accepted = true; }
-    var hiddenCookie = ViewContext.HttpContext.Request.Cookies["PlanTech-HideCookieBanner"];
-    if (hiddenCookie is not null && hiddenCookie.Equals("Hidden")) { hidden = true; }
+    var acceptedCookie = ViewContext.HttpContext.Request.Cookies["cookies_preferences_set"];
+    if (acceptedCookie is not null && acceptedCookie.Equals("true")) { accepted = true; }
+    var hiddenCookie = ViewContext.HttpContext.Request.Cookies["cookies_preferences_hidden"];
+    if (hiddenCookie is not null && hiddenCookie.Equals("true")) { hidden = true; }
 }
 
 

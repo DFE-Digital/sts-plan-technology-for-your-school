@@ -65,8 +65,8 @@ public class PagesController : BaseController<PagesController>
     
     private bool GetUserOptOutPreference()
     {
-        string optOutValue = Request.Cookies["PlanTech-CookieAccepted"];
+        string optOutValue = Request.Cookies["cookies_preferences_set"];
 
-        return optOutValue == "rejected";
+        return optOutValue == "false";
     }
 }
