@@ -3,20 +3,20 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Models;
 
 namespace Dfe.PlanTech.Web.Controllers;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 
 [Authorize]
 [Route("/cookies")]
 public class CookiesController : BaseController<CookiesController>
 {
-
-    public CookiesController(ILogger<CookiesController> logger) : base(logger) { }
+    public CookiesController(ILogger<CookiesController> logger) : base(logger)
+    {
+    }
 
     public async Task<IActionResult> GetCookiesPage([FromServices] GetPageQuery getPageQuery)
     {
-        
         //TODO: Need to setup content in contentful.
         //Page cookiesPageContent = await getPageQuery.GetPageBySlug("cookies", CancellationToken.None);
 
@@ -31,9 +31,27 @@ public class CookiesController : BaseController<CookiesController>
             }
         };
 
+
         return View("Cookies", cookiesViewModel);
     }
-    
+
+
+    private IActionResult RedirectToPlaceOfOrigin()
+    {
+        var returnUrl = Request.Headers["Referer"].ToString();
+        return Redirect(returnUrl);
+    }
+
+    private void CreateCookie(string key, string value)
+    {
+        CookieOptions cookieOptions = new CookieOptions();
+        cookieOptions.Secure = true;
+        cookieOptions.HttpOnly = true;
+        cookieOptions.Expires = new DateTimeOffset(DateTime.Now.AddYears(1));
+        HttpContext.Response.Cookies.Append(key, value, cookieOptions);
+    }
+
+
     [HttpPost]
     public IActionResult CookiePreference(string userPreference)
     {
@@ -43,7 +61,7 @@ public class CookiesController : BaseController<CookiesController>
         {
             Expires = DateTime.Now.AddYears(1)
         };
-        
+
         if (userPreference == "yes")
         {
             httpContext.Response.Cookies.Append("PlanTech-CookieAccepted", "accepted", cookieOptions);
@@ -54,10 +72,10 @@ public class CookiesController : BaseController<CookiesController>
         }
 
         TempData["UserPreferenceRecorded"] = true;
-        
+
         return RedirectToAction("GetByRoute", "Pages", new { route = "cookies" });
     }
-    
+
     [HttpPost("accept")]
     public IActionResult Accept()
     {
@@ -71,19 +89,4 @@ public class CookiesController : BaseController<CookiesController>
         CreateCookie("PlanTech-HideCookieBanner", "Hidden");
         return RedirectToPlaceOfOrigin();
     }
-
-    private IActionResult RedirectToPlaceOfOrigin()
-    {
-        var returnUrl = Request.Headers["Referer"].ToString();
-        return Redirect(returnUrl);
-    }
-
-    private void CreateCookie(string key, string value)
-    {
-        CookieOptions cookieOptions = new CookieOptions();
-        cookieOptions.Expires = new DateTimeOffset(DateTime.Now.AddYears(1));
-        HttpContext.Response.Cookies.Append(key, value, cookieOptions);
-    }
-    
 }
-
