@@ -88,13 +88,12 @@ jobs:
           export ASPNETCORE_ENVIRONMENT=Production
           export KeyVaultName=${{ env.KEYVAULT_NAME }}
           export Kestrel__Endpoints__Https__Url=https://*:8081
-          dotnet ./build/Dfe.PlanTech.Web.dll &
-          sleep 20
+          dotnet ./build/Dfe.PlanTech.Web.dll
           
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests
         with:
-          url: https://localhost:8081
+          url: https://127.0.0.1:8081
           dsi_url: ${{ secrets.DSI_URL }}
           dsi_username: ${{ secrets.DSI_USERNAME }}
           dsi_password: ${{ secrets.DSI_PASSWORD }}
