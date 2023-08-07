@@ -69,22 +69,13 @@ public class CookiesController : BaseController<CookiesController>
     [HttpPost]
     public IActionResult CookiePreference(string userPreference)
     {
-        HttpContext httpContext = HttpContext;
-
-        var cookieOptions = new CookieOptions
-        {
-            Expires = DateTime.Now.AddYears(1),
-            Secure = true,
-            HttpOnly = true
-        };
-
         if (userPreference == "yes")
         {
-            httpContext.Response.Cookies.Append(CookieName, "true", cookieOptions);
+            CreateCookie(CookieName, "true");
         }
         else
         {
-            httpContext.Response.Cookies.Append(CookieName, "false", cookieOptions);
+            CreateCookie(CookieName, "false");
         }
 
         TempData["UserPreferenceRecorded"] = true;
