@@ -174,6 +174,27 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 _controller.GetByRoute("NOT A VALID ROUTE", _query, CancellationToken.None, It.IsAny<string>()));
         }
 
+        [Fact]
+        public void Should_Retrieve_ErrorPage()
+        {
+            var httpContextMock = new Mock<HttpContext>();
+
+            var controllerContext = new ControllerContext
+            {
+                HttpContext = httpContextMock.Object
+            };
+
+            _controller.ControllerContext = controllerContext;
+
+            var result = _controller.Error();
+
+            var viewResult = result as ViewResult;
+
+            var model = viewResult!.Model;
+
+            Assert.IsType<ErrorViewModel>(model);
+        }
+
         [Theory]
         [InlineData("true")]
         [InlineData("false")]
