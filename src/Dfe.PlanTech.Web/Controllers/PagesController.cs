@@ -1,9 +1,9 @@
-﻿using System.Diagnostics;
-using Dfe.PlanTech.Application.Content.Queries;
+﻿using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
