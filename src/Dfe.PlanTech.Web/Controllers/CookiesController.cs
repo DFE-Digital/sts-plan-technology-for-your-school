@@ -73,7 +73,9 @@ public class CookiesController : BaseController<CookiesController>
 
         var cookieOptions = new CookieOptions
         {
-            Expires = DateTime.Now.AddYears(1)
+            Expires = DateTime.Now.AddYears(1),
+            Secure = true,
+            HttpOnly = true
         };
 
         if (userPreference == "yes")
