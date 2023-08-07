@@ -4,7 +4,7 @@
     @{
         await Html.RenderPartialAsync("BackButton");
     }
-    
+
     <div class="govuk-width-container" id="cookies-page">
         <main class="govuk-main-wrapper" id="main-content" role="main">
             <div class="govuk-grid-row">
@@ -14,26 +14,26 @@
                         if (userPreferenceSet)
                         {
                             <div class="govuk-notification-banner govuk-notification-banner--success" role="alert"
-                             aria-labelledby="govuk-notification-banner-title"
-                             data-module="govuk-notification-banner">
-                            <div class="govuk-notification-banner__header">
-                                <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
-                                    Success
-                                </h2>
+                                 aria-labelledby="govuk-notification-banner-title"
+                                 data-module="govuk-notification-banner">
+                                <div class="govuk-notification-banner__header">
+                                    <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                                        Success
+                                    </h2>
+                                </div>
+                                <div class="govuk-notification-banner__content">
+                                    <p class="govuk-notification-banner__heading">
+                                        You’ve set your cookie preferences. <a class="govuk-notification-banner__link" href="javascript:void(0)" onclick="window.history.go(-2)">Go back to the page you were looking at</a>.
+                                    </p>
+                                </div>
                             </div>
-                            <div class="govuk-notification-banner__content">
-                                <p class="govuk-notification-banner__heading">
-                                    You’ve set your cookie preferences. <a class="govuk-notification-banner__link" href="javascript:void(0)" onclick="window.history.go(-2)">Go back to the page you were looking at</a>.
-                                </p>
-                            </div>
-                        </div>
-                    }
+                        }
                     }
                     @{
                         await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Title);
                     }
-                 
-                     
+
+
                     @{
                         if (Model.Content != null)
                         {
