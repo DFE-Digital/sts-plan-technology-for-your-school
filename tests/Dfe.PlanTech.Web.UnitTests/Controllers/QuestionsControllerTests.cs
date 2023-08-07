@@ -11,6 +11,7 @@ using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
@@ -95,6 +96,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private readonly QuestionsController _controller;
         private readonly SubmitAnswerCommand _submitAnswerCommand;
         private readonly Mock<IQuestionnaireCacher> _questionnaireCacherMock;
+        private readonly Mock<IGetLatestResponseListForSubmissionQuery> _getLatestResponseListForSubmissionQueryMock;
         private readonly ICacher _cacher;
 
         public QuestionsControllerTests()
@@ -116,16 +118,18 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             IRecordAnswerCommand recordAnswerCommand = new RecordAnswerCommand(_databaseMock.Object);
             ICreateResponseCommand createResponseCommand = new CreateResponseCommand(_databaseMock.Object);
             IGetResponseQuery getResponseQuery = new GetResponseQuery(_databaseMock.Object);
+            IGetSubmissionQuery getSubmissionQuery = new GetSubmissionQuery(_databaseMock.Object);
             ICreateSubmissionCommand createSubmissionCommand = new CreateSubmissionCommand(_databaseMock.Object);
+            _getLatestResponseListForSubmissionQueryMock = new Mock<IGetLatestResponseListForSubmissionQuery>();
 
             var httpContext = new DefaultHttpContext();
             var tempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
             tempData["param"] = "admin";
 
-            GetSubmitAnswerQueries getSubmitAnswerQueries = new GetSubmitAnswerQueries(getQuestionQuery, getResponseQuery, getQuestionnaireQuery, user.Object);
+            GetSubmitAnswerQueries getSubmitAnswerQueries = new GetSubmitAnswerQueries(getQuestionQuery, getResponseQuery, getSubmissionQuery, getQuestionnaireQuery, user.Object);
             RecordSubmitAnswerCommands recordSubmitAnswerCommands = new RecordSubmitAnswerCommands(recordQuestionCommand, recordAnswerCommand, createSubmissionCommand, createResponseCommand);
 
-            _submitAnswerCommand = new SubmitAnswerCommand(getSubmitAnswerQueries, recordSubmitAnswerCommands);
+            _submitAnswerCommand = new SubmitAnswerCommand(getSubmitAnswerQueries, recordSubmitAnswerCommands, _getLatestResponseListForSubmissionQueryMock.Object);
 
             _controller = new QuestionsController(mockLogger.Object) { TempData = tempData };
 
@@ -170,7 +174,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var id = "Question1";
 
-            var result = await _controller.GetQuestionById(id, null, null, null, _submitAnswerCommand, CancellationToken.None);
+            var result = await _controller.GetQuestionById(id, null, 1, null, _submitAnswerCommand, CancellationToken.None);
             Assert.IsType<ViewResult>(result);
 
             var viewResult = result as ViewResult;
@@ -183,6 +187,198 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             Assert.NotNull(question);
             Assert.Equal("Question One", question.Question.Text);
+        }
+
+        [Fact]
+        public async Task GetQuestionById_Should_ReturnAsNormal_If_Submission_IsNull()
+        {
+            _controller.TempData["param"] = "SectionName+SectionId";
+
+            var questionRef = "Question1";
+
+            List<Submission> submissionList = new List<Submission>()
+            {
+                new Submission()
+                {
+                    Id = 1,
+                    EstablishmentId = -1,
+                    Completed = true,
+                    SectionId = "",
+                    SectionName = "",
+                    Maturity = null,
+                    RecomendationId = 0,
+                    DateCreated = DateTime.UtcNow,
+                    DateLastUpdated = null,
+                    DateCompleted = null
+                }
+            };
+
+            _databaseMock.Setup(m => m.GetSubmissions).Returns(submissionList.AsQueryable());
+            _databaseMock.Setup(m => m.FirstOrDefaultAsync(submissionList.AsQueryable())).ReturnsAsync(submissionList[0]);
+
+            var result = await _controller.GetQuestionById(questionRef, null, null, null, _submitAnswerCommand, CancellationToken.None);
+            Assert.IsType<ViewResult>(result);
+
+            var viewResult = result as ViewResult;
+
+            var model = viewResult!.Model;
+
+            Assert.IsType<QuestionViewModel>(model);
+
+            var question = model as QuestionViewModel;
+
+            Assert.NotNull(question);
+            Assert.Equal("Question1", question.Question.Sys.Id);
+        }
+
+        [Fact]
+        public async Task GetQuestionById_Should_ReturnAsNormal_If_PastSubmission_IsComplete()
+        {
+            _controller.TempData["param"] = "SectionName+SectionId";
+
+            var questionRef = "Question1";
+
+            List<Submission> submissionList = new List<Submission>()
+            {
+                new Submission()
+                {
+                    Id = 1,
+                    EstablishmentId = 0,
+                    Completed = true,
+                    SectionId = "SectionId",
+                    SectionName = "SectionName",
+                    Maturity = null,
+                    RecomendationId = 0,
+                    DateCreated = DateTime.UtcNow,
+                    DateLastUpdated = null,
+                    DateCompleted = null
+                }
+            };
+
+            _databaseMock.Setup(m => m.GetSubmissions).Returns(submissionList.AsQueryable());
+            _databaseMock.Setup(m => m.FirstOrDefaultAsync(submissionList.AsQueryable())).ReturnsAsync(submissionList[0]);
+
+            var result = await _controller.GetQuestionById(questionRef, null, null, null, _submitAnswerCommand, CancellationToken.None);
+            Assert.IsType<ViewResult>(result);
+
+            var viewResult = result as ViewResult;
+
+            var model = viewResult!.Model;
+
+            Assert.IsType<QuestionViewModel>(model);
+
+            var question = model as QuestionViewModel;
+
+            Assert.NotNull(question);
+            Assert.Equal("Question1", question.Question.Sys.Id);
+        }
+
+        [Fact]
+        public async Task GetQuestionById_Should_ReturnUnansweredQuestion_If_PastSubmission_IsNotCompleted()
+        {
+            _controller.TempData["param"] = "SectionName+SectionId";
+
+            var questionRef = "Question1";
+
+            List<Submission> submissionList = new List<Submission>()
+            {
+                new Submission()
+                {
+                    Id = 1,
+                    EstablishmentId = 0,
+                    Completed = false,
+                    SectionId = "SectionId",
+                    SectionName = "SectionName",
+                    Maturity = null,
+                    RecomendationId = 0,
+                    DateCreated = DateTime.UtcNow,
+                    DateLastUpdated = null,
+                    DateCompleted = null
+                }
+            };
+
+            List<QuestionWithAnswer> questionWithAnswerList = new List<QuestionWithAnswer>()
+            {
+                new QuestionWithAnswer()
+                {
+                    QuestionRef = questionRef,
+                    QuestionText = "Question One",
+                    AnswerRef = "Answer1",
+                    AnswerText = "Question 1 - Answer 1"
+                }
+            };
+
+            _databaseMock.Setup(m => m.GetSubmissions).Returns(submissionList.AsQueryable());
+            _databaseMock.Setup(m => m.FirstOrDefaultAsync(submissionList.AsQueryable())).ReturnsAsync(submissionList[0]);
+
+            _getLatestResponseListForSubmissionQueryMock.Setup(m => m.GetResponseListByDateCreated(1)).ReturnsAsync(questionWithAnswerList);
+
+            var result = await _controller.GetQuestionById(questionRef, null, null, null, _submitAnswerCommand, CancellationToken.None);
+            Assert.IsType<ViewResult>(result);
+
+            var viewResult = result as ViewResult;
+
+            var model = viewResult!.Model;
+
+            Assert.IsType<QuestionViewModel>(model);
+
+            var question = model as QuestionViewModel;
+
+            Assert.NotNull(question);
+            Assert.Equal("Question2", question.Question.Sys.Id);
+        }
+
+        [Fact]
+        public async Task GetQuestionById_Should_RedirectToCheckAnswersController_If_PastSubmission_IsNotCompleted_And_ThereIsNo_NextQuestion()
+        {
+            _controller.TempData["param"] = "SectionName+SectionId";
+
+            var questionRef = "Question2";
+
+            List<Submission> submissionList = new List<Submission>()
+            {
+                new Submission()
+                {
+                    Id = 1,
+                    EstablishmentId = 0,
+                    Completed = false,
+                    SectionId = "SectionId",
+                    SectionName = "SectionName",
+                    Maturity = null,
+                    RecomendationId = 0,
+                    DateCreated = DateTime.UtcNow,
+                    DateLastUpdated = null,
+                    DateCompleted = null
+                }
+            };
+
+            List<QuestionWithAnswer> questionWithAnswerList = new List<QuestionWithAnswer>()
+            {
+                new QuestionWithAnswer()
+                {
+                    QuestionRef = questionRef,
+                    QuestionText = "Question Two",
+                    AnswerRef = "Answer4",
+                    AnswerText = "Question 2 - Answer 4"
+                }
+            };
+
+            _databaseMock.Setup(m => m.GetSubmissions).Returns(submissionList.AsQueryable());
+            _databaseMock.Setup(m => m.FirstOrDefaultAsync(submissionList.AsQueryable())).ReturnsAsync(submissionList[0]);
+
+            _getLatestResponseListForSubmissionQueryMock.Setup(m => m.GetResponseListByDateCreated(1)).ReturnsAsync(questionWithAnswerList);
+
+            var result = await _controller.GetQuestionById(questionRef, null, null, null, _submitAnswerCommand, CancellationToken.None);
+            Assert.IsType<RedirectToActionResult>(result);
+
+            var redirectToActionResult = result as RedirectToActionResult;
+
+            Assert.NotNull(redirectToActionResult);
+            Assert.Equal("CheckAnswers", redirectToActionResult.ControllerName);
+            Assert.Equal("CheckAnswersPage", redirectToActionResult.ActionName);
+            Assert.NotNull(redirectToActionResult.RouteValues);
+            var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "submissionId");
+            Assert.Equal(1, id.Value);
         }
 
         [Fact]

@@ -94,6 +94,7 @@ public static class ProgramExtensions
         services.AddTransient<IGetAnswerQuery, GetAnswerQuery>();
 
         services.AddTransient<ICreateSubmissionCommand, CreateSubmissionCommand>();
+        services.AddTransient<IGetSubmissionQuery, GetSubmissionQuery>();
 
         services.AddTransient<ICreateResponseCommand, CreateResponseCommand>();
         services.AddTransient<IGetResponseQuery, GetResponseQuery>();
