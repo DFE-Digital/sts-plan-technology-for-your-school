@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 public class CookiesController : BaseController<CookiesController>
 {
     public const string CookieName = "cookies_preferences_set";
+
     public CookiesController(ILogger<CookiesController> logger) : base(logger)
     {
     }
@@ -85,7 +86,6 @@ public class CookiesController : BaseController<CookiesController>
         }
 
         TempData["UserPreferenceRecorded"] = true;
-
         return RedirectToAction("GetByRoute", "Pages", new { route = "cookies" });
     }
 }

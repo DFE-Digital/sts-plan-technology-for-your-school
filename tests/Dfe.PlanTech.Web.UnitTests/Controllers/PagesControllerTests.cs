@@ -7,6 +7,7 @@ using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -75,6 +76,17 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 .Build();
 
             _controller = new PagesController(mockLogger.Object, configuration);
+            
+            var httpContextMock = new Mock<HttpContext>();
+            var requestMock = new Mock<HttpRequest>();
+            
+            httpContextMock.Setup(c => c.Request).Returns(requestMock.Object);
+            requestMock.Setup(r => r.Cookies["cookies_preferences_set"]).Returns("true");
+
+            _controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = httpContextMock.Object
+            };
 
             _query = new GetPageQuery(_questionnaireCacherMock.Object, repositoryMock.Object);
         }
@@ -103,6 +115,17 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task Should_ReturnLandingPage_When_IndexRouteLoaded()
         {
+            var httpContextMock = new Mock<HttpContext>();
+            var requestMock = new Mock<HttpRequest>();
+            
+            httpContextMock.Setup(c => c.Request).Returns(requestMock.Object);
+            requestMock.Setup(r => r.Cookies["cookies_preferences_set"]).Returns("true");
+
+            _controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = httpContextMock.Object
+            };
+            
             var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None, It.IsAny<string>());
 
             Assert.IsType<ViewResult>(result);
@@ -142,6 +165,43 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public async Task Should_ThrowError_When_NoRouteFound()
         {
             await Assert.ThrowsAnyAsync<Exception>(() => _controller.GetByRoute("NOT A VALID ROUTE",_query, CancellationToken.None, It.IsAny<string>()));
+        }
+        
+        [Theory]
+        [InlineData("true")]
+        [InlineData("false")]
+        public async Task GoogleTrackingCodesAddedDependingOnWhatCookiePreferenceSetTo(string cookiePreference)
+        {
+            var httpContextMock = new Mock<HttpContext>();
+            var requestMock = new Mock<HttpRequest>();
+            
+            httpContextMock.Setup(c => c.Request).Returns(requestMock.Object);
+            requestMock.Setup(r => r.Cookies["cookies_preferences_set"]).Returns(cookiePreference);
+
+            _controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = httpContextMock.Object
+            };
+            
+            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None, It.IsAny<string>());
+
+            Assert.IsType<ViewResult>(result);
+
+            var viewResult = result as ViewResult;
+
+            var model = viewResult!.Model;
+            
+            var asPage = model as PageViewModel;
+            if (cookiePreference == "false")
+            {
+                Assert.NotEqual("Test Head", asPage!.GTMHead);
+                Assert.NotEqual("Test Body", asPage!.GTMBody);
+            }
+            else
+            {
+                Assert.Equal("Test Head", asPage!.GTMHead);
+                Assert.Equal("Test Body", asPage!.GTMBody);
+            }
         }
     }
 }
