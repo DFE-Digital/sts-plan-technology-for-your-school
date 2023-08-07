@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Application.Content.Queries;
+﻿using System.Diagnostics;
+using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -38,6 +39,14 @@ public class PagesController : BaseController<PagesController>
         var viewModel = CreatePageModel(page, param);
 
         return View("Page", viewModel);
+    }
+
+
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    [Route("/error")]
+    public IActionResult Error()
+    {
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 
     private PageViewModel CreatePageModel(Page page, string param = null!)
