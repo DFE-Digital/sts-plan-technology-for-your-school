@@ -34,8 +34,8 @@ module "main_hosting" {
   #############
   # Azure SQL #
   #############
-  enable_mssql_database       = true
-  mssql_database_name         = "${local.resource_prefix}-sqldb"
-  mssql_server_admin_password = local.az_sql_admin_password
+  enable_mssql_database              = true
+  mssql_database_name                = "${local.resource_prefix}-sqldb"
+  mssql_server_admin_password        = local.az_sql_admin_password
   mssql_server_public_access_enabled = true
 }
