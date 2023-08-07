@@ -39,7 +39,7 @@ jobs:
         shell: bash
         run: |
           sudo apt-get update -y  
-          sudo apt-get install -y libnss3-tools chromium-browser
+          sudo apt-get install -y libnss3-tools
 
       - name: Create trusted HTTPS cert
         shell: bash
