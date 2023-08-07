@@ -12,11 +12,11 @@
 
         public string SectionName { get; set; } = null!;
 
-        public string Maturity { get; set; } = null!;
+        public string? Maturity { get; set; }
 
         public int RecomendationId { get; set; }
 
-        public DateTime? DateCreated { get; set; }
+        public DateTime DateCreated { get; set; }
 
         public DateTime? DateLastUpdated { get; set; }
 
