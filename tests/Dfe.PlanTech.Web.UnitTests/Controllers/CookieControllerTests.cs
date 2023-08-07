@@ -116,7 +116,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
          [Theory]
          [InlineData("yes")]
          [InlineData("no")]
-         public async Task settingCookiePreferenceBasedOnInputRedirectsToCookiePage(string userPreference)
+         public Task settingCookiePreferenceBasedOnInputRedirectsToCookiePage(string userPreference)
          {
              CookiesController cookiesController = CreateStrut();
              
