@@ -30,13 +30,22 @@ jobs:
           dotnet_version: ${{ env.DOTNET_VERSION }}  
           solution_filename: plan-technology-for-your-school.sln
 
+      - name: Install dotnet coverage
+        run: dotnet tool install --global dotnet-coverage
+
       - name: Run unit tests
         uses: ./.github/actions/run-unit-tests
         with:
           solution_filename: plan-technology-for-your-school.sln
 
-      - name: Run SonarCloud
-        uses: ./github/actions/run-sonarcloud
+      - name: Merge test results
+        run: dotnet-coverage merge -f xml -o "coverage.xml" -s "coverage.settings.xml" -r coverage.cobertura.xml
+
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage-report
+          path: coverage.xml
 
   build-database-upgrader:  
     name: Build database upgrader
@@ -77,3 +86,33 @@ jobs:
           name: JEST Tests            # Name of the check run which will be created
           path: ./junit.xml    # Path to test results
           reporter: jest-junit        # Format of test results
+
+  run-sonarcloud:
+    runs-on: ubuntu-latest
+    name: Run Sonarcloud
+    needs: build-test-web-app
+
+    steps:
+      - name: Test result code coverage
+        uses: actions/download-artifact@v3
+        with:
+          name: code-coverage-report
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v1
+        with:
+          path: ~\sonar\cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Install SonarCloud scanners
+        run: dotnet tool install --global dotnet-sonarscanner
+        
+      - name: Build, Test and Analyze
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          dotnet-sonarscanner begin /k:"DFE-Digital_plan-technology-for-your-school" /o:"dfe-digital" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.coverage.exclusions=src/**/Program.cs,src/Dfe.PlanTech.Web/gulpfile.js,src/Dfe.PlanTech.Web/wwwroot/**
+
+          dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+
