@@ -11,7 +11,7 @@ jobs:
         defaults:
           run:
             shell: bash
-            working-directory: /src/Dfe.PlanTech.Web.Node/
+            working-directory: src/Dfe.PlanTech.Web.Node/
     
         steps:
           - name: Checkout
