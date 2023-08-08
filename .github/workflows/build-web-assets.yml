@@ -1,0 +1,47 @@
+name: Build and commit web assets (JS + CSS)
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    paths: 
+      - 'src/Dfe.PlanTech.Web.Node/**'
+
+jobs:
+    build-web-resouces:
+        name: Build JS and SCSS files
+        runs-on: ubuntu-22.04
+        defaults:
+          run:
+            working-directory: ./src/Dfe.PlanTech.Web.Node/
+
+        steps:
+          - name: Clone repo
+            uses: actions/checkout@v3
+            with:
+              ref: ${{ github.head_ref }}
+
+          - name: Setup Node.js
+            uses: actions/setup-node@v3
+            with:
+              node-version: "latest"
+    
+          - name: Install Dependencies
+            run: npm install
+    
+          - name: Build
+            run: npm run build
+          
+          - name: Commit and push changes
+            env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
+            run: |
+              if [[ `git status --porcelain` ]]; then
+                git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                git config --local user.name "github-actions[bot]"  
+                git commit -am "Updated JS + CSS files"
+                git push
+                echo "Commited changes"
+              else
+                echo "No changes to commit"
+              fi
+    
