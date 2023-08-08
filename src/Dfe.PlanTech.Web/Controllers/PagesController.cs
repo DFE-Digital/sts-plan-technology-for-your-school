@@ -51,10 +51,10 @@ public class PagesController : BaseController<PagesController>
 
     private PageViewModel CreatePageModel(Page page, string param = null!)
     {
-        bool userOptedOut = GetUserOptOutPreference();
+        bool acceptCookies = GetUserOptOutPreference();
         
-        string gtmHead = userOptedOut ? "" : Config.GetValue<string>("GTM:Head") ?? "";
-        string gtmBody = userOptedOut ? "" : Config.GetValue<string>("GTM:Body") ?? "";
+        string gtmHead = acceptCookies ?  Config.GetValue<string>("GTM:Head") ?? "" : "";
+        string gtmBody = acceptCookies ?  Config.GetValue<string>("GTM:Body") ?? "" : "";
 
         return new PageViewModel()
         {
@@ -74,8 +74,13 @@ public class PagesController : BaseController<PagesController>
     
     private bool GetUserOptOutPreference()
     {
-        var optOutValue = Request.Cookies["cookies_preferences_set"];
+        var userPreferenceCookieValue = Request.Cookies["cookies_preferences_set"];
 
-        return optOutValue == "false";
+        if (bool.TryParse(userPreferenceCookieValue, out bool acceptCookies))
+        {
+            return acceptCookies;
+        }
+        
+        return false;
     }
 }
