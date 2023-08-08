@@ -3,7 +3,9 @@ name: Build and commit web assets (JS + CSS)
 on:
   pull_request:
     branches: [ "main" ]
-  
+    paths: 
+      - 'src/Dfe.PlanTech.Web.Node/**'
+
 jobs:
     build-web-resouces:
         name: Build JS and SCSS files
