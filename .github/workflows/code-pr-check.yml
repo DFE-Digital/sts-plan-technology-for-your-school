@@ -24,6 +24,22 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
 
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v1
+        with:
+          path: ~\sonar\cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Install dotnet coverage
+        run: dotnet tool install --global dotnet-coverage
+  
+      - name: Install SonarCloud scanners
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: Start SonarCloud scanner
+        run: dotnet-sonarscanner begin /k:"DFE-Digital_plan-technology-for-your-school" /o:"dfe-digital" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.coverage.exclusions=src/**/Program.cs,src/Dfe.PlanTech.Web/gulpfile.js,src/Dfe.PlanTech.Web/wwwroot/**
+
       - name: Build web app  
         uses: ./.github/actions/build-dotnet-app
         with:
@@ -34,6 +50,18 @@ jobs:
         uses: ./.github/actions/run-unit-tests
         with:
           solution_filename: plan-technology-for-your-school.sln
+
+      - name: Merge test results
+        run: dotnet-coverage merge -f xml -o "coverage.xml" -s "coverage.settings.xml" -r coverage.cobertura.xml
+
+      - name: End SonarCloud Scanner
+        run: dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage-report
+          path: coverage.xml
 
   build-database-upgrader:  
     name: Build database upgrader
@@ -74,3 +102,4 @@ jobs:
           name: JEST Tests            # Name of the check run which will be created
           path: ./junit.xml    # Path to test results
           reporter: jest-junit        # Format of test results
+
