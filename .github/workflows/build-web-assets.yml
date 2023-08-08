@@ -15,10 +15,10 @@ jobs:
     
         steps:
           - name: Checkout
-            uses: actions/checkout@v3
-            with:
-              ref: ${{ github.ref }}
-    
+            env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            run: gh pr checkout ${{ github.event.pull_request.number }}
+      
           - name: Setup Node.js
             uses: actions/setup-node@v3
             with:
@@ -31,8 +31,12 @@ jobs:
             run: npm run build
           
           - name: Commit and push changes
+            env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
             run: |
               if [[ `git status --porcelain` ]]; then
+                git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                git config --local user.name "github-actions[bot]"  
                 git commit -am "Updated JS + CSS files"
                 git push
                 echo "Commited changes"
