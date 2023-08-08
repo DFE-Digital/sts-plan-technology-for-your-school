@@ -10,11 +10,9 @@ jobs:
         runs-on: ubuntu-22.04
     
         steps:
-          - name: Checkout
-            env:
-              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            run: gh pr checkout ${{ github.event.pull_request.number }}
-      
+          - name: Clone repo
+            uses: actions/checkout@v3
+        
           - name: Setup Node.js
             uses: actions/setup-node@v3
             with:
