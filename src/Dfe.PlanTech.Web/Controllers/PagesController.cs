@@ -3,6 +3,7 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
@@ -40,14 +41,27 @@ public class PagesController : BaseController<PagesController>
         return View("Page", viewModel);
     }
 
+
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    [Route("/error")]
+    public IActionResult Error()
+    {
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    }
+
     private PageViewModel CreatePageModel(Page page, string param = null!)
     {
+        bool acceptCookies = GetUserOptOutPreference();
+        
+        string gtmHead = acceptCookies ?  Config.GetValue<string>("GTM:Head") ?? "" : "";
+        string gtmBody = acceptCookies ?  Config.GetValue<string>("GTM:Body") ?? "" : "";
+
         return new PageViewModel()
         {
             Page = page,
             Param = param,
-            GTMHead = Config.GetValue<string>("GTM:Head") ?? "",
-            GTMBody = Config.GetValue<string>("GTM:Body") ?? "",
+            GTMHead = gtmHead,
+            GTMBody = gtmBody,
         };
     }
 
@@ -56,4 +70,17 @@ public class PagesController : BaseController<PagesController>
     /// </summary>
     /// <param name="route">Route slug from route binding</param>
     private string GetSlug(string? route) => (string.IsNullOrEmpty(route) ? Request.Path.Value : route) ?? "/";
+    
+    
+    private bool GetUserOptOutPreference()
+    {
+        var userPreferenceCookieValue = Request.Cookies["cookies_preferences_set"];
+
+        if (bool.TryParse(userPreferenceCookieValue, out bool acceptCookies))
+        {
+            return acceptCookies;
+        }
+        
+        return false;
+    }
 }

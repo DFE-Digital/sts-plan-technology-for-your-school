@@ -9,18 +9,21 @@ namespace Dfe.PlanTech.Application.Submission.Queries
 
         private readonly IGetQuestionQuery _getQuestionQuery;
         private readonly IGetResponseQuery _getResponseQuery;
+        private readonly IGetSubmissionQuery _getSubmissionQuery;
         private readonly Application.Questionnaire.Queries.GetQuestionQuery _getQuestionnaireQuery;
         private readonly IUser _user;
 
         public GetSubmitAnswerQueries(
             IGetQuestionQuery getQuestionQuery,
             IGetResponseQuery getResponseQuery,
+            IGetSubmissionQuery getSubmissionQuery,
             Application.Questionnaire.Queries.GetQuestionQuery getQuestionnaireQuery,
             IUser user)
         {
             _getQuestionQuery = getQuestionQuery;
             _getResponseQuery = getResponseQuery;
             _getQuestionnaireQuery = getQuestionnaireQuery;
+            _getSubmissionQuery = getSubmissionQuery;
             _user = user;
         }
 
@@ -32,6 +35,11 @@ namespace Dfe.PlanTech.Application.Submission.Queries
         public async Task<Domain.Responses.Models.Response[]?> GetResponseList(int submissionId)
         {
             return await _getResponseQuery.GetResponseListBy(submissionId);
+        }
+
+        public async Task<Domain.Submissions.Models.Submission?> GetSubmission(int establishmentId, string sectionId)
+        {
+            return await _getSubmissionQuery.GetSubmissionBy(establishmentId, sectionId);
         }
 
         public async Task<Domain.Questionnaire.Models.Question> GetQuestionnaireQuestion(string id, string? section, CancellationToken cancellationToken)

@@ -7,6 +7,7 @@ using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -21,7 +22,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private const string INDEX_SLUG = "/";
         private const string INDEX_TITLE = "Index";
 
-        private readonly List<Page> _pages = new() {
+        private readonly List<Page> _pages = new()
+        {
             new Page()
             {
                 Slug = "Landing",
@@ -40,14 +42,16 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 },
                 Content = Array.Empty<IContentComponent>()
             },
-            new Page(){
+            new Page()
+            {
                 Slug = INDEX_SLUG,
-                Title = new Title(){
+                Title = new Title()
+                {
                     Text = INDEX_TITLE,
                 },
                 Content = Array.Empty<IContentComponent>()
-                }
-            };
+            }
+        };
 
         private readonly PagesController _controller;
         private readonly GetPageQuery _query;
@@ -65,9 +69,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 Body = "Test Body"
             };
 
-            var inMemorySettings = new Dictionary<string, string?> {
-                {"GTM:Head", config.Head},
-                {"GTM:Body", config.Body},
+            var inMemorySettings = new Dictionary<string, string?>
+            {
+                { "GTM:Head", config.Head },
+                { "GTM:Body", config.Body },
             };
 
             IConfiguration configuration = new ConfigurationBuilder()
@@ -76,33 +81,57 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             _controller = new PagesController(mockLogger.Object, configuration);
 
+            var httpContextMock = new Mock<HttpContext>();
+            var requestMock = new Mock<HttpRequest>();
+
+            httpContextMock.Setup(c => c.Request).Returns(requestMock.Object);
+            requestMock.Setup(r => r.Cookies["cookies_preferences_set"]).Returns("true");
+
+            _controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = httpContextMock.Object
+            };
+
             _query = new GetPageQuery(_questionnaireCacherMock.Object, repositoryMock.Object);
         }
 
         private Mock<IContentRepository> SetupRepositoryMock()
         {
             var repositoryMock = new Mock<IContentRepository>();
-            repositoryMock.Setup(repo => repo.GetEntities<Page>(It.IsAny<IGetEntitiesOptions>(), It.IsAny<CancellationToken>())).ReturnsAsync((IGetEntitiesOptions options, CancellationToken _) =>
-            {
-                if (options?.Queries != null)
+            repositoryMock
+                .Setup(repo => repo.GetEntities<Page>(It.IsAny<IGetEntitiesOptions>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((IGetEntitiesOptions options, CancellationToken _) =>
                 {
-                    foreach (var query in options.Queries)
+                    if (options?.Queries != null)
                     {
-                        if (query is ContentQueryEquals equalsQuery && query.Field == "fields.slug")
+                        foreach (var query in options.Queries)
                         {
-                            return _pages.Where(page => page.Slug == equalsQuery.Value);
+                            if (query is ContentQueryEquals equalsQuery && query.Field == "fields.slug")
+                            {
+                                return _pages.Where(page => page.Slug == equalsQuery.Value);
+                            }
                         }
                     }
-                }
 
-                return Array.Empty<Page>();
-            });
+                    return Array.Empty<Page>();
+                });
             return repositoryMock;
         }
 
         [Fact]
         public async Task Should_ReturnLandingPage_When_IndexRouteLoaded()
         {
+            var httpContextMock = new Mock<HttpContext>();
+            var requestMock = new Mock<HttpRequest>();
+
+            httpContextMock.Setup(c => c.Request).Returns(requestMock.Object);
+            requestMock.Setup(r => r.Cookies["cookies_preferences_set"]).Returns("true");
+
+            _controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = httpContextMock.Object
+            };
+
             var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None, It.IsAny<string>());
 
             Assert.IsType<ViewResult>(result);
@@ -141,7 +170,67 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task Should_ThrowError_When_NoRouteFound()
         {
-            await Assert.ThrowsAnyAsync<Exception>(() => _controller.GetByRoute("NOT A VALID ROUTE",_query, CancellationToken.None, It.IsAny<string>()));
+            await Assert.ThrowsAnyAsync<Exception>(() =>
+                _controller.GetByRoute("NOT A VALID ROUTE", _query, CancellationToken.None, It.IsAny<string>()));
+        }
+
+        [Fact]
+        public void Should_Retrieve_ErrorPage()
+        {
+            var httpContextMock = new Mock<HttpContext>();
+
+            var controllerContext = new ControllerContext
+            {
+                HttpContext = httpContextMock.Object
+            };
+
+            _controller.ControllerContext = controllerContext;
+
+            var result = _controller.Error();
+
+            var viewResult = result as ViewResult;
+
+            var model = viewResult!.Model;
+
+            Assert.IsType<ErrorViewModel>(model);
+        }
+
+        [Theory]
+        [InlineData("true")]
+        [InlineData("false")]
+        [InlineData("")]
+        public async Task GoogleTrackingCodesAddedDependingOnWhatCookiePreferenceSetTo(string cookiePreference)
+        {
+            var httpContextMock = new Mock<HttpContext>();
+            var requestMock = new Mock<HttpRequest>();
+
+            httpContextMock.Setup(c => c.Request).Returns(requestMock.Object);
+            requestMock.Setup(r => r.Cookies["cookies_preferences_set"]).Returns(cookiePreference);
+
+            _controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = httpContextMock.Object
+            };
+
+            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None, It.IsAny<string>());
+
+            Assert.IsType<ViewResult>(result);
+
+            var viewResult = result as ViewResult;
+
+            var model = viewResult!.Model;
+
+            var asPage = model as PageViewModel;
+            if (cookiePreference == "true")
+            {
+                Assert.Equal("Test Head", asPage!.GTMHead);
+                Assert.Equal("Test Body", asPage!.GTMBody);
+            }
+            else
+            {
+                Assert.NotEqual("Test Head", asPage!.GTMHead);
+                Assert.NotEqual("Test Body", asPage!.GTMBody);
+            }
         }
     }
 }
