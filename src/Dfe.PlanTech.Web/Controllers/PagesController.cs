@@ -76,8 +76,11 @@ public class PagesController : BaseController<PagesController>
     {
         var userPreferenceCookieValue = Request.Cookies["cookies_preferences_set"];
 
-        bool.TryParse(userPreferenceCookieValue, out bool acceptCookies);
+        if (bool.TryParse(userPreferenceCookieValue, out bool acceptCookies))
+        {
+            return acceptCookies;
+        }
         
-        return acceptCookies;
+        return false;
     }
 }
