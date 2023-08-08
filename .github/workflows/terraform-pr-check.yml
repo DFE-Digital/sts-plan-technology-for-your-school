@@ -50,7 +50,7 @@ jobs:
   validate-terraform:  
     name: Validate Terraform 
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment || 'dev' }}
+    environment: ${{ github.event.inputs.environment || 'Tst' }}
     defaults:
       run:
         working-directory: ${{env.TF_WORKING_DIRECTORY}}
@@ -81,6 +81,11 @@ jobs:
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
           az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+
+      - name: Related RG's'
+        shell: bash
+        run: |
+          az group list
 
       - name: Add Runner to KV whitelist
         uses: azure/CLI@v1
