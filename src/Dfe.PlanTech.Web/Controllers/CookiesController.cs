@@ -1,33 +1,42 @@
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Models;
-
-namespace Dfe.PlanTech.Web.Controllers;
-
+using Dfe.PlanTech.Application.Cookie.Interfaces;
+using Dfe.PlanTech.Application.Cookie.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
+namespace Dfe.PlanTech.Web.Controllers;
 
 [Authorize]
 [Route("/cookies")]
 public class CookiesController : BaseController<CookiesController>
 {
-    public const string CookieName = "cookies_preferences_set";
+    private ICookieService _cookieService;
 
-    public CookiesController(ILogger<CookiesController> logger) : base(logger)
+    public CookiesController(ILogger<CookiesController> logger, ICookieService cookieService) : base(logger)
     {
+        _cookieService = cookieService;
     }
 
     [HttpPost("accept")]
     public IActionResult Accept()
     {
-        CreateCookie(CookieName, "true");
+        _cookieService.SetPreference("true");
+        return RedirectToPlaceOfOrigin();
+    }
+
+    [HttpPost("reject")]
+    public IActionResult Reject()
+    {
+        _cookieService.SetPreference("false");
         return RedirectToPlaceOfOrigin();
     }
 
     [HttpPost("hidebanner")]
     public IActionResult HideBanner()
     {
-        CreateCookie("cookies_preferences_hidden", "true");
+       // CreateCookie("cookies_preferences_hidden", "true");
         return RedirectToPlaceOfOrigin();
     }
 
@@ -37,14 +46,7 @@ public class CookiesController : BaseController<CookiesController>
         return Redirect(returnUrl);
     }
 
-    private void CreateCookie(string key, string value)
-    {
-        CookieOptions cookieOptions = new CookieOptions();
-        cookieOptions.Secure = true;
-        cookieOptions.HttpOnly = true;
-        cookieOptions.Expires = new DateTimeOffset(DateTime.Now.AddYears(1));
-        HttpContext.Response.Cookies.Append(key, value, cookieOptions);
-    }
+
 
     public async Task<IActionResult> GetCookiesPage([FromServices] GetPageQuery getPageQuery)
     {
@@ -67,17 +69,9 @@ public class CookiesController : BaseController<CookiesController>
     }
 
     [HttpPost]
-    public IActionResult CookiePreference(string userPreference)
+    public IActionResult CookiePreference(HttpContext.Response response, string userPreference)
     {
-        if (userPreference == "yes")
-        {
-            CreateCookie(CookieName, "true");
-        }
-        else
-        {
-            CreateCookie(CookieName, "false");
-        }
-
+        CookieService.SetPreference(userPreference);
         TempData["UserPreferenceRecorded"] = true;
         return RedirectToAction("GetByRoute", "Pages", new { route = "cookies" });
     }
