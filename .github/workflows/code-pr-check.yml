@@ -35,6 +35,9 @@ jobs:
         with:
           solution_filename: plan-technology-for-your-school.sln
 
+      - name: Run SonarCloud
+        uses: ./github/actions/run-sonar-cloud
+
   build-database-upgrader:  
     name: Build database upgrader
     runs-on: ubuntu-latest
