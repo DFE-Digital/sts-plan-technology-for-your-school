@@ -23,8 +23,7 @@ public class HyperlinkRenderer : BaseRichTextContentPartRender
             return stringBuilder;
         }
 
-        stringBuilder.Append("<a href=\"");
-        stringBuilder.Append(content.Data.Uri);
+        AddTagAndHref(content, stringBuilder);
 
         if (_options.Classes != null)
         {
@@ -39,5 +38,12 @@ public class HyperlinkRenderer : BaseRichTextContentPartRender
 
         stringBuilder.Append("</a>");
         return stringBuilder;
+    }
+
+    private static void AddTagAndHref(IRichTextContent content, StringBuilder stringBuilder)
+    {
+        stringBuilder.Append("<a href=\"");
+        stringBuilder.Append(content.Data?.Uri ?? "");
+        stringBuilder.Append('"');
     }
 }
