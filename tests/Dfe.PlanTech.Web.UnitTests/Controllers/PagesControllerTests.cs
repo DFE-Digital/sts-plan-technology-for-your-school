@@ -198,6 +198,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Theory]
         [InlineData("true")]
         [InlineData("false")]
+        [InlineData("")]
         public async Task GoogleTrackingCodesAddedDependingOnWhatCookiePreferenceSetTo(string cookiePreference)
         {
             var httpContextMock = new Mock<HttpContext>();
@@ -220,15 +221,15 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var model = viewResult!.Model;
 
             var asPage = model as PageViewModel;
-            if (cookiePreference == "false")
-            {
-                Assert.NotEqual("Test Head", asPage!.GTMHead);
-                Assert.NotEqual("Test Body", asPage!.GTMBody);
-            }
-            else
+            if (cookiePreference == "true")
             {
                 Assert.Equal("Test Head", asPage!.GTMHead);
                 Assert.Equal("Test Body", asPage!.GTMBody);
+            }
+            else
+            {
+                Assert.NotEqual("Test Head", asPage!.GTMHead);
+                Assert.NotEqual("Test Body", asPage!.GTMBody);
             }
         }
     }
