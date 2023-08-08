@@ -8,14 +8,9 @@ jobs:
     build-web-resouces:
         name: Build JS and SCSS files
         runs-on: ubuntu-22.04
-        defaults:
-          run:
-            shell: bash
-            working-directory: src/Dfe.PlanTech.Web.Node/
     
         steps:
           - name: Checkout
-            working-directory: ./
             env:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             run: gh pr checkout ${{ github.event.pull_request.number }}
@@ -26,9 +21,11 @@ jobs:
               node-version: "latest"
     
           - name: Install Dependencies
+            working-directory: ./src/Dfe.PlanTech.Web.Node/
             run: npm install
     
           - name: Build
+            working-directory: ./src/Dfe.PlanTech.Web.Node/
             run: npm run build
           
           - name: Commit and push changes
