@@ -32,6 +32,13 @@ public class TableRendererTests
             Value = ""
         };
 
+        var tableCellTwo = new RichTextContent()
+        {
+            Content = new RichTextContent[] { tableCellText },
+            NodeType = "paragraph",
+            Value = ""
+        };
+        
         var tableCellContent = new RichTextContent()
         {
             Content = new RichTextContent[] { tableCell },
@@ -46,16 +53,30 @@ public class TableRendererTests
             Value = ""
         };
 
+        var tableCellContentTwo = new RichTextContent()
+        {
+            Content = new RichTextContent[] { tableCell },
+            NodeType = "table-cell",
+            Value = ""
+        };
+
+        var tableHeaderCellsContentTwo = new RichTextContent()
+        {
+            Content = new RichTextContent[] { tableCell },
+            NodeType = "table-header-cell",
+            Value = ""
+        };
+        
         var tableHeaderRowContent = new RichTextContent()
         {
-            Content = new RichTextContent[] { tableHeaderCellsContent },
+            Content = new RichTextContent[] { tableHeaderCellsContent, tableHeaderCellsContentTwo },
             NodeType = "table-row",
             Value = "",
         };
 
         var tableBodyRowContent = new RichTextContent()
         {
-            Content = new RichTextContent[] { tableCellContent },
+            Content = new RichTextContent[] { tableCellContent, tableCellContentTwo },
             NodeType = "table-row",
             Value = "",
         };
@@ -107,7 +128,7 @@ public class TableRendererTests
         StringBuilder output = tableRenderer.AddHtml(content, rendererCollection, new StringBuilder());
 
         Assert.Equal(
-            "<table class=\"govuk-table\"><thead class=\"govuk-table__head\"><tr class=\"govuk-table__row\"><th class=\"govuk-table__header\">test</th></tr></thead><tr class=\"govuk-table__row\"><th scope=\"row\" class=\"govuk-table__header\">test</th></tr></table>",
+            "<table class=\"govuk-table\"><thead class=\"govuk-table__head\"><tr class=\"govuk-table__row\"><th class=\"govuk-table__header\">test</th><th class=\"govuk-table__header\">test</th></tr></thead><tr class=\"govuk-table__row\"><th scope=\"row\" class=\"govuk-table__header\">test</th><td class=\"govuk-table__cell\">test</td></tr></table>",
             output.ToString());
     }
 }
