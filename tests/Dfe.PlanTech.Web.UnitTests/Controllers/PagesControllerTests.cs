@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Cookie.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -62,6 +63,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Mock<IContentRepository> repositoryMock = SetupRepositoryMock();
 
             var mockLogger = new Mock<ILogger<PagesController>>();
+            Mock<ICookieService> cookiesMock = new Mock<ICookieService>();
 
             var config = new GtmConfiguration()
             {
@@ -79,7 +81,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 .AddInMemoryCollection(initialData: inMemorySettings)
                 .Build();
 
-            _controller = new PagesController(mockLogger.Object, configuration);
+            _controller = new PagesController(mockLogger.Object, configuration, cookiesMock.Object);
 
             var httpContextMock = new Mock<HttpContext>();
             var requestMock = new Mock<HttpRequest>();

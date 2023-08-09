@@ -5,22 +5,22 @@ namespace Dfe.PlanTech.Application.Cookie.Service
 {
     public class CookieService : ICookieService
     {
-        private HttpContext _context;
+        private IHttpContextAccessor _context;
 
-        public CookieService(HttpContext context)
+        public CookieService(IHttpContextAccessor context)
         {
             _context = context;
         }
 
         public bool GetCookiePreferenceValue()
         {
-            bool.TryParse(_context.Request.Cookies["cookies_preferences_set"], out bool cookieValue);
+            bool.TryParse(_context.HttpContext.Request.Cookies["cookies_preferences_set"], out bool cookieValue);
             return cookieValue;
         }
 
         public bool SetPreference(string userPreference)
         {
-            if (userPreference == "yes")
+            if (userPreference == "true")
             {
                 CreateCookie("cookies_preferences_set", "true");
                 return true;
@@ -38,7 +38,7 @@ namespace Dfe.PlanTech.Application.Cookie.Service
             cookieOptions.Secure = true;
             cookieOptions.HttpOnly = true;
             cookieOptions.Expires = new DateTimeOffset(DateTime.Now.AddYears(1));
-            _context.Response.Cookies.Append(key, value, cookieOptions);
+            _context.HttpContext.Response.Cookies.Append(key, value, cookieOptions);
         }
     }
 }

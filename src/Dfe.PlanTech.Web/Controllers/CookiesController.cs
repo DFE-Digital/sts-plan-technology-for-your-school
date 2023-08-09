@@ -5,6 +5,8 @@ using Dfe.PlanTech.Application.Cookie.Interfaces;
 using Dfe.PlanTech.Application.Cookie.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http.Features;
+using Polly;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
@@ -36,7 +38,7 @@ public class CookiesController : BaseController<CookiesController>
     [HttpPost("hidebanner")]
     public IActionResult HideBanner()
     {
-       // CreateCookie("cookies_preferences_hidden", "true");
+        // _cookieService.SetPreference("false");
         return RedirectToPlaceOfOrigin();
     }
 
@@ -48,7 +50,7 @@ public class CookiesController : BaseController<CookiesController>
 
 
 
-    public async Task<IActionResult> GetCookiesPage([FromServices] GetPageQuery getPageQuery)
+    public IActionResult GetCookiesPage([FromServices] GetPageQuery getPageQuery)
     {
         //TODO: Need to setup content in contentful.
         //Page cookiesPageContent = await getPageQuery.GetPageBySlug("cookies", CancellationToken.None);
@@ -69,9 +71,9 @@ public class CookiesController : BaseController<CookiesController>
     }
 
     [HttpPost]
-    public IActionResult CookiePreference(HttpContext.Response response, string userPreference)
+    public IActionResult CookiePreference(string userPreference)
     {
-        CookieService.SetPreference(userPreference);
+        _cookieService.SetPreference(userPreference);
         TempData["UserPreferenceRecorded"] = true;
         return RedirectToAction("GetByRoute", "Pages", new { route = "cookies" });
     }

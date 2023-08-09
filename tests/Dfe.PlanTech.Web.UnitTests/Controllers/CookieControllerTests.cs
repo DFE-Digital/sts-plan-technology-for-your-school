@@ -1,5 +1,6 @@
 ﻿using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Cookie.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
@@ -32,7 +33,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public static CookiesController CreateStrut()
         {
             Mock<ILogger<CookiesController>> loggerMock = new Mock<ILogger<CookiesController>>();
-            return new CookiesController(loggerMock.Object);
+            Mock<ICookieService> cookiesMock = new Mock<ICookieService>();
+            Mock<ITrackingConsentFeature> trackingConsentMock = new Mock<ITrackingConsentFeature>();
+
+            return new CookiesController(loggerMock.Object, cookiesMock.Object);
         }
 
         [Theory]
@@ -99,18 +103,18 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
          [Fact]
          public async Task CookiesPageDisplays()
          {
-             Mock<IQuestionnaireCacher> questionnaireCacherMock = new Mock<IQuestionnaireCacher>();
-             Mock<IContentRepository> contentRepositoryMock = SetupRepositoryMock();
-             Mock<GetPageQuery> _getPageQueryMock = new Mock<GetPageQuery>(questionnaireCacherMock.Object, contentRepositoryMock.Object);
+            Mock<IQuestionnaireCacher> questionnaireCacherMock = new Mock<IQuestionnaireCacher>();
+            Mock<IContentRepository> contentRepositoryMock = SetupRepositoryMock();
+            Mock<GetPageQuery> _getPageQueryMock = new Mock<GetPageQuery>(questionnaireCacherMock.Object, contentRepositoryMock.Object);
 
-             CookiesController cookiesController = CreateStrut();
-             var result = await cookiesController.GetCookiesPage(_getPageQueryMock.Object);
-             Assert.IsType<ViewResult>(result);
+            CookiesController cookiesController = CreateStrut();
+            var result = cookiesController.GetCookiesPage(_getPageQueryMock.Object);
+            Assert.IsType<ViewResult>(result);
              
-             var viewResult = result as ViewResult;
+            var viewResult = result as ViewResult;
 
-             Assert.NotNull(viewResult);
-             Assert.Equal("Cookies", viewResult.ViewName);
+            Assert.NotNull(viewResult);
+            Assert.Equal("Cookies", viewResult.ViewName);
          }
          
          [Theory]

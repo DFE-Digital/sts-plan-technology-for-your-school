@@ -7,6 +7,7 @@ using Dfe.PlanTech.Web.Helpers;
 using GovUk.Frontend.AspNetCore;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,13 @@ if (builder.Environment.IsProduction())
                         .PersistKeysToDbContext<DataProtectionDbContext>()
                         .ProtectKeysWithAzureKeyVault(new Uri(keyVaultUri + "keys/dataprotection"), azureCredentials);
 }
+
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    options.CheckConsentNeeded = context => true;
+    options.MinimumSameSitePolicy = SameSiteMode.None;
+    options.Secure = CookieSecurePolicy.Always;
+});
 
 builder.Services.AddCaching();
 builder.Services.AddCQRSServices();
@@ -53,11 +61,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseCookiePolicy(
-    new CookiePolicyOptions
-    {
-        Secure = CookieSecurePolicy.Always
-    });
+app.UseCookiePolicy();
 
 app.UseStaticFiles();
 
