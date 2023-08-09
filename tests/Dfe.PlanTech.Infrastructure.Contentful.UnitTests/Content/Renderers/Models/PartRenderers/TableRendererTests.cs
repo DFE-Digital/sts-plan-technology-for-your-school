@@ -17,14 +17,14 @@ public class TableRendererTests
 {
     private const string NODE_TYPE = "table";
 
-    private RichTextContent createTestData()
+    private static RichTextContent createTestData()
     {
         var tableCellText = new RichTextContent()
         {
             NodeType = "text",
             Value = "test"
         };
-        
+
         var tableCell = new RichTextContent()
         {
             Content = new RichTextContent[] { tableCellText },
@@ -102,11 +102,11 @@ public class TableRendererTests
             { tableRenderer, tableRowRenderer, tableHeaderCellRenderer, tableCellRenderer };
 
         var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(),
-            renderers );
+            renderers);
 
         StringBuilder output = tableRenderer.AddHtml(content, rendererCollection, new StringBuilder());
-        
-        Assert.True(output.ToString() != "");
 
+        Assert.True(output.ToString() ==
+                    "<table class=\"govuk-table\"><thead class=\"govuk-table__head\"><tr class=\"govuk-table__row\"><th class=\"govuk-table__header\">test</th></tr><thead><tr class=\"govuk-table__row\"><td>test</td></tr></table>");
     }
 }
