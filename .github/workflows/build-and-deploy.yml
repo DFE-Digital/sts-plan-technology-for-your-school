@@ -165,3 +165,20 @@ jobs:
               --image ${{ secrets.AZ_ACR_URL }}/${{ env.DOCKER_IMAGE }}:${{ needs.set-env.outputs.release }} \
               --output none
             
+  run-tests:
+    name: Run E2E Tests
+    needs: [ set-env, deploy-image ]
+    runs-on: ubuntu-22.04
+    if: ${{ needs.set-env.outputs.environment }} == 'dev'
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Cypress tests
+        uses: ./.github/actions/run-e2e-tests
+        with:
+          url: ${{ secrets.AZ_FRONTDOOR_URL }}
+          dsi_url: ${{ secrets.DSI_URL }}
+          dsi_username: ${{ secrets.DSI_USERNAME }}
+          dsi_password: ${{ secrets.DSI_PASSWORD }}
