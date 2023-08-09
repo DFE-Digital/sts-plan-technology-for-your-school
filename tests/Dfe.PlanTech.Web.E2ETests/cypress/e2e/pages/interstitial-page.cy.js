@@ -1,6 +1,5 @@
 describe("landing page", () => {
-    const url = Cypress.env("URL") + "/broadband-connection";
-    const selfassessmentUrl = Cypress.env("URL") + "/self-assessment";
+    const url = "/broadband-connection";
 
     beforeEach(() => {
         cy.loginWithEnv(url);

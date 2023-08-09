@@ -1,7 +1,7 @@
 const PARENT_SELECTOR = "details.govuk-details";
 
 describe("dropdown", () => {
-  const url = Cypress.env("URL");
+  const url = Cypress.env("/");
 
   beforeEach(() => {
     cy.visit(url);

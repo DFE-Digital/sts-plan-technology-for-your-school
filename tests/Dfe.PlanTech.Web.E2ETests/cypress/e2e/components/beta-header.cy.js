@@ -1,5 +1,5 @@
 describe("beta header", () => {
-  const url = Cypress.env("URL");
+  const url = Cypress.env("/");
 
   const expectedFeedbackLink = "https://feedback";
 

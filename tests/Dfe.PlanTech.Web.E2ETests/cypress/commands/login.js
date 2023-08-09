@@ -1,20 +1,30 @@
-const SELF_ASSESSMENT_URL = Cypress.env("URL") + "/self-assessment";
-
-Cypress.Commands.add("login", (email, password, url) => {
-    cy.visit(Cypress.env("URL"));
-
+Cypress.Commands.add("login", ({ email, password, url }) => {
     cy.visit(url);
+    cy.get("input#username").type(email);
+    cy.get("input#password").type(password);
+    cy.get("div.govuk-button-group button.govuk-button").first().click();
 
-    cy.session([email, password, url], () => {
-        cy.origin(Cypress.env("DSiUrl"), { args: { email, password } },({ email, password }) => {
-            cy.get("input#username").type(email);
-            cy.get("input#password").type(password);
-            cy.get("div.govuk-button-group button.govuk-button").click();
-        });
-
-    }, {
-        cacheAcrossSpecs: true
+    cy.origin(Cypress.env("URL"), { args: { url } }, ({ url }) => {
+        cy.url().should("contain", url);
     });
 });
 
-Cypress.Commands.add("loginWithEnv", (url) => cy.login(Cypress.env("Username"), Cypress.env("Password"), url));
+Cypress.Commands.add("loginWithEnv", (url) => {
+    const args = {
+        email: Cypress.env("Username"),
+        password: Cypress.env("Password"),
+        url
+    };
+
+    cy.session(
+        args.email,
+        () => {
+            cy.login(args);
+        },
+        {
+            cacheAcrossSpecs: true,
+        }
+    )
+
+    cy.visit(url);
+});

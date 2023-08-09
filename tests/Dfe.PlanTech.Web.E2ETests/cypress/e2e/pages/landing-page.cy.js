@@ -1,5 +1,5 @@
 describe("landing page", () => {
-  const url = Cypress.env("URL");
+  const url = "/";
 
   beforeEach(() => {
     cy.visit(url);

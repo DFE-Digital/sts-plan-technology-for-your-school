@@ -1,22 +1,22 @@
 describe("landing page", () => {
-  const url = Cypress.env("URL") + "/self-assessment";
+  const url = Cypress.env("/") + "/self-assessment";
 
   beforeEach(() => {
     cy.loginWithEnv(url);
-    cy.origin(Cypress.env("URL"), () => {
+    cy.origin(Cypress.env("/"), () => {
       cy.get("ul.app-task-list__items > li a").first().click();
       cy.get('a.govuk-button').contains('Continue').click();
     });
   });
 
   it("should contain form", () => {
-    cy.origin(Cypress.env("URL"), () => {
+    cy.origin(Cypress.env("/"), () => {
       cy.get("form").should("exist");
     });
   });
 
   it("should contain heading", () => {
-    cy.origin(Cypress.env("URL"), () => {
+    cy.origin(Cypress.env("/"), () => {
       cy.get("form h1.govuk-fieldset__heading").should("exist");
 
       cy.get("form h1.govuk-fieldset__heading")
@@ -26,7 +26,7 @@ describe("landing page", () => {
   });
 
   it("should contain answers", () => {
-    cy.origin(Cypress.env("URL"), () => {
+    cy.origin(Cypress.env("/"), () => {
       cy.get("form div.govuk-radios div.govuk-radios__item")
         .should("exist")
         .and("have.length.greaterThan", 1)
@@ -41,13 +41,13 @@ describe("landing page", () => {
   });
 
   it("should have submit button", () => {
-    cy.origin(Cypress.env("URL"), () => {
+    cy.origin(Cypress.env("/"), () => {
       cy.get("form button.govuk-button").should("exist");
     });
   });
 
   it("should navigate to next page on submit", () => {
-    cy.origin(Cypress.env("URL"), () => {
+    cy.origin(Cypress.env("/"), () => {
 
       const path = cy.location("pathname");
 
@@ -66,7 +66,7 @@ describe("landing page", () => {
   });
 
   it("should have back button", () => {
-    cy.origin(Cypress.env("URL"), () => {
+    cy.origin(Cypress.env("/"), () => {
       cy.get("a.govuk-back-link")
         .should("exist")
         .invoke("text")
@@ -75,7 +75,7 @@ describe("landing page", () => {
   });
 
   it("should have back button that navigates to last question once submitted", () => {
-    cy.origin(Cypress.env("URL"), { args: { FIRST_QUESTION } }, ({ FIRST_QUESTION }) => {
+    cy.origin(Cypress.env("/"), { args: { FIRST_QUESTION } }, ({ FIRST_QUESTION }) => {
       cy.get("form div.govuk-radios div.govuk-radios__item input")
         .first()
         .click();
