@@ -106,7 +106,8 @@ public class TableRendererTests
 
         StringBuilder output = tableRenderer.AddHtml(content, rendererCollection, new StringBuilder());
 
-        Assert.True(output.ToString() ==
-                    "<table class=\"govuk-table\"><thead class=\"govuk-table__head\"><tr class=\"govuk-table__row\"><th class=\"govuk-table__header\">test</th></tr><thead><tr class=\"govuk-table__row\"><td>test</td></tr></table>");
+        Assert.Equal(
+            "<table class=\"govuk-table\"><thead class=\"govuk-table__head\"><tr class=\"govuk-table__row\"><th class=\"govuk-table__header\">test</th></tr></thead><tr class=\"govuk-table__row\"><th scope=\"row\" class=\"govuk-table__header\">test</th></tr></table>",
+            output.ToString());
     }
 }

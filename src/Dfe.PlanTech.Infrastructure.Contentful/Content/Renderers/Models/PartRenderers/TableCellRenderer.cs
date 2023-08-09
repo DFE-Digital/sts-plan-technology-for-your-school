@@ -12,11 +12,28 @@ public class TableCellRenderer : BaseRichTextContentPartRender
 
     public override StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
-        stringBuilder.Append("<td>");
+        
+        String rowBeginsString = "<tr class=\"govuk-table__row\">";
 
-        stringBuilder.Append(content.Content[0].Content[0].Value);
+        if (stringBuilder.ToString().EndsWith(rowBeginsString))
+        {
+            stringBuilder.Append("<th scope=\"row\" class=\"govuk-table__header\">");
 
-        stringBuilder.Append("</td>");
+            stringBuilder.Append(content.Content[0].Content[0].Value);
+
+            stringBuilder.Append("</th>");
+        }
+        else
+        {
+            stringBuilder.Append("<td class=\"govuk-table__cell\">");
+
+            stringBuilder.Append(content.Content[0].Content[0].Value);
+
+            stringBuilder.Append("</td>");
+        }
+
+
+       
 
         return stringBuilder;
     }

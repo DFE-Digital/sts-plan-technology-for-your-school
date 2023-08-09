@@ -27,7 +27,7 @@ public class TableRowRenderer : BaseRichTextContentPartRender
         
         if (isHeaderRow)
         {
-            stringBuilder.Append("<thead>");
+            stringBuilder.Append("</thead>");
         }
 
         return stringBuilder;
