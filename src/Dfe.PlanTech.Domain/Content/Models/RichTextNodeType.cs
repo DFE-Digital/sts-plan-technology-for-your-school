@@ -9,5 +9,9 @@ public enum RichTextNodeType
     Text,
     Document,
     Hyperlink,
-    OrderedList
+    OrderedList,
+    Table,
+    TableRow,
+    TableHeaderCell,
+    TableCell,
 }
