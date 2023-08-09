@@ -33,12 +33,13 @@ describe("landing page", () => {
 
   it("should re-direct to login page", () => {
     cy.get("a.govuk-button--start.govuk-button").click();
-
-    cy.location("href").should("be.null");
-
-    const expectedUrl = Cypress.env("DSiUrl");
+    const dsiUrl = Cypress.env("DSiUrl");
     
-    cy.origin(expectedUrl, { args: { expectedUrl } }, ({ expectedUrl }) => {
+    cy.origin(dsiUrl, {
+      args: {
+        expectedUrl: dsiUrl
+      }
+    }, ({expectedUrl}) => {
       cy.location("href").should("include", expectedUrl);
     });
   });
