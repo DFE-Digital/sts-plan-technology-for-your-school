@@ -1,5 +1,4 @@
 using System.Text;
-using Contentful.Core.Models;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
@@ -128,7 +127,7 @@ public class TableRendererTests
         StringBuilder output = tableRenderer.AddHtml(content, rendererCollection, new StringBuilder());
 
         Assert.Equal(
-            "<table class=\"govuk-table\"><thead class=\"govuk-table__head\"><tr class=\"govuk-table__row\"><th class=\"govuk-table__header\">test</th><th class=\"govuk-table__header\">test</th></tr></thead><tr class=\"govuk-table__row\"><th scope=\"row\" class=\"govuk-table__header\">test</th><td class=\"govuk-table__cell\">test</td></tr></table>",
+            "<table class=\"govuk-table\"><thead class=\"govuk-table__head\"><tr class=\"govuk-table__row\"><th class=\"govuk-table__header\">test</th><th class=\"govuk-table__header\">test</th></tr></thead><tbody class=\"govuk-table__body\"><tr class=\"govuk-table__row\"><th scope=\"row\" class=\"govuk-table__header\">test</th><td class=\"govuk-table__cell\">test</td></tr></tbody></table>",
             output.ToString());
     }
 }

@@ -15,7 +15,8 @@ public class TableRenderer : BaseRichTextContentPartRender
         stringBuilder.Append("<table class=\"govuk-table\">");
 
         rendererCollection.RenderChildren(content, stringBuilder);
-        
+
+        stringBuilder.Append("</tbody>");
         stringBuilder.Append("</table>");
 
         return stringBuilder;
