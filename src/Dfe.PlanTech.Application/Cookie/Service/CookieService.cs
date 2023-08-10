@@ -8,6 +8,7 @@ namespace Dfe.PlanTech.Application.Cookie.Service
     public class CookieService : ICookieService
     {
         private readonly IHttpContextAccessor _context;
+        private const string Cookie_Key = "cookies_preferences_set";
 
         public CookieService(IHttpContextAccessor context)
         {
@@ -18,23 +19,23 @@ namespace Dfe.PlanTech.Application.Cookie.Service
         {
             var currentCookie = GetCookie();
             DeleteCookie();
-            CreateCookie("cookies_preferences_set", currentCookie.HasApproved, visibility, currentCookie.IsRejected);
+            CreateCookie(Cookie_Key, currentCookie.HasApproved, visibility, currentCookie.IsRejected);
         }
 
         public void RejectCookies()
         {
             DeleteCookie();
-            CreateCookie("cookies_preferences_set", false, true, true);
+            CreateCookie(Cookie_Key, false, true, true);
         }
 
         public void SetPreference(bool userPreference)
         {
-            CreateCookie("cookies_preferences_set", userPreference);
+            CreateCookie(Cookie_Key, userPreference);
         }
 
         public DfeCookie GetCookie()
         {
-            var cookie = _context.HttpContext.Request.Cookies["cookies_preferences_set"];
+            var cookie = _context.HttpContext.Request.Cookies[Cookie_Key];
             if (cookie is null) 
             { 
                 return new DfeCookie(); 
@@ -48,7 +49,7 @@ namespace Dfe.PlanTech.Application.Cookie.Service
 
         private void DeleteCookie()
         {
-            _context.HttpContext.Response.Cookies.Delete("cookies_preferences_set");
+            _context.HttpContext.Response.Cookies.Delete(Cookie_Key);
         }
 
         private void CreateCookie(string key, bool value, bool visibility = true, bool rejected = false)

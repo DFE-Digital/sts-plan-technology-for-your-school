@@ -25,7 +25,7 @@
                     <button value="reject" type="submit" name="cookies" class="govuk-button" data-module="govuk-button" asp-controller="Cookies" asp-action="Reject">
               Reject additional cookies
             </button>
-            <a class="govuk-link" href="#">View cookies</a>
+            <a class="govuk-link" href="/cookies">View cookies</a>
           </div>
         </div>
       </div>
@@ -41,11 +41,11 @@ else if ((cookie.HasApproved || cookie.IsRejected) && cookie.IsVisible)
                         <div class="govuk-cookie-banner__content">
                             @if (cookie.HasApproved && cookie.IsVisible) 
                             {
-                                <p class="govuk-body">You’ve accepted additional cookies. You can <a class="govuk-link" href="#">change your cookie settings</a> at any time.</p>
+                                <p class="govuk-body">You’ve accepted additional cookies. You can <a class="govuk-link" href="/cookies">change your cookie settings</a> at any time.</p>
                             }
                             @if (cookie.IsRejected && cookie.IsVisible)
                             {
-                                <p class="govuk-body">You’ve rejected additional cookies. You can <a class="govuk-link" href="#">change your cookie settings</a> at any time.</p>
+                                <p class="govuk-body">You’ve rejected additional cookies. You can <a class="govuk-link" href="/cookies">change your cookie settings</a> at any time.</p>
                             }
                         </div>
                     </div>

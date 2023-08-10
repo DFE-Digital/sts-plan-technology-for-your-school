@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Primitives;
-using Microsoft.Net.Http.Headers;
 using Moq;
 using Newtonsoft.Json.Linq;
 using System;
@@ -101,8 +100,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Cookie.Service
         [Fact]
         public void GetCookie_Returns_Cookie_When_Cookie_Does_Not_Exists()
         {
-            var http = new DefaultHttpContext();
-            mockHttp.Setup(x => x.HttpContext).Returns(http);
+            mockHttp.Setup(x => x.HttpContext).Returns(It.IsAny<HttpContext>());
             var service = CreateStrut();
             var cookie = service.GetCookie();
             Assert.False(cookie.HasApproved);

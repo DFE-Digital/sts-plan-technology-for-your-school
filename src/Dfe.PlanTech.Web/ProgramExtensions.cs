@@ -92,7 +92,6 @@ public static class ProgramExtensions
         services.AddTransient<IRecordQuestionCommand, RecordQuestionCommand>();
         services.AddTransient<IGetQuestionQuery, GetQuestionQuery>();
         services.AddTransient<ICookieService, CookieService>();
-        services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
 
         services.AddTransient<ICreateAnswerCommand, CreateAnswerCommand>();
         services.AddTransient<IRecordAnswerCommand, RecordAnswerCommand>();
