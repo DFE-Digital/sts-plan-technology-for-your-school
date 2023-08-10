@@ -47,18 +47,12 @@ public class CookiesController : BaseController<CookiesController>
 
     public IActionResult GetCookiesPage([FromServices] GetPageQuery getPageQuery)
     {
-        //TODO: Need to setup content in contentful.
-        //Page cookiesPageContent = await getPageQuery.GetPageBySlug("cookies", CancellationToken.None);
+        Page cookiesPageContent = await getPageQuery.GetPageBySlug("cookies", CancellationToken.None);
 
         CookiesViewModel cookiesViewModel = new CookiesViewModel()
         {
-            //TODO: Uncomment when the data is setup in contentful.
-            // Title = cookiesPageContent.Title ?? throw new NullReferenceException(nameof(cookiesPageContent.Title)),
-            // Content = cookiesPageContent.Content,
-            Title = new Title()
-            {
-                Text = "Cookies"
-            }
+             Title = cookiesPageContent.Title ?? throw new NullReferenceException(nameof(cookiesPageContent.Title)),
+             Content = cookiesPageContent.Content
         };
 
 
