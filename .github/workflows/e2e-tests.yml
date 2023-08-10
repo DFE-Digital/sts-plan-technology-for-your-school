@@ -64,6 +64,9 @@ jobs:
       SQL_IP_NAME: e2e-tests-pr
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
       - name: Azure CLI Login
         uses: ./.github/actions/azure-login
         with:
