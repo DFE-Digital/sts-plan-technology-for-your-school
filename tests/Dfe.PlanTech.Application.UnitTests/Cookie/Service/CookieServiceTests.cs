@@ -121,7 +121,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Cookie.Service
             mockHttp.Setup(x => x.HttpContext.Response.Cookies).Returns(responseCookiesMock.Object);
         }
 
-        private string SerializeCookie(bool visibility, bool rejected, bool hasApproved)
+        private static string SerializeCookie(bool visibility, bool rejected, bool hasApproved)
         {
             var cookie = new DfeCookie { IsVisible = visibility, IsRejected = rejected, HasApproved = hasApproved };
             return JsonSerializer.Serialize(cookie);

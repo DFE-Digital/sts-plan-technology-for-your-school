@@ -11,7 +11,7 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("/cookies")]
 public class CookiesController : BaseController<CookiesController>
 {
-    private ICookieService _cookieService;
+    private readonly ICookieService _cookieService;
 
     public CookiesController(ILogger<CookiesController> logger, ICookieService cookieService) : base(logger)
     {
@@ -63,6 +63,7 @@ public class CookiesController : BaseController<CookiesController>
     public IActionResult CookiePreference(string userPreference)
     {
         bool.TryParse(userPreference, out bool preference);
+
         if (preference)
         {
             _cookieService.SetPreference(preference);

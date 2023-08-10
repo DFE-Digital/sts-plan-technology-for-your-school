@@ -7,7 +7,7 @@ namespace Dfe.PlanTech.Application.Cookie.Service
 {
     public class CookieService : ICookieService
     {
-        private IHttpContextAccessor _context;
+        private readonly IHttpContextAccessor _context;
 
         public CookieService(IHttpContextAccessor context)
         {
