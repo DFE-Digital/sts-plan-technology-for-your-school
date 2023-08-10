@@ -164,4 +164,3 @@ jobs:
               --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP }} \
               --image ${{ secrets.AZ_ACR_URL }}/${{ env.DOCKER_IMAGE }}:${{ needs.set-env.outputs.release }} \
               --output none
-            
