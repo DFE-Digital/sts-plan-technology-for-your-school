@@ -15,8 +15,6 @@ describe("landing page", () => {
     });
 
     it("should link back to self-assessment", () => {
-        cy.get("ul.app-task-list__items  a").first().click();
-
         cy.get("a.govuk-back-link").should("exist");
         cy.get("a.govuk-back-link").should("have.attr", "href").and("include", "self-assessment");
     });
