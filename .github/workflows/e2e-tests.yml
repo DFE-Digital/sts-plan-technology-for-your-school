@@ -8,6 +8,11 @@ jobs:
   clear-db:
     name: Clear database
     runs-on: ubuntu-latest
+    env:
+      az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
+      az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
+      az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -27,13 +32,13 @@ jobs:
       - name: Add Azure firewall rules
         shell: bash
         run: |
-          az sql server firewall-rule create --resource-group ${{ inputs.az_resource_group_name }} --server ${{ inputs.az_sql_database_server_name }} --name db-upgrader --start-ip-address ${{ steps.whats-my-ip.outputs.ip }} --end-ip-address ${{ steps.whats-my-ip.outputs.ip }}
-          az keyvault network-rule add --resource-group ${{ inputs.az_resource_group_name }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
+          az sql server firewall-rule create --resource-group ${{ env.az_resource_group_name }} --server ${{ env.az_sql_database_server_name }} --name db-upgrader --start-ip-address ${{ steps.whats-my-ip.outputs.ip }} --end-ip-address ${{ steps.whats-my-ip.outputs.ip }}
+          az keyvault network-rule add --resource-group ${{ env.az_resource_group_name }} --name ${{ env.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
 
       - name: Get connection string
         shell: bash
         run: |
-          echo "CONNECTION_STRING=$(az keyvault secret show --name ${{ inputs.az_keyvault_database_connectionstring_name }} --vault-name ${{ inputs.az_keyvault_name }} --query value -o tsv)" >> $GITHUB_ENV
+          echo "CONNECTION_STRING=$(az keyvault secret show --name ${{ env.az_keyvault_database_connectionstring_name }} --vault-name ${{ env.az_keyvault_name }} --query value -o tsv)" >> $GITHUB_ENV
 
       - name: Execute stored procedure
         uses: azure/sql-action@v2.2
@@ -45,22 +50,98 @@ jobs:
         shell: bash
         if: always()
         run: |
-          az sql server firewall-rule delete --resource-group ${{ inputs.az_resource_group_name }} --server ${{ inputs.az_sql_database_server_name }} --name db-upgrader
-          az keyvault network-rule remove --resource-group ${{ inputs.az_resource_group_name }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
+          az sql server firewall-rule delete --resource-group ${{ env.az_resource_group_name }} --server ${{ env.az_sql_database_server_name }} --name db-upgrader
+          az keyvault network-rule remove --resource-group ${{ env.az_resource_group_name }} --name ${{ env.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
 
   run-tests:
     name: Run E2E Tests
     runs-on: ubuntu-22.04
     needs: [clear-db]
     steps:
-      - uses: actions/checkout@v3
+      - name: Azure CLI Login
+        uses: ./.github/actions/azure-login
         with:
-          ref: ${{ github.ref }}
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+            dotnet-version: 7.0.x
+          
+      - name: Trust cert
+        shell: bash
+        run: |
+          sudo apt-get update -y  
+          sudo apt-get install -y libnss3-tools
+
+      - name: Create trusted HTTPS cert
+        shell: bash
+        run: |
+          dotnet dev-certs https -ep localhost.crt --format PEM
+
+          # Create DB
+          mkdir -p $HOME/.pki/nssdb
+          certutil -d $HOME/.pki/nssdb -N
+
+          # Trust Edge/Chrome
+          certutil -d sql:$HOME/.pki/nssdb -A -t "P,," -n localhost -i ./localhost.crt
+          certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n localhost -i ./localhost.crt
+          
+          # Trust dotnet-to-dotnet (.pem extension is important here)
+          sudo cp localhost.crt /usr/lib/ssl/certs/aspnetcore-https-localhost.pem
+          
+          # Cleanup
+          rm localhost.crt
+        
+      - name: Install dependencies
+        shell: bash
+        run: dotnet restore ${{ env.PROJECT_PATH }}
+
+      - name: Build project
+        shell: bash
+        run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release --no-restore --output ./build
+
+      - name: Get workflow IP address
+        id: whats-my-ip
+        uses: ./.github/actions/whats-my-ip-address
+  
+      - name: Add Azure firewall rules
+        uses: ./.github/actions/azure-ip-whitelist
+        with:
+          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+          verb: "add"
+          az_keyvault_name: ${{ env.KEYVAULT_NAME }}
+          az_ip_name: ${{ env.SQL_IP_NAME }}
+          az_resource_group: ${{ env.RESOURCE_GROUP}}
+          az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
+
+      - name: Run project
+        shell: bash
+        run: |
+          export ASPNETCORE_ENVIRONMENT=Production
+          export KeyVaultName=${{ env.KEYVAULT_NAME }}
+          export Kestrel__Endpoints__Https__Url=https://*:8081
+          dotnet ./build/Dfe.PlanTech.Web.dll
+          
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests
         with:
-          url: ${{ secrets.AZ_FRONTDOOR_URL }}
+          url: https://127.0.0.1:8081
           dsi_url: ${{ secrets.DSI_URL }}
           dsi_username: ${{ secrets.DSI_USERNAME }}
           dsi_password: ${{ secrets.DSI_PASSWORD }}
+      
+      - name: Remove Azure firewall rules
+        if: always()
+        uses: ./.github/actions/azure-ip-whitelist
+        with:
+          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+          verb: "add"
+          az_keyvault_name: ${{ env.KEYVAULT_NAME }}
+          az_ip_name: ${{ env.SQL_IP_NAME }}
+          az_resource_group: ${{ env.RESOURCE_GROUP}}
+          az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}  
+  
