@@ -1,0 +1,66 @@
+name: Build & deploy to environment
+
+on:
+  pull_request:
+    branches: ['main']
+
+jobs:
+  clear-db:
+    name: Clear database
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with: ${{ github.ref }}
+      
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+
+      - name: Get workflow IP address
+        id: whats-my-ip
+        uses: ./.github/actions/whats-my-ip-address
+        
+      - name: Add Azure firewall rules
+        shell: bash
+        run: |
+          az sql server firewall-rule create --resource-group ${{ inputs.az_resource_group_name }} --server ${{ inputs.az_sql_database_server_name }} --name db-upgrader --start-ip-address ${{ steps.whats-my-ip.outputs.ip }} --end-ip-address ${{ steps.whats-my-ip.outputs.ip }}
+          az keyvault network-rule add --resource-group ${{ inputs.az_resource_group_name }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
+
+      - name: Get connection string
+        shell: bash
+        run: |
+          echo "CONNECTION_STRING=$(az keyvault secret show --name ${{ inputs.az_keyvault_database_connectionstring_name }} --vault-name ${{ inputs.az_keyvault_name }} --query value -o tsv)" >> $GITHUB_ENV
+
+      - name: Execute stored procedure
+        uses: azure/sql-action@v2.2
+        with:
+          connection-string: ${{ env.CONNECTION_STRING }}
+          path: './.github/scripts/drop-establishment-data.sql'
+
+      - name: Remove Azure firewall rules
+        shell: bash
+        if: always()
+        run: |
+          az sql server firewall-rule delete --resource-group ${{ inputs.az_resource_group_name }} --server ${{ inputs.az_sql_database_server_name }} --name db-upgrader
+          az keyvault network-rule remove --resource-group ${{ inputs.az_resource_group_name }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
+
+  run-tests:
+    name: Run E2E Tests
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Cypress tests
+        uses: ./.github/actions/run-e2e-tests
+        with:
+          url: ${{ secrets.AZ_FRONTDOOR_URL }}
+          dsi_url: ${{ secrets.DSI_URL }}
+          dsi_username: ${{ secrets.DSI_USERNAME }}
+          dsi_password: ${{ secrets.DSI_PASSWORD }}
