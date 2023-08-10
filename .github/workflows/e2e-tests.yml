@@ -1,4 +1,4 @@
-name: Build & deploy to environment
+name: Run E2E Tests
 
 on:
   pull_request:
