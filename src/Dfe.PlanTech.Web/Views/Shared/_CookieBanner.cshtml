@@ -4,9 +4,9 @@
     var cookie = cookieService.GetCookie();  
 }
 
-@if (!cookie.HasApproved)
+@if (!cookie.HasApproved && !cookie.IsRejected)
 {
-    <form method="post" asp-controller="Cookies" asp-action="Accept">
+    <form method="post">
       <div class="govuk-cookie-banner " data-nosnippet role="region" aria-label="Cookies on Plan technology for your school">
         <div class="govuk-cookie-banner__message govuk-width-container">
           <div class="govuk-grid-row">
@@ -19,10 +19,10 @@
             </div>
           </div>
           <div class="govuk-button-group">
-            <button value="accept" type="submit" name="cookies" class="govuk-button" data-module="govuk-button">
+                    <button value="accept" type="submit" name="cookies" class="govuk-button" data-module="govuk-button" asp-controller="Cookies" asp-action="Accept">
               Accept additional cookies
             </button>
-            <button value="reject" type="submit" name="cookies" class="govuk-button" data-module="govuk-button">
+                    <button value="reject" type="submit" name="cookies" class="govuk-button" data-module="govuk-button" asp-controller="Cookies" asp-action="Reject">
               Reject additional cookies
             </button>
             <a class="govuk-link" href="#">View cookies</a>
@@ -31,7 +31,7 @@
       </div>
     </form>
 } 
-else if(cookie.HasApproved && cookie.IsVisible)
+else if ((cookie.HasApproved || cookie.IsRejected) && cookie.IsVisible)
 {
     <form method="post" asp-controller="Cookies" asp-action="HideBanner">
         <div class="govuk-cookie-banner " data-nosnippet role="region" aria-label="Cookies on Plan technology for your school">
@@ -39,7 +39,14 @@ else if(cookie.HasApproved && cookie.IsVisible)
                 <div class="govuk-grid-row">
                     <div class="govuk-grid-column-two-thirds">
                         <div class="govuk-cookie-banner__content">
-                            <p class="govuk-body">You’ve accepted additional cookies. You can <a class="govuk-link" href="#">change your cookie settings</a> at any time.</p>
+                            @if (cookie.HasApproved && cookie.IsVisible) 
+                            {
+                                <p class="govuk-body">You’ve accepted additional cookies. You can <a class="govuk-link" href="#">change your cookie settings</a> at any time.</p>
+                            }
+                            @if (cookie.IsRejected && cookie.IsVisible)
+                            {
+                                <p class="govuk-body">You’ve rejected additional cookies. You can <a class="govuk-link" href="#">change your cookie settings</a> at any time.</p>
+                            }
                         </div>
                     </div>
                 </div>
@@ -52,3 +59,4 @@ else if(cookie.HasApproved && cookie.IsVisible)
         </div>
     </form>
 }
+

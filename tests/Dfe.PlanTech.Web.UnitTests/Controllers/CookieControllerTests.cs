@@ -108,14 +108,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Mock<GetPageQuery> _getPageQueryMock = new Mock<GetPageQuery>(questionnaireCacherMock.Object, contentRepositoryMock.Object);
 
             CookiesController cookiesController = CreateStrut();
-            var result = cookiesController.GetCookiesPage(_getPageQueryMock.Object);
+            var result = await cookiesController.GetCookiesPage(_getPageQueryMock.Object);
             Assert.IsType<ViewResult>(result);
-             
+
             var viewResult = result as ViewResult;
 
             Assert.NotNull(viewResult);
             Assert.Equal("Cookies", viewResult.ViewName);
-         }
+        }
          
          [Theory]
          [InlineData("true")]

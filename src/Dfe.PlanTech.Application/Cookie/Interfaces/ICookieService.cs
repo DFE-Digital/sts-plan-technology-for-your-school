@@ -9,5 +9,7 @@ namespace Dfe.PlanTech.Application.Cookie.Interfaces
         void SetPreference(bool userPreference);
 
         void SetVisibility(bool visibility);
+
+        void RejectCookies();
     }
 }

@@ -28,7 +28,7 @@ public class CookiesController : BaseController<CookiesController>
     [HttpPost("reject")]
     public IActionResult Reject()
     {
-        _cookieService.SetPreference(false);
+        _cookieService.RejectCookies();
         return RedirectToPlaceOfOrigin();
     }
 
@@ -45,7 +45,7 @@ public class CookiesController : BaseController<CookiesController>
         return Redirect(returnUrl);
     }
 
-    public IActionResult GetCookiesPage([FromServices] GetPageQuery getPageQuery)
+    public async Task<IActionResult> GetCookiesPage([FromServices] GetPageQuery getPageQuery)
     {
         Page cookiesPageContent = await getPageQuery.GetPageBySlug("cookies", CancellationToken.None);
 
@@ -63,7 +63,14 @@ public class CookiesController : BaseController<CookiesController>
     public IActionResult CookiePreference(string userPreference)
     {
         bool.TryParse(userPreference, out bool preference);
-        _cookieService.SetPreference(preference);
+        if (preference)
+        {
+            _cookieService.SetPreference(preference);
+        }
+        else
+        {
+            _cookieService.RejectCookies();
+        }
         TempData["UserPreferenceRecorded"] = true;
         return RedirectToAction("GetByRoute", "Pages", new { route = "cookies" });
     }

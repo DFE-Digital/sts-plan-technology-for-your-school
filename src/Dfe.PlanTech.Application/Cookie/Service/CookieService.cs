@@ -16,8 +16,15 @@ namespace Dfe.PlanTech.Application.Cookie.Service
 
         public void SetVisibility(bool visibility)
         {
+            var currentCookie = GetCookie();
             DeleteCookie();
-            CreateCookie("cookies_preferences_set", true, visibility);
+            CreateCookie("cookies_preferences_set", currentCookie.HasApproved, visibility, currentCookie.IsRejected);
+        }
+
+        public void RejectCookies()
+        {
+            DeleteCookie();
+            CreateCookie("cookies_preferences_set", false, true, true);
         }
 
         public void SetPreference(bool userPreference)
@@ -44,14 +51,14 @@ namespace Dfe.PlanTech.Application.Cookie.Service
             _context.HttpContext.Response.Cookies.Delete("cookies_preferences_set");
         }
 
-        private void CreateCookie(string key, bool value, bool visibility = true)
+        private void CreateCookie(string key, bool value, bool visibility = true, bool rejected = false)
         {
             CookieOptions cookieOptions = new CookieOptions();
             cookieOptions.Secure = true;
             cookieOptions.HttpOnly = true;
             cookieOptions.Expires = new DateTimeOffset(DateTime.Now.AddYears(1));
 
-            var cookie = new DfeCookie { IsVisible = visibility, HasApproved = value };
+            var cookie = new DfeCookie { IsVisible = visibility, HasApproved = value, IsRejected = rejected };
             var serializedCookie = JsonSerializer.Serialize(cookie);
             _context.HttpContext.Response.Cookies.Append(key, serializedCookie, cookieOptions);
         }
