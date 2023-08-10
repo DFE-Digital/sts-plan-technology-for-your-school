@@ -78,7 +78,7 @@ public class CookiesController : BaseController<CookiesController>
         }
         else
         {
-            throw new ArgumentException(nameof(userPreference)); 
+            throw new ArgumentException("Can't convert preference", nameof(userPreference)); 
         }
     }
 }
