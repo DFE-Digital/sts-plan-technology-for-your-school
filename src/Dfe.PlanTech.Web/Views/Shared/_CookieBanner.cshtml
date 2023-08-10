@@ -1,10 +1,10 @@
 ﻿@using Microsoft.AspNetCore.Http.Features
 @inject ICookieService cookieService
 @{
-    var accepted = cookieService.GetCookiePreferenceValue();  
+    var cookie = cookieService.GetCookie();  
 }
 
-@if (!accepted)
+@if (!cookie.HasApproved)
 {
     <form method="post" asp-controller="Cookies" asp-action="Accept">
       <div class="govuk-cookie-banner " data-nosnippet role="region" aria-label="Cookies on Plan technology for your school">
@@ -31,7 +31,7 @@
       </div>
     </form>
 } 
-else
+else if(cookie.HasApproved && cookie.IsVisible)
 {
     <form method="post" asp-controller="Cookies" asp-action="HideBanner">
         <div class="govuk-cookie-banner " data-nosnippet role="region" aria-label="Cookies on Plan technology for your school">

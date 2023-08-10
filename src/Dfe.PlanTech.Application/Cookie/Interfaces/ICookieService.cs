@@ -1,9 +1,13 @@
-﻿namespace Dfe.PlanTech.Application.Cookie.Interfaces
+﻿using Dfe.PlanTech.Domain.Cookie;
+
+namespace Dfe.PlanTech.Application.Cookie.Interfaces
 {
     public interface ICookieService
     {
-        bool SetPreference(string userPreference);
+        DfeCookie GetCookie();
 
-        bool GetCookiePreferenceValue();
+        void SetPreference(bool userPreference);
+
+        void SetVisibility(bool visibility);
     }
 }

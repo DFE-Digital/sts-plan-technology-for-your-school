@@ -4,6 +4,7 @@ using Dfe.PlanTech.Application.Cookie.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
@@ -22,6 +23,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
     {
         private const string INDEX_SLUG = "/";
         private const string INDEX_TITLE = "Index";
+        Mock<ICookieService> cookiesMock = new Mock<ICookieService>();
 
         private readonly List<Page> _pages = new()
         {
@@ -63,7 +65,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Mock<IContentRepository> repositoryMock = SetupRepositoryMock();
 
             var mockLogger = new Mock<ILogger<PagesController>>();
-            Mock<ICookieService> cookiesMock = new Mock<ICookieService>();
 
             var config = new GtmConfiguration()
             {
@@ -125,7 +126,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var httpContextMock = new Mock<HttpContext>();
             var requestMock = new Mock<HttpRequest>();
-
+            var cookie = new DfeCookie { HasApproved = true };
+            cookiesMock.Setup(x => x.GetCookie()).Returns(cookie);
             httpContextMock.Setup(c => c.Request).Returns(requestMock.Object);
             requestMock.Setup(r => r.Cookies["cookies_preferences_set"]).Returns("true");
 
@@ -154,8 +156,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task Should_Return_Page_On_Index_Route()
         {
+            var cookie = new DfeCookie { HasApproved = true };
+            cookiesMock.Setup(x => x.GetCookie()).Returns(cookie);
             var result = await _controller.Index(_query, CancellationToken.None);
-
             Assert.IsType<ViewResult>(result);
 
             var viewResult = result as ViewResult;
@@ -204,10 +207,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public async Task GoogleTrackingCodesAddedDependingOnWhatCookiePreferenceSetTo(string cookiePreference)
         {
             var httpContextMock = new Mock<HttpContext>();
-            var requestMock = new Mock<HttpRequest>();
 
-            httpContextMock.Setup(c => c.Request).Returns(requestMock.Object);
-            requestMock.Setup(r => r.Cookies["cookies_preferences_set"]).Returns(cookiePreference);
+            bool.TryParse(cookiePreference, out bool preference);
+            var cookie = new DfeCookie { HasApproved = preference };
+            cookiesMock.Setup(x => x.GetCookie()).Returns(cookie);
 
             _controller.ControllerContext = new ControllerContext()
             {

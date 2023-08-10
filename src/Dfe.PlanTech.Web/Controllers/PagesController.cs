@@ -54,7 +54,7 @@ public class PagesController : BaseController<PagesController>
 
     private PageViewModel CreatePageModel(Page page, string param = null!)
     {
-        bool acceptCookies = _cookieService.GetCookiePreferenceValue();
+        var acceptCookies = _cookieService.GetCookie().HasApproved;
         
         string gtmHead = acceptCookies ?  Config.GetValue<string>("GTM:Head") ?? "" : "";
         string gtmBody = acceptCookies ?  Config.GetValue<string>("GTM:Body") ?? "" : "";

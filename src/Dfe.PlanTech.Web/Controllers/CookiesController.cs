@@ -1,12 +1,9 @@
 using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Models;
-using Dfe.PlanTech.Application.Cookie.Interfaces;
-using Dfe.PlanTech.Application.Cookie.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http.Features;
-using Polly;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
@@ -24,21 +21,21 @@ public class CookiesController : BaseController<CookiesController>
     [HttpPost("accept")]
     public IActionResult Accept()
     {
-        _cookieService.SetPreference("true");
+        _cookieService.SetPreference(true);
         return RedirectToPlaceOfOrigin();
     }
 
     [HttpPost("reject")]
     public IActionResult Reject()
     {
-        _cookieService.SetPreference("false");
+        _cookieService.SetPreference(false);
         return RedirectToPlaceOfOrigin();
     }
 
     [HttpPost("hidebanner")]
     public IActionResult HideBanner()
     {
-        // _cookieService.SetPreference("false");
+        _cookieService.SetVisibility(false);
         return RedirectToPlaceOfOrigin();
     }
 
@@ -47,8 +44,6 @@ public class CookiesController : BaseController<CookiesController>
         var returnUrl = Request.Headers["Referer"].ToString();
         return Redirect(returnUrl);
     }
-
-
 
     public IActionResult GetCookiesPage([FromServices] GetPageQuery getPageQuery)
     {
@@ -73,7 +68,8 @@ public class CookiesController : BaseController<CookiesController>
     [HttpPost]
     public IActionResult CookiePreference(string userPreference)
     {
-        _cookieService.SetPreference(userPreference);
+        bool.TryParse(userPreference, out bool preference);
+        _cookieService.SetPreference(preference);
         TempData["UserPreferenceRecorded"] = true;
         return RedirectToAction("GetByRoute", "Pages", new { route = "cookies" });
     }

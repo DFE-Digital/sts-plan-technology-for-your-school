@@ -31,12 +31,6 @@ if (builder.Environment.IsProduction())
                         .ProtectKeysWithAzureKeyVault(new Uri(keyVaultUri + "keys/dataprotection"), azureCredentials);
 }
 
-builder.Services.Configure<CookiePolicyOptions>(options =>
-{
-    options.CheckConsentNeeded = context => true;
-    options.MinimumSameSitePolicy = SameSiteMode.None;
-    options.Secure = CookieSecurePolicy.Always;
-});
 
 builder.Services.AddCaching();
 builder.Services.AddCQRSServices();
@@ -51,6 +45,11 @@ builder.Services.AddAuthentication();
 
 var app = builder.Build();
 
+app.UseCookiePolicy(
+    new CookiePolicyOptions
+    {
+        Secure = CookieSecurePolicy.Always
+    });
 app.UseForwardedHeaders();
 
 // Configure the HTTP request pipeline.
