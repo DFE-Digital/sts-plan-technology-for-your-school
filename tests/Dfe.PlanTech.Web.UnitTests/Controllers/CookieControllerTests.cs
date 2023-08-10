@@ -3,7 +3,6 @@ using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Cookie.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Http;
@@ -14,7 +13,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using Moq;
-using System.Text.Json;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Controllers
@@ -78,6 +76,28 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             //Act
             var result = strut.Accept() as RedirectResult;
+
+            //Assert
+            Assert.IsType<RedirectResult>(result);
+            Assert.Equal(url, result.Url);
+        }
+
+        [Theory]
+        [InlineData("https://localhost:8080/self-assessment")]
+        [InlineData("https://www.dfe.gov.uk/self-assessment")]
+        public void Reject_Redirects_BackToPlaceOfOrigin(string url)
+        {
+            //Arrange
+            var strut = CreateStrut();
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Headers["Referer"] = url;
+            strut.ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext
+            };
+
+            //Act
+            var result = strut.Reject() as RedirectResult;
 
             //Assert
             Assert.IsType<RedirectResult>(result);
@@ -153,9 +173,32 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                  Assert.True(res.ControllerName == "Pages");
              }
          }
-         
-         
-         private Mock<IContentRepository> SetupRepositoryMock()
+
+        [Fact]
+        public void settingCookiePreferenceBasedOnInputAsNullThrowsException()
+        {
+            CookiesController cookiesController = CreateStrut();
+
+            var tempDataMock = new Mock<ITempDataDictionary>();
+            var httpContextMock = new Mock<HttpContext>();
+            var responseMock = new Mock<HttpResponse>();
+            var cookiesMock = new Mock<ICookieService>();
+
+
+            cookiesMock.Setup(r => r.SetPreference(It.IsAny<bool>()));
+            httpContextMock.SetupGet(c => c.Response).Returns(responseMock.Object);
+
+            cookiesController.TempData = tempDataMock.Object;
+            cookiesController.ControllerContext = new ControllerContext()
+            {
+                HttpContext = httpContextMock.Object
+            };
+
+            var result = Assert.Throws<ArgumentException>(() => cookiesController.CookiePreference(string.Empty));
+            Assert.Contains("Can't convert preference", result.Message);
+        }
+
+        private Mock<IContentRepository> SetupRepositoryMock()
          {
              var repositoryMock = new Mock<IContentRepository>();
              repositoryMock.Setup(repo => repo.GetEntities<Page>(It.IsAny<IGetEntitiesOptions>(), It.IsAny<CancellationToken>())).ReturnsAsync((IGetEntitiesOptions options, CancellationToken _) =>
