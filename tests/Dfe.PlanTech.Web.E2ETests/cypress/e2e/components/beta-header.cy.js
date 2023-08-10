@@ -1,12 +1,10 @@
 describe("beta header", () => {
-  const url = Cypress.env("/");
-
   const expectedFeedbackLink = "https://feedback";
 
   const phaseBannerSelector = "div.govuk-phase-banner";
 
   beforeEach(() => {
-    cy.visit(url);
+    cy.visit("/");
   });
 
   it("displays phase banner", () => {

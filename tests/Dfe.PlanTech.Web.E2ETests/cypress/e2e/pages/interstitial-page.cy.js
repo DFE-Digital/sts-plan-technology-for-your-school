@@ -1,8 +1,9 @@
 describe("landing page", () => {
-    const url = "/broadband-connection";
+    const url = "/self-assessment";
 
     beforeEach(() => {
         cy.loginWithEnv(url);
+        cy.clickFirstSection();
     });
 
     it("should have content", () => {

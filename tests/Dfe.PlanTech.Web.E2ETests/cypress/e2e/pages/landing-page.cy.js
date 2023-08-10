@@ -1,8 +1,6 @@
 describe("landing page", () => {
-  const url = "/";
-
   beforeEach(() => {
-    cy.visit(url);
+    cy.visit("/");
   });
 
   it("should contain title", () => {

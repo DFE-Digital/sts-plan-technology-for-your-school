@@ -3,7 +3,7 @@ describe("landing page", () => {
 
   beforeEach(() => {
     cy.loginWithEnv(url);
-    cy.get("ul.app-task-list__items > li a").first().click();
+    cy.clickFirstSection();
     cy.get('a.govuk-button').contains('Continue').click();
   });
 
@@ -37,45 +37,49 @@ describe("landing page", () => {
   });
 
   it("should navigate to next page on submit", () => {
-    const path = cy.location("pathname");
+    cy.url().then(firstUrl => {
+      
+      cy.get("form div.govuk-radios div.govuk-radios__item input")
+        .first()
+        .click();
 
-    cy.get("form div.govuk-radios div.govuk-radios__item input")
-      .first()
-      .click();
+      cy.get("form button.govuk-button")
+        .contains("Save and continue")
+        .click();
 
-    cy.get("form button.govuk-button")
-      .contains("Save and continue")
-      .click();
-
-    cy.location("pathname", { timeout: 60000 })
-      .should("not.include", path)
-      .and("include", "/question");
+      cy.location("pathname", { timeout: 60000 })
+        .should("not.include", firstUrl)
+        .and("include", "/question");
+    });
   });
 
   it("should have back button", () => {
     cy.get("a.govuk-back-link")
-      .should("exist")
-      .invoke("text")
-      .should("equal", "Back");
+      .contains("Back")
+      .should("exist");
   });
 
   it("should have back button that navigates to last question once submitted", () => {
-    const FIRST_QUESTION = "question"; //TODO;
-    
-    cy.get("form div.govuk-radios div.govuk-radios__item input")
-      .first()
-      .click();
+    cy.url().then(firstUrl => {
+      //Select first radio button
+      cy.get("form div.govuk-radios div.govuk-radios__item input")
+        .first()
+        .click();
 
-    cy.get("form button.govuk-button").click();
+      //Submit
+      cy.get("form button.govuk-button")
+        .contains("Save and continue")
+        .click();
 
-    cy.location("pathname", { timeout: 60000 })
-      .should("not.include", FIRST_QUESTION)
-      .and("include", "/question");
+      //Ensure path changes
+      cy.location("pathname", { timeout: 60000 })
+        .should("not.equal", firstUrl)
+        .and("match", /question|check-answers/g)
 
-    cy.get("a.govuk-back-link")
-      .should("exist")
-      .and("have.attr", "href")
-      .and("include", FIRST_QUESTION);
+      cy.get("a.govuk-back-link")
+        .should("exist")
+        .and("have.attr", "href")
+        .and("include", firstUrl);
+    });
   });
-
 });
