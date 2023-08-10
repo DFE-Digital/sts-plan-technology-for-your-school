@@ -29,16 +29,9 @@ describe("landing page", () => {
     cy.get("a.govuk-button--start.govuk-button").should("exist");
   });
 
-  it("should re-direct to login page", () => {
-    cy.get("a.govuk-button--start.govuk-button").click();
-    const dsiUrl = Cypress.env("DSiUrl");
-    
-    cy.origin(dsiUrl, {
-      args: {
-        expectedUrl: dsiUrl
-      }
-    }, ({expectedUrl}) => {
-      cy.location("href").should("include", expectedUrl);
-    });
+  it("should direct to self-assessment page", () => {
+    cy.get("a.govuk-button--start.govuk-button")
+      .and("have.attr", "href")
+      .and("equal", "/self-assessment");
   });
 });

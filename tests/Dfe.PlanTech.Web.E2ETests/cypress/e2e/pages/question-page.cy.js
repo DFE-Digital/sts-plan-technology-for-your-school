@@ -2,8 +2,7 @@ describe("Question page", () => {
   const url = "/self-assessment";
 
   beforeEach(() => {
-    cy.loginWithEnv();
-    cy.visit(url);
+    cy.loginWithEnv(url);
 
     //Navigate to first section
     cy.get("ul.app-task-list__items > li a")

@@ -2,7 +2,7 @@ describe("Self-assessment page", () => {
   const url = "/self-assessment";
 
   beforeEach(() => {
-    cy.loginWithEnv();
+    cy.loginWithEnv(url);
 });
 
   it("should have heading", () => {
