@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -62,17 +63,22 @@ public class CookiesController : BaseController<CookiesController>
     [HttpPost]
     public IActionResult CookiePreference(string userPreference)
     {
-        bool.TryParse(userPreference, out bool preference);
-
-        if (preference)
+        if (bool.TryParse(userPreference, out bool preference))
         {
-            _cookieService.SetPreference(preference);
+            if (preference)
+            {
+                _cookieService.SetPreference(preference);
+            }
+            else
+            {
+                _cookieService.RejectCookies();
+            }
+            TempData["UserPreferenceRecorded"] = true;
+            return RedirectToAction("GetByRoute", "Pages", new { route = "cookies" });
         }
         else
         {
-            _cookieService.RejectCookies();
+            throw new ArgumentException(nameof(userPreference)); 
         }
-        TempData["UserPreferenceRecorded"] = true;
-        return RedirectToAction("GetByRoute", "Pages", new { route = "cookies" });
     }
 }
