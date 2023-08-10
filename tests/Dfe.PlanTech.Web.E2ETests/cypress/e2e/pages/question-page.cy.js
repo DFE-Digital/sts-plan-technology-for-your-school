@@ -1,9 +1,16 @@
-describe("landing page", () => {
+describe("Question page", () => {
   const url = "/self-assessment";
 
   beforeEach(() => {
-    cy.loginWithEnv(url);
-    cy.clickFirstSection();
+    cy.loginWithEnv();
+    cy.visit(url);
+
+    //Navigate to first section
+    cy.get("ul.app-task-list__items > li a")
+      .first()
+      .click();
+
+    //Navigate to first question
     cy.get('a.govuk-button').contains('Continue').click();
   });
 
@@ -38,7 +45,7 @@ describe("landing page", () => {
 
   it("should navigate to next page on submit", () => {
     cy.url().then(firstUrl => {
-      
+
       cy.get("form div.govuk-radios div.govuk-radios__item input")
         .first()
         .click();

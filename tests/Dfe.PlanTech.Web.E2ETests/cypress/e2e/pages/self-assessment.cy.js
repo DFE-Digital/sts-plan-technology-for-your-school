@@ -1,9 +1,9 @@
-describe("landing page", () => {
+describe("Self-assessment page", () => {
   const url = "/self-assessment";
 
   beforeEach(() => {
-    cy.loginWithEnv(url);
-  });
+    cy.loginWithEnv();
+});
 
   it("should have heading", () => {
     cy.get("h1.govuk-heading-xl")

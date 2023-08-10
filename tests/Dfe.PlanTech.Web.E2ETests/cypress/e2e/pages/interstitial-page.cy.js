@@ -1,10 +1,12 @@
-describe("landing page", () => {
-    const url = "/self-assessment";
+
+describe("Interstitial page", () => {
+    const url = "/broadband-connection";
 
     beforeEach(() => {
-        cy.loginWithEnv(url);
-        cy.clickFirstSection();
-    });
+        cy.loginWithEnv("/self-assessment");
+        cy.get("ul.app-task-list__items > li a").first().click();
+        cy.url().should("contain", url);
+      });
 
     it("should have content", () => {
         cy.get("rich-text").should("exist");

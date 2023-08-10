@@ -11,8 +11,8 @@ Cypress.Commands.add("login", ({ email, password, url }) => {
 
 Cypress.Commands.add("loginWithEnv", (url) => {
     const args = {
-        email: Cypress.env("Username"),
-        password: Cypress.env("Password"),
+        email: Cypress.env("DSi_Email"),
+        password: Cypress.env("DSi_Password"),
         url
     };
 
