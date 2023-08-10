@@ -11,7 +11,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with: ${{ github.ref }}
       
       - name: Login with AZ
         uses: ./.github/actions/azure-login
