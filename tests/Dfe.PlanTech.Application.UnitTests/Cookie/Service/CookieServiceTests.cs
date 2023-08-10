@@ -86,6 +86,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Cookie.Service
             Assert.True(cookie.IsVisible);
         }
 
+        //TODO - Find out why DefaultHttpContext not working
         //[Fact]
         //public void GetCookie_Returns_Cookie_When_Cookie_Does_Not_Exists()
         //{
