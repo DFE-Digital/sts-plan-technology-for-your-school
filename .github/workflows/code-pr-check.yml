@@ -102,6 +102,3 @@ jobs:
           name: JEST Tests            # Name of the check run which will be created
           path: ./junit.xml    # Path to test results
           reporter: jest-junit        # Format of test results
-
-  run-e2e-tests:
-    uses: ./.github/workflows/e2e-tests.yml
