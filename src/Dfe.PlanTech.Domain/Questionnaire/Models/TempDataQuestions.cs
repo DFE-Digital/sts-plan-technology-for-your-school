@@ -1,6 +1,6 @@
 namespace Dfe.PlanTech.Domain.Questionnaire.Models
 {
-    public class ParameterQuestionPage
+    public class TempDataQuestions
     {
         public string QuestionRef { get; init; } = null!;
 

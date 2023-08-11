@@ -1,6 +1,6 @@
 namespace Dfe.PlanTech.Domain.Questionnaire.Models
 {
-    public class ParameterCheckAnswersPage
+    public class TempDataCheckAnswers
     {
         public int SubmissionId { get; init; }
 

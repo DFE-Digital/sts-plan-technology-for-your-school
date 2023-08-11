@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Response.Commands;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Constants;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -17,7 +18,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     [Route("check-answers")]
     public async Task<IActionResult> CheckAnswersPage([FromServices] ProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand, [FromServices] GetPageQuery getPageQuery)
     {
-        var parameterCheckAnswersPage = DeserialiseParameter<ParameterCheckAnswersPage>(TempData["CheckAnswersPage"]);
+        var parameterCheckAnswersPage = DeserialiseParameter<TempDataCheckAnswers>(TempData[TempDataConstants.CheckAnswers]);
 
         Page checkAnswerPageContent = await getPageQuery.GetPageBySlug("check-answers", CancellationToken.None);
 
@@ -37,7 +38,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     [Route("change-answer")]
     public IActionResult ChangeAnswer(string questionRef, string answerRef, int submissionId)
     {
-        TempData["QuestionPage"] = Newtonsoft.Json.JsonConvert.SerializeObject(new ParameterQuestionPage() { QuestionRef = questionRef, AnswerRef = answerRef, SubmissionId = submissionId });
+        TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = answerRef, SubmissionId = submissionId });
         return RedirectToAction("GetQuestionById", "Questions");
     }
 

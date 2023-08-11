@@ -6,6 +6,7 @@ using Dfe.PlanTech.Application.Response.Commands;
 using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Constants;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Web.Controllers;
@@ -120,7 +121,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _getLatestResponseListForSubmissionQueryMock.Setup(m => m.GetLatestResponseListForSubmissionBy(SubmissionId)).ReturnsAsync(questionWithAnswerList);
             _contentRepositoryMock.Setup(m => m.GetEntityById<Section>(SectionId, 3, CancellationToken.None)).ReturnsAsync(_section);
 
-            _checkAnswersController.TempData["CheckAnswersPage"] = Newtonsoft.Json.JsonConvert.SerializeObject(new ParameterCheckAnswersPage() { SubmissionId = SubmissionId, SectionId = SectionId, SectionName = SectionName });
+            _checkAnswersController.TempData[TempDataConstants.CheckAnswers] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataCheckAnswers() { SubmissionId = SubmissionId, SectionId = SectionId, SectionName = SectionName });
 
             var result = await _checkAnswersController.CheckAnswersPage(_processCheckAnswerDtoCommand, _getPageQueryMock.Object);
 
@@ -149,7 +150,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _getLatestResponseListForSubmissionQueryMock.Setup(m => m.GetLatestResponseListForSubmissionBy(SubmissionId)).ReturnsAsync(questionWithAnswerList);
             _contentRepositoryMock.Setup(m => m.GetEntityById<Section>(SectionId, 3, CancellationToken.None)).ReturnsAsync(_section);
 
-            _checkAnswersController.TempData["CheckAnswersPage"] = Newtonsoft.Json.JsonConvert.SerializeObject(new ParameterCheckAnswersPage() { SubmissionId = SubmissionId, SectionId = SectionId, SectionName = SectionName });
+            _checkAnswersController.TempData[TempDataConstants.CheckAnswers] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataCheckAnswers() { SubmissionId = SubmissionId, SectionId = SectionId, SectionName = SectionName });
 
             var result = await _checkAnswersController.CheckAnswersPage(_processCheckAnswerDtoCommand, _getPageQueryMock.Object);
 
@@ -203,7 +204,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _getLatestResponseListForSubmissionQueryMock.Setup(m => m.GetLatestResponseListForSubmissionBy(SubmissionId)).ReturnsAsync(questionWithAnswerList);
             _contentRepositoryMock.Setup(m => m.GetEntityById<Section?>(SectionId, 3, CancellationToken.None)).ReturnsAsync((Section?)null);
 
-            _checkAnswersController.TempData["CheckAnswersPage"] = Newtonsoft.Json.JsonConvert.SerializeObject(new ParameterCheckAnswersPage() { SubmissionId = SubmissionId, SectionId = SectionId, SectionName = SectionName });
+            _checkAnswersController.TempData[TempDataConstants.CheckAnswers] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataCheckAnswers() { SubmissionId = SubmissionId, SectionId = SectionId, SectionName = SectionName });
 
             await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(_processCheckAnswerDtoCommand, _getPageQueryMock.Object));
         }
@@ -234,7 +235,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _getLatestResponseListForSubmissionQueryMock.Setup(m => m.GetLatestResponseListForSubmissionBy(SubmissionId)).ReturnsAsync(questionWithAnswerList);
             _contentRepositoryMock.Setup(m => m.GetEntityById<Section?>(SectionId, 3, CancellationToken.None)).ReturnsAsync(_section);
 
-            _checkAnswersController.TempData["CheckAnswersPage"] = Newtonsoft.Json.JsonConvert.SerializeObject(new ParameterCheckAnswersPage() { SubmissionId = SubmissionId, SectionId = null!, SectionName = SectionName });
+            _checkAnswersController.TempData[TempDataConstants.CheckAnswers] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataCheckAnswers() { SubmissionId = SubmissionId, SectionId = null!, SectionName = SectionName });
 
             await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _checkAnswersController.CheckAnswersPage(_processCheckAnswerDtoCommand, _getPageQueryMock.Object));
         }
@@ -253,11 +254,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             Assert.NotNull(redirectToActionResult);
             Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
-            Assert.NotNull(_checkAnswersController.TempData["QuestionPage"]);
-            Assert.IsType<string>(_checkAnswersController.TempData["QuestionPage"]);
-            var id = Newtonsoft.Json.JsonConvert.DeserializeObject<ParameterQuestionPage>(_checkAnswersController.TempData["QuestionPage"] as string ?? "")?.QuestionRef;
+            Assert.NotNull(_checkAnswersController.TempData[TempDataConstants.Questions]);
+            Assert.IsType<string>(_checkAnswersController.TempData[TempDataConstants.Questions]);
+            var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_checkAnswersController.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
             Assert.Equal(question.ContentfulRef, id);
-            var answerRef = Newtonsoft.Json.JsonConvert.DeserializeObject<ParameterQuestionPage>(_checkAnswersController.TempData["QuestionPage"] as string ?? "")?.AnswerRef;
+            var answerRef = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_checkAnswersController.TempData[TempDataConstants.Questions] as string ?? "")?.AnswerRef;
             Assert.Equal(answer.ContentfulRef, answerRef);
         }
 

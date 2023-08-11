@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Submission.Commands;
+using Dfe.PlanTech.Domain.Questionnaire.Constants;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -32,7 +33,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
         if (string.IsNullOrEmpty(id))
         {
-            var parameterQuestionPage = DeserialiseParameter<ParameterQuestionPage>(TempData["QuestionPage"]);
+            var parameterQuestionPage = DeserialiseParameter<TempDataQuestions>(TempData[TempDataConstants.Questions]);
             id = parameterQuestionPage.QuestionRef;
             submissionId = parameterQuestionPage.SubmissionId;
             answerRef = parameterQuestionPage.AnswerRef;
@@ -52,7 +53,7 @@ public class QuestionsController : BaseController<QuestionsController>
                 question = await submitAnswerCommand.GetNextUnansweredQuestion(submission.Id);
                 if (question == null)
                 {
-                    TempData["CheckAnswersPage"] = Newtonsoft.Json.JsonConvert.SerializeObject(new ParameterCheckAnswersPage() { SubmissionId = submission.Id, SectionId = param.SectionId, SectionName = param.SectionName });
+                    TempData[TempDataConstants.CheckAnswers] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataCheckAnswers() { SubmissionId = submission.Id, SectionId = param.SectionId, SectionName = param.SectionName });
                     return RedirectToAction("CheckAnswersPage", "CheckAnswers");
                 }
 
@@ -85,7 +86,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
         if (!ModelState.IsValid)
         {
-            TempData["QuestionPage"] = Newtonsoft.Json.JsonConvert.SerializeObject(new ParameterQuestionPage() { QuestionRef = submitAnswerDto.QuestionId, SubmissionId = submitAnswerDto.SubmissionId });
+            TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = submitAnswerDto.QuestionId, SubmissionId = submitAnswerDto.SubmissionId });
             return RedirectToAction("GetQuestionById");
         }
 
@@ -94,12 +95,12 @@ public class QuestionsController : BaseController<QuestionsController>
 
         if (string.IsNullOrEmpty(nextQuestionId) || await submitAnswerCommand.NextQuestionIsAnswered(submissionId, nextQuestionId))
         {
-            TempData["CheckAnswersPage"] = Newtonsoft.Json.JsonConvert.SerializeObject(new ParameterCheckAnswersPage() { SubmissionId = submissionId, SectionId = param.SectionId, SectionName = param.SectionName });
+            TempData[TempDataConstants.CheckAnswers] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataCheckAnswers() { SubmissionId = submissionId, SectionId = param.SectionId, SectionName = param.SectionName });
             return RedirectToAction("CheckAnswersPage", "CheckAnswers");
         }
         else
         {
-            TempData["QuestionPage"] = Newtonsoft.Json.JsonConvert.SerializeObject(new ParameterQuestionPage() { QuestionRef = nextQuestionId, SubmissionId = submissionId });
+            TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = nextQuestionId, SubmissionId = submissionId });
             return RedirectToAction("GetQuestionById");
         }
     }
