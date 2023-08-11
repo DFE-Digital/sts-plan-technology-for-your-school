@@ -50,6 +50,7 @@ resource "azurerm_key_vault_secret" "vault_secret_contentful_previewapikey" {
   lifecycle {
     ignore_changes = [
       value,
+      expiration_date
     ]
   }
 }
@@ -63,6 +64,7 @@ resource "azurerm_key_vault_secret" "vault_secret_contentful_spaceid" {
   lifecycle {
     ignore_changes = [
       value,
+      expiration_date
     ]
   }
 }
@@ -76,6 +78,7 @@ resource "azurerm_key_vault_secret" "vault_secret_contentful_environment" {
   lifecycle {
     ignore_changes = [
       value,
+      expiration_date
     ]
   }
 }
@@ -89,6 +92,7 @@ resource "azurerm_key_vault_secret" "vault_secret_database_connectionstring" {
   lifecycle {
     ignore_changes = [
       value,
+      expiration_date
     ]
   }
 }
