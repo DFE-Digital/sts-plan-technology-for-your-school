@@ -16,7 +16,7 @@ resource "azurerm_key_vault_access_policy" "vault_access_policy_tf" {
   object_id    = local.current_user_id
 
   secret_permissions = ["List", "Get", "Set"]
-  key_permissions    = ["List", "Get", "Create", "GetRotationPolicy", "SetRotationPolicy", "Delete", "Purge"]
+  key_permissions    = ["List", "Get", "Create", "GetRotationPolicy", "SetRotationPolicy", "Delete", "Purge", "UnwrapKey", "WrapKey"]
 }
 
 resource "azurerm_key_vault_access_policy" "vault_access_policy_mi" {
