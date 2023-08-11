@@ -1,16 +1,13 @@
 name: Deploy Terraform
 
 on:
-  workflow_dispatch:
-    inputs:
-      environment:
-        type: environment
-        description: Choose an environment to apply tf changes.
   push:
     branches: [ "main" ]
     paths:
       - 'terraform/**'
-
+  pull_request:
+    branches: [ "main" ]
+    
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
 
@@ -42,10 +39,13 @@ jobs:
   validate-terraform:  
     name: Validate Terraform 
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment || 'dev' }}
     defaults:
       run:
         working-directory: ${{env.TF_WORKING_DIRECTORY}}
+    strategy:
+      matrix:
+        env: ['dev', 'Tst']  
+    environment: ${{ matrix.env }}  
     steps:
       - name: Clone repo
         uses: actions/checkout@v3
