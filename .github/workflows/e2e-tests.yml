@@ -78,11 +78,12 @@ jobs:
 
       - name: Run project
         shell: bash
+        working-directory: ./build
         run: |
           export ASPNETCORE_ENVIRONMENT=Production
           export KeyVaultName=s190d01-plantech-kv
           export Kestrel__Endpoints__Https__Url=https://*:8081
-          dotnet ./build/Dfe.PlanTech.Web.dll &> server.log &
+          dotnet ./Dfe.PlanTech.Web.dll &> server.log &
           
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests
