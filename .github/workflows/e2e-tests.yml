@@ -6,7 +6,8 @@ on:
     paths:
       - 'src/**'
       - 'tests/Dfe.PlanTech.Web.E2ETests/**'
-    
+      - '.github/workflows/e2e-tests.yml'
+      
 jobs:
   clear-db:
     name: Clear database
