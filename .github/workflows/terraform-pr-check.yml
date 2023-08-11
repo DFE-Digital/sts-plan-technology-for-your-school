@@ -4,6 +4,7 @@ on:
   pull_request:
     paths: 
       - 'terraform/**'
+      - '.github/**'
   push:
     branches: [ "main" ]
     paths: 
@@ -77,7 +78,7 @@ jobs:
         with:
           azcliversion: 2.45.0
           inlineScript: |
-            az keyvault network-rule add --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
+            az keyvault network-rule add --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} 2&>1 > /dev/null
         
       - name: Terraform init
         id: init
@@ -131,7 +132,7 @@ jobs:
         with:
           azcliversion: 2.45.0
           inlineScript: |
-            az keyvault network-rule remove --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
+            az keyvault network-rule remove --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} 2&>1 > /dev/null
   
   terraform-lint:
     name: Terraform Lint
