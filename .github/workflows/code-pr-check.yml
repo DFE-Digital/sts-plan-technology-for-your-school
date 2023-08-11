@@ -3,14 +3,14 @@ name: Code PR Check
 on:
   push:
     branches: [ "main" ]
-    paths-ignore:
-      - 'docs/**'
-      - 'terraform/**'
+    paths:
+      - 'src/**'
+      - 'tests/**'
   pull_request:
     branches: [ "main" ]
-    paths-ignore:
-      - 'docs/**'
-      - 'terraform/**'
+    paths:
+      - 'src/**'
+      - 'tests/**'
 
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
