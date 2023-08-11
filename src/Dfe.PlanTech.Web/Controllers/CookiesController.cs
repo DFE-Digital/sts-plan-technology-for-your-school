@@ -1,33 +1,39 @@
 using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-[Authorize]
 [Route("/cookies")]
 public class CookiesController : BaseController<CookiesController>
 {
-    public const string CookieName = "cookies_preferences_set";
+    private readonly ICookieService _cookieService;
 
-    public CookiesController(ILogger<CookiesController> logger) : base(logger)
+    public CookiesController(ILogger<CookiesController> logger, ICookieService cookieService) : base(logger)
     {
+        _cookieService = cookieService;
     }
 
     [HttpPost("accept")]
     public IActionResult Accept()
     {
-        CreateCookie(CookieName, "true");
+        _cookieService.SetPreference(true);
+        return RedirectToPlaceOfOrigin();
+    }
+
+    [HttpPost("reject")]
+    public IActionResult Reject()
+    {
+        _cookieService.RejectCookies();
         return RedirectToPlaceOfOrigin();
     }
 
     [HttpPost("hidebanner")]
     public IActionResult HideBanner()
     {
-        CreateCookie("cookies_preferences_hidden", "true");
+        _cookieService.SetVisibility(false);
         return RedirectToPlaceOfOrigin();
     }
 
@@ -37,29 +43,14 @@ public class CookiesController : BaseController<CookiesController>
         return Redirect(returnUrl);
     }
 
-    private void CreateCookie(string key, string value)
-    {
-        CookieOptions cookieOptions = new CookieOptions();
-        cookieOptions.Secure = true;
-        cookieOptions.HttpOnly = true;
-        cookieOptions.Expires = new DateTimeOffset(DateTime.Now.AddYears(1));
-        HttpContext.Response.Cookies.Append(key, value, cookieOptions);
-    }
-
     public async Task<IActionResult> GetCookiesPage([FromServices] GetPageQuery getPageQuery)
     {
-        //TODO: Need to setup content in contentful.
-        //Page cookiesPageContent = await getPageQuery.GetPageBySlug("cookies", CancellationToken.None);
+        Page cookiesPageContent = await getPageQuery.GetPageBySlug("cookies", CancellationToken.None);
 
         CookiesViewModel cookiesViewModel = new CookiesViewModel()
         {
-            //TODO: Uncomment when the data is setup in contentful.
-            // Title = cookiesPageContent.Title ?? throw new NullReferenceException(nameof(cookiesPageContent.Title)),
-            // Content = cookiesPageContent.Content,
-            Title = new Title()
-            {
-                Text = "Cookies"
-            }
+             Title = cookiesPageContent.Title ?? throw new NullReferenceException(nameof(cookiesPageContent.Title)),
+             Content = cookiesPageContent.Content
         };
 
 
@@ -69,16 +60,22 @@ public class CookiesController : BaseController<CookiesController>
     [HttpPost]
     public IActionResult CookiePreference(string userPreference)
     {
-        if (userPreference == "yes")
+        if (bool.TryParse(userPreference, out bool preference))
         {
-            CreateCookie(CookieName, "true");
+            if (preference)
+            {
+                _cookieService.SetPreference(preference);
+            }
+            else
+            {
+                _cookieService.RejectCookies();
+            }
+            TempData["UserPreferenceRecorded"] = true;
+            return RedirectToAction("GetByRoute", "Pages", new { route = "cookies" });
         }
         else
         {
-            CreateCookie(CookieName, "false");
+            throw new ArgumentException("Can't convert preference", nameof(userPreference)); 
         }
-
-        TempData["UserPreferenceRecorded"] = true;
-        return RedirectToAction("GetByRoute", "Pages", new { route = "cookies" });
     }
 }

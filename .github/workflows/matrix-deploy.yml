@@ -11,7 +11,8 @@ on:
           - Production
   push:
     branches: [ "main" ]
-  
+    paths:
+      - 'src/**'
 
 jobs:
   deploy-to-environments:

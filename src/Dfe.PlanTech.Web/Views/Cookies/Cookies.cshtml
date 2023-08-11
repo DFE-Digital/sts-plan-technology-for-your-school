@@ -8,7 +8,6 @@
     <div class="govuk-width-container" id="cookies-page">
         <main class="govuk-main-wrapper" id="main-content" role="main">
             <div class="govuk-grid-row">
-                <div class="govuk-grid-column-two-thirds-from-desktop">
                     @{
                         bool userPreferenceSet = TempData["UserPreferenceRecorded"] as bool? ?? false;
                         if (userPreferenceSet)
@@ -54,13 +53,13 @@
                                 </legend>
                                 <div class="govuk-radios" data-module="govuk-radios">
                                     <div class="govuk-radios__item">
-                                        <input class="govuk-radios__input" id="analytics-cookies-yes" name="userPreference" type="radio" value="yes" checked>
+                                        <input class="govuk-radios__input" id="analytics-cookies-yes" name="userPreference" type="radio" value="true" checked>
                                         <label class="govuk-label govuk-radios__label" for="analytics-cookies-yes">
                                             Yes
                                         </label>
                                     </div>
                                     <div class="govuk-radios__item">
-                                        <input class="govuk-radios__input" id="analytics-cookies-no" name="userPreference" type="radio" value="no">
+                                        <input class="govuk-radios__input" id="analytics-cookies-no" name="userPreference" type="radio" value="false">
                                         <label class="govuk-label govuk-radios__label" for="analytics-cookies-no">
                                             No
                                         </label>
@@ -72,7 +71,6 @@
                             Save cookie settings
                         </button>
                     </form>
-                </div>
             </div>
         </main>
     </div>

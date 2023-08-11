@@ -3,14 +3,15 @@ name: Code PR Check
 on:
   push:
     branches: [ "main" ]
-    paths-ignore:
-      - 'docs/**'
-      - 'terraform/**'
+    paths:
+      - 'src/**'
+      - 'tests/**'
   pull_request:
     branches: [ "main" ]
-    paths-ignore:
-      - 'docs/**'
-      - 'terraform/**'
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/code-pr-check.yml'
 
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
@@ -102,4 +103,3 @@ jobs:
           name: JEST Tests            # Name of the check run which will be created
           path: ./junit.xml    # Path to test results
           reporter: jest-junit        # Format of test results
-

@@ -17,7 +17,7 @@ builder.Services.AddGoogleTagManager(builder.Configuration);
 builder.Services.AddControllersWithViews();
 builder.Services.AddGovUkFrontend();
 
-if (builder.Environment.IsProduction())
+if (!builder.Environment.IsDevelopment())
 {
     var keyVaultUri = $"https://{builder.Configuration["KeyVaultName"]}.vault.azure.net/";
     var azureCredentials = new DefaultAzureCredential();
@@ -28,7 +28,14 @@ if (builder.Environment.IsProduction())
     builder.Services.AddDataProtection()
                         .PersistKeysToDbContext<DataProtectionDbContext>()
                         .ProtectKeysWithAzureKeyVault(new Uri(keyVaultUri + "keys/dataprotection"), azureCredentials);
+
+    //Add overrides json for overwriting KV values for testing
+    if (builder.Environment.IsStaging())
+    {
+        builder.Configuration.AddJsonFile("overrides.json", true);
+    }
 }
+
 
 builder.Services.AddCaching();
 builder.Services.AddCQRSServices();
@@ -43,6 +50,11 @@ builder.Services.AddAuthentication();
 
 var app = builder.Build();
 
+app.UseCookiePolicy(
+    new CookiePolicyOptions
+    {
+        Secure = CookieSecurePolicy.Always
+    });
 app.UseForwardedHeaders();
 
 // Configure the HTTP request pipeline.
@@ -53,11 +65,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseCookiePolicy(
-    new CookiePolicyOptions
-    {
-        Secure = CookieSecurePolicy.Always
-    });
+app.UseCookiePolicy();
 
 app.UseStaticFiles();
 

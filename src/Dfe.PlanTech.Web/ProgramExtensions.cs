@@ -1,5 +1,7 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
+using Dfe.PlanTech.Application.Cookie.Interfaces;
+using Dfe.PlanTech.Application.Cookie.Service;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Response.Commands;
 using Dfe.PlanTech.Application.Response.Interface;
@@ -18,6 +20,7 @@ using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Web.Helpers;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
 
@@ -88,6 +91,7 @@ public static class ProgramExtensions
         services.AddTransient<ICreateQuestionCommand, CreateQuestionCommand>();
         services.AddTransient<IRecordQuestionCommand, RecordQuestionCommand>();
         services.AddTransient<IGetQuestionQuery, GetQuestionQuery>();
+        services.AddTransient<ICookieService, CookieService>();
 
         services.AddTransient<ICreateAnswerCommand, CreateAnswerCommand>();
         services.AddTransient<IRecordAnswerCommand, RecordAnswerCommand>();

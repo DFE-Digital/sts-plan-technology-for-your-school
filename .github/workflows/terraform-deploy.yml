@@ -1,13 +1,9 @@
-name: Terraform PR Check
+name: Deploy Terraform
 
 on:
-  pull_request:
-    paths: 
-      - 'terraform/**'
-      - '.github/workflows/terraform-pr-check.yml'
   push:
     branches: [ "main" ]
-    paths: 
+    paths:
       - 'terraform/**'
     
 env:
@@ -38,18 +34,21 @@ env:
   TF_WORKING_DIRECTORY: terraform
 
 jobs:
-  validate-terraform:  
-    name: Validate Terraform 
+  deploy-terraform:  
+    name: Deploy Terraform 
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment || 'dev' }}
     defaults:
       run:
         working-directory: ${{env.TF_WORKING_DIRECTORY}}
+    strategy:
+      max-parallel: 1
+      fail-fast: true
+      matrix:
+        env: ['dev', 'Tst']  
+    environment: ${{ matrix.env }}  
     steps:
       - name: Clone repo
         uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
         
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -79,7 +78,7 @@ jobs:
           azcliversion: 2.45.0
           inlineScript: |
             az keyvault network-rule add --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
-        
+
       - name: Terraform init
         id: init
         run: |
@@ -88,43 +87,10 @@ jobs:
             -backend-config="storage_account_name=${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}"  \
             -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}"  \
             -backend-config="key=${{ env.TF_BACKEND_KEY }}"
-
-      - name: Terraform Validate
-        id: validate
-        run: terraform validate -no-color
-
-      - name: Terraform plan 
-        id: plan
-        run: terraform plan -no-color
-
-      - name: Terraform fmt
-        id: fmt
-        run: terraform fmt -check -diff
         
-      - name: Validate Terraform docs
-        uses: terraform-docs/gh-actions@v1.0.0
-        with:
-          working-dir: terraform
-          config-file: .terraform-docs.yml
-          output-file: terraform-configuration.md
-          output-method: inject
-          git-push: "true"
-
-      - name: Update PR with Terraform results  
-        uses: ./.github/actions/post-terraform-results
-        if: github.event_name == 'pull_request'
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          plan_stdout: ${{ steps.plan.outputs.stdout }}
-          plan_outcome: ${{ steps.plan.outcome }}
-          fmt_outcome: ${{ steps.fmt.outcome }}
-          init_outcome: ${{ steps.init.outcome }}
-          validate_outcome: ${{ steps.validate.outcome }}
-          validate_stdout: ${{ steps.validate.outputs.stdout }}
-          github_actor: ${{ github.actor }}
-          github_event_name: ${{ github.event_name }}
-          tf_working_directory: ${{ env.TF_WORKING_DIRECTORY }}
-          github_workflow: ${{ github.workflow }}
+      - name: Apply Terraform changes
+        id: apply
+        run: terraform apply -auto-approve
       
       - name: Remove Runner to KV whitelist
         uses: azure/CLI@v1
@@ -133,33 +99,3 @@ jobs:
           azcliversion: 2.45.0
           inlineScript: |
             az keyvault network-rule remove --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
-  
-  terraform-lint:
-    name: Terraform Lint
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: terraform
-    steps:
-      - name: Clone repo
-        uses: actions/checkout@v3
-
-      - name: Setup TFLint
-        uses: terraform-linters/setup-tflint@v3
-        with:
-          tflint_version: v0.44.1
-
-      - name: Run TFLint
-        run: tflint -f compact
-
-  tfsec-pr-commenter:
-    name: tfsec Check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Clone repo
-        uses: actions/checkout@v3
-
-      - name: tfsec
-        uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
-        with:
-          github_token: ${{ github.token }}
