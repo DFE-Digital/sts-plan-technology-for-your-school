@@ -54,7 +54,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     private ParameterCheckAnswersPage _DeserialiseParameter(object? parameterObject)
     {
         if (parameterObject == null) throw new ArgumentNullException(nameof(parameterObject));
-        if (parameterObject is not string) throw new FormatException(nameof(parameterObject));
+        if (parameterObject is not string) throw new ArithmeticException(nameof(parameterObject));
 
         var parameterCheckAnswersPage = Newtonsoft.Json.JsonConvert.DeserializeObject<ParameterCheckAnswersPage>((string)parameterObject);
 
