@@ -32,7 +32,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
         if (string.IsNullOrEmpty(id))
         {
-            var parameterQuestionPage = _DeserialiseParameter(TempData["QuestionPage"]);
+            var parameterQuestionPage = DeserialiseParameter<ParameterQuestionPage>(TempData["QuestionPage"]);
             id = parameterQuestionPage.QuestionRef;
             submissionId = parameterQuestionPage.SubmissionId;
             answerRef = parameterQuestionPage.AnswerRef;
@@ -102,16 +102,6 @@ public class QuestionsController : BaseController<QuestionsController>
             TempData["QuestionPage"] = Newtonsoft.Json.JsonConvert.SerializeObject(new ParameterQuestionPage() { QuestionRef = nextQuestionId, SubmissionId = submissionId });
             return RedirectToAction("GetQuestionById");
         }
-    }
-
-    private static ParameterQuestionPage _DeserialiseParameter(object? parameterObject)
-    {
-        // TODO: Move out of class and make generic
-        if (parameterObject == null) throw new ArgumentNullException(nameof(parameterObject));
-
-        var parameterQuestionPage = Newtonsoft.Json.JsonConvert.DeserializeObject<ParameterQuestionPage>(parameterObject as string ?? throw new ArithmeticException(nameof(parameterObject)));
-
-        return parameterQuestionPage ?? throw new NullReferenceException(nameof(parameterQuestionPage));
     }
 
     private static Params? _ParseParameters(string? parameters)

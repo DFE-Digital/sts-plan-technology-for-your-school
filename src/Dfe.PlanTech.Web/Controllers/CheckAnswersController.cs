@@ -17,7 +17,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     [Route("check-answers")]
     public async Task<IActionResult> CheckAnswersPage([FromServices] ProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand, [FromServices] GetPageQuery getPageQuery)
     {
-        ParameterCheckAnswersPage parameterCheckAnswersPage = _DeserialiseParameter(TempData["CheckAnswersPage"]);
+        var parameterCheckAnswersPage = DeserialiseParameter<ParameterCheckAnswersPage>(TempData["CheckAnswersPage"]);
 
         Page checkAnswerPageContent = await getPageQuery.GetPageBySlug("check-answers", CancellationToken.None);
 
@@ -49,15 +49,5 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
         TempData["SectionName"] = sectionName;
         return RedirectToAction("GetByRoute", "Pages", new { route = "self-assessment" });
 
-    }
-
-    private static ParameterCheckAnswersPage _DeserialiseParameter(object? parameterObject)
-    {
-        // TODO: Move out of class and make generic
-        if (parameterObject == null) throw new ArgumentNullException(nameof(parameterObject));
-
-        var parameterCheckAnswersPage = Newtonsoft.Json.JsonConvert.DeserializeObject<ParameterCheckAnswersPage>(parameterObject as string ?? throw new ArithmeticException(nameof(parameterObject)));
-
-        return parameterCheckAnswersPage ?? throw new NullReferenceException(nameof(parameterCheckAnswersPage));
     }
 }
