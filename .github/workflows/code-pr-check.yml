@@ -11,6 +11,7 @@ on:
     paths:
       - 'src/**'
       - 'tests/**'
+      - '.github/workflows/code-pr-check.yml'
 
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}

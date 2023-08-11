@@ -6,7 +6,8 @@ on:
     paths:
       - 'src/**'
       - 'tests/Dfe.PlanTech.Web.E2ETests/**'
-    
+      - '.github/workflows/e2e-tests.yml'
+      
 jobs:
   clear-db:
     name: Clear database
@@ -35,8 +36,8 @@ jobs:
       - name: Add Azure firewall rules
         shell: bash
         run: |
-          az sql server firewall-rule create --resource-group ${{ env.az_resource_group_name }} --server ${{ env.az_sql_database_server_name }} --name clear-db --start-ip-address ${{ steps.whats-my-ip.outputs.ip }} --end-ip-address ${{ steps.whats-my-ip.outputs.ip }}
-          az keyvault network-rule add --resource-group ${{ env.az_resource_group_name }} --name ${{ env.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
+          az sql server firewall-rule create --resource-group ${{ env.az_resource_group_name }} --server ${{ env.az_sql_database_server_name }} --name clear-db --start-ip-address ${{ steps.whats-my-ip.outputs.ip }} --end-ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+          az keyvault network-rule add --resource-group ${{ env.az_resource_group_name }} --name ${{ env.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
       - name: Get connection string
         shell: bash
@@ -53,8 +54,8 @@ jobs:
         shell: bash
         if: always()
         run: |
-          az sql server firewall-rule delete --resource-group ${{ env.az_resource_group_name }} --server ${{ env.az_sql_database_server_name }} --name clear-db
-          az keyvault network-rule remove --resource-group ${{ env.az_resource_group_name }} --name ${{ env.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
+          az sql server firewall-rule delete --resource-group ${{ env.az_resource_group_name }} --server ${{ env.az_sql_database_server_name }} --name clear-db &> /dev/null
+          az keyvault network-rule remove --resource-group ${{ env.az_resource_group_name }} --name ${{ env.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
   run-tests:
     name: Run E2E Tests
