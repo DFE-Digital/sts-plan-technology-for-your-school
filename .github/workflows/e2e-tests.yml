@@ -110,6 +110,11 @@ jobs:
         shell: bash
         run: dotnet publish ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj --configuration Release --no-restore --output ./build
 
+      - name: Create overwrite json file
+        shell: bash
+        run: |
+          echo "{ \"DfeSignIn\": { \"FrontDoorUrl\": \"https://localhost:8081\"}}" > overrides.json
+
       - name: Get workflow IP address
         id: whats-my-ip
         uses: ./.github/actions/whats-my-ip-address
@@ -128,10 +133,11 @@ jobs:
         shell: bash
         working-directory: ./build
         run: |
-          export ASPNETCORE_ENVIRONMENT=Production
+          export ASPNETCORE_ENVIRONMENT=Staging
           export KeyVaultName=s190d01-plantech-kv
           export Kestrel__Endpoints__Https__Url=https://*:8081
-          dotnet ./Dfe.PlanTech.Web.dll &
+          export DfeSignIn__FrontDoorUrl=https://localhost:8081
+          dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 &
           
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests
