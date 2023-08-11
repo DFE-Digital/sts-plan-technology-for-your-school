@@ -7,6 +7,7 @@ using Dfe.PlanTech.Web.Helpers;
 using GovUk.Frontend.AspNetCore;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,7 @@ if (builder.Environment.IsProduction())
                         .ProtectKeysWithAzureKeyVault(new Uri(keyVaultUri + "keys/dataprotection"), azureCredentials);
 }
 
+
 builder.Services.AddCaching();
 builder.Services.AddCQRSServices();
 builder.Services.AddContentfulServices(builder.Configuration);
@@ -43,6 +45,11 @@ builder.Services.AddAuthentication();
 
 var app = builder.Build();
 
+app.UseCookiePolicy(
+    new CookiePolicyOptions
+    {
+        Secure = CookieSecurePolicy.Always
+    });
 app.UseForwardedHeaders();
 
 // Configure the HTTP request pipeline.
@@ -53,11 +60,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseCookiePolicy(
-    new CookiePolicyOptions
-    {
-        Secure = CookieSecurePolicy.Always
-    });
+app.UseCookiePolicy();
 
 app.UseStaticFiles();
 
