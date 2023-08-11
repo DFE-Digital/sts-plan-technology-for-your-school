@@ -43,6 +43,8 @@ jobs:
       run:
         working-directory: ${{env.TF_WORKING_DIRECTORY}}
     strategy:
+      max-parallel: 1
+      fail-fast: true
       matrix:
         env: ['dev', 'Tst']  
     environment: ${{ matrix.env }}  
