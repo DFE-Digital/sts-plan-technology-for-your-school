@@ -106,6 +106,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
     private ParameterQuestionPage _DeserialiseParameter(object? parameterObject)
     {
+        // TODO: Move out of class and make generic
         if (parameterObject == null) throw new ArgumentNullException(nameof(parameterObject));
 
         var parameterQuestionPage = Newtonsoft.Json.JsonConvert.DeserializeObject<ParameterQuestionPage>(parameterObject as string ?? throw new ArithmeticException(nameof(parameterObject)));
