@@ -1,7 +1,11 @@
 name: Run E2E Tests
 
 on:
-  workflow_call:
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'src/**'
+      - 'tests/Dfe.PlanTech.Web.E2ETests/**'
     
 jobs:
   clear-db:
