@@ -51,9 +51,6 @@ jobs:
           certutil -d sql:$HOME/.pki/nssdb -A -t "P,," -n localhost -i ./localhost.crt
           certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n localhost -i ./localhost.crt
           
-          # Trust dotnet-to-dotnet (.pem extension is important here)
-          sudo cp localhost.crt /usr/lib/ssl/certs/aspnetcore-https-localhost.pem
-          
           # Cleanup
           rm localhost.crt
         
@@ -63,7 +60,7 @@ jobs:
 
       - name: Build project
         shell: bash
-        run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release --no-restore --output ./build
+        run: dotnet build ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj --configuration Release --no-restore --output ./build
 
       - name: Get workflow IP address
         id: whats-my-ip
@@ -83,9 +80,9 @@ jobs:
         shell: bash
         run: |
           export ASPNETCORE_ENVIRONMENT=Production
-          export KeyVaultName=${{ env.KEYVAULT_NAME }}
+          export KeyVaultName=s190d01-plantech-kv
           export Kestrel__Endpoints__Https__Url=https://*:8081
-          dotnet ./build/Dfe.PlanTech.Web.dll &
+          dotnet ./build/Dfe.PlanTech.Web.dll &> server.log &
           
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests
@@ -100,9 +97,15 @@ jobs:
         uses: ./.github/actions/azure-ip-whitelist
         with:
           ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-          verb: "add"
+          verb: "remove"
           az_keyvault_name: ${{ env.KEYVAULT_NAME }}
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.RESOURCE_GROUP}}
           az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}  
   
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: server-log
+          path: server.log
+        
