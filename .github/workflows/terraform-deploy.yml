@@ -36,8 +36,8 @@ env:
   TF_WORKING_DIRECTORY: terraform
 
 jobs:
-  validate-terraform:  
-    name: Validate Terraform 
+  deploy-terraform:  
+    name: Deploy Terraform 
     runs-on: ubuntu-latest
     defaults:
       run:
