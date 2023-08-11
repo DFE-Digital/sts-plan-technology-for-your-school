@@ -51,7 +51,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
     }
 
-    private ParameterCheckAnswersPage _DeserialiseParameter(object? parameterObject)
+    private static ParameterCheckAnswersPage _DeserialiseParameter(object? parameterObject)
     {
         // TODO: Move out of class and make generic
         if (parameterObject == null) throw new ArgumentNullException(nameof(parameterObject));

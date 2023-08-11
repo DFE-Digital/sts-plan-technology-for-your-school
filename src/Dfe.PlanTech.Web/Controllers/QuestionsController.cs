@@ -104,7 +104,7 @@ public class QuestionsController : BaseController<QuestionsController>
         }
     }
 
-    private ParameterQuestionPage _DeserialiseParameter(object? parameterObject)
+    private static ParameterQuestionPage _DeserialiseParameter(object? parameterObject)
     {
         // TODO: Move out of class and make generic
         if (parameterObject == null) throw new ArgumentNullException(nameof(parameterObject));
