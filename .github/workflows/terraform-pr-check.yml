@@ -4,7 +4,11 @@ on:
   pull_request:
     paths: 
       - 'terraform/**'
-
+  push:
+    branches: [ "main" ]
+    paths: 
+      - 'terraform/**'
+    
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
 
