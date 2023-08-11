@@ -1,5 +1,6 @@
 ﻿using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Cookie.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
@@ -28,11 +29,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             },
         };
 
-
         public static CookiesController CreateStrut()
         {
             Mock<ILogger<CookiesController>> loggerMock = new Mock<ILogger<CookiesController>>();
-            return new CookiesController(loggerMock.Object);
+            Mock<ICookieService> cookiesMock = new Mock<ICookieService>();
+
+            return new CookiesController(loggerMock.Object, cookiesMock.Object);
         }
 
         [Theory]
@@ -80,6 +82,28 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.Equal(url, result.Url);
         }
 
+        [Theory]
+        [InlineData("https://localhost:8080/self-assessment")]
+        [InlineData("https://www.dfe.gov.uk/self-assessment")]
+        public void Reject_Redirects_BackToPlaceOfOrigin(string url)
+        {
+            //Arrange
+            var strut = CreateStrut();
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Headers["Referer"] = url;
+            strut.ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext
+            };
+
+            //Act
+            var result = strut.Reject() as RedirectResult;
+
+            //Assert
+            Assert.IsType<RedirectResult>(result);
+            Assert.Equal(url, result.Url);
+        }
+
         private static IRequestCookieCollection MockRequestCookieCollection(string key, string value)
         {
             var requestFeature = new HttpRequestFeature();
@@ -99,56 +123,44 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
          [Fact]
          public async Task CookiesPageDisplays()
          {
-             Mock<IQuestionnaireCacher> questionnaireCacherMock = new Mock<IQuestionnaireCacher>();
-             Mock<IContentRepository> contentRepositoryMock = SetupRepositoryMock();
-             Mock<GetPageQuery> _getPageQueryMock = new Mock<GetPageQuery>(questionnaireCacherMock.Object, contentRepositoryMock.Object);
+            Mock<IQuestionnaireCacher> questionnaireCacherMock = new Mock<IQuestionnaireCacher>();
+            Mock<IContentRepository> contentRepositoryMock = SetupRepositoryMock();
+            Mock<GetPageQuery> _getPageQueryMock = new Mock<GetPageQuery>(questionnaireCacherMock.Object, contentRepositoryMock.Object);
 
-             CookiesController cookiesController = CreateStrut();
-             var result = await cookiesController.GetCookiesPage(_getPageQueryMock.Object);
-             Assert.IsType<ViewResult>(result);
-             
-             var viewResult = result as ViewResult;
+            CookiesController cookiesController = CreateStrut();
+            var result = await cookiesController.GetCookiesPage(_getPageQueryMock.Object);
+            Assert.IsType<ViewResult>(result);
 
-             Assert.NotNull(viewResult);
-             Assert.Equal("Cookies", viewResult.ViewName);
-         }
+            var viewResult = result as ViewResult;
+
+            Assert.NotNull(viewResult);
+            Assert.Equal("Cookies", viewResult.ViewName);
+        }
          
          [Theory]
-         [InlineData("yes")]
-         [InlineData("no")]
+         [InlineData("true")]
+         [InlineData("false")]
          public void settingCookiePreferenceBasedOnInputRedirectsToCookiePage(string userPreference)
          {
-             CookiesController cookiesController = CreateStrut();
+            CookiesController cookiesController = CreateStrut();
              
-             var tempDataMock = new Mock<ITempDataDictionary>();
-             var httpContextMock = new Mock<HttpContext>();
-             var responseMock = new Mock<HttpResponse>();
-             var cookiesMock = new Mock<IResponseCookies>();
+            var tempDataMock = new Mock<ITempDataDictionary>();
+            var httpContextMock = new Mock<HttpContext>();
+            var responseMock = new Mock<HttpResponse>();
+            var cookiesMock = new Mock<ICookieService>();
 
 
-             responseMock.SetupGet(r => r.Cookies).Returns(cookiesMock.Object);
-             httpContextMock.SetupGet(c => c.Response).Returns(responseMock.Object);
+            cookiesMock.Setup(r => r.SetPreference(It.IsAny<bool>()));
+            httpContextMock.SetupGet(c => c.Response).Returns(responseMock.Object);
 
-             cookiesController.TempData = tempDataMock.Object;
-             cookiesController.ControllerContext = new ControllerContext()
-             {
-                 HttpContext = httpContextMock.Object
-             };
+            cookiesController.TempData = tempDataMock.Object;
+            cookiesController.ControllerContext = new ControllerContext()
+            {
+                HttpContext = httpContextMock.Object
+            };
 
+            var result = cookiesController.CookiePreference(userPreference);
 
-             var result = cookiesController.CookiePreference(userPreference);
-
-             if (userPreference == "yes")
-             {
-                 cookiesMock.Verify(c => c.Append("cookies_preferences_set", "true", It.IsAny<CookieOptions>()),
-                     Times.Once);
-             }
-             else
-             {
-                 cookiesMock.Verify(c => c.Append("cookies_preferences_set", "false", It.IsAny<CookieOptions>()),
-                     Times.Once);
-             }
-             
              tempDataMock.VerifySet(td => td["UserPreferenceRecorded"] = true, Times.Once);
              
              Assert.IsType<RedirectToActionResult>(result);
@@ -161,9 +173,32 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                  Assert.True(res.ControllerName == "Pages");
              }
          }
-         
-         
-         private Mock<IContentRepository> SetupRepositoryMock()
+
+        [Fact]
+        public void settingCookiePreferenceBasedOnInputAsNullThrowsException()
+        {
+            CookiesController cookiesController = CreateStrut();
+
+            var tempDataMock = new Mock<ITempDataDictionary>();
+            var httpContextMock = new Mock<HttpContext>();
+            var responseMock = new Mock<HttpResponse>();
+            var cookiesMock = new Mock<ICookieService>();
+
+
+            cookiesMock.Setup(r => r.SetPreference(It.IsAny<bool>()));
+            httpContextMock.SetupGet(c => c.Response).Returns(responseMock.Object);
+
+            cookiesController.TempData = tempDataMock.Object;
+            cookiesController.ControllerContext = new ControllerContext()
+            {
+                HttpContext = httpContextMock.Object
+            };
+
+            var result = Assert.Throws<ArgumentException>(() => cookiesController.CookiePreference(string.Empty));
+            Assert.Contains("Can't convert preference", result.Message);
+        }
+
+        private Mock<IContentRepository> SetupRepositoryMock()
          {
              var repositoryMock = new Mock<IContentRepository>();
              repositoryMock.Setup(repo => repo.GetEntities<Page>(It.IsAny<IGetEntitiesOptions>(), It.IsAny<CancellationToken>())).ReturnsAsync((IGetEntitiesOptions options, CancellationToken _) =>

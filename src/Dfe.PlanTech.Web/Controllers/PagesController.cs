@@ -1,4 +1,5 @@
 ﻿using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -10,10 +11,12 @@ namespace Dfe.PlanTech.Web.Controllers;
 public class PagesController : BaseController<PagesController>
 {
     public IConfiguration Config { get; }
+    private readonly ICookieService _cookieService;
 
-    public PagesController(ILogger<PagesController> logger, IConfiguration config) : base(logger)
+    public PagesController(ILogger<PagesController> logger, IConfiguration config, ICookieService cookieService) : base(logger)
     {
         Config = config ?? throw new ArgumentNullException(nameof(config));
+        _cookieService = cookieService;
     }
 
     [HttpGet("/")]
@@ -51,7 +54,7 @@ public class PagesController : BaseController<PagesController>
 
     private PageViewModel CreatePageModel(Page page, string param = null!)
     {
-        bool acceptCookies = GetUserOptOutPreference();
+        var acceptCookies = _cookieService.GetCookie().HasApproved;
         
         string gtmHead = acceptCookies ?  Config.GetValue<string>("GTM:Head") ?? "" : "";
         string gtmBody = acceptCookies ?  Config.GetValue<string>("GTM:Body") ?? "" : "";
@@ -70,17 +73,4 @@ public class PagesController : BaseController<PagesController>
     /// </summary>
     /// <param name="route">Route slug from route binding</param>
     private string GetSlug(string? route) => (string.IsNullOrEmpty(route) ? Request.Path.Value : route) ?? "/";
-    
-    
-    private bool GetUserOptOutPreference()
-    {
-        var userPreferenceCookieValue = Request.Cookies["cookies_preferences_set"];
-
-        if (bool.TryParse(userPreferenceCookieValue, out bool acceptCookies))
-        {
-            return acceptCookies;
-        }
-        
-        return false;
-    }
 }
