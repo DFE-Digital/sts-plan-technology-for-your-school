@@ -16,7 +16,6 @@ internal class Program
     private const int SuccessResult = 0;
 
     private const string ScriptsNamespace = "Dfe.PlanTech.DatabaseUpgrader.Scripts";
-    private const string StoredProcsNamespace = "Dfe.PlanTech.DatabaseUpgrader.StoredProcs";
 
     private static int Main(string[] args)
     {
@@ -58,21 +57,7 @@ internal class Program
             .WithTransaction()
             .Build();
 
-        var storedProcUpgrader = DeployChanges.To
-            .SqlDatabase(connectionString)
-            .JournalTo(new NullJournal())
-            .WithScriptsEmbeddedInAssembly(
-                Assembly.GetExecutingAssembly(),
-                scriptNamespace => {
-                    return scriptNamespace.StartsWith(StoredProcsNamespace);
-                })
-            .LogToConsole()
-            .LogScriptOutput()
-            .WithTransaction()
-            .Build();
-
-        if(!Execute(scriptsUpgrader) ||
-           !Execute(storedProcUpgrader))
+        if(!Execute(scriptsUpgrader))
         {
             return false;
         }
