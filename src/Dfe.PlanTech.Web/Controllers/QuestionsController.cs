@@ -22,16 +22,23 @@ public class QuestionsController : BaseController<QuestionsController>
     /// <exception cref="ArgumentNullException">Throws exception when Id is null or empty</exception>
     /// <returns></returns>
     public async Task<IActionResult> GetQuestionById(
-        string id,
+        string? id,
         string? section,
-        int? submissionId,
-        string? answerRef,
         [FromServices] SubmitAnswerCommand submitAnswerCommand,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
-        object? parameters;
+        int? submissionId = null;
+        string? answerRef = null;
 
+        if (string.IsNullOrEmpty(id))
+        {
+            var parameterQuestionPage = _DeserialiseParameter(TempData["QuestionPage"]);
+            id = parameterQuestionPage.QuestionRef;
+            submissionId = parameterQuestionPage.SubmissionId;
+            answerRef = parameterQuestionPage.AnswerRef;
+        }
+
+        object? parameters;
         TempData.TryGetValue("param", out parameters);
 
         Question? question = null;
@@ -43,7 +50,11 @@ public class QuestionsController : BaseController<QuestionsController>
             if (submission != null && !submission.Completed)
             {
                 question = await submitAnswerCommand.GetNextUnansweredQuestion(submission.Id);
-                if (question == null) return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { submissionId = submission.Id, sectionId = param?.SectionId, sectionName = param?.SectionName });
+                if (question == null)
+                {
+                    TempData["CheckAnswersPage"] = Newtonsoft.Json.JsonConvert.SerializeObject(new ParameterCheckAnswersPage() { SubmissionId = submission.Id, SectionId = param.SectionId, SectionName = param.SectionName });
+                    return RedirectToAction("CheckAnswersPage", "CheckAnswers");
+                }
 
                 submissionId = submission.Id;
             }
@@ -65,8 +76,6 @@ public class QuestionsController : BaseController<QuestionsController>
     {
         if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
 
-        if (!ModelState.IsValid) return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.QuestionId, submissionId = submitAnswerDto.SubmissionId });
-
         Params param = new Params();
         if (!string.IsNullOrEmpty(submitAnswerDto.Params))
         {
@@ -74,11 +83,35 @@ public class QuestionsController : BaseController<QuestionsController>
             TempData["param"] = submitAnswerDto.Params;
         }
 
+        if (!ModelState.IsValid)
+        {
+            TempData["QuestionPage"] = Newtonsoft.Json.JsonConvert.SerializeObject(new ParameterQuestionPage() { QuestionRef = submitAnswerDto.QuestionId, SubmissionId = submitAnswerDto.SubmissionId });
+            return RedirectToAction("GetQuestionById");
+        }
+
         int submissionId = await submitAnswerCommand.SubmitAnswer(submitAnswerDto, param.SectionId, param.SectionName);
         string? nextQuestionId = await submitAnswerCommand.GetNextQuestionId(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId);
 
-        if (string.IsNullOrEmpty(nextQuestionId) || await submitAnswerCommand.NextQuestionIsAnswered(submissionId, nextQuestionId)) return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { submissionId = submissionId, sectionId = param.SectionId, sectionName = param.SectionName });
-        else return RedirectToAction("GetQuestionById", new { id = nextQuestionId, submissionId = submissionId });
+        if (string.IsNullOrEmpty(nextQuestionId) || await submitAnswerCommand.NextQuestionIsAnswered(submissionId, nextQuestionId))
+        {
+            TempData["CheckAnswersPage"] = Newtonsoft.Json.JsonConvert.SerializeObject(new ParameterCheckAnswersPage() { SubmissionId = submissionId, SectionId = param.SectionId, SectionName = param.SectionName });
+            return RedirectToAction("CheckAnswersPage", "CheckAnswers");
+        }
+        else
+        {
+            TempData["QuestionPage"] = Newtonsoft.Json.JsonConvert.SerializeObject(new ParameterQuestionPage() { QuestionRef = nextQuestionId, SubmissionId = submissionId });
+            return RedirectToAction("GetQuestionById");
+        }
+    }
+
+    private ParameterQuestionPage _DeserialiseParameter(object? parameterObject)
+    {
+        if (parameterObject == null) throw new ArgumentNullException(nameof(parameterObject));
+        if (parameterObject is not string) throw new FormatException(nameof(parameterObject));
+
+        var parameterQuestionPage = Newtonsoft.Json.JsonConvert.DeserializeObject<ParameterQuestionPage>((string)parameterObject);
+
+        return parameterQuestionPage ?? throw new NullReferenceException(nameof(parameterQuestionPage));
     }
 
     private static Params? _ParseParameters(string? parameters)
