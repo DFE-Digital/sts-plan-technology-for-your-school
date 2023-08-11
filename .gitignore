@@ -493,3 +493,7 @@ $RECYCLE.BIN/
 # Jest
 coverage/
 junit.xml
+
+#Build
+
+build/

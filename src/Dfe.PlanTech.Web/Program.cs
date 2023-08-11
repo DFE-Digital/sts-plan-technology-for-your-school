@@ -7,7 +7,6 @@ using Dfe.PlanTech.Web.Helpers;
 using GovUk.Frontend.AspNetCore;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +17,7 @@ builder.Services.AddGoogleTagManager(builder.Configuration);
 builder.Services.AddControllersWithViews();
 builder.Services.AddGovUkFrontend();
 
-if (builder.Environment.IsProduction())
+if (!builder.Environment.IsDevelopment())
 {
     var keyVaultUri = $"https://{builder.Configuration["KeyVaultName"]}.vault.azure.net/";
     var azureCredentials = new DefaultAzureCredential();
@@ -29,6 +28,12 @@ if (builder.Environment.IsProduction())
     builder.Services.AddDataProtection()
                         .PersistKeysToDbContext<DataProtectionDbContext>()
                         .ProtectKeysWithAzureKeyVault(new Uri(keyVaultUri + "keys/dataprotection"), azureCredentials);
+
+    //Add overrides json for overwriting KV values for testing
+    if (builder.Environment.IsStaging())
+    {
+        builder.Configuration.AddJsonFile("overrides.json", true);
+    }
 }
 
 

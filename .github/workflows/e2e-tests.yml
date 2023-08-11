@@ -1,0 +1,163 @@
+name: Run E2E Tests
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'src/**'
+      - 'tests/Dfe.PlanTech.Web.E2ETests/**'
+    
+jobs:
+  clear-db:
+    name: Clear database
+    runs-on: ubuntu-latest
+    env:
+      az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
+      az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
+      az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+
+      - name: Get workflow IP address
+        id: whats-my-ip
+        uses: ./.github/actions/whats-my-ip-address
+        
+      - name: Add Azure firewall rules
+        shell: bash
+        run: |
+          az sql server firewall-rule create --resource-group ${{ env.az_resource_group_name }} --server ${{ env.az_sql_database_server_name }} --name clear-db --start-ip-address ${{ steps.whats-my-ip.outputs.ip }} --end-ip-address ${{ steps.whats-my-ip.outputs.ip }}
+          az keyvault network-rule add --resource-group ${{ env.az_resource_group_name }} --name ${{ env.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
+
+      - name: Get connection string
+        shell: bash
+        run: |
+          echo "CONNECTION_STRING=$(az keyvault secret show --name ${{ env.az_keyvault_database_connectionstring_name }} --vault-name ${{ env.az_keyvault_name }} --query value -o tsv)" >> $GITHUB_ENV
+
+      - name: Execute stored procedure
+        uses: azure/sql-action@v2.2
+        with:
+          connection-string: ${{ env.CONNECTION_STRING }}
+          path: './.github/scripts/drop-establishment-data.sql'
+
+      - name: Remove Azure firewall rules
+        shell: bash
+        if: always()
+        run: |
+          az sql server firewall-rule delete --resource-group ${{ env.az_resource_group_name }} --server ${{ env.az_sql_database_server_name }} --name clear-db
+          az keyvault network-rule remove --resource-group ${{ env.az_resource_group_name }} --name ${{ env.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
+
+  run-tests:
+    name: Run E2E Tests
+    runs-on: ubuntu-22.04
+    needs: [clear-db]
+    env:
+      PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj 
+      KEYVAULT_NAME: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
+      RESOURCE_GROUP: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      SQL_IP_NAME: e2e-tests-pr
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Azure CLI Login
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+            dotnet-version: 7.0.x
+          
+      - name: Trust cert
+        shell: bash
+        run: |
+          sudo apt-get update -y  
+          sudo apt-get install -y libnss3-tools
+
+      - name: Create trusted HTTPS cert
+        shell: bash
+        run: |
+          dotnet dev-certs https -ep localhost.crt --format PEM
+
+          # Create DB
+          mkdir -p $HOME/.pki/nssdb
+          certutil -d $HOME/.pki/nssdb -N
+
+          # Trust Edge/Chrome
+          certutil -d sql:$HOME/.pki/nssdb -A -t "P,," -n localhost -i ./localhost.crt
+          certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n localhost -i ./localhost.crt
+          
+          # Cleanup
+          rm localhost.crt
+        
+      - name: Install dependencies
+        shell: bash
+        run: dotnet restore ${{ env.PROJECT_PATH }}
+
+      - name: Build project
+        shell: bash
+        run: dotnet publish ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj --configuration Release --no-restore --output ./build
+
+      - name: Create overwrite json file
+        shell: bash
+        working-directory: ./build
+        run: |
+          echo "{ \"DfeSignIn\": { \"FrontDoorUrl\": \"https://localhost:8081\"}}" > overrides.json
+
+      - name: Get workflow IP address
+        id: whats-my-ip
+        uses: ./.github/actions/whats-my-ip-address
+  
+      - name: Add Azure firewall rules
+        uses: ./.github/actions/azure-ip-whitelist
+        with:
+          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+          verb: "add"
+          az_keyvault_name: ${{ env.KEYVAULT_NAME }}
+          az_ip_name: ${{ env.SQL_IP_NAME }}
+          az_resource_group: ${{ env.RESOURCE_GROUP}}
+          az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
+
+      - name: Run project
+        shell: bash
+        working-directory: ./build
+        run: |
+          export ASPNETCORE_ENVIRONMENT=Staging
+          export KeyVaultName=s190d01-plantech-kv
+          export Kestrel__Endpoints__Https__Url=https://*:8081
+          export DfeSignIn__FrontDoorUrl=https://localhost:8081
+          dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 &
+          
+      - name: Cypress tests
+        uses: ./.github/actions/run-e2e-tests
+        with:
+          url: https://localhost:8081
+          dsi_url: ${{ secrets.DSI_URL }}
+          dsi_username: ${{ secrets.DSI_USERNAME }}
+          dsi_password: ${{ secrets.DSI_PASSWORD }}
+      
+      - name: Remove Azure firewall rules
+        if: always()
+        uses: ./.github/actions/azure-ip-whitelist
+        with:
+          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+          verb: "remove"
+          az_keyvault_name: ${{ env.KEYVAULT_NAME }}
+          az_ip_name: ${{ env.SQL_IP_NAME }}
+          az_resource_group: ${{ env.RESOURCE_GROUP}}
+          az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}  

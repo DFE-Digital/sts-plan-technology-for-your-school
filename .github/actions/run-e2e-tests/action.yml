@@ -22,7 +22,7 @@ runs:
     - name: Create Cypress config
       shell: bash
       run: |
-        echo "{\"URL\": \"${{inputs.url}}\", \"DSiUrl\": \"${{inputs.dsi_url}}\", \"Username\": \"${{inputs.dsi_username}}\", \"Password\": \"${{inputs.dsi_password}}\" }" >cypress.env.json 
+        echo "{\"URL\": \"${{inputs.url}}\", \"DSi_Url\": \"${{inputs.dsi_url}}\", \"DSi_Email\": \"${{inputs.dsi_username}}\", \"DSi_Password\": \"${{inputs.dsi_password}}\" }" >cypress.env.json 
       working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
 
     - name: Build and test project
@@ -30,6 +30,7 @@ runs:
       with:
         working-directory:  ./tests/Dfe.PlanTech.Web.E2ETests/
         browser: chrome
+        config: baseUrl=${{inputs.url}}
       
     - name: Store screenshots on test failure
       uses: actions/upload-artifact@v3
