@@ -4,6 +4,8 @@ describe("Question page", () => {
   const url = "/self-assessment";
 
   beforeEach(() => {
+    cy.injectAxe();
+
     cy.loginWithEnv(url);
 
     //Navigate to first section

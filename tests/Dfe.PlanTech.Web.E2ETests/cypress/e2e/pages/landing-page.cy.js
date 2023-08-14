@@ -1,7 +1,8 @@
 describe("landing page", () => {
   beforeEach(() => {
-    cy.visit("/");
     cy.injectAxe();
+
+    cy.visit("/");
   });
 
   it("should contain title", () => {
