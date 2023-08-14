@@ -20,9 +20,11 @@ runs:
         node-version: "latest"
 
     - name: Install Dependencies
+      shell: bash
       run: npm install
 
     - name: Run JS unit tests
+      shell: bash
       run: npm test
 
     - name: Test Report
