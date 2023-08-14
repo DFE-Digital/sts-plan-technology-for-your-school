@@ -4,8 +4,6 @@ describe("Question page", () => {
   const url = "/self-assessment";
 
   beforeEach(() => {
-    cy.injectAxe();
-
     cy.loginWithEnv(url);
 
     //Navigate to first section
@@ -15,6 +13,7 @@ describe("Question page", () => {
 
     //Navigate to first question
     cy.get('a.govuk-button').contains('Continue').click();
+    cy.injectAxe();
   });
 
   it("should contain form", () => {

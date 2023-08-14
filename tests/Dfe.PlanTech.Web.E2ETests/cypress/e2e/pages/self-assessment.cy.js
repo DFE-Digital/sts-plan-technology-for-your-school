@@ -2,15 +2,16 @@ describe("Self-assessment page", () => {
   const url = "/self-assessment";
 
   beforeEach(() => {
-    cy.injectAxe();
-
     cy.loginWithEnv(url);
+
+    cy.injectAxe();
 });
 
   it("should have heading", () => {
     cy.get("h1.govuk-heading-xl")
       .should("exist")
       .and("have.text", "Technology self-assessment");
+    
   });
 
   it("should contain categories", () => {

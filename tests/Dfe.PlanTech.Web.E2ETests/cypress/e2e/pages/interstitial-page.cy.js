@@ -3,11 +3,11 @@ describe("Interstitial page", () => {
     const url = "/broadband-connection";
 
     beforeEach(() => {
-        cy.injectAxe();
-
         cy.loginWithEnv("/self-assessment");
         cy.get("ul.app-task-list__items > li a").first().click();
         cy.url().should("contain", url);
+
+        cy.injectAxe();
       });
 
     it("should have content", () => {
