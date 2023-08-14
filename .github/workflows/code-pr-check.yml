@@ -45,8 +45,8 @@ jobs:
             /o:"dfe-digital" \
             /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.cs.vscoveragexml.reportsPaths=**/coverage.info,coverage/lcov.info \
-            /d:sonar.javascript.lcov.reportPaths=coverage/lcov.info \
+            /d:sonar.cs.vscoveragexml.reportsPaths=**/coverage.info \
+            /d:sonar.javascript.lcov.reportPaths=**/lcov.info \
             /d:sonar.coverage.exclusions=src/**/Program.cs,src/Dfe.PlanTech.Web/gulpfile.js,src/Dfe.PlanTech.Web/wwwroot/** \
             /d:sonar.issue.ignore.multicriteria=e1 \
             /d:sonar.issue.ignore.multicriteria.e1.ruleKey=csharpsquid:S6602 \
