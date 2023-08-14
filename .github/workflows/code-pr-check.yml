@@ -110,7 +110,7 @@ jobs:
         if: always()
         run: |
           npx sonar-scanner \
-          /Dsonar.projectKey	="DFE-Digital_plan-technology-for-your-school" \
+          /Dsonar.projectKey="DFE-Digital_plan-technology-for-your-school" \
           /Dsonar.login="${{ secrets.SONAR_TOKEN }}" \
           /Dsonar.host.url="https://sonarcloud.io"
 
