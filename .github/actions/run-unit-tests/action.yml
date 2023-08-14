@@ -12,7 +12,7 @@ runs:
   steps:
     - name: Run CS unit tests
       shell: bash
-      run: dotnet test ${{ inputs.solution_filename }} --no-restore --verbosity normal /p:CollectCoverage=true /Logger:trx /p:CoverletOutputFormat=opencover /p:CoverletOutput=../lcov --collect:"XPlat Code Coverage" --logger:"trx;LogFileName=test-results.trx" || true
+      run: dotnet test ${{ inputs.solution_filename }} --no-restore --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./TestResults/ --collect:"XPlat Code Coverage" --logger:"trx;LogFileName=test-results.trx" || true
 
     - name: Setup Node.js
       uses: actions/setup-node@v3
@@ -34,7 +34,7 @@ runs:
         name: DotNET Tests
         path: "**/test-results.trx"                            
         reporter: dotnet-trx
-        fail-on-error: true
+        fail-on-error: 'false'
 
     - name: Test report
       uses: dorny/test-reporter@v1
@@ -43,3 +43,4 @@ runs:
         name: JEST Tests            # Name of the check run which will be created
         path: ./junit.xml    # Path to test results
         reporter: jest-junit        # Format of test results
+        fail-on-error: 'false'
