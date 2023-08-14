@@ -27,5 +27,5 @@ Cypress.Commands.add("runAxe", () => {
       //Related to back button being outside of main + header tags, but this is based on GDS guidelines
       'region': { enabled: false },
     },
-  }, terminalLog);
+  }, terminalLog, true);
 });
