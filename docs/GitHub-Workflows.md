@@ -1,6 +1,5 @@
 # GitHub Workflows
 
-
 ## PR Checks
 
 The following GitHub workflows are used during the PR process to validate the changes being merged into the `main` branch
@@ -21,6 +20,15 @@ This workflow validates the following:
 * Runs a Terraform Security Check
 
 And will update the PR with the Plan results so reviews can easily see what changes will be applied to the infrastructure.
+
+## Deployment pipelines
+
+The following GitHub workflows are used when a PR is merged into the `main` branch
+
+| Workflow         | description                                                                                                                                                      |
+| ---------------- |------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| matrix-deploy    | Automatically runs when code is merged into main to kick off build and deploy job for dev and test environments (Can be manually triggered for Staging and Prod) |
+| build-and-deploy | Builds and deploys application for passed in environment                                                                                                         |
 
 ## Workflow Actions
 
