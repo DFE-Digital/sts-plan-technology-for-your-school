@@ -10,7 +10,6 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "cypress": "^12.17.3",
-    "sonarqube-scanner": "^3.0.1"
+    "cypress": "^12.17.3"
   }
 }
