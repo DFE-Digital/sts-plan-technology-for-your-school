@@ -36,7 +36,7 @@ public class PagesController : BaseController<PagesController>
         string slug = GetSlug(route);
         string param = "";
 
-        if (TempData[slug] is string) param = TempData[slug] as string ?? "";
+        if (TempData[slug] is string tempDataSlug) param = tempDataSlug;
 
         if (!string.IsNullOrEmpty(param))
             TempData["Param"] = param;

@@ -39,8 +39,7 @@ public class QuestionsController : BaseController<QuestionsController>
             answerRef = parameterQuestionPage.AnswerRef;
         }
 
-        object? parameters;
-        TempData.TryGetValue("param", out parameters);
+        TempData.TryGetValue("param", out object? parameters);
 
         Question? question = null;
 
