@@ -104,3 +104,5 @@ export class BrowserHistory {
         return window.location.pathname == "/" || window.location.pathname == DEFAULT_ROUTE;
     }
 }
+
+var testing = "test";

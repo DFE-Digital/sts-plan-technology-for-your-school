@@ -11,6 +11,8 @@ public class AuthController : Controller
 
     public AuthController()
     {
+        var testing = 5;
+        var test = "test";
     }
 
     [Authorize]
