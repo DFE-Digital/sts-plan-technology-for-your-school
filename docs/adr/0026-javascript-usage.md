@@ -26,7 +26,7 @@ We could modify all the Contentful content models in such a way so that we know 
 
 We could keep a track of the user's journey on the serverside, and use TempData to pass it back/forth each time the user navigates across pages.
 
-However, the cookies used for this should not exceed 500 bytes, which is likely quickly done with just a few URLs being tracked. And, given that the server will be split across multiple instances, session management will be impossible without caching.
+However, the total size limit of cookies is 4096 bytes, which we might quickly get close to tracking just a few URLs. And, given that the server will be split across multiple instances, session management will be impossible without caching.
 
 ### Caching
 
