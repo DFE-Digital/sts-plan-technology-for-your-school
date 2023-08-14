@@ -10,9 +10,21 @@ runs:
   using: composite
 
   steps:
-    - name: Test
+    - name: Run CS unit tests
       shell: bash
-      run: dotnet test ${{ inputs.solution_filename }} --no-restore --verbosity normal --collect:"XPlat Code Coverage" --logger:"trx;LogFileName=test-results.trx" || true
+      run: dotnet test ${{ inputs.solution_filename }} --no-restore --verbosity normal /p:CollectCoverage=true /Logger:trx /p:CoverletOutputFormat=opencover /p:CoverletOutput=../lcov --collect:"XPlat Code Coverage" --logger:"trx;LogFileName=test-results.trx" || true
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: "latest"
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Run JS unit tests
+      run: npm test
+
     - name: Test Report
       uses: dorny/test-reporter@v1
       if: always()
@@ -21,3 +33,11 @@ runs:
         path: "**/test-results.trx"                            
         reporter: dotnet-trx
         fail-on-error: true
+
+    - name: Test report
+      uses: dorny/test-reporter@v1
+      if: always()
+      with:
+        name: JEST Tests            # Name of the check run which will be created
+        path: ./junit.xml    # Path to test results
+        reporter: jest-junit        # Format of test results

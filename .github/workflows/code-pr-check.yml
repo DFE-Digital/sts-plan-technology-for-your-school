@@ -25,37 +25,51 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
 
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v1
+        with:
+          path: ~\sonar\cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
       - name: Install dotnet coverage
         run: dotnet tool install --global dotnet-coverage
+  
+      - name: Install SonarCloud scanners
+        run: dotnet tool install --global dotnet-sonarscanner
 
+      - name: Start SonarCloud scanner
+        run: |
+          dotnet-sonarscanner begin \
+            /k:"DFE-Digital_plan-technology-for-your-school" \
+            /o:"dfe-digital" \
+            /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.cs.vscoveragexml.reportsPaths=**/coverage.opencover.xml \
+            /d:sonar.javascript.lcov.reportPaths=coverage/lcov.info
+            /d:sonar.coverage.exclusions=src/**/Program.cs,src/Dfe.PlanTech.Web/gulpfile.js,src/Dfe.PlanTech.Web/wwwroot/** \
+            /d:sonar.issue.ignore.multicriteria=e1 \
+            /d:sonar.issue.ignore.multicriteria.e1.ruleKey=csharpsquid:S6602 \
+            /d:sonar.issue.ignore.multicriteria.e1.resourceKey=src/**/*.cs
+          
       - name: Build web app  
         uses: ./.github/actions/build-dotnet-app
         with:
           dotnet_version: ${{ env.DOTNET_VERSION }}  
           solution_filename: plan-technology-for-your-school.sln
-
+  
       - name: Run unit tests
         uses: ./.github/actions/run-unit-tests
         with:
           solution_filename: plan-technology-for-your-school.sln
 
-      - name: Merge test results
-        run: dotnet-coverage merge -f xml -o "coverage.xml" -s "coverage.settings.xml" -r coverage.cobertura.xml
-
-      - name: SonarQube Scan - CS
-        uses: sonarsource/sonarqube-scan-action@master
-        env:
-            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-            SONAR_HOST_URL: "https://sonarcloud.io"
-        with:
-          args: >
-            -Dsonar.cs.vscoveragexml.reportsPaths=coverage.xml
+      - name: End SonarCloud Scanner
+        run: dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
-        if: always()
         with:
-          name: cs-coverage-report
+          name: code-coverage-report
           path: coverage.xml
 
   build-database-upgrader:  
@@ -71,47 +85,3 @@ jobs:
         with:
           dotnet_version: ${{ env.DOTNET_VERSION }}  
           solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
-
-  run-javascript-tests:
-    runs-on: ubuntu-latest
-    name: Run javascript tests
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "latest"
-
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Run the tests
-        run: npm test
-
-      - name: Test report
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: JEST Tests            # Name of the check run which will be created
-          path: ./junit.xml    # Path to test results
-          reporter: jest-junit        # Format of test results
-
-      - name: SonarQube Scan - JS
-        uses: sonarsource/sonarqube-scan-action@master
-        if: always()
-        env:
-            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-            SONAR_HOST_URL: "https://sonarcloud.io"
-        with:
-          args: >
-            -Dsonar.cs.vscoveragexml.reportsPaths=coverage.xml
-
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: js-coverage-report
-          path: |
-            coverage/
-            ./junit.xml
