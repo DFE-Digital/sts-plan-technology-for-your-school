@@ -28,4 +28,8 @@ describe("Self-assessment page", () => {
         .and("not.be.null");
     });
   });
+
+  it("passes accessibility tests", () => {
+    cy.runAxe();
+  });
 });

@@ -1,3 +1,5 @@
+import { terminalLog } from "../../commands/axe-tools";
+
 describe("Question page", () => {
   const url = "/self-assessment";
 
@@ -87,5 +89,9 @@ describe("Question page", () => {
         .and("have.attr", "href")
         .and("include", firstUrl);
     });
+  });
+
+  it("passes accessibility tests", () => {
+    cy.runAxe();
   });
 });
