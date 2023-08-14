@@ -23,5 +23,7 @@ describe("Interstitial page", () => {
         cy.get("a.govuk-back-link").should("have.attr", "href").and("include", "self-assessment");
     });
 
-    cy.runAxe();
-});
+    it("passes accessibility tests", () => {
+        cy.runAxe();
+      });
+    });
