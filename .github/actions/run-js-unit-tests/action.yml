@@ -1,0 +1,28 @@
+name: Run Unit Tests
+description: Runs the unit tests and publishes them to the workflow runs 
+
+runs:
+  using: composite
+
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: "latest"
+
+    - name: Install Dependencies
+      shell: bash
+      run: npm install
+
+    - name: Run JS unit tests
+      shell: bash
+      run: npm test
+
+    - name: Test report
+      uses: dorny/test-reporter@v1
+      if: always()
+      with:
+        name: JEST Tests  
+        path: ./junit.xml  
+        reporter: jest-junit
+        fail-on-error: 'false'

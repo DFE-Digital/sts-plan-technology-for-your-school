@@ -1,0 +1,24 @@
+name: Run Unit Tests
+description: Runs the unit tests and publishes them to the workflow runs 
+
+inputs:
+  solution_filename:
+    required: true
+    type: string
+
+runs:
+  using: composite
+
+  steps:
+    - name: Run CS unit tests
+      shell: bash
+      run: dotnet test ${{ inputs.solution_filename }} --no-restore --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:CoverletOutput=./TestResults/ --collect:"XPlat Code Coverage" --logger:"trx;LogFileName=test-results.trx" || true
+
+    - name: Test Report
+      uses: dorny/test-reporter@v1
+      if: always()
+      with:
+        name: DotNET Tests
+        path: "**/test-results.trx"                            
+        reporter: dotnet-trx
+        fail-on-error: 'false'

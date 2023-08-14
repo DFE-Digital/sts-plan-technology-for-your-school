@@ -45,7 +45,7 @@ jobs:
             /o:"dfe-digital" \
             /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.cs.vscoveragexml.reportsPaths=**/coverage.opencover.xml \
+            /d:sonar.cs.vscoveragexml.reportsPaths=**/coverage.info,coverage/lcov.info \
             /d:sonar.javascript.lcov.reportPaths=coverage/lcov.info \
             /d:sonar.coverage.exclusions=src/**/Program.cs,src/Dfe.PlanTech.Web/gulpfile.js,src/Dfe.PlanTech.Web/wwwroot/** \
             /d:sonar.issue.ignore.multicriteria=e1 \
@@ -58,19 +58,25 @@ jobs:
           dotnet_version: ${{ env.DOTNET_VERSION }}  
           solution_filename: plan-technology-for-your-school.sln
   
-      - name: Run unit tests
-        uses: ./.github/actions/run-unit-tests
+      - name: Run C# unit tests
+        uses: ./.github/actions/run-cs-unit-tests
         with:
           solution_filename: plan-technology-for-your-school.sln
+
+      - name: Setup and run JS unit tests
+        uses: ./.github/actions/run-js-unit-tests
 
       - name: End SonarCloud Scanner
         run: dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
+        if: always()
         with:
           name: code-coverage-report
-          path: coverage.xml
+          path: |
+            tests/**/TestResults/coverage.opencover.xml
+            coverage/
 
   build-database-upgrader:  
     name: Build database upgrader

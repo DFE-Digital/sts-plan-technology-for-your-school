@@ -1,0 +1,1 @@
+dotnet test plan-technology-for-your-school.sln --no-restore --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./TestResults/ --collect:"XPlat Code Coverage" --logger:"trx;LogFileName=test-results.trx" || true
