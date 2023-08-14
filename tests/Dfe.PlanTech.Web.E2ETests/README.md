@@ -11,13 +11,18 @@ Created using [Cypress](https://cypress.io)
 1. Copy the `cypress.env.json.example` file and rename it to `cypress.env.json` in the root of the `Dfe.PlanTech.Web.E2ETests` folder
 2. Populate the variables within it
 3. Install the necessary packages by running `npm install`
-4. Run Cypress by running `npx cypress open`
+4. Run Cypress by running `npx cypress open --config "baseUrl=URL"` where URL is the same as in the variables mentioned below
+
 
 ### Variables
 
-| Name     | Description                                  |
-| -------- | -------------------------------------------- |
-| URL      | URL to run tests on (e.g. www.plan-tech.com) |
-| DSiUrl   | URL for DFE Sign-in Interactions             |
-| Username | DFE Sign-in Username                         |
-| Password | DFE Sign-in Password                         |
+| Name         | Description                                  |
+| ------------ | -------------------------------------------- |
+| URL          | URL to run tests on (e.g. www.plan-tech.com) |
+| DSi_Url      | URL for DFE Sign-in Interactions             |
+| DSi_Email    | DFE Sign-in Username                         |
+| DSi_Password | DFE Sign-in Password                         |
+
+## Packages Used
+
+- [Cypress-Axe]() - Used for accessibility testing
