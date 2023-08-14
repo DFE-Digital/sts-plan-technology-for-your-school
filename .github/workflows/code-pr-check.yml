@@ -58,13 +58,13 @@ jobs:
           dotnet_version: ${{ env.DOTNET_VERSION }}  
           solution_filename: plan-technology-for-your-school.sln
   
+      - name: Setup and run JS unit tests
+        uses: ./.github/actions/run-js-unit-tests  
+
       - name: Run C# unit tests
         uses: ./.github/actions/run-cs-unit-tests
         with:
           solution_filename: plan-technology-for-your-school.sln
-
-      - name: Setup and run JS unit tests
-        uses: ./.github/actions/run-js-unit-tests
 
       - name: End SonarCloud Scanner
         run: dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
