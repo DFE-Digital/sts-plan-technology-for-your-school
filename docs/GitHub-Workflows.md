@@ -22,6 +22,17 @@ This workflow validates the following:
 
 And will update the PR with the Plan results so reviews can easily see what changes will be applied to the infrastructure.
 
+### code-pr-check workflow
+
+* Builds the main solution file (`plan-technology-for-your-school.sln`), and runs all its unit tests
+* Builds the database upgrader project
+* Builds and runs the unit tests for the `Dfe.PlanTech.Web.Node` project
+  
+### e2e-tests workflow
+
+* Clears out all submissions for a particular testing establishment reference, so that all tests are fresh
+* Runs end-to-end tests using Cypress
+
 ## Deployment pipelines
 
 The following GitHub workflows are used when a PR is merged into the `main` branch
