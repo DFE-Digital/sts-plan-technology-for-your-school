@@ -42,6 +42,15 @@ jobs:
       - name: Merge test results
         run: dotnet-coverage merge -f xml -o "coverage.xml" -s "coverage.settings.xml" -r coverage.cobertura.xml
 
+      - name: SonarQube Scan - CS
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+            SONAR_HOST_URL: "https://sonarcloud.io"
+        with:
+          args: >
+            -Dsonar.cs.vscoveragexml.reportsPaths=coverage.xml
+
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
         if: always()
@@ -89,6 +98,16 @@ jobs:
           path: ./junit.xml    # Path to test results
           reporter: jest-junit        # Format of test results
 
+      - name: SonarQube Scan - JS
+        uses: sonarsource/sonarqube-scan-action@master
+        if: always()
+        env:
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+            SONAR_HOST_URL: "https://sonarcloud.io"
+        with:
+          args: >
+            -Dsonar.cs.vscoveragexml.reportsPaths=coverage.xml
+
       - uses: actions/upload-artifact@v3
         if: always()
         with:
@@ -96,29 +115,3 @@ jobs:
           path: |
             coverage/
             ./junit.xml
-
-  run-sonar-scanner:
-    name: Run SonarScanner
-    runs-on: ubuntu-latest
-    needs: [run-javascript-tests, build-test-web-app]
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          # Disabling shallow clone is recommended for improving relevancy of reporting
-          fetch-depth: 0
-
-      - name: Download CS test artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: cs-coverage-report
-
-      - name: Download JS test artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: js-coverage-report
-
-      - name: SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@master
-        env:
-            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-            SONAR_HOST_URL: "https://sonarcloud.io"

@@ -98,6 +98,8 @@ export class BrowserHistory {
         }
 
         backButtonLink.setAttribute("href", this.lastUrl);
+
+        var test = testingDummyMethod(555);
     }
 
     shouldClearHistory() {
@@ -107,8 +109,11 @@ export class BrowserHistory {
 
 
 function testingDummyMethod(bool) { 
-    if (bool) {
+    if (!bool) {
         return true;
+    }
+    else if (bool = "tetere") {
+        return 17;
     }
 
     return false;

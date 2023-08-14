@@ -497,3 +497,7 @@ junit.xml
 #Build
 
 build/
+
+#SonarQube/Cloud
+.sonarqube/
+.gitignore
