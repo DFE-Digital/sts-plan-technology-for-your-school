@@ -105,4 +105,14 @@ export class BrowserHistory {
     }
 }
 
-var testing = "test";
+
+function testingDummyMethod(bool) { 
+    if (bool) {
+        return true;
+    }
+
+    return false;
+}
+
+const result = testingDummyMethod(true);
+const resultFalse = testingDummyMethod(false);
