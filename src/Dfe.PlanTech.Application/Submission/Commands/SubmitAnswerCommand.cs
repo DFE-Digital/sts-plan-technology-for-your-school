@@ -83,7 +83,6 @@ namespace Dfe.PlanTech.Application.Submission.Commands
 
             if (submissionId == null)
             {
-                int establishmentId = await _getSubmitAnswerQueries.GetEstablishmentId();
                 var submission = await _getSubmitAnswerQueries.GetSubmission(await _getSubmitAnswerQueries.GetEstablishmentId(), sectionId);
 
                 if (submission != null && !submission.Completed)
