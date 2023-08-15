@@ -1,4 +1,6 @@
 resource "azurerm_key_vault" "vault" {
+  depends_on = [module.main_hosting]
+
   name                       = local.kv_name
   location                   = local.azure_location
   resource_group_name        = "${local.environment}${local.project_name}"

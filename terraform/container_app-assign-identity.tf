@@ -1,5 +1,5 @@
 resource "null_resource" "app-assign-identity" {
-  depends_on = [module.main_hosting]
+  depends_on = [azurerm_user_assigned_identity.user_assigned_identity]
 
   triggers = {
     always_run = timestamp()

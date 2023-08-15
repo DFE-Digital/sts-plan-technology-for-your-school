@@ -1,5 +1,5 @@
 resource "null_resource" "keyvault-add-vnet-restriction" {
-  depends_on = [module.main_hosting]
+  depends_on = [azurerm_key_vault.vault]
 
   triggers = {
     always_run = timestamp()
