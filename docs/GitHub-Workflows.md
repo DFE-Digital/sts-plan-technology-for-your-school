@@ -4,10 +4,11 @@
 
 The following GitHub workflows are used during the PR process to validate the changes being merged into the `main` branch
 
-| Workflow           | description                                                             |
-| ------------------ | ----------------------------------------------------------------------- |
-| code-pr-check      | Validates that the code and docker image build, and that unit test pass |
-| terraform-pr-check | Validates the Terraform configuration                                   |
+| Workflow           | Description                                                                         |
+| ------------------ | ----------------------------------------------------------------------------------- |
+| code-pr-check      | Builds projects, runs unit tests, runs E2E tests, pushes test results to SonarCloud |
+| terraform-pr-check | Validates the Terraform configuration                                               |
+| e2e-tests          | Runs E2E tests (using Cypress)                                                      |
 
 ### terraform-pr-check workflow
 
@@ -21,14 +22,32 @@ This workflow validates the following:
 
 And will update the PR with the Plan results so reviews can easily see what changes will be applied to the infrastructure.
 
+### code-pr-check workflow
+
+* Builds the main solution file (`plan-technology-for-your-school.sln`), and runs all its unit tests
+* Builds the database upgrader project
+* Builds and runs the unit tests for the `Dfe.PlanTech.Web.Node` project
+  
+### e2e-tests workflow
+
+* Clears out all submissions for a particular testing establishment reference, so that all tests are fresh
+* Runs end-to-end tests using Cypress
+
 ## Deployment pipelines
 
 The following GitHub workflows are used when a PR is merged into the `main` branch
 
-| Workflow         | description                                                                                                                                                      |
-| ---------------- |------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Workflow         | Description                                                                                                                                                      |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | matrix-deploy    | Automatically runs when code is merged into main to kick off build and deploy job for dev and test environments (Can be manually triggered for Staging and Prod) |
 | build-and-deploy | Builds and deploys application for passed in environment                                                                                                         |
+| terraform-deploy | Deploys Terraform to Azure environments                                                                                                                          |
+
+## Other Workflows
+
+| Name             | Description                                                                                                      |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------- |
+| build-web-assets | Builds JS + CSS files (and bundles, minifies, etc. as necessary) on PR, then pushes changes to the source branch |
 
 ## Workflow Actions
 
