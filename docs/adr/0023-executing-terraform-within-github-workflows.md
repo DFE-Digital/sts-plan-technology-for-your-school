@@ -1,6 +1,6 @@
-# 0023 - Deploy Database Schema Changes
+# 0023 - Execute Terraform Within Github Workflows
 
-* **Status**: proposed
+* **Status**: accepted
 
 ## Context and Problem Statement
 
@@ -26,4 +26,13 @@ What option should the PlanTech service use to execute Terraform within GitHub w
 
 ## Decision Outcome
 
-TBD
+We have made the decision to implement a new workflow ```terraform-deploy.yml``` which uses the Setup terraform action, within this new workflow we validate, plan and apply any terraform 
+changes automatically. 
+
+The benefits of this are:
+
+* This will allow us to keep our infrastructure upto date as soon as there is a change to any of the terraform files.
+
+* Having the terraform execute automatically will also save any dev setup required for a developer to run these manually from a local machine.
+
+* Save the dev team digging around for secrets and environment variables; these will now be held in github secrets for each environment.
