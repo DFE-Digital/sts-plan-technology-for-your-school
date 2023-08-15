@@ -11,7 +11,7 @@ General information about architectural decision records is available at <https:
 ## List
 
 | Title                                                                                                       | Status   |
-|-------------------------------------------------------------------------------------------------------------|----------|
+| ----------------------------------------------------------------------------------------------------------- | -------- |
 | [0001 - Web Framework](./0001-web-framework.md)                                                             | Accepted |
 | [0002 - Application Framework](./0002-application-framework.md)                                             | Accepted |
 | [0003 - Build/Test/Deploy Environment](./0002-application-framework.md)                                     | Accepted |
@@ -37,4 +37,4 @@ General information about architectural decision records is available at <https:
 | [0023 - Executing Terraform Within GitHub Workflows](./0023-executing-terraform-within-github-workflows.md) | Proposed |
 | [0024 - Caching](./0024-caching.md)                                                                         | Proposed |
 | [0025 - Hybrid Matrix Deployments](./0025-hybrid-matrix-deployments.md)                                     | Accepted |
-
+| [0027 - Accesibility Testing](./0027-accesibility-testing.md)                                               | Accepted |
