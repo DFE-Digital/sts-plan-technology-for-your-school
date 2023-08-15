@@ -19,56 +19,35 @@ public class QuestionsController : BaseController<QuestionsController>
     /// </summary>
     /// <param name="id"></param>
     /// <param name="section">Name of current section (if starting new)</param>
-    /// <param name="query"></param>
-    /// <exception cref="ArgumentNullException">Throws exception when Id is null or empty</exception>
     /// <returns></returns>
-    public async Task<IActionResult> GetQuestionById(
-        string? id,
-        string? section,
-        [FromServices] SubmitAnswerCommand submitAnswerCommand,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetQuestionById(string? id, string? section, [FromServices] SubmitAnswerCommand submitAnswerCommand, CancellationToken cancellationToken)
     {
-        int? submissionId = null;
-        string? answerRef = null;
+        var parameterQuestionPage = TempData[TempDataConstants.Questions] != null ? DeserialiseParameter<TempDataQuestions>(TempData[TempDataConstants.Questions]) : new TempDataQuestions();
 
-        if (string.IsNullOrEmpty(id))
-        {
-            var parameterQuestionPage = DeserialiseParameter<TempDataQuestions>(TempData[TempDataConstants.Questions]);
-            id = parameterQuestionPage.QuestionRef;
-            submissionId = parameterQuestionPage.SubmissionId;
-            answerRef = parameterQuestionPage.AnswerRef;
-        }
+        if (string.IsNullOrEmpty(id)) id = parameterQuestionPage.QuestionRef;
 
         TempData.TryGetValue("param", out object? parameters);
+        Params? param = _ParseParameters(parameters?.ToString());
 
-        Question? question = null;
+        var nextQuestionResult = await submitAnswerCommand.GetNextQuestion(parameterQuestionPage.SubmissionId, id, param?.SectionId ?? throw new NullReferenceException(nameof(param)), section, cancellationToken);
 
-        if (submissionId == null)
+        if (nextQuestionResult.Question == null)
         {
-            Params? param = _ParseParameters(parameters?.ToString());
-            var submission = await submitAnswerCommand.GetOngoingSubmission(param?.SectionId ?? throw new NullReferenceException(nameof(param.SectionId)));
-            if (submission != null && !submission.Completed)
-            {
-                question = await submitAnswerCommand.GetNextUnansweredQuestion(submission.Id);
-                if (question == null)
-                {
-                    TempData[TempDataConstants.CheckAnswers] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataCheckAnswers() { SubmissionId = submission.Id, SectionId = param.SectionId, SectionName = param.SectionName });
-                    return RedirectToAction("CheckAnswersPage", "CheckAnswers");
-                }
-
-                submissionId = submission.Id;
-            }
+            TempData[TempDataConstants.CheckAnswers] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataCheckAnswers() { SubmissionId = nextQuestionResult.Submission?.Id ?? throw new NullReferenceException(nameof(nextQuestionResult.Submission)), SectionId = param.SectionId, SectionName = param.SectionName });
+            return RedirectToAction("CheckAnswersPage", "CheckAnswers");
         }
-
-        var viewModel = new QuestionViewModel()
+        else
         {
-            Question = question ?? await submitAnswerCommand.GetQuestionnaireQuestion(id, section, cancellationToken),
-            AnswerRef = answerRef,
-            Params = parameters != null ? parameters.ToString() : null,
-            SubmissionId = submissionId,
-        };
+            var viewModel = new QuestionViewModel()
+            {
+                Question = nextQuestionResult.Question,
+                AnswerRef = parameterQuestionPage.AnswerRef,
+                Params = parameters?.ToString(),
+                SubmissionId = nextQuestionResult.Submission == null ? parameterQuestionPage.SubmissionId : nextQuestionResult.Submission.Id
+            };
 
-        return View("Question", viewModel);
+            return View("Question", viewModel);
+        }
     }
 
     [HttpPost("SubmitAnswer")]
