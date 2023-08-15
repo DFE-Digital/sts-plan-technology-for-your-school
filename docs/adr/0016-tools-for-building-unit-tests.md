@@ -37,3 +37,4 @@ Assertions
 
 ## Decision Outcome
 
+We will use Moq and xUnit for our testing purposes, as these are the two most popular testing packages currently available in their respective domains.

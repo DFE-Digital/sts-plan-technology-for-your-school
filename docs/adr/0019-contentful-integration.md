@@ -39,4 +39,4 @@ There are a variety of ways we could manage integration with Contentful; which m
 
 ## Decision Outcome
 
-TBD
+We are using the contentful.net C# package for our code, as it easily fulfills our requirements for MVS, and is already being used in DFE projects.
