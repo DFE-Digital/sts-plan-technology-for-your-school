@@ -34,7 +34,7 @@ General information about architectural decision records is available at <https:
 | [0020 - GitHub Actions](./0020-github-actions.md)                                                           | Accepted |
 | [0021 - Deploy Changes To SQL Database](./0021-deploy-database-schema-changes.md)                           | Accepted |
 | [0022 - Unit Test Reporting Within GitHub](./0022-unit-test-reporting-within-github.md)                     | Accepted |
-| [0023 - Executing Terraform Within GitHub Workflows](./0023-executing-terraform-within-github-workflows.md) | Proposed |
-| [0024 - Caching](./0024-caching.md)                                                                         | Proposed |
+| [0023 - Executing Terraform Within GitHub Workflows](./0023-executing-terraform-within-github-workflows.md) | Accepted |
+| [0024 - Caching](./0024-caching.md)                                                                         | Accepted |
 | [0025 - Hybrid Matrix Deployments](./0025-hybrid-matrix-deployments.md)                                     | Accepted |
 
