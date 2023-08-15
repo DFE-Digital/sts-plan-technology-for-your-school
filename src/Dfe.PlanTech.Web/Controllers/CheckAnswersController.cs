@@ -38,7 +38,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     [Route("change-answer")]
     public IActionResult ChangeAnswer(string questionRef, string answerRef, int submissionId)
     {
-        TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = answerRef, SubmissionId = submissionId });
+        TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = answerRef, SubmissionId = submissionId });
         return RedirectToAction("GetQuestionById", "Questions");
     }
 

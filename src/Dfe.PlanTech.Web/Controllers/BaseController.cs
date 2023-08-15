@@ -11,11 +11,20 @@ public class BaseController<TConcreteController> : Controller
         this.logger = logger;
     }
 
-    protected static T DeserialiseParameter<T>(object? parameterObject)
+    protected static string SerialiseParameter(object? parameterToSerialise)
     {
-        if (parameterObject == null) throw new ArgumentNullException(nameof(parameterObject));
+        if (parameterToSerialise == null) throw new ArgumentNullException(nameof(parameterToSerialise));
 
-        var parameterDeserialised = Newtonsoft.Json.JsonConvert.DeserializeObject<T>(parameterObject as string ?? throw new ArithmeticException(nameof(parameterObject)));
+        var parameterSerialised = Newtonsoft.Json.JsonConvert.SerializeObject(parameterToSerialise);
+
+        return parameterSerialised ?? throw new NullReferenceException(nameof(parameterSerialised));
+    }
+
+    protected static T DeserialiseParameter<T>(object? parameterToDeserialise)
+    {
+        if (parameterToDeserialise == null) throw new ArgumentNullException(nameof(parameterToDeserialise));
+
+        var parameterDeserialised = Newtonsoft.Json.JsonConvert.DeserializeObject<T>(parameterToDeserialise as string ?? throw new ArithmeticException(nameof(parameterToDeserialise)));
 
         return parameterDeserialised ?? throw new NullReferenceException(nameof(parameterDeserialised));
     }

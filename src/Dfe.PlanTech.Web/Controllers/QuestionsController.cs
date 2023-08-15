@@ -33,7 +33,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
         if (nextQuestionResult.Question == null)
         {
-            TempData[TempDataConstants.CheckAnswers] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataCheckAnswers() { SubmissionId = nextQuestionResult.Submission?.Id ?? throw new NullReferenceException(nameof(nextQuestionResult.Submission)), SectionId = param.SectionId, SectionName = param.SectionName });
+            TempData[TempDataConstants.CheckAnswers] = SerialiseParameter(new TempDataCheckAnswers() { SubmissionId = nextQuestionResult.Submission?.Id ?? throw new NullReferenceException(nameof(nextQuestionResult.Submission)), SectionId = param.SectionId, SectionName = param.SectionName });
             return RedirectToAction("CheckAnswersPage", "CheckAnswers");
         }
         else
@@ -64,7 +64,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
         if (!ModelState.IsValid)
         {
-            TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = submitAnswerDto.QuestionId, SubmissionId = submitAnswerDto.SubmissionId });
+            TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions() { QuestionRef = submitAnswerDto.QuestionId, SubmissionId = submitAnswerDto.SubmissionId });
             return RedirectToAction("GetQuestionById");
         }
 
@@ -73,12 +73,12 @@ public class QuestionsController : BaseController<QuestionsController>
 
         if (string.IsNullOrEmpty(nextQuestionId) || await submitAnswerCommand.NextQuestionIsAnswered(submissionId, nextQuestionId))
         {
-            TempData[TempDataConstants.CheckAnswers] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataCheckAnswers() { SubmissionId = submissionId, SectionId = param.SectionId, SectionName = param.SectionName });
+            TempData[TempDataConstants.CheckAnswers] = SerialiseParameter(new TempDataCheckAnswers() { SubmissionId = submissionId, SectionId = param.SectionId, SectionName = param.SectionName });
             return RedirectToAction("CheckAnswersPage", "CheckAnswers");
         }
         else
         {
-            TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = nextQuestionId, SubmissionId = submissionId });
+            TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions() { QuestionRef = nextQuestionId, SubmissionId = submissionId });
             return RedirectToAction("GetQuestionById");
         }
     }
