@@ -6,6 +6,8 @@ describe("Interstitial page", () => {
         cy.loginWithEnv("/self-assessment");
         cy.get("ul.app-task-list__items > li a").first().click();
         cy.url().should("contain", url);
+
+        cy.injectAxe();
       });
 
     it("should have content", () => {
@@ -21,4 +23,8 @@ describe("Interstitial page", () => {
         cy.get("a.govuk-back-link").should("exist");
         cy.get("a.govuk-back-link").should("have.attr", "href").and("include", "self-assessment");
     });
-});
+
+    it("passes accessibility tests", () => {
+        cy.runAxe();
+      });
+    });

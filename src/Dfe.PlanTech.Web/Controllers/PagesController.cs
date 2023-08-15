@@ -59,6 +59,8 @@ public class PagesController : BaseController<PagesController>
         string gtmHead = acceptCookies ?  Config.GetValue<string>("GTM:Head") ?? "" : "";
         string gtmBody = acceptCookies ?  Config.GetValue<string>("GTM:Body") ?? "" : "";
 
+        ViewData["Title"] = page.Title?.Text ?? "Plan Technology For Your School";
+
         return new PageViewModel()
         {
             Page = page,

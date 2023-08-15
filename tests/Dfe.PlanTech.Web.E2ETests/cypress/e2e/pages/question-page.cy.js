@@ -11,6 +11,7 @@ describe("Question page", () => {
 
     //Navigate to first question
     cy.get('a.govuk-button').contains('Continue').click();
+    cy.injectAxe();
   });
 
   it("should contain form", () => {
@@ -87,5 +88,9 @@ describe("Question page", () => {
         .and("have.attr", "href")
         .and("include", firstUrl);
     });
+  });
+
+  it("passes accessibility tests", () => {
+    cy.runAxe();
   });
 });
