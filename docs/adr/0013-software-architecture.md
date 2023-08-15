@@ -1,6 +1,6 @@
 # 0013 - Software Architecture
 
-* **Status**: proposed
+* **Status**: accepted
 
 ## Context and Problem Statement
 What software architecture should be adopted within the PTFYS service to ensure we're following modern and existing DfE standards?
@@ -38,3 +38,4 @@ What software architecture should be adopted within the PTFYS service to ensure 
 
 ## Decision Outcome
 
+We have decided to use Clean Architecture in our project. We are not using CQRS as it is unnecessarily complex for the scope of our MVS.
