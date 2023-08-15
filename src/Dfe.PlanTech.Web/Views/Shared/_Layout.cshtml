@@ -7,6 +7,21 @@
 
 @{
     Layout = "_GovUkPageTemplate";
+
+    if(ViewData["Title"] == null){
+        var routeData = Context.GetRouteData();
+        var lastSlug = routeData.Values.Values.Last()?.ToString(); 
+        if(lastSlug != null && lastSlug.Any(c => Char.IsNumber(c))){
+            lastSlug = routeData.Values.Values.SkipLast(1).Last()?.ToString(); 
+        }
+
+        if(lastSlug != null){
+            //Add white space before every capital letter
+            lastSlug = string.Concat(lastSlug.Select(c => Char.IsUpper(c) ? " " + c : c.ToString())).TrimStart(' ');
+        }
+
+        ViewData["Title"] = lastSlug?.ToString() ?? "Plan Technology For Your School";
+    }
 }
 
 
