@@ -1,5 +1,8 @@
-//Logs specific accessibilty violations to console as table
-//Stolen from their documentation: https://github.com/component-driven/cypress-axe
+/**
+ * Logs specific accessibilty violations to console as table
+ * Stolen from their documentation: https://github.com/component-driven/cypress-axe
+ * @param {*} violations Violated accessibility rules
+ */
 export function terminalLog(violations) {
   cy.task(
     'log',
@@ -19,7 +22,11 @@ export function terminalLog(violations) {
   cy.task('table', violationData)
 }
 
-
+/**
+ * Wrapper around the cy.checkA11y command (i.e. the command to run axe tests)
+ * That adds default ignore rules, and outputs the failed accessibility rules via
+ * terminalLog method
+ */
 Cypress.Commands.add("runAxe", () => {
   cy.checkA11y(null, {
     rules: {

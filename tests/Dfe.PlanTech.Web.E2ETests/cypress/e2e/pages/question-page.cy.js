@@ -1,5 +1,3 @@
-import { terminalLog } from "../../commands/axe-tools";
-
 describe("Question page", () => {
   const url = "/self-assessment";
 
