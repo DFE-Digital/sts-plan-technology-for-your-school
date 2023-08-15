@@ -1,6 +1,6 @@
 # 0013 - Software Architecture
 
-* **Status**: proposed
+* **Status**: accepted
 
 ## Context and Problem Statement
 What software architecture should be adopted within the PTFYS service to ensure we're following modern and existing DfE standards?

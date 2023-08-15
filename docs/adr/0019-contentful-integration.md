@@ -1,6 +1,6 @@
 # 0019 - Contentful Integration
 
-* **Status**: proposed
+* **Status**: accepted
 
 ## Context and Problem Statement
 
