@@ -100,7 +100,7 @@ jobs:
         run: |
           ENV_ARGS="--env ${{ inputs.environment}}"
           case "${{ inputs.environment}}" in
-                Tst) ADDITIONAL_ARGUMENTS="-p Analytics_Username=${{ secrets.ANALYTICS_USERNAME}} Analytics_Password=${{ secrets.ANALYTICS_PASSWORD }}" ;;
+                tst) ADDITIONAL_ARGUMENTS="-p Analytics_Username=${{ secrets.ANALYTICS_USERNAME}} Analytics_Password=${{ secrets.ANALYTICS_PASSWORD }}" ;;
                 *) ADDITIONAL_ARGUMENTS="" ;;
           esac
           echo "ADDITIONAL_ARGS=\"$ENV_ARGS $ADDITIONAL_ARGUMENTS\"" >> $GITHUB_ENV
