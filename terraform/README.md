@@ -80,10 +80,11 @@ export ARM_CLIENT_SECRET = <client_secret>
 And sign in to Azure using the Azure CLI, as the Terraform module uses this for part of the infrastructure deployoyment:
 
 ```
-az login --service-principal -u <client_id> -p <client_secret> --tenant <tenant_id> 
+az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET --tenant $ARM_TENANT_ID
 ```
 
 ### Terraform Init 
+
 Terraform needs to be initialised on your local machine before you can use it. To do this rename the `backend.tfvars.example` file to `backend.tfvars` and complete the configuration so that Terraform connects to the correct Azure Storage instance.  
 
 Run the following command to initialise Terraform.
@@ -93,12 +94,22 @@ Run the following command to initialise Terraform.
 ⚠️ tfvars files are ignored by git, but please ensure they do not get committed to the repo by accident ⚠️ 
 
 ### Terraform Plan
+
 To run the plan command, first rename the `terraform.tfvars.example` file to `terraform.tfvars` and complete the following configuration.  
 
-| Title          | description            |
-| -------------- | ---------------------- |
-| az_environment | The environment prefix |
-| az_location    | The Azure location     |
+| Title                                     | description                                                                  |
+| ----------------------------------------- | ---------------------------------------------------------------------------- |
+| az_environment                            | The environment prefix                                                       |
+| az_location                               | The Azure location                                                           |
+| project_name                              | DFE Project name                                                             |
+| environment                               | Azure environment (e.g. "dev")                                               |
+| azure_location                            | Azure location (e.g. "westeurope")                                           |
+| az_tag_environment                        | Environment tag for Azure resources (e.g. "Dev")                             |
+| az_tag_product                            | Product tag for Azure resources                                              |
+| cdn_frontdoor_origin_host_header_override | Override header for the frontdoor CDN                                        |
+| az_sql_admin_password                     | Password for SQL server admin                                                |
+| az_sql_admin_userid_postfix               | User for the SQL server  (this will be prepended by the resource group name) |
+| az_app_kestrel_endpoint                   | Expected endpoint for the Kestrel server (e.g. "https://127.0.0.1:8080)      |
 
 Run the following command to execute the Plan commande: 
 
@@ -141,6 +152,7 @@ When running locally you see an error similar to the following:
 To resolve this, you need to update the KeyVault Firewall to grant your IP access. 
 
 ### Logging
+
 To help troubleshoot Terraform, you can turn on [Terraform logging](https://developer.hashicorp.com/terraform/tutorials/configuration-language/troubleshooting-workflow#enable-terraform-logging) which can be directed to a file.
 
 To turn on logging create the following environment variable with either DEBUG or TRACE
@@ -152,6 +164,7 @@ To direct the output to a file, set the following environment variable. Terrafor
 `export TF_LOG_PATH=terraform.log`
 
 ### Output variables
+
 Another useful tip for debugging Terraform is to utilise output variables, refer to the [Output Data from Terraform](https://developer.hashicorp.com/terraform/tutorials/configuration-language/outputs) article.  
 
 The values of output variables are included within the log file so they can be reviewed.  
