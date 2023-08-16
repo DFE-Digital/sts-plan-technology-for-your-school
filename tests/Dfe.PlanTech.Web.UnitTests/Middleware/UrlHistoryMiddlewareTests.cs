@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Moq;
+using NSubstitute;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Middleware;
@@ -36,21 +36,21 @@ public class UrlHistoryMiddlewareTests
     [Fact]
     public async Task Should_PopHistory_When_Navigating_Backwards()
     {
-        var requestMock = new Mock<HttpRequest>();
+        var requestMock = Substitute.For<HttpRequest>();
 
-        requestMock.SetupGet(request => request.Scheme).Returns("https");
-        requestMock.SetupGet(request => request.Host).Returns(new HostString("www.website.com"));
-        requestMock.SetupGet(request => request.Path).Returns("/three");
+        requestMock.Scheme.Returns("https");
+        requestMock.Host.Returns(new HostString("www.website.com"));
+        requestMock.Path.Returns(new PathString("/three"));
 
-        var contextMock = new Mock<HttpContext>();
-        contextMock.Setup(context => context.Request).Returns(() => requestMock.Object);
+        var contextMock = Substitute.For<HttpContext>();
+        contextMock.Request.Returns(requestMock);
 
-        var nextDelegateMock = new Mock<RequestDelegate>();
+        var nextDelegateMock = Substitute.For<RequestDelegate>();
 
-        var urlHistory = new UrlHistoryMiddleware(new NullLogger<UrlHistoryMiddleware>(), nextDelegateMock.Object);
+        var urlHistory = new UrlHistoryMiddleware(new NullLogger<UrlHistoryMiddleware>(), nextDelegateMock);
 
         var history = new UrlHistory(_cacher);
-        await urlHistory.InvokeAsync(contextMock.Object, history);
+        await urlHistory.InvokeAsync(contextMock, history);
 
         var historyCache = history.History;
         Assert.Equal(2, historyCache.Count);
@@ -60,22 +60,22 @@ public class UrlHistoryMiddlewareTests
     [Fact]
     public async Task Should_AddToHistory_When_Navigating_ToNewPage()
     {
-        var requestMock = new Mock<HttpRequest>();
-        requestMock.SetupGet(request => request.Scheme).Returns("https");
-        requestMock.SetupGet(request => request.Host).Returns(new HostString(URL_FOURTH.Host));
-        requestMock.SetupGet(request => request.Path).Returns(URL_FOURTH.PathAndQuery);
-        requestMock.SetupGet(request => request.Headers).Returns(new HeaderDictionary(){
+        var requestMock = Substitute.For<HttpRequest>();
+        requestMock.Scheme.Returns("https");
+        requestMock.Host.Returns(new HostString(URL_FOURTH.Host));
+        requestMock.Path.Returns(new PathString(URL_FOURTH.PathAndQuery));
+        requestMock.Headers.Returns(new HeaderDictionary(){
             { UrlHistoryMiddleware.REFERER_HEADER_KEY, URL_FOURTH.ToString() }
         });
 
-        var contextMock = new Mock<HttpContext>();
-        contextMock.Setup(context => context.Request).Returns(() => requestMock.Object);
+        var contextMock = Substitute.For<HttpContext>();
+        contextMock.Request.Returns(requestMock);
 
-        var nextDelegateMock = new Mock<RequestDelegate>();
-        var urlHistory = new UrlHistoryMiddleware(new NullLogger<UrlHistoryMiddleware>(), nextDelegateMock.Object);
+        var nextDelegateMock = Substitute.For<RequestDelegate>();
+        var urlHistory = new UrlHistoryMiddleware(new NullLogger<UrlHistoryMiddleware>(), nextDelegateMock);
 
         var history = new UrlHistory(_cacher);
-        await urlHistory.InvokeAsync(contextMock.Object, history);
+        await urlHistory.InvokeAsync(contextMock, history);
 
         var historyCache = history.History;
 
@@ -86,20 +86,20 @@ public class UrlHistoryMiddlewareTests
     [Fact]
     public async Task Should_Not_AddToHistory_When_Missing_Referer_Header()
     {
-        var requestMock = new Mock<HttpRequest>();
-        requestMock.SetupGet(request => request.Scheme).Returns("notarealscheme");
-        requestMock.SetupGet(request => request.Host).Returns(new HostString("notarealhost"));
-        requestMock.SetupGet(request => request.Path).Returns("/");
-        requestMock.SetupGet(request => request.Headers).Returns(new HeaderDictionary());
+        var requestMock = Substitute.For<HttpRequest>();
+        requestMock.Scheme.Returns("notarealscheme");
+        requestMock.Host.Returns(new HostString("notarealhost"));
+        requestMock.Path.Returns(new PathString("/"));
+        requestMock.Headers.Returns(new HeaderDictionary());
 
-        var contextMock = new Mock<HttpContext>();
-        contextMock.Setup(context => context.Request).Returns(() => requestMock.Object);
+        var contextMock = Substitute.For<HttpContext>();
+        contextMock.Request.Returns(requestMock);
 
-        var nextDelegateMock = new Mock<RequestDelegate>();
-        var urlHistory = new UrlHistoryMiddleware(new NullLogger<UrlHistoryMiddleware>(), nextDelegateMock.Object);
+        var nextDelegateMock = Substitute.For<RequestDelegate>();
+        var urlHistory = new UrlHistoryMiddleware(new NullLogger<UrlHistoryMiddleware>(), nextDelegateMock);
 
         var history = new UrlHistory(_cacher);
-        await urlHistory.InvokeAsync(contextMock.Object, history);
+        await urlHistory.InvokeAsync(contextMock, history);
 
         var historyCache = history.History;
 
@@ -109,22 +109,22 @@ public class UrlHistoryMiddlewareTests
     [Fact]
     public async Task Should_Not_AddToHistory_When_Error_Getting_Uri()
     {
-        var requestMock = new Mock<HttpRequest>();
-        requestMock.SetupGet(request => request.Scheme).Returns(() => "");
-        requestMock.SetupGet(request => request.Host).Returns(new HostString(""));
-        requestMock.SetupGet(request => request.Path).Returns("/");
-        requestMock.SetupGet(request => request.Headers).Returns(new HeaderDictionary(){
+        var requestMock = Substitute.For<HttpRequest>();
+        requestMock.Scheme.Returns("");
+        requestMock.Host.Returns(new HostString(""));
+        requestMock.Path.Returns(new PathString("/"));
+        requestMock.Headers.Returns(new HeaderDictionary(){
             { UrlHistoryMiddleware.REFERER_HEADER_KEY, URL_FOURTH.ToString() }
         });
 
-        var contextMock = new Mock<HttpContext>();
-        contextMock.Setup(context => context.Request).Returns(() => requestMock.Object);
+        var contextMock = Substitute.For<HttpContext>();
+        contextMock.Request.Returns(requestMock);
 
-        var nextDelegateMock = new Mock<RequestDelegate>();
-        var urlHistory = new UrlHistoryMiddleware(new NullLogger<UrlHistoryMiddleware>(), nextDelegateMock.Object);
+        var nextDelegateMock = Substitute.For<RequestDelegate>();
+        var urlHistory = new UrlHistoryMiddleware(new NullLogger<UrlHistoryMiddleware>(), nextDelegateMock);
 
         var history = new UrlHistory(_cacher);
-        await urlHistory.InvokeAsync(contextMock.Object, history);
+        await urlHistory.InvokeAsync(contextMock, history);
 
         var historyCache = history.History;
 
@@ -134,39 +134,39 @@ public class UrlHistoryMiddlewareTests
     [Fact]
     public async Task Should_Log_Error_When_Uri_Parsing_Error()
     {
-        var requestMock = new Mock<HttpRequest>();
-        requestMock.SetupGet(request => request.Scheme).Returns(() => "");
-        requestMock.SetupGet(request => request.Host).Returns(new HostString(""));
-        requestMock.SetupGet(request => request.Path).Returns("/");
-        requestMock.SetupGet(request => request.Headers).Returns(new HeaderDictionary(){
+        var requestMock = Substitute.For<HttpRequest>();
+        requestMock.Scheme.Returns("");
+        requestMock.Host.Returns(new HostString(""));
+        requestMock.Path.Returns(new PathString("/"));
+        requestMock.Headers.Returns(new HeaderDictionary(){
             { UrlHistoryMiddleware.REFERER_HEADER_KEY, URL_FOURTH.ToString() }
         });
 
-        var contextMock = new Mock<HttpContext>();
-        contextMock.Setup(context => context.Request).Returns(() => requestMock.Object);
+        var contextMock = Substitute.For<HttpContext>();
+        contextMock.Request.Returns(requestMock);
 
-        var nextDelegateMock = new Mock<RequestDelegate>();
+        var nextDelegateMock = Substitute.For<RequestDelegate>();
 
-        var loggerMock = new Mock<ILogger<UrlHistoryMiddleware>>();
-        loggerMock.Setup(logger => logger.Log(It.IsAny<LogLevel>(),
-                                                            It.IsAny<EventId>(),
-                                                            It.IsAny<It.IsAnyType>(),
-                                                            It.IsAny<Exception?>(),
-                                                            It.IsAny<Func<It.IsAnyType, Exception?, string>>()))
+        var loggerMock = Substitute.For<ILogger<UrlHistoryMiddleware>>();
+        loggerMock.Log(Arg.Any<LogLevel>(),
+                                                            Arg.Any<EventId>(),
+                                                            Arg.Any<Arg.AnyType>(),
+                                                            Arg.Any<Exception?>(),
+                                                            Arg.Any<Func<Arg.AnyType, Exception?, string>>()))
                     .Verifiable();
 
-        var urlHistory = new UrlHistoryMiddleware(loggerMock.Object, nextDelegateMock.Object);
+        var urlHistory = new UrlHistoryMiddleware(loggerMock, nextDelegateMock);
 
         var history = new UrlHistory(_cacher);
-        await urlHistory.InvokeAsync(contextMock.Object, history);
+        await urlHistory.InvokeAsync(contextMock, history);
 
         var historyCache = history.History;
 
-        loggerMock.Verify(logger => logger.Log(It.IsAny<LogLevel>(),
-                                                It.IsAny<EventId>(),
-                                                It.IsAny<It.IsAnyType>(),
-                                                It.IsAny<Exception?>(),
-                                                It.IsAny<Func<It.IsAnyType, Exception?, string>>()));
+        loggerMock.Verify(logger => logger.Log(Arg.Any<LogLevel>(),
+                                                Arg.Any<EventId>(),
+                                                Arg.Any<Arg.AnyType>(),
+                                                Arg.Any<Exception?>(),
+                                                Arg.Any<Func<Arg.AnyType, Exception?, string>>()));
     }
 
 }

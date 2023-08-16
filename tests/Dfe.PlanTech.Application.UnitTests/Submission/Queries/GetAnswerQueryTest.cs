@@ -1,31 +1,35 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Submission.Queries;
-using Moq;
+
+using NSubstitute;
+using System.Linq.Expressions;
+using System;
+using Dfe.PlanTech.Domain.Answers.Models;
 
 namespace Dfe.PlanTech.Application.UnitTests.Submission.Queries
 {
     public class GetAnswerQueryTests
     {
-        private readonly Mock<IPlanTechDbContext> _planTechDbContextMock;
+        private IPlanTechDbContext _planTechDbContextMock;
         private readonly GetAnswerQuery _getAnswerQuery;
 
         public GetAnswerQueryTests()
         {
-            _planTechDbContextMock = new Mock<IPlanTechDbContext>();
+            _planTechDbContextMock = Substitute.For<IPlanTechDbContext>();
 
-            _getAnswerQuery = new GetAnswerQuery(_planTechDbContextMock.Object);
+            _getAnswerQuery = new GetAnswerQuery(_planTechDbContextMock);
         }
 
         [Fact]
         public async Task GetAnswerQuery_Returns_Answer()
         {
-            _planTechDbContextMock.Setup(m => m.GetAnswer(answer => answer.Id == 1)).ReturnsAsync(
-                new Domain.Answers.Models.Answer()
-                {
-                    Id = 1,
-                    AnswerText = "Answer Text",
-                    ContentfulRef = "AnswerRef-1"
-                });
+            var output = new Domain.Answers.Models.Answer()
+            {
+                Id = 1,
+                AnswerText = "Answer Text",
+                ContentfulRef = "AnswerRef-1"
+            };
+            _planTechDbContextMock.GetAnswer(Arg.Any<Expression<Func<Answer, bool>>>()).Returns(Task.FromResult(output));
 
             var result = await _getAnswerQuery.GetAnswerBy(1);
 

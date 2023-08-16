@@ -4,7 +4,7 @@ using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.TagHelpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Logging;
-using Moq;
+using NSubstitute;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.TagHelpers;
@@ -21,8 +21,8 @@ public class HeaderComponentTagHelperTests
             Size = HeaderSize.Small
         };
 
-        var loggerMock = new Mock<ILogger<HeaderComponentTagHelper>>();
-        var tagHelper = new HeaderComponentTagHelper(loggerMock.Object)
+        var loggerMock = Substitute.For<ILogger<HeaderComponentTagHelper>>();
+        var tagHelper = new HeaderComponentTagHelper(loggerMock)
         {
             Model = header
         };
@@ -44,8 +44,8 @@ public class HeaderComponentTagHelperTests
             Size = HeaderSize.Small
         };
 
-        var loggerMock = new Mock<ILogger<HeaderComponentTagHelper>>();
-        var tagHelper = new HeaderComponentTagHelper(loggerMock.Object)
+        var loggerMock = Substitute.For<ILogger<HeaderComponentTagHelper>>();
+        var tagHelper = new HeaderComponentTagHelper(loggerMock)
         {
             Model = header
         };
@@ -67,8 +67,8 @@ public class HeaderComponentTagHelperTests
             Size = HeaderSize.Small
         };
 
-        var loggerMock = new Mock<ILogger<HeaderComponentTagHelper>>();
-        var tagHelper = new HeaderComponentTagHelper(loggerMock.Object)
+        var loggerMock = Substitute.For<ILogger<HeaderComponentTagHelper>>();
+        var tagHelper = new HeaderComponentTagHelper(loggerMock)
         {
             Model = header
         };
@@ -90,8 +90,8 @@ public class HeaderComponentTagHelperTests
             Size = HeaderSize.Small
         };
 
-        var loggerMock = new Mock<ILogger<HeaderComponentTagHelper>>();
-        var tagHelper = new HeaderComponentTagHelper(loggerMock.Object)
+        var loggerMock = Substitute.For<ILogger<HeaderComponentTagHelper>>();
+        var tagHelper = new HeaderComponentTagHelper(loggerMock)
         {
             Model = header
         };
@@ -113,8 +113,8 @@ public class HeaderComponentTagHelperTests
             Size = HeaderSize.Medium
         };
 
-        var loggerMock = new Mock<ILogger<HeaderComponentTagHelper>>();
-        var tagHelper = new HeaderComponentTagHelper(loggerMock.Object)
+        var loggerMock = Substitute.For<ILogger<HeaderComponentTagHelper>>();
+        var tagHelper = new HeaderComponentTagHelper(loggerMock)
         {
             Model = header
         };
@@ -136,8 +136,8 @@ public class HeaderComponentTagHelperTests
             Size = HeaderSize.Large
         };
 
-        var loggerMock = new Mock<ILogger<HeaderComponentTagHelper>>();
-        var tagHelper = new HeaderComponentTagHelper(loggerMock.Object)
+        var loggerMock = Substitute.For<ILogger<HeaderComponentTagHelper>>();
+        var tagHelper = new HeaderComponentTagHelper(loggerMock)
         {
             Model = header
         };
@@ -159,8 +159,8 @@ public class HeaderComponentTagHelperTests
             Size = HeaderSize.ExtraLarge
         };
 
-        var loggerMock = new Mock<ILogger<HeaderComponentTagHelper>>();
-        var tagHelper = new HeaderComponentTagHelper(loggerMock.Object)
+        var loggerMock = Substitute.For<ILogger<HeaderComponentTagHelper>>();
+        var tagHelper = new HeaderComponentTagHelper(loggerMock)
         {
             Model = header
         };
@@ -177,10 +177,10 @@ public class HeaderComponentTagHelperTests
     {
         var content = "content";
 
-        var loggerMock = new Mock<ILogger<HeaderComponentTagHelper>>();
+        var loggerMock = Substitute.For<ILogger<HeaderComponentTagHelper>>();
         loggerMock.Setup(LoggerMock.LogMethod<HeaderComponentTagHelper>()).Verifiable();
 
-        var tagHelper = new HeaderComponentTagHelper(loggerMock.Object)
+        var tagHelper = new HeaderComponentTagHelper(loggerMock)
         {
         };
 
@@ -208,10 +208,10 @@ public class HeaderComponentTagHelperTests
     {
         var content = "content";
 
-        var loggerMock = new Mock<ILogger<HeaderComponentTagHelper>>();
+        var loggerMock = Substitute.For<ILogger<HeaderComponentTagHelper>>();
         loggerMock.Setup(LoggerMock.LogMethod<HeaderComponentTagHelper>()).Verifiable();
 
-        var tagHelper = new HeaderComponentTagHelper(loggerMock.Object)
+        var tagHelper = new HeaderComponentTagHelper(loggerMock)
         {
             Model = new Header()
             {

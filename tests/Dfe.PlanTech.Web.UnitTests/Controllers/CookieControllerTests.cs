@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
-using Moq;
+using NSubstitute;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Controllers
@@ -31,10 +31,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
         public static CookiesController CreateStrut()
         {
-            Mock<ILogger<CookiesController>> loggerMock = new Mock<ILogger<CookiesController>>();
-            Mock<ICookieService> cookiesMock = new Mock<ICookieService>();
+            ILogger<CookiesController> loggerMock = Substitute.For<ILogger<CookiesController>>();
+            ICookieService cookiesMock = Substitute.For<ICookieService>();
 
-            return new CookiesController(loggerMock.Object, cookiesMock.Object);
+            return new CookiesController(loggerMock, cookiesMock);
         }
 
         [Theory]
@@ -123,12 +123,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
          [Fact]
          public async Task CookiesPageDisplays()
          {
-            Mock<IQuestionnaireCacher> questionnaireCacherMock = new Mock<IQuestionnaireCacher>();
-            Mock<IContentRepository> contentRepositoryMock = SetupRepositoryMock();
-            Mock<GetPageQuery> _getPageQueryMock = new Mock<GetPageQuery>(questionnaireCacherMock.Object, contentRepositoryMock.Object);
+            IQuestionnaireCacher questionnaireCacherMock = Substitute.For<IQuestionnaireCacher>();
+            IContentRepository contentRepositoryMock = SetupRepositoryMock();
+            GetPageQuery _getPageQueryMock = Substitute.For<GetPageQuery>(questionnaireCacherMock, contentRepositoryMock);
 
             CookiesController cookiesController = CreateStrut();
-            var result = await cookiesController.GetCookiesPage(_getPageQueryMock.Object);
+            var result = await cookiesController.GetCookiesPage(_getPageQueryMock);
             Assert.IsType<ViewResult>(result);
 
             var viewResult = result as ViewResult;
@@ -144,25 +144,25 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
          {
             CookiesController cookiesController = CreateStrut();
              
-            var tempDataMock = new Mock<ITempDataDictionary>();
-            var httpContextMock = new Mock<HttpContext>();
-            var responseMock = new Mock<HttpResponse>();
-            var cookiesMock = new Mock<ICookieService>();
+            var tempDataMock = Substitute.For<ITempDataDictionary>();
+            var httpContextMock = Substitute.For<HttpContext>();
+            var responseMock = Substitute.For<HttpResponse>();
+            var cookiesMock = Substitute.For<ICookieService>();
 
 
-            cookiesMock.Setup(r => r.SetPreference(It.IsAny<bool>()));
-            httpContextMock.SetupGet(c => c.Response).Returns(responseMock.Object);
+            cookiesMock.SetPreference(Arg.Any<bool>());
+            httpContextMock.Response.Returns(responseMock);
 
-            cookiesController.TempData = tempDataMock.Object;
+            cookiesController.TempData = tempDataMock;
             cookiesController.ControllerContext = new ControllerContext()
             {
-                HttpContext = httpContextMock.Object
+                HttpContext = httpContextMock
             };
 
             var result = cookiesController.CookiePreference(userPreference);
 
-             tempDataMock.VerifySet(td => td["UserPreferenceRecorded"] = true, Times.Once);
-             
+            tempDataMock.Received(1)["UserPreferenceRecorded"] = true;
+
              Assert.IsType<RedirectToActionResult>(result);
 
              var res = result as RedirectToActionResult;
@@ -179,29 +179,29 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             CookiesController cookiesController = CreateStrut();
 
-            var tempDataMock = new Mock<ITempDataDictionary>();
-            var httpContextMock = new Mock<HttpContext>();
-            var responseMock = new Mock<HttpResponse>();
-            var cookiesMock = new Mock<ICookieService>();
+            var tempDataMock = Substitute.For<ITempDataDictionary>();
+            var httpContextMock = Substitute.For<HttpContext>();
+            var responseMock = Substitute.For<HttpResponse>();
+            var cookiesMock = Substitute.For<ICookieService>();
 
 
-            cookiesMock.Setup(r => r.SetPreference(It.IsAny<bool>()));
-            httpContextMock.SetupGet(c => c.Response).Returns(responseMock.Object);
+            cookiesMock.SetPreference(Arg.Any<bool>());
+            httpContextMock.Response.Returns(responseMock);
 
-            cookiesController.TempData = tempDataMock.Object;
+            cookiesController.TempData = tempDataMock;
             cookiesController.ControllerContext = new ControllerContext()
             {
-                HttpContext = httpContextMock.Object
+                HttpContext = httpContextMock
             };
 
             var result = Assert.Throws<ArgumentException>(() => cookiesController.CookiePreference(string.Empty));
             Assert.Contains("Can't convert preference", result.Message);
         }
 
-        private Mock<IContentRepository> SetupRepositoryMock()
+        private IContentRepository SetupRepositoryMock()
          {
-             var repositoryMock = new Mock<IContentRepository>();
-             repositoryMock.Setup(repo => repo.GetEntities<Page>(It.IsAny<IGetEntitiesOptions>(), It.IsAny<CancellationToken>())).ReturnsAsync((IGetEntitiesOptions options, CancellationToken _) =>
+             var repositoryMock = Substitute.For<IContentRepository>();
+             repositoryMock.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns(Task.FromResult((IGetEntitiesOptions options, CancellationToken _) =>
              {
                  if (options?.Queries != null)
                  {
@@ -214,7 +214,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                      }
                  }
                  return Array.Empty<Page>();
-             });
+             }));
              return repositoryMock;
          }
     }

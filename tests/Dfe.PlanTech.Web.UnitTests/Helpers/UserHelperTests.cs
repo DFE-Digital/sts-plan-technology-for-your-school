@@ -3,7 +3,7 @@ using Dfe.PlanTech.Application.Users.Helper;
 using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 using Microsoft.AspNetCore.Http;
-using Moq;
+using NSubstitute;
 using System.Security.Claims;
 using Xunit;
 
@@ -11,15 +11,15 @@ namespace Dfe.PlanTech.Web.UnitTests.Helpers;
 public class UserHelperTests
 {
     private readonly UserHelper _userHelper;
-    private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
-    private readonly Mock<IPlanTechDbContext> _planTechDbContextMock;
-    private readonly Mock<ICreateEstablishmentCommand> _createEstablishmentCommandMock;
+    private IHttpContextAccessor _httpContextAccessorMock;
+    private IPlanTechDbContext _planTechDbContextMock;
+    private ICreateEstablishmentCommand _createEstablishmentCommandMock;
 
     public UserHelperTests()
     {
-        _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
-        _planTechDbContextMock = new Mock<IPlanTechDbContext>();
-        _createEstablishmentCommandMock = new Mock<ICreateEstablishmentCommand>();
+        _httpContextAccessorMock = Substitute.For<IHttpContextAccessor>();
+        _planTechDbContextMock = Substitute.For<IPlanTechDbContext>();
+        _createEstablishmentCommandMock = Substitute.For<ICreateEstablishmentCommand>();
 
         var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
         {
@@ -28,15 +28,15 @@ public class UserHelperTests
             new Claim("organisation", "{\n  \"ukprn\" : \"131\",\n  \"type\" : {\n      \"name\" : \"Type name\"\n  },\n  \"name\" : \"Organisation name\"\n}"),
             }, "mock"));
 
-        _httpContextAccessorMock.Setup(m => m.HttpContext).Returns(new DefaultHttpContext() { User = user });
+        _httpContextAccessorMock.HttpContext.Returns(new DefaultHttpContext() { User = user });
 
-        _userHelper = new UserHelper(_httpContextAccessorMock.Object, _planTechDbContextMock.Object, _createEstablishmentCommandMock.Object);
+        _userHelper = new UserHelper(_httpContextAccessorMock, _planTechDbContextMock, _createEstablishmentCommandMock);
     }
 
     [Fact]
     public async Task GetCurrentUserId_Returns_Correct_Id_When_UserExists_InDatabase()
     {
-        _planTechDbContextMock.Setup(m => m.GetUserBy(userModel => userModel.DfeSignInRef == "1")).ReturnsAsync(new User() { Id = 1 });
+        _planTechDbContextMock.GetUserBy(userModel => userModel.DfeSignInRef == "1").Returns(Task.FromResult(new User() { Id = 1 }));
 
         var result = await _userHelper.GetCurrentUserId();
 
@@ -48,11 +48,11 @@ public class UserHelperTests
     [Fact]
     public async Task GetEstablishmentId_Returns_Correct_Id_When_Establishment_Exists_In_DB()
     {
-        _planTechDbContextMock.Setup(m => m.GetEstablishmentBy(establishment => establishment.EstablishmentRef == "131")).ReturnsAsync(new Establishment() { Id = 1 });
+        _planTechDbContextMock.GetEstablishmentBy(establishment => establishment.EstablishmentRef == "131").Returns(Task.FromResult(new Establishment() { Id = 1 }));
 
         var result = await _userHelper.GetEstablishmentId();
 
-        _createEstablishmentCommandMock.Verify(x => x.CreateEstablishment(It.IsAny<EstablishmentDto>()), Times.Never);
+        await _createEstablishmentCommandMock.Received(0).CreateEstablishment(Arg.Any<EstablishmentDto>());
 
         Assert.IsType<int>(result);
 
@@ -70,7 +70,7 @@ public class UserHelperTests
 
         var result = await _userHelper.GetEstablishmentId();
 
-        _createEstablishmentCommandMock.Verify(x => x.CreateEstablishment(It.IsAny<EstablishmentDto>()), Times.Once);
+        await _createEstablishmentCommandMock.Received(0).CreateEstablishment(Arg.Any<EstablishmentDto>());
 
         Assert.IsType<int>(result);
 
@@ -87,9 +87,9 @@ public class UserHelperTests
             new Claim("organisation", "{\n  \"type\" : {\n      \"name\" : \"Type name\"\n  },\n  \"name\" : \"Organisation name\"\n}"),
         }, "mock"));
 
-        _httpContextAccessorMock.Setup(m => m.HttpContext).Returns(new DefaultHttpContext() { User = user });
+        _httpContextAccessorMock.HttpContext.Returns(new DefaultHttpContext() { User = user });
 
-        var userHelperWithMissingOrgData = new UserHelper(_httpContextAccessorMock.Object, _planTechDbContextMock.Object, _createEstablishmentCommandMock.Object);
+        var userHelperWithMissingOrgData = new UserHelper(_httpContextAccessorMock, _planTechDbContextMock, _createEstablishmentCommandMock);
 
         var result = await userHelperWithMissingOrgData.GetEstablishmentId();
 

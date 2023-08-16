@@ -4,7 +4,7 @@ using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 using Microsoft.Extensions.Logging.Abstractions;
-using Moq;
+using NSubstitute;
 using System.Text;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Models;
@@ -12,14 +12,16 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Mod
 public class RichTextRendererTests
 {
     private readonly RichTextRenderer _renderer;
-    private readonly Mock<IRichTextContentPartRenderer> _partRenderer = new Mock<IRichTextContentPartRenderer>();
+    private IRichTextContentPartRenderer _partRenderer = Substitute.For<IRichTextContentPartRenderer>();
 
     public RichTextRendererTests()
     {
-        _partRenderer.Setup(partRenderer => partRenderer.Accepts(It.IsAny<IRichTextContent>()))
+        _partRenderer.Accepts(Arg.Any<IRichTextContent>())
                     .Returns((IRichTextContent content) => content.NodeType == "paragraph");
 
-        _partRenderer.Setup(partRenderer => partRenderer.AddHtml(It.IsAny<IRichTextContent>(), It.IsAny<IRichTextContentPartRendererCollection>(), It.IsAny<StringBuilder>()))
+
+
+        _partRenderer.AddHtml(Arg.Any<IRichTextContent>(), Arg.Any<IRichTextContentPartRendererCollection>(), Arg.Any<StringBuilder>())
                     .Returns((IRichTextContent content, IRichTextContentPartRendererCollection collection, StringBuilder stringBuilder) =>
                     {
                         stringBuilder.Append(content.Value);
@@ -29,7 +31,7 @@ public class RichTextRendererTests
                     .Verifiable();
 
         var partRenderers = new List<IRichTextContentPartRenderer>(){
-            _partRenderer.Object,
+            _partRenderer,
             new HyperlinkRenderer(new HyperlinkRendererOptions())
         };
 
@@ -46,7 +48,7 @@ public class RichTextRendererTests
 
         var renderer = _renderer.GetRendererForContent(content);
 
-        Assert.Equal(renderer, _partRenderer.Object);
+        Assert.Equal(renderer, _partRenderer);
     }
 
     [Fact]
@@ -66,7 +68,7 @@ public class RichTextRendererTests
         };
 
         var html = _renderer.ToHtml(content);
-        _partRenderer.Verify(renderer => renderer.AddHtml(It.IsAny<IRichTextContent>(), It.IsAny<IRichTextContentPartRendererCollection>(), It.IsAny<StringBuilder>()));
+        _partRenderer.Received().AddHtml(Arg.Any<IRichTextContent>(), Arg.Any<IRichTextContentPartRendererCollection>(), Arg.Any<StringBuilder>());
 
         Assert.Equal(testHtml, html);
     }

@@ -1,20 +1,20 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Submission.Queries;
-using Moq;
+using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Submission.Queries
 {
     public class GetSubmissionQueryTest
     {
-        private readonly Mock<IPlanTechDbContext> _planTechDbContextMock;
+        private IPlanTechDbContext _planTechDbContextMock;
 
         private readonly GetSubmissionQuery _getSubmissionQuery;
 
         public GetSubmissionQueryTest()
         {
-            _planTechDbContextMock = new Mock<IPlanTechDbContext>();
+            _planTechDbContextMock = Substitute.For<IPlanTechDbContext>();
 
-            _getSubmissionQuery = new GetSubmissionQuery(_planTechDbContextMock.Object);
+            _getSubmissionQuery = new GetSubmissionQuery(_planTechDbContextMock);
         }
 
         [Fact]
@@ -37,8 +37,8 @@ namespace Dfe.PlanTech.Application.UnitTests.Submission.Queries
                 }
             };
 
-            _planTechDbContextMock.Setup(m => m.GetSubmissions).Returns(submissionList.AsQueryable());
-            _planTechDbContextMock.Setup(m => m.FirstOrDefaultAsync(submissionList.AsQueryable())).ReturnsAsync(submissionList[0]);
+            _planTechDbContextMock.GetSubmissions.Returns(submissionList.AsQueryable());
+            _planTechDbContextMock.FirstOrDefaultAsync(submissionList.AsQueryable()).Returns(Task.FromResult(submissionList[0]));
 
             var result = await _getSubmissionQuery.GetSubmissionBy(16, "SectionId");
 

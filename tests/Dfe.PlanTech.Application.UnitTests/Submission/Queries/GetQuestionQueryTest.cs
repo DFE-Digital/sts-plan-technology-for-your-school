@@ -1,31 +1,33 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Submission.Queries;
-using Moq;
+using Dfe.PlanTech.Domain.Questions.Models;
+using NSubstitute;
+using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Application.UnitTests.Submission.Queries
 {
     public class GetQuestionQueryTests
     {
-        private readonly Mock<IPlanTechDbContext> _planTechDbContextMock;
+        private IPlanTechDbContext _planTechDbContextMock;
         private readonly GetQuestionQuery _getQuestionQuery;
 
         public GetQuestionQueryTests()
         {
-            _planTechDbContextMock = new Mock<IPlanTechDbContext>();
+            _planTechDbContextMock = Substitute.For<IPlanTechDbContext>();
 
-            _getQuestionQuery = new GetQuestionQuery(_planTechDbContextMock.Object);
+            _getQuestionQuery = new GetQuestionQuery(_planTechDbContextMock);
         }
 
         [Fact]
         public async Task GetQuestionQuery_Returns_Question()
         {
-            _planTechDbContextMock.Setup(m => m.GetQuestion(question => question.Id == 1)).ReturnsAsync(
+            _planTechDbContextMock.GetQuestion(Arg.Any<Expression<Func<Question, bool>>>()).Returns(Task.FromResult(
                 new Domain.Questions.Models.Question()
                 {
                     Id = 1,
                     QuestionText = "Question Text",
                     ContentfulRef = "QuestionRef-1"
-                });
+                }));
 
             var result = await _getQuestionQuery.GetQuestionBy(1);
 

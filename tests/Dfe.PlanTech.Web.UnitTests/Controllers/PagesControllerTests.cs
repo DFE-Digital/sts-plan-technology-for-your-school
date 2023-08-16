@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Moq;
+using NSubstitute;
 using Xunit;
 using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
 
@@ -23,7 +23,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
     {
         private const string INDEX_SLUG = "/";
         private const string INDEX_TITLE = "Index";
-        Mock<ICookieService> cookiesMock = new Mock<ICookieService>();
+        ICookieService cookiesMock = Substitute.For<ICookieService>();
 
         private readonly List<Page> _pages = new()
         {
@@ -58,13 +58,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
         private readonly PagesController _controller;
         private readonly GetPageQuery _query;
-        private readonly Mock<IQuestionnaireCacher> _questionnaireCacherMock = new Mock<IQuestionnaireCacher>();
+        private IQuestionnaireCacher _questionnaireCacherMock = Substitute.For<IQuestionnaireCacher>();
 
         public PagesControllerTests()
         {
-            Mock<IContentRepository> repositoryMock = SetupRepositoryMock();
+            IContentRepository repositoryMock = SetupRepositoryMock();
 
-            var mockLogger = new Mock<ILogger<PagesController>>();
+            var mockLogger = Substitute.For<ILogger<PagesController>>();
 
             var config = new GtmConfiguration()
             {
@@ -82,28 +82,28 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 .AddInMemoryCollection(initialData: inMemorySettings)
                 .Build();
 
-            _controller = new PagesController(mockLogger.Object, configuration, cookiesMock.Object);
+            _controller = new PagesController(mockLogger, configuration, cookiesMock);
 
-            var httpContextMock = new Mock<HttpContext>();
-            var requestMock = new Mock<HttpRequest>();
+            var httpContextMock = Substitute.For<HttpContext>();
+            var requestMock = Substitute.For<HttpRequest>();
 
-            httpContextMock.Setup(c => c.Request).Returns(requestMock.Object);
-            requestMock.Setup(r => r.Cookies["cookies_preferences_set"]).Returns("true");
+            httpContextMock.Request.Returns(requestMock);
+            requestMock.Cookies["cookies_preferences_set"].Returns("true");
 
             _controller.ControllerContext = new ControllerContext()
             {
-                HttpContext = httpContextMock.Object
+                HttpContext = httpContextMock
             };
 
-            _query = new GetPageQuery(_questionnaireCacherMock.Object, repositoryMock.Object);
+            _query = new GetPageQuery(_questionnaireCacherMock, repositoryMock);
         }
 
-        private Mock<IContentRepository> SetupRepositoryMock()
+        private IContentRepository SetupRepositoryMock()
         {
-            var repositoryMock = new Mock<IContentRepository>();
+            var repositoryMock = Substitute.For<IContentRepository>();
             repositoryMock
-                .Setup(repo => repo.GetEntities<Page>(It.IsAny<IGetEntitiesOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((IGetEntitiesOptions options, CancellationToken _) =>
+                .GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult((IGetEntitiesOptions options, CancellationToken _) =>
                 {
                     if (options?.Queries != null)
                     {
@@ -117,26 +117,26 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                     }
 
                     return Array.Empty<Page>();
-                });
+                }));
             return repositoryMock;
         }
 
         [Fact]
         public async Task Should_ReturnLandingPage_When_IndexRouteLoaded()
         {
-            var httpContextMock = new Mock<HttpContext>();
-            var requestMock = new Mock<HttpRequest>();
+            var httpContextMock = Substitute.For<HttpContext>();
+            var requestMock = Substitute.For<HttpRequest>();
             var cookie = new DfeCookie { HasApproved = true };
-            cookiesMock.Setup(x => x.GetCookie()).Returns(cookie);
-            httpContextMock.Setup(c => c.Request).Returns(requestMock.Object);
-            requestMock.Setup(r => r.Cookies["cookies_preferences_set"]).Returns("true");
+            cookiesMock.GetCookie().Returns(cookie);
+            httpContextMock.Request.Returns(requestMock);
+            requestMock.Cookies["cookies_preferences_set"].Returns("true");
 
             _controller.ControllerContext = new ControllerContext()
             {
-                HttpContext = httpContextMock.Object
+                HttpContext = httpContextMock
             };
 
-            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None, It.IsAny<string>());
+            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None, Arg.Any<string>());
 
             Assert.IsType<ViewResult>(result);
 
@@ -157,7 +157,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public async Task Should_Return_Page_On_Index_Route()
         {
             var cookie = new DfeCookie { HasApproved = true };
-            cookiesMock.Setup(x => x.GetCookie()).Returns(cookie);
+            cookiesMock.GetCookie().Returns(cookie);
             var result = await _controller.Index(_query, CancellationToken.None);
             Assert.IsType<ViewResult>(result);
 
@@ -176,17 +176,17 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public async Task Should_ThrowError_When_NoRouteFound()
         {
             await Assert.ThrowsAnyAsync<Exception>(() =>
-                _controller.GetByRoute("NOT A VALID ROUTE", _query, CancellationToken.None, It.IsAny<string>()));
+                _controller.GetByRoute("NOT A VALID ROUTE", _query, CancellationToken.None, Arg.Any<string>()));
         }
 
         [Fact]
         public void Should_Retrieve_ErrorPage()
         {
-            var httpContextMock = new Mock<HttpContext>();
+            var httpContextMock = Substitute.For<HttpContext>();
 
             var controllerContext = new ControllerContext
             {
-                HttpContext = httpContextMock.Object
+                HttpContext = httpContextMock
             };
 
             _controller.ControllerContext = controllerContext;
@@ -206,18 +206,18 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [InlineData("")]
         public async Task GoogleTrackingCodesAddedDependingOnWhatCookiePreferenceSetTo(string cookiePreference)
         {
-            var httpContextMock = new Mock<HttpContext>();
+            var httpContextMock = Substitute.For<HttpContext>();
 
             bool.TryParse(cookiePreference, out bool preference);
             var cookie = new DfeCookie { HasApproved = preference };
-            cookiesMock.Setup(x => x.GetCookie()).Returns(cookie);
+            cookiesMock.GetCookie().Returns(cookie);
 
             _controller.ControllerContext = new ControllerContext()
             {
-                HttpContext = httpContextMock.Object
+                HttpContext = httpContextMock
             };
 
-            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None, It.IsAny<string>());
+            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None, Arg.Any<string>());
 
             Assert.IsType<ViewResult>(result);
 

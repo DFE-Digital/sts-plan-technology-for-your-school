@@ -1,26 +1,26 @@
 ﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Submission.Commands;
 using Microsoft.Data.SqlClient;
-using Moq;
+using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Submission
 {
     public class CalculateMaturityCommandTests
     {
-        public Mock<IPlanTechDbContext> _dbMock = new Mock<IPlanTechDbContext>();
+        public IPlanTechDbContext _dbMock = Substitute.For<IPlanTechDbContext>();
 
         private CalculateMaturityCommand CreateStrut()
         {
-            return new CalculateMaturityCommand(_dbMock.Object);
+            return new CalculateMaturityCommand(_dbMock);
         }
 
         [Fact]
         public async Task CalculateMaturityReturnsEffectedRows_LargerThanOne()
         {
-            _dbMock.Setup(x => x.CallStoredProcedureWithReturnInt(It.IsAny<string>(), It.IsAny<List<SqlParameter>>()))
-                .ReturnsAsync(2);
+            _dbMock.CallStoredProcedureWithReturnInt(Arg.Any<string>(), Arg.Any<List<SqlParameter>>())
+                .Returns(Task.FromResult(2));
 
-            var result = await CreateStrut().CalculateMaturityAsync(It.IsAny<int>());
+            var result = await CreateStrut().CalculateMaturityAsync(2);
 
             Assert.True(result > 1);
         }
@@ -28,10 +28,10 @@ namespace Dfe.PlanTech.Application.UnitTests.Submission
         [Fact]
         public async Task CalculateMaturityReturnsEffectedRows_LessThanOne()
         {
-            _dbMock.Setup(x => x.CallStoredProcedureWithReturnInt(It.IsAny<string>(), It.IsAny<List<SqlParameter>>()))
-                            .ReturnsAsync(0);
+            _dbMock.CallStoredProcedureWithReturnInt(Arg.Any<string>(), Arg.Any<List<SqlParameter>>())
+                .Returns(Task.FromResult(0));
 
-            var result = await CreateStrut().CalculateMaturityAsync(It.IsAny<int>());
+            var result = await CreateStrut().CalculateMaturityAsync(0);
 
             Assert.True(result < 1);
         }

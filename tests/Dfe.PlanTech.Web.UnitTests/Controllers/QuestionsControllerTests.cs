@@ -21,7 +21,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using Moq;
+using NSubstitute;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Controllers
@@ -92,63 +92,63 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
        };
 
-        private readonly Mock<IPlanTechDbContext> _databaseMock;
+        private IPlanTechDbContext _databaseMock;
         private readonly QuestionsController _controller;
         private readonly SubmitAnswerCommand _submitAnswerCommand;
-        private readonly Mock<IQuestionnaireCacher> _questionnaireCacherMock;
-        private readonly Mock<IGetLatestResponseListForSubmissionQuery> _getLatestResponseListForSubmissionQueryMock;
+        private IQuestionnaireCacher _questionnaireCacherMock;
+        private IGetLatestResponseListForSubmissionQuery _getLatestResponseListForSubmissionQueryMock;
         private readonly ICacher _cacher;
 
         public QuestionsControllerTests()
         {
-            Mock<IContentRepository> repositoryMock = MockRepository();
+            IContentRepository repositoryMock = MockRepository();
             _questionnaireCacherMock = MockQuestionnaireCacher();
 
-            var mockLogger = new Mock<ILogger<QuestionsController>>();
-            _databaseMock = new Mock<IPlanTechDbContext>();
-            var user = new Mock<IUser>();
+            var mockLogger = Substitute.For<ILogger<QuestionsController>>();
+            _databaseMock = Substitute.For<IPlanTechDbContext>();
+            var user = Substitute.For<IUser>();
 
-            var getQuestionnaireQuery = new Application.Questionnaire.Queries.GetQuestionQuery(_questionnaireCacherMock.Object, repositoryMock.Object);
+            var getQuestionnaireQuery = new Application.Questionnaire.Queries.GetQuestionQuery(_questionnaireCacherMock, repositoryMock);
 
-            ICreateQuestionCommand createQuestionCommand = new CreateQuestionCommand(_databaseMock.Object);
-            IRecordQuestionCommand recordQuestionCommand = new RecordQuestionCommand(_databaseMock.Object);
+            ICreateQuestionCommand createQuestionCommand = new CreateQuestionCommand(_databaseMock);
+            IRecordQuestionCommand recordQuestionCommand = new RecordQuestionCommand(_databaseMock);
 
-            IGetQuestionQuery getQuestionQuery = new Application.Submission.Queries.GetQuestionQuery(_databaseMock.Object);
-            ICreateAnswerCommand createAnswerCommand = new CreateAnswerCommand(_databaseMock.Object);
-            IRecordAnswerCommand recordAnswerCommand = new RecordAnswerCommand(_databaseMock.Object);
-            ICreateResponseCommand createResponseCommand = new CreateResponseCommand(_databaseMock.Object);
-            IGetResponseQuery getResponseQuery = new GetResponseQuery(_databaseMock.Object);
-            IGetSubmissionQuery getSubmissionQuery = new GetSubmissionQuery(_databaseMock.Object);
-            ICreateSubmissionCommand createSubmissionCommand = new CreateSubmissionCommand(_databaseMock.Object);
-            _getLatestResponseListForSubmissionQueryMock = new Mock<IGetLatestResponseListForSubmissionQuery>();
+            IGetQuestionQuery getQuestionQuery = new Application.Submission.Queries.GetQuestionQuery(_databaseMock);
+            ICreateAnswerCommand createAnswerCommand = new CreateAnswerCommand(_databaseMock);
+            IRecordAnswerCommand recordAnswerCommand = new RecordAnswerCommand(_databaseMock);
+            ICreateResponseCommand createResponseCommand = new CreateResponseCommand(_databaseMock);
+            IGetResponseQuery getResponseQuery = new GetResponseQuery(_databaseMock);
+            IGetSubmissionQuery getSubmissionQuery = new GetSubmissionQuery(_databaseMock);
+            ICreateSubmissionCommand createSubmissionCommand = new CreateSubmissionCommand(_databaseMock);
+            _getLatestResponseListForSubmissionQueryMock = Substitute.For<IGetLatestResponseListForSubmissionQuery>();
 
             var httpContext = new DefaultHttpContext();
-            var tempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
+            var tempData = new TempDataDictionary(httpContext, Substitute.For<ITempDataProvider>());
             tempData["param"] = "admin";
 
-            GetSubmitAnswerQueries getSubmitAnswerQueries = new GetSubmitAnswerQueries(getQuestionQuery, getResponseQuery, getSubmissionQuery, getQuestionnaireQuery, user.Object);
+            GetSubmitAnswerQueries getSubmitAnswerQueries = new GetSubmitAnswerQueries(getQuestionQuery, getResponseQuery, getSubmissionQuery, getQuestionnaireQuery, user);
             RecordSubmitAnswerCommands recordSubmitAnswerCommands = new RecordSubmitAnswerCommands(recordQuestionCommand, recordAnswerCommand, createSubmissionCommand, createResponseCommand);
 
-            _submitAnswerCommand = new SubmitAnswerCommand(getSubmitAnswerQueries, recordSubmitAnswerCommands, _getLatestResponseListForSubmissionQueryMock.Object);
+            _submitAnswerCommand = new SubmitAnswerCommand(getSubmitAnswerQueries, recordSubmitAnswerCommands, _getLatestResponseListForSubmissionQueryMock);
 
-            _controller = new QuestionsController(mockLogger.Object) { TempData = tempData };
+            _controller = new QuestionsController(mockLogger) { TempData = tempData };
 
             _cacher = new Cacher(new CacheOptions(), new MemoryCache(new MemoryCacheOptions()));
         }
 
-        private static Mock<IQuestionnaireCacher> MockQuestionnaireCacher()
+        private static IQuestionnaireCacher MockQuestionnaireCacher()
         {
-            var mock = new Mock<IQuestionnaireCacher>();
-            mock.Setup(questionnaireCache => questionnaireCache.Cached).Returns(new QuestionnaireCache()).Verifiable();
-            mock.Setup(questionnaireCache => questionnaireCache.SaveCache(It.IsAny<QuestionnaireCache>())).Verifiable();
+            var mock = Substitute.For<IQuestionnaireCacher>();
+            mock.Cached.Returns(new QuestionnaireCache());
+            mock.SaveCache(Arg.Any<QuestionnaireCache>());
 
             return mock;
         }
 
-        private Mock<IContentRepository> MockRepository()
+        private IContentRepository MockRepository()
         {
-            var repositoryMock = new Mock<IContentRepository>();
-            repositoryMock.Setup(repo => repo.GetEntities<Question>(It.IsAny<IGetEntitiesOptions>(), It.IsAny<CancellationToken>())).ReturnsAsync((IGetEntitiesOptions options, CancellationToken _) =>
+            var repositoryMock = Substitute.For<IContentRepository>();
+            repositoryMock.GetEntities<Question>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns(Task.FromResult((IGetEntitiesOptions options, CancellationToken _) =>
             {
                 if (options?.Queries != null)
                 {
@@ -162,10 +162,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 }
 
                 return Array.Empty<Question>();
-            });
+            }));
 
-            repositoryMock.Setup(repo => repo.GetEntityById<Question>(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                          .ReturnsAsync((string id, int include, CancellationToken _) => _questions.FirstOrDefault(question => question.Sys.Id == id));
+            repositoryMock.GetEntityById<Question>(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
+                          .Returns(Task.FromResult((string id, int include, CancellationToken _) => _questions.FirstOrDefault(question => question.Sys.Id == id)));
             return repositoryMock;
         }
 
@@ -213,8 +213,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 }
             };
 
-            _databaseMock.Setup(m => m.GetSubmissions).Returns(submissionList.AsQueryable());
-            _databaseMock.Setup(m => m.FirstOrDefaultAsync(submissionList.AsQueryable())).ReturnsAsync(submissionList[0]);
+            _databaseMock.GetSubmissions.Returns(submissionList.AsQueryable());
+            _databaseMock.FirstOrDefaultAsync(submissionList.AsQueryable()).Returns(Task.FromResult(submissionList[0]));
 
             var result = await _controller.GetQuestionById(questionRef, null, null, null, _submitAnswerCommand, CancellationToken.None);
             Assert.IsType<ViewResult>(result);
@@ -255,8 +255,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 }
             };
 
-            _databaseMock.Setup(m => m.GetSubmissions).Returns(submissionList.AsQueryable());
-            _databaseMock.Setup(m => m.FirstOrDefaultAsync(submissionList.AsQueryable())).ReturnsAsync(submissionList[0]);
+            _databaseMock.GetSubmissions.Returns(submissionList.AsQueryable());
+            _databaseMock.FirstOrDefaultAsync(submissionList.AsQueryable()).Returns(Task.FromResult(submissionList[0]));
 
             var result = await _controller.GetQuestionById(questionRef, null, null, null, _submitAnswerCommand, CancellationToken.None);
             Assert.IsType<ViewResult>(result);
@@ -308,10 +308,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 }
             };
 
-            _databaseMock.Setup(m => m.GetSubmissions).Returns(submissionList.AsQueryable());
-            _databaseMock.Setup(m => m.FirstOrDefaultAsync(submissionList.AsQueryable())).ReturnsAsync(submissionList[0]);
+            _databaseMock.GetSubmissions.Returns(submissionList.AsQueryable());
+            _databaseMock.FirstOrDefaultAsync(submissionList.AsQueryable()).Returns(Task.FromResult(submissionList[0]));
 
-            _getLatestResponseListForSubmissionQueryMock.Setup(m => m.GetResponseListByDateCreated(1)).ReturnsAsync(questionWithAnswerList);
+            _getLatestResponseListForSubmissionQueryMock.GetResponseListByDateCreated(1).Returns(Task.FromResult(questionWithAnswerList));
 
             var result = await _controller.GetQuestionById(questionRef, null, null, null, _submitAnswerCommand, CancellationToken.None);
             Assert.IsType<ViewResult>(result);
@@ -363,10 +363,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 }
             };
 
-            _databaseMock.Setup(m => m.GetSubmissions).Returns(submissionList.AsQueryable());
-            _databaseMock.Setup(m => m.FirstOrDefaultAsync(submissionList.AsQueryable())).ReturnsAsync(submissionList[0]);
+            _databaseMock.GetSubmissions.Returns(submissionList.AsQueryable());
+            _databaseMock.FirstOrDefaultAsync(submissionList.AsQueryable()).Returns(Task.FromResult(submissionList[0]));
 
-            _getLatestResponseListForSubmissionQueryMock.Setup(m => m.GetResponseListByDateCreated(1)).ReturnsAsync(questionWithAnswerList);
+            _getLatestResponseListForSubmissionQueryMock.GetResponseListByDateCreated(1).Returns(Task.FromResult(questionWithAnswerList));
 
             var result = await _controller.GetQuestionById(questionRef, null, null, null, _submitAnswerCommand, CancellationToken.None);
             Assert.IsType<RedirectToActionResult>(result);
@@ -410,8 +410,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var id = "Question1";
             var result = await _controller.GetQuestionById(id, null, null, null, _submitAnswerCommand, CancellationToken.None);
 
-            _questionnaireCacherMock.Verify(cache => cache.Cached, Times.Never);
-            _questionnaireCacherMock.Verify(cache => cache.SaveCache(It.IsAny<QuestionnaireCache>()), Times.Never);
+            _questionnaireCacherMock.Received(0).Cached;
+            _questionnaireCacherMock.Received(0).SaveCache(Arg.Any<QuestionnaireCache>());
         }
 
         [Fact]
@@ -482,9 +482,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 ContentfulRef = "Question2"
             };
 
-            _databaseMock.Setup(m => m.GetQuestion(question => question.Id == 1)).ReturnsAsync(question);
+            _databaseMock.GetQuestion(question => question.Id == 1).Returns(Task.FromResult(question));
 
-            _databaseMock.Setup(m => m.GetResponseList(response => response.SubmissionId == 1)).ReturnsAsync(
+            _databaseMock.GetResponseList(response => response.SubmissionId == 1).Returns(Task.FromResult(
                 new Domain.Responses.Models.Response[]
                 {
                     new Domain.Responses.Models.Response()
@@ -492,7 +492,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                         QuestionId = 1,
                         Question = question
                     }
-                });
+                }));
 
             var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
 

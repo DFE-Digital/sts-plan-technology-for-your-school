@@ -1,7 +1,7 @@
 ﻿using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Moq;
+using NSubstitute;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Controllers;
@@ -12,8 +12,8 @@ public class RecommendationsControllerTests
 
     public RecommendationsControllerTests()
     {
-        Mock<ILogger<RecommendationsController>> loggerMock = new Mock<ILogger<RecommendationsController>>();
-        _recommendationsController = new RecommendationsController(loggerMock.Object);
+        ILogger<RecommendationsController> loggerMock = Substitute.For<ILogger<RecommendationsController>>();
+        _recommendationsController = new RecommendationsController(loggerMock);
     }
 
     [Fact]
