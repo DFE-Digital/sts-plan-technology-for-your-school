@@ -72,7 +72,7 @@ namespace Dfe.PlanTech.Application.Submission.Commands
             return false;
         }
 
-        public async Task<(Domain.Questionnaire.Models.Question? Question, Domain.Submissions.Models.Submission? Submission)> GetNextQuestion(
+        public async Task<(Domain.Questionnaire.Models.Question? Question, Domain.Submissions.Models.Submission? Submission)> GetQuestionWithSubmission(
             int? submissionId,
             string? questionRef,
             string sectionId,

@@ -29,21 +29,21 @@ public class QuestionsController : BaseController<QuestionsController>
         TempData.TryGetValue("param", out object? parameters);
         Params? param = _ParseParameters(parameters?.ToString());
 
-        var nextQuestionResult = await submitAnswerCommand.GetNextQuestion(parameterQuestionPage.SubmissionId, id, param?.SectionId ?? throw new NullReferenceException(nameof(param)), section, cancellationToken);
+        var questionWithSubmission = await submitAnswerCommand.GetQuestionWithSubmission(parameterQuestionPage.SubmissionId, id, param?.SectionId ?? throw new NullReferenceException(nameof(param)), section, cancellationToken);
 
-        if (nextQuestionResult.Question == null)
+        if (questionWithSubmission.Question == null)
         {
-            TempData[TempDataConstants.CheckAnswers] = SerialiseParameter(new TempDataCheckAnswers() { SubmissionId = nextQuestionResult.Submission?.Id ?? throw new NullReferenceException(nameof(nextQuestionResult.Submission)), SectionId = param.SectionId, SectionName = param.SectionName });
+            TempData[TempDataConstants.CheckAnswers] = SerialiseParameter(new TempDataCheckAnswers() { SubmissionId = questionWithSubmission.Submission?.Id ?? throw new NullReferenceException(nameof(questionWithSubmission.Submission)), SectionId = param.SectionId, SectionName = param.SectionName });
             return RedirectToAction("CheckAnswersPage", "CheckAnswers");
         }
         else
         {
             var viewModel = new QuestionViewModel()
             {
-                Question = nextQuestionResult.Question,
+                Question = questionWithSubmission.Question,
                 AnswerRef = parameterQuestionPage.AnswerRef,
                 Params = parameters?.ToString(),
-                SubmissionId = nextQuestionResult.Submission == null ? parameterQuestionPage.SubmissionId : nextQuestionResult.Submission.Id
+                SubmissionId = questionWithSubmission.Submission == null ? parameterQuestionPage.SubmissionId : questionWithSubmission.Submission.Id
             };
 
             return View("Question", viewModel);
