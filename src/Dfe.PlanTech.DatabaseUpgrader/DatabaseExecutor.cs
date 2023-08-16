@@ -1,6 +1,6 @@
 using System.Reflection;
-using System.Security;
 using DbUp;
+using DbUp.Builder;
 using DbUp.Engine;
 using Polly;
 using Polly.Retry;
@@ -37,11 +37,8 @@ public class DatabaseExecutor
     var engine = DeployChanges.To.SqlDatabase(_options.DatabaseConnectionString)
                                   .WithScriptsEmbeddedInAssembly(executingAssembley, ScriptNamespaceMatches(SCRIPTS_NAMESPACE));
 
-    foreach (var environment in _options.Environments)
-    {
-      var ns = GetNamespaceForEnvironment(environment);
-      engine.WithScriptsEmbeddedInAssembly(executingAssembley, ScriptNamespaceMatches(ns));
-    }
+    AddSqlParameters(engine);
+    AddEnvironmentSpecificScripts(executingAssembley, engine);
 
     return engine.LogToConsole()
     .LogScriptOutput()
@@ -49,8 +46,28 @@ public class DatabaseExecutor
     .Build();
   }
 
+  private void AddEnvironmentSpecificScripts(Assembly executingAssembley, UpgradeEngineBuilder engine)
+  {
+    foreach (var environment in _options.Environments)
+    {
+      var ns = GetNamespaceForEnvironment(environment);
+      engine.WithScriptsEmbeddedInAssembly(executingAssembley, ScriptNamespaceMatches(ns));
+    }
+  }
+
+  private void AddSqlParameters(UpgradeEngineBuilder engine)
+  {
+    var parameters = _options.FormattedSqlParameters;
+    if (parameters != null)
+    {
+      foreach (var param in parameters)
+      {
+        engine.WithVariable(param.Key, param.Value);
+      }
+    }
+  }
   private static Func<string, bool> ScriptNamespaceMatches(string expectedStartsWith)
-  => scriptNamespace => scriptNamespace.StartsWith(expectedStartsWith);
+   => scriptNamespace => scriptNamespace.StartsWith(expectedStartsWith);
 
   private static string GetNamespaceForEnvironment(string environment)
    => string.Format("{0}.{1}", ENVIRONMENT_SPECIFIC_SCRIPTS_NAMESPACE, environment);

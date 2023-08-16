@@ -8,7 +8,7 @@ public class Logger
 
   public void DisplaySuccess(string successMessage)
   {
-        DisplayMessages(_successColour, successMessage);
+    DisplayMessages(_successColour, successMessage);
     Console.ResetColor();
   }
 
@@ -16,22 +16,22 @@ public class Logger
   {
     if (!string.IsNullOrEmpty(exception?.StackTrace))
     {
-            DisplayMessages(_errorColour, errorMessage, exception.StackTrace);
+      DisplayMessages(_errorColour, errorMessage, exception.StackTrace);
     }
     else
     {
-            DisplayMessages(_errorColour, errorMessage);
+      DisplayMessages(_errorColour, errorMessage);
     }
   }
 
   public void DisplayErrors(params string?[] errors)
   {
-        DisplayMessages(_errorColour, errors);
+    DisplayMessages(_errorColour, errors);
   }
 
   public void DisplayInfo(params string?[] infos)
   {
-        DisplayMessages(ConsoleColor.White, infos);
+    DisplayMessages(ConsoleColor.White, infos);
   }
 
   private static void DisplayMessages(ConsoleColor foregroundColour, params string?[] messages)
