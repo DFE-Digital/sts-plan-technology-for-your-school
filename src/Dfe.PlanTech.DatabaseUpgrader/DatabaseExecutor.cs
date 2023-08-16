@@ -66,6 +66,7 @@ public class DatabaseExecutor
       }
     }
   }
+  
   private static Func<string, bool> ScriptNamespaceMatches(string expectedStartsWith)
    => scriptNamespace => scriptNamespace.StartsWith(expectedStartsWith);
 
