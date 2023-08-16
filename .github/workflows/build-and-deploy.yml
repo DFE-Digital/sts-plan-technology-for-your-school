@@ -94,6 +94,9 @@ jobs:
 
       - name: Build additional CLI arguments
         shell: bash
+        #Creates "--env" argument (i.e. what environment this is being run against) - used to run environment specific scripts
+        #Creates environment specific arguments if needed.
+        #Outputs combination to GitHub environment variables as "ADDITIONAL_ARGS"
         run: |
           ENV_ARGS="--env ${{ inputs.environment}}"
           case "${{ inputs.environment}}" in
