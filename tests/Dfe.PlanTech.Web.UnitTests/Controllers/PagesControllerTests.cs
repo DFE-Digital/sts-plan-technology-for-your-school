@@ -11,6 +11,7 @@ using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -82,7 +83,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 .AddInMemoryCollection(initialData: inMemorySettings)
                 .Build();
 
-            _controller = new PagesController(mockLogger.Object, configuration, cookiesMock.Object);
+            var httpContext = new DefaultHttpContext();
+            var tempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
+
+            _controller = new PagesController(mockLogger.Object, configuration, cookiesMock.Object) { TempData = tempData };
 
             var httpContextMock = new Mock<HttpContext>();
             var requestMock = new Mock<HttpRequest>();
@@ -136,7 +140,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 HttpContext = httpContextMock.Object
             };
 
-            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None, It.IsAny<string>());
+            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None);
 
             Assert.IsType<ViewResult>(result);
 
@@ -176,7 +180,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public async Task Should_ThrowError_When_NoRouteFound()
         {
             await Assert.ThrowsAnyAsync<Exception>(() =>
-                _controller.GetByRoute("NOT A VALID ROUTE", _query, CancellationToken.None, It.IsAny<string>()));
+                _controller.GetByRoute("NOT A VALID ROUTE", _query, CancellationToken.None));
         }
 
         [Fact]
@@ -217,7 +221,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 HttpContext = httpContextMock.Object
             };
 
-            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None, It.IsAny<string>());
+            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None);
 
             Assert.IsType<ViewResult>(result);
 

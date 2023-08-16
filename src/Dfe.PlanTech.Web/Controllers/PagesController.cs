@@ -31,9 +31,13 @@ public class PagesController : BaseController<PagesController>
 
     [Authorize]
     [HttpGet("/{route?}")]
-    public async Task<IActionResult> GetByRoute(string route, [FromServices] GetPageQuery query, CancellationToken cancellationToken, string param = "")
+    public async Task<IActionResult> GetByRoute(string route, [FromServices] GetPageQuery query, CancellationToken cancellationToken)
     {
         string slug = GetSlug(route);
+        string param = "";
+
+        if (TempData[slug] is string tempDataSlug) param = tempDataSlug;
+
         if (!string.IsNullOrEmpty(param))
             TempData["Param"] = param;
 
@@ -55,9 +59,9 @@ public class PagesController : BaseController<PagesController>
     private PageViewModel CreatePageModel(Page page, string param = null!)
     {
         var acceptCookies = _cookieService.GetCookie().HasApproved;
-        
-        string gtmHead = acceptCookies ?  Config.GetValue<string>("GTM:Head") ?? "" : "";
-        string gtmBody = acceptCookies ?  Config.GetValue<string>("GTM:Body") ?? "" : "";
+
+        string gtmHead = acceptCookies ? Config.GetValue<string>("GTM:Head") ?? "" : "";
+        string gtmBody = acceptCookies ? Config.GetValue<string>("GTM:Body") ?? "" : "";
 
         ViewData["Title"] = page.Title?.Text ?? "Plan Technology For Your School";
 

@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Submission.Commands;
+using Dfe.PlanTech.Domain.Questionnaire.Constants;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -18,54 +19,41 @@ public class QuestionsController : BaseController<QuestionsController>
     /// </summary>
     /// <param name="id"></param>
     /// <param name="section">Name of current section (if starting new)</param>
-    /// <param name="query"></param>
-    /// <exception cref="ArgumentNullException">Throws exception when Id is null or empty</exception>
     /// <returns></returns>
-    public async Task<IActionResult> GetQuestionById(
-        string id,
-        string? section,
-        int? submissionId,
-        string? answerRef,
-        [FromServices] SubmitAnswerCommand submitAnswerCommand,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetQuestionById(string? id, string? section, [FromServices] SubmitAnswerCommand submitAnswerCommand, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
-        object? parameters;
+        var parameterQuestionPage = TempData[TempDataConstants.Questions] != null ? DeserialiseParameter<TempDataQuestions>(TempData[TempDataConstants.Questions]) : new TempDataQuestions();
 
-        TempData.TryGetValue("param", out parameters);
+        if (string.IsNullOrEmpty(id)) id = parameterQuestionPage.QuestionRef;
 
-        Question? question = null;
+        TempData.TryGetValue("param", out object? parameters);
+        Params? param = _ParseParameters(parameters?.ToString());
 
-        if (submissionId == null)
+        var questionWithSubmission = await submitAnswerCommand.GetQuestionWithSubmission(parameterQuestionPage.SubmissionId, id, param?.SectionId ?? throw new NullReferenceException(nameof(param)), section, cancellationToken);
+
+        if (questionWithSubmission.Question == null)
         {
-            Params? param = _ParseParameters(parameters?.ToString());
-            var submission = await submitAnswerCommand.GetOngoingSubmission(param?.SectionId ?? throw new NullReferenceException(nameof(param.SectionId)));
-            if (submission != null && !submission.Completed)
-            {
-                question = await submitAnswerCommand.GetNextUnansweredQuestion(submission.Id);
-                if (question == null) return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { submissionId = submission.Id, sectionId = param?.SectionId, sectionName = param?.SectionName });
-
-                submissionId = submission.Id;
-            }
+            TempData[TempDataConstants.CheckAnswers] = SerialiseParameter(new TempDataCheckAnswers() { SubmissionId = questionWithSubmission.Submission?.Id ?? throw new NullReferenceException(nameof(questionWithSubmission.Submission)), SectionId = param.SectionId, SectionName = param.SectionName });
+            return RedirectToAction("CheckAnswersPage", "CheckAnswers");
         }
-
-        var viewModel = new QuestionViewModel()
+        else
         {
-            Question = question ?? await submitAnswerCommand.GetQuestionnaireQuestion(id, section, cancellationToken),
-            AnswerRef = answerRef,
-            Params = parameters != null ? parameters.ToString() : null,
-            SubmissionId = submissionId,
-        };
+            var viewModel = new QuestionViewModel()
+            {
+                Question = questionWithSubmission.Question,
+                AnswerRef = parameterQuestionPage.AnswerRef,
+                Params = parameters?.ToString(),
+                SubmissionId = questionWithSubmission.Submission == null ? parameterQuestionPage.SubmissionId : questionWithSubmission.Submission.Id
+            };
 
-        return View("Question", viewModel);
+            return View("Question", viewModel);
+        }
     }
 
     [HttpPost("SubmitAnswer")]
     public async Task<IActionResult> SubmitAnswer(SubmitAnswerDto submitAnswerDto, [FromServices] SubmitAnswerCommand submitAnswerCommand)
     {
         if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
-
-        if (!ModelState.IsValid) return RedirectToAction("GetQuestionById", new { id = submitAnswerDto.QuestionId, submissionId = submitAnswerDto.SubmissionId });
 
         Params param = new Params();
         if (!string.IsNullOrEmpty(submitAnswerDto.Params))
@@ -74,11 +62,25 @@ public class QuestionsController : BaseController<QuestionsController>
             TempData["param"] = submitAnswerDto.Params;
         }
 
+        if (!ModelState.IsValid)
+        {
+            TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions() { QuestionRef = submitAnswerDto.QuestionId, SubmissionId = submitAnswerDto.SubmissionId });
+            return RedirectToAction("GetQuestionById");
+        }
+
         int submissionId = await submitAnswerCommand.SubmitAnswer(submitAnswerDto, param.SectionId, param.SectionName);
         string? nextQuestionId = await submitAnswerCommand.GetNextQuestionId(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId);
 
-        if (string.IsNullOrEmpty(nextQuestionId) || await submitAnswerCommand.NextQuestionIsAnswered(submissionId, nextQuestionId)) return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { submissionId = submissionId, sectionId = param.SectionId, sectionName = param.SectionName });
-        else return RedirectToAction("GetQuestionById", new { id = nextQuestionId, submissionId = submissionId });
+        if (string.IsNullOrEmpty(nextQuestionId) || await submitAnswerCommand.NextQuestionIsAnswered(submissionId, nextQuestionId))
+        {
+            TempData[TempDataConstants.CheckAnswers] = SerialiseParameter(new TempDataCheckAnswers() { SubmissionId = submissionId, SectionId = param.SectionId, SectionName = param.SectionName });
+            return RedirectToAction("CheckAnswersPage", "CheckAnswers");
+        }
+        else
+        {
+            TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions() { QuestionRef = nextQuestionId, SubmissionId = submissionId });
+            return RedirectToAction("GetQuestionById");
+        }
     }
 
     private static Params? _ParseParameters(string? parameters)
