@@ -1,22 +1,31 @@
 ﻿@model Dfe.PlanTech.Domain.Questionnaire.Interfaces.ICategory;
 
 <task-list>
-    @foreach(var section in Model.Sections)
+    @foreach (var section in Model.Sections)
     {
-        var sectionMaturtiy = Model.SectionStatuses.Where(sectionStatus => sectionStatus.SectionId == section.Sys.Id && sectionStatus.Completed == 1)
-                                                .Select(sectionStatus => sectionStatus.Maturity)
-                                                .FirstOrDefault();
+        var sectionMaturity = Model.SectionStatuses.Where(sectionStatus => sectionStatus.SectionId == section.Sys.Id &&
+        sectionStatus.Completed == 1)
+        .Select(sectionStatus => sectionStatus.Maturity)
+        .FirstOrDefault();
 
-        if (string.IsNullOrEmpty(sectionMaturtiy))
+        if (string.IsNullOrEmpty(sectionMaturity))
             continue;
-        
-        var recommendation = section.GetRecommendationForMaturity(sectionMaturtiy);  
+
+        var recommendation = section.GetRecommendationForMaturity("sectionMaturity");
 
         <task-list-item>
             <task-list-item-name>
-                <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@recommendation?.Page?.Slug" class="govuk-link">
-                @recommendation?.DisplayName
-                </a>
+                @if (recommendation != null)
+                {
+                    <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@recommendation?.Page?.Slug"
+                        class="govuk-link">
+                        @recommendation?.DisplayName
+                    </a>
+                }
+                else
+                {
+                    <p class="govuk-error-message">Placeholder Error...</p>
+                }
             </task-list-item-name>
         </task-list-item>
     }

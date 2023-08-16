@@ -21,23 +21,28 @@ public class Section : ContentComponent, ISection
 
     public RecommendationPage[] Recommendations { get; init; } = Array.Empty<RecommendationPage>();
 
-    public RecommendationPage GetRecommendationForMaturity(Maturity maturity)
-     => Recommendations.FirstOrDefault(recommendation => recommendation.Maturity == maturity) ??
-        throw new KeyNotFoundException($"Could not find recommendation with maturity {maturity}");
+    public bool TryGetRecommendationForMaturity(Maturity maturity, out RecommendationPage? recommendationPage)
+    {
+        recommendationPage = Recommendations.FirstOrDefault(recommendation => recommendation.Maturity == maturity);
+        return recommendationPage != null;
+    }
 
-    public RecommendationPage GetRecommendationForMaturity(string maturity)
+    public RecommendationPage? GetRecommendationForMaturity(string maturity)
     {
         if (maturity is null)
             maturity = string.Empty;
 
-        if (Enum.TryParse(maturity, out Maturity maturityResponse))
+        RecommendationPage? recommendationPage;
+        Maturity maturityResponse;
+
+        if (!Enum.TryParse(maturity, out maturityResponse)) maturityResponse = Maturity.Unknown;
+
+        if (!TryGetRecommendationForMaturity(maturityResponse, out recommendationPage))
         {
-            return GetRecommendationForMaturity(maturityResponse);
+            // TODO: Log Recommendation Page Not Found
         }
-        else
-        {
-            return GetRecommendationForMaturity(Maturity.Unknown);
-        }
+
+        return recommendationPage;
 
     }
 }
