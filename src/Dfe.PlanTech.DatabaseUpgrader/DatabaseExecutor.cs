@@ -68,7 +68,7 @@ public class DatabaseExecutor
   }
   
   private static Func<string, bool> ScriptNamespaceMatches(string expectedStartsWith)
-   => scriptNamespace => scriptNamespace.StartsWith(expectedStartsWith);
+   => scriptNamespace => scriptNamespace.StartsWith(expectedStartsWith, StringComparison.InvariantCultureIgnoreCase);
 
   private static string GetNamespaceForEnvironment(string environment)
    => string.Format("{0}.{1}", ENVIRONMENT_SPECIFIC_SCRIPTS_NAMESPACE, environment);
