@@ -28,7 +28,7 @@ public class DfeOpenIdConnectEventsTests
         var dfePublicApiMock = Substitute.For<IDfePublicApi>();
 
         var claimsPrincipalMock = Substitute.For<ClaimsPrincipal>();
-        claimsPrincipalMock.Identity.Returns(() =>
+        claimsPrincipalMock.Identity.Returns((callInfo) =>
         {
             wasCalled = true;
             return null;
@@ -166,7 +166,7 @@ public class DfeOpenIdConnectEventsTests
         var dfePublicApiMock = Substitute.For<IDfePublicApi>();
 
         var claimsPrincipalMock = Substitute.For<ClaimsPrincipal>();
-        claimsPrincipalMock.Identity.Returns(() =>
+        claimsPrincipalMock.Identity.Returns((callInfo) =>
         {
             wasCalled = false;
             return null;

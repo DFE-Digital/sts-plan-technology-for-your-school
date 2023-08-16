@@ -17,18 +17,19 @@ public class RichTextRendererTests
     public RichTextRendererTests()
     {
         _partRenderer.Accepts(Arg.Any<IRichTextContent>())
-                    .Returns((IRichTextContent content) => content.NodeType == "paragraph");
-
-
+                    .Returns((content) => ((IRichTextContent)content[0]).NodeType == "paragraph");
 
         _partRenderer.AddHtml(Arg.Any<IRichTextContent>(), Arg.Any<IRichTextContentPartRendererCollection>(), Arg.Any<StringBuilder>())
-                    .Returns((IRichTextContent content, IRichTextContentPartRendererCollection collection, StringBuilder stringBuilder) =>
+                    .Returns((CallInfo) =>
                     {
+                        IRichTextContent content = (IRichTextContent)CallInfo[0];
+                        IRichTextContentPartRendererCollection collection = (IRichTextContentPartRendererCollection)CallInfo[1];
+                        StringBuilder stringBuilder = (StringBuilder)CallInfo[2];
+
                         stringBuilder.Append(content.Value);
 
                         return stringBuilder;
-                    })
-                    .Verifiable();
+                    });
 
         var partRenderers = new List<IRichTextContentPartRenderer>(){
             _partRenderer,

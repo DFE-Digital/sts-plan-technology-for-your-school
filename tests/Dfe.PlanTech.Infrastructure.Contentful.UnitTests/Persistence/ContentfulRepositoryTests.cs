@@ -4,7 +4,9 @@ using Contentful.Core.Search;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 using Microsoft.Extensions.Logging.Abstractions;
+using Newtonsoft.Json.Linq;
 using NSubstitute;
+using NSubstitute.Core;
 using System.Web;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
@@ -20,8 +22,10 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         public ContentfulRepositoryTests()
         {
             _clientMock.GetEntries(Arg.Any<QueryBuilder<TestClass>>(), Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult((QueryBuilder<TestClass> query, CancellationToken token) =>
+            .Returns(Task.FromResult((callInfo) =>
             {
+                QueryBuilder<TestClass> query = new QueryBuilder<TestClass>();
+                CancellationToken token;
                 var queryString = query.Build();
                 var parsedQueryString = HttpUtility.ParseQueryString(queryString);
                 var sysId = parsedQueryString.Get("sys.id");
@@ -41,16 +45,18 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
                 return collection;
             }));
 
-            _clientMock.Setup(client => client.GetEntries<OtherTestClass>(It.IsAny<QueryBuilder<OtherTestClass>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((QueryBuilder<OtherTestClass> query, CancellationToken token) =>
+            _clientMock.GetEntries<OtherTestClass>(Arg.Any<QueryBuilder<OtherTestClass>>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult((CallInfo) => (ContentfulCollection<OtherTestClass>)CallInfo
             {
+                QueryBuilder<OtherTestClass> query = new QueryBuilder<OtherTestClass>(); 
+                CancellationToken token;
                 var collection = new ContentfulCollection<OtherTestClass>
                 {
                     Items = Enumerable.Empty<OtherTestClass>()
                 };
 
                 return collection;
-            });
+            }));
 
             _clientMock.Setup(client => client.GetEntry<TestClass>(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((string id, string etag, QueryBuilder<TestClass> query, CancellationToken token) =>
