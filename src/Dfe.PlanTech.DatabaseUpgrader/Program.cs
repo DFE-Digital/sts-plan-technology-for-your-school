@@ -1,11 +1,5 @@
-﻿using DbUp;
-using DbUp.Engine;
-using System.Reflection;
-using Polly;
-using Polly.Timeout;
-using Polly.Retry;
-using DbUp.Helpers;
-using System.IO;
+﻿using Dfe.PlanTech.DatabaseUpgrader;
+using CommandLine;
 
 /// <summary>
 /// PlanTech Database Upgrader.
@@ -14,99 +8,43 @@ internal class Program
 {
     private const int ErrorResult = -1;
     private const int SuccessResult = 0;
-
-    private const string ScriptsNamespace = "Dfe.PlanTech.DatabaseUpgrader.Scripts";
+    private static readonly Logger _logger = new Logger();
 
     private static int Main(string[] args)
     {
-        if (args == null || !args.Any())
-        {
-            DisplayError("Please supply a connection string.");
-            return ErrorResult;
-        }
+        bool success = false;
 
-        var connectionString = args[0];
+        Parser.Default.ParseArguments<Options>(args)
+          .WithParsed((options) =>
+          {
+              var databaseExecutor = new DatabaseExecutor(options, _logger);
+              success = databaseExecutor.MigrateDatabase();
+          })
+          .WithNotParsed((errors) =>
+          {
+              success = HandleParseError(errors);
+          });
 
-        var result = false;
-        var retryPolicy = SetupRetryPolicy();
-
-        try
-        {
-            result = retryPolicy.Execute(() => MigrateDatabase(connectionString));
-        }
-        catch (Exception ex)
-        {
-            DisplayError("An exception occurred whilst migrating the database.");
-            DisplayError(ex.Message, ex);
-        }
-
-        return result ? SuccessResult : ErrorResult;
+        return success ? SuccessResult : ErrorResult;
     }
 
-    private static bool MigrateDatabase(string connectionString)
+    /// <summary>
+    /// Ran if error parsing command line arguments
+    /// </summary>
+    /// <param name="errors"></param>
+    private static bool HandleParseError(IEnumerable<Error> errors)
     {
-        var scriptsUpgrader = DeployChanges.To
-            .SqlDatabase(connectionString)
-            .WithScriptsEmbeddedInAssembly(
-                Assembly.GetExecutingAssembly(),
-                scriptNamespace => {
-                    return scriptNamespace.StartsWith(ScriptsNamespace);
-                })
-            .LogToConsole()
-            .LogScriptOutput()
-            .WithTransaction()
-            .Build();
-
-        if(!Execute(scriptsUpgrader))
+        bool continueProcessing = true;
+        foreach (var error in errors)
         {
-            return false;
-        }
+            _logger.DisplayErrors($"Error parsing {error.Tag}");
 
-        return true;
-    }
-
-    private static bool Execute(UpgradeEngine upgrader)
-    {
-        var result = upgrader.PerformUpgrade();
-
-        if (!result.Successful)
-        {
-            DisplayError("The database migration was not successful.");
-            DisplayError(result.Error.Message, result.Error);
-            return false;
-        }
-
-        return true;
-    }
-
-    private static RetryPolicy SetupRetryPolicy()
-    {
-        return Policy.Handle<Exception>().WaitAndRetry(
-            new[]
+            if (error.StopsProcessing)
             {
-                TimeSpan.FromMinutes(1),
-                TimeSpan.FromMinutes(2),
-                TimeSpan.FromMinutes(3)
-            });
-    }
-
-    private static void DisplaySuccess(string successMessage)
-    {
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine(successMessage);
-        Console.ResetColor();
-    }
-
-    private static void DisplayError(string errorMessage, Exception? exception = null)
-    {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine(errorMessage);
-
-        if (exception != null)
-        {
-            Console.WriteLine(exception.StackTrace);
+                continueProcessing = false;
+            }
         }
 
-        Console.ResetColor();
+        return continueProcessing;
     }
 }
