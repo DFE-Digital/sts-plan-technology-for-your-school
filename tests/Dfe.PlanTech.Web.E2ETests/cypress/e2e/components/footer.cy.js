@@ -1,4 +1,4 @@
-describe("beta header", () => {
+describe("Footer", () => {
   const FOOTER_SELECTOR = "footer.govuk-footer";
 
   beforeEach(() => {
