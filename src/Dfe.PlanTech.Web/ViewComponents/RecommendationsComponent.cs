@@ -15,11 +15,11 @@ namespace Dfe.PlanTech.Web.ViewComponents
 
         public IViewComponentResult Invoke(ICategory category)
         {
-            var recommendationPageList = _GetRecommendations(category);
-            return View(recommendationPageList);
+            var recommendationWithSectionNameList = _GetRecommendationsWithSectionNames(category);
+            return View(recommendationWithSectionNameList);
         }
 
-        private IEnumerable<RecommendationPage?> _GetRecommendations(ICategory category)
+        private IEnumerable<(RecommendationPage? Recommendation, string SectionName)> _GetRecommendationsWithSectionNames(ICategory category)
         {
             foreach (ISection section in category.Sections)
             {
@@ -33,7 +33,7 @@ namespace Dfe.PlanTech.Web.ViewComponents
 
                 if (recommendation == null) _logger.LogWarning("No Recommendation Found: Section - {0}, Maturity - {1}", section.Name, sectionMaturity);
 
-                yield return recommendation;
+                yield return (recommendation, section.Name);
             }
         }
     }
