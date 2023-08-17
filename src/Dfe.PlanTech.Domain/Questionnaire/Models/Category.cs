@@ -3,6 +3,8 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
 
+using Microsoft.Extensions.Logging;
+
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
 public class Category : ContentComponent, ICategory
@@ -16,4 +18,7 @@ public class Category : ContentComponent, ICategory
     public IList<SectionStatuses> SectionStatuses { get; set; } = new List<SectionStatuses>();
 
     public int Completed { get; set; }
+    
+    public bool RetrievalError { get; set; }
+
 }

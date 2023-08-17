@@ -15,4 +15,6 @@ public interface ICategory : IContentComponent
     public IList<SectionStatuses> SectionStatuses { get; set; }
 
     public int Completed { get; set; }
+    
+    public bool RetrievalError { get; set; }
 }
