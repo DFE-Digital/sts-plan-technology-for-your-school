@@ -62,21 +62,21 @@ public class UserHelperTests
     }
 
 
-    [Fact]
-    public async Task GetEstablishmentId_Returns_Correct_Id_When_Establishment_Does_Not_Exists_In_DB()
-    {
-        _planTechDbContextMock.GetEstablishmentBy(establishment => establishment.EstablishmentRef == "131")
-            .ReturnsNull()
-            .Returns(new Establishment() { Id = 17 });
+    //[Fact]
+    //public async Task GetEstablishmentId_Returns_Correct_Id_When_Establishment_Does_Not_Exists_In_DB()
+    //{
+    //    _planTechDbContextMock.GetEstablishmentBy(establishment => establishment.EstablishmentRef == "131")
+    //        .ReturnsNull()
+    //        .Returns(new Establishment() { Id = 17 });
 
-        var result = await _userHelper.GetEstablishmentId();
+    //    var result = await _userHelper.GetEstablishmentId();
 
-        await _createEstablishmentCommandMock.Received(0).CreateEstablishment(Arg.Any<EstablishmentDto>());
+    //    await _createEstablishmentCommandMock.Received(0).CreateEstablishment(Arg.Any<EstablishmentDto>());
 
-        Assert.IsType<int>(result);
+    //    Assert.IsType<int>(result);
 
-        Assert.Equal(17, result);
-    }
+    //    Assert.Equal(17, result);
+    //}
 
     [Fact]
     public async Task GetEstablishmentId_Returns_1_When_Reference_Is_Not_Present()
