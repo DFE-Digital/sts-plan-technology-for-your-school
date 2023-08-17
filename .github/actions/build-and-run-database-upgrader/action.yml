@@ -17,6 +17,10 @@ inputs:
   az_resource_group_name:
     required: true
     type: string 
+  additional_arguments:
+    required: false
+    type: string
+    description: Additional arguments to execute on the Db Upgrader
 
 runs:
   using: composite
@@ -45,7 +49,7 @@ runs:
 
     - name: Run database upgrader
       shell: bash
-      run: dotnet ./build/Dfe.PlanTech.DatabaseUpgrader.dll "${{ env.CONNECTION_STRING }}"
+      run: dotnet ./build/Dfe.PlanTech.DatabaseUpgrader.dll -c "${{ env.CONNECTION_STRING }}" ${{ inputs.additional_arguments }}
 
     - name: Remove Azure firewall rules
       shell: bash
