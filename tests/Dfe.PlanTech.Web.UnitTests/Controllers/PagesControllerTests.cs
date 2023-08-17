@@ -194,18 +194,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [InlineData("")]
         public async Task GoogleTrackingCodesAddedDependingOnWhatCookiePreferenceSetTo(string cookiePreference)
         {
-            var httpContextMock = Substitute.For<HttpContext>();
-
             bool.TryParse(cookiePreference, out bool preference);
             var cookie = new DfeCookie { HasApproved = preference };
             cookiesMock.GetCookie().Returns(cookie);
 
-            _controller.ControllerContext = new ControllerContext()
-            {
-                HttpContext = httpContextMock
-            };
-
-            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None, Arg.Any<string>());
+            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None, "");
 
             Assert.IsType<ViewResult>(result);
 

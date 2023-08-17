@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Application.Submission.Commands;
+using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -26,7 +26,7 @@ public class QuestionsController : BaseController<QuestionsController>
         string? section,
         int? submissionId,
         string? answerRef,
-        [FromServices] SubmitAnswerCommand submitAnswerCommand,
+        [FromServices] ISubmitAnswerCommand submitAnswerCommand,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
@@ -61,7 +61,7 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
     [HttpPost("SubmitAnswer")]
-    public async Task<IActionResult> SubmitAnswer(SubmitAnswerDto submitAnswerDto, [FromServices] SubmitAnswerCommand submitAnswerCommand)
+    public async Task<IActionResult> SubmitAnswer(SubmitAnswerDto submitAnswerDto, [FromServices] ISubmitAnswerCommand submitAnswerCommand)
     {
         if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
 
