@@ -17,6 +17,7 @@ using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Application.Users.Queries;
 using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Infrastructure.Data;
@@ -117,7 +118,7 @@ public static class ProgramExtensions
 
         services.AddTransient<Application.Questionnaire.Queries.GetSectionQuery>();
 
-        services.AddTransient<GetNavigationQuery>();
+        services.AddTransient<IGetNavigationQuery, GetNavigationQuery>();
 
         return services;
     }

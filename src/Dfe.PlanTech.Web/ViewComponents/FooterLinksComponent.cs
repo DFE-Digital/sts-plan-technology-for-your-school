@@ -1,13 +1,13 @@
-using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ViewComponentSample.ViewComponents;
 
 public class FooterLinks : ViewComponent
 {
-  private GetNavigationQuery _getNavQuery;
+  private readonly IGetNavigationQuery _getNavQuery;
 
-  public FooterLinks(GetNavigationQuery getNavQuery) => _getNavQuery = getNavQuery;
+  public FooterLinks(IGetNavigationQuery getNavQuery) => _getNavQuery = getNavQuery;
 
   public async Task<IViewComponentResult> InvokeAsync()
   {
