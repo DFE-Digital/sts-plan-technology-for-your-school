@@ -11,7 +11,7 @@
         if (string.IsNullOrEmpty(sectionMaturity))
             continue;
 
-        var recommendation = section.GetRecommendationForMaturity("sectionMaturity");
+        var recommendation = section.GetRecommendationForMaturity(sectionMaturity);
 
         <task-list-item>
             <task-list-item-name>
@@ -24,7 +24,8 @@
                 }
                 else
                 {
-                    <p class="govuk-error-message">Placeholder Error...</p>
+                    var errorMessage = "Unable to retrieve " + section.Name + " recommendation";
+                    <govuk-error-message>@errorMessage</govuk-error-message>
                 }
             </task-list-item-name>
         </task-list-item>
