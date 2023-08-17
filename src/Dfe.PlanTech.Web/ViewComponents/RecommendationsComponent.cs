@@ -4,16 +4,16 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewComponents
 {
-    class RecommendationsList : ViewComponent
+    public class Recommendations : ViewComponent
     {
-        private readonly ILogger<RecommendationsList> _logger;
+        private readonly ILogger<Recommendations> _logger;
 
-        public RecommendationsList(ILogger<RecommendationsList> logger)
+        public Recommendations(ILogger<Recommendations> logger)
         {
             _logger = logger;
         }
 
-        public async Task<IViewComponentResult> InvokeAsync(ICategory category)
+        public IViewComponentResult Invoke(ICategory category)
         {
             var recommendationPageList = _GetRecommendations(category);
             return View(recommendationPageList);
