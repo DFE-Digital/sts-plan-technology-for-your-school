@@ -11,6 +11,7 @@ using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -82,17 +83,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 .AddInMemoryCollection(initialData: inMemorySettings)
                 .Build();
 
-            _controller = new PagesController(mockLogger, configuration, cookiesMock);
+            var controllerContext = ControllerHelpers.MockControllerContext();
 
-            var httpContextMock = Substitute.For<HttpContext>();
-            var requestMock = Substitute.For<HttpRequest>();
-
-            httpContextMock.Request.Returns(requestMock);
-            requestMock.Cookies["cookies_preferences_set"].Returns("true");
-
-            _controller.ControllerContext = new ControllerContext()
+            _controller = new PagesController(mockLogger, configuration, cookiesMock)
             {
-                HttpContext = httpContextMock
+                ControllerContext = controllerContext,
+                TempData = Substitute.For<ITempDataDictionary>()
             };
 
             _query = new GetPageQuery(_questionnaireCacherMock, repositoryMock);
@@ -125,19 +121,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task Should_ReturnLandingPage_When_IndexRouteLoaded()
         {
-            var httpContextMock = Substitute.For<HttpContext>();
-            var requestMock = Substitute.For<HttpRequest>();
             var cookie = new DfeCookie { HasApproved = true };
             cookiesMock.GetCookie().Returns(cookie);
-            httpContextMock.Request.Returns(requestMock);
-            requestMock.Cookies["cookies_preferences_set"].Returns("true");
 
-            _controller.ControllerContext = new ControllerContext()
-            {
-                HttpContext = httpContextMock
-            };
-
-            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None, Arg.Any<string>());
+            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None, "");
 
             Assert.IsType<ViewResult>(result);
 
