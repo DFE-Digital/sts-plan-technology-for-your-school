@@ -2,7 +2,7 @@ using Dfe.PlanTech.Domain.Content.Models;
 
 namespace Dfe.PlanTech.Web.Models;
 
-public class PageViewModel : BasePageViewModel
+public class PageViewModel
 {
     public required Page Page { get; init; }
     public required string GTMHead { get; set; }
