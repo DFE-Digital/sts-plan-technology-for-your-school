@@ -5,6 +5,7 @@ using Dfe.PlanTech.Domain.Users.Models;
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
 using NSubstitute.Core;
+using NSubstitute.ReturnsExtensions;
 using System.Security.Claims;
 using Xunit;
 
@@ -37,7 +38,7 @@ public class UserHelperTests
     [Fact]
     public async Task GetCurrentUserId_Returns_Correct_Id_When_UserExists_InDatabase()
     {
-        _planTechDbContextMock.GetUserBy(userModel => userModel.DfeSignInRef == "1").Returns(Task.FromResult(new User() { Id = 1 }));
+        _planTechDbContextMock.GetUserBy(userModel => userModel.DfeSignInRef == "1").Returns(new User() { Id = 1 });
 
         var result = await _userHelper.GetCurrentUserId();
 
@@ -65,9 +66,8 @@ public class UserHelperTests
     public async Task GetEstablishmentId_Returns_Correct_Id_When_Establishment_Does_Not_Exists_In_DB()
     {
         _planTechDbContextMock.GetEstablishmentBy(establishment => establishment.EstablishmentRef == "131")
-            .Returns(
-            null,
-            Task.FromResult(new Establishment() { Id = 17 }));
+            .ReturnsNull()
+            .Returns(new Establishment() { Id = 17 });
 
         var result = await _userHelper.GetEstablishmentId();
 

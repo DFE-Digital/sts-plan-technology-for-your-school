@@ -90,7 +90,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var repositoryMock = Substitute.For<IContentRepository>();
             repositoryMock.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns((callInfo) =>
             {
-                IGetEntitiesOptions options = new GetEntitiesOptions();
+                IGetEntitiesOptions options = (IGetEntitiesOptions)callInfo[0];
                 if (options?.Queries != null)
                 {
                     foreach (var query in options.Queries)

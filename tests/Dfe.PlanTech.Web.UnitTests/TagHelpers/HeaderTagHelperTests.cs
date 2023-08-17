@@ -178,7 +178,7 @@ public class HeaderComponentTagHelperTests
         var content = "content";
 
         var loggerMock = Substitute.For<ILogger<HeaderComponentTagHelper>>();
-        loggerMock.When(x => LoggerMock.LogMethod<HeaderComponentTagHelper>()).Received();
+        loggerMock.When(x => LoggerMock.LogMethod<HeaderComponentTagHelper>());
 
         var tagHelper = new HeaderComponentTagHelper(loggerMock)
         {
@@ -209,7 +209,7 @@ public class HeaderComponentTagHelperTests
         var content = "content";
 
         var loggerMock = Substitute.For<ILogger<HeaderComponentTagHelper>>();
-        loggerMock.When(x => LoggerMock.LogMethod<HeaderComponentTagHelper>()).Received();
+        loggerMock.When(x => LoggerMock.LogMethod<HeaderComponentTagHelper>());
 
         var tagHelper = new HeaderComponentTagHelper(loggerMock)
         {
