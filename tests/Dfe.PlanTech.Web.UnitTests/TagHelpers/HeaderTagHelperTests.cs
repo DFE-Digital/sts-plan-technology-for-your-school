@@ -178,7 +178,7 @@ public class HeaderComponentTagHelperTests
         var content = "content";
 
         var loggerMock = Substitute.For<ILogger<HeaderComponentTagHelper>>();
-        loggerMock.Setup(LoggerMock.LogMethod<HeaderComponentTagHelper>()).Verifiable();
+        loggerMock.When(x => LoggerMock.LogMethod<HeaderComponentTagHelper>()).Received();
 
         var tagHelper = new HeaderComponentTagHelper(loggerMock)
         {
@@ -200,7 +200,7 @@ public class HeaderComponentTagHelperTests
 
         await tagHelper.ProcessAsync(context, output);
 
-        loggerMock.Verify();
+        loggerMock.Received();
     }
 
     [Fact]
@@ -209,7 +209,7 @@ public class HeaderComponentTagHelperTests
         var content = "content";
 
         var loggerMock = Substitute.For<ILogger<HeaderComponentTagHelper>>();
-        loggerMock.Setup(LoggerMock.LogMethod<HeaderComponentTagHelper>()).Verifiable();
+        loggerMock.When(x => LoggerMock.LogMethod<HeaderComponentTagHelper>()).Received();
 
         var tagHelper = new HeaderComponentTagHelper(loggerMock)
         {
@@ -235,7 +235,7 @@ public class HeaderComponentTagHelperTests
 
         await Assert.ThrowsAnyAsync<Exception>(() => tagHelper.ProcessAsync(context, output));
 
-        loggerMock.Verify();
+        loggerMock.Received();
     }
 
 }

@@ -4,6 +4,7 @@ using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
+using NSubstitute.Core;
 using System.Security.Claims;
 using Xunit;
 
@@ -63,10 +64,10 @@ public class UserHelperTests
     [Fact]
     public async Task GetEstablishmentId_Returns_Correct_Id_When_Establishment_Does_Not_Exists_In_DB()
     {
-        _planTechDbContextMock
-            .SetupSequence(m => m.GetEstablishmentBy(establishment => establishment.EstablishmentRef == "131"))
-            .ReturnsAsync(() => { return null; })
-            .ReturnsAsync(new Establishment() { Id = 17 });
+        _planTechDbContextMock.GetEstablishmentBy(establishment => establishment.EstablishmentRef == "131")
+            .Returns(
+            null,
+            Task.FromResult(new Establishment() { Id = 17 }));
 
         var result = await _userHelper.GetEstablishmentId();
 

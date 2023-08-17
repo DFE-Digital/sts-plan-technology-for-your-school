@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
 using NSubstitute;
 using Xunit;
 
@@ -150,10 +151,9 @@ public class UrlHistoryMiddlewareTests
         var loggerMock = Substitute.For<ILogger<UrlHistoryMiddleware>>();
         loggerMock.Log(Arg.Any<LogLevel>(),
                                                             Arg.Any<EventId>(),
-                                                            Arg.Any<Arg.AnyType>(),
+                                                            It.IsAny<It.IsAnyType>(),
                                                             Arg.Any<Exception?>(),
-                                                            Arg.Any<Func<Arg.AnyType, Exception?, string>>()))
-                    .Verifiable();
+                                                            Arg.Any<Func<It.IsAnyType, Exception?, string>>());
 
         var urlHistory = new UrlHistoryMiddleware(loggerMock, nextDelegateMock);
 
@@ -162,11 +162,11 @@ public class UrlHistoryMiddlewareTests
 
         var historyCache = history.History;
 
-        loggerMock.Verify(logger => logger.Log(Arg.Any<LogLevel>(),
+        loggerMock.Received().Log(Arg.Any<LogLevel>(),
                                                 Arg.Any<EventId>(),
-                                                Arg.Any<Arg.AnyType>(),
+                                                Arg.Any<It.IsAnyType>(),
                                                 Arg.Any<Exception?>(),
-                                                Arg.Any<Func<Arg.AnyType, Exception?, string>>()));
+                                                Arg.Any<Func<It.IsAnyType, Exception?, string>>());
     }
 
 }

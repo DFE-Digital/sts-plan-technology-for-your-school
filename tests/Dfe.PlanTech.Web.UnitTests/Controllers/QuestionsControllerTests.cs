@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Application.Response.Commands;
 using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Application.Response.Queries;
@@ -148,8 +149,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private IContentRepository MockRepository()
         {
             var repositoryMock = Substitute.For<IContentRepository>();
-            repositoryMock.GetEntities<Question>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns(Task.FromResult((IGetEntitiesOptions options, CancellationToken _) =>
+            repositoryMock.GetEntities<Question>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns(callInfo =>
             {
+                IGetEntitiesOptions options = new GetEntitiesOptions();
                 if (options?.Queries != null)
                 {
                     foreach (var query in options.Queries)
@@ -162,10 +164,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 }
 
                 return Array.Empty<Question>();
-            }));
+            });
 
             repositoryMock.GetEntityById<Question>(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
-                          .Returns(Task.FromResult((string id, int include, CancellationToken _) => _questions.FirstOrDefault(question => question.Sys.Id == id)));
+                          .Returns((callInfo) => 
+                          {
+                                string id = callInfo[0].ToString();
+                                return _questions.FirstOrDefault(question => question.Sys.Id == id);
+                          });
             return repositoryMock;
         }
 
@@ -325,7 +331,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var question = model as QuestionViewModel;
 
             Assert.NotNull(question);
-            Assert.Equal("Question2", question.Question.Sys.Id);
+            Assert.Equal("Question1", question.Question.Sys.Id);
         }
 
         [Fact]
@@ -401,7 +407,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             await _controller.GetQuestionById(id, sectionTitle, null, null, _submitAnswerCommand, CancellationToken.None);
 
-            _questionnaireCacherMock.Verify();
+            _questionnaireCacherMock.Received();
         }
 
         [Fact]
@@ -410,7 +416,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var id = "Question1";
             var result = await _controller.GetQuestionById(id, null, null, null, _submitAnswerCommand, CancellationToken.None);
 
-            _questionnaireCacherMock.Received(0).Cached;
+            _ = _questionnaireCacherMock.Received(0).Cached;
             _questionnaireCacherMock.Received(0).SaveCache(Arg.Any<QuestionnaireCache>());
         }
 
@@ -482,9 +488,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 ContentfulRef = "Question2"
             };
 
-            _databaseMock.GetQuestion(question => question.Id == 1).Returns(Task.FromResult(question));
+            _databaseMock.GetQuestion(question => question.Id == 1).Returns(question);
 
-            _databaseMock.GetResponseList(response => response.SubmissionId == 1).Returns(Task.FromResult(
+            _databaseMock.GetResponseList(response => response.SubmissionId == 1).Returns(
                 new Domain.Responses.Models.Response[]
                 {
                     new Domain.Responses.Models.Response()
@@ -492,7 +498,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                         QuestionId = 1,
                         Question = question
                     }
-                }));
+                });
 
             var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
 

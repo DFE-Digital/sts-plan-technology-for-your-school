@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Response.Commands;
 using Dfe.PlanTech.Application.Response.Interface;
@@ -14,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.ReturnsExtensions;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Controllers
@@ -86,8 +88,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private IContentRepository SetupRepositoryMock()
         {
             var repositoryMock = Substitute.For<IContentRepository>();
-            repositoryMock.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns(Task.FromResult((IGetEntitiesOptions options, CancellationToken _) =>
+            repositoryMock.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns((callInfo) =>
             {
+                IGetEntitiesOptions options = new GetEntitiesOptions();
                 if (options?.Queries != null)
                 {
                     foreach (var query in options.Queries)
@@ -99,7 +102,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                     }
                 }
                 return Array.Empty<Page>();
-            }));
+            });
             return repositoryMock;
         }
 
@@ -205,8 +208,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task CheckAnswersController_CheckAnswers_Null_QuestionWithAnswerList_ThrowsException()
         {
-            _getLatestResponseListForSubmissionQueryMock.GetLatestResponseListForSubmissionBy(SubmissionId).Returns(Task.FromResult((List<QuestionWithAnswer>)null!));
-            _contentRepositoryMock.GetEntityById<Section?>(SectionId, 3, CancellationToken.None).Returns(Task.FromResult(_section));
+            _getLatestResponseListForSubmissionQueryMock.GetLatestResponseListForSubmissionBy(SubmissionId).ReturnsNull();
+            _contentRepositoryMock.GetEntityById<Section?>(SectionId, 3, CancellationToken.None).Returns(_section);
 
             await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _checkAnswersController.CheckAnswersPage(SubmissionId, SectionId, SectionName, _processCheckAnswerDtoCommand, _getPageQueryMock));
         }

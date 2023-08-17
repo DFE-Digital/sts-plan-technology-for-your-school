@@ -103,8 +103,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var repositoryMock = Substitute.For<IContentRepository>();
             repositoryMock
                 .GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>())
-                .Returns(Task.FromResult((IGetEntitiesOptions options, CancellationToken _) =>
+                .Returns((callInfo) =>
                 {
+                    IGetEntitiesOptions options = (IGetEntitiesOptions)callInfo[0]; 
                     if (options?.Queries != null)
                     {
                         foreach (var query in options.Queries)
@@ -117,7 +118,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                     }
 
                     return Array.Empty<Page>();
-                }));
+                });
             return repositoryMock;
         }
 

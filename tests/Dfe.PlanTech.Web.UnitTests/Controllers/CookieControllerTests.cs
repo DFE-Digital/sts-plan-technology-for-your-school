@@ -201,8 +201,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private IContentRepository SetupRepositoryMock()
          {
              var repositoryMock = Substitute.For<IContentRepository>();
-             repositoryMock.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns(Task.FromResult((IGetEntitiesOptions options, CancellationToken _) =>
+             repositoryMock.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns((CallInfo) =>
              {
+                 IGetEntitiesOptions options = (IGetEntitiesOptions)CallInfo[0];
                  if (options?.Queries != null)
                  {
                      foreach (var query in options.Queries)
@@ -214,7 +215,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                      }
                  }
                  return Array.Empty<Page>();
-             }));
+             });
              return repositoryMock;
          }
     }

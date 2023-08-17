@@ -1,7 +1,6 @@
 ﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Queries;
 using Dfe.PlanTech.Domain.Users.Models;
-using Moq;
 using NSubstitute;
 using System.Linq.Expressions;
 

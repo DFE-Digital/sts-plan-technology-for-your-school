@@ -1,10 +1,8 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Submission.Queries;
-
+using Dfe.PlanTech.Domain.Answers.Models;
 using NSubstitute;
 using System.Linq.Expressions;
-using System;
-using Dfe.PlanTech.Domain.Answers.Models;
 
 namespace Dfe.PlanTech.Application.UnitTests.Submission.Queries
 {

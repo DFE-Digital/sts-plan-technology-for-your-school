@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
-using Moq;
+using NSubstitute;
+using System;
 
 namespace Dfe.PlanTech.Application.UnitTests.Core;
 
@@ -12,17 +13,24 @@ public class UrlHistoryTests
 
     public UrlHistoryTests()
     {
-        var cacherMock = new Mock<ICacher>();
-        cacherMock.Setup(cacher => cacher.Get<Stack<Uri>>(UrlHistory.CACHE_KEY)).Returns(history);
+        var cacherMock = Substitute.For<ICacher>();
+        cacherMock.Get<Stack<Uri>>(UrlHistory.CACHE_KEY).Returns(history);
 
-        cacherMock.Setup(cacher => cacher.Get(UrlHistory.CACHE_KEY, It.IsAny<Func<Stack<Uri>>>())).Returns(history);
-        cacherMock.Setup(cacher => cacher.Set(UrlHistory.CACHE_KEY, It.IsAny<TimeSpan>(), It.IsAny<Stack<Uri>>()))
-                .Callback((string key, TimeSpan timeSpan, Stack<Uri> stack) =>
-                {
-                    history = stack;
-                });
+        cacherMock.Get(UrlHistory.CACHE_KEY, Arg.Any<Func<Stack<Uri>>>()).Returns(history);
+        cacherMock.When(x => x.Set(UrlHistory.CACHE_KEY, Arg.Any<TimeSpan>(), Arg.Any<Stack<Uri>>()))
+            .Do((callInfo) =>
+            {
+                Stack<Uri> stack = (Stack<Uri>)callInfo[0];
+                history = stack;
+            });
+        cacherMock.When(x => x.Set(UrlHistory.CACHE_KEY, Arg.Any<TimeSpan>(), Arg.Any<Stack<Uri>>()))
+            .Do((callInfo) =>
+            {
+                Stack<Uri> stack = (Stack<Uri>)callInfo[0];
+                history = stack;
+            });
 
-        cacher = cacherMock.Object;
+        cacher = cacherMock;
     }
 
     [Fact]

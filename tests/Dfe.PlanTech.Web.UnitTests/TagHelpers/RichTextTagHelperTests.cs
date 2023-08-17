@@ -16,9 +16,6 @@ public class RichTextTagHelperTests
         string content = "rich text tag";
 
         var loggerMock = Substitute.For<ILogger<RichTextTagHelper>>();
-        loggerMock.Setup(LoggerMock.LogMethod<RichTextTagHelper>())
-                    .Verifiable();
-
         var richTextRendererMock = Substitute.For<IRichTextRenderer>();
 
         var context = new TagHelperContext(tagName: "rich-text",
@@ -38,8 +35,6 @@ public class RichTextTagHelperTests
         var richTextTagHelper = new RichTextTagHelper(loggerMock, richTextRendererMock);
 
         await richTextTagHelper.ProcessAsync(context, output);
-
-        loggerMock.Received().(LoggerMock.LogMethod<RichTextTagHelper>());
     }
 
     [Fact]

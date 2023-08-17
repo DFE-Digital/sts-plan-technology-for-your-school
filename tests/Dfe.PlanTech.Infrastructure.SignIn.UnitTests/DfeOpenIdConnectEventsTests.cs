@@ -125,7 +125,7 @@ public class DfeOpenIdConnectEventsTests
         await OnUserInformationReceivedEvent.OnUserInformationReceived(context);
 
         //Assert Service called
-        dfePublicApiMock.Received(api => api.GetUserAccessToService(userId.ToString(), orgId.ToString()));
+        await dfePublicApiMock.Received().GetUserAccessToService(userId.ToString(), orgId.ToString());
 
         //Assert has right number of identites
         Assert.NotNull(context.Principal);
