@@ -1,34 +1,3 @@
 ﻿@model Dfe.PlanTech.Domain.Questionnaire.Interfaces.ICategory;
 
-<task-list>
-    @foreach (var section in Model.Sections)
-    {
-        var sectionMaturity = Model.SectionStatuses.Where(sectionStatus => sectionStatus.SectionId == section.Sys.Id &&
-        sectionStatus.Completed == 1)
-        .Select(sectionStatus => sectionStatus.Maturity)
-        .FirstOrDefault();
-
-        if (string.IsNullOrEmpty(sectionMaturity))
-            continue;
-
-        var recommendation = section.GetRecommendationForMaturity(sectionMaturity);
-
-        <task-list-item>
-            <task-list-item-name>
-                @if (recommendation != null)
-                {
-                    <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@recommendation?.Page?.Slug"
-                        class="govuk-link">
-                        @recommendation?.DisplayName
-                    </a>
-                }
-                else
-                {
-                    var errorMessage = "Unable to retrieve " + section.Name + " recommendation";
-                    <govuk-error-message>@errorMessage</govuk-error-message>
-                }
-            </task-list-item-name>
-        </task-list-item>
-    }
-
-</task-list>
+@await Component.InvokeAsync("RecommendationsList", new { category = Model })

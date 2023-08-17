@@ -1,0 +1,23 @@
+@model IEnumerable<Dfe.PlanTech.Domain.Questionnaire.Models.RecommendationPage?>
+
+<task-list>
+    @foreach (var recommendationPage in Model)
+    {
+        <task-list-item>
+            <task-list-item-name>
+                @if (recommendationPage != null)
+                {
+                    <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@recommendationPage.Page?.Slug"
+                        class="govuk-link">
+                        @recommendationPage.DisplayName
+                    </a>
+                }
+                else
+                {
+                    var errorMessage = "Unable to retrieve recommendation";
+                    <govuk-error-message>@errorMessage</govuk-error-message>
+                }
+            </task-list-item-name>
+        </task-list-item>
+    }
+</task-list>
