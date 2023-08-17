@@ -95,7 +95,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             var maturity = Maturity.Low;
             var section = _componentBuilder.BuildSections().First();
 
-            section.TryGetRecommendationForMaturity(maturity, out RecommendationPage? lowMaturityRecommendation);
+            var lowMaturityRecommendation = section.TryGetRecommendationForMaturity(maturity);
 
             Assert.NotNull(lowMaturityRecommendation);
             Assert.Equal(maturity, lowMaturityRecommendation.Maturity);
@@ -131,7 +131,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             var maturity = Maturity.Unknown;
             var section = _componentBuilder.BuildSections().First();
 
-            section.TryGetRecommendationForMaturity(maturity, out RecommendationPage? unknownMaturityRecommendation);
+            var unknownMaturityRecommendation = section.TryGetRecommendationForMaturity(maturity);
 
             Assert.Null(unknownMaturityRecommendation);
         }

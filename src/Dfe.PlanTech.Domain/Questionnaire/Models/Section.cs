@@ -21,28 +21,18 @@ public class Section : ContentComponent, ISection
 
     public RecommendationPage[] Recommendations { get; init; } = Array.Empty<RecommendationPage>();
 
-    public bool TryGetRecommendationForMaturity(Maturity maturity, out RecommendationPage? recommendationPage)
-    {
-        recommendationPage = Recommendations.FirstOrDefault(recommendation => recommendation.Maturity == maturity);
-        return recommendationPage != null;
-    }
+    public RecommendationPage? TryGetRecommendationForMaturity(Maturity maturity) => Recommendations.FirstOrDefault(recommendation => recommendation.Maturity == maturity);
 
     public RecommendationPage? GetRecommendationForMaturity(string maturity)
     {
         if (maturity is null)
             maturity = string.Empty;
 
-        RecommendationPage? recommendationPage;
         Maturity maturityResponse;
 
         if (!Enum.TryParse(maturity, out maturityResponse)) maturityResponse = Maturity.Unknown;
 
-        if (!TryGetRecommendationForMaturity(maturityResponse, out recommendationPage))
-        {
-            // TODO: Log Recommendation Page Not Found
-        }
-
-        return recommendationPage;
+        return TryGetRecommendationForMaturity(maturityResponse);
 
     }
 }
