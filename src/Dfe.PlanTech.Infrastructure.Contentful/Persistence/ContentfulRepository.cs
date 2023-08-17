@@ -61,5 +61,5 @@ public class ContentfulRepository : IContentRepository
         return entities.FirstOrDefault();
     }
 
-    private string LowerCaseFirstLetter(string toLowerCase) => char.ToLower(toLowerCase[0]) + toLowerCase.Substring(1);
+    private static string LowerCaseFirstLetter(string toLowerCase) => char.ToLower(toLowerCase[0]) + toLowerCase.Substring(1);
 }
