@@ -2,7 +2,6 @@
 using Dfe.PlanTech.Application.Users.Commands;
 using Dfe.PlanTech.Domain.SignIn.Models;
 using Dfe.PlanTech.Domain.Users.Models;
-using Moq;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
@@ -26,7 +25,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
             var strut = CreateStrut();
             User? createdUser = null;
 
-            mockDb.When(x => x.AddUser(It.IsAny<User>()))
+            mockDb.When(x => x.AddUser(Arg.Any<User>()))
                     .Do((callInfo) => {
                     User user = (User)callInfo[0];
                         createdUser = user;
