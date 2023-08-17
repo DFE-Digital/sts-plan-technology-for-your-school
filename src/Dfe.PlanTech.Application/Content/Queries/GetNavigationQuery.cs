@@ -6,6 +6,9 @@ using Dfe.PlanTech.Domain.Content.Models;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
+/// <summary>
+/// Retrieves Navigation links from the CMS 
+/// </summary>
 public class GetNavigationQuery : ContentRetriever, IGetNavigationQuery
 {
     public GetNavigationQuery(IContentRepository repository) : base(repository)
