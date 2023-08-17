@@ -19,10 +19,8 @@ namespace Dfe.PlanTech.Web.ViewComponents
             return View(recommendationPageList);
         }
 
-        private List<RecommendationPage?> _GetRecommendations(ICategory category)
+        private IEnumerable<RecommendationPage?> _GetRecommendations(ICategory category)
         {
-            List<RecommendationPage?> recommendationPageList = new List<RecommendationPage?>();
-
             foreach (ISection section in category.Sections)
             {
                 var sectionMaturity = category.SectionStatuses.Where(sectionStatus => sectionStatus.SectionId == section.Sys.Id && sectionStatus.Completed == 1)
@@ -33,15 +31,10 @@ namespace Dfe.PlanTech.Web.ViewComponents
 
                 var recommendation = section.GetRecommendationForMaturity(sectionMaturity);
 
-                if (recommendation == null)
-                {
-                    // TODO: Log Recommendation Not Found
-                }
+                if (recommendation == null) _logger.LogWarning("No Recommendation Found: Section - {0}, Maturity - {1}", section.Name, sectionMaturity);
 
-                recommendationPageList.Add(recommendation);
+                yield return recommendation;
             }
-
-            return recommendationPageList;
         }
     }
 }
