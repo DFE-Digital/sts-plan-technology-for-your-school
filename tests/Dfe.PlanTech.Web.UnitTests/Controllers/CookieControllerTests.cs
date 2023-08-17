@@ -34,7 +34,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             ILogger<CookiesController> loggerMock = Substitute.For<ILogger<CookiesController>>();
             ICookieService cookiesMock = Substitute.For<ICookieService>();
 
-            return new CookiesController(loggerMock, cookiesMock);
+            return new CookiesController(loggerMock, cookiesMock)
+            {
+                ControllerContext = ControllerHelpers.MockControllerContext()
+            };
         }
 
         [Theory]
@@ -145,19 +148,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             CookiesController cookiesController = CreateStrut();
              
             var tempDataMock = Substitute.For<ITempDataDictionary>();
-            var httpContextMock = Substitute.For<HttpContext>();
-            var responseMock = Substitute.For<HttpResponse>();
             var cookiesMock = Substitute.For<ICookieService>();
 
-
             cookiesMock.SetPreference(Arg.Any<bool>());
-            httpContextMock.Response.Returns(responseMock);
 
             cookiesController.TempData = tempDataMock;
-            cookiesController.ControllerContext = new ControllerContext()
-            {
-                HttpContext = httpContextMock
-            };
 
             var result = cookiesController.CookiePreference(userPreference);
 
@@ -180,19 +175,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             CookiesController cookiesController = CreateStrut();
 
             var tempDataMock = Substitute.For<ITempDataDictionary>();
-            var httpContextMock = Substitute.For<HttpContext>();
-            var responseMock = Substitute.For<HttpResponse>();
             var cookiesMock = Substitute.For<ICookieService>();
 
-
             cookiesMock.SetPreference(Arg.Any<bool>());
-            httpContextMock.Response.Returns(responseMock);
 
             cookiesController.TempData = tempDataMock;
-            cookiesController.ControllerContext = new ControllerContext()
-            {
-                HttpContext = httpContextMock
-            };
 
             var result = Assert.Throws<ArgumentException>(() => cookiesController.CookiePreference(string.Empty));
             Assert.Contains("Can't convert preference", result.Message);
