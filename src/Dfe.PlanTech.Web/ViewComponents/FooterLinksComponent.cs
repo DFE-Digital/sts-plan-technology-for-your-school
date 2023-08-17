@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ViewComponentSample.ViewComponents;
+namespace Dfe.PlanTech.Web.ViewComponents;
 
 public class FooterLinks : ViewComponent
 {
