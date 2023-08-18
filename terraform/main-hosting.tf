@@ -25,6 +25,11 @@ module "main_hosting" {
     "ASPNETCORE_FORWARDEDHEADERS_ENABLED" = "true"
   }
 
+  container_app_identities = {
+    type         = "UserAssigned",
+    identity_ids = [azurerm_user_assigned_identity.user_assigned_identity.id]
+  }
+
   #############
   # Azure SQL #
   #############
