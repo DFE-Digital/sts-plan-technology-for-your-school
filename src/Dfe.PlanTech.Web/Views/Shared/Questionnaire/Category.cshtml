@@ -1,12 +1,10 @@
-@using Dfe.PlanTech.Web.Helpers
 @using Dfe.PlanTech.Web.TagHelpers.TaskList
 @model Dfe.PlanTech.Domain.Questionnaire.Interfaces.ICategory;
-@inject CategoryHelper helper;
 
 
 @{
     var completedCount = 0;
-    (Model.SectionStatuses, Model.RetrievalError) = helper.RetrieveSectionStatuses(Model.Sections);
+    Model.RetrieveSectionStatuses();
     completedCount = Model.SectionStatuses.Where(x => x.Completed == 1).ToList().Count;
     Model.Completed = completedCount;
 }

@@ -16,10 +16,11 @@ public class ContentfulRepository : IContentRepository
 {
     private readonly IContentfulClient _client;
 
-    public ContentfulRepository(ILoggerFactory loggerFactory, IContentfulClient client)
+    public ContentfulRepository(ILoggerFactory loggerFactory, IContentfulClient client, CategoryContractResolver contractResolver)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
         _client.ContentTypeResolver = new EntityResolver(loggerFactory.CreateLogger<IContentTypeResolver>());
+        _client.SerializerSettings.ContractResolver = contractResolver;
     }
 
     public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IGetEntitiesOptions? options, CancellationToken cancellationToken = default)

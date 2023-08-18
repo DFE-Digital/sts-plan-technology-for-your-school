@@ -23,6 +23,9 @@ using Dfe.PlanTech.Web.Helpers;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Domain.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Web;
 
@@ -31,6 +34,8 @@ public static class ProgramExtensions
 {
     public static IServiceCollection AddContentfulServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddTransient<CategoryContractResolver>();
+        
         services.SetupContentfulClient(configuration, "Contentful", HttpClientPolicyExtensions.AddRetryPolicy);
 
         services.AddScoped((services) =>
@@ -44,7 +49,7 @@ public static class ProgramExtensions
                     Classes = "govuk-body govuk-!-font-weight-bold",
                 }});
         });
-
+        
         services.AddScoped((_) => new ParagraphRendererOptions()
         {
             Classes = "govuk-body",
@@ -106,7 +111,8 @@ public static class ProgramExtensions
 
         services.AddTransient<ICalculateMaturityCommand, CalculateMaturityCommand>();
         services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
-
+        services.AddTransient<ILogger<Category>, Logger<Category>>();        
+        
         services.AddTransient<ProcessCheckAnswerDtoCommand>();
 
         services.AddTransient<GetSubmitAnswerQueries>();
@@ -117,7 +123,7 @@ public static class ProgramExtensions
 
         services.AddTransient<Application.Questionnaire.Queries.GetSectionQuery>();
         services.AddTransient<CategoryHelper>();
-
+        services.AddTransient<ICategory, Category>();
         return services;
     }
 
