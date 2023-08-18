@@ -122,7 +122,6 @@ public static class ProgramExtensions
         services.AddTransient<IGetEstablishmentIdQuery, GetEstablishmentIdQuery>();
 
         services.AddTransient<Application.Questionnaire.Queries.GetSectionQuery>();
-        services.AddTransient<CategoryHelper>();
         services.AddTransient<Category>();
         return services;
     }

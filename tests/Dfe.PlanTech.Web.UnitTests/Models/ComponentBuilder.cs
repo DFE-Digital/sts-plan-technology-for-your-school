@@ -11,11 +11,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
     {
         public Category BuildCategory()
         {
-            return new Category
+            return new Category(null, null)
             {
                 Header = new Header { Text = "Category" },
                 Content = BuildContent(),
                 Sections = BuildSections(),
+
             };
         }
         public TextBody BuildTextBody()
