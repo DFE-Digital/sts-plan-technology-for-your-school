@@ -16,7 +16,7 @@ public class ContentfulRepository : IContentRepository
 {
     private readonly IContentfulClient _client;
 
-    public ContentfulRepository(ILoggerFactory loggerFactory, IContentfulClient client, CategoryContractResolver contractResolver)
+    public ContentfulRepository(ILoggerFactory loggerFactory, IContentfulClient client, DependencyInjectionContractResolver contractResolver)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
         _client.ContentTypeResolver = new EntityResolver(loggerFactory.CreateLogger<IContentTypeResolver>());

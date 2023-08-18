@@ -34,7 +34,7 @@ public static class ProgramExtensions
 {
     public static IServiceCollection AddContentfulServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddTransient<CategoryContractResolver>();
+        services.AddTransient<DependencyInjectionContractResolver>();
         
         services.SetupContentfulClient(configuration, "Contentful", HttpClientPolicyExtensions.AddRetryPolicy);
 
@@ -123,7 +123,7 @@ public static class ProgramExtensions
 
         services.AddTransient<Application.Questionnaire.Queries.GetSectionQuery>();
         services.AddTransient<CategoryHelper>();
-        services.AddTransient<ICategory, Category>();
+        services.AddTransient<Category>();
         return services;
     }
 
