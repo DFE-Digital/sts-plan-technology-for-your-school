@@ -29,9 +29,9 @@ namespace Dfe.PlanTech.Web.ViewComponents
 
                 if (string.IsNullOrEmpty(sectionMaturity)) continue;
 
-                var recommendation = section.GetRecommendationForMaturity(sectionMaturity);
+                var recommendation = section.GetRecommendationForMaturity("sectionMaturity");
 
-                if (recommendation == null) _logger.LogInformation("No Recommendation Found: Section - {0}, Maturity - {1}", section.Name, sectionMaturity);
+                if (recommendation == null) _logger.LogWarning("No Recommendation Found: Section - {sectionName}, Maturity - {sectionMaturity}", section.Name, sectionMaturity);
 
                 yield return (recommendation, section.Name);
             }
