@@ -25,6 +25,11 @@ module "main_hosting" {
     "ASPNETCORE_FORWARDEDHEADERS_ENABLED" = "true"
   }
 
+  container_app_identities = {
+    type         = "UserAssigned",
+    identity_ids = [azurerm_user_assigned_identity.user_assigned_identity.id]
+  }
+
   #############
   # Azure SQL #
   #############
@@ -32,4 +37,9 @@ module "main_hosting" {
   mssql_database_name                = "${local.resource_prefix}-sqldb"
   mssql_server_admin_password        = local.az_sql_admin_password
   mssql_server_public_access_enabled = true
+
+  ##############
+  # Networking #
+  ##############
+  container_apps_infra_subnet_service_endpoints = ["Microsoft.KeyVault"]
 }

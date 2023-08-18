@@ -1,5 +1,5 @@
 module "waf" {
-  source = "github.com/dfe-digital/terraform-azurerm-front-door-app-gateway-waf?ref=v0.3.2"
+  source = "github.com/dfe-digital/terraform-azurerm-front-door-app-gateway-waf"
 
   depends_on = [module.main_hosting]
 
@@ -14,7 +14,7 @@ module "waf" {
 
   waf_targets = {
     "container-app-url" = {
-      domain = local.cdn_frontdoor_origin_host_header_override
+      domain = module.main_hosting.fqdn
     }
   }
 
