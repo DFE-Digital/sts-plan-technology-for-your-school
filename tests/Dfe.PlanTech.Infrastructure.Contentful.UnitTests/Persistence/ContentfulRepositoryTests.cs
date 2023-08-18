@@ -6,12 +6,15 @@ using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using System.Web;
+using Newtonsoft.Json.Serialization;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
 {
     public class ContentfulRepositoryTests
     {
         private readonly Mock<IContentfulClient> _clientMock = new();
+
+        private readonly Mock<IContractResolver> _contractResolver = new Mock<IContractResolver>();
 
         private readonly List<TestClass> _mockData = new() {
             new TestClass(), new TestClass("testId"), new TestClass("anotherId"), new TestClass("abcd1234")
@@ -37,7 +40,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
                 {
                     Items = items
                 };
-
+                
                 return collection;
             });
 
@@ -65,7 +68,8 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         [Fact]
         public async Task Should_Call_Client_Method_When_Using_GetEntities()
         {
-            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientMock.Object);
+            
+            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientMock.Object, _contractResolver.Object);
 
             var result = await repository.GetEntities<TestClass>();
 
@@ -75,7 +79,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         [Fact]
         public async Task Should_CallClientMethod_When_Using_GetEntityById()
         {
-            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientMock.Object);
+            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientMock.Object, _contractResolver.Object);
 
             var result = await repository.GetEntityById<TestClass>("testId");
 
@@ -85,7 +89,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         [Fact]
         public async Task GetEntities_Should_ReturnItems_When_ClassMatches()
         {
-            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientMock.Object);
+            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientMock.Object, _contractResolver.Object);
 
             var result = await repository.GetEntities<TestClass>();
 
@@ -97,7 +101,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         [Fact]
         public async Task GetEntities_Should_ReturnEmptyIEnumerable_When_NoDataFound()
         {
-            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientMock.Object);
+            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientMock.Object, _contractResolver.Object);
 
             var result = await repository.GetEntities<OtherTestClass>();
 
@@ -109,7 +113,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         public async Task GetEntityById_Should_FindMatchingItem_When_IdMatches()
         {
             var testId = "testId";
-            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientMock.Object);
+            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientMock.Object, _contractResolver.Object);
 
             var result = await repository.GetEntityById<TestClass>(testId);
 
@@ -120,7 +124,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         [Fact]
         public async Task GetEntityById_Should_ThrowException_When_IdIsNull()
         {
-            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientMock.Object);
+            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientMock.Object, _contractResolver.Object);
 
             await Assert.ThrowsAsync<ArgumentNullException>(() => repository.GetEntityById<TestClass>(null));
         }
@@ -128,7 +132,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         [Fact]
         public async Task GetEntityById_Should_ThrowException_When_IdIsEmpty()
         {
-            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientMock.Object);
+            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientMock.Object, _contractResolver.Object);
 
             await Assert.ThrowsAsync<ArgumentNullException>(() => repository.GetEntityById<TestClass>(""));
         }
@@ -136,7 +140,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         [Fact]
         public async Task Should_ReturnNull_When_IdNotFound()
         {
-            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientMock.Object);
+            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientMock.Object, _contractResolver.Object);
 
             var result = await repository.GetEntityById<TestClass>("not a real id");
 

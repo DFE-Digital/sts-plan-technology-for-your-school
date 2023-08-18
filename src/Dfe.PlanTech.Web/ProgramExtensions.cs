@@ -25,8 +25,8 @@ using Dfe.PlanTech.Web.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Domain.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Newtonsoft.Json.Serialization;
 
 namespace Dfe.PlanTech.Web;
 
@@ -35,7 +35,7 @@ public static class ProgramExtensions
 {
     public static IServiceCollection AddContentfulServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddTransient<DependencyInjectionContractResolver>();
+        services.AddTransient<IContractResolver, DependencyInjectionContractResolver>();
         
         services.SetupContentfulClient(configuration, "Contentful", HttpClientPolicyExtensions.AddRetryPolicy);
 
