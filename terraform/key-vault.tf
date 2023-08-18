@@ -37,6 +37,7 @@ resource "azurerm_key_vault_secret" "vault_secret_contentful_deliveryapikey" {
   lifecycle {
     ignore_changes = [
       value,
+      expiration_date
     ]
   }
 }
