@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
+using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Cookie.Interfaces;
 using Dfe.PlanTech.Application.Cookie.Service;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
@@ -16,11 +17,11 @@ using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Application.Users.Queries;
 using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Web.Helpers;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
 
@@ -116,6 +117,8 @@ public static class ProgramExtensions
         services.AddTransient<IGetEstablishmentIdQuery, GetEstablishmentIdQuery>();
 
         services.AddTransient<Application.Questionnaire.Queries.GetSectionQuery>();
+
+        services.AddTransient<IGetNavigationQuery, GetNavigationQuery>();
 
         return services;
     }
