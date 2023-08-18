@@ -1,0 +1,52 @@
+name: regidity checks against sql and TF
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/rigidity-checks.yml'
+
+  workflow_dispatch:
+
+jobs:
+  sqlcheck:
+    name: sqlcheck job
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: yokawasa/action-sqlcheck@v1.4.0
+      with:
+        post-comment: true
+        risk-level: 3
+        verbose: false
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+  scan:
+    permissions:
+      contents: read 
+      security-events: write 
+      actions: read 
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Checkov GitHub Action
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          output_format: cli,sarif
+          output_file_path: console,results.sarif
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v2
+
+        if: success() || failure()
+        with:
+          sarif_file: results.sarif
