@@ -1,4 +1,4 @@
-name: regidity checks against sql and TF
+name: rigidity checks against sql and TF
 on:
   push:
     branches: [ "main" ]
