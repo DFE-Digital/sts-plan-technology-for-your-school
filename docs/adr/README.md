@@ -11,7 +11,7 @@ General information about architectural decision records is available at <https:
 ## List
 
 | Title                                                                                                       | Status   |
-|-------------------------------------------------------------------------------------------------------------|----------|
+| ----------------------------------------------------------------------------------------------------------- | -------- |
 | [0001 - Web Framework](./0001-web-framework.md)                                                             | Accepted |
 | [0002 - Application Framework](./0002-application-framework.md)                                             | Accepted |
 | [0003 - Build/Test/Deploy Environment](./0002-application-framework.md)                                     | Accepted |
@@ -24,17 +24,18 @@ General information about architectural decision records is available at <https:
 | [0010 - Secrets Management](./0010-secrets-management.md)                                                   | Accepted |
 | [0011 - Content Management](./0011-content-management.md)                                                   | Accepted |
 | [0012 - Authentication Provider](./0012-authentication-provider.md)                                         | Accepted |
-| [0013 - Software Architecture](./0013-software-architecture.md)                                             | Proposed |
+| [0013 - Software Architecture](./0013-software-architecture.md)                                             | Accepted |
 | [0014 - Executing Unit Tests](./0014-executing-unit-tests.md)                                               | Accepted |
 | [0015 - Tool For UI Testing](./0015-tool-for-ui-testing.md)                                                 | Accepted |
-| [0016 - Tools For Building Unit Tests](./0016-tools-for-building-unit-tests.md)                             | Proposed |
+| [0016 - Tools For Building Unit Tests](./0016-tools-for-building-unit-tests.md)                             | Accepted |
 | [0017 - Unit Test Project Name And Location](./0017-unit-test-project-name-and-location.md)                 | Accepted |
 | [0018 - Project And Namespace Naming Convention](./0018-project-and-namespace-naming-convention.md)         | Accepted |
-| [0019 - Contentful Integration](./0019-contentful-integration.md)                                           | Proposed |
+| [0019 - Contentful Integration](./0019-contentful-integration.md)                                           | Accepted |
 | [0020 - GitHub Actions](./0020-github-actions.md)                                                           | Accepted |
 | [0021 - Deploy Changes To SQL Database](./0021-deploy-database-schema-changes.md)                           | Accepted |
 | [0022 - Unit Test Reporting Within GitHub](./0022-unit-test-reporting-within-github.md)                     | Accepted |
 | [0023 - Executing Terraform Within GitHub Workflows](./0023-executing-terraform-within-github-workflows.md) | Accepted |
 | [0024 - Caching](./0024-caching.md)                                                                         | Accepted |
 | [0025 - Hybrid Matrix Deployments](./0025-hybrid-matrix-deployments.md)                                     | Accepted |
-
+| [0027 - Accesibility Testing](./0027-accesibility-testing.md)                                               | Accepted |
+| [0028 - Command Line Arguments Parsing](./0028-command-line-arguments.md)                                   | Accepted |

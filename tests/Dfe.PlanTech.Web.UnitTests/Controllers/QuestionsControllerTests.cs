@@ -10,6 +10,7 @@ using Dfe.PlanTech.Application.Submission.Queries;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Constants;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
@@ -174,7 +175,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var id = "Question1";
 
-            var result = await _controller.GetQuestionById(id, null, 1, null, _submitAnswerCommand, CancellationToken.None);
+            var result = await _controller.GetQuestionById(id, null, _submitAnswerCommand, CancellationToken.None);
             Assert.IsType<ViewResult>(result);
 
             var viewResult = result as ViewResult;
@@ -216,7 +217,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _databaseMock.Setup(m => m.GetSubmissions).Returns(submissionList.AsQueryable());
             _databaseMock.Setup(m => m.FirstOrDefaultAsync(submissionList.AsQueryable())).ReturnsAsync(submissionList[0]);
 
-            var result = await _controller.GetQuestionById(questionRef, null, null, null, _submitAnswerCommand, CancellationToken.None);
+            _controller.TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = null, SubmissionId = null });
+
+            var result = await _controller.GetQuestionById(null, null, _submitAnswerCommand, CancellationToken.None);
             Assert.IsType<ViewResult>(result);
 
             var viewResult = result as ViewResult;
@@ -258,7 +261,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _databaseMock.Setup(m => m.GetSubmissions).Returns(submissionList.AsQueryable());
             _databaseMock.Setup(m => m.FirstOrDefaultAsync(submissionList.AsQueryable())).ReturnsAsync(submissionList[0]);
 
-            var result = await _controller.GetQuestionById(questionRef, null, null, null, _submitAnswerCommand, CancellationToken.None);
+            _controller.TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = null, SubmissionId = null });
+
+            var result = await _controller.GetQuestionById(null, null, _submitAnswerCommand, CancellationToken.None);
             Assert.IsType<ViewResult>(result);
 
             var viewResult = result as ViewResult;
@@ -313,7 +318,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             _getLatestResponseListForSubmissionQueryMock.Setup(m => m.GetResponseListByDateCreated(1)).ReturnsAsync(questionWithAnswerList);
 
-            var result = await _controller.GetQuestionById(questionRef, null, null, null, _submitAnswerCommand, CancellationToken.None);
+            _controller.TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = null, SubmissionId = null });
+
+            var result = await _controller.GetQuestionById(null, null, _submitAnswerCommand, CancellationToken.None);
             Assert.IsType<ViewResult>(result);
 
             var viewResult = result as ViewResult;
@@ -368,7 +375,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             _getLatestResponseListForSubmissionQueryMock.Setup(m => m.GetResponseListByDateCreated(1)).ReturnsAsync(questionWithAnswerList);
 
-            var result = await _controller.GetQuestionById(questionRef, null, null, null, _submitAnswerCommand, CancellationToken.None);
+            _controller.TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = null, SubmissionId = null });
+
+            var result = await _controller.GetQuestionById(null, null, _submitAnswerCommand, CancellationToken.None);
             Assert.IsType<RedirectToActionResult>(result);
 
             var redirectToActionResult = result as RedirectToActionResult;
@@ -376,21 +385,16 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.NotNull(redirectToActionResult);
             Assert.Equal("CheckAnswers", redirectToActionResult.ControllerName);
             Assert.Equal("CheckAnswersPage", redirectToActionResult.ActionName);
-            Assert.NotNull(redirectToActionResult.RouteValues);
-            var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "submissionId");
-            Assert.Equal(1, id.Value);
-        }
-
-        [Fact]
-        public async Task GetQuestionById_Should_ThrowException_When_IdIsNull()
-        {
-            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionById(null!, null, null, null, _submitAnswerCommand, CancellationToken.None));
+            Assert.NotNull(_controller.TempData[TempDataConstants.CheckAnswers]);
+            Assert.IsType<string>(_controller.TempData[TempDataConstants.CheckAnswers]);
+            var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataCheckAnswers>(_controller.TempData[TempDataConstants.CheckAnswers] as string ?? "")?.SubmissionId;
+            Assert.Equal(1, id);
         }
 
         [Fact]
         public async Task GetQuestionById_Should_ThrowException_When_IdIsNotFound()
         {
-            await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetQuestionById("not a real question id", null, null, null, _submitAnswerCommand, CancellationToken.None));
+            await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetQuestionById("not a real question id", null, _submitAnswerCommand, CancellationToken.None));
         }
 
         [Fact]
@@ -399,7 +403,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var id = "Question1";
             var sectionTitle = "Section title";
 
-            await _controller.GetQuestionById(id, sectionTitle, null, null, _submitAnswerCommand, CancellationToken.None);
+            await _controller.GetQuestionById(id, sectionTitle, _submitAnswerCommand, CancellationToken.None);
 
             _questionnaireCacherMock.Verify();
         }
@@ -408,7 +412,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public async Task GetQuestionById_Should_NotSaveSectionTitle_When_Null()
         {
             var id = "Question1";
-            var result = await _controller.GetQuestionById(id, null, null, null, _submitAnswerCommand, CancellationToken.None);
+            var result = await _controller.GetQuestionById(id, null, _submitAnswerCommand, CancellationToken.None);
 
             _questionnaireCacherMock.Verify(cache => cache.Cached, Times.Never);
             _questionnaireCacherMock.Verify(cache => cache.SaveCache(It.IsAny<QuestionnaireCache>()), Times.Never);
@@ -437,9 +441,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             Assert.NotNull(redirectToActionResult);
             Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
-            Assert.NotNull(redirectToActionResult.RouteValues);
-            var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "id");
-            Assert.Equal("Question2", id.Value);
+            Assert.NotNull(_controller.TempData[TempDataConstants.Questions]);
+            Assert.IsType<string>(_controller.TempData[TempDataConstants.Questions]);
+            var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_controller.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
+            Assert.Equal("Question2", id);
         }
 
         [Fact]
@@ -449,7 +454,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 QuestionId = "Question2",
                 ChosenAnswerId = "Answer1",
-                SubmissionId = 1
+                SubmissionId = 1,
+                Params = "SectionName+SectionId"
             };
 
             var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
@@ -461,9 +467,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.NotNull(redirectToActionResult);
             Assert.Equal("CheckAnswers", redirectToActionResult.ControllerName);
             Assert.Equal("CheckAnswersPage", redirectToActionResult.ActionName);
-            Assert.NotNull(redirectToActionResult.RouteValues);
-            var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "submissionId");
-            Assert.Equal(submitAnswerDto.SubmissionId, id.Value);
+            Assert.NotNull(_controller.TempData[TempDataConstants.CheckAnswers]);
+            Assert.IsType<string>(_controller.TempData[TempDataConstants.CheckAnswers]);
+            var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataCheckAnswers>(_controller.TempData[TempDataConstants.CheckAnswers] as string ?? "")?.SubmissionId;
+            Assert.Equal(submitAnswerDto.SubmissionId, id);
         }
 
         [Fact]
@@ -473,7 +480,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 QuestionId = "Question1",
                 ChosenAnswerId = "Answer1",
-                SubmissionId = 1
+                SubmissionId = 1,
+                Params = "SectionName+SectionId"
             };
 
             Domain.Questions.Models.Question question = new Domain.Questions.Models.Question()
@@ -503,9 +511,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.NotNull(redirectToActionResult);
             Assert.Equal("CheckAnswers", redirectToActionResult.ControllerName);
             Assert.Equal("CheckAnswersPage", redirectToActionResult.ActionName);
-            Assert.NotNull(redirectToActionResult.RouteValues);
-            var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "submissionId");
-            Assert.Equal(submitAnswerDto.SubmissionId, id.Value);
+            Assert.NotNull(_controller.TempData[TempDataConstants.CheckAnswers]);
+            Assert.IsType<string>(_controller.TempData[TempDataConstants.CheckAnswers]);
+            var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataCheckAnswers>(_controller.TempData[TempDataConstants.CheckAnswers] as string ?? "")?.SubmissionId;
+            Assert.Equal(submitAnswerDto.SubmissionId, id);
         }
 
         [Fact]
@@ -527,9 +536,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             Assert.NotNull(redirectToActionResult);
             Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
-            Assert.NotNull(redirectToActionResult.RouteValues);
-            var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "id");
-            Assert.Equal(submitAnswerDto.QuestionId, id.Value);
+            Assert.NotNull(_controller.TempData[TempDataConstants.Questions]);
+            Assert.IsType<string>(_controller.TempData[TempDataConstants.Questions]);
+            var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_controller.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
+            Assert.Equal(submitAnswerDto.QuestionId, id);
         }
 
         [Fact]
@@ -551,9 +561,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             Assert.NotNull(redirectToActionResult);
             Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
-            Assert.NotNull(redirectToActionResult.RouteValues);
-            var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "id");
-            Assert.Equal(submitAnswerDto.QuestionId, id.Value);
+            Assert.NotNull(_controller.TempData[TempDataConstants.Questions]);
+            Assert.IsType<string>(_controller.TempData[TempDataConstants.Questions]);
+            var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_controller.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
+            Assert.Equal(submitAnswerDto.QuestionId, id);
         }
 
         [Fact]
@@ -574,9 +585,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             Assert.NotNull(redirectToActionResult);
             Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
-            Assert.NotNull(redirectToActionResult.RouteValues);
-            var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "id");
-            Assert.Equal("Question2", id.Value);
+            Assert.NotNull(_controller.TempData[TempDataConstants.Questions]);
+            Assert.IsType<string>(_controller.TempData[TempDataConstants.Questions]);
+            var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_controller.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
+            Assert.Equal("Question2", id);
         }
     }
 }

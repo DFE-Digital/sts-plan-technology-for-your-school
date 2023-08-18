@@ -1,6 +1,7 @@
 describe("landing page", () => {
   beforeEach(() => {
     cy.visit("/");
+    cy.injectAxe();
   });
 
   it("should contain title", () => {
@@ -33,5 +34,9 @@ describe("landing page", () => {
     cy.get("a.govuk-button--start.govuk-button")
       .and("have.attr", "href")
       .and("equal", "/self-assessment");
+  });
+
+  it("passes accessibility tests", () => {
+    cy.runAxe();
   });
 });

@@ -11,19 +11,16 @@
         <WarningLevel>4</WarningLevel>
     </PropertyGroup>
     <ItemGroup>
+        <PackageReference Include="CommandLineParser" Version="2.9.1" />
         <PackageReference Include="dbup" Version="5.0.8" />
         <PackageReference Include="Polly" Version="7.2.4" />
     </ItemGroup>
     <ItemGroup>
         <Folder Include="Scripts\" />
+        <Folder Include="EnvironmentSpecificScripts\" />
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="Scripts\**\*.sql" />
-    </ItemGroup>
-    <ItemGroup>
-        <Folder Include="StoredProcs\" />
-    </ItemGroup>
-    <ItemGroup>
-        <EmbeddedResource Include="StoredProcs\*.sql" />
+        <EmbeddedResource Include="EnvironmentSpecificScripts\**\*.sql" />
     </ItemGroup>
 </Project>

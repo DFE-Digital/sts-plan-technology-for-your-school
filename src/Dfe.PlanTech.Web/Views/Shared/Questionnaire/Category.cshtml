@@ -43,6 +43,8 @@
 <task-list>
     @foreach (var categorySection in Model.Sections)
     {
+        TempData[categorySection.InterstitialPage.Slug] = categorySection.Name + "+" + categorySection.Sys.Id;
+
         if (Model.RetrievalError)
         {
             <task-list-item>
