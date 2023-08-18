@@ -21,7 +21,7 @@ locals {
   container_app_image_name = "plan-tech-app"
   container_app_name       = "${local.resource_prefix}-${local.container_app_image_name}"
   kestrel_endpoint         = var.az_app_kestrel_endpoint
-  az_container_port        = var.az_container_port
+  container_port        = var.az_container_port
 
   ####################
   # Managed Identity #
