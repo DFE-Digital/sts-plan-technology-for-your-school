@@ -35,14 +35,6 @@ variable "msi_id" {
   default     = null
 }
 
-##############
-# Front Door #
-##############
-variable "cdn_frontdoor_origin_host_header_override" {
-  description = "Override the frontdoor origin host header"
-  type        = string
-}
-
 #############
 # Azure SQL #
 #############
@@ -87,4 +79,10 @@ variable "key_size" {
 variable "az_app_kestrel_endpoint" {
   description = "Endpoint for Kestrel setup"
   type        = string
+}
+
+variable "az_container_port" {
+  description = "What port the container app is bound to"
+  type        = number
+  default     = 8080
 }
