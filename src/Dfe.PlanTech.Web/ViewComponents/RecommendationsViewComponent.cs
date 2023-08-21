@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewComponents
@@ -15,11 +16,11 @@ namespace Dfe.PlanTech.Web.ViewComponents
 
         public IViewComponentResult Invoke(ICategory category)
         {
-            var recommendationWithSectionNameList = category.Completed >= 1 ? _GetRecommendationsWithSectionNames(category) : null;
-            return View(recommendationWithSectionNameList);
+            var recommendationsViewComponentViewModel = category.Completed >= 1 ? _GetRecommendationsViewComponentViewModel(category) : null;
+            return View(recommendationsViewComponentViewModel);
         }
 
-        private IEnumerable<(RecommendationPage? Recommendation, string SectionName)> _GetRecommendationsWithSectionNames(ICategory category)
+        private IEnumerable<RecommendationsViewComponentViewModel> _GetRecommendationsViewComponentViewModel(ICategory category)
         {
             foreach (ISection section in category.Sections)
             {
@@ -33,7 +34,12 @@ namespace Dfe.PlanTech.Web.ViewComponents
 
                 if (recommendation == null) _logger.LogWarning("No Recommendation Found: Section - {sectionName}, Maturity - {sectionMaturity}", section.Name, sectionMaturity);
 
-                yield return (recommendation, section.Name);
+                yield return new RecommendationsViewComponentViewModel()
+                {
+                    RecommendationSlug = recommendation?.Page.Slug,
+                    RecommendationDisplayName = recommendation?.DisplayName,
+                    NoRecommendationFoundErrorMessage = recommendation == null ? String.Format("Unable to retrieve {0} recommendation", section.Name) : null
+                };
             }
         }
     }

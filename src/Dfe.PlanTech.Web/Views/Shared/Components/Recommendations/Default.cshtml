@@ -1,4 +1,4 @@
-@model IEnumerable<(Dfe.PlanTech.Domain.Questionnaire.Models.RecommendationPage? Recommendation, string SectionName)>
+@model IEnumerable<RecommendationsViewComponentViewModel>
 
 <h2 class="govuk-heading-m">Recommendations</h2>
 
@@ -10,22 +10,20 @@
 else
 {
     <task-list>
-    @foreach (var recommendationWithSectionName in Model)
+    @foreach (var recommendationsViewComponentViewModel in Model)
         {
             <task-list-item>
                 <task-list-item-name>
-                    @if (recommendationWithSectionName.Recommendation != null)
+                    @if (recommendationsViewComponentViewModel.RecommendationSlug != null)
                     {
                         <a asp-controller="Pages" asp-action="GetByRoute"
-                            asp-route-route="@recommendationWithSectionName.Recommendation.Page?.Slug" class="govuk-link">
-                            @recommendationWithSectionName.Recommendation.DisplayName
+                            asp-route-route="@recommendationsViewComponentViewModel.RecommendationSlug" class="govuk-link">
+                            @recommendationsViewComponentViewModel.RecommendationDisplayName
                         </a>
                     }
                     else
                     {
-                        var errorMessage = string.Format("Unable to retrieve {0} recommendation",
-                        recommendationWithSectionName.SectionName);
-                        <govuk-error-message>@errorMessage</govuk-error-message>
+                        <govuk-error-message>@recommendationsViewComponentViewModel.NoRecommendationFoundErrorMessage</govuk-error-message>
                     }
                 </task-list-item-name>
             </task-list-item>

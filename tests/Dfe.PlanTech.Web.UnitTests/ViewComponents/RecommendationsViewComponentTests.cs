@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.ViewComponents;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
 using Microsoft.Extensions.Logging;
@@ -30,8 +31,10 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                         {
                             new RecommendationPage()
                             {
-                                InternalName = "High-Maturity-Recommendation-Page",
-                                Maturity = Domain.Questionnaire.Enums.Maturity.High
+                                InternalName = "High-Maturity-Recommendation-Page-InternalName",
+                                DisplayName = "High-Maturity-Recommendation-Page-DisplayName",
+                                Maturity = Domain.Questionnaire.Enums.Maturity.High,
+                                Page = new Domain.Content.Models.Page() { Slug = "High-Maturity-Recommendation-Page-Slug" }
                             }
                         }
                     }
@@ -42,7 +45,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
 
         [Fact]
-        public void Returns_RecommendationPage_If_It_Exists_ForMaturity()
+        public void Returns_RecommendationInfo_If_It_Exists_ForMaturity()
         {
             var result = _recommendationsComponent.Invoke(category) as ViewViewComponentResult;
 
@@ -59,18 +62,19 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var model = result.ViewData.Model;
             Assert.NotNull(model);
 
-            var unboxed = model as IEnumerable<(RecommendationPage? Recommendation, string SectionName)>;
+            var unboxed = model as IEnumerable<RecommendationsViewComponentViewModel>;
             Assert.NotNull(unboxed);
 
             unboxed = unboxed.ToList();
             Assert.NotEmpty(unboxed);
 
-            Assert.Equal(category.Sections[0].Recommendations[0], unboxed.First().Recommendation);
-            Assert.Equal(category.Sections[0].Name, unboxed.First().SectionName);
+            Assert.Equal(category.Sections[0].Recommendations[0].Page.Slug, unboxed.First().RecommendationSlug);
+            Assert.Equal(category.Sections[0].Recommendations[0].DisplayName, unboxed.First().RecommendationDisplayName);
+            Assert.Null(unboxed.First().NoRecommendationFoundErrorMessage);
         }
 
         [Fact]
-        public void Returns_NullRecommendationPage_If_No_RecommendationPage_Exists_ForMaturity()
+        public void Returns_NullRecommendationInfo_If_No_RecommendationPage_Exists_ForMaturity()
         {
             category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
             {
@@ -87,18 +91,19 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var model = result.ViewData.Model;
             Assert.NotNull(model);
 
-            var unboxed = model as IEnumerable<(RecommendationPage? Recommendation, string SectionName)>;
+            var unboxed = model as IEnumerable<RecommendationsViewComponentViewModel>;
             Assert.NotNull(unboxed);
 
             unboxed = unboxed.ToList();
             Assert.NotEmpty(unboxed);
 
-            Assert.Null(unboxed.First().Recommendation);
-            Assert.Equal(category.Sections[0].Name, unboxed.First().SectionName);
+            Assert.Null(unboxed.First().RecommendationSlug);
+            Assert.Null(unboxed.First().RecommendationDisplayName);
+            Assert.NotNull(unboxed.First().NoRecommendationFoundErrorMessage);
         }
 
         [Fact]
-        public void DoesNotReturn_RecommendationPage_If_Section_IsNot_Completed()
+        public void DoesNotReturn_RecommendationInfo_If_Section_IsNot_Completed()
         {
             category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
             {
@@ -115,7 +120,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var model = result.ViewData.Model;
             Assert.NotNull(model);
 
-            var unboxed = model as IEnumerable<(RecommendationPage? Recommendation, string SectionName)>;
+            var unboxed = model as IEnumerable<RecommendationsViewComponentViewModel>;
             Assert.NotNull(unboxed);
 
             unboxed = unboxed.ToList();
