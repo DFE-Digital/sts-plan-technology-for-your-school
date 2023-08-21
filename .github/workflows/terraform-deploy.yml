@@ -45,7 +45,7 @@ jobs:
       max-parallel: 1
       fail-fast: true
       matrix:
-        env: ['dev', 'Tst']  
+        env: ['dev', 'Tst', 'Staging', 'Production']  
     environment: ${{ matrix.env }}  
     steps:
       - name: Clone repo
