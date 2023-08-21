@@ -92,7 +92,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             unboxed = unboxed.ToList();
             Assert.NotEmpty(unboxed);
 
-            Assert.Equal(null, unboxed.First().Recommendation);
+            Assert.Null(unboxed.First().Recommendation);
             Assert.Equal(category.Sections[0].Name, unboxed.First().SectionName);
         }
 
