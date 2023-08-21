@@ -8,14 +8,14 @@ using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 {
-    public class RecommendationComponentTests
+    public class RecommendationsViewComponentTests
     {
-        private readonly Recommendations _recommendationsComponent;
+        private readonly RecommendationsViewComponent _recommendationsComponent;
         private ICategory category;
 
-        public RecommendationComponentTests()
+        public RecommendationsViewComponentTests()
         {
-            _recommendationsComponent = new Recommendations(Substitute.For<ILogger<Recommendations>>());
+            _recommendationsComponent = new RecommendationsViewComponent(Substitute.For<ILogger<RecommendationsViewComponent>>());
 
             category = new Category()
             {

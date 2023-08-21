@@ -4,18 +4,18 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewComponents
 {
-    public class Recommendations : ViewComponent
+    public class RecommendationsViewComponent : ViewComponent
     {
-        private readonly ILogger<Recommendations> _logger;
+        private readonly ILogger<RecommendationsViewComponent> _logger;
 
-        public Recommendations(ILogger<Recommendations> logger)
+        public RecommendationsViewComponent(ILogger<RecommendationsViewComponent> logger)
         {
             _logger = logger;
         }
 
         public IViewComponentResult Invoke(ICategory category)
         {
-            var recommendationWithSectionNameList = category.Completed == 1 ? _GetRecommendationsWithSectionNames(category) : null;
+            var recommendationWithSectionNameList = category.Completed >= 1 ? _GetRecommendationsWithSectionNames(category) : null;
             return View(recommendationWithSectionNameList);
         }
 
