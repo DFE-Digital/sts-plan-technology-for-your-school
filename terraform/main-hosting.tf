@@ -25,13 +25,6 @@ module "main_hosting" {
     "ASPNETCORE_FORWARDEDHEADERS_ENABLED" = "true"
   }
 
-  ##############
-  # Front Door #
-  ##############
-  enable_cdn_frontdoor                      = true
-  cdn_frontdoor_origin_host_header_override = local.cdn_frontdoor_origin_host_header_override
-  cdn_frontdoor_enable_rate_limiting        = true
-
   #############
   # Azure SQL #
   #############

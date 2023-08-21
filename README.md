@@ -21,4 +21,5 @@ Web application to help schools plan a technology roadmap
 - [Conventions](./docs/Conventions.md)
 - [Database Upgrades](./src/Dfe.PlanTech.DatabaseUpgrader/README.md)
 - [GitHub Workflows](./docs/GitHub-Workflows.md)
-- [Terraform](./terraform/README.md)
+- [Terraform Main](./terraform/README.md)
+- [Terraform Configuration](./terraform/terraform-configuration.md)
