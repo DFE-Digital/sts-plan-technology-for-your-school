@@ -3,6 +3,9 @@ name: Multi stage build & deploy
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'src/**'
+      - '.github/workflows/matrix-deploy.yml'
 
 jobs:
   deploy-to-environments:
@@ -10,7 +13,7 @@ jobs:
       max-parallel: 1
       fail-fast: true
       matrix:
-        target: [ dev, tst, staging ]
+        target: [ Dev, Tst, Staging ]
     uses: ./.github/workflows/build-and-deploy.yml
     with:
       environment: ${{ matrix.target }}
