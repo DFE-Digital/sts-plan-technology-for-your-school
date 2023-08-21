@@ -32,6 +32,8 @@ resource "azurerm_key_vault_secret" "vault_secret_contentful_deliveryapikey" {
   key_vault_id = azurerm_key_vault.vault.id
   name         = "contentful--deliveryapikey"
   value        = "temp value"
+  expiration_date = timeadd(formatdate("YYYY-MM-DD'T'00:00:00Z", timestamp()), "8760h")
+  content_type = ""
   depends_on   = [azurerm_key_vault_access_policy.vault_access_policy_tf, null_resource.keyvault-add-vnet-restriction]
 
   lifecycle {
