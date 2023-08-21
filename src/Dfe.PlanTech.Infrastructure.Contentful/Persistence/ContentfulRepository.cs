@@ -32,10 +32,10 @@ public class ContentfulRepository : IContentRepository
     }
 
     public Task<IEnumerable<TEntity>> GetEntities<TEntity>(CancellationToken cancellationToken = default)
-    => GetEntities<TEntity>(typeof(TEntity).Name.ToLower(), null, cancellationToken);
+    => GetEntities<TEntity>(LowerCaseFirstLetter(typeof(TEntity).Name), null, cancellationToken);
 
     public Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default)
-        => GetEntities<TEntity>(typeof(TEntity).Name.ToLower(), options, cancellationToken);
+        => GetEntities<TEntity>(LowerCaseFirstLetter(typeof(TEntity).Name), options, cancellationToken);
 
     public async Task<TEntity?> GetEntityById<TEntity>(string id, int include = 2, CancellationToken cancellationToken = default)
     {
@@ -60,4 +60,6 @@ public class ContentfulRepository : IContentRepository
 
         return entities.FirstOrDefault();
     }
+
+    private static string LowerCaseFirstLetter(string toLowerCase) => char.ToLower(toLowerCase[0]) + toLowerCase.Substring(1);
 }

@@ -38,3 +38,4 @@ General information about architectural decision records is available at <https:
 | [0024 - Caching](./0024-caching.md)                                                                         | Accepted |
 | [0025 - Hybrid Matrix Deployments](./0025-hybrid-matrix-deployments.md)                                     | Accepted |
 | [0027 - Accesibility Testing](./0027-accesibility-testing.md)                                               | Accepted |
+| [0028 - Command Line Arguments Parsing](./0028-command-line-arguments.md)                                   | Accepted |
