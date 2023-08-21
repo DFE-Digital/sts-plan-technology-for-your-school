@@ -1,7 +1,6 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Response.Commands;
 using Dfe.PlanTech.Application.Response.Interface;

@@ -37,8 +37,8 @@ namespace Dfe.PlanTech.Application.UnitTests.Submission.Queries
                 }
             };
 
-            _planTechDbContextMock.GetSubmissions.Returns(submissionList.AsQueryable());
-            _planTechDbContextMock.FirstOrDefaultAsync(submissionList.AsQueryable()).Returns(submissionList[0]);
+            var query = Arg.Any<IQueryable<Domain.Submissions.Models.Submission>>();
+            _planTechDbContextMock.FirstOrDefaultAsync(query).Returns(submissionList[0]);
 
             var result = await _getSubmissionQuery.GetSubmissionBy(16, "SectionId");
 

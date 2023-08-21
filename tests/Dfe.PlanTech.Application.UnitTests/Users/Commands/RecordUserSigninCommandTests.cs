@@ -93,7 +93,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
                 createdUser = user;
             });
 
-            mockDb.When(x => x.AddSignIn(Arg.Any<Domain.SignIn.Models.SignIn>())).Do(callInfo =>
+            mockDb.When(x => x.AddSignIn(Arg.Any<Domain.SignIn.Models.SignIn>())).Do((callInfo) =>
             {
                 createdSignIn = (Domain.SignIn.Models.SignIn)callInfo[0];
             });
@@ -102,14 +102,14 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
             {
                 if (createdUser != null)
                 {
-                   return createdUser.Id = userId;
+                    createdUser.Id = userId;
                 }
 
                 if (createdSignIn != null)
                 {
-                    return createdSignIn.Id = signInId;
+                    createdSignIn.Id = signInId;
                 }
-                return callInfo[0];
+                return 0;
             });
 
             var createUserCommand = new CreateUserCommand(mockDb);
@@ -132,9 +132,9 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
             var result = await recordUserSignInCommand.RecordSignIn(recordUserSignInDto);
 
             Assert.Equal(userId, createdUser?.Id);
-
-            Assert.Equal(signInId, createdSignIn?.Id);
             await mockDb.Received(2).SaveChangesAsync();
+            Assert.Equal(signInId, createdSignIn?.Id);
+
         }
 
         [Fact]

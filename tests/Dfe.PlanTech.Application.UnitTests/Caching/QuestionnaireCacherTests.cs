@@ -12,11 +12,11 @@ public class QuestionnaireCacherTests
     {
         var cacherMock = Substitute.For<ICacher>();
         cacherMock.Get(Arg.Any<string>(), Arg.Any<Func<QuestionnaireCache>>())
-                    .Returns((callInfo) => 
-                    {
-                         Func<QuestionnaireCache> creator = (Func<QuestionnaireCache>)callInfo[0];
-                         return creator();
-                    });
+            .Returns((callInfo) =>
+            {
+                    Func<QuestionnaireCache> creator = (Func<QuestionnaireCache>)callInfo[1];
+                    return creator();
+            });
 
         var questionnaireCacher = new QuestionnaireCacher(cacherMock);
 

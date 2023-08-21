@@ -20,14 +20,7 @@ public class UrlHistoryTests
         cacherMock.When(x => x.Set(UrlHistory.CACHE_KEY, Arg.Any<TimeSpan>(), Arg.Any<Stack<Uri>>()))
             .Do((callInfo) =>
             {
-                Stack<Uri> stack = (Stack<Uri>)callInfo[0];
-                history = stack;
-            });
-        cacherMock.When(x => x.Set(UrlHistory.CACHE_KEY, Arg.Any<TimeSpan>(), Arg.Any<Stack<Uri>>()))
-            .Do((callInfo) =>
-            {
-                Stack<Uri> stack = (Stack<Uri>)callInfo[0];
-                history = stack;
+                history = (Stack<Uri>)callInfo[2];
             });
 
         cacher = cacherMock;
