@@ -15,7 +15,7 @@ namespace Dfe.PlanTech.Web.ViewComponents
 
         public IViewComponentResult Invoke(ICategory category)
         {
-            var recommendationWithSectionNameList = _GetRecommendationsWithSectionNames(category);
+            var recommendationWithSectionNameList = category.Completed == 1 ? _GetRecommendationsWithSectionNames(category) : null;
             return View(recommendationWithSectionNameList);
         }
 

@@ -19,6 +19,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             category = new Category()
             {
+                Completed = 1,
                 Sections = new Section[]
                 {
                     new Section()
@@ -119,6 +120,20 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             unboxed = unboxed.ToList();
             Assert.Empty(unboxed);
+        }
+
+        [Fact]
+        public void Returns_Null_If_Category_IsNot_Completed()
+        {
+            category.Completed = 0;
+
+            var result = _recommendationsComponent.Invoke(category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model;
+            Assert.Null(model);
         }
     }
 }

@@ -1,24 +1,34 @@
 @model IEnumerable<(Dfe.PlanTech.Domain.Questionnaire.Models.RecommendationPage? Recommendation, string SectionName)>
 
-<task-list>
+<h2 class="govuk-heading-m">Recommendations</h2>
+
+@if (Model == null)
+{
+    <p class="govuk-body">You&#39;ll get recommendations once you have answered at least one section from the
+    self-assessment</p>
+}
+else
+{
+    <task-list>
     @foreach (var recommendationWithSectionName in Model)
-    {
-        <task-list-item>
-            <task-list-item-name>
-                @if (recommendationWithSectionName.Recommendation != null)
-                {
-                    <a asp-controller="Pages" asp-action="GetByRoute"
-                        asp-route-route="@recommendationWithSectionName.Recommendation.Page?.Slug" class="govuk-link">
-                        @recommendationWithSectionName.Recommendation.DisplayName
-                    </a>
-                }
-                else
-                {
-                    var errorMessage = string.Format("Unable to retrieve {0} recommendation",
-                    recommendationWithSectionName.SectionName);
-                    <govuk-error-message>@errorMessage</govuk-error-message>
-                }
-            </task-list-item-name>
-        </task-list-item>
-    }
-</task-list>
+        {
+            <task-list-item>
+                <task-list-item-name>
+                    @if (recommendationWithSectionName.Recommendation != null)
+                    {
+                        <a asp-controller="Pages" asp-action="GetByRoute"
+                            asp-route-route="@recommendationWithSectionName.Recommendation.Page?.Slug" class="govuk-link">
+                            @recommendationWithSectionName.Recommendation.DisplayName
+                        </a>
+                    }
+                    else
+                    {
+                        var errorMessage = string.Format("Unable to retrieve {0} recommendation",
+                        recommendationWithSectionName.SectionName);
+                        <govuk-error-message>@errorMessage</govuk-error-message>
+                    }
+                </task-list-item-name>
+            </task-list-item>
+        }
+    </task-list>
+}
