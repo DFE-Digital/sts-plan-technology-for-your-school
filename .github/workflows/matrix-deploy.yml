@@ -1,14 +1,6 @@
 name: Multi stage build & deploy 
 
 on:
-  workflow_dispatch:
-    inputs:
-      name:
-        type: choice
-        description: Manual publish to which environment
-        options:
-          - Staging
-          - Production
   push:
     branches: [ "main" ]
     paths:
@@ -25,18 +17,3 @@ jobs:
     with:
       environment: ${{ matrix.target }}
     secrets: inherit
-    
-#  Once we have setup the Staging and Production Environment we can reconfigure the jobs below to call the build-and-deploy workflow with the correct envs.
-  deploy-to-staging:
-    needs: deploy-to-environments
-    if: ${{ github.event_name == 'workflow_dispatch' }}
-    runs-on: ubuntu-22.04
-    steps:
-      - run: echo "will deploy to staging on manual dispatch trigger here"
-
-  deploy-to-prod:
-    needs: deploy-to-staging
-    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.name == 'Production' }}
-    runs-on: ubuntu-22.04
-    steps:
-      - run: echo "will deploy to prod on manual dispatch when Production choice is selected"
