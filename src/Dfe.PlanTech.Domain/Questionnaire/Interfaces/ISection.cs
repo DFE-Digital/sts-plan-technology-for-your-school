@@ -24,5 +24,5 @@ public interface ISection : IContentComponent
 
     public RecommendationPage? TryGetRecommendationForMaturity(Maturity maturity);
 
-    public RecommendationPage? GetRecommendationForMaturity(string maturity);
+    public RecommendationPage? GetRecommendationForMaturity(string? maturity);
 }

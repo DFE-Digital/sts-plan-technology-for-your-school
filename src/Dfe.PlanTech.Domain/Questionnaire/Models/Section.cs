@@ -23,7 +23,7 @@ public class Section : ContentComponent, ISection
 
     public RecommendationPage? TryGetRecommendationForMaturity(Maturity maturity) => Recommendations.FirstOrDefault(recommendation => recommendation.Maturity == maturity);
 
-    public RecommendationPage? GetRecommendationForMaturity(string maturity)
+    public RecommendationPage? GetRecommendationForMaturity(string? maturity)
     {
         if (maturity is null)
             maturity = string.Empty;
