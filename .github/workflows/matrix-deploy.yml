@@ -3,8 +3,6 @@ name: Multi stage build & deploy
 on:
   push:
     branches: [ "main" ]
-    paths:
-      - 'src/**'
 
 jobs:
   deploy-to-environments:
