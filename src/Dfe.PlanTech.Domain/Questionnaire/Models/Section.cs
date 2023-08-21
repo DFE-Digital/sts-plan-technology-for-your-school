@@ -25,12 +25,7 @@ public class Section : ContentComponent, ISection
 
     public RecommendationPage? GetRecommendationForMaturity(string? maturity)
     {
-        if (maturity is null)
-            maturity = string.Empty;
-
-        Maturity maturityResponse;
-
-        if (!Enum.TryParse(maturity, out maturityResponse)) maturityResponse = Maturity.Unknown;
+        if (string.IsNullOrEmpty(maturity) || !Enum.TryParse(maturity, out Maturity maturityResponse)) return null;
 
         return TryGetRecommendationForMaturity(maturityResponse);
 
