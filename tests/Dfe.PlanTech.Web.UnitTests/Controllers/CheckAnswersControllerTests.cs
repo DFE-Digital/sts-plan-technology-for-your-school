@@ -6,10 +6,12 @@ using Dfe.PlanTech.Application.Response.Commands;
 using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Constants;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
@@ -124,6 +126,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var result = await _checkAnswersController.CheckAnswersPage(SubmissionId, SectionId, SectionName, _processCheckAnswerDtoCommand, _getPageQueryMock);
 
+            var result = await _checkAnswersController.CheckAnswersPage(_processCheckAnswerDtoCommand, _getPageQueryMock.Object);
+
             Assert.IsType<ViewResult>(result);
 
             var viewResult = result as ViewResult;
@@ -150,6 +154,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _contentRepositoryMock.GetEntityById<Section>(SectionId, 3, CancellationToken.None).Returns(Task.FromResult(_section));
 
             var result = await _checkAnswersController.CheckAnswersPage(SubmissionId, SectionId, SectionName, _processCheckAnswerDtoCommand, _getPageQueryMock);
+
+            var result = await _checkAnswersController.CheckAnswersPage(_processCheckAnswerDtoCommand, _getPageQueryMock.Object);
 
             Assert.IsType<ViewResult>(result);
 
@@ -247,11 +253,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             Assert.NotNull(redirectToActionResult);
             Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
-            Assert.NotNull(redirectToActionResult.RouteValues);
-            var id = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "id");
-            Assert.Equal(question.ContentfulRef, id.Value);
-            var answerRef = redirectToActionResult.RouteValues.FirstOrDefault(routeValue => routeValue.Key == "answerRef");
-            Assert.Equal(answer.ContentfulRef, answerRef.Value);
+            Assert.NotNull(_checkAnswersController.TempData[TempDataConstants.Questions]);
+            Assert.IsType<string>(_checkAnswersController.TempData[TempDataConstants.Questions]);
+            var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_checkAnswersController.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
+            Assert.Equal(question.ContentfulRef, id);
+            var answerRef = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_checkAnswersController.TempData[TempDataConstants.Questions] as string ?? "")?.AnswerRef;
+            Assert.Equal(answer.ContentfulRef, answerRef);
         }
 
         [Fact]

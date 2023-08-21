@@ -13,14 +13,17 @@
 }
 
 @{
-    foreach(var content in Model.Content){
+    foreach (var content in Model.Content)
+    {
         await Html.RenderPartialAsync("Components/PageComponentFactory", content);
     }
 }
 
+<h3 class="govuk-heading-s govuk-!-margin-bottom-2">Progress</h3>
+<p class="govuk-body govuk-!-margin-bottom-5">You have completed <strong>@completedCount of
+        @Model.Sections.Count()</strong> sections.</p>
+
 <task-list>
-    <h3 class="govuk-heading-s govuk-!-margin-bottom-2">Progress</h3>
-    <p class="govuk-body govuk-!-margin-bottom-5">You have completed <strong>@completedCount of @Model.Sections.Count()</strong> sections.</p>
     @foreach (var categorySection in Model.Sections)
     {
         var tagColour = TagColour.Grey;
@@ -38,13 +41,16 @@
             tagText = "STARTED";
         }
 
+        TempData[categorySection.InterstitialPage.Slug] = categorySection.Name + "+" + categorySection.Sys.Id;
+
         <task-list-item>
             <task-list-item-name>
-                <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@categorySection.InterstitialPage.Slug" asp-route-param=@categorySection.Name+@categorySection.Sys.Id class="govuk-link">
+                <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@categorySection.InterstitialPage.Slug"
+                    class="govuk-link">
                     @categorySection.Name
                 </a>
             </task-list-item-name>
-            
+
             <task-list-tag colour=@tagColour>
                 @tagText
             </task-list-tag>

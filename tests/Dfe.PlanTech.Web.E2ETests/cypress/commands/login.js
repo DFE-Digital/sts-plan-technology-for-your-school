@@ -1,3 +1,6 @@
+/**
+ * Login to DFE
+ */
 Cypress.Commands.add("login", ({ email, password, url }) => {
     cy.visit(url);
     cy.get("input#username").type(email);
@@ -9,6 +12,9 @@ Cypress.Commands.add("login", ({ email, password, url }) => {
     });
 });
 
+/**
+ * Login to DFE using values from the environment variables
+ */
 Cypress.Commands.add("loginWithEnv", (url) => {
     const args = {
         email: Cypress.env("DSi_Email"),

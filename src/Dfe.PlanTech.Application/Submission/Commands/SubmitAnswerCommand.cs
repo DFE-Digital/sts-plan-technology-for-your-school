@@ -73,7 +73,30 @@ namespace Dfe.PlanTech.Application.Submission.Commands
             return false;
         }
 
-        public async Task<Domain.Questionnaire.Models.Question?> GetNextUnansweredQuestion(int submissionId)
+        public async Task<(Domain.Questionnaire.Models.Question? Question, Domain.Submissions.Models.Submission? Submission)> GetQuestionWithSubmission(
+            int? submissionId,
+            string? questionRef,
+            string sectionId,
+            string? sectionName,
+            CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrEmpty(questionRef)) throw new ArgumentNullException(nameof(questionRef));
+
+            if (submissionId == null)
+            {
+                var submission = await _getSubmitAnswerQueries.GetSubmission(await _getSubmitAnswerQueries.GetEstablishmentId(), sectionId);
+
+                if (submission != null && !submission.Completed)
+                {
+                    Domain.Questionnaire.Models.Question? nextUnansweredQuestion = await _GetNextUnansweredQuestion(submission.Id);
+                    return nextUnansweredQuestion != null ? (nextUnansweredQuestion, submission) : (null, submission);
+                }
+            }
+
+            return (await _getSubmitAnswerQueries.GetQuestionnaireQuestion(questionRef, sectionName, cancellationToken), null);
+        }
+
+        private async Task<Domain.Questionnaire.Models.Question?> _GetNextUnansweredQuestion(int submissionId)
         {
             List<QuestionWithAnswer> questionWithAnswerList = await _getLatestResponseListForSubmissionQuery.GetResponseListByDateCreated(submissionId);
 
@@ -86,17 +109,6 @@ namespace Dfe.PlanTech.Application.Submission.Commands
             if (nextQuestion == null) return null;
 
             return questionWithAnswerList.Find(questionWithAnswer => questionWithAnswer.QuestionRef.Equals(nextQuestion.Sys.Id)) == null ? nextQuestion : null;
-        }
-
-        public async Task<Domain.Questionnaire.Models.Question> GetQuestionnaireQuestion(string questionId, string? section, CancellationToken cancellationToken)
-        {
-            return await _getSubmitAnswerQueries.GetQuestionnaireQuestion(questionId, section, cancellationToken);
-        }
-
-        public async Task<Domain.Submissions.Models.Submission?> GetOngoingSubmission(string sectionId)
-        {
-            int establishmentId = await _getSubmitAnswerQueries.GetEstablishmentId();
-            return await _getSubmitAnswerQueries.GetSubmission(establishmentId, sectionId);
         }
 
         private async Task<int> _GetSubmissionId(int? submissionId, string sectionId, string sectionName)

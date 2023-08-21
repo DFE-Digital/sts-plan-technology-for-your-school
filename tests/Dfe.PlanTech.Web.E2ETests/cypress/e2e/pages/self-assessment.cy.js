@@ -3,12 +3,15 @@ describe("Self-assessment page", () => {
 
   beforeEach(() => {
     cy.loginWithEnv(url);
+
+    cy.injectAxe();
 });
 
   it("should have heading", () => {
     cy.get("h1.govuk-heading-xl")
       .should("exist")
       .and("have.text", "Technology self-assessment");
+    
   });
 
   it("should contain categories", () => {
@@ -27,5 +30,9 @@ describe("Self-assessment page", () => {
         .should("have.attr", "href")
         .and("not.be.null");
     });
+  });
+
+  it("passes accessibility tests", () => {
+    cy.runAxe();
   });
 });
