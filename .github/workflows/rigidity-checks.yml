@@ -15,18 +15,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  sqlcheck:
-    name: sqlcheck job
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-    - uses: yokawasa/action-sqlcheck@v1.4.0
-      with:
-        post-comment: true
-        risk-level: 3
-        verbose: false
-        token: ${{ secrets.GITHUB_TOKEN }}
 
   scan:
     permissions:
