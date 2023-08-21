@@ -5,6 +5,7 @@ on:
     branches: [ "main" ]
     paths:
       - 'terraform/**'
+      - '.github/workflows/terraform-deploy.yml'
     
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
