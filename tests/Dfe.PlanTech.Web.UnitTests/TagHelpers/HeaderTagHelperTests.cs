@@ -197,7 +197,8 @@ public class HeaderComponentTagHelperTests
 
         await tagHelper.ProcessAsync(context, output);
 
-        loggerMock.HadMethodCalled("Log");
+        Assert.Equal("header-tag", output.TagName);
+        Assert.Equal("header-test", context.UniqueId);
     }
 
     [Fact]

@@ -35,6 +35,8 @@ public class RichTextTagHelperTests
         var richTextTagHelper = new RichTextTagHelper(loggerMock, richTextRendererMock);
 
         await richTextTagHelper.ProcessAsync(context, output);
+        Assert.Equal("rich-text-tag", output.TagName);
+        Assert.Equal("richtext-test", context.UniqueId);
     }
 
     [Fact]
