@@ -18,7 +18,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         {
             _recommendationsComponent = new RecommendationsViewComponent(Substitute.For<ILogger<RecommendationsViewComponent>>());
 
-            category = new Category()
+            category = new Category(null, null)
             {
                 Completed = 1,
                 Sections = new Section[]
