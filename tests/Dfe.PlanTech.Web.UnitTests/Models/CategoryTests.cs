@@ -35,19 +35,16 @@ public class CategoryTests
 
         _category.RetrieveSectionStatuses();
 
-        _logger.Received(0);
+        _logger.ReceivedWithAnyArgs(0).LogError("An exception has occurred while trying to retrieve section progress with the following message - test");
     }
 
     [Fact]
     public void RetrieveSectionStatuses_ExceptionThrown_ReturnsEmptyStatusesAndError()
     {
-        var section1 = Substitute.For<ISection>();
-        var section2 = Substitute.For<ISection>();
-        var sections = new ISection[] { section1, section2 };
+        var sections = Array.Empty<ISection>();
         _submissionStatusesQuery.GetSectionSubmissionStatuses(sections).Throws(new Exception("test"));
 
         _category.RetrieveSectionStatuses();
-        ;
-        _logger.Received(1);
+        _logger.ReceivedWithAnyArgs(1).LogError("An exception has occurred while trying to retrieve section progress with the following message - test");
     }
 }
