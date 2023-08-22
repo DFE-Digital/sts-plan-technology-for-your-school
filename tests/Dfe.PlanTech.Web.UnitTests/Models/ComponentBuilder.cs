@@ -1,17 +1,28 @@
 ﻿using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
+using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
 
 namespace Dfe.PlanTech.Web.UnitTests.Models
 {
     public class ComponentBuilder : IComponentBuilder
     {
+        
+        private IGetSubmissionStatusesQuery _submissionStatusesQuery;
+        private ILogger<Category> _logger;
+        
+            
         public Category BuildCategory()
         {
-            return new Category(null, null)
+            _submissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
+            _logger = Substitute.For<ILogger<Category>>();
+            
+            return new Category(_logger, _submissionStatusesQuery)
             {
                 Header = new Header { Text = "Category" },
                 Content = BuildContent(),
