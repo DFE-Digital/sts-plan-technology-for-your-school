@@ -5,6 +5,7 @@ on:
     branches: [ "main" ]
     paths:
       - 'terraform/**'
+      - '.github/workflows/terraform-deploy.yml'
     
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
@@ -44,7 +45,7 @@ jobs:
       max-parallel: 1
       fail-fast: true
       matrix:
-        env: ['dev', 'Tst']  
+        env: ['dev', 'Tst', 'Staging', 'Production']  
     environment: ${{ matrix.env }}  
     steps:
       - name: Clone repo
@@ -53,7 +54,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.4.5
+          terraform_version: 1.5.0
 
       - name: Get GitHub Runner IP
         id: whats-my-ip

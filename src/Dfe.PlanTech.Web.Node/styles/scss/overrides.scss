@@ -1,5 +1,21 @@
 /* STANDARD COLOURS */
-body, p, h1, h2, h3, h4, h5, h6, a, span, div, table, th, td, blockquote, li, tr {
+body,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+a,
+span,
+div,
+table,
+th,
+td,
+blockquote,
+li,
+tr {
     font-family: BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif !important;
 }
 
@@ -8,6 +24,7 @@ body, p, h1, h2, h3, h4, h5, h6, a, span, div, table, th, td, blockquote, li, tr
     max-height: 32px;
     max-width: 100%;
 }
+
 /* DFE CARD COMPONENT - NEW
 --------------------------- */
 .dfe-section-card {
@@ -36,7 +53,7 @@ body, p, h1, h2, h3, h4, h5, h6, a, span, div, table, th, td, blockquote, li, tr
     padding-top: 10px;
 }
 
-.app-related-items .govuk-list > li {
+.app-related-items .govuk-list>li {
     margin-bottom: 10px;
 }
 
@@ -72,7 +89,8 @@ body, p, h1, h2, h3, h4, h5, h6, a, span, div, table, th, td, blockquote, li, tr
     border-bottom: 10px solid #347ca9;
 }
 
-.govuk-header__product-name, .govuk-header__logotype-text {
+.govuk-header__product-name,
+.govuk-header__logotype-text {
     line-height: 2.5rem !important;
     font-size: 1.2rem;
 }
@@ -98,7 +116,9 @@ body, p, h1, h2, h3, h4, h5, h6, a, span, div, table, th, td, blockquote, li, tr
     margin-right: 0;
 }
 
-.govuk-header__navigation-item--active a:link, .govuk-header__navigation-item--active a:hover, .govuk-header__navigation-item--active a:visited {
+.govuk-header__navigation-item--active a:link,
+.govuk-header__navigation-item--active a:hover,
+.govuk-header__navigation-item--active a:visited {
     color: #f3f2f1;
     text-decoration: underline;
     text-decoration-thickness: 3px;
@@ -127,4 +147,10 @@ body, p, h1, h2, h3, h4, h5, h6, a, span, div, table, th, td, blockquote, li, tr
         margin-top: 0px !important;
         margin-bottom: 20px;
     }
+}
+
+/* OVERRIDE GOVUK ERROR MESSAGE FOR INLINE ERRORS IN TASK LIST
+----------------------------------------------- */
+strong.app-task-list__task-name>p.govuk-error-message {
+    margin-bottom: 0px;
 }

@@ -41,7 +41,6 @@ jobs:
   validate-terraform:  
     name: Validate Terraform 
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment || 'dev' }}
     defaults:
       run:
         working-directory: ${{env.TF_WORKING_DIRECTORY}}
@@ -54,7 +53,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.4.5
+          terraform_version: 1.5.0
 
       - name: Get GitHub Runner IP
         id: whats-my-ip

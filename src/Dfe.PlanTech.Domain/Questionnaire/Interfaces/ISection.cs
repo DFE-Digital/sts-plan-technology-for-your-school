@@ -22,7 +22,7 @@ public interface ISection : IContentComponent
 
     public RecommendationPage[] Recommendations { get; }
 
-    public RecommendationPage GetRecommendationForMaturity(Maturity maturity);
+    public RecommendationPage? TryGetRecommendationForMaturity(Maturity maturity);
 
-    public RecommendationPage GetRecommendationForMaturity(string maturity);
+    public RecommendationPage? GetRecommendationForMaturity(string? maturity);
 }

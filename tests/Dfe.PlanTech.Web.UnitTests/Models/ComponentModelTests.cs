@@ -1,4 +1,5 @@
 ﻿using Dfe.PlanTech.Domain.Questionnaire.Enums;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Models
@@ -94,7 +95,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             var maturity = Maturity.Low;
             var section = _componentBuilder.BuildSections().First();
 
-            var lowMaturityRecommendation = section.GetRecommendationForMaturity(maturity);
+            var lowMaturityRecommendation = section.TryGetRecommendationForMaturity(maturity);
 
             Assert.NotNull(lowMaturityRecommendation);
             Assert.Equal(maturity, lowMaturityRecommendation.Maturity);
@@ -113,25 +114,26 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         }
 
         [Fact]
-        public void Section_Should_Return_Default_Maturity_When_Maturity_Is_A_String_And_Is_Null()
+        public void Section_Should_Return_Null_When_Maturity_Is_A_String_And_Is_Null()
         {
             string? maturity = null;
             var section = _componentBuilder.BuildSections().First();
-            var exceptionType = typeof(KeyNotFoundException);
-          
-            #pragma warning disable CS8604 // Possible null reference argument.
-            Assert.Throws(exceptionType, () => section.GetRecommendationForMaturity(maturity));
-            #pragma warning restore CS8604 // Possible null reference argument.
+
+#pragma warning disable CS8604 // Possible null reference argument.
+            var recommendation = section.GetRecommendationForMaturity(maturity);
+
+            Assert.Null(recommendation);
         }
 
         [Fact]
-        public void Section_Should_Error_If_Maturity_Not_Found()
+        public void Section_Should_Return_Null_If_Maturity_Not_Found()
         {
             var maturity = Maturity.Unknown;
             var section = _componentBuilder.BuildSections().First();
-            var exceptionType = typeof(KeyNotFoundException);
 
-            Assert.Throws(exceptionType, () => section.GetRecommendationForMaturity(maturity));
+            var unknownMaturityRecommendation = section.TryGetRecommendationForMaturity(maturity);
+
+            Assert.Null(unknownMaturityRecommendation);
         }
 
     }

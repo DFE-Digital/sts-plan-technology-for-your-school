@@ -93,4 +93,4 @@
     }
 </task-list>
 
-<partial name="~/Views/Shared/Recommendation/HomeRecommendations.cshtml" model="Model"/>
+@await Component.InvokeAsync("Recommendations", new { category = Model })
