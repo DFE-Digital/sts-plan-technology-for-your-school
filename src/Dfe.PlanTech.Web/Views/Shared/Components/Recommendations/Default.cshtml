@@ -1,0 +1,32 @@
+@model IEnumerable<RecommendationsViewComponentViewModel>
+
+<h2 class="govuk-heading-m">Recommendations</h2>
+
+@if (Model == null)
+{
+    <p class="govuk-body">You&#39;ll get recommendations once you have answered at least one section from the
+    self-assessment</p>
+}
+else
+{
+    <task-list>
+    @foreach (var recommendationsViewComponentViewModel in Model)
+        {
+            <task-list-item>
+                <task-list-item-name>
+                    @if (recommendationsViewComponentViewModel.RecommendationSlug != null)
+                    {
+                        <a asp-controller="Pages" asp-action="GetByRoute"
+                            asp-route-route="@recommendationsViewComponentViewModel.RecommendationSlug" class="govuk-link">
+                            @recommendationsViewComponentViewModel.RecommendationDisplayName
+                        </a>
+                    }
+                    else
+                    {
+                        <govuk-error-message>@recommendationsViewComponentViewModel.NoRecommendationFoundErrorMessage</govuk-error-message>
+                    }
+                </task-list-item-name>
+            </task-list-item>
+        }
+    </task-list>
+}
