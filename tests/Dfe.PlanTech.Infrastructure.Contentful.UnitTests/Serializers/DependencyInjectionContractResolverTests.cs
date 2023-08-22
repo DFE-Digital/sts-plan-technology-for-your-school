@@ -37,7 +37,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Serializers
         }
         
 
-        private JsonObjectContract InvokeProtectedCreateObjectContract(DependencyInjectionContractResolver resolver, Type objectType)
+        private static JsonObjectContract? InvokeProtectedCreateObjectContract(DependencyInjectionContractResolver resolver, Type objectType)
         {
             var methodInfo = typeof(DependencyInjectionContractResolver).GetMethod(
                 "CreateObjectContract",
