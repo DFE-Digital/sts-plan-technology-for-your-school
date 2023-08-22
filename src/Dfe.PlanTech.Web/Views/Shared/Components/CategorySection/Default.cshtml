@@ -1,0 +1,23 @@
+@model CategorySectionViewComponentViewModel
+
+<h3 class="govuk-heading-s govuk-!-margin-bottom-2">Progress</h3>
+<p class="govuk-body govuk-!-margin-bottom-5">You have completed <strong>@Model.CompletedCount of
+        @Model.CategorySectionDto.Count()</strong> sections.</p>
+
+<task-list>
+    @foreach (var categorySectionDtoItem in Model.CategorySectionDto)
+    {
+        <task-list-item>
+            <task-list-item-name>
+                <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@categorySectionDtoItem.Slug"
+                    class="govuk-link">
+                    @categorySectionDtoItem.Name
+                </a>
+            </task-list-item-name>
+
+            <task-list-tag colour=@categorySectionDtoItem.TagColour>
+                @categorySectionDtoItem.TagText
+            </task-list-tag>
+        </task-list-item>
+    }
+</task-list>

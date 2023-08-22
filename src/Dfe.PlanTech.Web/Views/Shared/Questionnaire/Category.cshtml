@@ -1,18 +1,13 @@
 @using Dfe.PlanTech.Application.Submission.Interfaces;
-@using Dfe.PlanTech.Web.TagHelpers.TaskList
 @model Dfe.PlanTech.Domain.Questionnaire.Interfaces.ICategory;
 @inject IGetSubmissionStatusesQuery query
 
 @{
-    Model.SectionStatuses = query.GetSectionSubmissionStatuses(Model.Sections);
-    var completedCount = Model.SectionStatuses.Where(x => x.Completed == 1).ToList().Count;
-    Model.Completed = completedCount;
-}
-@{
-    await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Header);
-}
+    Model.SectionStatuses = query.GetSectionSubmissionStatuses(Model.Sections); // ..
+    var completedCount = Model.SectionStatuses.Where(x => x.Completed == 1).ToList().Count; // ..
+    Model.Completed = completedCount; // TODO: Integrate this block into the ViewComponent
 
-@{
+    await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Header);
     foreach (var content in Model.Content)
     {
         await Html.RenderPartialAsync("Components/PageComponentFactory", content);
@@ -23,39 +18,5 @@
 <p class="govuk-body govuk-!-margin-bottom-5">You have completed <strong>@completedCount of
         @Model.Sections.Count()</strong> sections.</p>
 
-<task-list>
-    @foreach (var categorySection in Model.Sections)
-    {
-        var tagColour = TagColour.Grey;
-        var tagText = "NOT STARTED";
-        var exists = Model.SectionStatuses.FirstOrDefault(x => x.SectionId == categorySection.Sys.Id);
-
-        if (exists != null && exists!.Completed == 1)
-        {
-            tagColour = TagColour.DarkBlue;
-            tagText = "COMPLETE";
-        }
-        else if (exists != null && exists!.Completed == 0)
-        {
-            tagColour = TagColour.Green;
-            tagText = "STARTED";
-        }
-
-        TempData[categorySection.InterstitialPage.Slug] = categorySection.Name + "+" + categorySection.Sys.Id;
-
-        <task-list-item>
-            <task-list-item-name>
-                <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@categorySection.InterstitialPage.Slug"
-                    class="govuk-link">
-                    @categorySection.Name
-                </a>
-            </task-list-item-name>
-
-            <task-list-tag colour=@tagColour>
-                @tagText
-            </task-list-tag>
-        </task-list-item>
-    }
-</task-list>
-
-@await Component.InvokeAsync("Recommendations", new { category = Model })
+@await Component.InvokeAsync("CategorySection", new { category = Model});
+@await Component.InvokeAsync("Recommendations", new { category = Model });
