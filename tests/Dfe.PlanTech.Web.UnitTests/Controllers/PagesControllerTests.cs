@@ -124,7 +124,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var cookie = new DfeCookie { HasApproved = true };
             cookiesMock.GetCookie().Returns(cookie);
 
-            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None, "");
+            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None);
 
             Assert.IsType<ViewResult>(result);
 
@@ -164,7 +164,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public async Task Should_ThrowError_When_NoRouteFound()
         {
             await Assert.ThrowsAnyAsync<Exception>(() =>
-                _controller.GetByRoute("NOT A VALID ROUTE", _query, CancellationToken.None, Arg.Any<string>()));
+                _controller.GetByRoute("NOT A VALID ROUTE", _query, CancellationToken.None));
         }
 
         [Fact]
@@ -198,7 +198,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var cookie = new DfeCookie { HasApproved = preference };
             cookiesMock.GetCookie().Returns(cookie);
 
-            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None, "");
+            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None);
 
             Assert.IsType<ViewResult>(result);
 

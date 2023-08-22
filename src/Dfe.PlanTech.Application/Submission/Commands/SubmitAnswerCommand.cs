@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Application.Response.Interface;
-using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Application.Submission.Queries;
 using Dfe.PlanTech.Domain.Answers.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -8,7 +7,7 @@ using Dfe.PlanTech.Domain.Responses.Models;
 
 namespace Dfe.PlanTech.Application.Submission.Commands
 {
-    public class SubmitAnswerCommand : ISubmitAnswerCommand
+    public class SubmitAnswerCommand
     {
         private readonly GetSubmitAnswerQueries _getSubmitAnswerQueries;
         private readonly RecordSubmitAnswerCommands _recordSubmitAnswerCommands;

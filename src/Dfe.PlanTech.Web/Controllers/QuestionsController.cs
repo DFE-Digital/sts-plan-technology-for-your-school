@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Submission.Commands;
+using Dfe.PlanTech.Domain.Questionnaire.Constants;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -19,13 +20,7 @@ public class QuestionsController : BaseController<QuestionsController>
     /// <param name="id"></param>
     /// <param name="section">Name of current section (if starting new)</param>
     /// <returns></returns>
-    public async Task<IActionResult> GetQuestionById(
-        string id,
-        string? section,
-        int? submissionId,
-        string? answerRef,
-        [FromServices] SubmitAnswerCommand submitAnswerCommand,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetQuestionById(string? id, string? section, [FromServices] SubmitAnswerCommand submitAnswerCommand, CancellationToken cancellationToken)
     {
         var parameterQuestionPage = TempData[TempDataConstants.Questions] != null ? DeserialiseParameter<TempDataQuestions>(TempData[TempDataConstants.Questions]) : new TempDataQuestions();
 
@@ -56,7 +51,7 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
     [HttpPost("SubmitAnswer")]
-    public async Task<IActionResult> SubmitAnswer(SubmitAnswerDto submitAnswerDto, [FromServices] ISubmitAnswerCommand submitAnswerCommand)
+    public async Task<IActionResult> SubmitAnswer(SubmitAnswerDto submitAnswerDto, [FromServices] SubmitAnswerCommand submitAnswerCommand)
     {
         if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
 
