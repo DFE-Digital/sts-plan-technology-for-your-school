@@ -1,8 +1,9 @@
-using NSubstitute;
-using Newtonsoft.Json.Serialization;
 using System.Reflection;
+using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
+using Newtonsoft.Json.Serialization;
+using NSubstitute;
 
-namespace Dfe.PlanTech.Infrastructure.Contentful.Serializers
+namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Serializers
 {
     public class DependencyInjectionContractResolverTests
     {
@@ -49,7 +50,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Serializers
 
             if (methodInfo != null)
             {
-                return (JsonObjectContract)methodInfo.Invoke(resolver, new object[] { objectType });
+                return (JsonObjectContract)methodInfo.Invoke(resolver, new object[] { objectType })!;
             }
 
             throw new MissingMethodException("CreateObjectContract method not found.");
