@@ -235,7 +235,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             };
 
             _getLatestResponseListForSubmissionQueryMock.GetLatestResponseListForSubmissionBy(SubmissionId).Returns(Task.FromResult(questionWithAnswerList));
-            _contentRepositoryMock.GetEntityById<Section?>(SectionId, 3, CancellationToken.None).Returns(Task.FromResult(_section));
+            _contentRepositoryMock.GetEntityById<Section?>(SectionId, 3, CancellationToken.None).Returns(_section);
 
             await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _checkAnswersController.CheckAnswersPage(_processCheckAnswerDtoCommand, _getPageQueryMock));
         }

@@ -21,13 +21,13 @@ namespace Dfe.PlanTech.Application.UnitTests.Submission.Queries
         [Fact]
         public async Task GetQuestionQuery_Returns_Question()
         {
-            _planTechDbContextMock.GetQuestion(Arg.Any<Expression<Func<Question, bool>>>()).Returns(Task.FromResult(
+            _planTechDbContextMock.GetQuestion(Arg.Any<Expression<Func<Question, bool>>>()).Returns(
                 new Domain.Questions.Models.Question()
                 {
                     Id = 1,
                     QuestionText = "Question Text",
                     ContentfulRef = "QuestionRef-1"
-                }));
+                });
 
             var result = await _getQuestionQuery.GetQuestionBy(1);
 
