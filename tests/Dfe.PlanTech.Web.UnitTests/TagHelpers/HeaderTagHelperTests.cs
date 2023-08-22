@@ -179,9 +179,7 @@ public class HeaderComponentTagHelperTests
 
         var loggerMock = Substitute.For<ILogger<HeaderComponentTagHelper>>();
 
-        var tagHelper = new HeaderComponentTagHelper(loggerMock)
-        {
-        };
+        var tagHelper = new HeaderComponentTagHelper(loggerMock){};
 
         var context = new TagHelperContext(tagName: "header",
                                             allAttributes: new TagHelperAttributeList(),

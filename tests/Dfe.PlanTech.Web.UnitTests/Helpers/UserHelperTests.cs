@@ -51,6 +51,8 @@ public class UserHelperTests
         _httpContextAccessorMock = Substitute.For<IHttpContextAccessor>();
         _planTechDbContextMock = Substitute.For<IPlanTechDbContext>();
         _createEstablishmentCommandMock = Substitute.For<ICreateEstablishmentCommand>();
+        _getUserIdQueryMock = Substitute.For<IGetUserIdQuery>();
+        _getEstablishmentIdQueryMock = Substitute.For<IGetEstablishmentIdQuery>(); 
 
         MockGetEstablishmentIdQuery();
         MockGetUserIdQuery();
@@ -116,22 +118,6 @@ public class UserHelperTests
         Assert.Equal(1, result);
     }
 
-
-    //[Fact]
-    //public async Task GetEstablishmentId_Returns_Correct_Id_When_Establishment_Does_Not_Exists_In_DB()
-    //{
-    //    _planTechDbContextMock.GetEstablishmentBy(establishment => establishment.EstablishmentRef == "131")
-    //        .ReturnsNull()
-    //        .Returns(new Establishment() { Id = 17 });
-
-    //    var result = await _userHelper.GetEstablishmentId();
-
-    //    await _createEstablishmentCommandMock.Received(0).CreateEstablishment(Arg.Any<EstablishmentDto>());
-
-    //    Assert.IsType<int>(result);
-
-    //    Assert.Equal(17, result);
-    //}
 
     [Fact]
     public async Task GetEstablishmentId_Returns_1_When_Reference_Is_Not_Present()

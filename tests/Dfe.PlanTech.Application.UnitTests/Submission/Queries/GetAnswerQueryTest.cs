@@ -21,17 +21,17 @@ namespace Dfe.PlanTech.Application.UnitTests.Submission.Queries
         [Fact]
         public async Task GetAnswerQuery_Returns_Answer()
         {
-            var output = new Domain.Answers.Models.Answer()
+            var output = new Answer()
             {
                 Id = 1,
                 AnswerText = "Answer Text",
                 ContentfulRef = "AnswerRef-1"
             };
-            _planTechDbContextMock.GetAnswer(Arg.Any<Expression<Func<Answer, bool>>>()).Returns(Task.FromResult(output));
+            _planTechDbContextMock.GetAnswer(Arg.Any<Expression<Func<Answer, bool>>>()).Returns(output);
 
             var result = await _getAnswerQuery.GetAnswerBy(1);
 
-            Assert.IsType<Domain.Answers.Models.Answer>(result);
+            Assert.IsType<Answer>(result);
             Assert.Equal(1, result.Id);
             Assert.Equal("Answer Text", result.AnswerText);
             Assert.Equal("AnswerRef-1", result.ContentfulRef);

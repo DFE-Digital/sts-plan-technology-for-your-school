@@ -10,7 +10,6 @@ namespace Dfe.PlanTech.Application.Users.Helper
     public class UserHelper : IUser
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IPlanTechDbContext _db;
         private readonly ICreateEstablishmentCommand _createEstablishmentCommand;
         private readonly IGetUserIdQuery _getUserIdQuery;
         private readonly IGetEstablishmentIdQuery _getEstablishmentIdQuery;
@@ -22,7 +21,6 @@ namespace Dfe.PlanTech.Application.Users.Helper
                             IGetEstablishmentIdQuery getEstablishmentIdQuery)
         {
             _httpContextAccessor = httpContextAccessor;
-            _db = db;
             _createEstablishmentCommand = createEstablishmentCommand;
             _getUserIdQuery = getUserIdQuery;
             _getEstablishmentIdQuery = getEstablishmentIdQuery;

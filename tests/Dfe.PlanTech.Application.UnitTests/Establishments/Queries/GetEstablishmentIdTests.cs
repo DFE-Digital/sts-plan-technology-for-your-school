@@ -25,7 +25,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishment.Queries
             var strut = CreateStrut();
             var establishmentRef = new Guid().ToString();
             var returnedEstablishment = new Domain.Establishments.Models.Establishment() { EstablishmentRef = establishmentRef, Id = establishmentId };
-            mockDb.GetEstablishmentBy(Arg.Any<Expression<Func<Domain.Establishments.Models.Establishment, bool>>>()).Returns(Task.FromResult(returnedEstablishment));
+            mockDb.GetEstablishmentBy(Arg.Any<Expression<Func<Domain.Establishments.Models.Establishment, bool>>>()).Returns(returnedEstablishment);
 
             //Act
             var result = await strut.GetEstablishmentId(establishmentRef);

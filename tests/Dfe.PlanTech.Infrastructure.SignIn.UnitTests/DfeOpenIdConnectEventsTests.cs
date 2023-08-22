@@ -90,7 +90,7 @@ public class DfeOpenIdConnectEventsTests
             }
         };
 
-        dfePublicApiMock.GetUserAccessToService(userId.ToString(), orgId.ToString()).Returns(Task.FromResult(userAccessToService));
+        dfePublicApiMock.GetUserAccessToService(userId.ToString(), orgId.ToString()).Returns(userAccessToService);
 
         var identityMock = Substitute.For<ClaimsIdentity>();
 

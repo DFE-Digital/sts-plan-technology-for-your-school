@@ -23,7 +23,6 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
             .Returns(callInfo =>
             {
                 QueryBuilder<TestClass> query = (QueryBuilder<TestClass>)callInfo[0];
-                CancellationToken token;
                 var queryString = query.Build();
                 var parsedQueryString = HttpUtility.ParseQueryString(queryString);
                 var sysId = parsedQueryString.Get("sys.id");
