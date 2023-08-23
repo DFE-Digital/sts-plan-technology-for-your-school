@@ -15,7 +15,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
         private readonly RecommendationsViewComponent _recommendationsComponent;
 
-        private ICategory category;
+        private ICategory _category;
 
         public RecommendationsViewComponentTests()
         {
@@ -23,7 +23,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             _recommendationsComponent = new RecommendationsViewComponent(Substitute.For<ILogger<RecommendationsViewComponent>>(), _getSubmissionStatusesQuery);
 
-            category = new Category()
+            _category = new Category()
             {
                 Completed = 1,
                 Sections = new Section[]
@@ -43,25 +43,23 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                             }
                         }
                     }
-                },
+                }
             };
         }
-
-
 
         [Fact]
         public void Returns_RecommendationInfo_If_It_Exists_ForMaturity()
         {
-            category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
             {
                 SectionId = "Section1",
                 Completed = 1,
                 Maturity = "High"
             });
 
-            _getSubmissionStatusesQuery.GetCategoryWithCompletedSectionStatuses(category).Returns(category);
+            _getSubmissionStatusesQuery.GetCategoryWithCompletedSectionStatuses(_category).Returns(_category);
 
-            var result = _recommendationsComponent.Invoke(category) as ViewViewComponentResult;
+            var result = _recommendationsComponent.Invoke(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -75,24 +73,24 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             unboxed = unboxed.ToList();
             Assert.NotEmpty(unboxed);
 
-            Assert.Equal(category.Sections[0].Recommendations[0].Page.Slug, unboxed.First().RecommendationSlug);
-            Assert.Equal(category.Sections[0].Recommendations[0].DisplayName, unboxed.First().RecommendationDisplayName);
+            Assert.Equal(_category.Sections[0].Recommendations[0].Page.Slug, unboxed.First().RecommendationSlug);
+            Assert.Equal(_category.Sections[0].Recommendations[0].DisplayName, unboxed.First().RecommendationDisplayName);
             Assert.Null(unboxed.First().NoRecommendationFoundErrorMessage);
         }
 
         [Fact]
         public void Returns_NullRecommendationInfo_If_No_RecommendationPage_Exists_ForMaturity()
         {
-            category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
             {
                 SectionId = "Section1",
                 Completed = 1,
                 Maturity = "Low"
             });
 
-            _getSubmissionStatusesQuery.GetCategoryWithCompletedSectionStatuses(category).Returns(category);
+            _getSubmissionStatusesQuery.GetCategoryWithCompletedSectionStatuses(_category).Returns(_category);
 
-            var result = _recommendationsComponent.Invoke(category) as ViewViewComponentResult;
+            var result = _recommendationsComponent.Invoke(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -114,16 +112,16 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public void DoesNotReturn_RecommendationInfo_If_Section_IsNot_Completed()
         {
-            category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
             {
                 SectionId = "Section1",
                 Completed = 0,
                 Maturity = null
             });
 
-            _getSubmissionStatusesQuery.GetCategoryWithCompletedSectionStatuses(category).Returns(category);
+            _getSubmissionStatusesQuery.GetCategoryWithCompletedSectionStatuses(_category).Returns(_category);
 
-            var result = _recommendationsComponent.Invoke(category) as ViewViewComponentResult;
+            var result = _recommendationsComponent.Invoke(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -141,9 +139,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public void Returns_Null_If_Category_IsNot_Completed()
         {
-            category.Completed = 0;
+            _category.Completed = 0;
 
-            var result = _recommendationsComponent.Invoke(category) as ViewViewComponentResult;
+            var result = _recommendationsComponent.Invoke(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
