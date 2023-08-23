@@ -4,7 +4,9 @@ namespace Dfe.PlanTech.Web.Models
 {
     public class CategorySectionViewComponentViewModel
     {
-        public int CompletedCount { get; init; }
+        public int CompletedSectionCount { get; init; }
+
+        public int TotalSectionCount { get; init; }
 
         public IEnumerable<CategorySectionDto> CategorySectionDto { get; init; } = null!;
     }

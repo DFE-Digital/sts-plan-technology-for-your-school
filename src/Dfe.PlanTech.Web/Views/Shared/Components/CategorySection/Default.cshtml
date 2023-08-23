@@ -1,8 +1,8 @@
 @model CategorySectionViewComponentViewModel
 
 <h3 class="govuk-heading-s govuk-!-margin-bottom-2">Progress</h3>
-<p class="govuk-body govuk-!-margin-bottom-5">You have completed <strong>@Model.CompletedCount of
-        @Model.CategorySectionDto.Count()</strong> sections.</p>
+<p class="govuk-body govuk-!-margin-bottom-5">You have completed <strong>@Model.CompletedSectionCount of
+        @Model.TotalSectionCount</strong> sections.</p>
 
 <task-list>
     @foreach (var categorySectionDtoItem in Model.CategorySectionDto)

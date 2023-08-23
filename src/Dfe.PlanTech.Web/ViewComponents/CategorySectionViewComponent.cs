@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Domain.CategorySection;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Web.Models;
@@ -9,17 +10,22 @@ namespace Dfe.PlanTech.Web.ViewComponents
     public class CategorySectionViewComponent : ViewComponent
     {
         private readonly ILogger<CategorySectionViewComponent> _logger;
+        private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
 
-        public CategorySectionViewComponent(ILogger<CategorySectionViewComponent> logger)
+        public CategorySectionViewComponent(ILogger<CategorySectionViewComponent> logger, IGetSubmissionStatusesQuery getSubmissionStatusesQuery)
         {
             _logger = logger;
+            _getSubmissionStatusesQuery = getSubmissionStatusesQuery;
         }
 
         public IViewComponentResult Invoke(ICategory category)
         {
+            category = _getSubmissionStatusesQuery.GetCategoryWithCompletedSectionStatuses(category);
+
             var categorySectionViewModel = new CategorySectionViewComponentViewModel()
             {
-                CompletedCount = category.SectionStatuses.Where(sectionStatus => sectionStatus.Completed == 1).ToList().Count,
+                CompletedSectionCount = category.Completed,
+                TotalSectionCount = category.Sections.Count(),
                 CategorySectionDto = _GetCategorySectionViewComponentViewModel(category)
             };
 

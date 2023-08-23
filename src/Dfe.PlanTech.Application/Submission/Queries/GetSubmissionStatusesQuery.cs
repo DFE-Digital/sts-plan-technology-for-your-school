@@ -14,6 +14,14 @@ namespace Dfe.PlanTech.Application.Submission.Queries
             _db = db;
         }
 
+        public ICategory GetCategoryWithCompletedSectionStatuses(ICategory category)
+        {
+            category.SectionStatuses = GetSectionSubmissionStatuses(category.Sections);
+            category.Completed = category.SectionStatuses.Where(sectionStatus => sectionStatus.Completed == 1).Count();
+
+            return category;
+        }
+
         public IList<SectionStatuses> GetSectionSubmissionStatuses(ISection[] sections)
         {
             string sectionStringify = string.Empty;

@@ -1,12 +1,6 @@
-@using Dfe.PlanTech.Application.Submission.Interfaces;
 @model Dfe.PlanTech.Domain.Questionnaire.Interfaces.ICategory;
-@inject IGetSubmissionStatusesQuery query
 
 @{
-    Model.SectionStatuses = query.GetSectionSubmissionStatuses(Model.Sections); // ..
-    var completedCount = Model.SectionStatuses.Where(x => x.Completed == 1).ToList().Count; // ..
-    Model.Completed = completedCount; // TODO: Integrate this block into the ViewComponent
-
     await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Header);
     foreach (var content in Model.Content)
     {
@@ -14,9 +8,5 @@
     }
 }
 
-<h3 class="govuk-heading-s govuk-!-margin-bottom-2">Progress</h3>
-<p class="govuk-body govuk-!-margin-bottom-5">You have completed <strong>@completedCount of
-        @Model.Sections.Count()</strong> sections.</p>
-
-@await Component.InvokeAsync("CategorySection", new { category = Model});
-@await Component.InvokeAsync("Recommendations", new { category = Model });
+@await Component.InvokeAsync("CategorySection", new { category = Model })
+@await Component.InvokeAsync("Recommendations", new { category = Model })

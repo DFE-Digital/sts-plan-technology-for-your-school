@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -7,15 +8,20 @@ namespace Dfe.PlanTech.Web.ViewComponents
     public class RecommendationsViewComponent : ViewComponent
     {
         private readonly ILogger<RecommendationsViewComponent> _logger;
+        private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
 
-        public RecommendationsViewComponent(ILogger<RecommendationsViewComponent> logger)
+        public RecommendationsViewComponent(ILogger<RecommendationsViewComponent> logger, IGetSubmissionStatusesQuery getSubmissionStatusesQuery)
         {
             _logger = logger;
+            _getSubmissionStatusesQuery = getSubmissionStatusesQuery;
         }
 
         public IViewComponentResult Invoke(ICategory category)
         {
+            category = _getSubmissionStatusesQuery.GetCategoryWithCompletedSectionStatuses(category);
+
             var recommendationsViewComponentViewModel = category.Completed >= 1 ? _GetRecommendationsViewComponentViewModel(category) : null;
+
             return View(recommendationsViewComponentViewModel);
         }
 
