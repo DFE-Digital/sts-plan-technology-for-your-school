@@ -42,20 +42,30 @@ namespace Dfe.PlanTech.Web.ViewComponents
                     Name = categorySection.Name
                 };
 
-                var sectionStatusCompleted = category.SectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId == categorySection.Sys.Id)?.Completed;
+                if (string.IsNullOrWhiteSpace(categorySectionDto.Slug)) categorySectionDto.Slug = null;
 
-                if (sectionStatusCompleted != null)
+                if (categorySectionDto.Slug != null)
                 {
-                    categorySectionDto.TagColour = (sectionStatusCompleted == 1 ? TagColour.DarkBlue : TagColour.Green).ToString();
-                    categorySectionDto.TagText = sectionStatusCompleted == 1 ? "COMPLETE" : "STARTED";
+                    var sectionStatusCompleted = category.SectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId == categorySection.Sys.Id)?.Completed;
+
+                    if (sectionStatusCompleted != null)
+                    {
+                        categorySectionDto.TagColour = (sectionStatusCompleted == 1 ? TagColour.DarkBlue : TagColour.Green).ToString();
+                        categorySectionDto.TagText = sectionStatusCompleted == 1 ? "COMPLETE" : "STARTED";
+                    }
+                    else
+                    {
+                        categorySectionDto.TagColour = TagColour.Grey.ToString();
+                        categorySectionDto.TagText = "NOT STARTED";
+                    }
+
+                    TempData[categorySectionDto.Slug] = categorySectionDto.Name + "+" + categorySection.Sys.Id;
                 }
                 else
                 {
-                    categorySectionDto.TagColour = TagColour.Grey.ToString();
-                    categorySectionDto.TagText = "NOT STARTED";
+                    _logger.LogError("No Slug found for Subtopic with ID: {categorySectionId}", categorySection.Sys.Id);
+                    categorySectionDto.NoSlugForSubtopicErrorMessage = String.Format("{0} unavailable", categorySection.Name);
                 }
-
-                TempData[categorySectionDto.Slug] = categorySectionDto.Name + "+" + categorySection.Sys.Id;
 
                 yield return categorySectionDto;
             }
