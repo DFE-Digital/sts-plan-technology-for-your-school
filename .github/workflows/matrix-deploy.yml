@@ -1,6 +1,7 @@
 name: Multi stage build & deploy 
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main" ]
     paths:
