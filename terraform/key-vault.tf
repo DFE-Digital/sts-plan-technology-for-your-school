@@ -7,7 +7,7 @@ resource "azurerm_key_vault" "vault" {
   soft_delete_retention_days = 90
   enable_rbac_authorization  = false
   tags                       = local.tags
-  purge_protection_enabled   = true
+  purge_protection_enabled   = false
 }
 
 resource "azurerm_key_vault_access_policy" "vault_access_policy_tf" {
