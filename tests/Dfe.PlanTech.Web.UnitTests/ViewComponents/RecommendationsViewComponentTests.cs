@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
@@ -11,12 +12,16 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 {
     public class RecommendationsViewComponentTests
     {
+        private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
         private readonly RecommendationsViewComponent _recommendationsComponent;
+
         private ICategory category;
 
         public RecommendationsViewComponentTests()
         {
-            _recommendationsComponent = new RecommendationsViewComponent(Substitute.For<ILogger<RecommendationsViewComponent>>());
+            _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
+
+            _recommendationsComponent = new RecommendationsViewComponent(Substitute.For<ILogger<RecommendationsViewComponent>>(), _getSubmissionStatusesQuery);
 
             category = new Category()
             {
@@ -47,14 +52,16 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public void Returns_RecommendationInfo_If_It_Exists_ForMaturity()
         {
-            var result = _recommendationsComponent.Invoke(category) as ViewViewComponentResult;
-
             category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
             {
                 SectionId = "Section1",
                 Completed = 1,
                 Maturity = "High"
             });
+
+            _getSubmissionStatusesQuery.GetCategoryWithCompletedSectionStatuses(category).Returns(category);
+
+            var result = _recommendationsComponent.Invoke(category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -82,6 +89,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Completed = 1,
                 Maturity = "Low"
             });
+
+            _getSubmissionStatusesQuery.GetCategoryWithCompletedSectionStatuses(category).Returns(category);
 
             var result = _recommendationsComponent.Invoke(category) as ViewViewComponentResult;
 
@@ -111,6 +120,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Completed = 0,
                 Maturity = null
             });
+
+            _getSubmissionStatusesQuery.GetCategoryWithCompletedSectionStatuses(category).Returns(category);
 
             var result = _recommendationsComponent.Invoke(category) as ViewViewComponentResult;
 
