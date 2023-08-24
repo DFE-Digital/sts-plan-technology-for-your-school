@@ -3,7 +3,7 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.TagHelpers.RichText;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Logging;
-using Moq;
+using NSubstitute;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.TagHelpers;
@@ -15,11 +15,8 @@ public class RichTextTagHelperTests
     {
         string content = "rich text tag";
 
-        var loggerMock = new Mock<ILogger<RichTextTagHelper>>();
-        loggerMock.Setup(LoggerMock.LogMethod<RichTextTagHelper>())
-                    .Verifiable();
-
-        var richTextRendererMock = new Mock<IRichTextRenderer>();
+        var loggerMock = Substitute.For<ILogger<RichTextTagHelper>>();
+        var richTextRendererMock = Substitute.For<IRichTextRenderer>();
 
         var context = new TagHelperContext(tagName: "rich-text",
                                                 allAttributes: new TagHelperAttributeList(),
@@ -35,11 +32,11 @@ public class RichTextTagHelperTests
                                             return Task.FromResult<TagHelperContent>(tagHelperContent);
                                         });
 
-        var richTextTagHelper = new RichTextTagHelper(loggerMock.Object, richTextRendererMock.Object);
+        var richTextTagHelper = new RichTextTagHelper(loggerMock, richTextRendererMock);
 
         await richTextTagHelper.ProcessAsync(context, output);
-
-        loggerMock.Verify(LoggerMock.LogMethod<RichTextTagHelper>());
+        Assert.Equal("rich-text-tag", output.TagName);
+        Assert.Equal("richtext-test", context.UniqueId);
     }
 
     [Fact]
@@ -48,10 +45,10 @@ public class RichTextTagHelperTests
         string content = "rich text tag";
         string expectedHtml = "has executed";
 
-        var loggerMock = new Mock<ILogger<RichTextTagHelper>>();
+        var loggerMock = Substitute.For<ILogger<RichTextTagHelper>>();
 
-        var richTextRendererMock = new Mock<IRichTextRenderer>();
-        richTextRendererMock.Setup(renderer => renderer.ToHtml(It.IsAny<IRichTextContent>())).Returns(expectedHtml);
+        var richTextRendererMock = Substitute.For<IRichTextRenderer>();
+        richTextRendererMock.ToHtml(Arg.Any<IRichTextContent>()).Returns(expectedHtml);
 
         var context = new TagHelperContext(tagName: "rich-text",
                                             allAttributes: new TagHelperAttributeList(),
@@ -67,7 +64,7 @@ public class RichTextTagHelperTests
                                             return Task.FromResult<TagHelperContent>(tagHelperContent);
                                         });
 
-        var richTextTagHelper = new RichTextTagHelper(loggerMock.Object, richTextRendererMock.Object)
+        var richTextTagHelper = new RichTextTagHelper(loggerMock, richTextRendererMock)
         {
             Content = new RichTextContent()
             {

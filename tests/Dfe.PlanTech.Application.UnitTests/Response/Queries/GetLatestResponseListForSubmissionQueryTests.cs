@@ -1,20 +1,20 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Response.Queries;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Moq;
+using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Response.Queries
 {
     public class GetLatestResponseListForSubmissionQueryTests
     {
-        private readonly Mock<IPlanTechDbContext> _planTechDbContextMock;
+        private IPlanTechDbContext _planTechDbContextMock;
         private readonly GetLatestResponseListForSubmissionQuery _getLatestResponseListForSubmissionQuery;
 
         public GetLatestResponseListForSubmissionQueryTests()
         {
-            _planTechDbContextMock = new Mock<IPlanTechDbContext>();
+            _planTechDbContextMock = Substitute.For<IPlanTechDbContext>();
 
-            _getLatestResponseListForSubmissionQuery = new GetLatestResponseListForSubmissionQuery(_planTechDbContextMock.Object);
+            _getLatestResponseListForSubmissionQuery = new GetLatestResponseListForSubmissionQuery(_planTechDbContextMock);
         }
 
         [Fact]
@@ -54,8 +54,8 @@ namespace Dfe.PlanTech.Application.UnitTests.Response.Queries
                 }
             };
 
-            _planTechDbContextMock.Setup(m => m.GetResponses).Returns(responseList.AsQueryable());
-            _planTechDbContextMock.Setup(m => m.ToListAsync(It.IsAny<IQueryable<QuestionWithAnswer>>())).ReturnsAsync(questionWithAnswerList);
+            _planTechDbContextMock.GetResponses.Returns(responseList.AsQueryable());
+            _planTechDbContextMock.ToListAsync(Arg.Any<IQueryable<QuestionWithAnswer>>()).Returns(Task.FromResult(questionWithAnswerList));
 
             var result = await _getLatestResponseListForSubmissionQuery.GetLatestResponseListForSubmissionBy(1);
 
@@ -135,8 +135,8 @@ namespace Dfe.PlanTech.Application.UnitTests.Response.Queries
                 }
             };
 
-            _planTechDbContextMock.Setup(m => m.GetResponses).Returns(responseList.AsQueryable());
-            _planTechDbContextMock.Setup(m => m.ToListAsync(It.IsAny<IQueryable<QuestionWithAnswer>>())).ReturnsAsync(questionWithAnswerList);
+            _planTechDbContextMock.GetResponses.Returns(responseList.AsQueryable());
+            _planTechDbContextMock.ToListAsync(Arg.Any<IQueryable<QuestionWithAnswer>>()).Returns(Task.FromResult(questionWithAnswerList));
 
             var result = await _getLatestResponseListForSubmissionQuery.GetResponseListByDateCreated(1);
 
