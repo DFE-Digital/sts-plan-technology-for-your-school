@@ -235,5 +235,42 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.NotNull(categorySectionDto.NoSlugForSubtopicErrorMessage);
             Assert.Equal("Test Section 1 unavailable", categorySectionDto.NoSlugForSubtopicErrorMessage);
         }
+
+        [Fact]
+        public void Returns_ProgressRetrievalError_When_ProgressCanNotBeRetrieved()
+        {
+            _category.SectionStatuses = null!;
+
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
+
+            var result = _categorySectionViewComponent.Invoke(_category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model;
+            Assert.NotNull(model);
+
+            var unboxed = model as CategorySectionViewComponentViewModel;
+            Assert.NotNull(unboxed);
+            Assert.Equal("Unable to retrieve progress, please refresh your browser.", unboxed.ProgressRetrievalErrorMessage);
+
+            var categorySectionDtoList = unboxed.CategorySectionDto as IEnumerable<CategorySectionDto>;
+
+            Assert.NotNull(categorySectionDtoList);
+
+            categorySectionDtoList = categorySectionDtoList.ToList();
+            Assert.NotEmpty(categorySectionDtoList);
+
+            var categorySectionDto = categorySectionDtoList.FirstOrDefault();
+
+            Assert.NotNull(categorySectionDto);
+
+            Assert.Equal("section-1", categorySectionDto.Slug);
+            Assert.Equal("Test Section 1", categorySectionDto.Name);
+            Assert.Equal("Red", categorySectionDto.TagColour);
+            Assert.Equal("UNABLE TO RETRIEVE STATUS", categorySectionDto.TagText);
+            Assert.Null(categorySectionDto.NoSlugForSubtopicErrorMessage);
+        }
     }
 }

@@ -62,7 +62,7 @@ namespace Dfe.PlanTech.Web.ViewComponents
                     else
                     {
                         categorySectionDto.TagColour = TagColour.Red.ToString();
-                        categorySectionDto.TagText = "Unable to retrieve status";
+                        categorySectionDto.TagText = "UNABLE TO RETRIEVE STATUS";
                     }
 
                     TempData[categorySectionDto.Slug] = categorySectionDto.Name + "+" + categorySection.Sys.Id;
