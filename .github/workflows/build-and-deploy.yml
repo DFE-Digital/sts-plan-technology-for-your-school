@@ -105,11 +105,19 @@ jobs:
           esac
           echo "ADDITIONAL_ARGS=\"$ENV_ARGS $ADDITIONAL_ARGUMENTS\"" >> $GITHUB_ENV
 
+      - name: Set az_keyvault_name based on environment
+        run: |
+          if [ "${{ inputs.environment }}" == "staging" ]; then
+            echo "az_keyvault_name=${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-stg-kv" >> $GITHUB_ENV
+          else
+            echo "az_keyvault_name=${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv" >> $GITHUB_ENV
+          fi
+            
       - name: Build and run database upgrader
         uses: ./.github/actions/build-and-run-database-upgrader
         with:
           dotnet_version: ${{ vars.DOTNET_VERSION }}
-          az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}${{ secrets.OPTIONAL_KV_SUFFIX }}-kv
+          az_keyvault_name: ${{ env.az_keyvault_name }}
           az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
           az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
           az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
