@@ -15,8 +15,8 @@ public class RichTextTagHelperTests
     {
         string content = "rich text tag";
 
-        var loggerMock = Substitute.For<ILogger<RichTextTagHelper>>();
-        var richTextRendererMock = Substitute.For<IRichTextRenderer>();
+        var loggerSubstitute = Substitute.For<ILogger<RichTextTagHelper>>();
+        var richTextRendererSubstitute = Substitute.For<IRichTextRenderer>();
 
         var context = new TagHelperContext(tagName: "rich-text",
                                                 allAttributes: new TagHelperAttributeList(),
@@ -32,7 +32,7 @@ public class RichTextTagHelperTests
                                             return Task.FromResult<TagHelperContent>(tagHelperContent);
                                         });
 
-        var richTextTagHelper = new RichTextTagHelper(loggerMock, richTextRendererMock);
+        var richTextTagHelper = new RichTextTagHelper(loggerSubstitute, richTextRendererSubstitute);
 
         await richTextTagHelper.ProcessAsync(context, output);
         Assert.Equal("rich-text-tag", output.TagName);
@@ -45,10 +45,10 @@ public class RichTextTagHelperTests
         string content = "rich text tag";
         string expectedHtml = "has executed";
 
-        var loggerMock = Substitute.For<ILogger<RichTextTagHelper>>();
+        var loggerSubstitute = Substitute.For<ILogger<RichTextTagHelper>>();
 
-        var richTextRendererMock = Substitute.For<IRichTextRenderer>();
-        richTextRendererMock.ToHtml(Arg.Any<IRichTextContent>()).Returns(expectedHtml);
+        var richTextRendererSubstitute = Substitute.For<IRichTextRenderer>();
+        richTextRendererSubstitute.ToHtml(Arg.Any<IRichTextContent>()).Returns(expectedHtml);
 
         var context = new TagHelperContext(tagName: "rich-text",
                                             allAttributes: new TagHelperAttributeList(),
@@ -64,7 +64,7 @@ public class RichTextTagHelperTests
                                             return Task.FromResult<TagHelperContent>(tagHelperContent);
                                         });
 
-        var richTextTagHelper = new RichTextTagHelper(loggerMock, richTextRendererMock)
+        var richTextTagHelper = new RichTextTagHelper(loggerSubstitute, richTextRendererSubstitute)
         {
             Content = new RichTextContent()
             {

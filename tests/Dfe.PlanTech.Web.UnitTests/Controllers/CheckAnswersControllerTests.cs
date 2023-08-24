@@ -25,10 +25,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private readonly CheckAnswersController _checkAnswersController;
         private readonly ProcessCheckAnswerDtoCommand _processCheckAnswerDtoCommand;
 
-        private IGetLatestResponseListForSubmissionQuery _getLatestResponseListForSubmissionQueryMock;
-        private IContentRepository _contentRepositoryMock;
-        private GetPageQuery _getPageQueryMock;
-        private ICalculateMaturityCommand _calculateMaturityCommandMock;
+        private IGetLatestResponseListForSubmissionQuery _getLatestResponseListForSubmissionQuerySubstitute;
+        private IContentRepository _contentRepositorySubstitute;
+        private GetPageQuery _getPageQuerySubstitute;
+        private ICalculateMaturityCommand _calculateMaturityCommandSubstitute;
 
         private const int SubmissionId = 1;
         private const string SectionId = "SectionId";
@@ -65,30 +65,30 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
         public CheckAnswersControllerTests()
         {
-            ILogger<CheckAnswersController> loggerMock = Substitute.For<ILogger<CheckAnswersController>>();
+            ILogger<CheckAnswersController> loggerSubstitute = Substitute.For<ILogger<CheckAnswersController>>();
 
-            IQuestionnaireCacher questionnaireCacherMock = Substitute.For<IQuestionnaireCacher>();
-            _contentRepositoryMock = SetupRepositoryMock();
+            IQuestionnaireCacher questionnaireCacherSubstitute = Substitute.For<IQuestionnaireCacher>();
+            _contentRepositorySubstitute = SetupRepositorySubstitute();
 
-            GetSectionQuery getSectionQueryMock = Substitute.For<GetSectionQuery>(_contentRepositoryMock);
-            _getPageQueryMock = Substitute.For<GetPageQuery>(questionnaireCacherMock, _contentRepositoryMock);
+            GetSectionQuery getSectionQuerySubstitute = Substitute.For<GetSectionQuery>(_contentRepositorySubstitute);
+            _getPageQuerySubstitute = Substitute.For<GetPageQuery>(questionnaireCacherSubstitute, _contentRepositorySubstitute);
 
-            _getLatestResponseListForSubmissionQueryMock = Substitute.For<IGetLatestResponseListForSubmissionQuery>();
-            _calculateMaturityCommandMock = Substitute.For<ICalculateMaturityCommand>();
+            _getLatestResponseListForSubmissionQuerySubstitute = Substitute.For<IGetLatestResponseListForSubmissionQuery>();
+            _calculateMaturityCommandSubstitute = Substitute.For<ICalculateMaturityCommand>();
 
-            ITempDataDictionary tempDataMock = Substitute.For<ITempDataDictionary>();
+            ITempDataDictionary tempDataSubstitute = Substitute.For<ITempDataDictionary>();
 
-            _processCheckAnswerDtoCommand = new ProcessCheckAnswerDtoCommand(getSectionQueryMock, _getLatestResponseListForSubmissionQueryMock, _calculateMaturityCommandMock);
+            _processCheckAnswerDtoCommand = new ProcessCheckAnswerDtoCommand(getSectionQuerySubstitute, _getLatestResponseListForSubmissionQuerySubstitute, _calculateMaturityCommandSubstitute);
 
-            _checkAnswersController = new CheckAnswersController(loggerMock);
+            _checkAnswersController = new CheckAnswersController(loggerSubstitute);
 
-            _checkAnswersController.TempData = tempDataMock;
+            _checkAnswersController.TempData = tempDataSubstitute;
         }
 
-        private IContentRepository SetupRepositoryMock()
+        private IContentRepository SetupRepositorySubstitute()
         {
-            var repositoryMock = Substitute.For<IContentRepository>();
-            repositoryMock.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns((callInfo) =>
+            var repositorySubstitute = Substitute.For<IContentRepository>();
+            repositorySubstitute.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns((callInfo) =>
             {
                 IGetEntitiesOptions options = (IGetEntitiesOptions)callInfo[0];
                 if (options?.Queries != null)
@@ -103,7 +103,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 }
                 return Array.Empty<Page>();
             });
-            return repositoryMock;
+            return repositorySubstitute;
         }
 
         [Fact]
@@ -120,12 +120,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 }
             };
 
-            _getLatestResponseListForSubmissionQueryMock.GetLatestResponseListForSubmissionBy(SubmissionId).Returns(questionWithAnswerList);
-            _contentRepositoryMock.GetEntityById<Section>(SectionId, 3, CancellationToken.None).Returns(_section);
+            _getLatestResponseListForSubmissionQuerySubstitute.GetLatestResponseListForSubmissionBy(SubmissionId).Returns(questionWithAnswerList);
+            _contentRepositorySubstitute.GetEntityById<Section>(SectionId, 3, CancellationToken.None).Returns(_section);
 
             _checkAnswersController.TempData[TempDataConstants.CheckAnswers] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataCheckAnswers() { SubmissionId = SubmissionId, SectionId = SectionId, SectionName = SectionName });
 
-            var result = await _checkAnswersController.CheckAnswersPage(_processCheckAnswerDtoCommand, _getPageQueryMock);
+            var result = await _checkAnswersController.CheckAnswersPage(_processCheckAnswerDtoCommand, _getPageQuerySubstitute);
 
             Assert.IsType<ViewResult>(result);
 
@@ -149,12 +149,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 }
             };
 
-            _getLatestResponseListForSubmissionQueryMock.GetLatestResponseListForSubmissionBy(SubmissionId).Returns(questionWithAnswerList);
-            _contentRepositoryMock.GetEntityById<Section>(SectionId, 3, CancellationToken.None).Returns(_section);
+            _getLatestResponseListForSubmissionQuerySubstitute.GetLatestResponseListForSubmissionBy(SubmissionId).Returns(questionWithAnswerList);
+            _contentRepositorySubstitute.GetEntityById<Section>(SectionId, 3, CancellationToken.None).Returns(_section);
 
             _checkAnswersController.TempData[TempDataConstants.CheckAnswers] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataCheckAnswers() { SubmissionId = SubmissionId, SectionId = SectionId, SectionName = SectionName });
 
-            var result = await _checkAnswersController.CheckAnswersPage(_processCheckAnswerDtoCommand, _getPageQueryMock);
+            var result = await _checkAnswersController.CheckAnswersPage(_processCheckAnswerDtoCommand, _getPageQuerySubstitute);
 
             Assert.IsType<ViewResult>(result);
 
@@ -203,21 +203,21 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 }
             };
 
-            _getLatestResponseListForSubmissionQueryMock.GetLatestResponseListForSubmissionBy(SubmissionId).Returns(questionWithAnswerList);
-            _contentRepositoryMock.GetEntityById<Section?>(SectionId, 3, CancellationToken.None).Returns((Section?)null);
+            _getLatestResponseListForSubmissionQuerySubstitute.GetLatestResponseListForSubmissionBy(SubmissionId).Returns(questionWithAnswerList);
+            _contentRepositorySubstitute.GetEntityById<Section?>(SectionId, 3, CancellationToken.None).Returns((Section?)null);
 
             _checkAnswersController.TempData[TempDataConstants.CheckAnswers] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataCheckAnswers() { SubmissionId = SubmissionId, SectionId = SectionId, SectionName = SectionName });
 
-            await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(_processCheckAnswerDtoCommand, _getPageQueryMock));
+            await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(_processCheckAnswerDtoCommand, _getPageQuerySubstitute));
         }
 
         [Fact]
         public async Task CheckAnswersController_CheckAnswers_Null_QuestionWithAnswerList_ThrowsException()
         {
-            _getLatestResponseListForSubmissionQueryMock.GetLatestResponseListForSubmissionBy(SubmissionId).ReturnsNull();
-            _contentRepositoryMock.GetEntityById<Section?>(SectionId, 3, CancellationToken.None).Returns(_section);
+            _getLatestResponseListForSubmissionQuerySubstitute.GetLatestResponseListForSubmissionBy(SubmissionId).ReturnsNull();
+            _contentRepositorySubstitute.GetEntityById<Section?>(SectionId, 3, CancellationToken.None).Returns(_section);
 
-            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _checkAnswersController.CheckAnswersPage(_processCheckAnswerDtoCommand, _getPageQueryMock));
+            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _checkAnswersController.CheckAnswersPage(_processCheckAnswerDtoCommand, _getPageQuerySubstitute));
         }
 
         [Fact]
@@ -234,10 +234,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 }
             };
 
-            _getLatestResponseListForSubmissionQueryMock.GetLatestResponseListForSubmissionBy(SubmissionId).Returns(Task.FromResult(questionWithAnswerList));
-            _contentRepositoryMock.GetEntityById<Section?>(SectionId, 3, CancellationToken.None).Returns(_section);
+            _getLatestResponseListForSubmissionQuerySubstitute.GetLatestResponseListForSubmissionBy(SubmissionId).Returns(Task.FromResult(questionWithAnswerList));
+            _contentRepositorySubstitute.GetEntityById<Section?>(SectionId, 3, CancellationToken.None).Returns(_section);
 
-            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _checkAnswersController.CheckAnswersPage(_processCheckAnswerDtoCommand, _getPageQueryMock));
+            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _checkAnswersController.CheckAnswersPage(_processCheckAnswerDtoCommand, _getPageQuerySubstitute));
         }
 
         [Fact]

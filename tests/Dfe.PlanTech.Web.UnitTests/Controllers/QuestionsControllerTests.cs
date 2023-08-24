@@ -135,35 +135,35 @@ public class QuestionsControllerTests
 
        };
 
-    private IPlanTechDbContext _databaseMock;
+    private IPlanTechDbContext _databaseSubstitute;
     private readonly QuestionsController _controller;
     private readonly SubmitAnswerCommand _submitAnswerCommand;
-    private IQuestionnaireCacher _questionnaireCacherMock;
-    private IGetLatestResponseListForSubmissionQuery _getLatestResponseListForSubmissionQueryMock;
+    private IQuestionnaireCacher _questionnaireCacherSubstitute;
+    private IGetLatestResponseListForSubmissionQuery _getLatestResponseListForSubmissionQuerySubstitute;
     private readonly ICacher _cacher;
 
     public QuestionsControllerTests()
     {
-        IContentRepository repositoryMock = MockRepository();
-        _questionnaireCacherMock = MockQuestionnaireCacher();
+        IContentRepository repositorySubstitute = SubstituteRepository();
+        _questionnaireCacherSubstitute = SubstituteQuestionnaireCacher();
 
-        var mockLogger = Substitute.For<ILogger<QuestionsController>>();
-        _databaseMock = Substitute.For<IPlanTechDbContext>();
+        var Logger = Substitute.For<ILogger<QuestionsController>>();
+        _databaseSubstitute = Substitute.For<IPlanTechDbContext>();
         var user = Substitute.For<IUser>();
 
-        var getQuestionnaireQuery = new Application.Questionnaire.Queries.GetQuestionQuery(_questionnaireCacherMock, repositoryMock);
+        var getQuestionnaireQuery = new Application.Questionnaire.Queries.GetQuestionQuery(_questionnaireCacherSubstitute, repositorySubstitute);
 
-        ICreateQuestionCommand createQuestionCommand = new CreateQuestionCommand(_databaseMock);
-        IRecordQuestionCommand recordQuestionCommand = new RecordQuestionCommand(_databaseMock);
+        ICreateQuestionCommand createQuestionCommand = new CreateQuestionCommand(_databaseSubstitute);
+        IRecordQuestionCommand recordQuestionCommand = new RecordQuestionCommand(_databaseSubstitute);
 
-        IGetQuestionQuery getQuestionQuery = new Application.Submission.Queries.GetQuestionQuery(_databaseMock);
-        ICreateAnswerCommand createAnswerCommand = new CreateAnswerCommand(_databaseMock);
-        IRecordAnswerCommand recordAnswerCommand = new RecordAnswerCommand(_databaseMock);
-        ICreateResponseCommand createResponseCommand = new CreateResponseCommand(_databaseMock);
-        IGetResponseQuery getResponseQuery = new GetResponseQuery(_databaseMock);
-        IGetSubmissionQuery getSubmissionQuery = new GetSubmissionQuery(_databaseMock);
-        ICreateSubmissionCommand createSubmissionCommand = new CreateSubmissionCommand(_databaseMock);
-        _getLatestResponseListForSubmissionQueryMock = Substitute.For<IGetLatestResponseListForSubmissionQuery>();
+        IGetQuestionQuery getQuestionQuery = new Application.Submission.Queries.GetQuestionQuery(_databaseSubstitute);
+        ICreateAnswerCommand createAnswerCommand = new CreateAnswerCommand(_databaseSubstitute);
+        IRecordAnswerCommand recordAnswerCommand = new RecordAnswerCommand(_databaseSubstitute);
+        ICreateResponseCommand createResponseCommand = new CreateResponseCommand(_databaseSubstitute);
+        IGetResponseQuery getResponseQuery = new GetResponseQuery(_databaseSubstitute);
+        IGetSubmissionQuery getSubmissionQuery = new GetSubmissionQuery(_databaseSubstitute);
+        ICreateSubmissionCommand createSubmissionCommand = new CreateSubmissionCommand(_databaseSubstitute);
+        _getLatestResponseListForSubmissionQuerySubstitute = Substitute.For<IGetLatestResponseListForSubmissionQuery>();
 
         var httpContext = new DefaultHttpContext();
         var tempData = new TempDataDictionary(httpContext, Substitute.For<ITempDataProvider>());
@@ -172,26 +172,26 @@ public class QuestionsControllerTests
         GetSubmitAnswerQueries getSubmitAnswerQueries = new GetSubmitAnswerQueries(getQuestionQuery, getResponseQuery, getSubmissionQuery, getQuestionnaireQuery, user);
         RecordSubmitAnswerCommands recordSubmitAnswerCommands = new RecordSubmitAnswerCommands(recordQuestionCommand, recordAnswerCommand, createSubmissionCommand, createResponseCommand);
 
-        _submitAnswerCommand = new SubmitAnswerCommand(getSubmitAnswerQueries, recordSubmitAnswerCommands, _getLatestResponseListForSubmissionQueryMock);
+        _submitAnswerCommand = new SubmitAnswerCommand(getSubmitAnswerQueries, recordSubmitAnswerCommands, _getLatestResponseListForSubmissionQuerySubstitute);
 
-        _controller = new QuestionsController(mockLogger) { TempData = tempData };
+        _controller = new QuestionsController(Logger) { TempData = tempData };
 
         _cacher = new Cacher(new CacheOptions(), new MemoryCache(new MemoryCacheOptions()));
     }
 
-    private static IQuestionnaireCacher MockQuestionnaireCacher()
+    private static IQuestionnaireCacher SubstituteQuestionnaireCacher()
     {
-        var mock = Substitute.For<IQuestionnaireCacher>();
-        mock.Cached.Returns(new QuestionnaireCache());
-        mock.When(x => x.SaveCache(Arg.Any<QuestionnaireCache>()));
+        var substitute = Substitute.For<IQuestionnaireCacher>();
+        substitute.Cached.Returns(new QuestionnaireCache());
+        substitute.When(x => x.SaveCache(Arg.Any<QuestionnaireCache>()));
 
-        return mock;
+        return substitute;
     }
 
-    private IContentRepository MockRepository()
+    private IContentRepository SubstituteRepository()
     {
-        var repositoryMock = Substitute.For<IContentRepository>();
-        repositoryMock.GetEntities<Question>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns((callInfo) =>
+        var repositorySubstitute = Substitute.For<IContentRepository>();
+        repositorySubstitute.GetEntities<Question>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns((callInfo) =>
         {
             IGetEntitiesOptions options = (IGetEntitiesOptions)callInfo[0];
             if (options?.Queries != null)
@@ -208,13 +208,13 @@ public class QuestionsControllerTests
             return Array.Empty<Question>();
         });
 
-        repositoryMock.GetEntityById<Question>(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
+        repositorySubstitute.GetEntityById<Question>(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
                       .Returns((callInfo) => 
                       {
                           string id = (string)callInfo[0];
                           return Task.FromResult(_questions.FirstOrDefault(question => question.Sys.Id == id));
                       });
-        return repositoryMock;
+        return repositorySubstitute;
     }
 
     [Fact]
@@ -262,7 +262,7 @@ public class QuestionsControllerTests
             };
 
         var query = Arg.Any<IQueryable<Submission>>();
-        _databaseMock.FirstOrDefaultAsync(query).Returns(submissionList[0]);
+        _databaseSubstitute.FirstOrDefaultAsync(query).Returns(submissionList[0]);
 
         _controller.TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = null, SubmissionId = null });
 
@@ -306,7 +306,7 @@ public class QuestionsControllerTests
             };
 
         var query = Arg.Any<IQueryable<Submission>>();
-        _databaseMock.FirstOrDefaultAsync(query).Returns(submissionList[0]);
+        _databaseSubstitute.FirstOrDefaultAsync(query).Returns(submissionList[0]);
 
         _controller.TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = null, SubmissionId = null });
 
@@ -360,9 +360,9 @@ public class QuestionsControllerTests
                 }
             };
         var query = Arg.Any<IQueryable<Domain.Submissions.Models.Submission>>();
-        _databaseMock.FirstOrDefaultAsync(query).Returns(submissionList[0]);
+        _databaseSubstitute.FirstOrDefaultAsync(query).Returns(submissionList[0]);
 
-        _getLatestResponseListForSubmissionQueryMock.GetResponseListByDateCreated(1).Returns(questionWithAnswerList);
+        _getLatestResponseListForSubmissionQuerySubstitute.GetResponseListByDateCreated(1).Returns(questionWithAnswerList);
 
         _controller.TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = null, SubmissionId = null });
 
@@ -417,9 +417,9 @@ public class QuestionsControllerTests
             };
 
         var query = Arg.Any<IQueryable<Domain.Submissions.Models.Submission>>();
-        _databaseMock.FirstOrDefaultAsync(query).Returns(submissionList[0]);
+        _databaseSubstitute.FirstOrDefaultAsync(query).Returns(submissionList[0]);
 
-        _getLatestResponseListForSubmissionQueryMock.GetResponseListByDateCreated(1).Returns(questionWithAnswerList);
+        _getLatestResponseListForSubmissionQuerySubstitute.GetResponseListByDateCreated(1).Returns(questionWithAnswerList);
 
         _controller.TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = null, SubmissionId = null });
 
@@ -515,8 +515,8 @@ public class QuestionsControllerTests
     //        ContentfulRef = "Question2"
     //    };
 
-    //    _databaseMock.GetQuestion(question => question.Id == 1).Returns(question);
-    //    _databaseMock.GetResponseList(response => response.SubmissionId == 1).Returns(
+    //    _databaseSubstitute.GetQuestion(question => question.Id == 1).Returns(question);
+    //    _databaseSubstitute.GetResponseList(response => response.SubmissionId == 1).Returns(
     //        new Domain.Responses.Models.Response[]
     //        {
     //                new Domain.Responses.Models.Response()

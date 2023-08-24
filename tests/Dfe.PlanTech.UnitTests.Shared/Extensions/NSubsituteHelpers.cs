@@ -7,12 +7,12 @@ namespace Dfe.PlanTech;
 
 public static class NSubstituteExtensions
 {
-  public static void HadMethodCalled<TMock>(this TMock mock, string methodName, IEnumerable<object>? expectedArguments = null, int timesCalled = 1)
-    where TMock : class
+  public static void HadMethodCalled<TSubstitute>(this TSubstitute substitute, string methodName, IEnumerable<object>? expectedArguments = null, int timesCalled = 1)
+    where TSubstitute : class
   {
-    var mockCalls = mock.ReceivedCalls();
+    var Calls = substitute.ReceivedCalls();
 
-    var methodCalls = mockCalls.Where(call => call.GetMethodInfo().Name == methodName).ToArray();
+    var methodCalls = Calls.Where(call => call.GetMethodInfo().Name == methodName).ToArray();
 
     Assert.Equal(timesCalled, methodCalls.Length);
 
