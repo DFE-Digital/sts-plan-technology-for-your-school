@@ -39,7 +39,6 @@ if (!builder.Environment.IsDevelopment())
 
 builder.Services.AddCaching();
 builder.Services.AddCQRSServices();
-builder.Services.AddContentfulServices(builder.Configuration);
 builder.Services.AddDfeSignIn(builder.Configuration);
 builder.Services.AddScoped<ComponentViewsFactory>();
 
@@ -47,6 +46,7 @@ builder.Services.AddDatabase(builder.Configuration);
 
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication();
+builder.Services.AddContentfulServices(builder.Configuration);
 
 var app = builder.Build();
 
