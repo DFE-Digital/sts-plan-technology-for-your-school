@@ -1,5 +1,5 @@
-using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Domain.CategorySection;
+using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
@@ -20,10 +20,12 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         private readonly CategorySectionViewComponent _categorySectionViewComponent;
 
         private ICategory _category;
+        private ILogger<Category> _loggerCategory;
 
         public CategorySectionViewComponentTests()
         {
             _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
+            _loggerCategory = Substitute.For<ILogger<Category>>();
 
             var httpContext = new DefaultHttpContext();
             var tempData = new TempDataDictionary(httpContext, Substitute.For<ITempDataProvider>());
@@ -35,7 +37,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _categorySectionViewComponent = new CategorySectionViewComponent(Substitute.For<ILogger<CategorySectionViewComponent>>(), _getSubmissionStatusesQuery);
             _categorySectionViewComponent.ViewComponentContext = viewComponentContext;
 
-            _category = new Category()
+            _category = new Category(_loggerCategory, _getSubmissionStatusesQuery)
             {
                 Completed = 1,
                 Sections = new Section[]

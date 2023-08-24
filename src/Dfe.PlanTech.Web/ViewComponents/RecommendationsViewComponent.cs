@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Application.Submission.Interfaces;
+using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +18,7 @@ namespace Dfe.PlanTech.Web.ViewComponents
 
         public IViewComponentResult Invoke(ICategory category)
         {
-            category = _getSubmissionStatusesQuery.GetCategoryWithCompletedSectionStatuses(category);
+            category.RetrieveSectionStatuses();
 
             var recommendationsViewComponentViewModel = category.Completed >= 1 ? _GetRecommendationsViewComponentViewModel(category) : null;
 

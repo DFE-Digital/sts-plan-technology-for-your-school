@@ -5,8 +5,6 @@ namespace Dfe.PlanTech.Domain.Interfaces
 {
     public interface IGetSubmissionStatusesQuery
     {
-        public ICategory GetCategoryWithCompletedSectionStatuses(ICategory category);
-
         IList<SectionStatuses> GetSectionSubmissionStatuses(ISection[] sections);
     }
 }

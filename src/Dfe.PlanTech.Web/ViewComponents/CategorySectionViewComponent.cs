@@ -1,5 +1,5 @@
-using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Domain.CategorySection;
+using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.TagHelpers.TaskList;
@@ -20,13 +20,14 @@ namespace Dfe.PlanTech.Web.ViewComponents
 
         public IViewComponentResult Invoke(ICategory category)
         {
-            category = _getSubmissionStatusesQuery.GetCategoryWithCompletedSectionStatuses(category);
+            category.RetrieveSectionStatuses();
 
             var categorySectionViewModel = new CategorySectionViewComponentViewModel()
             {
                 CompletedSectionCount = category.Completed,
                 TotalSectionCount = category.Sections.Count(),
-                CategorySectionDto = _GetCategorySectionViewComponentViewModel(category)
+                CategorySectionDto = _GetCategorySectionViewComponentViewModel(category),
+                ProgressRetrievalErrorMessage = category.RetrievalError ? "Unable to retrieve progress, please refresh your browser." : null
             };
 
             return View(categorySectionViewModel);
@@ -46,17 +47,25 @@ namespace Dfe.PlanTech.Web.ViewComponents
 
                 if (categorySectionDto.Slug != null)
                 {
-                    var sectionStatusCompleted = category.SectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId == categorySection.Sys.Id)?.Completed;
-
-                    if (sectionStatusCompleted != null)
+                    if (!category.RetrievalError)
                     {
-                        categorySectionDto.TagColour = (sectionStatusCompleted == 1 ? TagColour.DarkBlue : TagColour.Green).ToString();
-                        categorySectionDto.TagText = sectionStatusCompleted == 1 ? "COMPLETE" : "STARTED";
+                        var sectionStatusCompleted = category.SectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId == categorySection.Sys.Id)?.Completed;
+
+                        if (sectionStatusCompleted != null)
+                        {
+                            categorySectionDto.TagColour = (sectionStatusCompleted == 1 ? TagColour.DarkBlue : TagColour.Green).ToString();
+                            categorySectionDto.TagText = sectionStatusCompleted == 1 ? "COMPLETE" : "STARTED";
+                        }
+                        else
+                        {
+                            categorySectionDto.TagColour = TagColour.Grey.ToString();
+                            categorySectionDto.TagText = "NOT STARTED";
+                        }
                     }
                     else
                     {
-                        categorySectionDto.TagColour = TagColour.Grey.ToString();
-                        categorySectionDto.TagText = "NOT STARTED";
+                        categorySectionDto.TagColour = TagColour.Red.ToString();
+                        categorySectionDto.TagText = "Unable to retrieve status";
                     }
 
                     TempData[categorySectionDto.Slug] = categorySectionDto.Name + "+" + categorySection.Sys.Id;

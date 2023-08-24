@@ -12,21 +12,20 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 {
     public class RecommendationsViewComponentTests
     {
-        private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
         private readonly RecommendationsViewComponent _recommendationsComponent;
-        private ICategory category;
-        private IGetSubmissionStatusesQuery _submissionStatusesQuery;
-        private ILogger<Category> _logger;
+        private ICategory _category;
+        private IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
+        private ILogger<Category> _loggerCategory;
 
         public RecommendationsViewComponentTests()
         {
-            
-            _submissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
-            _logger = Substitute.For<ILogger<Category>>();
-            
-            _recommendationsComponent = new RecommendationsViewComponent(Substitute.For<ILogger<RecommendationsViewComponent>>());
 
-            category = new Category(_logger,_submissionStatusesQuery)
+            _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
+            _loggerCategory = Substitute.For<ILogger<Category>>();
+
+            _recommendationsComponent = new RecommendationsViewComponent(Substitute.For<ILogger<RecommendationsViewComponent>>(), _getSubmissionStatusesQuery);
+
+            _category = new Category(_loggerCategory, _getSubmissionStatusesQuery)
             {
                 Completed = 1,
                 Sections = new Section[]

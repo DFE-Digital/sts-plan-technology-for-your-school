@@ -1,8 +1,16 @@
 @model CategorySectionViewComponentViewModel
 
-<h3 class="govuk-heading-s govuk-!-margin-bottom-2">Progress</h3>
-<p class="govuk-body govuk-!-margin-bottom-5">You have completed <strong>@Model.CompletedSectionCount of
+@if (Model.ProgressRetrievalErrorMessage == null)
+{
+    <h3 class="govuk-heading-s govuk-!-margin-bottom-2">Progress</h3>
+    <p class="govuk-body govuk-!-margin-bottom-5">You have completed <strong>@Model.CompletedSectionCount of
         @Model.TotalSectionCount</strong> sections.</p>
+}
+else
+{
+    <p id="progress-error" class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span>Unable to retrieve
+    progress, please refresh your browser.</p>
+}
 
 <task-list>
     @foreach (var categorySectionDtoItem in Model.CategorySectionDto)
