@@ -1,7 +1,7 @@
 ﻿using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
 
-namespace Dfe.PlanTech.Application.Submission.Interfaces
+namespace Dfe.PlanTech.Domain.Interfaces
 {
     public interface IGetSubmissionStatusesQuery
     {

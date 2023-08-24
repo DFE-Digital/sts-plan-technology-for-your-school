@@ -9,6 +9,10 @@ using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Application.Submission.Queries;
+using Dfe.PlanTech.Domain.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 
@@ -29,9 +33,12 @@ public static class ContentfulSetup
         var options = configuration.GetSection(section).Get<ContentfulOptions>() ?? throw new KeyNotFoundException(nameof(ContentfulOptions));
 
         services.AddSingleton(options);
-
+        
+        services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
+        services.AddTransient<ILogger<Category>, Logger<Category>>();  
         services.AddScoped<IContentfulClient, ContentfulClient>();
         services.AddScoped<IContentRepository, ContentfulRepository>();
+        
 
         services.SetupRichTextRenderer();
 

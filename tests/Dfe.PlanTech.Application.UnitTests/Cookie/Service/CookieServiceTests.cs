@@ -1,7 +1,7 @@
 ﻿using Dfe.PlanTech.Application.Cookie.Service;
 using Dfe.PlanTech.Domain.Cookie;
 using Microsoft.AspNetCore.Http;
-using Moq;
+using NSubstitute;
 using System.Text.Json;
 
 
@@ -9,11 +9,11 @@ namespace Dfe.PlanTech.Application.UnitTests.Cookie.Service
 {
     public class CookieServiceTests
     {
-        Mock<IHttpContextAccessor> mockHttp = new Mock<IHttpContextAccessor>();
+        IHttpContextAccessor mockHttp = Substitute.For<IHttpContextAccessor>();
 
         private CookieService CreateStrut()
         {
-            return new CookieService(mockHttp.Object);
+            return new CookieService(mockHttp);
         }
 
 
@@ -73,10 +73,10 @@ namespace Dfe.PlanTech.Application.UnitTests.Cookie.Service
         public void GetCookie_Returns_Cookie_When_Cookie_Exists()
         {
             var cookieSerialized = SerializeCookie(true, false, true);
-            var requestCookiesMock = new Mock<IRequestCookieCollection>();
-            requestCookiesMock.SetupGet(c => c["cookies_preferences_set"]).Returns(cookieSerialized);
+            var requestCookiesMock = Substitute.For<IRequestCookieCollection>();
+            requestCookiesMock["cookies_preferences_set"].Returns(cookieSerialized);
 
-            mockHttp.Setup(x => x.HttpContext.Request.Cookies).Returns(requestCookiesMock.Object);
+            mockHttp.HttpContext.Request.Cookies.Returns(requestCookiesMock);
 
             var service = CreateStrut();
             var cookie = service.GetCookie();
@@ -101,13 +101,13 @@ namespace Dfe.PlanTech.Application.UnitTests.Cookie.Service
 
         private void SetUpCookie(string cookieValue)
         {
-            var requestCookiesMock = new Mock<IRequestCookieCollection>();
-            requestCookiesMock.SetupGet(c => c["cookies_preferences_set"]).Returns(cookieValue);
-            var responseCookiesMock = new Mock<IResponseCookies>();
-            responseCookiesMock.Setup(c => c.Delete("cookies_preferences_set")).Verifiable();
+            var requestCookiesMock = Substitute.For<IRequestCookieCollection>();
+            requestCookiesMock["cookies_preferences_set"].Returns(cookieValue);
+            var responseCookiesMock = Substitute.For<IResponseCookies>();
+            responseCookiesMock.Delete("cookies_preferences_set");
 
-            mockHttp.Setup(x => x.HttpContext.Request.Cookies).Returns(requestCookiesMock.Object);
-            mockHttp.Setup(x => x.HttpContext.Response.Cookies).Returns(responseCookiesMock.Object);
+            mockHttp.HttpContext.Request.Cookies.Returns(requestCookiesMock);
+            mockHttp.HttpContext.Response.Cookies.Returns(responseCookiesMock);
         }
 
         private static string SerializeCookie(bool visibility, bool rejected, bool hasApproved)

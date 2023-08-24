@@ -2,17 +2,17 @@
 using Dfe.PlanTech.Application.Users.Commands;
 using Dfe.PlanTech.Domain.SignIn.Models;
 using Dfe.PlanTech.Domain.Users.Models;
-using Moq;
+using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
 {
     public class CreateUserCommandTests
     {
-        public Mock<IPlanTechDbContext> mockDb = new Mock<IPlanTechDbContext>();
+        public IPlanTechDbContext mockDb = Substitute.For<IPlanTechDbContext>();
 
         public CreateUserCommand CreateStrut()
         {
-            return new CreateUserCommand(mockDb.Object);
+            return new CreateUserCommand(mockDb);
         }
 
         [Theory]
@@ -25,17 +25,20 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
             var strut = CreateStrut();
             User? createdUser = null;
 
-            mockDb.Setup(x => x.AddUser(It.IsAny<User>()))
-                    .Callback((User user) => createdUser = user);
+            mockDb.When(x => x.AddUser(Arg.Any<User>()))
+                    .Do((callInfo) => {
+                    User user = (User)callInfo[0];
+                        createdUser = user;
+                    });
 
-            mockDb.Setup(x => x.SaveChangesAsync()).Callback(() =>
-            {
-                if (createdUser != null)
+            mockDb.When(x => x.SaveChangesAsync())
+                .Do(x =>
                 {
-                    createdUser.Id = expectedUserId;
-                }
-            });
-
+                    if (createdUser != null)
+                    {
+                        createdUser.Id = expectedUserId;
+                    }
+                });
 
             var recordUserSignInDto = new RecordUserSignInDto
             {
@@ -48,7 +51,8 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
                         Name = "School",
                         Id = "Id"
                     }
-        } };
+                }
+            };
 
             //Act
             var result = await strut.CreateUser(recordUserSignInDto);

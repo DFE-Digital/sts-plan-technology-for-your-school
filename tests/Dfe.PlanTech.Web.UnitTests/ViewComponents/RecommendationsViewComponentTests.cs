@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Application.Submission.Interfaces;
+using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
@@ -14,16 +14,19 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
     {
         private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
         private readonly RecommendationsViewComponent _recommendationsComponent;
-
-        private ICategory _category;
+        private ICategory category;
+        private IGetSubmissionStatusesQuery _submissionStatusesQuery;
+        private ILogger<Category> _logger;
 
         public RecommendationsViewComponentTests()
         {
-            _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
+            
+            _submissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
+            _logger = Substitute.For<ILogger<Category>>();
+            
+            _recommendationsComponent = new RecommendationsViewComponent(Substitute.For<ILogger<RecommendationsViewComponent>>());
 
-            _recommendationsComponent = new RecommendationsViewComponent(Substitute.For<ILogger<RecommendationsViewComponent>>(), _getSubmissionStatusesQuery);
-
-            _category = new Category()
+            category = new Category(_logger,_submissionStatusesQuery)
             {
                 Completed = 1,
                 Sections = new Section[]
