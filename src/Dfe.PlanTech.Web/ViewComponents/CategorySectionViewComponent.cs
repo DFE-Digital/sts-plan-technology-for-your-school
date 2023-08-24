@@ -37,13 +37,13 @@ namespace Dfe.PlanTech.Web.ViewComponents
             categorySectionDto.NoSlugForSubtopicErrorMessage = String.Format("{0} unavailable", categorySection.Name);
         }
 
-        private void _SetCategorySectionDtoTagWithRetrievalError(ref CategorySectionDto categorySectionDto)
+        private static void _SetCategorySectionDtoTagWithRetrievalError(ref CategorySectionDto categorySectionDto)
         {
             categorySectionDto.TagColour = TagColour.Red.ToString();
             categorySectionDto.TagText = "UNABLE TO RETRIEVE STATUS";
         }
 
-        private void _SetCategorySectionDtoTagWithCurrentStatus(ICategory category, ISection categorySection, ref CategorySectionDto categorySectionDto)
+        private static void _SetCategorySectionDtoTagWithCurrentStatus(ICategory category, ISection categorySection, ref CategorySectionDto categorySectionDto)
         {
             var sectionStatusCompleted = category.SectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId == categorySection.Sys.Id)?.Completed;
 
