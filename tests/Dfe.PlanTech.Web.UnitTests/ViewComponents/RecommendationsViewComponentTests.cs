@@ -59,7 +59,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Maturity = "High"
             });
 
-            _getSubmissionStatusesQuery.GetCategoryWithCompletedSectionStatuses(_category).Returns(_category);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
 
             var result = _recommendationsComponent.Invoke(_category) as ViewViewComponentResult;
 
@@ -90,7 +90,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Maturity = "Low"
             });
 
-            _getSubmissionStatusesQuery.GetCategoryWithCompletedSectionStatuses(_category).Returns(_category);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
 
             var result = _recommendationsComponent.Invoke(_category) as ViewViewComponentResult;
 
@@ -121,7 +121,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Maturity = null
             });
 
-            _getSubmissionStatusesQuery.GetCategoryWithCompletedSectionStatuses(_category).Returns(_category);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
 
             var result = _recommendationsComponent.Invoke(_category) as ViewViewComponentResult;
 
@@ -129,13 +129,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.NotNull(result.ViewData);
 
             var model = result.ViewData.Model;
-            Assert.NotNull(model);
-
-            var unboxed = model as IEnumerable<RecommendationsViewComponentViewModel>;
-            Assert.NotNull(unboxed);
-
-            unboxed = unboxed.ToList();
-            Assert.Empty(unboxed);
+            Assert.Null(model);
         }
 
         [Fact]

@@ -64,7 +64,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Completed = 1,
             });
 
-            _getSubmissionStatusesQuery.GetCategoryWithCompletedSectionStatuses(_category).Returns(_category);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
 
             var result = _categorySectionViewComponent.Invoke(_category) as ViewViewComponentResult;
 
@@ -109,7 +109,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Completed = 0,
             });
 
-            _getSubmissionStatusesQuery.GetCategoryWithCompletedSectionStatuses(_category).Returns(_category);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
 
             var result = _categorySectionViewComponent.Invoke(_category) as ViewViewComponentResult;
 
@@ -148,7 +148,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         {
             _category.Completed = 0;
 
-            _getSubmissionStatusesQuery.GetCategoryWithCompletedSectionStatuses(_category).Returns(_category);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
 
             var result = _categorySectionViewComponent.Invoke(_category) as ViewViewComponentResult;
 
@@ -201,7 +201,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Completed = 1,
             });
 
-            _getSubmissionStatusesQuery.GetCategoryWithCompletedSectionStatuses(_category).Returns(_category);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
 
             var result = _categorySectionViewComponent.Invoke(_category) as ViewViewComponentResult;
 
