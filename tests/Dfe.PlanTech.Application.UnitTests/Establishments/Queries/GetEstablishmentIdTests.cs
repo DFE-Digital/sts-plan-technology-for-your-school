@@ -1,7 +1,6 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Queries;
-using Moq;
-
+using NSubstitute;
 using System.Linq.Expressions;
 
 
@@ -9,11 +8,11 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishment.Queries
 {
     public class GetEstablishmentIdQueryTests
     {
-        public Mock<IPlanTechDbContext> mockDb = new Mock<IPlanTechDbContext>();
+        public IPlanTechDbContext mockDb = Substitute.For<IPlanTechDbContext>();
 
         public GetEstablishmentIdQuery CreateStrut()
         {
-            return new GetEstablishmentIdQuery(mockDb.Object);
+            return new GetEstablishmentIdQuery(mockDb);
         }
 
         [Theory]
@@ -26,7 +25,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishment.Queries
             var strut = CreateStrut();
             var establishmentRef = new Guid().ToString();
             var returnedEstablishment = new Domain.Establishments.Models.Establishment() { EstablishmentRef = establishmentRef, Id = establishmentId };
-            mockDb.Setup(x => x.GetEstablishmentBy(It.IsAny<Expression<Func<Domain.Establishments.Models.Establishment, bool>>>())).ReturnsAsync(returnedEstablishment);
+            mockDb.GetEstablishmentBy(Arg.Any<Expression<Func<Domain.Establishments.Models.Establishment, bool>>>()).Returns(returnedEstablishment);
 
             //Act
             var result = await strut.GetEstablishmentId(establishmentRef);
