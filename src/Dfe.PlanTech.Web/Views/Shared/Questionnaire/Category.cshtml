@@ -4,6 +4,10 @@
 @inject IGetSubmissionStatusesQuery query
 
 @{
+    if (Model.Sections is null || Model.Sections.Count() == 0)
+    {
+        return new RedirectResult("");
+    }
     Model.SectionStatuses = query.GetSectionSubmissionStatuses(Model.Sections);
     var completedCount = Model.SectionStatuses.Where(x => x.Completed == 1).ToList().Count;
     Model.Completed = completedCount;
