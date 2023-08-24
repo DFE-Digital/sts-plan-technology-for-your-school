@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Domain.CategorySection;
-using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.TagHelpers.TaskList;
@@ -10,12 +9,10 @@ namespace Dfe.PlanTech.Web.ViewComponents
     public class CategorySectionViewComponent : ViewComponent
     {
         private readonly ILogger<CategorySectionViewComponent> _logger;
-        private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
 
-        public CategorySectionViewComponent(ILogger<CategorySectionViewComponent> logger, IGetSubmissionStatusesQuery getSubmissionStatusesQuery)
+        public CategorySectionViewComponent(ILogger<CategorySectionViewComponent> logger)
         {
             _logger = logger;
-            _getSubmissionStatusesQuery = getSubmissionStatusesQuery;
         }
 
         public IViewComponentResult Invoke(ICategory category)
@@ -25,7 +22,7 @@ namespace Dfe.PlanTech.Web.ViewComponents
             var categorySectionViewModel = new CategorySectionViewComponentViewModel()
             {
                 CompletedSectionCount = category.Completed,
-                TotalSectionCount = category.Sections.Count(),
+                TotalSectionCount = category.Sections.Length,
                 CategorySectionDto = _GetCategorySectionViewComponentViewModel(category),
                 ProgressRetrievalErrorMessage = category.RetrievalError ? "Unable to retrieve progress, please refresh your browser." : null
             };

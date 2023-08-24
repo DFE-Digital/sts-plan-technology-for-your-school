@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -8,12 +7,10 @@ namespace Dfe.PlanTech.Web.ViewComponents
     public class RecommendationsViewComponent : ViewComponent
     {
         private readonly ILogger<RecommendationsViewComponent> _logger;
-        private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
 
-        public RecommendationsViewComponent(ILogger<RecommendationsViewComponent> logger, IGetSubmissionStatusesQuery getSubmissionStatusesQuery)
+        public RecommendationsViewComponent(ILogger<RecommendationsViewComponent> logger)
         {
             _logger = logger;
-            _getSubmissionStatusesQuery = getSubmissionStatusesQuery;
         }
 
         public IViewComponentResult Invoke(ICategory category)

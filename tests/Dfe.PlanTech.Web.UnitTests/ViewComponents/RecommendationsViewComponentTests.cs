@@ -23,7 +23,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
             _loggerCategory = Substitute.For<ILogger<Category>>();
 
-            _recommendationsComponent = new RecommendationsViewComponent(Substitute.For<ILogger<RecommendationsViewComponent>>(), _getSubmissionStatusesQuery);
+            _recommendationsComponent = new RecommendationsViewComponent(Substitute.For<ILogger<RecommendationsViewComponent>>());
 
             _category = new Category(_loggerCategory, _getSubmissionStatusesQuery)
             {

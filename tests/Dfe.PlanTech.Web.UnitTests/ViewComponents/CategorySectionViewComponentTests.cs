@@ -34,7 +34,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var viewComponentContext = new ViewComponentContext();
             viewComponentContext.ViewContext = viewContext;
 
-            _categorySectionViewComponent = new CategorySectionViewComponent(Substitute.For<ILogger<CategorySectionViewComponent>>(), _getSubmissionStatusesQuery);
+            _categorySectionViewComponent = new CategorySectionViewComponent(Substitute.For<ILogger<CategorySectionViewComponent>>());
             _categorySectionViewComponent.ViewComponentContext = viewComponentContext;
 
             _category = new Category(_loggerCategory, _getSubmissionStatusesQuery)
