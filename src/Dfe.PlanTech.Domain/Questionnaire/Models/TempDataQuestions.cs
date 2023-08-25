@@ -7,5 +7,7 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models
         public string? AnswerRef { get; init; }
 
         public int? SubmissionId { get; init; }
+
+        public string? NoSelectedAnswerErrorMessage { get; init; }
     }
 }

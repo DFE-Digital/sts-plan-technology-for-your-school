@@ -5,6 +5,7 @@
         await Html.RenderPartialAsync("BackButton");
     }
 }
+
 <form asp-controller="Questions" asp-action="SubmitAnswer" method="post">
     <input id="QuestionId" hidden value=@Model.Question.Sys.Id name="QuestionId" />
     <input id="Params" hidden value="@Model.Params" name="Params" />
@@ -19,6 +20,11 @@
             @if (!string.IsNullOrEmpty(Model.Question.HelpText))
             {
                 <govuk-radios-hint>@Model.Question.HelpText</govuk-radios-hint>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.NoSelectedAnswerErrorMessage))
+            {
+                <govuk-radios-error-message>@Model.NoSelectedAnswerErrorMessage</govuk-radios-error-message>
             }
 
             @{
