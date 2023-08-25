@@ -20,8 +20,12 @@
 }
 
 <h3 class="govuk-heading-s govuk-!-margin-bottom-2">Progress</h3>
-
 @{
+    if (Model.Sections is null || Model.Sections.Length == 0)
+    {
+        Context.Response.Redirect(Url.Content("ServiceUnavailable"));
+    }
+
     if (Model.RetrievalError)
     {
         <p id="progress-error" class="govuk-error-message">
