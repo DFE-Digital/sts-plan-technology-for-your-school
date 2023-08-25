@@ -5,6 +5,7 @@ using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Serialization;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 
@@ -16,10 +17,17 @@ public class ContentfulRepository : IContentRepository
 {
     private readonly IContentfulClient _client;
 
-    public ContentfulRepository(ILoggerFactory loggerFactory, IContentfulClient client)
+    public ContentfulRepository(ILoggerFactory loggerFactory, IContentfulClient client, IContractResolver contractResolver)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
         _client.ContentTypeResolver = new EntityResolver(loggerFactory.CreateLogger<IContentTypeResolver>());
+        try
+        {
+            _client.SerializerSettings.ContractResolver = contractResolver;
+        } catch (Exception e)
+        {
+            loggerFactory.CreateLogger<ContentfulRepository>().LogError(e, "Failed to set contract resolver");
+        }
     }
 
     public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IGetEntitiesOptions? options, CancellationToken cancellationToken = default)

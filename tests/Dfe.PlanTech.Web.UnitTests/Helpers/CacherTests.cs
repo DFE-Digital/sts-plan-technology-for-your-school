@@ -2,7 +2,7 @@ using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Web.Helpers;
 using Microsoft.Extensions.Caching.Memory;
-using Moq;
+using NSubstitute;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Helpers;
@@ -86,15 +86,14 @@ public class CacherTests
     [Fact]
     public void Set_Should_Save_Using_Default_CacheOptions()
     {
-        var cacheOptionsMock = new Mock<ICacheOptions>();
-        cacheOptionsMock.SetupGet(cacheOptions => cacheOptions.DefaultTimeToLive)
-                        .Returns(TimeSpan.FromMinutes(60))
-                        .Verifiable();
+        var cacheOptionsMock = Substitute.For<ICacheOptions>();
+        cacheOptionsMock.DefaultTimeToLive
+                        .Returns(TimeSpan.FromMinutes(60));
 
         var testKey = "Testing";
         var testObject = "Test value";
 
-        var cacher = new Cacher(cacheOptionsMock.Object, _memoryCache);
+        var cacher = new Cacher(cacheOptionsMock, _memoryCache);
 
         cacher.Set(testKey, testObject);
 
@@ -102,7 +101,7 @@ public class CacherTests
 
         Assert.NotNull(cachedResult);
         Assert.Equal(testObject, cachedResult);
-        cacheOptionsMock.VerifyGet(cacheOptions => cacheOptions.DefaultTimeToLive);
+        _ = cacheOptionsMock.Received().DefaultTimeToLive;
     }
 
     [Fact]
@@ -157,16 +156,16 @@ public class CacherTests
         var testKey = "Testing";
         var newValue = "new value";
 
-        var cacheOptionsMock = new Mock<ICacheOptions>();
-        cacheOptionsMock.Setup(options => options.DefaultTimeToLive).Returns(TimeSpan.FromSeconds(1)).Verifiable();
+        var cacheOptionsMock = Substitute.For<ICacheOptions>();
+        cacheOptionsMock.DefaultTimeToLive.Returns(TimeSpan.FromSeconds(1));
 
-        var cacher = new Cacher(cacheOptionsMock.Object, _memoryCache);
+        var cacher = new Cacher(cacheOptionsMock, _memoryCache);
 
         var result = await cacher.GetAsync(testKey, () => Task.FromResult(newValue));
 
         var cachedResult = _memoryCache.Get(testKey);
 
-        cacheOptionsMock.Verify(options => options.DefaultTimeToLive);
+        _ = cacheOptionsMock.Received().DefaultTimeToLive;
     }
 
 }

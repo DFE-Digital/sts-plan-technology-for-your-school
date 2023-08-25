@@ -1,35 +1,37 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Submission.Queries;
-using Moq;
+using Dfe.PlanTech.Domain.Answers.Models;
+using NSubstitute;
+using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Application.UnitTests.Submission.Queries
 {
     public class GetAnswerQueryTests
     {
-        private readonly Mock<IPlanTechDbContext> _planTechDbContextMock;
+        private IPlanTechDbContext _planTechDbContextMock;
         private readonly GetAnswerQuery _getAnswerQuery;
 
         public GetAnswerQueryTests()
         {
-            _planTechDbContextMock = new Mock<IPlanTechDbContext>();
+            _planTechDbContextMock = Substitute.For<IPlanTechDbContext>();
 
-            _getAnswerQuery = new GetAnswerQuery(_planTechDbContextMock.Object);
+            _getAnswerQuery = new GetAnswerQuery(_planTechDbContextMock);
         }
 
         [Fact]
         public async Task GetAnswerQuery_Returns_Answer()
         {
-            _planTechDbContextMock.Setup(m => m.GetAnswer(answer => answer.Id == 1)).ReturnsAsync(
-                new Domain.Answers.Models.Answer()
-                {
-                    Id = 1,
-                    AnswerText = "Answer Text",
-                    ContentfulRef = "AnswerRef-1"
-                });
+            var output = new Answer()
+            {
+                Id = 1,
+                AnswerText = "Answer Text",
+                ContentfulRef = "AnswerRef-1"
+            };
+            _planTechDbContextMock.GetAnswer(Arg.Any<Expression<Func<Answer, bool>>>()).Returns(output);
 
             var result = await _getAnswerQuery.GetAnswerBy(1);
 
-            Assert.IsType<Domain.Answers.Models.Answer>(result);
+            Assert.IsType<Answer>(result);
             Assert.Equal(1, result.Id);
             Assert.Equal("Answer Text", result.AnswerText);
             Assert.Equal("AnswerRef-1", result.ContentfulRef);

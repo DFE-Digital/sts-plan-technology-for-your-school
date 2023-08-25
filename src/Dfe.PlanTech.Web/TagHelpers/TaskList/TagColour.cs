@@ -9,4 +9,5 @@ public enum TagColour
     Green,
     Yellow,
     DarkBlue,
+    White
 }

@@ -10,14 +10,20 @@ namespace Dfe.PlanTech.Application.Users.Helper
     public class UserHelper : IUser
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IPlanTechDbContext _db;
         private readonly ICreateEstablishmentCommand _createEstablishmentCommand;
+        private readonly IGetUserIdQuery _getUserIdQuery;
+        private readonly IGetEstablishmentIdQuery _getEstablishmentIdQuery;
 
-        public UserHelper(IHttpContextAccessor httpContextAccessor, IPlanTechDbContext db, ICreateEstablishmentCommand createEstablishmentCommand)
+        public UserHelper(IHttpContextAccessor httpContextAccessor, 
+                            IPlanTechDbContext db,
+                            ICreateEstablishmentCommand createEstablishmentCommand,
+                            IGetUserIdQuery getUserIdQuery,
+                            IGetEstablishmentIdQuery getEstablishmentIdQuery)
         {
             _httpContextAccessor = httpContextAccessor;
-            _db = db;
             _createEstablishmentCommand = createEstablishmentCommand;
+            _getUserIdQuery = getUserIdQuery;
+            _getEstablishmentIdQuery = getEstablishmentIdQuery;
         }
 
         public async Task<int?> GetCurrentUserId()
@@ -28,14 +34,11 @@ namespace Dfe.PlanTech.Application.Users.Helper
             if (userId is null)
                 return null;
 
-            var getUserIdQuery = new GetUserIdQuery(_db);
-            return await getUserIdQuery.GetUserId(userId);
+            return await _getUserIdQuery.GetUserId(userId);
         }
 
         public async Task<int> GetEstablishmentId()
         {
-            var getEstablishmentIdQuery = new GetEstablishmentIdQuery(_db);
-
             var establishmentDto = _GetOrganisationData();
 
             var reference = establishmentDto.Urn ?? establishmentDto.Ukprn;
@@ -43,12 +46,12 @@ namespace Dfe.PlanTech.Application.Users.Helper
             if (reference is null)
                 return 1;
 
-            var existingEstablishmentId = await getEstablishmentIdQuery.GetEstablishmentId(reference);
+            var existingEstablishmentId = await _getEstablishmentIdQuery.GetEstablishmentId(reference);
 
             if (existingEstablishmentId == null)
             {
                 await SetEstablishment();
-                var newEstablishmentId = await getEstablishmentIdQuery.GetEstablishmentId(reference);
+                var newEstablishmentId = await _getEstablishmentIdQuery.GetEstablishmentId(reference);
                 return newEstablishmentId is null ? 1 : Convert.ToUInt16(newEstablishmentId);
             }
 
