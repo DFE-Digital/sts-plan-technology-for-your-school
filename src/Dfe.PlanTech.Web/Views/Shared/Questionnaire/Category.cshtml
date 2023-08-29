@@ -1,5 +1,10 @@
 @model Dfe.PlanTech.Domain.Questionnaire.Interfaces.ICategory;
 
+@if (Model.Sections is null || Model.Sections.Length == 0)
+{
+    Context.Response.Redirect(Url.Content("ServiceUnavailable"));
+}
+
 @{
     await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Header);
     foreach (var content in Model.Content)
