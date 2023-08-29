@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Web.UnitTests;
 
 public static class ControllerHelpers
 {
-  public static ControllerContext MockControllerContext()
+  public static ControllerContext SubstituteControllerContext()
   {
     var httpContext = Substitute.For<HttpContext>();
     var session = Substitute.For<ISession>();

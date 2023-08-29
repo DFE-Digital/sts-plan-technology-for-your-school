@@ -6,15 +6,15 @@ namespace Dfe.PlanTech.Application.UnitTests.Submission.Queries
 {
     public class GetSubmissionQueryTest
     {
-        private IPlanTechDbContext _planTechDbContextMock;
+        private IPlanTechDbContext _planTechDbContextSubstitute;
 
         private readonly GetSubmissionQuery _getSubmissionQuery;
 
         public GetSubmissionQueryTest()
         {
-            _planTechDbContextMock = Substitute.For<IPlanTechDbContext>();
+            _planTechDbContextSubstitute = Substitute.For<IPlanTechDbContext>();
 
-            _getSubmissionQuery = new GetSubmissionQuery(_planTechDbContextMock);
+            _getSubmissionQuery = new GetSubmissionQuery(_planTechDbContextSubstitute);
         }
 
         [Fact]
@@ -38,7 +38,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Submission.Queries
             };
 
             var query = Arg.Any<IQueryable<Domain.Submissions.Models.Submission>>();
-            _planTechDbContextMock.FirstOrDefaultAsync(query).Returns(submissionList[0]);
+            _planTechDbContextSubstitute.FirstOrDefaultAsync(query).Returns(submissionList[0]);
 
             var result = await _getSubmissionQuery.GetSubmissionBy(16, "SectionId");
 

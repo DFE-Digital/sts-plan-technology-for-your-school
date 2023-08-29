@@ -17,11 +17,11 @@ public class UserHelperTests
     private const string FIRST_ESTABLISHMENT_REF = "131";
 
     private readonly UserHelper _userHelper;
-    private IHttpContextAccessor _httpContextAccessorMock;
-    private IPlanTechDbContext _planTechDbContextMock;
-    private ICreateEstablishmentCommand _createEstablishmentCommandMock;
-    private IGetUserIdQuery _getUserIdQueryMock;
-    private IGetEstablishmentIdQuery _getEstablishmentIdQueryMock;
+    private IHttpContextAccessor _httpContextAccessorSubstitute;
+    private IPlanTechDbContext _planTechDbContextSubstitute;
+    private ICreateEstablishmentCommand _createEstablishmentCommandSubstitute;
+    private IGetUserIdQuery _getUserIdQuerySubstitute;
+    private IGetEstablishmentIdQuery _getEstablishmentIdQuerySubstitute;
 
     private List<User> _users = new(){
         new User(){
@@ -48,31 +48,31 @@ public class UserHelperTests
 
     public UserHelperTests()
     {
-        _httpContextAccessorMock = Substitute.For<IHttpContextAccessor>();
-        _planTechDbContextMock = Substitute.For<IPlanTechDbContext>();
-        _createEstablishmentCommandMock = Substitute.For<ICreateEstablishmentCommand>();
-        _getUserIdQueryMock = Substitute.For<IGetUserIdQuery>();
-        _getEstablishmentIdQueryMock = Substitute.For<IGetEstablishmentIdQuery>(); 
+        _httpContextAccessorSubstitute = Substitute.For<IHttpContextAccessor>();
+        _planTechDbContextSubstitute = Substitute.For<IPlanTechDbContext>();
+        _createEstablishmentCommandSubstitute = Substitute.For<ICreateEstablishmentCommand>();
+        _getUserIdQuerySubstitute = Substitute.For<IGetUserIdQuery>();
+        _getEstablishmentIdQuerySubstitute = Substitute.For<IGetEstablishmentIdQuery>(); 
 
-        MockGetEstablishmentIdQuery();
-        MockGetUserIdQuery();
+        SubstituteGetEstablishmentIdQuery();
+        SubstituteGetUserIdQuery();
 
         var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
         {
             new Claim(ClaimTypes.Name, "test"),
             new Claim(ClaimTypes.NameIdentifier, "1"),
             new Claim("organisation", "{\n  \"ukprn\" : \"131\",\n  \"type\" : {\n      \"name\" : \"Type name\"\n  },\n  \"name\" : \"Organisation name\"\n}"),
-            }, "mock"));
+            }, ""));
 
-        _httpContextAccessorMock.HttpContext.Returns(new DefaultHttpContext() { User = user });
+        _httpContextAccessorSubstitute.HttpContext.Returns(new DefaultHttpContext() { User = user });
 
-        _userHelper = new UserHelper(_httpContextAccessorMock, _planTechDbContextMock, _createEstablishmentCommandMock, _getUserIdQueryMock, _getEstablishmentIdQueryMock);
+        _userHelper = new UserHelper(_httpContextAccessorSubstitute, _planTechDbContextSubstitute, _createEstablishmentCommandSubstitute, _getUserIdQuerySubstitute, _getEstablishmentIdQuerySubstitute);
     }
 
-    private void MockGetEstablishmentIdQuery()
+    private void SubstituteGetEstablishmentIdQuery()
     {
-        _getEstablishmentIdQueryMock = Substitute.For<IGetEstablishmentIdQuery>();
-        _getEstablishmentIdQueryMock.GetEstablishmentId(Arg.Any<string>())
+        _getEstablishmentIdQuerySubstitute = Substitute.For<IGetEstablishmentIdQuery>();
+        _getEstablishmentIdQuerySubstitute.GetEstablishmentId(Arg.Any<string>())
                                     .Returns((callInfo) =>
                                     {
                                         var establishmentRef = callInfo.ArgAt<string>(0);
@@ -83,10 +83,10 @@ public class UserHelperTests
                                     });
     }
 
-    private void MockGetUserIdQuery()
+    private void SubstituteGetUserIdQuery()
     {
-        _getUserIdQueryMock = Substitute.For<IGetUserIdQuery>();
-        _getUserIdQueryMock.GetUserId(Arg.Any<string>()).Returns((callInfo) =>
+        _getUserIdQuerySubstitute = Substitute.For<IGetUserIdQuery>();
+        _getUserIdQuerySubstitute.GetUserId(Arg.Any<string>()).Returns((callInfo) =>
         {
             var userRef = callInfo.ArgAt<string>(0);
 
@@ -111,7 +111,7 @@ public class UserHelperTests
     {
         var result = await _userHelper.GetEstablishmentId();
 
-        await _createEstablishmentCommandMock.Received(0).CreateEstablishment(Arg.Any<EstablishmentDto>());
+        await _createEstablishmentCommandSubstitute.Received(0).CreateEstablishment(Arg.Any<EstablishmentDto>());
 
         Assert.IsType<int>(result);
 
@@ -127,11 +127,11 @@ public class UserHelperTests
             new Claim(ClaimTypes.Name, "test"),
             new Claim(ClaimTypes.NameIdentifier, "1"),
             new Claim("organisation", "{\n  \"type\" : {\n      \"name\" : \"Type name\"\n  },\n  \"name\" : \"Organisation name\"\n}"),
-        }, "mock"));
+        }, ""));
 
-        _httpContextAccessorMock.HttpContext.Returns(new DefaultHttpContext() { User = user });
+        _httpContextAccessorSubstitute.HttpContext.Returns(new DefaultHttpContext() { User = user });
 
-        var userHelperWithMissingOrgData = new UserHelper(_httpContextAccessorMock, _planTechDbContextMock, _createEstablishmentCommandMock, _getUserIdQueryMock, _getEstablishmentIdQueryMock);
+        var userHelperWithMissingOrgData = new UserHelper(_httpContextAccessorSubstitute, _planTechDbContextSubstitute, _createEstablishmentCommandSubstitute, _getUserIdQuerySubstitute, _getEstablishmentIdQuerySubstitute);
 
         var result = await userHelperWithMissingOrgData.GetEstablishmentId();
 

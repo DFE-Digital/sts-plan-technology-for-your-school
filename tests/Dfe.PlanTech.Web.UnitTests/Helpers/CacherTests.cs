@@ -86,14 +86,14 @@ public class CacherTests
     [Fact]
     public void Set_Should_Save_Using_Default_CacheOptions()
     {
-        var cacheOptionsMock = Substitute.For<ICacheOptions>();
-        cacheOptionsMock.DefaultTimeToLive
+        var cacheOptionsSubstitute = Substitute.For<ICacheOptions>();
+        cacheOptionsSubstitute.DefaultTimeToLive
                         .Returns(TimeSpan.FromMinutes(60));
 
         var testKey = "Testing";
         var testObject = "Test value";
 
-        var cacher = new Cacher(cacheOptionsMock, _memoryCache);
+        var cacher = new Cacher(cacheOptionsSubstitute, _memoryCache);
 
         cacher.Set(testKey, testObject);
 
@@ -101,7 +101,7 @@ public class CacherTests
 
         Assert.NotNull(cachedResult);
         Assert.Equal(testObject, cachedResult);
-        _ = cacheOptionsMock.Received().DefaultTimeToLive;
+        _ = cacheOptionsSubstitute.Received().DefaultTimeToLive;
     }
 
     [Fact]
@@ -156,16 +156,16 @@ public class CacherTests
         var testKey = "Testing";
         var newValue = "new value";
 
-        var cacheOptionsMock = Substitute.For<ICacheOptions>();
-        cacheOptionsMock.DefaultTimeToLive.Returns(TimeSpan.FromSeconds(1));
+        var cacheOptionsSubstitute = Substitute.For<ICacheOptions>();
+        cacheOptionsSubstitute.DefaultTimeToLive.Returns(TimeSpan.FromSeconds(1));
 
-        var cacher = new Cacher(cacheOptionsMock, _memoryCache);
+        var cacher = new Cacher(cacheOptionsSubstitute, _memoryCache);
 
         var result = await cacher.GetAsync(testKey, () => Task.FromResult(newValue));
 
         var cachedResult = _memoryCache.Get(testKey);
 
-        _ = cacheOptionsMock.Received().DefaultTimeToLive;
+        _ = cacheOptionsSubstitute.Received().DefaultTimeToLive;
     }
 
 }
