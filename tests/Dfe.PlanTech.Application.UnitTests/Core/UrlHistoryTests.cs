@@ -13,17 +13,17 @@ public class UrlHistoryTests
 
     public UrlHistoryTests()
     {
-        var cacherMock = Substitute.For<ICacher>();
-        cacherMock.Get<Stack<Uri>>(UrlHistory.CACHE_KEY).Returns(history);
+        var cacherSubstitute = Substitute.For<ICacher>();
+        cacherSubstitute.Get<Stack<Uri>>(UrlHistory.CACHE_KEY).Returns(history);
 
-        cacherMock.Get(UrlHistory.CACHE_KEY, Arg.Any<Func<Stack<Uri>>>()).Returns(history);
-        cacherMock.When(x => x.Set(UrlHistory.CACHE_KEY, Arg.Any<TimeSpan>(), Arg.Any<Stack<Uri>>()))
+        cacherSubstitute.Get(UrlHistory.CACHE_KEY, Arg.Any<Func<Stack<Uri>>>()).Returns(history);
+        cacherSubstitute.When(x => x.Set(UrlHistory.CACHE_KEY, Arg.Any<TimeSpan>(), Arg.Any<Stack<Uri>>()))
             .Do((callInfo) =>
             {
                 history = (Stack<Uri>)callInfo[2];
             });
 
-        cacher = cacherMock;
+        cacher = cacherSubstitute;
     }
 
     [Fact]

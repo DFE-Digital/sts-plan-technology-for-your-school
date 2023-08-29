@@ -8,11 +8,11 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Queries
 {
     public class GetUserIdQueryTests
     {
-        public IPlanTechDbContext mockDb = Substitute.For<IPlanTechDbContext>();
+        public IPlanTechDbContext Db = Substitute.For<IPlanTechDbContext>();
 
         public GetUserIdQuery CreateStrut()
         {
-            return new GetUserIdQuery(mockDb);
+            return new GetUserIdQuery(Db);
         }
 
         [Theory]
@@ -25,7 +25,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Queries
             var strut = CreateStrut();
             var dfeSignInRef = new Guid().ToString();
             var returnedUser = new User { DfeSignInRef = dfeSignInRef, Id = expectedUserId };
-            mockDb.GetUserBy(Arg.Any<Expression<Func<User, bool>>>()).Returns(returnedUser);
+            Db.GetUserBy(Arg.Any<Expression<Func<User, bool>>>()).Returns(returnedUser);
 
             //Act
             var result = await strut.GetUserId(dfeSignInRef);

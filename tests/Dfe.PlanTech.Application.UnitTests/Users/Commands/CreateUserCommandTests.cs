@@ -8,11 +8,11 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
 {
     public class CreateUserCommandTests
     {
-        public IPlanTechDbContext mockDb = Substitute.For<IPlanTechDbContext>();
+        public IPlanTechDbContext Db = Substitute.For<IPlanTechDbContext>();
 
         public CreateUserCommand CreateStrut()
         {
-            return new CreateUserCommand(mockDb);
+            return new CreateUserCommand(Db);
         }
 
         [Theory]
@@ -25,13 +25,13 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
             var strut = CreateStrut();
             User? createdUser = null;
 
-            mockDb.When(x => x.AddUser(Arg.Any<User>()))
+            Db.When(x => x.AddUser(Arg.Any<User>()))
                     .Do((callInfo) => {
                     User user = (User)callInfo[0];
                         createdUser = user;
                     });
 
-            mockDb.When(x => x.SaveChangesAsync())
+            Db.When(x => x.SaveChangesAsync())
                 .Do(x =>
                 {
                     if (createdUser != null)

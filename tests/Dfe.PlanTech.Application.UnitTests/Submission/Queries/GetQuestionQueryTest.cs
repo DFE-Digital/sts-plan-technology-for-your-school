@@ -8,20 +8,20 @@ namespace Dfe.PlanTech.Application.UnitTests.Submission.Queries
 {
     public class GetQuestionQueryTests
     {
-        private IPlanTechDbContext _planTechDbContextMock;
+        private IPlanTechDbContext _planTechDbContextSubstitute;
         private readonly GetQuestionQuery _getQuestionQuery;
 
         public GetQuestionQueryTests()
         {
-            _planTechDbContextMock = Substitute.For<IPlanTechDbContext>();
+            _planTechDbContextSubstitute = Substitute.For<IPlanTechDbContext>();
 
-            _getQuestionQuery = new GetQuestionQuery(_planTechDbContextMock);
+            _getQuestionQuery = new GetQuestionQuery(_planTechDbContextSubstitute);
         }
 
         [Fact]
         public async Task GetQuestionQuery_Returns_Question()
         {
-            _planTechDbContextMock.GetQuestion(Arg.Any<Expression<Func<Question, bool>>>()).Returns(
+            _planTechDbContextSubstitute.GetQuestion(Arg.Any<Expression<Func<Question, bool>>>()).Returns(
                 new Domain.Questions.Models.Question()
                 {
                     Id = 1,

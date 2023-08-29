@@ -24,7 +24,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
     {
         private const string INDEX_SLUG = "/";
         private const string INDEX_TITLE = "Index";
-        ICookieService cookiesMock = Substitute.For<ICookieService>();
+        ICookieService cookiesSubstitute = Substitute.For<ICookieService>();
 
         private readonly List<Page> _pages = new()
         {
@@ -59,13 +59,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
         private readonly PagesController _controller;
         private readonly GetPageQuery _query;
-        private IQuestionnaireCacher _questionnaireCacherMock = Substitute.For<IQuestionnaireCacher>();
+        private IQuestionnaireCacher _questionnaireCacherSubstitute = Substitute.For<IQuestionnaireCacher>();
 
         public PagesControllerTests()
         {
-            IContentRepository repositoryMock = SetupRepositoryMock();
+            IContentRepository repositorySubstitute = SetupRepositorySubstitute();
 
-            var mockLogger = Substitute.For<ILogger<PagesController>>();
+            var Logger = Substitute.For<ILogger<PagesController>>();
 
             var config = new GtmConfiguration()
             {
@@ -83,21 +83,21 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 .AddInMemoryCollection(initialData: inMemorySettings)
                 .Build();
 
-            var controllerContext = ControllerHelpers.MockControllerContext();
+            var controllerContext = ControllerHelpers.SubstituteControllerContext();
 
-            _controller = new PagesController(mockLogger, configuration, cookiesMock)
+            _controller = new PagesController(Logger, configuration, cookiesSubstitute)
             {
                 ControllerContext = controllerContext,
                 TempData = Substitute.For<ITempDataDictionary>()
             };
 
-            _query = new GetPageQuery(_questionnaireCacherMock, repositoryMock);
+            _query = new GetPageQuery(_questionnaireCacherSubstitute, repositorySubstitute);
         }
 
-        private IContentRepository SetupRepositoryMock()
+        private IContentRepository SetupRepositorySubstitute()
         {
-            var repositoryMock = Substitute.For<IContentRepository>();
-            repositoryMock
+            var repositorySubstitute = Substitute.For<IContentRepository>();
+            repositorySubstitute
                 .GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>())
                 .Returns((callInfo) =>
                 {
@@ -115,14 +115,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
                     return Array.Empty<Page>();
                 });
-            return repositoryMock;
+            return repositorySubstitute;
         }
 
         [Fact]
         public async Task Should_ReturnLandingPage_When_IndexRouteLoaded()
         {
             var cookie = new DfeCookie { HasApproved = true };
-            cookiesMock.GetCookie().Returns(cookie);
+            cookiesSubstitute.GetCookie().Returns(cookie);
 
             var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None);
 
@@ -145,7 +145,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public async Task Should_Return_Page_On_Index_Route()
         {
             var cookie = new DfeCookie { HasApproved = true };
-            cookiesMock.GetCookie().Returns(cookie);
+            cookiesSubstitute.GetCookie().Returns(cookie);
             var result = await _controller.Index(_query, CancellationToken.None);
             Assert.IsType<ViewResult>(result);
 
@@ -170,11 +170,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public void Should_Retrieve_ErrorPage()
         {
-            var httpContextMock = Substitute.For<HttpContext>();
+            var httpContextSubstitute = Substitute.For<HttpContext>();
 
             var controllerContext = new ControllerContext
             {
-                HttpContext = httpContextMock
+                HttpContext = httpContextSubstitute
             };
 
             _controller.ControllerContext = controllerContext;
@@ -196,7 +196,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             bool.TryParse(cookiePreference, out bool preference);
             var cookie = new DfeCookie { HasApproved = preference };
-            cookiesMock.GetCookie().Returns(cookie);
+            cookiesSubstitute.GetCookie().Returns(cookie);
 
             var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None);
 

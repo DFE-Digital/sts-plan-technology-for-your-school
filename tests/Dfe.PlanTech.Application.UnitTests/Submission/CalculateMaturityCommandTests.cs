@@ -7,17 +7,17 @@ namespace Dfe.PlanTech.Application.UnitTests.Submission
 {
     public class CalculateMaturityCommandTests
     {
-        public IPlanTechDbContext _dbMock = Substitute.For<IPlanTechDbContext>();
+        public IPlanTechDbContext _dbSubstitute = Substitute.For<IPlanTechDbContext>();
 
         private CalculateMaturityCommand CreateStrut()
         {
-            return new CalculateMaturityCommand(_dbMock);
+            return new CalculateMaturityCommand(_dbSubstitute);
         }
 
         [Fact]
         public async Task CalculateMaturityReturnsEffectedRows_LargerThanOne()
         {
-            _dbMock.CallStoredProcedureWithReturnInt(Arg.Any<string>(), Arg.Any<List<SqlParameter>>())
+            _dbSubstitute.CallStoredProcedureWithReturnInt(Arg.Any<string>(), Arg.Any<List<SqlParameter>>())
                 .Returns(Task.FromResult(2));
 
             var result = await CreateStrut().CalculateMaturityAsync(2);
@@ -28,7 +28,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Submission
         [Fact]
         public async Task CalculateMaturityReturnsEffectedRows_LessThanOne()
         {
-            _dbMock.CallStoredProcedureWithReturnInt(Arg.Any<string>(), Arg.Any<List<SqlParameter>>())
+            _dbSubstitute.CallStoredProcedureWithReturnInt(Arg.Any<string>(), Arg.Any<List<SqlParameter>>())
                 .Returns(Task.FromResult(0));
 
             var result = await CreateStrut().CalculateMaturityAsync(0);

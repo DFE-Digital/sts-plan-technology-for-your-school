@@ -25,22 +25,22 @@ public class DfeOpenIdConnectEventsTests
             DiscoverRolesWithPublicApi = true
         };
 
-        var dfePublicApiMock = Substitute.For<IDfePublicApi>();
+        var dfePublicApiSubstitute = Substitute.For<IDfePublicApi>();
 
-        var claimsPrincipalMock = Substitute.For<ClaimsPrincipal>();
-        claimsPrincipalMock.Identity.Returns((callInfo) =>
+        var claimsPrincipalSubstitute = Substitute.For<ClaimsPrincipal>();
+        claimsPrincipalSubstitute.Identity.Returns((callInfo) =>
         {
             wasCalled = true;
             return null;
         });
 
-        var contextMock = Substitute.For<HttpContext>();
-        contextMock.RequestServices.GetService(typeof(IDfeSignInConfiguration)).Returns(config);
-        contextMock.RequestServices.GetService(typeof(IDfePublicApi)).Returns(dfePublicApiMock);
-        var context = new UserInformationReceivedContext(contextMock,
+        var contextSubstitute = Substitute.For<HttpContext>();
+        contextSubstitute.RequestServices.GetService(typeof(IDfeSignInConfiguration)).Returns(config);
+        contextSubstitute.RequestServices.GetService(typeof(IDfePublicApi)).Returns(dfePublicApiSubstitute);
+        var context = new UserInformationReceivedContext(contextSubstitute,
                                                 new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
                                                 new OpenIdConnectOptions(),
-                                                claimsPrincipalMock,
+                                                claimsPrincipalSubstitute,
                                                 new AuthenticationProperties());
 
         await OnUserInformationReceivedEvent.OnUserInformationReceived(context);
@@ -71,8 +71,8 @@ public class DfeOpenIdConnectEventsTests
             NumericId = "NumericId"
         };
 
-        var dfePublicApiMock = Substitute.For<IDfePublicApi>();
-        var commandMock = Substitute.For<IRecordUserSignInCommand>();
+        var dfePublicApiSubstitute = Substitute.For<IDfePublicApi>();
+        var commandSubstitute = Substitute.For<IRecordUserSignInCommand>();
         var userAccessToService = new UserAccessToService()
         {
             UserId = userId,
@@ -90,9 +90,9 @@ public class DfeOpenIdConnectEventsTests
             }
         };
 
-        dfePublicApiMock.GetUserAccessToService(userId.ToString(), orgId.ToString()).Returns(userAccessToService);
+        dfePublicApiSubstitute.GetUserAccessToService(userId.ToString(), orgId.ToString()).Returns(userAccessToService);
 
-        var identityMock = Substitute.For<ClaimsIdentity>();
+        var identitySubstitute = Substitute.For<ClaimsIdentity>();
 
         var organisationClaim = new Organisation()
         {
@@ -102,21 +102,21 @@ public class DfeOpenIdConnectEventsTests
 
         var organisationClaimSerialised = JsonSerializer.Serialize(organisationClaim);
 
-        identityMock.Claims.Returns(new List<Claim>(){
+        identitySubstitute.Claims.Returns(new List<Claim>(){
                             new Claim(ClaimConstants.NameIdentifier, userId.ToString()),
                             new Claim(ClaimConstants.Organisation, organisationClaimSerialised),
                         });
 
-        identityMock.IsAuthenticated.Returns(true);
+        identitySubstitute.IsAuthenticated.Returns(true);
 
-        var claimsPrincipal = new ClaimsPrincipal(identityMock);
+        var claimsPrincipal = new ClaimsPrincipal(identitySubstitute);
 
-        var contextMock = Substitute.For<HttpContext>();
-        contextMock.RequestServices.GetService(typeof(IDfeSignInConfiguration)).Returns(config);
-        contextMock.RequestServices.GetService(typeof(IDfePublicApi)).Returns(dfePublicApiMock);
-        contextMock.RequestServices.GetService(typeof(IRecordUserSignInCommand)).Returns(commandMock);
+        var contextSubstitute = Substitute.For<HttpContext>();
+        contextSubstitute.RequestServices.GetService(typeof(IDfeSignInConfiguration)).Returns(config);
+        contextSubstitute.RequestServices.GetService(typeof(IDfePublicApi)).Returns(dfePublicApiSubstitute);
+        contextSubstitute.RequestServices.GetService(typeof(IRecordUserSignInCommand)).Returns(commandSubstitute);
 
-        var context = new UserInformationReceivedContext(contextMock,
+        var context = new UserInformationReceivedContext(contextSubstitute,
                                                 new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
                                                 new OpenIdConnectOptions(),
                                                 claimsPrincipal,
@@ -125,7 +125,7 @@ public class DfeOpenIdConnectEventsTests
         await OnUserInformationReceivedEvent.OnUserInformationReceived(context);
 
         //Assert Service called
-        await dfePublicApiMock.Received().GetUserAccessToService(userId.ToString(), orgId.ToString());
+        await dfePublicApiSubstitute.Received().GetUserAccessToService(userId.ToString(), orgId.ToString());
 
         //Assert has right number of identites
         Assert.NotNull(context.Principal);
@@ -163,23 +163,23 @@ public class DfeOpenIdConnectEventsTests
             DiscoverRolesWithPublicApi = false
         };
 
-        var dfePublicApiMock = Substitute.For<IDfePublicApi>();
+        var dfePublicApiSubstitute = Substitute.For<IDfePublicApi>();
 
-        var claimsPrincipalMock = Substitute.For<ClaimsPrincipal>();
-        claimsPrincipalMock.Identity.Returns((callInfo) =>
+        var claimsPrincipalSubstitute = Substitute.For<ClaimsPrincipal>();
+        claimsPrincipalSubstitute.Identity.Returns((callInfo) =>
         {
             wasCalled = false;
             return null;
         });
 
-        var contextMock = Substitute.For<HttpContext>();
-        contextMock.RequestServices.GetService(typeof(IDfeSignInConfiguration)).Returns(config);
-        contextMock.RequestServices.GetService(typeof(IDfePublicApi)).Returns(dfePublicApiMock);
+        var contextSubstitute = Substitute.For<HttpContext>();
+        contextSubstitute.RequestServices.GetService(typeof(IDfeSignInConfiguration)).Returns(config);
+        contextSubstitute.RequestServices.GetService(typeof(IDfePublicApi)).Returns(dfePublicApiSubstitute);
 
-        var context = new UserInformationReceivedContext(contextMock,
+        var context = new UserInformationReceivedContext(contextSubstitute,
                                                 new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
                                                 new OpenIdConnectOptions(),
-                                                claimsPrincipalMock,
+                                                claimsPrincipalSubstitute,
                                                 new AuthenticationProperties());
 
         await OnUserInformationReceivedEvent.OnUserInformationReceived(context);
@@ -196,10 +196,10 @@ public class DfeOpenIdConnectEventsTests
             FrontDoorUrl = "www.frontdoorurl.com"
         };
 
-        var contextMock = Substitute.For<HttpContext>();
-        contextMock.RequestServices.GetService(typeof(IDfeSignInConfiguration)).Returns(config);
+        var contextSubstitute = Substitute.For<HttpContext>();
+        contextSubstitute.RequestServices.GetService(typeof(IDfeSignInConfiguration)).Returns(config);
 
-        var context = new RedirectContext(contextMock,
+        var context = new RedirectContext(contextSubstitute,
                                         new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
                                         new OpenIdConnectOptions(),
                                         new AuthenticationProperties());
@@ -227,10 +227,10 @@ public class DfeOpenIdConnectEventsTests
             FrontDoorUrl = "www.frontdoorurl.com"
         };
 
-        var contextMock = Substitute.For<HttpContext>();
-        contextMock.RequestServices.GetService(typeof(IDfeSignInConfiguration)).Returns(config);
+        var contextSubstitute = Substitute.For<HttpContext>();
+        contextSubstitute.RequestServices.GetService(typeof(IDfeSignInConfiguration)).Returns(config);
 
-        var context = new RedirectContext(contextMock,
+        var context = new RedirectContext(contextSubstitute,
                                         new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
                                         new OpenIdConnectOptions(),
                                         new AuthenticationProperties());

@@ -14,10 +14,10 @@ public class GetPageQueryTests
     private const string SECTION_SLUG = "SectionSlugTest";
     private const string SECTION_TITLE = "SectionTitleTest";
     private const string LANDING_PAGE_SLUG = "LandingPage";
-    private IContentRepository _repoMock = Substitute.For<IContentRepository>();
-    private IQuestionnaireCacher _questionnaireCacherMock = Substitute.For<IQuestionnaireCacher>();
+    private IContentRepository _repoSubstitute = Substitute.For<IContentRepository>();
+    private IQuestionnaireCacher _questionnaireCacherSubstitute = Substitute.For<IQuestionnaireCacher>();
 
-    private readonly List<Page> _mockData = new() {
+    private readonly List<Page> _Data = new() {
         new Page(){
             Slug = "Index"
         },
@@ -41,7 +41,7 @@ public class GetPageQueryTests
 
     private void SetupRepository()
     {
-        _repoMock.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>())
+        _repoSubstitute.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>())
         .Returns((callInfo) =>
         {
             IGetEntitiesOptions options = (IGetEntitiesOptions)callInfo[0];
@@ -51,7 +51,7 @@ public class GetPageQueryTests
                 {
                     if (query is ContentQueryEquals equalsQuery && query.Field == "fields.slug")
                     {
-                        return _mockData.Where(page => page.Slug == equalsQuery.Value);
+                        return _Data.Where(page => page.Slug == equalsQuery.Value);
                     }
                 }
             }
@@ -62,19 +62,19 @@ public class GetPageQueryTests
 
     private void SetupQuestionnaireCacher()
     {
-        _questionnaireCacherMock.Cached.Returns(new QuestionnaireCache()
+        _questionnaireCacherSubstitute.Cached.Returns(new QuestionnaireCache()
         {
             CurrentSectionTitle = SECTION_TITLE
         });
 
-        _questionnaireCacherMock.SaveCache(Arg.Any<QuestionnaireCache>());
+        _questionnaireCacherSubstitute.SaveCache(Arg.Any<QuestionnaireCache>());
     }
 
 
     [Fact]
     public async Task Should_Retrieve_Page_By_Slug()
     {
-        var query = new GetPageQuery(_questionnaireCacherMock, _repoMock);
+        var query = new GetPageQuery(_questionnaireCacherSubstitute, _repoSubstitute);
 
         var result = await query.GetPageBySlug(LANDING_PAGE_SLUG);
 
@@ -85,7 +85,7 @@ public class GetPageQueryTests
     [Fact]
     public async Task Should_ThrowException_When_SlugNotFound()
     {
-        var query = new GetPageQuery(_questionnaireCacherMock, _repoMock);
+        var query = new GetPageQuery(_questionnaireCacherSubstitute, _repoSubstitute);
 
         await Assert.ThrowsAsync<Exception>(async () => await query.GetPageBySlug("NOT A REAL SLUG"));
     }
@@ -93,11 +93,11 @@ public class GetPageQueryTests
     [Fact]
     public async Task Should_SetSectionTitle_When_DisplayTitle_IsTrue()
     {
-        var query = new GetPageQuery(_questionnaireCacherMock, _repoMock);
+        var query = new GetPageQuery(_questionnaireCacherSubstitute, _repoSubstitute);
         var result = await query.GetPageBySlug(SECTION_SLUG);
 
 
         Assert.Equal(SECTION_TITLE, result.SectionTitle);
-        _ = _questionnaireCacherMock.Received(1).Cached;
+        _ = _questionnaireCacherSubstitute.Received(1).Cached;
     }
 }

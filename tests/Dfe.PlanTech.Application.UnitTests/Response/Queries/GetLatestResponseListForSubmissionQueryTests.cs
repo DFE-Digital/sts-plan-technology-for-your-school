@@ -7,14 +7,14 @@ namespace Dfe.PlanTech.Application.UnitTests.Response.Queries
 {
     public class GetLatestResponseListForSubmissionQueryTests
     {
-        private IPlanTechDbContext _planTechDbContextMock;
+        private IPlanTechDbContext _planTechDbContextSubstitute;
         private readonly GetLatestResponseListForSubmissionQuery _getLatestResponseListForSubmissionQuery;
 
         public GetLatestResponseListForSubmissionQueryTests()
         {
-            _planTechDbContextMock = Substitute.For<IPlanTechDbContext>();
+            _planTechDbContextSubstitute = Substitute.For<IPlanTechDbContext>();
 
-            _getLatestResponseListForSubmissionQuery = new GetLatestResponseListForSubmissionQuery(_planTechDbContextMock);
+            _getLatestResponseListForSubmissionQuery = new GetLatestResponseListForSubmissionQuery(_planTechDbContextSubstitute);
         }
 
         [Fact]
@@ -54,8 +54,8 @@ namespace Dfe.PlanTech.Application.UnitTests.Response.Queries
                 }
             };
 
-            _planTechDbContextMock.GetResponses.Returns(responseList.AsQueryable());
-            _planTechDbContextMock.ToListAsync(Arg.Any<IQueryable<QuestionWithAnswer>>()).Returns(Task.FromResult(questionWithAnswerList));
+            _planTechDbContextSubstitute.GetResponses.Returns(responseList.AsQueryable());
+            _planTechDbContextSubstitute.ToListAsync(Arg.Any<IQueryable<QuestionWithAnswer>>()).Returns(Task.FromResult(questionWithAnswerList));
 
             var result = await _getLatestResponseListForSubmissionQuery.GetLatestResponseListForSubmissionBy(1);
 
@@ -135,8 +135,8 @@ namespace Dfe.PlanTech.Application.UnitTests.Response.Queries
                 }
             };
 
-            _planTechDbContextMock.GetResponses.Returns(responseList.AsQueryable());
-            _planTechDbContextMock.ToListAsync(Arg.Any<IQueryable<QuestionWithAnswer>>()).Returns(Task.FromResult(questionWithAnswerList));
+            _planTechDbContextSubstitute.GetResponses.Returns(responseList.AsQueryable());
+            _planTechDbContextSubstitute.ToListAsync(Arg.Any<IQueryable<QuestionWithAnswer>>()).Returns(Task.FromResult(questionWithAnswerList));
 
             var result = await _getLatestResponseListForSubmissionQuery.GetResponseListByDateCreated(1);
 

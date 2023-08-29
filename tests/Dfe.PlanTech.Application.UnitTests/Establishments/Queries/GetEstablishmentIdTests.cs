@@ -8,11 +8,11 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishment.Queries
 {
     public class GetEstablishmentIdQueryTests
     {
-        public IPlanTechDbContext mockDb = Substitute.For<IPlanTechDbContext>();
+        public IPlanTechDbContext Db = Substitute.For<IPlanTechDbContext>();
 
         public GetEstablishmentIdQuery CreateStrut()
         {
-            return new GetEstablishmentIdQuery(mockDb);
+            return new GetEstablishmentIdQuery(Db);
         }
 
         [Theory]
@@ -25,7 +25,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishment.Queries
             var strut = CreateStrut();
             var establishmentRef = new Guid().ToString();
             var returnedEstablishment = new Domain.Establishments.Models.Establishment() { EstablishmentRef = establishmentRef, Id = establishmentId };
-            mockDb.GetEstablishmentBy(Arg.Any<Expression<Func<Domain.Establishments.Models.Establishment, bool>>>()).Returns(returnedEstablishment);
+            Db.GetEstablishmentBy(Arg.Any<Expression<Func<Domain.Establishments.Models.Establishment, bool>>>()).Returns(returnedEstablishment);
 
             //Act
             var result = await strut.GetEstablishmentId(establishmentRef);

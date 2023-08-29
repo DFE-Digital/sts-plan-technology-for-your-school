@@ -10,15 +10,15 @@ public class QuestionnaireCacherTests
     [Fact]
     public void Should_Create_New_Cache_When_Not_Cached_Yet()
     {
-        var cacherMock = Substitute.For<ICacher>();
-        cacherMock.Get(Arg.Any<string>(), Arg.Any<Func<QuestionnaireCache>>())
+        var cacherSubstitute = Substitute.For<ICacher>();
+        cacherSubstitute.Get(Arg.Any<string>(), Arg.Any<Func<QuestionnaireCache>>())
             .Returns((callInfo) =>
             {
                     Func<QuestionnaireCache> creator = (Func<QuestionnaireCache>)callInfo[1];
                     return creator();
             });
 
-        var questionnaireCacher = new QuestionnaireCacher(cacherMock);
+        var questionnaireCacher = new QuestionnaireCacher(cacherSubstitute);
 
         var cache = questionnaireCacher.Cached;
 
@@ -29,13 +29,13 @@ public class QuestionnaireCacherTests
     [Fact]
     public void Should_Save_Cache()
     {
-        var cacherMock = Substitute.For<ICacher>();
-        cacherMock.Set(Arg.Any<string>(), Arg.Any<TimeSpan>(), Arg.Any<QuestionnaireCache>());
+        var cacherSubstitute = Substitute.For<ICacher>();
+        cacherSubstitute.Set(Arg.Any<string>(), Arg.Any<TimeSpan>(), Arg.Any<QuestionnaireCache>());
 
-        var questionnaireCacher = new QuestionnaireCacher(cacherMock);
+        var questionnaireCacher = new QuestionnaireCacher(cacherSubstitute);
 
         questionnaireCacher.SaveCache(new QuestionnaireCache());
 
-        cacherMock.Received().Set(Arg.Any<string>(), Arg.Any<TimeSpan>(), Arg.Any<QuestionnaireCache>());
+        cacherSubstitute.Received().Set(Arg.Any<string>(), Arg.Any<TimeSpan>(), Arg.Any<QuestionnaireCache>());
     }
 }
