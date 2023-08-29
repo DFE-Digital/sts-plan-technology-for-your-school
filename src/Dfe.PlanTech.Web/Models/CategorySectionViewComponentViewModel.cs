@@ -8,7 +8,9 @@ namespace Dfe.PlanTech.Web.Models
 
         public int TotalSectionCount { get; init; }
 
-        public IEnumerable<CategorySectionDto> CategorySectionDto { get; init; } = null!;
+        public IEnumerable<CategorySectionDto> CategorySectionDto { get; init; }
+
+        public string? NoSectionsErrorRedirectUrl { get; set; }
 
         public string? ProgressRetrievalErrorMessage { get; init; }
     }

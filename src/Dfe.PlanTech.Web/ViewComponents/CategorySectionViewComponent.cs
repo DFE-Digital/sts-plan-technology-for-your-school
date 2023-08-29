@@ -17,15 +17,19 @@ namespace Dfe.PlanTech.Web.ViewComponents
 
         public IViewComponentResult Invoke(ICategory category)
         {
+            bool sectionsExist = category.Sections != null && category.Sections?.Length > 0;
+
             category.RetrieveSectionStatuses();
 
             var categorySectionViewModel = new CategorySectionViewComponentViewModel()
             {
                 CompletedSectionCount = category.Completed,
-                TotalSectionCount = category.Sections.Length,
-                CategorySectionDto = _GetCategorySectionViewComponentViewModel(category),
+                TotalSectionCount = category.Sections?.Length ?? 0,
+                CategorySectionDto = sectionsExist ? _GetCategorySectionViewComponentViewModel(category) : Enumerable.Empty<CategorySectionDto>(),
                 ProgressRetrievalErrorMessage = category.RetrievalError ? "Unable to retrieve progress, please refresh your browser." : null
             };
+
+            if (!sectionsExist) categorySectionViewModel.NoSectionsErrorRedirectUrl = "ServiceUnavailable";
 
             return View(categorySectionViewModel);
         }

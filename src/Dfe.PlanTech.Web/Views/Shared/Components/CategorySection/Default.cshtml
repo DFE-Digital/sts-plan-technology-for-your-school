@@ -1,8 +1,14 @@
 @model CategorySectionViewComponentViewModel
 
+<h3 class="govuk-heading-s govuk-!-margin-bottom-2">Progress</h3>
+
+@if (Model.NoSectionsErrorRedirectUrl != null)
+{
+    Context.Response.Redirect(Url.Content(Model.NoSectionsErrorRedirectUrl));
+}
+
 @if (Model.ProgressRetrievalErrorMessage == null)
 {
-    <h3 class="govuk-heading-s govuk-!-margin-bottom-2">Progress</h3>
     <p class="govuk-body govuk-!-margin-bottom-5">You have completed <strong>@Model.CompletedSectionCount of
         @Model.TotalSectionCount</strong> sections.</p>
 }

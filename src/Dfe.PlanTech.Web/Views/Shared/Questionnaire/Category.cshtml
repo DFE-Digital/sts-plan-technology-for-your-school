@@ -8,10 +8,5 @@
     }
 }
 
-@if (Model.Sections is null || Model.Sections.Length == 0)
-{
-    Context.Response.Redirect(Url.Content("ServiceUnavailable"));
-}
-
 @await Component.InvokeAsync("CategorySection", new { category = Model })
 @await Component.InvokeAsync("Recommendations", new { category = Model })
