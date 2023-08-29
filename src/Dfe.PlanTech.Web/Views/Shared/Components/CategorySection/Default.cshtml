@@ -4,7 +4,7 @@
 
 @if (Model.NoSectionsErrorRedirectUrl != null)
 {
-    // Context.Response.Redirect(Url.Content(Model.NoSectionsErrorRedirectUrl));
+    Context.Response.Redirect(Url.Content(Model.NoSectionsErrorRedirectUrl));
 }
 
 @if (Model.ProgressRetrievalErrorMessage == null)
