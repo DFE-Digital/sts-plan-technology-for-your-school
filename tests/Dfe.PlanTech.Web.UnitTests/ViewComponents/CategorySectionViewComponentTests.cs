@@ -311,7 +311,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category = new Category(_loggerCategory, _getSubmissionStatusesQuery)
             {
                 Completed = 0,
-                Sections = new ISection[0]
+                Sections = Array.Empty<ISection>()
             };
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
