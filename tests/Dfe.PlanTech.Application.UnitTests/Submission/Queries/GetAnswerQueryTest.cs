@@ -8,14 +8,14 @@ namespace Dfe.PlanTech.Application.UnitTests.Submission.Queries
 {
     public class GetAnswerQueryTests
     {
-        private IPlanTechDbContext _planTechDbContextMock;
+        private IPlanTechDbContext _planTechDbContextSubstitute;
         private readonly GetAnswerQuery _getAnswerQuery;
 
         public GetAnswerQueryTests()
         {
-            _planTechDbContextMock = Substitute.For<IPlanTechDbContext>();
+            _planTechDbContextSubstitute = Substitute.For<IPlanTechDbContext>();
 
-            _getAnswerQuery = new GetAnswerQuery(_planTechDbContextMock);
+            _getAnswerQuery = new GetAnswerQuery(_planTechDbContextSubstitute);
         }
 
         [Fact]
@@ -27,7 +27,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Submission.Queries
                 AnswerText = "Answer Text",
                 ContentfulRef = "AnswerRef-1"
             };
-            _planTechDbContextMock.GetAnswer(Arg.Any<Expression<Func<Answer, bool>>>()).Returns(output);
+            _planTechDbContextSubstitute.GetAnswer(Arg.Any<Expression<Func<Answer, bool>>>()).Returns(output);
 
             var result = await _getAnswerQuery.GetAnswerBy(1);
 

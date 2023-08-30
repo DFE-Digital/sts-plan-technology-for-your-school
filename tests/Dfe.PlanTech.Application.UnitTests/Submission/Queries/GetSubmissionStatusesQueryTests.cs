@@ -8,14 +8,14 @@ namespace Dfe.PlanTech.Application.UnitTests.Submission.Queries
 {
     public class GetSubmissionStatusesQueryTests
     {
-        private IPlanTechDbContext mockDb = Substitute.For<IPlanTechDbContext>();
+        private IPlanTechDbContext Db = Substitute.For<IPlanTechDbContext>();
 
         [Fact]
         public void GetSectionSubmissionStatuses_ReturnsListOfStatuses()
         {
             var expectedStatuses = new List<SectionStatuses>() { new SectionStatuses { Completed = 1, SectionId = "1", Maturity = "Low", DateCreated = DateTime.UtcNow } }.AsQueryable();
             var sections = new Section[1] { new Section { Sys = new Sys { Id = "1" } } };
-            mockDb.GetSectionStatuses(Arg.Any<string>()).Returns(expectedStatuses);
+            Db.GetSectionStatuses(Arg.Any<string>()).Returns(expectedStatuses);
 
             var result = CreateStrut().GetSectionSubmissionStatuses(sections);
 
@@ -24,7 +24,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Submission.Queries
 
         private GetSubmissionStatusesQuery CreateStrut()
         {
-            return new GetSubmissionStatusesQuery(mockDb);
+            return new GetSubmissionStatusesQuery(Db);
         }
     }
 }

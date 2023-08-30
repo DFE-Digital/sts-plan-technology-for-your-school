@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,7 +15,10 @@ namespace Dfe.PlanTech.Web.ViewComponents
 
         public IViewComponentResult Invoke(ICategory category)
         {
+            category.RetrieveSectionStatuses();
+
             var recommendationsViewComponentViewModel = category.Completed >= 1 ? _GetRecommendationsViewComponentViewModel(category) : null;
+
             return View(recommendationsViewComponentViewModel);
         }
 
@@ -32,7 +34,7 @@ namespace Dfe.PlanTech.Web.ViewComponents
 
                 var recommendation = section.GetRecommendationForMaturity(sectionMaturity);
 
-                if (recommendation == null) _logger.LogWarning("No Recommendation Found: Section - {sectionName}, Maturity - {sectionMaturity}", section.Name, sectionMaturity);
+                if (recommendation == null) _logger.LogError("No Recommendation Found: Section - {sectionName}, Maturity - {sectionMaturity}", section.Name, sectionMaturity);
 
                 yield return new RecommendationsViewComponentViewModel()
                 {

@@ -7,11 +7,11 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
 {
     public class CreateEstablishmentCommandTests
     {
-        public IPlanTechDbContext mockDb = Substitute.For<IPlanTechDbContext>();
+        public IPlanTechDbContext Db = Substitute.For<IPlanTechDbContext>();
 
         public CreateEstablishmentCommand CreateStrut()
         {
-            return new CreateEstablishmentCommand(mockDb);
+            return new CreateEstablishmentCommand(Db);
         }
 
         [Theory]
@@ -21,8 +21,8 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
         {
             //Arrange
             var strut = CreateStrut();
-            mockDb.AddEstablishment(Arg.Any<Domain.Establishments.Models.Establishment>());
-            mockDb.SaveChangesAsync().Returns(Task.FromResult(expectedEstablishmentId));
+            Db.AddEstablishment(Arg.Any<Domain.Establishments.Models.Establishment>());
+            Db.SaveChangesAsync().Returns(Task.FromResult(expectedEstablishmentId));
             var establishmentDto = new EstablishmentDto() { Urn = null, Ukprn = new Guid().ToString() };
 
             //Act
@@ -39,8 +39,8 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
         {
             //Arrange
             var strut = CreateStrut();
-            mockDb.AddEstablishment(Arg.Any<Domain.Establishments.Models.Establishment>());
-            mockDb.SaveChangesAsync().Returns(Task.FromResult(expectedEstablishmentId));
+            Db.AddEstablishment(Arg.Any<Domain.Establishments.Models.Establishment>());
+            Db.SaveChangesAsync().Returns(Task.FromResult(expectedEstablishmentId));
             var establishmentDto = new EstablishmentDto() { Urn = new Guid().ToString(), Ukprn = null };
 
             //Act

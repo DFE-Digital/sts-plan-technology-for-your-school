@@ -1,96 +1,12 @@
-@using Dfe.PlanTech.Web.TagHelpers.TaskList
 @model Dfe.PlanTech.Domain.Questionnaire.Interfaces.ICategory;
 
-
-@{
-    var completedCount = 0;
-    Model.RetrieveSectionStatuses();
-    completedCount = Model.SectionStatuses.Where(x => x.Completed == 1).ToList().Count;
-    Model.Completed = completedCount;
-}
 @{
     await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Header);
-}
-
-@{
     foreach (var content in Model.Content)
     {
         await Html.RenderPartialAsync("Components/PageComponentFactory", content);
     }
 }
 
-<h3 class="govuk-heading-s govuk-!-margin-bottom-2">Progress</h3>
-
-@{
-    if (Model.RetrievalError)
-    {
-        <p id="progress-error" class="govuk-error-message">
-            <span class="govuk-visually-hidden">Error:</span> Unable to retrieve progress, please refresh your browser.
-        </p>
-    }
-    else
-    {
-        <p class="govuk-body govuk-!-margin-bottom-5">
-            You have completed
-            <strong>
-                @completedCount of
-                @Model.Sections.Count()
-            </strong> sections.
-        </p>
-    }
-}
-
-<task-list>
-    @foreach (var categorySection in Model.Sections)
-    {
-        TempData[categorySection.InterstitialPage.Slug] = categorySection.Name + "+" + categorySection.Sys.Id;
-
-        if (Model.RetrievalError)
-        {
-            <task-list-item>
-                <task-list-item-name>
-                    <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@categorySection.InterstitialPage.Slug"
-                       asp-route-param=@categorySection.Name+@categorySection.Sys.Id class="govuk-link">
-                        @categorySection.Name
-                    </a>
-                </task-list-item-name>
-
-                <task-list-tag colour=@TagColour.Red>
-                    Unable to retrieve status
-                </task-list-tag>
-            </task-list-item>
-        }
-        else
-        {
-            var tagColour = TagColour.Grey;
-            var tagText = "NOT STARTED";
-            var exists = Model.SectionStatuses.FirstOrDefault(x => x.SectionId == categorySection.Sys.Id);
-
-            if (exists != null && exists!.Completed == 1)
-            {
-                tagColour = TagColour.DarkBlue;
-                tagText = "COMPLETE";
-            }
-            else if (exists != null && exists!.Completed == 0)
-            {
-                tagColour = TagColour.Green;
-                tagText = "STARTED";
-            }
-
-            <task-list-item>
-                <task-list-item-name>
-                    <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@categorySection.InterstitialPage.Slug"
-                       asp-route-param=@categorySection.Name+@categorySection.Sys.Id class="govuk-link">
-                        @categorySection.Name
-                    </a>
-                </task-list-item-name>
-
-                <task-list-tag colour=@tagColour>
-                    @tagText
-                </task-list-tag>
-            </task-list-item>
-        }
-    }
-</task-list>
-
+@await Component.InvokeAsync("CategorySection", new { category = Model })
 @await Component.InvokeAsync("Recommendations", new { category = Model })

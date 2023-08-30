@@ -31,12 +31,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
         public static CookiesController CreateStrut()
         {
-            ILogger<CookiesController> loggerMock = Substitute.For<ILogger<CookiesController>>();
-            ICookieService cookiesMock = Substitute.For<ICookieService>();
+            ILogger<CookiesController> loggerSubstitute = Substitute.For<ILogger<CookiesController>>();
+            ICookieService cookiesSubstitute = Substitute.For<ICookieService>();
 
-            return new CookiesController(loggerMock, cookiesMock)
+            return new CookiesController(loggerSubstitute, cookiesSubstitute)
             {
-                ControllerContext = ControllerHelpers.MockControllerContext()
+                ControllerContext = ControllerHelpers.SubstituteControllerContext()
             };
         }
 
@@ -107,7 +107,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.Equal(url, result.Url);
         }
 
-        private static IRequestCookieCollection MockRequestCookieCollection(string key, string value)
+        private static IRequestCookieCollection SubstituteRequestCookieCollection(string key, string value)
         {
             var requestFeature = new HttpRequestFeature();
             var featureCollection = new FeatureCollection();
@@ -126,12 +126,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
          [Fact]
          public async Task CookiesPageDisplays()
          {
-            IQuestionnaireCacher questionnaireCacherMock = Substitute.For<IQuestionnaireCacher>();
-            IContentRepository contentRepositoryMock = SetupRepositoryMock();
-            GetPageQuery _getPageQueryMock = Substitute.For<GetPageQuery>(questionnaireCacherMock, contentRepositoryMock);
+            IQuestionnaireCacher questionnaireCacherSubstitute = Substitute.For<IQuestionnaireCacher>();
+            IContentRepository contentRepositorySubstitute = SetupRepositorySubstitute();
+            GetPageQuery _getPageQuerySubstitute = Substitute.For<GetPageQuery>(questionnaireCacherSubstitute, contentRepositorySubstitute);
 
             CookiesController cookiesController = CreateStrut();
-            var result = await cookiesController.GetCookiesPage(_getPageQueryMock);
+            var result = await cookiesController.GetCookiesPage(_getPageQuerySubstitute);
             Assert.IsType<ViewResult>(result);
 
             var viewResult = result as ViewResult;
@@ -147,16 +147,16 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
          {
             CookiesController cookiesController = CreateStrut();
              
-            var tempDataMock = Substitute.For<ITempDataDictionary>();
-            var cookiesMock = Substitute.For<ICookieService>();
+            var tempDataSubstitute = Substitute.For<ITempDataDictionary>();
+            var cookiesSubstitute = Substitute.For<ICookieService>();
 
-            cookiesMock.SetPreference(Arg.Any<bool>());
+            cookiesSubstitute.SetPreference(Arg.Any<bool>());
 
-            cookiesController.TempData = tempDataMock;
+            cookiesController.TempData = tempDataSubstitute;
 
             var result = cookiesController.CookiePreference(userPreference);
 
-            tempDataMock.Received(1)["UserPreferenceRecorded"] = true;
+            tempDataSubstitute.Received(1)["UserPreferenceRecorded"] = true;
 
              Assert.IsType<RedirectToActionResult>(result);
 
@@ -174,21 +174,21 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             CookiesController cookiesController = CreateStrut();
 
-            var tempDataMock = Substitute.For<ITempDataDictionary>();
-            var cookiesMock = Substitute.For<ICookieService>();
+            var tempDataSubstitute = Substitute.For<ITempDataDictionary>();
+            var cookiesSubstitute = Substitute.For<ICookieService>();
 
-            cookiesMock.SetPreference(Arg.Any<bool>());
+            cookiesSubstitute.SetPreference(Arg.Any<bool>());
 
-            cookiesController.TempData = tempDataMock;
+            cookiesController.TempData = tempDataSubstitute;
 
             var result = Assert.Throws<ArgumentException>(() => cookiesController.CookiePreference(string.Empty));
             Assert.Contains("Can't convert preference", result.Message);
         }
 
-        private IContentRepository SetupRepositoryMock()
+        private IContentRepository SetupRepositorySubstitute()
          {
-             var repositoryMock = Substitute.For<IContentRepository>();
-             repositoryMock.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns((CallInfo) =>
+             var repositorySubstitute = Substitute.For<IContentRepository>();
+             repositorySubstitute.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns((CallInfo) =>
              {
                  IGetEntitiesOptions options = (IGetEntitiesOptions)CallInfo[0];
                  if (options?.Queries != null)
@@ -203,7 +203,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                  }
                  return Array.Empty<Page>();
              });
-             return repositoryMock;
+             return repositorySubstitute;
          }
     }
 }
