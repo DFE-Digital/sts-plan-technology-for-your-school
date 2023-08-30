@@ -13,19 +13,19 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
     public class RecommendationsViewComponentTests
     {
         private readonly RecommendationsViewComponent _recommendationsComponent;
-        private ICategory category;
-        private IGetSubmissionStatusesQuery _submissionStatusesQuery;
-        private ILogger<Category> _logger;
+        private ICategory _category;
+        private IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
+        private ILogger<Category> _loggerCategory;
 
         public RecommendationsViewComponentTests()
         {
-            
-            _submissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
-            _logger = Substitute.For<ILogger<Category>>();
-            
+
+            _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
+            _loggerCategory = Substitute.For<ILogger<Category>>();
+
             _recommendationsComponent = new RecommendationsViewComponent(Substitute.For<ILogger<RecommendationsViewComponent>>());
 
-            category = new Category(_logger,_submissionStatusesQuery)
+            _category = new Category(_loggerCategory, _getSubmissionStatusesQuery)
             {
                 Completed = 1,
                 Sections = new Section[]
@@ -45,23 +45,23 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                             }
                         }
                     }
-                },
+                }
             };
         }
-
-
 
         [Fact]
         public void Returns_RecommendationInfo_If_It_Exists_ForMaturity()
         {
-            var result = _recommendationsComponent.Invoke(category) as ViewViewComponentResult;
-
-            category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
             {
                 SectionId = "Section1",
                 Completed = 1,
                 Maturity = "High"
             });
+
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
+
+            var result = _recommendationsComponent.Invoke(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -75,22 +75,24 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             unboxed = unboxed.ToList();
             Assert.NotEmpty(unboxed);
 
-            Assert.Equal(category.Sections[0].Recommendations[0].Page.Slug, unboxed.First().RecommendationSlug);
-            Assert.Equal(category.Sections[0].Recommendations[0].DisplayName, unboxed.First().RecommendationDisplayName);
+            Assert.Equal(_category.Sections[0].Recommendations[0].Page.Slug, unboxed.First().RecommendationSlug);
+            Assert.Equal(_category.Sections[0].Recommendations[0].DisplayName, unboxed.First().RecommendationDisplayName);
             Assert.Null(unboxed.First().NoRecommendationFoundErrorMessage);
         }
 
         [Fact]
         public void Returns_NullRecommendationInfo_If_No_RecommendationPage_Exists_ForMaturity()
         {
-            category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
             {
                 SectionId = "Section1",
                 Completed = 1,
                 Maturity = "Low"
             });
 
-            var result = _recommendationsComponent.Invoke(category) as ViewViewComponentResult;
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
+
+            var result = _recommendationsComponent.Invoke(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -112,34 +114,30 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public void DoesNotReturn_RecommendationInfo_If_Section_IsNot_Completed()
         {
-            category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
             {
                 SectionId = "Section1",
                 Completed = 0,
                 Maturity = null
             });
 
-            var result = _recommendationsComponent.Invoke(category) as ViewViewComponentResult;
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
+
+            var result = _recommendationsComponent.Invoke(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
 
             var model = result.ViewData.Model;
-            Assert.NotNull(model);
-
-            var unboxed = model as IEnumerable<RecommendationsViewComponentViewModel>;
-            Assert.NotNull(unboxed);
-
-            unboxed = unboxed.ToList();
-            Assert.Empty(unboxed);
+            Assert.Null(model);
         }
 
         [Fact]
         public void Returns_Null_If_Category_IsNot_Completed()
         {
-            category.Completed = 0;
+            _category.Completed = 0;
 
-            var result = _recommendationsComponent.Invoke(category) as ViewViewComponentResult;
+            var result = _recommendationsComponent.Invoke(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
