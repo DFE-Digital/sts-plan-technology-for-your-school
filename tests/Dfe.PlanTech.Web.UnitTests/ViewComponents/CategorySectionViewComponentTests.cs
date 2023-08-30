@@ -272,5 +272,69 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal("UNABLE TO RETRIEVE STATUS", categorySectionDto.TagText);
             Assert.Null(categorySectionDto.NoSlugForSubtopicErrorMessage);
         }
+
+        [Fact]
+        public void Returns_NoSectionsErrorRedirectUrl_If_SectionsAreNull()
+        {
+            _category = new Category(_loggerCategory, _getSubmissionStatusesQuery)
+            {
+                Completed = 0,
+                Sections = null!
+            };
+
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
+
+            var result = _categorySectionViewComponent.Invoke(_category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model;
+            Assert.NotNull(model);
+
+            var unboxed = model as CategorySectionViewComponentViewModel;
+            Assert.NotNull(unboxed);
+            Assert.Equal("ServiceUnavailable", unboxed.NoSectionsErrorRedirectUrl);
+            Assert.Equal(0, unboxed.TotalSectionCount);
+
+            var categorySectionDtoList = unboxed.CategorySectionDto as IEnumerable<CategorySectionDto>;
+
+            Assert.NotNull(categorySectionDtoList);
+
+            categorySectionDtoList = categorySectionDtoList.ToList();
+            Assert.Empty(categorySectionDtoList);
+        }
+
+        [Fact]
+        public void Returns_NoSectionsErrorRedirectUrl_If_SectionsAreEmpty()
+        {
+            _category = new Category(_loggerCategory, _getSubmissionStatusesQuery)
+            {
+                Completed = 0,
+                Sections = new ISection[0]
+            };
+
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
+
+            var result = _categorySectionViewComponent.Invoke(_category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model;
+            Assert.NotNull(model);
+
+            var unboxed = model as CategorySectionViewComponentViewModel;
+            Assert.NotNull(unboxed);
+            Assert.Equal("ServiceUnavailable", unboxed.NoSectionsErrorRedirectUrl);
+            Assert.Equal(0, unboxed.TotalSectionCount);
+
+            var categorySectionDtoList = unboxed.CategorySectionDto as IEnumerable<CategorySectionDto>;
+
+            Assert.NotNull(categorySectionDtoList);
+
+            categorySectionDtoList = categorySectionDtoList.ToList();
+            Assert.Empty(categorySectionDtoList);
+        }
     }
 }
