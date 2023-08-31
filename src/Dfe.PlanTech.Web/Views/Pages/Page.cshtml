@@ -5,6 +5,10 @@
     {
         await Html.RenderPartialAsync("BackButton", Model);
     }
+    @if (Model.Page.DisplayHomeButton)
+    {
+        await Html.RenderPartialAsync("HomeButton", Model);
+    }
 }
 
 @section Head {
