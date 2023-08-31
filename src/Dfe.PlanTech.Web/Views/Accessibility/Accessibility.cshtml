@@ -3,15 +3,7 @@
 @section BeforeContent {
 
     <div>
-        @* @if (User.Identity.IsAuthenticated) *@
-        @* { *@
-        @*     <a href="/self-assessment">Home</a> *@
-        @* } *@
-        @* else *@
-        @* { *@
-        @*     <a href="/">Home</a> *@
-        @* } *@
-            @await Component.InvokeAsync("HomeLink", new { model = Model })
+        @await Component.InvokeAsync("HomeLink", new { model = Model })
     </div>
 
     <div class="govuk-width-container" id="accessibility-page">
