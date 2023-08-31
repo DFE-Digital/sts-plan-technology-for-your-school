@@ -19,9 +19,9 @@ public class AccessibilityController : BaseController<AccessibilityController>
 
         AccessibilityViewModel accessibilityViewModel = new AccessibilityViewModel()
         {
-            Title = accessibilityPageContent.Title,
+            Title = accessibilityPageContent.Title ?? throw new NullReferenceException(nameof(accessibilityPageContent.Title)),
             Content = accessibilityPageContent.Content,
-            UserIsAuthenticated = User.Identity.IsAuthenticated
+            UserIsAuthenticated = User.Identity is { IsAuthenticated: true }
         };
         
         return View("Accessibility", accessibilityViewModel);
