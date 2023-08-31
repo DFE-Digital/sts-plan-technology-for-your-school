@@ -1,0 +1,30 @@
+@model Dfe.PlanTech.Web.Models.AccessibilityViewModel
+
+@section BeforeContent {
+
+    <div>
+        @await Component.InvokeAsync("HomeLink", new { model = Model })
+    </div>
+
+    <div class="govuk-width-container" id="accessibility-page">
+        <main class="govuk-main-wrapper" id="main-content" role="main">
+            <div class="govuk-grid-row">
+
+                @{
+                    await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Title);
+                }
+
+
+                @{
+                    if (Model.Content != null)
+                    {
+                        foreach (var content in Model.Content)
+                        {
+                            await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+                        }
+                    }
+                }
+            </div>
+        </main>
+    </div>
+}
