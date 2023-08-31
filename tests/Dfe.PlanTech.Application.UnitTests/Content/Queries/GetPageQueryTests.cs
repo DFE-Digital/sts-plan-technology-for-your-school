@@ -30,6 +30,8 @@ public class GetPageQueryTests
         new Page(){
             Slug = SECTION_SLUG,
             DisplayTopicTitle = true,
+            DisplayHomeButton= false,
+            DisplayBackButton = false,
         }
     };
 
