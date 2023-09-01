@@ -43,7 +43,8 @@ public class QuestionsController : BaseController<QuestionsController>
                 Question = questionWithSubmission.Question,
                 AnswerRef = parameterQuestionPage.AnswerRef,
                 Params = parameters?.ToString(),
-                SubmissionId = questionWithSubmission.Submission == null ? parameterQuestionPage.SubmissionId : questionWithSubmission.Submission.Id
+                SubmissionId = questionWithSubmission.Submission == null ? parameterQuestionPage.SubmissionId : questionWithSubmission.Submission.Id,
+                NoSelectedAnswerErrorMessage = parameterQuestionPage.NoSelectedAnswerErrorMessage
             };
 
             return View("Question", viewModel);
@@ -64,7 +65,12 @@ public class QuestionsController : BaseController<QuestionsController>
 
         if (!ModelState.IsValid)
         {
-            TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions() { QuestionRef = submitAnswerDto.QuestionId, SubmissionId = submitAnswerDto.SubmissionId });
+            TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions()
+            {
+                QuestionRef = submitAnswerDto.QuestionId,
+                SubmissionId = submitAnswerDto.SubmissionId,
+                NoSelectedAnswerErrorMessage = "You must select an answer to continue"
+            });
             return RedirectToAction("GetQuestionById");
         }
 
