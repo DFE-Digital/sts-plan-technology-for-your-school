@@ -12,15 +12,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
 {
     public class ComponentBuilder : IComponentBuilder
     {
-        
-        private readonly IGetSubmissionStatusesQuery _submissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
-        private readonly ILogger<Category> _logger = Substitute.For<ILogger<Category>>();
-        
-            
         public Category BuildCategory()
         {
             
-            return new Category(_logger, _submissionStatusesQuery)
+            return new Category()
             {
                 Header = new Header { Text = "Category" },
                 Content = BuildContent(),

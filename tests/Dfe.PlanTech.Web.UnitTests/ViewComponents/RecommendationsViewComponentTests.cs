@@ -6,6 +6,7 @@ using Dfe.PlanTech.Web.ViewComponents;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
@@ -15,17 +16,16 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         private readonly RecommendationsViewComponent _recommendationsComponent;
         private ICategory _category;
         private IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
-        private ILogger<Category> _loggerCategory;
+        private ILogger<RecommendationsViewComponent> _loggerCategory;
 
         public RecommendationsViewComponentTests()
         {
-
             _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
-            _loggerCategory = Substitute.For<ILogger<Category>>();
+            _loggerCategory = Substitute.For<ILogger<RecommendationsViewComponent>>();
+            
+            _recommendationsComponent = new RecommendationsViewComponent(_loggerCategory, _getSubmissionStatusesQuery);
 
-            _recommendationsComponent = new RecommendationsViewComponent(Substitute.For<ILogger<RecommendationsViewComponent>>());
-
-            _category = new Category(_loggerCategory, _getSubmissionStatusesQuery)
+            _category = new Category()
             {
                 Completed = 1,
                 Sections = new Section[]
@@ -78,6 +78,38 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal(_category.Sections[0].Recommendations[0].Page.Slug, unboxed.First().RecommendationSlug);
             Assert.Equal(_category.Sections[0].Recommendations[0].DisplayName, unboxed.First().RecommendationDisplayName);
             Assert.Null(unboxed.First().NoRecommendationFoundErrorMessage);
+        }
+        
+        [Fact]
+        public void Returns_RecommendationInfo_And_Logs_Error_If_Exception_Thrown_By_Get_Category()
+        {
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
+            {
+                SectionId = "Section1",
+                Completed = 1,
+                Maturity = "High"
+            });
+
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Throws(new Exception("test"));
+
+            var result = _recommendationsComponent.Invoke(_category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model;
+            Assert.NotNull(model);
+
+            var unboxed = model as IEnumerable<RecommendationsViewComponentViewModel>;
+            Assert.NotNull(unboxed);
+
+            unboxed = unboxed.ToList();
+            Assert.NotEmpty(unboxed);
+
+            Assert.Equal(_category.Sections[0].Recommendations[0].Page.Slug, unboxed.First().RecommendationSlug);
+            Assert.Equal(_category.Sections[0].Recommendations[0].DisplayName, unboxed.First().RecommendationDisplayName);
+            Assert.Null(unboxed.First().NoRecommendationFoundErrorMessage);
+            _loggerCategory.ReceivedWithAnyArgs(1).LogError("An exception has occurred while trying to retrieve section progress with the following message - test");
         }
 
         [Fact]

@@ -20,12 +20,12 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         private readonly CategorySectionViewComponent _categorySectionViewComponent;
 
         private ICategory _category;
-        private ILogger<Category> _loggerCategory;
+        private ILogger<CategorySectionViewComponent> _loggerCategory;
 
         public CategorySectionViewComponentTests()
         {
             _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
-            _loggerCategory = Substitute.For<ILogger<Category>>();
+            _loggerCategory = Substitute.For<ILogger<CategorySectionViewComponent>>();
 
             var httpContext = new DefaultHttpContext();
             var tempData = new TempDataDictionary(httpContext, Substitute.For<ITempDataProvider>());
@@ -34,10 +34,10 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var viewComponentContext = new ViewComponentContext();
             viewComponentContext.ViewContext = viewContext;
 
-            _categorySectionViewComponent = new CategorySectionViewComponent(Substitute.For<ILogger<CategorySectionViewComponent>>());
+            _categorySectionViewComponent = new CategorySectionViewComponent(_loggerCategory,_getSubmissionStatusesQuery);
             _categorySectionViewComponent.ViewComponentContext = viewComponentContext;
 
-            _category = new Category(_loggerCategory, _getSubmissionStatusesQuery)
+            _category = new Category()
             {
                 Completed = 1,
                 Sections = new Section[]
@@ -276,7 +276,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public void Returns_NoSectionsErrorRedirectUrl_If_SectionsAreNull()
         {
-            _category = new Category(_loggerCategory, _getSubmissionStatusesQuery)
+            _category = new Category()
             {
                 Completed = 0,
                 Sections = null!
@@ -308,7 +308,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public void Returns_NoSectionsErrorRedirectUrl_If_SectionsAreEmpty()
         {
-            _category = new Category(_loggerCategory, _getSubmissionStatusesQuery)
+            _category = new Category()
             {
                 Completed = 0,
                 Sections = Array.Empty<ISection>()

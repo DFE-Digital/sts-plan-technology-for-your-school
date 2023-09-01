@@ -113,7 +113,6 @@ public static class ProgramExtensions
 
         services.AddTransient<ICalculateMaturityCommand, CalculateMaturityCommand>();
         services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
-        services.AddTransient<ILogger<Category>, Logger<Category>>();        
         
         services.AddTransient<ProcessCheckAnswerDtoCommand>();
 
@@ -124,7 +123,6 @@ public static class ProgramExtensions
         services.AddTransient<IGetEstablishmentIdQuery, GetEstablishmentIdQuery>();
 
         services.AddTransient<Application.Questionnaire.Queries.GetSectionQuery>();
-        services.AddTransient<Category>();
         services.AddTransient<IGetNavigationQuery, GetNavigationQuery>();
 
         return services;
