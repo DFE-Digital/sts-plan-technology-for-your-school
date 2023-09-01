@@ -1,8 +1,10 @@
 describe("Privacy Policy Page", () => {
-    const url = "/privacy";
+    const url = "/self-assessment";
 
     beforeEach(() => {
-        cy.visit(url);
+        cy.loginWithEnv(url);
+        cy.get("govuk-footer__link").contains("Privacy").click();
+        cy.url().should("contain", "/privacy");
         cy.injectAxe();
     });
 
@@ -16,7 +18,7 @@ describe("Privacy Policy Page", () => {
         cy.get('a:contains("Home")')
             .should("exist")
             .should("have.attr", "href")
-            .and("include", "/")
+            .and("include", "self-assessment")
     });
 
     it("Should Have Content", () => {
