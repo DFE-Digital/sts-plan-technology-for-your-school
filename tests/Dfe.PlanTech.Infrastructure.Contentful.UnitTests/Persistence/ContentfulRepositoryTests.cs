@@ -72,9 +72,8 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         public async Task Should_Call_Client_Method_When_Using_GetEntities()
         {
             
-            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute, _contractResolver);
-
-
+            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
+            
             var result = await repository.GetEntities<TestClass>();
 
             Assert.NotNull(result);
@@ -83,7 +82,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         [Fact]
         public async Task Should_CallClientMethod_When_Using_GetEntityById()
         {
-            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute, _contractResolver);
+            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
             
             var result = await repository.GetEntityById<TestClass>("testId");
 
@@ -93,7 +92,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         [Fact]
         public async Task GetEntities_Should_ReturnItems_When_ClassMatches()
         {
-            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute, _contractResolver);
+            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
             
             var result = await repository.GetEntities<TestClass>();
 
@@ -105,7 +104,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         [Fact]
         public async Task GetEntities_Should_ReturnEmptyIEnumerable_When_NoDataFound()
         {
-            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute, _contractResolver);
+            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
             
             var result = await repository.GetEntities<OtherTestClass>();
 
@@ -118,7 +117,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         {
             var testId = "testId";
             
-            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute, _contractResolver);
+            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
             
             var result = await repository.GetEntityById<TestClass>(testId);
 
@@ -129,7 +128,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         [Fact]
         public async Task GetEntityById_Should_ThrowException_When_IdIsNull()
         {
-            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute, _contractResolver);
+            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
             
             await Assert.ThrowsAsync<ArgumentNullException>(() => repository.GetEntityById<TestClass>(null));
         }
@@ -137,7 +136,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         [Fact]
         public async Task GetEntityById_Should_ThrowException_When_IdIsEmpty()
         {
-            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute, _contractResolver);
+            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
             
             await Assert.ThrowsAsync<ArgumentNullException>(() => repository.GetEntityById<TestClass>(""));
         }
@@ -145,7 +144,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         [Fact]
         public async Task Should_ReturnNull_When_IdNotFound()
         {
-            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute, _contractResolver);
+            IContentRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
             
             var result = await repository.GetEntityById<TestClass>("not a real id");
 

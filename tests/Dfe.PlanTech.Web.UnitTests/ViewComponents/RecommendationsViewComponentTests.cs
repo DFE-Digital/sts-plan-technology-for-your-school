@@ -15,17 +15,16 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         private readonly RecommendationsViewComponent _recommendationsComponent;
         private ICategory _category;
         private IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
-        private ILogger<Category> _loggerCategory;
+        private ILogger<RecommendationsViewComponent> _loggerCategory;
 
         public RecommendationsViewComponentTests()
         {
-
             _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
-            _loggerCategory = Substitute.For<ILogger<Category>>();
+            _loggerCategory = Substitute.For<ILogger<RecommendationsViewComponent>>();
+            
+            _recommendationsComponent = new RecommendationsViewComponent(_loggerCategory, _getSubmissionStatusesQuery);
 
-            _recommendationsComponent = new RecommendationsViewComponent(Substitute.For<ILogger<RecommendationsViewComponent>>());
-
-            _category = new Category(_loggerCategory, _getSubmissionStatusesQuery)
+            _category = new Category()
             {
                 Completed = 1,
                 Sections = new Section[]

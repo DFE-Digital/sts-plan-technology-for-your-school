@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Domain.CategorySection;
+using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.TagHelpers.TaskList;
@@ -9,17 +10,20 @@ namespace Dfe.PlanTech.Web.ViewComponents
     public class CategorySectionViewComponent : ViewComponent
     {
         private readonly ILogger<CategorySectionViewComponent> _logger;
+        private readonly IGetSubmissionStatusesQuery _query;
 
-        public CategorySectionViewComponent(ILogger<CategorySectionViewComponent> logger)
+
+        public CategorySectionViewComponent(ILogger<CategorySectionViewComponent> logger, IGetSubmissionStatusesQuery query)
         {
             _logger = logger;
+            _query = query;
         }
 
         public IViewComponentResult Invoke(ICategory category)
         {
             bool sectionsExist = category.Sections != null && category.Sections?.Length > 0;
 
-            category.RetrieveSectionStatuses();
+            category = RetrieveSectionStatuses(category);
 
             var categorySectionViewModel = new CategorySectionViewComponentViewModel()
             {
@@ -80,6 +84,23 @@ namespace Dfe.PlanTech.Web.ViewComponents
                 if (categorySectionDto.Slug != null) TempData[categorySectionDto.Slug] = categorySectionDto.Name + "+" + categorySection.Sys.Id;
 
                 yield return categorySectionDto;
+            }
+        }
+        
+        public ICategory RetrieveSectionStatuses(ICategory category)
+        {
+            try
+            {
+                category.SectionStatuses = _query.GetSectionSubmissionStatuses(category.Sections).ToList();
+                category.Completed = category.SectionStatuses.Count(x => x.Completed == 1);
+                category.RetrievalError = false;
+                return category;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("An exception has occurred while trying to retrieve section progress with the following message - {}", e.Message);
+                category.RetrievalError = true;
+                return category;
             }
         }
     }
