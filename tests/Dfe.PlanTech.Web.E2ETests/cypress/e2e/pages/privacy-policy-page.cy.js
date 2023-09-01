@@ -3,7 +3,7 @@ describe("Privacy Policy Page", () => {
 
     beforeEach(() => {
         cy.loginWithEnv(url);
-        cy.get("govuk-footer__link").contains("Privacy").click();
+        cy.get("footer.govuk-footer ul.govuk-footer__inline-list a.govuk-footer__link").contains("Privacy").click();
         cy.url().should("contain", "/privacy");
         cy.injectAxe();
     });
