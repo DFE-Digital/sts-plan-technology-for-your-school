@@ -13,10 +13,9 @@ describe("Privacy Policy Page", () => {
     });
 
     it("Should Have Home Button", () => {
-        cy.get("a")
+        cy.get('a:contains("Home")')
             .should("exist")
             .should("have.attr", "href")
-            .should("not.be.empty")
             .and("include", "/")
     });
 
