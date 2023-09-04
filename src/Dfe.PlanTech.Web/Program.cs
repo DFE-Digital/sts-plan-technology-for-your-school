@@ -72,11 +72,13 @@ app.UseExceptionHandler(exceptionHandlerApp =>
     exceptionHandlerApp.Run(context =>
     {
         var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
-        if (exceptionHandlerPathFeature.Error is ContentfulDataUnavailableException)
+
+        var error = exceptionHandlerPathFeature?.Error;
+
+        if (error is ContentfulDataUnavailableException)
         {
             context.Response.Redirect("/service-unavailable");
         }
-
         return Task.CompletedTask;
     });
 });
