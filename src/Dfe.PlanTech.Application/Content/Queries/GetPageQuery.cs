@@ -4,6 +4,7 @@ using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
+using Dfe.PlanTech.Web.Exceptions;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
@@ -23,17 +24,25 @@ public class GetPageQuery : ContentRetriever
     /// <returns>Page matching slug</returns>
     public async Task<Page> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
     {
-        var options = new GetEntitiesOptions(4, new[] { new ContentQueryEquals() { Field = "fields.slug", Value = slug } });
-        var pages = await repository.GetEntities<Page>(options, cancellationToken);
-
-        var page = pages.FirstOrDefault() ?? throw new Exception($"Could not find page with slug {slug}");
-
-        if (page.DisplayTopicTitle)
+        try
         {
-            var cached = _cacher.Cached!;
-            page.SectionTitle = cached.CurrentSectionTitle;
-        }
+            var options = new GetEntitiesOptions(4,
+                new[] { new ContentQueryEquals() { Field = "fields.slug", Value = slug } });
+            var pages = await repository.GetEntities<Page>(options, cancellationToken);
 
-        return page;
+            var page = pages.FirstOrDefault() ?? throw new Exception($"Could not find page with slug {slug}");
+
+            if (page.DisplayTopicTitle)
+            {
+                var cached = _cacher.Cached!;
+                page.SectionTitle = cached.CurrentSectionTitle;
+            }
+
+            return page;
+        }
+        catch (Exception e)
+        {
+            throw new ContentfulDataUnavailable($"Could not retrieve page with slug {slug}", e);
+        }
     }
 }

@@ -3,9 +3,11 @@ using Dfe.PlanTech.Application.Helpers;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.SignIn;
 using Dfe.PlanTech.Web;
+using Dfe.PlanTech.Web.Exceptions;
 using Dfe.PlanTech.Web.Helpers;
 using GovUk.Frontend.AspNetCore;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -64,6 +66,18 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.UseExceptionHandler(exceptionHandlerApp =>
+{
+    exceptionHandlerApp.Run(async context =>
+    {
+        var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+        if (exceptionHandlerPathFeature.Error is ContentfulDataUnavailable)
+        {
+            context.Response.Redirect("/service-unavailable");
+        }
+    });
+});
 
 app.UseCookiePolicy();
 

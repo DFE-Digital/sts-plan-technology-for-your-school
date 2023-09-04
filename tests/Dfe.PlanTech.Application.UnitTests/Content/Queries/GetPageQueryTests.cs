@@ -5,7 +5,9 @@ using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
+using Dfe.PlanTech.Web.Exceptions;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace Dfe.PlanTech.Application.UnitTests.Content.Queries;
 
@@ -89,7 +91,7 @@ public class GetPageQueryTests
     {
         var query = new GetPageQuery(_questionnaireCacherSubstitute, _repoSubstitute);
 
-        await Assert.ThrowsAsync<Exception>(async () => await query.GetPageBySlug("NOT A REAL SLUG"));
+        await Assert.ThrowsAsync<ContentfulDataUnavailable>(async () => await query.GetPageBySlug("NOT A REAL SLUG"));
     }
 
     [Fact]
@@ -101,5 +103,16 @@ public class GetPageQueryTests
 
         Assert.Equal(SECTION_TITLE, result.SectionTitle);
         _ = _questionnaireCacherSubstitute.Received(1).Cached;
+    }
+    
+    [Fact]
+    public async Task ContentfulDataUnavailable_Exception_Is_Thrown_When_There_Is_An_Issue_Retrieving_Data()
+    {
+        _repoSubstitute.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>())
+            .Throws(new Exception("Test Exception"));
+        
+        var query = new GetPageQuery(_questionnaireCacherSubstitute, _repoSubstitute);
+
+        await Assert.ThrowsAsync<ContentfulDataUnavailable>(async () => await query.GetPageBySlug(SECTION_SLUG));
     }
 }
