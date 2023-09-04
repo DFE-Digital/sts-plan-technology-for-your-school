@@ -218,5 +218,26 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 Assert.NotEqual("Test Body", asPage!.GTMBody);
             }
         }
+        
+        [Fact]
+        public void Should_Render_Service_Unavailable_Page()
+        {
+            var httpContextSubstitute = Substitute.For<HttpContext>();
+
+            var controllerContext = new ControllerContext
+            {
+                HttpContext = httpContextSubstitute
+            };
+
+            _controller.ControllerContext = controllerContext;
+
+            var result = _controller.ServiceUnavailable();
+
+            var viewResult = result as ViewResult;
+
+            var model = viewResult!.Model;
+
+            Assert.IsType<ServiceUnavailableViewModel>(model);
+        }
     }
 }

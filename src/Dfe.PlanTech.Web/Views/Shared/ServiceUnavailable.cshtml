@@ -1,0 +1,14 @@
+@model ServiceUnavailableViewModel
+@{
+    ViewData["Title"] = "Service Unavailable";
+}
+
+<h1 class="text-danger">Service Unavailable</h1>
+<h2 class="text-danger">This service is currently unavailable please try again later.</h2>
+
+@if (Model?.ShowRequestId ?? false)
+{
+    <p>
+        <strong>Request ID:</strong> <code>@Model?.RequestId</code>
+    </p>
+}
