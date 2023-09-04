@@ -11,6 +11,8 @@ namespace Dfe.PlanTech.Application.Content.Queries;
 public class GetPageQuery : ContentRetriever
 {
     private readonly IQuestionnaireCacher _cacher;
+    
+    string getEntityEnvVariable = Environment.GetEnvironmentVariable("CONTENTFUL_GET_ENTITY_INT") ?? "4";
 
     public GetPageQuery(IQuestionnaireCacher cacher, IContentRepository repository) : base(repository)
     {
@@ -26,7 +28,9 @@ public class GetPageQuery : ContentRetriever
     {
         try
         {
-            var options = new GetEntitiesOptions(4,
+            int.TryParse(getEntityEnvVariable, out int getEntityValue);
+
+            var options = new GetEntitiesOptions(getEntityValue,
                 new[] { new ContentQueryEquals() { Field = "fields.slug", Value = slug } });
             var pages = await repository.GetEntities<Page>(options, cancellationToken);
 

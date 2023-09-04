@@ -39,6 +39,7 @@ public class GetPageQueryTests
 
     public GetPageQueryTests()
     {
+        Environment.SetEnvironmentVariable("CONTENTFUL_GET_ENTITY_INT", "7");
         SetupRepository();
         SetupQuestionnaireCacher();
     }
