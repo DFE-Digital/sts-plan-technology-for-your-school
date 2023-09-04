@@ -11,8 +11,8 @@ namespace Dfe.PlanTech.Application.Content.Queries;
 public class GetPageQuery : ContentRetriever
 {
     private readonly IQuestionnaireCacher _cacher;
-    
-    string getEntityEnvVariable = Environment.GetEnvironmentVariable("CONTENTFUL_GET_ENTITY_INT") ?? "4";
+
+    readonly string _getEntityEnvVariable = Environment.GetEnvironmentVariable("CONTENTFUL_GET_ENTITY_INT") ?? "4";
 
     public GetPageQuery(IQuestionnaireCacher cacher, IContentRepository repository) : base(repository)
     {
@@ -28,21 +28,27 @@ public class GetPageQuery : ContentRetriever
     {
         try
         {
-            int.TryParse(getEntityEnvVariable, out int getEntityValue);
-
-            var options = new GetEntitiesOptions(getEntityValue,
-                new[] { new ContentQueryEquals() { Field = "fields.slug", Value = slug } });
-            var pages = await repository.GetEntities<Page>(options, cancellationToken);
-
-            var page = pages.FirstOrDefault() ?? throw new Exception($"Could not find page with slug {slug}");
-
-            if (page.DisplayTopicTitle)
+            if (int.TryParse(_getEntityEnvVariable, out int getEntityValue))
             {
-                var cached = _cacher.Cached!;
-                page.SectionTitle = cached.CurrentSectionTitle;
-            }
 
-            return page;
+                var options = new GetEntitiesOptions(getEntityValue,
+                    new[] { new ContentQueryEquals() { Field = "fields.slug", Value = slug } });
+                var pages = await repository.GetEntities<Page>(options, cancellationToken);
+
+                var page = pages.FirstOrDefault() ?? throw new Exception($"Could not find page with slug {slug}");
+
+                if (page.DisplayTopicTitle)
+                {
+                    var cached = _cacher.Cached!;
+                    page.SectionTitle = cached.CurrentSectionTitle;
+                }
+
+                return page;
+            }
+            else
+            {
+                throw new Exception($"Could not parse CONTENTFUL_GET_ENTITY_INT environment variable to int. Value: {_getEntityEnvVariable}");
+            }
         }
         catch (Exception e)
         {
