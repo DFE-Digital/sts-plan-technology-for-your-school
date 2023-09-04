@@ -42,7 +42,7 @@ public class GetPageQuery : ContentRetriever
         }
         catch (Exception e)
         {
-            throw new ContentfulDataUnavailable($"Could not retrieve page with slug {slug}", e);
+            throw new ContentfulDataUnavailableException($"Could not retrieve page with slug {slug}", e);
         }
     }
 }

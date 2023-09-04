@@ -69,13 +69,15 @@ if (!app.Environment.IsDevelopment())
 
 app.UseExceptionHandler(exceptionHandlerApp =>
 {
-    exceptionHandlerApp.Run(async context =>
+    exceptionHandlerApp.Run(context =>
     {
         var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
-        if (exceptionHandlerPathFeature.Error is ContentfulDataUnavailable)
+        if (exceptionHandlerPathFeature.Error is ContentfulDataUnavailableException)
         {
             context.Response.Redirect("/service-unavailable");
         }
+
+        return Task.CompletedTask;
     });
 });
 

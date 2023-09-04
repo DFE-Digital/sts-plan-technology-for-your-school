@@ -91,7 +91,7 @@ public class GetPageQueryTests
     {
         var query = new GetPageQuery(_questionnaireCacherSubstitute, _repoSubstitute);
 
-        await Assert.ThrowsAsync<ContentfulDataUnavailable>(async () => await query.GetPageBySlug("NOT A REAL SLUG"));
+        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(async () => await query.GetPageBySlug("NOT A REAL SLUG"));
     }
 
     [Fact]
@@ -113,6 +113,6 @@ public class GetPageQueryTests
         
         var query = new GetPageQuery(_questionnaireCacherSubstitute, _repoSubstitute);
 
-        await Assert.ThrowsAsync<ContentfulDataUnavailable>(async () => await query.GetPageBySlug(SECTION_SLUG));
+        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(async () => await query.GetPageBySlug(SECTION_SLUG));
     }
 }
