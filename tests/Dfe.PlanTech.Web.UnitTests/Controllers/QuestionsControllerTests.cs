@@ -16,6 +16,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Web.Controllers;
+using Dfe.PlanTech.Web.Exceptions;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Http;
@@ -638,6 +639,26 @@ public class QuestionsControllerTests
         Assert.IsType<string>(_controller.TempData[TempDataConstants.Questions]);
         var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_controller.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
         Assert.Equal(submitAnswerDto.QuestionId, id);
+    }
+    
+    [Fact]
+    public async void Redirect_To_Service_Unavailable_Page_When_There_Is_An_Issue_Retrieving_Next_Question()
+    {
+        var submitAnswerDto = new SubmitAnswerDto()
+        {
+            QuestionId = "Question1",
+            ChosenAnswerId = "Answer1",
+        };
+        
+
+        _submitAnswerCommandSubstitute.SubmitAnswer(Arg.Any<SubmitAnswerDto>(), Arg.Any<string>(), Arg.Any<string>()).Returns(1);
+
+        _submitAnswerCommandSubstitute.When(x => x.GetNextQuestionId(Arg.Any<string>(), Arg.Any<string>())).Do(x => throw new Exception("Test"));
+       
+        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(async () => await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommandSubstitute));
+        
+        _logger.ReceivedWithAnyArgs(1).LogError("An error has occurred while retrieving the next question with the following message: Test");
+        
     }
 
     private void SetParams(string sectionId)
