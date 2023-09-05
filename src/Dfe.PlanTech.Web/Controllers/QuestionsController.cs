@@ -96,6 +96,7 @@ public class QuestionsController : BaseController<QuestionsController>
         }
 
         string? nextQuestionId;
+        
         try
         {
             nextQuestionId = await submitAnswerCommand.GetNextQuestionId(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId);
@@ -103,7 +104,7 @@ public class QuestionsController : BaseController<QuestionsController>
         catch (Exception e)
         {
             logger.LogError( "An error has occurred while retrieving the next question with the following message: {} ", e.Message);
-            throw new ContentfulDataUnavailableException($"An error has occurred while retrieving the next question with the following message: {e.Message}", e);
+            return Redirect("/service-unavailable");
         }
         
 

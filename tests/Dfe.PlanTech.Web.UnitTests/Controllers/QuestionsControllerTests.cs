@@ -650,12 +650,17 @@ public class QuestionsControllerTests
             ChosenAnswerId = "Answer1",
         };
         
-
         _submitAnswerCommandSubstitute.SubmitAnswer(Arg.Any<SubmitAnswerDto>(), Arg.Any<string>(), Arg.Any<string>()).Returns(1);
 
         _submitAnswerCommandSubstitute.When(x => x.GetNextQuestionId(Arg.Any<string>(), Arg.Any<string>())).Do(x => throw new Exception("Test"));
        
-        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(async () => await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommandSubstitute));
+        var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommandSubstitute);
+        
+        var redirectResult = result as RedirectResult;
+        
+        Assert.NotNull(redirectResult);
+
+        Assert.Equal("/service-unavailable", redirectResult.Url);
         
         _logger.ReceivedWithAnyArgs(1).LogError("An error has occurred while retrieving the next question with the following message: Test");
         
