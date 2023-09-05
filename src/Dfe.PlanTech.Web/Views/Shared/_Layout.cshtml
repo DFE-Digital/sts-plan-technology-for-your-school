@@ -3,7 +3,7 @@
 
 @section Head {
     <link rel="stylesheet" href="~/css/application.css">
-    @Html.Raw(GtmConfiguration.Head);
+    @Html.Raw(GtmConfiguration.Head)
     @RenderSection("Head", false)
 }
 
@@ -30,7 +30,7 @@
 }
 
 @section Header {
-    @Html.Raw(GtmConfiguration.Body);
+    @Html.Raw(GtmConfiguration.Body)
 
     @{    
         await Html.RenderPartialAsync("_CookieBanner");
