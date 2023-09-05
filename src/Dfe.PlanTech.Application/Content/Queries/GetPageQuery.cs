@@ -47,7 +47,7 @@ public class GetPageQuery : ContentRetriever
             }
             else
             {
-                throw new Exception($"Could not parse CONTENTFUL_GET_ENTITY_INT environment variable to int. Value: {_getEntityEnvVariable}");
+                throw new FormatException($"Could not parse CONTENTFUL_GET_ENTITY_INT environment variable to int. Value: {_getEntityEnvVariable}");
             }
         }
         catch (Exception e)
