@@ -1,5 +1,4 @@
 ﻿using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Application.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -10,11 +9,8 @@ namespace Dfe.PlanTech.Web.Controllers;
 
 public class PagesController : BaseController<PagesController>
 {
-    public IConfiguration Config { get; }
-
-    public PagesController(ILogger<PagesController> logger, IConfiguration config) : base(logger)
+    public PagesController(ILogger<PagesController> logger) : base(logger)
     {
-        Config = config ?? throw new ArgumentNullException(nameof(config));
     }
 
     [HttpGet("/")]
