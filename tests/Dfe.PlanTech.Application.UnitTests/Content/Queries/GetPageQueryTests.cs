@@ -115,4 +115,18 @@ public class GetPageQueryTests
 
         await Assert.ThrowsAsync<ContentfulDataUnavailableException>(async () => await query.GetPageBySlug(SECTION_SLUG));
     }
+    
+    [Fact]
+    public async Task ContentfulDataUnavailable_Exception_Is_Thrown_When_There_Is_An_Issue_Incorrect_Env_Variable_Passed()
+    {
+        Environment.SetEnvironmentVariable("CONTENTFUL_GET_ENTITY_INT", "FOUR");
+        
+        _repoSubstitute.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>())
+            .Throws(new Exception("Test Exception"));
+        
+        var query = new GetPageQuery(_questionnaireCacherSubstitute, _repoSubstitute);
+
+        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(async () => await query.GetPageBySlug(SECTION_SLUG));
+    }
+    
 }

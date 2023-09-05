@@ -14,5 +14,5 @@ public class QuestionViewModel
 
     public int? SubmissionId { get; init; }
 
-    public string? NoSelectedAnswerErrorMessage { get; init; }
+    public string? QuestionErrorMessage { get; init; }
 }

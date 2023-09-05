@@ -118,7 +118,7 @@ public static class ProgramExtensions
 
         services.AddTransient<GetSubmitAnswerQueries>();
         services.AddTransient<RecordSubmitAnswerCommands>();
-        services.AddTransient<SubmitAnswerCommand>();
+        services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
 
         services.AddTransient<IGetEstablishmentIdQuery, GetEstablishmentIdQuery>();
 

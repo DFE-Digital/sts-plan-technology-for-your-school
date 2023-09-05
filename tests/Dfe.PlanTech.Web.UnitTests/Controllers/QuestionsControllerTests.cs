@@ -136,16 +136,18 @@ public class QuestionsControllerTests
     private IPlanTechDbContext _databaseSubstitute;
     private readonly QuestionsController _controller;
     private readonly SubmitAnswerCommand _submitAnswerCommand;
+    private ISubmitAnswerCommand _submitAnswerCommandSubstitute = Substitute.For<ISubmitAnswerCommand>();
     private IQuestionnaireCacher _questionnaireCacherSubstitute;
     private IGetLatestResponseListForSubmissionQuery _getLatestResponseListForSubmissionQuerySubstitute;
     private readonly ICacher _cacher;
+    private ILogger<QuestionsController> _logger = Substitute.For<ILogger<QuestionsController>>();
+
 
     public QuestionsControllerTests()
     {
         IContentRepository repositorySubstitute = SubstituteRepository();
         _questionnaireCacherSubstitute = SubstituteQuestionnaireCacher();
 
-        var Logger = Substitute.For<ILogger<QuestionsController>>();
         _databaseSubstitute = Substitute.For<IPlanTechDbContext>();
         var user = Substitute.For<IUser>();
 
@@ -172,7 +174,7 @@ public class QuestionsControllerTests
 
         _submitAnswerCommand = new SubmitAnswerCommand(getSubmitAnswerQueries, recordSubmitAnswerCommands, _getLatestResponseListForSubmissionQuerySubstitute);
 
-        _controller = new QuestionsController(Logger) { TempData = tempData };
+        _controller = new QuestionsController(_logger) { TempData = tempData };
 
         _cacher = new Cacher(new CacheOptions(), new MemoryCache(new MemoryCacheOptions()));
     }
@@ -611,6 +613,31 @@ public class QuestionsControllerTests
         Assert.IsType<string>(_controller.TempData[TempDataConstants.Questions]);
         var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_controller.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
         Assert.Equal("Question2", id);
+    }
+    
+    [Fact]
+    public async void SubmitAnswer_Should_RedirectTo_SameQuestion_When_Saving_Submission_Errors()
+    {
+        var submitAnswerDto = new SubmitAnswerDto()
+        {
+            QuestionId = "Question1",
+            ChosenAnswerId = "Answer1",
+        };
+        
+        _submitAnswerCommandSubstitute.When(x => x.SubmitAnswer(Arg.Any<SubmitAnswerDto>(), Arg.Any<string>(), Arg.Any<string>())).Do(x => throw new Exception("Test"));
+        
+        var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommandSubstitute);
+
+        Assert.IsType<RedirectToActionResult>(result);
+
+        var redirectToActionResult = result as RedirectToActionResult;
+        _logger.ReceivedWithAnyArgs(1).LogError("An error has occurred while submitting an answer with the following message: Test");
+        Assert.NotNull(redirectToActionResult);
+        Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
+        Assert.NotNull(_controller.TempData[TempDataConstants.Questions]);
+        Assert.IsType<string>(_controller.TempData[TempDataConstants.Questions]);
+        var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_controller.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
+        Assert.Equal(submitAnswerDto.QuestionId, id);
     }
 
     private void SetParams(string sectionId)
