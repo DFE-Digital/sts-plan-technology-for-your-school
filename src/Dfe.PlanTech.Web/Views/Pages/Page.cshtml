@@ -1,5 +1,5 @@
-@using Microsoft.EntityFrameworkCore
 @model Dfe.PlanTech.Web.Models.PageViewModel;
+
 @section BeforeContent {
     @if (Model.Page.DisplayBackButton)
     {
@@ -7,7 +7,9 @@
     }
     @if (Model.Page.DisplayHomeButton)
     {
-        await Html.RenderPartialAsync("HomeButton", Model);
+        <div>
+            @await Component.InvokeAsync("HomeLink")
+        </div>
     }
 }
 
