@@ -4,7 +4,7 @@
   var anchorLabel = $"Change your answer for {Model.QuestionWithAnswer.QuestionText}";
 }
 
-<dl class="govuk-summary-list__row">
+<div class="govuk-summary-list__row">
   <dt class="govuk-summary-list__key spacer">
     @Model.QuestionWithAnswer.QuestionText
   </dt>
@@ -14,7 +14,8 @@
   <dd class="govuk-summary-list__actions spacer">
     <a class="govuk-link" asp-controller="CheckAnswers" asp-action="ChangeAnswer"
       asp-route-questionRef="@Model.QuestionWithAnswer.QuestionRef"
-      asp-route-answerRef="@Model.QuestionWithAnswer.AnswerRef" asp-route-submissionId="@Model.SubmissionId"
+      asp-route-answerRef="@Model.QuestionWithAnswer.AnswerRef"
+      asp-route-submissionId="@Model.SubmissionId"
       aria-label=@anchorLabel>Change</a>
   </dd>
-</dl>
+</div>
