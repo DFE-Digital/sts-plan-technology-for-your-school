@@ -1,6 +1,7 @@
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Web.Models;
+using System.Security.Claims;
 using Dfe.PlanTech.Web.ViewComponents;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
 using Xunit;
 
@@ -11,29 +12,65 @@ public class HomeLinkViewComponentTests
     [Fact]
     public void HomeLinkViewComponentReturnsAuthenticatedLinkWhenUserIsAuthenticated()
     {
-        var model = new AccessibilityViewModel
+        var httpContext = new DefaultHttpContext
         {
-            Title = new Title() { Text = "Accessibility" },
-            Content = new ContentComponent[] { new Header() { Tag = Domain.Content.Enums.HeaderTag.H1, Text = "Accessibility" }},
-            UserIsAuthenticated = true
+            User = new ClaimsPrincipal(new ClaimsIdentity("Cookies"))
         };
-        var viewComponent = new HomeLinkViewComponent();
 
-        var result = viewComponent.Invoke(model) as ViewViewComponentResult;
+        var viewComponent = new HomeLinkViewComponent()
+        {
+            ViewComponentContext = new ViewComponentContext
+            {
+                ViewContext = new ViewContext()
+                {
+                    HttpContext = httpContext
+                }
+            }
+        };
+
+        var result = viewComponent.Invoke() as ViewViewComponentResult;
 
         Assert.NotNull(result);
-        Assert.Equal("AuthenticatedLink", result.ViewName);
+        Assert.Equal("Default", result.ViewName);
+
+        var model = result.ViewData?.Model;
+        Assert.NotNull(model);
+
+        var href = model as string;
+
+        Assert.NotNull(href);
+        Assert.Equal("/self-assessment", model);
     }
 
     [Fact]
-    public void HomeLinkViewComponentReturnsUnauthenticatedLinkWhenUserIsNotAuthenticated()
+    public void HomeLinkViewComponentReturnsAuthenticatedLinkWhenUserIsNotuthenticated()
     {
-        var model = new AccessibilityViewModel { UserIsAuthenticated = false };
-        var viewComponent = new HomeLinkViewComponent();
+        var httpContext = new DefaultHttpContext
+        {
+        };
 
-        var result = viewComponent.Invoke(model) as ViewViewComponentResult;
-        
+        var viewComponent = new HomeLinkViewComponent()
+        {
+            ViewComponentContext = new ViewComponentContext
+            {
+                ViewContext = new ViewContext()
+                {
+                    HttpContext = httpContext
+                }
+            }
+        };
+
+        var result = viewComponent.Invoke() as ViewViewComponentResult;
+
         Assert.NotNull(result);
-        Assert.Equal("UnauthenticatedLink", result.ViewName);
+        Assert.Equal("Default", result.ViewName);
+
+        var model = result.ViewData?.Model;
+        Assert.NotNull(model);
+
+        var href = model as string;
+
+        Assert.NotNull(href);
+        Assert.Equal("/", model);
     }
 }
