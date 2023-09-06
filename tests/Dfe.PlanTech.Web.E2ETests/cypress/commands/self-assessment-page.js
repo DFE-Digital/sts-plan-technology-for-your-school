@@ -7,5 +7,5 @@ export const clickFirstSection = () => {
         .click();
 }
 
-Cypress.Commands.add("clickFirstSection", () => clickFirstSection());
+Cypress.Commands.add("clickFirstSection", clickFirstSection);
 
