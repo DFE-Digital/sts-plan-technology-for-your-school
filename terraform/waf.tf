@@ -33,25 +33,19 @@ module "waf" {
     "Microsoft_BotManagerRuleSet" = {
       version = "1.0",
       action  = "Block"
-      override = {
-        rule_group_name = "RFI"
-        rule = {
-          action  = "Log"
-          enabled = false
-          rule_id = "931130"
-        }
-      }
-      override = {
-        rule_group_name = "SQLI"
-        rule = {
-          action  = "Log"
-          enabled = false
-          rule_id = "942200"
-        }
-        rule = {
-          action  = "Log"
-          enabled = false
-          rule_id = "942340"
+      overrides = {
+        "SQLI" = {
+          "942200" = {
+            action = "Log"
+          },
+          "942340" = {
+            action = "Log"
+          }
+        },
+        "RFI" = {
+          "931130" = {
+            action = "Log"
+          }
         }
       }
     }
