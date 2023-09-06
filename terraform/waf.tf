@@ -28,11 +28,7 @@ module "waf" {
   cdn_waf_managed_rulesets = {
     "Microsoft_DefaultRuleSet" = {
       version = "2.1",
-      action  = "Block"
-    },
-    "Microsoft_BotManagerRuleSet" = {
-      version = "1.0",
-      action  = "Block"
+      action  = "Block",
       overrides = {
         "SQLI" = {
           "942200" = {
@@ -48,6 +44,10 @@ module "waf" {
           }
         }
       }
+    },
+    "Microsoft_BotManagerRuleSet" = {
+      version = "1.0",
+      action  = "Block"
     }
   }
 
