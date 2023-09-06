@@ -23,7 +23,7 @@ module "waf" {
   cdn_waf_enable_rate_limiting              = true
   cdn_waf_rate_limiting_duration_in_minutes = 5
   cdn_waf_rate_limiting_threshold           = 1000
-  cdn_waf_rate_limiting_action              = "Block" # one of "Allow", "Block", "Log"
+  cdn_waf_rate_limiting_action              = "Block"
 
   cdn_waf_managed_rulesets = {
     "Microsoft_DefaultRuleSet" = {
@@ -33,6 +33,27 @@ module "waf" {
     "Microsoft_BotManagerRuleSet" = {
       version = "1.0",
       action  = "Block"
+      override = {
+        rule_group_name = "RFI"
+        rule = {
+          action  = "Log"
+          enabled = false
+          rule_id = "931130"
+        }
+      }
+      override = {
+        rule_group_name = "SQLI"
+        rule = {
+          action  = "Log"
+          enabled = false
+          rule_id = "942200"
+        }
+        rule = {
+          action  = "Log"
+          enabled = false
+          rule_id = "942340"
+        }
+      }
     }
   }
 
