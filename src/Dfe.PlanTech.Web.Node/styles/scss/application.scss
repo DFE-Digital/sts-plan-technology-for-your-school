@@ -4,5 +4,5 @@ $govuk-new-link-styles: true;
 
 @use "../../node_modules/govuk-frontend/govuk/all";
 @use "../../node_modules/dfe-frontend-alpha/packages/dfefrontend";
-@import "overrides";
 @import "app-task-list";
+@import "overrides";
