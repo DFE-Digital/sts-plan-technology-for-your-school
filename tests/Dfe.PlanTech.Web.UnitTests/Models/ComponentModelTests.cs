@@ -135,14 +135,5 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
 
             Assert.Null(unknownMaturityRecommendation);
         }
-
-        [Fact]
-        public void Should_Build_CheckAnswerRowViewModel(){
-            var checkAnswerRowViewModel = ComponentBuilder.BuildCheckAnswerRow();
-
-            Assert.NotNull(checkAnswerRowViewModel.SubmissionId);
-            Assert.NotNull(checkAnswerRowViewModel.QuestionWithAnswer);
-        }
-
     }
 }

@@ -72,32 +72,18 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         };
 
         public ISection[] BuildSections()
-         => new ISection[]
-            {
-                new Section
-                {
-                    Name = "Section",
-                    Questions = BuildQuestion(),
-                    Recommendations = new RecommendationPage[] {
-                        BuildRecommendationsPage(Maturity.Low),
-                        BuildRecommendationsPage(Maturity.Medium),
-                        BuildRecommendationsPage(Maturity.High)
-                    }
-                }
-            };
-
-        public static CheckAnswerRowViewModel BuildCheckAnswerRow()
-        => new()
+        => new ISection[]
         {
-            QuestionWithAnswer = new QuestionWithAnswer()
+            new Section
             {
-                QuestionRef = "QuestionRef",
-                QuestionText = "Question text",
-                AnswerRef = "Answer ref",
-                AnswerText = "Answer Text",
-                DateCreated = DateTime.UtcNow
-            },
-            SubmissionId = 1
+                Name = "Section",
+                Questions = BuildQuestion(),
+                Recommendations = new RecommendationPage[] {
+                    BuildRecommendationsPage(Maturity.Low),
+                    BuildRecommendationsPage(Maturity.Medium),
+                    BuildRecommendationsPage(Maturity.High)
+                }
+            }
         };
 
         private Question[] BuildQuestion()
