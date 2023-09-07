@@ -5,12 +5,10 @@ namespace Dfe.PlanTech.Web.Middleware;
 /// </summary>
 public class SecurityHeadersMiddleware
 {
-  private readonly ILogger<SecurityHeadersMiddleware> _logger;
   private readonly RequestDelegate _next;
 
-  public SecurityHeadersMiddleware(ILogger<SecurityHeadersMiddleware> logger, RequestDelegate next)
+  public SecurityHeadersMiddleware(RequestDelegate next)
   {
-    _logger = logger;
     _next = next;
   }
 

@@ -16,9 +16,7 @@ public class SecurityHeadersMiddlewareTests
 
     var next = (HttpContext hc) => Task.CompletedTask;
 
-    var logger = new Logger<SecurityHeadersMiddleware>(new NullLoggerFactory());
-
-    var middleware = new SecurityHeadersMiddleware(logger, new RequestDelegate(next));
+    var middleware = new SecurityHeadersMiddleware( new RequestDelegate(next));
 
     await middleware.InvokeAsync(context);
 
