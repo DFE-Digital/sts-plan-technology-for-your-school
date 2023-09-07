@@ -5,6 +5,7 @@ using Dfe.PlanTech.Infrastructure.SignIn;
 using Dfe.PlanTech.Web;
 using Dfe.PlanTech.Web.Exceptions;
 using Dfe.PlanTech.Web.Helpers;
+using Dfe.PlanTech.Web.Middleware;
 using GovUk.Frontend.AspNetCore;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Diagnostics;
@@ -52,11 +53,14 @@ builder.Services.AddContentfulServices(builder.Configuration);
 
 var app = builder.Build();
 
+app.UseSecurityHeaders();
+
 app.UseCookiePolicy(
     new CookiePolicyOptions
     {
         Secure = CookieSecurePolicy.Always
     });
+    
 app.UseForwardedHeaders();
 
 // Configure the HTTP request pipeline.
