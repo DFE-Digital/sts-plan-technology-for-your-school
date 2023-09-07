@@ -14,6 +14,18 @@ describe("Check answers page", () => {
   it("passes accessibility tests", () => {
     cy.runAxe();
   });
+
+  it("submits answers", () => {
+    submitAnswers();
+
+    cy.url().should("contain", "self-assessment");
+  });
+
+  it("shows notification banner after submitting answers", () => {
+    submitAnswers();
+
+    cy.get("div.govuk-notification-banner__header").should("exist");
+  });
 });
 
 const navigateToCheckAnswersPage = () => {
@@ -38,3 +50,7 @@ const navigateThroughQuestions = () =>
 
       return navigateThroughQuestions();
     });
+function submitAnswers() {
+  cy.get("button.govuk-button").contains("Save and Submit").click();
+}
+
