@@ -25,7 +25,6 @@ using Dfe.PlanTech.Web.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Domain.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
 using Newtonsoft.Json.Serialization;
 
@@ -37,7 +36,7 @@ public static class ProgramExtensions
     public static IServiceCollection AddContentfulServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddTransient<IContractResolver, DependencyInjectionContractResolver>();
-        
+
         services.SetupContentfulClient(configuration, "Contentful", HttpClientPolicyExtensions.AddRetryPolicy);
 
         services.AddScoped((services) =>
@@ -51,7 +50,7 @@ public static class ProgramExtensions
                     Classes = "govuk-body govuk-!-font-weight-bold",
                 }});
         });
-        
+
         services.AddScoped((_) => new ParagraphRendererOptions()
         {
             Classes = "govuk-body",
@@ -113,7 +112,7 @@ public static class ProgramExtensions
 
         services.AddTransient<ICalculateMaturityCommand, CalculateMaturityCommand>();
         services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
-        
+
         services.AddTransient<ProcessCheckAnswerDtoCommand>();
 
         services.AddTransient<GetSubmitAnswerQueries>();
@@ -128,12 +127,9 @@ public static class ProgramExtensions
         return services;
     }
 
-    public static IServiceCollection AddGoogleTagManager(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddGoogleTagManager(this IServiceCollection services)
     {
-        var config = new GtmConfiguration();
-        configuration.GetSection("GTM").Bind(config);
-        services.AddSingleton((services) => config);
-
+        services.AddTransient<GtmConfiguration>();
         return services;
     }
 }

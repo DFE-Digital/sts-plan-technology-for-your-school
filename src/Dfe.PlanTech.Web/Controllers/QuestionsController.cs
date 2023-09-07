@@ -2,6 +2,7 @@ using Dfe.PlanTech.Application.Submission.Commands;
 using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Constants;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Web.Exceptions;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -93,8 +94,19 @@ public class QuestionsController : BaseController<QuestionsController>
             });
             return RedirectToAction("GetQuestionById");
         }
+
+        string? nextQuestionId;
         
-        string? nextQuestionId = await submitAnswerCommand.GetNextQuestionId(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId);
+        try
+        {
+            nextQuestionId = await submitAnswerCommand.GetNextQuestionId(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId);
+        }
+        catch (Exception e)
+        {
+            logger.LogError( "An error has occurred while retrieving the next question with the following message: {} ", e.Message);
+            return Redirect("/service-unavailable");
+        }
+        
 
         if (string.IsNullOrEmpty(nextQuestionId) || await submitAnswerCommand.NextQuestionIsAnswered(submissionId, nextQuestionId))
         {
