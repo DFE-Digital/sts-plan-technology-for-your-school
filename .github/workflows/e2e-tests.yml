@@ -7,7 +7,6 @@ on:
       - 'src/**'
       - 'tests/Dfe.PlanTech.Web.E2ETests/**'
       - '.github/workflows/e2e-tests.yml'
-      - 'tests/**'
 
 concurrency:
   group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
