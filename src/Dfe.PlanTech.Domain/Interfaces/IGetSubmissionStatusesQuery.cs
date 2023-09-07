@@ -5,6 +5,6 @@ namespace Dfe.PlanTech.Domain.Interfaces
 {
     public interface IGetSubmissionStatusesQuery
     {
-        Task<IList<SectionStatuses>> GetSectionSubmissionStatuses(IEnumerable<ISection> sections);
+        IList<SectionStatuses> GetSectionSubmissionStatuses(ISection[] sections);
     }
 }

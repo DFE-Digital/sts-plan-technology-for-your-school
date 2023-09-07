@@ -19,17 +19,17 @@ namespace Dfe.PlanTech.Web.ViewComponents
             _query = query;
         }
 
-        public async Task<IViewComponentResult> InvokeAsync(ICategory category)
+        public IViewComponentResult Invoke(ICategory category)
         {
             bool sectionsExist = category.Sections != null && category.Sections?.Length > 0;
 
-            category = await RetrieveSectionStatuses(category);
+            category = RetrieveSectionStatuses(category);
 
             var categorySectionViewModel = new CategorySectionViewComponentViewModel()
             {
                 CompletedSectionCount = category.Completed,
                 TotalSectionCount = category.Sections?.Length ?? 0,
-                CategorySectionDto = sectionsExist ? GetCategorySectionViewComponentViewModel(category) : Enumerable.Empty<CategorySectionDto>(),
+                CategorySectionDto = sectionsExist ? _GetCategorySectionViewComponentViewModel(category) : Enumerable.Empty<CategorySectionDto>(),
                 ProgressRetrievalErrorMessage = category.RetrievalError ? "Unable to retrieve progress, please refresh your browser." : null
             };
 
@@ -67,7 +67,7 @@ namespace Dfe.PlanTech.Web.ViewComponents
             }
         }
 
-        private IEnumerable<CategorySectionDto> GetCategorySectionViewComponentViewModel(ICategory category)
+        private IEnumerable<CategorySectionDto> _GetCategorySectionViewComponentViewModel(ICategory category)
         {
             foreach (var categorySection in category.Sections)
             {
@@ -86,12 +86,12 @@ namespace Dfe.PlanTech.Web.ViewComponents
                 yield return categorySectionDto;
             }
         }
-
-        public async Task<ICategory> RetrieveSectionStatuses(ICategory category)
+        
+        public ICategory RetrieveSectionStatuses(ICategory category)
         {
             try
             {
-                category.SectionStatuses = await _query.GetSectionSubmissionStatuses(category.Sections);
+                category.SectionStatuses = _query.GetSectionSubmissionStatuses(category.Sections).ToList();
                 category.Completed = category.SectionStatuses.Count(x => x.Completed == 1);
                 category.RetrievalError = false;
                 return category;
