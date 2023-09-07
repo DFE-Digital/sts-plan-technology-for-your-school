@@ -1,5 +1,5 @@
-@using Microsoft.EntityFrameworkCore
 @model Dfe.PlanTech.Web.Models.PageViewModel;
+
 @section BeforeContent {
     @if (Model.Page.DisplayBackButton)
     {
@@ -9,14 +9,6 @@
     {
         await Html.RenderPartialAsync("HomeButton", Model);
     }
-}
-
-@section Head {
-    @Html.Raw(Model.GTMHead)
-}
-
-@section Header {
-    @Html.Raw(Model.GTMBody)
 }
 
 @{

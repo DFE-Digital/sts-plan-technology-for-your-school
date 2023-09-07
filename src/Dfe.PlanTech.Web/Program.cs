@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplicationInsightsTelemetry();
-builder.Services.AddGoogleTagManager(builder.Configuration);
+builder.Services.AddGoogleTagManager();
 // Add services to the container.
 
 builder.Services.AddControllersWithViews();
