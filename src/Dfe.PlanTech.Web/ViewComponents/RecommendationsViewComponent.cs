@@ -18,35 +18,38 @@ namespace Dfe.PlanTech.Web.ViewComponents
             _query = query;
         }
 
-        public IViewComponentResult Invoke(ICategory[] categories)
+        public async Task<IViewComponentResult> InvokeAsync(ICategory[] categories)
         {
-            var allSectionsOfCombinedCategories = new List<Dfe.PlanTech.Domain.Questionnaire.Interfaces.ISection>();
-            var allSectionStatusesOfCombinedCategories = new List<SectionStatuses>();
+            var allSectionsOfCombinedCategories = new List<ISection>(categories.Length * 10);
+            var sectionStatuses = await _query.GetSectionSubmissionStatuses(categories.SelectMany(cat => cat.Sections));
 
             var recommendationsAvailable = false;
+
             foreach (var category in categories)
             {
                 if (category.Completed >= 1)
                 {
                     recommendationsAvailable = true;
                 }
-                
-                var categoryElement = RetrieveSectionStatuses(category);
-                allSectionsOfCombinedCategories.AddRange(categoryElement.Sections);
-                allSectionStatusesOfCombinedCategories.AddRange(categoryElement.SectionStatuses);
+
+                category.SectionStatuses = sectionStatuses.Where(sectionStatus => category.Sections.Any(section => section.Sys.Id == sectionStatus.SectionId))
+                                                            .ToList();
+                category.Completed = category.SectionStatuses.Count(x => x.Completed == 1);
+                category.RetrievalError = false;
+                allSectionsOfCombinedCategories.AddRange(category.Sections);
             }
 
             var recommendationsViewComponentViewModel =
                 recommendationsAvailable
                     ? _GetRecommendationsViewComponentViewModel(allSectionsOfCombinedCategories.ToArray(),
-                        allSectionStatusesOfCombinedCategories)
+                        sectionStatuses)
                     : null;
 
             return View(recommendationsViewComponentViewModel);
         }
 
         private IEnumerable<RecommendationsViewComponentViewModel> _GetRecommendationsViewComponentViewModel(
-            ISection[] sections, List<SectionStatuses> sectionStatusesList)
+            ISection[] sections, IList<SectionStatuses> sectionStatusesList)
         {
             foreach (ISection section in sections)
             {
@@ -68,29 +71,29 @@ namespace Dfe.PlanTech.Web.ViewComponents
                     RecommendationSlug = recommendation?.Page.Slug,
                     RecommendationDisplayName = recommendation?.DisplayName,
                     NoRecommendationFoundErrorMessage = recommendation == null
-                        ? String.Format("Unable to retrieve {0} recommendation", section.Name)
+                        ? string.Format("Unable to retrieve {0} recommendation", section.Name)
                         : null
                 };
             }
         }
 
-        public ICategory RetrieveSectionStatuses(ICategory category)
-        {
-            try
-            {
-                category.SectionStatuses = _query.GetSectionSubmissionStatuses(category.Sections).ToList();
-                category.Completed = category.SectionStatuses.Count(x => x.Completed == 1);
-                category.RetrievalError = false;
-                return category;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(
-                    "An exception has occurred while trying to retrieve section progress with the following message - {}",
-                    e.Message);
-                category.RetrievalError = true;
-                return category;
-            }
-        }
+        // public ICategory RetrieveSectionStatuses(ICategory category)
+        // {
+        //     try
+        //     {
+        //         category.SectionStatuses = _query.GetSectionSubmissionStatuses(category.Sections).ToList();
+        //         category.Completed = category.SectionStatuses.Count(x => x.Completed == 1);
+        //         category.RetrievalError = false;
+        //         return category;
+        //     }
+        //     catch (Exception e)
+        //     {
+        //         _logger.LogError(
+        //             "An exception has occurred while trying to retrieve section progress with the following message - {}",
+        //             e.Message);
+        //         category.RetrievalError = true;
+        //         return category;
+        //     }
+        // }
     }
 }

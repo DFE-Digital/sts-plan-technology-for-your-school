@@ -14,12 +14,11 @@ namespace Dfe.PlanTech.Application.Submission.Queries
             _db = db;
         }
 
-        public IList<SectionStatuses> GetSectionSubmissionStatuses(ISection[] sections)
+        public async Task<IList<SectionStatuses>> GetSectionSubmissionStatuses(IEnumerable<ISection> sections)
         {
-            string sectionStringify = string.Empty;
-            sectionStringify = string.Join(',', sections.Select(x => x.Sys.Id).ToList());
+            string sectionStringify = string.Join(',', sections.Select(x => x.Sys.Id));
 
-            return _db.GetSectionStatuses(sectionStringify).ToList();
+            return await  _db.ToListAsync(_db.GetSectionStatuses(sectionStringify));
         }
     }
 }
