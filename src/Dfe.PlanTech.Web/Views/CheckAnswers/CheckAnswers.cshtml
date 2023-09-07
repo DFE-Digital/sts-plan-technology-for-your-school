@@ -15,13 +15,22 @@
         <dl class="govuk-summary-list govuk-!-margin-bottom-9">
             @foreach (var questionWithAnswer in Model.CheckAnswerDto.QuestionAnswerList)
             {
-                var rowModel = new CheckAnswerRowViewModel()
-                {
-                    SubmissionId = Model.SubmissionId,
-                    QuestionWithAnswer = questionWithAnswer
-                };
+                var anchorLabel = $"Change your answer for {questionWithAnswer.QuestionText}";
 
-                await Html.RenderPartialAsync("CheckAnswerRow", rowModel);
+                <div class="govuk-summary-list__row">
+                    <dt class="govuk-summary-list__key spacer">
+                        @questionWithAnswer.QuestionText
+                    </dt>
+                    <dd class="govuk-summary-list__value spacer">
+                        @questionWithAnswer.AnswerText
+                    </dd>
+                    <dd class="govuk-summary-list__actions spacer">
+                        <a class="govuk-link" asp-controller="CheckAnswers" asp-action="ChangeAnswer"
+                            asp-route-questionRef="@questionWithAnswer.QuestionRef"
+                            asp-route-answerRef="@questionWithAnswer.AnswerRef" asp-route-submissionId="@Model.SubmissionId"
+                            aria-label=@anchorLabel>Change</a>
+                    </dd>
+                </div>
             }
         </dl>
         <form asp-controller="CheckAnswers" asp-action="ConfirmCheckAnswers" method="post">
