@@ -83,38 +83,12 @@ app.UseExceptionHandler(exceptionHandlerApp =>
     });
 });
 
-app.UseCookiePolicy();
-
 app.UseStaticFiles();
 
 app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.MapControllerRoute(
-    name: "questionsController",
-    pattern: "question/{action=GetQuestionById}/{id?}");
-
-app.MapControllerRoute(
-    name: "checkAnswersController",
-    pattern: "check-answers/"
-);
-
-app.MapControllerRoute(
-    name: "checkAnswersController",
-    pattern: "change-answer/"
-);
-
-app.MapControllerRoute(
-    name: "checkAnswersController",
-    pattern: "confirm-check-answers/"
-);
-
-app.MapControllerRoute(
-    name: "recommendationsController",
-    pattern: "recommendations/"
-);
 
 app.MapControllerRoute(
     pattern: "{controller=Pages}/{action=GetByRoute}/{id?}",
