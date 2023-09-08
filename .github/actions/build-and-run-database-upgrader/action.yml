@@ -44,7 +44,7 @@ runs:
       id: get-db-connection-string
       uses: ./.github/actions/azure-get-db-connectionstring
       with:
-        az_keyvault_name: ${{ env.KEYVAULT_NAME }}
+        az_keyvault_name: ${{ env.az_keyvault_name }}
         az_keyvault_database_connectionstring_name: ${{ env.az_keyvault_database_connectionstring_name }}
 
     - name: Run database upgrader
