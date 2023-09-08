@@ -41,7 +41,9 @@ runs:
     - name: Get connection string
       shell: bash
       run: |
-        echo "CONNECTION_STRING=$(az keyvault secret show --name ${{ inputs.az_keyvault_database_connectionstring_name }} --vault-name ${{ inputs.az_keyvault_name }} --query value -o tsv)" >> $GITHUB_ENV
+        CONNECTION_STRING=$(az keyvault secret show --name ${{ inputs.az_keyvault_database_connectionstring_name }} --vault-name ${{ inputs.az_keyvault_name }} --query value -o tsv)
+        echo "::add-mask::$CONNECTION_STRING"
+        echo "CONNECTION_STRING=$CONNECTION_STRING" >> $GITHUB_ENV
 
     - name: Run database upgrader
       shell: bash
