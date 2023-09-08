@@ -34,9 +34,14 @@ runs:
       
     - name: Add Azure firewall rules
       shell: bash
-      run: |
-        az sql server firewall-rule create --resource-group ${{ inputs.az_resource_group_name }} --server ${{ inputs.az_sql_database_server_name }} --name db-upgrader --start-ip-address ${{ steps.whats-my-ip.outputs.ip }} --end-ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
-        az keyvault network-rule add --resource-group ${{ inputs.az_resource_group_name }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+      uses: ./.github/actions/azure-ip-whitelist
+      with:
+        ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+        verb: "add"
+        az_keyvault_name: ${{ inputs.az_keyvault_name }}
+        az_ip_name: "db-upgrader"
+        az_resource_group: ${{ inputs.az_resource_group_name
+        az_sql_database_server_name: ${{ inputs.az_sql_database_server_name }}
 
     - name: Get connection string
       shell: bash
