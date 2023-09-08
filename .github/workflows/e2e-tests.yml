@@ -35,7 +35,6 @@ jobs:
         uses: ./.github/actions/whats-my-ip-address
 
       - name: Add Azure firewall rules
-        if: always()
         uses: ./.github/actions/azure-ip-whitelist
         with:
           ip_address: ${{ steps.whats-my-ip.outputs.ip }}
