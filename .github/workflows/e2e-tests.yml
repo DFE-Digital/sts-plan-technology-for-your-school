@@ -45,7 +45,7 @@ jobs:
           az_sql_database_server_name: ${{ env.az_sql_database_server_name }}    
   
       - name: Get connection string
-        id: get-db-connection-string
+        id: get-connection-string
         uses: ./.github/actions/azure-get-db-connectionstring
         with:
           az_keyvault_name: ${{ env.az_keyvault_name }}

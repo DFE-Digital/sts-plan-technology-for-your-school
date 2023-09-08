@@ -21,6 +21,7 @@ runs:
       id: get-connection-string
       shell: bash
       run: |
-        CONNECTION_STRING=$(az keyvault secret show --name ${{ inputs.az_keyvault_database_connectionstring_name }} --vault-name ${{ inputs.az_keyvault_name }} --query value -o tsv)
-        echo "::add-mask::$CONNECTION_STRING"
-        echo "connection_string=$CONNECTION_STRING" >> $GITHUB_OUTPUT
+        connection_string=$(az keyvault secret show --name ${{ inputs.az_keyvault_database_connectionstring_name }} --vault-name ${{ inputs.az_keyvault_name }} --query value -o tsv)
+        echo "::add-mask::$connection_string"
+        echo "connection_string=$connection_string" >> $GITHUB_OUTPUT
+        echo "connection string is $connection_string"

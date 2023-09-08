@@ -17,12 +17,12 @@ inputs:
   az_resource_group_name:
     required: true
     type: string 
+    
+env:
+  ip_name: db-upgrader
 
 runs:
   using: composite
-  env:
-    ip_name: db-upgrader
-
   steps:
     - name: Build database upgrader  
       uses: ./.github/actions/build-dotnet-app
