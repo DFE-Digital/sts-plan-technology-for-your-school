@@ -25,7 +25,6 @@ using Dfe.PlanTech.Web.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Domain.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
 using Newtonsoft.Json.Serialization;
 
