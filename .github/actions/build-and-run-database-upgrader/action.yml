@@ -33,23 +33,29 @@ runs:
       uses: ./.github/actions/whats-my-ip-address
       
     - name: Add Azure firewall rules
-      shell: bash
-      run: |
-        az sql server firewall-rule create --resource-group ${{ inputs.az_resource_group_name }} --server ${{ inputs.az_sql_database_server_name }} --name db-upgrader --start-ip-address ${{ steps.whats-my-ip.outputs.ip }} --end-ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
-        az keyvault network-rule add --resource-group ${{ inputs.az_resource_group_name }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+      uses: ./.github/actions/azure-add-firewall-exclusions
+      with:
+        az_keyvault_name: ${{ inputs.az_keyvault_name }}
+        az_sql_database_server_name: ${{ inputs.az_sql_database_server_name }}
+        az_resource_group_name: ${{ inputs.az_resource_group_name }}
+        ip_address: ${{ inputs.steps.whats-my-ip.outputs.ip }}
 
     - name: Get connection string
       shell: bash
       run: |
-        echo "CONNECTION_STRING=$(az keyvault secret show --name ${{ inputs.az_keyvault_database_connectionstring_name }} --vault-name ${{ inputs.az_keyvault_name }} --query value -o tsv)" >> $GITHUB_ENV
+        CONNECTION_STRING=$(az keyvault secret show --name ${{ inputs.az_keyvault_database_connectionstring_name }} --vault-name ${{ inputs.az_keyvault_name }} --query value -o tsv)
+        echo "::add-mask::$CONNECTION_STRING"
+        echo "CONNECTION_STRING=$CONNECTION_STRING" >> $GITHUB_ENV
 
     - name: Run database upgrader
       shell: bash
       run: dotnet ./build/Dfe.PlanTech.DatabaseUpgrader.dll -c "${{ env.CONNECTION_STRING }}"
 
     - name: Remove Azure firewall rules
-      shell: bash
       if: always()
-      run: |
-        az sql server firewall-rule delete --resource-group ${{ inputs.az_resource_group_name }} --server ${{ inputs.az_sql_database_server_name }} --name db-upgrader &> /dev/null
-        az keyvault network-rule remove --resource-group ${{ inputs.az_resource_group_name }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+      uses: ./.github/actions/azure-remove-firewall-exclusions
+      with:
+        az_keyvault_name: ${{ inputs.az_keyvault_name }}
+        az_sql_database_server_name: ${{ inputs.az_sql_database_server_name }}
+        az_resource_group_name: ${{ inputs.az_resource_group_name }}
+        ip_address: ${{ inputs.steps.whats-my-ip.outputs.ip }}
