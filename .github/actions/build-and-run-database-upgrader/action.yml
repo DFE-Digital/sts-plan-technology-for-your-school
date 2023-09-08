@@ -49,7 +49,7 @@ runs:
       uses: ./.github/actions/azure-get-db-connectionstring
       with:
         az_keyvault_name: ${{ env.KEYVAULT_NAME }}
-        az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
+        az_keyvault_database_connectionstring_name: ${{ env.az_keyvault_database_connectionstring_name }}
 
     - name: Run database upgrader
       shell: bash
