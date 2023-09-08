@@ -20,6 +20,8 @@ inputs:
 
 runs:
   using: composite
+  env:
+    ip_name: db-upgrader
 
   steps:
     - name: Build database upgrader  
@@ -33,29 +35,33 @@ runs:
       uses: ./.github/actions/whats-my-ip-address
       
     - name: Add Azure firewall rules
-      uses: ./.github/actions/azure-add-firewall-exclusions
+      uses: ./.github/actions/azure-ip-whitelist
       with:
+        ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+        verb: "add"
         az_keyvault_name: ${{ inputs.az_keyvault_name }}
+        az_ip_name: ${{ env.ip_name }}
+        az_resource_group: ${{ inputs.az_resource_group_name }}
         az_sql_database_server_name: ${{ inputs.az_sql_database_server_name }}
-        az_resource_group_name: ${{ inputs.az_resource_group_name }}
-        ip_address: ${{ inputs.steps.whats-my-ip.outputs.ip }}
 
     - name: Get connection string
-      shell: bash
-      run: |
-        CONNECTION_STRING=$(az keyvault secret show --name ${{ inputs.az_keyvault_database_connectionstring_name }} --vault-name ${{ inputs.az_keyvault_name }} --query value -o tsv)
-        echo "::add-mask::$CONNECTION_STRING"
-        echo "CONNECTION_STRING=$CONNECTION_STRING" >> $GITHUB_ENV
+      id: get-db-connection-string
+      uses: ./.github/actions/azure-get-db-connectionstring
+      with:
+        az_keyvault_name: ${{ env.KEYVAULT_NAME }}
+        az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
 
     - name: Run database upgrader
       shell: bash
-      run: dotnet ./build/Dfe.PlanTech.DatabaseUpgrader.dll -c "${{ env.CONNECTION_STRING }}"
+      run: dotnet ./build/Dfe.PlanTech.DatabaseUpgrader.dll -c "${{ steps.get-db-connection-string.outputs.connection_string }}"
 
     - name: Remove Azure firewall rules
       if: always()
-      uses: ./.github/actions/azure-remove-firewall-exclusions
+      uses: ./.github/actions/azure-ip-whitelist
       with:
+        ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+        verb: "remove"
         az_keyvault_name: ${{ inputs.az_keyvault_name }}
+        az_ip_name: ${{ env.ip_name }}
+        az_resource_group: ${{ inputs.az_resource_group_name }}
         az_sql_database_server_name: ${{ inputs.az_sql_database_server_name }}
-        az_resource_group_name: ${{ inputs.az_resource_group_name }}
-        ip_address: ${{ inputs.steps.whats-my-ip.outputs.ip }}
