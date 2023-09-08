@@ -39,7 +39,7 @@ runs:
         verb: "add"
         az_keyvault_name: ${{ inputs.az_keyvault_name }}
         az_ip_name: "db-upgrader"
-        az_resource_group: ${{ inputs.az_resource_group_name
+        az_resource_group: ${{ inputs.az_resource_group_name }}
         az_sql_database_server_name: ${{ inputs.az_sql_database_server_name }}
 
     - name: Get connection string
