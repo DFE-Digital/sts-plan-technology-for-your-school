@@ -16,12 +16,12 @@ BEGIN TRY
                      ROW_NUMBER() OVER (PARTITION BY question.contentfulRef ORDER BY response.dateCreated DESC) AS rowno
                  FROM
                      dbo.response AS response
-                         INNER JOIN
+                 INNER JOIN
                      dbo.question AS question
-                     ON
-                             response.questionId = question.id
+                 ON
+                     response.questionId = question.id
                  WHERE
-                         response.submissionId = @submissionId
+                     response.submissionId = @submissionId
              ) AS uniqueMaturity
         WHERE
                 uniqueMaturity.rowno = 1;
