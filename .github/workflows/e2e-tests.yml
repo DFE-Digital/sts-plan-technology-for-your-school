@@ -17,6 +17,7 @@ jobs:
       az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
       az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
       az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      SQL_IP_NAME: e2e-tests-clear-db
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -32,30 +33,40 @@ jobs:
       - name: Get workflow IP address
         id: whats-my-ip
         uses: ./.github/actions/whats-my-ip-address
-        
-      - name: Add Azure firewall rules
-        shell: bash
-        run: |
-          az sql server firewall-rule create --resource-group ${{ env.az_resource_group_name }} --server ${{ env.az_sql_database_server_name }} --name clear-db --start-ip-address ${{ steps.whats-my-ip.outputs.ip }} --end-ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
-          az keyvault network-rule add --resource-group ${{ env.az_resource_group_name }} --name ${{ env.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
+      - name: Add Azure firewall rules
+        uses: ./.github/actions/azure-ip-whitelist
+        with:
+          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+          verb: "add"
+          az_keyvault_name: ${{ env.az_keyvault_name }}
+          az_ip_name: ${{ env.SQL_IP_NAME }}
+          az_resource_group: ${{ env.az_resource_group_name}}
+          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}    
+  
       - name: Get connection string
-        shell: bash
-        run: |
-          echo "CONNECTION_STRING=$(az keyvault secret show --name ${{ env.az_keyvault_database_connectionstring_name }} --vault-name ${{ env.az_keyvault_name }} --query value -o tsv)" >> $GITHUB_ENV
+        id: get-connection-string
+        uses: ./.github/actions/azure-get-db-connectionstring
+        with:
+          az_keyvault_name: ${{ env.az_keyvault_name }}
+          az_keyvault_database_connectionstring_name: ${{ env.az_keyvault_database_connectionstring_name }}
 
       - name: Execute stored procedure
         uses: azure/sql-action@v2.2
         with:
-          connection-string: ${{ env.CONNECTION_STRING }}
+          connection-string: ${{ steps.get-db-connection-string.outputs.connection_string }}
           path: './.github/scripts/drop-establishment-data.sql'
 
       - name: Remove Azure firewall rules
-        shell: bash
         if: always()
-        run: |
-          az sql server firewall-rule delete --resource-group ${{ env.az_resource_group_name }} --server ${{ env.az_sql_database_server_name }} --name clear-db &> /dev/null
-          az keyvault network-rule remove --resource-group ${{ env.az_resource_group_name }} --name ${{ env.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+        uses: ./.github/actions/azure-ip-whitelist
+        with:
+          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+          verb: "remove"
+          az_keyvault_name: ${{ env.az_keyvault_name }}
+          az_ip_name: ${{ env.SQL_IP_NAME }}
+          az_resource_group: ${{ env.az_resource_group_name}}
+          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}    
 
   run-tests:
     name: Run E2E Tests
