@@ -54,7 +54,7 @@ jobs:
       - name: Execute stored procedure
         uses: azure/sql-action@v2.2
         with:
-          connection-string: ${{ steps.get-db-connection-string.outputs.connection_string }}
+          connection-string: ${{ steps.get-connection-string.outputs.connection_string }}
           path: './.github/scripts/drop-establishment-data.sql'
 
       - name: Remove Azure firewall rules

@@ -10,7 +10,7 @@ inputs:
     type: string
     
 outputs:
-  connection_stirng:
+  connection_string:
     description: DB connection string
     value: ${{ steps.get-connection-string.outputs.connection_string }}
 
