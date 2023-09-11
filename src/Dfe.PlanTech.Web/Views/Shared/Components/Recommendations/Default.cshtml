@@ -13,6 +13,7 @@ else
     @foreach (var recommendationsViewComponentViewModel in Model)
         {
             <task-list-item>
+                <task-list-item-name>
                     @if (recommendationsViewComponentViewModel.RecommendationSlug != null)
                     {
                         <a asp-controller="Pages" asp-action="GetByRoute"
@@ -24,6 +25,7 @@ else
                     {
                         <govuk-error-message>@recommendationsViewComponentViewModel.NoRecommendationFoundErrorMessage</govuk-error-message>
                     }
+                </task-list-item-name>
             </task-list-item>
         }
     </task-list>
