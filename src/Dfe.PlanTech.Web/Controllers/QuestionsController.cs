@@ -130,7 +130,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
         var splitParams = parameters.Split('+');
 
-        if (string.IsNullOrEmpty(splitParams))
+        if (splitParams is null)
         {
             return null;
         }
