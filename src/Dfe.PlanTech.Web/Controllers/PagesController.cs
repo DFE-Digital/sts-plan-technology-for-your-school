@@ -69,7 +69,6 @@ public class PagesController : BaseController<PagesController>
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 
-
     [Route("/service-unavailable")]
     public IActionResult ServiceUnavailable()
     {
