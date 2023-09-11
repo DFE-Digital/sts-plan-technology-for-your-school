@@ -126,7 +126,7 @@ public class QuestionsController : BaseController<QuestionsController>
             return null;
         }
 
-        var splitParams = parameters.Split('+');
+        string[]? splitParams = parameters.Split('+');
 
         if (splitParams is null)
         {
