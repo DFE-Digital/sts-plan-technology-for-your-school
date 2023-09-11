@@ -52,7 +52,7 @@ public class PagesController : BaseController<PagesController>
         return View("Page", viewModel);
     }
 
-    [HttpGet("/privacy")]
+    [HttpGet("/privacy-policy")]
     public async Task<IActionResult> GetPrivacyPolicyPage([FromServices] GetPageQuery query)
     {
         var page = await query.GetPageBySlug("privacy-policy", CancellationToken.None);
