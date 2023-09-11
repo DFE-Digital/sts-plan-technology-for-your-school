@@ -6,6 +6,7 @@ using Dfe.PlanTech.Web.Exceptions;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
@@ -129,7 +130,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
         var splitParams = parameters.Split('+');
 
-        if (splitParams == null)
+        if (string.IsNullOrEmpty(splitParams))
         {
             return null;
         }
