@@ -4,15 +4,15 @@ namespace Dfe.PlanTech.Application.Submission.Interfaces;
 
 public interface ISubmitAnswerCommand
 {
-  public Task<int> SubmitAnswer(SubmitAnswerDto submitAnswerDto, string sectionId, string sectionName);
+    public Task<int> SubmitAnswer(SubmitAnswerDto submitAnswerDto, string sectionId, string sectionName);
+    public Task<string?> GetNextQuestionId(string questionId, string chosenAnswerId);
+    public Task<bool> NextQuestionIsAnswered(int submissionId, string nextQuestionId);
 
-  public Task<string?> GetNextQuestionId(string questionId, string chosenAnswerId);
-
-  public Task<bool> NextQuestionIsAnswered(int submissionId, string nextQuestionId);
-
-  public Task<Question?> GetNextUnansweredQuestion(int submissionId);
-
-  public Task<Question> GetQuestionnaireQuestion(string questionId, string? section, CancellationToken cancellationToken);
-
-  public Task<Domain.Submissions.Models.Submission?> GetOngoingSubmission(string sectionId);
+    public Task<(Domain.Questionnaire.Models.Question? Question, Domain.Submissions.Models.Submission? Submission)>
+        GetQuestionWithSubmission(
+            int? submissionId,
+            string? questionRef,
+            string sectionId,
+            string? sectionName,
+            CancellationToken cancellationToken);
 }

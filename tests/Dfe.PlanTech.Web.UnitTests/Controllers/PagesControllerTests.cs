@@ -67,25 +67,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var Logger = Substitute.For<ILogger<PagesController>>();
 
-            var config = new GtmConfiguration()
-            {
-                Head = "Test Head",
-                Body = "Test Body"
-            };
-
-            var inMemorySettings = new Dictionary<string, string?>
-            {
-                { "GTM:Head", config.Head },
-                { "GTM:Body", config.Body },
-            };
-
-            IConfiguration configuration = new ConfigurationBuilder()
-                .AddInMemoryCollection(initialData: inMemorySettings)
-                .Build();
-
             var controllerContext = ControllerHelpers.SubstituteControllerContext();
 
-            _controller = new PagesController(Logger, configuration, cookiesSubstitute)
+            _controller = new PagesController(Logger)
             {
                 ControllerContext = controllerContext,
                 TempData = Substitute.For<ITempDataDictionary>()
@@ -136,8 +120,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var asPage = model as PageViewModel;
             Assert.Equal(INDEX_SLUG, asPage!.Page.Slug);
-            Assert.Equal("Test Head", asPage!.GTMHead);
-            Assert.Equal("Test Body", asPage!.GTMBody);
             Assert.Contains(INDEX_TITLE, asPage!.Page.Title!.Text);
         }
 
@@ -187,36 +169,26 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             Assert.IsType<ErrorViewModel>(model);
         }
-
-        [Theory]
-        [InlineData("true")]
-        [InlineData("false")]
-        [InlineData("")]
-        public async Task GoogleTrackingCodesAddedDependingOnWhatCookiePreferenceSetTo(string cookiePreference)
+        
+        [Fact]
+        public void Should_Render_Service_Unavailable_Page()
         {
-            bool.TryParse(cookiePreference, out bool preference);
-            var cookie = new DfeCookie { HasApproved = preference };
-            cookiesSubstitute.GetCookie().Returns(cookie);
+            var httpContextSubstitute = Substitute.For<HttpContext>();
 
-            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None);
+            var controllerContext = new ControllerContext
+            {
+                HttpContext = httpContextSubstitute
+            };
 
-            Assert.IsType<ViewResult>(result);
+            _controller.ControllerContext = controllerContext;
+
+            var result = _controller.ServiceUnavailable();
 
             var viewResult = result as ViewResult;
 
             var model = viewResult!.Model;
 
-            var asPage = model as PageViewModel;
-            if (cookiePreference == "true")
-            {
-                Assert.Equal("Test Head", asPage!.GTMHead);
-                Assert.Equal("Test Body", asPage!.GTMBody);
-            }
-            else
-            {
-                Assert.NotEqual("Test Head", asPage!.GTMHead);
-                Assert.NotEqual("Test Body", asPage!.GTMBody);
-            }
+            Assert.IsType<ServiceUnavailableViewModel>(model);
         }
     }
 }

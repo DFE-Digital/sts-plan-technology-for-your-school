@@ -16,6 +16,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Web.Controllers;
+using Dfe.PlanTech.Web.Exceptions;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Http;
@@ -136,16 +137,18 @@ public class QuestionsControllerTests
     private IPlanTechDbContext _databaseSubstitute;
     private readonly QuestionsController _controller;
     private readonly SubmitAnswerCommand _submitAnswerCommand;
+    private ISubmitAnswerCommand _submitAnswerCommandSubstitute = Substitute.For<ISubmitAnswerCommand>();
     private IQuestionnaireCacher _questionnaireCacherSubstitute;
     private IGetLatestResponseListForSubmissionQuery _getLatestResponseListForSubmissionQuerySubstitute;
     private readonly ICacher _cacher;
+    private ILogger<QuestionsController> _logger = Substitute.For<ILogger<QuestionsController>>();
+
 
     public QuestionsControllerTests()
     {
         IContentRepository repositorySubstitute = SubstituteRepository();
         _questionnaireCacherSubstitute = SubstituteQuestionnaireCacher();
 
-        var Logger = Substitute.For<ILogger<QuestionsController>>();
         _databaseSubstitute = Substitute.For<IPlanTechDbContext>();
         var user = Substitute.For<IUser>();
 
@@ -172,7 +175,7 @@ public class QuestionsControllerTests
 
         _submitAnswerCommand = new SubmitAnswerCommand(getSubmitAnswerQueries, recordSubmitAnswerCommands, _getLatestResponseListForSubmissionQuerySubstitute);
 
-        _controller = new QuestionsController(Logger) { TempData = tempData };
+        _controller = new QuestionsController(_logger) { TempData = tempData };
 
         _cacher = new Cacher(new CacheOptions(), new MemoryCache(new MemoryCacheOptions()));
     }
@@ -611,6 +614,56 @@ public class QuestionsControllerTests
         Assert.IsType<string>(_controller.TempData[TempDataConstants.Questions]);
         var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_controller.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
         Assert.Equal("Question2", id);
+    }
+    
+    [Fact]
+    public async void SubmitAnswer_Should_RedirectTo_SameQuestion_When_Saving_Submission_Errors()
+    {
+        var submitAnswerDto = new SubmitAnswerDto()
+        {
+            QuestionId = "Question1",
+            ChosenAnswerId = "Answer1",
+        };
+        
+        _submitAnswerCommandSubstitute.When(x => x.SubmitAnswer(Arg.Any<SubmitAnswerDto>(), Arg.Any<string>(), Arg.Any<string>())).Do(x => throw new Exception("Test"));
+        
+        var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommandSubstitute);
+
+        Assert.IsType<RedirectToActionResult>(result);
+
+        var redirectToActionResult = result as RedirectToActionResult;
+        _logger.ReceivedWithAnyArgs(1).LogError("An error has occurred while submitting an answer with the following message: Test");
+        Assert.NotNull(redirectToActionResult);
+        Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
+        Assert.NotNull(_controller.TempData[TempDataConstants.Questions]);
+        Assert.IsType<string>(_controller.TempData[TempDataConstants.Questions]);
+        var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_controller.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
+        Assert.Equal(submitAnswerDto.QuestionId, id);
+    }
+    
+    [Fact]
+    public async void Redirect_To_Service_Unavailable_Page_When_There_Is_An_Issue_Retrieving_Next_Question()
+    {
+        var submitAnswerDto = new SubmitAnswerDto()
+        {
+            QuestionId = "Question1",
+            ChosenAnswerId = "Answer1",
+        };
+        
+        _submitAnswerCommandSubstitute.SubmitAnswer(Arg.Any<SubmitAnswerDto>(), Arg.Any<string>(), Arg.Any<string>()).Returns(1);
+
+        _submitAnswerCommandSubstitute.When(x => x.GetNextQuestionId(Arg.Any<string>(), Arg.Any<string>())).Do(x => throw new Exception("Test"));
+       
+        var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommandSubstitute);
+        
+        var redirectResult = result as RedirectResult;
+        
+        Assert.NotNull(redirectResult);
+
+        Assert.Equal("/service-unavailable", redirectResult.Url);
+        
+        _logger.ReceivedWithAnyArgs(1).LogError("An error has occurred while retrieving the next question with the following message: Test");
+        
     }
 
     private void SetParams(string sectionId)

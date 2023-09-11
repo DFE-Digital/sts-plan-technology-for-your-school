@@ -22,9 +22,9 @@
                 <govuk-radios-hint>@Model.Question.HelpText</govuk-radios-hint>
             }
 
-            @if (!string.IsNullOrEmpty(Model.NoSelectedAnswerErrorMessage))
+            @if (!string.IsNullOrEmpty(Model.QuestionErrorMessage))
             {
-                <govuk-radios-error-message>@Model.NoSelectedAnswerErrorMessage</govuk-radios-error-message>
+                <govuk-radios-error-message>@Model.QuestionErrorMessage</govuk-radios-error-message>
             }
 
             @{

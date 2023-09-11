@@ -1,6 +1,8 @@
 using Dfe.PlanTech.Application.Submission.Commands;
+using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Constants;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Web.Exceptions;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +22,7 @@ public class QuestionsController : BaseController<QuestionsController>
     /// <param name="id"></param>
     /// <param name="section">Name of current section (if starting new)</param>
     /// <returns></returns>
-    public async Task<IActionResult> GetQuestionById(string? id, string? section, [FromServices] SubmitAnswerCommand submitAnswerCommand, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetQuestionById(string? id, string? section, [FromServices] ISubmitAnswerCommand submitAnswerCommand, CancellationToken cancellationToken)
     {
         var parameterQuestionPage = TempData[TempDataConstants.Questions] != null ? DeserialiseParameter<TempDataQuestions>(TempData[TempDataConstants.Questions]) : new TempDataQuestions();
 
@@ -44,7 +46,7 @@ public class QuestionsController : BaseController<QuestionsController>
                 AnswerRef = parameterQuestionPage.AnswerRef,
                 Params = parameters?.ToString(),
                 SubmissionId = questionWithSubmission.Submission == null ? parameterQuestionPage.SubmissionId : questionWithSubmission.Submission.Id,
-                NoSelectedAnswerErrorMessage = parameterQuestionPage.NoSelectedAnswerErrorMessage
+                QuestionErrorMessage = parameterQuestionPage.NoSelectedAnswerErrorMessage
             };
 
             return View("Question", viewModel);
@@ -52,7 +54,7 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
     [HttpPost("SubmitAnswer")]
-    public async Task<IActionResult> SubmitAnswer(SubmitAnswerDto submitAnswerDto, [FromServices] SubmitAnswerCommand submitAnswerCommand)
+    public async Task<IActionResult> SubmitAnswer(SubmitAnswerDto submitAnswerDto, [FromServices] ISubmitAnswerCommand submitAnswerCommand)
     {
         if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
 
@@ -74,8 +76,37 @@ public class QuestionsController : BaseController<QuestionsController>
             return RedirectToAction("GetQuestionById");
         }
 
-        int submissionId = await submitAnswerCommand.SubmitAnswer(submitAnswerDto, param.SectionId, param.SectionName);
-        string? nextQuestionId = await submitAnswerCommand.GetNextQuestionId(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId);
+        int submissionId;
+        
+        try
+        {
+            submissionId = await submitAnswerCommand.SubmitAnswer(submitAnswerDto, param.SectionId, param.SectionName);
+        }
+        catch (Exception e)
+        {
+            logger.LogError("An error has occurred while submitting an answer with the following message: {} ", e.Message);
+            
+            TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions()
+            {
+                QuestionRef = submitAnswerDto.QuestionId,
+                SubmissionId = submitAnswerDto.SubmissionId,
+                NoSelectedAnswerErrorMessage = "Save failed. Please try again later."
+            });
+            return RedirectToAction("GetQuestionById");
+        }
+
+        string? nextQuestionId;
+        
+        try
+        {
+            nextQuestionId = await submitAnswerCommand.GetNextQuestionId(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId);
+        }
+        catch (Exception e)
+        {
+            logger.LogError( "An error has occurred while retrieving the next question with the following message: {} ", e.Message);
+            return Redirect("/service-unavailable");
+        }
+        
 
         if (string.IsNullOrEmpty(nextQuestionId) || await submitAnswerCommand.NextQuestionIsAnswered(submissionId, nextQuestionId))
         {
