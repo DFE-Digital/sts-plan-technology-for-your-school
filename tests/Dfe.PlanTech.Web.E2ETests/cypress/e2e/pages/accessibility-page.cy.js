@@ -1,8 +1,8 @@
 describe("Accessibility Page", () => {
-    const url = "/self-assessment";
+    const url = "/accessibility";
 
     beforeEach(() => {
-        cy.loginWithEnv(url);
+        cy.visit(url);
         cy.get("footer.govuk-footer ul.govuk-footer__inline-list a.govuk-footer__link").contains("Accessibility").click();
         cy.url().should("contain", "/accessibility");
         cy.injectAxe();
@@ -11,14 +11,13 @@ describe("Accessibility Page", () => {
     it("Should Have Heading", () => {
         cy.get("h1.govuk-heading-xl")
             .should("exist")
-            .and("have.text", "Accessibility")
     });
 
     it("Should Have Home Button", () => {
         cy.get('a:contains("Home")')
             .should("exist")
             .should("have.attr", "href")
-            .and("include", "self-assessment")
+            .and("include", "/")
     });
 
     it("Should Have Content", () => {

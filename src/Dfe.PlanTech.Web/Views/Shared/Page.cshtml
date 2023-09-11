@@ -1,15 +1,24 @@
 @model Dfe.PlanTech.Domain.Content.Models.Page;
 
-<div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
-        @{
-            if(Model.Title != null){
+@section BeforeContent {
+    @if (Model.DisplayHomeButton)
+    {
+        await Html.RenderPartialAsync("HomeButton");
+    }
+}
+
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            @{
+            if (Model.Title != null)
+            {
                 await Html.RenderPartialAsync("Components/Title", Model.Title);
             }
         }
 
         @{
-            foreach(var content in Model.Content){
+            foreach (var content in Model.Content)
+            {
                 await Html.RenderPartialAsync("Components/PageComponentFactory", content);
             }
         }

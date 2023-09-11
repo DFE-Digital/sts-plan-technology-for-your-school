@@ -42,15 +42,14 @@ public class PagesController : BaseController<PagesController>
         return View("Page", viewModel);
     }
 
-
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     [Route("/error")]
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
-    
-    
+
+
     [Route("/service-unavailable")]
     public IActionResult ServiceUnavailable()
     {
