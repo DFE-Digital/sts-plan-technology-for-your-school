@@ -133,11 +133,13 @@ public class QuestionsController : BaseController<QuestionsController>
         {
             return null;
         }
-
-        return new Params
+        else
         {
-            SectionName = splitParams.Length > 0 ? splitParams[0].ToString() : string.Empty,
-            SectionId = splitParams.Length > 1 ? splitParams[1].ToString() : string.Empty,
-        };
+            return new Params
+            {
+                SectionName = splitParams.Length > 0 ? splitParams[0].ToString() : string.Empty,
+                SectionId = splitParams.Length > 1 ? splitParams[1].ToString() : string.Empty,
+            };
+        }
     }
 }
