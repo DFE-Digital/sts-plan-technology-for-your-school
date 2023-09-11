@@ -123,12 +123,16 @@ public class QuestionsController : BaseController<QuestionsController>
     private static Params? _ParseParameters(string? parameters)
     {
         if (string.IsNullOrEmpty(parameters))
+        {
             return null;
+        }
 
         var splitParams = parameters.Split('+');
 
-        if (splitParams is null)
+        if (splitParams == null)
+        {
             return null;
+        }
 
         return new Params
         {
