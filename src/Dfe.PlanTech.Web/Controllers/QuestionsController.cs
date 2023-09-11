@@ -2,7 +2,6 @@ using Dfe.PlanTech.Application.Submission.Commands;
 using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Constants;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Web.Exceptions;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -123,17 +122,23 @@ public class QuestionsController : BaseController<QuestionsController>
     private static Params? _ParseParameters(string? parameters)
     {
         if (string.IsNullOrEmpty(parameters))
+        {
             return null;
+        }
 
         var splitParams = parameters.Split('+');
 
         if (splitParams is null)
-            return null;
-
-        return new Params
         {
-            SectionName = splitParams.Length > 0 ? splitParams[0].ToString() : string.Empty,
-            SectionId = splitParams.Length > 1 ? splitParams[1].ToString() : string.Empty,
-        };
+            return null;
+        }
+        else
+        {
+            return new Params
+            {
+                SectionName = splitParams.Length > 0 ? splitParams[0].ToString() : string.Empty,
+                SectionId = splitParams.Length > 1 ? splitParams[1].ToString() : string.Empty,
+            };
+        }
     }
 }
