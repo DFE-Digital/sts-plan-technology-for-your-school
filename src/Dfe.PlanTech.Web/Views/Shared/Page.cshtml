@@ -1,15 +1,8 @@
 @model Dfe.PlanTech.Domain.Content.Models.Page;
 
-@section BeforeContent {
-    @if (Model.DisplayHomeButton)
-    {
-        await Html.RenderPartialAsync("HomeButton");
-    }
-}
-
-    <div class="govuk-grid-row">
-        <div class="govuk-grid-column-two-thirds">
-            @{
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        @{
             if (Model.Title != null)
             {
                 await Html.RenderPartialAsync("Components/Title", Model.Title);

@@ -42,6 +42,26 @@ public class PagesController : BaseController<PagesController>
         return View("Page", viewModel);
     }
 
+    [HttpGet("/accessibility")]
+    public async Task<IActionResult> GetAccessibilityPage([FromServices] GetPageQuery query)
+    {
+        var page = await query.GetPageBySlug("accessibility", CancellationToken.None);
+
+        var viewModel = CreatePageModel(page);
+
+        return View("Page", viewModel);
+    }
+
+    [HttpGet("/privacy")]
+    public async Task<IActionResult> GetPrivacyPolicyPage([FromServices] GetPageQuery query)
+    {
+        var page = await query.GetPageBySlug("privacy-policy", CancellationToken.None);
+
+        var viewModel = CreatePageModel(page);
+
+        return View("Page", viewModel);
+    }
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     [Route("/error")]
     public IActionResult Error()
