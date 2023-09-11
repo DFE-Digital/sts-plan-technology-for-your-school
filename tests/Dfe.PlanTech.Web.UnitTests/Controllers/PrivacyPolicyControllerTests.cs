@@ -23,7 +23,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             new Page()
             {
-                Slug = "privacy",
+                Slug = "privacy-policy",
                 Title = new Title() { Text = "Privacy Policy" },
                 Content = new ContentComponent[] { new Header() { Tag = Domain.Content.Enums.HeaderTag.H1, Text = "Analytical Cookies" }}
             },
@@ -38,10 +38,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 ControllerContext = ControllerHelpers.SubstituteControllerContext()
             };
         }
-        
-         [Fact]
-         public async Task PrivacyPolicyPageDisplays()
-         {
+
+        [Fact]
+        public async Task PrivacyPolicyPageDisplays()
+        {
             IQuestionnaireCacher questionnaireCacherSubstitute = Substitute.For<IQuestionnaireCacher>();
             IContentRepository contentRepositorySubstitute = SetupRepositorySubstitute();
             GetPageQuery _getPageQuerySubstitute = Substitute.For<GetPageQuery>(questionnaireCacherSubstitute, contentRepositorySubstitute);
@@ -53,28 +53,28 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var viewResult = result as ViewResult;
 
             Assert.NotNull(viewResult);
-            Assert.Equal("Privacy", viewResult.ViewName);
+            Assert.Equal("Page", viewResult.ViewName);
         }
 
         private IContentRepository SetupRepositorySubstitute()
-         {
-             var repositorySubstitute = Substitute.For<IContentRepository>();
-             repositorySubstitute.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns((CallInfo) =>
-             {
-                 IGetEntitiesOptions options = (IGetEntitiesOptions)CallInfo[0];
-                 if (options?.Queries != null)
-                 {
-                     foreach (var query in options.Queries)
-                     {
-                         if (query is ContentQueryEquals equalsQuery && query.Field == "fields.slug")
-                         {
-                             return _pages.Where(page => page.Slug == equalsQuery.Value);
-                         }
-                     }
-                 }
-                 return Array.Empty<Page>();
-             });
-             return repositorySubstitute;
-         }
+        {
+            var repositorySubstitute = Substitute.For<IContentRepository>();
+            repositorySubstitute.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns((CallInfo) =>
+            {
+                IGetEntitiesOptions options = (IGetEntitiesOptions)CallInfo[0];
+                if (options?.Queries != null)
+                {
+                    foreach (var query in options.Queries)
+                    {
+                        if (query is ContentQueryEquals equalsQuery && query.Field == "fields.slug")
+                        {
+                            return _pages.Where(page => page.Slug == equalsQuery.Value);
+                        }
+                    }
+                }
+                return Array.Empty<Page>();
+            });
+            return repositorySubstitute;
+        }
     }
 }

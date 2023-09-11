@@ -17,18 +17,7 @@ public class AccessibilityController : BaseController<AccessibilityController>
     {
         Page accessibilityPageContent = await getPageQuery.GetPageBySlug("accessibility", CancellationToken.None);
 
-        //var pageViewModel = new PageViewModel() { Page = accessibilityPageContent };
-
         return View("Page", accessibilityPageContent);
-
-        // AccessibilityViewModel accessibilityViewModel = new AccessibilityViewModel()
-        // {
-        //     Title = accessibilityPageContent.Title ?? throw new NullReferenceException(nameof(accessibilityPageContent.Title)),
-        //     Content = accessibilityPageContent.Content,
-        //     UserIsAuthenticated = User.Identity is { IsAuthenticated: true }
-        // };
-
-        // return View("Accessibility", accessibilityViewModel);
     }
 
 }

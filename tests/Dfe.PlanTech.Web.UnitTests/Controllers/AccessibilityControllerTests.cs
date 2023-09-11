@@ -27,7 +27,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public static AccessibilityController CreateStrut()
         {
             ILogger<AccessibilityController> loggerSubstitute = Substitute.For<ILogger<AccessibilityController>>();
-            
+
             return new AccessibilityController(loggerSubstitute)
             {
                 ControllerContext = ControllerHelpers.SubstituteControllerContext()
@@ -35,8 +35,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-         public async Task AccessibilityPageDisplays()
-         {
+        public async Task AccessibilityPageDisplays()
+        {
             IQuestionnaireCacher questionnaireCacherSubstitute = Substitute.For<IQuestionnaireCacher>();
             IContentRepository contentRepositorySubstitute = SetupRepositorySubstitute();
             GetPageQuery _getPageQuerySubstitute = Substitute.For<GetPageQuery>(questionnaireCacherSubstitute, contentRepositorySubstitute);
@@ -48,28 +48,28 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var viewResult = result as ViewResult;
 
             Assert.NotNull(viewResult);
-            Assert.Equal("Accessibility", viewResult.ViewName);
+            Assert.Equal("Page", viewResult.ViewName);
         }
 
-         private IContentRepository SetupRepositorySubstitute()
-         {
-             var repositorySubstitute = Substitute.For<IContentRepository>();
-             repositorySubstitute.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns((CallInfo) =>
-             {
-                 IGetEntitiesOptions options = (IGetEntitiesOptions)CallInfo[0];
-                 if (options?.Queries != null)
-                 {
-                     foreach (var query in options.Queries)
-                     {
-                         if (query is ContentQueryEquals equalsQuery && query.Field == "fields.slug")
-                         {
-                             return _pages.Where(page => page.Slug == equalsQuery.Value);
-                         }
-                     }
-                 }
-                 return Array.Empty<Page>();
-             });
-             return repositorySubstitute;
-         }
+        private IContentRepository SetupRepositorySubstitute()
+        {
+            var repositorySubstitute = Substitute.For<IContentRepository>();
+            repositorySubstitute.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns((CallInfo) =>
+            {
+                IGetEntitiesOptions options = (IGetEntitiesOptions)CallInfo[0];
+                if (options?.Queries != null)
+                {
+                    foreach (var query in options.Queries)
+                    {
+                        if (query is ContentQueryEquals equalsQuery && query.Field == "fields.slug")
+                        {
+                            return _pages.Where(page => page.Slug == equalsQuery.Value);
+                        }
+                    }
+                }
+                return Array.Empty<Page>();
+            });
+            return repositorySubstitute;
+        }
     }
 }

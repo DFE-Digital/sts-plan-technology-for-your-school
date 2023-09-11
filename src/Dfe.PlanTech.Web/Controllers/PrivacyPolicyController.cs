@@ -17,14 +17,5 @@ public class PrivacyPolicyController : BaseController<PrivacyPolicyController>
         Page privacyPageContent = await getPageQuery.GetPageBySlug("privacy-policy", CancellationToken.None);
 
         return View("Page", privacyPageContent);
-
-        // var privacyViewModel = new PrivacyViewModel()
-        // {
-        //     Title = privacyPageContent.Title ?? throw new NullReferenceException(nameof(privacyPageContent.Title)),
-        //     Content = privacyPageContent.Content
-        // };
-
-
-        // return View("Privacy", privacyViewModel);
     }
 }
