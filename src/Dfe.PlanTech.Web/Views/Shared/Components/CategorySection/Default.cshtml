@@ -24,12 +24,10 @@ else
         <task-list-item>
             @if (categorySectionDtoItem.Slug != null)
             {
-                <task-list-item-name>
                     <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@categorySectionDtoItem.Slug"
                         class="govuk-link">
                         @categorySectionDtoItem.Name
                     </a>
-                </task-list-item-name>
                 <task-list-tag colour=@categorySectionDtoItem.TagColour>
                     @categorySectionDtoItem.TagText
                 </task-list-tag>
