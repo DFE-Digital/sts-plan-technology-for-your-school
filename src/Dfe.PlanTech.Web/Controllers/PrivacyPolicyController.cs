@@ -1,6 +1,5 @@
 ﻿using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
@@ -8,9 +7,7 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("/privacy")]
 public class PrivacyPolicyController : BaseController<PrivacyPolicyController>
 {
-    public PrivacyPolicyController(ILogger<PrivacyPolicyController> logger) : base(logger)
-    {
-    }
+    public PrivacyPolicyController(ILogger<PrivacyPolicyController> logger) : base(logger) { }
 
     public async Task<IActionResult> GetPrivacyPage([FromServices] GetPageQuery getPageQuery)
     {
