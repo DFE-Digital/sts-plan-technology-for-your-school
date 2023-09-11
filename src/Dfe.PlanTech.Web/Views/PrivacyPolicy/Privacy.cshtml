@@ -6,8 +6,8 @@
     }
 
 <div class="govuk-width-container" id="privacy-page">
-    <main class="govuk-main-wrapper" id="main-content" role="main">
-        <div class="govuk-grid-row">
+    <div class="govuk-main-wrapper" id="privacy-page-wrapper">
+        <div class="govuk-grid-row" id="privacy-page-grid-row">
             @{
                     await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Title);
                 }
@@ -22,6 +22,6 @@
                     }
                 }
             </div>
-        </main>
+        </div>
     </div>
 }
