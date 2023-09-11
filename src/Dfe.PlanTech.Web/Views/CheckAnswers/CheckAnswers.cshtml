@@ -28,7 +28,8 @@
                         <a class="govuk-link" asp-controller="CheckAnswers" asp-action="ChangeAnswer"
                             asp-route-questionRef="@questionWithAnswer.QuestionRef"
                             asp-route-answerRef="@questionWithAnswer.AnswerRef" asp-route-submissionId="@Model.SubmissionId"
-                            aria-label=@anchorLabel>Change</a>
+                            aria-label=@anchorLabel
+                            title=@questionWithAnswer.QuestionText>Change</a>
                     </dd>
                 </div>
             }
