@@ -27,12 +27,15 @@ public class PageModelBinder : IModelBinder
 
     if (pageItem == null)
     {
+      _logger.LogWarning("Page is not set");
+      bindingContext.Result = ModelBindingResult.Failed();
       return Task.CompletedTask;
     }
 
     if (pageItem is not Page page)
     {
       _logger.LogWarning("Page is not {type}", typeof(Page));
+      bindingContext.Result = ModelBindingResult.Failed();
       return Task.CompletedTask;
     }
 
