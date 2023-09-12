@@ -135,5 +135,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
 
             Assert.Null(unknownMaturityRecommendation);
         }
+
     }
 }

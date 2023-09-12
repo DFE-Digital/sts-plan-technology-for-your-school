@@ -7,6 +7,6 @@ public class TaskListItemNameTagHelper : BaseTaskListTagHelper
     public TaskListItemNameTagHelper()
     {
         Class = _class;
-        TagName = "span";
+        TagName = "strong";
     }
 }

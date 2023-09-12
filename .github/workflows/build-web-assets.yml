@@ -6,10 +6,6 @@ on:
     paths: 
       - 'src/Dfe.PlanTech.Web.Node/**'
 
-concurrency:
-  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
-  cancel-in-progress: true
-  
 jobs:
     build-web-resouces:
         name: Build JS and SCSS files

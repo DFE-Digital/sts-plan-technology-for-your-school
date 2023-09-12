@@ -1,4 +1,5 @@
 ﻿using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
@@ -10,8 +11,13 @@ namespace Dfe.PlanTech.Web.Controllers;
 
 public class PagesController : BaseController<PagesController>
 {
-    public PagesController(ILogger<PagesController> logger) : base(logger)
+    public IConfiguration Config { get; }
+    private readonly ICookieService _cookieService;
+
+    public PagesController(ILogger<PagesController> logger, IConfiguration config, ICookieService cookieService) : base(logger)
     {
+        Config = config ?? throw new ArgumentNullException(nameof(config));
+        _cookieService = cookieService;
     }
 
     [Authorize(Policy = "UsePageAuthentication")]
@@ -50,12 +56,19 @@ public class PagesController : BaseController<PagesController>
 
     private PageViewModel CreatePageModel(Page page, string param = null!)
     {
+        var acceptCookies = _cookieService.GetCookie().HasApproved;
+
+        string gtmHead = acceptCookies ? Config.GetValue<string>("GTM:Head") ?? "" : "";
+        string gtmBody = acceptCookies ? Config.GetValue<string>("GTM:Body") ?? "" : "";
+
         ViewData["Title"] = page.Title?.Text ?? "Plan Technology For Your School";
 
         return new PageViewModel()
         {
             Page = page,
             Param = param,
+            GTMHead = gtmHead,
+            GTMBody = gtmBody,
         };
     }
 

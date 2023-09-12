@@ -7,13 +7,16 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Web.Controllers;
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
+using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
 
 namespace Dfe.PlanTech.Web.UnitTests.Controllers
 {
@@ -51,24 +54,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                     Text = INDEX_TITLE,
                 },
                 Content = Array.Empty<IContentComponent>()
-            },
-            new Page()
-            {
-                Slug = "accessibility",
-                Title = new Title()
-                {
-                    Text = "Accessibility Page"
-                },
-                Content = Array.Empty<IContentComponent>()
-            },
-            new Page()
-            {
-                Slug = "privacy-policy",
-                Title = new Title()
-                {
-                    Text = "Privacy Policy Page"
-                },
-                Content = Array.Empty<IContentComponent>()
             }
         };
 
@@ -82,9 +67,25 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var Logger = Substitute.For<ILogger<PagesController>>();
 
+            var config = new GtmConfiguration()
+            {
+                Head = "Test Head",
+                Body = "Test Body"
+            };
+
+            var inMemorySettings = new Dictionary<string, string?>
+            {
+                { "GTM:Head", config.Head },
+                { "GTM:Body", config.Body },
+            };
+
+            IConfiguration configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(initialData: inMemorySettings)
+                .Build();
+
             var controllerContext = ControllerHelpers.SubstituteControllerContext();
 
-            _controller = new PagesController(Logger)
+            _controller = new PagesController(Logger, configuration, cookiesSubstitute)
             {
                 ControllerContext = controllerContext,
                 TempData = Substitute.For<ITempDataDictionary>()
@@ -100,7 +101,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 .GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>())
                 .Returns((callInfo) =>
                 {
-                    IGetEntitiesOptions options = (IGetEntitiesOptions)callInfo[0];
+                    IGetEntitiesOptions options = (IGetEntitiesOptions)callInfo[0]; 
                     if (options?.Queries != null)
                     {
                         foreach (var query in options.Queries)
@@ -135,6 +136,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var asPage = model as PageViewModel;
             Assert.Equal(INDEX_SLUG, asPage!.Page.Slug);
+            Assert.Equal("Test Head", asPage!.GTMHead);
+            Assert.Equal("Test Body", asPage!.GTMBody);
             Assert.Contains(INDEX_TITLE, asPage!.Page.Title!.Text);
         }
 
@@ -165,48 +168,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Should_Retrieve_AccessibilityPage()
-        {
-            var httpContextSubstitute = Substitute.For<HttpContext>();
-
-            var controllerContext = new ControllerContext
-            {
-                HttpContext = httpContextSubstitute
-            };
-
-            _controller.ControllerContext = controllerContext;
-
-            var result = _controller.GetAccessibilityPage(_query);
-
-            var viewResult = await result as ViewResult;
-
-            var model = viewResult!.Model;
-
-            Assert.IsType<PageViewModel>(model);
-        }
-
-        [Fact]
-        public async Task Should_Retrieve_PrivacyPolicyPage()
-        {
-            var httpContextSubstitute = Substitute.For<HttpContext>();
-
-            var controllerContext = new ControllerContext
-            {
-                HttpContext = httpContextSubstitute
-            };
-
-            _controller.ControllerContext = controllerContext;
-
-            var result = _controller.GetPrivacyPolicyPage(_query);
-
-            var viewResult = await result as ViewResult;
-
-            var model = viewResult!.Model;
-
-            Assert.IsType<PageViewModel>(model);
-        }
-
-        [Fact]
         public void Should_Retrieve_ErrorPage()
         {
             var httpContextSubstitute = Substitute.For<HttpContext>();
@@ -227,6 +188,37 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.IsType<ErrorViewModel>(model);
         }
 
+        [Theory]
+        [InlineData("true")]
+        [InlineData("false")]
+        [InlineData("")]
+        public async Task GoogleTrackingCodesAddedDependingOnWhatCookiePreferenceSetTo(string cookiePreference)
+        {
+            bool.TryParse(cookiePreference, out bool preference);
+            var cookie = new DfeCookie { HasApproved = preference };
+            cookiesSubstitute.GetCookie().Returns(cookie);
+
+            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None);
+
+            Assert.IsType<ViewResult>(result);
+
+            var viewResult = result as ViewResult;
+
+            var model = viewResult!.Model;
+
+            var asPage = model as PageViewModel;
+            if (cookiePreference == "true")
+            {
+                Assert.Equal("Test Head", asPage!.GTMHead);
+                Assert.Equal("Test Body", asPage!.GTMBody);
+            }
+            else
+            {
+                Assert.NotEqual("Test Head", asPage!.GTMHead);
+                Assert.NotEqual("Test Body", asPage!.GTMBody);
+            }
+        }
+        
         [Fact]
         public void Should_Render_Service_Unavailable_Page()
         {

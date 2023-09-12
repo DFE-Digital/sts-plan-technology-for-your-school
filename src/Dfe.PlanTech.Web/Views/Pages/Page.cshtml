@@ -13,6 +13,14 @@
     }
 }
 
+@section Head {
+    @Html.Raw(Model.GTMHead)
+}
+
+@section Header {
+    @Html.Raw(Model.GTMBody)
+}
+
 @{
     if (TempData.ContainsKey("SectionName"))
     {

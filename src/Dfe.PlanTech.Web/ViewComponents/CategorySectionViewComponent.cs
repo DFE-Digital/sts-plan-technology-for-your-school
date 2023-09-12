@@ -57,8 +57,8 @@ namespace Dfe.PlanTech.Web.ViewComponents
 
             if (sectionStatusCompleted != null)
             {
-                categorySectionDto.TagColour = sectionStatusCompleted == 1 ? TagColour.DarkBlue.ToString() : TagColour.Blue.ToString();
-                categorySectionDto.TagText = sectionStatusCompleted == 1 ? "COMPLETE" : "IN PROGRESS";
+                categorySectionDto.TagColour = sectionStatusCompleted == 1 ? TagColour.DarkBlue.ToString() : TagColour.Green.ToString();
+                categorySectionDto.TagText = sectionStatusCompleted == 1 ? "COMPLETE" : "STARTED";
             }
             else
             {

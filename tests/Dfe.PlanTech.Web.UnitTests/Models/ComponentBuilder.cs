@@ -5,7 +5,6 @@ using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Web.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
@@ -15,7 +14,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
     {
         public Category BuildCategory()
         {
-
+            
             return new Category()
             {
                 Header = new Header { Text = "Category" },
@@ -72,19 +71,19 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         };
 
         public ISection[] BuildSections()
-        => new ISection[]
-        {
-            new Section
+         => new ISection[]
             {
-                Name = "Section",
-                Questions = BuildQuestion(),
-                Recommendations = new RecommendationPage[] {
-                    BuildRecommendationsPage(Maturity.Low),
-                    BuildRecommendationsPage(Maturity.Medium),
-                    BuildRecommendationsPage(Maturity.High)
+                new Section
+                {
+                    Name = "Section",
+                    Questions = BuildQuestion(),
+                    Recommendations = new RecommendationPage[] {
+                        BuildRecommendationsPage(Maturity.Low),
+                        BuildRecommendationsPage(Maturity.Medium),
+                        BuildRecommendationsPage(Maturity.High)
+                    }
                 }
-            }
-        };
+            };
 
         private Question[] BuildQuestion()
         {

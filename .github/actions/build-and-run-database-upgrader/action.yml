@@ -20,6 +20,7 @@ inputs:
 
 runs:
   using: composite
+
   steps:
     - name: Build database upgrader  
       uses: ./.github/actions/build-dotnet-app
@@ -38,15 +39,13 @@ runs:
         az keyvault network-rule add --resource-group ${{ inputs.az_resource_group_name }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
     - name: Get connection string
-      id: get-db-connection-string
-      uses: ./.github/actions/azure-get-db-connectionstring
-      with:
-        az_keyvault_name: ${{ inputs.az_keyvault_name }}
-        az_keyvault_database_connectionstring_name: ${{ inputs.az_keyvault_database_connectionstring_name }}
+      shell: bash
+      run: |
+        echo "CONNECTION_STRING=$(az keyvault secret show --name ${{ inputs.az_keyvault_database_connectionstring_name }} --vault-name ${{ inputs.az_keyvault_name }} --query value -o tsv)" >> $GITHUB_ENV
 
     - name: Run database upgrader
       shell: bash
-      run: dotnet ./build/Dfe.PlanTech.DatabaseUpgrader.dll -c "${{ steps.get-db-connection-string.outputs.connection_string }}"
+      run: dotnet ./build/Dfe.PlanTech.DatabaseUpgrader.dll -c "${{ env.CONNECTION_STRING }}"
 
     - name: Remove Azure firewall rules
       shell: bash

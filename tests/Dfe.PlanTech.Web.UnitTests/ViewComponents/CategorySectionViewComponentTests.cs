@@ -138,8 +138,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Equal("Blue", categorySectionDto.TagColour);
-            Assert.Equal("IN PROGRESS", categorySectionDto.TagText);
+            Assert.Equal("Green", categorySectionDto.TagColour);
+            Assert.Equal("STARTED", categorySectionDto.TagText);
             Assert.Null(categorySectionDto.NoSlugForSubtopicErrorMessage);
         }
 

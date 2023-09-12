@@ -1,6 +1,6 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
+
+using System.ComponentModel.DataAnnotations;
 
 public class QuestionWithAnswer
 {
