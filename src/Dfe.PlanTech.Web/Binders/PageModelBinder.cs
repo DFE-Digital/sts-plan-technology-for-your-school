@@ -23,14 +23,16 @@ public class PageModelBinder : IModelBinder
       throw new ArgumentNullException(nameof(bindingContext));
     }
 
-    var pageItem = bindingContext.HttpContext.Items[nameof(Page)];
-
-    if (pageItem == null)
+    if (!bindingContext.HttpContext.Items.ContainsKey(nameof(Page)))
     {
       _logger.LogWarning("Page is not set");
       bindingContext.Result = ModelBindingResult.Failed();
       return Task.CompletedTask;
     }
+    
+    var pageItem = bindingContext.HttpContext.Items[nameof(Page)];
+
+  
 
     if (pageItem is not Page page)
     {
