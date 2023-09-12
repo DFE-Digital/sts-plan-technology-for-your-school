@@ -37,17 +37,19 @@ public class QuestionsController : BaseController<QuestionsController>
             TempData[TempDataConstants.CheckAnswers] = SerialiseParameter(new TempDataCheckAnswers() { SubmissionId = questionWithSubmission.Submission?.Id ?? throw new NullReferenceException(nameof(questionWithSubmission.Submission)), SectionId = param.SectionId, SectionName = param.SectionName });
             return RedirectToAction("CheckAnswersPage", "CheckAnswers");
         }
-
-        var viewModel = new QuestionViewModel()
+        else
         {
-            Question = questionWithSubmission.Question,
-            AnswerRef = parameterQuestionPage.AnswerRef,
-            Params = parameters?.ToString(),
-            SubmissionId = questionWithSubmission.Submission == null ? parameterQuestionPage.SubmissionId : questionWithSubmission.Submission.Id,
-            QuestionErrorMessage = parameterQuestionPage.NoSelectedAnswerErrorMessage
-        };
+            var viewModel = new QuestionViewModel()
+            {
+                Question = questionWithSubmission.Question,
+                AnswerRef = parameterQuestionPage.AnswerRef,
+                Params = parameters?.ToString(),
+                SubmissionId = questionWithSubmission.Submission == null ? parameterQuestionPage.SubmissionId : questionWithSubmission.Submission.Id,
+                QuestionErrorMessage = parameterQuestionPage.NoSelectedAnswerErrorMessage
+            };
 
-        return View("Question", viewModel);
+            return View("Question", viewModel);
+        }
     }
 
     [HttpPost("SubmitAnswer")]
@@ -74,7 +76,7 @@ public class QuestionsController : BaseController<QuestionsController>
         }
 
         int submissionId;
-
+        
         try
         {
             submissionId = await submitAnswerCommand.SubmitAnswer(submitAnswerDto, param.SectionId, param.SectionName);
@@ -82,7 +84,7 @@ public class QuestionsController : BaseController<QuestionsController>
         catch (Exception e)
         {
             logger.LogError("An error has occurred while submitting an answer with the following message: {} ", e.Message);
-
+            
             TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions()
             {
                 QuestionRef = submitAnswerDto.QuestionId,
@@ -93,17 +95,17 @@ public class QuestionsController : BaseController<QuestionsController>
         }
 
         string? nextQuestionId;
-
+        
         try
         {
             nextQuestionId = await submitAnswerCommand.GetNextQuestionId(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId);
         }
         catch (Exception e)
         {
-            logger.LogError("An error has occurred while retrieving the next question with the following message: {} ", e.Message);
+            logger.LogError( "An error has occurred while retrieving the next question with the following message: {} ", e.Message);
             return Redirect("/service-unavailable");
         }
-
+        
 
         if (string.IsNullOrEmpty(nextQuestionId) || await submitAnswerCommand.NextQuestionIsAnswered(submissionId, nextQuestionId))
         {
