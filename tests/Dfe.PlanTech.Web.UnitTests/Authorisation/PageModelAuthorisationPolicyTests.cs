@@ -39,11 +39,12 @@ public class PageModelAuthorisationPolicyTests
     httpContext.Request.RouteValues = new RouteValueDictionary();
     httpContext.Request.RouteValues[PageModelAuthorisationPolicy.ROUTE_NAME] = "/";
 
+    httpContext.Items = new Dictionary<object, object?>();
+
     _authContext = new AuthorizationHandlerContext(new[] { new PageAuthorisationRequirement() }, new ClaimsPrincipal(), httpContext);
   }
 
   [Fact]
-
   public async Task Should_Success_If_Page_Does_Not_Require_Authorisation()
   {
     _getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(callInfo => new Page()
@@ -56,6 +57,31 @@ public class PageModelAuthorisationPolicyTests
     Assert.True(_authContext.HasSucceeded);
   }
 
+
+  [Fact]
+  public async Task Should_Set_HttpContext_Item_For_Page()
+  {
+    var testPage = new Page()
+    {
+      RequiresAuthorisation = false,
+      Slug = "TestingSlug"
+    };
+    _getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(callInfo => testPage);
+
+    await _policy.HandleAsync(_authContext);
+
+    var httpContext = _authContext.Resource as HttpContext;
+    Assert.NotNull(httpContext);
+    var pageObject = httpContext.Items[nameof(Page)];
+
+    Assert.NotNull(pageObject);
+
+    var page = pageObject as Page;
+
+    Assert.NotNull(page);
+    Assert.Equal(testPage, page);
+  }
+
   [Fact]
   public async Task Should_Succeed_If_Page_Requires_Authorisation_And_User_Authenticated()
   {
@@ -64,7 +90,7 @@ public class PageModelAuthorisationPolicyTests
       RequiresAuthorisation = true
     });
 
-    var claimsIdentity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, "Name")}, CookieAuthenticationDefaults.AuthenticationScheme);
+    var claimsIdentity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, "Name") }, CookieAuthenticationDefaults.AuthenticationScheme);
 
     _authContext.User.AddIdentity(claimsIdentity);
 
