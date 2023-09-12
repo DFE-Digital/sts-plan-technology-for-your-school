@@ -29,10 +29,10 @@ public class PageModelBinder : IModelBinder
     {
       return Task.CompletedTask;
     }
-    
+
     if (pageItem is not Page page)
     {
-      _logger.LogWarning($"Page is not {typeof(Page)}");
+      _logger.LogWarning("Page is not {type}", typeof(Page));
       return Task.CompletedTask;
     }
 
