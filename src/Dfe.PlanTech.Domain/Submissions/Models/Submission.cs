@@ -1,4 +1,6 @@
-﻿namespace Dfe.PlanTech.Domain.Submissions.Models
+﻿using Dfe.PlanTech.Domain.Establishments.Models;
+
+namespace Dfe.PlanTech.Domain.Submissions.Models
 {
     public class Submission
     {
@@ -6,6 +8,8 @@
 
         public int EstablishmentId { get; set; }
 
+        public Establishment Establishment { get; set; } = null!;
+        
         public bool Completed { get; set; }
 
         public string SectionId { get; set; } = null!;

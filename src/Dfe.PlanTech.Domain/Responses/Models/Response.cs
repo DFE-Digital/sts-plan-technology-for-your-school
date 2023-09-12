@@ -1,6 +1,7 @@
 ﻿using Dfe.PlanTech.Domain.Answers.Models;
 using Dfe.PlanTech.Domain.Questions.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
+using Dfe.PlanTech.Domain.Users.Models;
 
 namespace Dfe.PlanTech.Domain.Responses.Models;
 
@@ -10,6 +11,8 @@ public class Response
 
     public int UserId { get; set; }
 
+    public User User { get; set; } = null!;
+    
     public int SubmissionId { get; set; }
 
     public Submission Submission { get; set; } = null!;
