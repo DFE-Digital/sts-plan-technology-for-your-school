@@ -28,6 +28,14 @@ namespace Dfe.PlanTech.Application.Response.Commands
             return checkAnswerDto;
         }
 
+        public async Task<CheckAnswerDto> GetLatestSubmissionAnswers(string sectionName, string establishmentRef)
+        {
+            List<QuestionWithAnswer> questionWithAnswerList = await _getLatestResponseListForSubmissionQuery.GetLatestResponseListForSectioName(sectionName, establishmentRef);
+            CheckAnswerDto checkAnswerDto = await RemoveDetachedQuestionsByName(questionWithAnswerList, sectionName);
+            return checkAnswerDto;
+        }
+
+
         public async Task CalculateMaturityAsync(int submissionId)
         {
             await _calculateMaturityCommand.CalculateMaturityAsync(submissionId);
@@ -62,10 +70,39 @@ namespace Dfe.PlanTech.Application.Response.Commands
             return checkAnswerDto;
         }
 
+        private async Task<CheckAnswerDto> RemoveDetachedQuestionsByName(List<QuestionWithAnswer> questionWithAnswerList, string sectionName)
+        {
+            if (questionWithAnswerList == null) throw new ArgumentNullException(nameof(questionWithAnswerList));
+            if (string.IsNullOrEmpty(sectionName)) throw new ArgumentNullException(nameof(sectionName));
+
+            CheckAnswerDto checkAnswerDto = new CheckAnswerDto();
+
+            Dictionary<string, QuestionWithAnswer> questionWithAnswerMap = questionWithAnswerList
+                            .Select((questionWithAnswer, index) => new KeyValuePair<string, QuestionWithAnswer>(questionWithAnswer.QuestionRef, questionWithAnswerList[index]))
+                            .ToDictionary(x => x.Key, x => x.Value);
+
+            Section? section = await _getSectionQuery.GetSectionByName(sectionName, CancellationToken.None);
+
+            if(section == null){
+                throw new KeyNotFoundException($"Could not find section with name {sectionName}");
+            }
+
+            Question? node = section.Questions.FirstOrDefault(question => question.Sys.Id.Equals(section.FirstQuestionId));
+
+            while (node != null)
+            {
+                checkAnswerDto.QuestionAnswerList.Add(questionWithAnswerMap[node.Sys.Id]);
+                node = node.Answers.FirstOrDefault(answer => answer.Sys.Id.Equals(questionWithAnswerMap[node.Sys.Id].AnswerRef))?.NextQuestion;
+            }
+
+            return checkAnswerDto;
+        }
+
         private async Task<Domain.Questionnaire.Models.Section?> _GetSection(string sectionId)
         {
             if (string.IsNullOrEmpty(sectionId)) throw new ArgumentNullException(nameof(sectionId));
             return await _getSectionQuery.GetSectionById(sectionId, CancellationToken.None);
         }
+        
     }
 }

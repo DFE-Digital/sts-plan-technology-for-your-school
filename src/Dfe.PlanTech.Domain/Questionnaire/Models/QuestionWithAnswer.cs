@@ -18,4 +18,6 @@ public class QuestionWithAnswer
 
     [Required]
     public DateTime? DateCreated { get; init; } = null!;
+
+    public int SubmissionId { get; init; }
 }

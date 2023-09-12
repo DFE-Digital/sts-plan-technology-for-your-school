@@ -1,4 +1,5 @@
 ﻿using Dfe.PlanTech.Domain.Establishments.Models;
+using Dfe.PlanTech.Domain.Responses.Models;
 
 namespace Dfe.PlanTech.Domain.Submissions.Models
 {
@@ -25,5 +26,7 @@ namespace Dfe.PlanTech.Domain.Submissions.Models
         public DateTime? DateLastUpdated { get; set; }
 
         public DateTime? DateCompleted { get; set; }
+
+        public List<Response> Responses { get; set; } = new List<Response>();
     }
 }

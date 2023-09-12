@@ -31,6 +31,29 @@ namespace Dfe.PlanTech.Application.Response.Queries
             return await _db.ToListAsync(responseListByDate);
         }
 
+        public Task<List<QuestionWithAnswer>> GetLatestResponseListForSectioName(string sectionName, string establishmentRef){
+
+            var latestSubmission = _db.GetSubmissions.Where(submission => submission.SectionName == sectionName && submission.Establishment.EstablishmentRef == establishmentRef)
+                                                    .OrderByDescending(submission => submission.DateLastUpdated);
+
+
+            var responseListByDate = _db.GetResponses
+                            .Where(response => response.Submission == latestSubmission.FirstOrDefault())
+                            .Select(response => new QuestionWithAnswer()
+                            {
+                                QuestionRef = response.Question.ContentfulRef,
+                                QuestionText = response.Question.QuestionText ?? "",
+                                AnswerRef = response.Answer.ContentfulRef,
+                                AnswerText = response.Answer.AnswerText ?? "",
+                                DateCreated = response.DateCreated,
+                                SubmissionId = response.Submission.Id
+                            })
+                            .GroupBy(questionWithAnswer => questionWithAnswer.QuestionRef)
+                            .Select(group => group.OrderByDescending(questionWithAnswer => questionWithAnswer.DateCreated).First());
+
+            return _db.ToListAsync(responseListByDate);
+        }
+
         public async Task<List<QuestionWithAnswer>> GetResponseListByDateCreated(int submissionId)
         {
             var responseListByDate = _db.GetResponses
