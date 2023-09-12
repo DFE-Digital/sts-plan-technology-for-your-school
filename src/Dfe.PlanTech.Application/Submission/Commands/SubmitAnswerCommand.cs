@@ -8,7 +8,7 @@ using Dfe.PlanTech.Domain.Responses.Models;
 
 namespace Dfe.PlanTech.Application.Submission.Commands
 {
-    public class SubmitAnswerCommand: ISubmitAnswerCommand
+    public class SubmitAnswerCommand : ISubmitAnswerCommand
     {
         private readonly GetSubmitAnswerQueries _getSubmitAnswerQueries;
         private readonly RecordSubmitAnswerCommands _recordSubmitAnswerCommands;
@@ -86,11 +86,17 @@ namespace Dfe.PlanTech.Application.Submission.Commands
             {
                 var submission = await _getSubmitAnswerQueries.GetSubmission(await _getSubmitAnswerQueries.GetEstablishmentId(), sectionId);
 
-                if (submission != null && !submission.Completed)
+                if (submission != null)
                 {
+                    if (submission.Completed)
+                    {
+                        return (null, submission);
+                    }
+                    
                     Domain.Questionnaire.Models.Question? nextUnansweredQuestion = await _GetNextUnansweredQuestion(submission.Id);
                     return nextUnansweredQuestion != null ? (nextUnansweredQuestion, submission) : (null, submission);
                 }
+
             }
 
             return (await _getSubmitAnswerQueries.GetQuestionnaireQuestion(questionRef, sectionName, cancellationToken), null);
