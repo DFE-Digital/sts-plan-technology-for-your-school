@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 
 namespace Dfe.PlanTech.Web.Binders;
 
@@ -29,7 +28,7 @@ public class PageModelBinder : IModelBinder
       bindingContext.Result = ModelBindingResult.Failed();
       return Task.CompletedTask;
     }
-    
+
     var pageItem = bindingContext.HttpContext.Items[nameof(Page)];
 
   
@@ -43,23 +42,5 @@ public class PageModelBinder : IModelBinder
 
     bindingContext.Result = ModelBindingResult.Success(page);
     return Task.CompletedTask;
-  }
-}
-
-public class PageModelBinderProvider : IModelBinderProvider
-{
-  public IModelBinder? GetBinder(ModelBinderProviderContext context)
-  {
-    if (context == null)
-    {
-      throw new ArgumentNullException(nameof(context));
-    }
-
-    if (context.Metadata.ModelType == typeof(Page))
-    {
-      return new BinderTypeModelBinder(typeof(PageModelBinder));
-    }
-
-    return null;
   }
 }
