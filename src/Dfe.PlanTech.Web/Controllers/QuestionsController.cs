@@ -93,8 +93,19 @@ public class QuestionsController : BaseController<QuestionsController>
             });
             return RedirectToAction("GetQuestionById");
         }
+
+        string? nextQuestionId;
         
-        string? nextQuestionId = await submitAnswerCommand.GetNextQuestionId(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId);
+        try
+        {
+            nextQuestionId = await submitAnswerCommand.GetNextQuestionId(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId);
+        }
+        catch (Exception e)
+        {
+            logger.LogError( "An error has occurred while retrieving the next question with the following message: {} ", e.Message);
+            return Redirect("/service-unavailable");
+        }
+        
 
         if (string.IsNullOrEmpty(nextQuestionId) || await submitAnswerCommand.NextQuestionIsAnswered(submissionId, nextQuestionId))
         {
@@ -111,17 +122,23 @@ public class QuestionsController : BaseController<QuestionsController>
     private static Params? _ParseParameters(string? parameters)
     {
         if (string.IsNullOrEmpty(parameters))
+        {
             return null;
+        }
 
-        var splitParams = parameters.Split('+');
+        string[]? splitParams = parameters.Split('+');
 
         if (splitParams is null)
-            return null;
-
-        return new Params
         {
-            SectionName = splitParams.Length > 0 ? splitParams[0].ToString() : string.Empty,
-            SectionId = splitParams.Length > 1 ? splitParams[1].ToString() : string.Empty,
-        };
+            return null;
+        }
+        else
+        {
+            return new Params
+            {
+                SectionName = splitParams.Length > 0 ? splitParams[0].ToString() : string.Empty,
+                SectionId = splitParams.Length > 1 ? splitParams[1].ToString() : string.Empty,
+            };
+        }
     }
 }

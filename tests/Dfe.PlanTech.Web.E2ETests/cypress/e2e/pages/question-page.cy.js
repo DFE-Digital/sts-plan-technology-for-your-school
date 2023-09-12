@@ -5,12 +5,11 @@ describe("Question page", () => {
     cy.loginWithEnv(url);
 
     //Navigate to first section
-    cy.get("ul.app-task-list__items > li a")
-      .first()
-      .click();
+    cy.clickFirstSection();
 
     //Navigate to first question
-    cy.get('a.govuk-button').contains('Continue').click();
+    cy.clickContinueButton();
+    
     cy.injectAxe();
   });
 

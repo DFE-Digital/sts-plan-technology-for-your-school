@@ -4,11 +4,11 @@ describe("Interstitial page", () => {
 
     beforeEach(() => {
         cy.loginWithEnv("/self-assessment");
-        cy.get("ul.app-task-list__items > li a").first().click();
+        cy.clickFirstSection();
         cy.url().should("contain", url);
 
         cy.injectAxe();
-      });
+    });
 
     it("should have content", () => {
         cy.get("rich-text").should("exist");
@@ -26,5 +26,5 @@ describe("Interstitial page", () => {
 
     it("passes accessibility tests", () => {
         cy.runAxe();
-      });
     });
+});

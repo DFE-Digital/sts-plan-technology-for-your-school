@@ -1,21 +1,26 @@
 ﻿@inject GovUk.Frontend.AspNetCore.PageTemplateHelper PageTemplateHelper
+@inject Dfe.PlanTech.Web.Helpers.GtmConfiguration GtmConfiguration
 
 @section Head {
     <link rel="stylesheet" href="~/css/application.css">
+    @Html.Raw(GtmConfiguration.Head)
     @RenderSection("Head", false)
 }
 
 @{
     Layout = "_GovUkPageTemplate";
 
-    if(ViewData["Title"] == null){
+    if (ViewData["Title"] == null)
+    {
         var routeData = Context.GetRouteData();
-        var lastSlug = routeData.Values.Values.Last()?.ToString(); 
-        if(lastSlug != null && lastSlug.Any(c => Char.IsNumber(c))){
-            lastSlug = routeData.Values.Values.SkipLast(1).Last()?.ToString(); 
+        var lastSlug = routeData.Values.Values.Last()?.ToString();
+        if (lastSlug != null && lastSlug.Any(c => Char.IsNumber(c)))
+        {
+            lastSlug = routeData.Values.Values.SkipLast(1).Last()?.ToString();
         }
 
-        if(lastSlug != null){
+        if (lastSlug != null)
+        {
             //Add white space before every capital letter
             lastSlug = string.Concat(lastSlug.Select(c => Char.IsUpper(c) ? " " + c : c.ToString())).TrimStart(' ');
         }
@@ -24,22 +29,22 @@
     }
 }
 
-@{
-    var pageErrors = ViewData;
-    var test = ViewContext.ModelState;
-}
 @section Header {
-    @{
+    @Html.Raw(GtmConfiguration.Body)
+
+    @{    
         await Html.RenderPartialAsync("_CookieBanner");
         await Html.RenderPartialAsync("_Header");
     }
-@RenderSection("Header", false)
+
+    @RenderSection("Header", false)
 }
+
 @section BeforeContent{
     @{
         await Html.RenderPartialAsync("BetaHeader");
     }
-@RenderSection("BeforeContent", required: false)
+    @RenderSection("BeforeContent", required: false)
 }
 
 @RenderBody()
