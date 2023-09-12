@@ -15,7 +15,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     public CheckAnswersController(ILogger<CheckAnswersController> logger) : base(logger) { }
 
     [HttpGet]
-    [Route("check-answers")]
+    [Route("{SectionSlug}/check-answers")]
     public async Task<IActionResult> CheckAnswersPage([FromServices] ProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand, [FromServices] GetPageQuery getPageQuery)
     {
         var parameterCheckAnswersPage = DeserialiseParameter<TempDataCheckAnswers>(TempData[TempDataConstants.CheckAnswers]);
@@ -28,7 +28,9 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
             SectionName = parameterCheckAnswersPage.SectionName,
             CheckAnswerDto = await processCheckAnswerDtoCommand.ProcessCheckAnswerDto(parameterCheckAnswersPage.SubmissionId, parameterCheckAnswersPage.SectionId),
             Content = checkAnswerPageContent.Content,
-            SubmissionId = parameterCheckAnswersPage.SubmissionId
+            SectionSlug = parameterCheckAnswersPage.SectionSlug,
+            SubmissionId = parameterCheckAnswersPage.SubmissionId,
+            Slug = checkAnswerPageContent.Slug
         };
 
         return View("CheckAnswers", checkAnswersViewModel);

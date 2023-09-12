@@ -29,7 +29,8 @@ public class PagesController : BaseController<PagesController>
     {
         string slug = GetSlug(route);
         string param = "";
-
+        TempData["SectionSlug"] = route;
+  
         if (TempData[slug] is string tempDataSlug) param = tempDataSlug;
 
         if (!string.IsNullOrEmpty(param))

@@ -9,12 +9,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace Dfe.PlanTech.Web.Controllers;
 
 [Authorize]
-[Route("/question")]
+////[Route("/question")]
 public class QuestionsController : BaseController<QuestionsController>
 {
     public QuestionsController(ILogger<QuestionsController> logger) : base(logger) { }
 
-    [HttpGet("{id?}")]
+    [HttpGet("/question/{id?}")]
+    [Route("{SectionSlug}/{question}/{id?}")]
     /// <summary>
     /// 
     /// </summary>
@@ -34,11 +35,11 @@ public class QuestionsController : BaseController<QuestionsController>
 
         if (questionWithSubmission.Question == null)
         {
-            TempData[TempDataConstants.CheckAnswers] = SerialiseParameter(new TempDataCheckAnswers() { SubmissionId = questionWithSubmission.Submission?.Id ?? throw new NullReferenceException(nameof(questionWithSubmission.Submission)), SectionId = param.SectionId, SectionName = param.SectionName });
-            return RedirectToAction("CheckAnswersPage", "CheckAnswers");
+            TempData[TempDataConstants.CheckAnswers] = SerialiseParameter(new TempDataCheckAnswers() { SubmissionId = questionWithSubmission.Submission?.Id ?? throw new NullReferenceException(nameof(questionWithSubmission.Submission)), SectionId = param.SectionId, SectionName = param.SectionName, SectionSlug = param.SectionSlug });
+            return RedirectPermanent($"~/{param.SectionSlug}/check-answers");
         }
         else
-        {
+                                                {
             var viewModel = new QuestionViewModel()
             {
                 Question = questionWithSubmission.Question,
@@ -52,7 +53,7 @@ public class QuestionsController : BaseController<QuestionsController>
         }
     }
 
-    [HttpPost("SubmitAnswer")]
+    [HttpPost("/question/SubmitAnswer")]
     public async Task<IActionResult> SubmitAnswer(SubmitAnswerDto submitAnswerDto, [FromServices] ISubmitAnswerCommand submitAnswerCommand)
     {
         if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
@@ -138,6 +139,7 @@ public class QuestionsController : BaseController<QuestionsController>
             {
                 SectionName = splitParams.Length > 0 ? splitParams[0].ToString() : string.Empty,
                 SectionId = splitParams.Length > 1 ? splitParams[1].ToString() : string.Empty,
+                SectionSlug = splitParams.Length > 1 ? splitParams[2].ToString() : string.Empty,
             };
         }
     }

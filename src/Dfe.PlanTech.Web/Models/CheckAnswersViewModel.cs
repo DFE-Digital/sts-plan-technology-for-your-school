@@ -21,4 +21,8 @@ public class CheckAnswersViewModel
     public IContentComponent[] Content { get; init; } = null!;
 
     public int? SubmissionId { get; init; }
+
+    public string? SectionSlug { get; init; } = null;
+
+    public string? Slug { get; init; } = null;
 }

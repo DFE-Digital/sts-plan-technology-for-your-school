@@ -37,6 +37,7 @@
         <form asp-controller="CheckAnswers" asp-action="ConfirmCheckAnswers" method="post">
             <input type="hidden" name="submissionId" value="@Model.SubmissionId" />
             <input type="hidden" name="sectionName" value="@Model.SectionName">
+            <input type="hidden" name="sectionSlug" value="@Model.SectionSlug">
             @{
                 foreach (var content in Model.Content)
                 {
