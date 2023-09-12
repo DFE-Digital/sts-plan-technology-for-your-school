@@ -1,5 +1,7 @@
 ﻿using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Web.Authorisation;
+using Dfe.PlanTech.Web.Binders;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,19 +15,9 @@ public class PagesController : BaseController<PagesController>
     {
     }
 
-    [HttpGet("/")]
-    public async Task<IActionResult> Index([FromServices] GetPageQuery query, CancellationToken cancellationToken)
-    {
-        var page = await query.GetPageBySlug("/", cancellationToken);
-
-        var viewModel = CreatePageModel(page);
-
-        return View("Page", viewModel);
-    }
-
-    [Authorize]
+    [Authorize(Policy = PageModelAuthorisationPolicy.POLICY_NAME)]
     [HttpGet("/{route?}")]
-    public async Task<IActionResult> GetByRoute(string route, [FromServices] GetPageQuery query, CancellationToken cancellationToken)
+    public IActionResult GetByRoute(string route, [ModelBinder(typeof(PageModelBinder))] Page page)
     {
         string slug = GetSlug(route);
         string param = "";
@@ -35,29 +27,7 @@ public class PagesController : BaseController<PagesController>
         if (!string.IsNullOrEmpty(param))
             TempData["Param"] = param;
 
-        var page = await query.GetPageBySlug(slug, cancellationToken);
-
         var viewModel = CreatePageModel(page, param);
-
-        return View("Page", viewModel);
-    }
-
-    [HttpGet("/accessibility")]
-    public async Task<IActionResult> GetAccessibilityPage([FromServices] GetPageQuery query)
-    {
-        var page = await query.GetPageBySlug("accessibility", CancellationToken.None);
-
-        var viewModel = CreatePageModel(page);
-
-        return View("Page", viewModel);
-    }
-
-    [HttpGet("/privacy-policy")]
-    public async Task<IActionResult> GetPrivacyPolicyPage([FromServices] GetPageQuery query)
-    {
-        var page = await query.GetPageBySlug("privacy-policy", CancellationToken.None);
-
-        var viewModel = CreatePageModel(page);
 
         return View("Page", viewModel);
     }

@@ -1,0 +1,91 @@
+using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Domain.Content.Models;
+using Microsoft.AspNetCore.Authorization;
+
+namespace Dfe.PlanTech.Web.Authorisation;
+
+/// <summary>
+/// Retrieves a given <see cref="Page"/> from Contentful, and authorises the user based off that 
+/// </summary>
+public class PageModelAuthorisationPolicy : AuthorizationHandler<PageAuthorisationRequirement>
+{
+  public const string POLICY_NAME = "UsePageAuthentication";
+  private const string ROUTE_NAME = "route";
+  private readonly ILogger<PageModelAuthorisationPolicy> _logger;
+
+  public PageModelAuthorisationPolicy(ILoggerFactory loggerFactory)
+  {
+    _logger = loggerFactory.CreateLogger<PageModelAuthorisationPolicy>();
+  }
+
+  protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, PageAuthorisationRequirement requirement)
+  {
+    if (context.Resource is not HttpContext httpContext)
+    {
+      _logger.LogError("Expected resource to be HttpContext but received {type}", context.Resource?.GetType());
+      return;
+    }
+
+    bool success = await ProcessPage(httpContext);
+
+    if (success)
+    {
+      context.Succeed(requirement);
+    }
+    else
+    {
+      context.Fail();
+    }
+  }
+
+  private async Task<bool> ProcessPage(HttpContext httpContext)
+  {
+    var endpoint = httpContext.GetEndpoint();
+
+    if (endpoint == null)
+    {
+      _logger.LogError("Endpoint is null but should have value");
+      return false;
+    }
+
+    string slug = GetRequestRoute(httpContext);
+
+    var scope = httpContext.RequestServices.CreateAsyncScope();
+    using var pageQuery = scope.ServiceProvider.GetRequiredService<GetPageQuery>();
+
+    Page page = await GetPageForSlug(httpContext, slug, pageQuery) ?? throw new KeyNotFoundException($"Could not find page for {slug}");
+    
+    httpContext.Items.Add(nameof(Page), page);
+
+    return !page.RequiresAuthorisation || UserIsAuthorised(httpContext, page);
+  }
+
+  private static async Task<Page> GetPageForSlug(HttpContext httpContext, string slug, GetPageQuery pageQuery)
+  => await pageQuery.GetPageBySlug(slug, httpContext.RequestAborted) ?? throw new KeyNotFoundException($"Could not find page with slug {slug}");
+
+  private static bool UserIsAuthorised(HttpContext httpContext, Page page)
+  => page.RequiresAuthorisation && httpContext.User.Identity?.IsAuthenticated == true;
+
+  private static string GetRequestRoute(HttpContext httpContext)
+  {
+    var slug = httpContext.Request.RouteValues[ROUTE_NAME];
+
+    if (slug == null || slug is not string slugString)
+    {
+      slugString = "/";
+      httpContext.Request.RouteValues[ROUTE_NAME] = slugString;
+    }
+
+
+    return slugString;
+  }
+}
+
+
+public class PageAuthorisationRequirement : IAuthorizationRequirement
+{
+  public PageAuthorisationRequirement()
+  {
+
+  }
+}

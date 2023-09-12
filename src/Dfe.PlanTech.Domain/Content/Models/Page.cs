@@ -14,6 +14,8 @@ public class Page : ContentComponent
 
     public bool DisplayTopicTitle { get; init; }
 
+    public bool RequiresAuthorisation { get; init; } = true;
+
     public string? SectionTitle { get; set; }
 
     public string? Param { get; set; }
