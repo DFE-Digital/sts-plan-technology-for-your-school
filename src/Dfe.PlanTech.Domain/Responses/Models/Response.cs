@@ -1,5 +1,6 @@
 ﻿using Dfe.PlanTech.Domain.Answers.Models;
 using Dfe.PlanTech.Domain.Questions.Models;
+using Dfe.PlanTech.Domain.Submissions.Models;
 
 namespace Dfe.PlanTech.Domain.Responses.Models;
 
@@ -11,6 +12,8 @@ public class Response
 
     public int SubmissionId { get; set; }
 
+    public Submission Submission { get; set; } = null!;
+    
     public int QuestionId { get; set; }
 
     public Question Question { get; set; } = null!;
