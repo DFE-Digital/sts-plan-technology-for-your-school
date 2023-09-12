@@ -63,7 +63,7 @@ public class PageModelAuthorisationPolicy : AuthorizationHandler<PageAuthorisati
   {
     var slug = httpContext.Request.RouteValues[ROUTE_NAME];
 
-    if (slug == null || slug is not string slugString)
+    if (slug is not string slugString)
     {
       slugString = "/";
       httpContext.Request.RouteValues[ROUTE_NAME] = slugString;
