@@ -8,7 +8,7 @@ using Dfe.PlanTech.Web.Exceptions;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
-public class GetPageQuery : ContentRetriever, IDisposable
+public class GetPageQuery : ContentRetriever, IGetPageQuery
 {
     private readonly IQuestionnaireCacher _cacher;
 

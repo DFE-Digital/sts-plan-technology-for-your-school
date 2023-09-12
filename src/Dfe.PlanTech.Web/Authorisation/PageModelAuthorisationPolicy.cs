@@ -10,7 +10,8 @@ namespace Dfe.PlanTech.Web.Authorisation;
 public class PageModelAuthorisationPolicy : AuthorizationHandler<PageAuthorisationRequirement>
 {
   public const string POLICY_NAME = "UsePageAuthentication";
-  private const string ROUTE_NAME = "route";
+  public const string ROUTE_NAME = "route";
+  
   private readonly ILogger<PageModelAuthorisationPolicy> _logger;
 
   public PageModelAuthorisationPolicy(ILoggerFactory loggerFactory)
@@ -40,18 +41,10 @@ public class PageModelAuthorisationPolicy : AuthorizationHandler<PageAuthorisati
 
   private async Task<bool> ProcessPage(HttpContext httpContext)
   {
-    var endpoint = httpContext.GetEndpoint();
-
-    if (endpoint == null)
-    {
-      _logger.LogError("Endpoint is null but should have value");
-      return false;
-    }
-
     string slug = GetRequestRoute(httpContext);
 
     var scope = httpContext.RequestServices.CreateAsyncScope();
-    using var pageQuery = scope.ServiceProvider.GetRequiredService<GetPageQuery>();
+    using var pageQuery = scope.ServiceProvider.GetRequiredService<IGetPageQuery>();
 
     Page page = await GetPageForSlug(httpContext, slug, pageQuery) ?? throw new KeyNotFoundException($"Could not find page for {slug}");
     
@@ -60,7 +53,7 @@ public class PageModelAuthorisationPolicy : AuthorizationHandler<PageAuthorisati
     return !page.RequiresAuthorisation || UserIsAuthorised(httpContext, page);
   }
 
-  private static async Task<Page> GetPageForSlug(HttpContext httpContext, string slug, GetPageQuery pageQuery)
+  private static async Task<Page> GetPageForSlug(HttpContext httpContext, string slug, IGetPageQuery pageQuery)
   => await pageQuery.GetPageBySlug(slug, httpContext.RequestAborted) ?? throw new KeyNotFoundException($"Could not find page with slug {slug}");
 
   private static bool UserIsAuthorised(HttpContext httpContext, Page page)
@@ -75,7 +68,6 @@ public class PageModelAuthorisationPolicy : AuthorizationHandler<PageAuthorisati
       slugString = "/";
       httpContext.Request.RouteValues[ROUTE_NAME] = slugString;
     }
-
 
     return slugString;
   }
