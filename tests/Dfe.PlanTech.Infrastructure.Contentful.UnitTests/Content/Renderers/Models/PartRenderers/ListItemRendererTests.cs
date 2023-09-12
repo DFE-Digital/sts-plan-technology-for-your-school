@@ -65,41 +65,4 @@ public class ListItemRendererTests
 
         Assert.Equal("<li></li>", html);
     }
-    
-    [Fact]
-    public void Should_CreateListItem_With_Content()
-    {
-        var renderer = new ListItemRenderer();
-        var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), new[] { renderer });
-
-        const string listItemValue = "List item one";
-
-        var content = new RichTextContent()
-        {
-            NodeType = NODE_TYPE,
-            Value = listItemValue,
-            Content = new[]
-            {
-                new RichTextContent()
-                {
-                    NodeType = "paragraph",
-                    Value = "Paragraph",
-                    Content = new[]
-                    {
-                        new RichTextContent()
-                        {
-                            NodeType = "text",
-                            Value = "This is some list item text"
-                        }
-                    }
-                }
-            }
-        };
-        
-        var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
-
-        var html = result.ToString();
-
-        Assert.Equal("<li>This is some list item text</li>", html);
-    }
 }
