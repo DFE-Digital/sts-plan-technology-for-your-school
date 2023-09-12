@@ -1,6 +1,7 @@
 ﻿using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,19 +20,9 @@ public class PagesController : BaseController<PagesController>
         _cookieService = cookieService;
     }
 
-    [HttpGet("/")]
-    public async Task<IActionResult> Index([FromServices] GetPageQuery query, CancellationToken cancellationToken)
-    {
-        var page = await query.GetPageBySlug("/", cancellationToken);
-
-        var viewModel = CreatePageModel(page);
-
-        return View("Page", viewModel);
-    }
-
-    [Authorize]
+    [Authorize(Policy = "UsePageAuthentication")]
     [HttpGet("/{route?}")]
-    public async Task<IActionResult> GetByRoute(string route, [FromServices] GetPageQuery query, CancellationToken cancellationToken)
+    public IActionResult GetByRoute(string route, [ModelBinder(typeof(PageModelBinder))] Page jimTesting)
     {
         string slug = GetSlug(route);
         string param = "";
@@ -41,9 +32,9 @@ public class PagesController : BaseController<PagesController>
         if (!string.IsNullOrEmpty(param))
             TempData["Param"] = param;
 
-        var page = await query.GetPageBySlug(slug, cancellationToken);
+        var page = HttpContext.Items["page"] as Page ?? throw new KeyNotFoundException("Could not find HttpContext item for Page");
 
-        var viewModel = CreatePageModel(page, param);
+        var viewModel = CreatePageModel(page!, param);
 
         return View("Page", viewModel);
     }
@@ -55,8 +46,8 @@ public class PagesController : BaseController<PagesController>
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
-    
-    
+
+
     [Route("/service-unavailable")]
     public IActionResult ServiceUnavailable()
     {

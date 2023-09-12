@@ -24,7 +24,10 @@
     }
 }
 
-
+@{
+    var pageErrors = ViewData;
+    var test = ViewContext.ModelState;
+}
 @section Header {
     @{
         await Html.RenderPartialAsync("_CookieBanner");

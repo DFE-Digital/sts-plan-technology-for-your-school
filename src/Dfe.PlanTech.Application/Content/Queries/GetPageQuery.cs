@@ -8,7 +8,7 @@ using Dfe.PlanTech.Web.Exceptions;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
-public class GetPageQuery : ContentRetriever
+public class GetPageQuery : ContentRetriever, IDisposable
 {
     private readonly IQuestionnaireCacher _cacher;
 
@@ -54,5 +54,10 @@ public class GetPageQuery : ContentRetriever
         {
             throw new ContentfulDataUnavailableException($"Could not retrieve page with slug {slug}", e);
         }
+    }
+
+    public void Dispose()
+    {
+
     }
 }

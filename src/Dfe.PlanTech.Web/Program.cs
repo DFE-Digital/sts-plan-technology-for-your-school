@@ -6,6 +6,7 @@ using Dfe.PlanTech.Web;
 using Dfe.PlanTech.Web.Exceptions;
 using Dfe.PlanTech.Web.Helpers;
 using GovUk.Frontend.AspNetCore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,9 @@ builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.AddGoogleTagManager(builder.Configuration);
 // Add services to the container.
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+});
 builder.Services.AddGovUkFrontend();
 
 if (!builder.Environment.IsDevelopment())
@@ -46,8 +49,17 @@ builder.Services.AddScoped<ComponentViewsFactory>();
 
 builder.Services.AddDatabase(builder.Configuration);
 
-builder.Services.AddAuthorization();
+builder.Services.AddSingleton<IAuthorizationHandler, AuthorisationPolicy>();
 builder.Services.AddAuthentication();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("UsePageAuthentication", policy =>
+    {
+        policy.Requirements.Add(new PageAuthorisationRequirement());
+    });
+});
+
+
 builder.Services.AddContentfulServices(builder.Configuration);
 
 var app = builder.Build();
