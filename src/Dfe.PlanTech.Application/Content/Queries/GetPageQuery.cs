@@ -19,10 +19,6 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
         _cacher = cacher;
     }
 
-    public void Dispose()
-    {
-    }
-
     /// <summary>
     /// Fetches page from <see chref="IContentRepository"/> by slug
     /// </summary>

@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Application.Content.Queries;
 /// <summary>
 /// Retrieves a page from contentful
 /// </summary>
-public interface IGetPageQuery : IDisposable
+public interface IGetPageQuery
 {
   /// <summary>
   /// Fetches page from <see chref="IContentRepository"/> by slug

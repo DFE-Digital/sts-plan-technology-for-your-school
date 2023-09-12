@@ -43,8 +43,8 @@ public class PageModelAuthorisationPolicy : AuthorizationHandler<PageAuthorisati
   {
     string slug = GetRequestRoute(httpContext);
 
-    var scope = httpContext.RequestServices.CreateAsyncScope();
-    using var pageQuery = scope.ServiceProvider.GetRequiredService<IGetPageQuery>();
+    using var scope = httpContext.RequestServices.CreateAsyncScope();
+    var pageQuery = scope.ServiceProvider.GetRequiredService<IGetPageQuery>();
 
     Page page = await GetPageForSlug(httpContext, slug, pageQuery) ?? throw new KeyNotFoundException($"Could not find page for {slug}");
     
