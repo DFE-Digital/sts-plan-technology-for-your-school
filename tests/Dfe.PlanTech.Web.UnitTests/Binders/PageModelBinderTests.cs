@@ -12,6 +12,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Binders;
 
 public class PageModelBinderTests
 {
+
   [Fact]
   public void Should_Get_Page_From_Items()
   {
@@ -38,5 +39,28 @@ public class PageModelBinderTests
 
     Assert.True(modelBinderContext.Result.IsModelSet);
     Assert.Equal(page, modelBinderContext.Result.Model);
+  }
+
+  [Fact]
+  public void Should_LogError_When_Page_Not_Expected_Type()
+  {
+    var logger = Substitute.For<ILogger<PageModelBinder>>();
+    var pageModelBinder = new PageModelBinder(logger);
+
+    var modelBinderContext = Substitute.For<ModelBindingContext>();
+    modelBinderContext.Result = new ModelBindingResult();
+
+    var httpContext = Substitute.For<HttpContext>();
+
+    httpContext.Items = new Dictionary<object, object?>
+    {
+      [nameof(Page)] = "Not a page type"
+    };
+
+    modelBinderContext.HttpContext.Returns(httpContext);
+
+    pageModelBinder.BindModelAsync(modelBinderContext);
+
+    logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
   }
 }
