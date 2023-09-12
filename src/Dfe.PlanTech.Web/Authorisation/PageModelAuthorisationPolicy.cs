@@ -14,9 +14,9 @@ public class PageModelAuthorisationPolicy : AuthorizationHandler<PageAuthorisati
   
   private readonly ILogger<PageModelAuthorisationPolicy> _logger;
 
-  public PageModelAuthorisationPolicy(ILoggerFactory loggerFactory)
+  public PageModelAuthorisationPolicy(ILogger<PageModelAuthorisationPolicy> logger)
   {
-    _logger = loggerFactory.CreateLogger<PageModelAuthorisationPolicy>();
+    _logger = logger;
   }
 
   protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, PageAuthorisationRequirement requirement)

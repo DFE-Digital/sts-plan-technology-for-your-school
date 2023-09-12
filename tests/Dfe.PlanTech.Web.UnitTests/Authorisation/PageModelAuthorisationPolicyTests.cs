@@ -1,14 +1,16 @@
-using System.Security.Claims;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging;
+using System.Security.Claims;
 using NSubstitute;
 using Xunit;
+using Page = Dfe.PlanTech.Domain.Content.Models.Page;
 
 namespace Dfe.PlanTech.Web.Authorisation;
 
@@ -17,17 +19,20 @@ public class PageModelAuthorisationPolicyTests
   private IGetPageQuery _getPageQuery;
   private PageModelAuthorisationPolicy _policy;
   private AuthorizationHandlerContext _authContext;
+  private ILogger<PageModelAuthorisationPolicy> _logger;
+  private HttpContext _httpContext;
 
   public PageModelAuthorisationPolicyTests()
   {
-    _policy = new PageModelAuthorisationPolicy(new NullLoggerFactory());
+    _logger = Substitute.For<ILogger<PageModelAuthorisationPolicy>>();
+    _policy = new PageModelAuthorisationPolicy(_logger);
 
     _getPageQuery = Substitute.For<IGetPageQuery>();
 
-    var httpContext = Substitute.For<HttpContext>();
+    _httpContext = Substitute.For<HttpContext>();
 
     var serviceScopeFactory = Substitute.For<IServiceScopeFactory>();
-    httpContext.RequestServices.GetService(typeof(IServiceScopeFactory)).Returns(serviceScopeFactory);
+    _httpContext.RequestServices.GetService(typeof(IServiceScopeFactory)).Returns(serviceScopeFactory);
     var serviceProvider = Substitute.For<IServiceProvider>();
     var serviceScope = Substitute.For<IServiceScope>();
     serviceScope.ServiceProvider.Returns(serviceProvider);
@@ -36,12 +41,12 @@ public class PageModelAuthorisationPolicyTests
     serviceScopeFactory.CreateAsyncScope().Returns(asyncServiceScope);
     serviceProvider.GetService(typeof(IGetPageQuery)).Returns(_getPageQuery);
 
-    httpContext.Request.RouteValues = new RouteValueDictionary();
-    httpContext.Request.RouteValues[PageModelAuthorisationPolicy.ROUTE_NAME] = "/";
+    _httpContext.Request.RouteValues = new RouteValueDictionary();
+    _httpContext.Request.RouteValues[PageModelAuthorisationPolicy.ROUTE_NAME] = "/slug";
 
-    httpContext.Items = new Dictionary<object, object?>();
+    _httpContext.Items = new Dictionary<object, object?>();
 
-    _authContext = new AuthorizationHandlerContext(new[] { new PageAuthorisationRequirement() }, new ClaimsPrincipal(), httpContext);
+    _authContext = new AuthorizationHandlerContext(new[] { new PageAuthorisationRequirement() }, new ClaimsPrincipal(), _httpContext);
   }
 
   [Fact]
@@ -111,4 +116,29 @@ public class PageModelAuthorisationPolicyTests
 
     Assert.False(_authContext.HasSucceeded);
   }
+
+  [Fact]
+  public async Task Should_LogError_When_Resource_Not_HttpContext()
+  {
+    _authContext = new AuthorizationHandlerContext(new[] { new PageAuthorisationRequirement() }, new ClaimsPrincipal(), null);
+    await _policy.HandleAsync(_authContext);
+    _logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
+  }
+
+  [Fact]
+  public async Task Should_Set_Route_Value_When_Null()
+  {
+    _getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(callInfo => new Page()
+    {
+      RequiresAuthorisation = true
+    });
+
+    _httpContext.Request.RouteValues.Remove(PageModelAuthorisationPolicy.ROUTE_NAME);
+
+    await _policy.HandleAsync(_authContext);
+
+    Assert.True(_httpContext.Request.RouteValues.ContainsKey(PageModelAuthorisationPolicy.ROUTE_NAME));
+    Assert.Equal("/", _httpContext.Request.RouteValues[PageModelAuthorisationPolicy.ROUTE_NAME]);
+  }
+
 }
