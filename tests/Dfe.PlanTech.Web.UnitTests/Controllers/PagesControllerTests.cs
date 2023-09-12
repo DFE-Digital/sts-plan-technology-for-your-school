@@ -73,13 +73,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         };
 
         private readonly PagesController _controller;
-        private readonly GetPageQuery _query;
-        private IQuestionnaireCacher _questionnaireCacherSubstitute = Substitute.For<IQuestionnaireCacher>();
 
         public PagesControllerTests()
         {
-            IContentRepository repositorySubstitute = SetupRepositorySubstitute();
-
             var Logger = Substitute.For<ILogger<PagesController>>();
 
             var controllerContext = ControllerHelpers.SubstituteControllerContext();
@@ -89,41 +85,15 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 ControllerContext = controllerContext,
                 TempData = Substitute.For<ITempDataDictionary>()
             };
-
-            _query = new GetPageQuery(_questionnaireCacherSubstitute, repositorySubstitute);
-        }
-
-        private IContentRepository SetupRepositorySubstitute()
-        {
-            var repositorySubstitute = Substitute.For<IContentRepository>();
-            repositorySubstitute
-                .GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>())
-                .Returns((callInfo) =>
-                {
-                    IGetEntitiesOptions options = (IGetEntitiesOptions)callInfo[0];
-                    if (options?.Queries != null)
-                    {
-                        foreach (var query in options.Queries)
-                        {
-                            if (query is ContentQueryEquals equalsQuery && query.Field == "fields.slug")
-                            {
-                                return _pages.Where(page => page.Slug == equalsQuery.Value);
-                            }
-                        }
-                    }
-
-                    return Array.Empty<Page>();
-                });
-            return repositorySubstitute;
         }
 
         [Fact]
-        public async Task Should_ReturnLandingPage_When_IndexRouteLoaded()
+        public void Should_ReturnLandingPage_When_IndexRouteLoaded()
         {
             var cookie = new DfeCookie { HasApproved = true };
             cookiesSubstitute.GetCookie().Returns(cookie);
-
-            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None);
+            var page = _pages.FirstOrDefault(page => page.Slug == INDEX_SLUG);
+            var result = _controller.GetByRoute(INDEX_SLUG, page!);
 
             Assert.IsType<ViewResult>(result);
 
@@ -139,71 +109,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Should_Return_Page_On_Index_Route()
+        public void Should_ThrowError_When_NoRouteFound()
         {
-            var cookie = new DfeCookie { HasApproved = true };
-            cookiesSubstitute.GetCookie().Returns(cookie);
-            var result = await _controller.Index(_query, CancellationToken.None);
-            Assert.IsType<ViewResult>(result);
-
-            var viewResult = result as ViewResult;
-
-            var model = viewResult!.Model;
-
-            Assert.IsType<PageViewModel>(model);
-
-            var asPage = model as PageViewModel;
-            Assert.Equal(INDEX_SLUG, asPage!.Page.Slug);
-            Assert.Contains(INDEX_TITLE, asPage!.Page.Title!.Text);
-        }
-
-        [Fact]
-        public async Task Should_ThrowError_When_NoRouteFound()
-        {
-            await Assert.ThrowsAnyAsync<Exception>(() =>
-                _controller.GetByRoute("NOT A VALID ROUTE", _query, CancellationToken.None));
-        }
-
-        [Fact]
-        public async Task Should_Retrieve_AccessibilityPage()
-        {
-            var httpContextSubstitute = Substitute.For<HttpContext>();
-
-            var controllerContext = new ControllerContext
-            {
-                HttpContext = httpContextSubstitute
-            };
-
-            _controller.ControllerContext = controllerContext;
-
-            var result = _controller.GetAccessibilityPage(_query);
-
-            var viewResult = await result as ViewResult;
-
-            var model = viewResult!.Model;
-
-            Assert.IsType<PageViewModel>(model);
-        }
-
-        [Fact]
-        public async Task Should_Retrieve_PrivacyPolicyPage()
-        {
-            var httpContextSubstitute = Substitute.For<HttpContext>();
-
-            var controllerContext = new ControllerContext
-            {
-                HttpContext = httpContextSubstitute
-            };
-
-            _controller.ControllerContext = controllerContext;
-
-            var result = _controller.GetPrivacyPolicyPage(_query);
-
-            var viewResult = await result as ViewResult;
-
-            var model = viewResult!.Model;
-
-            Assert.IsType<PageViewModel>(model);
+            Assert.ThrowsAny<Exception>(() => _controller.GetByRoute("NOT A VALID ROUTE", null!));
         }
 
         [Fact]
