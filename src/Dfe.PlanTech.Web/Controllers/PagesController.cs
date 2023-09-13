@@ -42,6 +42,25 @@ public class PagesController : BaseController<PagesController>
         return View("Page", viewModel);
     }
 
+    [HttpGet("/accessibility")]
+    public async Task<IActionResult> GetAccessibilityPage([FromServices] GetPageQuery query)
+    {
+        var page = await query.GetPageBySlug("accessibility", CancellationToken.None);
+
+        var viewModel = CreatePageModel(page);
+
+        return View("Page", viewModel);
+    }
+
+    [HttpGet("/privacy-policy")]
+    public async Task<IActionResult> GetPrivacyPolicyPage([FromServices] GetPageQuery query)
+    {
+        var page = await query.GetPageBySlug("privacy-policy", CancellationToken.None);
+
+        var viewModel = CreatePageModel(page);
+
+        return View("Page", viewModel);
+    }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     [Route("/error")]
@@ -49,8 +68,7 @@ public class PagesController : BaseController<PagesController>
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
-    
-    
+
     [Route("/service-unavailable")]
     public IActionResult ServiceUnavailable()
     {

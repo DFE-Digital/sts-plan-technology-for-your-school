@@ -1,11 +1,12 @@
 ﻿@{
-    var isAuthenticated = Context.User.Identity.IsAuthenticated;
+    var isAuthenticated = Context.User.Identity?.IsAuthenticated ?? false;
 }
 
 @if (isAuthenticated)
 {
     <a href="/self-assessment">Home</a>
 }
-else {
+else
+{
     <a href="/">Home</a>
 }

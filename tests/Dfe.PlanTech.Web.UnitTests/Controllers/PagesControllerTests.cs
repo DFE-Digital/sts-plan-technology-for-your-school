@@ -7,16 +7,13 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Web.Controllers;
-using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
-using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
 
 namespace Dfe.PlanTech.Web.UnitTests.Controllers
 {
@@ -54,6 +51,24 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                     Text = INDEX_TITLE,
                 },
                 Content = Array.Empty<IContentComponent>()
+            },
+            new Page()
+            {
+                Slug = "accessibility",
+                Title = new Title()
+                {
+                    Text = "Accessibility Page"
+                },
+                Content = Array.Empty<IContentComponent>()
+            },
+            new Page()
+            {
+                Slug = "privacy-policy",
+                Title = new Title()
+                {
+                    Text = "Privacy Policy Page"
+                },
+                Content = Array.Empty<IContentComponent>()
             }
         };
 
@@ -85,7 +100,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 .GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>())
                 .Returns((callInfo) =>
                 {
-                    IGetEntitiesOptions options = (IGetEntitiesOptions)callInfo[0]; 
+                    IGetEntitiesOptions options = (IGetEntitiesOptions)callInfo[0];
                     if (options?.Queries != null)
                     {
                         foreach (var query in options.Queries)
@@ -150,6 +165,48 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
+        public async Task Should_Retrieve_AccessibilityPage()
+        {
+            var httpContextSubstitute = Substitute.For<HttpContext>();
+
+            var controllerContext = new ControllerContext
+            {
+                HttpContext = httpContextSubstitute
+            };
+
+            _controller.ControllerContext = controllerContext;
+
+            var result = _controller.GetAccessibilityPage(_query);
+
+            var viewResult = await result as ViewResult;
+
+            var model = viewResult!.Model;
+
+            Assert.IsType<PageViewModel>(model);
+        }
+
+        [Fact]
+        public async Task Should_Retrieve_PrivacyPolicyPage()
+        {
+            var httpContextSubstitute = Substitute.For<HttpContext>();
+
+            var controllerContext = new ControllerContext
+            {
+                HttpContext = httpContextSubstitute
+            };
+
+            _controller.ControllerContext = controllerContext;
+
+            var result = _controller.GetPrivacyPolicyPage(_query);
+
+            var viewResult = await result as ViewResult;
+
+            var model = viewResult!.Model;
+
+            Assert.IsType<PageViewModel>(model);
+        }
+
+        [Fact]
         public void Should_Retrieve_ErrorPage()
         {
             var httpContextSubstitute = Substitute.For<HttpContext>();
@@ -169,7 +226,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             Assert.IsType<ErrorViewModel>(model);
         }
-        
+
         [Fact]
         public void Should_Render_Service_Unavailable_Page()
         {
