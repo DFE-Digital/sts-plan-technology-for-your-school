@@ -60,10 +60,7 @@ namespace Dfe.PlanTech.Application.Response.Commands
                     checkAnswerDto.QuestionAnswerList.Add(questionWithAnswerMap[node.Sys.Id]);
                     node = node.Answers.FirstOrDefault(answer => answer.Sys.Id.Equals(questionWithAnswerMap[node.Sys.Id].AnswerRef))?.NextQuestion;
                 }
-                else
-                {
-                    node = null;
-                }
+                else node = null;
             }
 
             return checkAnswerDto;
