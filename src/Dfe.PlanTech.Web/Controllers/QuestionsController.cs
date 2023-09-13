@@ -126,19 +126,18 @@ public class QuestionsController : BaseController<QuestionsController>
             return null;
         }
 
-        string[]? splitParams = parameters.Split('+');
+        string[] splitParams = parameters.Split('+');
 
-        if (splitParams is null)
+        if (splitParams.Length == 0)
         {
             return null;
         }
-        else
+
+        return new Params
         {
-            return new Params
-            {
-                SectionName = splitParams.Length > 0 ? splitParams[0].ToString() : string.Empty,
-                SectionId = splitParams.Length > 1 ? splitParams[1].ToString() : string.Empty,
-            };
-        }
+            SectionName = splitParams.Length > 0 ? splitParams[0].ToString() : string.Empty,
+            SectionId = splitParams.Length > 1 ? splitParams[1].ToString() : string.Empty,
+        };
     }
+
 }
