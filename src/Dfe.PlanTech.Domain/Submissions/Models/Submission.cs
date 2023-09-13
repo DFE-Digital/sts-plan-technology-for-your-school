@@ -1,25 +1,22 @@
-﻿namespace Dfe.PlanTech.Domain.Submissions.Models
+﻿namespace Dfe.PlanTech.Domain.Submissions.Models;
+
+public class Submission
 {
-    public class Submission
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        public int EstablishmentId { get; set; }
+    public int EstablishmentId { get; set; }
 
-        public bool Completed { get; set; }
+    public bool Completed { get; set; }
 
-        public string SectionId { get; set; } = null!;
+    public required string SectionId { get; set; }
 
-        public string SectionName { get; set; } = null!;
+    public required string SectionName { get; set; }
 
-        public string? Maturity { get; set; }
+    public string? Maturity { get; set; }
 
-        public int RecomendationId { get; set; }
+    public DateTime DateCreated { get; set; }
 
-        public DateTime DateCreated { get; set; }
+    public DateTime? DateLastUpdated { get; set; }
 
-        public DateTime? DateLastUpdated { get; set; }
-
-        public DateTime? DateCompleted { get; set; }
-    }
+    public DateTime? DateCompleted { get; set; }
 }
