@@ -2,9 +2,11 @@ using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Cookie.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Cookie;
+using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
@@ -22,6 +24,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private const string INDEX_SLUG = "/";
         private const string INDEX_TITLE = "Index";
         ICookieService cookiesSubstitute = Substitute.For<ICookieService>();
+        IUser userSubstitute = Substitute.For<IUser>();
 
         private readonly List<Page> _pages = new()
         {
@@ -91,6 +94,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             };
 
             _query = new GetPageQuery(_questionnaireCacherSubstitute, repositorySubstitute);
+            
         }
 
         private IContentRepository SetupRepositorySubstitute()
@@ -122,8 +126,21 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var cookie = new DfeCookie { HasApproved = true };
             cookiesSubstitute.GetCookie().Returns(cookie);
+            
+            var establishment = new EstablishmentDto()
+            {
+                OrgName = "Test Org",
+                Ukprn = "12345678",
+                Urn = "123456",
+                Type = new EstablishmentTypeDto()
+                {
+                    Name = "Test Name"
+                }
+            };
+            
+            userSubstitute.GetOrganisationData().Returns(establishment);
 
-            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None);
+            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None, userSubstitute);
 
             Assert.IsType<ViewResult>(result);
 
@@ -134,6 +151,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.IsType<PageViewModel>(model);
 
             var asPage = model as PageViewModel;
+            Assert.Equal(establishment.OrgName, asPage.OrganisationName);
             Assert.Equal(INDEX_SLUG, asPage!.Page.Slug);
             Assert.Contains(INDEX_TITLE, asPage!.Page.Title!.Text);
         }
@@ -161,7 +179,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public async Task Should_ThrowError_When_NoRouteFound()
         {
             await Assert.ThrowsAnyAsync<Exception>(() =>
-                _controller.GetByRoute("NOT A VALID ROUTE", _query, CancellationToken.None));
+                _controller.GetByRoute("NOT A VALID ROUTE", _query, CancellationToken.None, userSubstitute));
         }
 
         [Fact]
