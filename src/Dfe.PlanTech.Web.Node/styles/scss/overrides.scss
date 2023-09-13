@@ -154,3 +154,9 @@ tr {
 strong.app-task-list__task-name>p.govuk-error-message {
     margin-bottom: 0px;
 }
+
+@media (min-width: 40.0625em) {
+    .govuk-body, .govuk-body-m {
+        margin-bottom: 10px;
+    }
+}
