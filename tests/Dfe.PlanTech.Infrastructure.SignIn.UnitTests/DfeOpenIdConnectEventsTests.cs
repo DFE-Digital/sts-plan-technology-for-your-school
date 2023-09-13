@@ -74,10 +74,12 @@ public class DfeOpenIdConnectEventsTests
 
         var dfePublicApiSubstitute = Substitute.For<IDfePublicApi>();
         var commandSubstitute = Substitute.For<IRecordUserSignInCommand>();
+        var dbUserIdValue = 1234;
+        var dbEstablishmentIdValue = 5678;
         commandSubstitute.RecordSignIn(Arg.Any<RecordUserSignInDto>()).Returns(new Domain.SignIn.Models.SignIn()
         {
-            UserId = 1234,
-            EstablishmentId = 5678,
+            UserId = dbUserIdValue,
+            EstablishmentId = dbEstablishmentIdValue,
             SignInDateTime = DateTime.UtcNow,
             Id = 1,
         });
@@ -158,6 +160,14 @@ public class DfeOpenIdConnectEventsTests
         Assert.NotNull(roleNumericIdClaim);
         Assert.Equal(expectedRole.NumericId, roleNumericIdClaim.Value);
 
+        //Has DB User + Establishment Ids
+        var dbUserId = context.Principal.Claims.FirstOrDefault(claim => claim.Type == ClaimConstants.DB_USER_ID);
+        Assert.NotNull(dbUserId);
+        Assert.Equal(dbUserIdValue, int.Parse(dbUserId.Value));
+
+        var dbEstablishmentId = context.Principal.Claims.FirstOrDefault(claim => claim.Type == ClaimConstants.DB_ESTABLISHMENT_ID);
+        Assert.NotNull(dbEstablishmentId);
+        Assert.Equal(dbEstablishmentIdValue, int.Parse(dbEstablishmentId.Value));
     }
 
     [Fact]
