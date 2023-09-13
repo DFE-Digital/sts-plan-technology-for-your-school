@@ -1,0 +1,2 @@
+# DNS Zone Terraform
+Similar to the container app terraform, this folder is used to standup the dns zones for each environment. For dev and test we will only suppy a `primary_fqdn` for setting up the single dns zone that we have in each of those subscriptions. As production has staging as a subdomain zone, we can pass that in as a `['staging']` so that it creates the zone and the associated NS record.
