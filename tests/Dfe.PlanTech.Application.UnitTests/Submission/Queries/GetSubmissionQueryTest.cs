@@ -30,7 +30,6 @@ namespace Dfe.PlanTech.Application.UnitTests.Submission.Queries
                     SectionId = "SectionId",
                     SectionName = "SectionName",
                     Maturity = null,
-                    RecomendationId = 0,
                     DateCreated = DateTime.UtcNow,
                     DateLastUpdated = null,
                     DateCompleted = null
