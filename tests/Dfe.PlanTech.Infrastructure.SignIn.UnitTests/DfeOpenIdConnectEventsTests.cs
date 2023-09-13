@@ -2,6 +2,7 @@ using Dfe.PlanTech.Application.SignIn.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.SignIn.Enums;
 using Dfe.PlanTech.Domain.SignIn.Models;
+using Dfe.PlanTech.Domain.Users.Models;
 using Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -73,6 +74,14 @@ public class DfeOpenIdConnectEventsTests
 
         var dfePublicApiSubstitute = Substitute.For<IDfePublicApi>();
         var commandSubstitute = Substitute.For<IRecordUserSignInCommand>();
+        commandSubstitute.RecordSignIn(Arg.Any<RecordUserSignInDto>()).Returns(new Domain.SignIn.Models.SignIn()
+        {
+            UserId = 1234,
+            EstablishmentId = 5678,
+            SignInDateTime = DateTime.UtcNow,
+            Id = 1,
+        });
+
         var userAccessToService = new UserAccessToService()
         {
             UserId = userId,
@@ -130,24 +139,22 @@ public class DfeOpenIdConnectEventsTests
         //Assert has right number of identites
         Assert.NotNull(context.Principal);
         var identities = context.Principal.Identities;
-        Assert.Equal(2, identities.Count());
+        Assert.Equal(3, identities.Count());
 
         //Assert claims added
-        var addedIdentity = identities.Skip(1).FirstOrDefault()!;
-
-        var roleCodeClaim = addedIdentity.Claims.FirstOrDefault(c => c.Type == ClaimConstants.RoleCode);
+        var roleCodeClaim = context.Principal.Claims.FirstOrDefault(c => c.Type == ClaimConstants.RoleCode);
         Assert.NotNull(roleCodeClaim);
         Assert.Equal(expectedRole.Code, roleCodeClaim.Value);
 
-        var roleIdClaim = addedIdentity.Claims.FirstOrDefault(c => c.Type == ClaimConstants.RoleId);
+        var roleIdClaim = context.Principal.Claims.FirstOrDefault(c => c.Type == ClaimConstants.RoleId);
         Assert.NotNull(roleIdClaim);
         Assert.Equal(expectedRole.Id.ToString(), roleIdClaim.Value);
 
-        var roleNameClaim = addedIdentity.Claims.FirstOrDefault(c => c.Type == ClaimConstants.RoleName);
+        var roleNameClaim = context.Principal.Claims.FirstOrDefault(c => c.Type == ClaimConstants.RoleName);
         Assert.NotNull(roleNameClaim);
         Assert.Equal(expectedRole.Name, roleNameClaim.Value);
 
-        var roleNumericIdClaim = addedIdentity.Claims.FirstOrDefault(c => c.Type == ClaimConstants.RoleNumericId);
+        var roleNumericIdClaim = context.Principal.Claims.FirstOrDefault(c => c.Type == ClaimConstants.RoleNumericId);
         Assert.NotNull(roleNumericIdClaim);
         Assert.Equal(expectedRole.NumericId, roleNumericIdClaim.Value);
 
