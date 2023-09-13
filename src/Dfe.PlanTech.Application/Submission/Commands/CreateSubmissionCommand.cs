@@ -28,7 +28,6 @@ namespace Dfe.PlanTech.Application.Submission.Commands
                 SectionId = submission.SectionId,
                 SectionName = submission.SectionName,
                 Maturity = submission.Maturity,
-                RecomendationId = submission.RecomendationId,
                 DateCreated = DateTime.UtcNow,
             };
 
