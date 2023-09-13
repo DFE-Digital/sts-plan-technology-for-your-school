@@ -10,14 +10,6 @@
         await Html.RenderPartialAsync("HomeButton", Model);
     }
 }
-
-@{
-    if(Model.Page.Slug == "self-assessment")
-    {
-        <span class="govuk-caption-xl">@Model.OrganisationName</span>
-    }
-}
-
 @{
     if (TempData.ContainsKey("SectionName"))
     {
@@ -39,6 +31,11 @@
                 </div>
             </div>
         }
+    }
+    
+    if(Model.Page.Slug == "self-assessment")
+    {
+        <span class="govuk-caption-xl">@Model.OrganisationName</span>
     }
     
     await Html.RenderPartialAsync("Components/Page", Model.Page);

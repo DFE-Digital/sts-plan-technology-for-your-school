@@ -4,9 +4,7 @@ using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using Dfe.PlanTech.Application.Users.Helper;
 using Dfe.PlanTech.Application.Users.Interfaces;
-using Dfe.PlanTech.Domain.Establishments.Models;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
