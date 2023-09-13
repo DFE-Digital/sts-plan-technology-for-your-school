@@ -1,20 +1,23 @@
 ﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
-using Dfe.PlanTech.Application.Users.Queries;
 using Dfe.PlanTech.Domain.Establishments.Models;
 using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 using System.Text.Json;
 
 namespace Dfe.PlanTech.Application.Users.Helper
 {
     public class UserHelper : IUser
     {
+        private const string USER_ID_IDENTIFIER = "db_user_id";
+        private const string ETABLISHMENT_ID_IDENTIFIER = "db_establishment_id";
+
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ICreateEstablishmentCommand _createEstablishmentCommand;
         private readonly IGetUserIdQuery _getUserIdQuery;
         private readonly IGetEstablishmentIdQuery _getEstablishmentIdQuery;
 
-        public UserHelper(IHttpContextAccessor httpContextAccessor, 
+        public UserHelper(IHttpContextAccessor httpContextAccessor,
                             IPlanTechDbContext db,
                             ICreateEstablishmentCommand createEstablishmentCommand,
                             IGetUserIdQuery getUserIdQuery,
@@ -28,34 +31,36 @@ namespace Dfe.PlanTech.Application.Users.Helper
 
         public async Task<int?> GetCurrentUserId()
         {
-            var claims = _httpContextAccessor.HttpContext.User.Claims.ToList();
-            var userId = claims?.Find(x => x.Type.Contains("nameidentifier"))?.Value;
+            var dbUserId = GetDbIdFromClaim(USER_ID_IDENTIFIER);
+            if (dbUserId != null) return dbUserId;
+
+            var userId = _httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(x => x.Type.Contains("nameidentifier"))?.Value;
 
             if (userId is null)
                 return null;
 
-            return await _getUserIdQuery.GetUserId(userId);
+            var fromDb = await _getUserIdQuery.GetUserId(userId);
+
+            if (fromDb != null) SetDbIdAsClaim(USER_ID_IDENTIFIER, fromDb.Value);
+
+            return fromDb;
         }
 
         public async Task<int> GetEstablishmentId()
         {
+            var dbEstablishmentId = GetDbIdFromClaim(ETABLISHMENT_ID_IDENTIFIER);
+            if (dbEstablishmentId != null) return dbEstablishmentId.Value;
+
             var establishmentDto = _GetOrganisationData();
 
-            var reference = establishmentDto.Urn ?? establishmentDto.Ukprn;
+            var reference = (establishmentDto.Urn ?? establishmentDto.Ukprn) ?? throw new Exception("Establishment has no Urn nor Ukprn");
 
-            if (reference is null)
-                return 1;
+            var establishmentId = await _getEstablishmentIdQuery.GetEstablishmentId(reference) ?? await SetEstablishment();
 
-            var existingEstablishmentId = await _getEstablishmentIdQuery.GetEstablishmentId(reference);
+            SetDbIdAsClaim(ETABLISHMENT_ID_IDENTIFIER, establishmentId);
 
-            if (existingEstablishmentId == null)
-            {
-                await SetEstablishment();
-                var newEstablishmentId = await _getEstablishmentIdQuery.GetEstablishmentId(reference);
-                return newEstablishmentId is null ? 1 : Convert.ToUInt16(newEstablishmentId);
-            }
-
-            return Convert.ToInt16(existingEstablishmentId);
+            var asShort = Convert.ToInt16(establishmentId);
+            return asShort;
         }
 
         public async Task<int> SetEstablishment()
@@ -79,6 +84,17 @@ namespace Dfe.PlanTech.Application.Users.Helper
             establishment ??= new EstablishmentDto();
 
             return establishment;
+        }
+
+        private int? GetDbIdFromClaim(string type)
+        {
+            var id = _httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == type)?.Value;
+
+            return id != null ? int.Parse(id) : null;
+        }
+        private void SetDbIdAsClaim(string type, int value)
+        {
+            _httpContextAccessor.HttpContext.User.AddIdentity(new ClaimsIdentity(new[] { new Claim(type, value.ToString()) }));
         }
     }
 }
