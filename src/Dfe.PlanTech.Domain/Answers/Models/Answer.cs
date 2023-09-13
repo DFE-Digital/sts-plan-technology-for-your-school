@@ -1,6 +1,6 @@
-namespace Dfe.PlanTech.Domain.Answers.Models;
-
 using System.ComponentModel.DataAnnotations;
+
+namespace Dfe.PlanTech.Domain.Answers.Models;
 
 public class Answer
 {
