@@ -193,7 +193,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             {
                 SectionId = "Section1",
                 Completed = 1,
-                Maturity = "Low"
+                Maturity = "Low",
             });
             
             ICategory[] categories = new ICategory[] { _category };
