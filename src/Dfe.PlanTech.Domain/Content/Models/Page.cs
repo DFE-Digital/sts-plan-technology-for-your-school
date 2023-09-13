@@ -4,6 +4,7 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 
 public class Page : ContentComponent
 {
+    public string organisationName { get; set; } = null!;
     public string InternalName { get; init; } = null!;
 
     public string Slug { get; init; } = null!;

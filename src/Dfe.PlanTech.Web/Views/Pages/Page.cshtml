@@ -12,6 +12,13 @@
 }
 
 @{
+    if(Model.Page.Slug == "self-assessment")
+    {
+        <h1>@Model.OrganisationName</h1>
+    }
+}
+
+@{
     if (TempData.ContainsKey("SectionName"))
     {
         if (Model.Page.Slug == "self-assessment")
