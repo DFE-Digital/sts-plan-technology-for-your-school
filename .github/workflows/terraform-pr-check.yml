@@ -39,7 +39,7 @@ env:
   TF_VAR_az_sql_admin_password: ${{secrets.AZ_SQL_ADMIN_PASSWORD}}
   TF_VAR_az_sql_admin_userid_postfix: ${{secrets.AZ_SQL_ADMIN_USERID_POSTFIX}}
 
-  TF_WORKING_DIRECTORY: terraform
+  TF_WORKING_DIRECTORY: terraform/container-app
 
 jobs:
   validate-terraform:  
