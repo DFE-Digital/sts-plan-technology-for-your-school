@@ -151,7 +151,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.IsType<PageViewModel>(model);
 
             var asPage = model as PageViewModel;
-            Assert.Equal(establishment.OrgName, asPage!.OrganisationName);
+            Assert.Equal(establishment.OrgName, asPage!.Page.OrganisationName);
             Assert.Equal(INDEX_SLUG, asPage!.Page.Slug);
             Assert.Contains(INDEX_TITLE, asPage!.Page.Title!.Text);
         }

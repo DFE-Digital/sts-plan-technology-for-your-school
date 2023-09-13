@@ -81,13 +81,12 @@ public class PagesController : BaseController<PagesController>
     private PageViewModel CreatePageModel(Page page, string param = null!, string organisationName = null!)
     {
         
-        
-        
         ViewData["Title"] = page.Title?.Text ?? "Plan Technology For Your School";
+
+        page.OrganisationName = organisationName;
 
         return new PageViewModel()
         {
-            OrganisationName = organisationName,
             Page = page,
             Param = param,
         };

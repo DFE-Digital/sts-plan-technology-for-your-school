@@ -33,10 +33,9 @@
         }
     }
     
-    if(Model.Page.Slug == "self-assessment")
+    if (Model.Page.DisplayOrganisationName)
     {
-        <span class="govuk-caption-xl">@Model.OrganisationName</span>
+        <span class="govuk-caption-xl">@Model.Page.OrganisationName</span>
     }
-    
     await Html.RenderPartialAsync("Components/Page", Model.Page);
 }
