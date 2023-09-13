@@ -3,6 +3,7 @@ using Dfe.PlanTech.Application.Response.Commands;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Constants;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -41,6 +42,11 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     public IActionResult ChangeAnswer(string questionRef, string answerRef, int submissionId)
     {
         TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = answerRef, SubmissionId = submissionId });
+        // section slug
+        // question slug
+        //var paramData = TempData.Peek("param");
+        //TempData.Keep();
+        //var param = ParamParser._ParseParameters(paramData?.ToString());
         return RedirectToAction("GetQuestionById", "Questions");
     }
 

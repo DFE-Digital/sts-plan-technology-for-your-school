@@ -2,6 +2,7 @@ using Dfe.PlanTech.Application.Submission.Commands;
 using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Constants;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,12 +25,13 @@ public class QuestionsController : BaseController<QuestionsController>
     /// <returns></returns>
     public async Task<IActionResult> GetQuestionById(string? id, string? section, [FromServices] ISubmitAnswerCommand submitAnswerCommand, CancellationToken cancellationToken)
     {
+       
         var parameterQuestionPage = TempData[TempDataConstants.Questions] != null ? DeserialiseParameter<TempDataQuestions>(TempData[TempDataConstants.Questions]) : new TempDataQuestions();
 
         if (string.IsNullOrEmpty(id)) id = parameterQuestionPage.QuestionRef;
 
         TempData.TryGetValue("param", out object? parameters);
-        Params? param = _ParseParameters(parameters?.ToString());
+        Params? param = ParamParser._ParseParameters(parameters?.ToString());
 
         var questionWithSubmission = await submitAnswerCommand.GetQuestionWithSubmission(parameterQuestionPage.SubmissionId, id, param?.SectionId ?? throw new NullReferenceException(nameof(param)), section, cancellationToken);
 
@@ -61,7 +63,7 @@ public class QuestionsController : BaseController<QuestionsController>
         Params param = new Params();
         if (!string.IsNullOrEmpty(submitAnswerDto.Params))
         {
-            param = _ParseParameters(submitAnswerDto.Params) ?? null!;
+            param = ParamParser._ParseParameters(submitAnswerDto.Params) ?? null!;
             TempData["param"] = submitAnswerDto.Params;
         }
 
@@ -117,30 +119,6 @@ public class QuestionsController : BaseController<QuestionsController>
         {
             TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions() { QuestionRef = nextQuestionId, SubmissionId = submissionId });
             return RedirectToAction("GetQuestionById");
-        }
-    }
-
-    private static Params? _ParseParameters(string? parameters)
-    {
-        if (string.IsNullOrEmpty(parameters))
-        {
-            return null;
-        }
-
-        string[]? splitParams = parameters.Split('+');
-
-        if (splitParams is null)
-        {
-            return null;
-        }
-        else
-        {
-            return new Params
-            {
-                SectionName = splitParams.Length > 0 ? splitParams[0].ToString() : string.Empty,
-                SectionId = splitParams.Length > 1 ? splitParams[1].ToString() : string.Empty,
-                SectionSlug = splitParams.Length > 1 ? splitParams[2].ToString() : string.Empty,
-            };
         }
     }
 }
