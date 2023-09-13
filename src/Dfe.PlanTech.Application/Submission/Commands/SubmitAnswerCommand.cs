@@ -8,7 +8,7 @@ using Dfe.PlanTech.Domain.Responses.Models;
 
 namespace Dfe.PlanTech.Application.Submission.Commands
 {
-    public class SubmitAnswerCommand: ISubmitAnswerCommand
+    public class SubmitAnswerCommand : ISubmitAnswerCommand
     {
         private readonly GetSubmitAnswerQueries _getSubmitAnswerQueries;
         private readonly RecordSubmitAnswerCommands _recordSubmitAnswerCommands;
@@ -27,27 +27,19 @@ namespace Dfe.PlanTech.Application.Submission.Commands
 
             int submissionId = await _GetSubmissionId(submitAnswerDto.SubmissionId, sectionId, sectionName);
 
-            int? questionId = await _recordSubmitAnswerCommands.RecordQuestion(new RecordQuestionDto()
-            {
-                QuestionText = await _GetQuestionTextById(submitAnswerDto.QuestionId),
-                ContentfulRef = submitAnswerDto.QuestionId
-            });
+            var question = await _getSubmitAnswerQueries.GetQuestionnaireQuestion(submitAnswerDto.QuestionId, null, CancellationToken.None) ??
+                            throw new KeyNotFoundException($"Could not find question for Id {submitAnswerDto.QuestionId}");
 
-            int? answerId = await _recordSubmitAnswerCommands.RecordAnswer(new RecordAnswerDto()
-            {
-                AnswerText = await _GetAnswerTextById(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId),
-                ContentfulRef = submitAnswerDto.ChosenAnswerId
-            });
-
-            string maturity = await _GetMaturityForAnswer(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId);
+            var answer = question.Answers.FirstOrDefault(answer => answer.Sys.Id == submitAnswerDto.ChosenAnswerId) ??
+                            throw new KeyNotFoundException($"Could not find answer for Id {submitAnswerDto.ChosenAnswerId} under question {submitAnswerDto.QuestionId}");
 
             await _recordSubmitAnswerCommands.RecordResponse(new RecordResponseDto()
             {
                 UserId = userId,
                 SubmissionId = submissionId,
-                QuestionId = questionId ?? throw new NullReferenceException(nameof(questionId)),
-                AnswerId = answerId ?? throw new NullReferenceException(nameof(answerId)),
-                Maturity = maturity
+                Question = new ContentfulReference(Id: question.Sys.Id, Text: question.Text),
+                Answer = new ContentfulReference(Id: answer.Sys.Id, Text: answer.Text),
+                Maturity = answer.Maturity
             });
 
             return submissionId;
@@ -123,34 +115,6 @@ namespace Dfe.PlanTech.Application.Submission.Commands
                 });
             }
             else return Convert.ToUInt16(submissionId);
-        }
-
-        private async Task<string?> _GetQuestionTextById(string questionId)
-        {
-            var question = await _getSubmitAnswerQueries.GetQuestionnaireQuestion(questionId, null, CancellationToken.None);
-            return question.Text;
-        }
-
-        private async Task<string?> _GetAnswerTextById(string questionId, string chosenAnswerId)
-        {
-            var question = await _getSubmitAnswerQueries.GetQuestionnaireQuestion(questionId, null, CancellationToken.None);
-            foreach (var answer in question.Answers)
-            {
-                if (answer.Sys?.Id == chosenAnswerId) return answer.Text;
-            }
-            return null;
-        }
-
-        private async Task<string> _GetMaturityForAnswer(string questionId, string chosenAnswerId)
-        {
-            if (string.IsNullOrEmpty(questionId) || string.IsNullOrEmpty(chosenAnswerId))
-                return string.Empty;
-
-            var question = await _getSubmitAnswerQueries.GetQuestionnaireQuestion(questionId, null, CancellationToken.None);
-
-            var answer = Array.Find(question.Answers, x => x.Sys?.Id == chosenAnswerId);
-
-            return answer != null ? answer.Maturity : string.Empty;
         }
     }
 }
