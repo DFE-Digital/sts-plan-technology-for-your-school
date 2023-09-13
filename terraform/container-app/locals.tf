@@ -25,6 +25,7 @@ locals {
   # Front Door #
   ##############
   cdn_frontdoor_origin_host_header_override = var.cdn_frontdoor_origin_host_header_override
+  cdn_create_custom_domain                  = var.cdn_create_custom_domain
 
   ####################
   # Managed Identity #
