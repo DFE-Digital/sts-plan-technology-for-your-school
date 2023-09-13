@@ -615,7 +615,79 @@ public class QuestionsControllerTests
         var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_controller.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
         Assert.Equal("Question2", id);
     }
-    
+
+    [Fact]
+    public async void SubmitAnswer_Params_Should_Return_Null_On_Null_Params()
+    {
+        var submitAnswerDto = new SubmitAnswerDto()
+        {
+            QuestionId = "Question1",
+            ChosenAnswerId = "Answer1",
+            Params = ""
+        };
+
+        var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
+
+        Assert.IsType<RedirectToActionResult>(result);
+
+        var redirectToActionResult = result as RedirectToActionResult;
+
+        Assert.NotNull(redirectToActionResult);
+        Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
+        Assert.NotNull(_controller.TempData[TempDataConstants.Questions]);
+        Assert.IsType<string>(_controller.TempData[TempDataConstants.Questions]);
+        var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_controller.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
+        Assert.Equal("Question2", id);
+    }
+
+    [Fact]
+    public async void SubmitAnswer_Params_Should_Return_Null_On_Excessive_Params()
+    {
+        var submitAnswerDto = new SubmitAnswerDto()
+        {
+            QuestionId = "Question1",
+            ChosenAnswerId = "Answer1",
+            Params = "qwe lqwd +wdqwdqwdq+123dqwd   "
+        };
+
+        var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
+
+        Assert.IsType<RedirectToActionResult>(result);
+
+        var redirectToActionResult = result as RedirectToActionResult;
+
+        Assert.NotNull(redirectToActionResult);
+        Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
+        Assert.NotNull(_controller.TempData[TempDataConstants.Questions]);
+        Assert.IsType<string>(_controller.TempData[TempDataConstants.Questions]);
+        var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_controller.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
+        Assert.Equal("Question2", id);
+    }
+
+    [Fact]
+    public async void SubmitAnswer_Params_Should_Return_Null_On_Unparsed_Params()
+    {
+        var submitAnswerDto = new SubmitAnswerDto()
+        {
+            QuestionId = "Question1",
+            ChosenAnswerId = "Answer1",
+            Params = "+"
+        };
+
+        var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
+
+        Assert.IsType<RedirectToActionResult>(result);
+
+        var redirectToActionResult = result as RedirectToActionResult;
+
+        Assert.NotNull(redirectToActionResult);
+        Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
+        Assert.NotNull(_controller.TempData[TempDataConstants.Questions]);
+        Assert.IsType<string>(_controller.TempData[TempDataConstants.Questions]);
+        var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_controller.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
+        Assert.Equal("Question2", id);
+    }
+
     [Fact]
     public async void SubmitAnswer_Should_RedirectTo_SameQuestion_When_Saving_Submission_Errors()
     {
