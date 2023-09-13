@@ -1,4 +1,5 @@
-using Dfe.PlanTech.Application.Submission.Commands;
+using Dfe.PlanTech.Application.Questionnaire.Queries;
+using Dfe.PlanTech.Application.Submission.Interface;
 using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Constants;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -6,18 +7,20 @@ using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static System.Collections.Specialized.BitVector32;
-using System.Threading;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
 [Authorize]
 public class QuestionsController : BaseController<QuestionsController>
 {
-    public QuestionsController(ILogger<QuestionsController> logger) : base(logger) { }
+    private readonly GetQuestionQuery _getQuestionQuery;
+    public QuestionsController(ILogger<QuestionsController> logger, GetQuestionQuery getQuestionQuery) : base(logger) 
+    {
+        _getQuestionQuery = getQuestionQuery;
+    }
 
     [HttpGet("/question/{id?}")]
-    [Route("{SectionSlug}/{question}/{id?}")]
+    [Route("{SectionSlug}/{question}/{id?}", Name = "SectionQuestionAnswerWithId")]
     [Route("{SectionSlug}/{question}", Name = "SectionQuestionAnswer")]
     /// <summary>
     /// 
@@ -40,7 +43,7 @@ public class QuestionsController : BaseController<QuestionsController>
         if (questionWithSubmission.Question == null)
         {
             TempData[TempDataConstants.CheckAnswers] = SerialiseParameter(new TempDataCheckAnswers() { SubmissionId = questionWithSubmission.Submission?.Id ?? throw new NullReferenceException(nameof(questionWithSubmission.Submission)), SectionId = param.SectionId, SectionName = param.SectionName, SectionSlug = param.SectionSlug });
-            return RedirectPermanent($"~/{param.SectionSlug}/check-answers");
+            return RedirectToRoute("CheckAnswersRoute", new { sectionSlug = param.SectionSlug });
         }
         else
                                                 {
@@ -115,14 +118,13 @@ public class QuestionsController : BaseController<QuestionsController>
         if (string.IsNullOrEmpty(nextQuestionId) || await submitAnswerCommand.NextQuestionIsAnswered(submissionId, nextQuestionId))
         {
             TempData[TempDataConstants.CheckAnswers] = SerialiseParameter(new TempDataCheckAnswers() { SubmissionId = submissionId, SectionId = param.SectionId, SectionName = param.SectionName });
-            // return RedirectToAction("CheckAnswersPage", "CheckAnswers");
-            return RedirectPermanent($"~/{param.SectionSlug}/check-answers");
+            return RedirectToRoute("CheckAnswersRoute", new { sectionSlug = param.SectionSlug });
         }
         else
         {
             TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions() { QuestionRef = nextQuestionId, SubmissionId = submissionId });
-            //return RedirectToAction("GetQuestionById");
-            return RedirectPermanent($"~/{param.SectionSlug}/sumair/{nextQuestionId}");
+            var question = await _getQuestionQuery.GetQuestionById(nextQuestionId);
+            return RedirectToRoute("SectionQuestionAnswer", new { sectionSlug = param.SectionSlug, question= question?.Slug });
         }
     }
 }

@@ -71,6 +71,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _contentRepositorySubstitute = SetupRepositorySubstitute();
 
             GetSectionQuery getSectionQuerySubstitute = Substitute.For<GetSectionQuery>(_contentRepositorySubstitute);
+            GetQuestionQuery getQuestionQuerySubstitute = Substitute.For<GetQuestionQuery>();
             _getPageQuerySubstitute = Substitute.For<GetPageQuery>(questionnaireCacherSubstitute, _contentRepositorySubstitute);
 
             _getLatestResponseListForSubmissionQuerySubstitute = Substitute.For<IGetLatestResponseListForSubmissionQuery>();
@@ -80,7 +81,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             _processCheckAnswerDtoCommand = new ProcessCheckAnswerDtoCommand(getSectionQuerySubstitute, _getLatestResponseListForSubmissionQuerySubstitute, _calculateMaturityCommandSubstitute);
 
-            _checkAnswersController = new CheckAnswersController(loggerSubstitute, null);
+            _checkAnswersController = new CheckAnswersController(loggerSubstitute, getQuestionQuerySubstitute);
 
             _checkAnswersController.TempData = tempDataSubstitute;
         }
@@ -241,12 +242,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public void CheckAnswersController_ChangeAnswer_RedirectsToView()
+        public async Task CheckAnswersController_ChangeAnswer_RedirectsToView()
         {
             Domain.Questions.Models.Question question = new Domain.Questions.Models.Question() { ContentfulRef = "QuestionRef-1", QuestionText = "Question Text" };
             Domain.Answers.Models.Answer answer = new Domain.Answers.Models.Answer() { ContentfulRef = "AnswerRef-1", AnswerText = "Answer Text" };
 
-            var result = _checkAnswersController.ChangeAnswer(question.ContentfulRef, answer.ContentfulRef, SubmissionId, string.Empty);
+
+            var result = await _checkAnswersController.ChangeAnswer(question.ContentfulRef, answer.ContentfulRef, SubmissionId, string.Empty);
 
             Assert.IsType<RedirectToActionResult>(result);
 

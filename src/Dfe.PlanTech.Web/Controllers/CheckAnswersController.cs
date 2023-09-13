@@ -22,7 +22,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     }
 
     [HttpGet]
-    [Route("{SectionSlug}/check-answers")]
+    [Route("{SectionSlug}/check-answers", Name = "CheckAnswersRoute")]
     public async Task<IActionResult> CheckAnswersPage([FromServices] ProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand, [FromServices] GetPageQuery getPageQuery)
     {
         var parameterCheckAnswersPage = DeserialiseParameter<TempDataCheckAnswers>(TempData[TempDataConstants.CheckAnswers]);
@@ -51,7 +51,6 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
         var paramData = TempData.Peek("param");
         var param = ParamParser._ParseParameters(paramData?.ToString());
         var question = await _getQuestionnaireQuery.GetQuestionById(questionRef);
-        // return RedirectPermanent($"~/{param?.SectionSlug}/{question?.Slug}/{questionRef}");
         return RedirectToRoute("SectionQuestionAnswer", new { sectionSlug = param?.SectionSlug, question = question?.Slug });
     }
 

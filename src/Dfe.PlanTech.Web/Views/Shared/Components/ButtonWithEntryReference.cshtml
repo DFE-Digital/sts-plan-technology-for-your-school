@@ -20,8 +20,6 @@
         case Question question:
             {
                 var sectionSlug = TempData["SectionSlug"] as string;
-                //<govuk-button-link asp-controller="Questions" asp-action="GetQuestionById" asp-route-param=@question.Param asp-route-id=@question.Sys.Id
-                //    class="govuk-link">@Model.Button.Value</govuk-button-link>
                 <govuk-button-link href="@sectionSlug/@question.Slug/@question.Sys.Id"
                    class="govuk-link">@Model.Button.Value</govuk-button-link>
                 break;

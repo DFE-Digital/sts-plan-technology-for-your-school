@@ -102,6 +102,7 @@ public class QuestionsControllerTests
     private IQuestionnaireCacher _questionnaireCacherSubstitute;
     private IGetLatestResponseListForSubmissionQuery _getLatestResponseListForSubmissionQuerySubstitute;
     private ILogger<QuestionsController> _logger = Substitute.For<ILogger<QuestionsController>>();
+    private Application.Questionnaire.Queries.GetQuestionQuery _questionQuery = Substitute.For<Application.Questionnaire.Queries.GetQuestionQuery>();
 
 
     public QuestionsControllerTests()
@@ -116,7 +117,7 @@ public class QuestionsControllerTests
 
         IRecordQuestionCommand recordQuestionCommand = new RecordQuestionCommand(_databaseSubstitute);
 
-        IGetQuestionQuery getQuestionQuery = new Application.Submission.Queries.GetQuestionQuery(_databaseSubstitute);
+        IGetQuestionQuery getQuestionQuery = new GetQuestionQuery(_databaseSubstitute);
         IRecordAnswerCommand recordAnswerCommand = new RecordAnswerCommand(_databaseSubstitute);
         ICreateResponseCommand createResponseCommand = new CreateResponseCommand(_databaseSubstitute);
         IGetResponseQuery getResponseQuery = new GetResponseQuery(_databaseSubstitute);
@@ -133,7 +134,7 @@ public class QuestionsControllerTests
 
         _submitAnswerCommand = new SubmitAnswerCommand(getSubmitAnswerQueries, recordSubmitAnswerCommands, _getLatestResponseListForSubmissionQuerySubstitute);
 
-        _controller = new QuestionsController(_logger) { TempData = tempData };
+        _controller = new QuestionsController(_logger, _questionQuery) { TempData = tempData };
     }
 
     private static IQuestionnaireCacher SubstituteQuestionnaireCacher()
