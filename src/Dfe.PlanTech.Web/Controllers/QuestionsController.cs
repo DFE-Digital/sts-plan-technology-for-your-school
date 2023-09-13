@@ -32,10 +32,6 @@ public class QuestionsController : BaseController<QuestionsController>
 
         var questionWithSubmission = await submitAnswerCommand.GetQuestionWithSubmission(parameterQuestionPage.SubmissionId, id, param?.SectionId ?? throw new NullReferenceException(nameof(param)), section, cancellationToken);
 
-        // (Q, NULL) -> START FROM BEGINNING OF QUESTIONNAIRE NEW SUBMISSION
-        // (Q, S) -> PICK UP WHERE YOU LEFT OFF IN CURRENT SUBMISSION
-        // (NULL, S) -> GO TO CHECK ANSWERS PAGE
-
         if (questionWithSubmission.Question == null && questionWithSubmission.Submission != null)
         {
             TempData[TempDataConstants.CheckAnswers] = SerialiseParameter(new TempDataCheckAnswers() { SubmissionId = questionWithSubmission.Submission?.Id ?? throw new NullReferenceException(nameof(questionWithSubmission.Submission)), SectionId = param.SectionId, SectionName = param.SectionName });

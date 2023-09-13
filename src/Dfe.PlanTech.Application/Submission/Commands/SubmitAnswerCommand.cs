@@ -92,14 +92,19 @@ namespace Dfe.PlanTech.Application.Submission.Commands
                 if (submission != null && !submission.Completed)
                 {
                     Domain.Questionnaire.Models.Question? nextUnansweredQuestion = await _GetNextUnansweredQuestion(submission.Id);
+                    Section section = await _getSectionQuery.GetSectionById(sectionId) ?? throw new NullReferenceException(nameof(section));
+
                     if (nextUnansweredQuestion != null)
                     {
-                        Section section = await _getSectionQuery.GetSectionById(sectionId) ?? throw new NullReferenceException(nameof(section));
                         bool sectionContainsQuestion = section.Questions.Any(question => question.Sys.Id.Equals(nextUnansweredQuestion.Sys.Id));
                         if (sectionContainsQuestion) return (nextUnansweredQuestion, submission);
                     }
-                    else return (null, submission);
-                    // return nextUnansweredQuestion != null ? (nextUnansweredQuestion, submission) : (null, submission);
+                    else
+                    {
+                        List<QuestionWithAnswer> questionWithAnswerList = await _getLatestResponseListForSubmissionQuery.GetResponseListByDateCreated(submission.Id);
+                        bool sectionContainsQuestionList = questionWithAnswerList.All(questionWithAnswer => section.Questions.Any(question => question.Sys.Id.Equals(questionWithAnswer.QuestionRef)));
+                        if (sectionContainsQuestionList) return (null, submission);
+                    }
                 }
             }
 
