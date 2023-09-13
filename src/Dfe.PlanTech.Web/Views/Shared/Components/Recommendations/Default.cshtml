@@ -16,10 +16,12 @@ else
                 <task-list-item-name>
                     @if (recommendationsViewComponentViewModel.RecommendationSlug != null)
                     {
-                        <a asp-controller="Pages" asp-action="GetByRoute"
+@*                        <a asp-controller="Pages" asp-action="GetByRoute"
                             asp-route-route="@recommendationsViewComponentViewModel.RecommendationSlug" class="govuk-link">
                             @recommendationsViewComponentViewModel.RecommendationDisplayName
-                        </a>
+                        </a>*@
+                        @Html.RouteLink(recommendationsViewComponentViewModel.RecommendationDisplayName,
+            "GetPageByRouteAndSection", new {route=recommendationsViewComponentViewModel.RecommendationSlug, sectionSlug=recommendationsViewComponentViewModel.SectionSlug}, new { @class="govuk-link"} )
                     }
                     else
                     {

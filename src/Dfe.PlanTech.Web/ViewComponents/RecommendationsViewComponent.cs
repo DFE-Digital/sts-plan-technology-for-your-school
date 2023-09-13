@@ -67,6 +67,7 @@ namespace Dfe.PlanTech.Web.ViewComponents
                 {
                     RecommendationSlug = recommendation?.Page.Slug,
                     RecommendationDisplayName = recommendation?.DisplayName,
+                    SectionSlug = section.InterstitialPage.Slug,
                     NoRecommendationFoundErrorMessage = recommendation == null
                         ? String.Format("Unable to retrieve {0} recommendation", section.Name)
                         : null

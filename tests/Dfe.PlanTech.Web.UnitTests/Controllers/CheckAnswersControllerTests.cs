@@ -80,7 +80,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             _processCheckAnswerDtoCommand = new ProcessCheckAnswerDtoCommand(getSectionQuerySubstitute, _getLatestResponseListForSubmissionQuerySubstitute, _calculateMaturityCommandSubstitute);
 
-            _checkAnswersController = new CheckAnswersController(loggerSubstitute);
+            _checkAnswersController = new CheckAnswersController(loggerSubstitute, null);
 
             _checkAnswersController.TempData = tempDataSubstitute;
         }
@@ -246,7 +246,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Domain.Questions.Models.Question question = new Domain.Questions.Models.Question() { ContentfulRef = "QuestionRef-1", QuestionText = "Question Text" };
             Domain.Answers.Models.Answer answer = new Domain.Answers.Models.Answer() { ContentfulRef = "AnswerRef-1", AnswerText = "Answer Text" };
 
-            var result = _checkAnswersController.ChangeAnswer(question.ContentfulRef, answer.ContentfulRef, SubmissionId);
+            var result = _checkAnswersController.ChangeAnswer(question.ContentfulRef, answer.ContentfulRef, SubmissionId, string.Empty);
 
             Assert.IsType<RedirectToActionResult>(result);
 

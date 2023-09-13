@@ -6,17 +6,19 @@ using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using static System.Collections.Specialized.BitVector32;
+using System.Threading;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
 [Authorize]
-////[Route("/question")]
 public class QuestionsController : BaseController<QuestionsController>
 {
     public QuestionsController(ILogger<QuestionsController> logger) : base(logger) { }
 
     [HttpGet("/question/{id?}")]
     [Route("{SectionSlug}/{question}/{id?}")]
+    [Route("{SectionSlug}/{question}", Name = "SectionQuestionAnswer")]
     /// <summary>
     /// 
     /// </summary>
@@ -113,12 +115,14 @@ public class QuestionsController : BaseController<QuestionsController>
         if (string.IsNullOrEmpty(nextQuestionId) || await submitAnswerCommand.NextQuestionIsAnswered(submissionId, nextQuestionId))
         {
             TempData[TempDataConstants.CheckAnswers] = SerialiseParameter(new TempDataCheckAnswers() { SubmissionId = submissionId, SectionId = param.SectionId, SectionName = param.SectionName });
-            return RedirectToAction("CheckAnswersPage", "CheckAnswers");
+            // return RedirectToAction("CheckAnswersPage", "CheckAnswers");
+            return RedirectPermanent($"~/{param.SectionSlug}/check-answers");
         }
         else
         {
             TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions() { QuestionRef = nextQuestionId, SubmissionId = submissionId });
-            return RedirectToAction("GetQuestionById");
+            //return RedirectToAction("GetQuestionById");
+            return RedirectPermanent($"~/{param.SectionSlug}/sumair/{nextQuestionId}");
         }
     }
 }
