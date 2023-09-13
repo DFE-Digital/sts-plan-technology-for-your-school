@@ -11,18 +11,14 @@ using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Constants;
-using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Web.Controllers;
-using Dfe.PlanTech.Web.Exceptions;
-using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -31,44 +27,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers;
 
 public class QuestionsControllerTests
 {
-    private const int COMPLETED_SUBMISSION_ID = 1;
-    private const string COMPLETED_SECTION_ID = "CompletedSectionId";
-
-    private const int INCOMPLETE_SUBMISSION_ID = 2;
-    private const string INCOMPLETE_SECTION_ID = "IncompleteSectionId";
     private const string FIRST_QUESTION_ID = "Question1";
     private const string FIRST_ANSWER_ID = "Answer1";
     private const string SECOND_QUESTION_ID = "Question2";
-
-    private readonly List<Submission> _submissions = new()
-            {
-                new Submission()
-                {
-                    Id = INCOMPLETE_SUBMISSION_ID,
-                    EstablishmentId = 0,
-                    Completed = false,
-                    SectionId = INCOMPLETE_SECTION_ID,
-                    SectionName = "SectionName",
-                    Maturity = null,
-                    RecomendationId = 0,
-                    DateCreated = DateTime.UtcNow,
-                    DateLastUpdated = DateTime.UtcNow,
-                    DateCompleted = null
-                },
-                new Submission()
-                {
-                    Id = COMPLETED_SUBMISSION_ID,
-                    EstablishmentId = 0,
-                    Completed = true,
-                    SectionId = COMPLETED_SECTION_ID,
-                    SectionName = "SectionName",
-                    Maturity = Maturity.Medium.ToString(),
-                    RecomendationId = 0,
-                    DateCreated = DateTime.UtcNow,
-                    DateLastUpdated = DateTime.UtcNow,
-                    DateCompleted = DateTime.UtcNow
-                }
-            };
 
     private readonly List<Question> _questions = new() {
            new Question()
@@ -140,7 +101,6 @@ public class QuestionsControllerTests
     private ISubmitAnswerCommand _submitAnswerCommandSubstitute = Substitute.For<ISubmitAnswerCommand>();
     private IQuestionnaireCacher _questionnaireCacherSubstitute;
     private IGetLatestResponseListForSubmissionQuery _getLatestResponseListForSubmissionQuerySubstitute;
-    private readonly ICacher _cacher;
     private ILogger<QuestionsController> _logger = Substitute.For<ILogger<QuestionsController>>();
 
 
@@ -154,11 +114,9 @@ public class QuestionsControllerTests
 
         var getQuestionnaireQuery = new Application.Questionnaire.Queries.GetQuestionQuery(_questionnaireCacherSubstitute, repositorySubstitute);
 
-        ICreateQuestionCommand createQuestionCommand = new CreateQuestionCommand(_databaseSubstitute);
         IRecordQuestionCommand recordQuestionCommand = new RecordQuestionCommand(_databaseSubstitute);
 
         IGetQuestionQuery getQuestionQuery = new Application.Submission.Queries.GetQuestionQuery(_databaseSubstitute);
-        ICreateAnswerCommand createAnswerCommand = new CreateAnswerCommand(_databaseSubstitute);
         IRecordAnswerCommand recordAnswerCommand = new RecordAnswerCommand(_databaseSubstitute);
         ICreateResponseCommand createResponseCommand = new CreateResponseCommand(_databaseSubstitute);
         IGetResponseQuery getResponseQuery = new GetResponseQuery(_databaseSubstitute);
@@ -176,8 +134,6 @@ public class QuestionsControllerTests
         _submitAnswerCommand = new SubmitAnswerCommand(getSubmitAnswerQueries, recordSubmitAnswerCommands, _getLatestResponseListForSubmissionQuerySubstitute);
 
         _controller = new QuestionsController(_logger) { TempData = tempData };
-
-        _cacher = new Cacher(new CacheOptions(), new MemoryCache(new MemoryCacheOptions()));
     }
 
     private static IQuestionnaireCacher SubstituteQuestionnaireCacher()
@@ -210,7 +166,7 @@ public class QuestionsControllerTests
         });
 
         repositorySubstitute.GetEntityById<Question>(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
-                      .Returns((callInfo) => 
+                      .Returns((callInfo) =>
                       {
                           string id = (string)callInfo[0];
                           return Task.FromResult(_questions.FirstOrDefault(question => question.Sys.Id == id));
@@ -255,7 +211,6 @@ public class QuestionsControllerTests
                     SectionId = "",
                     SectionName = "",
                     Maturity = null,
-                    RecomendationId = 0,
                     DateCreated = DateTime.UtcNow,
                     DateLastUpdated = null,
                     DateCompleted = null
@@ -299,7 +254,6 @@ public class QuestionsControllerTests
                     SectionId = "SectionId",
                     SectionName = "SectionName",
                     Maturity = null,
-                    RecomendationId = 0,
                     DateCreated = DateTime.UtcNow,
                     DateLastUpdated = null,
                     DateCompleted = null
@@ -343,7 +297,6 @@ public class QuestionsControllerTests
                     SectionId = "SectionId",
                     SectionName = "SectionName",
                     Maturity = null,
-                    RecomendationId = 0,
                     DateCreated = DateTime.UtcNow,
                     DateLastUpdated = null,
                     DateCompleted = null
@@ -399,7 +352,6 @@ public class QuestionsControllerTests
                     SectionId = "SectionId",
                     SectionName = "SectionName",
                     Maturity = null,
-                    RecomendationId = 0,
                     DateCreated = DateTime.UtcNow,
                     DateLastUpdated = null,
                     DateCompleted = null
@@ -498,49 +450,6 @@ public class QuestionsControllerTests
         var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataCheckAnswers>(_controller.TempData[TempDataConstants.CheckAnswers] as string ?? "")?.SubmissionId;
         Assert.Equal(submitAnswerDto.SubmissionId, id);
     }
-
-    //[Fact]
-    //public async void SubmitAnswer_Should_RedirectTo_CheckAnswers_When_NextQuestionIsAnswered()
-    //{
-    //    var submitAnswerDto = new SubmitAnswerDto()
-    //    {
-    //        QuestionId = "Question1",
-    //        ChosenAnswerId = "Answer1",
-    //        SubmissionId = 1,
-    //        Params = "SectionName+SectionId"
-    //    };
-
-    //    Domain.Questions.Models.Question question = new Domain.Questions.Models.Question()
-    //    {
-    //        Id = 1,
-    //        ContentfulRef = "Question2"
-    //    };
-
-    //    _databaseSubstitute.GetQuestion(question => question.Id == 1).Returns(question);
-    //    _databaseSubstitute.GetResponseList(response => response.SubmissionId == 1).Returns(
-    //        new Domain.Responses.Models.Response[]
-    //        {
-    //                new Domain.Responses.Models.Response()
-    //                {
-    //                    QuestionId = 1,
-    //                    Question = question
-    //                }
-    //        });
-
-    //    var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
-
-    //    Assert.IsType<RedirectToActionResult>(result);
-
-    //    var redirectToActionResult = result as RedirectToActionResult;
-
-    //    Assert.NotNull(redirectToActionResult);
-    //    Assert.Equal("CheckAnswers", redirectToActionResult.ControllerName);
-    //    Assert.Equal("CheckAnswersPage", redirectToActionResult.ActionName);
-    //    Assert.NotNull(_controller.TempData[TempDataConstants.CheckAnswers]);
-    //    Assert.IsType<string>(_controller.TempData[TempDataConstants.CheckAnswers]);
-    //    var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataCheckAnswers>(_controller.TempData[TempDataConstants.CheckAnswers] as string ?? "")?.SubmissionId;
-    //    Assert.Equal(submitAnswerDto.SubmissionId, id);
-    //}
 
     [Fact]
     public async void SubmitAnswer_Should_RedirectTo_SameQuestion_When_ChosenAnswerId_IsNull()
@@ -696,9 +605,9 @@ public class QuestionsControllerTests
             QuestionId = "Question1",
             ChosenAnswerId = "Answer1",
         };
-        
+
         _submitAnswerCommandSubstitute.When(x => x.SubmitAnswer(Arg.Any<SubmitAnswerDto>(), Arg.Any<string>(), Arg.Any<string>())).Do(x => throw new Exception("Test"));
-        
+
         var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommandSubstitute);
 
         Assert.IsType<RedirectToActionResult>(result);
@@ -712,7 +621,7 @@ public class QuestionsControllerTests
         var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_controller.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
         Assert.Equal(submitAnswerDto.QuestionId, id);
     }
-    
+
     [Fact]
     public async void Redirect_To_Service_Unavailable_Page_When_There_Is_An_Issue_Retrieving_Next_Question()
     {
@@ -721,27 +630,20 @@ public class QuestionsControllerTests
             QuestionId = "Question1",
             ChosenAnswerId = "Answer1",
         };
-        
+
         _submitAnswerCommandSubstitute.SubmitAnswer(Arg.Any<SubmitAnswerDto>(), Arg.Any<string>(), Arg.Any<string>()).Returns(1);
 
         _submitAnswerCommandSubstitute.When(x => x.GetNextQuestionId(Arg.Any<string>(), Arg.Any<string>())).Do(x => throw new Exception("Test"));
-       
+
         var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommandSubstitute);
-        
+
         var redirectResult = result as RedirectResult;
-        
+
         Assert.NotNull(redirectResult);
 
         Assert.Equal("/service-unavailable", redirectResult.Url);
-        
+
         _logger.ReceivedWithAnyArgs(1).LogError("An error has occurred while retrieving the next question with the following message: Test");
-        
-    }
 
-    private void SetParams(string sectionId)
-    {
-        _controller.TempData["param"] = CreateParams(sectionId);
     }
-
-    private static string CreateParams(string sectionId) => $"SectionName+{sectionId}";
 }
