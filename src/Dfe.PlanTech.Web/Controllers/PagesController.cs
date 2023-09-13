@@ -28,7 +28,7 @@ public class PagesController : BaseController<PagesController>
 
     [Authorize]
     [HttpGet("/{route?}")]
-    public async Task<IActionResult> GetByRoute(string route, [FromServices] GetPageQuery query, CancellationToken cancellationToken, [FromServices] IUser user)
+    public async Task<IActionResult> GetByRoute(string route, [FromServices] GetPageQuery query, [FromServices] IUser user, CancellationToken cancellationToken)
     {
         string slug = GetSlug(route);
         string param = "";

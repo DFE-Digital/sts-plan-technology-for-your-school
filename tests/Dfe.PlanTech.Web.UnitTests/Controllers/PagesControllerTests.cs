@@ -140,7 +140,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             
             userSubstitute.GetOrganisationData().Returns(establishment);
 
-            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None, userSubstitute);
+            var result = await _controller.GetByRoute(INDEX_SLUG, _query, userSubstitute, CancellationToken.None);
 
             Assert.IsType<ViewResult>(result);
 
@@ -151,7 +151,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.IsType<PageViewModel>(model);
 
             var asPage = model as PageViewModel;
-            Assert.Equal(establishment.OrgName, asPage.OrganisationName);
+            Assert.Equal(establishment.OrgName, asPage!.OrganisationName);
             Assert.Equal(INDEX_SLUG, asPage!.Page.Slug);
             Assert.Contains(INDEX_TITLE, asPage!.Page.Title!.Text);
         }
@@ -179,7 +179,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public async Task Should_ThrowError_When_NoRouteFound()
         {
             await Assert.ThrowsAnyAsync<Exception>(() =>
-                _controller.GetByRoute("NOT A VALID ROUTE", _query, CancellationToken.None, userSubstitute));
+                _controller.GetByRoute("NOT A VALID ROUTE", _query, userSubstitute, CancellationToken.None));
         }
 
         [Fact]
