@@ -107,7 +107,7 @@ jobs:
       - name: Validate Terraform docs
         uses: terraform-docs/gh-actions@v1.0.0
         with:
-          working-dir: terraform
+          working-dir: ${{ env.TF_WORKING_DIRECTORY }}
           config-file: .terraform-docs.yml
           output-file: terraform-configuration.md
           output-method: inject
@@ -142,7 +142,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: terraform
+        working-directory: ${{ env.TF_WORKING_DIRECTORY }}
     steps:
       - name: Clone repo
         uses: actions/checkout@v3
