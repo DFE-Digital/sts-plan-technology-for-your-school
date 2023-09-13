@@ -16,6 +16,8 @@ module "waf" {
     "container-app-url" = {
       domain                    = local.cdn_frontdoor_origin_host_header_override
       health_probe_request_type = "GET"
+      domain                    = module.main_hosting.fqdn
+      create_custom_domain      = local.cdn_create_custom_domain
     }
   }
 
