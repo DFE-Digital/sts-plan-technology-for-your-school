@@ -26,6 +26,15 @@ describe("Check answers page", () => {
 
     cy.get("div.govuk-notification-banner__header").should("exist");
   });
+
+  it("each change answer link should have correct attributes", () => {
+    cy.get("a")
+      .contains("Change")
+      .each((link) => {
+        cy.wrap(link).should("have.attr", "aria-label");
+        cy.wrap(link).should("have.attr", "title");
+      });
+  });
 });
 
 const navigateToCheckAnswersPage = () => {
@@ -33,10 +42,12 @@ const navigateToCheckAnswersPage = () => {
   cy.clickContinueButton();
 
   navigateThroughQuestions();
-}
+};
 
 const navigateThroughQuestions = () =>
-  cy.get("main").then(($main) => $main.find("form div.govuk-radios").length > 0)
+  cy
+    .get("main")
+    .then(($main) => $main.find("form div.govuk-radios").length > 0)
     .then((onQuestionPage) => {
       if (!onQuestionPage) {
         cy.log("no longer on question page");
@@ -50,7 +61,7 @@ const navigateThroughQuestions = () =>
 
       return navigateThroughQuestions();
     });
+
 function submitAnswers() {
   cy.get("button.govuk-button").contains("Save and Submit").click();
 }
-
