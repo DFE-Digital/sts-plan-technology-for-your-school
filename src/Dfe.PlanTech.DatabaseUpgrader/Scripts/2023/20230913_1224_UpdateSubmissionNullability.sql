@@ -9,6 +9,6 @@ BEGIN TRAN
 
   ALTER TABLE [dbo].[submission] ALTER COLUMN [sectionId] [NVARCHAR](50) NOT NULL
   ALTER TABLE [dbo].[submission] ALTER COLUMN [sectionName] [NVARCHAR](50) NOT NULL
-  ALTER TABLE [dbo].[submission] DROP COLUMN [recommendationId]
+  ALTER TABLE [dbo].[submission] DROP COLUMN [recomendationId]
   
 COMMIT TRAN

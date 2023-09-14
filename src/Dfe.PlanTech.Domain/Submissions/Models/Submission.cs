@@ -1,10 +1,15 @@
-﻿namespace Dfe.PlanTech.Domain.Submissions.Models;
+﻿using Dfe.PlanTech.Domain.Establishments.Models;
+using Dfe.PlanTech.Domain.Responses.Models;
+
+namespace Dfe.PlanTech.Domain.Submissions.Models;
 
 public class Submission
 {
     public int Id { get; set; }
 
     public int EstablishmentId { get; set; }
+
+    public Establishment Establishmet { get; set; } = null!;
 
     public bool Completed { get; set; }
 
@@ -19,4 +24,6 @@ public class Submission
     public DateTime? DateLastUpdated { get; set; }
 
     public DateTime? DateCompleted { get; set; }
+
+    public List<Response> Responses { get; set; } = new();
 }

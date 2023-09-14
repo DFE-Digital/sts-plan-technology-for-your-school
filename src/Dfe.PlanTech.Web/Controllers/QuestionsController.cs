@@ -133,7 +133,7 @@ public class QuestionsController : BaseController<QuestionsController>
         {
             TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions() { QuestionRef = nextQuestionId, SubmissionId = submissionId });
             var question = await _getQuestionQuery.GetQuestionById(nextQuestionId);
-            return RedirectToRoute("SectionQuestionAnswer", new { sectionSlug = param.SectionSlug, question= question?.Slug });
+            return RedirectToRoute("SectionQuestionAnswer", new { sectionSlug = param.SectionSlug, question = question?.Slug });
         }
     }
 }
