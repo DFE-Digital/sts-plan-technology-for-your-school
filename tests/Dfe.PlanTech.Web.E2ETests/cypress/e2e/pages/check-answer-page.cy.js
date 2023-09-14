@@ -27,6 +27,7 @@ describe("Check answers page", () => {
       .should("exist")
       .and("have.length", selectedQuestionsWithAnswers.length)
       .each((row) => {
+        //Get question and answer tecxt for each row
         const questionWithAnswer = {
           question: null,
           answer: null,
@@ -43,6 +44,8 @@ describe("Check answers page", () => {
           .invoke("text")
           .then((answer) => (questionWithAnswer.answer = answer.trim()));
 
+          
+        //Ensure it matches one of the items in array
         cy.wrap(questionWithAnswer).then(() => {
           cy.log(JSON.stringify(selectedQuestionsWithAnswers));
 
@@ -56,6 +59,19 @@ describe("Check answers page", () => {
           expect(matchingQuestionWithAnswer.answer).to.equal(
             questionWithAnswer.answer
           );
+
+          //Has "Change" me link with accessibility attributes
+          cy.wrap(row)
+            .find("a")
+            .contains("Change")
+            .and("have.attr", "aria-label")
+            .and("contain", questionWithAnswer.question);
+          
+            cy.wrap(row)
+            .find("a")
+            .contains("Change")
+            .and("have.attr", "title")
+              .and("equal", questionWithAnswer.question);
         });
       });
   });
@@ -64,15 +80,6 @@ describe("Check answers page", () => {
     submitAnswers();
 
     cy.get("div.govuk-notification-banner__header").should("exist");
-  });
-
-  it("each change answer link should have correct attributes", () => {
-    cy.get("a")
-      .contains("Change")
-      .each((link) => {
-        cy.wrap(link).should("have.attr", "aria-label");
-        cy.wrap(link).should("have.attr", "title");
-      });
   });
 
   it("passes accessibility tests", () => {
@@ -102,9 +109,7 @@ const navigateThroughQuestions = () => {
 
       return navigateThroughQuestions();
     })
-    .then(() => {
-
-    });
+    .then(() => {});
 };
 
 const submitAnswers = () =>
