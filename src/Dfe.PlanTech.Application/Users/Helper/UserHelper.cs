@@ -3,7 +3,6 @@ using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.SignIn.Enums;
 using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
 using System.Text.Json;
 
 namespace Dfe.PlanTech.Application.Users.Helper
@@ -56,14 +55,13 @@ namespace Dfe.PlanTech.Application.Users.Helper
         public async Task<int> SetEstablishment()
         {
             var establishmentDto = GetOrganisationData();
-            var establishmentDto = GetOrganisationData();
 
             var establishmentId = await _createEstablishmentCommand.CreateEstablishment(establishmentDto);
 
             return establishmentId;
         }
 
-        private EstablishmentDto GetOrganisationData()
+        public EstablishmentDto GetOrganisationData()
         {
             var orgDetails = _httpContextAccessor.HttpContext.User.Claims.First(x => x.Type.Contains(ORG_CLAIM_TYPE))?.Value ??
                         throw new KeyNotFoundException($"Could not find {ORG_CLAIM_TYPE} claim type");
