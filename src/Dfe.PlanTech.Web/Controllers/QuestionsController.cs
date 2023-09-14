@@ -20,8 +20,6 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
     [HttpGet("{SectionSlug}/{question}", Name = "SectionQuestionAnswer")]
-  //  [Route("{SectionSlug}/{question}/{id?}", Name = "SectionQuestionAnswerWithId")]
-  //  [Route("{SectionSlug}/{question}", Name = "SectionQuestionAnswer")]
     /// <summary>
     /// 
     /// </summary>
