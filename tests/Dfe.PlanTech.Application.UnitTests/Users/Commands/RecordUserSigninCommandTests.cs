@@ -13,7 +13,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
     public class RecordUserSigninCommandTests
     {
         public IPlanTechDbContext Db = Substitute.For<IPlanTechDbContext>();
-        public IGetUserIdQuery UserQuery = Substitute.For<IGetUserIdQuery> ();
+        public IGetUserIdQuery UserQuery = Substitute.For<IGetUserIdQuery>();
         public ICreateUserCommand CreateUserCommand = Substitute.For<ICreateUserCommand>();
         public IGetEstablishmentIdQuery GetEstablishmentIdQuery = Substitute.For<IGetEstablishmentIdQuery>();
         private ICreateEstablishmentCommand CreateEstablishmentCommand = Substitute.For<ICreateEstablishmentCommand>();
@@ -41,7 +41,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
             var strut = CreateStrut();
             UserQuery.GetUserId(Arg.Any<string>()).Returns(1);
             Db.GetUserBy(Arg.Any<Expression<Func<User, bool>>>()).Returns(user);
-            Db.When(x => x.AddSignIn(Arg.Any<Domain.SignIn.Models.SignIn>())).Do(callInfo => 
+            Db.When(x => x.AddSignIn(Arg.Any<Domain.SignIn.Models.SignIn>())).Do(callInfo =>
             {
                 createdSignIn = (Domain.SignIn.Models.SignIn)callInfo[0];
             });
@@ -71,7 +71,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
             var result = await strut.RecordSignIn(recordUserSignInDto);
 
             //Assert
-            Assert.Equal(signInId, result);
+            Assert.Equal(signInId, result.Id);
             await Db.Received(1).SaveChangesAsync();
         }
 
@@ -87,7 +87,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
 
             Db.GetUserBy(Arg.Any<Expression<Func<User, bool>>>()).ReturnsNull();
 
-            Db.When(x => x.AddUser(Arg.Any<User>())).Do((callInfo) => 
+            Db.When(x => x.AddUser(Arg.Any<User>())).Do((callInfo) =>
             {
                 User user = (User)callInfo[0];
                 createdUser = user;

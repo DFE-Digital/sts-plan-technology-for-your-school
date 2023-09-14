@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System.Diagnostics.CodeAnalysis;
+using System.Security.Claims;
 
 namespace Dfe.PlanTech.Infrastructure.SignIn;
 
@@ -78,7 +79,7 @@ public static class DfeSignInSetup
         {
             OnUserInformationReceived = OnUserInformationReceivedEvent.OnUserInformationReceived,
             OnRedirectToIdentityProvider = DfeOpenIdConnectEvents.OnRedirectToIdentityProvider,
-            OnRedirectToIdentityProviderForSignOut = DfeOpenIdConnectEvents.OnRedirectToIdentityProviderForSignOut
+            OnRedirectToIdentityProviderForSignOut = DfeOpenIdConnectEvents.OnRedirectToIdentityProviderForSignOut,
         };
     }
 
