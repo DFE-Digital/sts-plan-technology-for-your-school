@@ -8,7 +8,7 @@ using Dfe.PlanTech.Web.Exceptions;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
-public class GetPageQuery : ContentRetriever
+public class GetPageQuery : ContentRetriever, IGetPageQuery
 {
     private readonly IQuestionnaireCacher _cacher;
 
@@ -35,7 +35,7 @@ public class GetPageQuery : ContentRetriever
                     new[] { new ContentQueryEquals() { Field = "fields.slug", Value = slug } });
                 var pages = await repository.GetEntities<Page>(options, cancellationToken);
 
-                var page = pages.FirstOrDefault() ?? throw new Exception($"Could not find page with slug {slug}");
+                var page = pages.FirstOrDefault() ?? throw new KeyNotFoundException($"Could not find page with slug {slug}");
 
                 if (page.DisplayTopicTitle)
                 {
