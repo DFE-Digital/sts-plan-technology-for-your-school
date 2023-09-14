@@ -16,12 +16,6 @@ describe("Check answers page", () => {
     cy.injectAxe();
   });
 
-  it("submits answers", () => {
-    submitAnswers();
-
-    cy.url().should("contain", "self-assessment");
-  });
-
   it("should show each selected question with answer", () => {
     cy.get("div.govuk-summary-list__row")
       .should("exist")
@@ -44,7 +38,6 @@ describe("Check answers page", () => {
           .invoke("text")
           .then((answer) => (questionWithAnswer.answer = answer.trim()));
 
-          
         //Ensure it matches one of the items in array
         cy.wrap(questionWithAnswer).then(() => {
           cy.log(JSON.stringify(selectedQuestionsWithAnswers));
@@ -66,12 +59,12 @@ describe("Check answers page", () => {
             .contains("Change")
             .and("have.attr", "aria-label")
             .and("contain", questionWithAnswer.question);
-          
-            cy.wrap(row)
+
+          cy.wrap(row)
             .find("a")
             .contains("Change")
             .and("have.attr", "title")
-              .and("equal", questionWithAnswer.question);
+            .and("equal", questionWithAnswer.question);
         });
       });
   });
@@ -84,6 +77,12 @@ describe("Check answers page", () => {
 
   it("passes accessibility tests", () => {
     cy.runAxe();
+  });
+
+  it("submits answers", () => {
+    submitAnswers();
+
+    cy.url().should("contain", "self-assessment");
   });
 });
 
