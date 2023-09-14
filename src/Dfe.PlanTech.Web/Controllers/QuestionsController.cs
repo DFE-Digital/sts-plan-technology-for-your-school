@@ -28,7 +28,7 @@ public class QuestionsController : BaseController<QuestionsController>
     public async Task<IActionResult> GetQuestionById(string? section, [FromServices] ISubmitAnswerCommand submitAnswerCommand, CancellationToken cancellationToken)
     {
         var parameterQuestionPage = TempData[TempDataConstants.Questions] != null ? DeserialiseParameter<TempDataQuestions>(TempData[TempDataConstants.Questions]) : new TempDataQuestions();
-        string id = string.Empty;
+        string? id = string.Empty;
 
         if (!string.IsNullOrEmpty(TempData.Peek("questionId") as string))
         {
@@ -44,7 +44,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
         var questionWithSubmission = await submitAnswerCommand.GetQuestionWithSubmission(parameterQuestionPage.SubmissionId, id, param?.SectionId ?? throw new NullReferenceException(nameof(param)), section, cancellationToken);
 
-        if (questionWithSubmission.Question == null && questionWithSubmission.Submission != null)
+        if (questionWithSubmission.Question == null)
         {
             TempData[TempDataConstants.CheckAnswers] = SerialiseParameter(new TempDataCheckAnswers() { SubmissionId = questionWithSubmission.Submission?.Id ?? throw new NullReferenceException(nameof(questionWithSubmission.Submission)), SectionId = param.SectionId, SectionName = param.SectionName, SectionSlug = param.SectionSlug });
             return RedirectToRoute("CheckAnswersRoute", new { sectionSlug = param.SectionSlug });
@@ -53,7 +53,7 @@ public class QuestionsController : BaseController<QuestionsController>
         {
             var viewModel = new QuestionViewModel()
             {
-                Question = questionWithSubmission.Question ?? throw new NullReferenceException(nameof(questionWithSubmission.Question)),
+                Question = questionWithSubmission.Question,
                 AnswerRef = parameterQuestionPage.AnswerRef,
                 Params = parameters?.ToString(),
                 SubmissionId = questionWithSubmission.Submission == null ? parameterQuestionPage.SubmissionId : questionWithSubmission.Submission.Id,
