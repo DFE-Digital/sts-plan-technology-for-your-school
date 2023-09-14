@@ -19,8 +19,8 @@ variable "azure_location" {
 
 variable "subdomains" {
   description = "A list of subdomains that can be associated with the primary domain"
-  type        = list(string)
-  default     = null
+  type        = set(string)
+  default     = []
 }
 variable "primary_fqdn" {
   description = "The fully qualified domain name for the primary dns zone"
