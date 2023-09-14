@@ -29,9 +29,7 @@ public class PagesController : BaseController<PagesController>
         if (!string.IsNullOrEmpty(param))
             TempData["Param"] = param;
 
-        var establishment = user.GetOrganisationData();
-
-        var viewModel = CreatePageModel(page, param, establishment.OrgName);
+        var viewModel = CreatePageModel(page, param, user);
 
         return View("Page", viewModel);
     }
@@ -49,20 +47,19 @@ public class PagesController : BaseController<PagesController>
         return View(new ServiceUnavailableViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 
-    private PageViewModel CreatePageModel(Page page, string param, string organisationName)
+    private PageViewModel CreatePageModel(Page page, string param, IUser user)
     {
         ViewData["Title"] = page.Title?.Text ?? "Plan Technology For Your School";
 
-        if (page.DisplayOrganisationName)
-        {
-            page.OrganisationName = organisationName;
-        }
-
-        return new PageViewModel()
+        var viewModel = new PageViewModel()
         {
             Page = page,
-            Param = param,
+            Param = param
         };
+
+        viewModel.TryLoadOrganisationName(HttpContext, user, logger);
+
+        return viewModel;
     }
 
     /// <summary>

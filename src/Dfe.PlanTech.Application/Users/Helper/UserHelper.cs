@@ -63,7 +63,7 @@ public class UserHelper : IUser
 
     public EstablishmentDto GetOrganisationData()
     {
-        var orgDetails = _httpContextAccessor.HttpContext.User.Claims.First(x => x.Type.Contains(ORG_CLAIM_TYPE))?.Value ??
+        var orgDetails = _httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(x => x.Type.Contains(ORG_CLAIM_TYPE))?.Value ??
                     throw new KeyNotFoundException($"Could not find {ORG_CLAIM_TYPE} claim type");
 
         var establishment = JsonSerializer.Deserialize<EstablishmentDto>(orgDetails);
