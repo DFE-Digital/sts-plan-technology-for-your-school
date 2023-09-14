@@ -23,6 +23,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
     {
         private const string INDEX_SLUG = "/";
         private const string INDEX_TITLE = "Index";
+        private const string SELF_ASSESSMENT_SLUG = "self-assessment";
         ICookieService cookiesSubstitute = Substitute.For<ICookieService>();
         IUser userSubstitute = Substitute.For<IUser>();
 
@@ -34,6 +35,16 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 Title = new Title()
                 {
                     Text = "Landing Page Title"
+                },
+                Content = Array.Empty<IContentComponent>()
+            },
+            new Page()
+            {
+                Slug = "self-assessment",
+                DisplayOrganisationName = true,
+                Title = new Title()
+                {
+                    Text = "self-assessment"
                 },
                 Content = Array.Empty<IContentComponent>()
             },
@@ -151,9 +162,42 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.IsType<PageViewModel>(model);
 
             var asPage = model as PageViewModel;
-            Assert.Equal(establishment.OrgName, asPage!.Page.OrganisationName);
             Assert.Equal(INDEX_SLUG, asPage!.Page.Slug);
             Assert.Contains(INDEX_TITLE, asPage!.Page.Title!.Text);
+        }
+        
+        [Fact]
+        public async Task Should_SetOrganisationName_When_DisplayOrganisationNameIsTrue()
+        {
+            var cookie = new DfeCookie { HasApproved = true };
+            cookiesSubstitute.GetCookie().Returns(cookie);
+            
+            var establishment = new EstablishmentDto()
+            {
+                OrgName = "Test Org",
+                Ukprn = "12345678",
+                Urn = "123456",
+                Type = new EstablishmentTypeDto()
+                {
+                    Name = "Test Name"
+                }
+            };
+            
+            userSubstitute.GetOrganisationData().Returns(establishment);
+
+            var result = await _controller.GetByRoute(SELF_ASSESSMENT_SLUG, _query, userSubstitute, CancellationToken.None);
+
+            Assert.IsType<ViewResult>(result);
+
+            var viewResult = result as ViewResult;
+
+            var model = viewResult!.Model;
+
+            Assert.IsType<PageViewModel>(model);
+
+            var asPage = model as PageViewModel;
+            Assert.Equal(establishment.OrgName, asPage!.Page.OrganisationName);
+            Assert.Equal(SELF_ASSESSMENT_SLUG, asPage!.Page.Slug);
         }
 
         [Fact]
