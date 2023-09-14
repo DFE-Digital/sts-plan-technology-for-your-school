@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Application.Helpers;
 /// <summary>
 /// Adds CQRS classes to application
 /// </summary>
-public static class CQRSServicesSetup
+public static class QueryServiceSetup
 {
     /// <summary>
     /// Adds CQRS commands/queries as services

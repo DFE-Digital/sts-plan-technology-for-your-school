@@ -35,7 +35,7 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
                     new[] { new ContentQueryEquals() { Field = "fields.slug", Value = slug } });
                 var pages = await repository.GetEntities<Page>(options, cancellationToken);
 
-                var page = pages.FirstOrDefault() ?? throw new Exception($"Could not find page with slug {slug}");
+                var page = pages.FirstOrDefault() ?? throw new KeyNotFoundException($"Could not find page with slug {slug}");
 
                 if (page.DisplayTopicTitle)
                 {
