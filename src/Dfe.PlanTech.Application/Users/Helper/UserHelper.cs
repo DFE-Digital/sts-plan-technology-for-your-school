@@ -51,7 +51,7 @@ namespace Dfe.PlanTech.Application.Users.Helper
 
             var establishmentId = await _getEstablishmentIdQuery.GetEstablishmentId(reference) ?? await SetEstablishment();
 
-            return Convert.ToInt16(establishmentId);;
+            return Convert.ToInt16(establishmentId);
         }
 
         public async Task<int> SetEstablishment()
