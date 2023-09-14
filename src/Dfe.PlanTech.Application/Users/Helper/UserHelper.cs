@@ -56,6 +56,7 @@ namespace Dfe.PlanTech.Application.Users.Helper
         public async Task<int> SetEstablishment()
         {
             var establishmentDto = GetOrganisationData();
+            var establishmentDto = GetOrganisationData();
 
             var establishmentId = await _createEstablishmentCommand.CreateEstablishment(establishmentDto);
 
