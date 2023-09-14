@@ -21,13 +21,13 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
         _getUserIdQuery = getUserIdQuery;
     }
 
-    public async Task<int> RecordSignIn(RecordUserSignInDto recordUserSignInDto)
+    public async Task<Domain.SignIn.Models.SignIn> RecordSignIn(RecordUserSignInDto recordUserSignInDto)
     {
         var signIn = await CreateSignIn(recordUserSignInDto);
 
-        var signInId = await AddSignInDetails(signIn);
+        await AddSignInDetails(signIn);
 
-        return signInId;
+        return signIn;
     }
 
     /// <summary>

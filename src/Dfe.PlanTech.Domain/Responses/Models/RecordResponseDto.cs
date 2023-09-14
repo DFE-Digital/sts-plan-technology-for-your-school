@@ -1,17 +1,16 @@
-﻿namespace Dfe.PlanTech.Domain.Responses.Models
+﻿namespace Dfe.PlanTech.Domain.Responses.Models;
+
+public class RecordResponseDto
 {
-    public class RecordResponseDto
-    {
-        public int UserId { get; set; }
+    public int UserId { get; set; }
 
-        public int SubmissionId { get; set; }
+    public int SubmissionId { get; set; }
 
-        public int QuestionId { get; set; }
+    public ContentfulReference Question { get; init; }
 
-        public int AnswerId { get; set; }
+    public ContentfulReference Answer { get; init; }
 
-        public string Maturity { get; set; } = null!;
+    public string Maturity { get; set; } = null!;
 
-        public DateTime? DateCreated { get; set; }
-    }
+    public DateTime? DateCreated { get; set; }
 }

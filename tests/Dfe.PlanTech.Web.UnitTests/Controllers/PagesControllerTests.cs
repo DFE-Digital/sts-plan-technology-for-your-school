@@ -1,11 +1,8 @@
-using Dfe.PlanTech.Application.Caching.Interfaces;
-using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Cookie.Interfaces;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Cookie;
-using Dfe.PlanTech.Infrastructure.Application.Models;
+using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Http;
@@ -21,56 +18,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
     {
         private const string INDEX_SLUG = "/";
         private const string INDEX_TITLE = "Index";
+        private const string SELF_ASSESSMENT_SLUG = "self-assessment";
         ICookieService cookiesSubstitute = Substitute.For<ICookieService>();
-
-        private readonly List<Page> _pages = new()
-        {
-            new Page()
-            {
-                Slug = "Landing",
-                Title = new Title()
-                {
-                    Text = "Landing Page Title"
-                },
-                Content = Array.Empty<IContentComponent>()
-            },
-            new Page()
-            {
-                Slug = "Other Page",
-                Title = new Title()
-                {
-                    Text = "Other Page Title"
-                },
-                Content = Array.Empty<IContentComponent>()
-            },
-            new Page()
-            {
-                Slug = INDEX_SLUG,
-                Title = new Title()
-                {
-                    Text = INDEX_TITLE,
-                },
-                Content = Array.Empty<IContentComponent>()
-            },
-            new Page()
-            {
-                Slug = "accessibility",
-                Title = new Title()
-                {
-                    Text = "Accessibility Page"
-                },
-                Content = Array.Empty<IContentComponent>()
-            },
-            new Page()
-            {
-                Slug = "privacy-policy",
-                Title = new Title()
-                {
-                    Text = "Privacy Policy Page"
-                },
-                Content = Array.Empty<IContentComponent>()
-            }
-        };
+        IUser userSubstitute = Substitute.For<IUser>();
 
         private readonly PagesController _controller;
 
@@ -92,8 +42,30 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var cookie = new DfeCookie { HasApproved = true };
             cookiesSubstitute.GetCookie().Returns(cookie);
-            var page = _pages.FirstOrDefault(page => page.Slug == INDEX_SLUG);
-            var result = _controller.GetByRoute(INDEX_SLUG, page!);
+
+            var establishment = new EstablishmentDto()
+            {
+                OrgName = "Test Org",
+                Ukprn = "12345678",
+                Urn = "123456",
+                Type = new EstablishmentTypeDto()
+                {
+                    Name = "Test Name"
+                }
+            };
+
+            userSubstitute.GetOrganisationData().Returns(establishment);
+
+            var page = new Page()
+            {
+                Slug = INDEX_SLUG,
+                Title = new Title()
+                {
+                    Text = INDEX_TITLE
+                }
+            };
+
+            var result = _controller.GetByRoute(INDEX_SLUG, page, userSubstitute);
 
             Assert.IsType<ViewResult>(result);
 
@@ -109,9 +81,89 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public void Should_ThrowError_When_NoRouteFound()
+        public void Should_SetOrganisationName_When_DisplayOrganisationNameIsTrue()
         {
-            Assert.ThrowsAny<Exception>(() => _controller.GetByRoute("NOT A VALID ROUTE", null!));
+            var cookie = new DfeCookie { HasApproved = true };
+            cookiesSubstitute.GetCookie().Returns(cookie);
+
+            var establishment = new EstablishmentDto()
+            {
+                OrgName = "Test Org",
+                Ukprn = "12345678",
+                Urn = "123456",
+                Type = new EstablishmentTypeDto()
+                {
+                    Name = "Test Name"
+                }
+            };
+            userSubstitute.GetOrganisationData().Returns(establishment);
+
+            var page = new Page()
+            {
+                Slug = SELF_ASSESSMENT_SLUG,
+                Title = new Title()
+                {
+                    Text = "Self assessment"
+                },
+                DisplayOrganisationName = true
+            };
+
+            var result = _controller.GetByRoute(SELF_ASSESSMENT_SLUG, page, userSubstitute);
+
+            Assert.IsType<ViewResult>(result);
+
+            var viewResult = result as ViewResult;
+
+            var model = viewResult!.Model;
+
+            Assert.IsType<PageViewModel>(model);
+
+            var asPage = model as PageViewModel;
+            Assert.Equal(establishment.OrgName, asPage!.Page.OrganisationName);
+            Assert.Equal(SELF_ASSESSMENT_SLUG, asPage!.Page.Slug);
+        }
+
+          [Fact]
+        public void Should_Not_OrganisationName_When_DisplayOrganisationName_Is_False()
+        {
+            var cookie = new DfeCookie { HasApproved = true };
+            cookiesSubstitute.GetCookie().Returns(cookie);
+
+            var establishment = new EstablishmentDto()
+            {
+                OrgName = "Test Org",
+                Ukprn = "12345678",
+                Urn = "123456",
+                Type = new EstablishmentTypeDto()
+                {
+                    Name = "Test Name"
+                }
+            };
+            userSubstitute.GetOrganisationData().Returns(establishment);
+
+            var page = new Page()
+            {
+                Slug = SELF_ASSESSMENT_SLUG,
+                Title = new Title()
+                {
+                    Text = "Self assessment"
+                },
+                DisplayOrganisationName = false
+            };
+
+            var result = _controller.GetByRoute(SELF_ASSESSMENT_SLUG, page, userSubstitute);
+
+            Assert.IsType<ViewResult>(result);
+
+            var viewResult = result as ViewResult;
+
+            var model = viewResult!.Model;
+
+            Assert.IsType<PageViewModel>(model);
+
+            var asPage = model as PageViewModel;
+            Assert.Null(asPage!.Page.OrganisationName);
+            Assert.Equal(SELF_ASSESSMENT_SLUG, asPage!.Page.Slug);
         }
 
         [Fact]

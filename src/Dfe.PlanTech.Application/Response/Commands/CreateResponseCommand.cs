@@ -19,8 +19,16 @@ namespace Dfe.PlanTech.Application.Response.Commands
             {
                 UserId = recordResponseDto.UserId,
                 SubmissionId = recordResponseDto.SubmissionId,
-                QuestionId = recordResponseDto.QuestionId,
-                AnswerId = recordResponseDto.AnswerId,
+                Question = new Domain.Questions.Models.Question()
+                {
+                    QuestionText = recordResponseDto.Question.Text,
+                    ContentfulRef = recordResponseDto.Question.Id,
+                },
+                Answer = new Domain.Answers.Models.Answer()
+                {
+                    AnswerText = recordResponseDto.Answer.Text,
+                    ContentfulRef = recordResponseDto.Answer.Id,
+                },
                 Maturity = recordResponseDto.Maturity,
             };
 

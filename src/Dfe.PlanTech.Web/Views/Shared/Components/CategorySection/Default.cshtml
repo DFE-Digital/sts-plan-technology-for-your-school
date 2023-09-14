@@ -25,7 +25,7 @@ else
             @if (categorySectionDtoItem.Slug != null)
             {
                 <task-list-item-name>
-                    <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@categorySectionDtoItem.Slug"
+                     <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@categorySectionDtoItem.Slug"
                         class="govuk-link">
                         @categorySectionDtoItem.Name
                     </a>

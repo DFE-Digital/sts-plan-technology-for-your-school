@@ -16,7 +16,6 @@ describe("Interstitial page", () => {
 
     it("should have button which links to a question", () => {
         cy.get("a.govuk-button.govuk-link").should("exist");
-        cy.get("a.govuk-button.govuk-link").should("have.attr", "href").and("include", "question");
     });
 
     it("should link back to self-assessment", () => {

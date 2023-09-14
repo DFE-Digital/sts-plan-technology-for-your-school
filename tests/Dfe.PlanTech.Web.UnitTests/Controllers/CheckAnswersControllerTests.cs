@@ -71,6 +71,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _contentRepositorySubstitute = SetupRepositorySubstitute();
 
             GetSectionQuery getSectionQuerySubstitute = Substitute.For<GetSectionQuery>(_contentRepositorySubstitute);
+            GetQuestionQuery getQuestionQuerySubstitute = Substitute.For<GetQuestionQuery>(questionnaireCacherSubstitute, _contentRepositorySubstitute);
             _getPageQuerySubstitute = Substitute.For<GetPageQuery>(questionnaireCacherSubstitute, _contentRepositorySubstitute);
 
             _getLatestResponseListForSubmissionQuerySubstitute = Substitute.For<IGetLatestResponseListForSubmissionQuery>();
@@ -80,7 +81,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             _processCheckAnswerDtoCommand = new ProcessCheckAnswerDtoCommand(getSectionQuerySubstitute, _getLatestResponseListForSubmissionQuerySubstitute, _calculateMaturityCommandSubstitute);
 
-            _checkAnswersController = new CheckAnswersController(loggerSubstitute);
+            _checkAnswersController = new CheckAnswersController(loggerSubstitute, getQuestionQuerySubstitute);
 
             _checkAnswersController.TempData = tempDataSubstitute;
         }
@@ -241,19 +242,19 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public void CheckAnswersController_ChangeAnswer_RedirectsToView()
+        public async Task CheckAnswersController_ChangeAnswer_RedirectsToView()
         {
             Domain.Questions.Models.Question question = new Domain.Questions.Models.Question() { ContentfulRef = "QuestionRef-1", QuestionText = "Question Text" };
             Domain.Answers.Models.Answer answer = new Domain.Answers.Models.Answer() { ContentfulRef = "AnswerRef-1", AnswerText = "Answer Text" };
 
-            var result = _checkAnswersController.ChangeAnswer(question.ContentfulRef, answer.ContentfulRef, SubmissionId);
 
-            Assert.IsType<RedirectToActionResult>(result);
+            var result = await _checkAnswersController.ChangeAnswer(question.ContentfulRef, answer.ContentfulRef, SubmissionId, string.Empty);
 
-            var redirectToActionResult = result as RedirectToActionResult;
+            Assert.IsType<RedirectToRouteResult>(result);
+
+            var redirectToActionResult = result as RedirectToRouteResult;
 
             Assert.NotNull(redirectToActionResult);
-            Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
             Assert.NotNull(_checkAnswersController.TempData[TempDataConstants.Questions]);
             Assert.IsType<string>(_checkAnswersController.TempData[TempDataConstants.Questions]);
             var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_checkAnswersController.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;

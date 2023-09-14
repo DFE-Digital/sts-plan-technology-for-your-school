@@ -4,5 +4,5 @@ namespace Dfe.PlanTech.Application.Users.Interfaces;
 
 public interface IRecordUserSignInCommand
 {
-    Task<int> RecordSignIn(RecordUserSignInDto recordUserSignInDto);
+    Task<Domain.SignIn.Models.SignIn> RecordSignIn(RecordUserSignInDto recordUserSignInDto);
 }

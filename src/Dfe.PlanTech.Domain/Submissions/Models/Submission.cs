@@ -1,25 +1,29 @@
-﻿namespace Dfe.PlanTech.Domain.Submissions.Models
+﻿using Dfe.PlanTech.Domain.Establishments.Models;
+using Dfe.PlanTech.Domain.Responses.Models;
+
+namespace Dfe.PlanTech.Domain.Submissions.Models;
+
+public class Submission
 {
-    public class Submission
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        public int EstablishmentId { get; set; }
+    public int EstablishmentId { get; set; }
 
-        public bool Completed { get; set; }
+    public Establishment Establishmet { get; set; } = null!;
 
-        public string SectionId { get; set; } = null!;
+    public bool Completed { get; set; }
 
-        public string SectionName { get; set; } = null!;
+    public required string SectionId { get; set; }
 
-        public string? Maturity { get; set; }
+    public required string SectionName { get; set; }
 
-        public int RecomendationId { get; set; }
+    public string? Maturity { get; set; }
 
-        public DateTime DateCreated { get; set; }
+    public DateTime DateCreated { get; set; }
 
-        public DateTime? DateLastUpdated { get; set; }
+    public DateTime? DateLastUpdated { get; set; }
 
-        public DateTime? DateCompleted { get; set; }
-    }
+    public DateTime? DateCompleted { get; set; }
+
+    public List<Response> Responses { get; set; } = new();
 }
