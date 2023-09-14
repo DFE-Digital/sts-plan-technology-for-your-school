@@ -14,4 +14,8 @@ public class EstablishmentDto
 
     [JsonPropertyName("name")]
     public string OrgName { get; set; } = null!;
+
+    public bool IsValid => !string.IsNullOrEmpty(OrgName) && string.IsNullOrEmpty(Urn) && string.IsNullOrEmpty(Ukprn);
+
+    public string Reference => Urn ?? Ukprn ?? throw new Exception($"Both {nameof(Urn)} and {nameof(Ukprn)} are invalid");
 }

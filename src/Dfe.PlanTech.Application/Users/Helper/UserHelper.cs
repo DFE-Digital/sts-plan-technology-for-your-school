@@ -10,6 +10,7 @@ namespace Dfe.PlanTech.Application.Users.Helper
 {
     public class UserHelper : IUser
     {
+        private const string ORG_CLAIM_TYPE = "organisation";
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ICreateEstablishmentCommand _createEstablishmentCommand;
         private readonly IGetUserIdQuery _getUserIdQuery;
@@ -45,34 +46,29 @@ namespace Dfe.PlanTech.Application.Users.Helper
             var dbEstablishmentId = GetDbIdFromClaim(ClaimConstants.DB_ESTABLISHMENT_ID);
             if (dbEstablishmentId != null) return dbEstablishmentId.Value;
 
-            var establishmentDto = _GetOrganisationData();
+            var establishmentDto = GetOrganisationData();
 
-            var reference = (establishmentDto.Urn ?? establishmentDto.Ukprn) ?? throw new Exception("Establishment has no Urn nor Ukprn");
-
-            var establishmentId = await _getEstablishmentIdQuery.GetEstablishmentId(reference) ?? await SetEstablishment();
+            var establishmentId = await _getEstablishmentIdQuery.GetEstablishmentId(establishmentDto.Reference) ?? await SetEstablishment();
 
             return Convert.ToInt16(establishmentId);
         }
 
         public async Task<int> SetEstablishment()
         {
-            var establishmentDto = _GetOrganisationData();
+            var establishmentDto = GetOrganisationData();
 
             var establishmentId = await _createEstablishmentCommand.CreateEstablishment(establishmentDto);
 
             return establishmentId;
         }
 
-        private EstablishmentDto _GetOrganisationData()
+        private EstablishmentDto GetOrganisationData()
         {
+            var orgDetails = _httpContextAccessor.HttpContext.User.Claims.First(x => x.Type.Contains(ORG_CLAIM_TYPE))?.Value ??
+                        throw new KeyNotFoundException($"Could not find {ORG_CLAIM_TYPE} claim type");
 
-            var claims = _httpContextAccessor.HttpContext.User.Claims.ToList();
-            var orgDetails = claims?.Find(x => x.Type.Contains("organisation"))?.Value;
-
-            orgDetails ??= "{}";
             var establishment = JsonSerializer.Deserialize<EstablishmentDto>(orgDetails);
-
-            establishment ??= new EstablishmentDto();
+            if (establishment == null || !establishment.IsValid) throw new Exception("Establishment was not expected format");
 
             return establishment;
         }
