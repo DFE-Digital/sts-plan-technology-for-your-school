@@ -336,6 +336,63 @@ public class QuestionsControllerTests
     }
 
     [Fact]
+    public async Task GetQuestionById_Should_ReturnUnansweredQuestion_WhenQuestionIdPassedThroughViaTempdata()
+    {
+        _controller.TempData["param"] = "SectionName+SectionId+SectionSlug";
+
+        var questionRef = "Question1";
+
+        List<Submission> submissionList = new List<Submission>()
+            {
+                new Submission()
+                {
+                    Id = 1,
+                    EstablishmentId = 0,
+                    Completed = false,
+                    SectionId = "SectionId",
+                    SectionName = "SectionName",
+                    Maturity = null,
+                    DateCreated = DateTime.UtcNow,
+                    DateLastUpdated = null,
+                    DateCompleted = null
+                }
+            };
+
+        List<QuestionWithAnswer> questionWithAnswerList = new List<QuestionWithAnswer>()
+            {
+                new QuestionWithAnswer()
+                {
+                    QuestionRef = questionRef,
+                    QuestionText = "Question One",
+                    AnswerRef = "Answer1",
+                    AnswerText = "Question 1 - Answer 1"
+                }
+            };
+        var query = Arg.Any<IQueryable<Domain.Submissions.Models.Submission>>();
+        _databaseSubstitute.FirstOrDefaultAsync(query).Returns(submissionList[0]);
+
+        _getLatestResponseListForSubmissionQuerySubstitute.GetResponseListByDateCreated(1).Returns(questionWithAnswerList);
+
+        _controller.TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = null, SubmissionId = null });
+        _controller.TempData["questionId"] = "question1";
+
+        var result = await _controller.GetQuestionById(null, null, _submitAnswerCommand, CancellationToken.None);
+        Assert.IsType<ViewResult>(result);
+
+        var viewResult = result as ViewResult;
+
+        var model = viewResult!.Model;
+
+        Assert.IsType<QuestionViewModel>(model);
+
+        var question = model as QuestionViewModel;
+
+        Assert.NotNull(question);
+        Assert.Equal("Question2", question.Question.Sys.Id);
+    }
+
+
+    [Fact]
     public async Task GetQuestionById_Should_RedirectToCheckAnswersController_If_PastSubmission_IsNotCompleted_And_ThereIsNo_NextQuestion()
     {
         _controller.TempData["param"] = "SectionName+SectionId+SectionSlug";
