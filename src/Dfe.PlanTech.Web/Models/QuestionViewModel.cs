@@ -15,4 +15,6 @@ public class QuestionViewModel
     public int? SubmissionId { get; init; }
 
     public string? QuestionErrorMessage { get; init; }
+
+    public string? Slug { get; init; }
 }

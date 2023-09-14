@@ -13,7 +13,8 @@ public class SecurityHeadersMiddleware
   }
 
   public async Task InvokeAsync(HttpContext context)
-  {
+  
+    {
     AddFramejackingPreventHeaders(context);
 
     await _next(context);

@@ -26,11 +26,13 @@ public class PagesController : BaseController<PagesController>
 
     [Authorize]
     [HttpGet("/{route?}")]
+    [Route("~/{SectionSlug}/recommendation/{route?}", Name = "GetPageByRouteAndSection")]
     public async Task<IActionResult> GetByRoute(string route, [FromServices] GetPageQuery query, [FromServices] IUser user, CancellationToken cancellationToken)
     {
         string slug = GetSlug(route);
         string param = "";
-
+        TempData["SectionSlug"] = route;
+  
         if (TempData[slug] is string tempDataSlug) param = tempDataSlug;
 
         if (!string.IsNullOrEmpty(param))
