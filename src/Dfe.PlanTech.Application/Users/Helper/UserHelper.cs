@@ -5,78 +5,77 @@ using Dfe.PlanTech.Domain.SignIn.Enums;
 using Microsoft.AspNetCore.Http;
 using System.Text.Json;
 
-namespace Dfe.PlanTech.Application.Users.Helper
+namespace Dfe.PlanTech.Application.Users.Helper;
+
+public class UserHelper : IUser
 {
-    public class UserHelper : IUser
+    private const string ORG_CLAIM_TYPE = "organisation";
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ICreateEstablishmentCommand _createEstablishmentCommand;
+    private readonly IGetUserIdQuery _getUserIdQuery;
+    private readonly IGetEstablishmentIdQuery _getEstablishmentIdQuery;
+
+    public UserHelper(IHttpContextAccessor httpContextAccessor,
+                        IPlanTechDbContext db,
+                        ICreateEstablishmentCommand createEstablishmentCommand,
+                        IGetUserIdQuery getUserIdQuery,
+                        IGetEstablishmentIdQuery getEstablishmentIdQuery)
     {
-        private const string ORG_CLAIM_TYPE = "organisation";
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly ICreateEstablishmentCommand _createEstablishmentCommand;
-        private readonly IGetUserIdQuery _getUserIdQuery;
-        private readonly IGetEstablishmentIdQuery _getEstablishmentIdQuery;
+        _httpContextAccessor = httpContextAccessor;
+        _createEstablishmentCommand = createEstablishmentCommand;
+        _getUserIdQuery = getUserIdQuery;
+        _getEstablishmentIdQuery = getEstablishmentIdQuery;
+    }
 
-        public UserHelper(IHttpContextAccessor httpContextAccessor,
-                            IPlanTechDbContext db,
-                            ICreateEstablishmentCommand createEstablishmentCommand,
-                            IGetUserIdQuery getUserIdQuery,
-                            IGetEstablishmentIdQuery getEstablishmentIdQuery)
-        {
-            _httpContextAccessor = httpContextAccessor;
-            _createEstablishmentCommand = createEstablishmentCommand;
-            _getUserIdQuery = getUserIdQuery;
-            _getEstablishmentIdQuery = getEstablishmentIdQuery;
-        }
+    public async Task<int?> GetCurrentUserId()
+    {
+        var dbUserId = GetDbIdFromClaim(ClaimConstants.DB_USER_ID);
+        if (dbUserId != null) return dbUserId;
 
-        public async Task<int?> GetCurrentUserId()
-        {
-            var dbUserId = GetDbIdFromClaim(ClaimConstants.DB_USER_ID);
-            if (dbUserId != null) return dbUserId;
+        var userId = _httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(x => x.Type.Contains("nameidentifier"))?.Value;
 
-            var userId = _httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(x => x.Type.Contains("nameidentifier"))?.Value;
+        if (userId is null)
+            return null;
 
-            if (userId is null)
-                return null;
+        return await _getUserIdQuery.GetUserId(userId);
+    }
 
-            return await _getUserIdQuery.GetUserId(userId);
-        }
+    public async Task<int> GetEstablishmentId()
+    {
+        var dbEstablishmentId = GetDbIdFromClaim(ClaimConstants.DB_ESTABLISHMENT_ID);
+        if (dbEstablishmentId != null) return dbEstablishmentId.Value;
 
-        public async Task<int> GetEstablishmentId()
-        {
-            var dbEstablishmentId = GetDbIdFromClaim(ClaimConstants.DB_ESTABLISHMENT_ID);
-            if (dbEstablishmentId != null) return dbEstablishmentId.Value;
+        var establishmentDto = GetOrganisationData();
 
-            var establishmentDto = GetOrganisationData();
+        var establishmentId = await _getEstablishmentIdQuery.GetEstablishmentId(establishmentDto.Reference) ?? await SetEstablishment();
 
-            var establishmentId = await _getEstablishmentIdQuery.GetEstablishmentId(establishmentDto.Reference) ?? await SetEstablishment();
+        return Convert.ToInt16(establishmentId);
+    }
 
-            return Convert.ToInt16(establishmentId);
-        }
+    public async Task<int> SetEstablishment()
+    {
+        var establishmentDto = GetOrganisationData();
 
-        public async Task<int> SetEstablishment()
-        {
-            var establishmentDto = GetOrganisationData();
+        var establishmentId = await _createEstablishmentCommand.CreateEstablishment(establishmentDto);
 
-            var establishmentId = await _createEstablishmentCommand.CreateEstablishment(establishmentDto);
+        return establishmentId;
+    }
 
-            return establishmentId;
-        }
+    public EstablishmentDto GetOrganisationData()
+    {
+        var orgDetails = _httpContextAccessor.HttpContext.User.Claims.First(x => x.Type.Contains(ORG_CLAIM_TYPE))?.Value ??
+                    throw new KeyNotFoundException($"Could not find {ORG_CLAIM_TYPE} claim type");
 
-        public EstablishmentDto GetOrganisationData()
-        {
-            var orgDetails = _httpContextAccessor.HttpContext.User.Claims.First(x => x.Type.Contains(ORG_CLAIM_TYPE))?.Value ??
-                        throw new KeyNotFoundException($"Could not find {ORG_CLAIM_TYPE} claim type");
+        var establishment = JsonSerializer.Deserialize<EstablishmentDto>(orgDetails);
+        if (establishment == null || !establishment.IsValid) throw new Exception("Establishment was not expected format");
 
-            var establishment = JsonSerializer.Deserialize<EstablishmentDto>(orgDetails);
-            if (establishment == null || !establishment.IsValid) throw new Exception("Establishment was not expected format");
+        return establishment;
+    }
 
-            return establishment;
-        }
+    private int? GetDbIdFromClaim(string type)
+    {
+        var id = _httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == type)?.Value;
 
-        private int? GetDbIdFromClaim(string type)
-        {
-            var id = _httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == type)?.Value;
-
-            return id != null ? int.Parse(id) : null;
-        }
+        return id != null ? int.Parse(id) : null;
     }
 }
