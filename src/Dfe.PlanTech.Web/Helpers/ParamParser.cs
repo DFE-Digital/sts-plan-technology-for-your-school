@@ -23,7 +23,7 @@ namespace Dfe.PlanTech.Web.Helpers
                 {
                     SectionName = splitParams.Length > 0 ? splitParams[0].ToString() : string.Empty,
                     SectionId = splitParams.Length > 1 ? splitParams[1].ToString() : string.Empty,
-                    SectionSlug = splitParams.Length > 1 ? splitParams[2].ToString() : string.Empty,
+                    SectionSlug = splitParams.Length > 2 ? splitParams[2].ToString() : string.Empty,
                 };
             }
         }

@@ -531,12 +531,11 @@ public class QuestionsControllerTests
 
         var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
 
-        Assert.IsType<RedirectToActionResult>(result);
+        Assert.IsType<RedirectToRouteResult>(result);
 
-        var redirectToActionResult = result as RedirectToActionResult;
+        var redirectToActionResult = result as RedirectToRouteResult;
 
         Assert.NotNull(redirectToActionResult);
-        Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
         Assert.NotNull(_controller.TempData[TempDataConstants.Questions]);
         Assert.IsType<string>(_controller.TempData[TempDataConstants.Questions]);
         var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_controller.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
@@ -550,17 +549,16 @@ public class QuestionsControllerTests
         {
             QuestionId = "Question1",
             ChosenAnswerId = "Answer1",
-            Params = "qwe lqwd +wdqwdqwdq+123dqwd   "
+            Params = "qwe lqwd +wdqwdqwdq+123dqwd   +testSlug"
         };
 
         var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
 
-        Assert.IsType<RedirectToActionResult>(result);
+        Assert.IsType<RedirectToRouteResult>(result);
 
-        var redirectToActionResult = result as RedirectToActionResult;
+        var redirectToActionResult = result as RedirectToRouteResult;
 
         Assert.NotNull(redirectToActionResult);
-        Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
         Assert.NotNull(_controller.TempData[TempDataConstants.Questions]);
         Assert.IsType<string>(_controller.TempData[TempDataConstants.Questions]);
         var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_controller.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
@@ -579,12 +577,11 @@ public class QuestionsControllerTests
 
         var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
 
-        Assert.IsType<RedirectToActionResult>(result);
+        Assert.IsType<RedirectToRouteResult>(result);
 
-        var redirectToActionResult = result as RedirectToActionResult;
+        var redirectToActionResult = result as RedirectToRouteResult;
 
         Assert.NotNull(redirectToActionResult);
-        Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
         Assert.NotNull(_controller.TempData[TempDataConstants.Questions]);
         Assert.IsType<string>(_controller.TempData[TempDataConstants.Questions]);
         var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_controller.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
