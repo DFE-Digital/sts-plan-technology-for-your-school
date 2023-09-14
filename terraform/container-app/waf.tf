@@ -16,6 +16,7 @@ module "waf" {
     "container-app-url" = {
       domain               = local.cdn_frontdoor_origin_host_header_override
       create_custom_domain = local.cdn_create_custom_domain
+      custom_fqdn          = local.cdn_frontdoor_origin_host_header_override
     }
   }
 
