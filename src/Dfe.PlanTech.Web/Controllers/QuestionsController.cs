@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Application.Questionnaire.Queries;
-using Dfe.PlanTech.Application.Submission.Interface;
 using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Constants;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -54,7 +53,7 @@ public class QuestionsController : BaseController<QuestionsController>
         {
             var viewModel = new QuestionViewModel()
             {
-                Question = questionWithSubmission.Question,
+                Question = questionWithSubmission.Question ?? throw new NullReferenceException(nameof(questionWithSubmission.Question)),
                 AnswerRef = parameterQuestionPage.AnswerRef,
                 Params = parameters?.ToString(),
                 SubmissionId = questionWithSubmission.Submission == null ? parameterQuestionPage.SubmissionId : questionWithSubmission.Submission.Id,
@@ -63,72 +62,73 @@ public class QuestionsController : BaseController<QuestionsController>
 
             return View("Question", viewModel);
         }
+    }
 
-        [HttpPost("/question/SubmitAnswer")]
-        public async Task<IActionResult> SubmitAnswer(SubmitAnswerDto submitAnswerDto, [FromServices] ISubmitAnswerCommand submitAnswerCommand)
+    [HttpPost("/question/SubmitAnswer")]
+    public async Task<IActionResult> SubmitAnswer(SubmitAnswerDto submitAnswerDto, [FromServices] ISubmitAnswerCommand submitAnswerCommand)
+    {
+        if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
+
+        Params param = new Params();
+        if (!string.IsNullOrEmpty(submitAnswerDto.Params))
         {
-            if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
+            param = ParamParser._ParseParameters(submitAnswerDto.Params) ?? null!;
+            TempData["param"] = submitAnswerDto.Params;
+        }
 
-            Params param = new Params();
-            if (!string.IsNullOrEmpty(submitAnswerDto.Params))
+        if (!ModelState.IsValid)
+        {
+            TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions()
             {
-                param = ParamParser._ParseParameters(submitAnswerDto.Params) ?? null!;
-                TempData["param"] = submitAnswerDto.Params;
-            }
+                QuestionRef = submitAnswerDto.QuestionId,
+                SubmissionId = submitAnswerDto.SubmissionId,
+                NoSelectedAnswerErrorMessage = "You must select an answer to continue"
+            });
+            return RedirectToAction("GetQuestionById");
+        }
 
-            if (!ModelState.IsValid)
+        int submissionId;
+
+        try
+        {
+            submissionId = await submitAnswerCommand.SubmitAnswer(submitAnswerDto, param.SectionId, param.SectionName);
+        }
+        catch (Exception e)
+        {
+            logger.LogError("An error has occurred while submitting an answer with the following message: {} ", e.Message);
+
+            TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions()
             {
-                TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions()
-                {
-                    QuestionRef = submitAnswerDto.QuestionId,
-                    SubmissionId = submitAnswerDto.SubmissionId,
-                    NoSelectedAnswerErrorMessage = "You must select an answer to continue"
-                });
-                return RedirectToAction("GetQuestionById");
-            }
+                QuestionRef = submitAnswerDto.QuestionId,
+                SubmissionId = submitAnswerDto.SubmissionId,
+                NoSelectedAnswerErrorMessage = "Save failed. Please try again later."
+            });
+            return RedirectToAction("GetQuestionById");
+        }
 
-            int submissionId;
+        string? nextQuestionId;
 
-            try
-            {
-                submissionId = await submitAnswerCommand.SubmitAnswer(submitAnswerDto, param.SectionId, param.SectionName);
-            }
-            catch (Exception e)
-            {
-                logger.LogError("An error has occurred while submitting an answer with the following message: {} ", e.Message);
-
-                TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions()
-                {
-                    QuestionRef = submitAnswerDto.QuestionId,
-                    SubmissionId = submitAnswerDto.SubmissionId,
-                    NoSelectedAnswerErrorMessage = "Save failed. Please try again later."
-                });
-                return RedirectToAction("GetQuestionById");
-            }
-
-            string? nextQuestionId;
-
-            try
-            {
-                nextQuestionId = await submitAnswerCommand.GetNextQuestionId(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId);
-            }
-            catch (Exception e)
-            {
-                logger.LogError("An error has occurred while retrieving the next question with the following message: {} ", e.Message);
-                return Redirect("/service-unavailable");
-            }
+        try
+        {
+            nextQuestionId = await submitAnswerCommand.GetNextQuestionId(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId);
+        }
+        catch (Exception e)
+        {
+            logger.LogError("An error has occurred while retrieving the next question with the following message: {} ", e.Message);
+            return Redirect("/service-unavailable");
+        }
 
 
-            if (string.IsNullOrEmpty(nextQuestionId) || await submitAnswerCommand.NextQuestionIsAnswered(submissionId, nextQuestionId))
-            {
-                TempData[TempDataConstants.CheckAnswers] = SerialiseParameter(new TempDataCheckAnswers() { SubmissionId = submissionId, SectionId = param.SectionId, SectionName = param.SectionName });
-                return RedirectToRoute("CheckAnswersRoute", new { sectionSlug = param.SectionSlug });
-            }
-            else
-            {
-                TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions() { QuestionRef = nextQuestionId, SubmissionId = submissionId });
-                var question = await _getQuestionQuery.GetQuestionById(nextQuestionId);
-                return RedirectToRoute("SectionQuestionAnswer", new { sectionSlug = param.SectionSlug, question = question?.Slug });
-            }
+        if (string.IsNullOrEmpty(nextQuestionId) || await submitAnswerCommand.NextQuestionIsAnswered(submissionId, nextQuestionId))
+        {
+            TempData[TempDataConstants.CheckAnswers] = SerialiseParameter(new TempDataCheckAnswers() { SubmissionId = submissionId, SectionId = param.SectionId, SectionName = param.SectionName });
+            return RedirectToRoute("CheckAnswersRoute", new { sectionSlug = param.SectionSlug });
+        }
+        else
+        {
+            TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions() { QuestionRef = nextQuestionId, SubmissionId = submissionId });
+            var question = await _getQuestionQuery.GetQuestionById(nextQuestionId);
+            return RedirectToRoute("SectionQuestionAnswer", new { sectionSlug = param.SectionSlug, question = question?.Slug });
         }
     }
+}

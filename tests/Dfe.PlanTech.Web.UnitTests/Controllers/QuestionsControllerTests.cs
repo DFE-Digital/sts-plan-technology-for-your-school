@@ -117,7 +117,7 @@ public class QuestionsControllerTests
 
         IRecordQuestionCommand recordQuestionCommand = new RecordQuestionCommand(_databaseSubstitute);
 
-        IGetQuestionQuery getQuestionQuery = new GetQuestionQuery(_databaseSubstitute);
+        IGetQuestionQuery getQuestionQuery = new Application.Submission.Queries.GetQuestionQuery(_databaseSubstitute);
         IRecordAnswerCommand recordAnswerCommand = new RecordAnswerCommand(_databaseSubstitute);
         ICreateResponseCommand createResponseCommand = new CreateResponseCommand(_databaseSubstitute);
         IGetResponseQuery getResponseQuery = new GetResponseQuery(_databaseSubstitute);
@@ -382,6 +382,8 @@ public class QuestionsControllerTests
         _controller.TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = null, SubmissionId = null });
         _controller.TempData["questionId"] = "question1";
 
+        _getSectionQuerySubstitute.GetSectionById("SectionId").Returns(new Section() { Questions = _questions.ToArray() });
+
         var result = await _controller.GetQuestionById(null, _submitAnswerCommand, CancellationToken.None);
         Assert.IsType<ViewResult>(result);
 
@@ -442,11 +444,11 @@ public class QuestionsControllerTests
         _getSectionQuerySubstitute.GetSectionById("SectionId").Returns(new Section() { Questions = _questions.ToArray() });
 
         var result = await _controller.GetQuestionById(null, _submitAnswerCommand, CancellationToken.None);
-        Assert.IsType<RedirectToActionResult>(result);
+        Assert.IsType<RedirectToRouteResult>(result);
 
-        var redirectToActionResult = result as RedirectToRouteResult;
+        var redirectToRouteResult = result as RedirectToRouteResult;
 
-        Assert.NotNull(redirectToActionResult);
+        Assert.NotNull(redirectToRouteResult);
         Assert.NotNull(_controller.TempData[TempDataConstants.CheckAnswers]);
         Assert.IsType<string>(_controller.TempData[TempDataConstants.CheckAnswers]);
         var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataCheckAnswers>(_controller.TempData[TempDataConstants.CheckAnswers] as string ?? "")?.SubmissionId;
