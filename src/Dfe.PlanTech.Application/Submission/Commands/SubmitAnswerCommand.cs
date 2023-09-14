@@ -91,20 +91,12 @@ namespace Dfe.PlanTech.Application.Submission.Commands
 
                 if (submission != null && !submission.Completed)
                 {
-                    Domain.Questionnaire.Models.Question? nextUnansweredQuestion = await _GetNextUnansweredQuestion(submission.Id);
-                    Section section = await _getSectionQuery.GetSectionById(sectionId, CancellationToken.None) ?? throw new NullReferenceException(nameof(section));
+                    var nextUnansweredQuestion = await _GetNextUnansweredQuestion(submission.Id);
+                    var section = await _getSectionQuery.GetSectionById(sectionId, CancellationToken.None);
 
-                    if (nextUnansweredQuestion != null)
-                    {
-                        bool sectionContainsQuestion = Array.Exists(section.Questions, question => question.Sys.Id.Equals(nextUnansweredQuestion.Sys.Id));
-                        if (sectionContainsQuestion) return (nextUnansweredQuestion, submission);
-                    }
-                    else
-                    {
-                        List<QuestionWithAnswer> questionWithAnswerList = await _getLatestResponseListForSubmissionQuery.GetResponseListByDateCreated(submission.Id);
-                        bool sectionContainsQuestionList = questionWithAnswerList.TrueForAll(questionWithAnswer => Array.Exists(section.Questions, question => question.Sys.Id.Equals(questionWithAnswer.QuestionRef)));
-                        if (sectionContainsQuestionList) return (null, submission);
-                    }
+                    if (nextUnansweredQuestion == null) return (null, submission);
+
+                    if (section != null && Array.Exists(section.Questions, question => question.Sys.Id.Equals(nextUnansweredQuestion.Sys.Id))) return (nextUnansweredQuestion, submission);
                 }
             }
 
