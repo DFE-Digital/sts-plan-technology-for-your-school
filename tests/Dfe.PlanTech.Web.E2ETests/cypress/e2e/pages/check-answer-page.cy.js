@@ -69,20 +69,16 @@ describe("Check answers page", () => {
       });
   });
 
-  it("shows notification banner after submitting answers", () => {
-    submitAnswers();
-
-    cy.get("div.govuk-notification-banner__header").should("exist");
-  });
-
   it("passes accessibility tests", () => {
     cy.runAxe();
   });
 
-  it("submits answers", () => {
+  //This needs to be last on this test run, so that the question-page tests have a clean slate to work from!
+  it("submits answers and shows notification", () => {
     submitAnswers();
 
     cy.url().should("contain", "self-assessment");
+    cy.get("div.govuk-notification-banner__header").should("exist");
   });
 });
 
