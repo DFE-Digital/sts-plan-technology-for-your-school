@@ -13,7 +13,7 @@ namespace Dfe.PlanTech.Web.Helpers
 
             string[]? splitParams = parameters.Split('+');
 
-            if (splitParams is null)
+            if (!splitParams.Any())
             {
                 return null;
             }

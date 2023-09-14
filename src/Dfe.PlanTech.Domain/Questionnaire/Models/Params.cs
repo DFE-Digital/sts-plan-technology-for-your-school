@@ -6,6 +6,6 @@
 
         public string SectionId { get; set; } = null!;
 
-        public string SectionSlug { get; set; } = null;
+        public string SectionSlug { get; set; } = null!;
     }
 }
