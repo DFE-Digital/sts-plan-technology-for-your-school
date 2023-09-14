@@ -17,6 +17,7 @@ module "waf" {
       health_probe_request_type = "GET"
       domain                    = module.main_hosting.fqdn
       create_custom_domain      = local.cdn_create_custom_domain
+      custom_fqdn               = module.main_hosting.fqdn
     }
   }
 
