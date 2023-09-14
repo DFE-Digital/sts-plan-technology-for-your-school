@@ -25,7 +25,7 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
     {
         var signIn = await CreateSignIn(recordUserSignInDto);
 
-        var signInId = await AddSignInDetails(signIn);
+        await AddSignInDetails(signIn);
 
         return signIn;
     }
