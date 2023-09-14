@@ -25,7 +25,10 @@
                         @questionWithAnswer.AnswerText
                     </dd>
                     <dd class="govuk-summary-list__actions spacer">
-                        @Html.RouteLink("Change", "ChangeAnswerRouteLink", new { questionRef=questionWithAnswer.QuestionRef, answerRef=questionWithAnswer.AnswerRef, submissionId=Model.SubmissionId}, new {@class="govuk-link"})
+                        @Html.RouteLink("Change",
+                                    "ChangeAnswerRouteLink", 
+                                    new { questionRef=questionWithAnswer.QuestionRef, answerRef=questionWithAnswer.AnswerRef, submissionId=Model.SubmissionId},
+                                    new {@class="govuk-link", aria_label=anchorLabel, title=questionWithAnswer.QuestionText})
                     </dd>
                 </div>
             }
