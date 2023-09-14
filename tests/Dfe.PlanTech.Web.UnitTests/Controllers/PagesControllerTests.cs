@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Dfe.PlanTech.Application.Cookie.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -5,6 +6,7 @@ using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
@@ -23,18 +25,22 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         IUser userSubstitute = Substitute.For<IUser>();
 
         private readonly PagesController _controller;
+        private readonly ControllerContext _controllerContext;
 
         public PagesControllerTests()
         {
             var Logger = Substitute.For<ILogger<PagesController>>();
 
-            var controllerContext = ControllerHelpers.SubstituteControllerContext();
+            _controllerContext = ControllerHelpers.SubstituteControllerContext();
 
             _controller = new PagesController(Logger)
             {
-                ControllerContext = controllerContext,
+                ControllerContext = _controllerContext,
                 TempData = Substitute.For<ITempDataDictionary>()
             };
+
+            var claimIdentity = new ClaimsIdentity(new[] { new Claim("Type", "Value") }, CookieAuthenticationDefaults.AuthenticationScheme);
+            _controllerContext.HttpContext.User.Identity.Returns(claimIdentity);
         }
 
         [Fact]
@@ -123,7 +129,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.Equal(SELF_ASSESSMENT_SLUG, asPage!.Page.Slug);
         }
 
-          [Fact]
+        [Fact]
         public void Should_Not_OrganisationName_When_DisplayOrganisationName_Is_False()
         {
             var cookie = new DfeCookie { HasApproved = true };
