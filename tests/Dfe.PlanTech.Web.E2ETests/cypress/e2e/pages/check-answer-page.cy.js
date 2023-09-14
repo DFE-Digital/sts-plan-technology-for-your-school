@@ -26,6 +26,11 @@ describe("Check answers page", () => {
 
     cy.get("div.govuk-notification-banner__header").should("exist");
   });
+
+  it("navigates to correct page when clicking change", () => {
+    cy.get("/html/body/div/main/div/div/dl/div[2]/dd[2]/a").url.click()
+    .should("match", url);
+  });
 });
 
 const navigateToCheckAnswersPage = () => {

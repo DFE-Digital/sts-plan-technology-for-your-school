@@ -34,6 +34,7 @@ public class QuestionsController : BaseController<QuestionsController>
         if (!string.IsNullOrEmpty(TempData.Peek("questionId") as string))
         {
             id = TempData["questionId"] as string;
+            TempData["questionId"] = null;
         }
         else
         {
