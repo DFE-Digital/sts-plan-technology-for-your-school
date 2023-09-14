@@ -20,7 +20,7 @@ namespace Dfe.PlanTech.Web.ViewComponents
 
         public IViewComponentResult Invoke(ICategory[] categories)
         {
-            var allSectionsOfCombinedCategories = new List<Dfe.PlanTech.Domain.Questionnaire.Interfaces.ISection>();
+            var allSectionsOfCombinedCategories = new List<ISection>();
             var allSectionStatusesOfCombinedCategories = new List<SectionStatuses>();
 
             var recommendationsAvailable = false;
@@ -32,7 +32,7 @@ namespace Dfe.PlanTech.Web.ViewComponents
                 }
                 
                 var categoryElement = RetrieveSectionStatuses(category);
-                allSectionsOfCombinedCategories.AddRange(categoryElement.Sections);
+                allSectionsOfCombinedCategories.AddRange(categoryElement.Sections); 
                 allSectionStatusesOfCombinedCategories.AddRange(categoryElement.SectionStatuses);
             }
 
@@ -67,6 +67,7 @@ namespace Dfe.PlanTech.Web.ViewComponents
                 {
                     RecommendationSlug = recommendation?.Page.Slug,
                     RecommendationDisplayName = recommendation?.DisplayName,
+                    SectionSlug = section.InterstitialPage.Slug,
                     NoRecommendationFoundErrorMessage = recommendation == null
                         ? String.Format("Unable to retrieve {0} recommendation", section.Name)
                         : null

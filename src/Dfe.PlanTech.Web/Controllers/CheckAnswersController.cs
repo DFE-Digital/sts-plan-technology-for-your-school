@@ -1,8 +1,10 @@
 using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Response.Commands;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Constants;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,10 +14,15 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Authorize]
 public class CheckAnswersController : BaseController<CheckAnswersController>
 {
-    public CheckAnswersController(ILogger<CheckAnswersController> logger) : base(logger) { }
+    private readonly GetQuestionQuery _getQuestionnaireQuery;
+
+    public CheckAnswersController(ILogger<CheckAnswersController> logger, GetQuestionQuery getQuestionQuery) : base(logger) 
+    {
+        this._getQuestionnaireQuery = getQuestionQuery;  
+    }
 
     [HttpGet]
-    [Route("check-answers")]
+    [Route("{SectionSlug}/check-answers", Name = "CheckAnswersRoute")]
     public async Task<IActionResult> CheckAnswersPage([FromServices] ProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand, [FromServices] GetPageQuery getPageQuery)
     {
         var parameterCheckAnswersPage = DeserialiseParameter<TempDataCheckAnswers>(TempData[TempDataConstants.CheckAnswers]);
@@ -28,18 +35,23 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
             SectionName = parameterCheckAnswersPage.SectionName,
             CheckAnswerDto = await processCheckAnswerDtoCommand.ProcessCheckAnswerDto(parameterCheckAnswersPage.SubmissionId, parameterCheckAnswersPage.SectionId),
             Content = checkAnswerPageContent.Content,
-            SubmissionId = parameterCheckAnswersPage.SubmissionId
+            SectionSlug = parameterCheckAnswersPage.SectionSlug,
+            SubmissionId = parameterCheckAnswersPage.SubmissionId,
+            Slug = checkAnswerPageContent.Slug
         };
 
         return View("CheckAnswers", checkAnswersViewModel);
     }
 
     [HttpGet]
-    [Route("change-answer")]
-    public IActionResult ChangeAnswer(string questionRef, string answerRef, int submissionId)
+    [Route("change-answer", Name = "ChangeAnswerRouteLink")]
+    public async Task<IActionResult> ChangeAnswer(string questionRef, string answerRef, int submissionId, string slug)
     {
         TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = answerRef, SubmissionId = submissionId });
-        return RedirectToAction("GetQuestionById", "Questions");
+        var paramData = TempData.Peek("param");
+        var param = ParamParser._ParseParameters(paramData?.ToString());
+        var question = await _getQuestionnaireQuery.GetQuestionById(questionRef);
+        return RedirectToRoute("SectionQuestionAnswer", new { sectionSlug = param?.SectionSlug, question = question?.Slug });
     }
 
     [HttpPost("ConfirmCheckAnswers")]

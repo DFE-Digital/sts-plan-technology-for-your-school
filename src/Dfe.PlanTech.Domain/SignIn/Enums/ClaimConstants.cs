@@ -35,4 +35,7 @@ public static class ClaimConstants
     public const string Nonce = "nonce";
     public const string AccessTokenHash = "at_hash";
     public const string AuthenticationTime = "auth_time";
+
+    public const string DB_USER_ID = "db_user_id";
+    public const string DB_ESTABLISHMENT_ID = "db_establishment_id";
 }

@@ -105,7 +105,6 @@ public class QuestionsControllerTests
     private IGetLatestResponseListForSubmissionQuery _getLatestResponseListForSubmissionQuerySubstitute;
     private ILogger<QuestionsController> _logger = Substitute.For<ILogger<QuestionsController>>();
 
-
     public QuestionsControllerTests()
     {
         IContentRepository repositorySubstitute = SubstituteRepository();
@@ -118,7 +117,7 @@ public class QuestionsControllerTests
 
         IRecordQuestionCommand recordQuestionCommand = new RecordQuestionCommand(_databaseSubstitute);
 
-        IGetQuestionQuery getQuestionQuery = new Application.Submission.Queries.GetQuestionQuery(_databaseSubstitute);
+        IGetQuestionQuery getQuestionQuery = new GetQuestionQuery(_databaseSubstitute);
         IRecordAnswerCommand recordAnswerCommand = new RecordAnswerCommand(_databaseSubstitute);
         ICreateResponseCommand createResponseCommand = new CreateResponseCommand(_databaseSubstitute);
         IGetResponseQuery getResponseQuery = new GetResponseQuery(_databaseSubstitute);
@@ -135,8 +134,9 @@ public class QuestionsControllerTests
         RecordSubmitAnswerCommands recordSubmitAnswerCommands = new RecordSubmitAnswerCommands(recordQuestionCommand, recordAnswerCommand, createSubmissionCommand, createResponseCommand);
 
         _submitAnswerCommand = new SubmitAnswerCommand(_getSectionQuerySubstitute, getSubmitAnswerQueries, recordSubmitAnswerCommands, _getLatestResponseListForSubmissionQuerySubstitute);
+        Application.Questionnaire.Queries.GetQuestionQuery _questionQuery = Substitute.For<Application.Questionnaire.Queries.GetQuestionQuery>(_questionnaireCacherSubstitute, repositorySubstitute);
 
-        _controller = new QuestionsController(_logger) { TempData = tempData };
+        _controller = new QuestionsController(_logger, _questionQuery) { TempData = tempData };
     }
 
     private static IQuestionnaireCacher SubstituteQuestionnaireCacher()
@@ -181,8 +181,9 @@ public class QuestionsControllerTests
     public async Task GetQuestionById_Should_ReturnQuestionPage_When_FetchingQuestionWithValidId()
     {
         var id = FIRST_QUESTION_ID;
+        _controller.TempData["questionId"] = id;
 
-        var result = await _controller.GetQuestionById(id, null, _submitAnswerCommand, CancellationToken.None);
+        var result = await _controller.GetQuestionById(null, _submitAnswerCommand, CancellationToken.None);
         Assert.IsType<ViewResult>(result);
 
         var viewResult = result as ViewResult;
@@ -200,7 +201,7 @@ public class QuestionsControllerTests
     [Fact]
     public async Task GetQuestionById_Should_ReturnAsNormal_If_Submission_IsNull()
     {
-        _controller.TempData["param"] = "SectionName+SectionId";
+        _controller.TempData["param"] = "SectionName+SectionId+SectionSlug";
 
         var questionRef = "Question1";
 
@@ -225,7 +226,7 @@ public class QuestionsControllerTests
 
         _controller.TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = null, SubmissionId = null });
 
-        var result = await _controller.GetQuestionById(null, null, _submitAnswerCommand, CancellationToken.None);
+        var result = await _controller.GetQuestionById(null, _submitAnswerCommand, CancellationToken.None);
         Assert.IsType<ViewResult>(result);
 
         var viewResult = result as ViewResult;
@@ -243,7 +244,7 @@ public class QuestionsControllerTests
     [Fact]
     public async Task GetQuestionById_Should_ReturnAsNormal_If_PastSubmission_IsComplete()
     {
-        _controller.TempData["param"] = "SectionName+SectionId";
+        _controller.TempData["param"] = "SectionName+SectionId+SectionSlug";
 
         var questionRef = "Question1";
 
@@ -268,7 +269,7 @@ public class QuestionsControllerTests
 
         _controller.TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = null, SubmissionId = null });
 
-        var result = await _controller.GetQuestionById(null, null, _submitAnswerCommand, CancellationToken.None);
+        var result = await _controller.GetQuestionById(null, _submitAnswerCommand, CancellationToken.None);
         Assert.IsType<ViewResult>(result);
 
         var viewResult = result as ViewResult;
@@ -286,7 +287,7 @@ public class QuestionsControllerTests
     [Fact]
     public async Task GetQuestionById_Should_ReturnUnansweredQuestion_If_PastSubmission_IsNotCompleted()
     {
-        _controller.TempData["param"] = "SectionName+SectionId";
+        _controller.TempData["param"] = "SectionName+SectionId+SectionSlug";
 
         var questionRef = "Question1";
 
@@ -325,7 +326,7 @@ public class QuestionsControllerTests
 
         _getSectionQuerySubstitute.GetSectionById("SectionId").Returns(new Section() { Questions = _questions.ToArray() });
 
-        var result = await _controller.GetQuestionById(null, null, _submitAnswerCommand, CancellationToken.None);
+        var result = await _controller.GetQuestionById(null, _submitAnswerCommand, CancellationToken.None);
         Assert.IsType<ViewResult>(result);
 
         var viewResult = result as ViewResult;
@@ -341,9 +342,66 @@ public class QuestionsControllerTests
     }
 
     [Fact]
+    public async Task GetQuestionById_Should_ReturnUnansweredQuestion_WhenQuestionIdPassedThroughViaTempdata()
+    {
+        _controller.TempData["param"] = "SectionName+SectionId+SectionSlug";
+
+        var questionRef = "Question1";
+
+        List<Submission> submissionList = new List<Submission>()
+            {
+                new Submission()
+                {
+                    Id = 1,
+                    EstablishmentId = 0,
+                    Completed = false,
+                    SectionId = "SectionId",
+                    SectionName = "SectionName",
+                    Maturity = null,
+                    DateCreated = DateTime.UtcNow,
+                    DateLastUpdated = null,
+                    DateCompleted = null
+                }
+            };
+
+        List<QuestionWithAnswer> questionWithAnswerList = new List<QuestionWithAnswer>()
+            {
+                new QuestionWithAnswer()
+                {
+                    QuestionRef = questionRef,
+                    QuestionText = "Question One",
+                    AnswerRef = "Answer1",
+                    AnswerText = "Question 1 - Answer 1"
+                }
+            };
+        var query = Arg.Any<IQueryable<Domain.Submissions.Models.Submission>>();
+        _databaseSubstitute.FirstOrDefaultAsync(query).Returns(submissionList[0]);
+
+        _getLatestResponseListForSubmissionQuerySubstitute.GetResponseListByDateCreated(1).Returns(questionWithAnswerList);
+
+        _controller.TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = null, SubmissionId = null });
+        _controller.TempData["questionId"] = "question1";
+
+        var result = await _controller.GetQuestionById(null, _submitAnswerCommand, CancellationToken.None);
+        Assert.IsType<ViewResult>(result);
+
+        var viewResult = result as ViewResult;
+
+        var model = viewResult!.Model;
+
+        Assert.IsType<QuestionViewModel>(model);
+
+        var question = model as QuestionViewModel;
+
+        Assert.NotNull(question);
+        Assert.Equal("Question2", question.Question.Sys.Id);
+    }
+
+
+    [Fact]
     public async Task GetQuestionById_Should_RedirectToCheckAnswersController_If_PastSubmission_IsNotCompleted_And_ThereIsNo_NextQuestion()
     {
-        _controller.TempData["param"] = "SectionName+SectionId";
+        _controller.TempData["param"] = "SectionName+SectionId+SectionSlug";
 
         var questionRef = "Question2";
 
@@ -383,14 +441,12 @@ public class QuestionsControllerTests
 
         _getSectionQuerySubstitute.GetSectionById("SectionId").Returns(new Section() { Questions = _questions.ToArray() });
 
-        var result = await _controller.GetQuestionById(null, null, _submitAnswerCommand, CancellationToken.None);
+        var result = await _controller.GetQuestionById(null, _submitAnswerCommand, CancellationToken.None);
         Assert.IsType<RedirectToActionResult>(result);
 
-        var redirectToActionResult = result as RedirectToActionResult;
+        var redirectToActionResult = result as RedirectToRouteResult;
 
         Assert.NotNull(redirectToActionResult);
-        Assert.Equal("CheckAnswers", redirectToActionResult.ControllerName);
-        Assert.Equal("CheckAnswersPage", redirectToActionResult.ActionName);
         Assert.NotNull(_controller.TempData[TempDataConstants.CheckAnswers]);
         Assert.IsType<string>(_controller.TempData[TempDataConstants.CheckAnswers]);
         var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataCheckAnswers>(_controller.TempData[TempDataConstants.CheckAnswers] as string ?? "")?.SubmissionId;
@@ -400,7 +456,7 @@ public class QuestionsControllerTests
     [Fact]
     public async Task GetQuestionById_Should_ThrowException_When_IdIsNull()
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionById(null, null, _submitAnswerCommand, CancellationToken.None));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionById(null, _submitAnswerCommand, CancellationToken.None));
     }
 
     [Fact]
@@ -420,12 +476,11 @@ public class QuestionsControllerTests
 
         var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
 
-        Assert.IsType<RedirectToActionResult>(result);
+        Assert.IsType<RedirectToRouteResult>(result);
 
-        var redirectToActionResult = result as RedirectToActionResult;
+        var redirectToActionResult = result as RedirectToRouteResult;
 
         Assert.NotNull(redirectToActionResult);
-        Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
         Assert.NotNull(_controller.TempData[TempDataConstants.Questions]);
         Assert.IsType<string>(_controller.TempData[TempDataConstants.Questions]);
         var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_controller.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
@@ -440,18 +495,16 @@ public class QuestionsControllerTests
             QuestionId = "Question2",
             ChosenAnswerId = "Answer1",
             SubmissionId = 1,
-            Params = "SectionName+SectionId"
+            Params = "SectionName+SectionId+SectionSlug"
         };
 
         var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
 
-        Assert.IsType<RedirectToActionResult>(result);
+        Assert.IsType<RedirectToRouteResult>(result);
 
-        var redirectToActionResult = result as RedirectToActionResult;
+        var redirectToActionResult = result as RedirectToRouteResult;
 
         Assert.NotNull(redirectToActionResult);
-        Assert.Equal("CheckAnswers", redirectToActionResult.ControllerName);
-        Assert.Equal("CheckAnswersPage", redirectToActionResult.ActionName);
         Assert.NotNull(_controller.TempData[TempDataConstants.CheckAnswers]);
         Assert.IsType<string>(_controller.TempData[TempDataConstants.CheckAnswers]);
         var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataCheckAnswers>(_controller.TempData[TempDataConstants.CheckAnswers] as string ?? "")?.SubmissionId;
@@ -515,17 +568,85 @@ public class QuestionsControllerTests
         {
             QuestionId = "Question1",
             ChosenAnswerId = "Answer1",
-            Params = "SectionName+SectionId"
+            Params = "SectionName+SectionId+SectionSlug"
         };
 
         var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
 
-        Assert.IsType<RedirectToActionResult>(result);
+        Assert.IsType<RedirectToRouteResult>(result);
 
-        var redirectToActionResult = result as RedirectToActionResult;
+        var redirectToActionResult = result as RedirectToRouteResult;
 
         Assert.NotNull(redirectToActionResult);
-        Assert.Equal("GetQuestionById", redirectToActionResult.ActionName);
+        Assert.NotNull(_controller.TempData[TempDataConstants.Questions]);
+        Assert.IsType<string>(_controller.TempData[TempDataConstants.Questions]);
+        var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_controller.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
+        Assert.Equal("Question2", id);
+    }
+
+    [Fact]
+    public async void SubmitAnswer_Params_Should_Return_Null_On_Null_Params()
+    {
+        var submitAnswerDto = new SubmitAnswerDto()
+        {
+            QuestionId = "Question1",
+            ChosenAnswerId = "Answer1",
+            Params = ""
+        };
+
+        var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
+
+        Assert.IsType<RedirectToRouteResult>(result);
+
+        var redirectToActionResult = result as RedirectToRouteResult;
+
+        Assert.NotNull(redirectToActionResult);
+        Assert.NotNull(_controller.TempData[TempDataConstants.Questions]);
+        Assert.IsType<string>(_controller.TempData[TempDataConstants.Questions]);
+        var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_controller.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
+        Assert.Equal("Question2", id);
+    }
+
+    [Fact]
+    public async void SubmitAnswer_Params_Should_Return_Null_On_Excessive_Params()
+    {
+        var submitAnswerDto = new SubmitAnswerDto()
+        {
+            QuestionId = "Question1",
+            ChosenAnswerId = "Answer1",
+            Params = "qwe lqwd +wdqwdqwdq+123dqwd   +testSlug"
+        };
+
+        var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
+
+        Assert.IsType<RedirectToRouteResult>(result);
+
+        var redirectToActionResult = result as RedirectToRouteResult;
+
+        Assert.NotNull(redirectToActionResult);
+        Assert.NotNull(_controller.TempData[TempDataConstants.Questions]);
+        Assert.IsType<string>(_controller.TempData[TempDataConstants.Questions]);
+        var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_controller.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
+        Assert.Equal("Question2", id);
+    }
+
+    [Fact]
+    public async void SubmitAnswer_Params_Should_Return_Null_On_Unparsed_Params()
+    {
+        var submitAnswerDto = new SubmitAnswerDto()
+        {
+            QuestionId = "Question1",
+            ChosenAnswerId = "Answer1",
+            Params = "+"
+        };
+
+        var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
+
+        Assert.IsType<RedirectToRouteResult>(result);
+
+        var redirectToActionResult = result as RedirectToRouteResult;
+
+        Assert.NotNull(redirectToActionResult);
         Assert.NotNull(_controller.TempData[TempDataConstants.Questions]);
         Assert.IsType<string>(_controller.TempData[TempDataConstants.Questions]);
         var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_controller.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;

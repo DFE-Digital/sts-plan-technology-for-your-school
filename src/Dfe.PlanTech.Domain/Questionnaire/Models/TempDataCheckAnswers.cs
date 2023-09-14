@@ -7,5 +7,7 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models
         public string SectionId { get; init; } = null!;
 
         public string SectionName { get; init; } = null!;
+
+        public string SectionSlug { get; init; } = null!;
     }
 }

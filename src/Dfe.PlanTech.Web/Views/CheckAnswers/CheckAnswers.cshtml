@@ -25,11 +25,7 @@
                         @questionWithAnswer.AnswerText
                     </dd>
                     <dd class="govuk-summary-list__actions spacer">
-                        <a class="govuk-link" asp-controller="CheckAnswers" asp-action="ChangeAnswer"
-                            asp-route-questionRef="@questionWithAnswer.QuestionRef"
-                            asp-route-answerRef="@questionWithAnswer.AnswerRef" asp-route-submissionId="@Model.SubmissionId"
-                            aria-label=@anchorLabel
-                            title=@questionWithAnswer.QuestionText>Change</a>
+                        @Html.RouteLink("Change", "ChangeAnswerRouteLink", new { questionRef=questionWithAnswer.QuestionRef, answerRef=questionWithAnswer.AnswerRef, submissionId=Model.SubmissionId}, new {@class="govuk-link"})
                     </dd>
                 </div>
             }
@@ -37,6 +33,7 @@
         <form asp-controller="CheckAnswers" asp-action="ConfirmCheckAnswers" method="post">
             <input type="hidden" name="submissionId" value="@Model.SubmissionId" />
             <input type="hidden" name="sectionName" value="@Model.SectionName">
+            <input type="hidden" name="sectionSlug" value="@Model.SectionSlug">
             @{
                 foreach (var content in Model.Content)
                 {

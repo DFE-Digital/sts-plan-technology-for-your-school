@@ -2,9 +2,11 @@ using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Cookie.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Cookie;
+using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
@@ -21,7 +23,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
     {
         private const string INDEX_SLUG = "/";
         private const string INDEX_TITLE = "Index";
+        private const string SELF_ASSESSMENT_SLUG = "self-assessment";
         ICookieService cookiesSubstitute = Substitute.For<ICookieService>();
+        IUser userSubstitute = Substitute.For<IUser>();
 
         private readonly List<Page> _pages = new()
         {
@@ -31,6 +35,16 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 Title = new Title()
                 {
                     Text = "Landing Page Title"
+                },
+                Content = Array.Empty<IContentComponent>()
+            },
+            new Page()
+            {
+                Slug = "self-assessment",
+                DisplayOrganisationName = true,
+                Title = new Title()
+                {
+                    Text = "self-assessment"
                 },
                 Content = Array.Empty<IContentComponent>()
             },
@@ -91,6 +105,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             };
 
             _query = new GetPageQuery(_questionnaireCacherSubstitute, repositorySubstitute);
+            
         }
 
         private IContentRepository SetupRepositorySubstitute()
@@ -122,8 +137,21 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var cookie = new DfeCookie { HasApproved = true };
             cookiesSubstitute.GetCookie().Returns(cookie);
+            
+            var establishment = new EstablishmentDto()
+            {
+                OrgName = "Test Org",
+                Ukprn = "12345678",
+                Urn = "123456",
+                Type = new EstablishmentTypeDto()
+                {
+                    Name = "Test Name"
+                }
+            };
+            
+            userSubstitute.GetOrganisationData().Returns(establishment);
 
-            var result = await _controller.GetByRoute(INDEX_SLUG, _query, CancellationToken.None);
+            var result = await _controller.GetByRoute(INDEX_SLUG, _query, userSubstitute, CancellationToken.None);
 
             Assert.IsType<ViewResult>(result);
 
@@ -136,6 +164,40 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var asPage = model as PageViewModel;
             Assert.Equal(INDEX_SLUG, asPage!.Page.Slug);
             Assert.Contains(INDEX_TITLE, asPage!.Page.Title!.Text);
+        }
+        
+        [Fact]
+        public async Task Should_SetOrganisationName_When_DisplayOrganisationNameIsTrue()
+        {
+            var cookie = new DfeCookie { HasApproved = true };
+            cookiesSubstitute.GetCookie().Returns(cookie);
+            
+            var establishment = new EstablishmentDto()
+            {
+                OrgName = "Test Org",
+                Ukprn = "12345678",
+                Urn = "123456",
+                Type = new EstablishmentTypeDto()
+                {
+                    Name = "Test Name"
+                }
+            };
+            
+            userSubstitute.GetOrganisationData().Returns(establishment);
+
+            var result = await _controller.GetByRoute(SELF_ASSESSMENT_SLUG, _query, userSubstitute, CancellationToken.None);
+
+            Assert.IsType<ViewResult>(result);
+
+            var viewResult = result as ViewResult;
+
+            var model = viewResult!.Model;
+
+            Assert.IsType<PageViewModel>(model);
+
+            var asPage = model as PageViewModel;
+            Assert.Equal(establishment.OrgName, asPage!.Page.OrganisationName);
+            Assert.Equal(SELF_ASSESSMENT_SLUG, asPage!.Page.Slug);
         }
 
         [Fact]
@@ -161,7 +223,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public async Task Should_ThrowError_When_NoRouteFound()
         {
             await Assert.ThrowsAnyAsync<Exception>(() =>
-                _controller.GetByRoute("NOT A VALID ROUTE", _query, CancellationToken.None));
+                _controller.GetByRoute("NOT A VALID ROUTE", _query, userSubstitute, CancellationToken.None));
         }
 
         [Fact]

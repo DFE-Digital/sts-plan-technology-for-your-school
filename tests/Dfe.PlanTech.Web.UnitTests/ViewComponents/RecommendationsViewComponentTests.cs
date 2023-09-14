@@ -44,6 +44,10 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                                 Maturity = Domain.Questionnaire.Enums.Maturity.High,
                                 Page = new Domain.Content.Models.Page() { Slug = "High-Maturity-Recommendation-Page-Slug" }
                             }
+                        },
+                        InterstitialPage = new Domain.Content.Models.Page
+                        {
+                            Slug = "test-slug"
                         }
                     }
                 }
@@ -67,6 +71,10 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                                 Maturity = Domain.Questionnaire.Enums.Maturity.High,
                                 Page = new Domain.Content.Models.Page() { Slug = "High-Maturity-Recommendation-Page-Slug-Two" }
                             }
+                        },
+                        InterstitialPage = new Domain.Content.Models.Page
+                        {
+                            Slug = "test-slug"
                         }
                     }
                 }
@@ -193,7 +201,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             {
                 SectionId = "Section1",
                 Completed = 1,
-                Maturity = "Low"
+                Maturity = "Low",
             });
             
             ICategory[] categories = new ICategory[] { _category };
