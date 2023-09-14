@@ -4,6 +4,7 @@ using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using Dfe.PlanTech.Application.Users.Interfaces;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
@@ -25,7 +26,7 @@ public class PagesController : BaseController<PagesController>
 
     [Authorize]
     [HttpGet("/{route?}")]
-    public async Task<IActionResult> GetByRoute(string route, [FromServices] GetPageQuery query, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetByRoute(string route, [FromServices] GetPageQuery query, [FromServices] IUser user, CancellationToken cancellationToken)
     {
         string slug = GetSlug(route);
         string param = "";
@@ -37,7 +38,9 @@ public class PagesController : BaseController<PagesController>
 
         var page = await query.GetPageBySlug(slug, cancellationToken);
 
-        var viewModel = CreatePageModel(page, param);
+        var establishment = user.GetOrganisationData();
+
+        var viewModel = CreatePageModel(page, param, establishment.OrgName);
 
         return View("Page", viewModel);
     }
@@ -75,9 +78,14 @@ public class PagesController : BaseController<PagesController>
         return View(new ServiceUnavailableViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 
-    private PageViewModel CreatePageModel(Page page, string param = null!)
+    private PageViewModel CreatePageModel(Page page, string param = null!, string organisationName = null!)
     {
         ViewData["Title"] = page.Title?.Text ?? "Plan Technology For Your School";
+
+        if (page.DisplayOrganisationName)
+        {
+            page.OrganisationName = organisationName;
+        }
 
         return new PageViewModel()
         {

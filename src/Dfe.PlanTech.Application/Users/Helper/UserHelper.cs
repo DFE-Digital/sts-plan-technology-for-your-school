@@ -39,7 +39,7 @@ namespace Dfe.PlanTech.Application.Users.Helper
 
         public async Task<int> GetEstablishmentId()
         {
-            var establishmentDto = _GetOrganisationData();
+            var establishmentDto = GetOrganisationData();
 
             var reference = establishmentDto.Urn ?? establishmentDto.Ukprn;
 
@@ -60,14 +60,14 @@ namespace Dfe.PlanTech.Application.Users.Helper
 
         public async Task<int> SetEstablishment()
         {
-            var establishmentDto = _GetOrganisationData();
+            var establishmentDto = GetOrganisationData();
 
             var establishmentId = await _createEstablishmentCommand.CreateEstablishment(establishmentDto);
 
             return establishmentId;
         }
 
-        private EstablishmentDto _GetOrganisationData()
+        public EstablishmentDto GetOrganisationData()
         {
 
             var claims = _httpContextAccessor.HttpContext.User.Claims.ToList();
