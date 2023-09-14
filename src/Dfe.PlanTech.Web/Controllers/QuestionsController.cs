@@ -30,10 +30,19 @@ public class QuestionsController : BaseController<QuestionsController>
     /// <returns></returns>
     public async Task<IActionResult> GetQuestionById(string? id, string? section, [FromServices] ISubmitAnswerCommand submitAnswerCommand, CancellationToken cancellationToken)
     {
-       
         var parameterQuestionPage = TempData[TempDataConstants.Questions] != null ? DeserialiseParameter<TempDataQuestions>(TempData[TempDataConstants.Questions]) : new TempDataQuestions();
 
-        if (string.IsNullOrEmpty(id)) id = parameterQuestionPage.QuestionRef;
+        if (string.IsNullOrEmpty(id))
+        {
+            if (!string.IsNullOrEmpty(TempData.Peek("questionId") as string))
+            {
+                id = TempData["questionId"] as string;
+            }
+            else
+            {
+                id = parameterQuestionPage.QuestionRef;
+            }
+        }
 
         TempData.TryGetValue("param", out object? parameters);
         Params? param = ParamParser._ParseParameters(parameters?.ToString());
