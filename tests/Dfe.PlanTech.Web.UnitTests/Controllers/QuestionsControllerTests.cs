@@ -178,8 +178,9 @@ public class QuestionsControllerTests
     public async Task GetQuestionById_Should_ReturnQuestionPage_When_FetchingQuestionWithValidId()
     {
         var id = FIRST_QUESTION_ID;
+        _controller.TempData["questionId"] = id;
 
-        var result = await _controller.GetQuestionById(id, null, _submitAnswerCommand, CancellationToken.None);
+        var result = await _controller.GetQuestionById(null, _submitAnswerCommand, CancellationToken.None);
         Assert.IsType<ViewResult>(result);
 
         var viewResult = result as ViewResult;
@@ -222,7 +223,7 @@ public class QuestionsControllerTests
 
         _controller.TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = null, SubmissionId = null });
 
-        var result = await _controller.GetQuestionById(null, null, _submitAnswerCommand, CancellationToken.None);
+        var result = await _controller.GetQuestionById(null, _submitAnswerCommand, CancellationToken.None);
         Assert.IsType<ViewResult>(result);
 
         var viewResult = result as ViewResult;
@@ -265,7 +266,7 @@ public class QuestionsControllerTests
 
         _controller.TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = null, SubmissionId = null });
 
-        var result = await _controller.GetQuestionById(null, null, _submitAnswerCommand, CancellationToken.None);
+        var result = await _controller.GetQuestionById(null, _submitAnswerCommand, CancellationToken.None);
         Assert.IsType<ViewResult>(result);
 
         var viewResult = result as ViewResult;
@@ -320,7 +321,7 @@ public class QuestionsControllerTests
 
         _controller.TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = null, SubmissionId = null });
 
-        var result = await _controller.GetQuestionById(null, null, _submitAnswerCommand, CancellationToken.None);
+        var result = await _controller.GetQuestionById(null, _submitAnswerCommand, CancellationToken.None);
         Assert.IsType<ViewResult>(result);
 
         var viewResult = result as ViewResult;
@@ -376,7 +377,7 @@ public class QuestionsControllerTests
         _controller.TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = null, SubmissionId = null });
         _controller.TempData["questionId"] = "question1";
 
-        var result = await _controller.GetQuestionById(null, null, _submitAnswerCommand, CancellationToken.None);
+        var result = await _controller.GetQuestionById(null, _submitAnswerCommand, CancellationToken.None);
         Assert.IsType<ViewResult>(result);
 
         var viewResult = result as ViewResult;
@@ -433,7 +434,7 @@ public class QuestionsControllerTests
 
         _controller.TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = null, SubmissionId = null });
 
-        var result = await _controller.GetQuestionById(null, null, _submitAnswerCommand, CancellationToken.None);
+        var result = await _controller.GetQuestionById(null, _submitAnswerCommand, CancellationToken.None);
         Assert.IsType<RedirectToRouteResult>(result);
 
         var redirectToActionResult = result as RedirectToRouteResult;
@@ -448,7 +449,7 @@ public class QuestionsControllerTests
     [Fact]
     public async Task GetQuestionById_Should_ThrowException_When_IdIsNull()
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionById(null, null, _submitAnswerCommand, CancellationToken.None));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionById(null, _submitAnswerCommand, CancellationToken.None));
     }
 
     [Fact]
