@@ -4,7 +4,7 @@ Similar to the container app terraform, this folder is used to standup the dns z
 
 ## Deploying a DNS zone
 When deploying a new DNS zone there are a couple of steps to runt through:
-1. Make sure a storage environment exists fo rthe backend. Ideally this should re-use the same storage as [cluster-app](../container-app/) but with a unique key for the statefile.
+1. Make sure a storage environment exists fo rthe backend. Ideally this should re-use the same storage as [container-app](../container-app/) but with a unique key for the statefile.
 2. Apply the terraform in `dns-zone` while supplying the fully qualified domain name passed in as `primary_fqdn=plan-technology-for-your-school.education.gov.uk`
 3. The terraform will output the name servers which can be submitted to InfraOps to get the domain delegated across here: [How To Request DNS](https://dfe-ssp.visualstudio.com/s190-schools-technology-services/_wiki/wikis/s190-schools-technology-services.wiki/12901/How-to-request-DNS)
 
@@ -35,7 +35,7 @@ This is a slight variation on the above, as in prod we deploy the staging DNS zo
 
 
 When deploying a new DNS zone there are a couple of steps to runt through:
-1. Make sure a storage environment exists fo rthe backend. Ideally this should re-use the same storage as [cluster-app](../container-app/) but with a unique key for the statefile.
+1. Make sure a storage account exists for the backend. Ideally this should re-use the same storage as [cluster-app](../container-app/) but with a unique key for the statefile.
 2. Apply the terraform in `dns-zone` while supplying the fully qualified domain name passed in as `primary_fqdn=plan-technology-for-your-school.education.gov.uk` and `subdomains='["staging"]'`. Note: we use a set here so that the code can support additional subdomains in the future.
 3. The terraform will output the name servers which can be submitted to InfraOps to get the domain delegated across here: [How To Request DNS](https://dfe-ssp.visualstudio.com/s190-schools-technology-services/_wiki/wikis/s190-schools-technology-services.wiki/12901/How-to-request-DNS)
 
@@ -69,5 +69,5 @@ When deploying a new DNS zone there are a couple of steps to runt through:
     ]
    ```
 
-  ## Front Door association
+  ## CDN/WAF Domain association
   All current environments have had their front door CDN/WAF association setup manually. In the future, these could be setup by simpling setting the value of `cdn_create_custom_domain` to `true` in [container-app](../container-app)
