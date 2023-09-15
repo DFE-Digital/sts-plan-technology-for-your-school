@@ -28,8 +28,8 @@ describe("Check answers page", () => {
   });
 
   it("navigates to correct page when clicking change", () => {
-    const expectedUrl = cy.get("a").contains("Change").eq(1).url;
-    cy.get("a").contains("Change").eq(1).click();
+    const expectedUrl = cy.get("a:nth-child(1)").contains("Change").url;
+    cy.get("a:nth-child(1)").contains("Change").click();
     cy.url().should("eq", expectedUrl);
   });
 });
