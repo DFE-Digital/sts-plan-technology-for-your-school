@@ -21,7 +21,7 @@
             {
                 var sectionSlug = TempData["SectionSlug"] as string;
                 TempData["questionId"] = question.Sys.Id;
-                <govuk-button-link href="@Url.RouteUrl("SectionQuestionAnswer", new { sectionSlug = sectionSlug, question = question.Slug })"
+                <govuk-button-link href="@Url.RouteUrl("SectionQuestionAnswer", new { sectionSlug = sectionSlug, questionSlug = question.Slug })"
                    class="govuk-link">@Model.Button.Value</govuk-button-link>
                 break;
             }

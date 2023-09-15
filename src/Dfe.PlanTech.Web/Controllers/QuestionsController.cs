@@ -19,15 +19,16 @@ public class QuestionsController : BaseController<QuestionsController>
         _getQuestionQuery = getQuestionQuery;
     }
 
-    [HttpGet("{SectionSlug}/{question}", Name = "SectionQuestionAnswer")]
+    [HttpGet("{sectionSlug}/{questionSlug}", Name = "SectionQuestionAnswer")]
     /// <summary>
     /// 
     /// </summary>
     /// <param name="id"></param>
     /// <param name="section">Name of current section (if starting new)</param>
     /// <returns></returns>
-    public async Task<IActionResult> GetQuestionById(string? section, [FromServices] ISubmitAnswerCommand submitAnswerCommand, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetQuestionById(string? section, string sectionSlug, string questionSlug, [FromServices] ISubmitAnswerCommand submitAnswerCommand, CancellationToken cancellationToken)
     {
+        var question = await _getQuestionQuery.GetQuestionBySlug(sectionSlug: sectionSlug, questionSlug: questionSlug, cancellationToken);
         var parameterQuestionPage = TempData[TempDataConstants.Questions] != null ? DeserialiseParameter<TempDataQuestions>(TempData[TempDataConstants.Questions]) : new TempDataQuestions();
         string id;
 
