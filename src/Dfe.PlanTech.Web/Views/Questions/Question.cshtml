@@ -6,7 +6,12 @@
     }
 }
 
-<form asp-controller="Questions" asp-action="SubmitAnswer" method="post">
+<form asp-controller="Questions"
+    asp-action="SubmitAnswer"
+    asp-route-sectionSlug=@Model.SectionSlug
+    asp-route-questionSlug=@Model.Question.Slug
+    method="post">
+
     <input id="QuestionId" hidden value=@Model.Question.Sys.Id name="QuestionId" />
     <input id="Params" hidden value="@Model.Params" name="Params" />
     <input id="SubmissionId" hidden value="@Model.SubmissionId" name="SubmissionId" />

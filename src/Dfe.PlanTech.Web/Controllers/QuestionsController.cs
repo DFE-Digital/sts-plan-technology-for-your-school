@@ -57,55 +57,17 @@ public class QuestionsController : BaseController<QuestionsController>
             AnswerRef = null,
             Params = null,
             SubmissionId = 1,
-            QuestionErrorMessage = null
+            QuestionErrorMessage = null,
+            SectionSlug = sectionSlug
         };
 
         return View("Question", viewModel);
 
     }
 
-    [HttpPost("/question/SubmitAnswer")]
-    public async Task<IActionResult> SubmitAnswer(SubmitAnswerDto submitAnswerDto, [FromServices] ISubmitAnswerCommand submitAnswerCommand)
+    [HttpPost("{sectionSlug}/{questionSlug}")]
+    public async Task<IActionResult> SubmitAnswer(string sectionSlug, string questionSlug, SubmitAnswerDto submitAnswerDto, [FromServices] ISubmitAnswerCommand submitAnswerCommand)
     {
-        if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
-
-        Params param = new Params();
-        if (!string.IsNullOrEmpty(submitAnswerDto.Params))
-        {
-            param = ParamParser._ParseParameters(submitAnswerDto.Params) ?? null!;
-            TempData["param"] = submitAnswerDto.Params;
-        }
-
-        if (!ModelState.IsValid)
-        {
-            TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions()
-            {
-                QuestionRef = submitAnswerDto.QuestionId,
-                SubmissionId = submitAnswerDto.SubmissionId,
-                NoSelectedAnswerErrorMessage = "You must select an answer to continue"
-            });
-            return RedirectToAction("GetQuestionById");
-        }
-
-        int submissionId;
-
-        try
-        {
-            submissionId = await submitAnswerCommand.SubmitAnswer(submitAnswerDto, param.SectionId, param.SectionName);
-        }
-        catch (Exception e)
-        {
-            logger.LogError("An error has occurred while submitting an answer with the following message: {} ", e.Message);
-
-            TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions()
-            {
-                QuestionRef = submitAnswerDto.QuestionId,
-                SubmissionId = submitAnswerDto.SubmissionId,
-                NoSelectedAnswerErrorMessage = "Save failed. Please try again later."
-            });
-            return RedirectToAction("GetQuestionById");
-        }
-
         string? nextQuestionId;
 
         try
@@ -119,16 +81,13 @@ public class QuestionsController : BaseController<QuestionsController>
         }
 
 
-        if (string.IsNullOrEmpty(nextQuestionId) || await submitAnswerCommand.NextQuestionIsAnswered(submissionId, nextQuestionId))
+        if (string.IsNullOrEmpty(nextQuestionId))
         {
-            TempData[TempDataConstants.CheckAnswers] = SerialiseParameter(new TempDataCheckAnswers() { SubmissionId = submissionId, SectionId = param.SectionId, SectionName = param.SectionName });
-            return RedirectToRoute("CheckAnswersRoute", new { sectionSlug = param.SectionSlug });
+            return Redirect("/self-assessment");
         }
         else
         {
-            TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions() { QuestionRef = nextQuestionId, SubmissionId = submissionId });
-            var question = await _getQuestionQuery.GetQuestionById(nextQuestionId);
-            return RedirectToRoute("SectionQuestionAnswer", new { sectionSlug = param.SectionSlug, question = question?.Slug });
+            return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug });
         }
     }
 }
