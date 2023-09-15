@@ -31,9 +31,9 @@ public class QuestionsController : BaseController<QuestionsController>
         var parameterQuestionPage = TempData[TempDataConstants.Questions] != null ? DeserialiseParameter<TempDataQuestions>(TempData[TempDataConstants.Questions]) : new TempDataQuestions();
         string id = string.Empty;
 
-        if (!string.IsNullOrEmpty(TempData.Peek("questionId") as string))
+        if (TempData.Peek("questionId") is string questionId && !string.IsNullOrEmpty(questionId))
         {
-            id = TempData["questionId"] as string;
+            id = questionId;
             TempData["questionId"] = null;
         }
         else
