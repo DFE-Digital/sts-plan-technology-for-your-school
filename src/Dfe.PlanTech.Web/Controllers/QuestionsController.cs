@@ -106,7 +106,7 @@ public class QuestionsController : BaseController<QuestionsController>
         }
         catch (Exception e)
         {
-            logger.LogError("An error has occurred while retrieving the next question with the following message: {} ", e.Message);
+            logger.LogError("An error has occurred while retrieving the next question with the following message: {errorNoNextQuestionId} ", e.Message);
             return Redirect("/service-unavailable");
         }
 
