@@ -55,10 +55,10 @@ namespace Dfe.PlanTech.Application.Response.Commands
 
             while (node != null)
             {
-                if (questionWithAnswerMap.ContainsKey(node.Sys.Id))
+                if (questionWithAnswerMap.TryGetValue(node.Sys.Id, out QuestionWithAnswer? questionWithAnswer))
                 {
-                    checkAnswerDto.QuestionAnswerList.Add(questionWithAnswerMap[node.Sys.Id]);
-                    node = node.Answers.FirstOrDefault(answer => answer.Sys.Id.Equals(questionWithAnswerMap[node.Sys.Id].AnswerRef))?.NextQuestion;
+                    checkAnswerDto.QuestionAnswerList.Add(questionWithAnswer);
+                    node = node.Answers.FirstOrDefault(answer => answer.Sys.Id.Equals(questionWithAnswer.AnswerRef))?.NextQuestion;
                 }
                 else node = null;
             }

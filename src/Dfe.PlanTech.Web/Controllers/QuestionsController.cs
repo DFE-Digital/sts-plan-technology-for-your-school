@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
-using Dfe.PlanTech.Application.Submission.Interface;
 using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Constants;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -15,7 +14,7 @@ namespace Dfe.PlanTech.Web.Controllers;
 public class QuestionsController : BaseController<QuestionsController>
 {
     private readonly GetQuestionQuery _getQuestionQuery;
-    public QuestionsController(ILogger<QuestionsController> logger, GetQuestionQuery getQuestionQuery) : base(logger) 
+    public QuestionsController(ILogger<QuestionsController> logger, GetQuestionQuery getQuestionQuery) : base(logger)
     {
         _getQuestionQuery = getQuestionQuery;
     }
@@ -30,7 +29,7 @@ public class QuestionsController : BaseController<QuestionsController>
     public async Task<IActionResult> GetQuestionById(string? section, [FromServices] ISubmitAnswerCommand submitAnswerCommand, CancellationToken cancellationToken)
     {
         var parameterQuestionPage = TempData[TempDataConstants.Questions] != null ? DeserialiseParameter<TempDataQuestions>(TempData[TempDataConstants.Questions]) : new TempDataQuestions();
-        string id = string.Empty;
+        string id;
 
         if (TempData.Peek("questionId") is string questionId && !string.IsNullOrEmpty(questionId))
         {
@@ -53,7 +52,7 @@ public class QuestionsController : BaseController<QuestionsController>
             return RedirectToRoute("CheckAnswersRoute", new { sectionSlug = param.SectionSlug });
         }
         else
-                                                {
+        {
             var viewModel = new QuestionViewModel()
             {
                 Question = questionWithSubmission.Question,
@@ -91,7 +90,7 @@ public class QuestionsController : BaseController<QuestionsController>
         }
 
         int submissionId;
-        
+
         try
         {
             submissionId = await submitAnswerCommand.SubmitAnswer(submitAnswerDto, param.SectionId, param.SectionName);
@@ -99,7 +98,7 @@ public class QuestionsController : BaseController<QuestionsController>
         catch (Exception e)
         {
             logger.LogError("An error has occurred while submitting an answer with the following message: {} ", e.Message);
-            
+
             TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions()
             {
                 QuestionRef = submitAnswerDto.QuestionId,
@@ -110,17 +109,17 @@ public class QuestionsController : BaseController<QuestionsController>
         }
 
         string? nextQuestionId;
-        
+
         try
         {
             nextQuestionId = await submitAnswerCommand.GetNextQuestionId(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId);
         }
         catch (Exception e)
         {
-            logger.LogError( "An error has occurred while retrieving the next question with the following message: {} ", e.Message);
+            logger.LogError("An error has occurred while retrieving the next question with the following message: {errorNoNextQuestionId} ", e.Message);
             return Redirect(UrlConstants.ServiceUnavailable);
         }
-        
+
 
         if (string.IsNullOrEmpty(nextQuestionId) || await submitAnswerCommand.NextQuestionIsAnswered(submissionId, nextQuestionId))
         {

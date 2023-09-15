@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Response.Commands;
 using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Application.Response.Queries;
@@ -101,6 +102,7 @@ public class QuestionsControllerTests
     private readonly SubmitAnswerCommand _submitAnswerCommand;
     private ISubmitAnswerCommand _submitAnswerCommandSubstitute = Substitute.For<ISubmitAnswerCommand>();
     private IQuestionnaireCacher _questionnaireCacherSubstitute;
+    private GetSectionQuery _getSectionQuerySubstitute;
     private IGetLatestResponseListForSubmissionQuery _getLatestResponseListForSubmissionQuerySubstitute;
     private ILogger<QuestionsController> _logger = Substitute.For<ILogger<QuestionsController>>();
 
@@ -116,7 +118,7 @@ public class QuestionsControllerTests
 
         IRecordQuestionCommand recordQuestionCommand = new RecordQuestionCommand(_databaseSubstitute);
 
-        IGetQuestionQuery getQuestionQuery = new GetQuestionQuery(_databaseSubstitute);
+        IGetQuestionQuery getQuestionQuery = new Application.Submission.Queries.GetQuestionQuery(_databaseSubstitute);
         IRecordAnswerCommand recordAnswerCommand = new RecordAnswerCommand(_databaseSubstitute);
         ICreateResponseCommand createResponseCommand = new CreateResponseCommand(_databaseSubstitute);
         IGetResponseQuery getResponseQuery = new GetResponseQuery(_databaseSubstitute);
@@ -128,10 +130,11 @@ public class QuestionsControllerTests
         var tempData = new TempDataDictionary(httpContext, Substitute.For<ITempDataProvider>());
         tempData["param"] = "admin";
 
+        _getSectionQuerySubstitute = Substitute.For<GetSectionQuery>(repositorySubstitute);
         GetSubmitAnswerQueries getSubmitAnswerQueries = new GetSubmitAnswerQueries(getQuestionQuery, getResponseQuery, getSubmissionQuery, getQuestionnaireQuery, user);
         RecordSubmitAnswerCommands recordSubmitAnswerCommands = new RecordSubmitAnswerCommands(recordQuestionCommand, recordAnswerCommand, createSubmissionCommand, createResponseCommand);
 
-        _submitAnswerCommand = new SubmitAnswerCommand(getSubmitAnswerQueries, recordSubmitAnswerCommands, _getLatestResponseListForSubmissionQuerySubstitute);
+        _submitAnswerCommand = new SubmitAnswerCommand(_getSectionQuerySubstitute, getSubmitAnswerQueries, recordSubmitAnswerCommands, _getLatestResponseListForSubmissionQuerySubstitute);
         Application.Questionnaire.Queries.GetQuestionQuery _questionQuery = Substitute.For<Application.Questionnaire.Queries.GetQuestionQuery>(_questionnaireCacherSubstitute, repositorySubstitute);
 
         _controller = new QuestionsController(_logger, _questionQuery) { TempData = tempData };
@@ -322,6 +325,8 @@ public class QuestionsControllerTests
 
         _controller.TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = null, SubmissionId = null });
 
+        _getSectionQuerySubstitute.GetSectionById("SectionId").Returns(new Section() { Questions = _questions.ToArray() });
+
         var result = await _controller.GetQuestionById(null, _submitAnswerCommand, CancellationToken.None);
         Assert.IsType<ViewResult>(result);
 
@@ -377,6 +382,8 @@ public class QuestionsControllerTests
 
         _controller.TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = null, SubmissionId = null });
         _controller.TempData["questionId"] = "question1";
+
+        _getSectionQuerySubstitute.GetSectionById("SectionId").Returns(new Section() { Questions = _questions.ToArray() });
 
         var result = await _controller.GetQuestionById(null, _submitAnswerCommand, CancellationToken.None);
         Assert.IsType<ViewResult>(result);
@@ -435,12 +442,14 @@ public class QuestionsControllerTests
 
         _controller.TempData[TempDataConstants.Questions] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = null, SubmissionId = null });
 
+        _getSectionQuerySubstitute.GetSectionById("SectionId").Returns(new Section() { Questions = _questions.ToArray() });
+
         var result = await _controller.GetQuestionById(null, _submitAnswerCommand, CancellationToken.None);
         Assert.IsType<RedirectToRouteResult>(result);
 
-        var redirectToActionResult = result as RedirectToRouteResult;
+        var redirectToRouteResult = result as RedirectToRouteResult;
 
-        Assert.NotNull(redirectToActionResult);
+        Assert.NotNull(redirectToRouteResult);
         Assert.NotNull(_controller.TempData[TempDataConstants.CheckAnswers]);
         Assert.IsType<string>(_controller.TempData[TempDataConstants.CheckAnswers]);
         var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataCheckAnswers>(_controller.TempData[TempDataConstants.CheckAnswers] as string ?? "")?.SubmissionId;

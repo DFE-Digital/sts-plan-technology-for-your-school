@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Application.Submission.Queries;
@@ -10,12 +11,14 @@ namespace Dfe.PlanTech.Application.Submission.Commands
 {
     public class SubmitAnswerCommand : ISubmitAnswerCommand
     {
+        private readonly GetSectionQuery _getSectionQuery;
         private readonly GetSubmitAnswerQueries _getSubmitAnswerQueries;
         private readonly RecordSubmitAnswerCommands _recordSubmitAnswerCommands;
         private readonly IGetLatestResponseListForSubmissionQuery _getLatestResponseListForSubmissionQuery;
 
-        public SubmitAnswerCommand(GetSubmitAnswerQueries getSubmitAnswerQueries, RecordSubmitAnswerCommands recordSubmitAnswerCommands, IGetLatestResponseListForSubmissionQuery getLatestResponseListForSubmissionQuery)
+        public SubmitAnswerCommand(GetSectionQuery getSectionQuery, GetSubmitAnswerQueries getSubmitAnswerQueries, RecordSubmitAnswerCommands recordSubmitAnswerCommands, IGetLatestResponseListForSubmissionQuery getLatestResponseListForSubmissionQuery)
         {
+            _getSectionQuery = getSectionQuery;
             _getSubmitAnswerQueries = getSubmitAnswerQueries;
             _recordSubmitAnswerCommands = recordSubmitAnswerCommands;
             _getLatestResponseListForSubmissionQuery = getLatestResponseListForSubmissionQuery;
@@ -80,8 +83,11 @@ namespace Dfe.PlanTech.Application.Submission.Commands
 
                 if (submission != null && !submission.Completed)
                 {
-                    Domain.Questionnaire.Models.Question? nextUnansweredQuestion = await _GetNextUnansweredQuestion(submission.Id);
-                    return nextUnansweredQuestion != null ? (nextUnansweredQuestion, submission) : (null, submission);
+                    var nextUnansweredQuestion = await _GetNextUnansweredQuestion(submission.Id);
+                    if (nextUnansweredQuestion == null) return (null, submission);
+
+                    var section = await _getSectionQuery.GetSectionById(sectionId, CancellationToken.None);
+                    if (section != null && Array.Exists(section.Questions, question => question.Sys.Id.Equals(nextUnansweredQuestion.Sys.Id))) return (nextUnansweredQuestion, submission);
                 }
             }
 
