@@ -3,10 +3,12 @@ using Dfe.PlanTech.Application.Helpers;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.SignIn;
 using Dfe.PlanTech.Web;
+using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Exceptions;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using GovUk.Frontend.AspNetCore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
@@ -46,9 +48,17 @@ builder.Services.AddDfeSignIn(builder.Configuration);
 builder.Services.AddScoped<ComponentViewsFactory>();
 
 builder.Services.AddDatabase(builder.Configuration);
+builder.Services.AddSingleton<IAuthorizationHandler, PageModelAuthorisationPolicy>();
 
-builder.Services.AddAuthorization();
 builder.Services.AddAuthentication();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(PageModelAuthorisationPolicy.POLICY_NAME, policy =>
+    {
+        policy.Requirements.Add(new PageAuthorisationRequirement());
+    });
+});
+
 builder.Services.AddContentfulServices(builder.Configuration);
 
 var app = builder.Build();
@@ -60,13 +70,12 @@ app.UseCookiePolicy(
     {
         Secure = CookieSecurePolicy.Always
     });
-    
+
 app.UseForwardedHeaders();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error");
+{ 
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
@@ -79,10 +88,8 @@ app.UseExceptionHandler(exceptionHandlerApp =>
 
         var error = exceptionHandlerPathFeature?.Error;
 
-        if (error is ContentfulDataUnavailableException)
-        {
-            context.Response.Redirect("/service-unavailable");
-        }
+        context.Response.Redirect(error is ContentfulDataUnavailableException ? "/service-unavailable" : "/error");
+        
         return Task.CompletedTask;
     });
 });
