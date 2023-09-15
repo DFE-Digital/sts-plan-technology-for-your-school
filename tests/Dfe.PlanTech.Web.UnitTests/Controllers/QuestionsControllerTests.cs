@@ -474,7 +474,7 @@ public class QuestionsControllerTests
         var submitAnswerDto = new SubmitAnswerDto()
         {
             QuestionId = "Question1",
-            ChosenAnswerId = "Answer1",
+            ChosenAnswerJson = "Answer1",
         };
 
         var result = await _controller.SubmitAnswer(submitAnswerDto, _submitAnswerCommand);
@@ -496,7 +496,7 @@ public class QuestionsControllerTests
         var submitAnswerDto = new SubmitAnswerDto()
         {
             QuestionId = "Question2",
-            ChosenAnswerId = "Answer1",
+            ChosenAnswerJson = "Answer1",
             SubmissionId = 1,
             Params = "SectionName+SectionId+SectionSlug"
         };
@@ -520,7 +520,7 @@ public class QuestionsControllerTests
         var submitAnswerDto = new SubmitAnswerDto()
         {
             QuestionId = "Question1",
-            ChosenAnswerId = null!,
+            ChosenAnswerJson = null!,
         };
 
         _controller.ModelState.AddModelError("ChosenAnswerId", "Required");
@@ -545,7 +545,7 @@ public class QuestionsControllerTests
         var submitAnswerDto = new SubmitAnswerDto()
         {
             QuestionId = "Question1",
-            ChosenAnswerId = null!
+            ChosenAnswerJson = null!
         };
 
         _controller.ModelState.AddModelError("ChosenAnswerId", "Required");
@@ -570,7 +570,7 @@ public class QuestionsControllerTests
         var submitAnswerDto = new SubmitAnswerDto()
         {
             QuestionId = "Question1",
-            ChosenAnswerId = "Answer1",
+            ChosenAnswerJson = "Answer1",
             Params = "SectionName+SectionId+SectionSlug"
         };
 
@@ -593,7 +593,7 @@ public class QuestionsControllerTests
         var submitAnswerDto = new SubmitAnswerDto()
         {
             QuestionId = "Question1",
-            ChosenAnswerId = "Answer1",
+            ChosenAnswerJson = "Answer1",
             Params = ""
         };
 
@@ -616,7 +616,7 @@ public class QuestionsControllerTests
         var submitAnswerDto = new SubmitAnswerDto()
         {
             QuestionId = "Question1",
-            ChosenAnswerId = "Answer1",
+            ChosenAnswerJson = "Answer1",
             Params = "qwe lqwd +wdqwdqwdq+123dqwd   +testSlug"
         };
 
@@ -639,7 +639,7 @@ public class QuestionsControllerTests
         var submitAnswerDto = new SubmitAnswerDto()
         {
             QuestionId = "Question1",
-            ChosenAnswerId = "Answer1",
+            ChosenAnswerJson = "Answer1",
             Params = "+"
         };
 
@@ -662,7 +662,7 @@ public class QuestionsControllerTests
         var submitAnswerDto = new SubmitAnswerDto()
         {
             QuestionId = "Question1",
-            ChosenAnswerId = "Answer1",
+            ChosenAnswerJson = "Answer1",
         };
 
         _submitAnswerCommandSubstitute.When(x => x.SubmitAnswer(Arg.Any<SubmitAnswerDto>(), Arg.Any<string>(), Arg.Any<string>())).Do(x => throw new Exception("Test"));
@@ -687,7 +687,7 @@ public class QuestionsControllerTests
         var submitAnswerDto = new SubmitAnswerDto()
         {
             QuestionId = "Question1",
-            ChosenAnswerId = "Answer1",
+            ChosenAnswerJson = "Answer1",
         };
 
         _submitAnswerCommandSubstitute.SubmitAnswer(Arg.Any<SubmitAnswerDto>(), Arg.Any<string>(), Arg.Any<string>()).Returns(1);

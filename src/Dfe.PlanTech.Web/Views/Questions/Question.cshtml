@@ -1,4 +1,5 @@
 @model Dfe.PlanTech.Web.Models.QuestionViewModel
+@using System.Text.Json;
 
 @section BeforeContent {
     @{
@@ -16,7 +17,7 @@
     <input id="Params" hidden value="@Model.Params" name="Params" />
     <input id="SubmissionId" hidden value="@Model.SubmissionId" name="SubmissionId" />
 
-    <govuk-radios name="ChosenAnswerId">
+    <govuk-radios name="ChosenAnswerJson">
         <govuk-radios-fieldset>
             <govuk-radios-fieldset-legend is-page-heading="true" class="govuk-fieldset__legend--l">
                 @Model.Question.Text
@@ -35,16 +36,9 @@
             @{
                 foreach (var answer in Model.Question.Answers)
                 {
-                    var chosenAnswerId = answer.Sys.Id ?? "";
-
-                    if (Model.AnswerRef != null && Model.AnswerRef.Equals(chosenAnswerId))
-                    {
-                        <govuk-radios-item value=@chosenAnswerId checked="true">@answer.Text</govuk-radios-item>
-                    }
-                    else
-                    {
-                        <govuk-radios-item value=@chosenAnswerId>@answer.Text</govuk-radios-item>
-                    }
+                    var answerDto = answer.AsDto;
+                //var checked = false;//Model.AnswerRef != null && Model.AnswerRef.Equals(chosenAnswerId);
+                    <govuk-radios-item value="@JsonSerializer.Serialize(answerDto)" checked="false">@answer.Text</govuk-radios-item>
                 }
             }
 

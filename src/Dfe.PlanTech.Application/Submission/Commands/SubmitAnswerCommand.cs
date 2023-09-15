@@ -33,8 +33,8 @@ namespace Dfe.PlanTech.Application.Submission.Commands
             var question = await _getSubmitAnswerQueries.GetQuestionnaireQuestion(submitAnswerDto.QuestionId, null, CancellationToken.None) ??
                             throw new KeyNotFoundException($"Could not find question for Id {submitAnswerDto.QuestionId}");
 
-            var answer = question.Answers.FirstOrDefault(answer => answer.Sys.Id == submitAnswerDto.ChosenAnswerId) ??
-                            throw new KeyNotFoundException($"Could not find answer for Id {submitAnswerDto.ChosenAnswerId} under question {submitAnswerDto.QuestionId}");
+            var answer = question.Answers.FirstOrDefault(answer => answer.Sys.Id == submitAnswerDto.ChosenAnswerJson) ??
+                            throw new KeyNotFoundException($"Could not find answer for Id {submitAnswerDto.ChosenAnswerJson} under question {submitAnswerDto.QuestionId}");
 
             await _recordSubmitAnswerCommands.RecordResponse(new RecordResponseDto()
             {
