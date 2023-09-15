@@ -19,16 +19,12 @@ public class QuestionsController : BaseController<QuestionsController>
         _getQuestionQuery = getQuestionQuery;
     }
 
-    [HttpGet("{sectionSlug}/{questionSlug}", Name = "SectionQuestionAnswer")]
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="section">Name of current section (if starting new)</param>
-    /// <returns></returns>
-    public async Task<IActionResult> GetQuestionById(string? section, string sectionSlug, string questionSlug, [FromServices] ISubmitAnswerCommand submitAnswerCommand, CancellationToken cancellationToken)
+    [HttpGet("{sectionSlug}/{questionSlug}")]
+    public async Task<IActionResult> GetQuestionBySlug(string sectionSlug, string questionSlug, [FromServices] ISubmitAnswerCommand submitAnswerCommand, CancellationToken cancellationToken)
     {
         var question = await _getQuestionQuery.GetQuestionBySlug(sectionSlug: sectionSlug, questionSlug: questionSlug, cancellationToken);
+
+        /*
         var parameterQuestionPage = TempData[TempDataConstants.Questions] != null ? DeserialiseParameter<TempDataQuestions>(TempData[TempDataConstants.Questions]) : new TempDataQuestions();
         string id;
 
@@ -54,17 +50,18 @@ public class QuestionsController : BaseController<QuestionsController>
         }
         else
         {
-            var viewModel = new QuestionViewModel()
-            {
-                Question = questionWithSubmission.Question,
-                AnswerRef = parameterQuestionPage.AnswerRef,
-                Params = parameters?.ToString(),
-                SubmissionId = questionWithSubmission.Submission == null ? parameterQuestionPage.SubmissionId : questionWithSubmission.Submission.Id,
-                QuestionErrorMessage = parameterQuestionPage.NoSelectedAnswerErrorMessage
-            };
+        */
+        var viewModel = new QuestionViewModel()
+        {
+            Question = question,
+            AnswerRef = null,
+            Params = null,
+            SubmissionId = 1,
+            QuestionErrorMessage = null
+        };
 
-            return View("Question", viewModel);
-        }
+        return View("Question", viewModel);
+
     }
 
     [HttpPost("/question/SubmitAnswer")]
