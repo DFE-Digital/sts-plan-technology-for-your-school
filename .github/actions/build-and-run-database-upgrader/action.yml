@@ -17,6 +17,15 @@ inputs:
   az_resource_group_name:
     required: true
     type: string 
+  environment:
+    required: true
+    type: string
+  sql_analytics_username:
+    required: true
+    type: string
+  sql_analytics_password:
+    required: true
+    type: string
 
 runs:
   using: composite
@@ -46,7 +55,7 @@ runs:
 
     - name: Run database upgrader
       shell: bash
-      run: dotnet ./build/Dfe.PlanTech.DatabaseUpgrader.dll -c "${{ steps.get-db-connection-string.outputs.connection_string }}"
+      run: dotnet ./build/Dfe.PlanTech.DatabaseUpgrader.dll -c "${{ steps.get-db-connection-string.outputs.connection_string }}" --env ${{ inputs.environment }} -p Analytics_Username=${{ inputs.sql_analytics_username }} Analytics_Password=${{ inputs.sql_analytics_password }}
 
     - name: Remove Azure firewall rules
       shell: bash

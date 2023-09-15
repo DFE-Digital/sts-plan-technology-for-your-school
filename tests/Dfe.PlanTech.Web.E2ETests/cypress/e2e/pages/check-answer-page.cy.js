@@ -73,6 +73,11 @@ describe("Check answers page", () => {
     cy.runAxe();
   });
 
+  it("navigates to correct page when clicking change", () => {
+    cy.get("a:nth-child(1)").contains("Change").click();
+    cy.url().should("contains", "broadband-contract-review");
+  });
+  
   //This needs to be last on this test run, so that the question-page tests have a clean slate to work from!
   it("submits answers and shows notification", () => {
     submitAnswers();
@@ -80,6 +85,7 @@ describe("Check answers page", () => {
     cy.url().should("contain", "self-assessment");
     cy.get("div.govuk-notification-banner__header").should("exist");
   });
+
 });
 
 const navigateToCheckAnswersPage = () => {
