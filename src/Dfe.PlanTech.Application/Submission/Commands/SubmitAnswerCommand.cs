@@ -84,10 +84,9 @@ namespace Dfe.PlanTech.Application.Submission.Commands
                 if (submission != null && !submission.Completed)
                 {
                     var nextUnansweredQuestion = await _GetNextUnansweredQuestion(submission.Id);
-                    var section = await _getSectionQuery.GetSectionById(sectionId, CancellationToken.None);
-
                     if (nextUnansweredQuestion == null) return (null, submission);
 
+                    var section = await _getSectionQuery.GetSectionById(sectionId, CancellationToken.None);
                     if (section != null && Array.Exists(section.Questions, question => question.Sys.Id.Equals(nextUnansweredQuestion.Sys.Id))) return (nextUnansweredQuestion, submission);
                 }
             }
