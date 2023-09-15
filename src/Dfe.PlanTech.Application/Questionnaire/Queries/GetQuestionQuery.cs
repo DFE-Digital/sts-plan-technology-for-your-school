@@ -2,6 +2,8 @@ using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
+using Dfe.PlanTech.Application.Response.Interface;
+using Dfe.PlanTech.Application.Response.Queries;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
@@ -11,10 +13,17 @@ namespace Dfe.PlanTech.Application.Questionnaire.Queries;
 public class GetQuestionQuery : ContentRetriever
 {
     private readonly IQuestionnaireCacher _cacher;
+    private readonly IGetLatestResponseListForSubmissionQuery _getResponseQuery;
+    private readonly GetSectionQuery _getSectionQuery;
 
-    public GetQuestionQuery(IQuestionnaireCacher cacher, IContentRepository repository) : base(repository)
+    public GetQuestionQuery(IQuestionnaireCacher cacher,
+                            IGetLatestResponseListForSubmissionQuery getResponseQuery,
+                            GetSectionQuery getSectionQuery,
+                            IContentRepository repository) : base(repository)
     {
         _cacher = cacher;
+        _getResponseQuery = getResponseQuery;
+        _getSectionQuery = getSectionQuery;
     }
 
     public async Task<Question?> GetQuestionById(string id, CancellationToken cancellationToken = default)
@@ -34,24 +43,11 @@ public class GetQuestionQuery : ContentRetriever
         return GetQuestionById(id, cancellationToken);
     }
 
-    public async Task<QuestionWithSectionDto> GetQuestionBySlug(string sectionSlug, string questionSlug, CancellationToken cancellationToken = default)
+    public async Task<QuestionWithSectionDto?> GetQuestionBySlug(string sectionSlug, string questionSlug, CancellationToken cancellationToken = default)
     {
-        var options = new GetEntitiesOptions()
-        {
-            Queries = new[] {
-                new ContentQueryEquals(){
-                    Field = "fields.interstitialPage.fields.slug",
-                    Value = sectionSlug
-                },
-                new ContentQueryEquals(){
-                    Field="fields.interstitialPage.sys.contentType.sys.id",
-                    Value="page"
-                }
-            }
-        };
+        var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken);
 
-        var section = (await repository.GetEntities<Section>(options, cancellationToken)).FirstOrDefault() ??
-                    throw new KeyNotFoundException($"Unable to find section with slug {sectionSlug}");
+        if (section == null) return null;
 
         var question = Array.Find(section.Questions, question => question.Slug == questionSlug) ??
                         throw new KeyNotFoundException($"Unable to find question with slug {questionSlug} under section {sectionSlug}");
@@ -61,6 +57,35 @@ public class GetQuestionQuery : ContentRetriever
                                             SectionName: section.Name,
                                             SectionSlug: section.InterstitialPage.Slug);
     }
+
+    public async Task<QuestionWithSectionDto?> GetQuestionByIdNew(string sectionId, string questionId, CancellationToken cancellationToken = default)
+    {
+        var section = await _getSectionQuery.GetSectionById(sectionId, cancellationToken);
+
+        if (section == null) return null;
+
+        var question = Array.Find(section.Questions, question => question.Sys.Id == questionId) ??
+                        throw new KeyNotFoundException($"Unable to find question with slug {questionId} under section {questionId}");
+
+        return new QuestionWithSectionDto(question,
+                                            SectionId: section.Sys.Id,
+                                            SectionName: section.Name,
+                                            SectionSlug: section.InterstitialPage.Slug);
+    }
+
+    // public async Task<Question?> GetNextUnansweredQuestion(int establishmentId, string sectionId, CancellationToken cancellationToken = default)
+    // {
+    //     var latestQuestionWithAnswer = await _getResponseQuery.GetLatestResponse(establishmentId, sectionId);
+
+    //     if (latestQuestionWithAnswer == null) return null;
+
+    //     var question = await GetQuestionById(latestQuestionWithAnswer.QuestionRef, cancellationToken) ??
+    //                     throw new KeyNotFoundException($"Could not find question with Id {latestQuestionWithAnswer.QuestionRef}");
+
+    //     var nextQuestion = Array.Find(question.Answers, answer => answer.Sys.Id.Equals(latestQuestionWithAnswer.AnswerRef))?.NextQuestion;
+
+    //     return nextQuestion;
+    // }
 
     private void UpdateSectionTitle(string section)
     {

@@ -1,6 +1,8 @@
 using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
+using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Application.Submission.Interfaces;
+using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Constants;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Helpers;
@@ -20,24 +22,65 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
     [HttpGet("{sectionSlug}/{questionSlug}")]
-    public async Task<IActionResult> GetQuestionBySlug(string sectionSlug, string questionSlug, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetQuestionBySlug(string sectionSlug,
+                                                        string questionSlug,
+                                                        [FromServices] GetSectionQuery getSectionQuery,
+                                                        [FromServices] IGetLatestResponseListForSubmissionQuery _getResponseQuery,
+                                                        [FromServices] IUser user,
+                                                        CancellationToken cancellationToken = default)
     {
-        //TODO: Check status -> redirect to check answers if appropriate
-        var question = await _getQuestionQuery.GetQuestionBySlug(sectionSlug: sectionSlug, questionSlug: questionSlug, cancellationToken);
+        //TODO: Move all logic below elsehwere
+        //New class - GetNextQuestionForEstablishment
+        var section = await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
+                        throw new KeyNotFoundException($"Could not find section for slug {sectionSlug}");
+
+        var question = section.Questions.FirstOrDefault(question => question.Slug == questionSlug);
+
+        var latestQuestionWithAnswer = await _getResponseQuery.GetLatestResponse(await user.GetEstablishmentId(),
+                                                                                section.Sys.Id);
+
+        if (latestQuestionWithAnswer != null)
+        {
+            var answeredQuestion = section.Questions.Select(q =>
+                        q.Answers.FirstOrDefault(answer => answer.Sys.Id == latestQuestionWithAnswer.AnswerRef && q.Sys.Id == latestQuestionWithAnswer.QuestionRef)).FirstOrDefault();
+
+            var nextQuestion = answeredQuestion?.NextQuestion != null ? section.Questions.FirstOrDefault(q => q.Sys.Id == answeredQuestion.NextQuestion.Sys.Id) : null;
+
+            if (nextQuestion != null)
+            {
+                var model = new QuestionViewModel()
+                {
+                    Question = nextQuestion,
+                    AnswerRef = null,
+                    Params = null,
+                    SubmissionId = 1,
+                    QuestionErrorMessage = null,
+                    SectionSlug = sectionSlug,
+                    SectionId = section.Sys.Id
+                };
+
+                return View("Question", model);
+            }
+            else{
+                //TODO: REDIRECT TO CHECK ANSWERS
+                return Redirect("/self-assessment");
+            }
+        }
+
+        if (question == null) throw new Exception("No question");
 
         var viewModel = new QuestionViewModel()
         {
-            Question = question.Question,
+            Question = question,
             AnswerRef = null,
             Params = null,
             SubmissionId = 1,
             QuestionErrorMessage = null,
             SectionSlug = sectionSlug,
-            SectionId = question.SectionId
+            SectionId = section.Sys.Id
         };
 
         return View("Question", viewModel);
-
     }
 
     [HttpPost("{sectionSlug}/{questionSlug}")]
