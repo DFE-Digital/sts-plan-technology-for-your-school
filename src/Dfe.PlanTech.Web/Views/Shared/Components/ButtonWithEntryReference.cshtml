@@ -20,8 +20,6 @@
         case Question question:
             {
                 var sectionSlug = TempData["SectionSlug"] as string;
-                //<govuk-button-link href="@sectionSlug/@question.Slug/@question.Sys.Id"
-                //   class="govuk-link">@Model.Button.Value</govuk-button-link>
                 TempData["questionId"] = question.Sys.Id;
                 <govuk-button-link href="@Url.RouteUrl("SectionQuestionAnswer", new { sectionSlug = sectionSlug, question = question.Slug })"
                    class="govuk-link">@Model.Button.Value</govuk-button-link>
