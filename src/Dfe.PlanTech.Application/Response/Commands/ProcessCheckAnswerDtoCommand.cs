@@ -55,8 +55,7 @@ namespace Dfe.PlanTech.Application.Response.Commands
 
             while (node != null)
             {
-                QuestionWithAnswer? questionWithAnswer;
-                if (questionWithAnswerMap.TryGetValue(node.Sys.Id, out questionWithAnswer))
+                if (questionWithAnswerMap.TryGetValue(node.Sys.Id, out QuestionWithAnswer? questionWithAnswer))
                 {
                     checkAnswerDto.QuestionAnswerList.Add(questionWithAnswer);
                     node = node.Answers.FirstOrDefault(answer => answer.Sys.Id.Equals(questionWithAnswer.AnswerRef))?.NextQuestion;
