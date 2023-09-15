@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Submission.Interface;
 using Dfe.PlanTech.Application.Submission.Interfaces;
@@ -116,7 +117,7 @@ public class QuestionsController : BaseController<QuestionsController>
         catch (Exception e)
         {
             logger.LogError( "An error has occurred while retrieving the next question with the following message: {} ", e.Message);
-            return Redirect("/service-unavailable");
+            return Redirect(UrlConstants.ServiceUnavailable);
         }
         
 
