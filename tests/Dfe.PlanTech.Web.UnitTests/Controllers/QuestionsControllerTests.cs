@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Response.Commands;
@@ -699,7 +700,7 @@ public class QuestionsControllerTests
 
         Assert.NotNull(redirectResult);
 
-        Assert.Equal("/service-unavailable", redirectResult.Url);
+        Assert.Equal(UrlConstants.ServiceUnavailable, redirectResult.Url);
 
         _logger.ReceivedWithAnyArgs(1).LogError("An error has occurred while retrieving the next question with the following message: Test");
 

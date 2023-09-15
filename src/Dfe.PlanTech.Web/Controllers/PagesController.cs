@@ -1,9 +1,11 @@
-﻿using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Domain.Content.Models;
+﻿using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Web.Authorisation;
+using Dfe.PlanTech.Web.Binders;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Users.Interfaces;
 
 namespace Dfe.PlanTech.Web.Controllers;
@@ -14,86 +16,51 @@ public class PagesController : BaseController<PagesController>
     {
     }
 
-    [HttpGet("/")]
-    public async Task<IActionResult> Index([FromServices] GetPageQuery query, CancellationToken cancellationToken)
-    {
-        var page = await query.GetPageBySlug("/", cancellationToken);
-
-        var viewModel = CreatePageModel(page);
-
-        return View("Page", viewModel);
-    }
-
-    [Authorize]
+    [Authorize(Policy = PageModelAuthorisationPolicy.POLICY_NAME)]
     [HttpGet("/{route?}")]
     [Route("~/{SectionSlug}/recommendation/{route?}", Name = "GetPageByRouteAndSection")]
-    public async Task<IActionResult> GetByRoute(string route, [FromServices] GetPageQuery query, [FromServices] IUser user, CancellationToken cancellationToken)
+    public IActionResult GetByRoute(string route, [ModelBinder(typeof(PageModelBinder))] Page page, [FromServices] IUser user)
     {
         string slug = GetSlug(route);
         string param = "";
         TempData["SectionSlug"] = route;
-  
+
         if (TempData[slug] is string tempDataSlug) param = tempDataSlug;
 
         if (!string.IsNullOrEmpty(param))
             TempData["Param"] = param;
 
-        var page = await query.GetPageBySlug(slug, cancellationToken);
-
-        var establishment = user.GetOrganisationData();
-
-        var viewModel = CreatePageModel(page, param, establishment.OrgName);
-
-        return View("Page", viewModel);
-    }
-
-    [HttpGet("/accessibility")]
-    public async Task<IActionResult> GetAccessibilityPage([FromServices] GetPageQuery query)
-    {
-        var page = await query.GetPageBySlug("accessibility", CancellationToken.None);
-
-        var viewModel = CreatePageModel(page);
-
-        return View("Page", viewModel);
-    }
-
-    [HttpGet("/privacy-policy")]
-    public async Task<IActionResult> GetPrivacyPolicyPage([FromServices] GetPageQuery query)
-    {
-        var page = await query.GetPageBySlug("privacy-policy", CancellationToken.None);
-
-        var viewModel = CreatePageModel(page);
+        var viewModel = CreatePageModel(page, param, user);
 
         return View("Page", viewModel);
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    [Route("/error")]
+    [Route(UrlConstants.Error)]
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 
-    [Route("/service-unavailable")]
+    [Route(UrlConstants.ServiceUnavailable)]
     public IActionResult ServiceUnavailable()
     {
         return View(new ServiceUnavailableViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 
-    private PageViewModel CreatePageModel(Page page, string param = null!, string organisationName = null!)
+    private PageViewModel CreatePageModel(Page page, string param, IUser user)
     {
         ViewData["Title"] = page.Title?.Text ?? "Plan Technology For Your School";
 
-        if (page.DisplayOrganisationName)
-        {
-            page.OrganisationName = organisationName;
-        }
-
-        return new PageViewModel()
+        var viewModel = new PageViewModel()
         {
             Page = page,
-            Param = param,
+            Param = param
         };
+
+        viewModel.TryLoadOrganisationName(HttpContext, user, logger);
+
+        return viewModel;
     }
 
     /// <summary>

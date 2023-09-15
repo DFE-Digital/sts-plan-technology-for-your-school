@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Constants;
@@ -28,8 +29,17 @@ public class QuestionsController : BaseController<QuestionsController>
     public async Task<IActionResult> GetQuestionById(string? section, [FromServices] ISubmitAnswerCommand submitAnswerCommand, CancellationToken cancellationToken)
     {
         var parameterQuestionPage = TempData[TempDataConstants.Questions] != null ? DeserialiseParameter<TempDataQuestions>(TempData[TempDataConstants.Questions]) : new TempDataQuestions();
+        string id;
 
-        string id = TempData["questionId"] as string ?? parameterQuestionPage.QuestionRef;
+        if (TempData.Peek("questionId") is string questionId && !string.IsNullOrEmpty(questionId))
+        {
+            id = questionId;
+            TempData["questionId"] = null;
+        }
+        else
+        {
+            id = parameterQuestionPage.QuestionRef;
+        }
 
         TempData.TryGetValue("param", out object? parameters);
         Params? param = ParamParser._ParseParameters(parameters?.ToString());
@@ -107,7 +117,7 @@ public class QuestionsController : BaseController<QuestionsController>
         catch (Exception e)
         {
             logger.LogError("An error has occurred while retrieving the next question with the following message: {errorNoNextQuestionId} ", e.Message);
-            return Redirect("/service-unavailable");
+            return Redirect(UrlConstants.ServiceUnavailable);
         }
 
 
