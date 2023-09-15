@@ -1,4 +1,5 @@
 using Azure.Identity;
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Helpers;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.SignIn;
@@ -88,7 +89,7 @@ app.UseExceptionHandler(exceptionHandlerApp =>
 
         var error = exceptionHandlerPathFeature?.Error;
 
-        context.Response.Redirect(error is ContentfulDataUnavailableException ? "/service-unavailable" : "/error");
+        context.Response.Redirect(error is ContentfulDataUnavailableException ? UrlConstants.ServiceUnavailable : UrlConstants.Error);
         
         return Task.CompletedTask;
     });

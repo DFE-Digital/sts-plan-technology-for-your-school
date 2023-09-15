@@ -5,6 +5,7 @@ using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Users.Interfaces;
 
 namespace Dfe.PlanTech.Web.Controllers;
@@ -35,13 +36,13 @@ public class PagesController : BaseController<PagesController>
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    [Route("/error")]
+    [Route(UrlConstants.Error)]
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 
-    [Route("/service-unavailable")]
+    [Route(UrlConstants.ServiceUnavailable)]
     public IActionResult ServiceUnavailable()
     {
         return View(new ServiceUnavailableViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
