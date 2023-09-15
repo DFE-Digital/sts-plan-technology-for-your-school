@@ -1,6 +1,6 @@
 namespace Dfe.PlanTech.Application.Constants;
 
-public class UrlConstants
+public static class  UrlConstants
 {
     public const string ServiceUnavailable = "/service-unavailable";
     
