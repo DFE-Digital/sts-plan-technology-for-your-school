@@ -9,7 +9,7 @@ describe("landing page", () => {
   });
 
   it("should contain headings", () => {
-    cy.get("h2.govuk-heading-m")
+    cy.get("h2.govuk-heading-l")
       .should("exist")
       .and("have.length.of.at.least", 4);
   });
