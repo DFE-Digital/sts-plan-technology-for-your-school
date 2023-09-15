@@ -37,7 +37,7 @@ public interface IPlanTechDbContext
 
     public Task<int> SaveChangesAsync();
 
-    Task<int> CallStoredProcedureWithReturnInt(string sprocName, List<SqlParameter> parms);
+    Task<int> CallStoredProcedureWithReturnInt(string sprocName, IEnumerable<SqlParameter> parms);
 
     IQueryable<SectionStatuses> GetSectionStatuses(string sectionIds);
 

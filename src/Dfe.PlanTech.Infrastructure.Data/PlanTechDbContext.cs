@@ -138,7 +138,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
 
     public Task<Establishment?> GetEstablishmentBy(Expression<Func<Establishment, bool>> predicate) => Establishments.FirstOrDefaultAsync(predicate);
 
-    public Task<int> CallStoredProcedureWithReturnInt(string sprocName, List<SqlParameter> parms) => base.Database.ExecuteSqlRawAsync(sprocName, parms);
+    public Task<int> CallStoredProcedureWithReturnInt(string sprocName, IEnumerable<SqlParameter> parms) => Database.ExecuteSqlRawAsync(sprocName, parms);
 
     public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable) => queryable.FirstOrDefaultAsync();
 
