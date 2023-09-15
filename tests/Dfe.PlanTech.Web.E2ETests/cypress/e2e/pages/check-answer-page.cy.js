@@ -15,6 +15,11 @@ describe("Check answers page", () => {
     cy.runAxe();
   });
 
+  it("navigates to correct page when clicking change", () => {
+    cy.get("a:nth-child(1)").contains("Change").click();
+    cy.url().should("contains", "broadband-contract-review");
+  });
+
   it("submits answers", () => {
     submitAnswers();
 
@@ -27,10 +32,6 @@ describe("Check answers page", () => {
     cy.get("div.govuk-notification-banner__header").should("exist");
   });
 
-  it("navigates to correct page when clicking change", () => {
-    cy.get("a:nth-child(1)").contains("Change").click();
-    cy.url().should("contains", "broadband-contract-review");
-  });
 });
 
 const navigateToCheckAnswersPage = () => {
