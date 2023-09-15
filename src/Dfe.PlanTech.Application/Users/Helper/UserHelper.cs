@@ -63,11 +63,11 @@ public class UserHelper : IUser
 
     public EstablishmentDto GetOrganisationData()
     {
-        var orgDetails = _httpContextAccessor.HttpContext.User.Claims.First(x => x.Type.Contains(ORG_CLAIM_TYPE))?.Value ??
+        var orgDetails = _httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(x => x.Type.Contains(ORG_CLAIM_TYPE))?.Value ??
                     throw new KeyNotFoundException($"Could not find {ORG_CLAIM_TYPE} claim type");
 
         var establishment = JsonSerializer.Deserialize<EstablishmentDto>(orgDetails);
-        if (establishment == null || !establishment.IsValid) throw new Exception("Establishment was not expected format");
+        if (establishment == null || !establishment.IsValid) throw new InvalidDataException("Establishment was not expected format");
 
         return establishment;
     }
