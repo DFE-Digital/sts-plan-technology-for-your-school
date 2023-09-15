@@ -28,13 +28,13 @@ describe("Check answers page", () => {
         };
 
         cy.wrap(row)
-          .find("dt.govuk-summary-list__key")
+          .find("dt.govuk-summary-list__key.spacer")
           .should("exist")
           .invoke("text")
           .then((question) => (questionWithAnswer.question = question.trim()));
 
         cy.wrap(row)
-          .find("dd.govuk-summary-list__value")
+          .find("dd.govuk-summary-list__value.spacer")
           .invoke("text")
           .then((answer) => (questionWithAnswer.answer = answer.trim()));
 
