@@ -17,4 +17,6 @@ public class QuestionViewModel
     public string? QuestionErrorMessage { get; init; }
 
     public string? SectionSlug { get; init; }
+
+    public string? SectionId { get; init; }
 }

@@ -12,10 +12,11 @@
     asp-route-sectionSlug=@Model.SectionSlug
     asp-route-questionSlug=@Model.Question.Slug
     method="post">
-
+    <input id="QuestionText" hidden value="@Model.Question.Text" name="QuestionText"/>
     <input id="QuestionId" hidden value=@Model.Question.Sys.Id name="QuestionId" />
     <input id="Params" hidden value="@Model.Params" name="Params" />
     <input id="SubmissionId" hidden value="@Model.SubmissionId" name="SubmissionId" />
+    <input id="SectionId" hidden value="@Model.SectionId" name="SectionId"/>
 
     <govuk-radios name="ChosenAnswerJson">
         <govuk-radios-fieldset>

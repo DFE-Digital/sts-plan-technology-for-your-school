@@ -1,14 +1,23 @@
-﻿namespace Dfe.PlanTech.Domain.Responses.Models;
+﻿using Dfe.PlanTech.Domain.Questionnaire.Models;
+
+namespace Dfe.PlanTech.Domain.Responses.Models;
 
 public class RecordResponseDto
 {
     public int UserId { get; set; }
 
+    public int EstablishmentId { get; set; }
+
+    //TODO: REMOVE
     public int SubmissionId { get; set; }
 
-    public ContentfulReference Question { get; init; }
+    public string SectionId { get; set; } = null!;
 
-    public ContentfulReference Answer { get; init; }
+    public string SectionName { get; set; } = null!;
+
+    public IdWithText Question { get; init; }
+
+    public IdWithText Answer { get; init; }
 
     public string Maturity { get; set; } = null!;
 

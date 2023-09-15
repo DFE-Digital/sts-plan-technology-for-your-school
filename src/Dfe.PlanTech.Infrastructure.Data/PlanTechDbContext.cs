@@ -140,6 +140,10 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
 
     public Task<int> CallStoredProcedureWithReturnInt(string sprocName, IEnumerable<SqlParameter> parms) => Database.ExecuteSqlRawAsync(sprocName, parms);
 
+    //TODO: Fix so not exposing fact we are using SQL!
+    public Task<int> ExecuteRaw(FormattableString sql, CancellationToken cancellationToken = default)
+    => Database.ExecuteSqlAsync(sql, cancellationToken);
+
     public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable) => queryable.FirstOrDefaultAsync();
 
     public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable) => queryable.ToListAsync();

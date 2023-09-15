@@ -5,9 +5,13 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
 public class SubmitAnswerDto
 {
+    //TODO: Refactor QuestionId + QuestionText to IdWithText object
     [Required]
     public string QuestionId { get; init; } = null!;
 
+    [Required]
+    public string QuestionText { get; init; } = null!;
+    
     [Required]
     public string ChosenAnswerJson { get; init; } = null!;
 
@@ -17,4 +21,7 @@ public class SubmitAnswerDto
     public string? Params { get; init; } = null!;
 
     public int? SubmissionId { get; init; }
+
+    [Required]
+    public string SectionId { get; init; } = null!;
 }

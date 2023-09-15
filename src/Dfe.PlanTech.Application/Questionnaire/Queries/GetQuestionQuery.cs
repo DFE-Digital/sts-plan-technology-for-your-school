@@ -34,7 +34,7 @@ public class GetQuestionQuery : ContentRetriever
         return GetQuestionById(id, cancellationToken);
     }
 
-    public async Task<Question> GetQuestionBySlug(string sectionSlug, string questionSlug, CancellationToken cancellationToken = default)
+    public async Task<QuestionWithSectionDto> GetQuestionBySlug(string sectionSlug, string questionSlug, CancellationToken cancellationToken = default)
     {
         var options = new GetEntitiesOptions()
         {
@@ -56,7 +56,10 @@ public class GetQuestionQuery : ContentRetriever
         var question = Array.Find(section.Questions, question => question.Slug == questionSlug) ??
                         throw new KeyNotFoundException($"Unable to find question with slug {questionSlug} under section {sectionSlug}");
 
-        return question;
+        return new QuestionWithSectionDto(question,
+                                            SectionId: section.Sys.Id,
+                                            SectionName: section.Name,
+                                            SectionSlug: section.InterstitialPage.Slug);
     }
 
     private void UpdateSectionTitle(string section)

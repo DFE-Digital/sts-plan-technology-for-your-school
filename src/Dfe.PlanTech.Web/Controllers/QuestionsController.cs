@@ -22,16 +22,18 @@ public class QuestionsController : BaseController<QuestionsController>
     [HttpGet("{sectionSlug}/{questionSlug}")]
     public async Task<IActionResult> GetQuestionBySlug(string sectionSlug, string questionSlug, CancellationToken cancellationToken)
     {
+        //TODO: Check status -> redirect to check answers if appropriate
         var question = await _getQuestionQuery.GetQuestionBySlug(sectionSlug: sectionSlug, questionSlug: questionSlug, cancellationToken);
 
         var viewModel = new QuestionViewModel()
         {
-            Question = question,
+            Question = question.Question,
             AnswerRef = null,
             Params = null,
             SubmissionId = 1,
             QuestionErrorMessage = null,
-            SectionSlug = sectionSlug
+            SectionSlug = sectionSlug,
+            SectionId = question.SectionId
         };
 
         return View("Question", viewModel);
@@ -41,14 +43,16 @@ public class QuestionsController : BaseController<QuestionsController>
     [HttpPost("{sectionSlug}/{questionSlug}")]
     public async Task<IActionResult> SubmitAnswer(string sectionSlug, string questionSlug, SubmitAnswerDto submitAnswerDto, [FromServices] ISubmitAnswerCommand submitAnswerCommand)
     {
+        if (!ModelState.IsValid) return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug });
+
+        var result = await submitAnswerCommand.SubmitAnswer(submitAnswerDto, submitAnswerDto.SectionId, sectionName: sectionSlug);
+
         if (submitAnswerDto.ChosenAnswer?.NextQuestion == null)
         {
             //TODO: Redirect to check answers page
             return Redirect("/self-assessment");
         }
-        else
-        {
-            return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = submitAnswerDto.ChosenAnswer.NextQuestion.Value.Slug });
-        }
+
+        return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = submitAnswerDto.ChosenAnswer.NextQuestion.Value.Slug });
     }
 }

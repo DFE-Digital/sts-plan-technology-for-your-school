@@ -8,7 +8,7 @@ AS
   BEGIN TRY
     BEGIN TRAN
 
-    SET @submissionId = (SELECT
+    SELECT @submissionId = (SELECT
                     TOP 1
                     Id from [dbo].[submission]
                     WHERE completed = 0
@@ -27,12 +27,8 @@ AS
       
         SELECT @submissionId = Scope_Identity() 
       END
-
-    RETURN @submissionId
-
     COMMIT TRAN
   END TRY
   BEGIN CATCH
     ROLLBACK TRAN
-    RETURN 0
   END CATCH

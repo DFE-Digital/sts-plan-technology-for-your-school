@@ -1,4 +1,4 @@
-CREATE PROCEDURE SubmitAnswer
+ALTER PROCEDURE SubmitAnswer
   @sectionId NVARCHAR(50),
   @sectionName NVARCHAR(50),
   @questionContentfulId NVARCHAR(50),
@@ -6,14 +6,15 @@ CREATE PROCEDURE SubmitAnswer
   @answerContentfulId NVARCHAR(50),
   @answerText NVARCHAR(MAX),
   @userId INT,
-  @establishmentId int,
-  @maturity NVARCHAR(20)
+  @establishmentId INT,
+  @maturity NVARCHAR(20),
+  @responseId INT OUTPUT,
+  @submissionId INT OUTPUT
 AS
 
 BEGIN TRY
 	BEGIN TRAN
 
-    DECLARE @submissionId INT 
     EXEC SelectOrInsertSubmissionId @sectionId=@sectionId, @sectionName=@sectionName,@establishmentId=@establishmentId, @submissionId = @submissionId OUTPUT;
 
     DECLARE @answerId INT
@@ -35,13 +36,11 @@ BEGIN TRY
     VALUES
       (@userId, @submissionId, @questionId, @answerId, @maturity)
 
-    DECLARE @responseId INT = Scope_Identity() 
-
-    RETURN @responseId
-
+    SELECT @responseId = Scope_Identity() 
   COMMIT TRAN
+
   END TRY
   BEGIN CATCH
     ROLLBACK TRAN
-    RETURN 0
   END CATCH
+  

@@ -1,23 +1,30 @@
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Application.Submission.Queries;
-using Dfe.PlanTech.Domain.Answers.Models;
+using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Domain.Questions.Models;
 using Dfe.PlanTech.Domain.Responses.Models;
 
 namespace Dfe.PlanTech.Application.Submission.Commands
 {
     public class SubmitAnswerCommand : ISubmitAnswerCommand
     {
+        private readonly IPlanTechDbContext _db;
+
         private readonly GetSectionQuery _getSectionQuery;
         private readonly GetSubmitAnswerQueries _getSubmitAnswerQueries;
         private readonly RecordSubmitAnswerCommands _recordSubmitAnswerCommands;
         private readonly IGetLatestResponseListForSubmissionQuery _getLatestResponseListForSubmissionQuery;
+        private readonly ICreateResponseCommand _createResponseCommand;
+        private readonly IUser _user;
 
-        public SubmitAnswerCommand(GetSectionQuery getSectionQuery, GetSubmitAnswerQueries getSubmitAnswerQueries, RecordSubmitAnswerCommands recordSubmitAnswerCommands, IGetLatestResponseListForSubmissionQuery getLatestResponseListForSubmissionQuery)
+        public SubmitAnswerCommand(IPlanTechDbContext db, ICreateResponseCommand createResponseCommand, IUser user, GetSectionQuery getSectionQuery, GetSubmitAnswerQueries getSubmitAnswerQueries, RecordSubmitAnswerCommands recordSubmitAnswerCommands, IGetLatestResponseListForSubmissionQuery getLatestResponseListForSubmissionQuery)
         {
+            _db = db;
+            _createResponseCommand = createResponseCommand;
+            _user = user;
             _getSectionQuery = getSectionQuery;
             _getSubmitAnswerQueries = getSubmitAnswerQueries;
             _recordSubmitAnswerCommands = recordSubmitAnswerCommands;
@@ -26,26 +33,27 @@ namespace Dfe.PlanTech.Application.Submission.Commands
 
         public async Task<int> SubmitAnswer(SubmitAnswerDto submitAnswerDto, string sectionId, string sectionName)
         {
+            if (submitAnswerDto.ChosenAnswer == null) throw new NullReferenceException(nameof(submitAnswerDto.ChosenAnswer));
+
             int userId = await _getSubmitAnswerQueries.GetUserId();
+            int establishmentId = await _user.GetEstablishmentId();
 
-            int submissionId = await _GetSubmissionId(submitAnswerDto.SubmissionId, sectionId, sectionName);
-
-            var question = await _getSubmitAnswerQueries.GetQuestionnaireQuestion(submitAnswerDto.QuestionId, null, CancellationToken.None) ??
-                            throw new KeyNotFoundException($"Could not find question for Id {submitAnswerDto.QuestionId}");
-
-            var answer = question.Answers.FirstOrDefault(answer => answer.Sys.Id == submitAnswerDto.ChosenAnswerJson) ??
-                            throw new KeyNotFoundException($"Could not find answer for Id {submitAnswerDto.ChosenAnswerJson} under question {submitAnswerDto.QuestionId}");
-
-            await _recordSubmitAnswerCommands.RecordResponse(new RecordResponseDto()
+            var responseId = await _createResponseCommand.CreateResponsNew(new RecordResponseDto()
             {
-                UserId = userId,
-                SubmissionId = submissionId,
-                Question = new ContentfulReference(Id: question.Sys.Id, Text: question.Text),
-                Answer = new ContentfulReference(Id: answer.Sys.Id, Text: answer.Text),
-                Maturity = answer.Maturity
+                SectionId = sectionId,
+                SectionName = sectionName,
+                Answer = submitAnswerDto.ChosenAnswer!.Answer,
+                Question = new IdWithText()
+                {
+                    Text = submitAnswerDto.QuestionText,
+                    Id = submitAnswerDto.QuestionId
+                },
+                Maturity = submitAnswerDto.ChosenAnswer.Maturity,
+                EstablishmentId = establishmentId,
+                UserId = userId
             });
 
-            return submissionId;
+            return responseId;
         }
 
         public async Task<string?> GetNextQuestionId(string questionId, string chosenAnswerId)
