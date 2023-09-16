@@ -34,9 +34,6 @@ namespace Dfe.PlanTech.Application.Response.Commands
             return await RemoveDetachedQuestions(questionWithAnswerList.Responses, sectionId, questionWithAnswerList.Id, cancellationToken);
         }
 
-
-        public Task CalculateMaturityAsync(int submissionId) => _calculateMaturityCommand.CalculateMaturityAsync(submissionId);
-
         private async Task<CheckAnswerDto> RemoveDetachedQuestions(List<QuestionWithAnswer> questionWithAnswerList, string sectionId, int submissionId, CancellationToken cancellationToken)
         {
             if (questionWithAnswerList == null) throw new ArgumentNullException(nameof(questionWithAnswerList));

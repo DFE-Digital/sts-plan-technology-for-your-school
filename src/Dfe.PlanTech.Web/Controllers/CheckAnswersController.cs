@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Response.Commands;
+using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -41,14 +42,12 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
         return View("CheckAnswers", checkAnswersViewModel);
     }
-    
+
     [HttpPost("ConfirmCheckAnswers")]
-    public async Task<IActionResult> ConfirmCheckAnswers(int submissionId, string sectionName, [FromServices] ProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand)
+    public async Task<IActionResult> ConfirmCheckAnswers(int submissionId, [FromServices] ICalculateMaturityCommand calculateMaturityCommand, CancellationToken cancellationToken = default)
     {
-        await processCheckAnswerDtoCommand.CalculateMaturityAsync(submissionId);
+        await calculateMaturityCommand.CalculateMaturityAsync(submissionId, cancellationToken);
 
-        TempData["SectionName"] = sectionName;
         return RedirectToAction("GetByRoute", "Pages", new { route = "self-assessment" });
-
     }
 }

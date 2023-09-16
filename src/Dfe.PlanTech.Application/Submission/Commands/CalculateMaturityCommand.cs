@@ -14,7 +14,7 @@ namespace Dfe.PlanTech.Application.Submission.Commands
             _db = db;
         }
 
-        public async Task<int> CalculateMaturityAsync(int submissionId)
+        public Task<int> CalculateMaturityAsync(int submissionId, CancellationToken cancellationToken = default)
         {
             var sprocName = DatabaseConstants.CalculateMaturitySproc;
             var parms = new List<SqlParameter>
@@ -22,8 +22,7 @@ namespace Dfe.PlanTech.Application.Submission.Commands
                 new SqlParameter { ParameterName = DatabaseConstants.CalculateMaturitySprocParam, Value = submissionId, Direction = System.Data.ParameterDirection.Input }
             };
 
-            var successfullyCalculated = await _db.CallStoredProcedureWithReturnInt(sprocName, parms);
-            return successfullyCalculated;
+            return _db.CallStoredProcedureWithReturnInt(sprocName, parms);
         }
     }
 }

@@ -2,6 +2,6 @@
 {
     public interface ICalculateMaturityCommand
     {
-        Task<int> CalculateMaturityAsync(int submissionId);
+        Task<int> CalculateMaturityAsync(int submissionId, CancellationToken cancellationToken = default);
     }
 }
