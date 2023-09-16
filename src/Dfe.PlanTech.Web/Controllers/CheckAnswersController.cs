@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
-using Dfe.PlanTech.Application.Response.Commands;
-using Dfe.PlanTech.Application.Submission.Interfaces;
+using Dfe.PlanTech.Application.Responses.Commands;
+using Dfe.PlanTech.Application.Submissions.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;

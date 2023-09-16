@@ -1,6 +1,7 @@
 ﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Establishments.Models;
+using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 namespace Dfe.PlanTech.Application.Users.Commands;
 
@@ -21,7 +22,7 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
         _getUserIdQuery = getUserIdQuery;
     }
 
-    public async Task<Domain.SignIn.Models.SignIn> RecordSignIn(RecordUserSignInDto recordUserSignInDto)
+    public async Task<SignIn> RecordSignIn(RecordUserSignInDto recordUserSignInDto)
     {
         var signIn = await CreateSignIn(recordUserSignInDto);
 
@@ -35,7 +36,7 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
     /// </summary>
     /// <param name="recordUserSignInDto"></param>
     /// <returns></returns>
-    private async Task<Domain.SignIn.Models.SignIn> CreateSignIn(RecordUserSignInDto recordUserSignInDto)
+    private async Task<SignIn> CreateSignIn(RecordUserSignInDto recordUserSignInDto)
     {
         int userId = await GetUserId(recordUserSignInDto);
         var establishmentId = await GetEstablishmentId(recordUserSignInDto);
@@ -87,12 +88,12 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
         });
     }
 
-    private static Domain.SignIn.Models.SignIn MapToSignIn(int userId, int establishmentId = 1)
+    private static SignIn MapToSignIn(int userId, int establishmentId = 1)
     {
         if (userId == 0)
             throw new ArgumentNullException(nameof(userId), "User id cannot be null");
 
-        return new Domain.SignIn.Models.SignIn
+        return new SignIn
         {
             UserId = userId,
             EstablishmentId = establishmentId,
@@ -105,7 +106,7 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
     /// </summary>
     /// <param name="signIn"></param>
     /// <returns>Id of created SignIn</returns>
-    private async Task<int> AddSignInDetails(Domain.SignIn.Models.SignIn signIn)
+    private async Task<int> AddSignInDetails(SignIn signIn)
     {
         _db.AddSignIn(signIn);
         await _db.SaveChangesAsync();

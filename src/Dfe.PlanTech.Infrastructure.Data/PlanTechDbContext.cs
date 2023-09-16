@@ -4,7 +4,7 @@ using Dfe.PlanTech.Domain.Answers.Models;
 using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.Questions.Models;
 using Dfe.PlanTech.Domain.Responses.Models;
-using Dfe.PlanTech.Domain.SignIn.Models;
+using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 using Microsoft.Data.SqlClient;

@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Application.Questionnaire.Queries;
-using Dfe.PlanTech.Application.Response.Interface;
-using Dfe.PlanTech.Application.Submission.Interfaces;
+using Dfe.PlanTech.Application.Responses.Interface;
+using Dfe.PlanTech.Application.Submissions.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
@@ -65,10 +65,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
         bool navigateToCheckAnswersPage = await GetQuestionCompletionStatus(submitAnswerDto, user, getResponseQuery);
 
-        if (navigateToCheckAnswersPage)
-        {
-            return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { sectionSlug });
-        }
+        if (navigateToCheckAnswersPage) return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { sectionSlug });
 
         return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = submitAnswerDto.ChosenAnswer!.NextQuestion!.Value.Slug });
     }

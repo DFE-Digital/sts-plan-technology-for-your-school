@@ -1,5 +1,5 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Application.Response.Queries;
+using Dfe.PlanTech.Application.Responses.Queries;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using NSubstitute;
 

@@ -1,5 +1,5 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Application.Submission.Queries;
+using Dfe.PlanTech.Application.Submissions.Queries;
 using Dfe.PlanTech.Domain.Questions.Models;
 using NSubstitute;
 using System.Linq.Expressions;

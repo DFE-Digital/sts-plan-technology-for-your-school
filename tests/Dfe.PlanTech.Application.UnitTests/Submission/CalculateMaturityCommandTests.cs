@@ -1,5 +1,5 @@
 ﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Application.Submission.Commands;
+using Dfe.PlanTech.Application.Submissions.Commands;
 using Microsoft.Data.SqlClient;
 using NSubstitute;
 
