@@ -44,37 +44,43 @@ namespace Dfe.PlanTech.Application.Response.Queries
             return await _db.ToListAsync(responseListByDate);
         }
 
-        private static Expression<Func<Domain.Responses.Models.Response, QuestionWithAnswer>> ToQuestionWithAnswer()
-        => response => new QuestionWithAnswer()
-        {
-            QuestionRef = response.Question.ContentfulRef,
-            QuestionText = response.Question.QuestionText, //Should this come from Contentful?
-            AnswerRef = response.Answer.ContentfulRef,
-            AnswerText = response.Answer.AnswerText,//Should this come from Contentful?
-            DateCreated = response.DateCreated
-        };
-
         public Task<QuestionWithAnswer?> GetLatestResponse(int establishmentId, string sectionId)
         {
-            var responseListByDate = GetQuestionsWithAnswers(establishmentId, sectionId).Select(qwa => qwa.FirstOrDefault());
+            var responseListByDate = GetLatestResponsesQueryable(establishmentId, sectionId).Select(qwa => qwa.FirstOrDefault());
 
             return _db.FirstOrDefaultAsync(responseListByDate);
         }
 
-        public Task<IEnumerable<QuestionWithAnswer>?> GetResponses(int establishmentId, string sectionId)
-            => _db.FirstOrDefaultAsync(GetQuestionsWithAnswers(establishmentId, sectionId));
+        public async Task<QuestionWithAnswer?> GetLatestResponseForQuestion(int establishmentId, string sectionId, string questionId)
+        {
+            var submission = await _db.FirstOrDefaultAsync(GetCurrentSubmission(establishmentId, sectionId));
 
-        private IQueryable<IEnumerable<QuestionWithAnswer>> GetQuestionsWithAnswers(int establishmentId, string sectionId)
+            var responseListByDate = GetCurrentSubmission(establishmentId, sectionId)
+                                            .SelectMany(submission => submission.Responses)
+                                            .Where(response => response.Question.ContentfulRef == questionId)
+                                            .OrderByDescending(response => response.DateCreated)
+                                            .Select(ToQuestionWithAnswer());
+
+            return await _db.FirstOrDefaultAsync(responseListByDate);
+        }
+
+
+        public Task<IEnumerable<QuestionWithAnswer>?> GetLatestResponses(int establishmentId, string sectionId)
+            => _db.FirstOrDefaultAsync(GetLatestResponsesQueryable(establishmentId, sectionId));
+
+        private IQueryable<IEnumerable<QuestionWithAnswer>> GetLatestResponsesQueryable(int establishmentId, string sectionId)
         => GetCurrentSubmission(establishmentId, sectionId)
                 .Select(submission => submission.Responses
-                    .Select(response => new QuestionWithAnswer
-                    {
-                        QuestionRef = response.Question.ContentfulRef,
-                        AnswerRef = response.Answer.ContentfulRef,
-                        DateCreated = response.DateCreated
-                    })
-                    .GroupBy(questionWithAnswer => questionWithAnswer.QuestionRef)
-                    .Select(group => group.OrderByDescending(questionWithAnswer => questionWithAnswer.DateCreated).First()));
+                                                .Select(response => new QuestionWithAnswer
+                                                {
+                                                    QuestionRef = response.Question.ContentfulRef,
+                                                    QuestionText = response.Question.QuestionText ?? "", //Should this come from Contentful?
+                                                    AnswerRef = response.Answer.ContentfulRef,
+                                                    AnswerText = response.Answer.AnswerText ?? "",//Should this come from Contentful?
+                                                    DateCreated = response.DateCreated
+                                                })
+                                                .GroupBy(questionWithAnswer => questionWithAnswer.QuestionRef)
+                                                .Select(group => group.OrderByDescending(questionWithAnswer => questionWithAnswer.DateCreated).First()));
 
         private IQueryable<Domain.Submissions.Models.Submission> GetCurrentSubmission(int establishmentId, string sectionId)
         => _db.GetSubmissions
@@ -85,5 +91,16 @@ namespace Dfe.PlanTech.Application.Response.Queries
         => submission => submission.Completed == false &&
                         submission.EstablishmentId == establishmentId &&
                         submission.SectionId == sectionId;
+
+        private static Expression<Func<Domain.Responses.Models.Response, QuestionWithAnswer>> ToQuestionWithAnswer()
+        => response => new QuestionWithAnswer()
+        {
+            QuestionRef = response.Question.ContentfulRef,
+            QuestionText = response.Question.QuestionText ?? "", //Should this come from Contentful?
+            AnswerRef = response.Answer.ContentfulRef,
+            AnswerText = response.Answer.AnswerText ?? "",//Should this come from Contentful?
+            DateCreated = response.DateCreated
+        };
+
     }
 }

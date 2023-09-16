@@ -32,7 +32,7 @@ namespace Dfe.PlanTech.Application.Response.Commands
         //TODO: Rename
         public async Task<CheckAnswerDto> GetCheckAnswerDtoForSectionId(int establishmentId, string sectionId)
         {
-            var questionWithAnswerList = await _getLatestResponseListForSubmissionQuery.GetResponses(establishmentId, sectionId);
+            var questionWithAnswerList = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(establishmentId, sectionId);
             if (questionWithAnswerList == null || !questionWithAnswerList.Any())
             {
                 return new CheckAnswerDto()

@@ -14,8 +14,6 @@
     method="post">
     <input id="QuestionText" hidden value="@Model.Question.Text" name="QuestionText"/>
     <input id="QuestionId" hidden value=@Model.Question.Sys.Id name="QuestionId" />
-    <input id="Params" hidden value="@Model.Params" name="Params" />
-    <input id="SubmissionId" hidden value="@Model.SubmissionId" name="SubmissionId" />
     <input id="SectionId" hidden value="@Model.SectionId" name="SectionId"/>
 
     <govuk-radios name="ChosenAnswerJson">
@@ -29,17 +27,19 @@
                 <govuk-radios-hint>@Model.Question.HelpText</govuk-radios-hint>
             }
 
-            @if (!string.IsNullOrEmpty(Model.QuestionErrorMessage))
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
             {
-                <govuk-radios-error-message>@Model.QuestionErrorMessage</govuk-radios-error-message>
+                <govuk-radios-error-message>@Model.ErrorMessage</govuk-radios-error-message>
             }
 
             @{
                 foreach (var answer in Model.Question.Answers)
                 {
                     var answerDto = answer.AsDto;
-                //var checked = false;//Model.AnswerRef != null && Model.AnswerRef.Equals(chosenAnswerId);
-                    <govuk-radios-item value="@JsonSerializer.Serialize(answerDto)" checked="false">@answer.Text</govuk-radios-item>
+                    var isChecked = Model.AnswerRef != null && Model.AnswerRef.Equals(answer.Sys.Id);
+                    var radioValue = JsonSerializer.Serialize(answerDto);
+
+                    <govuk-radios-item value="@radioValue" checked="@isChecked">@answer.Text</govuk-radios-item>
                 }
             }
 

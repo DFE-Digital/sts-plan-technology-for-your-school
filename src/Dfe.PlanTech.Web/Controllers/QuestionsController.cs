@@ -34,51 +34,53 @@ public class QuestionsController : BaseController<QuestionsController>
         var section = await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
                         throw new KeyNotFoundException($"Could not find section for slug {sectionSlug}");
 
-        var question = section.Questions.FirstOrDefault(question => question.Slug == questionSlug);
+        //TODO: change exception
+        var question = section.Questions.FirstOrDefault(question => question.Slug == questionSlug) ?? throw new Exception("No question");
+
+        var latestResponseForQuestion = await _getResponseQuery.GetLatestResponseForQuestion(await user.GetEstablishmentId(),
+                                                                                        section.Sys.Id,
+                                                                                        question!.Sys.Id);
 
         //todo: address logic
         //check question answered for incomplete section - if so use answer
         var latestQuestionWithAnswer = await _getResponseQuery.GetLatestResponse(await user.GetEstablishmentId(),
                                                                                 section.Sys.Id);
-
-        if (latestQuestionWithAnswer != null)
-        {
-            var answeredQuestion = section.Questions.Select(q =>
-                        q.Answers.FirstOrDefault(answer => answer.Sys.Id == latestQuestionWithAnswer.AnswerRef && q.Sys.Id == latestQuestionWithAnswer.QuestionRef)).FirstOrDefault();
-
-            var nextQuestion = answeredQuestion?.NextQuestion != null ? section.Questions.FirstOrDefault(q => q.Sys.Id == answeredQuestion.NextQuestion.Sys.Id) : null;
-
-            if (nextQuestion != null)
-            {
-                var model = new QuestionViewModel()
+        /* 
+                if (latestQuestionWithAnswer != null)
                 {
-                    Question = nextQuestion,
-                    AnswerRef = null,
-                    Params = null,
-                    SubmissionId = 1,
-                    QuestionErrorMessage = null,
-                    SectionSlug = sectionSlug,
-                    SectionId = section.Sys.Id
-                };
+                    var answeredQuestion = section.Questions.Select(q =>
+                                q.Answers.FirstOrDefault(answer => answer.Sys.Id == latestQuestionWithAnswer.AnswerRef && q.Sys.Id == latestQuestionWithAnswer.QuestionRef)).FirstOrDefault();
 
-                return View("Question", model);
-            }
-            else
-            {
-                //TODO: REDIRECT TO CHECK ANSWERS
-                return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { sectionSlug });
-            }
-        }
+                    var nextQuestion = answeredQuestion?.NextQuestion != null ? section.Questions.FirstOrDefault(q => q.Sys.Id == answeredQuestion.NextQuestion.Sys.Id) : null;
 
-        if (question == null) throw new Exception("No question");
+                    if (nextQuestion != null)
+                    {
+                        var model = new QuestionViewModel()
+                        {
+                            Question = nextQuestion,
+                            AnswerRef = null,
+                            Params = null,
+                            SubmissionId = 1,
+                            QuestionErrorMessage = null,
+                            SectionSlug = sectionSlug,
+                            SectionId = section.Sys.Id
+                        };
+
+                        return View("Question", model);
+                    }
+                    else
+                    {
+                        //TODO: REDIRECT TO CHECK ANSWERS
+                        return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { sectionSlug });
+                    }
+                }
+         */
 
         var viewModel = new QuestionViewModel()
         {
             Question = question,
-            AnswerRef = null,
-            Params = null,
-            SubmissionId = 1,
-            QuestionErrorMessage = null,
+            AnswerRef = latestResponseForQuestion?.AnswerRef,
+            ErrorMessage = null,
             SectionSlug = sectionSlug,
             SectionId = section.Sys.Id
         };

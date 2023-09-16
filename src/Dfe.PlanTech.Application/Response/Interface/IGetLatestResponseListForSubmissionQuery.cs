@@ -10,6 +10,8 @@ namespace Dfe.PlanTech.Application.Response.Interface
 
         Task<QuestionWithAnswer?> GetLatestResponse(int establishmentId, string sectionId);
 
-        Task<IEnumerable<QuestionWithAnswer>?> GetResponses(int establishmentId, string sectionId);
+        Task<QuestionWithAnswer?> GetLatestResponseForQuestion(int establishmentId, string sectionId, string questionId);
+
+        Task<IEnumerable<QuestionWithAnswer>?> GetLatestResponses(int establishmentId, string sectionId);
     }
 }
