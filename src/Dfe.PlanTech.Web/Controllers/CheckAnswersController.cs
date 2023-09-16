@@ -2,10 +2,6 @@ using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Response.Commands;
 using Dfe.PlanTech.Application.Users.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Constants;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +25,8 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
         var establishmentId = await user.GetEstablishmentId();
 
         var responses = await processCheckAnswerDtoCommand.GetCheckAnswerDtoForSectionId(establishmentId, section!.Sys.Id);
+
+        if (responses == null) return RedirectToAction("GetByRoute", "Pages", new { route = "/self-assessment" });
 
         CheckAnswersViewModel checkAnswersViewModel = new()
         {
