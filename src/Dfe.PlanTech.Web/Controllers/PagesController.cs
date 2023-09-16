@@ -18,7 +18,7 @@ public class PagesController : BaseController<PagesController>
 
     [Authorize(Policy = PageModelAuthorisationPolicy.POLICY_NAME)]
     [HttpGet("/{route?}")]
-    [Route("~/{SectionSlug}/recommendation/{route?}", Name = "GetPageByRouteAndSection")]
+    [Route("~/{sectionSlug}/recommendation/{route?}", Name = "GetPageByRouteAndSection")]
     public IActionResult GetByRoute(string route, [ModelBinder(typeof(PageModelBinder))] Page page, [FromServices] IUser user)
     {
         string slug = GetSlug(route);

@@ -73,19 +73,25 @@ public class GetQuestionQuery : ContentRetriever
                                             SectionSlug: section.InterstitialPage.Slug);
     }
 
-    // public async Task<Question?> GetNextUnansweredQuestion(int establishmentId, string sectionId, CancellationToken cancellationToken = default)
-    // {
-    //     var latestQuestionWithAnswer = await _getResponseQuery.GetLatestResponse(establishmentId, sectionId);
 
-    //     if (latestQuestionWithAnswer == null) return null;
+    //TODO: move to another class 
+    public async Task<Question?> GetNextUnansweredQuestion(int establishmentId, Section section, CancellationToken cancellationToken = default)
+    {
+        var latestQuestionWithAnswer = await _getResponseQuery.GetLatestResponse(establishmentId, section.Sys.Id);
 
-    //     var question = await GetQuestionById(latestQuestionWithAnswer.QuestionRef, cancellationToken) ??
-    //                     throw new KeyNotFoundException($"Could not find question with Id {latestQuestionWithAnswer.QuestionRef}");
+        //When there's no response for section yet == section not started == return first question for section
+        if (latestQuestionWithAnswer == null)
+        {
+            return section.Questions.FirstOrDefault();
+        }
 
-    //     var nextQuestion = Array.Find(question.Answers, answer => answer.Sys.Id.Equals(latestQuestionWithAnswer.AnswerRef))?.NextQuestion;
+        var question = Array.Find(section.Questions, question => question.Sys.Id == latestQuestionWithAnswer.QuestionRef) ?? 
+                        throw new Exception("Not find question");
+                        
+        var nextQuestion = Array.Find(question.Answers, answer => answer.Sys.Id.Equals(latestQuestionWithAnswer.AnswerRef))?.NextQuestion;
 
-    //     return nextQuestion;
-    // }
+        return nextQuestion;
+    }
 
     private void UpdateSectionTitle(string section)
     {

@@ -31,6 +31,10 @@ namespace Dfe.PlanTech.Application.Submission.Commands
             _getLatestResponseListForSubmissionQuery = getLatestResponseListForSubmissionQuery;
         }
 
+        //TODO: This should check if we are re-submitting an answer
+        //If so, return some sort of result indicating so
+        //Then on the action on the controller, we should redirect to a new route called "GetNextUnansweredQuestionForSection"
+        //Which will then either redirect to the "GetQuestionBySlug" route or "Check Answers" route
         public async Task<int> SubmitAnswer(SubmitAnswerDto submitAnswerDto, string sectionId, string sectionName)
         {
             if (submitAnswerDto.ChosenAnswer == null) throw new NullReferenceException(nameof(submitAnswerDto.ChosenAnswer));

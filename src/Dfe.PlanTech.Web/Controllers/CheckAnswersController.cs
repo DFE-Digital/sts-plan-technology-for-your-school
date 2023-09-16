@@ -15,11 +15,8 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Authorize]
 public class CheckAnswersController : BaseController<CheckAnswersController>
 {
-    private readonly GetQuestionQuery _getQuestionnaireQuery;
-
-    public CheckAnswersController(ILogger<CheckAnswersController> logger, GetQuestionQuery getQuestionQuery) : base(logger)
+    public CheckAnswersController(ILogger<CheckAnswersController> logger) : base(logger)
     {
-        this._getQuestionnaireQuery = getQuestionQuery;
     }
 
     [HttpGet("{sectionSlug}/check-answers")]
