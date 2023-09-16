@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Azure;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -64,9 +65,8 @@ namespace Dfe.PlanTech.Application.Response.Queries
             return await _db.FirstOrDefaultAsync(responseListByDate);
         }
 
-
-        public Task<IEnumerable<QuestionWithAnswer>?> GetLatestResponses(int establishmentId, string sectionId)
-            => _db.FirstOrDefaultAsync(GetLatestResponsesQueryable(establishmentId, sectionId));
+        public Task<SubmissionWithResponses> GetLatestResponses(int establishmentId, string sectionId)
+            => _db.FirstOrDefaultAsync(GetLatestResponsesBySectionIdQueryable(establishmentId, sectionId));
 
         private IQueryable<IEnumerable<QuestionWithAnswer>> GetLatestResponsesQueryable(int establishmentId, string sectionId)
         => GetCurrentSubmission(establishmentId, sectionId)
@@ -81,6 +81,24 @@ namespace Dfe.PlanTech.Application.Response.Queries
                                                 })
                                                 .GroupBy(questionWithAnswer => questionWithAnswer.QuestionRef)
                                                 .Select(group => group.OrderByDescending(questionWithAnswer => questionWithAnswer.DateCreated).First()));
+
+        private IQueryable<SubmissionWithResponses> GetLatestResponsesBySectionIdQueryable(int establishmentId, string sectionId)
+        => GetCurrentSubmission(establishmentId, sectionId)
+                .Select(submission => new SubmissionWithResponses()
+                {
+                    Id = submission.Id,
+                    Responses = submission.Responses.Select(response => new QuestionWithAnswer
+                    {
+                        QuestionRef = response.Question.ContentfulRef,
+                        QuestionText = response.Question.QuestionText ?? "", //Should this come from Contentful?
+                        AnswerRef = response.Answer.ContentfulRef,
+                        AnswerText = response.Answer.AnswerText ?? "",//Should this come from Contentful?
+                        DateCreated = response.DateCreated
+                    })
+                    .GroupBy(questionWithAnswer => questionWithAnswer.QuestionRef)
+                    .Select(group => group.OrderByDescending(questionWithAnswer => questionWithAnswer.DateCreated).First())
+                    .ToList()
+                });
 
         private IQueryable<Domain.Submissions.Models.Submission> GetCurrentSubmission(int establishmentId, string sectionId)
         => _db.GetSubmissions
@@ -103,4 +121,15 @@ namespace Dfe.PlanTech.Application.Response.Queries
         };
 
     }
+}
+
+public readonly record struct SubmissionWithResponses
+{
+    public SubmissionWithResponses()
+    {
+    }
+
+    public int Id { get; init; }
+
+    public List<QuestionWithAnswer> Responses { get; init; } = new();
 }

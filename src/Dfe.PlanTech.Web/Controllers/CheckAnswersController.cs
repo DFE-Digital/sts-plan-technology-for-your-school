@@ -40,7 +40,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
             CheckAnswerDto = responses,
             Content = checkAnswerPageContent.Content,
             SectionSlug = sectionSlug,
-            SubmissionId = 0,
+            SubmissionId = responses.SubmissionId,
             Slug = checkAnswerPageContent.Slug
         };
 

@@ -25,7 +25,7 @@ namespace Dfe.PlanTech.Application.Response.Commands
         public async Task<CheckAnswerDto> ProcessCheckAnswerDto(int submissionId, string sectionId)
         {
             List<QuestionWithAnswer> questionWithAnswerList = await _GetQuestionWithAnswerList(submissionId);
-            CheckAnswerDto checkAnswerDto = await _RemoveDetachedQuestions(questionWithAnswerList, sectionId);
+            CheckAnswerDto checkAnswerDto = await _RemoveDetachedQuestions(questionWithAnswerList, sectionId, submissionId);
             return checkAnswerDto;
         }
 
@@ -33,7 +33,7 @@ namespace Dfe.PlanTech.Application.Response.Commands
         public async Task<CheckAnswerDto> GetCheckAnswerDtoForSectionId(int establishmentId, string sectionId)
         {
             var questionWithAnswerList = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(establishmentId, sectionId);
-            if (questionWithAnswerList == null || !questionWithAnswerList.Any())
+            if (questionWithAnswerList.Responses == null || !questionWithAnswerList.Responses.Any())
             {
                 return new CheckAnswerDto()
                 {
@@ -41,26 +41,27 @@ namespace Dfe.PlanTech.Application.Response.Commands
                 };
             }
 
-            CheckAnswerDto checkAnswerDto = await _RemoveDetachedQuestions(questionWithAnswerList!.ToList(), sectionId);
+            var checkAnswerDto = await _RemoveDetachedQuestions(questionWithAnswerList.Responses, sectionId, questionWithAnswerList.Id);
             return checkAnswerDto;
         }
 
 
-        public async Task CalculateMaturityAsync(int submissionId)
-        {
-            await _calculateMaturityCommand.CalculateMaturityAsync(submissionId);
-        }
+        public Task CalculateMaturityAsync(int submissionId) => _calculateMaturityCommand.CalculateMaturityAsync(submissionId);
 
         //TODO: DELETE
         private Task<List<QuestionWithAnswer>> _GetQuestionWithAnswerList(int submissionId)
         => _getLatestResponseListForSubmissionQuery.GetLatestResponseListForSubmissionBy(submissionId);
 
-        private async Task<CheckAnswerDto> _RemoveDetachedQuestions(List<QuestionWithAnswer> questionWithAnswerList, string sectionId)
+        private async Task<CheckAnswerDto> _RemoveDetachedQuestions(List<QuestionWithAnswer> questionWithAnswerList, string sectionId, int submissionId)
         {
             if (questionWithAnswerList == null) throw new ArgumentNullException(nameof(questionWithAnswerList));
             if (sectionId == null) throw new ArgumentNullException(nameof(sectionId));
 
-            CheckAnswerDto checkAnswerDto = new CheckAnswerDto();
+            CheckAnswerDto checkAnswerDto = new()
+            {
+                SubmissionId = submissionId,
+                QuestionAnswerList = new List<QuestionWithAnswer>(questionWithAnswerList.Count)
+            };
 
             Dictionary<string, QuestionWithAnswer> questionWithAnswerMap = questionWithAnswerList
                             .Select((questionWithAnswer, index) => new KeyValuePair<string, QuestionWithAnswer>(questionWithAnswer.QuestionRef, questionWithAnswerList[index]))
