@@ -19,10 +19,14 @@ namespace Dfe.PlanTech.Application.Submission.Commands
             var sprocName = DatabaseConstants.CalculateMaturitySproc;
             var parms = new List<SqlParameter>
             {
-                new SqlParameter { ParameterName = DatabaseConstants.CalculateMaturitySprocParam, Value = submissionId, Direction = System.Data.ParameterDirection.Input }
+                new() {
+                    ParameterName = DatabaseConstants.CalculateMaturitySprocParam,
+                    Value = submissionId,
+                    Direction = System.Data.ParameterDirection.Input
+                }
             };
 
-            return _db.CallStoredProcedureWithReturnInt(sprocName, parms);
+            return _db.CallStoredProcedureWithReturnInt(sprocName, parms, cancellationToken);
         }
     }
 }
