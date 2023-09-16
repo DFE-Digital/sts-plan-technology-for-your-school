@@ -1,9 +1,13 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Responses.Queries;
+using Dfe.PlanTech.Domain.Answers.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Responses.Models;
 using NSubstitute;
+using Answer = Dfe.PlanTech.Domain.Answers.Models.Answer;
+using Question = Dfe.PlanTech.Domain.Questions.Models.Question;
 
-namespace Dfe.PlanTech.Application.UnitTests.Response.Queries
+namespace Dfe.PlanTech.Application.UnitTests.Responses.Queries
 {
     public class GetLatestResponseListForSubmissionQueryTests
     {
@@ -20,21 +24,21 @@ namespace Dfe.PlanTech.Application.UnitTests.Response.Queries
         [Fact]
         public async Task GetLatestResponseListForSubmissionBy_Returns_QuestionWithAnswerList()
         {
-            List<Domain.Responses.Models.Response> responseList = new List<Domain.Responses.Models.Response>()
+            List<Response> responseList = new()
             {
-                new Domain.Responses.Models.Response()
+                new()
                 {
                     Id = 1,
                     SubmissionId = 1,
                     QuestionId = 1,
-                    Question = new Domain.Questions.Models.Question()
+                    Question = new Question()
                     {
                         Id = 1,
                         QuestionText = "Question Text",
                         ContentfulRef = "QuestionRef-1"
                     },
                     AnswerId = 1,
-                    Answer = new Domain.Answers.Models.Answer()
+                    Answer = new Answer()
                     {
                         Id = 1,
                         AnswerText = "Answer Text",
@@ -69,21 +73,21 @@ namespace Dfe.PlanTech.Application.UnitTests.Response.Queries
             DateTime responseOneDateCreated = new DateTime(2000, 01, 01, 04, 08, 16);
             DateTime responseTwoDateCreated = new DateTime(2000, 01, 01, 08, 16, 32);
 
-            List<Domain.Responses.Models.Response> responseList = new List<Domain.Responses.Models.Response>()
+            List<Response> responseList = new ()
             {
-                new Domain.Responses.Models.Response()
+                new Response()
                 {
                     Id = 1,
                     SubmissionId = 1,
                     QuestionId = 1,
-                    Question = new Domain.Questions.Models.Question()
+                    Question = new Question
                     {
                         Id = 1,
                         QuestionText = "Question Text",
                         ContentfulRef = "QuestionRef-1"
                     },
                     AnswerId = 1,
-                    Answer = new Domain.Answers.Models.Answer()
+                    Answer = new Answer()
                     {
                         Id = 1,
                         AnswerText = "Answer Text",
@@ -92,19 +96,19 @@ namespace Dfe.PlanTech.Application.UnitTests.Response.Queries
                     DateCreated = responseOneDateCreated
                 },
 
-                new Domain.Responses.Models.Response()
+                new Response()
                 {
                     Id = 2,
                     SubmissionId = 1,
                     QuestionId = 2,
-                    Question = new Domain.Questions.Models.Question()
+                    Question = new Question()
                     {
                         Id = 2,
                         QuestionText = "Question Text",
                         ContentfulRef = "QuestionRef-2"
                     },
                     AnswerId = 2,
-                    Answer = new Domain.Answers.Models.Answer()
+                    Answer = new Answer()
                     {
                         Id = 2,
                         AnswerText = "Answer Text",
@@ -114,7 +118,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Response.Queries
                 }
             };
 
-            List<QuestionWithAnswer>? questionWithAnswerList = new List<QuestionWithAnswer>()
+            List<QuestionWithAnswer>? questionWithAnswerList = new()
             {
                 new QuestionWithAnswer()
                 {
