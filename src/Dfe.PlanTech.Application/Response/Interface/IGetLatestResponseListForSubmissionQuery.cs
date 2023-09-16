@@ -9,5 +9,7 @@ namespace Dfe.PlanTech.Application.Response.Interface
         Task<List<QuestionWithAnswer>> GetResponseListByDateCreated(int submissionId);
 
         Task<QuestionWithAnswer?> GetLatestResponse(int establishmentId, string sectionId);
+
+        Task<IEnumerable<QuestionWithAnswer>?> GetResponses(int establishmentId, string sectionId);
     }
 }

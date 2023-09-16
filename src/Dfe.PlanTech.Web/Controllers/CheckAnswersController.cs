@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Response.Commands;
+using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Constants;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -16,27 +17,30 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 {
     private readonly GetQuestionQuery _getQuestionnaireQuery;
 
-    public CheckAnswersController(ILogger<CheckAnswersController> logger, GetQuestionQuery getQuestionQuery) : base(logger) 
+    public CheckAnswersController(ILogger<CheckAnswersController> logger, GetQuestionQuery getQuestionQuery) : base(logger)
     {
-        this._getQuestionnaireQuery = getQuestionQuery;  
+        this._getQuestionnaireQuery = getQuestionQuery;
     }
 
-    [HttpGet]
-    [Route("{SectionSlug}/check-answers", Name = "CheckAnswersRoute")]
-    public async Task<IActionResult> CheckAnswersPage([FromServices] ProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand, [FromServices] GetPageQuery getPageQuery)
+    [HttpGet("{sectionSlug}/check-answers")]
+    public async Task<IActionResult> CheckAnswersPage(string sectionSlug, [FromServices] IUser user, [FromServices] GetSectionQuery getSectionQuery, [FromServices] ProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand, [FromServices] GetPageQuery getPageQuery, CancellationToken cancellationToken = default)
     {
-        var parameterCheckAnswersPage = DeserialiseParameter<TempDataCheckAnswers>(TempData[TempDataConstants.CheckAnswers]);
+        var section = await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken);
 
-        Page checkAnswerPageContent = await getPageQuery.GetPageBySlug("check-answers", CancellationToken.None);
+        var checkAnswerPageContent = await getPageQuery.GetPageBySlug("check-answers", CancellationToken.None);
+
+        var establishmentId = await user.GetEstablishmentId();
+
+        var responses = await processCheckAnswerDtoCommand.GetCheckAnswerDtoForSectionId(establishmentId, section!.Sys.Id);
 
         CheckAnswersViewModel checkAnswersViewModel = new CheckAnswersViewModel()
         {
             Title = checkAnswerPageContent.Title ?? throw new NullReferenceException(nameof(checkAnswerPageContent.Title)),
-            SectionName = parameterCheckAnswersPage.SectionName,
-            CheckAnswerDto = await processCheckAnswerDtoCommand.ProcessCheckAnswerDto(parameterCheckAnswersPage.SubmissionId, parameterCheckAnswersPage.SectionId),
+            SectionName = section.Name,
+            CheckAnswerDto = responses,
             Content = checkAnswerPageContent.Content,
-            SectionSlug = parameterCheckAnswersPage.SectionSlug,
-            SubmissionId = parameterCheckAnswersPage.SubmissionId,
+            SectionSlug = sectionSlug,
+            SubmissionId = 0,
             Slug = checkAnswerPageContent.Slug
         };
 

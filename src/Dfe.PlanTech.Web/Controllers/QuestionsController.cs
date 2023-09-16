@@ -36,6 +36,8 @@ public class QuestionsController : BaseController<QuestionsController>
 
         var question = section.Questions.FirstOrDefault(question => question.Slug == questionSlug);
 
+        //todo: address logic
+        //check question answered for incomplete section - if so use answer
         var latestQuestionWithAnswer = await _getResponseQuery.GetLatestResponse(await user.GetEstablishmentId(),
                                                                                 section.Sys.Id);
 
@@ -61,9 +63,10 @@ public class QuestionsController : BaseController<QuestionsController>
 
                 return View("Question", model);
             }
-            else{
+            else
+            {
                 //TODO: REDIRECT TO CHECK ANSWERS
-                return Redirect("/self-assessment");
+                return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { sectionSlug });
             }
         }
 

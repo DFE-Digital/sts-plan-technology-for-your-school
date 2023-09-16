@@ -21,6 +21,7 @@ namespace Dfe.PlanTech.Application.Response.Commands
             _calculateMaturityCommand = calculateMaturityCommand;
         }
 
+        //TODO: DELETE
         public async Task<CheckAnswerDto> ProcessCheckAnswerDto(int submissionId, string sectionId)
         {
             List<QuestionWithAnswer> questionWithAnswerList = await _GetQuestionWithAnswerList(submissionId);
@@ -28,15 +29,31 @@ namespace Dfe.PlanTech.Application.Response.Commands
             return checkAnswerDto;
         }
 
+        //TODO: Rename
+        public async Task<CheckAnswerDto> GetCheckAnswerDtoForSectionId(int establishmentId, string sectionId)
+        {
+            var questionWithAnswerList = await _getLatestResponseListForSubmissionQuery.GetResponses(establishmentId, sectionId);
+            if (questionWithAnswerList == null || !questionWithAnswerList.Any())
+            {
+                return new CheckAnswerDto()
+                {
+
+                };
+            }
+
+            CheckAnswerDto checkAnswerDto = await _RemoveDetachedQuestions(questionWithAnswerList!.ToList(), sectionId);
+            return checkAnswerDto;
+        }
+
+
         public async Task CalculateMaturityAsync(int submissionId)
         {
             await _calculateMaturityCommand.CalculateMaturityAsync(submissionId);
         }
 
-        private async Task<List<QuestionWithAnswer>> _GetQuestionWithAnswerList(int submissionId)
-        {
-            return await _getLatestResponseListForSubmissionQuery.GetLatestResponseListForSubmissionBy(submissionId);
-        }
+        //TODO: DELETE
+        private Task<List<QuestionWithAnswer>> _GetQuestionWithAnswerList(int submissionId)
+        => _getLatestResponseListForSubmissionQuery.GetLatestResponseListForSubmissionBy(submissionId);
 
         private async Task<CheckAnswerDto> _RemoveDetachedQuestions(List<QuestionWithAnswer> questionWithAnswerList, string sectionId)
         {
@@ -57,6 +74,13 @@ namespace Dfe.PlanTech.Application.Response.Commands
             {
                 if (questionWithAnswerMap.TryGetValue(node.Sys.Id, out QuestionWithAnswer? questionWithAnswer))
                 {
+                    var answer = Array.Find(node.Answers, answer => answer.Sys.Id == questionWithAnswer.AnswerRef);
+                    questionWithAnswer = questionWithAnswer with
+                    {
+                        AnswerText = answer?.Text ?? questionWithAnswer.AnswerText,
+                        QuestionText = node.Text
+                    };
+
                     checkAnswerDto.QuestionAnswerList.Add(questionWithAnswer);
                     node = node.Answers.FirstOrDefault(answer => answer.Sys.Id.Equals(questionWithAnswer.AnswerRef))?.NextQuestion;
                 }
