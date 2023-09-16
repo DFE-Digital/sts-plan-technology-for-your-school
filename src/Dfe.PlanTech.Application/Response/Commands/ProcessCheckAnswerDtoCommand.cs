@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Response.Interface;
-using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Application.Response.Commands
@@ -9,16 +8,11 @@ namespace Dfe.PlanTech.Application.Response.Commands
     {
         private readonly GetSectionQuery _getSectionQuery;
         private readonly IGetLatestResponseListForSubmissionQuery _getLatestResponseListForSubmissionQuery;
-        private readonly ICalculateMaturityCommand _calculateMaturityCommand;
 
-        public ProcessCheckAnswerDtoCommand(
-            GetSectionQuery getSectionQuery,
-            IGetLatestResponseListForSubmissionQuery getLatestResponseListForSubmissionQuery,
-            ICalculateMaturityCommand calculateMaturityCommand)
+        public ProcessCheckAnswerDtoCommand(GetSectionQuery getSectionQuery, IGetLatestResponseListForSubmissionQuery getLatestResponseListForSubmissionQuery)
         {
             _getSectionQuery = getSectionQuery;
             _getLatestResponseListForSubmissionQuery = getLatestResponseListForSubmissionQuery;
-            _calculateMaturityCommand = calculateMaturityCommand;
         }
 
         //TODO: Rename
@@ -45,7 +39,7 @@ namespace Dfe.PlanTech.Application.Response.Commands
                 QuestionAnswerList = new List<QuestionWithAnswer>(questionWithAnswerList.Count)
             };
 
-            var questionWithAnswerMap = questionWithAnswerList.ToDictionary(questionWithAnswer => questionWithAnswer.QuestionRef, 
+            var questionWithAnswerMap = questionWithAnswerList.ToDictionary(questionWithAnswer => questionWithAnswer.QuestionRef,
                                                                             questionWithAnswer => questionWithAnswer);
 
             Section section = await _getSectionQuery.GetSectionById(sectionId, cancellationToken) ?? throw new KeyNotFoundException(sectionId);
