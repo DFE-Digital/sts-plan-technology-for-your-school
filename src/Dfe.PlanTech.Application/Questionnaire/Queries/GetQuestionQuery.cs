@@ -79,7 +79,7 @@ public class GetQuestionQuery : ContentRetriever
         var answeredQuestions = await _getResponseQuery.GetLatestResponses(establishmentId, section.Sys.Id, cancellationToken);
 
         //When there's no response for section yet == section not started == return first question for section
-        if (answeredQuestions.Responses.Count == 0) return section.Questions.FirstOrDefault();
+        if (answeredQuestions.Responses == null || answeredQuestions.Responses.Count == 0) return section.Questions.FirstOrDefault();
 
         return GetNextQuestion(section, answeredQuestions.Responses);
     }
