@@ -1,11 +1,8 @@
-using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Application.Submission.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Constants;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +13,7 @@ namespace Dfe.PlanTech.Web.Controllers;
 public class QuestionsController : BaseController<QuestionsController>
 {
     private readonly GetQuestionQuery _getQuestionQuery;
+
     public QuestionsController(ILogger<QuestionsController> logger, GetQuestionQuery getQuestionQuery) : base(logger)
     {
         _getQuestionQuery = getQuestionQuery;
@@ -29,14 +27,13 @@ public class QuestionsController : BaseController<QuestionsController>
                                                         [FromServices] IUser user,
                                                         CancellationToken cancellationToken = default)
     {
-        var section = await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
-                        throw new KeyNotFoundException($"Could not find section for slug {sectionSlug}");
+        var section = await getSectionQuery.GetSectionBySlug(sectionSlug) ?? throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
 
         var question = section.Questions.FirstOrDefault(question => question.Slug == questionSlug) ?? throw new Exception("No question");
 
         int establishmentId = await user.GetEstablishmentId();
 
-        return await ShowQuestionPage(establishmentId, sectionSlug, section, question, getResponseQuery);
+        return await ShowQuestionPage(establishmentId, sectionSlug, section, question, getResponseQuery, cancellationToken);
     }
 
     [HttpGet("{sectionSlug}/next-question")]
@@ -47,27 +44,23 @@ public class QuestionsController : BaseController<QuestionsController>
                                                                 [FromServices] IUser user,
                                                                 CancellationToken cancellationToken = default)
     {
-        var section = await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
-                throw new KeyNotFoundException($"Could not find section for slug {sectionSlug}");
+        var section = await getSectionQuery.GetSectionBySlug(sectionSlug) ?? throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
 
         int establishmentId = await user.GetEstablishmentId();
 
         var nextQuestion = await getQuestionQuery.GetNextUnansweredQuestion(establishmentId, section, cancellationToken);
 
-        if (nextQuestion == null)
-        {
-            return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { sectionSlug });
-        }
+        if (nextQuestion == null) return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { sectionSlug });
 
-        return await ShowQuestionPage(establishmentId, sectionSlug, section, nextQuestion, getResponseQuery);
+        return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = nextQuestion.Slug });
     }
 
     [HttpPost("{sectionSlug}/{questionSlug}")]
     public async Task<IActionResult> SubmitAnswer(string sectionSlug, string questionSlug, SubmitAnswerDto submitAnswerDto, [FromServices] IUser user, [FromServices] ISubmitAnswerCommand submitAnswerCommand, [FromServices] IGetLatestResponseListForSubmissionQuery getResponseQuery)
     {
-        //TODO: Move all logic out of here to submit answer DTO
         if (!ModelState.IsValid) return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug });
 
+        //TODO: Move logic to submit answer
         var result = await submitAnswerCommand.SubmitAnswer(submitAnswerDto, submitAnswerDto.SectionId, sectionName: sectionSlug);
 
         bool navigateToCheckAnswersPage = await GetQuestionCompletionStatus(submitAnswerDto, user, getResponseQuery);
@@ -96,11 +89,12 @@ public class QuestionsController : BaseController<QuestionsController>
         return latestResponseForQuestion != null;
     }
 
-    private async Task<IActionResult> ShowQuestionPage(int establishmentId, string sectionSlug, Section section, Question question, IGetLatestResponseListForSubmissionQuery getResponseQuery)
+    private async Task<IActionResult> ShowQuestionPage(int establishmentId, string sectionSlug, Section section, Question question, IGetLatestResponseListForSubmissionQuery getResponseQuery, CancellationToken cancellationToken = default)
     {
         var latestResponseForQuestion = await getResponseQuery.GetLatestResponseForQuestion(establishmentId,
                                                                                 section.Sys.Id,
-                                                                                question.Sys.Id);
+                                                                                question.Sys.Id,
+                                                                                cancellationToken);
 
         var viewModel = new QuestionViewModel()
         {
