@@ -37,7 +37,7 @@ namespace Dfe.PlanTech.Application.Response.Queries
         public Task<SubmissionWithResponses> GetLatestResponses(int establishmentId, string sectionId, CancellationToken cancellationToken = default)
             => _db.FirstOrDefaultAsync(GetLatestResponsesBySectionIdQueryable(establishmentId, sectionId), cancellationToken);
 
-        private IQueryable<IEnumerable<QuestionWithAnswer>> GetLatestResponsesQueryable(int establishmentId, string sectionId, CancellationToken cancellationToken = default)
+        private IQueryable<IEnumerable<QuestionWithAnswer>> GetLatestResponsesQueryable(int establishmentId, string sectionId)
         => GetCurrentSubmission(establishmentId, sectionId)
                 .Select(submission => submission.Responses
                                                 .Select(response => new QuestionWithAnswer
@@ -51,7 +51,7 @@ namespace Dfe.PlanTech.Application.Response.Queries
                                                 .GroupBy(questionWithAnswer => questionWithAnswer.QuestionRef)
                                                 .Select(group => group.OrderByDescending(questionWithAnswer => questionWithAnswer.DateCreated).First()));
 
-        private IQueryable<SubmissionWithResponses> GetLatestResponsesBySectionIdQueryable(int establishmentId, string sectionId, CancellationToken cancellationToken = default)
+        private IQueryable<SubmissionWithResponses> GetLatestResponsesBySectionIdQueryable(int establishmentId, string sectionId)
         => GetCurrentSubmission(establishmentId, sectionId)
                 .Select(submission => new SubmissionWithResponses()
                 {

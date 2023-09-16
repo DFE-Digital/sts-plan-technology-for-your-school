@@ -73,24 +73,45 @@ public class GetQuestionQuery : ContentRetriever
                                             SectionSlug: section.InterstitialPage.Slug);
     }
 
-
     //TODO: move to another class 
     public async Task<Question?> GetNextUnansweredQuestion(int establishmentId, Section section, CancellationToken cancellationToken = default)
     {
-        var latestQuestionWithAnswer = await _getResponseQuery.GetLatestResponse(establishmentId, section.Sys.Id,cancellationToken);
+        var answeredQuestions = await _getResponseQuery.GetLatestResponses(establishmentId, section.Sys.Id, cancellationToken);
 
         //When there's no response for section yet == section not started == return first question for section
-        if (latestQuestionWithAnswer == null)
+        if (answeredQuestions.Responses.Count == 0) return section.Questions.FirstOrDefault();
+
+        return GetNextQuestion(section, answeredQuestions.Responses);
+    }
+
+    //TODO: Refactor this with the ProcessCheckAnswerCommand logic
+    private static Question? GetNextQuestion(Section section, List<QuestionWithAnswer> responses)
+    {
+        Question? node = section.Questions[0];
+
+        while (node != null)
         {
-            return section.Questions.FirstOrDefault();
+            var response = responses.FirstOrDefault(response => response.QuestionRef == node.Sys.Id);
+            if (response != null)
+            {
+                var answer = Array.Find(node.Answers, answer => answer.Sys.Id == response.AnswerRef);
+                
+                response = response with
+                {
+                    AnswerText = answer?.Text ?? response.AnswerText,
+                    QuestionText = node.Text,
+                    QuestionSlug = node.Slug
+                };
+
+                node = node.Answers.FirstOrDefault(answer => answer.Sys.Id.Equals(response.AnswerRef))?.NextQuestion;
+            }
+            else
+            {
+                return node;
+            }
         }
 
-        var question = Array.Find(section.Questions, question => question.Sys.Id == latestQuestionWithAnswer.QuestionRef) ?? 
-                        throw new Exception("Not find question");
-                        
-        var nextQuestion = Array.Find(question.Answers, answer => answer.Sys.Id.Equals(latestQuestionWithAnswer.AnswerRef))?.NextQuestion;
-
-        return nextQuestion;
+        return null;
     }
 
     private void UpdateSectionTitle(string section)

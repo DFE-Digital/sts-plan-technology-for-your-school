@@ -22,6 +22,7 @@ namespace Dfe.PlanTech.Application.Response.Commands
         }
 
         //TODO: Rename
+        //TODO: Pass in Section object
         public async Task<CheckAnswerDto?> GetCheckAnswerDtoForSectionId(int establishmentId, string sectionId, CancellationToken cancellationToken = default)
         {
             var questionWithAnswerList = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(establishmentId, sectionId, cancellationToken);
@@ -52,7 +53,7 @@ namespace Dfe.PlanTech.Application.Response.Commands
 
             Section section = await _getSectionQuery.GetSectionById(sectionId, cancellationToken) ?? throw new KeyNotFoundException(sectionId);
 
-            Question? node = section.Questions.FirstOrDefault(question => question.Sys.Id.Equals(section.FirstQuestionId));
+            Question? node = section.Questions[0];
 
             while (node != null)
             {
