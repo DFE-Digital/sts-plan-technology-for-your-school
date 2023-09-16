@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using Azure;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -7,6 +6,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Models;
 namespace Dfe.PlanTech.Application.Response.Queries
 {
     //TODO: Rename to "GetLatestResponseQuery", or similiar
+    //TODO: Refactor all queries to one or two - lot of duplication
     public class GetLatestResponseListForSubmissionQuery : IGetLatestResponseListForSubmissionQuery
     {
         private readonly IPlanTechDbContext _db;
@@ -16,59 +16,28 @@ namespace Dfe.PlanTech.Application.Response.Queries
             _db = db;
         }
 
-        //TODO: DELETE
-        public async Task<List<QuestionWithAnswer>> GetLatestResponseListForSubmissionBy(int submissionId)
-        {
-            var responseListByDate = _db.GetResponses
-                            .Where(response => response.SubmissionId == submissionId)
-                            .Select(response => new QuestionWithAnswer()
-                            {
-                                QuestionRef = response.Question.ContentfulRef,
-                                QuestionText = response.Question.QuestionText ?? "",
-                                AnswerRef = response.Answer.ContentfulRef,
-                                AnswerText = response.Answer.AnswerText ?? "",
-                                DateCreated = response.DateCreated
-                            })
-                            .GroupBy(questionWithAnswer => questionWithAnswer.QuestionRef)
-                            .Select(group => group.OrderByDescending(questionWithAnswer => questionWithAnswer.DateCreated).First());
-
-            return await _db.ToListAsync(responseListByDate);
-        }
-
-        public async Task<List<QuestionWithAnswer>> GetResponseListByDateCreated(int submissionId)
-        {
-            var responseListByDate = _db.GetResponses
-                            .Where(response => response.SubmissionId == submissionId)
-                            .Select(ToQuestionWithAnswer())
-                            .OrderByDescending(questionWithAnswer => questionWithAnswer.DateCreated);
-
-            return await _db.ToListAsync(responseListByDate);
-        }
-
-        public Task<QuestionWithAnswer?> GetLatestResponse(int establishmentId, string sectionId)
+        public Task<QuestionWithAnswer?> GetLatestResponse(int establishmentId, string sectionId, CancellationToken cancellationToken = default)
         {
             var responseListByDate = GetLatestResponsesQueryable(establishmentId, sectionId).Select(qwa => qwa.FirstOrDefault());
 
-            return _db.FirstOrDefaultAsync(responseListByDate);
+            return _db.FirstOrDefaultAsync(responseListByDate, cancellationToken);
         }
 
-        public async Task<QuestionWithAnswer?> GetLatestResponseForQuestion(int establishmentId, string sectionId, string questionId)
+        public Task<QuestionWithAnswer?> GetLatestResponseForQuestion(int establishmentId, string sectionId, string questionId, CancellationToken cancellationToken = default)
         {
-            var submission = await _db.FirstOrDefaultAsync(GetCurrentSubmission(establishmentId, sectionId));
-
             var responseListByDate = GetCurrentSubmission(establishmentId, sectionId)
                                             .SelectMany(submission => submission.Responses)
                                             .Where(response => response.Question.ContentfulRef == questionId)
                                             .OrderByDescending(response => response.DateCreated)
                                             .Select(ToQuestionWithAnswer());
 
-            return await _db.FirstOrDefaultAsync(responseListByDate);
+            return _db.FirstOrDefaultAsync(responseListByDate, cancellationToken);
         }
 
-        public Task<SubmissionWithResponses> GetLatestResponses(int establishmentId, string sectionId)
-            => _db.FirstOrDefaultAsync(GetLatestResponsesBySectionIdQueryable(establishmentId, sectionId));
+        public Task<SubmissionWithResponses> GetLatestResponses(int establishmentId, string sectionId, CancellationToken cancellationToken = default)
+            => _db.FirstOrDefaultAsync(GetLatestResponsesBySectionIdQueryable(establishmentId, sectionId), cancellationToken);
 
-        private IQueryable<IEnumerable<QuestionWithAnswer>> GetLatestResponsesQueryable(int establishmentId, string sectionId)
+        private IQueryable<IEnumerable<QuestionWithAnswer>> GetLatestResponsesQueryable(int establishmentId, string sectionId, CancellationToken cancellationToken = default)
         => GetCurrentSubmission(establishmentId, sectionId)
                 .Select(submission => submission.Responses
                                                 .Select(response => new QuestionWithAnswer
@@ -82,7 +51,7 @@ namespace Dfe.PlanTech.Application.Response.Queries
                                                 .GroupBy(questionWithAnswer => questionWithAnswer.QuestionRef)
                                                 .Select(group => group.OrderByDescending(questionWithAnswer => questionWithAnswer.DateCreated).First()));
 
-        private IQueryable<SubmissionWithResponses> GetLatestResponsesBySectionIdQueryable(int establishmentId, string sectionId)
+        private IQueryable<SubmissionWithResponses> GetLatestResponsesBySectionIdQueryable(int establishmentId, string sectionId, CancellationToken cancellationToken = default)
         => GetCurrentSubmission(establishmentId, sectionId)
                 .Select(submission => new SubmissionWithResponses()
                 {

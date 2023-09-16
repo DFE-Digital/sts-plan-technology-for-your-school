@@ -21,38 +21,22 @@ namespace Dfe.PlanTech.Application.Response.Commands
             _calculateMaturityCommand = calculateMaturityCommand;
         }
 
-        //TODO: DELETE
-        public async Task<CheckAnswerDto> ProcessCheckAnswerDto(int submissionId, string sectionId)
-        {
-            List<QuestionWithAnswer> questionWithAnswerList = await _GetQuestionWithAnswerList(submissionId);
-            CheckAnswerDto checkAnswerDto = await _RemoveDetachedQuestions(questionWithAnswerList, sectionId, submissionId);
-            return checkAnswerDto;
-        }
-
         //TODO: Rename
-        public async Task<CheckAnswerDto> GetCheckAnswerDtoForSectionId(int establishmentId, string sectionId)
+        public async Task<CheckAnswerDto?> GetCheckAnswerDtoForSectionId(int establishmentId, string sectionId, CancellationToken cancellationToken = default)
         {
-            var questionWithAnswerList = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(establishmentId, sectionId);
+            var questionWithAnswerList = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(establishmentId, sectionId, cancellationToken);
             if (questionWithAnswerList.Responses == null || !questionWithAnswerList.Responses.Any())
             {
-                return new CheckAnswerDto()
-                {
-
-                };
+                return null;
             }
 
-            var checkAnswerDto = await _RemoveDetachedQuestions(questionWithAnswerList.Responses, sectionId, questionWithAnswerList.Id);
-            return checkAnswerDto;
+            return await RemoveDetachedQuestions(questionWithAnswerList.Responses, sectionId, questionWithAnswerList.Id, cancellationToken);
         }
 
 
         public Task CalculateMaturityAsync(int submissionId) => _calculateMaturityCommand.CalculateMaturityAsync(submissionId);
 
-        //TODO: DELETE
-        private Task<List<QuestionWithAnswer>> _GetQuestionWithAnswerList(int submissionId)
-        => _getLatestResponseListForSubmissionQuery.GetLatestResponseListForSubmissionBy(submissionId);
-
-        private async Task<CheckAnswerDto> _RemoveDetachedQuestions(List<QuestionWithAnswer> questionWithAnswerList, string sectionId, int submissionId)
+        private async Task<CheckAnswerDto> RemoveDetachedQuestions(List<QuestionWithAnswer> questionWithAnswerList, string sectionId, int submissionId, CancellationToken cancellationToken)
         {
             if (questionWithAnswerList == null) throw new ArgumentNullException(nameof(questionWithAnswerList));
             if (sectionId == null) throw new ArgumentNullException(nameof(sectionId));
@@ -63,11 +47,10 @@ namespace Dfe.PlanTech.Application.Response.Commands
                 QuestionAnswerList = new List<QuestionWithAnswer>(questionWithAnswerList.Count)
             };
 
-            Dictionary<string, QuestionWithAnswer> questionWithAnswerMap = questionWithAnswerList
-                            .Select((questionWithAnswer, index) => new KeyValuePair<string, QuestionWithAnswer>(questionWithAnswer.QuestionRef, questionWithAnswerList[index]))
-                            .ToDictionary(x => x.Key, x => x.Value);
+            var questionWithAnswerMap = questionWithAnswerList.ToDictionary(questionWithAnswer => questionWithAnswer.QuestionRef, 
+                                                                            questionWithAnswer => questionWithAnswer);
 
-            Section section = await _GetSection(sectionId) ?? throw new NullReferenceException(nameof(section));
+            Section section = await _getSectionQuery.GetSectionById(sectionId, cancellationToken) ?? throw new KeyNotFoundException(sectionId);
 
             Question? node = section.Questions.FirstOrDefault(question => question.Sys.Id.Equals(section.FirstQuestionId));
 
@@ -90,12 +73,6 @@ namespace Dfe.PlanTech.Application.Response.Commands
             }
 
             return checkAnswerDto;
-        }
-
-        private async Task<Domain.Questionnaire.Models.Section?> _GetSection(string sectionId)
-        {
-            if (string.IsNullOrEmpty(sectionId)) throw new ArgumentNullException(nameof(sectionId));
-            return await _getSectionQuery.GetSectionById(sectionId, CancellationToken.None);
         }
     }
 }

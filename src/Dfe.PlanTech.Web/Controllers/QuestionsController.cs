@@ -63,18 +63,37 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
     [HttpPost("{sectionSlug}/{questionSlug}")]
-    public async Task<IActionResult> SubmitAnswer(string sectionSlug, string questionSlug, SubmitAnswerDto submitAnswerDto, [FromServices] ISubmitAnswerCommand submitAnswerCommand)
+    public async Task<IActionResult> SubmitAnswer(string sectionSlug, string questionSlug, SubmitAnswerDto submitAnswerDto, [FromServices] IUser user, [FromServices] ISubmitAnswerCommand submitAnswerCommand, [FromServices] IGetLatestResponseListForSubmissionQuery getResponseQuery)
     {
+        //TODO: Move all logic out of here to submit answer DTO
         if (!ModelState.IsValid) return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug });
 
         var result = await submitAnswerCommand.SubmitAnswer(submitAnswerDto, submitAnswerDto.SectionId, sectionName: sectionSlug);
 
-        if (submitAnswerDto.ChosenAnswer?.NextQuestion == null)
+        bool navigateToCheckAnswersPage = await GetQuestionCompletionStatus(submitAnswerDto, user, getResponseQuery);
+
+        if (navigateToCheckAnswersPage)
         {
             return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { sectionSlug });
         }
 
-        return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = submitAnswerDto.ChosenAnswer.NextQuestion.Value.Slug });
+        return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = submitAnswerDto.ChosenAnswer!.NextQuestion!.Value.Slug });
+    }
+
+    private static async Task<bool> GetQuestionCompletionStatus(SubmitAnswerDto submitAnswerDto, IUser user, IGetLatestResponseListForSubmissionQuery getResponseQuery)
+    {
+        //IF there's no next question for the answer, then section should be complete
+        if (submitAnswerDto.ChosenAnswer?.NextQuestion == null) return true;
+
+        //Otherwise, do we have a response for next question?
+        //If so, we were changing our last answer, and the next question in the sequence is the same- so just navigate to check answers page
+        //Otherwise, we should navigate to next question
+        int establishmentId = await user.GetEstablishmentId();
+        var latestResponseForQuestion = await getResponseQuery.GetLatestResponseForQuestion(establishmentId,
+                                                                                            sectionId: submitAnswerDto.SectionId,
+                                                                                            questionId: submitAnswerDto.ChosenAnswer!.NextQuestion!.Value.Id);
+
+        return latestResponseForQuestion != null;
     }
 
     private async Task<IActionResult> ShowQuestionPage(int establishmentId, string sectionSlug, Section section, Question question, IGetLatestResponseListForSubmissionQuery getResponseQuery)

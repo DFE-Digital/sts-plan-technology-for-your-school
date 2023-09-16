@@ -77,7 +77,7 @@ public class GetQuestionQuery : ContentRetriever
     //TODO: move to another class 
     public async Task<Question?> GetNextUnansweredQuestion(int establishmentId, Section section, CancellationToken cancellationToken = default)
     {
-        var latestQuestionWithAnswer = await _getResponseQuery.GetLatestResponse(establishmentId, section.Sys.Id);
+        var latestQuestionWithAnswer = await _getResponseQuery.GetLatestResponse(establishmentId, section.Sys.Id,cancellationToken);
 
         //When there's no response for section yet == section not started == return first question for section
         if (latestQuestionWithAnswer == null)

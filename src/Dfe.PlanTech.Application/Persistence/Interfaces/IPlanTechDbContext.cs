@@ -28,7 +28,7 @@ public interface IPlanTechDbContext
     public IQueryable<Domain.Submissions.Models.Submission> GetSubmissions { get; }
     public void AddSubmission(Domain.Submissions.Models.Submission submission);
 
-    public void AddEstablishment(Domain.Establishments.Models.Establishment establishment);
+    public void AddEstablishment(Establishment establishment);
 
     // Response Table
     public IQueryable<Domain.Responses.Models.Response> GetResponses { get; }
@@ -45,9 +45,9 @@ public interface IPlanTechDbContext
 
     Task<Establishment?> GetEstablishmentBy(Expression<Func<Establishment, bool>> predicate);
 
-    Task<List<T>> ToListAsync<T>(IQueryable<T> queryable);
+    Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default);
 
-    Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable);
+    Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default);
     
     Task<int> ExecuteRaw(FormattableString sql, CancellationToken cancellationToken = default);
 }
