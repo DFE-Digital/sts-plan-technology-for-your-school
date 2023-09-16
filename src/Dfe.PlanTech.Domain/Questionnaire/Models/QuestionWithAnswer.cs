@@ -18,4 +18,6 @@ public record QuestionWithAnswer
 
     [Required]
     public DateTime? DateCreated { get; init; } = null!;
+
+    public string? QuestionSlug { get; set; }
 }

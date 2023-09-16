@@ -79,7 +79,8 @@ namespace Dfe.PlanTech.Application.Response.Commands
                     questionWithAnswer = questionWithAnswer with
                     {
                         AnswerText = answer?.Text ?? questionWithAnswer.AnswerText,
-                        QuestionText = node.Text
+                        QuestionText = node.Text,
+                        QuestionSlug = node.Slug
                     };
 
                     checkAnswerDto.QuestionAnswerList.Add(questionWithAnswer);

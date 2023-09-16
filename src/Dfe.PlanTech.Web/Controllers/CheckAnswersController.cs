@@ -33,7 +33,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
         var responses = await processCheckAnswerDtoCommand.GetCheckAnswerDtoForSectionId(establishmentId, section!.Sys.Id);
 
-        CheckAnswersViewModel checkAnswersViewModel = new CheckAnswersViewModel()
+        CheckAnswersViewModel checkAnswersViewModel = new()
         {
             Title = checkAnswerPageContent.Title ?? throw new NullReferenceException(nameof(checkAnswerPageContent.Title)),
             SectionName = section.Name,
@@ -46,18 +46,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
         return View("CheckAnswers", checkAnswersViewModel);
     }
-
-    [HttpGet]
-    [Route("change-answer", Name = "ChangeAnswerRouteLink")]
-    public async Task<IActionResult> ChangeAnswer(string questionRef, string answerRef, int submissionId, string slug)
-    {
-        TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = answerRef, SubmissionId = submissionId });
-        var paramData = TempData.Peek("param");
-        var param = ParamParser._ParseParameters(paramData?.ToString());
-        var question = await _getQuestionnaireQuery.GetQuestionById(questionRef);
-        return RedirectToRoute("SectionQuestionAnswer", new { sectionSlug = param?.SectionSlug, question = question?.Slug });
-    }
-
+    
     [HttpPost("ConfirmCheckAnswers")]
     public async Task<IActionResult> ConfirmCheckAnswers(int submissionId, string sectionName, [FromServices] ProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand)
     {
