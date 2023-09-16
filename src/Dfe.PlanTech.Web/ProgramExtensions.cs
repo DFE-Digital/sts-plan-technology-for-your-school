@@ -94,14 +94,7 @@ public static class ProgramExtensions
         services.AddTransient<ICreateEstablishmentCommand, CreateEstablishmentCommand>();
         services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
 
-        services.AddTransient<ICreateQuestionCommand, CreateQuestionCommand>();
-        services.AddTransient<IRecordQuestionCommand, RecordQuestionCommand>();
-        services.AddTransient<IGetQuestionQuery, GetQuestionQuery>();
         services.AddTransient<ICookieService, CookieService>();
-
-        services.AddTransient<ICreateAnswerCommand, CreateAnswerCommand>();
-        services.AddTransient<IRecordAnswerCommand, RecordAnswerCommand>();
-        services.AddTransient<IGetAnswerQuery, GetAnswerQuery>();
 
         services.AddTransient<ICreateSubmissionCommand, CreateSubmissionCommand>();
         services.AddTransient<IGetSubmissionQuery, GetSubmissionQuery>();
@@ -115,8 +108,6 @@ public static class ProgramExtensions
 
         services.AddTransient<ProcessCheckAnswerDtoCommand>();
 
-        services.AddTransient<GetSubmitAnswerQueries>();
-        services.AddTransient<RecordSubmitAnswerCommands>();
         services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
 
         services.AddTransient<IGetEstablishmentIdQuery, GetEstablishmentIdQuery>();

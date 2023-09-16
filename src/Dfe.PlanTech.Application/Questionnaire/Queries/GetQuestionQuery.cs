@@ -1,12 +1,9 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Application.Response.Interface;
-using Dfe.PlanTech.Application.Response.Queries;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Infrastructure.Application.Models;
 
 namespace Dfe.PlanTech.Application.Questionnaire.Queries;
 

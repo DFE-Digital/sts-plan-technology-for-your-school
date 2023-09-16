@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Application.Response.Interface;
 using Dfe.PlanTech.Application.Submission.Interfaces;
-using Dfe.PlanTech.Application.Submission.Queries;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Responses.Models;
@@ -9,15 +8,13 @@ namespace Dfe.PlanTech.Application.Submission.Commands;
 
 public class SubmitAnswerCommand : ISubmitAnswerCommand
 {
-    private readonly GetSubmitAnswerQueries _getSubmitAnswerQueries;
     private readonly ICreateResponseCommand _createResponseCommand;
     private readonly IUser _user;
 
-    public SubmitAnswerCommand(ICreateResponseCommand createResponseCommand, IUser user, GetSubmitAnswerQueries getSubmitAnswerQueries)
+    public SubmitAnswerCommand(ICreateResponseCommand createResponseCommand, IUser user)
     {
         _createResponseCommand = createResponseCommand;
         _user = user;
-        _getSubmitAnswerQueries = getSubmitAnswerQueries;
     }
 
     //TODO: This should check if we are re-submitting an answer
@@ -28,7 +25,8 @@ public class SubmitAnswerCommand : ISubmitAnswerCommand
     {
         if (submitAnswerDto.ChosenAnswer == null) throw new NullReferenceException(nameof(submitAnswerDto.ChosenAnswer));
 
-        int userId = await _getSubmitAnswerQueries.GetUserId();
+        //TODO: Change exception type
+        int userId = await _user.GetCurrentUserId() ?? throw new Exception("User is not authenticated");
         int establishmentId = await _user.GetEstablishmentId();
 
         //TODO: Bring this functionality to this class - duplicate purpose
