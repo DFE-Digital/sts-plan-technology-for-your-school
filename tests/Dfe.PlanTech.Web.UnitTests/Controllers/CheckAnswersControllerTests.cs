@@ -118,12 +118,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             });
 
             _processCheckAnswerDtoCommand = Substitute.For<IProcessCheckAnswerDtoCommand>();
-            _processCheckAnswerDtoCommand.GetCheckAnswerDtoForSectionId(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            _processCheckAnswerDtoCommand.GetCheckAnswerDtoForSection(Arg.Any<int>(), Arg.Any<Section>(), Arg.Any<CancellationToken>())
                                         .Returns((callInfo) =>
                                         {
-                                            string sectionId = callInfo.ArgAt<string>(1);
+                                            Section section = callInfo.ArgAt<Section>(1);
 
-                                            if (sectionId != _section.Sys.Id) return null;
+                                            if (section != _section) return null;
 
                                             return new CheckAnswerDto()
                                             {
