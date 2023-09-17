@@ -30,7 +30,7 @@ public class SubmitAnswerCommand : ISubmitAnswerCommand
         int establishmentId = await _user.GetEstablishmentId();
 
         //TODO: Bring this functionality to this class - duplicate purpose
-        var responseId = await _createResponseCommand.CreateResponsNew(new RecordResponseDto()
+        var responseId = await _createResponseCommand.CreateResponse(new RecordResponseDto()
         {
             SectionId = sectionId,
             SectionName = sectionName,

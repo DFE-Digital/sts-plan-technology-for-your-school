@@ -31,7 +31,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
         var establishmentId = await user.GetEstablishmentId();
 
-        var responses = await processCheckAnswerDtoCommand.GetCheckAnswerDtoForSectionId(establishmentId, section!.Sys.Id, cancellationToken);
+        var responses = await processCheckAnswerDtoCommand.GetCheckAnswerDtoForSection(establishmentId, section, cancellationToken);
 
         if (responses == null) return RedirectToAction("GetByRoute", "Pages", new { route = "/self-assessment" });
 

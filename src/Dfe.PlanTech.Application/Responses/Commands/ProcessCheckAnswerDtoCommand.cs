@@ -17,23 +17,21 @@ public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand
         _getLatestResponseListForSubmissionQuery = getLatestResponseListForSubmissionQuery;
     }
 
-    //TODO: Rename
-    //TODO: Pass in Section object
-    public async Task<CheckAnswerDto?> GetCheckAnswerDtoForSectionId(int establishmentId, string sectionId, CancellationToken cancellationToken = default)
+    public async Task<CheckAnswerDto?> GetCheckAnswerDtoForSection(int establishmentId, Section section, CancellationToken cancellationToken = default)
     {
-        var questionWithAnswerList = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(establishmentId, sectionId, cancellationToken);
+        var questionWithAnswerList = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(establishmentId, section.Sys.Id, cancellationToken);
         if (questionWithAnswerList.Responses == null || !questionWithAnswerList.Responses.Any())
         {
             return null;
         }
 
-        return await RemoveDetachedQuestions(questionWithAnswerList.Responses, sectionId, questionWithAnswerList.Id, cancellationToken);
+        return RemoveDetachedQuestions(questionWithAnswerList.Responses, section, questionWithAnswerList.Id);
     }
 
-    private async Task<CheckAnswerDto> RemoveDetachedQuestions(List<QuestionWithAnswer> questionWithAnswerList, string sectionId, int submissionId, CancellationToken cancellationToken)
+    private static CheckAnswerDto RemoveDetachedQuestions(List<QuestionWithAnswer> questionWithAnswerList, Section section, int submissionId)
     {
         if (questionWithAnswerList == null) throw new ArgumentNullException(nameof(questionWithAnswerList));
-        if (sectionId == null) throw new ArgumentNullException(nameof(sectionId));
+        if (section == null) throw new ArgumentNullException(nameof(section));
 
         CheckAnswerDto checkAnswerDto = new()
         {
@@ -43,8 +41,6 @@ public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand
 
         var questionWithAnswerMap = questionWithAnswerList.ToDictionary(questionWithAnswer => questionWithAnswer.QuestionRef,
                                                                         questionWithAnswer => questionWithAnswer);
-
-        Section section = await _getSectionQuery.GetSectionById(sectionId, cancellationToken) ?? throw new KeyNotFoundException(sectionId);
 
         Question? node = section.Questions[0];
 

@@ -8,9 +8,6 @@ public class RecordResponseDto
 
     public int EstablishmentId { get; set; }
 
-    //TODO: REMOVE
-    public int SubmissionId { get; set; }
-
     public string SectionId { get; set; } = null!;
 
     public string SectionName { get; set; } = null!;
@@ -20,6 +17,4 @@ public class RecordResponseDto
     public IdWithText Answer { get; init; }
 
     public string Maturity { get; set; } = null!;
-
-    public DateTime? DateCreated { get; set; }
 }

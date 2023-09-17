@@ -15,32 +15,7 @@ namespace Dfe.PlanTech.Application.Responses.Commands
             _db = db;
         }
 
-        //TODO: REMOVE
         public async Task<int> CreateResponse(RecordResponseDto recordResponseDto)
-        {
-            var response = new Domain.Responses.Models.Response()
-            {
-                UserId = recordResponseDto.UserId,
-                SubmissionId = recordResponseDto.SubmissionId,
-                Question = new Domain.Questions.Models.Question()
-                {
-                    QuestionText = recordResponseDto.Question.Text,
-                    ContentfulRef = recordResponseDto.Question.Id,
-                },
-                Answer = new Domain.Answers.Models.Answer()
-                {
-                    AnswerText = recordResponseDto.Answer.Text,
-                    ContentfulRef = recordResponseDto.Answer.Id,
-                },
-                Maturity = recordResponseDto.Maturity,
-            };
-
-            _db.AddResponse(response);
-            await _db.SaveChangesAsync();
-            return response.Id;
-        }
-
-        public async Task<int> CreateResponsNew(RecordResponseDto recordResponseDto)
         {
             //TODO: get away from using SQL specific things in application layer!
             var establishmentId = new SqlParameter("@establishmentId", recordResponseDto.EstablishmentId);
@@ -62,8 +37,6 @@ namespace Dfe.PlanTech.Application.Responses.Commands
             {
                 Direction = ParameterDirection.Output
             };
-
-
 
             await _db.ExecuteRaw($@"EXEC SubmitAnswer
                                             @establishmentId={establishmentId},
