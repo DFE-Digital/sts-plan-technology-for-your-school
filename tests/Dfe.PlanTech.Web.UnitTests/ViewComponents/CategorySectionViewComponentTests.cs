@@ -29,8 +29,6 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
             _loggerCategory = Substitute.For<ILogger<CategorySectionViewComponent>>();
 
-            var httpContext = new DefaultHttpContext();
-            var tempData = new TempDataDictionary(httpContext, Substitute.For<ITempDataProvider>());
             var viewContext = new ViewContext();
 
             var viewComponentContext = new ViewComponentContext
@@ -109,7 +107,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         {
             _category.Completed = 0;
 
-            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
+            _category.SectionStatuses.Add(new SectionStatuses()
             {
                 SectionId = "Section1",
                 Completed = 0,

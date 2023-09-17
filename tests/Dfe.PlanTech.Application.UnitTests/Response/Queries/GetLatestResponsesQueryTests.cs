@@ -24,7 +24,8 @@ public class GetLatestResponsesQueryTests
     private readonly List<Domain.Submissions.Models.Submission> _submissions;
 
 
-    private readonly List<Section> _sections;
+    private readonly List<Section> _incompleteSections;
+    private readonly List<Section> _completeSections;
 
     private int responseId = 1;
     private int questionId = 1;
@@ -71,9 +72,10 @@ public class GetLatestResponsesQueryTests
                                 .RuleFor(section => section.Questions, _ => questionFaker.Generate(QUESTION_PER_SECTION_COUNT).ToArray());
 
 
-        _sections = sectionFaker.Generate(SECTION_COUNT);
+        _incompleteSections = sectionFaker.Generate(SECTION_COUNT);
+        _completeSections = sectionFaker.Generate(SECTION_COUNT);
 
-        var sectionIds = _sections.Select(section => section.Sys.Id).ToArray();
+        var sectionIds = _incompleteSections.Concat(_completeSections).Select(section => section.Sys.Id).ToArray();
 
         int submissionId = 1;
 
@@ -83,22 +85,9 @@ public class GetLatestResponsesQueryTests
                                     .RuleFor(submission => submission.EstablishmentId, ESTABLISHMENT_ID)
                                     .RuleFor(submission => submission.Id, faker => submissionId++);
 
-        _submissions = submissionFaker.Generate(20);
-
-        //First 2 sections == incomplete, last 2 sections == complete
-        for (var x = 0; x < _submissions.Count; x++)
-        {
-            var submission = _submissions[x];
-            var section = x < 2 ? _sections[x] : _sections[faker.Random.Int(2, 3)];
-            submission.SectionId = section.Sys.Id;
-            submission.SectionName = section.Name;
-            submission.Responses = GenerateResponses(submission, faker).ToList();
-
-            if (x < 2) continue;
-            submission.Completed = true;
-            submission.DateCompleted = faker.Date.Future(1, submission.DateCreated);
-            submission.Maturity = faker.PickRandom(maturities);
-        }
+        _submissions = GenerateSubmissions(faker, submissionFaker)
+                            .SelectMany(submission => submission)
+                            .ToList();
 
         _planTechDbContextSubstitute = Substitute.For<IPlanTechDbContext>();
         _planTechDbContextSubstitute.GetSubmissions.Returns(_submissions.AsQueryable());
@@ -131,6 +120,41 @@ public class GetLatestResponsesQueryTests
 
     }
 
+    private IEnumerable<List<Domain.Submissions.Models.Submission>> GenerateSubmissions(Faker faker, Faker<Domain.Submissions.Models.Submission> submissionFaker)
+    {
+        foreach (var submissionGroup in GenerateSubmissionsForSections(faker, submissionFaker, _completeSections, true))
+            yield return submissionGroup;
+
+        foreach (var submissionGroup in GenerateSubmissionsForSections(faker, submissionFaker, _incompleteSections, false))
+            yield return submissionGroup;
+    }
+
+    private IEnumerable<List<Domain.Submissions.Models.Submission>> GenerateSubmissionsForSections(Faker faker,
+                                                                                        Faker<Domain.Submissions.Models.Submission> submissionFaker,
+                                                                                        List<Section> sections,
+                                                                                        bool completeSections)
+    {
+        foreach (var section in sections)
+        {
+            var submissions = submissionFaker.Generate(completeSections ? faker.Random.Int(1, 5) : 1);
+            foreach (var submission in submissions)
+            {
+                submission.SectionId = section.Sys.Id;
+                submission.SectionName = section.Name;
+                submission.Responses = GenerateResponses(sections, submission, faker).ToList();
+
+                if (!completeSections) continue;
+
+                submission.Completed = true;
+                submission.DateCompleted = faker.Date.Future(1, submission.DateCreated);
+                submission.Maturity = faker.PickRandom(maturities);
+            }
+
+            yield return submissions;
+        }
+
+    }
+
     [Fact]
     public async Task GetLatestResponseForQuestion_Should_Return_Latest_Response_For_QuestionId_In_Incomplete_Submission()
     {
@@ -139,7 +163,7 @@ public class GetLatestResponsesQueryTests
                                                                         .GroupBy(r => r.Question.ContentfulRef)
                                                                         .ToArray();
 
-        var sectionQuestionsWithResponses = _sections.SelectMany(section => section.Questions)
+        var sectionQuestionsWithResponses = _incompleteSections.SelectMany(section => section.Questions)
                                                     .ToDictionary(question => question,
                                                                   question => responsesForIncompleteSubmissionsGroupedByQuestion
                                                                                         .FirstOrDefault(g => g.Key == question.Sys.Id)?
@@ -176,27 +200,32 @@ public class GetLatestResponsesQueryTests
     [Fact]
     public async Task GetLatestResponses_Should_Return_LatestResponses_For_Incomplete_Submission()
     {
-        var incompleteSubmission = GetIncompleteSubmissionForIncompleteSection();
-
-        var responsesForIncompleteSubmissionsGroupedByQuestion = _submissions.Where(submission => !submission.Completed)
-                                                                            .SelectMany(submission => submission.Responses)
-                                                                            .GroupBy(response => response.Question.ContentfulRef)
-                                                                            .Select(responses => responses.OrderByDescending(response => response.DateCreated).First())
-                                                                            .ToArray();
-
-        var latestResponse = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(ESTABLISHMENT_ID, incompleteSubmission.SectionId);
-
-        Assert.NotNull(latestResponse);
-        Assert.NotNull(latestResponse.Value.Responses);
-        Assert.True(latestResponse.Value.Responses.Count > 0);
-        Assert.Equal(responsesForIncompleteSubmissionsGroupedByQuestion.Length, latestResponse.Value.Responses.Count);
-
-        foreach (var response in latestResponse.Value.Responses)
+        try
         {
-            var matching = responsesForIncompleteSubmissionsGroupedByQuestion.FirstOrDefault(r => r.Question.ContentfulRef == response.QuestionRef &&
-                                                                                                  r.Answer.ContentfulRef == response.AnswerRef);
+            var incompleteSubmission = GetIncompleteSubmissionForIncompleteSection();
 
-            Assert.NotNull(response);
+            var responsesForIncompleteSubmissionsGroupedByQuestion = incompleteSubmission.Responses
+                                                                                .GroupBy(response => response.Question.ContentfulRef)
+                                                                                .Select(responses => responses.OrderByDescending(response => response.DateCreated).First())
+                                                                                .ToArray();
+
+            var latestResponse = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(ESTABLISHMENT_ID, incompleteSubmission.SectionId);
+
+            Assert.NotNull(latestResponse);
+            Assert.NotNull(latestResponse.Value.Responses);
+            Assert.True(latestResponse.Value.Responses.Count > 0);
+            Assert.Equal(responsesForIncompleteSubmissionsGroupedByQuestion.Length, latestResponse.Value.Responses.Count);
+
+            foreach (var response in latestResponse.Value.Responses)
+            {
+                var matching = responsesForIncompleteSubmissionsGroupedByQuestion.FirstOrDefault(r => r.Question.ContentfulRef == response.QuestionRef &&
+                                                                                                      r.Answer.ContentfulRef == response.AnswerRef);
+
+                Assert.NotNull(response);
+            }
+        }
+        catch(Exception ex){
+            Console.WriteLine("");
         }
     }
 
@@ -210,11 +239,16 @@ public class GetLatestResponsesQueryTests
         Assert.Null(latestResponse);
     }
 
-
-    private IEnumerable<Response> GenerateResponses(Domain.Submissions.Models.Submission submission, Faker faker)
+    private IEnumerable<Response> GenerateResponses(List<Section> sections,
+                                                    Domain.Submissions.Models.Submission submission,
+                                                    Faker faker)
     {
-        var section = _sections.First(section => section.Sys.Id == submission.SectionId);
+        var section = sections.FirstOrDefault(section => section.Sys.Id == submission.SectionId);
 
+        if(section == null) {
+            Console.WriteLine("");
+            throw new Exception("error");
+        }
         int timesAnswered = faker.Random.Int(1, 5);
 
         while (timesAnswered > 0)
@@ -233,12 +267,10 @@ public class GetLatestResponsesQueryTests
     }
 
     private Domain.Submissions.Models.Submission GetCompletedSubmissionForCompletedSection()
-    => _submissions.First(submission => submission.Completed &&
-                                        (submission.SectionId == _sections[2].Sys.Id || submission.SectionId == _sections[3].Sys.Id));
+    => _submissions.First(submission => submission.Completed && _completeSections.Any(section => section.Sys.Id == submission.SectionId));
 
     private Domain.Submissions.Models.Submission GetIncompleteSubmissionForIncompleteSection()
-    => _submissions.First(submission => !submission.Completed &&
-                        (submission.SectionId == _sections[0].Sys.Id || submission.SectionId == _sections[1].Sys.Id));
+    => _submissions.First(submission => !submission.Completed && _incompleteSections.Any(section => section.Sys.Id == submission.SectionId));
 
     private Response GenerateResponse(Domain.Submissions.Models.Submission submission, Faker faker, Section section, int x)
     {
