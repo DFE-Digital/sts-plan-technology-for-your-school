@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Submissions.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Responses.Interfaces;
 using Dfe.PlanTech.Web.Models;
@@ -22,12 +23,12 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     public async Task<IActionResult> CheckAnswersPage(string sectionSlug, [FromServices] IUser user, [FromServices] IGetSectionQuery getSectionQuery, [FromServices] IProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand, [FromServices] IGetPageQuery getPageQuery, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
-        
+
         var section = await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
-                            throw new NullReferenceException($"Could not find section for {sectionSlug}");
+                            throw new KeyNotFoundException($"Could not find section for {sectionSlug}");
 
         var checkAnswerPageContent = await getPageQuery.GetPageBySlug(PAGE_SLUG, CancellationToken.None) ??
-                                        throw new NullReferenceException($"Could not find page for slug {PAGE_SLUG}");
+                                        throw new KeyNotFoundException($"Could not find page for slug {PAGE_SLUG}");
 
         var establishmentId = await user.GetEstablishmentId();
 
@@ -37,7 +38,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
         CheckAnswersViewModel checkAnswersViewModel = new()
         {
-            Title = checkAnswerPageContent.Title ?? throw new NullReferenceException(nameof(checkAnswerPageContent.Title)),
+            Title = checkAnswerPageContent.Title ?? new Title() { Text = "Check Answers" },
             SectionName = section.Name,
             CheckAnswerDto = responses,
             Content = checkAnswerPageContent.Content,
