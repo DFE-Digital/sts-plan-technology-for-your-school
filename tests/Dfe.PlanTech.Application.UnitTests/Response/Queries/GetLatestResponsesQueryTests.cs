@@ -9,7 +9,8 @@ using Answer = Dfe.PlanTech.Domain.Answers.Models.Answer;
 using Question = Dfe.PlanTech.Domain.Questions.Models.Question;
 
 namespace Dfe.PlanTech.Application.UnitTests.Responses.Queries;
-public class GetLatestResponseListForSubmissionQueryTests
+
+public class GetLatestResponsesQueryTests
 {
     private const int ESTABLISHMENT_ID = 1;
     private const int USER_ID = 1;
@@ -31,7 +32,7 @@ public class GetLatestResponseListForSubmissionQueryTests
 
     private readonly string[] maturities = new[] { "Low", "Medium", "High" };
 
-    public GetLatestResponseListForSubmissionQueryTests()
+    public GetLatestResponsesQueryTests()
     {
         var faker = new Faker();
 
