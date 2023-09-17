@@ -19,28 +19,25 @@ public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand
 
     public async Task<CheckAnswerDto?> GetCheckAnswerDtoForSection(int establishmentId, Section section, CancellationToken cancellationToken = default)
     {
-        var questionWithAnswerList = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(establishmentId, section.Sys.Id, cancellationToken);
-        if (questionWithAnswerList.Value.Responses == null || !questionWithAnswerList.Value.Responses.Any())
+        var checkAnswerDto = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(establishmentId, section.Sys.Id, cancellationToken);
+        if (checkAnswerDto?.Responses == null || !checkAnswerDto.Responses.Any())
         {
             return null;
         }
 
-        return RemoveDetachedQuestions(questionWithAnswerList.Value.Responses, section, questionWithAnswerList.Value.Id);
+        return RemoveDetachedQuestions(checkAnswerDto, section);
     }
 
-    private static CheckAnswerDto RemoveDetachedQuestions(List<QuestionWithAnswer> questionWithAnswerList, Section section, int submissionId)
+    private static CheckAnswerDto RemoveDetachedQuestions(CheckAnswerDto checkAnswerDto, Section section)
     {
-        if (questionWithAnswerList == null) throw new ArgumentNullException(nameof(questionWithAnswerList));
+        if (checkAnswerDto == null) throw new ArgumentNullException(nameof(checkAnswerDto));
         if (section == null) throw new ArgumentNullException(nameof(section));
 
-        CheckAnswerDto checkAnswerDto = new()
-        {
-            SubmissionId = submissionId,
-            QuestionAnswerList = new List<QuestionWithAnswer>(questionWithAnswerList.Count)
-        };
 
-        var questionWithAnswerMap = questionWithAnswerList.ToDictionary(questionWithAnswer => questionWithAnswer.QuestionRef,
+        var questionWithAnswerMap = checkAnswerDto.Responses.ToDictionary(questionWithAnswer => questionWithAnswer.QuestionRef,
                                                                         questionWithAnswer => questionWithAnswer);
+
+        var attachedQuestions = new List<QuestionWithAnswer>(checkAnswerDto.Responses.Count);
 
         Question? node = section.Questions[0];
 
@@ -56,12 +53,15 @@ public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand
                     QuestionSlug = node.Slug
                 };
 
-                checkAnswerDto.QuestionAnswerList.Add(questionWithAnswer);
+                attachedQuestions.Add(questionWithAnswer);
                 node = node.Answers.FirstOrDefault(answer => answer.Sys.Id.Equals(questionWithAnswer.AnswerRef))?.NextQuestion;
             }
             else node = null;
         }
 
-        return checkAnswerDto;
+        return new CheckAnswerDto(){
+            SubmissionId = checkAnswerDto.SubmissionId,
+            Responses = attachedQuestions
+        };
     }
 }

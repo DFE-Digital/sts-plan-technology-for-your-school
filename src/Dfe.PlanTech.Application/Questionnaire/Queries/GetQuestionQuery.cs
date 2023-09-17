@@ -75,9 +75,9 @@ public class GetQuestionQuery : ContentRetriever
     {
         var answeredQuestions = await _getResponseQuery.GetLatestResponses(establishmentId, section.Sys.Id, cancellationToken);
 
-        if (answeredQuestions == null || answeredQuestions.Value.Responses.Count == 0) return section.Questions.FirstOrDefault();
+        if (answeredQuestions == null || answeredQuestions.Responses.Count == 0) return section.Questions.FirstOrDefault();
         
-        return GetNextQuestion(section, answeredQuestions.Value.Responses);
+        return GetNextQuestion(section, answeredQuestions.Responses);
     }
 
     //TODO: Refactor this with the ProcessCheckAnswerCommand logic

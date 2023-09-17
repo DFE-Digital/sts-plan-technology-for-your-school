@@ -107,10 +107,10 @@ public class GetLatestResponsesQueryTests
                                         return Task.FromResult(queryable.FirstOrDefault());
                                     });
 
-        _planTechDbContextSubstitute.FirstOrDefaultAsync(Arg.Any<IQueryable<SubmissionWithResponses>>(), Arg.Any<CancellationToken>())
+        _planTechDbContextSubstitute.FirstOrDefaultAsync(Arg.Any<IQueryable<CheckAnswerDto>>(), Arg.Any<CancellationToken>())
         .Returns((callInfo) =>
         {
-            var queryable = callInfo.ArgAt<IQueryable<SubmissionWithResponses>>(0);
+            var queryable = callInfo.ArgAt<IQueryable<CheckAnswerDto>>(0);
 
             return Task.FromResult(queryable.FirstOrDefault());
         });
@@ -210,11 +210,11 @@ public class GetLatestResponsesQueryTests
         var latestResponse = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(ESTABLISHMENT_ID, incompleteSubmission.SectionId);
 
         Assert.NotNull(latestResponse);
-        Assert.NotNull(latestResponse.Value.Responses);
-        Assert.True(latestResponse.Value.Responses.Count > 0);
-        Assert.Equal(responsesForIncompleteSubmissionsGroupedByQuestion.Length, latestResponse.Value.Responses.Count);
+        Assert.NotNull(latestResponse.Responses);
+        Assert.True(latestResponse.Responses.Count > 0);
+        Assert.Equal(responsesForIncompleteSubmissionsGroupedByQuestion.Length, latestResponse.Responses.Count);
 
-        foreach (var response in latestResponse.Value.Responses)
+        foreach (var response in latestResponse.Responses)
         {
             var matching = responsesForIncompleteSubmissionsGroupedByQuestion.FirstOrDefault(r => r.Question.ContentfulRef == response.QuestionRef &&
                                                                                                   r.Answer.ContentfulRef == response.AnswerRef);

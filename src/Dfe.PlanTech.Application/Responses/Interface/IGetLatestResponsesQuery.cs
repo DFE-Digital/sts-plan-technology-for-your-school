@@ -6,6 +6,6 @@ namespace Dfe.PlanTech.Application.Responses.Interface
     {
         Task<QuestionWithAnswer?> GetLatestResponseForQuestion(int establishmentId, string sectionId, string questionId, CancellationToken cancellationToken = default);
 
-        Task<SubmissionWithResponses?> GetLatestResponses(int establishmentId, string sectionId, CancellationToken cancellationToken = default);
+        Task<CheckAnswerDto?> GetLatestResponses(int establishmentId, string sectionId, CancellationToken cancellationToken = default);
     }
 }

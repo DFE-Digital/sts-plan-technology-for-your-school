@@ -17,7 +17,6 @@ public class SubmitAnswerCommand : ISubmitAnswerCommand
         _user = user;
     }
 
-    //TODO: This should check if we are re-submitting an answer
     //If so, return some sort of result indicating so
     //Then on the action on the controller, we should redirect to a new route called "GetNextUnansweredQuestionForSection"
     //Which will then either redirect to the "GetQuestionBySlug" route or "Check Answers" route

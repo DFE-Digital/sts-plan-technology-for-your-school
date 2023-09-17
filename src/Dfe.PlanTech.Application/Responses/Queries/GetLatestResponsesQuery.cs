@@ -27,19 +27,21 @@ namespace Dfe.PlanTech.Application.Responses.Queries
             return _db.FirstOrDefaultAsync(responseListByDate, cancellationToken);
         }
 
-        public async Task<SubmissionWithResponses?> GetLatestResponses(int establishmentId, string sectionId, CancellationToken cancellationToken = default)
+        public async Task<CheckAnswerDto?> GetLatestResponses(int establishmentId, string sectionId, CancellationToken cancellationToken = default)
         {
-            var latestSubmissionWithResponses = await _db.FirstOrDefaultAsync(GetLatestResponsesBySectionIdQueryable(establishmentId, sectionId), cancellationToken);
+            var latestCheckAnswerDto = await _db.FirstOrDefaultAsync(GetLatestResponsesBySectionIdQueryable(establishmentId, sectionId), cancellationToken);
 
-            bool haveSubmission = latestSubmissionWithResponses.Id > 0 && latestSubmissionWithResponses.Responses != null;
-            return haveSubmission ? latestSubmissionWithResponses : null;
+            bool haveSubmission = latestCheckAnswerDto != null && 
+                                        latestCheckAnswerDto.SubmissionId > 0 && 
+                                        latestCheckAnswerDto.Responses != null;
+            return haveSubmission ? latestCheckAnswerDto : null;
         }
 
-        private IQueryable<SubmissionWithResponses> GetLatestResponsesBySectionIdQueryable(int establishmentId, string sectionId)
+        private IQueryable<CheckAnswerDto> GetLatestResponsesBySectionIdQueryable(int establishmentId, string sectionId)
         => GetCurrentSubmission(establishmentId, sectionId)
-                .Select(submission => new SubmissionWithResponses()
+                .Select(submission => new CheckAnswerDto()
                 {
-                    Id = submission.Id,
+                    SubmissionId = submission.Id,
                     Responses = submission.Responses.Select(response => new QuestionWithAnswer
                     {
                         QuestionRef = response.Question.ContentfulRef,
@@ -74,15 +76,4 @@ namespace Dfe.PlanTech.Application.Responses.Queries
         };
 
     }
-}
-
-public readonly record struct SubmissionWithResponses
-{
-    public SubmissionWithResponses()
-    {
-    }
-
-    public int Id { get; init; }
-
-    public List<QuestionWithAnswer> Responses { get; init; } = new();
 }

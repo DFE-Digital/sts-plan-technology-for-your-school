@@ -127,7 +127,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
                                             return new CheckAnswerDto()
                                             {
-                                                QuestionAnswerList = _questionWithAnswerList,
+                                                Responses = _questionWithAnswerList,
                                                 SubmissionId = SUBMISSION_ID
                                             };
                                         });
@@ -176,7 +176,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var checkAnswerDto = checkAnswersViewModel.CheckAnswerDto;
 
             Assert.NotNull(checkAnswerDto);
-            Assert.Equal(_questionWithAnswerList, checkAnswerDto.QuestionAnswerList);
+            Assert.Equal(_questionWithAnswerList, checkAnswerDto.Responses);
         }
 
         [Fact]
