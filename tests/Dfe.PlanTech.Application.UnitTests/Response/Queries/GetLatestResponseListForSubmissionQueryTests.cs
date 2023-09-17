@@ -1,3 +1,4 @@
+using System.Reflection.Metadata;
 using Bogus;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Responses.Queries;
@@ -33,22 +34,41 @@ public class GetLatestResponseListForSubmissionQueryTests
 
     public GetLatestResponseListForSubmissionQueryTests()
     {
-        var sysFaker = new Faker<SystemDetails>().RuleFor(sys => sys.Id, faker => faker.Random.AlphaNumeric(20));
-        var generatedSystemDetails = sysFaker.GenerateForever();
+        var faker = new Faker();
 
+        var generatedIds = new HashSet<string>();
+
+        var generateSystemDetails = () =>
+        {
+            bool createdUniqueId = false;
+            string id = "";
+
+            while (!createdUniqueId)
+            {
+                id = faker.Random.AlphaNumeric(30);
+                createdUniqueId = !generatedIds.Contains(id);
+            }
+
+            generatedIds.Add(id);
+
+            return new SystemDetails()
+            {
+                Id = id
+            };
+        };
 
         var answerFaker = new Faker<Domain.Questionnaire.Models.Answer>()
-                            .RuleFor(answer => answer.Sys, generatedSystemDetails.First())
+                            .RuleFor(answer => answer.Sys, generateSystemDetails)
                             .RuleFor(answer => answer.Text, faker => faker.Lorem.Sentence(faker.Random.Int(1, 5)));
 
         var questionFaker = new Faker<Domain.Questionnaire.Models.Question>()
-                            .RuleFor(question => question.Sys, generatedSystemDetails.First())
+                            .RuleFor(question => question.Sys, generateSystemDetails)
                             .RuleFor(question => question.Text, faker => faker.Lorem.Sentence())
                             .RuleFor(question => question.Answers, _ => answerFaker.Generate(ANSWER_PER_QUESTION_COUNT).ToArray());
 
         var sectionFaker = new Faker<Section>()
-                                .RuleFor(section => section.Sys, generatedSystemDetails.First())
-                                .RuleFor(section => section.Questions, questionFaker.Generate(QUESTION_PER_SECTION_COUNT).ToArray());
+                                .RuleFor(section => section.Sys, generateSystemDetails)
+                                .RuleFor(section => section.Questions, _ => questionFaker.Generate(QUESTION_PER_SECTION_COUNT).ToArray());
 
 
         _sections = sectionFaker.Generate(SECTION_COUNT);
@@ -70,13 +90,7 @@ public class GetLatestResponseListForSubmissionQueryTests
                                     .RuleFor(submission => submission.Maturity, (faker, submission) => submission.Completed ? faker.PickRandom(maturities) : null)
                                     .RuleFor(submission => submission.SectionId, faker => faker.PickRandom(sectionIds))
                                     .RuleFor(submission => submission.SectionName, (faker, submission) => $"Section {submission.Id}")
-                                    .RuleFor(submission => submission.Responses, (faker, submission) =>
-                                    {
-                                        var response = new Response()
-                                        {
-                                            response.DateCreated = faker.Date.Between(submission.DateCreated, submission.DateCompleted ?? DateTime.UtcNow),
-                                        }
-                                    });
+                                    .RuleFor(submission => submission.Responses, (faker, submission) => GenerateResponses(submission, faker).ToList());
 
         _submissions = submissionFaker.Generate(20);
 
@@ -87,139 +101,15 @@ public class GetLatestResponseListForSubmissionQueryTests
     }
 
     [Fact]
-    public void Test()
+    public void Should_Get_LatestResponse_For_QuestionId()
     {
-        Console.WriteLine("");
+        var responsesGroupedByQuestion = _submissions.SelectMany(submission => submission.Responses).GroupBy(r => r.Question);
+
+        // var responsesGroupedByQuestions = _sections.SelectMany(s => s.Questions).ToDictionary(q => q.Sys.Id, q => responsesGroupedByQuestion.First(g => g.Key.ContentfulRef == q.Sys.Id));
+
+        var tst = "";
     }
 
-    /*
-            [Fact]
-            public async Task GetLatestResponseListForSubmissionBy_Returns_QuestionWithAnswerList()
-            {
-                List<Response> responseList = new()
-                {
-                    new()
-                    {
-                        Id = 1,
-                        SubmissionId = 1,
-                        QuestionId = 1,
-                        Question = new Question()
-                        {
-                            Id = 1,
-                            QuestionText = "Question Text",
-                            ContentfulRef = "QuestionRef-1"
-                        },
-                        AnswerId = 1,
-                        Answer = new Answer()
-                        {
-                            Id = 1,
-                            AnswerText = "Answer Text",
-                            ContentfulRef = "AnswerRef-1"
-                        }
-                    }
-                };
-
-                List<QuestionWithAnswer>? questionWithAnswerList = new List<QuestionWithAnswer>()
-                {
-                    new QuestionWithAnswer()
-                    {
-                        QuestionRef = "QuestionRef-1",
-                        QuestionText = "Question Text",
-                        AnswerRef = "AnswerRef-1",
-                        AnswerText = "Answer Text"
-                    }
-                };
-
-                _planTechDbContextSubstitute.GetResponses.Returns(responseList.AsQueryable());
-                _planTechDbContextSubstitute.ToListAsync(Arg.Any<IQueryable<QuestionWithAnswer>>()).Returns(Task.FromResult(questionWithAnswerList));
-
-                var result = await _getLatestResponseListForSubmissionQuery.GetLatestResponseListForSubmissionBy(1);
-
-                Assert.IsType<List<QuestionWithAnswer>>(result);
-                Assert.Equal(questionWithAnswerList, result);
-            }
-
-            [Fact]
-            public async Task GetResponseListByDateCreated_Returns_QuestionWithAnswerList_In_DateCreated_DescendingOrder()
-            {
-                DateTime responseOneDateCreated = new DateTime(2000, 01, 01, 04, 08, 16);
-                DateTime responseTwoDateCreated = new DateTime(2000, 01, 01, 08, 16, 32);
-
-                List<Response> responseList = new()
-                {
-                    new Response()
-                    {
-                        Id = 1,
-                        SubmissionId = 1,
-                        QuestionId = 1,
-                        Question = new Question
-                        {
-                            Id = 1,
-                            QuestionText = "Question Text",
-                            ContentfulRef = "QuestionRef-1"
-                        },
-                        AnswerId = 1,
-                        Answer = new Answer()
-                        {
-                            Id = 1,
-                            AnswerText = "Answer Text",
-                            ContentfulRef = "AnswerRef-1"
-                        },
-                        DateCreated = responseOneDateCreated
-                    },
-
-                    new Response()
-                    {
-                        Id = 2,
-                        SubmissionId = 1,
-                        QuestionId = 2,
-                        Question = new Question()
-                        {
-                            Id = 2,
-                            QuestionText = "Question Text",
-                            ContentfulRef = "QuestionRef-2"
-                        },
-                        AnswerId = 2,
-                        Answer = new Answer()
-                        {
-                            Id = 2,
-                            AnswerText = "Answer Text",
-                            ContentfulRef = "AnswerRef-2"
-                        },
-                        DateCreated = responseTwoDateCreated
-                    }
-                };
-
-                List<QuestionWithAnswer>? questionWithAnswerList = new()
-                {
-                    new QuestionWithAnswer()
-                    {
-                        QuestionRef = "QuestionRef-2",
-                        QuestionText = "Question Text",
-                        AnswerRef = "AnswerRef-2",
-                        AnswerText = "AnswerText",
-                        DateCreated = responseTwoDateCreated
-                    },
-
-                    new QuestionWithAnswer()
-                    {
-                        QuestionRef = "QuestionRef-1",
-                        QuestionText = "Question Text",
-                        AnswerRef = "AnswerRef-1",
-                        AnswerText = "Answer Text",
-                        DateCreated = responseOneDateCreated
-                    }
-                };
-
-                _planTechDbContextSubstitute.GetResponses.Returns(responseList.AsQueryable());
-                _planTechDbContextSubstitute.ToListAsync(Arg.Any<IQueryable<QuestionWithAnswer>>()).Returns(Task.FromResult(questionWithAnswerList));
-
-                var result = await _getLatestResponseListForSubmissionQuery.GetResponseListByDateCreated(1);
-
-                Assert.IsType<List<QuestionWithAnswer>>(result);
-                Assert.Equal(questionWithAnswerList, result);
-            }
-            */
 
     private IEnumerable<Response> GenerateResponses(Domain.Submissions.Models.Submission submission, Faker faker)
     {
@@ -237,6 +127,8 @@ public class GetLatestResponseListForSubmissionQueryTests
 
                 yield return response;
             }
+
+            timesAnswered--;
         }
     }
 
@@ -264,10 +156,8 @@ public class GetLatestResponseListForSubmissionQueryTests
                 ContentfulRef = answer.Sys.Id,
                 Id = answerId++,
             },
-            Maturity = faker.PickRandom(maturities),
+            Maturity = answer.Maturity
         };
         return response;
     }
-
-    private IEnumerable<Response>
 }
