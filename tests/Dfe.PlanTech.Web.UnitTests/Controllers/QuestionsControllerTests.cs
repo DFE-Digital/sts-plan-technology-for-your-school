@@ -1,4 +1,3 @@
-using Castle.Core.Logging;
 using Dfe.PlanTech.Application.Responses.Interface;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -32,7 +31,7 @@ public class QuestionsControllerTests
   }
 
   [Fact]
-  public async Task Should_Load_QuestionBySlug_When_Args_Valid()
+  public async Task GetQuestionBySlug_Should_Load_QuestionBySlug_When_Args_Valid()
   {
     var questionSlug = "question-slug";
     var sectionSlug = "section-slug";
@@ -96,7 +95,55 @@ public class QuestionsControllerTests
     Assert.NotNull(question);
     Assert.Equal(firstQuestion, question.Question);
   }
+
+  [Fact]
+  public async Task GetQuestionBySlug_Should_Error_When_Missing_SectionId()
+  {
+    await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionBySlug(null!, "question-slug"));
+  }
+
+  [Fact]
+  public async Task GetQuestionBySlug_Should_Error_When_Missing_QuestionId()
+  {
+    await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionBySlug("section-slug", null!));
+  }
+
+  [Fact]
+  public async Task GetQuestionBySlug_Should_Error_When_Section_Not_Found()
+  {
+    _getSectionQuery.GetSectionBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                    .Returns((callinfo) =>
+                    {
+                      Section? section = null;
+                      return section;
+                    });
+
+    await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetQuestionBySlug("section", "question"));
+  }
+
+  [Fact]
+  public async Task GetQuestionBySlug_Should_Error_When_Question_Not_Found()
+  {
+    var section = new Section()
+    {
+      InterstitialPage = new Page()
+      {
+        Slug = "section-slug"
+      },
+      Questions = new Question[] {
+        new()
+        {
+          Slug = "question-slug"
+        }
+      }
+    };
+
+    _getSectionQuery.GetSectionBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(section);
+
+    await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetQuestionBySlug("section-slug", "question"));
+  }
 }
+
 //     private const string FIRST_QUESTION_ID = "Question1";
 //     private const string FIRST_ANSWER_ID = "Answer1";
 //     private const string SECOND_QUESTION_ID = "Question2";
