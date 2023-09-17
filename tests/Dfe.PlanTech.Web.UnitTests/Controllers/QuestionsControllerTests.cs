@@ -142,6 +142,17 @@ public class QuestionsControllerTests
 
     Assert.Equal(model.Question, _validSection.Questions.First());
   }
+
+  //Test: GetQuestionBySlug - Retrieves + returns answer reference
+
+  //Test: GetNextUnansweredQuestion - sectionslug null - errors
+  //Test: GetNextUnansweredQuestion - section not found - errors
+  //Test: GetNextUnansweredQuestion - GetNextUnansweredQuestion query - null - returns check answer page
+  //Test: GetNextUnansweredQuestion - GetNextUnansweredQuestion query - redirects to GetQuestionBySlug
+
+
+  //Test: SubmitAnswer - ModelStateInvalid - Returns to GetQuestionBySlug
+  //Test: SubmitAnswer - SubmitAnswer - Redirects to GetNextUnansweredQuestion
 }
 
 //     private const string FIRST_QUESTION_ID = "Question1";
