@@ -66,7 +66,10 @@ public class QuestionsController : BaseController<QuestionsController>
                                                                 [FromServices] IGetNextUnansweredQuestionQuery getQuestionQuery,
                                                                 CancellationToken cancellationToken = default)
     {
-        var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ?? throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
+        if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
+
+        var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ?? 
+                        throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
 
         int establishmentId = await _user.GetEstablishmentId();
 
