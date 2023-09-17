@@ -76,7 +76,7 @@ public class DfeOpenIdConnectEventsTests
         var commandSubstitute = Substitute.For<IRecordUserSignInCommand>();
         var dbUserIdValue = 1234;
         var dbEstablishmentIdValue = 5678;
-        commandSubstitute.RecordSignIn(Arg.Any<RecordUserSignInDto>()).Returns(new Domain.SignIn.Models.SignIn()
+        commandSubstitute.RecordSignIn(Arg.Any<RecordUserSignInDto>()).Returns(new SignIn()
         {
             UserId = dbUserIdValue,
             EstablishmentId = dbEstablishmentIdValue,
