@@ -75,17 +75,13 @@ public class GetLatestResponsesQueryTests
 
         var sectionIds = _sections.Select(section => section.Sys.Id).ToArray();
 
-        int submissionId = 0;
+        int submissionId = 1;
 
         var submissionFaker = new Faker<Domain.Submissions.Models.Submission>()
                                     .RuleFor(submission => submission.Completed, faker => faker.Random.Bool())
                                     .RuleFor(submission => submission.DateCreated, faker => faker.Date.Past())
                                     .RuleFor(submission => submission.EstablishmentId, ESTABLISHMENT_ID)
-                                    .RuleFor(submission => submission.Id, faker =>
-                                    {
-                                        submissionId++;
-                                        return submissionId;
-                                    });
+                                    .RuleFor(submission => submission.Id, faker => submissionId++);
 
         _submissions = submissionFaker.Generate(20);
 
@@ -122,21 +118,29 @@ public class GetLatestResponsesQueryTests
                                         return Task.FromResult(queryable.FirstOrDefault());
                                     });
 
+        _planTechDbContextSubstitute.FirstOrDefaultAsync(Arg.Any<IQueryable<SubmissionWithResponses>>(), Arg.Any<CancellationToken>())
+        .Returns((callInfo) =>
+        {
+            var queryable = callInfo.ArgAt<IQueryable<SubmissionWithResponses>>(0);
+
+            return Task.FromResult(queryable.FirstOrDefault());
+        });
+
 
         _getLatestResponseListForSubmissionQuery = new GetLatestResponsesQuery(_planTechDbContextSubstitute);
 
     }
 
     [Fact]
-    public async Task Should_Get_LatestResponse_For_QuestionId()
+    public async Task GetLatestResponseForQuestion_Should_Return_Latest_Response_For_QuestionId_In_Incomplete_Submission()
     {
-        var responsesForIncompleteSubmissionsGroupedByQuestion = _submissions.Where(submission => !submission.Completed)
-                                                                            .SelectMany(submission => submission.Responses)
-                                                                            .GroupBy(r => r.Question.ContentfulRef)
-                                                                            .ToArray();
+        var responsesForIncompleteSubmissionsGroupedByQuestion = GetIncompleteSubmissionForIncompleteSection()
+                                                                        .Responses
+                                                                        .GroupBy(r => r.Question.ContentfulRef)
+                                                                        .ToArray();
 
         var sectionQuestionsWithResponses = _sections.SelectMany(section => section.Questions)
-                                                    .ToDictionary(question => question, 
+                                                    .ToDictionary(question => question,
                                                                   question => responsesForIncompleteSubmissionsGroupedByQuestion
                                                                                         .FirstOrDefault(g => g.Key == question.Sys.Id)?
                                                                                         .Select(r => r).ToArray() ?? Array.Empty<Response>());
@@ -154,6 +158,56 @@ public class GetLatestResponsesQueryTests
 
         Assert.Equal(expectedMostRecentResponse.Answer.ContentfulRef, latestResponse.AnswerRef);
         Assert.Equal(expectedMostRecentResponse.Answer.AnswerText, latestResponse.AnswerText);
+    }
+
+    [Fact]
+    public async Task GetLatestResponseForQuestion_Should_Return_Null_For_Complete_Submission()
+    {
+        var completedSubmission = GetCompletedSubmissionForCompletedSection();
+
+        var questionIdInCompletedSubmission = completedSubmission.Responses.Select(response => response.Question.ContentfulRef)
+                                                                            .First();
+
+        var latestResponse = await _getLatestResponseListForSubmissionQuery.GetLatestResponseForQuestion(ESTABLISHMENT_ID, completedSubmission.SectionId, questionIdInCompletedSubmission);
+
+        Assert.Null(latestResponse);
+    }
+
+    [Fact]
+    public async Task GetLatestResponses_Should_Return_LatestResponses_For_Incomplete_Submission()
+    {
+        var incompleteSubmission = GetIncompleteSubmissionForIncompleteSection();
+
+        var responsesForIncompleteSubmissionsGroupedByQuestion = _submissions.Where(submission => !submission.Completed)
+                                                                            .SelectMany(submission => submission.Responses)
+                                                                            .GroupBy(response => response.Question.ContentfulRef)
+                                                                            .Select(responses => responses.OrderByDescending(response => response.DateCreated).First())
+                                                                            .ToArray();
+
+        var latestResponse = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(ESTABLISHMENT_ID, incompleteSubmission.SectionId);
+
+        Assert.NotNull(latestResponse);
+        Assert.NotNull(latestResponse.Value.Responses);
+        Assert.True(latestResponse.Value.Responses.Count > 0);
+        Assert.Equal(responsesForIncompleteSubmissionsGroupedByQuestion.Length, latestResponse.Value.Responses.Count);
+
+        foreach (var response in latestResponse.Value.Responses)
+        {
+            var matching = responsesForIncompleteSubmissionsGroupedByQuestion.FirstOrDefault(r => r.Question.ContentfulRef == response.QuestionRef &&
+                                                                                                  r.Answer.ContentfulRef == response.AnswerRef);
+
+            Assert.NotNull(response);
+        }
+    }
+
+    [Fact]
+    public async Task GetLatestResponses_Should_Return_Null_For_Completed_Submission()
+    {
+        var incompleteSubmission = GetCompletedSubmissionForCompletedSection();
+
+        var latestResponse = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(ESTABLISHMENT_ID, incompleteSubmission.SectionId);
+
+        Assert.Null(latestResponse);
     }
 
 
@@ -177,6 +231,14 @@ public class GetLatestResponsesQueryTests
             timesAnswered--;
         }
     }
+
+    private Domain.Submissions.Models.Submission GetCompletedSubmissionForCompletedSection()
+    => _submissions.First(submission => submission.Completed &&
+                                        (submission.SectionId == _sections[2].Sys.Id || submission.SectionId == _sections[3].Sys.Id));
+
+    private Domain.Submissions.Models.Submission GetIncompleteSubmissionForIncompleteSection()
+    => _submissions.First(submission => !submission.Completed &&
+                        (submission.SectionId == _sections[0].Sys.Id || submission.SectionId == _sections[1].Sys.Id));
 
     private Response GenerateResponse(Domain.Submissions.Models.Submission submission, Faker faker, Section section, int x)
     {

@@ -20,12 +20,12 @@ public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand
     public async Task<CheckAnswerDto?> GetCheckAnswerDtoForSection(int establishmentId, Section section, CancellationToken cancellationToken = default)
     {
         var questionWithAnswerList = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(establishmentId, section.Sys.Id, cancellationToken);
-        if (questionWithAnswerList.Responses == null || !questionWithAnswerList.Responses.Any())
+        if (questionWithAnswerList.Value.Responses == null || !questionWithAnswerList.Value.Responses.Any())
         {
             return null;
         }
 
-        return RemoveDetachedQuestions(questionWithAnswerList.Responses, section, questionWithAnswerList.Id);
+        return RemoveDetachedQuestions(questionWithAnswerList.Value.Responses, section, questionWithAnswerList.Value.Id);
     }
 
     private static CheckAnswerDto RemoveDetachedQuestions(List<QuestionWithAnswer> questionWithAnswerList, Section section, int submissionId)

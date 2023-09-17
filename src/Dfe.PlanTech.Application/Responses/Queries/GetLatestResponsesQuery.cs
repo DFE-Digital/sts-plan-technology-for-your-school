@@ -27,8 +27,13 @@ namespace Dfe.PlanTech.Application.Responses.Queries
             return _db.FirstOrDefaultAsync(responseListByDate, cancellationToken);
         }
 
-        public Task<SubmissionWithResponses> GetLatestResponses(int establishmentId, string sectionId, CancellationToken cancellationToken = default)
-            => _db.FirstOrDefaultAsync(GetLatestResponsesBySectionIdQueryable(establishmentId, sectionId), cancellationToken);
+        public async Task<SubmissionWithResponses?> GetLatestResponses(int establishmentId, string sectionId, CancellationToken cancellationToken = default)
+        {
+            var latestSubmissionWithResponses = await _db.FirstOrDefaultAsync(GetLatestResponsesBySectionIdQueryable(establishmentId, sectionId), cancellationToken);
+
+            bool haveSubmission = latestSubmissionWithResponses.Id > 0 && latestSubmissionWithResponses.Responses != null;
+            return haveSubmission ? latestSubmissionWithResponses : null;
+        }
 
         private IQueryable<SubmissionWithResponses> GetLatestResponsesBySectionIdQueryable(int establishmentId, string sectionId)
         => GetCurrentSubmission(establishmentId, sectionId)
@@ -54,9 +59,9 @@ namespace Dfe.PlanTech.Application.Responses.Queries
                 .OrderByDescending(submission => submission.DateCreated);
 
         private static Expression<Func<Domain.Submissions.Models.Submission, bool>> IsMatchingIncompleteSubmission(int establishmentId, string sectionId)
-        => submission => submission.Completed == false &&
-                        submission.EstablishmentId == establishmentId &&
-                        submission.SectionId == sectionId;
+        => submission => !submission.Completed &&
+                            submission.EstablishmentId == establishmentId &&
+                            submission.SectionId == sectionId;
 
         private static Expression<Func<Domain.Responses.Models.Response, QuestionWithAnswer>> ToQuestionWithAnswer()
         => response => new QuestionWithAnswer()
