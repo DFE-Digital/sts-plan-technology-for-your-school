@@ -1,4 +1,3 @@
-using Contentful.Core.Models;
 using Dfe.PlanTech.Application.Responses.Interface;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -180,8 +179,6 @@ public class QuestionsControllerTests
     Assert.Equal(model.Question, _validSection.Questions.First());
     Assert.Equal(model.AnswerRef, answerRef);
   }
-
-  //Test: GetQuestionBySlug - Retrieves + returns answer reference
 
   //Test: GetNextUnansweredQuestion - sectionslug null - errors
   //Test: GetNextUnansweredQuestion - section not found - errors
