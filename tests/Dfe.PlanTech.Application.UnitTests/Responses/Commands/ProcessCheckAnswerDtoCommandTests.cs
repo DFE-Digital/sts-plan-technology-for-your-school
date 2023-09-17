@@ -3,6 +3,7 @@ using Dfe.PlanTech.Application.Responses.Interface;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using NSubstitute;
+using NSubstitute.ReturnsExtensions;
 
 namespace Dfe.PlanTech.Application.UnitTests.Responses.Commands;
 
@@ -102,8 +103,8 @@ public class ProcessCheckAnswerDtoCommandTests
 
     var getLatestResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
     getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-                         .Returns(Task.FromResult(response));
-
+                         .Returns((callinfo) => response);
+                         
     var processCheckAnswerDtoCommand = new ProcessCheckAnswerDtoCommand(getLatestResponsesQuery);
 
 

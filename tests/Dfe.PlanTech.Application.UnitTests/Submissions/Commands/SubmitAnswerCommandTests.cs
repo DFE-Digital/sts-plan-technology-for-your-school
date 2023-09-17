@@ -73,5 +73,4 @@ public class SubmitAnswerCommandTests
 
     await Assert.ThrowsAnyAsync<AuthenticationException>(() => _submitAnswerCommand.SubmitAnswer(dto));
   }
-
 }
