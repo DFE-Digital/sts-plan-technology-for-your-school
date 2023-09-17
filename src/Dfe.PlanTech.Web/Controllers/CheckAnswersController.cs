@@ -1,8 +1,8 @@
 using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Application.Questionnaire.Queries;
-using Dfe.PlanTech.Application.Responses.Commands;
 using Dfe.PlanTech.Application.Submissions.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.Responses.Interfaces;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +19,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     }
 
     [HttpGet("{sectionSlug}/check-answers")]
-    public async Task<IActionResult> CheckAnswersPage(string sectionSlug, [FromServices] IUser user, [FromServices] GetSectionQuery getSectionQuery, [FromServices] ProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand, [FromServices] GetPageQuery getPageQuery, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> CheckAnswersPage(string sectionSlug, [FromServices] IUser user, [FromServices] IGetSectionQuery getSectionQuery, [FromServices] IProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand, [FromServices] IGetPageQuery getPageQuery, CancellationToken cancellationToken = default)
     {
         var section = await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken);
 

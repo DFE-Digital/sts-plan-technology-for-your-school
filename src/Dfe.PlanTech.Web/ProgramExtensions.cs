@@ -27,6 +27,10 @@ using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
 using Newtonsoft.Json.Serialization;
+using Dfe.PlanTech.Domain.Responses.Interfaces;
+using System.Diagnostics;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+using Dfe.PlanTech.Application.Questionnaire.Queries;
 
 namespace Dfe.PlanTech.Web;
 
@@ -106,15 +110,14 @@ public static class ProgramExtensions
         services.AddTransient<ICalculateMaturityCommand, CalculateMaturityCommand>();
         services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
 
-        services.AddTransient<ProcessCheckAnswerDtoCommand>();
-
         services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
 
         services.AddTransient<IGetEstablishmentIdQuery, GetEstablishmentIdQuery>();
 
-        services.AddTransient<Application.Questionnaire.Queries.GetSectionQuery>();
         services.AddTransient<IGetNavigationQuery, GetNavigationQuery>();
 
+        services.AddTransient<IProcessCheckAnswerDtoCommand, ProcessCheckAnswerDtoCommand>();
+        services.AddTransient<IGetSectionQuery, GetSectionQuery>();
         return services;
     }
 

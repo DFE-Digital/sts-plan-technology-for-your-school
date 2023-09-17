@@ -3,14 +3,14 @@ using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Responses.Commands;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Constants;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Responses.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using NSubstitute.ReturnsExtensions;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Controllers
@@ -19,9 +19,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
     {
         private readonly CheckAnswersController _checkAnswersController;
 
-        private readonly ProcessCheckAnswerDtoCommand _processCheckAnswerDtoCommand;
-        private readonly GetSectionQuery _getSectionQuery;
-        private readonly GetPageQuery _getPageQuerySubstitute;
+        private readonly IProcessCheckAnswerDtoCommand _processCheckAnswerDtoCommand;
+        private readonly IGetSectionQuery _getSectionQuery;
+        private readonly IGetPageQuery _getPageQuerySubstitute;
         private readonly IUser _user;
 
         private readonly Page _checkAnswersPage = new()
@@ -81,14 +81,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             ILogger<CheckAnswersController> loggerSubstitute = Substitute.For<ILogger<CheckAnswersController>>();
 
-            _getPageQuerySubstitute = Substitute.For<GetPageQuery>();
+            _getPageQuerySubstitute = Substitute.For<IGetPageQuery>();
             _getPageQuerySubstitute.GetPageBySlug("check-answers", Arg.Any<CancellationToken>()).Returns(_checkAnswersPage);
 
             _user = Substitute.For<IUser>();
             _user.GetEstablishmentId().Returns(ESTABLISHMENT_ID);
             _user.GetCurrentUserId().Returns(Task.FromResult(USER_ID as int?));
 
-            _getSectionQuery = Substitute.For<GetSectionQuery>();
+            _getSectionQuery = Substitute.For<IGetSectionQuery>();
             _getSectionQuery.GetSectionBySlug(_section.InterstitialPage.Slug).Returns((callInfo) =>
             {
                 var sectionArg = callInfo.ArgAt<string>(0);
@@ -96,7 +96,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 return sectionArg == _section.InterstitialPage.Slug ? _section : null;
             });
 
-            _processCheckAnswerDtoCommand = Substitute.For<ProcessCheckAnswerDtoCommand>();
+            _processCheckAnswerDtoCommand = Substitute.For<IProcessCheckAnswerDtoCommand>();
             _processCheckAnswerDtoCommand.GetCheckAnswerDtoForSectionId(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
                                         .Returns((callInfo) =>
                                         {

@@ -1,23 +1,24 @@
 using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 
-namespace Dfe.PlanTech.Application.Questionnaire.Queries
+namespace Dfe.PlanTech.Application.Questionnaire.Queries;
+
+public class GetSectionQuery : ContentRetriever, IGetSectionQuery
 {
-    public class GetSectionQuery : ContentRetriever
+    public GetSectionQuery(IContentRepository repository) : base(repository) { }
+
+    public Task<Section?> GetSectionById(string sectionId, CancellationToken cancellationToken = default)
+    => repository.GetEntityById<Section>(sectionId, 3, cancellationToken);
+
+    public async Task<Section?> GetSectionBySlug(string sectionSlug, CancellationToken cancellationToken = default)
     {
-        public GetSectionQuery(IContentRepository repository) : base(repository) { }
-
-        public Task<Section?> GetSectionById(string sectionId, CancellationToken cancellationToken = default)
-        => repository.GetEntityById<Section>(sectionId, 3, cancellationToken);
-
-        public async Task<Section?> GetSectionBySlug(string sectionSlug, CancellationToken cancellationToken = default)
+        var options = new GetEntitiesOptions()
         {
-            var options = new GetEntitiesOptions()
-            {
-                Queries = new[] {
+            Queries = new[] {
                     new ContentQueryEquals(){
                         Field = "fields.interstitialPage.fields.slug",
                         Value = sectionSlug
@@ -27,9 +28,8 @@ namespace Dfe.PlanTech.Application.Questionnaire.Queries
                     Value="page"
                     }
                 }
-            };
+        };
 
-            return (await repository.GetEntities<Section>(options, cancellationToken)).FirstOrDefault();
-        }
+        return (await repository.GetEntities<Section>(options, cancellationToken)).FirstOrDefault();
     }
 }
