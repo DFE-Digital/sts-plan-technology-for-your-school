@@ -2,6 +2,7 @@ using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Responses.Interface;
 using Dfe.PlanTech.Application.Submissions.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -12,83 +13,33 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Authorize]
 public class QuestionsController : BaseController<QuestionsController>
 {
-    private readonly GetQuestionQuery _getQuestionQuery;
+    private readonly IGetSectionQuery _getSectionQuery;
+    private readonly IGetLatestResponsesQuery _getResponseQuery;
+    private readonly IUser _user;
 
-    public QuestionsController(ILogger<QuestionsController> logger, GetQuestionQuery getQuestionQuery) : base(logger)
+    public QuestionsController(ILogger<QuestionsController> logger,
+                                IGetSectionQuery getSectionQuery,
+                                IGetLatestResponsesQuery getResponseQuery,
+                                IUser user) : base(logger)
     {
-        _getQuestionQuery = getQuestionQuery;
+        _getResponseQuery = getResponseQuery;
+        _getSectionQuery = getSectionQuery;
+        _user = user;
     }
 
     [HttpGet("{sectionSlug}/{questionSlug}")]
     public async Task<IActionResult> GetQuestionBySlug(string sectionSlug,
                                                         string questionSlug,
-                                                        [FromServices] GetSectionQuery getSectionQuery,
-                                                        [FromServices] IGetLatestResponsesQuery getResponseQuery,
-                                                        [FromServices] IUser user,
                                                         CancellationToken cancellationToken = default)
     {
-        var section = await getSectionQuery.GetSectionBySlug(sectionSlug) ?? throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
+        var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ?? 
+                        throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
 
         var question = section.Questions.FirstOrDefault(question => question.Slug == questionSlug) ?? throw new Exception("No question");
 
-        int establishmentId = await user.GetEstablishmentId();
+        int establishmentId = await _user.GetEstablishmentId();
 
-        return await ShowQuestionPage(establishmentId, sectionSlug, section, question, getResponseQuery, cancellationToken);
-    }
-
-    [HttpGet("{sectionSlug}/next-question")]
-    public async Task<IActionResult> GetNextUnansweredQuestion(string sectionSlug,
-                                                                [FromServices] GetSectionQuery getSectionQuery,
-                                                                [FromServices] GetQuestionQuery getQuestionQuery,
-                                                                [FromServices] IGetLatestResponsesQuery getResponseQuery,
-                                                                [FromServices] IUser user,
-                                                                CancellationToken cancellationToken = default)
-    {
-        var section = await getSectionQuery.GetSectionBySlug(sectionSlug) ?? throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
-
-        int establishmentId = await user.GetEstablishmentId();
-
-        var nextQuestion = await getQuestionQuery.GetNextUnansweredQuestion(establishmentId, section, cancellationToken);
-
-        if (nextQuestion == null) return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { sectionSlug });
-
-        return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = nextQuestion.Slug });
-    }
-
-    [HttpPost("{sectionSlug}/{questionSlug}")]
-    public async Task<IActionResult> SubmitAnswer(string sectionSlug, string questionSlug, SubmitAnswerDto submitAnswerDto, [FromServices] IUser user, [FromServices] ISubmitAnswerCommand submitAnswerCommand, [FromServices] IGetLatestResponsesQuery getResponseQuery, CancellationToken cancellationToken = default)
-    {
-        if (!ModelState.IsValid) return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug });
-
-        //TODO: Move logic to submit answer
-        var result = await submitAnswerCommand.SubmitAnswer(submitAnswerDto, cancellationToken);
-
-        bool navigateToCheckAnswersPage = await GetQuestionCompletionStatus(submitAnswerDto, user, getResponseQuery);
-
-        if (navigateToCheckAnswersPage) return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { sectionSlug });
-
-        return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = submitAnswerDto.ChosenAnswer!.NextQuestion!.Value.Slug });
-    }
-
-    private static async Task<bool> GetQuestionCompletionStatus(SubmitAnswerDto submitAnswerDto, IUser user, IGetLatestResponsesQuery getResponseQuery)
-    {
-        //IF there's no next question for the answer, then section should be complete
-        if (submitAnswerDto.ChosenAnswer?.NextQuestion == null) return true;
-
-        //Otherwise, do we have a response for next question?
-        //If so, we were changing our last answer, and the next question in the sequence is the same- so just navigate to check answers page
-        //Otherwise, we should navigate to next question
-        int establishmentId = await user.GetEstablishmentId();
-        var latestResponseForQuestion = await getResponseQuery.GetLatestResponseForQuestion(establishmentId,
-                                                                                            sectionId: submitAnswerDto.SectionId,
-                                                                                            questionId: submitAnswerDto.ChosenAnswer!.NextQuestion!.Value.Id);
-
-        return latestResponseForQuestion != null;
-    }
-
-    private async Task<IActionResult> ShowQuestionPage(int establishmentId, string sectionSlug, Section section, Question question, IGetLatestResponsesQuery getResponseQuery, CancellationToken cancellationToken = default)
-    {
-        var latestResponseForQuestion = await getResponseQuery.GetLatestResponseForQuestion(establishmentId,
+        var latestResponseForQuestion = await _getResponseQuery.GetLatestResponseForQuestion(establishmentId,
                                                                                 section.Sys.Id,
                                                                                 question.Sys.Id,
                                                                                 cancellationToken);
@@ -104,5 +55,31 @@ public class QuestionsController : BaseController<QuestionsController>
         };
 
         return View("Question", viewModel);
+    }
+
+    [HttpGet("{sectionSlug}/next-question")]
+    public async Task<IActionResult> GetNextUnansweredQuestion(string sectionSlug,
+                                                                [FromServices] GetQuestionQuery getQuestionQuery,
+                                                                CancellationToken cancellationToken = default)
+    {
+        var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ?? throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
+
+        int establishmentId = await _user.GetEstablishmentId();
+
+        var nextQuestion = await getQuestionQuery.GetNextUnansweredQuestion(establishmentId, section, cancellationToken);
+
+        if (nextQuestion == null) return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { sectionSlug });
+
+        return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = nextQuestion.Slug });
+    }
+
+    [HttpPost("{sectionSlug}/{questionSlug}")]
+    public async Task<IActionResult> SubmitAnswer(string sectionSlug, string questionSlug, SubmitAnswerDto submitAnswerDto, [FromServices] ISubmitAnswerCommand submitAnswerCommand, CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid) return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug });
+
+        var result = await submitAnswerCommand.SubmitAnswer(submitAnswerDto, cancellationToken);
+
+        return RedirectToAction(nameof(GetNextUnansweredQuestion), new { sectionSlug });
     }
 }
