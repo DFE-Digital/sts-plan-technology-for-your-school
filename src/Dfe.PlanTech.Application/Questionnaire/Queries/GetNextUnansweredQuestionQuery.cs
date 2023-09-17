@@ -43,7 +43,7 @@ public class GetNextUnansweredQuestionQuery : IGetNextUnansweredQuestionQuery
           QuestionSlug = node.Slug
         };
 
-        node = node.Answers.FirstOrDefault(answer => answer.Sys.Id.Equals(response.AnswerRef))?.NextQuestion;
+        node = Array.Find(node.Answers, answer => answer.Sys.Id.Equals(response.AnswerRef))?.NextQuestion;
       }
       else
       {

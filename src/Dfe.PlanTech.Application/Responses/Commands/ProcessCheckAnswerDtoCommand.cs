@@ -50,7 +50,7 @@ public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand
                 };
 
                 attachedQuestions.Add(questionWithAnswer);
-                node = node.Answers.FirstOrDefault(answer => answer.Sys.Id.Equals(questionWithAnswer.AnswerRef))?.NextQuestion;
+                node = Array.Find(node.Answers, answer => answer.Sys.Id.Equals(questionWithAnswer.AnswerRef))?.NextQuestion;
             }
             else node = null;
         }
