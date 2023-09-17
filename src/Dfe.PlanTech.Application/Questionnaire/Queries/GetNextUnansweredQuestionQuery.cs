@@ -7,12 +7,11 @@ using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Application.Questionnaire.Queries;
 
-public class GetNextUnansweredQuestionQuery : ContentRetriever, IGetNextUnansweredQuestionQuery
+public class GetNextUnansweredQuestionQuery : IGetNextUnansweredQuestionQuery
 {
   private readonly IGetLatestResponsesQuery _getResponseQuery;
 
-  public GetNextUnansweredQuestionQuery(IGetLatestResponsesQuery getResponseQuery,
-                                        IContentRepository repository) : base(repository)
+  public GetNextUnansweredQuestionQuery(IGetLatestResponsesQuery getResponseQuery)
   {
     _getResponseQuery = getResponseQuery;
   }
