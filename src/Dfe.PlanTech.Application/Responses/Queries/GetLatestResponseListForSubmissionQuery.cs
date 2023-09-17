@@ -7,11 +7,11 @@ namespace Dfe.PlanTech.Application.Responses.Queries
 {
     //TODO: Rename to "GetLatestResponseQuery", or similiar
     //TODO: Refactor all queries to one or two - lot of duplication
-    public class GetLatestResponseListForSubmissionQuery : IGetLatestResponseListForSubmissionQuery
+    public class GetLatestResponsesQuery : IGetLatestResponsesQuery
     {
         private readonly IPlanTechDbContext _db;
 
-        public GetLatestResponseListForSubmissionQuery(IPlanTechDbContext db)
+        public GetLatestResponsesQuery(IPlanTechDbContext db)
         {
             _db = db;
         }
