@@ -60,10 +60,22 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 }
             },
         };
+        private readonly Section _completedSection = new()
+        {
+            InterstitialPage = new Page()
+            {
+                Slug = COMPLETED_SECTION_SLUG
+            },
+            Sys = new()
+            {
+                Id = "CompletedSectionId"
+            }
+        };
 
         private const int ESTABLISHMENT_ID = 3;
         private const int USER_ID = 7;
         private const int SUBMISSION_ID = 1;
+        private const string COMPLETED_SECTION_SLUG = "COMPLETED";
 
         private readonly List<QuestionWithAnswer> _questionWithAnswerList = new()
             {
@@ -89,11 +101,20 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _user.GetCurrentUserId().Returns(Task.FromResult(USER_ID as int?));
 
             _getSectionQuery = Substitute.For<IGetSectionQuery>();
-            _getSectionQuery.GetSectionBySlug(_section.InterstitialPage.Slug).Returns((callInfo) =>
+            _getSectionQuery.GetSectionBySlug(Arg.Any<string>()).Returns((callInfo) =>
             {
                 var sectionArg = callInfo.ArgAt<string>(0);
 
-                return sectionArg == _section.InterstitialPage.Slug ? _section : null;
+                if (sectionArg == _section.InterstitialPage.Slug)
+                {
+                    return _section;
+                }
+                else if (sectionArg == _completedSection.InterstitialPage.Slug)
+                {
+                    return _completedSection;
+                }
+
+                return null;
             });
 
             _processCheckAnswerDtoCommand = Substitute.For<IProcessCheckAnswerDtoCommand>();
@@ -158,93 +179,39 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.Equal(_questionWithAnswerList, checkAnswerDto.QuestionAnswerList);
         }
 
-/*         [Fact]
+        [Fact]
         public async Task CheckAnswersController_CheckAnswers_Null_Section_ThrowsException()
         {
-            List<QuestionWithAnswer> questionWithAnswerList = new List<QuestionWithAnswer>()
-            {
-                new QuestionWithAnswer()
-                {
-                    QuestionRef = "QuestionRef-1",
-                    QuestionText = "Question Text",
-                    AnswerRef = "AnswerRef-1",
-                    AnswerText = "Answer Text"
-                }
-            };
-
-            _getLatestResponseListForSubmissionQuerySubstitute.GetLatestResponseListForSubmissionBy(SUBMISSION_ID).Returns(questionWithAnswerList);
-            _contentRepositorySubstitute.GetEntityById<Section?>(SectionId, 3, CancellationToken.None).Returns((Section?)null);
-
-            _checkAnswersController.TempData[TempDataConstants.CheckAnswers] = Newtonsoft.Json.JsonConvert.SerializeObject(new TempDataCheckAnswers() { SubmissionId = SUBMISSION_ID, SectionId = SectionId, SectionName = SectionName });
-
-            await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage(_processCheckAnswerDtoCommand, _getPageQuerySubstitute));
+            await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage("NOT THE RIGHT SLUG", _user, _getSectionQuery, _processCheckAnswerDtoCommand, _getPageQuerySubstitute));
         }
 
-        [Fact]
-        public async Task CheckAnswersController_CheckAnswers_Null_QuestionWithAnswerList_ThrowsException()
-        {
-            _getLatestResponseListForSubmissionQuerySubstitute.GetLatestResponseListForSubmissionBy(SUBMISSION_ID).ReturnsNull();
-            _contentRepositorySubstitute.GetEntityById<Section?>(SectionId, 3, CancellationToken.None).Returns(_section);
-
-            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _checkAnswersController.CheckAnswersPage(_processCheckAnswerDtoCommand, _getPageQuerySubstitute));
-        }
 
         [Fact]
         public async Task CheckAnswersController_CheckAnswers_Null_SectionId_ThrowsException()
         {
-            List<QuestionWithAnswer> questionWithAnswerList = new List<QuestionWithAnswer>()
-            {
-                new QuestionWithAnswer()
-                {
-                    QuestionRef = "QuestionRef-1",
-                    QuestionText = "Question Text",
-                    AnswerRef = "AnswerRef-1",
-                    AnswerText = "Answer Text"
-                }
-            };
-
-            _getLatestResponseListForSubmissionQuerySubstitute.GetLatestResponseListForSubmissionBy(SUBMISSION_ID).Returns(Task.FromResult(questionWithAnswerList));
-            _contentRepositorySubstitute.GetEntityById<Section?>(SectionId, 3, CancellationToken.None).Returns(_section);
-
-            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _checkAnswersController.CheckAnswersPage(_processCheckAnswerDtoCommand, _getPageQuerySubstitute));
+            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _checkAnswersController.CheckAnswersPage(null!, _user, _getSectionQuery, _processCheckAnswerDtoCommand, _getPageQuerySubstitute));
         }
 
-        [Fact]
-        public async Task CheckAnswersController_ChangeAnswer_RedirectsToView()
-        {
-            Domain.Questions.Models.Question question = new Domain.Questions.Models.Question() { ContentfulRef = "QuestionRef-1", QuestionText = "Question Text" };
-            Domain.Answers.Models.Answer answer = new Domain.Answers.Models.Answer() { ContentfulRef = "AnswerRef-1", AnswerText = "Answer Text" };
-
-
-            var result = await _checkAnswersController.ChangeAnswer(question.ContentfulRef, answer.ContentfulRef, SUBMISSION_ID, string.Empty);
-
-            Assert.IsType<RedirectToRouteResult>(result);
-
-            var redirectToActionResult = result as RedirectToRouteResult;
-
-            Assert.NotNull(redirectToActionResult);
-            Assert.NotNull(_checkAnswersController.TempData[TempDataConstants.Questions]);
-            Assert.IsType<string>(_checkAnswersController.TempData[TempDataConstants.Questions]);
-            var id = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_checkAnswersController.TempData[TempDataConstants.Questions] as string ?? "")?.QuestionRef;
-            Assert.Equal(question.ContentfulRef, id);
-            var answerRef = Newtonsoft.Json.JsonConvert.DeserializeObject<TempDataQuestions>(_checkAnswersController.TempData[TempDataConstants.Questions] as string ?? "")?.AnswerRef;
-            Assert.Equal(answer.ContentfulRef, answerRef);
-        }
 
         [Fact]
-        public async Task ConfirmCheckAnswers_RedirectsToSelfAssessment_WhenMaturityIsLargerThan1()
+        public async Task CheckAnswersPage_RedirectsToSelfAssessment_When_No_Responses()
         {
-            var result = await _checkAnswersController.ConfirmCheckAnswers(SUBMISSION_ID, SectionName, _processCheckAnswerDtoCommand);
+            var result = await _checkAnswersController.CheckAnswersPage(_completedSection.InterstitialPage.Slug, _user, _getSectionQuery, _processCheckAnswerDtoCommand, _getPageQuerySubstitute);
 
             Assert.IsType<RedirectToActionResult>(result);
 
-            var res = result as RedirectToActionResult;
-
-            if (res != null)
+            if (result is RedirectToActionResult res)
             {
                 Assert.True(res.ActionName == "GetByRoute");
                 Assert.True(res.ControllerName == "Pages");
+                Assert.NotNull(res.RouteValues);
+                Assert.True(res.RouteValues.ContainsKey("route"));
+                Assert.True(res.RouteValues["route"] is string s && s == "/self-assessment");
+            }
+            else
+            {
+                Assert.Fail("Not redirect to action result");
             }
         }
- */    }
+    }
 }

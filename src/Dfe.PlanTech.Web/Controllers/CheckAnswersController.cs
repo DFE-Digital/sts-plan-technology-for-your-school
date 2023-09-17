@@ -21,9 +21,13 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     [HttpGet("{sectionSlug}/check-answers")]
     public async Task<IActionResult> CheckAnswersPage(string sectionSlug, [FromServices] IUser user, [FromServices] IGetSectionQuery getSectionQuery, [FromServices] IProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand, [FromServices] IGetPageQuery getPageQuery, CancellationToken cancellationToken = default)
     {
-        var section = await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken);
+        if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
+        
+        var section = await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
+                            throw new NullReferenceException($"Could not find section for {sectionSlug}");
 
-        var checkAnswerPageContent = await getPageQuery.GetPageBySlug(PAGE_SLUG, CancellationToken.None);
+        var checkAnswerPageContent = await getPageQuery.GetPageBySlug(PAGE_SLUG, CancellationToken.None) ??
+                                        throw new NullReferenceException($"Could not find page for slug {PAGE_SLUG}");
 
         var establishmentId = await user.GetEstablishmentId();
 
