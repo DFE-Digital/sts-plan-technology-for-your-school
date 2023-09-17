@@ -98,8 +98,6 @@ public static class ProgramExtensions
 
         services.AddTransient<ICookieService, CookieService>();
 
-        services.AddTransient<ICreateResponseCommand, CreateResponseCommand>();
-        services.AddTransient<IGetResponseQuery, GetResponseQuery>();
         services.AddTransient<IGetLatestResponsesQuery, GetLatestResponsesQuery>();
 
         services.AddTransient<ICalculateMaturityCommand, CalculateMaturityCommand>();
