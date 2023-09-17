@@ -25,8 +25,18 @@ public class QuestionsControllerTests
   private const string SECTION_SLUG = "section-slug";
   private const int ESTABLISHMENT_ID = 1;
 
+  private readonly Question _validQuestion = new Question()
+  {
+    Slug = QUESTION_SLUG,
+    Sys = new SystemDetails()
+    {
+      Id = "QuestionId"
+    }
+  };
+
   private readonly Section _validSection = new Section()
   {
+    Name = "Valid Section",
     Sys = new SystemDetails()
     {
       Id = "SectionId"
@@ -35,18 +45,13 @@ public class QuestionsControllerTests
     {
       Slug = SECTION_SLUG,
     },
-    Questions = new Question[] {
-        new(){
-          Slug = QUESTION_SLUG,
-          Sys = new SystemDetails(){
-            Id = "QuestionId"
-          }
-        }
-      }
+    Questions = new Question[1],
   };
 
   public QuestionsControllerTests()
   {
+    _validSection.Questions[0] = _validQuestion;
+
     _logger = Substitute.For<ILogger<QuestionsController>>();
 
     _getSectionQuery = Substitute.For<IGetSectionQuery>();
@@ -74,9 +79,7 @@ public class QuestionsControllerTests
   [Fact]
   public async Task GetQuestionBySlug_Should_Load_QuestionBySlug_When_Args_Valid()
   {
-    var firstQuestion = _validSection.Questions.First();
-
-    _getResponseQuery.GetLatestResponseForQuestion(Arg.Any<int>(), _validSection.Sys.Id, firstQuestion.Sys.Id, Arg.Any<CancellationToken>())
+    _getResponseQuery.GetLatestResponseForQuestion(Arg.Any<int>(), _validSection.Sys.Id, _validQuestion.Sys.Id, Arg.Any<CancellationToken>())
             .Returns((callinfo) =>
             {
               QuestionWithAnswer? result = null;
@@ -96,7 +99,7 @@ public class QuestionsControllerTests
     var question = model as QuestionViewModel;
 
     Assert.NotNull(question);
-    Assert.Equal(firstQuestion, question.Question);
+    Assert.Equal(_validQuestion, question.Question);
   }
 
   [Fact]
@@ -140,7 +143,42 @@ public class QuestionsControllerTests
     var model = viewResult.Model as QuestionViewModel;
     Assert.NotNull(model);
 
+    Assert.Equal(_validQuestion, model.Question);
+    Assert.Equal(_validSection.Name, model.SectionName);
+    Assert.Equal(SECTION_SLUG, model.SectionSlug);
+    Assert.Null(model.ErrorMessage);
+    Assert.Null(model.AnswerRef);
+  }
+
+  [Fact]
+  public async Task GetQuestionBySlug_Should_Retrieve_Existing_Answer_And_Display_Page()
+  {
+    var answerRef = "chosen-answer-ref";
+    _getResponseQuery.GetLatestResponseForQuestion(ESTABLISHMENT_ID, _validSection.Sys.Id, _validQuestion.Sys.Id, Arg.Any<CancellationToken>())
+                    .Returns((callinfo) => new QuestionWithAnswer()
+                    {
+                      AnswerRef = answerRef,
+                      QuestionRef = _validQuestion.Sys.Id,
+                      AnswerText = "answer text",
+                      QuestionText = "question text"
+                    });
+
+    var result = await _controller.GetQuestionBySlug(SECTION_SLUG, QUESTION_SLUG);
+
+    Assert.NotNull(result);
+
+    if (result is not ViewResult view)
+    {
+      Assert.Fail($"Result is {result.GetType()} but expected {nameof(ViewResult)}");
+    }
+
+    var viewResult = result as ViewResult;
+    Assert.NotNull(viewResult);
+    var model = viewResult.Model as QuestionViewModel;
+    Assert.NotNull(model);
+
     Assert.Equal(model.Question, _validSection.Questions.First());
+    Assert.Equal(model.AnswerRef, answerRef);
   }
 
   //Test: GetQuestionBySlug - Retrieves + returns answer reference
