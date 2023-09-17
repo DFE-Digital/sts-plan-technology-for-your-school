@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Responses.Interface;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Submissions.Models;
 
 namespace Dfe.PlanTech.Application.Responses.Queries
 {
@@ -55,12 +56,12 @@ namespace Dfe.PlanTech.Application.Responses.Queries
                     .ToList()
                 });
 
-        private IQueryable<Domain.Submissions.Models.Submission> GetCurrentSubmission(int establishmentId, string sectionId)
+        private IQueryable<Submission> GetCurrentSubmission(int establishmentId, string sectionId)
         => _db.GetSubmissions
                 .Where(IsMatchingIncompleteSubmission(establishmentId, sectionId))
                 .OrderByDescending(submission => submission.DateCreated);
 
-        private static Expression<Func<Domain.Submissions.Models.Submission, bool>> IsMatchingIncompleteSubmission(int establishmentId, string sectionId)
+        private static Expression<Func<Submission, bool>> IsMatchingIncompleteSubmission(int establishmentId, string sectionId)
         => submission => !submission.Completed &&
                             submission.EstablishmentId == establishmentId &&
                             submission.SectionId == sectionId;
