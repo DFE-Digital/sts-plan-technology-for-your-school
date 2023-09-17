@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: true
   
 env:
-  DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
+  DOTNET_VERSION: '7.0.x'
   
 jobs:
   build-test-web-app:  
