@@ -1,8 +1,9 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Submissions.Queries;
+using Dfe.PlanTech.Domain.Submissions.Models;
 using NSubstitute;
 
-namespace Dfe.PlanTech.Application.UnitTests.Submission.Queries
+namespace Dfe.PlanTech.Application.UnitTests.Submissions.Queries
 {
     public class GetSubmissionQueryTest
     {
@@ -20,9 +21,9 @@ namespace Dfe.PlanTech.Application.UnitTests.Submission.Queries
         [Fact]
         public async Task GetSubmissionBy_Returns_Submission()
         {
-            List<Domain.Submissions.Models.Submission> submissionList = new List<Domain.Submissions.Models.Submission>()
+            List<Submission> submissionList = new List<Submission>()
             {
-                new Domain.Submissions.Models.Submission()
+                new Submission()
                 {
                     Id = 1,
                     EstablishmentId = 16,
@@ -36,12 +37,12 @@ namespace Dfe.PlanTech.Application.UnitTests.Submission.Queries
                 }
             };
 
-            var query = Arg.Any<IQueryable<Domain.Submissions.Models.Submission>>();
+            var query = Arg.Any<IQueryable<Submission>>();
             _planTechDbContextSubstitute.FirstOrDefaultAsync(query).Returns(submissionList[0]);
 
             var result = await _getSubmissionQuery.GetSubmissionBy(16, "SectionId");
 
-            Assert.IsType<Domain.Submissions.Models.Submission>(result);
+            Assert.IsType<Submission>(result);
             Assert.Equal(submissionList[0], result);
         }
     }

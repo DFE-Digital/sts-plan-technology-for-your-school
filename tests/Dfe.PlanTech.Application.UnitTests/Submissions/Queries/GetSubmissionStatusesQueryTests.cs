@@ -5,7 +5,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using NSubstitute;
 
-namespace Dfe.PlanTech.Application.UnitTests.Submission.Queries
+namespace Dfe.PlanTech.Application.UnitTests.Submissions.Queries
 {
     public class GetSubmissionStatusesQueryTests
     {

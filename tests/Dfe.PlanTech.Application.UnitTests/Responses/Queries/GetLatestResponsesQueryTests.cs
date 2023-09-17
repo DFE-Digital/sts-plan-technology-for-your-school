@@ -4,6 +4,7 @@ using Dfe.PlanTech.Application.Responses.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Responses.Models;
+using Dfe.PlanTech.Domain.Submissions.Models;
 using NSubstitute;
 using Answer = Dfe.PlanTech.Domain.Answers.Models.Answer;
 using Question = Dfe.PlanTech.Domain.Questions.Models.Question;
@@ -21,7 +22,7 @@ public class GetLatestResponsesQueryTests
     private IPlanTechDbContext _planTechDbContextSubstitute;
     private readonly GetLatestResponsesQuery _getLatestResponseListForSubmissionQuery;
 
-    private readonly List<Domain.Submissions.Models.Submission> _submissions;
+    private readonly List<Submission> _submissions;
 
 
     private readonly List<Section> _incompleteSections;
@@ -79,7 +80,7 @@ public class GetLatestResponsesQueryTests
 
         int submissionId = 1;
 
-        var submissionFaker = new Faker<Domain.Submissions.Models.Submission>()
+        var submissionFaker = new Faker<Submission>()
                                     .RuleFor(submission => submission.Completed, faker => faker.Random.Bool())
                                     .RuleFor(submission => submission.DateCreated, faker => faker.Date.Past())
                                     .RuleFor(submission => submission.EstablishmentId, ESTABLISHMENT_ID)
@@ -91,10 +92,10 @@ public class GetLatestResponsesQueryTests
 
         _planTechDbContextSubstitute = Substitute.For<IPlanTechDbContext>();
         _planTechDbContextSubstitute.GetSubmissions.Returns(_submissions.AsQueryable());
-        _planTechDbContextSubstitute.FirstOrDefaultAsync(Arg.Any<IQueryable<Domain.Submissions.Models.Submission>>(), Arg.Any<CancellationToken>())
+        _planTechDbContextSubstitute.FirstOrDefaultAsync(Arg.Any<IQueryable<Submission>>(), Arg.Any<CancellationToken>())
                                     .Returns((callInfo) =>
                                     {
-                                        var queryable = callInfo.ArgAt<IQueryable<Domain.Submissions.Models.Submission>>(0);
+                                        var queryable = callInfo.ArgAt<IQueryable<Submission>>(0);
 
                                         return Task.FromResult(queryable.FirstOrDefault());
                                     });
@@ -120,7 +121,7 @@ public class GetLatestResponsesQueryTests
 
     }
 
-    private IEnumerable<List<Domain.Submissions.Models.Submission>> GenerateSubmissions(Faker faker, Faker<Domain.Submissions.Models.Submission> submissionFaker)
+    private IEnumerable<List<Submission>> GenerateSubmissions(Faker faker, Faker<Submission> submissionFaker)
     {
         foreach (var submissionGroup in GenerateSubmissionsForSections(faker, submissionFaker, _completeSections, true))
             yield return submissionGroup;
@@ -129,8 +130,8 @@ public class GetLatestResponsesQueryTests
             yield return submissionGroup;
     }
 
-    private IEnumerable<List<Domain.Submissions.Models.Submission>> GenerateSubmissionsForSections(Faker faker,
-                                                                                        Faker<Domain.Submissions.Models.Submission> submissionFaker,
+    private IEnumerable<List<Submission>> GenerateSubmissionsForSections(Faker faker,
+                                                                                        Faker<Submission> submissionFaker,
                                                                                         List<Section> sections,
                                                                                         bool completeSections)
     {
@@ -234,7 +235,7 @@ public class GetLatestResponsesQueryTests
     }
 
     private IEnumerable<Response> GenerateResponses(List<Section> sections,
-                                                    Domain.Submissions.Models.Submission submission,
+                                                    Submission submission,
                                                     Faker faker)
     {
         var section = sections.FirstOrDefault(section => section.Sys.Id == submission.SectionId);
@@ -261,13 +262,13 @@ public class GetLatestResponsesQueryTests
         }
     }
 
-    private Domain.Submissions.Models.Submission GetCompletedSubmissionForCompletedSection()
+    private Submission GetCompletedSubmissionForCompletedSection()
     => _submissions.First(submission => submission.Completed && _completeSections.Any(section => section.Sys.Id == submission.SectionId));
 
-    private Domain.Submissions.Models.Submission GetIncompleteSubmissionForIncompleteSection()
+    private Submission GetIncompleteSubmissionForIncompleteSection()
     => _submissions.First(submission => !submission.Completed && _incompleteSections.Any(section => section.Sys.Id == submission.SectionId));
 
-    private Response GenerateResponse(Domain.Submissions.Models.Submission submission, Faker faker, Section section, int x)
+    private Response GenerateResponse(Submission submission, Faker faker, Section section, int x)
     {
         var question = section.Questions[x];
         var answer = faker.PickRandom(question.Answers);

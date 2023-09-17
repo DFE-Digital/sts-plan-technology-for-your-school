@@ -318,7 +318,7 @@
 //                     AnswerText = "Question 1 - Answer 1"
 //                 }
 //             };
-//         var query = Arg.Any<IQueryable<Domain.Submissions.Models.Submission>>();
+//         var query = Arg.Any<IQueryable<Submission>>();
 //         _databaseSubstitute.FirstOrDefaultAsync(query).Returns(submissionList[0]);
 
 //         _getLatestResponseListForSubmissionQuerySubstitute.GetResponseListByDateCreated(1).Returns(questionWithAnswerList);
@@ -375,7 +375,7 @@
 //                     AnswerText = "Question 1 - Answer 1"
 //                 }
 //             };
-//         var query = Arg.Any<IQueryable<Domain.Submissions.Models.Submission>>();
+//         var query = Arg.Any<IQueryable<Submission>>();
 //         _databaseSubstitute.FirstOrDefaultAsync(query).Returns(submissionList[0]);
 
 //         _getLatestResponseListForSubmissionQuerySubstitute.GetResponseListByDateCreated(1).Returns(questionWithAnswerList);
@@ -435,7 +435,7 @@
 //                 }
 //             };
 
-//         var query = Arg.Any<IQueryable<Domain.Submissions.Models.Submission>>();
+//         var query = Arg.Any<IQueryable<Submission>>();
 //         _databaseSubstitute.FirstOrDefaultAsync(query).Returns(submissionList[0]);
 
 //         _getLatestResponseListForSubmissionQuerySubstitute.GetResponseListByDateCreated(1).Returns(questionWithAnswerList);
