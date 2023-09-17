@@ -35,7 +35,8 @@ public class QuestionsController : BaseController<QuestionsController>
         var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ?? 
                         throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
 
-        var question = section.Questions.FirstOrDefault(question => question.Slug == questionSlug) ?? throw new Exception("No question");
+        var question = section.Questions.FirstOrDefault(question => question.Slug == questionSlug) ??
+                            throw new KeyNotFoundException($"Could not find question slug {questionSlug} under section {sectionSlug}");
 
         int establishmentId = await _user.GetEstablishmentId();
 
