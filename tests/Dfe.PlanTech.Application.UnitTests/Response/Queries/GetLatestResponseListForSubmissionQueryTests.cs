@@ -11,18 +11,25 @@ using Question = Dfe.PlanTech.Domain.Questions.Models.Question;
 namespace Dfe.PlanTech.Application.UnitTests.Responses.Queries;
 public class GetLatestResponseListForSubmissionQueryTests
 {
-    private int ESTABLISHMENT_ID = 1;
+    private const int ESTABLISHMENT_ID = 1;
+    private const int USER_ID = 1;
+    private const int SECTION_COUNT = 3;
+    private const int QUESTION_PER_SECTION_COUNT = 5;
+    private const int ANSWER_PER_QUESTION_COUNT = 4;
 
     private IPlanTechDbContext _planTechDbContextSubstitute;
     private readonly GetLatestResponseListForSubmissionQuery _getLatestResponseListForSubmissionQuery;
 
     private readonly List<Domain.Submissions.Models.Submission> _submissions;
 
-    private const int SECTION_COUNT = 3;
-    private const int QUESTION_PER_SECTION_COUNT = 5;
-    private const int ANSWER_PER_QUESTION_COUNT = 4;
 
     private readonly List<Section> _sections;
+
+    private int responseId = 1;
+    private int questionId = 1;
+    private int answerId = 1;
+
+    private readonly string[] maturities = new[] { "Low", "Medium", "High" };
 
     public GetLatestResponseListForSubmissionQueryTests()
     {
@@ -46,7 +53,7 @@ public class GetLatestResponseListForSubmissionQueryTests
 
         _sections = sectionFaker.Generate(SECTION_COUNT);
 
-        //.RuleFor(question => question.Text, faker => faker.Random.Words());
+        var sectionIds = _sections.Select(section => section.Sys.Id).ToArray();
 
         int submissionId = 0;
 
@@ -60,9 +67,16 @@ public class GetLatestResponseListForSubmissionQueryTests
                                         submissionId++;
                                         return submissionId;
                                     })
-                                    .RuleFor(submission => submission.Maturity, faker => faker.PickRandom(new[] { "Low", "Medium", "High", null }))
-                                    //       .RuleFor(submission => submission.SectionId, faker => faker.PickRandom(_sectionIds))
-                                    .RuleFor(submission => submission.SectionName, (faker, submission) => $"Section {submission.Id}");
+                                    .RuleFor(submission => submission.Maturity, (faker, submission) => submission.Completed ? faker.PickRandom(maturities) : null)
+                                    .RuleFor(submission => submission.SectionId, faker => faker.PickRandom(sectionIds))
+                                    .RuleFor(submission => submission.SectionName, (faker, submission) => $"Section {submission.Id}")
+                                    .RuleFor(submission => submission.Responses, (faker, submission) =>
+                                    {
+                                        var response = new Response()
+                                        {
+                                            response.DateCreated = faker.Date.Between(submission.DateCreated, submission.DateCompleted ?? DateTime.UtcNow),
+                                        }
+                                    });
 
         _submissions = submissionFaker.Generate(20);
 
@@ -206,4 +220,54 @@ public class GetLatestResponseListForSubmissionQueryTests
                 Assert.Equal(questionWithAnswerList, result);
             }
             */
+
+    private IEnumerable<Response> GenerateResponses(Domain.Submissions.Models.Submission submission, Faker faker)
+    {
+        var section = _sections.First(section => section.Sys.Id == submission.SectionId);
+
+        int timesAnswered = faker.Random.Int(1, 5);
+
+        while (timesAnswered > 0)
+        {
+            var responseCount = submission.Completed ? section.Questions.Length : faker.Random.Int(1, section.Questions.Length);
+
+            for (var x = 0; x < responseCount; x++)
+            {
+                Response response = GenerateResponse(submission, faker, section, x);
+
+                yield return response;
+            }
+        }
+    }
+
+    private Response GenerateResponse(Domain.Submissions.Models.Submission submission, Faker faker, Section section, int x)
+    {
+        var question = section.Questions[x];
+        var answer = faker.PickRandom(question.Answers);
+
+        var response = new Response()
+        {
+            DateCreated = faker.Date.Between(submission.DateCreated, submission.DateCompleted ?? DateTime.UtcNow),
+            Id = responseId++,
+            UserId = USER_ID,
+            SubmissionId = submission.Id,
+            Submission = submission,
+            Question = new Question()
+            {
+                QuestionText = question.Text,
+                ContentfulRef = question.Sys.Id,
+                Id = questionId++,
+            },
+            Answer = new Answer()
+            {
+                AnswerText = answer.Text,
+                ContentfulRef = answer.Sys.Id,
+                Id = answerId++,
+            },
+            Maturity = faker.PickRandom(maturities),
+        };
+        return response;
+    }
+
+    private IEnumerable<Response>
 }
