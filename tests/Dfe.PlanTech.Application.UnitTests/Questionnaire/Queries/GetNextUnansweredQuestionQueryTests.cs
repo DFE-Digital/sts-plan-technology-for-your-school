@@ -87,7 +87,7 @@ public class GetNextUnansweredQuestionQueryTests
       };
     }
 
-    CheckAnswerDto? response = new CheckAnswerDto()
+    CheckAnswerDto response = new CheckAnswerDto()
     {
       SubmissionId = 1,
       Responses = _section.Questions.Select(question => new QuestionWithAnswer()
@@ -100,7 +100,9 @@ public class GetNextUnansweredQuestionQueryTests
 
     var getLatestResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
     getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-    .Returns(Task.FromResult(response));
+    .Returns((callinfo) => {
+      return Task.FromResult(response);
+    });
 
     var getNextUnansweredQuestionQuery = new GetNextUnansweredQuestionQuery(getLatestResponsesQuery);
 
