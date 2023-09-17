@@ -12,6 +12,8 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Authorize]
 public class CheckAnswersController : BaseController<CheckAnswersController>
 {
+    public const string PAGE_SLUG = "check-answers";
+
     public CheckAnswersController(ILogger<CheckAnswersController> logger) : base(logger)
     {
     }
@@ -21,11 +23,11 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     {
         var section = await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken);
 
-        var checkAnswerPageContent = await getPageQuery.GetPageBySlug("check-answers", CancellationToken.None);
+        var checkAnswerPageContent = await getPageQuery.GetPageBySlug(PAGE_SLUG, CancellationToken.None);
 
         var establishmentId = await user.GetEstablishmentId();
 
-        var responses = await processCheckAnswerDtoCommand.GetCheckAnswerDtoForSectionId(establishmentId, section!.Sys.Id);
+        var responses = await processCheckAnswerDtoCommand.GetCheckAnswerDtoForSectionId(establishmentId, section!.Sys.Id, cancellationToken);
 
         if (responses == null) return RedirectToAction("GetByRoute", "Pages", new { route = "/self-assessment" });
 
