@@ -1,34 +1,102 @@
-// using Dfe.PlanTech.Application.Caching.Interfaces;
-// using Dfe.PlanTech.Application.Constants;
-// using Dfe.PlanTech.Application.Persistence.Interfaces;
-// using Dfe.PlanTech.Application.Questionnaire.Queries;
-// using Dfe.PlanTech.Application.Responses.Commands;
-// using Dfe.PlanTech.Application.Responses.Interface;
-// using Dfe.PlanTech.Application.Responses.Queries;
-// using Dfe.PlanTech.Application.Submissions.Commands;
-// using Dfe.PlanTech.Application.Submissions.Interface;
-// using Dfe.PlanTech.Application.Submissions.Interfaces;
-// using Dfe.PlanTech.Application.Submissions.Queries;
-// using Dfe.PlanTech.Application.Users.Interfaces;
-// using Dfe.PlanTech.Domain.Caching.Models;
-// using Dfe.PlanTech.Domain.Content.Models;
-// using Dfe.PlanTech.Domain.Questionnaire.Constants;
-// using Dfe.PlanTech.Domain.Questionnaire.Models;
-// using Dfe.PlanTech.Domain.Submissions.Models;
-// using Dfe.PlanTech.Infrastructure.Application.Models;
-// using Dfe.PlanTech.Web.Controllers;
-// using Dfe.PlanTech.Web.Models;
-// using Microsoft.AspNetCore.Http;
-// using Microsoft.AspNetCore.Mvc;
-// using Microsoft.AspNetCore.Mvc.ViewFeatures;
-// using Microsoft.Extensions.Logging;
-// using NSubstitute;
-// using Xunit;
+using Castle.Core.Logging;
+using Dfe.PlanTech.Application.Responses.Interface;
+using Dfe.PlanTech.Application.Users.Interfaces;
+using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Web.Controllers;
+using Dfe.PlanTech.Web.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
+using Xunit;
 
-// namespace Dfe.PlanTech.Web.UnitTests.Controllers;
+namespace Dfe.PlanTech.Web.UnitTests.Controllers;
 
-// public class QuestionsControllerTests
-// {
+public class QuestionsControllerTests
+{
+  private readonly ILogger<QuestionsController> _logger;
+  private readonly IGetSectionQuery _getSectionQuery;
+  private readonly IGetLatestResponsesQuery _getResponseQuery;
+  private readonly IUser _user;
+  private readonly QuestionsController _controller;
+
+  public QuestionsControllerTests()
+  {
+    _logger = Substitute.For<ILogger<QuestionsController>>();
+    _getSectionQuery = Substitute.For<IGetSectionQuery>();
+    _getResponseQuery = Substitute.For<IGetLatestResponsesQuery>();
+    _user = Substitute.For<IUser>();
+
+    _controller = new QuestionsController(_logger, _getSectionQuery, _getResponseQuery, _user);
+  }
+
+  [Fact]
+  public async Task Should_Load_QuestionBySlug_When_Args_Valid()
+  {
+    var questionSlug = "question-slug";
+    var sectionSlug = "section-slug";
+
+    var section = new Section()
+    {
+      Sys = new SystemDetails()
+      {
+        Id = "SectionId"
+      },
+      InterstitialPage = new Page()
+      {
+        Slug = sectionSlug,
+      },
+      Questions = new Question[] {
+        new(){
+          Slug = questionSlug,
+          Sys = new SystemDetails(){
+            Id = "QuestionId"
+          }
+        }
+      }
+    };
+
+    _getSectionQuery.GetSectionBySlug(sectionSlug, Arg.Any<CancellationToken>())
+                    .Returns((callInfo) =>
+                    {
+                      var sectionSlug = callInfo.ArgAt<string>(0);
+
+                      if (sectionSlug == section.InterstitialPage.Slug)
+                      {
+                        return section;
+                      }
+
+                      return null;
+                    });
+
+    _user.GetEstablishmentId().Returns(1);
+
+    var firstQuestion = section.Questions.First();
+
+    _getResponseQuery.GetLatestResponseForQuestion(Arg.Any<int>(), section.Sys.Id, firstQuestion.Sys.Id, Arg.Any<CancellationToken>())
+            .Returns((callinfo) =>
+            {
+              QuestionWithAnswer? result = null;
+
+              return result;
+            });
+
+    var result = await _controller.GetQuestionBySlug(sectionSlug, questionSlug);
+    Assert.IsType<ViewResult>(result);
+
+    var viewResult = result as ViewResult;
+
+    var model = viewResult!.Model;
+
+    Assert.IsType<QuestionViewModel>(model);
+
+    var question = model as QuestionViewModel;
+
+    Assert.NotNull(question);
+    Assert.Equal(firstQuestion, question.Question);
+  }
+}
 //     private const string FIRST_QUESTION_ID = "Question1";
 //     private const string FIRST_ANSWER_ID = "Answer1";
 //     private const string SECOND_QUESTION_ID = "Question2";
