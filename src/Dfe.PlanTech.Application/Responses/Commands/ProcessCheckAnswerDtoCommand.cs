@@ -9,9 +9,9 @@ namespace Dfe.PlanTech.Application.Responses.Commands;
 public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand
 {
     private readonly IGetSectionQuery _getSectionQuery;
-    private readonly IGetLatestResponseListForSubmissionQuery _getLatestResponseListForSubmissionQuery;
+    private readonly IGetLatestResponsesQuery _getLatestResponseListForSubmissionQuery;
 
-    public ProcessCheckAnswerDtoCommand(IGetSectionQuery getSectionQuery, IGetLatestResponseListForSubmissionQuery getLatestResponseListForSubmissionQuery)
+    public ProcessCheckAnswerDtoCommand(IGetSectionQuery getSectionQuery, IGetLatestResponsesQuery getLatestResponseListForSubmissionQuery)
     {
         _getSectionQuery = getSectionQuery;
         _getLatestResponseListForSubmissionQuery = getLatestResponseListForSubmissionQuery;

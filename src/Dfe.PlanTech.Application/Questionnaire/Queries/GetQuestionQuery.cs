@@ -10,11 +10,11 @@ namespace Dfe.PlanTech.Application.Questionnaire.Queries;
 public class GetQuestionQuery : ContentRetriever
 {
     private readonly IQuestionnaireCacher _cacher;
-    private readonly IGetLatestResponseListForSubmissionQuery _getResponseQuery;
+    private readonly IGetLatestResponsesQuery _getResponseQuery;
     private readonly GetSectionQuery _getSectionQuery;
 
     public GetQuestionQuery(IQuestionnaireCacher cacher,
-                            IGetLatestResponseListForSubmissionQuery getResponseQuery,
+                            IGetLatestResponsesQuery getResponseQuery,
                             GetSectionQuery getSectionQuery,
                             IContentRepository repository) : base(repository)
     {

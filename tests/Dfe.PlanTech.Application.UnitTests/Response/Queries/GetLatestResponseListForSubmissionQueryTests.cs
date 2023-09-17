@@ -1,4 +1,3 @@
-using System.Reflection.Metadata;
 using Bogus;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Responses.Queries;
@@ -14,12 +13,12 @@ public class GetLatestResponseListForSubmissionQueryTests
 {
     private const int ESTABLISHMENT_ID = 1;
     private const int USER_ID = 1;
-    private const int SECTION_COUNT = 3;
+    private const int SECTION_COUNT = 4;
     private const int QUESTION_PER_SECTION_COUNT = 5;
     private const int ANSWER_PER_QUESTION_COUNT = 4;
 
     private IPlanTechDbContext _planTechDbContextSubstitute;
-    private readonly GetLatestResponseListForSubmissionQuery _getLatestResponseListForSubmissionQuery;
+    private readonly GetLatestResponsesQuery _getLatestResponseListForSubmissionQuery;
 
     private readonly List<Domain.Submissions.Models.Submission> _submissions;
 
@@ -80,34 +79,80 @@ public class GetLatestResponseListForSubmissionQueryTests
         var submissionFaker = new Faker<Domain.Submissions.Models.Submission>()
                                     .RuleFor(submission => submission.Completed, faker => faker.Random.Bool())
                                     .RuleFor(submission => submission.DateCreated, faker => faker.Date.Past())
-                                    .RuleFor(submission => submission.DateCompleted, (faker, submission) => submission.Completed ? faker.Date.Future(1, submission.DateCreated) : null)
                                     .RuleFor(submission => submission.EstablishmentId, ESTABLISHMENT_ID)
                                     .RuleFor(submission => submission.Id, faker =>
                                     {
                                         submissionId++;
                                         return submissionId;
-                                    })
-                                    .RuleFor(submission => submission.Maturity, (faker, submission) => submission.Completed ? faker.PickRandom(maturities) : null)
-                                    .RuleFor(submission => submission.SectionId, faker => faker.PickRandom(sectionIds))
-                                    .RuleFor(submission => submission.SectionName, (faker, submission) => $"Section {submission.Id}")
-                                    .RuleFor(submission => submission.Responses, (faker, submission) => GenerateResponses(submission, faker).ToList());
+                                    });
 
         _submissions = submissionFaker.Generate(20);
 
-        _planTechDbContextSubstitute = Substitute.For<IPlanTechDbContext>();
-        _getLatestResponseListForSubmissionQuery = new GetLatestResponseListForSubmissionQuery(_planTechDbContextSubstitute);
+        //First 2 sections == incomplete, last 2 sections == complete
+        for (var x = 0; x < _submissions.Count; x++)
+        {
+            var submission = _submissions[x];
+            var section = x < 2 ? _sections[x] : _sections[faker.Random.Int(2, 3)];
+            submission.SectionId = section.Sys.Id;
+            submission.SectionName = section.Name;
+            submission.Responses = GenerateResponses(submission, faker).ToList();
 
+            if (x < 2) continue;
+            submission.Completed = true;
+            submission.DateCompleted = faker.Date.Future(1, submission.DateCreated);
+            submission.Maturity = faker.PickRandom(maturities);
+        }
+
+        _planTechDbContextSubstitute = Substitute.For<IPlanTechDbContext>();
         _planTechDbContextSubstitute.GetSubmissions.Returns(_submissions.AsQueryable());
+        _planTechDbContextSubstitute.FirstOrDefaultAsync(Arg.Any<IQueryable<Domain.Submissions.Models.Submission>>(), Arg.Any<CancellationToken>())
+                                    .Returns((callInfo) =>
+                                    {
+                                        var queryable = callInfo.ArgAt<IQueryable<Domain.Submissions.Models.Submission>>(0);
+
+                                        return Task.FromResult(queryable.FirstOrDefault());
+                                    });
+
+        _planTechDbContextSubstitute.FirstOrDefaultAsync(Arg.Any<IQueryable<QuestionWithAnswer>>(), Arg.Any<CancellationToken>())
+                                    .Returns((callInfo) =>
+                                    {
+                                        var queryable = callInfo.ArgAt<IQueryable<QuestionWithAnswer>>(0);
+
+                                        return Task.FromResult(queryable.FirstOrDefault());
+                                    });
+
+
+        _getLatestResponseListForSubmissionQuery = new GetLatestResponsesQuery(_planTechDbContextSubstitute);
+
     }
 
     [Fact]
-    public void Should_Get_LatestResponse_For_QuestionId()
+    public async Task Should_Get_LatestResponse_For_QuestionId()
     {
-        var responsesGroupedByQuestion = _submissions.SelectMany(submission => submission.Responses).GroupBy(r => r.Question);
+        var responsesForIncompleteSubmissionsGroupedByQuestion = _submissions.Where(submission => !submission.Completed)
+                                                                            .SelectMany(submission => submission.Responses)
+                                                                            .GroupBy(r => r.Question.ContentfulRef)
+                                                                            .ToArray();
 
-        // var responsesGroupedByQuestions = _sections.SelectMany(s => s.Questions).ToDictionary(q => q.Sys.Id, q => responsesGroupedByQuestion.First(g => g.Key.ContentfulRef == q.Sys.Id));
+        var sectionQuestionsWithResponses = _sections.SelectMany(section => section.Questions)
+                                                    .ToDictionary(question => question, 
+                                                                  question => responsesForIncompleteSubmissionsGroupedByQuestion
+                                                                                        .FirstOrDefault(g => g.Key == question.Sys.Id)?
+                                                                                        .Select(r => r).ToArray() ?? Array.Empty<Response>());
 
-        var tst = "";
+        var mostAnsweredQuestion = sectionQuestionsWithResponses.OrderByDescending(q => q.Value != null ? q.Value.Length : 0).First();
+
+        var expectedMostRecentResponse = mostAnsweredQuestion.Value!.OrderByDescending(response => response.DateCreated).First();
+
+        var latestResponse = await _getLatestResponseListForSubmissionQuery.GetLatestResponseForQuestion(ESTABLISHMENT_ID, expectedMostRecentResponse.Submission.SectionId, mostAnsweredQuestion.Key.Sys.Id);
+
+        Assert.NotNull(latestResponse);
+
+        Assert.Equal(expectedMostRecentResponse.Question.ContentfulRef, latestResponse.QuestionRef);
+        Assert.Equal(expectedMostRecentResponse.Question.QuestionText, latestResponse.QuestionText);
+
+        Assert.Equal(expectedMostRecentResponse.Answer.ContentfulRef, latestResponse.AnswerRef);
+        Assert.Equal(expectedMostRecentResponse.Answer.AnswerText, latestResponse.AnswerText);
     }
 
 

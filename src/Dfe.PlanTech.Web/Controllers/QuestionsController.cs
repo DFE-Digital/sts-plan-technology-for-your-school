@@ -23,7 +23,7 @@ public class QuestionsController : BaseController<QuestionsController>
     public async Task<IActionResult> GetQuestionBySlug(string sectionSlug,
                                                         string questionSlug,
                                                         [FromServices] GetSectionQuery getSectionQuery,
-                                                        [FromServices] IGetLatestResponseListForSubmissionQuery getResponseQuery,
+                                                        [FromServices] IGetLatestResponsesQuery getResponseQuery,
                                                         [FromServices] IUser user,
                                                         CancellationToken cancellationToken = default)
     {
@@ -40,7 +40,7 @@ public class QuestionsController : BaseController<QuestionsController>
     public async Task<IActionResult> GetNextUnansweredQuestion(string sectionSlug,
                                                                 [FromServices] GetSectionQuery getSectionQuery,
                                                                 [FromServices] GetQuestionQuery getQuestionQuery,
-                                                                [FromServices] IGetLatestResponseListForSubmissionQuery getResponseQuery,
+                                                                [FromServices] IGetLatestResponsesQuery getResponseQuery,
                                                                 [FromServices] IUser user,
                                                                 CancellationToken cancellationToken = default)
     {
@@ -56,7 +56,7 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
     [HttpPost("{sectionSlug}/{questionSlug}")]
-    public async Task<IActionResult> SubmitAnswer(string sectionSlug, string questionSlug, SubmitAnswerDto submitAnswerDto, [FromServices] IUser user, [FromServices] ISubmitAnswerCommand submitAnswerCommand, [FromServices] IGetLatestResponseListForSubmissionQuery getResponseQuery)
+    public async Task<IActionResult> SubmitAnswer(string sectionSlug, string questionSlug, SubmitAnswerDto submitAnswerDto, [FromServices] IUser user, [FromServices] ISubmitAnswerCommand submitAnswerCommand, [FromServices] IGetLatestResponsesQuery getResponseQuery)
     {
         if (!ModelState.IsValid) return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug });
 
@@ -70,7 +70,7 @@ public class QuestionsController : BaseController<QuestionsController>
         return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = submitAnswerDto.ChosenAnswer!.NextQuestion!.Value.Slug });
     }
 
-    private static async Task<bool> GetQuestionCompletionStatus(SubmitAnswerDto submitAnswerDto, IUser user, IGetLatestResponseListForSubmissionQuery getResponseQuery)
+    private static async Task<bool> GetQuestionCompletionStatus(SubmitAnswerDto submitAnswerDto, IUser user, IGetLatestResponsesQuery getResponseQuery)
     {
         //IF there's no next question for the answer, then section should be complete
         if (submitAnswerDto.ChosenAnswer?.NextQuestion == null) return true;
@@ -86,7 +86,7 @@ public class QuestionsController : BaseController<QuestionsController>
         return latestResponseForQuestion != null;
     }
 
-    private async Task<IActionResult> ShowQuestionPage(int establishmentId, string sectionSlug, Section section, Question question, IGetLatestResponseListForSubmissionQuery getResponseQuery, CancellationToken cancellationToken = default)
+    private async Task<IActionResult> ShowQuestionPage(int establishmentId, string sectionSlug, Section section, Question question, IGetLatestResponsesQuery getResponseQuery, CancellationToken cancellationToken = default)
     {
         var latestResponseForQuestion = await getResponseQuery.GetLatestResponseForQuestion(establishmentId,
                                                                                 section.Sys.Id,

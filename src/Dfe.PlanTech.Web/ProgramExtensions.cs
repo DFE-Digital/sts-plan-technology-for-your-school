@@ -105,7 +105,7 @@ public static class ProgramExtensions
 
         services.AddTransient<ICreateResponseCommand, CreateResponseCommand>();
         services.AddTransient<IGetResponseQuery, GetResponseQuery>();
-        services.AddTransient<IGetLatestResponseListForSubmissionQuery, GetLatestResponseListForSubmissionQuery>();
+        services.AddTransient<IGetLatestResponsesQuery, GetLatestResponsesQuery>();
 
         services.AddTransient<ICalculateMaturityCommand, CalculateMaturityCommand>();
         services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
