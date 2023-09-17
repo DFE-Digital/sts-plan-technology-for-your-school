@@ -16,13 +16,6 @@ namespace Dfe.PlanTech.Application.Responses.Queries
             _db = db;
         }
 
-        public Task<QuestionWithAnswer?> GetLatestResponse(int establishmentId, string sectionId, CancellationToken cancellationToken = default)
-        {
-            var responseListByDate = GetLatestResponsesQueryable(establishmentId, sectionId).Select(qwa => qwa.FirstOrDefault());
-
-            return _db.FirstOrDefaultAsync(responseListByDate, cancellationToken);
-        }
-
         public Task<QuestionWithAnswer?> GetLatestResponseForQuestion(int establishmentId, string sectionId, string questionId, CancellationToken cancellationToken = default)
         {
             var responseListByDate = GetCurrentSubmission(establishmentId, sectionId)
@@ -36,20 +29,6 @@ namespace Dfe.PlanTech.Application.Responses.Queries
 
         public Task<SubmissionWithResponses> GetLatestResponses(int establishmentId, string sectionId, CancellationToken cancellationToken = default)
             => _db.FirstOrDefaultAsync(GetLatestResponsesBySectionIdQueryable(establishmentId, sectionId), cancellationToken);
-
-        private IQueryable<IEnumerable<QuestionWithAnswer>> GetLatestResponsesQueryable(int establishmentId, string sectionId)
-        => GetCurrentSubmission(establishmentId, sectionId)
-                .Select(submission => submission.Responses
-                                                .Select(response => new QuestionWithAnswer
-                                                {
-                                                    QuestionRef = response.Question.ContentfulRef,
-                                                    QuestionText = response.Question.QuestionText ?? "", //Should this come from Contentful?
-                                                    AnswerRef = response.Answer.ContentfulRef,
-                                                    AnswerText = response.Answer.AnswerText ?? "",//Should this come from Contentful?
-                                                    DateCreated = response.DateCreated
-                                                })
-                                                .GroupBy(questionWithAnswer => questionWithAnswer.QuestionRef)
-                                                .Select(group => group.OrderByDescending(questionWithAnswer => questionWithAnswer.DateCreated).First()));
 
         private IQueryable<SubmissionWithResponses> GetLatestResponsesBySectionIdQueryable(int establishmentId, string sectionId)
         => GetCurrentSubmission(establishmentId, sectionId)
