@@ -1,4 +1,4 @@
-ALTER PROCEDURE SubmitAnswer
+CREATE PROCEDURE SubmitAnswer
   @sectionId NVARCHAR(50),
   @sectionName NVARCHAR(50),
   @questionContentfulId NVARCHAR(50),
