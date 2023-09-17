@@ -1,4 +1,6 @@
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
@@ -31,9 +33,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Completed = 1,
                 Sections = new Section[]
                 {
-                    new Section()
+                    new()
                     {
-                        Sys = new Sys() { Id = "Section1" },
+                        Sys = new SystemDetails() { Id = "Section1" },
                         Name = "Test Section 1",
                         Recommendations = new RecommendationPage[]
                         {
@@ -41,11 +43,11 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                             {
                                 InternalName = "High-Maturity-Recommendation-Page-InternalName",
                                 DisplayName = "High-Maturity-Recommendation-Page-DisplayName",
-                                Maturity = Domain.Questionnaire.Enums.Maturity.High,
-                                Page = new Domain.Content.Models.Page() { Slug = "High-Maturity-Recommendation-Page-Slug" }
+                                Maturity = Maturity.High,
+                                Page = new Page() { Slug = "High-Maturity-Recommendation-Page-Slug" }
                             }
                         },
-                        InterstitialPage = new Domain.Content.Models.Page
+                        InterstitialPage = new Page
                         {
                             Slug = "test-slug"
                         }
@@ -58,21 +60,21 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Completed = 1,
                 Sections = new Section[]
                 {
-                    new Section()
+                    new()
                     {
-                        Sys = new Sys() { Id = "Section1" },
+                        Sys = new SystemDetails() { Id = "Section1" },
                         Name = "Test Section 1",
                         Recommendations = new RecommendationPage[]
                         {
-                            new RecommendationPage()
+                            new()
                             {
                                 InternalName = "High-Maturity-Recommendation-Page-InternalName-Two",
                                 DisplayName = "High-Maturity-Recommendation-Page-DisplayName-Twp",
-                                Maturity = Domain.Questionnaire.Enums.Maturity.High,
-                                Page = new Domain.Content.Models.Page() { Slug = "High-Maturity-Recommendation-Page-Slug-Two" }
+                                Maturity = Maturity.High,
+                                Page = new Page() { Slug = "High-Maturity-Recommendation-Page-Slug-Two" }
                             }
                         },
-                        InterstitialPage = new Domain.Content.Models.Page
+                        InterstitialPage = new Page
                         {
                             Slug = "test-slug"
                         }
