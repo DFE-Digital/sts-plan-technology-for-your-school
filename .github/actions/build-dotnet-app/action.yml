@@ -1,5 +1,5 @@
-name: Build DotNet App
-description: Sets up .Net for specified version and builds application
+name: Build DotNet Solution
+description: Sets up .Net for specified version and builds solution
 
 inputs:
   dotnet_version:
@@ -20,6 +20,7 @@ runs:
     - name: Install dependencies
       shell: bash
       run: dotnet restore ${{ inputs.solution_filename }}
+      
     - name: Build
       shell: bash
-      run: dotnet build ${{ inputs.solution_filename }} --configuration Release --no-restore --output ./build
+      run: dotnet build ${{ inputs.solution_filename }} --configuration Release --no-restore
