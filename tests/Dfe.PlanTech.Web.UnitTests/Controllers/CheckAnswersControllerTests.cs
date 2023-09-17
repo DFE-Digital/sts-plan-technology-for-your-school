@@ -182,7 +182,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task CheckAnswersController_CheckAnswers_Null_Section_ThrowsException()
         {
-            await Assert.ThrowsAnyAsync<NullReferenceException>(() => _checkAnswersController.CheckAnswersPage("NOT THE RIGHT SLUG", _user, _getSectionQuery, _processCheckAnswerDtoCommand, _getPageQuerySubstitute));
+            await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _checkAnswersController.CheckAnswersPage("NOT THE RIGHT SLUG", _user, _getSectionQuery, _processCheckAnswerDtoCommand, _getPageQuerySubstitute));
         }
 
 
