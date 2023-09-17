@@ -200,32 +200,26 @@ public class GetLatestResponsesQueryTests
     [Fact]
     public async Task GetLatestResponses_Should_Return_LatestResponses_For_Incomplete_Submission()
     {
-        try
+        var incompleteSubmission = GetIncompleteSubmissionForIncompleteSection();
+
+        var responsesForIncompleteSubmissionsGroupedByQuestion = incompleteSubmission.Responses
+                                                                            .GroupBy(response => response.Question.ContentfulRef)
+                                                                            .Select(responses => responses.OrderByDescending(response => response.DateCreated).First())
+                                                                            .ToArray();
+
+        var latestResponse = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(ESTABLISHMENT_ID, incompleteSubmission.SectionId);
+
+        Assert.NotNull(latestResponse);
+        Assert.NotNull(latestResponse.Value.Responses);
+        Assert.True(latestResponse.Value.Responses.Count > 0);
+        Assert.Equal(responsesForIncompleteSubmissionsGroupedByQuestion.Length, latestResponse.Value.Responses.Count);
+
+        foreach (var response in latestResponse.Value.Responses)
         {
-            var incompleteSubmission = GetIncompleteSubmissionForIncompleteSection();
+            var matching = responsesForIncompleteSubmissionsGroupedByQuestion.FirstOrDefault(r => r.Question.ContentfulRef == response.QuestionRef &&
+                                                                                                  r.Answer.ContentfulRef == response.AnswerRef);
 
-            var responsesForIncompleteSubmissionsGroupedByQuestion = incompleteSubmission.Responses
-                                                                                .GroupBy(response => response.Question.ContentfulRef)
-                                                                                .Select(responses => responses.OrderByDescending(response => response.DateCreated).First())
-                                                                                .ToArray();
-
-            var latestResponse = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(ESTABLISHMENT_ID, incompleteSubmission.SectionId);
-
-            Assert.NotNull(latestResponse);
-            Assert.NotNull(latestResponse.Value.Responses);
-            Assert.True(latestResponse.Value.Responses.Count > 0);
-            Assert.Equal(responsesForIncompleteSubmissionsGroupedByQuestion.Length, latestResponse.Value.Responses.Count);
-
-            foreach (var response in latestResponse.Value.Responses)
-            {
-                var matching = responsesForIncompleteSubmissionsGroupedByQuestion.FirstOrDefault(r => r.Question.ContentfulRef == response.QuestionRef &&
-                                                                                                      r.Answer.ContentfulRef == response.AnswerRef);
-
-                Assert.NotNull(response);
-            }
-        }
-        catch(Exception ex){
-            Console.WriteLine("");
+            Assert.NotNull(response);
         }
     }
 
@@ -245,7 +239,8 @@ public class GetLatestResponsesQueryTests
     {
         var section = sections.FirstOrDefault(section => section.Sys.Id == submission.SectionId);
 
-        if(section == null) {
+        if (section == null)
+        {
             Console.WriteLine("");
             throw new Exception("error");
         }
