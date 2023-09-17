@@ -18,12 +18,12 @@ concurrency:
   cancel-in-progress: true
   
 env:
-  DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
+  DOTNET_VERSION: '7.0.11'
   
 jobs:
   build-test-web-app:  
     name: Build and run unit tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Check out repository
