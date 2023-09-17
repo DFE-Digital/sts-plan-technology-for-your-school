@@ -203,9 +203,9 @@ public class GetLatestResponsesQueryTests
     [Fact]
     public async Task GetLatestResponses_Should_Return_Null_For_Completed_Submission()
     {
-        var incompleteSubmission = GetCompletedSubmissionForCompletedSection();
+        var completeSubmission = GetCompletedSubmissionForCompletedSection();
 
-        var latestResponse = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(ESTABLISHMENT_ID, incompleteSubmission.SectionId);
+        var latestResponse = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(ESTABLISHMENT_ID, completeSubmission.SectionId);
 
         Assert.Null(latestResponse);
     }
