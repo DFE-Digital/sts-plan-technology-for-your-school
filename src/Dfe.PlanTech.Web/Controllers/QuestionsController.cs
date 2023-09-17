@@ -32,7 +32,10 @@ public class QuestionsController : BaseController<QuestionsController>
                                                         string questionSlug,
                                                         CancellationToken cancellationToken = default)
     {
-        var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ?? 
+        if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
+        if (string.IsNullOrEmpty(questionSlug)) throw new ArgumentNullException(nameof(questionSlug));
+
+        var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
                         throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
 
         var question = section.Questions.FirstOrDefault(question => question.Slug == questionSlug) ??
