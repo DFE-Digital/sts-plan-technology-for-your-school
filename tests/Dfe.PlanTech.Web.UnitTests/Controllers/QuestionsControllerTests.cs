@@ -1,3 +1,4 @@
+using Contentful.Core.Models;
 using Dfe.PlanTech.Application.Responses.Interface;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -20,12 +21,52 @@ public class QuestionsControllerTests
   private readonly IUser _user;
   private readonly QuestionsController _controller;
 
+  private const string QUESTION_SLUG = "question-slug";
+  private const string SECTION_SLUG = "section-slug";
+  private const int ESTABLISHMENT_ID = 1;
+
+  private readonly Section _validSection = new Section()
+  {
+    Sys = new SystemDetails()
+    {
+      Id = "SectionId"
+    },
+    InterstitialPage = new Page()
+    {
+      Slug = SECTION_SLUG,
+    },
+    Questions = new Question[] {
+        new(){
+          Slug = QUESTION_SLUG,
+          Sys = new SystemDetails(){
+            Id = "QuestionId"
+          }
+        }
+      }
+  };
+
   public QuestionsControllerTests()
   {
     _logger = Substitute.For<ILogger<QuestionsController>>();
+
     _getSectionQuery = Substitute.For<IGetSectionQuery>();
+    _getSectionQuery.GetSectionBySlug(SECTION_SLUG, Arg.Any<CancellationToken>())
+                .Returns((callInfo) =>
+                {
+                  var sectionSlug = callInfo.ArgAt<string>(0);
+
+                  if (sectionSlug == _validSection.InterstitialPage.Slug)
+                  {
+                    return _validSection;
+                  }
+
+                  return null;
+                });
+
     _getResponseQuery = Substitute.For<IGetLatestResponsesQuery>();
+
     _user = Substitute.For<IUser>();
+    _user.GetEstablishmentId().Returns(ESTABLISHMENT_ID);
 
     _controller = new QuestionsController(_logger, _getSectionQuery, _getResponseQuery, _user);
   }
@@ -33,47 +74,9 @@ public class QuestionsControllerTests
   [Fact]
   public async Task GetQuestionBySlug_Should_Load_QuestionBySlug_When_Args_Valid()
   {
-    var questionSlug = "question-slug";
-    var sectionSlug = "section-slug";
+    var firstQuestion = _validSection.Questions.First();
 
-    var section = new Section()
-    {
-      Sys = new SystemDetails()
-      {
-        Id = "SectionId"
-      },
-      InterstitialPage = new Page()
-      {
-        Slug = sectionSlug,
-      },
-      Questions = new Question[] {
-        new(){
-          Slug = questionSlug,
-          Sys = new SystemDetails(){
-            Id = "QuestionId"
-          }
-        }
-      }
-    };
-
-    _getSectionQuery.GetSectionBySlug(sectionSlug, Arg.Any<CancellationToken>())
-                    .Returns((callInfo) =>
-                    {
-                      var sectionSlug = callInfo.ArgAt<string>(0);
-
-                      if (sectionSlug == section.InterstitialPage.Slug)
-                      {
-                        return section;
-                      }
-
-                      return null;
-                    });
-
-    _user.GetEstablishmentId().Returns(1);
-
-    var firstQuestion = section.Questions.First();
-
-    _getResponseQuery.GetLatestResponseForQuestion(Arg.Any<int>(), section.Sys.Id, firstQuestion.Sys.Id, Arg.Any<CancellationToken>())
+    _getResponseQuery.GetLatestResponseForQuestion(Arg.Any<int>(), _validSection.Sys.Id, firstQuestion.Sys.Id, Arg.Any<CancellationToken>())
             .Returns((callinfo) =>
             {
               QuestionWithAnswer? result = null;
@@ -81,7 +84,7 @@ public class QuestionsControllerTests
               return result;
             });
 
-    var result = await _controller.GetQuestionBySlug(sectionSlug, questionSlug);
+    var result = await _controller.GetQuestionBySlug(SECTION_SLUG, QUESTION_SLUG);
     Assert.IsType<ViewResult>(result);
 
     var viewResult = result as ViewResult;
@@ -111,36 +114,33 @@ public class QuestionsControllerTests
   [Fact]
   public async Task GetQuestionBySlug_Should_Error_When_Section_Not_Found()
   {
-    _getSectionQuery.GetSectionBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                    .Returns((callinfo) =>
-                    {
-                      Section? section = null;
-                      return section;
-                    });
-
     await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetQuestionBySlug("section", "question"));
   }
 
   [Fact]
   public async Task GetQuestionBySlug_Should_Error_When_Question_Not_Found()
   {
-    var section = new Section()
-    {
-      InterstitialPage = new Page()
-      {
-        Slug = "section-slug"
-      },
-      Questions = new Question[] {
-        new()
-        {
-          Slug = "question-slug"
-        }
-      }
-    };
-
-    _getSectionQuery.GetSectionBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(section);
-
     await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetQuestionBySlug("section-slug", "question"));
+  }
+
+  [Fact]
+  public async Task GetQuestionBySlug_Should_Display_Page()
+  {
+    var result = await _controller.GetQuestionBySlug(SECTION_SLUG, QUESTION_SLUG);
+
+    Assert.NotNull(result);
+
+    if (result is not ViewResult view)
+    {
+      Assert.Fail($"Result is {result.GetType()} but expected {nameof(ViewResult)}");
+    }
+
+    var viewResult = result as ViewResult;
+    Assert.NotNull(viewResult);
+    var model = viewResult.Model as QuestionViewModel;
+    Assert.NotNull(model);
+
+    Assert.Equal(model.Question, _validSection.Questions.First());
   }
 }
 
