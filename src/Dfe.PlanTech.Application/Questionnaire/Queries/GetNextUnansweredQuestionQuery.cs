@@ -1,6 +1,3 @@
-using Dfe.PlanTech.Application.Caching.Interfaces;
-using Dfe.PlanTech.Application.Core;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Questionnaire.Interfaces;
 using Dfe.PlanTech.Application.Responses.Interface;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -31,7 +28,7 @@ public class GetNextUnansweredQuestionQuery : IGetNextUnansweredQuestionQuery
 
     while (node != null)
     {
-      var response = responses.FirstOrDefault(response => response.QuestionRef == node.Sys.Id);
+      var response = responses.Find(response => response.QuestionRef == node.Sys.Id);
       if (response != null)
       {
         var answer = Array.Find(node.Answers, answer => answer.Sys.Id == response.AnswerRef);
