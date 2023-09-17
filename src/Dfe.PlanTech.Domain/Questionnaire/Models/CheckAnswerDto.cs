@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-//TODO: merge with CheckAnswerDto 
 public class CheckAnswerDto
 {
     [Required]

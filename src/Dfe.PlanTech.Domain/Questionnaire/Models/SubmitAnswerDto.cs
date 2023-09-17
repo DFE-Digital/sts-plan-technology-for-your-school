@@ -5,7 +5,6 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
 public class SubmitAnswerDto
 {
-    //TODO: Refactor QuestionId + QuestionText to IdWithText object
     [Required]
     public string QuestionId { get; init; } = null!;
 

@@ -4,6 +4,7 @@ using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Cookie.Interfaces;
 using Dfe.PlanTech.Application.Cookie.Service;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Questionnaire.Interfaces;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Responses.Commands;
 using Dfe.PlanTech.Application.Responses.Interface;
@@ -91,26 +92,20 @@ public static class ProgramExtensions
     {
         services.AddDbContext<IPlanTechDbContext, PlanTechDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("Database")));
 
-        services.AddTransient<IGetUserIdQuery, GetUserIdQuery>();
-        services.AddTransient<ICreateUserCommand, CreateUserCommand>();
-        services.AddTransient<ICreateEstablishmentCommand, CreateEstablishmentCommand>();
-        services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
-
-        services.AddTransient<ICookieService, CookieService>();
-
-        services.AddTransient<IGetLatestResponsesQuery, GetLatestResponsesQuery>();
-
         services.AddTransient<ICalculateMaturityCommand, CalculateMaturityCommand>();
-        services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
-
-        services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
-
+        services.AddTransient<ICookieService, CookieService>();
+        services.AddTransient<ICreateEstablishmentCommand, CreateEstablishmentCommand>();
+        services.AddTransient<ICreateUserCommand, CreateUserCommand>();
         services.AddTransient<IGetEstablishmentIdQuery, GetEstablishmentIdQuery>();
-
+        services.AddTransient<IGetLatestResponsesQuery, GetLatestResponsesQuery>();
         services.AddTransient<IGetNavigationQuery, GetNavigationQuery>();
-
-        services.AddTransient<IProcessCheckAnswerDtoCommand, ProcessCheckAnswerDtoCommand>();
+        services.AddTransient<IGetNextUnansweredQuestionQuery, GetNextUnansweredQuestionQuery>();
         services.AddTransient<IGetSectionQuery, GetSectionQuery>();
+        services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
+        services.AddTransient<IGetUserIdQuery, GetUserIdQuery>();
+        services.AddTransient<IProcessCheckAnswerDtoCommand, ProcessCheckAnswerDtoCommand>();
+        services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
+        services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
         return services;
     }
 

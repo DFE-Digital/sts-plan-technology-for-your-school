@@ -59,7 +59,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
     [HttpGet("{sectionSlug}/next-question")]
     public async Task<IActionResult> GetNextUnansweredQuestion(string sectionSlug,
-                                                                [FromServices] GetQuestionQuery getQuestionQuery,
+                                                                [FromServices] GetNextUnansweredQuestionQuery getQuestionQuery,
                                                                 CancellationToken cancellationToken = default)
     {
         var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ?? throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");

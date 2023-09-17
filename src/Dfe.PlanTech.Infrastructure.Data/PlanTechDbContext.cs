@@ -138,11 +138,9 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
 
     public Task<Establishment?> GetEstablishmentBy(Expression<Func<Establishment, bool>> predicate) => Establishments.FirstOrDefaultAsync(predicate);
 
-    //TODO: Fix so not exposing fact we are using SQL!
     public Task<int> CallStoredProcedureWithReturnInt(string sprocName, IEnumerable<SqlParameter> parms, CancellationToken cancellationToken = default)
      => Database.ExecuteSqlRawAsync(sprocName, parms, cancellationToken: cancellationToken);
 
-    //TODO: Fix so not exposing fact we are using SQL!
     public Task<int> ExecuteRaw(FormattableString sql, CancellationToken cancellationToken = default)
     => Database.ExecuteSqlAsync(sql, cancellationToken);
 

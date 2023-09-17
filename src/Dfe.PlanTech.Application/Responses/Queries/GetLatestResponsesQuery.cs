@@ -6,8 +6,6 @@ using Dfe.PlanTech.Domain.Submissions.Models;
 
 namespace Dfe.PlanTech.Application.Responses.Queries
 {
-    //TODO: Rename to "GetLatestResponseQuery", or similiar
-    //TODO: Refactor all queries to one or two - lot of duplication
     public class GetLatestResponsesQuery : IGetLatestResponsesQuery
     {
         private readonly IPlanTechDbContext _db;
