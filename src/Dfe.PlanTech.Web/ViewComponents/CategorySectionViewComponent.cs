@@ -81,8 +81,6 @@ namespace Dfe.PlanTech.Web.ViewComponents
                 else if (category.RetrievalError) _SetCategorySectionDtoTagWithRetrievalError(ref categorySectionDto);
                 else _SetCategorySectionDtoTagWithCurrentStatus(category, categorySection, ref categorySectionDto);
 
-                if (categorySectionDto.Slug != null) TempData[categorySectionDto.Slug] = categorySectionDto.Name + "+" + categorySection.Sys.Id + "+" + categorySectionDto.Slug;
-
                 yield return categorySectionDto;
             }
         }
