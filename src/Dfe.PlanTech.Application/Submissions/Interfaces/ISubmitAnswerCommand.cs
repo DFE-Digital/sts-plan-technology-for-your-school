@@ -4,5 +4,5 @@ namespace Dfe.PlanTech.Application.Submissions.Interfaces;
 
 public interface ISubmitAnswerCommand
 {
-    public Task<int> SubmitAnswer(SubmitAnswerDto submitAnswerDto, string sectionId, string sectionName);
+    public Task<int> SubmitAnswer(SubmitAnswerDto submitAnswerDto, CancellationToken cancellationToken = default);
 }

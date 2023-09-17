@@ -11,17 +11,16 @@ public class SubmitAnswerDto
 
     [Required]
     public string QuestionText { get; init; } = null!;
-    
+
     [Required]
     public string ChosenAnswerJson { get; init; } = null!;
 
-    public AnswerViewModelDto? ChosenAnswer => !string.IsNullOrEmpty(ChosenAnswerJson) ? 
+    public AnswerViewModelDto? ChosenAnswer => !string.IsNullOrEmpty(ChosenAnswerJson) ?
                                                     JsonSerializer.Deserialize<AnswerViewModelDto>(ChosenAnswerJson) : null;
-
-    public string? Params { get; init; } = null!;
-
-    public int? SubmissionId { get; init; }
 
     [Required]
     public string SectionId { get; init; } = null!;
+
+    [Required]
+    public string SectionName { get; init; } = null!;
 }

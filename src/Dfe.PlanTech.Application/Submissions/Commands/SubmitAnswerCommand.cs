@@ -21,7 +21,7 @@ public class SubmitAnswerCommand : ISubmitAnswerCommand
     //If so, return some sort of result indicating so
     //Then on the action on the controller, we should redirect to a new route called "GetNextUnansweredQuestionForSection"
     //Which will then either redirect to the "GetQuestionBySlug" route or "Check Answers" route
-    public async Task<int> SubmitAnswer(SubmitAnswerDto submitAnswerDto, string sectionId, string sectionName)
+    public async Task<int> SubmitAnswer(SubmitAnswerDto submitAnswerDto, CancellationToken cancellationToken = default)
     {
         if (submitAnswerDto.ChosenAnswer == null) throw new NullReferenceException(nameof(submitAnswerDto.ChosenAnswer));
 
@@ -32,8 +32,8 @@ public class SubmitAnswerCommand : ISubmitAnswerCommand
         //TODO: Bring this functionality to this class - duplicate purpose
         var responseId = await _createResponseCommand.CreateResponse(new RecordResponseDto()
         {
-            SectionId = sectionId,
-            SectionName = sectionName,
+            SectionId = submitAnswerDto.SectionId,
+            SectionName = submitAnswerDto.SectionName,
             Answer = submitAnswerDto.ChosenAnswer!.Answer,
             Question = new IdWithText()
             {

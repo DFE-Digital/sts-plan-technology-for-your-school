@@ -56,12 +56,12 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
     [HttpPost("{sectionSlug}/{questionSlug}")]
-    public async Task<IActionResult> SubmitAnswer(string sectionSlug, string questionSlug, SubmitAnswerDto submitAnswerDto, [FromServices] IUser user, [FromServices] ISubmitAnswerCommand submitAnswerCommand, [FromServices] IGetLatestResponsesQuery getResponseQuery)
+    public async Task<IActionResult> SubmitAnswer(string sectionSlug, string questionSlug, SubmitAnswerDto submitAnswerDto, [FromServices] IUser user, [FromServices] ISubmitAnswerCommand submitAnswerCommand, [FromServices] IGetLatestResponsesQuery getResponseQuery, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid) return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug });
 
         //TODO: Move logic to submit answer
-        var result = await submitAnswerCommand.SubmitAnswer(submitAnswerDto, submitAnswerDto.SectionId, sectionName: sectionSlug);
+        var result = await submitAnswerCommand.SubmitAnswer(submitAnswerDto, cancellationToken);
 
         bool navigateToCheckAnswersPage = await GetQuestionCompletionStatus(submitAnswerDto, user, getResponseQuery);
 
@@ -98,6 +98,7 @@ public class QuestionsController : BaseController<QuestionsController>
             Question = question,
             AnswerRef = latestResponseForQuestion?.AnswerRef,
             ErrorMessage = null,
+            SectionName = section.Name,
             SectionSlug = sectionSlug,
             SectionId = section.Sys.Id
         };

@@ -12,7 +12,9 @@ public class QuestionViewModel
 
     public string? ErrorMessage { get; init; }
 
-    public string? SectionSlug { get; init; }
+    public string SectionName { get; init; } = null!;
 
-    public string? SectionId { get; init; }
+    public string SectionSlug { get; init; } = null!;
+
+    public string SectionId { get; init; } = null!;
 }
