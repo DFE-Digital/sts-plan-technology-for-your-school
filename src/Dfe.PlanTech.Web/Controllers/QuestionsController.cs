@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Application.Questionnaire.Queries;
+using Dfe.PlanTech.Application.Questionnaire.Interfaces;
 using Dfe.PlanTech.Application.Responses.Interface;
 using Dfe.PlanTech.Application.Submissions.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
@@ -59,7 +59,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
     [HttpGet("{sectionSlug}/next-question")]
     public async Task<IActionResult> GetNextUnansweredQuestion(string sectionSlug,
-                                                                [FromServices] GetNextUnansweredQuestionQuery getQuestionQuery,
+                                                                [FromServices] IGetNextUnansweredQuestionQuery getQuestionQuery,
                                                                 CancellationToken cancellationToken = default)
     {
         var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ?? throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
