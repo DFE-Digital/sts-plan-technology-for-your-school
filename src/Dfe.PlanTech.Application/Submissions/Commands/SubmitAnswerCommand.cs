@@ -52,7 +52,6 @@ public class SubmitAnswerCommand : ISubmitAnswerCommand
 
     private async Task<int> SubmitResponse(RecordResponseDto recordResponseDto, CancellationToken cancellationToken)
     {
-        //TODO: get away from using SQL specific things in application layer!
         var establishmentId = new SqlParameter("@establishmentId", recordResponseDto.EstablishmentId);
         var userId = new SqlParameter("@userId", recordResponseDto.UserId);
         var sectionId = new SqlParameter("@sectionId", recordResponseDto.SectionId);
