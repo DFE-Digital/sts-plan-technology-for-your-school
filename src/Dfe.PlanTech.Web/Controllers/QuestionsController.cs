@@ -78,7 +78,7 @@ public class QuestionsController : BaseController<QuestionsController>
     {
         if (!ModelState.IsValid) return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug });
 
-        var result = await submitAnswerCommand.SubmitAnswer(submitAnswerDto, cancellationToken);
+        await submitAnswerCommand.SubmitAnswer(submitAnswerDto, cancellationToken);
 
         return RedirectToAction(nameof(GetNextUnansweredQuestion), new { sectionSlug });
     }
