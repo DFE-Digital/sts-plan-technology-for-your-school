@@ -5,6 +5,7 @@ using Dfe.PlanTech.Application.Submissions.Commands;
 using Dfe.PlanTech.Application.Submissions.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Microsoft.Data.SqlClient;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Submissions.Commands;
@@ -15,12 +16,37 @@ public class SubmitAnswerCommandTests
   private readonly IPlanTechDbContext _db;
   private readonly IUser _user;
 
+  private readonly AnswerViewModelDto _chosenAnswer;
+  private readonly SubmitAnswerDto _dto;
+
   public SubmitAnswerCommandTests()
   {
     _db = Substitute.For<IPlanTechDbContext>();
     _user = Substitute.For<IUser>();
 
     _submitAnswerCommand = new SubmitAnswerCommand(_db, _user);
+
+       _chosenAnswer = new AnswerViewModelDto()
+    {
+      Maturity = "Low",
+      Answer = new IdWithText()
+      {
+        Id = "Id",
+        Text = "Text"
+      },
+      NextQuestion = new IdAndSlugAndText()
+      {
+        Id = "QId",
+        Text = "QText",
+        Slug = "QSlug"
+      }
+    };
+
+    _dto = new SubmitAnswerDto()
+    {
+      ChosenAnswerJson = JsonSerializer.Serialize(_chosenAnswer)
+    };
+
   }
 
   [Fact]
@@ -44,33 +70,44 @@ public class SubmitAnswerCommandTests
   [Fact]
   public async Task Should_Throw_Exception_If_UserId_Null()
   {
-    var chosenAnswer = new AnswerViewModelDto()
-    {
-      Maturity = "Low",
-      Answer = new IdWithText()
-      {
-        Id = "Id",
-        Text = "Text"
-      },
-      NextQuestion = new IdAndSlugAndText()
-      {
-        Id = "QId",
-        Text = "QText",
-        Slug = "QSlug"
-      }
-    };
-
-    var dto = new SubmitAnswerDto()
-    {
-      ChosenAnswerJson = JsonSerializer.Serialize(chosenAnswer)
-    };
-
     _user.GetCurrentUserId().Returns((callinfo) =>
     {
       int? userId = null;
       return Task.FromResult(userId);
     });
 
-    await Assert.ThrowsAnyAsync<AuthenticationException>(() => _submitAnswerCommand.SubmitAnswer(dto));
+    await Assert.ThrowsAnyAsync<AuthenticationException>(() => _submitAnswerCommand.SubmitAnswer(_dto));
+  }
+
+  [Fact]
+  public async Task Should_Call_ExecuteRaw_With_Params(){
+    var result = "";
+    FormattableString? formattableString = null;
+    _db.ExecuteRaw(Arg.Any<FormattableString>(), Arg.Any<CancellationToken>())
+        .Returns((callInfo) =>
+        {
+          formattableString = callInfo.ArgAt<FormattableString>(0);
+
+          SqlParameter? responseParam = formattableString.GetArguments()
+                                                .Select(argument => argument is SqlParameter sqlParameter ? sqlParameter : null)
+                                                .Where(param => param != null && param.ParameterName.Contains("responseId"))
+                                                .First();
+
+          Assert.NotNull(responseParam);
+          responseParam.Value = 2;
+          result = formattableString.Format;
+          
+          return 1;
+        });
+
+    _user.GetCurrentUserId().Returns((callinfo) =>
+    {
+      int? userId = 1;
+      return Task.FromResult(userId);
+    });
+
+    var id = await _submitAnswerCommand.SubmitAnswer(_dto);
+
+    Assert.NotNull(formattableString);
   }
 }
