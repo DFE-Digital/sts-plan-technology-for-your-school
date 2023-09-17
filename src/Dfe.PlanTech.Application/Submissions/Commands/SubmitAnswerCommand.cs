@@ -1,3 +1,4 @@
+using System.Security.Authentication;
 using Dfe.PlanTech.Application.Responses.Interface;
 using Dfe.PlanTech.Application.Submissions.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
@@ -22,10 +23,9 @@ public class SubmitAnswerCommand : ISubmitAnswerCommand
     //Which will then either redirect to the "GetQuestionBySlug" route or "Check Answers" route
     public async Task<int> SubmitAnswer(SubmitAnswerDto submitAnswerDto, CancellationToken cancellationToken = default)
     {
-        if (submitAnswerDto.ChosenAnswer == null) throw new NullReferenceException(nameof(submitAnswerDto.ChosenAnswer));
+        if (submitAnswerDto?.ChosenAnswer == null) throw new InvalidDataException($"{nameof(submitAnswerDto.ChosenAnswer)} is null");
 
-        //TODO: Change exception type
-        int userId = await _user.GetCurrentUserId() ?? throw new Exception("User is not authenticated");
+        int userId = await _user.GetCurrentUserId() ?? throw new AuthenticationException("User is not authenticated");
         int establishmentId = await _user.GetEstablishmentId();
 
         //TODO: Bring this functionality to this class - duplicate purpose
