@@ -14,7 +14,7 @@ AS
                     WHERE completed = 0
                       AND sectionId = @sectionId
                       AND sectionName = @sectionName
-                      AND establishmentId = 3
+                      AND establishmentId = @establishmentId
                     ORDER BY dateCreated DESC)
 
     IF @submissionId IS NULL
