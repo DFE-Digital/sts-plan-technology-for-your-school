@@ -81,7 +81,6 @@ public class GetLatestResponsesQueryTests
         int submissionId = 1;
 
         var submissionFaker = new Faker<Submission>()
-                                    .RuleFor(submission => submission.Completed, faker => faker.Random.Bool())
                                     .RuleFor(submission => submission.DateCreated, faker => faker.Date.Past())
                                     .RuleFor(submission => submission.EstablishmentId, ESTABLISHMENT_ID)
                                     .RuleFor(submission => submission.Id, faker => submissionId++);
@@ -89,7 +88,7 @@ public class GetLatestResponsesQueryTests
         _submissions = GenerateSubmissions(faker, submissionFaker)
                             .SelectMany(submission => submission)
                             .ToList();
-
+        
         _planTechDbContextSubstitute = Substitute.For<IPlanTechDbContext>();
         _planTechDbContextSubstitute.GetSubmissions.Returns(_submissions.AsQueryable());
         _planTechDbContextSubstitute.FirstOrDefaultAsync(Arg.Any<IQueryable<Submission>>(), Arg.Any<CancellationToken>())
