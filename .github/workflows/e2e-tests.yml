@@ -2,16 +2,16 @@ name: Run E2E Tests
 
 on:
   pull_request:
-    branches: ["main"]
+    branches: [ "main" ]
     paths:
-      - "src/**"
-      - "tests/Dfe.PlanTech.Web.E2ETests/**"
-      - ".github/workflows/e2e-tests.yml"
+      - 'src/**'
+      - 'tests/Dfe.PlanTech.Web.E2ETests/**'
+      - '.github/workflows/e2e-tests.yml'
 
 concurrency:
-  group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true
-
+      
 jobs:
   clear-db:
     name: Clear database
@@ -25,7 +25,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
+      
       - name: Login with AZ
         uses: ./.github/actions/azure-login
         with:
@@ -46,8 +46,8 @@ jobs:
           az_keyvault_name: ${{ env.az_keyvault_name }}
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.az_resource_group_name}}
-          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
-
+          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}    
+  
       - name: Get connection string
         id: get-connection-string
         uses: ./.github/actions/azure-get-db-connectionstring
@@ -59,7 +59,7 @@ jobs:
         uses: azure/sql-action@v2.2
         with:
           connection-string: ${{ steps.get-connection-string.outputs.connection_string }}
-          path: "./.github/scripts/drop-establishment-data.sql"
+          path: './.github/scripts/drop-establishment-data.sql'
 
       - name: Remove Azure firewall rules
         if: always()
@@ -70,14 +70,14 @@ jobs:
           az_keyvault_name: ${{ env.az_keyvault_name }}
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.az_resource_group_name}}
-          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
+          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}    
 
   run-tests:
     name: Run E2E Tests
-    runs-on: windows-latest
+    runs-on: ubuntu-22.04
     needs: [clear-db]
     env:
-      PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj
+      PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj 
       KEYVAULT_NAME: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
       RESOURCE_GROUP: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
       SQL_IP_NAME: e2e-tests-pr
@@ -85,7 +85,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
+        
       - name: Azure CLI Login
         uses: ./.github/actions/azure-login
         with:
@@ -97,8 +97,30 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: 7.0.x
+            dotnet-version: 7.0.x
+          
+      - name: Trust cert
+        shell: bash
+        run: |
+          sudo apt-get update -y  
+          sudo apt-get install -y libnss3-tools
 
+      - name: Create trusted HTTPS cert
+        shell: bash
+        run: |
+          dotnet dev-certs https -ep localhost.crt --format PEM
+
+          # Create DB
+          mkdir -p $HOME/.pki/nssdb
+          certutil -d $HOME/.pki/nssdb -N
+
+          # Trust Edge/Chrome
+          certutil -d sql:$HOME/.pki/nssdb -A -t "P,," -n localhost -i ./localhost.crt
+          certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n localhost -i ./localhost.crt
+          
+          # Cleanup
+          rm localhost.crt
+        
       - name: Install dependencies
         shell: bash
         run: dotnet restore ${{ env.PROJECT_PATH }}
@@ -116,7 +138,7 @@ jobs:
       - name: Get workflow IP address
         id: whats-my-ip
         uses: ./.github/actions/whats-my-ip-address
-
+  
       - name: Add Azure firewall rules
         uses: ./.github/actions/azure-ip-whitelist
         with:
@@ -136,7 +158,7 @@ jobs:
           export Kestrel__Endpoints__Https__Url=https://*:8081
           export DfeSignIn__FrontDoorUrl=https://localhost:8081
           dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 &
-
+          
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests
         with:
@@ -144,7 +166,7 @@ jobs:
           dsi_url: ${{ secrets.DSI_URL }}
           dsi_username: ${{ secrets.DSI_USERNAME }}
           dsi_password: ${{ secrets.DSI_PASSWORD }}
-
+      
       - name: Remove Azure firewall rules
         if: always()
         uses: ./.github/actions/azure-ip-whitelist
@@ -154,4 +176,4 @@ jobs:
           az_keyvault_name: ${{ env.KEYVAULT_NAME }}
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.RESOURCE_GROUP}}
-          az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
+          az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}  
