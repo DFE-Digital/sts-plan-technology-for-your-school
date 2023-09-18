@@ -1,29 +1,29 @@
-name: Code PR Check
+name: Code PR Check 
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
     paths:
-      - "src/**"
-      - "tests/**"
+      - 'src/**'
+      - 'tests/**'
   pull_request:
-    branches: ["main"]
+    branches: [ "main" ]
     paths:
-      - "src/**"
-      - "tests/**"
-      - ".github/workflows/code-pr-check.yml"
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/code-pr-check.yml'
 
 concurrency:
-  group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true
-
+  
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
-
+  
 jobs:
-  build-test-web-app:
+  build-test-web-app:  
     name: Build and run unit tests
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Check out repository
@@ -36,41 +36,37 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      - name: Setup .NET Core SDK 7.0.400
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '7.0.400'
-
       - name: Install dotnet coverage
         run: dotnet tool install --global dotnet-coverage
-
+  
       - name: Install SonarCloud scanners
         run: dotnet tool install --global dotnet-sonarscanner
 
       - name: Install latest JDK
         uses: actions/setup-java@v3
         with:
-          distribution: "microsoft"
-          java-version: "17"
-
+          distribution: 'microsoft'
+          java-version: '17'
+          
       - name: Start SonarCloud scanner
         run: |
-          dotnet-sonarscanner begin \
-            /k:"DFE-Digital_plan-technology-for-your-school" \
-            /o:"dfe-digital" \
-            /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
-            /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml \
-            /d:sonar.coverage.exclusions=src/**/Program.cs,src/Dfe.PlanTech.Web/gulpfile.js,src/Dfe.PlanTech.Web/wwwroot/** \
-            /d:sonar.issue.ignore.multicriteria=e1 \
-            /d:sonar.issue.ignore.multicriteria.e1.ruleKey=csharpsquid:S6602 \
+          dotnet-sonarscanner begin `
+            /k:"DFE-Digital_plan-technology-for-your-school" `
+            /o:"dfe-digital" `
+            /d:sonar.login="${{ secrets.SONAR_TOKEN }}" `
+            /d:sonar.host.url="https://sonarcloud.io" `
+            /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml `
+            /d:sonar.coverage.exclusions="src/**/Program.cs,src/Dfe.PlanTech.Web/gulpfile.js,src/Dfe.PlanTech.Web/wwwroot/**" `
+            /d:sonar.issue.ignore.multicriteria=e1 `
+            /d:sonar.issue.ignore.multicriteria.e1.ruleKey=csharpsquid:S6602 `
             /d:sonar.issue.ignore.multicriteria.e1.resourceKey=src/**/*.cs
-
-      - name: Build web app
+          
+      - name: Build web app  
         uses: ./.github/actions/build-dotnet-app
         with:
+          dotnet_version: ${{ env.DOTNET_VERSION }}  
           solution_filename: plan-technology-for-your-school.sln
-
+          
       - name: Run unit tests
         uses: ./.github/actions/run-unit-tests
         with:
@@ -88,14 +84,14 @@ jobs:
           name: code-coverage-report
           path: coverage.xml
 
-      - name: "Upload Build Artifact"
+      - name: 'Upload Build Artifact'
         uses: actions/upload-artifact@v3
         with:
           name: solution-build
           path: ./build/
           retention-days: 5
 
-  build-database-upgrader:
+  build-database-upgrader:  
     name: Build database upgrader
     runs-on: ubuntu-latest
     needs: [build-test-web-app]
@@ -104,15 +100,10 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Setup .NET Core SDK 7.0.400
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '7.0.400'
-
-      - name: Build database upgrader
+      - name: Build database upgrader  
         uses: ./.github/actions/build-dotnet-app
         with:
-          dotnet_version: ${{ env.DOTNET_VERSION }}
+          dotnet_version: ${{ env.DOTNET_VERSION }}  
           solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
 
   run-javascript-tests:
@@ -136,11 +127,11 @@ jobs:
 
       - name: Test report
         uses: dorny/test-reporter@v1
-        if: success() || failure() # run this step even if previous step failed
+        if: success() || failure()    # run this step even if previous step failed
         with:
-          name: JEST Tests # Name of the check run which will be created
-          path: ./junit.xml # Path to test results
-          reporter: jest-junit # Format of test results
+          name: JEST Tests            # Name of the check run which will be created
+          path: ./junit.xml    # Path to test results
+          reporter: jest-junit        # Format of test results
 
   run-e2e-tests:
     needs: [build-test-web-app]

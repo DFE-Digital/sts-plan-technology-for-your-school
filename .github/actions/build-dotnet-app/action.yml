@@ -2,6 +2,9 @@ name: Build DotNet App
 description: Sets up .Net for specified version and builds application
 
 inputs:
+  dotnet_version:
+    required: true
+    type: string
   solution_filename:
     required: true
     type: string
@@ -10,9 +13,15 @@ runs:
   using: composite
 
   steps:
+    - name: Setup .NET Core SDK ${{ inputs.dotnet_version }}
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ inputs.dotnet_version }}
+
     - name: Install dependencies
       shell: bash
       run: dotnet restore ${{ inputs.solution_filename }}
+      
     - name: Build
       shell: bash
       run: dotnet build ${{ inputs.solution_filename }} --configuration Release --no-restore --output ./build
