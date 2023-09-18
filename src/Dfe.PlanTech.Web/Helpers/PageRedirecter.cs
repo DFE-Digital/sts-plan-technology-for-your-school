@@ -4,12 +4,12 @@ namespace Dfe.PlanTech.Web;
 
 public static class PageRedirecter
 {
-  private const string PAGES_CONTROLLER = "Pages";
-  private const string GET_BY_ROUTE_ACTION = "GetByRoute";
-  private const string SELF_ASSESSMENT_ROUTE = "/self-assessment";
+  public const string PAGES_CONTROLLER = "Pages";
+  public const string GET_BY_ROUTE_ACTION = "GetByRoute";
+  public const string SELF_ASSESSMENT_ROUTE = "/self-assessment";
 
-  private const string CHECK_ANSWERS_ACTION = "CheckAnswersPage";
-  private const string CHECK_ANSWERS_CONTROLLER = "CheckAnswers";
+  public const string CHECK_ANSWERS_ACTION = "CheckAnswersPage";
+  public const string CHECK_ANSWERS_CONTROLLER = "CheckAnswers";
 
   public static RedirectToActionResult RedirectToSelfAssessment(this Controller controller)
     => controller.RedirectToAction(GET_BY_ROUTE_ACTION, PAGES_CONTROLLER, new { route = SELF_ASSESSMENT_ROUTE });
