@@ -36,6 +36,11 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
+      - name: Setup .NET Core SDK 7.0.400
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.0.400'
+
       - name: Install dotnet coverage
         run: dotnet tool install --global dotnet-coverage
 
@@ -64,7 +69,6 @@ jobs:
       - name: Build web app
         uses: ./.github/actions/build-dotnet-app
         with:
-          dotnet_version: '7.0.400'
           solution_filename: plan-technology-for-your-school.sln
 
       - name: Run unit tests
@@ -99,6 +103,11 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
+
+      - name: Setup .NET Core SDK 7.0.400
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.0.400'
 
       - name: Build database upgrader
         uses: ./.github/actions/build-dotnet-app
