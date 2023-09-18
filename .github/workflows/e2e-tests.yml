@@ -1,11 +1,10 @@
 name: Run E2E Tests
 
 on:
+  workflow_call:
   pull_request:
     branches: ["main"]
     paths:
-      - "src/**"
-      - "tests/Dfe.PlanTech.Web.E2ETests/**"
       - ".github/workflows/e2e-tests.yml"
 
 concurrency:
@@ -99,13 +98,10 @@ jobs:
         with:
           dotnet-version: 7.0.x
 
-      - name: Install dependencies
-        shell: bash
-        run: dotnet restore ${{ env.PROJECT_PATH }}
-
-      - name: Build project
-        shell: bash
-        run: dotnet publish ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj --configuration Release --no-restore --output ./build
+      - uses: actions/download-artifact@v3
+        with:
+          name: solution-build
+          path: ./build
 
       - name: Create overwrite json file
         shell: bash
