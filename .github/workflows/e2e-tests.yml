@@ -99,6 +99,29 @@ jobs:
           name: solution-build
           path: ./build
 
+           
+      - name: Trust cert
+        shell: bash
+        run: |
+          sudo apt-get update -y  
+          sudo apt-get install -y libnss3-tools
+  
+      - name: Create trusted HTTPS cert
+        shell: bash
+        run: |
+          dotnet dev-certs https -ep localhost.crt --format PEM
+
+          # Create DB
+          mkdir -p $HOME/.pki/nssdb
+          certutil -d $HOME/.pki/nssdb -N
+
+          # Trust Edge/Chrome
+          certutil -d sql:$HOME/.pki/nssdb -A -t "P,," -n localhost -i ./localhost.crt
+          certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n localhost -i ./localhost.crt
+          
+          # Cleanup
+          rm localhost.crt
+
       - name: Create overwrite json file
         shell: bash
         working-directory: ./build
