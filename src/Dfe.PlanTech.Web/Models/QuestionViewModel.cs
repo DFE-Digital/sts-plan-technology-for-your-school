@@ -10,7 +10,7 @@ public class QuestionViewModel
 
     public string? AnswerRef { get; init; }
 
-    public string? ErrorMessage { get; init; }
+    public IEnumerable<string>? ErrorMessages { get; set; }
 
     public string SectionName { get; init; } = null!;
 
