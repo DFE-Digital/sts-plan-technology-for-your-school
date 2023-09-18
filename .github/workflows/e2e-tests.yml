@@ -2,10 +2,6 @@ name: Run E2E Tests
 
 on:
   workflow_call:
-  pull_request:
-    branches: ["main"]
-    paths:
-      - ".github/workflows/e2e-tests.yml"
 
 concurrency:
   group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
