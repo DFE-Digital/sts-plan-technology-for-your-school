@@ -71,7 +71,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 }
             };
 
-            var result = _controller.GetByRoute(INDEX_SLUG, page, userSubstitute);
+            var result = _controller.GetByRoute(page, userSubstitute);
 
             Assert.IsType<ViewResult>(result);
 
@@ -114,7 +114,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 DisplayOrganisationName = true
             };
 
-            var result = _controller.GetByRoute(SELF_ASSESSMENT_SLUG, page, userSubstitute);
+            var result = _controller.GetByRoute(page, userSubstitute);
 
             Assert.IsType<ViewResult>(result);
 
@@ -157,7 +157,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 DisplayOrganisationName = false
             };
 
-            var result = _controller.GetByRoute(SELF_ASSESSMENT_SLUG, page, userSubstitute);
+            var result = _controller.GetByRoute(page, userSubstitute);
 
             Assert.IsType<ViewResult>(result);
 

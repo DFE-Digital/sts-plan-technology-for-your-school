@@ -17,11 +17,9 @@ public class Section : ContentComponent, ISection
 
     public Page InterstitialPage { get; init; } = null!;
 
-    public new Sys Sys { get; init; } = null!;
-
     public RecommendationPage[] Recommendations { get; init; } = Array.Empty<RecommendationPage>();
 
-    public RecommendationPage? TryGetRecommendationForMaturity(Maturity maturity) => Recommendations.FirstOrDefault(recommendation => recommendation.Maturity == maturity);
+    public RecommendationPage? TryGetRecommendationForMaturity(Maturity maturity) => Array.Find(Recommendations, recommendation => recommendation.Maturity == maturity);
 
     public RecommendationPage? GetRecommendationForMaturity(string? maturity)
     {

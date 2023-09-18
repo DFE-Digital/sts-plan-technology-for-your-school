@@ -1,10 +1,9 @@
 using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Application.Questionnaire.Queries;
-using Dfe.PlanTech.Application.Response.Commands;
+using Dfe.PlanTech.Application.Submissions.Interfaces;
+using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Constants;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Web.Helpers;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.Responses.Interfaces;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,53 +13,50 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Authorize]
 public class CheckAnswersController : BaseController<CheckAnswersController>
 {
-    private readonly GetQuestionQuery _getQuestionnaireQuery;
+    public const string PAGE_SLUG = "check-answers";
 
-    public CheckAnswersController(ILogger<CheckAnswersController> logger, GetQuestionQuery getQuestionQuery) : base(logger) 
+    public CheckAnswersController(ILogger<CheckAnswersController> logger) : base(logger)
     {
-        this._getQuestionnaireQuery = getQuestionQuery;  
     }
 
-    [HttpGet]
-    [Route("{SectionSlug}/check-answers", Name = "CheckAnswersRoute")]
-    public async Task<IActionResult> CheckAnswersPage([FromServices] ProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand, [FromServices] GetPageQuery getPageQuery)
+    [HttpGet("{sectionSlug}/check-answers")]
+    public async Task<IActionResult> CheckAnswersPage(string sectionSlug, [FromServices] IUser user, [FromServices] IGetSectionQuery getSectionQuery, [FromServices] IProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand, [FromServices] IGetPageQuery getPageQuery, CancellationToken cancellationToken = default)
     {
-        var parameterCheckAnswersPage = DeserialiseParameter<TempDataCheckAnswers>(TempData[TempDataConstants.CheckAnswers]);
+        if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
 
-        Page checkAnswerPageContent = await getPageQuery.GetPageBySlug("check-answers", CancellationToken.None);
+        var section = await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
+                            throw new KeyNotFoundException($"Could not find section for {sectionSlug}");
 
-        CheckAnswersViewModel checkAnswersViewModel = new CheckAnswersViewModel()
+        var checkAnswerPageContent = await getPageQuery.GetPageBySlug(PAGE_SLUG, CancellationToken.None) ??
+                                        throw new KeyNotFoundException($"Could not find page for slug {PAGE_SLUG}");
+
+        var establishmentId = await user.GetEstablishmentId();
+
+        var responses = await processCheckAnswerDtoCommand.GetCheckAnswerDtoForSection(establishmentId, section, cancellationToken);
+
+        if (responses == null) return this.RedirectToSelfAssessment();
+
+        CheckAnswersViewModel checkAnswersViewModel = new()
         {
-            Title = checkAnswerPageContent.Title ?? throw new NullReferenceException(nameof(checkAnswerPageContent.Title)),
-            SectionName = parameterCheckAnswersPage.SectionName,
-            CheckAnswerDto = await processCheckAnswerDtoCommand.ProcessCheckAnswerDto(parameterCheckAnswersPage.SubmissionId, parameterCheckAnswersPage.SectionId),
+            Title = checkAnswerPageContent.Title ?? new Title() { Text = "Check Answers" },
+            SectionName = section.Name,
+            CheckAnswerDto = responses,
             Content = checkAnswerPageContent.Content,
-            SectionSlug = parameterCheckAnswersPage.SectionSlug,
-            SubmissionId = parameterCheckAnswersPage.SubmissionId,
+            SectionSlug = sectionSlug,
+            SubmissionId = responses.SubmissionId,
             Slug = checkAnswerPageContent.Slug
         };
 
         return View("CheckAnswers", checkAnswersViewModel);
     }
 
-    [HttpGet]
-    [Route("change-answer", Name = "ChangeAnswerRouteLink")]
-    public async Task<IActionResult> ChangeAnswer(string questionRef, string answerRef, int submissionId, string slug)
-    {
-        TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = answerRef, SubmissionId = submissionId });
-        var paramData = TempData.Peek("param");
-        var param = ParamParser._ParseParameters(paramData?.ToString());
-        var question = await _getQuestionnaireQuery.GetQuestionById(questionRef);
-        return RedirectToRoute("SectionQuestionAnswer", new { sectionSlug = param?.SectionSlug, question = question?.Slug });
-    }
-
     [HttpPost("ConfirmCheckAnswers")]
-    public async Task<IActionResult> ConfirmCheckAnswers(int submissionId, string sectionName, [FromServices] ProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand)
+    public async Task<IActionResult> ConfirmCheckAnswers(int submissionId, string sectionName, [FromServices] ICalculateMaturityCommand calculateMaturityCommand, CancellationToken cancellationToken = default)
     {
-        await processCheckAnswerDtoCommand.CalculateMaturityAsync(submissionId);
+        await calculateMaturityCommand.CalculateMaturityAsync(submissionId, cancellationToken);
 
         TempData["SectionName"] = sectionName;
-        return RedirectToAction("GetByRoute", "Pages", new { route = "self-assessment" });
 
+        return this.RedirectToSelfAssessment();
     }
 }

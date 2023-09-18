@@ -4,7 +4,7 @@ using Dfe.PlanTech.Domain.Answers.Models;
 using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.Questions.Models;
 using Dfe.PlanTech.Domain.Responses.Models;
-using Dfe.PlanTech.Domain.SignIn.Models;
+using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 using Microsoft.Data.SqlClient;
@@ -138,9 +138,13 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
 
     public Task<Establishment?> GetEstablishmentBy(Expression<Func<Establishment, bool>> predicate) => Establishments.FirstOrDefaultAsync(predicate);
 
-    public Task<int> CallStoredProcedureWithReturnInt(string sprocName, List<SqlParameter> parms) => base.Database.ExecuteSqlRawAsync(sprocName, parms);
+    public Task<int> CallStoredProcedureWithReturnInt(string sprocName, IEnumerable<SqlParameter> parms, CancellationToken cancellationToken = default)
+     => Database.ExecuteSqlRawAsync(sprocName, parms, cancellationToken: cancellationToken);
 
-    public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable) => queryable.FirstOrDefaultAsync();
+    public Task<int> ExecuteRaw(FormattableString sql, CancellationToken cancellationToken = default)
+    => Database.ExecuteSqlAsync(sql, cancellationToken);
 
-    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable) => queryable.ToListAsync();
+    public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default) => queryable.FirstOrDefaultAsync(cancellationToken);
+
+    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default) => queryable.ToListAsync(cancellationToken);
 }

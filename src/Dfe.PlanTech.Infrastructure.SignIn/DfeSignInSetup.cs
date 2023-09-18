@@ -1,5 +1,5 @@
-using Dfe.PlanTech.Domain.SignIn.Models;
-using Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;
+using Dfe.PlanTech.Domain.SignIns.Models;
+using Dfe.PlanTech.Infrastructure.SignIns.ConnectEvents;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -12,7 +12,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 
-namespace Dfe.PlanTech.Infrastructure.SignIn;
+namespace Dfe.PlanTech.Infrastructure.SignIns;
 
 [ExcludeFromCodeCoverage]
 public static class DfeSignInSetup

@@ -13,4 +13,6 @@ public class Answer : ContentComponent
     public Question? NextQuestion { get; init; }
 
     public string Maturity { get; init; } = null!;
+
+    public AnswerViewModelDto AsDto => new(this);
 }

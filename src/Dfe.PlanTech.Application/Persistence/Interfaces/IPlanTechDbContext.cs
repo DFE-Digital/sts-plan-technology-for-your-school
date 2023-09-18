@@ -1,6 +1,8 @@
 ﻿using Dfe.PlanTech.Domain.Answers.Models;
 using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.Questions.Models;
+using Dfe.PlanTech.Domain.Responses.Models;
+using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 using Microsoft.Data.SqlClient;
@@ -12,9 +14,9 @@ public interface IPlanTechDbContext
 {
     // User Table & SignIn Table
     IQueryable<User> GetUsers { get; }
-    IQueryable<Domain.SignIn.Models.SignIn> SignIns { get; }
+    IQueryable<SignIn> SignIns { get; }
     public void AddUser(User user);
-    public void AddSignIn(Domain.SignIn.Models.SignIn signIn);
+    public void AddSignIn(SignIn signIn);
 
     // Question Table
     public void AddQuestion(Question question);
@@ -25,19 +27,19 @@ public interface IPlanTechDbContext
     public Task<Answer?> GetAnswer(Expression<Func<Answer, bool>> predicate);
 
     // Submission Table
-    public IQueryable<Domain.Submissions.Models.Submission> GetSubmissions { get; }
-    public void AddSubmission(Domain.Submissions.Models.Submission submission);
+    public IQueryable<Submission> GetSubmissions { get; }
+    public void AddSubmission(Submission submission);
 
-    public void AddEstablishment(Domain.Establishments.Models.Establishment establishment);
+    public void AddEstablishment(Establishment establishment);
 
     // Response Table
-    public IQueryable<Domain.Responses.Models.Response> GetResponses { get; }
-    public void AddResponse(Domain.Responses.Models.Response response);
-    public Task<Domain.Responses.Models.Response[]?> GetResponseList(Expression<Func<Domain.Responses.Models.Response, bool>> predicate);
+    public IQueryable<Response> GetResponses { get; }
+    public void AddResponse(Response response);
+    public Task<Response[]?> GetResponseList(Expression<Func<Response, bool>> predicate);
 
     public Task<int> SaveChangesAsync();
 
-    Task<int> CallStoredProcedureWithReturnInt(string sprocName, List<SqlParameter> parms);
+    Task<int> CallStoredProcedureWithReturnInt(string sprocName, IEnumerable<SqlParameter> parms, CancellationToken cancellationToken = default);
 
     IQueryable<SectionStatuses> GetSectionStatuses(string sectionIds);
 
@@ -45,7 +47,9 @@ public interface IPlanTechDbContext
 
     Task<Establishment?> GetEstablishmentBy(Expression<Func<Establishment, bool>> predicate);
 
-    Task<List<T>> ToListAsync<T>(IQueryable<T> queryable);
+    Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default);
 
-    Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable);
+    Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default);
+    
+    Task<int> ExecuteRaw(FormattableString sql, CancellationToken cancellationToken = default);
 }

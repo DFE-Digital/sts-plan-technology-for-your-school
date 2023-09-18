@@ -1,8 +1,8 @@
-using Dfe.PlanTech.Domain.SignIn.Models;
+using Dfe.PlanTech.Domain.SignIns.Models;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Dfe.PlanTech.Infrastructure.SignIn;
+namespace Dfe.PlanTech.Infrastructure.SignIns;
 
 public static class DfeOpenIdConnectEvents
 {

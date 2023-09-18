@@ -18,5 +18,5 @@ public class Question : ContentComponent
 
     public string Param { get; init; } = null!;
 
-    public string? Slug { get; set; }
+    public string Slug { get; set; } = null!;
 }

@@ -4,6 +4,10 @@
 @model Dfe.PlanTech.Domain.Content.Models.Buttons.ButtonWithEntryReference;
 
 @{
+    var sectionSlug = Context.GetRouteData().Values.First(value => value.Key == "sectionSlug" || value.Key == "route").Value as string;
+}
+
+@{
     switch (Model.LinkToEntry)
     {
         case Page pageContent:
@@ -19,10 +23,13 @@
             }
         case Question question:
             {
-                var sectionSlug = TempData["SectionSlug"] as string;
-                TempData["questionId"] = question.Sys.Id;
-                <govuk-button-link href="@Url.RouteUrl("SectionQuestionAnswer", new { sectionSlug = sectionSlug, question = question.Slug })"
-                   class="govuk-link">@Model.Button.Value</govuk-button-link>
+                <govuk-button-link
+                    asp-controller="Questions"
+                    asp-action="GetNextUnansweredQuestion"
+                    asp-route-sectionSlug=@sectionSlug
+                    class="govuk-link">
+                @Model.Button.Value
+                   </govuk-button-link>
                 break;
             }
     }

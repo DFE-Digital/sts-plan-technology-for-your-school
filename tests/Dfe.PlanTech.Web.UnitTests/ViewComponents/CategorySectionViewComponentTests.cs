@@ -1,7 +1,9 @@
 using Dfe.PlanTech.Domain.CategorySection;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.ViewComponents;
 using Microsoft.AspNetCore.Http;
@@ -27,26 +29,28 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
             _loggerCategory = Substitute.For<ILogger<CategorySectionViewComponent>>();
 
-            var httpContext = new DefaultHttpContext();
-            var tempData = new TempDataDictionary(httpContext, Substitute.For<ITempDataProvider>());
             var viewContext = new ViewContext();
-            viewContext.TempData = tempData;
-            var viewComponentContext = new ViewComponentContext();
-            viewComponentContext.ViewContext = viewContext;
 
-            _categorySectionViewComponent = new CategorySectionViewComponent(_loggerCategory,_getSubmissionStatusesQuery);
-            _categorySectionViewComponent.ViewComponentContext = viewComponentContext;
+            var viewComponentContext = new ViewComponentContext
+            {
+                ViewContext = viewContext
+            };
+
+            _categorySectionViewComponent = new CategorySectionViewComponent(_loggerCategory, _getSubmissionStatusesQuery)
+            {
+                ViewComponentContext = viewComponentContext
+            };
 
             _category = new Category()
             {
                 Completed = 1,
                 Sections = new Section[]
                 {
-                    new Section()
+                    new ()
                     {
-                        Sys = new Sys() { Id = "Section1" },
+                        Sys = new SystemDetails() { Id = "Section1" },
                         Name = "Test Section 1",
-                        InterstitialPage = new Domain.Content.Models.Page()
+                        InterstitialPage = new Page()
                         {
                             Slug = "section-1",
                         }
@@ -103,7 +107,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         {
             _category.Completed = 0;
 
-            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
+            _category.SectionStatuses.Add(new SectionStatuses()
             {
                 SectionId = "Section1",
                 Completed = 0,
@@ -187,15 +191,15 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         {
             _category.Sections[0] = new Section()
             {
-                Sys = new Sys() { Id = "Section1" },
+                Sys = new SystemDetails() { Id = "Section1" },
                 Name = "Test Section 1",
-                InterstitialPage = new Domain.Content.Models.Page()
+                InterstitialPage = new Page()
                 {
                     Slug = null!,
                 }
             };
 
-            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
+            _category.SectionStatuses.Add(new SectionStatuses()
             {
                 SectionId = "Section1",
                 Completed = 1,

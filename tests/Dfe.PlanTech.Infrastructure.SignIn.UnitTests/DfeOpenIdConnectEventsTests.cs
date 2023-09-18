@@ -1,9 +1,9 @@
-using Dfe.PlanTech.Application.SignIn.Interfaces;
+using Dfe.PlanTech.Application.SignIns.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
-using Dfe.PlanTech.Domain.SignIn.Enums;
-using Dfe.PlanTech.Domain.SignIn.Models;
+using Dfe.PlanTech.Domain.SignIns.Enums;
+using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Users.Models;
-using Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;
+using Dfe.PlanTech.Infrastructure.SignIns.ConnectEvents;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
@@ -12,7 +12,7 @@ using NSubstitute;
 using System.Security.Claims;
 using System.Text.Json;
 
-namespace Dfe.PlanTech.Infrastructure.SignIn.UnitTests;
+namespace Dfe.PlanTech.Infrastructure.SignIns.UnitTests;
 
 public class DfeOpenIdConnectEventsTests
 {
@@ -76,7 +76,7 @@ public class DfeOpenIdConnectEventsTests
         var commandSubstitute = Substitute.For<IRecordUserSignInCommand>();
         var dbUserIdValue = 1234;
         var dbEstablishmentIdValue = 5678;
-        commandSubstitute.RecordSignIn(Arg.Any<RecordUserSignInDto>()).Returns(new Domain.SignIn.Models.SignIn()
+        commandSubstitute.RecordSignIn(Arg.Any<RecordUserSignInDto>()).Returns(new SignIn()
         {
             UserId = dbUserIdValue,
             EstablishmentId = dbEstablishmentIdValue,

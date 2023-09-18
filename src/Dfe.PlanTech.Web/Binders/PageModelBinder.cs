@@ -31,8 +31,6 @@ public class PageModelBinder : IModelBinder
 
     var pageItem = bindingContext.HttpContext.Items[nameof(Page)];
 
-  
-
     if (pageItem is not Page page)
     {
       _logger.LogWarning("Page is not {type}", typeof(Page));

@@ -13,7 +13,7 @@
             await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Title);
         }
         <dl class="govuk-summary-list govuk-!-margin-bottom-9">
-            @foreach (var questionWithAnswer in Model.CheckAnswerDto.QuestionAnswerList)
+            @foreach (var questionWithAnswer in Model.CheckAnswerDto.Responses)
             {
                 var anchorLabel = $"Change your answer for {questionWithAnswer.QuestionText}";
 
@@ -25,10 +25,15 @@
                         @questionWithAnswer.AnswerText
                     </dd>
                     <dd class="govuk-summary-list__actions spacer">
-                        @Html.RouteLink("Change",
-                                    "ChangeAnswerRouteLink", 
-                                    new { questionRef=questionWithAnswer.QuestionRef, answerRef=questionWithAnswer.AnswerRef, submissionId=Model.SubmissionId},
-                                    new {@class="govuk-link", aria_label=anchorLabel, title=questionWithAnswer.QuestionText})
+                        <a asp-controller="Questions"
+                            asp-action="GetQuestionBySlug"
+                            asp-route-questionSlug="@questionWithAnswer.QuestionSlug"
+                            asp-route-sectionSlug="@Model.SectionSlug"
+                            class="govuk-link"
+                            aria-label="@anchorLabel"
+                            title="@questionWithAnswer.QuestionText">
+                                Change
+                        </a>
                     </dd>
                 </div>
             }

@@ -7,7 +7,6 @@ namespace Dfe.PlanTech.Web.Models;
 
 public class CheckAnswersViewModel
 {
-
     [Required]
     public Title Title { get; init; } = null!;
 

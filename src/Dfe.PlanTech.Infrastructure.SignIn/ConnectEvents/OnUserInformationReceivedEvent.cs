@@ -1,14 +1,14 @@
-using Dfe.PlanTech.Application.SignIn.Interfaces;
+using Dfe.PlanTech.Application.SignIns.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
-using Dfe.PlanTech.Domain.SignIn.Enums;
-using Dfe.PlanTech.Domain.SignIn.Models;
+using Dfe.PlanTech.Domain.SignIns.Enums;
+using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Users.Models;
-using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
+using Dfe.PlanTech.Infrastructure.SignIns.Extensions;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
 using System.Security.Claims;
 
-namespace Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;
+namespace Dfe.PlanTech.Infrastructure.SignIns.ConnectEvents;
 
 public static class OnUserInformationReceivedEvent
 {
@@ -56,7 +56,7 @@ public static class OnUserInformationReceivedEvent
         AddClaimsToPrincipal(context, signin);
     }
 
-    private static void AddClaimsToPrincipal(UserInformationReceivedContext context, Domain.SignIn.Models.SignIn signin)
+    private static void AddClaimsToPrincipal(UserInformationReceivedContext context, SignIn signin)
     {
         var principal = context.Principal;
 

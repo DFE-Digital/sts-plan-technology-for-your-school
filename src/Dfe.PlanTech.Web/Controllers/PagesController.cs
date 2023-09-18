@@ -18,19 +18,10 @@ public class PagesController : BaseController<PagesController>
 
     [Authorize(Policy = PageModelAuthorisationPolicy.POLICY_NAME)]
     [HttpGet("/{route?}")]
-    [Route("~/{SectionSlug}/recommendation/{route?}", Name = "GetPageByRouteAndSection")]
-    public IActionResult GetByRoute(string route, [ModelBinder(typeof(PageModelBinder))] Page page, [FromServices] IUser user)
+    [HttpGet("~/{sectionSlug}/recommendation/{route?}", Name = "GetPageByRouteAndSection")]
+    public IActionResult GetByRoute([ModelBinder(typeof(PageModelBinder))] Page page, [FromServices] IUser user)
     {
-        string slug = GetSlug(route);
-        string param = "";
-        TempData["SectionSlug"] = route;
-
-        if (TempData[slug] is string tempDataSlug) param = tempDataSlug;
-
-        if (!string.IsNullOrEmpty(param))
-            TempData["Param"] = param;
-
-        var viewModel = CreatePageModel(page, param, user);
+        var viewModel = CreatePageModel(page, user);
 
         return View("Page", viewModel);
     }
@@ -48,24 +39,17 @@ public class PagesController : BaseController<PagesController>
         return View(new ServiceUnavailableViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 
-    private PageViewModel CreatePageModel(Page page, string param, IUser user)
+    private PageViewModel CreatePageModel(Page page,  IUser user)
     {
         ViewData["Title"] = page.Title?.Text ?? "Plan Technology For Your School";
 
         var viewModel = new PageViewModel()
         {
             Page = page,
-            Param = param
         };
 
         viewModel.TryLoadOrganisationName(HttpContext, user, logger);
 
         return viewModel;
     }
-
-    /// <summary>
-    /// Returns either the entire slug for the URL (if not null/empty), or "/"
-    /// </summary>
-    /// <param name="route">Route slug from route binding</param>
-    private string GetSlug(string? route) => (string.IsNullOrEmpty(route) ? Request.Path.Value : route) ?? "/";
 }

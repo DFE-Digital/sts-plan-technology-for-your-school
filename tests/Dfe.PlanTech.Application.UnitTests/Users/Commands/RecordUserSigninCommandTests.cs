@@ -1,10 +1,9 @@
 ﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Commands;
 using Dfe.PlanTech.Application.Users.Interfaces;
-using Dfe.PlanTech.Domain.SignIn.Models;
+using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 using NSubstitute;
-using NSubstitute.Core;
 using NSubstitute.ReturnsExtensions;
 using System.Linq.Expressions;
 
@@ -28,7 +27,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
         public async Task RecordSignInForExistingUser_UpdatesSignInDetailsAnd_ReturnsId()
         {
             //Arrange
-            Domain.SignIn.Models.SignIn? createdSignIn = null;
+            SignIn? createdSignIn = null;
             int signInId = 1;
 
             var guid = Guid.NewGuid().ToString();
@@ -41,9 +40,9 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
             var strut = CreateStrut();
             UserQuery.GetUserId(Arg.Any<string>()).Returns(1);
             Db.GetUserBy(Arg.Any<Expression<Func<User, bool>>>()).Returns(user);
-            Db.When(x => x.AddSignIn(Arg.Any<Domain.SignIn.Models.SignIn>())).Do(callInfo =>
+            Db.When(x => x.AddSignIn(Arg.Any<SignIn>())).Do(callInfo =>
             {
-                createdSignIn = (Domain.SignIn.Models.SignIn)callInfo[0];
+                createdSignIn = (SignIn)callInfo[0];
             });
             Db.When(x => x.SaveChangesAsync())
                 .Do(x =>
@@ -82,7 +81,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
         public async Task RecordSignInForNewUser_AddsUser_UpdatesSignInDetailsAnd_ReturnsId(int userId)
         {
             User? createdUser = null;
-            Domain.SignIn.Models.SignIn? createdSignIn = null;
+            SignIn? createdSignIn = null;
             int signInId = 1;
 
             Db.GetUserBy(Arg.Any<Expression<Func<User, bool>>>()).ReturnsNull();
@@ -93,9 +92,9 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
                 createdUser = user;
             });
 
-            Db.When(x => x.AddSignIn(Arg.Any<Domain.SignIn.Models.SignIn>())).Do((callInfo) =>
+            Db.When(x => x.AddSignIn(Arg.Any<SignIn>())).Do((callInfo) =>
             {
-                createdSignIn = (Domain.SignIn.Models.SignIn)callInfo[0];
+                createdSignIn = (SignIn)callInfo[0];
             });
 
             Db.SaveChangesAsync().Returns((callInfo) =>
