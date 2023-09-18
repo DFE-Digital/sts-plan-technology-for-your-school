@@ -30,6 +30,7 @@ public class QuestionsController : BaseController<QuestionsController>
     [HttpGet("{sectionSlug}/{questionSlug}")]
     public async Task<IActionResult> GetQuestionBySlug(string sectionSlug,
                                                         string questionSlug,
+                                                        bool isErrored = false,
                                                         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
@@ -52,7 +53,7 @@ public class QuestionsController : BaseController<QuestionsController>
         {
             Question = question,
             AnswerRef = latestResponseForQuestion?.AnswerRef,
-            ErrorMessage = null,
+            ErrorMessage = isErrored ? "You must select an answer to continue" : null,
             SectionName = section.Name,
             SectionSlug = sectionSlug,
             SectionId = section.Sys.Id
@@ -83,7 +84,7 @@ public class QuestionsController : BaseController<QuestionsController>
     [HttpPost("{sectionSlug}/{questionSlug}")]
     public async Task<IActionResult> SubmitAnswer(string sectionSlug, string questionSlug, SubmitAnswerDto submitAnswerDto, [FromServices] ISubmitAnswerCommand submitAnswerCommand, CancellationToken cancellationToken = default)
     {
-        if (!ModelState.IsValid) return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug });
+        if (!ModelState.IsValid) return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug, isErrored = true });
 
         await submitAnswerCommand.SubmitAnswer(submitAnswerDto, cancellationToken);
 
