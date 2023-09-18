@@ -150,7 +150,7 @@ jobs:
           export KeyVaultName=s190d01-plantech-kv
           export Kestrel__Endpoints__Https__Url=https://*:8081
           export DfeSignIn__FrontDoorUrl=https://localhost:8081
-          dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081
+          dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 &
 
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests
