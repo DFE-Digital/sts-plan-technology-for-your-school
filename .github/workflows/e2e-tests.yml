@@ -107,10 +107,6 @@ jobs:
         shell: bash
         run: dotnet publish ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj --configuration Release --no-restore --output ./build
 
-      - name: Trust dev certs
-        shell: bash
-        run: dotnet dev-certs https --trust
-
       - name: Create overwrite json file
         shell: bash
         working-directory: ./build
