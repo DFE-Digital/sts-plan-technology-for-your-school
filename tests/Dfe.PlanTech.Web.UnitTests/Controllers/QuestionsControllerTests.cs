@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Questionnaire.Interfaces;
 using Dfe.PlanTech.Application.Responses.Interface;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -15,6 +16,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers;
 public class QuestionsControllerTests
 {
   private readonly ILogger<QuestionsController> _logger;
+  private readonly IGetNextUnansweredQuestionQuery _getNextUnansweredQuestionQuery;
   private readonly IGetSectionQuery _getSectionQuery;
   private readonly IGetLatestResponsesQuery _getResponseQuery;
   private readonly IUser _user;
@@ -68,6 +70,8 @@ public class QuestionsControllerTests
                 });
 
     _getResponseQuery = Substitute.For<IGetLatestResponsesQuery>();
+
+    _getNextUnansweredQuestionQuery = Substitute.For<IGetNextUnansweredQuestionQuery>();
 
     _user = Substitute.For<IUser>();
     _user.GetEstablishmentId().Returns(ESTABLISHMENT_ID);
@@ -180,9 +184,30 @@ public class QuestionsControllerTests
     Assert.Equal(model.AnswerRef, answerRef);
   }
 
-  //Test: GetNextUnansweredQuestion - sectionslug null - errors
-  //Test: GetNextUnansweredQuestion - section not found - errors
-  //Test: GetNextUnansweredQuestion - GetNextUnansweredQuestion query - null - returns check answer page
+  [Fact]
+  public async Task GetNextUnansweredQuestion_Should_Error_When_SectionSlug_Null()
+  {
+
+    await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetNextUnansweredQuestion(null!, _getNextUnansweredQuestionQuery));
+  }
+
+  [Fact]
+  public async Task GetNextUnansweredQuestion_Should_Error_When_SectionSlug_NotFound()
+  {
+    await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetNextUnansweredQuestion("Not a real section", _getNextUnansweredQuestionQuery));
+  }
+
+  [Fact]
+  public async Task GetNextUnansweredQuestion_Should_Redirect_To_CheckAnswersPage_When_No_Question_Returned()
+  {
+    var result = await _controller.GetNextUnansweredQuestion(SECTION_SLUG, _getNextUnansweredQuestionQuery);
+
+    var redirectResult = result as RedirectToActionResult;
+    Assert.NotNull(redirectResult);
+    Assert.Equal(PageRedirecter.CHECK_ANSWERS_CONTROLLER, redirectResult.ControllerName);
+    Assert.Equal(PageRedirecter.CHECK_ANSWERS_ACTION, redirectResult.ActionName);
+  }
+
   //Test: GetNextUnansweredQuestion - GetNextUnansweredQuestion query - redirects to GetQuestionBySlug
 
 
