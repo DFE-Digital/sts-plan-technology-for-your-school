@@ -57,12 +57,6 @@ tr {
     margin-bottom: 10px;
 }
 
-/* OVERIDE GOV INSET TEXT STYLING - NEW
---------------------------------------- */
-.govuk-inset-text {
-    border-left: 10px solid #347ca9;
-}
-
 /* HOMEPAGE HERO BANNER ----------------------- */
 .app-section-beta {
     padding: 30px 0;
@@ -167,8 +161,4 @@ strong.app-task-list__task-name>p.govuk-error-message {
     h3, .dfe-heading-s, .govuk-heading-s {
         margin-top: 35px
     }
-}
-
-.govuk-inset-text {
-    border-left: 10px solid #b1b4b6;
 }
