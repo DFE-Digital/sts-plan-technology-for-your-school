@@ -68,16 +68,16 @@ public class QuestionsController : BaseController<QuestionsController>
     {
         if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
 
-        var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ?? 
+        var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
                         throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
 
         int establishmentId = await _user.GetEstablishmentId();
 
         var nextQuestion = await getQuestionQuery.GetNextUnansweredQuestion(establishmentId, section, cancellationToken);
 
-        if (nextQuestion == null) return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { sectionSlug });
+        if (nextQuestion == null) return this.RedirectToCheckAnswers(sectionSlug);
 
-        return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = nextQuestion.Slug });
+        return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = nextQuestion!.Slug });
     }
 
     [HttpPost("{sectionSlug}/{questionSlug}")]

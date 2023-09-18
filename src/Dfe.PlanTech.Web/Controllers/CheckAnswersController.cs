@@ -34,7 +34,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
         var responses = await processCheckAnswerDtoCommand.GetCheckAnswerDtoForSection(establishmentId, section, cancellationToken);
 
-        if (responses == null) return RedirectToAction("GetByRoute", "Pages", new { route = "/self-assessment" });
+        if (responses == null) return this.RedirectToSelfAssessment();
 
         CheckAnswersViewModel checkAnswersViewModel = new()
         {
@@ -51,10 +51,12 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     }
 
     [HttpPost("ConfirmCheckAnswers")]
-    public async Task<IActionResult> ConfirmCheckAnswers(int submissionId, [FromServices] ICalculateMaturityCommand calculateMaturityCommand, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> ConfirmCheckAnswers(int submissionId, string sectionName, [FromServices] ICalculateMaturityCommand calculateMaturityCommand, CancellationToken cancellationToken = default)
     {
         await calculateMaturityCommand.CalculateMaturityAsync(submissionId, cancellationToken);
 
-        return RedirectToAction("GetByRoute", "Pages", new { route = "self-assessment" });
+        TempData["SectionName"] = sectionName;
+
+        return this.RedirectToSelfAssessment();
     }
 }
