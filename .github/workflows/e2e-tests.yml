@@ -69,7 +69,7 @@ jobs:
 
   run-tests:
     name: Run E2E Tests
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     needs: [clear-db]
     env:
       PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj
@@ -92,7 +92,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: 7.0.x
+          dotnet-version: '7.0.400'
 
       - uses: actions/download-artifact@v3
         with:
@@ -127,7 +127,7 @@ jobs:
           export KeyVaultName=s190d01-plantech-kv
           export Kestrel__Endpoints__Https__Url=https://*:8081
           export DfeSignIn__FrontDoorUrl=https://localhost:8081
-          dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 &
+          dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081
 
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests
