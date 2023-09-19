@@ -132,7 +132,7 @@ jobs:
         working-directory: ./build
         run: |
           export ASPNETCORE_ENVIRONMENT=Staging
-          export KeyVaultName=${{ env.KEYVAULT_NAME }}
+          export KeyVaultName=s190d01-plantech-kv
           export Kestrel__Endpoints__Https__Url=https://*:8081
           export DfeSignIn__FrontDoorUrl=https://localhost:8081
           dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 &
@@ -155,17 +155,3 @@ jobs:
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.RESOURCE_GROUP}}
           az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
-
-      - name: Combine test results
-        if: always()
-        shell: bash
-        working-directory: tests/Dfe.PlanTech.Web.E2ETests/
-        run: npm run report:merge
-
-      - uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: E2E Test Report
-          path: tests/Dfe.PlanTech.Web.E2ETests/index.json
-          reporter: mocha-json
-          fail-on-error: false
