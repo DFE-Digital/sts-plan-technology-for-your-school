@@ -1,3 +1,6 @@
 cypress.env.json
 screenshots/
 videos/
+public/
+cypress/results/
+index.json
