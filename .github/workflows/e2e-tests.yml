@@ -66,18 +66,18 @@ jobs:
       - uses: actions/download-artifact@v3
         name: Download solution artifact
         with:
-          name: solution-build
-          path: ./build
+          name: web-app-build
+          path: ./publish
 
       - name: Create overwrite json file
         shell: bash
-        working-directory: ./build
+        working-directory: ./publish
         run: |
           echo "{ \"DfeSignIn\": { \"FrontDoorUrl\": \"https://localhost:8081\"}}" > overrides.json
 
       - name: Run project
         shell: bash
-        working-directory: ./build
+        working-directory: ./publish
         run: |
           export ASPNETCORE_ENVIRONMENT=Staging
           export KeyVaultName=s190d01-plantech-kv

@@ -61,11 +61,15 @@ jobs:
             /d:sonar.issue.ignore.multicriteria.e1.ruleKey=csharpsquid:S6602 `
             /d:sonar.issue.ignore.multicriteria.e1.resourceKey=src/**/*.cs
           
-      - name: Build web app  
+      - name: Build solution
         uses: ./.github/actions/build-dotnet-app
         with:
           dotnet_version: ${{ env.DOTNET_VERSION }}  
           solution_filename: plan-technology-for-your-school.sln
+
+      - name: Publish web app
+        run: |
+          dotnet publish ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj -c Release --no-build -o ./publish/
           
       - name: Run unit tests
         uses: ./.github/actions/run-unit-tests
@@ -84,11 +88,11 @@ jobs:
           name: code-coverage-report
           path: coverage.xml
 
-      - name: 'Upload Build Artifact'
+      - name: Upload Published Web App
         uses: actions/upload-artifact@v3
         with:
-          name: solution-build
-          path: ./build/
+          name: web-app-build
+          path: ./publish/
           retention-days: 5
 
   build-database-upgrader:  
