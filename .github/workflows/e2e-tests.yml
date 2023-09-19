@@ -155,3 +155,15 @@ jobs:
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.RESOURCE_GROUP}}
           az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
+
+      - name: Combine test results
+        shell: bash
+        working-directory: tests/Dfe.PlanTech.Web.E2ETests/
+        run: npm run report:merge
+
+      - uses: dorny/test-reporter@v1
+        with:
+          artifact: e2e-test-report
+          name: E2E Test Report
+          path: "tests/Dfe.PlanTech.Web.E2ETests/index.json"
+          reporter: mocha-json
