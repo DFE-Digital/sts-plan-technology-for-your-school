@@ -16,7 +16,6 @@ public class QuestionsController : BaseController<QuestionsController>
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetLatestResponsesQuery _getResponseQuery;
     private readonly IUser _user;
-
     public QuestionsController(ILogger<QuestionsController> logger,
                                 IGetSectionQuery getSectionQuery,
                                 IGetLatestResponsesQuery getResponseQuery,
@@ -69,7 +68,17 @@ public class QuestionsController : BaseController<QuestionsController>
             return RenderView(viewModel);
         }
 
-        await submitAnswerCommand.SubmitAnswer(submitAnswerDto, cancellationToken);
+        try
+        {
+            await submitAnswerCommand.SubmitAnswer(submitAnswerDto, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            logger.LogError("An error has occurred while submitting an answer with the following message: {} ", e.Message);
+            var viewModel = await GenerateViewModel(sectionSlug, questionSlug, cancellationToken);
+            viewModel.ErrorMessages = new[] { "Save failed. Please try again later."};
+            return RenderView(viewModel);
+        }
 
         return RedirectToAction(nameof(GetNextUnansweredQuestion), new { sectionSlug });
     }
