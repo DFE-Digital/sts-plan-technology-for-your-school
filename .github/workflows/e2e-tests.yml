@@ -75,9 +75,20 @@ jobs:
           echo "{ \"DfeSignIn\": { \"FrontDoorUrl\": \"https://localhost:8081\"}}" > overrides.json
 
       - name: Generate and trust https cert
-        shell: bash
-        run: dotnet dev-certs https --trust
-        
+        shell: powershell
+        run: |
+          dotnet dev-certs https --export-path certificate.pfx
+          $pfxpath = 'certificate.pfx'
+          
+          Add-Type -AssemblyName System.Security
+          $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
+          $cert.Import($pfxpath, $password, [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]"PersistKeySet")
+          $store = new-object system.security.cryptography.X509Certificates.X509Store -argumentlist "MY", CurrentUser
+          $store.Open([System.Security.Cryptography.X509Certificates.OpenFlags]"ReadWrite")
+          $store.Add($cert)
+          $store.Close()
+          
+
       - name: Run project
         shell: bash
         run: |
