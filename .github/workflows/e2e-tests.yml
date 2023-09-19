@@ -16,7 +16,6 @@ jobs:
       az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
       az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
       az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-      PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj
       SQL_IP_NAME: e2e-tests-pr
 
     steps:
@@ -77,13 +76,12 @@ jobs:
 
       - name: Run project
         shell: bash
-        working-directory: ./publish
         run: |
           export ASPNETCORE_ENVIRONMENT=Staging
-          export KeyVaultName=s190d01-plantech-kv
+          export KeyVaultName=${{ env.az_keyvault_name }}
           export Kestrel__Endpoints__Https__Url=https://*:8081
           export DfeSignIn__FrontDoorUrl=https://localhost:8081
-          dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 &
+          dotnet ./publish/Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081
 
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests
