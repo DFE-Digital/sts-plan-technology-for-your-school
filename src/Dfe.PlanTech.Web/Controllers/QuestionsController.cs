@@ -90,6 +90,9 @@ public class QuestionsController : BaseController<QuestionsController>
                                                                                 section.Sys.Id,
                                                                                 question.Sys.Id,
                                                                                 cancellationToken);
+
+        ViewData["Title"] = question.Text;
+
         return new QuestionViewModel()
         {
             Question = question,
