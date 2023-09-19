@@ -62,18 +62,11 @@ jobs:
         with:
           dotnet-version: "7.0.x"
 
-      - uses: actions/download-artifact@v3
-        name: Download solution artifact
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
         with:
-          name: web-app-build
-          path: ./publish
-
-      - name: Create overwrite json file
-        shell: bash
-        working-directory: ./publish
-        run: |
-          echo "{ \"DfeSignIn\": { \"FrontDoorUrl\": \"https://localhost:8081\"}}" > overrides.json
-
+            dotnet-version: 7.0.x
+            
       - name: Trust cert
         shell: bash
         run: |
@@ -92,19 +85,34 @@ jobs:
           # Trust Edge/Chrome
           certutil -d sql:$HOME/.pki/nssdb -A -t "P,," -n localhost -i ./localhost.crt
           certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n localhost -i ./localhost.crt
-
+          
           # Cleanup
           rm localhost.crt
+        
+      - name: Install dependencies
+        shell: bash
+        run: dotnet restore ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj
 
+      - name: Build project
+        shell: bash
+        run: dotnet publish ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj --configuration Release --no-restore --output ./build
+
+      - name: Create overwrite json file
+        shell: bash
+        working-directory: ./build
+        run: |
+          echo "{ \"DfeSignIn\": { \"FrontDoorUrl\": \"https://localhost:8081\"}}" > overrides.json
+  
       - name: Run project
         shell: bash
+        working-directory: ./build
         run: |
           export ASPNETCORE_ENVIRONMENT=Staging
           export KeyVaultName=${{ env.az_keyvault_name }}
           export Kestrel__Endpoints__Https__Url=https://*:8081
           export DfeSignIn__FrontDoorUrl=https://localhost:8081
-          dotnet ./publish/Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 &
-
+          dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 &
+  
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests
         with:
