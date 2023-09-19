@@ -57,8 +57,10 @@ describe("Check answers page", () => {
           cy.wrap(row)
             .find("a")
             .contains("Change")
-            .and("have.attr", "aria-label")
-            .and("contain", questionWithAnswer.question);
+            .and("contain", questionWithAnswer.question)
+            .get('span[class="govuk-visually-hidden"]')
+            .invoke("text")
+            .should("have.length.greaterThan", 1);
 
           cy.wrap(row)
             .find("a")
@@ -77,7 +79,7 @@ describe("Check answers page", () => {
     cy.get("a:nth-child(1)").contains("Change").click();
     cy.url().should("contains", "broadband-contract-review");
   });
-  
+
   //This needs to be last on this test run, so that the question-page tests have a clean slate to work from!
   it("submits answers and shows notification", () => {
     submitAnswers();
@@ -110,7 +112,7 @@ const navigateThroughQuestions = () => {
 
       return navigateThroughQuestions();
     })
-    .then(() => {});
+    .then(() => { });
 };
 
 const submitAnswers = () =>
