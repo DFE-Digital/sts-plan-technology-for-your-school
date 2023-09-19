@@ -37,6 +37,9 @@ module "waf" {
           },
           "942340" = {
             action = "Log"
+          },
+          "942450" = {
+            action = "Log"
           }
         },
         "RFI" = {
