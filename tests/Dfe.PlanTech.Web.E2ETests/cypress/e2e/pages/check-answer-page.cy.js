@@ -114,4 +114,4 @@ const navigateThroughQuestions = () => {
 };
 
 const submitAnswers = () =>
-  cy.get("button.govuk-button").contains("Save and Submit").click();
+  cy.get("button.govuk-button").contains("Save and submit").click();
