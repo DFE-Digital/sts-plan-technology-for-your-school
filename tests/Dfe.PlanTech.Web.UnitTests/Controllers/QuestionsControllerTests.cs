@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Questionnaire.Interfaces;
 using Dfe.PlanTech.Application.Responses.Interface;
+using Dfe.PlanTech.Application.Submissions.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
@@ -207,6 +208,30 @@ public class QuestionsControllerTests
     Assert.Equal(PageRedirecter.CHECK_ANSWERS_CONTROLLER, redirectResult.ControllerName);
     Assert.Equal(PageRedirecter.CHECK_ANSWERS_ACTION, redirectResult.ActionName);
   }
+  
+  [Fact]
+  public async Task SubmitAnswer_Should_Handle_Exception_And_Return_InLine_Error_Message()
+  {
+    var sectionSlug = SECTION_SLUG;
+    var questionSlug = QUESTION_SLUG;
+    var submitAnswerDto = new SubmitAnswerDto();
+    var cancellationToken = CancellationToken.None;
+
+    var submitAnswerCommand = Substitute.For<ISubmitAnswerCommand>();
+    var expectedErrorMessage = "Save failed. Please try again later.";
+    
+    submitAnswerCommand
+      .When(x => x.SubmitAnswer(Arg.Any<SubmitAnswerDto>(), Arg.Any<CancellationToken>()))
+      .Do(x => throw new Exception("A Dummy exception thrown by the test"));
+
+    var result = await _controller.SubmitAnswer(sectionSlug, questionSlug, submitAnswerDto, submitAnswerCommand, cancellationToken);
+
+    var viewResult = Assert.IsType<ViewResult>(result);
+    var viewModel = Assert.IsType<QuestionViewModel>(viewResult.Model);
+
+    Assert.Contains(expectedErrorMessage, viewModel.ErrorMessages);
+  }
+
 
   //Test: GetNextUnansweredQuestion - GetNextUnansweredQuestion query - redirects to GetQuestionBySlug
 

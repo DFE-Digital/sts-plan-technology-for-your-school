@@ -1,22 +1,5 @@
 /* STANDARD COLOURS */
-body,
-p,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-a,
-span,
-div,
-table,
-th,
-td,
-blockquote,
-li,
-tr,
-.govuk-button {
+* {
     font-family: BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif !important;
 }
 
@@ -24,6 +7,11 @@ tr,
   display: block;
   max-height: 32px;
   max-width: 100%;
+}
+
+.govuk-table {
+    margin-top: 30px;
+    margin-bottom: 30px;
 }
 
 /* DFE CARD COMPONENT - NEW

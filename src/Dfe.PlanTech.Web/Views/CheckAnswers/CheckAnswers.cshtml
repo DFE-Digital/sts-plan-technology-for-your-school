@@ -15,7 +15,7 @@
         <dl class="govuk-summary-list govuk-!-margin-bottom-9">
             @foreach (var questionWithAnswer in Model.CheckAnswerDto.Responses)
             {
-                var anchorLabel = $"Change your answer for {questionWithAnswer.QuestionText}";
+                var anchorLabel = $"your answer for {questionWithAnswer.QuestionText}";
 
                 <div class="govuk-summary-list__row">
                     <dt class="govuk-summary-list__key spacer">
@@ -25,14 +25,12 @@
                         @questionWithAnswer.AnswerText
                     </dd>
                     <dd class="govuk-summary-list__actions spacer">
-                        <a asp-controller="Questions"
-                            asp-action="GetQuestionBySlug"
+                        <a asp-controller="Questions" asp-action="GetQuestionBySlug"
                             asp-route-questionSlug="@questionWithAnswer.QuestionSlug"
-                            asp-route-sectionSlug="@Model.SectionSlug"
-                            class="govuk-link"
-                            aria-label="@anchorLabel"
+                            asp-route-sectionSlug="@Model.SectionSlug" class="govuk-link"
                             title="@questionWithAnswer.QuestionText">
-                                Change
+                            Change
+                            <span class="govuk-visually-hidden">@anchorLabel</span>
                         </a>
                     </dd>
                 </div>
