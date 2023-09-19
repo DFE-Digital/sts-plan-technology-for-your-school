@@ -1,15 +1,16 @@
-let selectedQuestionsWithAnswers = [];
-
 describe("Check answers page", () => {
   const url = "/self-assessment";
+  let selectedQuestionsWithAnswers = [];
 
   beforeEach(() => {
     selectedQuestionsWithAnswers = [];
     cy.loginWithEnv(url);
 
-    navigateToCheckAnswersPage();
+    navigateToCheckAnswersPage().then(() =>
+      cy.wrap(selectedQuestionsWithAnswers)
+    );
 
-    cy.log(selectedQuestionsWithAnswers);
+    cy.log(cy.wrap(selectedQuestionsWithAnswers));
 
     cy.url().should("contain", "check-answers");
 
@@ -87,18 +88,18 @@ describe("Check answers page", () => {
     cy.url().should("contain", "self-assessment");
     cy.get("div.govuk-notification-banner__header").should("exist");
   });
-
 });
 
 const navigateToCheckAnswersPage = () => {
   cy.clickFirstSection();
   cy.clickContinueButton();
 
-  return navigateThroughQuestions();
+  return navigateThroughQuestions().then((res) => cy.wrap(res));
 };
 
 const navigateThroughQuestions = () => {
-  cy.get("main")
+  return cy
+    .get("main")
     .then(($main) => $main.find("form div.govuk-radios").length > 0)
     .then((onQuestionPage) => {
       if (!onQuestionPage) {
@@ -112,7 +113,7 @@ const navigateThroughQuestions = () => {
 
       return navigateThroughQuestions();
     })
-    .then(() => { });
+    .then(() => cy.wrap(selectedQuestionsWithAnswers));
 };
 
 const submitAnswers = () =>

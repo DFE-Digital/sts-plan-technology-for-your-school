@@ -13,15 +13,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  clear-db:
-    name: Clear database
-    runs-on: ubuntu-latest
+  run-e2e-tests:
+    name: Run E2E Tests
+    runs-on: windows-latest
+    strategy:
+      max-parallel: 1
+      fail-fast: true
+      matrix:
+        project: [web]
     env:
       az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
       az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
       az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
       az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
       SQL_IP_NAME: e2e-tests-clear-db
+      PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -55,44 +62,11 @@ jobs:
           az_keyvault_name: ${{ env.az_keyvault_name }}
           az_keyvault_database_connectionstring_name: ${{ env.az_keyvault_database_connectionstring_name }}
 
-      - name: Execute stored procedure
+      - name: Clear DB
         uses: azure/sql-action@v2.2
         with:
           connection-string: ${{ steps.get-connection-string.outputs.connection_string }}
           path: "./.github/scripts/drop-establishment-data.sql"
-
-      - name: Remove Azure firewall rules
-        if: always()
-        uses: ./.github/actions/azure-ip-whitelist
-        with:
-          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-          verb: "remove"
-          az_keyvault_name: ${{ env.az_keyvault_name }}
-          az_ip_name: ${{ env.SQL_IP_NAME }}
-          az_resource_group: ${{ env.az_resource_group_name}}
-          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
-
-  run-tests:
-    name: Run E2E Tests
-    runs-on: windows-latest
-    needs: [clear-db]
-    env:
-      PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj
-      KEYVAULT_NAME: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
-      RESOURCE_GROUP: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-      SQL_IP_NAME: e2e-tests-pr
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Azure CLI Login
-        uses: ./.github/actions/azure-login
-        with:
-          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
-          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
-          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
@@ -113,26 +87,12 @@ jobs:
         run: |
           echo "{ \"DfeSignIn\": { \"FrontDoorUrl\": \"https://localhost:8081\"}}" > overrides.json
 
-      - name: Get workflow IP address
-        id: whats-my-ip
-        uses: ./.github/actions/whats-my-ip-address
-
-      - name: Add Azure firewall rules
-        uses: ./.github/actions/azure-ip-whitelist
-        with:
-          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-          verb: "add"
-          az_keyvault_name: ${{ env.KEYVAULT_NAME }}
-          az_ip_name: ${{ env.SQL_IP_NAME }}
-          az_resource_group: ${{ env.RESOURCE_GROUP}}
-          az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
-
       - name: Run project
         shell: bash
         working-directory: ./build
         run: |
           export ASPNETCORE_ENVIRONMENT=Staging
-          export KeyVaultName=s190d01-plantech-kv
+          export KeyVaultName=${{ env.az_keyvault_name }}
           export Kestrel__Endpoints__Https__Url=https://*:8081
           export DfeSignIn__FrontDoorUrl=https://localhost:8081
           dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 &
@@ -151,7 +111,7 @@ jobs:
         with:
           ip_address: ${{ steps.whats-my-ip.outputs.ip }}
           verb: "remove"
-          az_keyvault_name: ${{ env.KEYVAULT_NAME }}
+          az_keyvault_name: ${{ env.az_keyvault_name }}
           az_ip_name: ${{ env.SQL_IP_NAME }}
-          az_resource_group: ${{ env.RESOURCE_GROUP}}
-          az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
+          az_resource_group: ${{ env.az_resource_group_name}}
+          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
