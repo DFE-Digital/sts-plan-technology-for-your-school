@@ -13,22 +13,15 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  run-e2e-tests:
-    name: Run E2E Tests
-    runs-on: windows-latest
-    strategy:
-      max-parallel: 1
-      fail-fast: true
-      matrix:
-        project: [web]
+  clear-db:
+    name: Clear database
+    runs-on: ubuntu-latest
     env:
       az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
       az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
       az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
       az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
       SQL_IP_NAME: e2e-tests-clear-db
-      PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -62,11 +55,44 @@ jobs:
           az_keyvault_name: ${{ env.az_keyvault_name }}
           az_keyvault_database_connectionstring_name: ${{ env.az_keyvault_database_connectionstring_name }}
 
-      - name: Clear DB
+      - name: Execute stored procedure
         uses: azure/sql-action@v2.2
         with:
           connection-string: ${{ steps.get-connection-string.outputs.connection_string }}
           path: "./.github/scripts/drop-establishment-data.sql"
+
+      - name: Remove Azure firewall rules
+        if: always()
+        uses: ./.github/actions/azure-ip-whitelist
+        with:
+          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+          verb: "remove"
+          az_keyvault_name: ${{ env.az_keyvault_name }}
+          az_ip_name: ${{ env.SQL_IP_NAME }}
+          az_resource_group: ${{ env.az_resource_group_name}}
+          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
+
+  run-tests:
+    name: Run E2E Tests
+    runs-on: windows-latest
+    needs: [clear-db]
+    env:
+      PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj
+      KEYVAULT_NAME: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
+      RESOURCE_GROUP: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      SQL_IP_NAME: e2e-tests-pr
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Azure CLI Login
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
@@ -86,6 +112,20 @@ jobs:
         working-directory: ./build
         run: |
           echo "{ \"DfeSignIn\": { \"FrontDoorUrl\": \"https://localhost:8081\"}}" > overrides.json
+
+      - name: Get workflow IP address
+        id: whats-my-ip
+        uses: ./.github/actions/whats-my-ip-address
+
+      - name: Add Azure firewall rules
+        uses: ./.github/actions/azure-ip-whitelist
+        with:
+          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+          verb: "add"
+          az_keyvault_name: ${{ env.KEYVAULT_NAME }}
+          az_ip_name: ${{ env.SQL_IP_NAME }}
+          az_resource_group: ${{ env.RESOURCE_GROUP}}
+          az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
 
       - name: Run project
         shell: bash
@@ -111,7 +151,7 @@ jobs:
         with:
           ip_address: ${{ steps.whats-my-ip.outputs.ip }}
           verb: "remove"
-          az_keyvault_name: ${{ env.az_keyvault_name }}
+          az_keyvault_name: ${{ env.KEYVAULT_NAME }}
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.RESOURCE_GROUP}}
           az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
