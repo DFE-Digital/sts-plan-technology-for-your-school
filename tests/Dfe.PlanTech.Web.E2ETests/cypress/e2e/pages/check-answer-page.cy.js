@@ -109,7 +109,7 @@ const navigateThroughQuestions = () => {
       cy.saveAndContinue();
 
       return navigateThroughQuestions();
-    });
+    }).then(() => cy.wrap(selectedQuestionsWithAnswers));
 };
 
 const submitAnswers = () =>
