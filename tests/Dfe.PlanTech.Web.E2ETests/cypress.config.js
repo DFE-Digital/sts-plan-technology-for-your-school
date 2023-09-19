@@ -6,6 +6,9 @@ module.exports = defineConfig({
   reporterOptions: {
       "configFile": "reporter-config.json"
   },
+  retries: {
+    runMode: 1
+  },
   e2e: {
     setupNodeEvents(on, config) {
       on('task', {
