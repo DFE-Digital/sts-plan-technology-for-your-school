@@ -1,6 +1,7 @@
+let selectedQuestionsWithAnswers = [];
+
 describe("Check answers page", () => {
   const url = "/self-assessment";
-  let selectedQuestionsWithAnswers = [];
 
   beforeEach(() => {
     selectedQuestionsWithAnswers = [];
