@@ -69,7 +69,7 @@ jobs:
 
       - name: Publish web app
         run: |
-          dotnet publish ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj -c Release --no-build -o ./publish/
+          dotnet publish ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj -c Release -o ./publish/
           
       - name: Run unit tests
         uses: ./.github/actions/run-unit-tests
