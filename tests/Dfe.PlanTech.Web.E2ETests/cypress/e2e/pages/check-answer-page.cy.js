@@ -7,7 +7,7 @@ describe("Check answers page", () => {
     selectedQuestionsWithAnswers = [];
     cy.loginWithEnv(url);
 
-    navigateToCheckAnswersPage();
+    navigateToCheckAnswersPage().then(() => cy.wrap(selectedQuestionsWithAnswers));
 
     cy.log(selectedQuestionsWithAnswers);
 
@@ -96,7 +96,7 @@ const navigateToCheckAnswersPage = () => {
 };
 
 const navigateThroughQuestions = () => {
-  cy.get("main")
+  return cy.get("main")
     .then(($main) => $main.find("form div.govuk-radios").length > 0)
     .then((onQuestionPage) => {
       if (!onQuestionPage) {
@@ -109,8 +109,7 @@ const navigateThroughQuestions = () => {
       cy.saveAndContinue();
 
       return navigateThroughQuestions();
-    })
-    .then(() => {});
+    }).then(() => cy.wrap(selectedQuestionsWithAnswers));
 };
 
 const submitAnswers = () =>
