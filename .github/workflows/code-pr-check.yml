@@ -62,10 +62,7 @@ jobs:
             /d:sonar.issue.ignore.multicriteria.e1.resourceKey=src/**/*.cs
           
       - name: Build solution
-        uses: ./.github/actions/build-dotnet-app
-        with:
-          dotnet_version: ${{ env.DOTNET_VERSION }}  
-          solution_filename: plan-technology-for-your-school.sln
+        run: dotnet build ./plan-technology-for-your-school.sln --configuration Release --no-restore
           
       - name: Run unit tests
         uses: ./.github/actions/run-unit-tests
