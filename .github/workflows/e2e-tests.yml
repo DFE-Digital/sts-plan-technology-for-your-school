@@ -157,11 +157,13 @@ jobs:
           az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
 
       - name: Combine test results
+        if: always()
         shell: bash
         working-directory: tests/Dfe.PlanTech.Web.E2ETests/
         run: npm run report:merge
 
       - uses: dorny/test-reporter@v1
+        if: always()
         with:
           artifact: e2e-test-report
           name: E2E Test Report
