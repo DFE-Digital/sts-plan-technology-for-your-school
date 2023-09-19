@@ -17,4 +17,9 @@ public class NavigationLink : ContentComponent
   /// Href value (i.e. <a href="{Href}"></a>)
   /// </summary>
   public string Href { get; init; } = null!;
+
+  /// <summary>
+  /// Should this link open in a new tab?
+  /// </summary>
+  public bool OpenInNewTab { get; init; } = false;
 }

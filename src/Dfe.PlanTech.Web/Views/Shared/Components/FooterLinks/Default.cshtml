@@ -5,7 +5,7 @@
     foreach (var link in Model)
     {
       <li class="govuk-footer__inline-list-item">
-        <a class="govuk-footer__link" href=@link.Href>@link.DisplayText</a>
+        <footer-link link=@link />
       </li>
     }
   }
