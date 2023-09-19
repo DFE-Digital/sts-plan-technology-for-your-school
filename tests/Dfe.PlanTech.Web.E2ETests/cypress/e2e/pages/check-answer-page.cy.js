@@ -59,8 +59,10 @@ describe("Check answers page", () => {
           cy.wrap(row)
             .find("a")
             .contains("Change")
-            .and("have.attr", "aria-label")
-            .and("contain", questionWithAnswer.question);
+            .and("contain", questionWithAnswer.question)
+            .get('span[class="govuk-visually-hidden"]')
+            .invoke("text")
+            .should("have.length.greaterThan", 1);
 
           cy.wrap(row)
             .find("a")
