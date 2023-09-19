@@ -69,7 +69,16 @@ public class QuestionsController : BaseController<QuestionsController>
             return RenderView(viewModel);
         }
 
-        await submitAnswerCommand.SubmitAnswer(submitAnswerDto, cancellationToken);
+        try
+        {
+            await submitAnswerCommand.SubmitAnswer(submitAnswerDto, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            var viewModel = await GenerateViewModel(sectionSlug, questionSlug, cancellationToken);
+            viewModel.ErrorMessages = new[] { "Save failed. Please try again later."};
+            return RenderView(viewModel);
+        }
 
         return RedirectToAction(nameof(GetNextUnansweredQuestion), new { sectionSlug });
     }
