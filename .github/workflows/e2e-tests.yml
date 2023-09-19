@@ -19,13 +19,15 @@ jobs:
     strategy:
       max-parallel: 1
       fail-fast: true
+      matrix:
+        project_path: [./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj]
     env:
       az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
       az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
       az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
       az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
       SQL_IP_NAME: e2e-tests-clear-db
-      PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj
+      PROJECT_PATH: ${{ matrix.project_path }}
 
     steps:
       - name: Checkout
@@ -102,7 +104,6 @@ jobs:
           dsi_url: ${{ secrets.DSI_URL }}
           dsi_username: ${{ secrets.DSI_USERNAME }}
           dsi_password: ${{ secrets.DSI_PASSWORD }}
-
 
       - name: Remove Azure firewall rules
         if: always()
