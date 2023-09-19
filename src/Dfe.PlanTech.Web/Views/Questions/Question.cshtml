@@ -25,9 +25,9 @@
                 <govuk-radios-hint>@Model.Question.HelpText</govuk-radios-hint>
             }
 
-            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            @if (Model.ErrorMessages != null)
             {
-                <govuk-radios-error-message>@Model.ErrorMessage</govuk-radios-error-message>
+                <govuk-radios-error-message>@string.Join(",", Model.ErrorMessages)</govuk-radios-error-message>
             }
 
             @{
