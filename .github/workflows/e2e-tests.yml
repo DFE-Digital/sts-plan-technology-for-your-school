@@ -102,7 +102,6 @@ jobs:
           export ASPNETCORE_ENVIRONMENT=Staging
           export KeyVaultName=${{ env.az_keyvault_name }}
           export Kestrel__Endpoints__Https__Url=https://*:8081
-          ASPNETCORE_Kestrel__Certificates__Default__Path=localhost.crt
           export DfeSignIn__FrontDoorUrl=https://localhost:8081
           dotnet ./publish/Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 &
 
