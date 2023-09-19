@@ -16,11 +16,7 @@ jobs:
   run-e2e-tests:
     name: Run E2E Tests
     runs-on: windows-latest
-    strategy:
-      max-parallel: 1
-      fail-fast: true
-      matrix:
-        project: [web]
+
     env:
       az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
       az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
