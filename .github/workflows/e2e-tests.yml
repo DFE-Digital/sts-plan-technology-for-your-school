@@ -165,7 +165,7 @@ jobs:
       - uses: dorny/test-reporter@v1
         if: always()
         with:
-          artifact: e2e-test-report
           name: E2E Test Report
-          path: "tests/Dfe.PlanTech.Web.E2ETests/index.json"
+          path: tests/Dfe.PlanTech.Web.E2ETests/index.json
           reporter: mocha-json
+          fail-on-error: false
