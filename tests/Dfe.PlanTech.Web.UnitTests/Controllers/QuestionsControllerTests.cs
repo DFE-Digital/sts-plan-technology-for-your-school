@@ -149,7 +149,7 @@ public class QuestionsControllerTests
     Assert.Equal(_validQuestion, model.Question);
     Assert.Equal(_validSection.Name, model.SectionName);
     Assert.Equal(SECTION_SLUG, model.SectionSlug);
-    Assert.Null(model.ErrorMessage);
+    Assert.Null(model.ErrorMessages);
     Assert.Null(model.AnswerRef);
   }
 
