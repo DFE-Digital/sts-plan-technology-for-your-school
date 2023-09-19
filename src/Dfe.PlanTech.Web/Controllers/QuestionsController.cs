@@ -58,6 +58,8 @@ public class QuestionsController : BaseController<QuestionsController>
             SectionId = section.Sys.Id
         };
 
+        ViewData["Title"] = question.Text;
+
         return View("Question", viewModel);
     }
 
