@@ -15,9 +15,9 @@ th,
 td,
 blockquote,
 li,
-tr {
-  font-family: BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu,
-    Cantarell, "Helvetica Neue", sans-serif !important;
+tr,
+.govuk-button {
+    font-family: BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif !important;
 }
 
 .logo {

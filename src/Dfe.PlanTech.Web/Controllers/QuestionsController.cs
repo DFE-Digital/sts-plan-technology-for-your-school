@@ -35,31 +35,10 @@ public class QuestionsController : BaseController<QuestionsController>
         if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
         if (string.IsNullOrEmpty(questionSlug)) throw new ArgumentNullException(nameof(questionSlug));
 
-        var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
-                        throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
-
-        var question = section.Questions.FirstOrDefault(question => question.Slug == questionSlug) ??
-                            throw new KeyNotFoundException($"Could not find question slug {questionSlug} under section {sectionSlug}");
-
-        int establishmentId = await _user.GetEstablishmentId();
-
-        var latestResponseForQuestion = await _getResponseQuery.GetLatestResponseForQuestion(establishmentId,
-                                                                                section.Sys.Id,
-                                                                                question.Sys.Id,
-                                                                                cancellationToken);
-
-        var viewModel = new QuestionViewModel()
-        {
-            Question = question,
-            AnswerRef = latestResponseForQuestion?.AnswerRef,
-            ErrorMessage = null,
-            SectionName = section.Name,
-            SectionSlug = sectionSlug,
-            SectionId = section.Sys.Id
-        };
-
-        return View("Question", viewModel);
+        var viewModel = await GenerateViewModel(sectionSlug, questionSlug, cancellationToken);
+        return RenderView(viewModel);
     }
+
 
     [HttpGet("{sectionSlug}/next-question")]
     public async Task<IActionResult> GetNextUnansweredQuestion(string sectionSlug,
@@ -83,10 +62,45 @@ public class QuestionsController : BaseController<QuestionsController>
     [HttpPost("{sectionSlug}/{questionSlug}")]
     public async Task<IActionResult> SubmitAnswer(string sectionSlug, string questionSlug, SubmitAnswerDto submitAnswerDto, [FromServices] ISubmitAnswerCommand submitAnswerCommand, CancellationToken cancellationToken = default)
     {
-        if (!ModelState.IsValid) return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug });
+        if (!ModelState.IsValid)
+        {
+            var viewModel = await GenerateViewModel(sectionSlug, questionSlug, cancellationToken);
+            viewModel.ErrorMessages = ModelState.Values.SelectMany(value => value.Errors.Select(err => err.ErrorMessage)).ToArray();
+            return RenderView(viewModel);
+        }
 
         await submitAnswerCommand.SubmitAnswer(submitAnswerDto, cancellationToken);
 
         return RedirectToAction(nameof(GetNextUnansweredQuestion), new { sectionSlug });
     }
+
+    private IActionResult RenderView(QuestionViewModel viewModel) => View("Question", viewModel);
+
+    private async Task<QuestionViewModel> GenerateViewModel(string sectionSlug, string questionSlug, CancellationToken cancellationToken)
+    {
+        var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
+                        throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
+
+        var question = section.Questions.FirstOrDefault(question => question.Slug == questionSlug) ??
+                            throw new KeyNotFoundException($"Could not find question slug {questionSlug} under section {sectionSlug}");
+
+        int establishmentId = await _user.GetEstablishmentId();
+
+        var latestResponseForQuestion = await _getResponseQuery.GetLatestResponseForQuestion(establishmentId,
+                                                                                section.Sys.Id,
+                                                                                question.Sys.Id,
+                                                                                cancellationToken);
+
+        ViewData["Title"] = question.Text;
+
+        return new QuestionViewModel()
+        {
+            Question = question,
+            AnswerRef = latestResponseForQuestion?.AnswerRef,
+            SectionName = section.Name,
+            SectionSlug = sectionSlug,
+            SectionId = section.Sys.Id
+        };
+    }
+
 }

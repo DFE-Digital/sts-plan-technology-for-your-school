@@ -11,7 +11,7 @@ public class SubmitAnswerDto
     [Required]
     public string QuestionText { get; init; } = null!;
 
-    [Required]
+    [Required(AllowEmptyStrings = false, ErrorMessage = "You must select an answer to continue")]
     public string ChosenAnswerJson { get; init; } = null!;
 
     public AnswerViewModelDto? ChosenAnswer => !string.IsNullOrEmpty(ChosenAnswerJson) ?
