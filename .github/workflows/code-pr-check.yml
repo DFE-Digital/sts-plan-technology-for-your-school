@@ -62,7 +62,7 @@ jobs:
             /d:sonar.issue.ignore.multicriteria.e1.resourceKey=src/**/*.cs
           
       - name: Build solution
-        run: dotnet build ./plan-technology-for-your-school.sln --configuration Release
+        run: dotnet build ./plan-technology-for-your-school.sln
           
       - name: Run unit tests
         uses: ./.github/actions/run-unit-tests
