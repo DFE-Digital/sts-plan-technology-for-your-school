@@ -1,12 +1,16 @@
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Web.Helpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using System.Text;
 
 namespace Dfe.PlanTech.Web.TagHelpers;
 
+/// <summary>
+/// Renders a single navigation link in the footer.
+/// </summary>
+/// <remarks>Should be refactored in future to be any <see cref="NavigationLink"/>, and pass in HTML class used</remarks>
 public class FooterLinkTagHelper : TagHelper
 {
+  public const string FOOTER_CLASS = "govuk-footer__link";
   private readonly ILogger<FooterLinkTagHelper> _logger;
 
   public NavigationLink? Link { get; set; }
@@ -18,9 +22,9 @@ public class FooterLinkTagHelper : TagHelper
 
   public override void Process(TagHelperContext context, TagHelperOutput output)
   {
-    if (Link == null)
+    if (Link == null || !Link.IsValid)
     {
-      _logger.LogWarning($"Missing {nameof(Link)}");
+      _logger.LogWarning("Missing {link}", nameof(Link));
       return;
     }
 

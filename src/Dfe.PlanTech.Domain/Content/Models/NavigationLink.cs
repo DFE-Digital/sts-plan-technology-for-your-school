@@ -22,4 +22,6 @@ public class NavigationLink : ContentComponent
   /// Should this link open in a new tab?
   /// </summary>
   public bool OpenInNewTab { get; init; } = false;
+
+  public bool IsValid => !string.IsNullOrEmpty(DisplayText) && !string.IsNullOrEmpty(Href);
 }
