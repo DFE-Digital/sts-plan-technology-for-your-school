@@ -16,14 +16,11 @@ public class QuestionsController : BaseController<QuestionsController>
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetLatestResponsesQuery _getResponseQuery;
     private readonly IUser _user;
-    private readonly ILogger _logger;
-
     public QuestionsController(ILogger<QuestionsController> logger,
                                 IGetSectionQuery getSectionQuery,
                                 IGetLatestResponsesQuery getResponseQuery,
                                 IUser user) : base(logger)
     {
-        _logger = logger;
         _getResponseQuery = getResponseQuery;
         _getSectionQuery = getSectionQuery;
         _user = user;
