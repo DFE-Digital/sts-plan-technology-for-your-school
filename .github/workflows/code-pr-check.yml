@@ -84,13 +84,6 @@ jobs:
           name: code-coverage-report
           path: coverage.xml
 
-      - name: Upload Published Web App
-        uses: actions/upload-artifact@v3
-        with:
-          name: web-app-build
-          path: ./publish/
-          retention-days: 5
-
   build-database-upgrader:  
     name: Build database upgrader
     runs-on: ubuntu-latest
