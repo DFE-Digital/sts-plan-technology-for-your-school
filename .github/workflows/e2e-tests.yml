@@ -9,8 +9,8 @@ on:
       - ".github/workflows/e2e-tests.yml"
 
 concurrency:
-  group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
-  cancel-in-progress: true
+  group: "${{ github.workflow }}"
+  cancel-in-progress: false
 
 jobs:
   run-e2e-tests:
@@ -92,7 +92,7 @@ jobs:
         working-directory: ./build
         run: |
           export ASPNETCORE_ENVIRONMENT=Staging
-          export KeyVaultName=${{ env.az_keyvault_name }}
+          export KeyVaultName=${{ env.KEYVAULT_NAME }}
           export Kestrel__Endpoints__Https__Url=https://*:8081
           export DfeSignIn__FrontDoorUrl=https://localhost:8081
           dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 &
@@ -113,5 +113,5 @@ jobs:
           verb: "remove"
           az_keyvault_name: ${{ env.az_keyvault_name }}
           az_ip_name: ${{ env.SQL_IP_NAME }}
-          az_resource_group: ${{ env.az_resource_group_name}}
-          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
+          az_resource_group: ${{ env.RESOURCE_GROUP}}
+          az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
