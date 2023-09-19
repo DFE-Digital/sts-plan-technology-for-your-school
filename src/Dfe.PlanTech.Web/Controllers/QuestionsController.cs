@@ -16,12 +16,14 @@ public class QuestionsController : BaseController<QuestionsController>
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetLatestResponsesQuery _getResponseQuery;
     private readonly IUser _user;
+    private readonly ILogger _logger;
 
     public QuestionsController(ILogger<QuestionsController> logger,
                                 IGetSectionQuery getSectionQuery,
                                 IGetLatestResponsesQuery getResponseQuery,
                                 IUser user) : base(logger)
     {
+        _logger = logger;
         _getResponseQuery = getResponseQuery;
         _getSectionQuery = getSectionQuery;
         _user = user;
@@ -75,6 +77,7 @@ public class QuestionsController : BaseController<QuestionsController>
         }
         catch (Exception e)
         {
+            logger.LogError("An error has occurred while submitting an answer with the following message: {} ", e.Message);
             var viewModel = await GenerateViewModel(sectionSlug, questionSlug, cancellationToken);
             viewModel.ErrorMessages = new[] { "Save failed. Please try again later."};
             return RenderView(viewModel);
