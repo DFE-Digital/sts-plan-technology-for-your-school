@@ -74,6 +74,10 @@ jobs:
         run: |
           echo "{ \"DfeSignIn\": { \"FrontDoorUrl\": \"https://localhost:8081\"}}" > overrides.json
 
+      - name: Generate and trust https cert
+        shell: bash
+        run: dotnet dev-certs https --trust
+        
       - name: Run project
         shell: bash
         run: |
