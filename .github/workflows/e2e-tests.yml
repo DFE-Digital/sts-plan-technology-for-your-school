@@ -132,7 +132,7 @@ jobs:
         working-directory: ./build
         run: |
           export ASPNETCORE_ENVIRONMENT=Staging
-          export KeyVaultName=s190d01-plantech-kv
+          export KeyVaultName=${{ env.KEYVAULT_NAME }}
           export Kestrel__Endpoints__Https__Url=https://*:8081
           export DfeSignIn__FrontDoorUrl=https://localhost:8081
           dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 &
