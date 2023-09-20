@@ -7,9 +7,11 @@ describe("Check answers page", () => {
     selectedQuestionsWithAnswers = [];
     cy.loginWithEnv(url);
 
-    navigateToCheckAnswersPage();
+    navigateToCheckAnswersPage().then(() =>
+      cy.wrap(selectedQuestionsWithAnswers)
+    );
 
-    cy.log(selectedQuestionsWithAnswers);
+    cy.log(cy.wrap(selectedQuestionsWithAnswers));
 
     cy.url().should("contain", "check-answers");
 
@@ -57,8 +59,10 @@ describe("Check answers page", () => {
           cy.wrap(row)
             .find("a")
             .contains("Change")
-            .and("have.attr", "aria-label")
-            .and("contain", questionWithAnswer.question);
+            .and("contain", questionWithAnswer.question)
+            .get('span[class="govuk-visually-hidden"]')
+            .invoke("text")
+            .should("have.length.greaterThan", 1);
 
           cy.wrap(row)
             .find("a")
@@ -77,7 +81,7 @@ describe("Check answers page", () => {
     cy.get("a:nth-child(1)").contains("Change").click();
     cy.url().should("contains", "broadband-contract-review");
   });
-  
+
   //This needs to be last on this test run, so that the question-page tests have a clean slate to work from!
   it("submits answers and shows notification", () => {
     submitAnswers();
@@ -85,18 +89,18 @@ describe("Check answers page", () => {
     cy.url().should("contain", "self-assessment");
     cy.get("div.govuk-notification-banner__header").should("exist");
   });
-
 });
 
 const navigateToCheckAnswersPage = () => {
   cy.clickFirstSection();
   cy.clickContinueButton();
 
-  return navigateThroughQuestions();
+  return navigateThroughQuestions().then((res) => cy.wrap(res));
 };
 
 const navigateThroughQuestions = () => {
-  cy.get("main")
+  return cy
+    .get("main")
     .then(($main) => $main.find("form div.govuk-radios").length > 0)
     .then((onQuestionPage) => {
       if (!onQuestionPage) {
@@ -110,8 +114,8 @@ const navigateThroughQuestions = () => {
 
       return navigateThroughQuestions();
     })
-    .then(() => {});
+    .then(() => cy.wrap(selectedQuestionsWithAnswers));
 };
 
 const submitAnswers = () =>
-  cy.get("button.govuk-button").contains("Save and Submit").click();
+  cy.get("button.govuk-button").contains("Save and submit").click();
