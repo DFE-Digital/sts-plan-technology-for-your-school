@@ -10,7 +10,7 @@ describe("Self-assessment page", () => {
   it("should have heading", () => {
     cy.get("h1.govuk-heading-xl")
       .should("exist")
-      .and("have.text", "Technology self\u00ADassessment");
+      .and("have.text", "Technology self\u00AD-assessment");
     
   });
 
