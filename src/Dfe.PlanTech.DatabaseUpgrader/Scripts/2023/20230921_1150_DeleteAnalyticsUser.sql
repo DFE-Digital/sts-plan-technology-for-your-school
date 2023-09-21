@@ -1,5 +1,4 @@
--- $Analytics_Username$ $Analytics_Password$
-IF EXISTS (SELECT * FROM sys.database_principals WHERE name = '$Analytics_Username$')
+IF EXISTS (SELECT * FROM sys.database_principals WHERE name = 'AnalyticsUser')
 BEGIN
-    DROP USER [$Analytics_Username$]
+    DROP USER [AnalyticsUser]
 END
