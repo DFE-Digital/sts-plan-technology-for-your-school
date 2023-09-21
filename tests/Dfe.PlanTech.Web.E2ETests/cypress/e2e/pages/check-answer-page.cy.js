@@ -4,14 +4,14 @@ describe("Check answers page", () => {
   const url = "/self-assessment";
 
   beforeEach(() => {
-    selectedQuestionsWithAnswers = [];
     cy.loginWithEnv(url);
 
-    navigateToCheckAnswersPage().then(() =>
-      cy.wrap(selectedQuestionsWithAnswers)
-    );
+    cy.clickFirstSection();
+    cy.clickContinueButton();
 
-    cy.log(cy.wrap(selectedQuestionsWithAnswers));
+    cy.navigateToCheckAnswersPage(selectedQuestionsWithAnswers);
+
+    cy.log(selectedQuestionsWithAnswers);
 
     cy.url().should("contain", "check-answers");
 
@@ -84,38 +84,9 @@ describe("Check answers page", () => {
 
   //This needs to be last on this test run, so that the question-page tests have a clean slate to work from!
   it("submits answers and shows notification", () => {
-    submitAnswers();
+    cy.submitAnswers();
 
     cy.url().should("contain", "self-assessment");
     cy.get("div.govuk-notification-banner__header").should("exist");
   });
 });
-
-const navigateToCheckAnswersPage = () => {
-  cy.clickFirstSection();
-  cy.clickContinueButton();
-
-  return navigateThroughQuestions().then((res) => cy.wrap(res));
-};
-
-const navigateThroughQuestions = () => {
-  return cy
-    .get("main")
-    .then(($main) => $main.find("form div.govuk-radios").length > 0)
-    .then((onQuestionPage) => {
-      if (!onQuestionPage) {
-        return Promise.resolve();
-      }
-
-      cy.selectFirstRadioButton().then((questionWithAnswer) =>
-        selectedQuestionsWithAnswers.push(questionWithAnswer)
-      );
-      cy.saveAndContinue();
-
-      return navigateThroughQuestions();
-    })
-    .then(() => cy.wrap(selectedQuestionsWithAnswers));
-};
-
-const submitAnswers = () =>
-  cy.get("button.govuk-button").contains("Save and submit").click();

@@ -9,7 +9,7 @@ describe("Question page", () => {
 
     //Navigate to first question
     cy.clickContinueButton();
-    
+
     cy.injectAxe();
   });
 
