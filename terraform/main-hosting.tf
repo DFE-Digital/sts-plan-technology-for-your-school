@@ -28,8 +28,15 @@ module "main_hosting" {
   #############
   # Azure SQL #
   #############
-  enable_mssql_database              = true
-  mssql_database_name                = "${local.resource_prefix}-sqldb"
-  mssql_server_admin_password        = local.az_sql_admin_password
-  mssql_server_public_access_enabled = true
+  enable_mssql_database         = true
+  mssql_database_name           = "${local.resource_prefix}-sqldb"
+  mssql_azuread_admin_username  = local.az_sql_azuread_admin_username
+  mssql_azuread_admin_object_id = local.az_sql_azuread_admin_objectid
+  mssql_azuread_auth_only       = local.az_use_azure_ad_auth_only
+}
+
+resource "random_password" "az_sql_password" {
+  length           = 32
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
