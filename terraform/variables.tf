@@ -46,11 +46,6 @@ variable "cdn_frontdoor_origin_host_header_override" {
 #############
 # Azure SQL #
 #############
-variable "az_sql_admin_userid_postfix" {
-  description = "Azure SQL admin userid postfix, used with `project_name` and `environment` to build userid"
-  type        = string
-}
-
 variable "az_sql_azuread_admin_username" {
   description = "Username/email/service principal name/etc of the Azure AD account to use as admin for the SQL Server"
   type        = string
