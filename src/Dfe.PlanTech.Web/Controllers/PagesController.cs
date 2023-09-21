@@ -41,7 +41,7 @@ public class PagesController : BaseController<PagesController>
 
     private PageViewModel CreatePageModel(Page page,  IUser user)
     {
-        ViewData["Title"] = page.Title?.Text ?? "Plan Technology For Your School";
+        ViewData["Title"] = System.Net.WebUtility.HtmlDecode(page.Title?.Text) ?? "Plan Technology For Your School";
 
         var viewModel = new PageViewModel()
         {
