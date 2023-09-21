@@ -1,6 +1,7 @@
 using Azure.Identity;
 using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Helpers;
+using Dfe.PlanTech.Domain.SignIns.Enums;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.SignIns;
 using Dfe.PlanTech.Web;
@@ -86,15 +87,31 @@ app.UseExceptionHandler(exceptionHandlerApp =>
     exceptionHandlerApp.Run(context =>
     {
         var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
-
         var error = exceptionHandlerPathFeature?.Error;
 
-        context.Response.Redirect(error is ContentfulDataUnavailableException ? UrlConstants.ServiceUnavailable : UrlConstants.Error);
-        
+        string redirectUrl;
+
+        switch (error)
+        {
+            case ContentfulDataUnavailableException _:
+                redirectUrl = UrlConstants.ServiceUnavailable;
+                break;
+            
+            case Exception outerException when outerException.InnerException is KeyNotFoundException innerException &&
+                                               innerException.Message.Contains(ClaimConstants.Organisation):
+                redirectUrl = UrlConstants.ServiceUnavailable;
+                break;
+            
+            default:
+                redirectUrl = UrlConstants.Error;
+                break;
+        }
+
+        context.Response.Redirect(redirectUrl);
+
         return Task.CompletedTask;
     });
 });
-
 app.UseStaticFiles();
 
 app.UseRouting();
