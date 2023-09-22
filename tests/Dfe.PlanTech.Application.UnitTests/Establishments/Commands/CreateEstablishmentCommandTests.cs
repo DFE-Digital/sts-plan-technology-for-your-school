@@ -3,10 +3,13 @@ using Dfe.PlanTech.Application.Users.Commands;
 using Dfe.PlanTech.Domain.Establishments.Models;
 using NSubstitute;
 
-namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
+namespace Dfe.PlanTech.Application.UnitTests.Establishments.Commands
 {
     public class CreateEstablishmentCommandTests
     {
+        private const string OrgName = "Org name";
+        private readonly EstablishmentTypeDto EstablishmentType = new() { Name = "Establishment Type"};
+
         public IPlanTechDbContext Db = Substitute.For<IPlanTechDbContext>();
 
         public CreateEstablishmentCommand CreateStrut()
@@ -14,40 +17,60 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
             return new CreateEstablishmentCommand(Db);
         }
 
-        [Theory]
-        [InlineData(1)]
-        [InlineData(100)]
-        public async Task CreateEstablishmentReturnsIdOfNewlyCreateEstablishmentWithUkprn(int expectedEstablishmentId)
+        [Fact]
+        public async Task CreateEstablishmentReturnsIdOfNewlyCreateEstablishmentWithUkprn()
         {
+            var establishmentId = 1;
+            var establishment = new Domain.Establishments.Models.Establishment();
+            
             //Arrange
             var strut = CreateStrut();
-            Db.AddEstablishment(Arg.Any<Domain.Establishments.Models.Establishment>());
-            Db.SaveChangesAsync().Returns(Task.FromResult(expectedEstablishmentId));
-            var establishmentDto = new EstablishmentDto() { Urn = null, Ukprn = new Guid().ToString() };
+            Db.When(db => db.AddEstablishment(Arg.Any<Domain.Establishments.Models.Establishment>()))
+            .Do(callinfo =>
+            {
+                var dto = callinfo.ArgAt<Domain.Establishments.Models.Establishment>(0);
+
+                establishment = dto;
+                establishment.Id = establishmentId;
+            });
+
+            Db.SaveChangesAsync().Returns(Task.FromResult(establishment.Id));
+
+            var establishmentDto = new EstablishmentDto() { Urn = null, Ukprn = new Guid().ToString(), Type = EstablishmentType, OrgName = OrgName };
 
             //Act
             var result = await strut.CreateEstablishment(establishmentDto);
 
             //Assert
-            Assert.Equal(expectedEstablishmentId, result);
+            Assert.Equal(establishmentId, result);
         }
 
-        [Theory]
-        [InlineData(3)]
-        [InlineData(300)]
-        public async Task CreateEstablishmentReturnsIdOfNewlyCreateEstablishmentWithUrn(int expectedEstablishmentId)
+        [Fact]
+        public async Task CreateEstablishmentReturnsIdOfNewlyCreateEstablishmentWithUrn()
         {
             //Arrange
+            var establishmentId = 1;
+            var establishment = new Domain.Establishments.Models.Establishment();
+            
+            //Arrange
             var strut = CreateStrut();
-            Db.AddEstablishment(Arg.Any<Domain.Establishments.Models.Establishment>());
-            Db.SaveChangesAsync().Returns(Task.FromResult(expectedEstablishmentId));
-            var establishmentDto = new EstablishmentDto() { Urn = new Guid().ToString(), Ukprn = null };
+            Db.When(db => db.AddEstablishment(Arg.Any<Domain.Establishments.Models.Establishment>()))
+            .Do(callinfo =>
+            {
+                var dto = callinfo.ArgAt<Domain.Establishments.Models.Establishment>(0);
+
+                establishment = dto;
+                establishment.Id = establishmentId;
+            });
+
+            Db.SaveChangesAsync().Returns(Task.FromResult(establishment.Id));
+            var establishmentDto = new EstablishmentDto() { Urn = new Guid().ToString(), Ukprn = null, Type = EstablishmentType, OrgName = OrgName };
 
             //Act
             var result = await strut.CreateEstablishment(establishmentDto);
 
             //Assert
-            Assert.Equal(expectedEstablishmentId, result);
+            Assert.Equal(establishmentId, result);
         }
 
 
@@ -55,7 +78,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
         public async Task CreateEstablishmentDoesThrowsExceptionWhenUrnAndUkprnAreNotPresent()
         {
             var strut = CreateStrut();
-            var establishmentDto = new EstablishmentDto() { Urn = null, Ukprn = null };
+            var establishmentDto = new EstablishmentDto() { Urn = null, Ukprn = null, OrgName = OrgName, Type = EstablishmentType };
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () => await strut.CreateEstablishment(establishmentDto));
 
