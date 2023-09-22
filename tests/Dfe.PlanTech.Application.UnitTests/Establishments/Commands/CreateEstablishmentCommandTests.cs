@@ -21,14 +21,14 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Commands
         public async Task CreateEstablishmentReturnsIdOfNewlyCreateEstablishmentWithUkprn()
         {
             var establishmentId = 1;
-            var establishment = new Domain.Establishments.Models.Establishment();
+            var establishment = new Establishment();
 
             //Arrange
             var strut = CreateStrut();
-            Db.When(db => db.AddEstablishment(Arg.Any<Domain.Establishments.Models.Establishment>()))
+            Db.When(db => db.AddEstablishment(Arg.Any<Establishment>()))
             .Do(callinfo =>
             {
-                var dto = callinfo.ArgAt<Domain.Establishments.Models.Establishment>(0);
+                var dto = callinfo.ArgAt<Establishment>(0);
 
                 establishment = dto;
                 establishment.Id = establishmentId;
@@ -50,14 +50,14 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Commands
         {
             //Arrange
             var establishmentId = 1;
-            var establishment = new Domain.Establishments.Models.Establishment();
+            var establishment = new Establishment();
 
             //Arrange
             var strut = CreateStrut();
-            Db.When(db => db.AddEstablishment(Arg.Any<Domain.Establishments.Models.Establishment>()))
+            Db.When(db => db.AddEstablishment(Arg.Any<Establishment>()))
             .Do(callinfo =>
             {
-                var dto = callinfo.ArgAt<Domain.Establishments.Models.Establishment>(0);
+                var dto = callinfo.ArgAt<Establishment>(0);
 
                 establishment = dto;
                 establishment.Id = establishmentId;
