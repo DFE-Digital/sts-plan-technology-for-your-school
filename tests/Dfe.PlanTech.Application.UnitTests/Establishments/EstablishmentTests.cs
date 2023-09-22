@@ -22,9 +22,9 @@ public class EstablishmentTests
       EstablishmentType = faker.Random.AlphaNumeric(Establishment.EstablishmentTypeLength - 1),
     };
 
-    Assert.True(establishment.OrgName.Length <= Establishment.OrgNameLength);
+    Assert.True(establishment.OrgName.Length <= Establishment.OrgNameLength, $"OrgName is {establishment.OrgName.Length}");
     Assert.Equal(Establishment.OrgNameLength, establishment.OrgName.Length);
-    Assert.StartsWith(orgName, establishment.OrgName);
+    Assert.StartsWith(establishment.OrgName, orgName);
     Assert.NotEqual(orgName, establishment.OrgName);
   }
 
@@ -45,9 +45,9 @@ public class EstablishmentTests
       EstablishmentType = faker.Random.AlphaNumeric(Establishment.EstablishmentTypeLength - 1),
     };
 
-    Assert.True(establishment.EstablishmentRef.Length <= Establishment.EstablishmentRefLength);
+    Assert.True(establishment.EstablishmentRef.Length <= Establishment.EstablishmentRefLength, $"Ref is {establishment.EstablishmentRef.Length}");
     Assert.Equal(Establishment.EstablishmentTypeLength, establishment.EstablishmentRef.Length);
-    Assert.StartsWith(establishmentRef, establishment.EstablishmentRef);
+    Assert.StartsWith(establishment.EstablishmentRef, establishmentRef);
     Assert.NotEqual(establishmentRef, establishment.EstablishmentRef);
   }
 
@@ -68,9 +68,9 @@ public class EstablishmentTests
       EstablishmentType = establishmentType
     };
 
-    Assert.True(establishment.EstablishmentType.Length <= Establishment.EstablishmentTypeLength);
+    Assert.True(establishment.EstablishmentType.Length <= Establishment.EstablishmentTypeLength, $"Type is {establishment.EstablishmentType.Length}");
     Assert.Equal(Establishment.EstablishmentTypeLength, establishment.EstablishmentType.Length);
-    Assert.StartsWith(establishmentType, establishment.EstablishmentRef);
+    Assert.StartsWith(establishment.EstablishmentType, establishmentType);
     Assert.NotEqual(establishmentType, establishment.EstablishmentType);
   }
 }
