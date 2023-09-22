@@ -1,5 +1,5 @@
 ALTER PROCEDURE GetSectionStatuses 
-    @splitStringVal nvarchar(255)
+    @splitStringVal nvarchar(255),
     @establishmentId int
     AS
 DECLARE @val NVARCHAR(50)
