@@ -22,7 +22,7 @@ public class Establishment
         {
             _establishmentRef = value.Length < EstablishmentRefLength ?
                                     value :
-                                    value.AsSpan(0, EstablishmentRefLength - 1).ToString();
+                                    value.AsSpan(0, EstablishmentRefLength).ToString();
         }
     }
 
@@ -34,7 +34,7 @@ public class Establishment
         {
             _establishmentType = value.Length < EstablishmentTypeLength ?
                                     value :
-                                    value.AsSpan(0, EstablishmentTypeLength - 1).ToString();
+                                    value.AsSpan(0, EstablishmentTypeLength).ToString();
         }
     }
 
@@ -46,7 +46,7 @@ public class Establishment
         {
             _orgName = value.Length < OrgNameLength ?
                                     value :
-                                    value.AsSpan(0, OrgNameLength - 1).ToString();
+                                    value.AsSpan(0, OrgNameLength).ToString();
         }
     }
 
