@@ -108,7 +108,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
 
     public IQueryable<User> GetUsers => Users;
     public IQueryable<SignIn> SignIns => SignIn;
-    public IQueryable<SectionStatuses> GetSectionStatuses(string sectionIds) => sectionStatusesSp.FromSqlInterpolated($"{DatabaseConstants.GetSectionStatuses} {sectionIds}");
+    public IQueryable<SectionStatuses> GetSectionStatuses(string sectionIds, int establishmentId) => sectionStatusesSp.FromSqlInterpolated($"{DatabaseConstants.GetSectionStatuses} {sectionIds} , {establishmentId}");
 
     public void AddUser(User user) => Users.Add(user);
 
