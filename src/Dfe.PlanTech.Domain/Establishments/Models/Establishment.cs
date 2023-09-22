@@ -3,6 +3,7 @@
     public class Establishment
     {
         public int Id { get; set; }
+        
         public string EstablishmentRef { get; set; } = null!;
 
         public string EstablishmentType { get; set; } = null!;
