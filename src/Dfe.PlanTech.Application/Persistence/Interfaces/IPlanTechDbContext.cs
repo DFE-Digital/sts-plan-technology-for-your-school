@@ -41,7 +41,7 @@ public interface IPlanTechDbContext
 
     Task<int> CallStoredProcedureWithReturnInt(string sprocName, IEnumerable<SqlParameter> parms, CancellationToken cancellationToken = default);
 
-    IQueryable<SectionStatuses> GetSectionStatuses(string sectionIds);
+    IQueryable<SectionStatuses> GetSectionStatuses(string sectionIds, int establishmentId);
 
     Task<User?> GetUserBy(Expression<Func<User, bool>> predicate);
 

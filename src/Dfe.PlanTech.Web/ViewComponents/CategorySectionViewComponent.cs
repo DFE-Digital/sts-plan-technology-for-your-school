@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.CategorySection;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
