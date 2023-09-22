@@ -30,8 +30,8 @@ public class CreateEstablishmentCommand : ICreateEstablishmentCommand
 
         _db.AddEstablishment(establishment);
 
-        var establishmentId = await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
-        return establishmentId;
+        return establishment.Id;
     }
 }
