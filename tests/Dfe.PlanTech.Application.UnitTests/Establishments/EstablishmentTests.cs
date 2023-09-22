@@ -73,4 +73,53 @@ public class EstablishmentTests
     Assert.StartsWith(establishment.EstablishmentType, establishmentType);
     Assert.NotEqual(establishmentType, establishment.EstablishmentType);
   }
+
+  [Fact]
+  public void Should_Not_Trim_Values_When_Under_Length()
+  {
+    var faker = new Faker();
+
+    for (var x = 0; x < 20; x++)
+    {
+      var orgName = faker.Random.AlphaNumeric(faker.Random.Int(1, Establishment.OrgNameLength - 1));
+      var establishmentRef = faker.Random.AlphaNumeric(faker.Random.Int(1, Establishment.EstablishmentRefLength - 1));
+      var establishmentType = faker.Random.AlphaNumeric(faker.Random.Int(1, Establishment.EstablishmentTypeLength - 1));
+
+      var establishment = new Establishment()
+      {
+        OrgName = orgName,
+        EstablishmentRef = establishmentRef,
+        EstablishmentType = establishmentType
+      };
+
+      Assert.Equal(orgName, establishment.OrgName);
+      Assert.Equal(establishmentRef, establishment.EstablishmentRef);
+      Assert.Equal(establishmentType, establishment.EstablishmentType);
+    }
+  }
+
+  [Fact]
+  public void Should_Not_Trim_Values_When_Max_Length()
+  {
+    var faker = new Faker();
+
+    for (var x = 0; x < 20; x++)
+    {
+      var orgName = faker.Random.AlphaNumeric(faker.Random.Int(1, Establishment.OrgNameLength));
+      var establishmentRef = faker.Random.AlphaNumeric(faker.Random.Int(1, Establishment.EstablishmentRefLength));
+      var establishmentType = faker.Random.AlphaNumeric(faker.Random.Int(1, Establishment.EstablishmentTypeLength));
+
+      var establishment = new Establishment()
+      {
+        OrgName = orgName,
+        EstablishmentRef = establishmentRef,
+        EstablishmentType = establishmentType
+      };
+
+      Assert.Equal(orgName, establishment.OrgName);
+      Assert.Equal(establishmentRef, establishment.EstablishmentRef);
+      Assert.Equal(establishmentType, establishment.EstablishmentType);
+    }
+
+  }
 }
