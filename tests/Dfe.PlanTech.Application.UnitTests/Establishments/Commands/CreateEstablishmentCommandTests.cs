@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Commands
     public class CreateEstablishmentCommandTests
     {
         private const string OrgName = "Org name";
-        private readonly EstablishmentTypeDto EstablishmentType = new() { Name = "Establishment Type"};
+        private readonly EstablishmentTypeDto EstablishmentType = new() { Name = "Establishment Type" };
 
         public IPlanTechDbContext Db = Substitute.For<IPlanTechDbContext>();
 
@@ -22,7 +22,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Commands
         {
             var establishmentId = 1;
             var establishment = new Domain.Establishments.Models.Establishment();
-            
+
             //Arrange
             var strut = CreateStrut();
             Db.When(db => db.AddEstablishment(Arg.Any<Domain.Establishments.Models.Establishment>()))
@@ -51,7 +51,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Commands
             //Arrange
             var establishmentId = 1;
             var establishment = new Domain.Establishments.Models.Establishment();
-            
+
             //Arrange
             var strut = CreateStrut();
             Db.When(db => db.AddEstablishment(Arg.Any<Domain.Establishments.Models.Establishment>()))
@@ -80,9 +80,9 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Commands
             var strut = CreateStrut();
             var establishmentDto = new EstablishmentDto() { Urn = null, Ukprn = null, OrgName = OrgName, Type = EstablishmentType };
 
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () => await strut.CreateEstablishment(establishmentDto));
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => strut.CreateEstablishment(establishmentDto));
 
-            Assert.Equal("Both Urn and Ukprn cannot be null.", exception.Message);
+            Assert.Equal(EstablishmentDto.InvalidEstablishmentErrorMessage, exception.Message);
         }
 
     }
