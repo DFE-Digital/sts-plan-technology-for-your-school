@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Commands;
+using Dfe.PlanTech.Domain.Establishments.Exceptions;
 using Dfe.PlanTech.Domain.Establishments.Models;
 using NSubstitute;
 
@@ -80,7 +81,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Commands
             var strut = CreateStrut();
             var establishmentDto = new EstablishmentDto() { Urn = null, Ukprn = null, OrgName = OrgName, Type = EstablishmentType };
 
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => strut.CreateEstablishment(establishmentDto));
+            var exception = await Assert.ThrowsAsync<InvalidEstablishmentException>(() => strut.CreateEstablishment(establishmentDto));
 
             Assert.Equal(EstablishmentDto.InvalidEstablishmentErrorMessage, exception.Message);
         }
