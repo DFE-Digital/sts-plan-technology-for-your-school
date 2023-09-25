@@ -9,7 +9,7 @@ public class Establishment
     public const int OrgNameLength = 200;
 
     private string _establishmentRef = null!;
-    private string _establishmentType = null!;
+    private string? _establishmentType;
     private string _orgName = null!;
 
     public int Id { get; set; }
@@ -27,12 +27,12 @@ public class Establishment
     }
 
     [StringLength(EstablishmentTypeLength)]
-    public string EstablishmentType
+    public string? EstablishmentType
     {
         get => _establishmentType;
         set
         {
-            _establishmentType = value.Length < EstablishmentTypeLength ?
+            _establishmentType = value == null ? null : value.Length < EstablishmentTypeLength ?
                                     value :
                                     value.AsSpan(0, EstablishmentTypeLength).ToString();
         }
