@@ -59,6 +59,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
 
             //Assert
             Assert.Equal(expectedUserId, result);
+            Assert.NotNull(createdUser);
         }
     }
 }
