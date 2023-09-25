@@ -14,6 +14,19 @@
     margin-bottom: 30px;
 }
 
+@media (min-width: 40.0625em) {
+    .govuk-button--start {
+        margin-bottom: 0 !important;
+    }
+}
+
+a.govuk-home-link {
+    position: relative;
+    display: inline-block;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
 /* DFE CARD COMPONENT - NEW
 --------------------------- */
 .dfe-section-card {
