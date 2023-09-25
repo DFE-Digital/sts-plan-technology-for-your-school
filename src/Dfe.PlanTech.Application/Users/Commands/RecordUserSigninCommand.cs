@@ -80,9 +80,9 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
         {
             Ukprn = recordUserSignInDto.Organisation.Ukprn,
             Urn = recordUserSignInDto.Organisation.Urn,
-            Type = new EstablishmentTypeDto()
+            Type = recordUserSignInDto.Organisation.Type?.Name == null ? null : new EstablishmentTypeDto()
             {
-                Name = recordUserSignInDto.Organisation.Type.Name
+                Name = recordUserSignInDto.Organisation.Type.Name 
             },
             OrgName = recordUserSignInDto.Organisation.Name
         });

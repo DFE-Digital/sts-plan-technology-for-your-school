@@ -12,7 +12,7 @@ public class EstablishmentDto
     [JsonPropertyName("urn")] public string? Urn { get; set; }
 
     [JsonPropertyName("type")]
-    public EstablishmentTypeDto Type { get; set; } = new EstablishmentTypeDto();
+    public EstablishmentTypeDto? Type { get; set; }
 
     [JsonPropertyName("name")]
     public string OrgName { get; set; } = null!;

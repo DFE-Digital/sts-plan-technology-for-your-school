@@ -8,9 +8,9 @@ public sealed class Organisation
 
     public string Name { get; set; } = null!;
 
-    public IdWithName Category { get; set; } = null!;
+    public IdWithName? Category { get; set; }
 
-    public IdWithName Type { get; set; } = null!;
+    public IdWithName? Type { get; set; }
 
     public string? Urn { get; set; }
 
