@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Dfe.PlanTech.Domain.Establishments.Exceptions;
 
 namespace Dfe.PlanTech.Domain.Establishments.Models;
 
@@ -20,7 +21,7 @@ public class EstablishmentDto
     public bool IsValid => References().Any(reference => !string.IsNullOrEmpty(reference));
 
     public string Reference => References().FirstOrDefault(reference => !string.IsNullOrEmpty(reference)) ??
-                                throw new InvalidOperationException(InvalidEstablishmentErrorMessage);
+                                throw new InvalidEstablishmentException(InvalidEstablishmentErrorMessage);
 
     private IEnumerable<string?> References()
     {

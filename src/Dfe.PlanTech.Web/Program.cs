@@ -1,6 +1,7 @@
 using Azure.Identity;
 using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Helpers;
+using Dfe.PlanTech.Domain.Establishments.Exceptions;
 using Dfe.PlanTech.Domain.SignIns.Enums;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.SignIns;
@@ -89,29 +90,25 @@ app.UseExceptionHandler(exceptionHandlerApp =>
         var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
         var error = exceptionHandlerPathFeature?.Error;
 
-        string redirectUrl;
-
-        switch (error)
-        {
-            case ContentfulDataUnavailableException _:
-                redirectUrl = UrlConstants.ServiceUnavailable;
-                break;
-            
-            case Exception outerException when outerException.InnerException is KeyNotFoundException innerException &&
-                                               innerException.Message.Contains(ClaimConstants.Organisation):
-                redirectUrl = UrlConstants.ServiceUnavailable;
-                break;
-            
-            default:
-                redirectUrl = UrlConstants.Error;
-                break;
-        }
-
+        string redirectUrl = GetRedirectUrlForException(error);
+        
         context.Response.Redirect(redirectUrl);
 
         return Task.CompletedTask;
     });
+    
+    
+    string GetRedirectUrlForException(Exception? exception) =>
+        exception switch
+        {
+            null => UrlConstants.Error,
+            ContentfulDataUnavailableException => UrlConstants.ServiceUnavailable,
+            KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) => UrlConstants.ServiceUnavailable,
+            InvalidEstablishmentException => UrlConstants.ServiceUnavailable,
+            _ => GetRedirectUrlForException(exception.InnerException)
+        };
 });
+
 app.UseStaticFiles();
 
 app.UseRouting();
