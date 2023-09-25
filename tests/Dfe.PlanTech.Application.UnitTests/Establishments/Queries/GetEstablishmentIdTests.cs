@@ -1,10 +1,11 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Queries;
+using Dfe.PlanTech.Domain.Establishments.Models;
 using NSubstitute;
 using System.Linq.Expressions;
 
 
-namespace Dfe.PlanTech.Application.UnitTests.Establishment.Queries
+namespace Dfe.PlanTech.Application.UnitTests.Establishments.Queries
 {
     public class GetEstablishmentIdQueryTests
     {
@@ -24,8 +25,8 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishment.Queries
             //Arrange
             var strut = CreateStrut();
             var establishmentRef = new Guid().ToString();
-            var returnedEstablishment = new Domain.Establishments.Models.Establishment() { EstablishmentRef = establishmentRef, Id = establishmentId };
-            Db.GetEstablishmentBy(Arg.Any<Expression<Func<Domain.Establishments.Models.Establishment, bool>>>()).Returns(returnedEstablishment);
+            var returnedEstablishment = new Establishment() { EstablishmentRef = establishmentRef, Id = establishmentId };
+            Db.GetEstablishmentBy(Arg.Any<Expression<Func<Establishment, bool>>>()).Returns(returnedEstablishment);
 
             //Act
             var result = await strut.GetEstablishmentId(establishmentRef);

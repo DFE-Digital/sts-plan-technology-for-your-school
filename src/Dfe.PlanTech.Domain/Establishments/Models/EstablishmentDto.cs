@@ -4,6 +4,8 @@ namespace Dfe.PlanTech.Domain.Establishments.Models;
 
 public class EstablishmentDto
 {
+    public const string InvalidEstablishmentErrorMessage = $"Both {nameof(Urn)} and {nameof(Ukprn)} are invalid";
+
     [JsonPropertyName("ukprn")]
     public string? Ukprn { get; set; }
 
@@ -18,7 +20,7 @@ public class EstablishmentDto
     public bool IsValid => References().Any(reference => !string.IsNullOrEmpty(reference));
 
     public string Reference => References().FirstOrDefault(reference => !string.IsNullOrEmpty(reference)) ??
-                                throw new Exception($"Both {nameof(Urn)} and {nameof(Ukprn)} are invalid");
+                                throw new InvalidOperationException(InvalidEstablishmentErrorMessage);
 
     private IEnumerable<string?> References()
     {

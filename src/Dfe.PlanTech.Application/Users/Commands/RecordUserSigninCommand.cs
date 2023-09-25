@@ -88,7 +88,7 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
         });
     }
 
-    private static SignIn MapToSignIn(int userId, int establishmentId = 1)
+    private static SignIn MapToSignIn(int userId, int establishmentId)
     {
         if (userId == 0)
             throw new ArgumentNullException(nameof(userId), "User id cannot be null");
