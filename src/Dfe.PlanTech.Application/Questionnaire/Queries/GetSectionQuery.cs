@@ -10,6 +10,8 @@ namespace Dfe.PlanTech.Application.Questionnaire.Queries;
 
 public class GetSectionQuery : ContentRetriever, IGetSectionQuery
 {
+    public const string SlugFieldPath = "fields.interstitialPage.fields.slug";
+
     public GetSectionQuery(IContentRepository repository) : base(repository) { }
 
     public Task<Section?> GetSectionById(string sectionId, CancellationToken cancellationToken = default)
@@ -21,7 +23,7 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
         {
             Queries = new[] {
                     new ContentQueryEquals(){
-                        Field = "fields.interstitialPage.fields.slug",
+                        Field = SlugFieldPath,
                         Value = sectionSlug
                     },
                     new ContentQueryEquals(){

@@ -3,7 +3,6 @@ using Dfe.PlanTech.Application.Responses.Interface;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using NSubstitute;
-using NSubstitute.ReturnsExtensions;
 
 namespace Dfe.PlanTech.Application.UnitTests.Responses.Commands;
 

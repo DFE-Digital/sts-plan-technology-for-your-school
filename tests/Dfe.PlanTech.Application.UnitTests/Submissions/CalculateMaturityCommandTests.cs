@@ -1,4 +1,6 @@
-﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
+﻿using System.Data.SqlTypes;
+using Dfe.PlanTech.Application.Constants;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Submissions.Commands;
 using Microsoft.Data.SqlClient;
 using NSubstitute;
@@ -7,31 +9,42 @@ namespace Dfe.PlanTech.Application.UnitTests.Submissions;
 public class CalculateMaturityCommandTests
 {
     public IPlanTechDbContext _dbSubstitute = Substitute.For<IPlanTechDbContext>();
+    private List<SqlParameter>? _sqlParams = null;
 
-    private CalculateMaturityCommand CreateStrut()
+    public CalculateMaturityCommandTests()
     {
-        return new CalculateMaturityCommand(_dbSubstitute);
+        _dbSubstitute.CallStoredProcedureWithReturnInt(DatabaseConstants.CalculateMaturitySproc, Arg.Any<List<SqlParameter>>())
+        .Returns((callinfo) =>
+        {
+            var sqlParams = callinfo.ArgAt<List<SqlParameter>>(1);
+
+            _sqlParams = sqlParams;
+
+            var submissionIdParam = _sqlParams.FirstOrDefault(sqlParam => sqlParam.ParameterName == DatabaseConstants.CalculateMaturitySprocParam);
+
+            if (submissionIdParam != null && submissionIdParam.Value is int i && i > 0)
+            {
+                return i;
+            }
+
+            throw new SqlTypeException("Invalid submission Id");
+        });
     }
+    private CalculateMaturityCommand CreateStrut() => new CalculateMaturityCommand(_dbSubstitute);
 
     [Fact]
     public async Task CalculateMaturityReturnsEffectedRows_LargerThanOne()
     {
-        _dbSubstitute.CallStoredProcedureWithReturnInt(Arg.Any<string>(), Arg.Any<List<SqlParameter>>())
-            .Returns(Task.FromResult(2));
+        var submissionId = 2;
 
-        var result = await CreateStrut().CalculateMaturityAsync(2);
+        var result = await CreateStrut().CalculateMaturityAsync(submissionId);
 
-        Assert.True(result > 1);
+        Assert.Equal(submissionId, result);
     }
 
     [Fact]
     public async Task CalculateMaturityReturnsEffectedRows_LessThanOne()
     {
-        _dbSubstitute.CallStoredProcedureWithReturnInt(Arg.Any<string>(), Arg.Any<List<SqlParameter>>())
-            .Returns(Task.FromResult(0));
-
-        var result = await CreateStrut().CalculateMaturityAsync(0);
-
-        Assert.True(result < 1);
+        await Assert.ThrowsAsync<SqlTypeException>(() => CreateStrut().CalculateMaturityAsync(0));
     }
 }
