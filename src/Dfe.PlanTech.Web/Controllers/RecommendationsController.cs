@@ -51,22 +51,8 @@ public class RecommendationsController : BaseController<RecommendationsControlle
 
     var page = await getPageQuery.GetPageBySlug(recommendationSlug, cancellationToken);
 
-    var viewModel = CreatePageModel(page, user);
+    var viewModel = new PageViewModel(page, this, user, logger);
 
     return View("~/Views/Pages/Page.cshtml", viewModel);
-  }
-
-  private PageViewModel CreatePageModel(Page page, IUser user)
-  {
-    ViewData["Title"] = System.Net.WebUtility.HtmlDecode(page.Title?.Text) ?? "Plan Technology For Your School";
-
-    var viewModel = new PageViewModel()
-    {
-      Page = page,
-    };
-
-    viewModel.TryLoadOrganisationName(HttpContext, user, logger);
-
-    return viewModel;
   }
 }

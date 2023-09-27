@@ -47,7 +47,14 @@ public class QuestionsController : BaseController<QuestionsController>
                     var question = journeyStatus.Section.Questions.FirstOrDefault(question => question.Slug == questionSlug) ?? throw new ContentfulDataUnavailableException($"Couldn't find question with slug {questionSlug} under section {sectionSlug}");
                     return RenderView(GenerateViewModel(sectionSlug, question, journeyStatus.Section, journeyStatus.LastResponseAnswerContentfulId));
                 }
-            case JourneyStatus.CheckAnswers: return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { sectionSlug });
+            case JourneyStatus.CheckAnswers:
+                {
+                    var question = journeyStatus.Section.Questions.FirstOrDefault(q => q.Slug == questionSlug) ??
+                                    throw new ContentfulDataUnavailableException("No");
+
+                    var viewModel = GenerateViewModel(sectionSlug, question, journeyStatus.Section, null);
+                    return RenderView(viewModel);
+                }
             case JourneyStatus.NextQuestion:
             case JourneyStatus.NotStarted:
                 {
