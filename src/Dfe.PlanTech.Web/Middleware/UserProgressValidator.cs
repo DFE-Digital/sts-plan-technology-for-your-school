@@ -73,4 +73,22 @@ public enum JourneyStatus
     Completed
 }
 
-public record JourneyStatusInfo(JourneyStatus Status, Section Section, Question? NextQuestion = null, string? LastResponseAnswerContentfulId = null, string? Maturity = null);
+public class JourneyStatusInfo
+{
+    public JourneyStatus Status { get; init; }
+    public Section Section { get; init; } = null!;
+    public Question? NextQuestion = null;
+    public string? LastResponseAnswerContentfulId { get; init; }
+    public string? Maturity { get; init; }
+
+    public JourneyStatusInfo() { }
+
+    public JourneyStatusInfo(JourneyStatus status, Section section, Question? nextQuestion = null, string? lastResponseAnswerContentfulId = null, string? maturity = null)
+    {
+        Status = status;
+        Section = section;
+        NextQuestion = nextQuestion;
+        LastResponseAnswerContentfulId = lastResponseAnswerContentfulId;
+        Maturity = maturity;
+    }
+}
