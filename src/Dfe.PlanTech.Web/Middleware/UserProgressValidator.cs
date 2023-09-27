@@ -1,7 +1,5 @@
-using Dfe.PlanTech.Application.Responses.Interface;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Exceptions;
@@ -56,10 +54,7 @@ public class UserProgressValidator
         var lastSelectedAnswer = lastAnsweredQuestion.Answers.FirstOrDefault(answer => answer.Sys.Id == sectionStatus.LatestResponse.AnswerContentfulId) ??
                                     throw new InvalidDataException($"Could not find answer {sectionStatus.LatestResponse.AnswerContentfulId} in question {sectionStatus.LatestResponse.QuestionContentfulId} in section {section.Sys.Id}");
 
-        if (lastSelectedAnswer.NextQuestion == null)
-        {
-            return new JourneyStatusInfo(JourneyStatus.CheckAnswers, section);
-        }
+        if (lastSelectedAnswer.NextQuestion == null) return new JourneyStatusInfo(JourneyStatus.CheckAnswers, section);
 
         return new JourneyStatusInfo(JourneyStatus.NextQuestion, section, lastSelectedAnswer.NextQuestion, sectionStatus.LatestResponse.AnswerContentfulId);
     }
@@ -92,3 +87,4 @@ public class JourneyStatusInfo
         Maturity = maturity;
     }
 }
+
