@@ -54,6 +54,8 @@ builder.Services.AddScoped<ComponentViewsFactory>();
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddSingleton<IAuthorizationHandler, PageModelAuthorisationPolicy>();
 
+builder.Services.AddTransient<UserProgressValidator>();
+
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization(options =>
 {

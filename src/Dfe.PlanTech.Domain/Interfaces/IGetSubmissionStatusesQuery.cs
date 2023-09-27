@@ -7,7 +7,7 @@ public interface IGetSubmissionStatusesQuery
 {
     IList<SectionStatus> GetSectionSubmissionStatuses(ISection[] sections);
 
-    Task<List<SectionStatus>> GetSectionSubmissionStatusesAsync(int establishmentId,
+    Task<List<SectionStatusNew>> GetSectionSubmissionStatusesAsync(int establishmentId,
                                                                 IEnumerable<ISection> sections,
                                                                 CancellationToken cancellationToken);
 

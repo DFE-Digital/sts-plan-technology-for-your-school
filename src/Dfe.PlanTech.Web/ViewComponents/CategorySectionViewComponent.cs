@@ -57,8 +57,8 @@ namespace Dfe.PlanTech.Web.ViewComponents
 
             if (sectionStatusCompleted != null)
             {
-                categorySectionDto.TagColour = sectionStatusCompleted.Value ? TagColour.DarkBlue.ToString() : TagColour.Blue.ToString();
-                categorySectionDto.TagText = sectionStatusCompleted.Value ? "COMPLETE" : "IN PROGRESS";
+                categorySectionDto.TagColour = sectionStatusCompleted == 1 ? TagColour.DarkBlue.ToString() : TagColour.Blue.ToString();
+                categorySectionDto.TagText = sectionStatusCompleted == 1 ? "COMPLETE" : "IN PROGRESS";
             }
             else
             {
@@ -90,7 +90,7 @@ namespace Dfe.PlanTech.Web.ViewComponents
             try
             {
                 category.SectionStatuses = _query.GetSectionSubmissionStatuses(category.Sections).ToList();
-                category.Completed = category.SectionStatuses.Count(x => x.Completed);
+                category.Completed = category.SectionStatuses.Count(x => x.Completed == 1);
                 category.RetrievalError = false;
                 return category;
             }
