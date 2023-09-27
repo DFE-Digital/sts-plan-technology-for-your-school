@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Responses.Interface;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Exceptions;
@@ -11,16 +12,13 @@ public class UserProgressValidator
 {
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
-    private readonly IGetLatestResponsesQuery _getResponseQuery;
     private readonly IUser _user;
 
     public UserProgressValidator(IGetSectionQuery getSectionQuery,
-                                    IGetLatestResponsesQuery getResponseQuery,
                                     IGetSubmissionStatusesQuery getSubmissionStatusesQuery,
                                     IUser user)
     {
         _getSectionQuery = getSectionQuery;
-        _getResponseQuery = getResponseQuery;
         _getSubmissionStatusesQuery = getSubmissionStatusesQuery;
         _user = user;
     }
@@ -28,6 +26,7 @@ public class UserProgressValidator
     public async Task<JourneyStatusInfo> GetJourneyStatusForSection(string sectionSlug, CancellationToken cancellationToken)
     {
         var establishmentId = await _user.GetEstablishmentId();
+
         var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
                         throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
 
@@ -36,7 +35,7 @@ public class UserProgressValidator
                                                                                               cancellationToken);
 
 
-        bool sectionStarted = sectionStatus?.SectionStatus != null && !sectionStatus.SectionStatus.Completed;
+        bool sectionStarted = sectionStatus?.SectionStatus != null && sectionStatus.SectionStatus.Completed;
 
         if (!sectionStarted)
         {
@@ -44,12 +43,12 @@ public class UserProgressValidator
         }
         else if (sectionStatus!.SectionStatus!.Completed)
         {
-            return new JourneyStatusInfo(JourneyStatus.Completed, section);
+            return new JourneyStatusInfo(JourneyStatus.Completed, section, null, null, sectionStatus.SectionStatus.Maturity);
         }
 
         if (sectionStatus.LatestResponse == null)
         {
-            throw new InvalidDataException("Latest response is null, but should have a response by this point");
+            throw new InvalidDataException("Latest response is null, section has started");
         }
 
         var lastAnsweredQuestion = section.Questions.FirstOrDefault(question => question.Sys.Id == sectionStatus.LatestResponse.QuestionContentfulId) ??
@@ -75,4 +74,4 @@ public enum JourneyStatus
     Completed
 }
 
-public record JourneyStatusInfo(JourneyStatus Status, Section Section, Question? NextQuestion = null, string? LastResponseAnswerContentfulId = null);
+public record JourneyStatusInfo(JourneyStatus Status, Section Section, Question? NextQuestion = null, string? LastResponseAnswerContentfulId = null, string? Maturity = null);
