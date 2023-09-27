@@ -7,7 +7,7 @@ namespace Dfe.PlanTech.Application.Users.Interfaces
         Task<int?> GetCurrentUserId();
 
         Task<int> GetEstablishmentId();
-        
+
         EstablishmentDto GetOrganisationData();
     }
 }

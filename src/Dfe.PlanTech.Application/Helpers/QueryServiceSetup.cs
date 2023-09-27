@@ -25,7 +25,7 @@ public static class QueryServiceSetup
         }
 
         services.AddScoped<IGetPageQuery, GetPageQuery>();
-        
+
         return services;
     }
 

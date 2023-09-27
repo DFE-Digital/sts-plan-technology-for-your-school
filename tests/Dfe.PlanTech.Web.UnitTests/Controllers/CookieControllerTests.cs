@@ -121,11 +121,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             return cookiesFeature.Cookies;
         }
-        
-        
-         [Fact]
-         public async Task CookiesPageDisplays()
-         {
+
+
+        [Fact]
+        public async Task CookiesPageDisplays()
+        {
             IQuestionnaireCacher questionnaireCacherSubstitute = Substitute.For<IQuestionnaireCacher>();
             IContentRepository contentRepositorySubstitute = SetupRepositorySubstitute();
             GetPageQuery _getPageQuerySubstitute = Substitute.For<GetPageQuery>(questionnaireCacherSubstitute, contentRepositorySubstitute);
@@ -139,14 +139,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.NotNull(viewResult);
             Assert.Equal("Cookies", viewResult.ViewName);
         }
-         
-         [Theory]
-         [InlineData("true")]
-         [InlineData("false")]
-         public void settingCookiePreferenceBasedOnInputRedirectsToCookiePage(string userPreference)
-         {
+
+        [Theory]
+        [InlineData("true")]
+        [InlineData("false")]
+        public void settingCookiePreferenceBasedOnInputRedirectsToCookiePage(string userPreference)
+        {
             CookiesController cookiesController = CreateStrut();
-             
+
             var tempDataSubstitute = Substitute.For<ITempDataDictionary>();
             var cookiesSubstitute = Substitute.For<ICookieService>();
 
@@ -158,16 +158,16 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             tempDataSubstitute.Received(1)["UserPreferenceRecorded"] = true;
 
-             Assert.IsType<RedirectToActionResult>(result);
+            Assert.IsType<RedirectToActionResult>(result);
 
-             var res = result as RedirectToActionResult;
+            var res = result as RedirectToActionResult;
 
-             if (res != null)
-             {
-                 Assert.True(res.ActionName == "GetByRoute");
-                 Assert.True(res.ControllerName == "Pages");
-             }
-         }
+            if (res != null)
+            {
+                Assert.True(res.ActionName == "GetByRoute");
+                Assert.True(res.ControllerName == "Pages");
+            }
+        }
 
         [Fact]
         public void settingCookiePreferenceBasedOnInputAsNullThrowsException()
@@ -186,24 +186,24 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         private IContentRepository SetupRepositorySubstitute()
-         {
-             var repositorySubstitute = Substitute.For<IContentRepository>();
-             repositorySubstitute.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns((CallInfo) =>
-             {
-                 IGetEntitiesOptions options = (IGetEntitiesOptions)CallInfo[0];
-                 if (options?.Queries != null)
-                 {
-                     foreach (var query in options.Queries)
-                     {
-                         if (query is ContentQueryEquals equalsQuery && query.Field == "fields.slug")
-                         {
-                             return _pages.Where(page => page.Slug == equalsQuery.Value);
-                         }
-                     }
-                 }
-                 return Array.Empty<Page>();
-             });
-             return repositorySubstitute;
-         }
+        {
+            var repositorySubstitute = Substitute.For<IContentRepository>();
+            repositorySubstitute.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns((CallInfo) =>
+            {
+                IGetEntitiesOptions options = (IGetEntitiesOptions)CallInfo[0];
+                if (options?.Queries != null)
+                {
+                    foreach (var query in options.Queries)
+                    {
+                        if (query is ContentQueryEquals equalsQuery && query.Field == "fields.slug")
+                        {
+                            return _pages.Where(page => page.Slug == equalsQuery.Value);
+                        }
+                    }
+                }
+                return Array.Empty<Page>();
+            });
+            return repositorySubstitute;
+        }
     }
 }

@@ -60,7 +60,7 @@ public static class OnUserInformationReceivedEvent
     {
         var principal = context.Principal;
 
-        if (principal == null) return; 
+        if (principal == null) return;
 
         ClaimsIdentity claimsIdentity = new(new[]{
             new Claim(ClaimConstants.DB_USER_ID, signin.UserId.ToString()),

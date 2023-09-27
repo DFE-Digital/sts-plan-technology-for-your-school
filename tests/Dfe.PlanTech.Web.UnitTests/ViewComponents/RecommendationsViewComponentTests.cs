@@ -25,7 +25,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         {
             _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
             _loggerCategory = Substitute.For<ILogger<RecommendationsViewComponent>>();
-            
+
             _recommendationsComponent = new RecommendationsViewComponent(_loggerCategory, _getSubmissionStatusesQuery);
 
             _category = new Category()
@@ -54,7 +54,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                     }
                 }
             };
-            
+
             _categoryTwo = new Category()
             {
                 Completed = 1,
@@ -115,7 +115,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal(_category.Sections[0].Recommendations[0].DisplayName, unboxed.First().RecommendationDisplayName);
             Assert.Null(unboxed.First().NoRecommendationFoundErrorMessage);
         }
-        
+
         [Fact]
         public void Returns_RecommendationInfo_For_Multiple_Categories_If_It_Exists_ForMaturity()
         {
@@ -125,7 +125,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Completed = 1,
                 Maturity = "High"
             });
-            
+
             _categoryTwo.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
             {
                 SectionId = "Section1",
@@ -158,9 +158,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Null(unboxed.First().NoRecommendationFoundErrorMessage);
             Assert.Null(unboxed.Skip(1).First().NoRecommendationFoundErrorMessage);
 
-            
+
         }
-        
+
         [Fact]
         public void Returns_RecommendationInfo_And_Logs_Error_If_Exception_Thrown_By_Get_Category()
         {
@@ -173,7 +173,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             ICategory[] categories = new ICategory[] { _category };
 
-            
+
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Throws(new Exception("test"));
 
             var result = _recommendationsComponent.Invoke(categories) as ViewViewComponentResult;
@@ -205,7 +205,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Completed = 1,
                 Maturity = "Low",
             });
-            
+
             ICategory[] categories = new ICategory[] { _category };
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
@@ -232,14 +232,14 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public void DoesNotReturn_RecommendationInfo_If_Section_IsNot_Completed()
         {
-            _category.Completed= 0;
+            _category.Completed = 0;
             _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
             {
                 SectionId = "Section1",
                 Completed = 0,
                 Maturity = null
             });
-            
+
             ICategory[] categories = new ICategory[] { _category };
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
@@ -257,7 +257,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         public void Returns_Null_If_Category_IsNot_Completed()
         {
             _category.Completed = 0;
-            
+
             ICategory[] categories = new ICategory[] { _category };
 
             var result = _recommendationsComponent.Invoke(categories) as ViewViewComponentResult;

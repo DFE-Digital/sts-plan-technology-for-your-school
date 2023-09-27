@@ -5,7 +5,7 @@ using Dfe.PlanTech.Domain.Submissions.Models;
 namespace Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 public interface ICategory : IContentComponent
-{    
+{
     public Header Header { get; }
 
     public IContentComponent[] Content { get; }
@@ -15,7 +15,7 @@ public interface ICategory : IContentComponent
     public IList<SectionStatuses> SectionStatuses { get; set; }
 
     public int Completed { get; set; }
-    
+
     public bool RetrievalError { get; set; }
-    
+
 }

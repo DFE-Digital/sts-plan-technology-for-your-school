@@ -82,7 +82,7 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
             Urn = recordUserSignInDto.Organisation.Urn,
             Type = recordUserSignInDto.Organisation.Type?.Name == null ? null : new EstablishmentTypeDto()
             {
-                Name = recordUserSignInDto.Organisation.Type.Name 
+                Name = recordUserSignInDto.Organisation.Type.Name
             },
             OrgName = recordUserSignInDto.Organisation.Name
         });

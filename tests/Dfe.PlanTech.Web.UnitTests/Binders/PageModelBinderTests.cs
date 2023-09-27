@@ -1,4 +1,3 @@
-using Azure;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Binders;
 using Microsoft.AspNetCore.Http;
@@ -12,78 +11,78 @@ namespace Dfe.PlanTech.Web.UnitTests.Binders;
 
 public class PageModelBinderTests
 {
-  [Fact]
-  public void Should_Get_Page_From_Items()
-  {
-    var page = new Page()
+    [Fact]
+    public void Should_Get_Page_From_Items()
     {
-      Slug = "Testing Slug"
-    };
+        var page = new Page()
+        {
+            Slug = "Testing Slug"
+        };
 
-    var pageModelBinder = new PageModelBinder(new NullLoggerFactory().CreateLogger<PageModelBinder>());
+        var pageModelBinder = new PageModelBinder(new NullLoggerFactory().CreateLogger<PageModelBinder>());
 
-    var modelBinderContext = Substitute.For<ModelBindingContext>();
-    modelBinderContext.Result = new ModelBindingResult();
+        var modelBinderContext = Substitute.For<ModelBindingContext>();
+        modelBinderContext.Result = new ModelBindingResult();
 
-    var httpContext = Substitute.For<HttpContext>();
+        var httpContext = Substitute.For<HttpContext>();
 
-    httpContext.Items = new Dictionary<object, object?>
+        httpContext.Items = new Dictionary<object, object?>
+        {
+            [nameof(Page)] = page
+        };
+
+        modelBinderContext.HttpContext.Returns(httpContext);
+
+        pageModelBinder.BindModelAsync(modelBinderContext);
+
+        Assert.True(modelBinderContext.Result.IsModelSet);
+        Assert.Equal(page, modelBinderContext.Result.Model);
+    }
+
+    [Fact]
+    public void Should_LogError_When_Page_Not_Expected_Type()
     {
-      [nameof(Page)] = page
-    };
+        var logger = Substitute.For<ILogger<PageModelBinder>>();
+        var pageModelBinder = new PageModelBinder(logger);
 
-    modelBinderContext.HttpContext.Returns(httpContext);
+        var modelBinderContext = Substitute.For<ModelBindingContext>();
+        modelBinderContext.Result = new ModelBindingResult();
 
-    pageModelBinder.BindModelAsync(modelBinderContext);
+        var httpContext = Substitute.For<HttpContext>();
 
-    Assert.True(modelBinderContext.Result.IsModelSet);
-    Assert.Equal(page, modelBinderContext.Result.Model);
-  }
+        httpContext.Items = new Dictionary<object, object?>
+        {
+            [nameof(Page)] = "Not a page type"
+        };
 
-  [Fact]
-  public void Should_LogError_When_Page_Not_Expected_Type()
-  {
-    var logger = Substitute.For<ILogger<PageModelBinder>>();
-    var pageModelBinder = new PageModelBinder(logger);
+        modelBinderContext.HttpContext.Returns(httpContext);
 
-    var modelBinderContext = Substitute.For<ModelBindingContext>();
-    modelBinderContext.Result = new ModelBindingResult();
+        pageModelBinder.BindModelAsync(modelBinderContext);
 
-    var httpContext = Substitute.For<HttpContext>();
+        logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
+        Assert.False(modelBinderContext.Result.IsModelSet);
+    }
 
-    httpContext.Items = new Dictionary<object, object?>
+    [Fact]
+    public void Should_LogError_When_Page_Not_Present()
     {
-      [nameof(Page)] = "Not a page type"
-    };
+        var logger = Substitute.For<ILogger<PageModelBinder>>();
+        var pageModelBinder = new PageModelBinder(logger);
 
-    modelBinderContext.HttpContext.Returns(httpContext);
+        var modelBinderContext = Substitute.For<ModelBindingContext>();
+        modelBinderContext.Result = new ModelBindingResult();
 
-    pageModelBinder.BindModelAsync(modelBinderContext);
+        var httpContext = Substitute.For<HttpContext>();
 
-    logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
-    Assert.False(modelBinderContext.Result.IsModelSet);
-  }
+        httpContext.Items = new Dictionary<object, object?>();
 
-  [Fact]
-  public void Should_LogError_When_Page_Not_Present()
-  {
-    var logger = Substitute.For<ILogger<PageModelBinder>>();
-    var pageModelBinder = new PageModelBinder(logger);
+        modelBinderContext.HttpContext.Returns(httpContext);
 
-    var modelBinderContext = Substitute.For<ModelBindingContext>();
-    modelBinderContext.Result = new ModelBindingResult();
+        pageModelBinder.BindModelAsync(modelBinderContext);
 
-    var httpContext = Substitute.For<HttpContext>();
+        logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
 
-    httpContext.Items = new Dictionary<object, object?>();
-
-    modelBinderContext.HttpContext.Returns(httpContext);
-
-    pageModelBinder.BindModelAsync(modelBinderContext);
-
-    logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
-
-    Assert.False(modelBinderContext.Result.IsModelSet);
-  }
+        Assert.False(modelBinderContext.Result.IsModelSet);
+    }
 
 }

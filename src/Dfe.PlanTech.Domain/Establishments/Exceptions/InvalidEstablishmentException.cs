@@ -6,5 +6,5 @@ public class InvalidEstablishmentException : Exception
         : base(message)
     {
     }
-    
+
 }
