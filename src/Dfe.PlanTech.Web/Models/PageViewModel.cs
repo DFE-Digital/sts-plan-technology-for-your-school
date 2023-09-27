@@ -11,7 +11,8 @@ public class PageViewModel
 
     public PageViewModel(Page page, Controller controller, IUser user, ILogger logger)
     {
-        controller.ViewData["Title"] = System.Net.WebUtility.HtmlDecode(page.Title?.Text) ?? "Plan Technology For Your School";
+        controller.ViewData["Title"] = System.Net.WebUtility.HtmlDecode(page.Title?.Text) ?? 
+                                       "Plan Technology For Your School";
         Page = page;
         TryLoadOrganisationName(controller.HttpContext, user, logger);
     }

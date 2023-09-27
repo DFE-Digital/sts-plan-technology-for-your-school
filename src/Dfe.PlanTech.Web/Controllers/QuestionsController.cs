@@ -4,8 +4,6 @@ using Dfe.PlanTech.Application.Submissions.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Web.Exceptions;
-using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
@@ -21,19 +19,17 @@ public class QuestionsController : BaseController<QuestionsController>
 
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetLatestResponsesQuery _getResponseQuery;
-    private readonly UserProgressValidator _userProgressValidator;
     private readonly UserJourneyRouter _userJourneyRouter;
     private readonly IUser _user;
+    
     public QuestionsController(ILogger<QuestionsController> logger,
                                 IGetSectionQuery getSectionQuery,
                                 IGetLatestResponsesQuery getResponseQuery,
-                                UserProgressValidator userProgressValidator,
                                 UserJourneyRouter userJourneyRouter,
                                 IUser user) : base(logger)
     {
         _getResponseQuery = getResponseQuery;
         _getSectionQuery = getSectionQuery;
-        _userProgressValidator = userProgressValidator;
         _userJourneyRouter = userJourneyRouter;
         _user = user;
     }

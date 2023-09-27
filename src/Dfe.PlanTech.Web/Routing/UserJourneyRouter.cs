@@ -5,7 +5,6 @@ using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Web.Exceptions;
-using Dfe.PlanTech.Web.Middleware;
 
 namespace Dfe.PlanTech.Web.Routing;
 
@@ -48,14 +47,10 @@ public class UserJourneyRouter
     Section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
                     throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
 
-    var sectionStatus = await _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(establishmentId,
+    SectionStatus = await _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(establishmentId,
                                                                                           Section,
                                                                                           cancellationToken);
-    if (sectionStatus != null)
-    {
-      SectionStatus = sectionStatus.SectionStatus;
-    }
-
+                                                                                          
     foreach (var statusChecker in _statusCheckers)
     {
       if (statusChecker.IsMatchingUserJourney(this))

@@ -56,7 +56,7 @@ builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddSingleton<IAuthorizationHandler, PageModelAuthorisationPolicy>();
 
 builder.Services.AddTransient<UserJourneyRouter>();
-builder.Services.AddTransient<UserProgressValidator>();
+builder.Services.AddTransient<GetRecommendationValidator>();
 builder.Services.AddTransient<GetQuestionBySlugValidator>();
 
 builder.Services.AddAuthentication();
