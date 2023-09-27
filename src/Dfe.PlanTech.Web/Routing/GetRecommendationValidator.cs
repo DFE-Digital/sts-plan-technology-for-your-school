@@ -29,34 +29,40 @@ public class GetRecommendationValidator
     if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentException($"'{nameof(sectionSlug)}' cannot be null or empty.");
     if (string.IsNullOrEmpty(recommendationSlug)) throw new ArgumentException($"'{nameof(recommendationSlug)}' cannot be null or empty.");
 
-    switch (router.Status)
+    return router.Status switch
     {
-      case JourneyStatus.CheckAnswers: return controller.RedirectToCheckAnswers(sectionSlug);
-      case JourneyStatus.NotStarted:
-      case JourneyStatus.NextQuestion: return new RedirectToActionResult("GetQuestionBySlug", "Questions", new { sectionSlug, questionSlug = router.NextQuestion!.Slug });
-      default:
-        {
-
-          if (router.SectionStatus?.Maturity == null) throw new InvalidDataException("Maturity is null - shouldn't be");
-
-          var recommendationForSlug = router.Section!.Recommendations.FirstOrDefault(recommendation => recommendation.Page.Slug == recommendationSlug) ??
-                                        throw new ContentfulDataUnavailableException($"Couldn't find recommendation with slug {recommendationSlug} under {sectionSlug}");
-
-          var recommendationForMaturity = router.Section.GetRecommendationForMaturity(router.SectionStatus.Maturity) ??
-                                          throw new ContentfulDataUnavailableException("Missing recommendation page");
-
-          if (recommendationForMaturity.Sys.Id != recommendationForSlug.Sys.Id)
-          {
-            return controller.RedirectToAction(RecommendationsController.GetRecommendationAction,
-                                               new { sectionSlug, recommendationSlug = recommendationForMaturity.Page.Slug });
-          }
-
-          var page = await _getPageQuery.GetPageBySlug(recommendationSlug, cancellationToken);
-
-          var viewModel = new PageViewModel(page, controller, _user, _logger);
-
-          return controller.View("~/Views/Pages/Page.cshtml", viewModel);
-        }
-    }
+      JourneyStatus.Completed => await HandleCompleteStatus(sectionSlug, recommendationSlug, router, controller, cancellationToken),
+      JourneyStatus.CheckAnswers => controller.RedirectToCheckAnswers(sectionSlug),
+      JourneyStatus.NotStarted or JourneyStatus.NextQuestion => HandleQuestionStatus(sectionSlug, router),
+      _ => throw new InvalidOperationException($"Invalid journey status - {router.Status}"),
+    };
   }
+
+  private async Task<IActionResult> HandleCompleteStatus(string sectionSlug, string recommendationSlug, UserJourneyRouter router, RecommendationsController controller, CancellationToken cancellationToken)
+  {
+    if (router.SectionStatus?.Maturity == null) throw new InvalidDataException("Maturity is null - shouldn't be");
+
+    var recommendationForSlug = router.Section!.Recommendations.FirstOrDefault(recommendation => recommendation.Page.Slug == recommendationSlug) ??
+                                  throw new ContentfulDataUnavailableException($"Couldn't find recommendation with slug {recommendationSlug} under {sectionSlug}");
+
+    var recommendationForMaturity = router.Section.GetRecommendationForMaturity(router.SectionStatus.Maturity) ??
+                                    throw new ContentfulDataUnavailableException("Missing recommendation page");
+
+    if (recommendationForMaturity.Sys.Id != recommendationForSlug.Sys.Id)
+    {
+      return controller.RedirectToAction(RecommendationsController.GetRecommendationAction,
+                                         new { sectionSlug, recommendationSlug = recommendationForMaturity.Page.Slug });
+    }
+
+    var page = await _getPageQuery.GetPageBySlug(recommendationSlug, cancellationToken);
+
+    var viewModel = new PageViewModel(page, controller, _user, _logger);
+
+    return controller.View("~/Views/Pages/Page.cshtml", viewModel);
+  }
+
+  private IActionResult HandleQuestionStatus(string sectionSlug, UserJourneyRouter router)
+  => new RedirectToActionResult(QuestionsController.GetQuestionBySlugAction,
+                                QuestionsController.GetQuestionBySlugAction,
+                                new { sectionSlug, questionSlug = router.NextQuestion!.Slug });
 }
