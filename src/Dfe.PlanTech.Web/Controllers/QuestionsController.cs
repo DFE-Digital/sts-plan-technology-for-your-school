@@ -40,26 +40,31 @@ public class QuestionsController : BaseController<QuestionsController>
 
         var journeyStatus = await _userProgressValidator.GetJourneyStatusForSection(sectionSlug, cancellationToken);
 
-        if (journeyStatus.Status == JourneyStatus.CheckAnswers)
+        switch (journeyStatus.Status)
         {
-            var question = journeyStatus.Section.Questions.FirstOrDefault(question => question.Slug == questionSlug) ?? throw new ContentfulDataUnavailableException($"Couldn't find question with slug {questionSlug} under section {sectionSlug}");
-            return RenderView(GenerateViewModel(sectionSlug, question, journeyStatus.Section, journeyStatus.LastResponseAnswerContentfulId));
-        }
+            case JourneyStatus.Completed:
+                {
+                    var question = journeyStatus.Section.Questions.FirstOrDefault(question => question.Slug == questionSlug) ?? throw new ContentfulDataUnavailableException($"Couldn't find question with slug {questionSlug} under section {sectionSlug}");
+                    return RenderView(GenerateViewModel(sectionSlug, question, journeyStatus.Section, journeyStatus.LastResponseAnswerContentfulId));
+                }
+            case JourneyStatus.CheckAnswers: return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { sectionSlug });
+            case JourneyStatus.NextQuestion:
+            case JourneyStatus.NotStarted:
+                {
+                    if (journeyStatus.NextQuestion == null)
+                    {
+                        throw new InvalidDataException("Next question is null but really shouldn't be");
+                    }
 
-        if (journeyStatus.Status == JourneyStatus.NextQuestion || journeyStatus.Status == JourneyStatus.NotStarted)
-        {
-            if (journeyStatus.NextQuestion == null)
-            {
-                throw new InvalidDataException("Next question is null but really shouldn't be");
-            }
+                    if (journeyStatus.NextQuestion!.Slug != questionSlug)
+                    {
+                        return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = journeyStatus.NextQuestion!.Slug });
+                    }
 
-            if (journeyStatus.NextQuestion!.Slug != questionSlug)
-            {
-                return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = journeyStatus.NextQuestion!.Slug });
-            }
+                    var viewModel = GenerateViewModel(sectionSlug, journeyStatus.NextQuestion!, journeyStatus.Section, null);
+                    return RenderView(viewModel);
+                }
 
-            var viewModel = GenerateViewModel(sectionSlug, journeyStatus.NextQuestion!, journeyStatus.Section, null);
-            return RenderView(viewModel);
         }
 
         throw new Exception($"Invalid journey state");
