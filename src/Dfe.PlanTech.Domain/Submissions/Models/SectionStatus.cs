@@ -1,4 +1,6 @@
-﻿namespace Dfe.PlanTech.Domain.Submissions.Models;
+﻿using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+
+namespace Dfe.PlanTech.Domain.Submissions.Models;
 
 public class SectionStatus
 {
@@ -11,7 +13,7 @@ public class SectionStatus
     public DateTime DateCreated { get; set; }
 }
 
-public class SectionStatusNew
+public record SectionStatusNew
 {
     public string SectionId { get; set; } = null!;
 

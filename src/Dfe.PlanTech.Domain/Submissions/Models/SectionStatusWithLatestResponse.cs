@@ -1,5 +1,3 @@
-using Dfe.PlanTech.Domain.Responses.Models;
-
 namespace Dfe.PlanTech.Domain.Submissions.Models;
 
 public record SectionStatusWithLatestResponse(SectionStatusNew? SectionStatus, SectionResponseDto? LatestResponse);
