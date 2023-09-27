@@ -30,9 +30,9 @@ namespace Dfe.PlanTech.Web.ViewComponents
                 {
                     recommendationsAvailable = true;
                 }
-                
+
                 var categoryElement = RetrieveSectionStatuses(category);
-                allSectionsOfCombinedCategories.AddRange(categoryElement.Sections); 
+                allSectionsOfCombinedCategories.AddRange(categoryElement.Sections);
                 allSectionStatusesOfCombinedCategories.AddRange(categoryElement.SectionStatuses);
             }
 
@@ -51,7 +51,7 @@ namespace Dfe.PlanTech.Web.ViewComponents
             foreach (ISection section in sections)
             {
                 var sectionMaturity = sectionStatusesList.Where(sectionStatus =>
-                        sectionStatus.SectionId == section.Sys.Id && sectionStatus.Completed)
+                        sectionStatus.SectionId == section.Sys.Id && sectionStatus.Completed == 1)
                     .Select(sectionStatus => sectionStatus.Maturity)
                     .FirstOrDefault();
 
@@ -80,7 +80,7 @@ namespace Dfe.PlanTech.Web.ViewComponents
             try
             {
                 category.SectionStatuses = _query.GetSectionSubmissionStatuses(category.Sections).ToList();
-                category.Completed = category.SectionStatuses.Count(x => x.Completed);
+                category.Completed = category.SectionStatuses.Count(x => x.Completed == 1);
                 category.RetrievalError = false;
                 return category;
             }

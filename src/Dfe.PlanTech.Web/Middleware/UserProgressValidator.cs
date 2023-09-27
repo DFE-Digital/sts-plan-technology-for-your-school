@@ -36,12 +36,11 @@ public class UserProgressValidator
                                                                                               cancellationToken);
 
 
-        bool sectionNotStarted = sectionStatus == null || sectionStatus.SectionStatus == null ||
-                                    (!sectionStatus.SectionStatus.Completed && sectionStatus.LatestResponse == null);
+        bool sectionStarted = sectionStatus?.SectionStatus != null && !sectionStatus.SectionStatus.Completed;
 
-        if (!sectionNotStarted)
+        if (!sectionStarted)
         {
-            return new JourneyStatusInfo(JourneyStatus.NotStarted, section);
+            return new JourneyStatusInfo(JourneyStatus.NotStarted, section, section.Questions.First());
         }
         else if (sectionStatus!.SectionStatus!.Completed)
         {
@@ -64,7 +63,7 @@ public class UserProgressValidator
             return new JourneyStatusInfo(JourneyStatus.CheckAnswers, section);
         }
 
-        return new JourneyStatusInfo(JourneyStatus.NextQuestion, section, lastSelectedAnswer.NextQuestion);
+        return new JourneyStatusInfo(JourneyStatus.NextQuestion, section, lastSelectedAnswer.NextQuestion, sectionStatus.LatestResponse.AnswerContentfulId);
     }
 }
 
@@ -76,4 +75,4 @@ public enum JourneyStatus
     Completed
 }
 
-public record JourneyStatusInfo(JourneyStatus Status, Section Section, Question? NextQuestion = null);
+public record JourneyStatusInfo(JourneyStatus Status, Section Section, Question? NextQuestion = null, string? LastResponseAnswerContentfulId = null);

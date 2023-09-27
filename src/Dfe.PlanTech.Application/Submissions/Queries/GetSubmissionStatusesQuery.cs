@@ -22,13 +22,12 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
     {
         int establishmentId = _userHelper.GetEstablishmentId().Result;
 
-        string sectionStringify = string.Empty;
-        sectionStringify = string.Join(',', sections.Select(x => x.Sys.Id).ToList());
+        string sectionStringify = string.Join(',', sections.Select(x => x.Sys.Id));
 
         return _db.GetSectionStatuses(sectionStringify, establishmentId).ToList();
     }
 
-    public Task<List<SectionStatus>> GetSectionSubmissionStatusesAsync(int establishmentId,
+    public Task<List<SectionStatusNew>> GetSectionSubmissionStatusesAsync(int establishmentId,
                                                                        IEnumerable<ISection> sections,
                                                                        CancellationToken cancellationToken)
     {
@@ -40,7 +39,7 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
         return _db.ToListAsync(latestSubmissionPerSection, cancellationToken);
     }
 
-    public Task<SectionStatusWithLatestResponse?> GetSectionSubmissionStatusAsync(int establishmentId,
+    public async Task<SectionStatusWithLatestResponse?> GetSectionSubmissionStatusAsync(int establishmentId,
                                                                ISection section,
                                                                CancellationToken cancellationToken)
     {
@@ -55,7 +54,7 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
                                                                 response.Answer.ContentfulRef
                                                              ))
                                                              .FirstOrDefault(),
-                               SectionStatus = new SectionStatus()
+                               SectionStatus = new SectionStatusNew()
                                {
                                    DateCreated = submission.DateCreated,
                                    Completed = submission.Completed,
@@ -65,10 +64,14 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
                            })
                            .GroupBy(submission => submission.SectionStatus.SectionId)
                            .Select(grouping => grouping.OrderByDescending(group => group.SectionStatus.DateCreated)
-                                                       .First())
-                            .Select(latest => new SectionStatusWithLatestResponse(latest.SectionStatus, latest.LatestResponse));
+                                                       .First());
 
-        return _db.FirstOrDefaultAsync(sectionStatus, cancellationToken);
+
+        var result = await _db.FirstOrDefaultAsync(sectionStatus, cancellationToken);
+
+        if (result == null) return null;
+
+        return new SectionStatusWithLatestResponse(result.SectionStatus, result.LatestResponse);
     }
 
     /// <summary>
@@ -78,8 +81,8 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
     /// </summary>
     /// <param name="submissionStatuses"></param>
     /// <returns></returns>
-    private static IQueryable<SectionStatus> GetLatestSubmissionStatus(IQueryable<Submission> submissionStatuses)
-    => submissionStatuses.Select(submission => new SectionStatus()
+    private static IQueryable<SectionStatusNew> GetLatestSubmissionStatus(IQueryable<Submission> submissionStatuses)
+    => submissionStatuses.Select(submission => new SectionStatusNew()
     {
         DateCreated = submission.DateCreated,
         Completed = submission.Completed,

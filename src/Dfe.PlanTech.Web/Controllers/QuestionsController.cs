@@ -4,6 +4,8 @@ using Dfe.PlanTech.Application.Submissions.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Web.Exceptions;
+using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,14 +17,17 @@ public class QuestionsController : BaseController<QuestionsController>
 {
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetLatestResponsesQuery _getResponseQuery;
+    private readonly UserProgressValidator _userProgressValidator;
     private readonly IUser _user;
     public QuestionsController(ILogger<QuestionsController> logger,
                                 IGetSectionQuery getSectionQuery,
                                 IGetLatestResponsesQuery getResponseQuery,
+                                UserProgressValidator userProgressValidator,
                                 IUser user) : base(logger)
     {
         _getResponseQuery = getResponseQuery;
         _getSectionQuery = getSectionQuery;
+        _userProgressValidator = userProgressValidator;
         _user = user;
     }
 
@@ -34,8 +39,31 @@ public class QuestionsController : BaseController<QuestionsController>
         if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
         if (string.IsNullOrEmpty(questionSlug)) throw new ArgumentNullException(nameof(questionSlug));
 
-        var viewModel = await GenerateViewModel(sectionSlug, questionSlug, cancellationToken);
-        return RenderView(viewModel);
+        var journeyStatus = await _userProgressValidator.GetJourneyStatusForSection(sectionSlug, cancellationToken);
+
+        if (journeyStatus.Status == JourneyStatus.CheckAnswers)
+        {
+            var question = journeyStatus.Section.Questions.FirstOrDefault(question => question.Slug == questionSlug) ?? throw new ContentfulDataUnavailableException($"Couldn't find question with slug {questionSlug} under section {sectionSlug}");
+            return RenderView(GenerateViewModel(sectionSlug, question, journeyStatus.Section, journeyStatus.LastResponseAnswerContentfulId));
+        }
+
+        if (journeyStatus.Status == JourneyStatus.NextQuestion || journeyStatus.Status == JourneyStatus.NotStarted)
+        {
+            if (journeyStatus.NextQuestion == null)
+            {
+                throw new InvalidDataException("Next question is null but really shouldn't be");
+            }
+
+            if (journeyStatus.NextQuestion!.Slug != questionSlug)
+            {
+                return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = journeyStatus.NextQuestion!.Slug });
+            }
+
+            var viewModel = GenerateViewModel(sectionSlug, journeyStatus.NextQuestion!, journeyStatus.Section, null);
+            return RenderView(viewModel);
+        }
+
+        throw new Exception($"Invalid journey state");
     }
 
 
@@ -76,7 +104,7 @@ public class QuestionsController : BaseController<QuestionsController>
         {
             logger.LogError("An error has occurred while submitting an answer with the following message: {} ", e.Message);
             var viewModel = await GenerateViewModel(sectionSlug, questionSlug, cancellationToken);
-            viewModel.ErrorMessages = new[] { "Save failed. Please try again later."};
+            viewModel.ErrorMessages = new[] { "Save failed. Please try again later." };
             return RenderView(viewModel);
         }
 
@@ -100,16 +128,22 @@ public class QuestionsController : BaseController<QuestionsController>
                                                                                 question.Sys.Id,
                                                                                 cancellationToken);
 
+        return GenerateViewModel(sectionSlug, question, section, latestResponseForQuestion?.AnswerRef);
+    }
+
+    private QuestionViewModel GenerateViewModel(string sectionSlug, Question question, ISection section, string? latestAnswerContentfulId)
+    {
         ViewData["Title"] = question.Text;
 
         return new QuestionViewModel()
         {
             Question = question,
-            AnswerRef = latestResponseForQuestion?.AnswerRef,
+            AnswerRef = latestAnswerContentfulId,
             SectionName = section.Name,
             SectionSlug = sectionSlug,
             SectionId = section.Sys.Id
         };
     }
+
 
 }
