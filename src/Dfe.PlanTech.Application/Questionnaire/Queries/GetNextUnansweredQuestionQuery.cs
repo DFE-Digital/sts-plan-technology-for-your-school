@@ -24,30 +24,12 @@ public class GetNextUnansweredQuestionQuery : IGetNextUnansweredQuestionQuery
 
   public static Question? GetNextUnansweredQuestion(Section section, List<QuestionWithAnswer> responses)
   {
-    Question? node = section.Questions[0];
+    var lastAttachedResponse = section.GetAttachedQuestions(responses).Last();
 
-    while (node != null)
-    {
-      var response = responses.Find(response => response.QuestionRef == node.Sys.Id);
-      if (response != null)
-      {
-        var answer = Array.Find(node.Answers, answer => answer.Sys.Id == response.AnswerRef);
-
-        response = response with
-        {
-          AnswerText = answer?.Text ?? response.AnswerText,
-          QuestionText = node.Text,
-          QuestionSlug = node.Slug
-        };
-
-        node = Array.Find(node.Answers, answer => answer.Sys.Id.Equals(response.AnswerRef))?.NextQuestion;
-      }
-      else
-      {
-        return node;
-      }
-    }
-
-    return null;
+    return section.Questions.Where(question => question.Sys.Id == lastAttachedResponse.QuestionRef)
+                          .SelectMany(question => question.Answers)
+                          .Where(answer => answer.Sys.Id == lastAttachedResponse.AnswerRef)
+                          .Select(answer => answer.NextQuestion)
+                          .FirstOrDefault();
   }
 }
