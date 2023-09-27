@@ -33,27 +33,8 @@ public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand
         var questionWithAnswerMap = checkAnswerDto.Responses.ToDictionary(questionWithAnswer => questionWithAnswer.QuestionRef,
                                                                         questionWithAnswer => questionWithAnswer);
 
-        var attachedQuestions = new List<QuestionWithAnswer>(checkAnswerDto.Responses.Count);
-
-        Question? node = section.Questions[0];
-
-        while (node != null)
-        {
-            if (questionWithAnswerMap.TryGetValue(node.Sys.Id, out QuestionWithAnswer? questionWithAnswer))
-            {
-                var answer = Array.Find(node.Answers, answer => answer.Sys.Id == questionWithAnswer.AnswerRef);
-                questionWithAnswer = questionWithAnswer with
-                {
-                    AnswerText = answer?.Text ?? questionWithAnswer.AnswerText,
-                    QuestionText = node.Text,
-                    QuestionSlug = node.Slug
-                };
-
-                attachedQuestions.Add(questionWithAnswer);
-                node = Array.Find(node.Answers, answer => answer.Sys.Id.Equals(questionWithAnswer.AnswerRef))?.NextQuestion;
-            }
-            else node = null;
-        }
+        var attachedQuestions = section.GetAttachedQuestions(checkAnswerDto.Responses)
+                                       .ToList();
 
         return new CheckAnswerDto()
         {
