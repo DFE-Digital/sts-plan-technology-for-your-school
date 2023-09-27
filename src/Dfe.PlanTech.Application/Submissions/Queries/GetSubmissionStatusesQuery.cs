@@ -59,7 +59,10 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
                                    DateCreated = submission.DateCreated,
                                    Completed = submission.Completed,
                                    Maturity = submission.Maturity,
-                                   SectionId = submission.SectionId
+                                   SectionId = submission.SectionId,
+                                   Status = submission.Completed ? Status.Completed : 
+                                            submission.Responses.Any() ? Status.InProgress :
+                                                                         Status.NotStarted,
                                }
                            })
                            .GroupBy(submission => submission.SectionStatus.SectionId)
