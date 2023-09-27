@@ -10,6 +10,7 @@ using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Exceptions;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
+using Dfe.PlanTech.Web.Routing;
 using GovUk.Frontend.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
@@ -54,7 +55,9 @@ builder.Services.AddScoped<ComponentViewsFactory>();
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddSingleton<IAuthorizationHandler, PageModelAuthorisationPolicy>();
 
+builder.Services.AddTransient<UserJourneyRouter>();
 builder.Services.AddTransient<UserProgressValidator>();
+builder.Services.AddTransient<GetQuestionBySlugValidator>();
 
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization(options =>

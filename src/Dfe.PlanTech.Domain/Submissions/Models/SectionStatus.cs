@@ -22,4 +22,12 @@ public record SectionStatusNew
     public string? Maturity { get; set; }
 
     public DateTime DateCreated { get; set; }
+    
+    public Status Status { get; init; }
+}
+
+public enum Status{
+    NotStarted,
+    InProgress,
+    Completed
 }

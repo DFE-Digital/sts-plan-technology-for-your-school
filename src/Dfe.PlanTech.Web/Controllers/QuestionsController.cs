@@ -6,6 +6,7 @@ using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Exceptions;
 using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Models;
+using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,81 +15,40 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Authorize]
 public class QuestionsController : BaseController<QuestionsController>
 {
+    public const string Controller = "Questions";
+    public const string GetQuestionBySlugAction = nameof(GetQuestionBySlug);
+
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetLatestResponsesQuery _getResponseQuery;
     private readonly UserProgressValidator _userProgressValidator;
+    private readonly UserJourneyRouter _userJourneyRouter;
     private readonly IUser _user;
     public QuestionsController(ILogger<QuestionsController> logger,
                                 IGetSectionQuery getSectionQuery,
                                 IGetLatestResponsesQuery getResponseQuery,
                                 UserProgressValidator userProgressValidator,
+                                UserJourneyRouter userJourneyRouter,
                                 IUser user) : base(logger)
     {
         _getResponseQuery = getResponseQuery;
         _getSectionQuery = getSectionQuery;
         _userProgressValidator = userProgressValidator;
+        _userJourneyRouter = userJourneyRouter;
         _user = user;
     }
 
     [HttpGet("{sectionSlug}/{questionSlug}")]
     public async Task<IActionResult> GetQuestionBySlug(string sectionSlug,
                                                         string questionSlug,
+                                                        [FromServices] GetQuestionBySlugValidator router,
                                                         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
         if (string.IsNullOrEmpty(questionSlug)) throw new ArgumentNullException(nameof(questionSlug));
 
-        var journeyStatus = await _userProgressValidator.GetJourneyStatusForSection(sectionSlug, cancellationToken);
+        await _userJourneyRouter.GetJourneyStatusForSection(sectionSlug, cancellationToken);
 
-        switch (journeyStatus.Status)
-        {
-            case JourneyStatus.Completed:
-                {
-                    var question = journeyStatus.Section.Questions.FirstOrDefault(question => question.Slug == questionSlug) ?? throw new ContentfulDataUnavailableException($"Couldn't find question with slug {questionSlug} under section {sectionSlug}");
-                    return RenderView(GenerateViewModel(sectionSlug, question, journeyStatus.Section, journeyStatus.LastResponseAnswerContentfulId));
-                }
-            case JourneyStatus.CheckAnswers:
-                {
-                    var question = journeyStatus.Section.Questions.FirstOrDefault(q => q.Slug == questionSlug) ??
-                                    throw new ContentfulDataUnavailableException("No");
-
-                    var latestResponses = await _getResponseQuery.GetLatestResponses(await _user.GetEstablishmentId(),
-                                                                                              journeyStatus.Section.Sys.Id,
-                                                                                              cancellationToken) ?? throw new Exception("Null");
-                    var isAttachedQuestion = journeyStatus.Section.GetAttachedQuestions(latestResponses.Responses)
-                                                                  .Any(response => response.QuestionRef == question.Sys.Id);
-
-
-                    if (!isAttachedQuestion)
-                    {
-                        return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { sectionSlug });
-                    }
-
-                    var latestResponseForQuestion = latestResponses.Responses.First(response => response.QuestionRef == question.Sys.Id);
-
-                    var viewModel = GenerateViewModel(sectionSlug, question, journeyStatus.Section, latestResponseForQuestion.AnswerRef);
-                    return RenderView(viewModel);
-                }
-            case JourneyStatus.NextQuestion:
-            case JourneyStatus.NotStarted:
-                {
-                    if (journeyStatus.NextQuestion == null)
-                    {
-                        throw new InvalidDataException("Next question is null but really shouldn't be");
-                    }
-
-                    if (journeyStatus.NextQuestion!.Slug != questionSlug)
-                    {
-                        return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = journeyStatus.NextQuestion!.Slug });
-                    }
-
-                    var viewModel = GenerateViewModel(sectionSlug, journeyStatus.NextQuestion!, journeyStatus.Section, null);
-                    return RenderView(viewModel);
-                }
-
-        }
-
-        throw new Exception($"Invalid journey state");
+        return await router.ValidateRoute(sectionSlug, questionSlug, _userJourneyRouter, this, cancellationToken);
     }
 
 
@@ -136,9 +96,9 @@ public class QuestionsController : BaseController<QuestionsController>
         return RedirectToAction(nameof(GetNextUnansweredQuestion), new { sectionSlug });
     }
 
-    private IActionResult RenderView(QuestionViewModel viewModel) => View("Question", viewModel);
+    public IActionResult RenderView(QuestionViewModel viewModel) => View("Question", viewModel);
 
-    private async Task<QuestionViewModel> GenerateViewModel(string sectionSlug, string questionSlug, CancellationToken cancellationToken)
+    public async Task<QuestionViewModel> GenerateViewModel(string sectionSlug, string questionSlug, CancellationToken cancellationToken)
     {
         var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
                         throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
@@ -156,7 +116,7 @@ public class QuestionsController : BaseController<QuestionsController>
         return GenerateViewModel(sectionSlug, question, section, latestResponseForQuestion?.AnswerRef);
     }
 
-    private QuestionViewModel GenerateViewModel(string sectionSlug, Question question, ISection section, string? latestAnswerContentfulId)
+    public QuestionViewModel GenerateViewModel(string sectionSlug, Question question, ISection section, string? latestAnswerContentfulId)
     {
         ViewData["Title"] = question.Text;
 
@@ -169,6 +129,4 @@ public class QuestionsController : BaseController<QuestionsController>
             SectionId = section.Sys.Id
         };
     }
-
-
 }
