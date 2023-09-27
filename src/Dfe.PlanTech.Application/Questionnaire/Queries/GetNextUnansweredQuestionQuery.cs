@@ -17,7 +17,7 @@ public class GetNextUnansweredQuestionQuery : IGetNextUnansweredQuestionQuery
   {
     var answeredQuestions = await _getResponseQuery.GetLatestResponses(establishmentId, section.Sys.Id, cancellationToken);
 
-    if (answeredQuestions == null || answeredQuestions.Responses.Count == 0) return section.Questions.FirstOrDefault();
+    if (answeredQuestions == null || !answeredQuestions.Responses.Any()) return section.Questions.FirstOrDefault();
 
     return GetNextUnansweredQuestion(section, answeredQuestions.Responses);
   }
