@@ -53,10 +53,10 @@ public class QuestionsController : BaseController<QuestionsController>
                     var question = journeyStatus.Section.Questions.FirstOrDefault(q => q.Slug == questionSlug) ??
                                     throw new ContentfulDataUnavailableException("No");
 
-                    var latestResponse = await _getResponseQuery.GetLatestResponses(await _user.GetEstablishmentId(),
+                    var latestResponses = await _getResponseQuery.GetLatestResponses(await _user.GetEstablishmentId(),
                                                                                               journeyStatus.Section.Sys.Id,
                                                                                               cancellationToken) ?? throw new Exception("Null");
-                    var isAttachedQuestion = journeyStatus.Section.GetAttachedQuestions(latestResponse.Responses)
+                    var isAttachedQuestion = journeyStatus.Section.GetAttachedQuestions(latestResponses.Responses)
                                                                   .Any(response => response.QuestionRef == question.Sys.Id);
 
 
@@ -65,7 +65,9 @@ public class QuestionsController : BaseController<QuestionsController>
                         return RedirectToAction("CheckAnswersPage", "CheckAnswers", new { sectionSlug });
                     }
 
-                    var viewModel = GenerateViewModel(sectionSlug, question, journeyStatus.Section, null);
+                    var latestResponseForQuestion = latestResponses.Responses.First(response => response.QuestionRef == question.Sys.Id);
+
+                    var viewModel = GenerateViewModel(sectionSlug, question, journeyStatus.Section, latestResponseForQuestion.AnswerRef);
                     return RenderView(viewModel);
                 }
             case JourneyStatus.NextQuestion:
