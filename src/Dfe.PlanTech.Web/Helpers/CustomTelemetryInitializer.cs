@@ -22,7 +22,7 @@ public class CustomTelemetryInitializer : ITelemetryInitializer
         requestTelemetry.Properties["RequestId"] = requestId;
     }
     
-    private string GetRequestId()
+    private string? GetRequestId()
     {
         return Activity.Current?.Id ?? _httpContextAccessor.HttpContext?.TraceIdentifier;
     }
