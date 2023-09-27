@@ -11,7 +11,7 @@ public interface IGetSubmissionStatusesQuery
                                                                 IEnumerable<ISection> sections,
                                                                 CancellationToken cancellationToken);
 
-    Task<SectionStatusWithLatestResponse?> GetSectionSubmissionStatusAsync(int establishmentId,
+    Task<SectionStatusNew?> GetSectionSubmissionStatusAsync(int establishmentId,
                                                            ISection section,
                                                            CancellationToken cancellationToken);
 }
