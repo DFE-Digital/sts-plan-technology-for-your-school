@@ -1,10 +1,18 @@
 ﻿using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
 
-namespace Dfe.PlanTech.Domain.Interfaces
+namespace Dfe.PlanTech.Domain.Interfaces;
+
+public interface IGetSubmissionStatusesQuery
 {
-    public interface IGetSubmissionStatusesQuery
-    {
-        IList<SectionStatuses> GetSectionSubmissionStatuses(ISection[] sections);
-    }
+    IList<SectionStatus> GetSectionSubmissionStatuses(ISection[] sections);
+
+    Task<List<SectionStatus>> GetSectionSubmissionStatusesAsync(int establishmentId,
+                                                                IEnumerable<ISection> sections,
+                                                                CancellationToken cancellationToken);
+
+    Task<SectionStatusWithLatestResponse?> GetSectionSubmissionStatusAsync(int establishmentId,
+                                                           ISection section,
+                                                           CancellationToken cancellationToken);
 }
+

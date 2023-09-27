@@ -62,10 +62,10 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public void Returns_CategorySectionInfo_If_Slug_Exists_And_SectionIsCompleted()
         {
-            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatus()
             {
                 SectionId = "Section1",
-                Completed = 1,
+                Completed = true,
             });
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
@@ -107,10 +107,10 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         {
             _category.Completed = 0;
 
-            _category.SectionStatuses.Add(new SectionStatuses()
+            _category.SectionStatuses.Add(new SectionStatus()
             {
                 SectionId = "Section1",
-                Completed = 0,
+                Completed = false,
             });
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
@@ -199,10 +199,10 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 }
             };
 
-            _category.SectionStatuses.Add(new SectionStatuses()
+            _category.SectionStatuses.Add(new SectionStatus()
             {
                 SectionId = "Section1",
-                Completed = 1,
+                Completed = true,
             });
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);

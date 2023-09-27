@@ -8,4 +8,10 @@ public class ContentfulDataUnavailableException : Exception
         : base(message, inner)
     {
     }
+
+    public ContentfulDataUnavailableException(string message)
+    : base(message)
+    {
+    }
+
 }

@@ -12,7 +12,7 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models
         public Header Header { get; set; } = null!;
         public IContentComponent[] Content { get; set; } = Array.Empty<IContentComponent>();
         public ISection[] Sections { get; set; } = Array.Empty<ISection>();
-        public IList<SectionStatuses> SectionStatuses { get; set; } = new List<SectionStatuses>();
+        public IList<SectionStatus> SectionStatuses { get; set; } = new List<SectionStatus>();
         public int Completed { get; set; }
         public bool RetrievalError { get; set; }
 

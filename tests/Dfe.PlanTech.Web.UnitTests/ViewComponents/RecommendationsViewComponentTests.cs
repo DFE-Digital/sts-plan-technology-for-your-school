@@ -86,10 +86,10 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public void Returns_RecommendationInfo_If_It_Exists_ForMaturity()
         {
-            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatus()
             {
                 SectionId = "Section1",
-                Completed = 1,
+                Completed = true,
                 Maturity = "High"
             });
 
@@ -119,17 +119,17 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public void Returns_RecommendationInfo_For_Multiple_Categories_If_It_Exists_ForMaturity()
         {
-            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatus()
             {
                 SectionId = "Section1",
-                Completed = 1,
+                Completed = true,
                 Maturity = "High"
             });
             
-            _categoryTwo.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
+            _categoryTwo.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatus()
             {
                 SectionId = "Section1",
-                Completed = 1,
+                Completed = true,
                 Maturity = "High"
             });
 
@@ -164,10 +164,10 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public void Returns_RecommendationInfo_And_Logs_Error_If_Exception_Thrown_By_Get_Category()
         {
-            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatus()
             {
                 SectionId = "Section1",
-                Completed = 1,
+                Completed = true,
                 Maturity = "High"
             });
 
@@ -199,10 +199,10 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public void Returns_NullRecommendationInfo_If_No_RecommendationPage_Exists_ForMaturity()
         {
-            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatus()
             {
                 SectionId = "Section1",
-                Completed = 1,
+                Completed = true,
                 Maturity = "Low",
             });
             
@@ -233,10 +233,10 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         public void DoesNotReturn_RecommendationInfo_If_Section_IsNot_Completed()
         {
             _category.Completed= 0;
-            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatus()
             {
                 SectionId = "Section1",
-                Completed = 0,
+                Completed = false,
                 Maturity = null
             });
             

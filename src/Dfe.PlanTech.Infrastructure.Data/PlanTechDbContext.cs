@@ -31,7 +31,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
 
     public DbSet<Response> Responses { get; set; } = null!;
 
-    public DbSet<SectionStatuses> sectionStatusesSp { get; set; } = null!;
+    public DbSet<SectionStatus> sectionStatusesSp { get; set; } = null!;
 
     public PlanTechDbContext() { }
 
@@ -100,7 +100,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
             builder.Property(response => response.DateCreated).HasColumnType("datetime").ValueGeneratedOnAdd();
         });
 
-        modelBuilder.Entity<SectionStatuses>(builder =>
+        modelBuilder.Entity<SectionStatus>(builder =>
         {
             builder.HasNoKey();
         });
@@ -108,7 +108,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
 
     public IQueryable<User> GetUsers => Users;
     public IQueryable<SignIn> SignIns => SignIn;
-    public IQueryable<SectionStatuses> GetSectionStatuses(string sectionIds, int establishmentId) => sectionStatusesSp.FromSqlInterpolated($"{DatabaseConstants.GetSectionStatuses} {sectionIds} , {establishmentId}");
+    public IQueryable<SectionStatus> GetSectionStatuses(string sectionIds, int establishmentId) => sectionStatusesSp.FromSqlInterpolated($"{DatabaseConstants.GetSectionStatuses} {sectionIds} , {establishmentId}");
 
     public void AddUser(User user) => Users.Add(user);
 
