@@ -16,9 +16,14 @@ else
                 <task-list-item-name>
                     @if (recommendationsViewComponentViewModel.RecommendationSlug != null)
                     {
-                        @Html.RouteLink(recommendationsViewComponentViewModel.RecommendationDisplayName,
-            "GetPageByRouteAndSection", new {route=recommendationsViewComponentViewModel.RecommendationSlug,
-            sectionSlug=recommendationsViewComponentViewModel.SectionSlug}, new { @class="govuk-link"} )
+                        <a
+                            class="govuk-link"
+                            asp-route="GetRecommendation"
+                            asp-route-sectionSlug="@recommendationsViewComponentViewModel.SectionSlug"
+                            asp-route-recommendationSlug="@recommendationsViewComponentViewModel.RecommendationSlug"
+                        >
+                        @recommendationsViewComponentViewModel.RecommendationDisplayName
+                        </a>
                     }
                     else
                     {

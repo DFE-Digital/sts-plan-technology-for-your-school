@@ -18,7 +18,6 @@ public class PagesController : BaseController<PagesController>
 
     [Authorize(Policy = PageModelAuthorisationPolicy.POLICY_NAME)]
     [HttpGet("/{route?}")]
-    [HttpGet("~/{sectionSlug}/recommendation/{route?}", Name = "GetPageByRouteAndSection")]
     public IActionResult GetByRoute([ModelBinder(typeof(PageModelBinder))] Page page, [FromServices] IUser user)
     {
         var viewModel = CreatePageModel(page, user);
