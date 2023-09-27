@@ -3,6 +3,7 @@ using Dfe.PlanTech.Web.Helpers;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
+using NSubstitute.ReturnsExtensions;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Helpers;
@@ -45,7 +46,7 @@ public class CustomTelemetryInitializerTests
         var telemetry = new RequestTelemetry();
         var customInitializer = new CustomTelemetryInitializer(_httpContextAccessor);
 
-        _httpContextAccessor.HttpContext.Returns((HttpContext)null);
+        _httpContextAccessor.HttpContext.ReturnsNull();
 
         customInitializer.Initialize(telemetry);
 
