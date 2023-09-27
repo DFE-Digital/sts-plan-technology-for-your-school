@@ -20,7 +20,7 @@ public class PagesController : BaseController<PagesController>
     [HttpGet("/{route?}")]
     public IActionResult GetByRoute([ModelBinder(typeof(PageModelBinder))] Page page, [FromServices] IUser user)
     {
-        var viewModel = CreatePageModel(page, user);
+        var viewModel = new PageViewModel(page, this, user, logger);
 
         return View("Page", viewModel);
     }
@@ -36,19 +36,5 @@ public class PagesController : BaseController<PagesController>
     public IActionResult ServiceUnavailable()
     {
         return View(new ServiceUnavailableViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-    }
-
-    private PageViewModel CreatePageModel(Page page,  IUser user)
-    {
-        ViewData["Title"] = System.Net.WebUtility.HtmlDecode(page.Title?.Text) ?? "Plan Technology For Your School";
-
-        var viewModel = new PageViewModel()
-        {
-            Page = page,
-        };
-
-        viewModel.TryLoadOrganisationName(HttpContext, user, logger);
-
-        return viewModel;
     }
 }

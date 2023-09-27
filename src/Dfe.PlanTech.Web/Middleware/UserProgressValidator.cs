@@ -34,8 +34,7 @@ public class UserProgressValidator
                                                                                               section,
                                                                                               cancellationToken);
 
-
-        bool sectionStarted = sectionStatus?.SectionStatus != null && sectionStatus.SectionStatus.Completed;
+        bool sectionStarted = sectionStatus?.SectionStatus != null && !sectionStatus.SectionStatus.Completed && sectionStatus.LatestResponse != null;
 
         if (!sectionStarted)
         {
