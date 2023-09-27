@@ -2,7 +2,6 @@ using Dfe.PlanTech.Application.Responses.Interface;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Exceptions;
-using Dfe.PlanTech.Web.Middleware;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Routing;
@@ -30,6 +29,7 @@ public class GetQuestionBySlugValidator
     {
       JourneyStatus.CheckAnswers => await ProcessCheckAnswersStatus(sectionSlug, questionSlug, router, controller, cancellationToken),
       JourneyStatus.NextQuestion or JourneyStatus.NotStarted => ProcessQuestionStatus(sectionSlug, questionSlug, router, controller),
+      JourneyStatus.Completed => controller.RedirectToAction("GetByRoute", "Pages", new { route = sectionSlug }),
       _ => throw new InvalidDataException($"Invalid journey state - state is {router.Status}"),
     };
   }
