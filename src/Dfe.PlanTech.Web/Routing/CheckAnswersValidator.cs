@@ -31,6 +31,7 @@ public class CheckAnswersValidator
     return router.Status switch
     {
       JourneyStatus.CheckAnswers => await ProcessCheckAnswers(sectionSlug, router, controller, cancellationToken),
+      JourneyStatus.Completed => controller.RedirectToAction("GetByRoute", "Pages", new { route = sectionSlug }),
       _ => ProcessQuestionStatus(sectionSlug, router, controller),
     };
   }
