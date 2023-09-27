@@ -24,7 +24,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
         private readonly Page _checkAnswersPage = new()
         {
-            Slug = CheckAnswersController.PAGE_SLUG,
+            Slug = CheckAnswersController.CheckAnswersPageSlug,
             Title = new Title() { Text = "Title Text" },
             Content = new ContentComponent[] { new Header() { Tag = Domain.Content.Enums.HeaderTag.H1, Text = "Header Text" } }
         };

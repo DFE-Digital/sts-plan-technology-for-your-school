@@ -58,6 +58,7 @@ builder.Services.AddSingleton<IAuthorizationHandler, PageModelAuthorisationPolic
 builder.Services.AddTransient<UserJourneyRouter>();
 builder.Services.AddTransient<GetRecommendationValidator>();
 builder.Services.AddTransient<GetQuestionBySlugValidator>();
+builder.Services.AddTransient<CheckAnswersValidator>();
 
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization(options =>
