@@ -23,6 +23,7 @@ builder.Services.AddGoogleTagManager();
 // Add services to the container.
 
 builder.Services.AddControllersWithViews();
+
 builder.Services.AddGovUkFrontend();
 
 if (!builder.Environment.IsDevelopment())
@@ -115,7 +116,6 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllerRoute(
     pattern: "{controller=Pages}/{action=GetByRoute}/{id?}",
     name: "default"

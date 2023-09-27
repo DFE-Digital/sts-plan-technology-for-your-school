@@ -21,7 +21,7 @@ namespace Dfe.PlanTech.Web.ViewComponents
         public IViewComponentResult Invoke(ICategory[] categories)
         {
             var allSectionsOfCombinedCategories = new List<ISection>();
-            var allSectionStatusesOfCombinedCategories = new List<SectionStatuses>();
+            var allSectionStatusesOfCombinedCategories = new List<SectionStatus>();
 
             var recommendationsAvailable = false;
             foreach (var category in categories)
@@ -46,12 +46,12 @@ namespace Dfe.PlanTech.Web.ViewComponents
         }
 
         private IEnumerable<RecommendationsViewComponentViewModel> _GetRecommendationsViewComponentViewModel(
-            ISection[] sections, List<SectionStatuses> sectionStatusesList)
+            ISection[] sections, List<SectionStatus> sectionStatusesList)
         {
             foreach (ISection section in sections)
             {
                 var sectionMaturity = sectionStatusesList.Where(sectionStatus =>
-                        sectionStatus.SectionId == section.Sys.Id && sectionStatus.Completed == 1)
+                        sectionStatus.SectionId == section.Sys.Id && sectionStatus.Completed)
                     .Select(sectionStatus => sectionStatus.Maturity)
                     .FirstOrDefault();
 
@@ -80,7 +80,7 @@ namespace Dfe.PlanTech.Web.ViewComponents
             try
             {
                 category.SectionStatuses = _query.GetSectionSubmissionStatuses(category.Sections).ToList();
-                category.Completed = category.SectionStatuses.Count(x => x.Completed == 1);
+                category.Completed = category.SectionStatuses.Count(x => x.Completed);
                 category.RetrievalError = false;
                 return category;
             }
