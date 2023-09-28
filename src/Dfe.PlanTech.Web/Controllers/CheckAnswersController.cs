@@ -49,4 +49,14 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
         return View("CheckAnswers", checkAnswersViewModel);
     }
+
+    [HttpPost("ConfirmCheckAnswers")]
+    public async Task<IActionResult> ConfirmCheckAnswers(int submissionId, string sectionName, [FromServices] ICalculateMaturityCommand calculateMaturityCommand, CancellationToken cancellationToken = default)
+    {
+        await calculateMaturityCommand.CalculateMaturityAsync(submissionId, cancellationToken);
+
+        TempData["SectionName"] = sectionName;
+
+        return this.RedirectToSelfAssessment();
+    }
 }
