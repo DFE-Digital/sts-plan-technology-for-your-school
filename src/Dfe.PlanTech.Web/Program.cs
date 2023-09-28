@@ -61,7 +61,7 @@ builder.Services.AddTransient<IGetQuestionBySlugRouter, GetQuestionBySlugRouter>
 builder.Services.AddTransient<ICheckAnswersRouter, CheckAnswersRouter>();
 
 builder.Services.AddTransient((_) => SectionCompleteChecker.SectionComplete);
-builder.Services.AddTransient((_) => SectionNotStartedChecker.SectionNotStarted);
+builder.Services.AddTransient((_) => SectionNotStartedStatusChecker.SectionNotStarted);
 builder.Services.AddTransient((_) => CheckAnswersOrNextQuestionChecker.CheckAnswersOrNextQuestion);
 
 builder.Services.AddAuthentication();
