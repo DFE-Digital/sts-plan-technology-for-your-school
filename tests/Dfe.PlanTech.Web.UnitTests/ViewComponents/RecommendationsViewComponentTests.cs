@@ -89,7 +89,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatus()
             {
                 SectionId = "Section1",
-                Completed = true,
+                Completed = 1,
                 Maturity = "High"
             });
 
@@ -122,14 +122,14 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatus()
             {
                 SectionId = "Section1",
-                Completed = true,
+                Completed = 1,
                 Maturity = "High"
             });
             
             _categoryTwo.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatus()
             {
                 SectionId = "Section1",
-                Completed = true,
+                Completed = 1,
                 Maturity = "High"
             });
 
@@ -167,7 +167,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatus()
             {
                 SectionId = "Section1",
-                Completed = true,
+                Completed = 1,
                 Maturity = "High"
             });
 
@@ -202,7 +202,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatus()
             {
                 SectionId = "Section1",
-                Completed = true,
+                Completed = 1,
                 Maturity = "Low",
             });
             
@@ -236,7 +236,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatus()
             {
                 SectionId = "Section1",
-                Completed = false,
+                Completed = 0,
                 Maturity = null
             });
             
