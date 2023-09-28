@@ -37,6 +37,15 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     };
   }
 
+  /// <summary>
+  /// Return Question page for question slug, if it is the next unanswered question in their section,
+  /// if not redirect to that question
+  /// </summary>
+  /// <param name="sectionSlug"></param>
+  /// <param name="questionSlug"></param>
+  /// <param name="controller"></param>
+  /// <returns></returns>
+  /// <exception cref="InvalidDataException"></exception>
   private IActionResult ProcessQuestionStatus(string sectionSlug, string questionSlug, QuestionsController controller)
   {
     if (_router.NextQuestion == null)
@@ -53,6 +62,17 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     return controller.RenderView(viewModel);
   }
 
+  /// <summary>
+  /// If the question is an attached question in the establishment's latest user journey for the section, return the question page for it,
+  /// otherwise redirect to Check Answers page
+  /// </summary>
+  /// <param name="sectionSlug"></param>
+  /// <param name="questionSlug"></param>
+  /// <param name="controller"></param>
+  /// <param name="cancellationToken"></param>
+  /// <returns></returns>
+  /// <exception cref="ContentfulDataUnavailableException"></exception>
+  /// <exception cref="InvalidDataException"></exception>
   private async Task<IActionResult> ProcessCheckAnswersStatus(string sectionSlug, string questionSlug, QuestionsController controller, CancellationToken cancellationToken)
   {
     var question = _router.Section!.Questions.FirstOrDefault(q => q.Slug == questionSlug) ??

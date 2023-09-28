@@ -43,6 +43,13 @@ public class UserJourneyStatusProcessor : IUserJourneyStatusProcessor
   public Section? Section { get; private set; }
   public SectionStatusNew? SectionStatus { get; private set; }
 
+/// <summary>
+/// Get's the current status for the current user's establishment and the given section
+/// </summary>
+/// <param name="sectionSlug"></param>
+/// <param name="cancellationToken"></param>
+/// <returns></returns>
+/// <exception cref="ContentfulDataUnavailableException"></exception>
   public async Task GetJourneyStatusForSection(string sectionSlug, CancellationToken cancellationToken)
   {
     var establishmentId = await User.GetEstablishmentId();
