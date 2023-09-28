@@ -6,13 +6,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Routing;
 
-public class GetQuestionBySlugValidator
+public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
 {
   private readonly IGetLatestResponsesQuery _getResponseQuery;
   private readonly IUser _user;
-  private readonly UserJourneyRouter _router;
+  private readonly IUserJourneyStatusProcessor _router;
 
-  public GetQuestionBySlugValidator(IGetLatestResponsesQuery getResponseQuery, IUser user, UserJourneyRouter router)
+  public GetQuestionBySlugRouter(IGetLatestResponsesQuery getResponseQuery, IUser user, IUserJourneyStatusProcessor router)
   {
     _getResponseQuery = getResponseQuery;
     _user = user;

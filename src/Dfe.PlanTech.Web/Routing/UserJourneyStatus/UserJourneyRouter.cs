@@ -8,14 +8,14 @@ using Dfe.PlanTech.Web.Exceptions;
 
 namespace Dfe.PlanTech.Web.Routing;
 
-public class UserJourneyRouter
+public class UserJourneyStatusProcessor : IUserJourneyStatusProcessor
 {
   private readonly IGetSectionQuery _getSectionQuery;
   private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
 
   private readonly UserJourneyStatusChecker[] _statusCheckers;
 
-  public UserJourneyRouter(IGetSectionQuery getSectionQuery,
+  public UserJourneyStatusProcessor(IGetSectionQuery getSectionQuery,
                            IGetSubmissionStatusesQuery getSubmissionStatusesQuery,
                            IEnumerable<UserJourneyStatusChecker> statusCheckers,
                            IGetLatestResponsesQuery getResponsesQuery,
@@ -24,18 +24,18 @@ public class UserJourneyRouter
     _getSectionQuery = getSectionQuery;
     _getSubmissionStatusesQuery = getSubmissionStatusesQuery;
     _statusCheckers = statusCheckers.ToArray();
-    
-    if(_statusCheckers.Length == 0){
+
+    if (_statusCheckers.Length == 0)
+    {
       throw new ArgumentNullException(nameof(statusCheckers));
     }
-    
+
     GetResponsesQuery = getResponsesQuery;
     User = user;
-    
   }
 
-  public readonly IGetLatestResponsesQuery GetResponsesQuery;
-  public readonly IUser User;
+  public IGetLatestResponsesQuery GetResponsesQuery { get; init; }
+  public IUser User { get; init; }
 
   public JourneyStatus Status { get; set; }
   public Question? NextQuestion { get; set; }
@@ -53,7 +53,7 @@ public class UserJourneyRouter
     SectionStatus = await _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(establishmentId,
                                                                                           Section,
                                                                                           cancellationToken);
-                                                                                          
+
     foreach (var statusChecker in _statusCheckers)
     {
       if (statusChecker.IsMatchingUserJourney(this))
