@@ -63,7 +63,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatus()
             {
                 SectionId = "Section1",
-                Completed = true,
+                Completed = 0,
             });
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
@@ -108,7 +108,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category.SectionStatuses.Add(new SectionStatus()
             {
                 SectionId = "Section1",
-                Completed = false,
+                Completed = 0,
             });
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
@@ -200,7 +200,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category.SectionStatuses.Add(new SectionStatus()
             {
                 SectionId = "Section1",
-                Completed = true,
+                Completed = 1,
             });
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
