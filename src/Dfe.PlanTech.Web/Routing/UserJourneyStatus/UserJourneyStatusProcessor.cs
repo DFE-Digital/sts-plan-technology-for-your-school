@@ -58,8 +58,8 @@ public class UserJourneyStatusProcessor : IUserJourneyStatusProcessor
                     throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
 
     SectionStatus = await _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(establishmentId,
-                                                                                          Section,
-                                                                                          cancellationToken);
+                                                                                      Section,
+                                                                                      cancellationToken);
 
     foreach (var statusChecker in _statusCheckers)
     {
