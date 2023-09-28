@@ -24,3 +24,16 @@ flowchart TD;
     F -- Yes --> G[Display page for action]
     F -- No --> H[Redirect to appropriate action]
 ```
+
+
+| Target URL          | User Journey Stage | When | Outcome                                   |
+| ------------------- | ------------------ | ---- | ----------------------------------------- |
+| CheckAnswers        | Check Answers      |      | Show check answers page                   |
+| CheckAnswers        | Completed          |      | Redirect to interstitial page             |
+| CheckAnswers        | Other              |      | Redirect to next question in user journey |
+| Any question URL    | Check Answers      |      |                                           |
+| Any question URL    | In progress        |      |                                           |
+| Any question URL    | Completed          |      |                                           |
+| Any question URL    | Not started        |      |                                           |
+| Recommendation Page | Completed          |      |                                           |
+| Recommendation Page | Other              |      |                                           |
