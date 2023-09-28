@@ -3,7 +3,7 @@ namespace Dfe.PlanTech.Web.Routing;
 /// <summary>
 /// User journey status checker for when the section for the establishment is complete
 /// </summary>
-public static class SectionCompleteChecker
+public static class SectionCompleteStatusChecker
 {
   public static readonly UserJourneyStatusChecker SectionComplete = new()
   {
