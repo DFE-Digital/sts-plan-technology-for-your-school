@@ -13,22 +13,25 @@ public class UserJourneyRouter
   private readonly IGetSectionQuery _getSectionQuery;
   private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
 
-  private readonly UserJourneyStatusChecker[] _statusCheckers = new[] {
-    SectionNotStartedChecker.SectionNotStarted,
-    SectionCompleteChecker.SectionComplete,
-    CheckAnswersOrNextQuestionChecker.CheckAnswersOrNextQuestion
-  };
+  private readonly UserJourneyStatusChecker[] _statusCheckers;
 
   public UserJourneyRouter(IGetSectionQuery getSectionQuery,
                            IGetSubmissionStatusesQuery getSubmissionStatusesQuery,
+                           IEnumerable<UserJourneyStatusChecker> statusCheckers,
                            IGetLatestResponsesQuery getResponsesQuery,
                            IUser user)
   {
     _getSectionQuery = getSectionQuery;
     _getSubmissionStatusesQuery = getSubmissionStatusesQuery;
-
+    _statusCheckers = statusCheckers.ToArray();
+    
+    if(_statusCheckers.Length == 0){
+      throw new ArgumentNullException(nameof(statusCheckers));
+    }
+    
     GetResponsesQuery = getResponsesQuery;
     User = user;
+    
   }
 
   public readonly IGetLatestResponsesQuery GetResponsesQuery;
