@@ -37,6 +37,6 @@ public class PagesController : BaseController<PagesController>
     public IActionResult ServiceUnavailable()
     => View(new ServiceUnavailableViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 
-    public IActionResult RedirectToGetByROute(string route, Controller controller)
+    public IActionResult RedirectToGetByRoute(string route, Controller controller)
     => controller.RedirectToAction(nameof(GetByRoute), Controller, new { route });
 }
