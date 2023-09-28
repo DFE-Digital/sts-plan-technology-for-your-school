@@ -60,7 +60,7 @@ builder.Services.AddTransient<IGetRecommendationRouter, GetRecommendationRouter>
 builder.Services.AddTransient<IGetQuestionBySlugRouter, GetQuestionBySlugRouter>();
 builder.Services.AddTransient<ICheckAnswersRouter, CheckAnswersRouter>();
 
-builder.Services.AddTransient((_) => SectionCompleteChecker.SectionComplete);
+builder.Services.AddTransient((_) => SectionCompleteStatusChecker.SectionComplete);
 builder.Services.AddTransient((_) => SectionNotStartedStatusChecker.SectionNotStarted);
 builder.Services.AddTransient((_) => CheckAnswersOrNextQuestionChecker.CheckAnswersOrNextQuestion);
 
