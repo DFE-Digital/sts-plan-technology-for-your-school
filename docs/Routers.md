@@ -25,15 +25,22 @@ flowchart TD;
     F -- No --> H[Redirect to appropriate action]
 ```
 
+## Routing Logic
 
-| Target URL          | User Journey Stage | When | Outcome                                   |
-| ------------------- | ------------------ | ---- | ----------------------------------------- |
-| CheckAnswers        | Check Answers      |      | Show check answers page                   |
-| CheckAnswers        | Completed          |      | Redirect to interstitial page             |
-| CheckAnswers        | Other              |      | Redirect to next question in user journey |
-| Any question URL    | Check Answers      |      |                                           |
-| Any question URL    | In progress        |      |                                           |
-| Any question URL    | Completed          |      |                                           |
-| Any question URL    | Not started        |      |                                           |
-| Recommendation Page | Completed          |      |                                           |
-| Recommendation Page | Other              |      |                                           |
+| Target URL          | User Journey Stage | When                                      | Outcome                                   |
+| ------------------- | ------------------ | ----------------------------------------- | ----------------------------------------- |
+| CheckAnswers        | Check Answers      |                                           | Show check answers page                   |
+| CheckAnswers        | Completed          |                                           | Redirect to interstitial page             |
+| CheckAnswers        | Other              |                                           | Redirect to next question in user journey |
+| Any question URL    | Check Answers      |                                           | Redirect to check answers page            |
+| Any question URL    | In progress        | Next question on user journey             | Show question page                        |
+| Any question URL    | In progress        | Other question on user journey            | Redirect to next question                 |
+| Any question URL    | Completed          | First question for section                | Show question page                        |
+| Any question URL    | Completed          | Any other question                        | Redirect to first question                |
+| Any question URL    | Not started        | First question for section                | Show question page                        |
+| Any question URL    | Not started        | Any other question                        | Redirect to first question                |
+| Recommendation Page | Completed          | Is recommendation for the maturity        | Show recommendation page                  |
+| Recommendation Page | Completed          | Any other recommendation page for section | Redirect to correct recommendation page   |
+| Recommendation Page | Check answers      |                                           | Redirect to check answers page            |
+| Recommendation Page | Not started        |                                           | Redirect to first question for section    |
+| Recommendation Page | In Progress        |                                           | Redirect to next question in user journey |
