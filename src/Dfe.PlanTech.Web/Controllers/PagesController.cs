@@ -12,6 +12,9 @@ namespace Dfe.PlanTech.Web.Controllers;
 
 public class PagesController : BaseController<PagesController>
 {
+    public const string Controller = "Pages";
+    public const string GetPageByRouteAction = nameof(GetByRoute);
+
     public PagesController(ILogger<PagesController> logger) : base(logger)
     {
     }
@@ -28,13 +31,12 @@ public class PagesController : BaseController<PagesController>
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     [Route(UrlConstants.Error)]
     public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-    }
+    => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 
     [Route(UrlConstants.ServiceUnavailable)]
     public IActionResult ServiceUnavailable()
-    {
-        return View(new ServiceUnavailableViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-    }
+    => View(new ServiceUnavailableViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+
+    public IActionResult RedirectToGetByROute(string route, Controller controller)
+    => controller.RedirectToAction(nameof(GetByRoute), Controller, new { route });
 }

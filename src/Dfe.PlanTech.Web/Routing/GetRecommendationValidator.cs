@@ -12,29 +12,31 @@ public class GetRecommendationValidator
   private readonly IGetPageQuery _getPageQuery;
   private readonly ILogger<GetRecommendationValidator> _logger;
   private readonly IUser _user;
+  private readonly UserJourneyRouter _router;
 
-  public GetRecommendationValidator(IGetPageQuery getPageQuery, ILogger<GetRecommendationValidator> logger, IUser user)
+  public GetRecommendationValidator(IGetPageQuery getPageQuery, ILogger<GetRecommendationValidator> logger, IUser user, UserJourneyRouter router)
   {
     _getPageQuery = getPageQuery;
     _logger = logger;
     _user = user;
+    _router = router;
   }
 
   public async Task<IActionResult> ValidateRoute(string sectionSlug,
                                                  string recommendationSlug,
-                                                 UserJourneyRouter router,
                                                  RecommendationsController controller,
                                                  CancellationToken cancellationToken)
   {
     if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentException($"'{nameof(sectionSlug)}' cannot be null or empty.");
     if (string.IsNullOrEmpty(recommendationSlug)) throw new ArgumentException($"'{nameof(recommendationSlug)}' cannot be null or empty.");
 
-    return router.Status switch
+    await _router.GetJourneyStatusForSection(sectionSlug, cancellationToken);
+    return _router.Status switch
     {
-      JourneyStatus.Completed => await HandleCompleteStatus(sectionSlug, recommendationSlug, router, controller, cancellationToken),
+      JourneyStatus.Completed => await HandleCompleteStatus(sectionSlug, recommendationSlug, _router, controller, cancellationToken),
       JourneyStatus.CheckAnswers => controller.RedirectToCheckAnswers(sectionSlug),
-      JourneyStatus.NotStarted or JourneyStatus.NextQuestion => HandleQuestionStatus(sectionSlug, router),
-      _ => throw new InvalidOperationException($"Invalid journey status - {router.Status}"),
+      JourneyStatus.NotStarted or JourneyStatus.NextQuestion => HandleQuestionStatus(sectionSlug, _router, controller),
+      _ => throw new InvalidOperationException($"Invalid journey status - {_router.Status}"),
     };
   }
 
@@ -61,8 +63,6 @@ public class GetRecommendationValidator
     return controller.View("~/Views/Pages/Page.cshtml", viewModel);
   }
 
-  private IActionResult HandleQuestionStatus(string sectionSlug, UserJourneyRouter router)
-  => new RedirectToActionResult(QuestionsController.GetQuestionBySlugAction,
-                                QuestionsController.GetQuestionBySlugAction,
-                                new { sectionSlug, questionSlug = router.NextQuestion!.Slug });
+  private static IActionResult HandleQuestionStatus(string sectionSlug, UserJourneyRouter router, Controller controller)
+  => QuestionsController.RedirectToQuestionBySlug(sectionSlug, router.NextQuestion!.Slug, controller);
 }

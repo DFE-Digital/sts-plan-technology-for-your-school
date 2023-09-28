@@ -13,6 +13,7 @@ public static class SectionNotStartedChecker
     ProcessUserJourneyRouter = (userJourneyRouter, cancellationToken) =>
     {
       userJourneyRouter.Status = JourneyStatus.NotStarted;
+      userJourneyRouter.NextQuestion = userJourneyRouter.Section!.Questions.First();
       return Task.CompletedTask;
     }
   };
