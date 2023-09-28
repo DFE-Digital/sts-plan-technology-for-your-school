@@ -1,4 +1,4 @@
-using System.Diagnostics;
+using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Extensibility;
@@ -19,11 +19,11 @@ public class CustomTelemetryInitializer : ITelemetryInitializer
     {
         if (telemetry is not RequestTelemetry requestTelemetry) return;
         var requestId = GetRequestId();
-        requestTelemetry.Properties["RequestId"] = requestId;
+        requestTelemetry.Context.Properties["RequestId"] = requestId;
     }
     
     private string? GetRequestId()
     {
-        return Activity.Current?.Id ?? _httpContextAccessor.HttpContext?.TraceIdentifier;
+        return _httpContextAccessor.HttpContext?.TraceIdentifier;
     }
 }

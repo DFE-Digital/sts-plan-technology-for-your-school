@@ -39,18 +39,4 @@ public class CustomTelemetryInitializerTests
 
         Assert.False(telemetry.Properties.ContainsKey("RequestId"));
     }
-
-    [Fact]
-    public void CustomInitializerAddsRequestIdToRequestTelemetryWhereNoHttpContext()
-    {
-        var telemetry = new RequestTelemetry();
-        var customInitializer = new CustomTelemetryInitializer(_httpContextAccessor);
-
-        _httpContextAccessor.HttpContext.ReturnsNull();
-
-        customInitializer.Initialize(telemetry);
-
-        Assert.True(telemetry.Properties.TryGetValue("RequestId", out var requestId));
-        Assert.Equal(Activity.Current?.Id, requestId);
-    }
 }
