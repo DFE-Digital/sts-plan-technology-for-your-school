@@ -82,7 +82,8 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
 
     if (!isAttachedQuestion) return controller.RedirectToCheckAnswers(sectionSlug);
 
-    var latestResponseForQuestion = latestResponses.Responses.First(response => response.QuestionRef == question.Sys.Id);
+    var latestResponseForQuestion = latestResponses.Responses.FirstOrDefault(response => response.QuestionRef == question.Sys.Id) ??
+                                    throw new InvalidDataException($"Could not find response for question {question.Sys.Id}");
 
     var viewModel = controller.GenerateViewModel(sectionSlug,
                                                  question,
