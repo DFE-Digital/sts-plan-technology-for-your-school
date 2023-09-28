@@ -15,22 +15,18 @@ namespace Dfe.PlanTech.Web.Controllers;
 public class QuestionsController : BaseController<QuestionsController>
 {
     public const string Controller = "Questions";
-    public const string GetQuestionBySlugAction = nameof(GetQuestionBySlug);
 
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetLatestResponsesQuery _getResponseQuery;
-    private readonly UserJourneyRouter _userJourneyRouter;
     private readonly IUser _user;
     
     public QuestionsController(ILogger<QuestionsController> logger,
                                 IGetSectionQuery getSectionQuery,
                                 IGetLatestResponsesQuery getResponseQuery,
-                                UserJourneyRouter userJourneyRouter,
                                 IUser user) : base(logger)
     {
         _getResponseQuery = getResponseQuery;
         _getSectionQuery = getSectionQuery;
-        _userJourneyRouter = userJourneyRouter;
         _user = user;
     }
 
@@ -43,9 +39,7 @@ public class QuestionsController : BaseController<QuestionsController>
         if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
         if (string.IsNullOrEmpty(questionSlug)) throw new ArgumentNullException(nameof(questionSlug));
 
-        await _userJourneyRouter.GetJourneyStatusForSection(sectionSlug, cancellationToken);
-
-        return await router.ValidateRoute(sectionSlug, questionSlug, _userJourneyRouter, this, cancellationToken);
+        return await router.ValidateRoute(sectionSlug, questionSlug, this, cancellationToken);
     }
 
 
@@ -126,4 +120,7 @@ public class QuestionsController : BaseController<QuestionsController>
             SectionId = section.Sys.Id
         };
     }
+
+    public static IActionResult RedirectToQuestionBySlug(string sectionSlug, string questionSlug, Controller controller)
+    => controller.RedirectToAction(nameof(GetQuestionBySlug), Controller, new { sectionSlug, questionSlug }); 
 }

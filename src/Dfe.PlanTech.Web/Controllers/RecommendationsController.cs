@@ -14,17 +14,13 @@ public class RecommendationsController : BaseController<RecommendationsControlle
   }
 
   [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}", Name = "GetRecommendation")]
-  public async Task<IActionResult> GetRecommendation(string sectionSlug,
+  public Task<IActionResult> GetRecommendation(string sectionSlug,
                                                      string recommendationSlug,
-                                                     [FromServices] UserJourneyRouter userJourneyRouter,
                                                      [FromServices] GetRecommendationValidator getRecommendationValidator,
                                                      CancellationToken cancellationToken)
   {
-    await userJourneyRouter.GetJourneyStatusForSection(sectionSlug, cancellationToken);
-
-    return await getRecommendationValidator.ValidateRoute(sectionSlug,
+    return getRecommendationValidator.ValidateRoute(sectionSlug,
                                                           recommendationSlug,
-                                                          userJourneyRouter,
                                                           this,
                                                           cancellationToken);
   }

@@ -22,13 +22,13 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     }
 
     [HttpGet("{sectionSlug}/check-answers")]
-    public async Task<IActionResult> CheckAnswersPage(string sectionSlug, [FromServices] UserJourneyRouter router, [FromServices] CheckAnswersValidator checkAnswersValidator, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> CheckAnswersPage(string sectionSlug,
+                                                      [FromServices] CheckAnswersValidator checkAnswersValidator,
+                                                      CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
 
-        await router.GetJourneyStatusForSection(sectionSlug, cancellationToken);
-
-        return await checkAnswersValidator.ValidateRoute(sectionSlug, router, this, cancellationToken);
+        return await checkAnswersValidator.ValidateRoute(sectionSlug, this, cancellationToken);
     }
 
     [HttpPost("ConfirmCheckAnswers")]
