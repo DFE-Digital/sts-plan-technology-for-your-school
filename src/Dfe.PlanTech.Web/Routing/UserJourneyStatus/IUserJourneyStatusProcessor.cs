@@ -5,6 +5,10 @@ using Dfe.PlanTech.Domain.Submissions.Models;
 
 namespace Dfe.PlanTech.Web.Routing;
 
+/// <summary>
+/// Gets current journey status for a user's establishment and a given section,
+/// along with bits of needed information for this (e.g. Section)
+/// </summary>
 public interface IUserJourneyStatusProcessor
 {
   public IGetLatestResponsesQuery GetResponsesQuery { get; }

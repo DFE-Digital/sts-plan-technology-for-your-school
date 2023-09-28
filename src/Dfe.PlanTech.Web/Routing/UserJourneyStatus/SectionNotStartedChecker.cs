@@ -2,6 +2,9 @@ using Dfe.PlanTech.Domain.Submissions.Models;
 
 namespace Dfe.PlanTech.Web.Routing;
 
+/// <summary>
+/// User journey status checker for when the section for the establishment hasn't been started
+/// </summary>
 public static class SectionNotStartedChecker
 {
   public static readonly UserJourneyStatusChecker SectionNotStarted = new()
