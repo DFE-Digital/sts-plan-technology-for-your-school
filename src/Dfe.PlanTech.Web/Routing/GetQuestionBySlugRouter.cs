@@ -48,7 +48,7 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
   /// <exception cref="InvalidDataException"></exception>
   private IActionResult ProcessQuestionStatus(string sectionSlug, string questionSlug, QuestionsController controller)
   {
-    if (_router.NextQuestion == null) throw new InvalidDataException("Next question is null but really shouldn't be");
+    if (_router.NextQuestion == null) throw new InvalidDataException($"Next question is null, but shouldn't be for status '{_router.Status}'");
 
     if (_router.NextQuestion!.Slug != questionSlug) return QuestionsController.RedirectToQuestionBySlug(sectionSlug, _router.NextQuestion!.Slug, controller);
 
@@ -70,12 +70,12 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
   private async Task<IActionResult> ProcessCheckAnswersStatus(string sectionSlug, string questionSlug, QuestionsController controller, CancellationToken cancellationToken)
   {
     var question = _router.Section!.Questions.FirstOrDefault(q => q.Slug == questionSlug) ??
-                    throw new ContentfulDataUnavailableException($"Could not find question {questionSlug} in section {sectionSlug}");
+                    throw new ContentfulDataUnavailableException($"Could not find question '{questionSlug}' in section '{sectionSlug}'");
 
     var latestResponses = await _getResponseQuery.GetLatestResponses(await _user.GetEstablishmentId(),
                                                                               _router.Section.Sys.Id,
                                                                               cancellationToken) ??
-                        throw new InvalidDataException($"Could not find latest response for {questionSlug} but is in CheckAnswers status");
+                        throw new InvalidDataException($"Could not find latest response for '{questionSlug}' but is in CheckAnswers status");
 
     var isAttachedQuestion = _router.Section.GetAttachedQuestions(latestResponses.Responses)
                                                   .Any(response => response.QuestionRef == question.Sys.Id);
@@ -83,7 +83,7 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     if (!isAttachedQuestion) return controller.RedirectToCheckAnswers(sectionSlug);
 
     var latestResponseForQuestion = latestResponses.Responses.FirstOrDefault(response => response.QuestionRef == question.Sys.Id) ??
-                                    throw new InvalidDataException($"Could not find response for question {question.Sys.Id}");
+                                    throw new InvalidDataException($"Could not find response for question '{question.Sys.Id}'");
 
     var viewModel = controller.GenerateViewModel(sectionSlug,
                                                  question,

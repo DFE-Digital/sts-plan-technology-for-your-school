@@ -56,13 +56,13 @@ public class GetRecommendationRouter : IGetRecommendationRouter
                                                          RecommendationsController controller,
                                                          CancellationToken cancellationToken)
   {
-    if (_router.SectionStatus?.Maturity == null) throw new InvalidDataException("Maturity is null - shouldn't be");
+    if (_router.SectionStatus?.Maturity == null) throw new InvalidDataException("Maturity is null, but shouldn't be for a completed section");
 
     var recommendationForSlug = _router.Section!.Recommendations.FirstOrDefault(recommendation => recommendation.Page.Slug == recommendationSlug) ??
-                                  throw new ContentfulDataUnavailableException($"Couldn't find recommendation with slug {recommendationSlug} under {sectionSlug}");
+                                  throw new ContentfulDataUnavailableException($"Couldn't find recommendation with slug {recommendationSlug} under '{sectionSlug}'");
 
     var recommendationForMaturity = _router.Section.GetRecommendationForMaturity(_router.SectionStatus.Maturity) ??
-                                    throw new ContentfulDataUnavailableException("Missing recommendation page");
+                                    throw new ContentfulDataUnavailableException($"Missing recommendation page for {_router.SectionStatus.Maturity} in section '{sectionSlug}'");
 
     if (recommendationForMaturity.Sys.Id != recommendationForSlug.Sys.Id)
     {
