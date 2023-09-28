@@ -7,6 +7,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
+using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -51,6 +52,8 @@ public class QuestionsControllerTests
     Questions = new Question[1],
   };
 
+  private readonly IGetQuestionBySlugRouter _router;
+
   public QuestionsControllerTests()
   {
     _validSection.Questions[0] = _validQuestion;
@@ -78,6 +81,8 @@ public class QuestionsControllerTests
     _user = Substitute.For<IUser>();
     _user.GetEstablishmentId().Returns(EstablishmentId);
 
+    _router = Substitute.For<IGetQuestionBySlugRouter>();
+
     _controller = new QuestionsController(_logger, _getSectionQuery, _getResponseQuery, _user);
   }
 
@@ -92,7 +97,7 @@ public class QuestionsControllerTests
               return result;
             });
 
-    var result = await _controller.GetQuestionBySlug(SectionSlug, QuestionSlug);
+    var result = await _controller.GetQuestionBySlug(SectionSlug, QuestionSlug, _router);
     Assert.IsType<ViewResult>(result);
 
     var viewResult = result as ViewResult;
