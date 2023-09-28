@@ -55,7 +55,8 @@ public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand
             else node = null;
         }
 
-        return new CheckAnswerDto(){
+        return new CheckAnswerDto()
+        {
             SubmissionId = checkAnswerDto.SubmissionId,
             Responses = attachedQuestions
         };

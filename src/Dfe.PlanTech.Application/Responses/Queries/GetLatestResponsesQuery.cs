@@ -1,8 +1,8 @@
-using System.Linq.Expressions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Responses.Interface;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
+using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Application.Responses.Queries
 {
@@ -30,8 +30,8 @@ namespace Dfe.PlanTech.Application.Responses.Queries
         {
             var latestCheckAnswerDto = await _db.FirstOrDefaultAsync(GetLatestResponsesBySectionIdQueryable(establishmentId, sectionId), cancellationToken);
 
-            bool haveSubmission = latestCheckAnswerDto != null && 
-                                        latestCheckAnswerDto.SubmissionId > 0 && 
+            bool haveSubmission = latestCheckAnswerDto != null &&
+                                        latestCheckAnswerDto.SubmissionId > 0 &&
                                         latestCheckAnswerDto.Responses != null;
             return haveSubmission ? latestCheckAnswerDto : null;
         }

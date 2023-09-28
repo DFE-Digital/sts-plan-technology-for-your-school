@@ -88,7 +88,7 @@ public class GetLatestResponsesQueryTests
         _submissions = GenerateSubmissions(faker, submissionFaker)
                             .SelectMany(submission => submission)
                             .ToList();
-        
+
         _planTechDbContextSubstitute = Substitute.For<IPlanTechDbContext>();
         _planTechDbContextSubstitute.GetSubmissions.Returns(_submissions.AsQueryable());
         _planTechDbContextSubstitute.FirstOrDefaultAsync(Arg.Any<IQueryable<Submission>>(), Arg.Any<CancellationToken>())

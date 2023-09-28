@@ -1,6 +1,4 @@
 using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Application.Questionnaire.Queries;
-using Dfe.PlanTech.Application.Responses.Commands;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;

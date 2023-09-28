@@ -36,7 +36,8 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
         try
         {
             return (await repository.GetEntities<Section>(options, cancellationToken)).FirstOrDefault();
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             throw new ContentfulDataUnavailableException($"Error getting section with slug {sectionSlug}", ex);
         }

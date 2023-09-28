@@ -1,5 +1,4 @@
 ﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Application.Users.Helper;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
@@ -22,7 +21,7 @@ namespace Dfe.PlanTech.Application.Submissions.Queries
         public IList<SectionStatuses> GetSectionSubmissionStatuses(ISection[] sections)
         {
             int establishmentId = _userHelper.GetEstablishmentId().Result;
-            
+
             string sectionStringify = string.Empty;
             sectionStringify = string.Join(',', sections.Select(x => x.Sys.Id).ToList());
 

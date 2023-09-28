@@ -50,6 +50,6 @@ public interface IPlanTechDbContext
     Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default);
 
     Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default);
-    
+
     Task<int> ExecuteRaw(FormattableString sql, CancellationToken cancellationToken = default);
 }

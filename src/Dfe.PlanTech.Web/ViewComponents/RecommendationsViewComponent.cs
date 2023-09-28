@@ -30,9 +30,9 @@ namespace Dfe.PlanTech.Web.ViewComponents
                 {
                     recommendationsAvailable = true;
                 }
-                
+
                 var categoryElement = RetrieveSectionStatuses(category);
-                allSectionsOfCombinedCategories.AddRange(categoryElement.Sections); 
+                allSectionsOfCombinedCategories.AddRange(categoryElement.Sections);
                 allSectionStatusesOfCombinedCategories.AddRange(categoryElement.SectionStatuses);
             }
 

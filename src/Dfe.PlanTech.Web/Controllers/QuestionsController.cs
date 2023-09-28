@@ -76,7 +76,7 @@ public class QuestionsController : BaseController<QuestionsController>
         {
             logger.LogError("An error has occurred while submitting an answer with the following message: {} ", e.Message);
             var viewModel = await GenerateViewModel(sectionSlug, questionSlug, cancellationToken);
-            viewModel.ErrorMessages = new[] { "Save failed. Please try again later."};
+            viewModel.ErrorMessages = new[] { "Save failed. Please try again later." };
             return RenderView(viewModel);
         }
 

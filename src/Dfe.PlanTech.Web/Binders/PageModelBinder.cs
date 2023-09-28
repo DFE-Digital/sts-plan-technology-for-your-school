@@ -8,37 +8,37 @@ namespace Dfe.PlanTech.Web.Binders;
 /// </summary>
 public class PageModelBinder : IModelBinder
 {
-  private readonly ILogger<PageModelBinder> _logger;
+    private readonly ILogger<PageModelBinder> _logger;
 
-  public PageModelBinder(ILogger<PageModelBinder> logger)
-  {
-    _logger = logger;
-  }
-
-  public Task BindModelAsync(ModelBindingContext bindingContext)
-  {
-    if (bindingContext == null)
+    public PageModelBinder(ILogger<PageModelBinder> logger)
     {
-      throw new ArgumentNullException(nameof(bindingContext));
+        _logger = logger;
     }
 
-    if (!bindingContext.HttpContext.Items.ContainsKey(nameof(Page)))
+    public Task BindModelAsync(ModelBindingContext bindingContext)
     {
-      _logger.LogWarning("Page is not set");
-      bindingContext.Result = ModelBindingResult.Failed();
-      return Task.CompletedTask;
+        if (bindingContext == null)
+        {
+            throw new ArgumentNullException(nameof(bindingContext));
+        }
+
+        if (!bindingContext.HttpContext.Items.ContainsKey(nameof(Page)))
+        {
+            _logger.LogWarning("Page is not set");
+            bindingContext.Result = ModelBindingResult.Failed();
+            return Task.CompletedTask;
+        }
+
+        var pageItem = bindingContext.HttpContext.Items[nameof(Page)];
+
+        if (pageItem is not Page page)
+        {
+            _logger.LogWarning("Page is not {type}", typeof(Page));
+            bindingContext.Result = ModelBindingResult.Failed();
+            return Task.CompletedTask;
+        }
+
+        bindingContext.Result = ModelBindingResult.Success(page);
+        return Task.CompletedTask;
     }
-
-    var pageItem = bindingContext.HttpContext.Items[nameof(Page)];
-
-    if (pageItem is not Page page)
-    {
-      _logger.LogWarning("Page is not {type}", typeof(Page));
-      bindingContext.Result = ModelBindingResult.Failed();
-      return Task.CompletedTask;
-    }
-
-    bindingContext.Result = ModelBindingResult.Success(page);
-    return Task.CompletedTask;
-  }
 }

@@ -16,7 +16,7 @@ public class ListItemRenderer : BaseRichTextContentPartRender
         stringBuilder.Append("<li>");
 
         rendererCollection.RenderChildren(content, stringBuilder);
-        
+
         stringBuilder.Append("</li>");
 
         return stringBuilder;

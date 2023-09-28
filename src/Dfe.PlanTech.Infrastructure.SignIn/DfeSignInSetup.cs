@@ -10,7 +10,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System.Diagnostics.CodeAnalysis;
-using System.Security.Claims;
 
 namespace Dfe.PlanTech.Infrastructure.SignIns;
 

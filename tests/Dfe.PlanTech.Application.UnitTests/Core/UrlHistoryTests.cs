@@ -1,7 +1,6 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
 using NSubstitute;
-using System;
 
 namespace Dfe.PlanTech.Application.UnitTests.Core;
 

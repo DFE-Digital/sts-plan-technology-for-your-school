@@ -42,7 +42,7 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
                     var cached = _cacher.Cached!;
                     page.SectionTitle = cached.CurrentSectionTitle;
                 }
-                
+
                 return page;
             }
             else

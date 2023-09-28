@@ -1,7 +1,7 @@
-using System.Reflection;
 using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
 using Newtonsoft.Json.Serialization;
 using NSubstitute;
+using System.Reflection;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Serializers
 {
@@ -21,7 +21,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Serializers
 
             Assert.NotNull(contract);
         }
-        
+
         [Fact]
         public void CreateObjectContract_ModelNotFound()
         {
@@ -36,7 +36,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Serializers
 
             Assert.NotNull(contract);
         }
-        
+
 
         private static JsonObjectContract? InvokeProtectedCreateObjectContract(DependencyInjectionContractResolver resolver, Type objectType)
         {

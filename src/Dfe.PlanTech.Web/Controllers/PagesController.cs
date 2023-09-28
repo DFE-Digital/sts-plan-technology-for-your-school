@@ -1,12 +1,12 @@
-﻿using Dfe.PlanTech.Domain.Content.Models;
+﻿using Dfe.PlanTech.Application.Constants;
+using Dfe.PlanTech.Application.Users.Interfaces;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Binders;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using Dfe.PlanTech.Application.Constants;
-using Dfe.PlanTech.Application.Users.Interfaces;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
@@ -39,7 +39,7 @@ public class PagesController : BaseController<PagesController>
         return View(new ServiceUnavailableViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 
-    private PageViewModel CreatePageModel(Page page,  IUser user)
+    private PageViewModel CreatePageModel(Page page, IUser user)
     {
         ViewData["Title"] = System.Net.WebUtility.HtmlDecode(page.Title?.Text) ?? "Plan Technology For Your School";
 

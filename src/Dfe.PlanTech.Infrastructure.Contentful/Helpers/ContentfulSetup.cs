@@ -2,17 +2,17 @@
 using Contentful.Core;
 using Contentful.Core.Configuration;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Submissions.Queries;
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Diagnostics.CodeAnalysis;
-using Dfe.PlanTech.Application.Submissions.Queries;
-using Dfe.PlanTech.Domain.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 
@@ -33,12 +33,12 @@ public static class ContentfulSetup
         var options = configuration.GetSection(section).Get<ContentfulOptions>() ?? throw new KeyNotFoundException(nameof(ContentfulOptions));
 
         services.AddSingleton(options);
-        
+
         services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
-        services.AddTransient<ILogger<Category>, Logger<Category>>();  
+        services.AddTransient<ILogger<Category>, Logger<Category>>();
         services.AddScoped<IContentfulClient, ContentfulClient>();
         services.AddScoped<IContentRepository, ContentfulRepository>();
-        
+
 
         services.SetupRichTextRenderer();
 

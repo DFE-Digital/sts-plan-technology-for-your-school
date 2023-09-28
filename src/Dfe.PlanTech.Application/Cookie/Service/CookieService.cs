@@ -36,9 +36,9 @@ namespace Dfe.PlanTech.Application.Cookie.Service
         public DfeCookie GetCookie()
         {
             var cookie = _context.HttpContext.Request.Cookies[Cookie_Key];
-            if (cookie is null) 
-            { 
-                return new DfeCookie(); 
+            if (cookie is null)
+            {
+                return new DfeCookie();
             }
             else
             {
