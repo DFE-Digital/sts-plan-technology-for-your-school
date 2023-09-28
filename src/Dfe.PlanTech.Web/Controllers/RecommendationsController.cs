@@ -18,10 +18,8 @@ public class RecommendationsController : BaseController<RecommendationsControlle
                                                      string recommendationSlug,
                                                      [FromServices] IGetRecommendationRouter getRecommendationValidator,
                                                      CancellationToken cancellationToken)
-  {
-    return getRecommendationValidator.ValidateRoute(sectionSlug,
-                                                          recommendationSlug,
-                                                          this,
-                                                          cancellationToken);
-  }
+    => getRecommendationValidator.ValidateRoute(sectionSlug,
+        recommendationSlug,
+        this,
+        cancellationToken);
 }
