@@ -48,15 +48,9 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
   /// <exception cref="InvalidDataException"></exception>
   private IActionResult ProcessQuestionStatus(string sectionSlug, string questionSlug, QuestionsController controller)
   {
-    if (_router.NextQuestion == null)
-    {
-      throw new InvalidDataException("Next question is null but really shouldn't be");
-    }
+    if (_router.NextQuestion == null) throw new InvalidDataException("Next question is null but really shouldn't be");
 
-    if (_router.NextQuestion!.Slug != questionSlug)
-    {
-      return QuestionsController.RedirectToQuestionBySlug(sectionSlug, _router.NextQuestion!.Slug, controller);
-    }
+    if (_router.NextQuestion!.Slug != questionSlug) return QuestionsController.RedirectToQuestionBySlug(sectionSlug, _router.NextQuestion!.Slug, controller);
 
     var viewModel = controller.GenerateViewModel(sectionSlug, _router.NextQuestion!, _router.Section!, null);
     return controller.RenderView(viewModel);
@@ -76,7 +70,7 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
   private async Task<IActionResult> ProcessCheckAnswersStatus(string sectionSlug, string questionSlug, QuestionsController controller, CancellationToken cancellationToken)
   {
     var question = _router.Section!.Questions.FirstOrDefault(q => q.Slug == questionSlug) ??
-                    throw new ContentfulDataUnavailableException("No");
+                    throw new ContentfulDataUnavailableException($"Could not find question {questionSlug} in section {sectionSlug}");
 
     var latestResponses = await _getResponseQuery.GetLatestResponses(await _user.GetEstablishmentId(),
                                                                               _router.Section.Sys.Id,
