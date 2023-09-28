@@ -13,10 +13,8 @@ public interface IUserJourneyStatusProcessor
 {
   public IGetLatestResponsesQuery GetResponsesQuery { get; }
   public IUser User { get; }
-
   public JourneyStatus Status { get; set; }
   public Question? NextQuestion { get; set; }
-
   public Section? Section { get; }
   public SectionStatusNew? SectionStatus { get; }
 
