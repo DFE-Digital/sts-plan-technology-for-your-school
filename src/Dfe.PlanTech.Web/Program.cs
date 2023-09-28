@@ -60,6 +60,10 @@ builder.Services.AddTransient<GetRecommendationValidator>();
 builder.Services.AddTransient<GetQuestionBySlugValidator>();
 builder.Services.AddTransient<CheckAnswersValidator>();
 
+builder.Services.AddTransient((_) => SectionCompleteChecker.SectionComplete);
+builder.Services.AddTransient((_) => SectionNotStartedChecker.SectionNotStarted);
+builder.Services.AddTransient((_) => CheckAnswersOrNextQuestionChecker.CheckAnswersOrNextQuestion);
+
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization(options =>
 {

@@ -1,5 +1,3 @@
-using Dfe.PlanTech.Web.Middleware;
-
 namespace Dfe.PlanTech.Web.Routing;
 
 public static class SectionCompleteChecker
