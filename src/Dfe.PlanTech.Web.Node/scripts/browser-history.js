@@ -10,6 +10,9 @@ export class BrowserHistory {
 
     get lastUrl() {
         if (this.history.length > 0) {
+            if (this.getLastRef() == window.location.href){
+                return this.history[0];
+            }
             return this.history[this.history.length - 1];
         }
 
@@ -35,6 +38,10 @@ export class BrowserHistory {
         
         this.history.push(window.location.href);
         this.saveHistory();
+    }
+
+    getLastRef() {
+        return this.history.length > 0 ? this.history[this.history.length - 1] : "";
     }
 
     /**
