@@ -8,14 +8,19 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Routing;
 
-public class CheckAnswersValidator
+public class CheckAnswersRouter : ICheckAnswersRouter
 {
+  private const string PageTitle = "Check Answers";
+  
   private readonly IGetPageQuery _getPageQuery;
   private readonly IProcessCheckAnswerDtoCommand _processCheckAnswerDtoCommand;
   private readonly IUser _user;
-  private readonly UserJourneyRouter _router;
+  private readonly IUserJourneyStatusProcessor _router;
 
-  public CheckAnswersValidator(IGetPageQuery getPageQuery, IProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand, IUser user, UserJourneyRouter router)
+  public CheckAnswersRouter(IGetPageQuery getPageQuery,
+                            IProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand,
+                            IUser user,
+                            IUserJourneyStatusProcessor router)
   {
     _getPageQuery = getPageQuery;
     _processCheckAnswerDtoCommand = processCheckAnswerDtoCommand;
@@ -51,7 +56,7 @@ public class CheckAnswersValidator
 
     var model = new CheckAnswersViewModel()
     {
-      Title = checkAnswerPageContent.Title ?? new Title() { Text = "Check Answers" },
+      Title = checkAnswerPageContent.Title ?? new Title() { Text = PageTitle },
       SectionName = _router.Section!.Name,
       CheckAnswerDto = checkAnswerDto,
       Content = checkAnswerPageContent.Content,

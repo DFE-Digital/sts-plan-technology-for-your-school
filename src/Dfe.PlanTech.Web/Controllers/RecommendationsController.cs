@@ -16,7 +16,7 @@ public class RecommendationsController : BaseController<RecommendationsControlle
   [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}", Name = "GetRecommendation")]
   public Task<IActionResult> GetRecommendation(string sectionSlug,
                                                      string recommendationSlug,
-                                                     [FromServices] GetRecommendationValidator getRecommendationValidator,
+                                                     [FromServices] IGetRecommendationRouter getRecommendationValidator,
                                                      CancellationToken cancellationToken)
   {
     return getRecommendationValidator.ValidateRoute(sectionSlug,

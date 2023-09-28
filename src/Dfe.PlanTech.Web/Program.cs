@@ -55,10 +55,10 @@ builder.Services.AddScoped<ComponentViewsFactory>();
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddSingleton<IAuthorizationHandler, PageModelAuthorisationPolicy>();
 
-builder.Services.AddTransient<UserJourneyRouter>();
-builder.Services.AddTransient<GetRecommendationValidator>();
-builder.Services.AddTransient<GetQuestionBySlugValidator>();
-builder.Services.AddTransient<CheckAnswersValidator>();
+builder.Services.AddTransient<IUserJourneyStatusProcessor, UserJourneyStatusProcessor>();
+builder.Services.AddTransient<IGetRecommendationRouter, GetRecommendationRouter>();
+builder.Services.AddTransient<IGetQuestionBySlugRouter, GetQuestionBySlugRouter>();
+builder.Services.AddTransient<ICheckAnswersRouter, CheckAnswersRouter>();
 
 builder.Services.AddTransient((_) => SectionCompleteChecker.SectionComplete);
 builder.Services.AddTransient((_) => SectionNotStartedChecker.SectionNotStarted);

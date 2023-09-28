@@ -21,9 +21,9 @@ public class QuestionsController : BaseController<QuestionsController>
     private readonly IUser _user;
     
     public QuestionsController(ILogger<QuestionsController> logger,
-                                IGetSectionQuery getSectionQuery,
-                                IGetLatestResponsesQuery getResponseQuery,
-                                IUser user) : base(logger)
+                               IGetSectionQuery getSectionQuery,
+                               IGetLatestResponsesQuery getResponseQuery,
+                               IUser user) : base(logger)
     {
         _getResponseQuery = getResponseQuery;
         _getSectionQuery = getSectionQuery;
@@ -33,7 +33,7 @@ public class QuestionsController : BaseController<QuestionsController>
     [HttpGet("{sectionSlug}/{questionSlug}")]
     public async Task<IActionResult> GetQuestionBySlug(string sectionSlug,
                                                         string questionSlug,
-                                                        [FromServices] GetQuestionBySlugValidator router,
+                                                        [FromServices] IGetQuestionBySlugRouter router,
                                                         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));

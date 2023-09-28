@@ -7,14 +7,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Routing;
 
-public class GetRecommendationValidator
+public class GetRecommendationRouter : IGetRecommendationRouter
 {
   private readonly IGetPageQuery _getPageQuery;
-  private readonly ILogger<GetRecommendationValidator> _logger;
+  private readonly ILogger<GetRecommendationRouter> _logger;
   private readonly IUser _user;
-  private readonly UserJourneyRouter _router;
+  private readonly IUserJourneyStatusProcessor _router;
 
-  public GetRecommendationValidator(IGetPageQuery getPageQuery, ILogger<GetRecommendationValidator> logger, IUser user, UserJourneyRouter router)
+  public GetRecommendationRouter(IGetPageQuery getPageQuery, ILogger<GetRecommendationRouter> logger, IUser user, IUserJourneyStatusProcessor router)
   {
     _getPageQuery = getPageQuery;
     _logger = logger;
@@ -33,21 +33,24 @@ public class GetRecommendationValidator
     await _router.GetJourneyStatusForSection(sectionSlug, cancellationToken);
     return _router.Status switch
     {
-      JourneyStatus.Completed => await HandleCompleteStatus(sectionSlug, recommendationSlug, _router, controller, cancellationToken),
+      JourneyStatus.Completed => await HandleCompleteStatus(sectionSlug, recommendationSlug, controller, cancellationToken),
       JourneyStatus.CheckAnswers => controller.RedirectToCheckAnswers(sectionSlug),
-      JourneyStatus.NotStarted or JourneyStatus.NextQuestion => HandleQuestionStatus(sectionSlug, _router, controller),
+      JourneyStatus.NotStarted or JourneyStatus.NextQuestion => HandleQuestionStatus(sectionSlug, controller),
       _ => throw new InvalidOperationException($"Invalid journey status - {_router.Status}"),
     };
   }
 
-  private async Task<IActionResult> HandleCompleteStatus(string sectionSlug, string recommendationSlug, UserJourneyRouter router, RecommendationsController controller, CancellationToken cancellationToken)
+  private async Task<IActionResult> HandleCompleteStatus(string sectionSlug,
+                                                         string recommendationSlug,
+                                                         RecommendationsController controller,
+                                                         CancellationToken cancellationToken)
   {
-    if (router.SectionStatus?.Maturity == null) throw new InvalidDataException("Maturity is null - shouldn't be");
+    if (_router.SectionStatus?.Maturity == null) throw new InvalidDataException("Maturity is null - shouldn't be");
 
-    var recommendationForSlug = router.Section!.Recommendations.FirstOrDefault(recommendation => recommendation.Page.Slug == recommendationSlug) ??
+    var recommendationForSlug = _router.Section!.Recommendations.FirstOrDefault(recommendation => recommendation.Page.Slug == recommendationSlug) ??
                                   throw new ContentfulDataUnavailableException($"Couldn't find recommendation with slug {recommendationSlug} under {sectionSlug}");
 
-    var recommendationForMaturity = router.Section.GetRecommendationForMaturity(router.SectionStatus.Maturity) ??
+    var recommendationForMaturity = _router.Section.GetRecommendationForMaturity(_router.SectionStatus.Maturity) ??
                                     throw new ContentfulDataUnavailableException("Missing recommendation page");
 
     if (recommendationForMaturity.Sys.Id != recommendationForSlug.Sys.Id)
@@ -63,6 +66,6 @@ public class GetRecommendationValidator
     return controller.View("~/Views/Pages/Page.cshtml", viewModel);
   }
 
-  private static IActionResult HandleQuestionStatus(string sectionSlug, UserJourneyRouter router, Controller controller)
-  => QuestionsController.RedirectToQuestionBySlug(sectionSlug, router.NextQuestion!.Slug, controller);
+  private IActionResult HandleQuestionStatus(string sectionSlug, Controller controller)
+  => QuestionsController.RedirectToQuestionBySlug(sectionSlug, _router.NextQuestion!.Slug, controller);
 }
