@@ -27,18 +27,6 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
         return _db.GetSectionStatuses(sectionStringify, establishmentId).ToList();
     }
 
-    public Task<List<SectionStatusNew>> GetSectionSubmissionStatusesAsync(int establishmentId,
-                                                                          IEnumerable<ISection> sections,
-                                                                          CancellationToken cancellationToken)
-    {
-        var submissionsForSections = _db.GetSubmissions.Where(submission => submission.EstablishmentId == establishmentId &&
-                                               sections.Any(section => section.Sys.Id == submission.SectionId));
-
-        var latestSubmissionPerSection = GetLatestSubmissionStatus(submissionsForSections);
-
-        return _db.ToListAsync(latestSubmissionPerSection, cancellationToken);
-    }
-
     public async Task<SectionStatusNew?> GetSectionSubmissionStatusAsync(int establishmentId,
                                                                          ISection section,
                                                                          CancellationToken cancellationToken)
