@@ -40,6 +40,17 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     };
   }
 
+  /// <summary>
+  /// Either render the recommendation page (if correct recommendation for section + maturity),
+  /// or redirect user to correct recommendation page
+  /// </summary>
+  /// <param name="sectionSlug"></param>
+  /// <param name="recommendationSlug"></param>
+  /// <param name="controller"></param>
+  /// <param name="cancellationToken"></param>
+  /// <returns></returns>
+  /// <exception cref="InvalidDataException"></exception>
+  /// <exception cref="ContentfulDataUnavailableException"></exception>
   private async Task<IActionResult> HandleCompleteStatus(string sectionSlug,
                                                          string recommendationSlug,
                                                          RecommendationsController controller,
@@ -66,6 +77,12 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     return controller.View("~/Views/Pages/Page.cshtml", viewModel);
   }
 
+  /// <summary>
+  /// Redirect user to next question in their journey
+  /// </summary>
+  /// <param name="sectionSlug"></param>
+  /// <param name="controller"></param>
+  /// <returns></returns>
   private IActionResult HandleQuestionStatus(string sectionSlug, Controller controller)
   => QuestionsController.RedirectToQuestionBySlug(sectionSlug, _router.NextQuestion!.Slug, controller);
 }
