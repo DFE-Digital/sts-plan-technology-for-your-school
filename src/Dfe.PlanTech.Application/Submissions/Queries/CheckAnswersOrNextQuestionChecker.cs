@@ -13,9 +13,7 @@ public static class CheckAnswersOrNextQuestionChecker
   {
     IsMatchingSubmissionStatusFunc = (userJourneyRouter) => userJourneyRouter.Section != null &&
                                                     userJourneyRouter.SectionStatus != null &&
-                                                    userJourneyRouter.SectionStatus.Status > Status.NotStarted ?
-                                                    true : throw new InvalidDataException("Should not be null"),
-
+                                                    userJourneyRouter.SectionStatus.Status > Status.NotStarted,
     ProcessSubmissionFunc = async (userJourneyRouter, cancellationToken) =>
     {
       var responses = await userJourneyRouter.GetResponsesQuery.GetLatestResponses(await userJourneyRouter.User.GetEstablishmentId(),
