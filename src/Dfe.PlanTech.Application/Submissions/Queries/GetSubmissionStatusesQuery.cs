@@ -28,7 +28,7 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
         return _db.GetSectionStatuses(sectionStringify, establishmentId).ToList();
     }
 
-    public async Task<SectionStatusNew?> GetSectionSubmissionStatusAsync(int establishmentId,
+    public async Task<SectionStatusNew> GetSectionSubmissionStatusAsync(int establishmentId,
                                                                          ISection section,
                                                                          CancellationToken cancellationToken)
     {

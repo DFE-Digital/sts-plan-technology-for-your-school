@@ -61,7 +61,6 @@ public class SubmissionStatusProcessor : ISubmissionStatusProcessor
     SectionStatus = await _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(establishmentId,
                                                                                       Section,
                                                                                       cancellationToken);
-
     foreach (var statusChecker in _statusCheckers)
     {
       if (statusChecker.IsMatchingSubmissionStatus(this))
