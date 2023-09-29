@@ -29,12 +29,7 @@ public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand
         if (checkAnswerDto == null) throw new ArgumentNullException(nameof(checkAnswerDto));
         if (section == null) throw new ArgumentNullException(nameof(section));
 
-
-        var questionWithAnswerMap = checkAnswerDto.Responses.ToDictionary(questionWithAnswer => questionWithAnswer.QuestionRef,
-                                                                        questionWithAnswer => questionWithAnswer);
-
-        var attachedQuestions = section.GetAttachedQuestions(checkAnswerDto.Responses)
-                                       .ToList();
+        var attachedQuestions = section.GetAttachedQuestions(checkAnswerDto.Responses).ToList();
 
         return new CheckAnswerDto()
         {
