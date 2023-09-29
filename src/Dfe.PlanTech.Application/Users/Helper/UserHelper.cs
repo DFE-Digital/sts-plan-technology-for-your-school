@@ -2,6 +2,7 @@
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.SignIns.Enums;
+using Dfe.PlanTech.Domain.Users.Interfaces;
 using Microsoft.AspNetCore.Http;
 using System.Text.Json;
 

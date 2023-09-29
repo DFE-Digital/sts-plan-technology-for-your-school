@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+﻿using Dfe.PlanTech.Domain.Submissions.Enums;
 
 namespace Dfe.PlanTech.Domain.Submissions.Models;
 
@@ -24,10 +24,4 @@ public record SectionStatusNew
     public DateTime DateCreated { get; set; }
     
     public Status Status { get; init; }
-}
-
-public enum Status{
-    NotStarted,
-    InProgress,
-    Completed
 }

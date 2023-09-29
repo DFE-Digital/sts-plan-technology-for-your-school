@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using Dfe.PlanTech.Application.Constants;
-using Dfe.PlanTech.Application.Users.Interfaces;
+using Dfe.PlanTech.Domain.Users.Interfaces;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
