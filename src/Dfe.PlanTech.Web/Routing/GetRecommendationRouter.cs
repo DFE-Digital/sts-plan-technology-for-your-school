@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Application.Users.Interfaces;
+using Dfe.PlanTech.Domain.Submissions.Interfaces;
+using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Exceptions;
 using Dfe.PlanTech.Web.Models;
@@ -12,9 +13,9 @@ public class GetRecommendationRouter : IGetRecommendationRouter
   private readonly IGetPageQuery _getPageQuery;
   private readonly ILogger<GetRecommendationRouter> _logger;
   private readonly IUser _user;
-  private readonly IUserJourneyStatusProcessor _router;
+  private readonly ISubmissionStatusProcessor _router;
 
-  public GetRecommendationRouter(IGetPageQuery getPageQuery, ILogger<GetRecommendationRouter> logger, IUser user, IUserJourneyStatusProcessor router)
+  public GetRecommendationRouter(IGetPageQuery getPageQuery, ILogger<GetRecommendationRouter> logger, IUser user, ISubmissionStatusProcessor router)
   {
     _getPageQuery = getPageQuery;
     _logger = logger;
@@ -33,9 +34,9 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     await _router.GetJourneyStatusForSection(sectionSlug, cancellationToken);
     return _router.Status switch
     {
-      JourneyStatus.Completed => await HandleCompleteStatus(sectionSlug, recommendationSlug, controller, cancellationToken),
-      JourneyStatus.CheckAnswers => controller.RedirectToCheckAnswers(sectionSlug),
-      JourneyStatus.NotStarted or JourneyStatus.NextQuestion => HandleQuestionStatus(sectionSlug, controller),
+      SubmissionStatus.Completed => await HandleCompleteStatus(sectionSlug, recommendationSlug, controller, cancellationToken),
+      SubmissionStatus.CheckAnswers => controller.RedirectToCheckAnswers(sectionSlug),
+      SubmissionStatus.NotStarted or SubmissionStatus.NextQuestion => HandleQuestionStatus(sectionSlug, controller),
       _ => throw new InvalidOperationException($"Invalid journey status - {_router.Status}"),
     };
   }

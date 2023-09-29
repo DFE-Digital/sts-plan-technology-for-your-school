@@ -3,6 +3,7 @@ using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Helpers;
 using Dfe.PlanTech.Domain.Establishments.Exceptions;
 using Dfe.PlanTech.Domain.SignIns.Enums;
+using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.SignIns;
 using Dfe.PlanTech.Web;
@@ -55,7 +56,7 @@ builder.Services.AddScoped<ComponentViewsFactory>();
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddSingleton<IAuthorizationHandler, PageModelAuthorisationPolicy>();
 
-builder.Services.AddTransient<IUserJourneyStatusProcessor, UserJourneyStatusProcessor>();
+builder.Services.AddTransient<ISubmissionStatusProcessor, SubmissionStatusProcessor>();
 builder.Services.AddTransient<IGetRecommendationRouter, GetRecommendationRouter>();
 builder.Services.AddTransient<IGetQuestionBySlugRouter, GetQuestionBySlugRouter>();
 builder.Services.AddTransient<ICheckAnswersRouter, CheckAnswersRouter>();

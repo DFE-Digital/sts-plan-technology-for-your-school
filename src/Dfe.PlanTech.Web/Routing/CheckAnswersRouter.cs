@@ -1,7 +1,8 @@
 using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Responses.Interfaces;
+using Dfe.PlanTech.Domain.Submissions.Interfaces;
+using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -15,12 +16,12 @@ public class CheckAnswersRouter : ICheckAnswersRouter
   private readonly IGetPageQuery _getPageQuery;
   private readonly IProcessCheckAnswerDtoCommand _processCheckAnswerDtoCommand;
   private readonly IUser _user;
-  private readonly IUserJourneyStatusProcessor _router;
+  private readonly ISubmissionStatusProcessor _router;
 
   public CheckAnswersRouter(IGetPageQuery getPageQuery,
                             IProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand,
                             IUser user,
-                            IUserJourneyStatusProcessor router)
+                            ISubmissionStatusProcessor router)
   {
     _getPageQuery = getPageQuery;
     _processCheckAnswerDtoCommand = processCheckAnswerDtoCommand;
@@ -38,8 +39,8 @@ public class CheckAnswersRouter : ICheckAnswersRouter
 
     return _router.Status switch
     {
-      JourneyStatus.CheckAnswers => await ProcessCheckAnswers(sectionSlug, controller, cancellationToken),
-      JourneyStatus.Completed => controller.RedirectToAction(PagesController.GetPageByRouteAction, PagesController.Controller, new { route = sectionSlug }),
+      SubmissionStatus.CheckAnswers => await ProcessCheckAnswers(sectionSlug, controller, cancellationToken),
+      SubmissionStatus.Completed => controller.RedirectToAction(PagesController.GetPageByRouteAction, PagesController.Controller, new { route = sectionSlug }),
       _ => ProcessQuestionStatus(sectionSlug, controller),
     };
   }

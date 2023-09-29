@@ -1,5 +1,6 @@
-using Dfe.PlanTech.Application.Responses.Interface;
-using Dfe.PlanTech.Application.Users.Interfaces;
+using Dfe.PlanTech.Domain.Responses.Interface;
+using Dfe.PlanTech.Domain.Submissions.Interfaces;
+using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Exceptions;
 using Microsoft.AspNetCore.Mvc;
@@ -10,9 +11,9 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
 {
   private readonly IGetLatestResponsesQuery _getResponseQuery;
   private readonly IUser _user;
-  private readonly IUserJourneyStatusProcessor _router;
+  private readonly ISubmissionStatusProcessor _router;
 
-  public GetQuestionBySlugRouter(IGetLatestResponsesQuery getResponseQuery, IUser user, IUserJourneyStatusProcessor router)
+  public GetQuestionBySlugRouter(IGetLatestResponsesQuery getResponseQuery, IUser user, ISubmissionStatusProcessor router)
   {
     _getResponseQuery = getResponseQuery;
     _user = user;
@@ -31,8 +32,8 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
 
     return _router.Status switch
     {
-      JourneyStatus.CheckAnswers => await ProcessCheckAnswersStatus(sectionSlug, questionSlug, controller, cancellationToken),
-      JourneyStatus.NextQuestion or JourneyStatus.NotStarted or JourneyStatus.Completed => ProcessQuestionStatus(sectionSlug, questionSlug, controller),
+      SubmissionStatus.CheckAnswers => await ProcessCheckAnswersStatus(sectionSlug, questionSlug, controller, cancellationToken),
+      SubmissionStatus.NextQuestion or SubmissionStatus.NotStarted or SubmissionStatus.Completed => ProcessQuestionStatus(sectionSlug, questionSlug, controller),
       _ => throw new InvalidDataException($"Invalid journey state - state is {_router.Status}"),
     };
   }

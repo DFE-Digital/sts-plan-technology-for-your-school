@@ -14,11 +14,11 @@ public class SubmissionStatusProcessor : ISubmissionStatusProcessor
   private readonly IGetSectionQuery _getSectionQuery;
   private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
 
-  private readonly SubmissionStatusChecker[] _statusCheckers;
+  private readonly ISubmissionStatusChecker[] _statusCheckers;
 
   public SubmissionStatusProcessor(IGetSectionQuery getSectionQuery,
                            IGetSubmissionStatusesQuery getSubmissionStatusesQuery,
-                           IEnumerable<SubmissionStatusChecker> statusCheckers,
+                           IEnumerable<ISubmissionStatusChecker> statusCheckers,
                            IGetLatestResponsesQuery getResponsesQuery,
                            IUser user)
   {
