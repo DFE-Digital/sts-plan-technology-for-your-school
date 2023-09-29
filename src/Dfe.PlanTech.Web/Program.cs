@@ -7,7 +7,7 @@ using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.SignIns;
 using Dfe.PlanTech.Web;
 using Dfe.PlanTech.Web.Authorisation;
-using Dfe.PlanTech.Web.Exceptions;
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using GovUk.Frontend.AspNetCore;
@@ -97,14 +97,14 @@ app.UseExceptionHandler(exceptionHandlerApp =>
         return Task.CompletedTask;
     });
 
-
-    string GetRedirectUrlForException(Exception? exception) =>
+    static string GetRedirectUrlForException(Exception? exception) =>
         exception switch
         {
             null => UrlConstants.Error,
             ContentfulDataUnavailableException => UrlConstants.ServiceUnavailable,
-            KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) => UrlConstants.ServiceUnavailable,
+            DatabaseException => UrlConstants.ServiceUnavailable,
             InvalidEstablishmentException => UrlConstants.ServiceUnavailable,
+            KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) => UrlConstants.ServiceUnavailable,
             _ => GetRedirectUrlForException(exception.InnerException)
         };
 });

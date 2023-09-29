@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Questionnaire.Interfaces;
 using Dfe.PlanTech.Application.Responses.Interface;
 using Dfe.PlanTech.Application.Submissions.Interfaces;
@@ -47,7 +48,7 @@ public class QuestionsController : BaseController<QuestionsController>
         if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
 
         var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
-                        throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
+                        throw new ContentfulDataUnavailableException($"Could not find section with slug {sectionSlug}");
 
         int establishmentId = await _user.GetEstablishmentId();
 
