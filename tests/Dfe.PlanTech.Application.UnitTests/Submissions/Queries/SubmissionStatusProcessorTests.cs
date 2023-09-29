@@ -6,6 +6,7 @@ using Dfe.PlanTech.Domain.Responses.Interface;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
+using Dfe.PlanTech.Web.Exceptions;
 using Dfe.PlanTech.Web.Routing;
 using NSubstitute;
 
@@ -20,6 +21,8 @@ public class SubmissionStatusProcessorTests
 
   private static readonly ISubmissionStatusChecker _failureStatusChecker = Substitute.For<ISubmissionStatusChecker>();
   private readonly ISubmissionStatusChecker[] _statusCheckers = new[] { _failureStatusChecker };
+
+  private const int _establishmentId = 1;
 
   private const string SectionSlug = "section-slug";
   private static readonly ISection _section = new Section()
@@ -39,9 +42,19 @@ public class SubmissionStatusProcessorTests
   public SubmissionStatusProcessorTests()
   {
     _getSectionQuery = Substitute.For<IGetSectionQuery>();
+    _getSectionQuery.GetSectionBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                    .Returns((callinfo) =>
+                    {
+                      var sectionSlug = callinfo.ArgAt<string>(0);
+
+                      return _sections.FirstOrDefault(section => section.InterstitialPage.Slug == sectionSlug) as Section;
+                    });
+
     _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
     _getResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
+
     _user = Substitute.For<IUser>();
+    _user.GetEstablishmentId().Returns(_establishmentId);
   }
 
   [Fact]
@@ -53,17 +66,10 @@ public class SubmissionStatusProcessorTests
                                                                          _getResponsesQuery,
                                                                          _user);
 
-    _user.GetEstablishmentId()
-         .Returns(1);
-
-    _getSectionQuery.GetSectionBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                    .Returns(new Section() { });
-
     _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(Arg.Any<int>(), Arg.Any<Section>(), Arg.Any<CancellationToken>())
                                .Returns(new SectionStatusNew());
 
-
-    await processor.GetJourneyStatusForSection("section slug", default);
+    await processor.GetJourneyStatusForSection(SectionSlug, default);
 
     await _user.Received().GetEstablishmentId();
   }
@@ -77,25 +83,13 @@ public class SubmissionStatusProcessorTests
                                                                          _getResponsesQuery,
                                                                          _user);
 
-    int establishmentId = 1;
-
-    _user.GetEstablishmentId()
-         .Returns(establishmentId);
-
-    _getSectionQuery.GetSectionBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                    .Returns((callinfo) =>
-                    {
-                      var sectionSlug = callinfo.ArgAt<string>(0);
-
-                      return _sections.FirstOrDefault(section => section.InterstitialPage.Slug == sectionSlug) as Section;
-                    });
 
     _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(Arg.Any<int>(), Arg.Any<Section>(), Arg.Any<CancellationToken>())
                                .Returns(new SectionStatusNew());
 
     await processor.GetJourneyStatusForSection(SectionSlug, default);
 
-    await _getSubmissionStatusesQuery.Received().GetSectionSubmissionStatusAsync(establishmentId, _section, Arg.Any<CancellationToken>());
+    await _getSubmissionStatusesQuery.Received().GetSectionSubmissionStatusAsync(_establishmentId, _section, Arg.Any<CancellationToken>());
   }
 
   [Fact]
@@ -119,19 +113,6 @@ public class SubmissionStatusProcessorTests
                                                                          _getResponsesQuery,
                                                                          _user);
 
-    int establishmentId = 1;
-
-    _user.GetEstablishmentId()
-         .Returns(establishmentId);
-
-    _getSectionQuery.GetSectionBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                    .Returns((callinfo) =>
-                    {
-                      var sectionSlug = callinfo.ArgAt<string>(0);
-
-                      return _sections.FirstOrDefault(section => section.InterstitialPage.Slug == sectionSlug) as Section;
-                    });
-
     _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(Arg.Any<int>(), Arg.Any<Section>(), Arg.Any<CancellationToken>())
                                .Returns(new SectionStatusNew());
 
@@ -142,5 +123,22 @@ public class SubmissionStatusProcessorTests
 
     successStatusChecker.Received(1).IsMatchingSubmissionStatus(processor);
     await successStatusChecker.Received(1).ProcessSubmission(processor, Arg.Any<CancellationToken>());
+  }
+
+  [Fact]
+  public async Task Should_ThrowException_When_Section_NotFound()
+  {
+    ISubmissionStatusProcessor processor = new SubmissionStatusProcessor(_getSectionQuery,
+                                                                         _getSubmissionStatusesQuery,
+                                                                         _statusCheckers,
+                                                                         _getResponsesQuery,
+                                                                         _user);
+    _user.GetEstablishmentId()
+         .Returns(1);
+
+    _getSectionQuery.GetSectionBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                    .Returns(null as Section);
+
+    await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() => processor.GetJourneyStatusForSection("not matching section slug", default));
   }
 }
