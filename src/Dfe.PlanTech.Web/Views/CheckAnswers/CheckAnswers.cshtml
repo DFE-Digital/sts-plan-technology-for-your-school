@@ -40,6 +40,7 @@
             <input type="hidden" name="submissionId" value="@Model.SubmissionId" />
             <input type="hidden" name="sectionName" value="@Model.SectionName">
             <input type="hidden" name="sectionSlug" value="@Model.SectionSlug">
+            
             @{
                 foreach (var content in Model.Content)
                 {
@@ -47,6 +48,14 @@
                 }
             }
             <govuk-button type="submit">Save and submit</govuk-button>
+            
+            @if (Model.ErrorMessage != null)
+            {
+                <p class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Gwall:</span> @Model.ErrorMessage
+                </p>
+            }
+            
         </form>
     </div>
 </div>

@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Submissions.Interfaces;
 using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
@@ -7,8 +8,10 @@ using Dfe.PlanTech.Domain.Responses.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Controllers
@@ -21,6 +24,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private readonly IGetSectionQuery _getSectionQuery;
         private readonly IGetPageQuery _getPageQuerySubstitute;
         private readonly IUser _user;
+        private readonly ICalculateMaturityCommand _calculateMaturityCommand;
 
         private readonly Page _checkAnswersPage = new()
         {
@@ -130,13 +134,23 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                                             };
                                         });
 
-            _checkAnswersController = new CheckAnswersController(loggerSubstitute);
+
+
+            _calculateMaturityCommand = Substitute.For<ICalculateMaturityCommand>();
+            _calculateMaturityCommand.CalculateMaturityAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
+                .Throws(new Exception());        
+            
+            _checkAnswersController = new CheckAnswersController(_user, _getSectionQuery, _processCheckAnswerDtoCommand, _getPageQuerySubstitute, _calculateMaturityCommand, loggerSubstitute);
+            
+            var tempData = Substitute.For<ITempDataDictionary>();
+            _checkAnswersController.TempData = tempData;
+
         }
 
         [Fact]
         public async Task CheckAnswersController_CheckAnswersPage_RedirectsToView_When_CheckAnswersDto_IsPopulated()
         {
-            var result = await _checkAnswersController.CheckAnswersPage(_section.InterstitialPage.Slug, _user, _getSectionQuery, _processCheckAnswerDtoCommand, _getPageQuerySubstitute);
+            var result = await _checkAnswersController.CheckAnswersPage(_section.InterstitialPage.Slug);
 
             Assert.IsType<ViewResult>(result);
 
@@ -149,7 +163,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task CheckAnswersController_CheckAnswersPage_ViewModel_IsPopulated_Correctly()
         {
-            var result = await _checkAnswersController.CheckAnswersPage(_section.InterstitialPage.Slug, _user, _getSectionQuery, _processCheckAnswerDtoCommand, _getPageQuerySubstitute);
+            var result = await _checkAnswersController.CheckAnswersPage(_section.InterstitialPage.Slug);
 
             Assert.IsType<ViewResult>(result);
 
@@ -180,21 +194,21 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task CheckAnswersController_CheckAnswers_Null_Section_ThrowsException()
         {
-            await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _checkAnswersController.CheckAnswersPage("NOT THE RIGHT SLUG", _user, _getSectionQuery, _processCheckAnswerDtoCommand, _getPageQuerySubstitute));
+            await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _checkAnswersController.CheckAnswersPage("NOT THE RIGHT SLUG"));
         }
 
 
         [Fact]
         public async Task CheckAnswersController_CheckAnswers_Null_SectionId_ThrowsException()
         {
-            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _checkAnswersController.CheckAnswersPage(null!, _user, _getSectionQuery, _processCheckAnswerDtoCommand, _getPageQuerySubstitute));
+            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _checkAnswersController.CheckAnswersPage(null!));
         }
 
 
         [Fact]
         public async Task CheckAnswersPage_RedirectsToSelfAssessment_When_No_Responses()
         {
-            var result = await _checkAnswersController.CheckAnswersPage(_completedSection.InterstitialPage.Slug, _user, _getSectionQuery, _processCheckAnswerDtoCommand, _getPageQuerySubstitute);
+            var result = await _checkAnswersController.CheckAnswersPage(_completedSection.InterstitialPage.Slug);
 
             Assert.IsType<RedirectToActionResult>(result);
 
@@ -210,6 +224,41 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 Assert.Fail("Not redirect to action result");
             }
+        }
+        
+        
+        [Fact]
+        public async Task CheckAnswersController_CheckAnswersPage_RedirectsToView_When_There_Is_An_Error_Calculating_Recommendations()
+        {
+            var result = await _checkAnswersController.ConfirmCheckAnswers(_section.InterstitialPage.Slug, SUBMISSION_ID, _section.Name);
+
+            Assert.IsType<ViewResult>(result);
+
+            var viewResult = result as ViewResult;
+
+            Assert.NotNull(viewResult);
+            Assert.Equal("CheckAnswers", viewResult.ViewName);
+
+            Assert.IsType<CheckAnswersViewModel>(viewResult.Model);
+
+            var checkAnswersViewModel = viewResult.Model as CheckAnswersViewModel;
+
+            Assert.NotNull(checkAnswersViewModel);
+            Assert.Equal(_checkAnswersPage.Title, checkAnswersViewModel.Title);
+            Assert.Equal(SUBMISSION_ID, checkAnswersViewModel.SubmissionId);
+
+            Assert.NotNull(checkAnswersViewModel.Content);
+            Assert.Equal(_checkAnswersPage.Content, checkAnswersViewModel.Content);
+
+            Assert.IsType<CheckAnswerDto>(checkAnswersViewModel.CheckAnswerDto);
+
+            var checkAnswerDto = checkAnswersViewModel.CheckAnswerDto;
+
+            Assert.NotNull(checkAnswerDto);
+            Assert.Equal(_questionWithAnswerList, checkAnswerDto.Responses);
+            
+            Assert.NotNull(checkAnswersViewModel.ErrorMessage);
+            Assert.Equal("Unable to determine your recommendation. Please try again.", checkAnswersViewModel.ErrorMessage);
         }
     }
 }
