@@ -1,5 +1,5 @@
-using Dfe.PlanTech.Application.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Cookie;
+using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
 using Microsoft.Extensions.Configuration;
 using NSubstitute;

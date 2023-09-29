@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Application.Exceptions;
-using Dfe.PlanTech.Application.Questionnaire.Interfaces;
-using Dfe.PlanTech.Application.Responses.Interface;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Responses.Interface;
 
 namespace Dfe.PlanTech.Application.Questionnaire.Queries;
 
