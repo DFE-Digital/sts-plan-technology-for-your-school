@@ -49,45 +49,47 @@ flowchart TD;
 ```mermaid
 graph TD
     subgraph CheckAnswers
-    A[User navigates to check answer page] --> B{Is section on check answers status?}
-    B -- Yes --> C[Show check answers page]
-    B -- No --> D{Is the section completed?}
-    D -- Yes --> E[Show interstitial page for section]
-    E -- No --> F{Is section in progress?}
-    F -- Yes --> G[Show next question for section]
-    F -- No --> H[Show interstitial page for section]
+        A[User navigates to check answer page] --> B{Is section on check answers status?}
+        B -- Yes --> C[Show check answers page]
+        B -- No --> D{Is the section completed?}
+        D -- Yes --> E[Show interstitial page for section]
+        E -- No --> F{Is section in progress?}
+        F -- Yes --> G[Show next question for section]
+        F -- No --> H[Show interstitial page for section]
     end
 ```
 
 ```mermaid
 graph TD
     subgraph Recommendation
-    A[User navigates to a recommendation page] --> B{Is the section complete?}
-    B -- Yes --> C{Is it the recommendation for their maturity?}
-    C -- Yes --> D[Show recommendation page]
-    C -- No --> E[Redirect to correct recommendation page]
-    E --> D
+        A[User navigates to a recommendation page] --> B{Is the section complete?}
+        B -- Yes --> C{Is it the recommendation for their maturity?}
+        C -- Yes --> D[Show recommendation page]
+        C -- No --> E[Redirect to correct recommendation page]
+        E --> D
 
-    C -- No --> F{Is section on check answers status?}
-    F -- Yes --> G[Show check answers page]
-    F -- No --> H{Is section started?}
-    H -- No --> I[Show interstitial page for section]
-    H -- Yes --> J[Show next question for user journey]
+        C -- No --> F{Is section on check answers status?}
+        F -- Yes --> G[Show check answers page]
+        F -- No --> H{Is section started?}
+        H -- No --> I[Show interstitial page for section]
+        H -- Yes --> J[Show next question for user journey]
     end
 ```
 
 ```mermaid
 graph TD
     subgraph Question page
-    A[User navigates to a question page] --> B{Is the section in progress?}
-    B -- Yes --> C{Have they already answered this question in their latest journey?}
-    C -- Yes --> D[Show question page]
-    C -- No --> E{Is it the next question in the section?}
-    E -- Yes --> D
-    E -- No --> F[Show next question in section]
-    B -- No; section is complete or not started --> G{Is it the first question for the section?}
-    G -- Yes --> D
-    G -- No --> H[Redirect to first question in section]
-    H --> D
+        A[User navigates to a question page] --> B{Is the section in progress?}
+        B -- Yes --> C{Have they already answered this question in their latest journey?}
+        C -- Yes --> D[Show question page]
+        C -- No --> E{Are they on the check answers stage?}
+        E -- Yes --> I[Show check answers page]
+        E -- No --> J{Is it the next question in their journey?}
+        J -- Yes --> D
+        J -- No --> H
+        B -- No; section is complete or not started --> G{Is it the first question for the section?}
+        G -- Yes --> D
+        G -- No --> H[Redirect to first question in section]
+        H --> D
     end
 ```
