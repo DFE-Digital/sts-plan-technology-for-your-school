@@ -125,7 +125,6 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Completed = 1,
                 Maturity = "High"
             });
-
             _categoryTwo.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatus()
             {
                 SectionId = "Section1",
