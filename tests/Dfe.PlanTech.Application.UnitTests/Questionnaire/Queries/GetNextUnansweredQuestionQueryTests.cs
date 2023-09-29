@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -72,6 +73,19 @@ public class GetNextUnansweredQuestionQueryTests
         var result = await getNextUnansweredQuestionQuery.GetNextUnansweredQuestion(3, _section);
 
         Assert.Equal(result, _section.Questions[0]);
+    }
+
+    [Fact]
+    public async Task Should_Throw_DatabaseException_When_No_Responses_In_OngoingSubmission()
+    {
+        CheckAnswerDto? response = new() { Responses = new(), SubmissionId = 1 };
+        var getLatestResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
+        getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+        .Returns(Task.FromResult(response ?? null));
+
+        var getNextUnansweredQuestionQuery = new GetNextUnansweredQuestionQuery(getLatestResponsesQuery);
+
+        await Assert.ThrowsAsync<DatabaseException>(() => getNextUnansweredQuestionQuery.GetNextUnansweredQuestion(3, _section));
     }
 
     [Fact]
