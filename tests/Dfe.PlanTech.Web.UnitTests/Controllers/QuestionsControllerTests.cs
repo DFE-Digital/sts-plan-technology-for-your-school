@@ -20,6 +20,7 @@ public class QuestionsControllerTests
     private readonly IGetNextUnansweredQuestionQuery _getNextUnansweredQuestionQuery;
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetLatestResponsesQuery _getResponseQuery;
+    private readonly IGetQuestionBySlugRouter _getQuestionBySlugRouter;
     private readonly IUser _user;
     private readonly QuestionsController _controller;
 
@@ -58,7 +59,7 @@ public class QuestionsControllerTests
         _logger = Substitute.For<ILogger<QuestionsController>>();
 
         _getSectionQuery = Substitute.For<IGetSectionQuery>();
-        _getSectionQuery.GetSectionBySlug(SectionSlug, Arg.Any<CancellationToken>())
+        _getSectionQuery.GetSectionBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
                     .Returns((callInfo) =>
                     {
                         var sectionSlug = callInfo.ArgAt<string>(0);
@@ -72,9 +73,9 @@ public class QuestionsControllerTests
                     });
 
         _getResponseQuery = Substitute.For<IGetLatestResponsesQuery>();
-
+        _getQuestionBySlugRouter = Substitute.For<IGetQuestionBySlugRouter>();
         _getNextUnansweredQuestionQuery = Substitute.For<IGetNextUnansweredQuestionQuery>();
-
+        
         _user = Substitute.For<IUser>();
         _user.GetEstablishmentId().Returns(EstablishmentId);
 
@@ -82,108 +83,42 @@ public class QuestionsControllerTests
     }
 
     [Fact]
-    public async Task GetQuestionBySlug_Should_Load_QuestionBySlug_When_Args_Valid()
-    {
-        _getResponseQuery.GetLatestResponseForQuestion(Arg.Any<int>(), _validSection.Sys.Id, _validQuestion.Sys.Id, Arg.Any<CancellationToken>())
-                .Returns((callinfo) =>
-                {
-                    QuestionWithAnswer? result = null;
-
-                    return result;
-                });
-
-        var result = await _controller.GetQuestionBySlug(SectionSlug, QuestionSlug);
-        Assert.IsType<ViewResult>(result);
-
-        var viewResult = result as ViewResult;
-
-        var model = viewResult!.Model;
-
-        Assert.IsType<QuestionViewModel>(model);
-
-        var question = model as QuestionViewModel;
-
-        Assert.NotNull(question);
-        Assert.Equal(_validQuestion, question.Question);
-    }
-
-    [Fact]
     public async Task GetQuestionBySlug_Should_Error_When_Missing_SectionId()
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionBySlug(null!, "question-slug"));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionBySlug(null!, "question-slug", _getQuestionBySlugRouter));
     }
 
     [Fact]
     public async Task GetQuestionBySlug_Should_Error_When_Missing_QuestionId()
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionBySlug("section-slug", null!));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionBySlug("section-slug", null!, _getQuestionBySlugRouter));
     }
 
     [Fact]
-    public async Task GetQuestionBySlug_Should_Error_When_Section_Not_Found()
+    public async Task GetQuestionBySlug_Should_Call_Router_When_Args_Valid()
     {
-        await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetQuestionBySlug("section", "question"));
-    }
+        var sectionSlug = string.Empty;
+        var questionSlug = string.Empty;
+        QuestionsController? controller = null;
 
-    [Fact]
-    public async Task GetQuestionBySlug_Should_Error_When_Question_Not_Found()
-    {
-        await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetQuestionBySlug("section-slug", "question"));
-    }
+        _getQuestionBySlugRouter.ValidateRoute(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<QuestionsController>(), Arg.Any<CancellationToken>())
+                                .Returns((callinfo) =>
+                                {
+                                    sectionSlug = callinfo.ArgAt<string>(0);
+                                    questionSlug = callinfo.ArgAt<string>(1);
+                                    controller = callinfo.ArgAt<QuestionsController>(2);
 
-    [Fact]
-    public async Task GetQuestionBySlug_Should_Display_Page()
-    {
-        var result = await _controller.GetQuestionBySlug(SectionSlug, QuestionSlug);
+                                    return new AcceptedResult();
+                                });
 
-        Assert.NotNull(result);
+        string section = "section";
+        string question = "question";
 
-        if (result is not ViewResult view)
-        {
-            Assert.Fail($"Result is {result.GetType()} but expected {nameof(ViewResult)}");
-        }
+        await _controller.GetQuestionBySlug(section, question, _getQuestionBySlugRouter);
 
-        var viewResult = result as ViewResult;
-        Assert.NotNull(viewResult);
-        var model = viewResult.Model as QuestionViewModel;
-        Assert.NotNull(model);
-
-        Assert.Equal(_validQuestion, model.Question);
-        Assert.Equal(_validSection.Name, model.SectionName);
-        Assert.Equal(SectionSlug, model.SectionSlug);
-        Assert.Null(model.ErrorMessages);
-        Assert.Null(model.AnswerRef);
-    }
-
-    [Fact]
-    public async Task GetQuestionBySlug_Should_Retrieve_Existing_Answer_And_Display_Page()
-    {
-        var answerRef = "chosen-answer-ref";
-        _getResponseQuery.GetLatestResponseForQuestion(EstablishmentId, _validSection.Sys.Id, _validQuestion.Sys.Id, Arg.Any<CancellationToken>())
-                        .Returns((callinfo) => new QuestionWithAnswer()
-                        {
-                            AnswerRef = answerRef,
-                            QuestionRef = _validQuestion.Sys.Id,
-                            AnswerText = "answer text",
-                            QuestionText = "question text"
-                        });
-
-        var result = await _controller.GetQuestionBySlug(SectionSlug, QuestionSlug);
-
-        Assert.NotNull(result);
-
-        if (result is not ViewResult view)
-        {
-            Assert.Fail($"Result is {result.GetType()} but expected {nameof(ViewResult)}");
-        }
-
-        var viewResult = result as ViewResult;
-        Assert.NotNull(viewResult);
-        var model = viewResult.Model as QuestionViewModel;
-        Assert.NotNull(model);
-
-        Assert.Equal(model.Question, _validSection.Questions.First());
-        Assert.Equal(model.AnswerRef, answerRef);
+        Assert.Equal(section, sectionSlug);
+        Assert.Equal(question, questionSlug);
+        Assert.Equal(_controller, controller);
     }
 
     [Fact]
