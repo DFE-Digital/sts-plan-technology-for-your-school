@@ -37,20 +37,20 @@ public class Section : ContentComponent, ISection
 
         while (node != null)
         {
-            if (questionWithAnswerMap.TryGetValue(node.Sys.Id, out QuestionWithAnswer? questionWithAnswer))
-            {
-                var answer = Array.Find(node.Answers, answer => answer.Sys.Id == questionWithAnswer.AnswerRef);
-                questionWithAnswer = questionWithAnswer with
-                {
-                    AnswerText = answer?.Text ?? questionWithAnswer.AnswerText,
-                    QuestionText = node.Text,
-                    QuestionSlug = node.Slug
-                };
-
-                yield return questionWithAnswer;
-                node = Array.Find(node.Answers, answer => answer.Sys.Id.Equals(questionWithAnswer.AnswerRef))?.NextQuestion;
+            if (!questionWithAnswerMap.TryGetValue(node.Sys.Id, out QuestionWithAnswer? questionWithAnswer)){
+                break;
             }
-            else node = null;
+
+            var answer = Array.Find(node.Answers, answer => answer.Sys.Id == questionWithAnswer.AnswerRef);
+            questionWithAnswer = questionWithAnswer with
+            {
+                AnswerText = answer?.Text ?? questionWithAnswer.AnswerText,
+                QuestionText = node.Text,
+                QuestionSlug = node.Slug
+            };
+
+            yield return questionWithAnswer;
+            node = Array.Find(node.Answers, answer => answer.Sys.Id.Equals(questionWithAnswer.AnswerRef))?.NextQuestion;
         }
     }
 }

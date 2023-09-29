@@ -42,7 +42,7 @@ public class SubmissionStatusProcessor : ISubmissionStatusProcessor
   public SubmissionStatus Status { get; set; }
   public Question? NextQuestion { get; set; }
 
-  public Section? Section { get; private set; }
+  public ISection? Section { get; private set; }
   public SectionStatusNew? SectionStatus { get; private set; }
 
   /// <summary>

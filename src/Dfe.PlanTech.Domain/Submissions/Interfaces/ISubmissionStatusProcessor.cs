@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Responses.Interface;
 using Dfe.PlanTech.Domain.Submissions.Enums;
@@ -16,7 +17,7 @@ public interface ISubmissionStatusProcessor
   public IUser User { get; }
   public SubmissionStatus Status { get; set; }
   public Question? NextQuestion { get; set; }
-  public Section? Section { get; }
+  public ISection? Section { get; }
   public SectionStatusNew? SectionStatus { get; }
 
   Task GetJourneyStatusForSection(string sectionSlug, CancellationToken cancellationToken);
