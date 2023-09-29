@@ -1,23 +1,24 @@
-using Dfe.PlanTech.Application.Responses.Interface;
-using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Responses.Interface;
+using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
+using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Exceptions;
 
 namespace Dfe.PlanTech.Web.Routing;
 
-public class UserJourneyStatusProcessor : IUserJourneyStatusProcessor
+public class SubmissionStatusProcessor : ISubmissionStatusProcessor
 {
   private readonly IGetSectionQuery _getSectionQuery;
   private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
 
-  private readonly UserJourneyStatusChecker[] _statusCheckers;
+  private readonly SubmissionStatusChecker[] _statusCheckers;
 
-  public UserJourneyStatusProcessor(IGetSectionQuery getSectionQuery,
+  public SubmissionStatusProcessor(IGetSectionQuery getSectionQuery,
                            IGetSubmissionStatusesQuery getSubmissionStatusesQuery,
-                           IEnumerable<UserJourneyStatusChecker> statusCheckers,
+                           IEnumerable<SubmissionStatusChecker> statusCheckers,
                            IGetLatestResponsesQuery getResponsesQuery,
                            IUser user)
   {
@@ -37,19 +38,19 @@ public class UserJourneyStatusProcessor : IUserJourneyStatusProcessor
   public IGetLatestResponsesQuery GetResponsesQuery { get; init; }
   public IUser User { get; init; }
 
-  public JourneyStatus Status { get; set; }
+  public SubmissionStatus Status { get; set; }
   public Question? NextQuestion { get; set; }
 
   public Section? Section { get; private set; }
   public SectionStatusNew? SectionStatus { get; private set; }
 
-/// <summary>
-/// Get's the current status for the current user's establishment and the given section
-/// </summary>
-/// <param name="sectionSlug"></param>
-/// <param name="cancellationToken"></param>
-/// <returns></returns>
-/// <exception cref="ContentfulDataUnavailableException"></exception>
+  /// <summary>
+  /// Get's the current status for the current user's establishment and the given section
+  /// </summary>
+  /// <param name="sectionSlug"></param>
+  /// <param name="cancellationToken"></param>
+  /// <returns></returns>
+  /// <exception cref="ContentfulDataUnavailableException"></exception>
   public async Task GetJourneyStatusForSection(string sectionSlug, CancellationToken cancellationToken)
   {
     var establishmentId = await User.GetEstablishmentId();
@@ -63,9 +64,9 @@ public class UserJourneyStatusProcessor : IUserJourneyStatusProcessor
 
     foreach (var statusChecker in _statusCheckers)
     {
-      if (statusChecker.IsMatchingUserJourney(this))
+      if (statusChecker.IsMatchingSubmissionStatus(this))
       {
-        await statusChecker.ProcessUserJourneyRouter(this, cancellationToken);
+        await statusChecker.ProcessSubmission(this, cancellationToken);
         return;
       }
     }

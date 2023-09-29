@@ -1,6 +1,6 @@
 namespace Dfe.PlanTech.Web.Routing;
 
-public enum JourneyStatus
+public enum SubmissionStatus
 {
     NotStarted,
     NextQuestion,
