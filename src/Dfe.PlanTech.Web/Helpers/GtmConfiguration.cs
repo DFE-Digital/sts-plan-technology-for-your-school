@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Cookie.Interfaces;
+﻿using Dfe.PlanTech.Domain.Cookie.Interfaces;
 
 namespace Dfe.PlanTech.Web.Helpers;
 

@@ -1,6 +1,6 @@
 ﻿using Dfe.PlanTech.Application.Constants;
-using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Binders;
 using Dfe.PlanTech.Web.Models;

@@ -1,5 +1,5 @@
-using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Users.Interfaces;
 
 namespace Dfe.PlanTech.Web.Models;
 
