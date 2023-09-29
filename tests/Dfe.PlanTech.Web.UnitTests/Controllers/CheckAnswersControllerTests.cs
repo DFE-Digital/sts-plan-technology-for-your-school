@@ -196,91 +196,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 Assert.Fail("Not redirect to action result");
             }
 
-            Assert.True(redirectToActionResult.ControllerName == PageRedirecter.PAGES_CONTROLLER);
-            Assert.True(redirectToActionResult.ActionName == PageRedirecter.GET_BY_ROUTE_ACTION);
+            Assert.Equal(PagesController.ControllerName, redirectToActionResult.ControllerName);
+            Assert.Equal(PagesController.GetPageByRouteAction, redirectToActionResult.ActionName);
             Assert.NotNull(redirectToActionResult.RouteValues);
             Assert.True(redirectToActionResult.RouteValues.ContainsKey("route"));
             Assert.True(redirectToActionResult.RouteValues["route"] is string s && s == "/self-assessment");
         }
-
-        /*   [Fact]
-           public async Task CheckAnswersController_CheckAnswersPage_RedirectsToView_When_CheckAnswersDto_IsPopulated()
-           {
-               var result = await _checkAnswersController.CheckAnswersPage(_section.InterstitialPage.Slug, _user, _getSectionQuery, _processCheckAnswerDtoCommand, _getPageQuerySubstitute);
-
-               Assert.IsType<ViewResult>(result);
-
-               var viewResult = result as ViewResult;
-
-               Assert.NotNull(viewResult);
-               Assert.Equal("CheckAnswers", viewResult.ViewName);
-           }
-
-           [Fact]
-           public async Task CheckAnswersController_CheckAnswersPage_ViewModel_IsPopulated_Correctly()
-           {
-               var result = await _checkAnswersController.CheckAnswersPage(_section.InterstitialPage.Slug, _user, _getSectionQuery, _processCheckAnswerDtoCommand, _getPageQuerySubstitute);
-
-               Assert.IsType<ViewResult>(result);
-
-               var viewResult = result as ViewResult;
-
-               Assert.NotNull(viewResult);
-               Assert.Equal("CheckAnswers", viewResult.ViewName);
-
-               Assert.IsType<CheckAnswersViewModel>(viewResult.Model);
-
-               var checkAnswersViewModel = viewResult.Model as CheckAnswersViewModel;
-
-               Assert.NotNull(checkAnswersViewModel);
-               Assert.Equal(_checkAnswersPage.Title, checkAnswersViewModel.Title);
-               Assert.Equal(SUBMISSION_ID, checkAnswersViewModel.SubmissionId);
-
-               Assert.NotNull(checkAnswersViewModel.Content);
-               Assert.Equal(_checkAnswersPage.Content, checkAnswersViewModel.Content);
-
-               Assert.IsType<CheckAnswerDto>(checkAnswersViewModel.CheckAnswerDto);
-
-               var checkAnswerDto = checkAnswersViewModel.CheckAnswerDto;
-
-               Assert.NotNull(checkAnswerDto);
-               Assert.Equal(_questionWithAnswerList, checkAnswerDto.Responses);
-           }
-
-           [Fact]
-           public async Task CheckAnswersController_CheckAnswers_Null_Section_ThrowsException()
-           {
-               await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _checkAnswersController.CheckAnswersPage("NOT THE RIGHT SLUG", _user, _getSectionQuery, _processCheckAnswerDtoCommand, _getPageQuerySubstitute));
-           }
-
-
-           [Fact]
-           public async Task CheckAnswersController_CheckAnswers_Null_SectionId_ThrowsException()
-           {
-               await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _checkAnswersController.CheckAnswersPage(null!, _user, _getSectionQuery, _processCheckAnswerDtoCommand, _getPageQuerySubstitute));
-           }
-
-
-           [Fact]
-           public async Task CheckAnswersPage_RedirectsToSelfAssessment_When_No_Responses()
-           {
-               var result = await _checkAnswersController.CheckAnswersPage(_completedSection.InterstitialPage.Slug, _user, _getSectionQuery, _processCheckAnswerDtoCommand, _getPageQuerySubstitute);
-
-               Assert.IsType<RedirectToActionResult>(result);
-
-               if (result is RedirectToActionResult res)
-               {
-                   Assert.True(res.ActionName == "GetByRoute");
-                   Assert.True(res.ControllerName == "Pages");
-                   Assert.NotNull(res.RouteValues);
-                   Assert.True(res.RouteValues.ContainsKey("route"));
-                   Assert.True(res.RouteValues["route"] is string s && s == "/self-assessment");
-               }
-               else
-               {
-                   Assert.Fail("Not redirect to action result");
-               }
-           }
-           */
     }
 }

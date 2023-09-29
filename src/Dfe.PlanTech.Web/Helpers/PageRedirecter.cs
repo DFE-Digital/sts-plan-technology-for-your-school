@@ -11,12 +11,12 @@ public static class PageRedirecter
   => RedirectToPage(controller, SelfAssessmentRoute);
 
   public static RedirectToActionResult RedirectToCheckAnswers(this Controller controller, string sectionSlug)
-    => controller.RedirectToAction(CheckAnswersController.ControllerName, CheckAnswersController.CheckAnswersPageAction, new { sectionSlug });
+    => controller.RedirectToAction(CheckAnswersController.CheckAnswersAction, CheckAnswersController.ControllerName , new { sectionSlug });
 
   public static RedirectToActionResult RedirectToInterstitialPage(this Controller controller, string sectionSlug)
   => RedirectToPage(controller, sectionSlug);
 
   private static RedirectToActionResult RedirectToPage(this Controller controller, string route)
-  => controller.RedirectToAction(PagesController.ControllerName, PagesController.GetPageByRouteAction, new { route });
+  => controller.RedirectToAction(PagesController.GetPageByRouteAction, PagesController.ControllerName, new { route });
 }
 

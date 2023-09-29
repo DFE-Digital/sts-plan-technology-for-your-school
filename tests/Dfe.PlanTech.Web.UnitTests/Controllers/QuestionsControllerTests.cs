@@ -140,8 +140,8 @@ public class QuestionsControllerTests
 
         var redirectResult = result as RedirectToActionResult;
         Assert.NotNull(redirectResult);
-        Assert.Equal(PageRedirecter.CHECK_ANSWERS_CONTROLLER, redirectResult.ControllerName);
-        Assert.Equal(PageRedirecter.CHECK_ANSWERS_ACTION, redirectResult.ActionName);
+        Assert.Equal(CheckAnswersController.ControllerName, redirectResult.ControllerName);
+        Assert.Equal(CheckAnswersController.CheckAnswersAction, redirectResult.ActionName);
     }
 
     [Fact]
