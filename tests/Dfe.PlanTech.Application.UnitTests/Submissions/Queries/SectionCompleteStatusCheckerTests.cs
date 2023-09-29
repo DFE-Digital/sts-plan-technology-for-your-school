@@ -36,4 +36,28 @@ public class SectionCompleteStatusCheckerTests
 
     Assert.False(matches);
   }
+
+  [Fact]
+  public async Task Should_Set_SubmissionStatus_And_FirstQuestion()
+  {
+    var section = new Section()
+    {
+      Questions = new Question[]
+      {
+        new Question(){
+          Slug = "question-one"
+        },
+        new Question(){
+          Slug = "question-two"
+        }
+      }
+    };
+    var processor = Substitute.For<ISubmissionStatusProcessor>();
+    processor.Section.Returns(section);
+    processor.SectionStatus.Returns(new SectionStatusNew() { Status = Status.Completed, Completed = true });
+
+    await StatusChecker.ProcessSubmission(processor, default);
+    Assert.Equal(SubmissionStatus.Completed, processor.Status);
+    Assert.Equal(section.Questions.First(), processor.NextQuestion);
+  }
 }
