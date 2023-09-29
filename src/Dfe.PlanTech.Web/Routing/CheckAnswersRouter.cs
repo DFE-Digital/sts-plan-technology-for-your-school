@@ -40,7 +40,7 @@ public class CheckAnswersRouter : ICheckAnswersRouter
     return _router.Status switch
     {
       SubmissionStatus.CheckAnswers => await ProcessCheckAnswers(sectionSlug, controller, cancellationToken),
-      SubmissionStatus.Completed => controller.RedirectToAction(PagesController.GetPageByRouteAction, PagesController.Controller, new { route = sectionSlug }),
+      SubmissionStatus.Completed => controller.RedirectToInterstitialPage(sectionSlug),
       _ => ProcessQuestionStatus(sectionSlug, controller),
     };
   }

@@ -8,6 +8,8 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Authorize]
 public class CheckAnswersController : BaseController<CheckAnswersController>
 {
+    public const string ControllerName = "CheckAnswers";
+    public const string CheckAnswersPageAction = nameof(CheckAnswersPage);
     public const string CheckAnswersPageSlug = "check-answers";
     public const string CheckAnswersViewName = "CheckAnswers";
 
