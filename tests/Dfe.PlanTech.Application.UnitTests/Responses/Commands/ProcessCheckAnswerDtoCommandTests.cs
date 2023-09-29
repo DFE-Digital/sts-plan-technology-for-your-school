@@ -13,6 +13,7 @@ public class ProcessCheckAnswerDtoCommandTests
     {
         var questionIds = new[] { "QuestionRef1", "QuestionRef2", "QuestionRef3" };
         var answerIds = new[] { "AnswerRef1", "AnswerRef2", "AnswerRef3" };
+        var questionSlugs = new[] { "question-1", "question-2", "question-3" };
 
         CheckAnswerDto response = new()
         {
@@ -54,7 +55,8 @@ public class ProcessCheckAnswerDtoCommandTests
               Id = answerIds[0]
             },
           }
-        }
+        },
+        Slug = questionSlugs[0]
     },new(){
       Sys = new SystemDetails()
       {
@@ -66,7 +68,8 @@ public class ProcessCheckAnswerDtoCommandTests
               Id = answerIds[1]
             }
           }
-        }
+        },
+        Slug = questionSlugs[1]
       },
     new()
     {
@@ -80,7 +83,8 @@ public class ProcessCheckAnswerDtoCommandTests
             Id = answerIds[2]
           }
         }
-      }
+      },
+      Slug = questionSlugs[2]
     }
   };
 
