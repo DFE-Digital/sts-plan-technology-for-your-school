@@ -2,7 +2,7 @@
 
 namespace Dfe.PlanTech.Domain.Submissions.Models;
 
-public class SectionStatus
+public class SectionStatusDto
 {
     public string SectionId { get; set; } = null!;
 

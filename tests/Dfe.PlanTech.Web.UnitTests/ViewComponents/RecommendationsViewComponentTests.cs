@@ -86,7 +86,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public void Returns_RecommendationInfo_If_It_Exists_ForMaturity()
         {
-            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatus()
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
             {
                 SectionId = "Section1",
                 Completed = 1,
@@ -119,13 +119,13 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public void Returns_RecommendationInfo_For_Multiple_Categories_If_It_Exists_ForMaturity()
         {
-            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatus()
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
             {
                 SectionId = "Section1",
                 Completed = 1,
                 Maturity = "High"
             });
-            _categoryTwo.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatus()
+            _categoryTwo.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
             {
                 SectionId = "Section1",
                 Completed = 1,
@@ -163,7 +163,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public void Returns_RecommendationInfo_And_Logs_Error_If_Exception_Thrown_By_Get_Category()
         {
-            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatus()
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
             {
                 SectionId = "Section1",
                 Completed = 1,
@@ -198,7 +198,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public void Returns_NullRecommendationInfo_If_No_RecommendationPage_Exists_ForMaturity()
         {
-            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatus()
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
             {
                 SectionId = "Section1",
                 Completed = 1,
@@ -232,7 +232,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         public void DoesNotReturn_RecommendationInfo_If_Section_IsNot_Completed()
         {
             _category.Completed= 0;
-            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatus()
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
             {
                 SectionId = "Section1",
                 Completed = 0,

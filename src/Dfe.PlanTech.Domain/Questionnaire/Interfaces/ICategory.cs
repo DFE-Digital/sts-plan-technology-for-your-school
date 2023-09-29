@@ -12,7 +12,7 @@ public interface ICategory : IContentComponent
 
     public ISection[] Sections { get; }
 
-    public IList<SectionStatus> SectionStatuses { get; set; }
+    public IList<SectionStatusDto> SectionStatuses { get; set; }
 
     public int Completed { get; set; }
 

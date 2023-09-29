@@ -13,11 +13,11 @@ namespace Dfe.PlanTech.Application.UnitTests.Submissions.Queries
         private readonly IPlanTechDbContext Db = Substitute.For<IPlanTechDbContext>();
         private readonly IUser user = Substitute.For<IUser>();
 
-        private readonly List<SectionStatus> SectionStatuses = new() {
-            new SectionStatus { Completed = 1, SectionId = "1", Maturity = "Low", DateCreated = DateTime.UtcNow },
-            new SectionStatus { Completed = 1, SectionId = "2", Maturity = "High", DateCreated = DateTime.UtcNow },
-            new SectionStatus { Completed = 0, SectionId = "3", DateCreated = DateTime.UtcNow },
-            new SectionStatus { Completed = 0, SectionId = "4",  DateCreated = DateTime.UtcNow },
+        private readonly List<SectionStatusDto> SectionStatuses = new() {
+            new SectionStatusDto { Completed = 1, SectionId = "1", Maturity = "Low", DateCreated = DateTime.UtcNow },
+            new SectionStatusDto { Completed = 1, SectionId = "2", Maturity = "High", DateCreated = DateTime.UtcNow },
+            new SectionStatusDto { Completed = 0, SectionId = "3", DateCreated = DateTime.UtcNow },
+            new SectionStatusDto { Completed = 0, SectionId = "4",  DateCreated = DateTime.UtcNow },
         };
 
         private GetSubmissionStatusesQuery CreateStrut() => new GetSubmissionStatusesQuery(Db, user);
