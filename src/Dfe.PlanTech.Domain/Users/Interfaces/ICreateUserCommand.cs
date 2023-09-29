@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Domain.Users.Models;
 
-namespace Dfe.PlanTech.Application.Persistence.Interfaces;
+namespace Dfe.PlanTech.Domain.Users.Interfaces;
 
 public interface ICreateUserCommand
 {

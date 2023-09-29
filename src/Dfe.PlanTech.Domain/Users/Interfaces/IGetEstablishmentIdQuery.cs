@@ -1,4 +1,4 @@
-namespace Dfe.PlanTech.Application.Users.Interfaces;
+namespace Dfe.PlanTech.Domain.Users.Interfaces;
 
 public interface IGetEstablishmentIdQuery
 {
