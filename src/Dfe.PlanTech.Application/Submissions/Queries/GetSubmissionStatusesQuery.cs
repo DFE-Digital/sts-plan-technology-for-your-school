@@ -39,11 +39,7 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
 
         var result = await _db.FirstOrDefaultAsync(groupedAndLatest, cancellationToken);
 
-        if(result != null){
-            return result;
-        }
-
-        return new SectionStatusNew()
+        return result ?? new SectionStatusNew()
         {
             SectionId = section.Sys.Id,
             Completed = false,
