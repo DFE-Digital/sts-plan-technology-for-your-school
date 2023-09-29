@@ -28,6 +28,9 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     [HttpPost("ConfirmCheckAnswers")]
     public async Task<IActionResult> ConfirmCheckAnswers(int submissionId, string sectionName, [FromServices] ICalculateMaturityCommand calculateMaturityCommand, CancellationToken cancellationToken = default)
     {
+        if (submissionId <= 0) throw new ArgumentOutOfRangeException(nameof(submissionId));
+        if (string.IsNullOrEmpty(sectionName)) throw new ArgumentNullException(nameof(sectionName));
+        
         await calculateMaturityCommand.CalculateMaturityAsync(submissionId, cancellationToken);
 
         TempData["SectionName"] = sectionName;
