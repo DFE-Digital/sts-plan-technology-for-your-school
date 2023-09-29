@@ -1,4 +1,4 @@
-namespace Dfe.PlanTech.Web.Routing;
+namespace Dfe.PlanTech.Domain.Submissions.Enums;
 
 public enum SubmissionStatus
 {

@@ -2,7 +2,7 @@ using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
 
-namespace Dfe.PlanTech.Web.Routing;
+namespace Dfe.PlanTech.Application.Submissions.Queries;
 
 /// <summary>
 /// User journey status checker for when the user is at the Check Answers or their Next Question

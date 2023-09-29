@@ -2,7 +2,7 @@ using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
 
-namespace Dfe.PlanTech.Web.Routing;
+namespace Dfe.PlanTech.Application.Submissions.Queries;
 
 /// <summary>
 /// User journey status checker for when the section for the establishment hasn't been started
