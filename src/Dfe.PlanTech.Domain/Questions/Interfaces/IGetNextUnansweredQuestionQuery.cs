@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 
-namespace Dfe.PlanTech.Application.Questionnaire.Interfaces;
+namespace Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 public interface IGetNextUnansweredQuestionQuery
 {
