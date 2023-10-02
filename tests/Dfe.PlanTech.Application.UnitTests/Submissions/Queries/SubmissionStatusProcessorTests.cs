@@ -89,6 +89,25 @@ public class SubmissionStatusProcessorTests
     await successStatusChecker.Received(1).ProcessSubmission(processor, Arg.Any<CancellationToken>());
   }
 
+
+
+  [Fact]
+  public async Task Should_Throw_Exception_When_NoStatusChecker_Matches()
+  {
+    _failureStatusChecker.IsMatchingSubmissionStatus(Arg.Any<SubmissionStatusProcessor>()).Returns(false);
+
+    ISubmissionStatusProcessor processor = new SubmissionStatusProcessor(_getSectionQuery,
+                                                                         _getSubmissionStatusesQuery,
+                                                                         _statusCheckers,
+                                                                         _getResponsesQuery,
+                                                                         _user);
+
+    _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(Arg.Any<int>(), Arg.Any<Section>(), Arg.Any<CancellationToken>())
+                               .Returns(new SectionStatusNew());
+
+    await Assert.ThrowsAnyAsync<InvalidDataException>(() => processor.GetJourneyStatusForSection(SectionSlug, default));
+  }
+
   [Fact]
   public async Task Should_ThrowException_When_Section_NotFound()
   {
