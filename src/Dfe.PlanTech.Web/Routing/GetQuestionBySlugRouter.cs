@@ -26,8 +26,8 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
                                                  QuestionsController controller,
                                                  CancellationToken cancellationToken)
   {
-    if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentException($"'{nameof(sectionSlug)}' cannot be null or empty.");
-    if (string.IsNullOrEmpty(questionSlug)) throw new ArgumentException($"'{nameof(questionSlug)}' cannot be null or empty.");
+    if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
+    if (string.IsNullOrEmpty(questionSlug)) throw new ArgumentNullException(nameof(questionSlug));
 
     await _router.GetJourneyStatusForSection(sectionSlug, cancellationToken);
 

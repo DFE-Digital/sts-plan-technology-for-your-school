@@ -35,7 +35,7 @@ public class CheckAnswersRouter : ICheckAnswersRouter
                                                  CheckAnswersController controller,
                                                  CancellationToken cancellationToken)
   {
-    if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentException($"'{nameof(sectionSlug)}' cannot be null or empty.");
+    if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
 
     await _router.GetJourneyStatusForSection(sectionSlug, cancellationToken);
 
