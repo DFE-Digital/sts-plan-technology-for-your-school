@@ -128,11 +128,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             };
         }
 
-        private static IDictionary<string, string> GetSectionStatuses()
-        {
-            return new Dictionary<string, string> { { "3XQEHYfvEQkQwdrihDGagJ", "Completed" } };
-        }
-
         private static Page BuildPage(string? param = null)
         => new()
         {
