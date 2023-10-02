@@ -64,10 +64,10 @@ public class SubmissionStatusProcessor : ISubmissionStatusProcessor
                                                                                       cancellationToken);
 
 
-    foreach (var statusChecker in _statusCheckers.Where(statusChecker => statusChecker.IsMatchingSubmissionStatus(this)))
-    {
-      await statusChecker.ProcessSubmission(this, cancellationToken);
-      return;
-    }
+
+    var matchingStatusChecker = _statusCheckers.FirstOrDefault(statusChecker => statusChecker.IsMatchingSubmissionStatus(this)) ?? 
+                                throw new InvalidDataException($"Could not find appropriate status checker for section status {SectionStatus}");
+
+    await matchingStatusChecker.ProcessSubmission(this, cancellationToken);
   }
 }
