@@ -1,5 +1,6 @@
 @using Dfe.PlanTech.Domain.Content.Models;
 @using Dfe.PlanTech.Domain.Content.Models.Buttons;
+@using Dfe.PlanTech.Domain.Questionnaire.Models;
 @model Dfe.PlanTech.Domain.Content.Models.Buttons.ButtonWithEntryReference;
 
 @{
@@ -21,7 +22,7 @@
                 <button-with-link model=@buttonWithLink />
                 break;
             }
-        default:
+        case Question _:
             {
                 <govuk-button-link asp-controller="Questions" asp-action="GetNextUnansweredQuestion" asp-route-sectionSlug=@sectionSlug
                     class="govuk-link">
