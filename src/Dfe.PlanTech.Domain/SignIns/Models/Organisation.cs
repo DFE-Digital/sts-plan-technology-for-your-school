@@ -28,7 +28,8 @@ public sealed class Organisation
     public string Reference => Urn ?? Ukprn ?? Uid ?? Id.ToString();
 }
 
-public class IdWithName {
+public class IdWithName
+{
     public string Id { get; init; } = null!;
 
     public string Name { get; init; } = null!;

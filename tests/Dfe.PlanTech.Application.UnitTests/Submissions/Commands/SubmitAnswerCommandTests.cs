@@ -1,113 +1,114 @@
-using System.Security.Authentication;
-using System.Text.Json;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Submissions.Commands;
-using Dfe.PlanTech.Application.Submissions.Interfaces;
-using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Submissions.Interfaces;
+using Dfe.PlanTech.Domain.Users.Interfaces;
 using Microsoft.Data.SqlClient;
 using NSubstitute;
+using System.Security.Authentication;
+using System.Text.Json;
 
 namespace Dfe.PlanTech.Application.UnitTests.Submissions.Commands;
 
 public class SubmitAnswerCommandTests
 {
-  private readonly ISubmitAnswerCommand _submitAnswerCommand;
-  private readonly IPlanTechDbContext _db;
-  private readonly IUser _user;
+    private readonly ISubmitAnswerCommand _submitAnswerCommand;
+    private readonly IPlanTechDbContext _db;
+    private readonly IUser _user;
 
-  private readonly AnswerViewModelDto _chosenAnswer;
-  private readonly SubmitAnswerDto _dto;
+    private readonly AnswerViewModelDto _chosenAnswer;
+    private readonly SubmitAnswerDto _dto;
 
-  public SubmitAnswerCommandTests()
-  {
-    _db = Substitute.For<IPlanTechDbContext>();
-    _user = Substitute.For<IUser>();
-
-    _submitAnswerCommand = new SubmitAnswerCommand(_db, _user);
-
-       _chosenAnswer = new AnswerViewModelDto()
+    public SubmitAnswerCommandTests()
     {
-      Maturity = "Low",
-      Answer = new IdWithText()
-      {
-        Id = "Id",
-        Text = "Text"
-      },
-      NextQuestion = new IdAndSlugAndText()
-      {
-        Id = "QId",
-        Text = "QText",
-        Slug = "QSlug"
-      }
-    };
+        _db = Substitute.For<IPlanTechDbContext>();
+        _user = Substitute.For<IUser>();
 
-    _dto = new SubmitAnswerDto()
-    {
-      ChosenAnswerJson = JsonSerializer.Serialize(_chosenAnswer)
-    };
+        _submitAnswerCommand = new SubmitAnswerCommand(_db, _user);
 
-  }
-
-  [Fact]
-  public async Task Should_Throw_Exception_If_Dto_Null()
-  {
-    await Assert.ThrowsAnyAsync<InvalidDataException>(() => _submitAnswerCommand.SubmitAnswer(null!));
-  }
-
-
-  [Fact]
-  public async Task Should_Throw_Exception_If_ChosenAnswer_Null()
-  {
-    var dto = new SubmitAnswerDto()
-    {
-
-    };
-
-    await Assert.ThrowsAnyAsync<InvalidDataException>(() => _submitAnswerCommand.SubmitAnswer(dto));
-  }
-
-  [Fact]
-  public async Task Should_Throw_Exception_If_UserId_Null()
-  {
-    _user.GetCurrentUserId().Returns((callinfo) =>
-    {
-      int? userId = null;
-      return Task.FromResult(userId);
-    });
-
-    await Assert.ThrowsAnyAsync<AuthenticationException>(() => _submitAnswerCommand.SubmitAnswer(_dto));
-  }
-
-  [Fact]
-  public async Task Should_Call_ExecuteRaw_With_Params(){
-    var result = "";
-    FormattableString? formattableString = null;
-    _db.ExecuteRaw(Arg.Any<FormattableString>(), Arg.Any<CancellationToken>())
-        .Returns((callInfo) =>
+        _chosenAnswer = new AnswerViewModelDto()
         {
-          formattableString = callInfo.ArgAt<FormattableString>(0);
+            Maturity = "Low",
+            Answer = new IdWithText()
+            {
+                Id = "Id",
+                Text = "Text"
+            },
+            NextQuestion = new IdAndSlugAndText()
+            {
+                Id = "QId",
+                Text = "QText",
+                Slug = "QSlug"
+            }
+        };
 
-          SqlParameter? responseParam = formattableString.GetArguments()
-                                                .Select(argument => argument is SqlParameter sqlParameter ? sqlParameter : null)
-                                                .Where(param => param != null && param.ParameterName.Contains("responseId"))
-                                                .First();
+        _dto = new SubmitAnswerDto()
+        {
+            ChosenAnswerJson = JsonSerializer.Serialize(_chosenAnswer)
+        };
 
-          Assert.NotNull(responseParam);
-          responseParam.Value = 2;
-          result = formattableString.Format;
-          
-          return 1;
+    }
+
+    [Fact]
+    public async Task Should_Throw_Exception_If_Dto_Null()
+    {
+        await Assert.ThrowsAnyAsync<InvalidDataException>(() => _submitAnswerCommand.SubmitAnswer(null!));
+    }
+
+
+    [Fact]
+    public async Task Should_Throw_Exception_If_ChosenAnswer_Null()
+    {
+        var dto = new SubmitAnswerDto()
+        {
+
+        };
+
+        await Assert.ThrowsAnyAsync<InvalidDataException>(() => _submitAnswerCommand.SubmitAnswer(dto));
+    }
+
+    [Fact]
+    public async Task Should_Throw_Exception_If_UserId_Null()
+    {
+        _user.GetCurrentUserId().Returns((callinfo) =>
+        {
+            int? userId = null;
+            return Task.FromResult(userId);
         });
 
-    _user.GetCurrentUserId().Returns((callinfo) =>
+        await Assert.ThrowsAnyAsync<AuthenticationException>(() => _submitAnswerCommand.SubmitAnswer(_dto));
+    }
+
+    [Fact]
+    public async Task Should_Call_ExecuteRaw_With_Params()
     {
-      int? userId = 1;
-      return Task.FromResult(userId);
-    });
+        var result = "";
+        FormattableString? formattableString = null;
+        _db.ExecuteRaw(Arg.Any<FormattableString>(), Arg.Any<CancellationToken>())
+            .Returns((callInfo) =>
+            {
+                formattableString = callInfo.ArgAt<FormattableString>(0);
 
-    var id = await _submitAnswerCommand.SubmitAnswer(_dto);
+                SqlParameter? responseParam = formattableString.GetArguments()
+                                                  .Select(argument => argument is SqlParameter sqlParameter ? sqlParameter : null)
+                                                  .Where(param => param != null && param.ParameterName.Contains("responseId"))
+                                                  .First();
 
-    Assert.NotNull(formattableString);
-  }
+                Assert.NotNull(responseParam);
+                responseParam.Value = 2;
+                result = formattableString.Format;
+
+                return 1;
+            });
+
+        _user.GetCurrentUserId().Returns((callinfo) =>
+        {
+            int? userId = 1;
+            return Task.FromResult(userId);
+        });
+
+        var id = await _submitAnswerCommand.SubmitAnswer(_dto);
+
+        Assert.NotNull(formattableString);
+    }
 }

@@ -4,5 +4,5 @@ namespace Dfe.PlanTech.Domain.Content.Interfaces;
 
 public interface IContentComponent
 {
-  public SystemDetails Sys { get; }
+    public SystemDetails Sys { get; }
 }

@@ -1,14 +1,12 @@
 using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Security.Claims;
 using NSubstitute;
+using System.Security.Claims;
 using Xunit;
 using Page = Dfe.PlanTech.Domain.Content.Models.Page;
 
@@ -16,129 +14,129 @@ namespace Dfe.PlanTech.Web.Authorisation;
 
 public class PageModelAuthorisationPolicyTests
 {
-  private IGetPageQuery _getPageQuery;
-  private PageModelAuthorisationPolicy _policy;
-  private AuthorizationHandlerContext _authContext;
-  private ILogger<PageModelAuthorisationPolicy> _logger;
-  private HttpContext _httpContext;
+    private IGetPageQuery _getPageQuery;
+    private PageModelAuthorisationPolicy _policy;
+    private AuthorizationHandlerContext _authContext;
+    private ILogger<PageModelAuthorisationPolicy> _logger;
+    private HttpContext _httpContext;
 
-  public PageModelAuthorisationPolicyTests()
-  {
-    _logger = Substitute.For<ILogger<PageModelAuthorisationPolicy>>();
-    _policy = new PageModelAuthorisationPolicy(_logger);
-
-    _getPageQuery = Substitute.For<IGetPageQuery>();
-
-    _httpContext = Substitute.For<HttpContext>();
-
-    var serviceScopeFactory = Substitute.For<IServiceScopeFactory>();
-    _httpContext.RequestServices.GetService(typeof(IServiceScopeFactory)).Returns(serviceScopeFactory);
-    var serviceProvider = Substitute.For<IServiceProvider>();
-    var serviceScope = Substitute.For<IServiceScope>();
-    serviceScope.ServiceProvider.Returns(serviceProvider);
-    var asyncServiceScope = new AsyncServiceScope(serviceScope);
-
-    serviceScopeFactory.CreateAsyncScope().Returns(asyncServiceScope);
-    serviceProvider.GetService(typeof(IGetPageQuery)).Returns(_getPageQuery);
-
-    _httpContext.Request.RouteValues = new RouteValueDictionary();
-    _httpContext.Request.RouteValues[PageModelAuthorisationPolicy.ROUTE_NAME] = "/slug";
-
-    _httpContext.Items = new Dictionary<object, object?>();
-
-    _authContext = new AuthorizationHandlerContext(new[] { new PageAuthorisationRequirement() }, new ClaimsPrincipal(), _httpContext);
-  }
-
-  [Fact]
-  public async Task Should_Success_If_Page_Does_Not_Require_Authorisation()
-  {
-    _getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(callInfo => new Page()
+    public PageModelAuthorisationPolicyTests()
     {
-      RequiresAuthorisation = false
-    });
+        _logger = Substitute.For<ILogger<PageModelAuthorisationPolicy>>();
+        _policy = new PageModelAuthorisationPolicy(_logger);
 
-    await _policy.HandleAsync(_authContext);
+        _getPageQuery = Substitute.For<IGetPageQuery>();
 
-    Assert.True(_authContext.HasSucceeded);
-  }
+        _httpContext = Substitute.For<HttpContext>();
 
+        var serviceScopeFactory = Substitute.For<IServiceScopeFactory>();
+        _httpContext.RequestServices.GetService(typeof(IServiceScopeFactory)).Returns(serviceScopeFactory);
+        var serviceProvider = Substitute.For<IServiceProvider>();
+        var serviceScope = Substitute.For<IServiceScope>();
+        serviceScope.ServiceProvider.Returns(serviceProvider);
+        var asyncServiceScope = new AsyncServiceScope(serviceScope);
 
-  [Fact]
-  public async Task Should_Set_HttpContext_Item_For_Page()
-  {
-    var testPage = new Page()
+        serviceScopeFactory.CreateAsyncScope().Returns(asyncServiceScope);
+        serviceProvider.GetService(typeof(IGetPageQuery)).Returns(_getPageQuery);
+
+        _httpContext.Request.RouteValues = new RouteValueDictionary();
+        _httpContext.Request.RouteValues[PageModelAuthorisationPolicy.ROUTE_NAME] = "/slug";
+
+        _httpContext.Items = new Dictionary<object, object?>();
+
+        _authContext = new AuthorizationHandlerContext(new[] { new PageAuthorisationRequirement() }, new ClaimsPrincipal(), _httpContext);
+    }
+
+    [Fact]
+    public async Task Should_Success_If_Page_Does_Not_Require_Authorisation()
     {
-      RequiresAuthorisation = false,
-      Slug = "TestingSlug"
-    };
-    _getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(callInfo => testPage);
+        _getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(callInfo => new Page()
+        {
+            RequiresAuthorisation = false
+        });
 
-    await _policy.HandleAsync(_authContext);
+        await _policy.HandleAsync(_authContext);
 
-    var httpContext = _authContext.Resource as HttpContext;
-    Assert.NotNull(httpContext);
-    var pageObject = httpContext.Items[nameof(Page)];
+        Assert.True(_authContext.HasSucceeded);
+    }
 
-    Assert.NotNull(pageObject);
 
-    var page = pageObject as Page;
-
-    Assert.NotNull(page);
-    Assert.Equal(testPage, page);
-  }
-
-  [Fact]
-  public async Task Should_Succeed_If_Page_Requires_Authorisation_And_User_Authenticated()
-  {
-    _getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(callInfo => new Page()
+    [Fact]
+    public async Task Should_Set_HttpContext_Item_For_Page()
     {
-      RequiresAuthorisation = true
-    });
+        var testPage = new Page()
+        {
+            RequiresAuthorisation = false,
+            Slug = "TestingSlug"
+        };
+        _getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(callInfo => testPage);
 
-    var claimsIdentity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, "Name") }, CookieAuthenticationDefaults.AuthenticationScheme);
+        await _policy.HandleAsync(_authContext);
 
-    _authContext.User.AddIdentity(claimsIdentity);
+        var httpContext = _authContext.Resource as HttpContext;
+        Assert.NotNull(httpContext);
+        var pageObject = httpContext.Items[nameof(Page)];
 
-    await _policy.HandleAsync(_authContext);
+        Assert.NotNull(pageObject);
 
-    Assert.False(_authContext.HasSucceeded);
-  }
+        var page = pageObject as Page;
 
-  [Fact]
-  public async Task Should_Fail_If_Page_Requires_Authorisation_And_User_Not_Authenticated()
-  {
-    _getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(callInfo => new Page()
+        Assert.NotNull(page);
+        Assert.Equal(testPage, page);
+    }
+
+    [Fact]
+    public async Task Should_Succeed_If_Page_Requires_Authorisation_And_User_Authenticated()
     {
-      RequiresAuthorisation = true
-    });
+        _getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(callInfo => new Page()
+        {
+            RequiresAuthorisation = true
+        });
 
-    await _policy.HandleAsync(_authContext);
+        var claimsIdentity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, "Name") }, CookieAuthenticationDefaults.AuthenticationScheme);
 
-    Assert.False(_authContext.HasSucceeded);
-  }
+        _authContext.User.AddIdentity(claimsIdentity);
 
-  [Fact]
-  public async Task Should_LogError_When_Resource_Not_HttpContext()
-  {
-    _authContext = new AuthorizationHandlerContext(new[] { new PageAuthorisationRequirement() }, new ClaimsPrincipal(), null);
-    await _policy.HandleAsync(_authContext);
-    _logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
-  }
+        await _policy.HandleAsync(_authContext);
 
-  [Fact]
-  public async Task Should_Set_Route_Value_When_Null()
-  {
-    _getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(callInfo => new Page()
+        Assert.False(_authContext.HasSucceeded);
+    }
+
+    [Fact]
+    public async Task Should_Fail_If_Page_Requires_Authorisation_And_User_Not_Authenticated()
     {
-      RequiresAuthorisation = true
-    });
+        _getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(callInfo => new Page()
+        {
+            RequiresAuthorisation = true
+        });
 
-    _httpContext.Request.RouteValues.Remove(PageModelAuthorisationPolicy.ROUTE_NAME);
+        await _policy.HandleAsync(_authContext);
 
-    await _policy.HandleAsync(_authContext);
+        Assert.False(_authContext.HasSucceeded);
+    }
 
-    Assert.True(_httpContext.Request.RouteValues.ContainsKey(PageModelAuthorisationPolicy.ROUTE_NAME));
-    Assert.Equal("/", _httpContext.Request.RouteValues[PageModelAuthorisationPolicy.ROUTE_NAME]);
-  }
+    [Fact]
+    public async Task Should_LogError_When_Resource_Not_HttpContext()
+    {
+        _authContext = new AuthorizationHandlerContext(new[] { new PageAuthorisationRequirement() }, new ClaimsPrincipal(), null);
+        await _policy.HandleAsync(_authContext);
+        _logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
+    }
+
+    [Fact]
+    public async Task Should_Set_Route_Value_When_Null()
+    {
+        _getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(callInfo => new Page()
+        {
+            RequiresAuthorisation = true
+        });
+
+        _httpContext.Request.RouteValues.Remove(PageModelAuthorisationPolicy.ROUTE_NAME);
+
+        await _policy.HandleAsync(_authContext);
+
+        Assert.True(_httpContext.Request.RouteValues.ContainsKey(PageModelAuthorisationPolicy.ROUTE_NAME));
+        Assert.Equal("/", _httpContext.Request.RouteValues[PageModelAuthorisationPolicy.ROUTE_NAME]);
+    }
 
 }

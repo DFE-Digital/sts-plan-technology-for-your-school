@@ -179,7 +179,7 @@ public class HeaderComponentTagHelperTests
 
         var loggerSubstitute = Substitute.For<ILogger<HeaderComponentTagHelper>>();
 
-        var tagHelper = new HeaderComponentTagHelper(loggerSubstitute){};
+        var tagHelper = new HeaderComponentTagHelper(loggerSubstitute) { };
 
         var context = new TagHelperContext(tagName: "header",
                                             allAttributes: new TagHelperAttributeList(),

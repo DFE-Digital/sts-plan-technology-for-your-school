@@ -1,9 +1,9 @@
-using System.Text;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.Text;
 using TableCellRenderer =
     Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers.TableCellRenderer;
 using TableRenderer = Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers.TableRenderer;
@@ -37,7 +37,7 @@ public class TableRendererTests
             NodeType = "paragraph",
             Value = ""
         };
-        
+
         var tableCellContent = new RichTextContent()
         {
             Content = new RichTextContent[] { tableCell },
@@ -65,7 +65,7 @@ public class TableRendererTests
             NodeType = "table-header-cell",
             Value = ""
         };
-        
+
         var tableHeaderRowContent = new RichTextContent()
         {
             Content = new RichTextContent[] { tableHeaderCellsContent, tableHeaderCellsContentTwo },
@@ -129,7 +129,7 @@ public class TableRendererTests
         Assert.Equal(
             """<table class="govuk-table"><thead class="govuk-table__head"><tr class="govuk-table__row"><th class="govuk-table__header">test</th><th class="govuk-table__header">test</th></tr></thead><tbody class="govuk-table__body"><tr class="govuk-table__row"><th scope="row" class="govuk-table__header">test</th><td class="govuk-table__cell">test</td></tr></tbody></table>""",
             output.ToString());
-        
-        
+
+
     }
 }

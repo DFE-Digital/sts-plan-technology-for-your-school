@@ -23,14 +23,14 @@
     <ItemGroup>
       <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.2.2" />
       <PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Keys" Version="1.2.2" />
-      <PackageReference Include="Azure.Identity" Version="1.9.0" />
-      <PackageReference Include="GovUk.Frontend.AspNetCore" Version="1.0.0" />
+      <PackageReference Include="Azure.Identity" Version="1.10.1" />
+      <PackageReference Include="GovUk.Frontend.AspNetCore" Version="1.4.0" />
       <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.21.0" />
-      <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="7.0.8" />
-      <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="7.0.8" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.8" />
+      <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="7.0.11" />
+      <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="7.0.11" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.11" />
       <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="7.0.5" />
+      <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="7.0.11" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,5 +1,5 @@
-﻿using Dfe.PlanTech.Application.Cookie.Interfaces;
-using Dfe.PlanTech.Domain.Cookie;
+﻿using Dfe.PlanTech.Domain.Cookie;
+using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Microsoft.AspNetCore.Http;
 using System.Text.Json;
 
@@ -36,9 +36,9 @@ namespace Dfe.PlanTech.Application.Cookie.Service
         public DfeCookie GetCookie()
         {
             var cookie = _context.HttpContext.Request.Cookies[Cookie_Key];
-            if (cookie is null) 
-            { 
-                return new DfeCookie(); 
+            if (cookie is null)
+            {
+                return new DfeCookie();
             }
             else
             {

@@ -8,10 +8,10 @@ namespace Dfe.PlanTech.Application.Content.Queries;
 /// </summary>
 public interface IGetPageQuery
 {
-  /// <summary>
-  /// Fetches page from <see chref="IContentRepository"/> by slug
-  /// </summary>
-  /// <param name="slug">Slug for the Page</param>
-  /// <returns>Page matching slug</returns>
-  public Task<Page> GetPageBySlug(string slug, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Fetches page from <see chref="IContentRepository"/> by slug
+    /// </summary>
+    /// <param name="slug">Slug for the Page</param>
+    /// <returns>Page matching slug</returns>
+    public Task<Page> GetPageBySlug(string slug, CancellationToken cancellationToken = default);
 }

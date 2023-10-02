@@ -1,13 +1,9 @@
 ﻿using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
-using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Web.Models;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
 
 namespace Dfe.PlanTech.Web.UnitTests.Models
 {

@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 
-namespace Dfe.PlanTech.Application.Users.Interfaces;
+namespace Dfe.PlanTech.Domain.Users.Interfaces;
 
 public interface IRecordUserSignInCommand
 {

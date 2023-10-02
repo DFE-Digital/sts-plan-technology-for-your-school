@@ -12,7 +12,7 @@ public class TableCellRenderer : BaseRichTextContentPartRender
 
     public override StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
-        
+
         String rowBeginsString = "<tr class=\"govuk-table__row\">";
 
         if (stringBuilder.ToString().EndsWith(rowBeginsString))
@@ -33,7 +33,7 @@ public class TableCellRenderer : BaseRichTextContentPartRender
         }
 
 
-       
+
 
         return stringBuilder;
     }

@@ -4,7 +4,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Serializers;
 public class DependencyInjectionContractResolver : DefaultContractResolver
 {
     private readonly IServiceProvider _serviceProvider;
-    
+
     public DependencyInjectionContractResolver(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;

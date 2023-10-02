@@ -1,5 +1,5 @@
-using Dfe.PlanTech.Application.Responses.Interface;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Responses.Interface;
 using Dfe.PlanTech.Domain.Responses.Interfaces;
 
 namespace Dfe.PlanTech.Application.Responses.Commands;
@@ -55,7 +55,8 @@ public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand
             else node = null;
         }
 
-        return new CheckAnswerDto(){
+        return new CheckAnswerDto()
+        {
             SubmissionId = checkAnswerDto.SubmissionId,
             Responses = attachedQuestions
         };

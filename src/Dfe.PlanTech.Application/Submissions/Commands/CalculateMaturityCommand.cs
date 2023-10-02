@@ -1,6 +1,6 @@
 ﻿using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Application.Submissions.Interfaces;
+using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Microsoft.Data.SqlClient;
 
 namespace Dfe.PlanTech.Application.Submissions.Commands

@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Helper;
-using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Establishments.Models;
+using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Domain.Users.Models;
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
@@ -52,7 +52,7 @@ public class UserHelperTests
         _planTechDbContextSubstitute = Substitute.For<IPlanTechDbContext>();
         _createEstablishmentCommandSubstitute = Substitute.For<ICreateEstablishmentCommand>();
         _getUserIdQuerySubstitute = Substitute.For<IGetUserIdQuery>();
-        _getEstablishmentIdQuerySubstitute = Substitute.For<IGetEstablishmentIdQuery>(); 
+        _getEstablishmentIdQuerySubstitute = Substitute.For<IGetEstablishmentIdQuery>();
 
         SubstituteGetEstablishmentIdQuery();
         SubstituteGetUserIdQuery();

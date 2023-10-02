@@ -5,7 +5,6 @@ using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Serialization;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 

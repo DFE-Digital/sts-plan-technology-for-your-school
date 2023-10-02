@@ -1,5 +1,4 @@
 ﻿using Dfe.PlanTech.Domain.Questionnaire.Enums;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Models
