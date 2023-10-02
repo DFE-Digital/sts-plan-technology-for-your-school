@@ -34,6 +34,15 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _checkAnswersController.CheckAnswersPage(section!, _checkAnswersRouter, default));
         }
 
+        [Fact]
+        public async Task CheckAnswersPage_Should_Call_CheckAnswersRouter_When_Args_Valid()
+        {
+            string sectionSlug = "section-slug";
+
+            await _checkAnswersController.CheckAnswersPage(sectionSlug, _checkAnswersRouter, default);
+            await _checkAnswersRouter.Received().ValidateRoute(sectionSlug, _checkAnswersController, Arg.Any<CancellationToken>());
+        }
+
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]

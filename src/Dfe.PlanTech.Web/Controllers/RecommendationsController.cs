@@ -18,8 +18,13 @@ public class RecommendationsController : BaseController<RecommendationsControlle
                                                      string recommendationSlug,
                                                      [FromServices] IGetRecommendationRouter getRecommendationValidator,
                                                      CancellationToken cancellationToken)
-    => getRecommendationValidator.ValidateRoute(sectionSlug,
-        recommendationSlug,
-        this,
-        cancellationToken);
+  {
+    if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
+    if (string.IsNullOrEmpty(recommendationSlug)) throw new ArgumentNullException(nameof(recommendationSlug));
+
+    return getRecommendationValidator.ValidateRoute(sectionSlug,
+      recommendationSlug,
+      this,
+      cancellationToken);
+  }
 }
