@@ -1,5 +1,6 @@
 using Contentful.Core.Models;
 using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
@@ -91,7 +92,8 @@ public class CheckAnswersRouterTests
   [Theory]
   [InlineData("")]
   [InlineData(null)]
-  public async Task Should_Throw_Exception_When_SectionSlug_NullOrEmpty(string? sectionSlug){
+  public async Task Should_Throw_Exception_When_SectionSlug_NullOrEmpty(string? sectionSlug)
+  {
     await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _router.ValidateRoute(sectionSlug!, _controller, default));
   }
 
@@ -184,7 +186,7 @@ public class CheckAnswersRouterTests
 
 
   [Fact]
-  public async Task Should_RedirectToSelfAssessment_When_No_Responses()
+  public async Task Should_Throw_DatabaseException_When_Responses_Null()
   {
     var noneAnsweredSection = new Section()
     {
@@ -207,18 +209,6 @@ public class CheckAnswersRouterTests
                                 _submissionStatusProcessor.Section.Returns(noneAnsweredSection);
                               });
 
-    var result = await _router.ValidateRoute(sectionSlug, _controller, default);
-
-    var redirectResult = result as RedirectToActionResult;
-
-    Assert.NotNull(redirectResult);
-
-    Assert.NotNull(redirectResult);
-    Assert.Equal(PagesController.ControllerName, redirectResult.ControllerName);
-    Assert.Equal(PagesController.GetPageByRouteAction, redirectResult.ActionName);
-
-    var route = redirectResult.RouteValues?["route"];
-    Assert.NotNull(route);
-    Assert.Equal(PageRedirecter.SelfAssessmentRoute, route);
+    await Assert.ThrowsAnyAsync<DatabaseException>(() => _router.ValidateRoute(sectionSlug, _controller, default));
   }
 }
