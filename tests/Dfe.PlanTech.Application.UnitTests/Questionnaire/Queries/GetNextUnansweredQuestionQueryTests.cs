@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Domain.Responses.Interface;
+using Dfe.PlanTech.Domain.Responses.Interfaces;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Questionnaire.Queries;
