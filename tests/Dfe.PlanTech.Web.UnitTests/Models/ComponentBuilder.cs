@@ -82,7 +82,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             }
         };
 
-        private Question[] BuildQuestion()
+        private static Question[] BuildQuestion()
         {
             return new Question[]
             {
@@ -95,7 +95,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             };
         }
 
-        private Answer[] BuildAnswer()
+        private static Answer[] BuildAnswer()
         {
             return new Answer[]
             {
