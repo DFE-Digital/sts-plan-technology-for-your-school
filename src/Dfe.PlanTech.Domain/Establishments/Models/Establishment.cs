@@ -32,9 +32,8 @@ public class Establishment
         get => _establishmentType;
         set
         {
-            _establishmentType = value == null ? null : value.Length < EstablishmentTypeLength ?
-                                    value :
-                                    value.AsSpan(0, EstablishmentTypeLength).ToString();
+            if (value == null) _establishmentType = null;
+            else _establishmentType = value.Length < EstablishmentTypeLength ? value : value.AsSpan(0, EstablishmentTypeLength).ToString();
         }
     }
 
