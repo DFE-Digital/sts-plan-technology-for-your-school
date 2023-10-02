@@ -197,6 +197,36 @@ public class GetQuestionBySlugRouterTests
     Assert.Equal(secondQuestion.Slug, questionSlug);
   }
 
+  [Theory]
+  [InlineData(SubmissionStatus.Completed)]
+  [InlineData(SubmissionStatus.NotStarted)]
+  public async Task Should_Redirect_To_InterstitialPage_When_QuestionSlug_Not_Matching_And_Status_CompeletedOrNotStarted(SubmissionStatus submissionStatus)
+  {
+    var secondQuestion = _section.Questions[1];
+    var nextQuestion = _section.Questions[0];
+
+    _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+                              .Do(callinfo =>
+                              {
+                                _submissionStatusProcessor.NextQuestion = secondQuestion;
+                                _submissionStatusProcessor.Status = submissionStatus;
+                                _submissionStatusProcessor.Section.Returns(_section);
+                              });
+
+    var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, nextQuestion.Slug, _controller, default);
+
+    var redirectResult = result as RedirectToActionResult;
+
+    Assert.NotNull(redirectResult);
+
+    Assert.Equal(PagesController.ControllerName, redirectResult.ControllerName);
+    Assert.Equal(PagesController.GetPageByRouteAction, redirectResult.ActionName);
+
+    var route = redirectResult.RouteValues?["route"];
+    Assert.NotNull(route);
+    Assert.Equal(_section.InterstitialPage.Slug, route);
+  }
+
   [Fact]
   public async Task Should_Redirect_To_CheckAnswers_When_Status_Is_CheckAnswers_And_Question_Is_Unattached()
   {

@@ -34,7 +34,8 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     return _router.Status switch
     {
       SubmissionStatus.CheckAnswers => await ProcessCheckAnswersStatus(sectionSlug, questionSlug, controller, cancellationToken),
-      SubmissionStatus.NextQuestion or SubmissionStatus.NotStarted or SubmissionStatus.Completed => ProcessQuestionStatus(sectionSlug, questionSlug, controller),
+      SubmissionStatus.NextQuestion => ProcessQuestionStatus(sectionSlug, questionSlug, controller, () => QuestionsController.RedirectToQuestionBySlug(sectionSlug, _router.NextQuestion!.Slug, controller)),
+      SubmissionStatus.NotStarted or SubmissionStatus.Completed => ProcessQuestionStatus(sectionSlug, questionSlug, controller, () => PageRedirecter.RedirectToInterstitialPage(controller, sectionSlug)),
       _ => throw new InvalidDataException($"Invalid journey state - state is {_router.Status}"),
     };
   }
@@ -48,11 +49,11 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
   /// <param name="controller"></param>
   /// <returns></returns>
   /// <exception cref="InvalidDataException"></exception>
-  private IActionResult ProcessQuestionStatus(string sectionSlug, string questionSlug, QuestionsController controller)
+  private IActionResult ProcessQuestionStatus(string sectionSlug, string questionSlug, QuestionsController controller, Func<IActionResult> onMismatchedQustionSlugs)
   {
     if (_router.NextQuestion == null) throw new InvalidDataException($"Next question is null, but shouldn't be for status '{_router.Status}'");
 
-    if (_router.NextQuestion!.Slug != questionSlug) return QuestionsController.RedirectToQuestionBySlug(sectionSlug, _router.NextQuestion!.Slug, controller);
+    if (_router.NextQuestion!.Slug != questionSlug) return onMismatchedQustionSlugs();
 
     var viewModel = controller.GenerateViewModel(sectionSlug, _router.NextQuestion!, _router.Section!, null);
     return controller.RenderView(viewModel);

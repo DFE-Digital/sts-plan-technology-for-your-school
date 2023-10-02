@@ -115,10 +115,8 @@ public class GetRecommendationRouterTests
     Assert.Equal(_section.InterstitialPage.Slug, section);
   }
 
-  [Theory]
-  [InlineData(SubmissionStatus.NotStarted)]
-  [InlineData(SubmissionStatus.NextQuestion)]
-  public async Task Should_Redirect_To_QuestionBySlug_When_Status_NotStarted_Or_NextQuestion(SubmissionStatus submissionStatus)
+  [Fact]
+  public async Task Should_Redirect_To_QuestionBySlug_When_Status_NextQuestion()
   {
     var nextQuestion = new Question()
     {
@@ -128,7 +126,7 @@ public class GetRecommendationRouterTests
     _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
                               .Do((callinfo) =>
                               {
-                                _submissionStatusProcessor.Status = submissionStatus;
+                                _submissionStatusProcessor.Status = SubmissionStatus.NextQuestion;
                                 _submissionStatusProcessor.NextQuestion = nextQuestion;
                               });
 
@@ -150,6 +148,36 @@ public class GetRecommendationRouterTests
 
     Assert.NotNull(questionSlug);
     Assert.Equal(nextQuestion.Slug, questionSlug);
+  }
+
+  [Fact]
+  public async Task Should_Redirect_To_InterstitialPage_When_NotStarted()
+  {
+    var nextQuestion = new Question()
+    {
+      Slug = "next-question"
+    };
+
+    _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+                              .Do((callinfo) =>
+                              {
+                                _submissionStatusProcessor.Status = SubmissionStatus.NotStarted;
+                                _submissionStatusProcessor.NextQuestion = nextQuestion;
+                              });
+
+    var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, "recommendation-slug", _controller, default);
+
+    var redirectResult = result as RedirectToActionResult;
+
+    Assert.NotNull(redirectResult);
+
+    Assert.Equal(PagesController.ControllerName, redirectResult.ControllerName);
+    Assert.Equal(PagesController.GetPageByRouteAction, redirectResult.ActionName);
+
+    var route = redirectResult.RouteValues?["route"];
+
+    Assert.NotNull(route);
+    Assert.Equal(_section.InterstitialPage.Slug, route);
   }
 
   [Fact]
