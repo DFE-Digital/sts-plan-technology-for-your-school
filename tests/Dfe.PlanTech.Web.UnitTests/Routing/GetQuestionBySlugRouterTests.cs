@@ -6,6 +6,7 @@ using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
+using Dfe.PlanTech.Web.Exceptions;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,8 @@ public class GetQuestionBySlugRouterTests
   private readonly GetQuestionBySlugRouter _router;
 
   private readonly ISection _section;
+
+  private readonly CheckAnswerDto _responses;
 
   public GetQuestionBySlugRouterTests()
   {
@@ -93,6 +96,20 @@ public class GetQuestionBySlugRouterTests
       InterstitialPage = new Page()
       {
         Slug = "section-slug"
+      }
+    };
+
+    _responses = new()
+    {
+      Responses = new List<QuestionWithAnswer>(){
+        new(){
+          QuestionRef = firstQuestion.Sys.Id,
+          AnswerRef = firstQuestion.Answers[0].Sys.Id
+        },
+        new(){
+          QuestionRef = secondQuestion.Sys.Id,
+          AnswerRef = secondQuestion.Answers[0].Sys.Id
+        }
       }
     };
 
@@ -205,19 +222,8 @@ public class GetQuestionBySlugRouterTests
     var secondQuestion = _section.Questions[1];
     var thirdQuestion = _section.Questions[2];
 
-    var responses = new CheckAnswerDto()
-    {
-      Responses = new List<QuestionWithAnswer>(){
-        new(){
-          QuestionRef = firstQuestion.Sys.Id,
-          AnswerRef = firstQuestion.Answers[0].Sys.Id
-        },
-        new(){
-          QuestionRef = secondQuestion.Sys.Id,
-          AnswerRef = secondQuestion.Answers[0].Sys.Id
-        }
-      }
-    };
+    _getResponseQuery.GetLatestResponses(Arg.Any<int>(), _section.Sys.Id, Arg.Any<CancellationToken>())
+                     .Returns(_responses);
 
     _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
                               .Do(callinfo =>
@@ -225,9 +231,6 @@ public class GetQuestionBySlugRouterTests
                                 _submissionStatusProcessor.Status = SubmissionStatus.CheckAnswers;
                                 _submissionStatusProcessor.Section.Returns(_section);
                               });
-
-    _getResponseQuery.GetLatestResponses(Arg.Any<int>(), _section.Sys.Id, Arg.Any<CancellationToken>())
-                     .Returns(responses);
 
     var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, thirdQuestion.Slug, _controller, default);
 
@@ -242,5 +245,35 @@ public class GetQuestionBySlugRouterTests
 
     Assert.NotNull(sectionSlug);
     Assert.Equal(_section.InterstitialPage.Slug, sectionSlug);
+  }
+
+  [Fact]
+  public async Task Should_Throw_Exception_When_Question_NoLonger_In_Section()
+  {
+    _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+                                .Do(callinfo =>
+                                {
+                                  _submissionStatusProcessor.Status = SubmissionStatus.CheckAnswers;
+                                  _submissionStatusProcessor.Section.Returns(_section);
+                                });
+
+    _getResponseQuery.GetLatestResponses(Arg.Any<int>(), _section.Sys.Id, Arg.Any<CancellationToken>())
+                      .Returns(_responses);
+
+
+    await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() => _router.ValidateRoute(_section.InterstitialPage.Slug, "fourth-question", _controller, default));
+  }
+
+  [Fact]
+  public async Task Should_Throw_Exception_When_No_Responses_Returned()
+  {
+    _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+                            .Do(callinfo =>
+                            {
+                              _submissionStatusProcessor.Status = SubmissionStatus.CheckAnswers;
+                              _submissionStatusProcessor.Section.Returns(_section);
+                            });
+
+    await Assert.ThrowsAnyAsync<InvalidDataException>(() => _router.ValidateRoute(_section.InterstitialPage.Slug, _section.Questions[0].Slug, _controller, default));
   }
 }
