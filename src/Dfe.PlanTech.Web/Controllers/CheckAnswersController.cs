@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Responses.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
@@ -44,9 +44,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
         var ErrorMessage = TempData["ErrorMessage"]?.ToString() ?? null;
         
         var checkAnswersViewModel = await GenerateCheckAnswersViewModel(sectionSlug, ErrorMessage, cancellationToken);
-
-        if (checkAnswersViewModel == null) return this.RedirectToSelfAssessment();
-
+        
         return View("CheckAnswers", checkAnswersViewModel);
     }
 
@@ -66,13 +64,11 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
             return this.RedirectToCheckAnswers(sectionSlug);
         }
-
         TempData["SectionName"] = sectionName;
         return this.RedirectToSelfAssessment();
     }
-
-
-    private async Task<CheckAnswersViewModel?> GenerateCheckAnswersViewModel(string sectionSlug, string? errorMessage,
+    
+    private async Task<CheckAnswersViewModel> GenerateCheckAnswersViewModel(string sectionSlug, string? errorMessage,
         CancellationToken cancellationToken = default)
     {
         var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
@@ -86,10 +82,13 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
         var responses =
             await _processCheckAnswerDtoCommand.GetCheckAnswerDtoForSection(establishmentId, section,
                 cancellationToken);
-
-        if (responses == null) return null;
-
-        CheckAnswersViewModel? checkAnswersViewModel = new()
+        
+        if (responses == null || !responses.Responses.Any())
+        {
+            throw new DatabaseException("Could not retrieve the answered question list");
+        }
+        
+        CheckAnswersViewModel checkAnswersViewModel = new()
         {
             Title = checkAnswerPageContent.Title ?? new Title() { Text = "Check Answers" },
             SectionName = section.Name,

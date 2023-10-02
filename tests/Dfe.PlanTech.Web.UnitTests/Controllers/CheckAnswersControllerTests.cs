@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -204,24 +205,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
 
         [Fact]
-        public async Task CheckAnswersPage_RedirectsToSelfAssessment_When_No_Responses()
+        public async Task CheckAnswersPage_Throws_DatabaseException_When_NoResponses()
         {
-            var result = await _checkAnswersController.CheckAnswersPage(_completedSection.InterstitialPage.Slug);
-
-            Assert.IsType<RedirectToActionResult>(result);
-
-            if (result is RedirectToActionResult res)
-            {
-                Assert.True(res.ActionName == "GetByRoute");
-                Assert.True(res.ControllerName == "Pages");
-                Assert.NotNull(res.RouteValues);
-                Assert.True(res.RouteValues.ContainsKey("route"));
-                Assert.True(res.RouteValues["route"] is string s && s == "/self-assessment");
-            }
-            else
-            {
-                Assert.Fail("Not redirect to action result");
-            }
+            await Assert.ThrowsAsync<DatabaseException>(() => _checkAnswersController.CheckAnswersPage(_completedSection.InterstitialPage.Slug));
         }
         
         
