@@ -14,9 +14,9 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Authorize]
 public class CheckAnswersController : BaseController<CheckAnswersController>
 {
-    public const string PAGE_SLUG = "check-answers";
+    public const string PageSlug = "check-answers";
 
-    public const string INLINE_RECOMMENDATION_UNAVAILABLE_ERROR_MESSAGE =
+    public const string InlineRecommendationUnavailableErrorMessage =
         "Unable to save. Please try again. If this problem continues you can";
 
     private readonly IUser _user;
@@ -60,7 +60,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
         {
             logger.LogError("There has been an error while trying to calculate maturity", e);
 
-            TempData["ErrorMessage"] = INLINE_RECOMMENDATION_UNAVAILABLE_ERROR_MESSAGE;
+            TempData["ErrorMessage"] = InlineRecommendationUnavailableErrorMessage;
 
             return this.RedirectToCheckAnswers(sectionSlug);
         }
@@ -74,8 +74,8 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
         var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
                       throw new KeyNotFoundException($"Could not find section for {sectionSlug}");
 
-        var checkAnswerPageContent = await _getPageQuery.GetPageBySlug(PAGE_SLUG, CancellationToken.None) ??
-                                     throw new KeyNotFoundException($"Could not find page for slug {PAGE_SLUG}");
+        var checkAnswerPageContent = await _getPageQuery.GetPageBySlug(PageSlug, CancellationToken.None) ??
+                                     throw new KeyNotFoundException($"Could not find page for slug {PageSlug}");
 
         var establishmentId = await _user.GetEstablishmentId();
 

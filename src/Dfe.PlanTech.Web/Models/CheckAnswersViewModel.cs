@@ -25,5 +25,5 @@ public class CheckAnswersViewModel
 
     public string? Slug { get; init; } = null;
 
-    public string? ErrorMessage { get; set; }
+    public string? ErrorMessage { get; set; } = null;
 }
