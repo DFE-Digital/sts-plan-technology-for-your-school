@@ -26,11 +26,75 @@ public class GetQuestionBySlugRouterTests
 
   private readonly GetQuestionBySlugRouter _router;
 
-  private readonly string _sectionSlug = "section-slug";
+  private readonly ISection _section;
 
   public GetQuestionBySlugRouterTests()
   {
     _controller = new QuestionsController(new NullLogger<QuestionsController>(), _getSectionQuery, _getResponseQuery, _user);
+    _user.GetEstablishmentId().Returns(1);
+
+    var secondQuestion = new Question()
+    {
+      Slug = "second-question",
+      Sys = new SystemDetails()
+      {
+        Id = "q2"
+      },
+      Answers = new Answer[]{
+        new(){
+          Sys = new SystemDetails(){
+            Id = "q2-a1"
+          }
+        }
+      }
+    };
+
+    var firstQuestion = new Question()
+    {
+      Slug = "next-question",
+      Sys = new SystemDetails()
+      {
+        Id = "q1"
+      },
+      Answers = new Answer[]{
+        new(){
+          Sys = new SystemDetails(){
+            Id = "q1-a1"
+          },
+          NextQuestion = secondQuestion
+        },
+      }
+    };
+
+    var thirdQuestion = new Question()
+    {
+      Slug = "unattached-question",
+      Sys = new SystemDetails()
+      {
+        Id = "q3"
+      },
+      Answers = new Answer[]{
+        new(){
+          Sys = new SystemDetails(){
+            Id = "q3-a1"
+          }
+        }
+      }
+    };
+
+    _section = new Section()
+    {
+      Questions = new[] { firstQuestion, secondQuestion, thirdQuestion },
+      Name = "section name",
+      Sys = new SystemDetails()
+      {
+        Id = "section-id"
+      },
+      InterstitialPage = new Page()
+      {
+        Slug = "section-slug"
+      }
+    };
 
     _router = new GetQuestionBySlugRouter(_getResponseQuery, _user, _submissionStatusProcessor);
   }
@@ -77,7 +141,7 @@ public class GetQuestionBySlugRouterTests
       }
     };
 
-    _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_sectionSlug, Arg.Any<CancellationToken>()))
+    _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
                               .Do(callinfo =>
                               {
                                 _submissionStatusProcessor.NextQuestion = nextQuestion;
@@ -85,7 +149,7 @@ public class GetQuestionBySlugRouterTests
                                 _submissionStatusProcessor.Section.Returns(section);
                               });
 
-    var result = await _router.ValidateRoute(_sectionSlug, nextQuestion.Slug, _controller, default);
+    var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, nextQuestion.Slug, _controller, default);
 
     var pageResult = result as ViewResult;
 
@@ -96,7 +160,7 @@ public class GetQuestionBySlugRouterTests
     Assert.NotNull(model);
 
     Assert.Equal(section.Name, model.SectionName);
-    Assert.Equal(_sectionSlug, model.SectionSlug);
+    Assert.Equal(_section.InterstitialPage.Slug, model.SectionSlug);
     Assert.Equal(section.Sys.Id, model.SectionId);
     Assert.Null(model.AnswerRef);
     Assert.Equal(nextQuestion, model.Question);
@@ -105,35 +169,18 @@ public class GetQuestionBySlugRouterTests
   [Fact]
   public async Task Should_Redirect_To_Correct_QuestionSlug_If_NextQuestion_DoesntMatch_Slug()
   {
-    var nextQuestion = new Question()
-    {
-      Slug = "next-question"
-    };
+    var secondQuestion = _section.Questions[1];
+    var nextQuestion = _section.Questions[0];
 
-    var secondQuestion = new Question()
-    {
-      Slug = "second-question"
-    };
-
-    var section = new Section()
-    {
-      Questions = new[] { nextQuestion, secondQuestion },
-      Name = "section name",
-      Sys = new SystemDetails()
-      {
-        Id = "section-id"
-      }
-    };
-
-    _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_sectionSlug, Arg.Any<CancellationToken>()))
+    _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
                               .Do(callinfo =>
                               {
                                 _submissionStatusProcessor.NextQuestion = secondQuestion;
                                 _submissionStatusProcessor.Status = SubmissionStatus.NextQuestion;
-                                _submissionStatusProcessor.Section.Returns(section);
+                                _submissionStatusProcessor.Section.Returns(_section);
                               });
 
-    var result = await _router.ValidateRoute(_sectionSlug, nextQuestion.Slug, _controller, default);
+    var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, nextQuestion.Slug, _controller, default);
 
     var redirectResult = result as RedirectToActionResult;
 
@@ -147,8 +194,53 @@ public class GetQuestionBySlugRouterTests
 
     Assert.NotNull(sectionSlug);
     Assert.NotNull(questionSlug);
-    Assert.Equal(_sectionSlug, sectionSlug);
+    Assert.Equal(_section.InterstitialPage.Slug, sectionSlug);
     Assert.Equal(secondQuestion.Slug, questionSlug);
   }
 
+  [Fact]
+  public async Task Should_Redirect_To_CheckAnswers_When_Status_Is_CheckAnswers_And_Question_Is_Unattached()
+  {
+    var firstQuestion = _section.Questions[0];
+    var secondQuestion = _section.Questions[1];
+    var thirdQuestion = _section.Questions[2];
+
+    var responses = new CheckAnswerDto()
+    {
+      Responses = new List<QuestionWithAnswer>(){
+        new(){
+          QuestionRef = firstQuestion.Sys.Id,
+          AnswerRef = firstQuestion.Answers[0].Sys.Id
+        },
+        new(){
+          QuestionRef = secondQuestion.Sys.Id,
+          AnswerRef = secondQuestion.Answers[0].Sys.Id
+        }
+      }
+    };
+
+    _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+                              .Do(callinfo =>
+                              {
+                                _submissionStatusProcessor.Status = SubmissionStatus.CheckAnswers;
+                                _submissionStatusProcessor.Section.Returns(_section);
+                              });
+
+    _getResponseQuery.GetLatestResponses(Arg.Any<int>(), _section.Sys.Id, Arg.Any<CancellationToken>())
+                     .Returns(responses);
+
+    var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, thirdQuestion.Slug, _controller, default);
+
+    var redirectResult = result as RedirectToActionResult;
+
+    Assert.NotNull(redirectResult);
+
+    Assert.Equal(CheckAnswersController.ControllerName, redirectResult.ControllerName);
+    Assert.Equal(CheckAnswersController.CheckAnswersAction, redirectResult.ActionName);
+
+    var sectionSlug = redirectResult.RouteValues?["sectionSlug"];
+
+    Assert.NotNull(sectionSlug);
+    Assert.Equal(_section.InterstitialPage.Slug, sectionSlug);
+  }
 }
