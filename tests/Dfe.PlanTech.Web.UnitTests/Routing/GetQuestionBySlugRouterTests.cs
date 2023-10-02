@@ -140,12 +140,12 @@ public class GetQuestionBySlugRouterTests
     _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_sectionSlug, Arg.Any<CancellationToken>()))
                               .Do(callinfo =>
                               {
-                                _submissionStatusProcessor.NextQuestion = nextQuestion;
+                                _submissionStatusProcessor.NextQuestion = secondQuestion;
                                 _submissionStatusProcessor.Status = SubmissionStatus.NextQuestion;
                                 _submissionStatusProcessor.Section.Returns(section);
                               });
 
-    var result = await _router.ValidateRoute(_sectionSlug, secondQuestion.Slug, _controller, default);
+    var result = await _router.ValidateRoute(_sectionSlug, nextQuestion.Slug, _controller, default);
 
     var redirectResult = result as RedirectToActionResult;
 
