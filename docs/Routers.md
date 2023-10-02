@@ -27,25 +27,6 @@ flowchart TD;
 
 ## Routing Logic
 
-| Target URL          | User Journey Stage | When                                      | Outcome                                   |
-| ------------------- | ------------------ | ----------------------------------------- | ----------------------------------------- |
-| CheckAnswers        | Check Answers      |                                           | Show check answers page                   |
-| CheckAnswers        | Completed          |                                           | Redirect to interstitial page             |
-| CheckAnswers        | Other              |                                           | Redirect to next question in user journey |
-| Any question URL    | Check Answers      |                                           | Redirect to check answers page            |
-| Any question URL    | In progress        | Next question on user journey             | Show question page                        |
-| Any question URL    | In progress        | Other question on user journey            | Redirect to next question                 |
-| Any question URL    | Completed          | First question for section                | Show question page                        |
-| Any question URL    | Completed          | Any other question                        | Redirect to first question                |
-| Any question URL    | Not started        | First question for section                | Show question page                        |
-| Any question URL    | Not started        | Any other question                        | Redirect to first question                |
-| Recommendation Page | Completed          | Is recommendation for the maturity        | Show recommendation page                  |
-| Recommendation Page | Completed          | Any other recommendation page for section | Redirect to correct recommendation page   |
-| Recommendation Page | Check answers      |                                           | Redirect to check answers page            |
-| Recommendation Page | Not started        |                                           | Redirect to first question for section    |
-| Recommendation Page | In Progress        |                                           | Redirect to next question in user journey |
-
-
 ```mermaid
 graph TD
     subgraph CheckAnswers
@@ -53,7 +34,7 @@ graph TD
         B -- Yes --> C[Show check answers page]
         B -- No --> D{Is the section completed?}
         D -- Yes --> E[Show interstitial page for section]
-        E -- No --> F{Is section in progress?}
+        D -- No --> F{Is section in progress?}
         F -- Yes --> G[Show next question for section]
         F -- No --> H[Show interstitial page for section]
     end
@@ -86,10 +67,10 @@ graph TD
         E -- Yes --> I[Show check answers page]
         E -- No --> J{Is it the next question in their journey?}
         J -- Yes --> D
-        J -- No --> H
+        J -- No --> H[Redirect to first question in section]
         B -- No; section is complete or not started --> G{Is it the first question for the section?}
         G -- Yes --> D
-        G -- No --> H[Redirect to first question in section]
+        G -- No --> K[Redirect to interstitial page]
         H --> D
     end
 ```
