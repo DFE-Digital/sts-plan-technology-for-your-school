@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
@@ -6,7 +7,6 @@ using Dfe.PlanTech.Domain.Responses.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
-using Dfe.PlanTech.Web.Exceptions;
 using Dfe.PlanTech.Web.Routing;
 using NSubstitute;
 
