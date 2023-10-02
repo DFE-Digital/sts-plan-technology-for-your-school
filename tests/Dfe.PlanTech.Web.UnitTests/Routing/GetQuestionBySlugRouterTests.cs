@@ -1,4 +1,3 @@
-using Castle.Core.Logging;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -18,20 +17,6 @@ namespace Dfe.PlanTech.Web.UnitTests;
 
 public class GetQuestionBySlugRouterTests
 {
-  /*
-    private readonly IGetLatestResponsesQuery _getResponseQuery;
-  private readonly IUser _user;
-  private readonly ISubmissionStatusProcessor _router;
-
-  public GetQuestionBySlugRouter(IGetLatestResponsesQuery getResponseQuery, IUser user, ISubmissionStatusProcessor router)
-  {
-    _getResponseQuery = getResponseQuery;
-    _user = user;
-    _router = router;
-  }
-
-*/
-
   private readonly IGetLatestResponsesQuery _getResponseQuery = Substitute.For<IGetLatestResponsesQuery>();
   private readonly ISubmissionStatusProcessor _submissionStatusProcessor = Substitute.For<ISubmissionStatusProcessor>();
   private readonly IUser _user = Substitute.For<IUser>();
