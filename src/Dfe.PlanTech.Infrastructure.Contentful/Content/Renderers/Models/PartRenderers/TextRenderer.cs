@@ -38,7 +38,7 @@ public class TextRenderer : BaseRichTextContentPartRender
         }
     }
 
-    private void AppendOpenTags(StringBuilder stringBuilder, IEnumerable<MarkOption> markOptions)
+    private static void AppendOpenTags(StringBuilder stringBuilder, IEnumerable<MarkOption> markOptions)
     {
         foreach (var mark in markOptions)
         {
