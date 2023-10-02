@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;

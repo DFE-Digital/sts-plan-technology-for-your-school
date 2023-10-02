@@ -11,78 +11,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
     public class CheckAnswersControllerTests
     {
         private readonly CheckAnswersController _checkAnswersController;
-
-        /*
-                private readonly IProcessCheckAnswerDtoCommand _processCheckAnswerDtoCommand;
-                private readonly IGetSectionQuery _getSectionQuery;
-                private readonly IGetPageQuery _getPageQuerySubstitute;
-                private readonly IUser _user;
-
-                private readonly Page _checkAnswersPage = new()
-                {
-                    Slug = CheckAnswersController.CheckAnswersPageSlug,
-                    Title = new Title() { Text = "Title Text" },
-                    Content = new ContentComponent[] { new Header() { Tag = Domain.Content.Enums.HeaderTag.H1, Text = "Header Text" } }
-                };
-
-                private static readonly Page InterstitialPage = new()
-                {
-                    Slug = "section-slug",
-                };
-
-                private readonly Section _section = new()
-                {
-                    Name = "Section Name",
-                    InterstitialPage = InterstitialPage,
-                    Sys = new()
-                    {
-                        Id = "SectionId"
-                    },
-                    Questions = new Question[]
-                    {
-                        new()
-                        {
-                            Sys = new SystemDetails() { Id = "QuestionRef-1"},
-                            Answers = new Answer[]
-                            {
-                                new()
-                                {
-                                    Sys = new SystemDetails() { Id = "AnswerRef-1" },
-                                    NextQuestion = null
-                                }
-                            }
-                        }
-                    },
-                };
-                private readonly Section _completedSection = new()
-                {
-                    InterstitialPage = new Page()
-                    {
-                        Slug = COMPLETED_SECTION_SLUG
-                    },
-                    Sys = new()
-                    {
-                        Id = "CompletedSectionId"
-                    }
-                };
-
-                private const int ESTABLISHMENT_ID = 3;
-                private const int USER_ID = 7;
-                private const int SUBMISSION_ID = 1;
-                private const string COMPLETED_SECTION_SLUG = "COMPLETED";
-
-                private readonly List<QuestionWithAnswer> _questionWithAnswerList = new()
-                    {
-                        new QuestionWithAnswer()
-                        {
-                            QuestionRef = "QuestionRef-1",
-                            QuestionText = "Question Text",
-                            AnswerRef = "AnswerRef-1",
-                            AnswerText = "Answer Text"
-                        }
-                    };
-                    */
-
         private readonly ICalculateMaturityCommand _calculateMaturityCommand;
         private readonly ICheckAnswersRouter _checkAnswersRouter;
 
@@ -96,47 +24,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 ControllerContext = ControllerHelpers.SubstituteControllerContext()
             };
-            
-            /*
-                        _getPageQuerySubstitute = Substitute.For<IGetPageQuery>();
-                        _getPageQuerySubstitute.GetPageBySlug("check-answers", Arg.Any<CancellationToken>()).Returns(_checkAnswersPage);
-
-                        _user = Substitute.For<IUser>();
-                        _user.GetEstablishmentId().Returns(ESTABLISHMENT_ID);
-                        _user.GetCurrentUserId().Returns(Task.FromResult(USER_ID as int?));
-
-                        _getSectionQuery = Substitute.For<IGetSectionQuery>();
-                        _getSectionQuery.GetSectionBySlug(Arg.Any<string>()).Returns((callInfo) =>
-                        {
-                            var sectionArg = callInfo.ArgAt<string>(0);
-
-                            if (sectionArg == _section.InterstitialPage.Slug)
-                            {
-                                return _section;
-                            }
-                            else if (sectionArg == _completedSection.InterstitialPage.Slug)
-                            {
-                                return _completedSection;
-                            }
-
-                            return null;
-                        });
-
-                        _processCheckAnswerDtoCommand = Substitute.For<IProcessCheckAnswerDtoCommand>();
-                        _processCheckAnswerDtoCommand.GetCheckAnswerDtoForSection(Arg.Any<int>(), Arg.Any<Section>(), Arg.Any<CancellationToken>())
-                                                    .Returns((callInfo) =>
-                                                    {
-                                                        Section section = callInfo.ArgAt<Section>(1);
-
-                                                        if (section != _section) return null;
-
-                                                        return new CheckAnswerDto()
-                                                        {
-                                                            Responses = _questionWithAnswerList,
-                                                            SubmissionId = SUBMISSION_ID
-                                                        };
-                                                    });
-            */
         }
 
         [Theory]
@@ -146,9 +33,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _checkAnswersController.CheckAnswersPage(section!, _checkAnswersRouter, default));
         }
-
-        //Confirm check answers tests:
-        //Calculates maturity whenv alid args
 
         [Theory]
         [InlineData(0)]
