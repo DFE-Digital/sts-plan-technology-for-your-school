@@ -45,7 +45,7 @@ public class FooterLinkTagHelper : TagHelper
         return stringBuilder.ToString();
     }
 
-    private void AppendCloseTag(StringBuilder stringBuilder)
+    private static void AppendCloseTag(StringBuilder stringBuilder)
     {
         stringBuilder.Append("</a>");
     }
