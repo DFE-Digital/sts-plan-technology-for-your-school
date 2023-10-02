@@ -22,7 +22,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplicationInsightsTelemetry();
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddSingleton<ITelemetryInitializer, CustomTelemetryInitializer>();
+builder.Services.AddSingleton<ITelemetryInitializer, CustomRequestDimensionsTelemetryInitializer>();
 
 builder.Services.AddGoogleTagManager();
 // Add services to the container.

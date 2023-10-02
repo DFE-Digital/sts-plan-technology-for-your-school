@@ -17,7 +17,7 @@ public class CustomTelemetryInitializerTests
     public void CustomInitializerAddsRequestIdToRequestTelemetry()
     {
         var telemetry = new RequestTelemetry();
-        var customInitializer = new CustomTelemetryInitializer(_httpContextAccessor);
+        var customInitializer = new CustomRequestDimensionsTelemetryInitializer(_httpContextAccessor);
 
         var httpContext = new DefaultHttpContext();
         httpContext.TraceIdentifier = "TestTraceId";
@@ -33,7 +33,7 @@ public class CustomTelemetryInitializerTests
     public void CustomInitializerDoesNotAddRequestIdToNonRequestTelemetry()
     {
         var telemetry = new DependencyTelemetry();
-        var customInitializer = new CustomTelemetryInitializer(_httpContextAccessor);
+        var customInitializer = new CustomRequestDimensionsTelemetryInitializer(_httpContextAccessor);
 
         customInitializer.Initialize(telemetry);
 
