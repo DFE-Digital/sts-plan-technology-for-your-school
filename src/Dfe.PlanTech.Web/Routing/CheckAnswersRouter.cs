@@ -54,9 +54,8 @@ public class CheckAnswersRouter : ICheckAnswersRouter
 
     if (checkAnswerDto == null || checkAnswerDto.Responses == null) return controller.RedirectToSelfAssessment();
 
-    var checkAnswerPageContent = await _getPageQuery.GetPageBySlug(CheckAnswersController.CheckAnswersPageSlug, CancellationToken.None) ??
-                                 throw new ContentfulDataUnavailableException($"Could not find page for slug {CheckAnswersController.CheckAnswersPageSlug}");
-
+    var checkAnswerPageContent = await _getPageQuery.GetPageBySlug(CheckAnswersController.CheckAnswersPageSlug, CancellationToken.None);
+    
     var model = new CheckAnswersViewModel()
     {
       Title = checkAnswerPageContent.Title ?? new Title() { Text = PageTitle },

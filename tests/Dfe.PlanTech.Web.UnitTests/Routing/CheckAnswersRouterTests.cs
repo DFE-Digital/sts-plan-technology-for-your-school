@@ -9,10 +9,10 @@ using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
+using Dfe.PlanTech.Web.Exceptions;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using Xunit;
@@ -38,7 +38,7 @@ public class CheckAnswersRouterTests
     {
       Id = "section-id"
     },
-    InterstitialPage = new Domain.Content.Models.Page()
+    InterstitialPage = new Page()
     {
       Slug = "section-slug"
     },
@@ -80,17 +80,17 @@ public class CheckAnswersRouterTests
                         });
 
     _getPageQuery.GetPageBySlug(CheckAnswersController.CheckAnswersPageSlug, Arg.Any<CancellationToken>())
-    .Returns(new Domain.Content.Models.Page()
-    {
-      Slug = CheckAnswersController.CheckAnswersPageSlug,
-      Content = _checkAnswersPageContent
-    });
+                .Returns(new Page()
+                {
+                  Slug = CheckAnswersController.CheckAnswersPageSlug,
+                  Content = _checkAnswersPageContent
+                });
 
     _router = new CheckAnswersRouter(_getPageQuery, _checkAnswerCommand, _user, _submissionStatusProcessor);
   }
 
   [Fact]
-  public async Task Should_Redirect_To_SelfAssessmentPage_When_Status_Is_Completed()
+  public async Task Should_Redirect_To_InterstitialPage_When_Status_Is_Completed()
   {
     var sectionSlug = "section-slug";
 
@@ -153,11 +153,11 @@ public class CheckAnswersRouterTests
     var sectionSlug = _section.InterstitialPage.Slug;
 
     _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, Arg.Any<CancellationToken>()))
-    .Do(processor =>
-    {
-      _submissionStatusProcessor.Status = SubmissionStatus.CheckAnswers;
-      _submissionStatusProcessor.Section.Returns(_section);
-    });
+                              .Do(processor =>
+                              {
+                                _submissionStatusProcessor.Status = SubmissionStatus.CheckAnswers;
+                                _submissionStatusProcessor.Section.Returns(_section);
+                              });
 
     var result = await _router.ValidateRoute(sectionSlug, _controller, default);
 
@@ -174,5 +174,45 @@ public class CheckAnswersRouterTests
     Assert.Equal(_checkAnswersDto, model.CheckAnswerDto);
     Assert.Equal(_checkAnswersDto.SubmissionId, model.SubmissionId);
     Assert.Equal(_checkAnswersPageContent, model.Content);
+  }
+
+
+  [Fact]
+  public async Task Should_RedirectToSelfAssessment_When_No_Responses()
+  {
+    var noneAnsweredSection = new Section()
+    {
+      Sys = new SystemDetails()
+      {
+        Id = "non-answered-section"
+      },
+      InterstitialPage = new Page()
+      {
+        Slug = "non-answered-section-slug"
+      }
+    };
+
+    var sectionSlug = noneAnsweredSection.InterstitialPage.Slug;
+
+    _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, Arg.Any<CancellationToken>()))
+                              .Do(processor =>
+                              {
+                                _submissionStatusProcessor.Status = SubmissionStatus.CheckAnswers;
+                                _submissionStatusProcessor.Section.Returns(noneAnsweredSection);
+                              });
+
+    var result = await _router.ValidateRoute(sectionSlug, _controller, default);
+
+    var redirectResult = result as RedirectToActionResult;
+
+    Assert.NotNull(redirectResult);
+
+    Assert.NotNull(redirectResult);
+    Assert.Equal(PagesController.ControllerName, redirectResult.ControllerName);
+    Assert.Equal(PagesController.GetPageByRouteAction, redirectResult.ActionName);
+
+    var route = redirectResult.RouteValues?["route"];
+    Assert.NotNull(route);
+    Assert.Equal(PageRedirecter.SelfAssessmentRoute, route);
   }
 }
