@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -222,6 +223,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             Assert.True(selfAssessmentResult.ActionName == "GetByRoute");
             Assert.True(selfAssessmentResult.ControllerName == "Pages");
+            Debug.Assert(selfAssessmentResult.RouteValues != null, "selfAssessmentResult.RouteValues != null");
             Assert.True(selfAssessmentResult.RouteValues["route"] is string and "/self-assessment");
         }
         
@@ -240,6 +242,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.NotNull(checkAnswerResult);
             Assert.Equal("CheckAnswers", checkAnswerResult.ControllerName);
             Assert.Equal("CheckAnswersPage", checkAnswerResult.ActionName);
+            Debug.Assert(checkAnswerResult.RouteValues != null, "checkAnswerResult.RouteValues != null");
             Assert.Equal(_section.InterstitialPage.Slug, checkAnswerResult.RouteValues["sectionSlug"]);
             Assert.Equal("Unable to determine your recommendation. Please try again.", _checkAnswersController.TempData["ErrorMessage"]);
         }
