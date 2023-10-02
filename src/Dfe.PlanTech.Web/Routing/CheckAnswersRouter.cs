@@ -5,6 +5,7 @@ using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
+using Dfe.PlanTech.Web.Exceptions;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,7 +14,7 @@ namespace Dfe.PlanTech.Web.Routing;
 public class CheckAnswersRouter : ICheckAnswersRouter
 {
   private const string PageTitle = "Check Answers";
-  
+
   private readonly IGetPageQuery _getPageQuery;
   private readonly IProcessCheckAnswerDtoCommand _processCheckAnswerDtoCommand;
   private readonly IUser _user;
@@ -54,7 +55,7 @@ public class CheckAnswersRouter : ICheckAnswersRouter
     if (checkAnswerDto == null || checkAnswerDto.Responses == null) return controller.RedirectToSelfAssessment();
 
     var checkAnswerPageContent = await _getPageQuery.GetPageBySlug(CheckAnswersController.CheckAnswersPageSlug, CancellationToken.None) ??
-                                 throw new KeyNotFoundException($"Could not find page for slug {CheckAnswersController.CheckAnswersPageSlug}");
+                                 throw new ContentfulDataUnavailableException($"Could not find page for slug {CheckAnswersController.CheckAnswersPageSlug}");
 
     var model = new CheckAnswersViewModel()
     {
