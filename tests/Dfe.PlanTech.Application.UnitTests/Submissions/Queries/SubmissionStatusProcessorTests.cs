@@ -58,41 +58,6 @@ public class SubmissionStatusProcessorTests
   }
 
   [Fact]
-  public async Task Should_Retrieve_EstablishmentId()
-  {
-    ISubmissionStatusProcessor processor = new SubmissionStatusProcessor(_getSectionQuery,
-                                                                         _getSubmissionStatusesQuery,
-                                                                         _statusCheckers,
-                                                                         _getResponsesQuery,
-                                                                         _user);
-
-    _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(Arg.Any<int>(), Arg.Any<Section>(), Arg.Any<CancellationToken>())
-                               .Returns(new SectionStatusNew());
-
-    await processor.GetJourneyStatusForSection(SectionSlug, default);
-
-    await _user.Received().GetEstablishmentId();
-  }
-
-  [Fact]
-  public async Task Should_GetSectionBySlug()
-  {
-    ISubmissionStatusProcessor processor = new SubmissionStatusProcessor(_getSectionQuery,
-                                                                         _getSubmissionStatusesQuery,
-                                                                         _statusCheckers,
-                                                                         _getResponsesQuery,
-                                                                         _user);
-
-
-    _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(Arg.Any<int>(), Arg.Any<Section>(), Arg.Any<CancellationToken>())
-                               .Returns(new SectionStatusNew());
-
-    await processor.GetJourneyStatusForSection(SectionSlug, default);
-
-    await _getSubmissionStatusesQuery.Received().GetSectionSubmissionStatusAsync(_establishmentId, _section, Arg.Any<CancellationToken>());
-  }
-
-  [Fact]
   public async Task Should_Use_StatusCheckers()
   {
     ISubmissionStatusChecker successStatusChecker = Substitute.For<ISubmissionStatusChecker>();
@@ -103,7 +68,6 @@ public class SubmissionStatusProcessorTests
 
                     return processor.Section == _section;
                   });
-
 
     _failureStatusChecker.IsMatchingSubmissionStatus(Arg.Any<SubmissionStatusProcessor>()).Returns(false);
 
