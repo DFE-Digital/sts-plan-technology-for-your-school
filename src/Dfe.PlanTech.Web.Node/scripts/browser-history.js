@@ -11,7 +11,7 @@ export class BrowserHistory {
     get lastUrl() {
         if (this.history.length > 0) {
             if (this.getLastRef() == window.location.href){
-                return this.history[0];
+                return this.history[this.history.length - 2];
             }
             return this.history[this.history.length - 1];
         }
