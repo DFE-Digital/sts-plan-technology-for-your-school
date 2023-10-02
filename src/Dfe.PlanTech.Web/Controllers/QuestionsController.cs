@@ -15,11 +15,12 @@ namespace Dfe.PlanTech.Web.Controllers;
 public class QuestionsController : BaseController<QuestionsController>
 {
     public const string Controller = "Questions";
+    public const string GetQuestionBySlugActionName = nameof(GetQuestionBySlug);
 
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetLatestResponsesQuery _getResponseQuery;
     private readonly IUser _user;
-    
+
     public QuestionsController(ILogger<QuestionsController> logger,
                                IGetSectionQuery getSectionQuery,
                                IGetLatestResponsesQuery getResponseQuery,
@@ -122,5 +123,5 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
     public static IActionResult RedirectToQuestionBySlug(string sectionSlug, string questionSlug, Controller controller)
-    => controller.RedirectToAction(nameof(GetQuestionBySlug), Controller, new { sectionSlug, questionSlug }); 
+    => controller.RedirectToAction(GetQuestionBySlugActionName, Controller, new { sectionSlug, questionSlug });
 }

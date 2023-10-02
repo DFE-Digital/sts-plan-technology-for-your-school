@@ -29,8 +29,8 @@ public class GetRecommendationRouter : IGetRecommendationRouter
                                                  RecommendationsController controller,
                                                  CancellationToken cancellationToken)
   {
-    if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentException($"'{nameof(sectionSlug)}' cannot be null or empty.");
-    if (string.IsNullOrEmpty(recommendationSlug)) throw new ArgumentException($"'{nameof(recommendationSlug)}' cannot be null or empty.");
+    if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
+    if (string.IsNullOrEmpty(recommendationSlug)) throw new ArgumentNullException(nameof(recommendationSlug));
 
     await _router.GetJourneyStatusForSection(sectionSlug, cancellationToken);
     return _router.Status switch
@@ -51,14 +51,14 @@ public class GetRecommendationRouter : IGetRecommendationRouter
   /// <param name="controller"></param>
   /// <param name="cancellationToken"></param>
   /// <returns></returns>
-  /// <exception cref="InvalidDataException"></exception>
+  /// <exception cref="DatabaseException"></exception>
   /// <exception cref="ContentfulDataUnavailableException"></exception>
   private async Task<IActionResult> HandleCompleteStatus(string sectionSlug,
                                                          string recommendationSlug,
                                                          RecommendationsController controller,
                                                          CancellationToken cancellationToken)
   {
-    if (_router.SectionStatus?.Maturity == null) throw new InvalidDataException("Maturity is null, but shouldn't be for a completed section");
+    if (_router.SectionStatus?.Maturity == null) throw new DatabaseException("Maturity is null, but shouldn't be for a completed section");
 
     var recommendationForSlug = _router.Section!.Recommendations.FirstOrDefault(recommendation => recommendation.Page.Slug == recommendationSlug) ??
                                   throw new ContentfulDataUnavailableException($"Couldn't find recommendation with slug {recommendationSlug} under '{sectionSlug}'");

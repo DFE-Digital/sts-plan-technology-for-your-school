@@ -186,7 +186,7 @@ public class GetQuestionBySlugRouterTests
     Assert.NotNull(redirectResult);
 
     Assert.Equal(QuestionsController.Controller, redirectResult.ControllerName);
-    Assert.Equal("GetQuestionBySlug", redirectResult.ActionName);
+    Assert.Equal(QuestionsController.GetQuestionBySlugActionName, redirectResult.ActionName);
 
     var sectionSlug = redirectResult.RouteValues?["sectionSlug"];
     var questionSlug = redirectResult.RouteValues?["questionSlug"];
