@@ -15,7 +15,8 @@ public static class SectionCompleteStatusChecker
     ProcessSubmissionFunc = (userJourneyRouter, cancellationToken) =>
     {
       userJourneyRouter.Status = SubmissionStatus.Completed;
-      userJourneyRouter.NextQuestion = userJourneyRouter.Section!.Questions.First();
+      userJourneyRouter.NextQuestion = userJourneyRouter.Section!.Questions[0];
+      
       return Task.CompletedTask;
     }
   };

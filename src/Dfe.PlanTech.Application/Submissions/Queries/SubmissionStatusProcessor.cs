@@ -62,13 +62,12 @@ public class SubmissionStatusProcessor : ISubmissionStatusProcessor
     SectionStatus = await _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(establishmentId,
                                                                                       Section,
                                                                                       cancellationToken);
-    foreach (var statusChecker in _statusCheckers)
+
+
+    foreach (var statusChecker in _statusCheckers.Where(statusChecker => statusChecker.IsMatchingSubmissionStatus(this)))
     {
-      if (statusChecker.IsMatchingSubmissionStatus(this))
-      {
-        await statusChecker.ProcessSubmission(this, cancellationToken);
-        return;
-      }
+      await statusChecker.ProcessSubmission(this, cancellationToken);
+      return;
     }
   }
 }
