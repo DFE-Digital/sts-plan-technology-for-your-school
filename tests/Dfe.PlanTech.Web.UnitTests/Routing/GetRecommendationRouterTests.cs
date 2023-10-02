@@ -235,6 +235,7 @@ public class GetRecommendationRouterTests
     Assert.Equal(_section.Recommendations[1].Page.Slug, recommendationSlug);
   }
 
+  [Fact]
   public async Task Should_Show_RecommendationPage_When_Status_Is_Recommendation_And_All_Valid()
   {
     var recommendation = _section.Recommendations[0];
