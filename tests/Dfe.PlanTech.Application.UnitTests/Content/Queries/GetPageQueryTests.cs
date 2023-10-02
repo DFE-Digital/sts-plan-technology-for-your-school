@@ -4,7 +4,7 @@ using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
-using Dfe.PlanTech.Web.Exceptions;
+using Dfe.PlanTech.Application.Exceptions;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 

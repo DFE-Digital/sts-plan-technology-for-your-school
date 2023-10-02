@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 
-namespace Dfe.PlanTech.Domain.Responses.Interface;
+namespace Dfe.PlanTech.Domain.Responses.Interfaces;
 
 public interface IGetLatestResponsesQuery
 {

@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Responses.Interfaces;
@@ -34,7 +35,10 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
         var responses = await processCheckAnswerDtoCommand.GetCheckAnswerDtoForSection(establishmentId, section, cancellationToken);
 
-        if (responses == null) return this.RedirectToSelfAssessment();
+        if (responses == null || !responses.Responses.Any())
+        {
+            throw new DatabaseException("Could not retrieve the answered question list");
+        }
 
         CheckAnswersViewModel checkAnswersViewModel = new()
         {

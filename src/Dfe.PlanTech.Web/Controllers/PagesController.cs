@@ -27,13 +27,13 @@ public class PagesController : BaseController<PagesController>
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    [Route(UrlConstants.Error)]
+    [HttpGet(UrlConstants.Error, Name = UrlConstants.Error)]
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 
-    [Route(UrlConstants.ServiceUnavailable)]
+    [HttpGet(UrlConstants.ServiceUnavailable, Name = UrlConstants.ServiceUnavailable)]
     public IActionResult ServiceUnavailable()
     {
         return View(new ServiceUnavailableViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });

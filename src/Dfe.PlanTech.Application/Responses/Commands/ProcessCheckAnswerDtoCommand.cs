@@ -1,5 +1,5 @@
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Domain.Responses.Interface;
 using Dfe.PlanTech.Domain.Responses.Interfaces;
 
 namespace Dfe.PlanTech.Application.Responses.Commands;
@@ -41,7 +41,10 @@ public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand
         {
             if (questionWithAnswerMap.TryGetValue(node.Sys.Id, out QuestionWithAnswer? questionWithAnswer))
             {
+                if (string.IsNullOrWhiteSpace(node.Slug)) throw new ContentfulDataUnavailableException($"Question Slug for Contentful ID {node.Sys.Id} is null, empty or whitespace.");
+
                 var answer = Array.Find(node.Answers, answer => answer.Sys.Id == questionWithAnswer.AnswerRef);
+
                 questionWithAnswer = questionWithAnswer with
                 {
                     AnswerText = answer?.Text ?? questionWithAnswer.AnswerText,
@@ -50,6 +53,7 @@ public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand
                 };
 
                 attachedQuestions.Add(questionWithAnswer);
+
                 node = Array.Find(node.Answers, answer => answer.Sys.Id.Equals(questionWithAnswer.AnswerRef))?.NextQuestion;
             }
             else node = null;
