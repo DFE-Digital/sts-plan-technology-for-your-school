@@ -221,6 +221,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var selfAssessmentResult = result as RedirectToActionResult;
 
+            Assert.NotNull(selfAssessmentResult);
             Assert.True(selfAssessmentResult.ActionName == "GetByRoute");
             Assert.True(selfAssessmentResult.ControllerName == "Pages");
             Debug.Assert(selfAssessmentResult.RouteValues != null, "selfAssessmentResult.RouteValues != null");
@@ -239,7 +240,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var checkAnswerResult = result as RedirectToActionResult;
 
-            Assert.NotNull(checkAnswerResult);
             Assert.Equal("CheckAnswers", checkAnswerResult.ControllerName);
             Assert.Equal("CheckAnswersPage", checkAnswerResult.ActionName);
             Debug.Assert(checkAnswerResult.RouteValues != null, "checkAnswerResult.RouteValues != null");
