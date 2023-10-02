@@ -89,6 +89,13 @@ public class CheckAnswersRouterTests
     _router = new CheckAnswersRouter(_getPageQuery, _checkAnswerCommand, _user, _submissionStatusProcessor);
   }
 
+  [Theory]
+  [InlineData("")]
+  [InlineData(null)]
+  public async Task Should_Throw_Exception_When_SectionSlug_NullOrEmpty(string? sectionSlug){
+    await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _router.ValidateRoute(sectionSlug!, _controller, default));
+  }
+
   [Fact]
   public async Task Should_Redirect_To_InterstitialPage_When_Status_Is_Completed()
   {
