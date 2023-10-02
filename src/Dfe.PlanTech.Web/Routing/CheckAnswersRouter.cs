@@ -1,11 +1,11 @@
 using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Responses.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
-using Dfe.PlanTech.Web.Exceptions;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -52,7 +52,7 @@ public class CheckAnswersRouter : ICheckAnswersRouter
     var establishmentId = await _user.GetEstablishmentId();
     var checkAnswerDto = await _processCheckAnswerDtoCommand.GetCheckAnswerDtoForSection(establishmentId, _router.Section!, cancellationToken);
 
-    if (checkAnswerDto == null || checkAnswerDto.Responses == null) return controller.RedirectToSelfAssessment();
+    if (checkAnswerDto == null || checkAnswerDto.Responses == null) throw new DatabaseException("Could not retrieve the answered question list");
 
     var checkAnswerPageContent = await _getPageQuery.GetPageBySlug(CheckAnswersController.CheckAnswersPageSlug, CancellationToken.None);
     

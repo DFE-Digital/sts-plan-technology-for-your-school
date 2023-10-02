@@ -5,7 +5,7 @@ using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
-using Dfe.PlanTech.Web.Exceptions;
+using Dfe.PlanTech.Application.Exceptions;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Questionnaire.Queries;
