@@ -51,8 +51,11 @@ public class GetQuestionBySlugRouterTests
     await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _router.ValidateRoute("section soug", questionSlug!, _controller, default));
   }
 
-  [Fact]
-  public async Task Should_Return_QuestionPage_If_NextQuestion_Matches_Slug()
+  [Theory]
+  [InlineData(SubmissionStatus.Completed)]
+  [InlineData(SubmissionStatus.NextQuestion)]
+  [InlineData(SubmissionStatus.NotStarted)]
+  public async Task Should_Return_QuestionPage_If_NextQuestion_Matches_Slug(SubmissionStatus submissionStatus)
   {
     var nextQuestion = new Question()
     {
@@ -78,7 +81,7 @@ public class GetQuestionBySlugRouterTests
                               .Do(callinfo =>
                               {
                                 _submissionStatusProcessor.NextQuestion = nextQuestion;
-                                _submissionStatusProcessor.Status = SubmissionStatus.NextQuestion;
+                                _submissionStatusProcessor.Status = submissionStatus;
                                 _submissionStatusProcessor.Section.Returns(section);
                               });
 
