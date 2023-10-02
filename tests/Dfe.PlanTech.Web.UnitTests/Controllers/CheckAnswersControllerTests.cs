@@ -244,13 +244,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.Equal("CheckAnswersPage", checkAnswerResult.ActionName);
             Debug.Assert(checkAnswerResult.RouteValues != null, "checkAnswerResult.RouteValues != null");
             Assert.Equal(_section.InterstitialPage.Slug, checkAnswerResult.RouteValues["sectionSlug"]);
-            Assert.Equal("Unable to determine your recommendation. Please try again.", _checkAnswersController.TempData["ErrorMessage"]);
+            Assert.Equal("Unable to save. Please try again. If this problem continues you can", _checkAnswersController.TempData["ErrorMessage"]);
         }
         
         [Fact]
         public async Task CheckAnswersController_CheckAnswersPage_Generates_View_With_Error_When_There_Is_An_Error()
         {
-            _checkAnswersController.TempData["ErrorMessage"] = "Unable to determine your recommendation. Please try again.";
+            _checkAnswersController.TempData["ErrorMessage"] = "Unable to save. Please try again. If this problem continues you can";
             
             var result = await _checkAnswersController.CheckAnswersPage(_section.InterstitialPage.Slug);
 
@@ -280,7 +280,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.Equal(_questionWithAnswerList, checkAnswerDto.Responses);
             
             Assert.NotNull(checkAnswersViewModel.ErrorMessage);
-            Assert.Equal("Unable to determine your recommendation. Please try again.", checkAnswersViewModel.ErrorMessage);
+            Assert.Equal("Unable to save. Please try again. If this problem continues you can", checkAnswersViewModel.ErrorMessage);
         }
         
     }

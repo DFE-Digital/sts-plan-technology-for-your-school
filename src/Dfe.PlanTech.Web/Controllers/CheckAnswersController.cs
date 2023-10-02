@@ -17,7 +17,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     public const string PAGE_SLUG = "check-answers";
 
     public const string INLINE_RECOMMENDATION_UNAVAILABLE_ERROR_MESSAGE =
-        "Unable to determine your recommendation. Please try again.";
+        "Unable to save. Please try again. If this problem continues you can";
 
     private readonly IUser _user;
     private readonly IGetSectionQuery _getSectionQuery;
@@ -41,9 +41,9 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     {
         if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
         
-        var ErrorMessage = TempData["ErrorMessage"]?.ToString() ?? null;
+        var errorMessage = TempData["ErrorMessage"]?.ToString();
         
-        var checkAnswersViewModel = await GenerateCheckAnswersViewModel(sectionSlug, ErrorMessage, cancellationToken);
+        var checkAnswersViewModel = await GenerateCheckAnswersViewModel(sectionSlug, errorMessage, cancellationToken);
         
         return View("CheckAnswers", checkAnswersViewModel);
     }
