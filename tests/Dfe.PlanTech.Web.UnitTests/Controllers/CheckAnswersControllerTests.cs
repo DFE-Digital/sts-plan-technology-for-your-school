@@ -137,9 +137,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
 
             _calculateMaturityCommand = Substitute.For<ICalculateMaturityCommand>();
-            _calculateMaturityCommand.CalculateMaturityAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
-                .Throws(new Exception());        
-            
+
             _checkAnswersController = new CheckAnswersController(_user, _getSectionQuery, _processCheckAnswerDtoCommand, _getPageQuerySubstitute, _calculateMaturityCommand, loggerSubstitute);
             
             var tempData = Substitute.For<ITempDataDictionary>();
@@ -228,9 +226,44 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         
         
         [Fact]
-        public async Task CheckAnswersController_CheckAnswersPage_RedirectsToView_When_There_Is_An_Error_Calculating_Recommendations()
+        public async Task CheckAnswersController_ConfirmCheckAnswers_RedirectsToSelfAssessmentPage_When_There_Are_No_Errors()
         {
             var result = await _checkAnswersController.ConfirmCheckAnswers(_section.InterstitialPage.Slug, SUBMISSION_ID, _section.Name);
+
+            Assert.IsType<RedirectToActionResult>(result);
+
+            var selfAssessmentResult = result as RedirectToActionResult;
+
+            Assert.True(selfAssessmentResult.ActionName == "GetByRoute");
+            Assert.True(selfAssessmentResult.ControllerName == "Pages");
+            Assert.True(selfAssessmentResult.RouteValues["route"] is string and "/self-assessment");
+        }
+        
+        [Fact]
+        public async Task CheckAnswersController_ConfirmCheckAnswers_RedirectsToCheckAnswerPage_When_There_Is_An_Error_Calculating_Recommendations()
+        {
+            _calculateMaturityCommand.CalculateMaturityAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
+                .Throws(new Exception());   
+            
+            var result = await _checkAnswersController.ConfirmCheckAnswers(_section.InterstitialPage.Slug, SUBMISSION_ID, _section.Name);
+
+            Assert.IsType<RedirectToActionResult>(result);
+
+            var checkAnswerResult = result as RedirectToActionResult;
+
+            Assert.NotNull(checkAnswerResult);
+            Assert.Equal("CheckAnswers", checkAnswerResult.ControllerName);
+            Assert.Equal("CheckAnswersPage", checkAnswerResult.ActionName);
+            Assert.Equal(_section.InterstitialPage.Slug, checkAnswerResult.RouteValues["sectionSlug"]);
+            Assert.Equal("Unable to determine your recommendation. Please try again.", _checkAnswersController.TempData["ErrorMessage"]);
+        }
+        
+        [Fact]
+        public async Task CheckAnswersController_CheckAnswersPage_Generates_View_With_Error_When_There_Is_An_Error()
+        {
+            _checkAnswersController.TempData["ErrorMessage"] = "Unable to determine your recommendation. Please try again.";
+            
+            var result = await _checkAnswersController.CheckAnswersPage(_section.InterstitialPage.Slug);
 
             Assert.IsType<ViewResult>(result);
 
@@ -260,5 +293,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.NotNull(checkAnswersViewModel.ErrorMessage);
             Assert.Equal("Unable to determine your recommendation. Please try again.", checkAnswersViewModel.ErrorMessage);
         }
+        
     }
 }

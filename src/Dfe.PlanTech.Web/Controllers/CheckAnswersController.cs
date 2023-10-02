@@ -40,8 +40,10 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     public async Task<IActionResult> CheckAnswersPage(string sectionSlug, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
-
-        var checkAnswersViewModel = await GenerateCheckAnswersViewModel(sectionSlug, null, cancellationToken);
+        
+        var ErrorMessage = TempData["ErrorMessage"]?.ToString() ?? null;
+        
+        var checkAnswersViewModel = await GenerateCheckAnswersViewModel(sectionSlug, ErrorMessage, cancellationToken);
 
         if (checkAnswersViewModel == null) return this.RedirectToSelfAssessment();
 
@@ -60,12 +62,9 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
         {
             logger.LogError("There has been an error while trying to calculate maturity", e);
 
-            var errorCheckAnswersViewModel = await GenerateCheckAnswersViewModel(sectionSlug,
-                INLINE_RECOMMENDATION_UNAVAILABLE_ERROR_MESSAGE, cancellationToken);
+            TempData["ErrorMessage"] = INLINE_RECOMMENDATION_UNAVAILABLE_ERROR_MESSAGE;
 
-            if (errorCheckAnswersViewModel == null) return this.RedirectToSelfAssessment();
-
-            return View("CheckAnswers", errorCheckAnswersViewModel);
+            return this.RedirectToCheckAnswers(sectionSlug);
         }
 
         TempData["SectionName"] = sectionName;
@@ -73,7 +72,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     }
 
 
-    private async Task<CheckAnswersViewModel> GenerateCheckAnswersViewModel(string sectionSlug, string? errorMessage,
+    private async Task<CheckAnswersViewModel?> GenerateCheckAnswersViewModel(string sectionSlug, string? errorMessage,
         CancellationToken cancellationToken = default)
     {
         var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
@@ -90,7 +89,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
 
         if (responses == null) return null;
 
-        CheckAnswersViewModel checkAnswersViewModel = new()
+        CheckAnswersViewModel? checkAnswersViewModel = new()
         {
             Title = checkAnswerPageContent.Title ?? new Title() { Text = "Check Answers" },
             SectionName = section.Name,
