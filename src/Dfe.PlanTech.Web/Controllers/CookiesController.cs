@@ -49,7 +49,7 @@ public class CookiesController : BaseController<CookiesController>
 
         CookiesViewModel cookiesViewModel = new()
         {
-            Title = cookiesPageContent.Title ?? throw new NullReferenceException(nameof(cookiesPageContent.Title)),
+            Title = cookiesPageContent.Title ?? new Title() { Text = "Cookies" },
             Content = cookiesPageContent.Content
         };
 

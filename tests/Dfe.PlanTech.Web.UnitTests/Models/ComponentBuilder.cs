@@ -82,7 +82,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             }
         };
 
-        private Question[] BuildQuestion()
+        private static Question[] BuildQuestion()
         {
             return new Question[]
             {
@@ -95,7 +95,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             };
         }
 
-        private Answer[] BuildAnswer()
+        private static Answer[] BuildAnswer()
         {
             return new Answer[]
             {
@@ -126,11 +126,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
                 Value = "Submit",
                 IsStartButton = false,
             };
-        }
-
-        private static IDictionary<string, string> GetSectionStatuses()
-        {
-            return new Dictionary<string, string> { { "3XQEHYfvEQkQwdrihDGagJ", "Completed" } };
         }
 
         private static Page BuildPage(string? param = null)
