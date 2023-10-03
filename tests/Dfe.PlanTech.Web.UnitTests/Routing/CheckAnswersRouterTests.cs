@@ -94,7 +94,7 @@ public class CheckAnswersRouterTests
   [InlineData(null)]
   public async Task Should_Throw_Exception_When_SectionSlug_NullOrEmpty(string? sectionSlug)
   {
-    await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _router.ValidateRoute(sectionSlug!, _controller, default));
+    await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _router.ValidateRoute(sectionSlug!, null, _controller, default));
   }
 
   [Fact]
@@ -108,7 +108,7 @@ public class CheckAnswersRouterTests
       _submissionStatusProcessor.Status = SubmissionStatus.Completed;
     });
 
-    var result = await _router.ValidateRoute(sectionSlug, _controller, default);
+    var result = await _router.ValidateRoute(sectionSlug, null, _controller, default);
 
     var redirectResult = result as RedirectToActionResult;
 
@@ -138,7 +138,7 @@ public class CheckAnswersRouterTests
       _submissionStatusProcessor.NextQuestion = nextQuestion;
     });
 
-    var result = await _router.ValidateRoute(sectionSlug, _controller, default);
+    var result = await _router.ValidateRoute(sectionSlug, null, _controller, default);
 
     var redirectResult = result as RedirectToActionResult;
 
@@ -167,7 +167,7 @@ public class CheckAnswersRouterTests
                                 _submissionStatusProcessor.Section.Returns(_section);
                               });
 
-    var result = await _router.ValidateRoute(sectionSlug, _controller, default);
+    var result = await _router.ValidateRoute(sectionSlug, null, _controller, default);
 
     var pageResult = result as ViewResult;
 
@@ -183,7 +183,6 @@ public class CheckAnswersRouterTests
     Assert.Equal(_checkAnswersDto.SubmissionId, model.SubmissionId);
     Assert.Equal(_checkAnswersPageContent, model.Content);
   }
-
 
   [Fact]
   public async Task Should_Throw_DatabaseException_When_Responses_Null()
@@ -209,6 +208,6 @@ public class CheckAnswersRouterTests
                                 _submissionStatusProcessor.Section.Returns(noneAnsweredSection);
                               });
 
-    await Assert.ThrowsAnyAsync<DatabaseException>(() => _router.ValidateRoute(sectionSlug, _controller, default));
+    await Assert.ThrowsAnyAsync<DatabaseException>(() => _router.ValidateRoute(sectionSlug, null,  _controller, default));
   }
 }

@@ -13,10 +13,12 @@ public interface ICheckAnswersRouter
   /// or redirects to correct next part of user journey
   /// </summary>
   /// <param name="sectionSlug"></param>
+  /// <param name="errorMessage"></param>
   /// <param name="controller"></param>
   /// <param name="cancellationToken"></param>
   /// <returns></returns>
   Task<IActionResult> ValidateRoute(string sectionSlug,
+                                    string? errorMessage,
                                     CheckAnswersController controller,
                                     CancellationToken cancellationToken);
 }

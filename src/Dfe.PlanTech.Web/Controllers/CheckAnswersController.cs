@@ -12,6 +12,9 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     public const string CheckAnswersAction = nameof(CheckAnswersPage);
     public const string CheckAnswersPageSlug = "check-answers";
     public const string CheckAnswersViewName = "CheckAnswers";
+    
+    public const string InlineRecommendationUnavailableErrorMessage =
+        "Unable to save. Please try again. If this problem continues you can";
 
     public CheckAnswersController(ILogger<CheckAnswersController> logger) : base(logger)
     {
@@ -23,17 +26,28 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
                                                       CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
+        
+        var errorMessage = TempData["ErrorMessage"]?.ToString();
 
-        return await checkAnswersValidator.ValidateRoute(sectionSlug, this, cancellationToken);
+        return await checkAnswersValidator.ValidateRoute(sectionSlug, errorMessage, this, cancellationToken);
     }
 
     [HttpPost("ConfirmCheckAnswers")]
-    public async Task<IActionResult> ConfirmCheckAnswers(int submissionId, string sectionName, [FromServices] ICalculateMaturityCommand calculateMaturityCommand, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> ConfirmCheckAnswers(string sectionSlug, int submissionId, string sectionName, [FromServices] ICalculateMaturityCommand calculateMaturityCommand, CancellationToken cancellationToken = default)
     {
         if (submissionId <= 0) throw new ArgumentOutOfRangeException(nameof(submissionId));
         if (string.IsNullOrEmpty(sectionName)) throw new ArgumentNullException(nameof(sectionName));
-        
-        await calculateMaturityCommand.CalculateMaturityAsync(submissionId, cancellationToken);
+
+        try
+        {
+            await calculateMaturityCommand.CalculateMaturityAsync(submissionId, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            logger.LogError("There has been an error while trying to calculate maturity", e);
+            TempData["ErrorMessage"] = InlineRecommendationUnavailableErrorMessage;
+            return this.RedirectToCheckAnswers(sectionSlug);
+        }
 
         TempData["SectionName"] = sectionName;
 

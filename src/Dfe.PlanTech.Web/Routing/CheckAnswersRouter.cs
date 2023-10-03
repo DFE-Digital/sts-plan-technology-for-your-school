@@ -31,7 +31,7 @@ public class CheckAnswersRouter : ICheckAnswersRouter
     _router = router;
   }
 
-  public async Task<IActionResult> ValidateRoute(string sectionSlug, CheckAnswersController controller, CancellationToken cancellationToken)
+  public async Task<IActionResult> ValidateRoute(string sectionSlug, string? errorMessage, CheckAnswersController controller, CancellationToken cancellationToken)
   {
     if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
 
@@ -39,13 +39,13 @@ public class CheckAnswersRouter : ICheckAnswersRouter
 
     return _router.Status switch
     {
-      SubmissionStatus.CheckAnswers => await ProcessCheckAnswers(sectionSlug, controller, cancellationToken),
+      SubmissionStatus.CheckAnswers => await ProcessCheckAnswers(sectionSlug, errorMessage, controller, cancellationToken),
       SubmissionStatus.Completed => controller.RedirectToInterstitialPage(sectionSlug),
       _ => ProcessQuestionStatus(sectionSlug, controller),
     };
   }
 
-  private async Task<IActionResult> ProcessCheckAnswers(string sectionSlug, CheckAnswersController controller, CancellationToken cancellationToken)
+  private async Task<IActionResult> ProcessCheckAnswers(string sectionSlug, string? errorMessage, CheckAnswersController controller, CancellationToken cancellationToken)
   {
     var establishmentId = await _user.GetEstablishmentId();
     var checkAnswerDto = await _processCheckAnswerDtoCommand.GetCheckAnswerDtoForSection(establishmentId, _router.Section!, cancellationToken);
@@ -62,7 +62,8 @@ public class CheckAnswersRouter : ICheckAnswersRouter
       Content = checkAnswerPageContent.Content,
       SectionSlug = sectionSlug,
       SubmissionId = checkAnswerDto.SubmissionId,
-      Slug = checkAnswerPageContent.Slug
+      Slug = checkAnswerPageContent.Slug,
+      ErrorMessage = errorMessage
     };
 
     return controller.View(CheckAnswersController.CheckAnswersViewName, model);
