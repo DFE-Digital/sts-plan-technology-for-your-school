@@ -14,14 +14,20 @@ public class SubmissionStatusProcessor : ISubmissionStatusProcessor
 {
   private readonly IGetSectionQuery _getSectionQuery;
   private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
-
   private readonly ISubmissionStatusChecker[] _statusCheckers;
 
+  public IGetLatestResponsesQuery GetResponsesQuery { get; init; }
+  public ISection? Section { get; private set; }
+  public IUser User { get; init; }
+  public Question? NextQuestion { get; set; }
+  public SectionStatusNew? SectionStatus { get; private set; }
+  public SubmissionStatus Status { get; set; }
+
   public SubmissionStatusProcessor(IGetSectionQuery getSectionQuery,
-                           IGetSubmissionStatusesQuery getSubmissionStatusesQuery,
-                           IEnumerable<ISubmissionStatusChecker> statusCheckers,
-                           IGetLatestResponsesQuery getResponsesQuery,
-                           IUser user)
+                                  IGetSubmissionStatusesQuery getSubmissionStatusesQuery,
+                                  IEnumerable<ISubmissionStatusChecker> statusCheckers,
+                                  IGetLatestResponsesQuery getResponsesQuery,
+                                  IUser user)
   {
     _getSectionQuery = getSectionQuery;
     _getSubmissionStatusesQuery = getSubmissionStatusesQuery;
@@ -35,15 +41,6 @@ public class SubmissionStatusProcessor : ISubmissionStatusProcessor
     GetResponsesQuery = getResponsesQuery;
     User = user;
   }
-
-  public IGetLatestResponsesQuery GetResponsesQuery { get; init; }
-  public IUser User { get; init; }
-
-  public SubmissionStatus Status { get; set; }
-  public Question? NextQuestion { get; set; }
-
-  public ISection? Section { get; private set; }
-  public SectionStatusNew? SectionStatus { get; private set; }
 
   /// <summary>
   /// Get's the current status for the current user's establishment and the given section
@@ -65,7 +62,7 @@ public class SubmissionStatusProcessor : ISubmissionStatusProcessor
 
 
 
-    var matchingStatusChecker = _statusCheckers.FirstOrDefault(statusChecker => statusChecker.IsMatchingSubmissionStatus(this)) ?? 
+    var matchingStatusChecker = _statusCheckers.FirstOrDefault(statusChecker => statusChecker.IsMatchingSubmissionStatus(this)) ??
                                 throw new InvalidDataException($"Could not find appropriate status checker for section status {SectionStatus}");
 
     await matchingStatusChecker.ProcessSubmission(this, cancellationToken);
