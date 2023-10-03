@@ -10,7 +10,7 @@
         await Html.RenderPartialAsync("HomeButton", Model);
     }
     }
-    @{
+@{
     if (Model.Page.Slug == "self-assessment" && TempData.ContainsKey("SectionName"))
     {
         var sectionName = TempData["SectionName"] as string;
@@ -21,11 +21,14 @@
                     Success
                 </h2>
             </div>
-            <div class="govuk-notification-banner__content">
-                <h3 class="govuk-notification-banner__heading">
-                    You have one new recommendation for @sectionName
-                </h3>
-            </div>
+            @if (!string.IsNullOrEmpty(sectionName))
+            {
+                <div class="govuk-notification-banner__content">
+                    <h3 class="govuk-notification-banner__heading">
+                        You have one new recommendation for @sectionName
+                    </h3>
+                </div>
+            }
         </div>
     }
 
