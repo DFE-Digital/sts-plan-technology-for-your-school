@@ -31,9 +31,7 @@ public class CheckAnswersRouter : ICheckAnswersRouter
     _router = router;
   }
 
-  public async Task<IActionResult> ValidateRoute(string sectionSlug,
-                                                 CheckAnswersController controller,
-                                                 CancellationToken cancellationToken)
+  public async Task<IActionResult> ValidateRoute(string sectionSlug, CheckAnswersController controller, CancellationToken cancellationToken)
   {
     if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
 

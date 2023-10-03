@@ -24,10 +24,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     _router = router;
   }
 
-  public async Task<IActionResult> ValidateRoute(string sectionSlug,
-                                                 string recommendationSlug,
-                                                 RecommendationsController controller,
-                                                 CancellationToken cancellationToken)
+  public async Task<IActionResult> ValidateRoute(string sectionSlug, string recommendationSlug, RecommendationsController controller, CancellationToken cancellationToken)
   {
     if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
     if (string.IsNullOrEmpty(recommendationSlug)) throw new ArgumentNullException(nameof(recommendationSlug));
@@ -54,10 +51,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
   /// <returns></returns>
   /// <exception cref="DatabaseException"></exception>
   /// <exception cref="ContentfulDataUnavailableException"></exception>
-  private async Task<IActionResult> HandleCompleteStatus(string sectionSlug,
-                                                         string recommendationSlug,
-                                                         RecommendationsController controller,
-                                                         CancellationToken cancellationToken)
+  private async Task<IActionResult> HandleCompleteStatus(string sectionSlug, string recommendationSlug, RecommendationsController controller, CancellationToken cancellationToken)
   {
     if (_router.SectionStatus?.Maturity == null) throw new DatabaseException("Maturity is null, but shouldn't be for a completed section");
 

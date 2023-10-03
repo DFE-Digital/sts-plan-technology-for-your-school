@@ -21,10 +21,7 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     _router = router;
   }
 
-  public async Task<IActionResult> ValidateRoute(string sectionSlug,
-                                                 string questionSlug,
-                                                 QuestionsController controller,
-                                                 CancellationToken cancellationToken)
+  public async Task<IActionResult> ValidateRoute(string sectionSlug, string questionSlug, QuestionsController controller, CancellationToken cancellationToken)
   {
     if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
     if (string.IsNullOrEmpty(questionSlug)) throw new ArgumentNullException(nameof(questionSlug));
