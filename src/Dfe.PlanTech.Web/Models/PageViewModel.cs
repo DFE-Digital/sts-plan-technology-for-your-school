@@ -1,11 +1,22 @@
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Models;
 
 public class PageViewModel
 {
-    public required Page Page { get; init; }
+    public Page Page { get; init; } = null!;
+
+    public PageViewModel(Page page, Controller controller, IUser user, ILogger logger)
+    {
+        controller.ViewData["Title"] = System.Net.WebUtility.HtmlDecode(page.Title?.Text) ?? 
+                                       "Plan Technology For Your School";
+        Page = page;
+        TryLoadOrganisationName(controller.HttpContext, user, logger);
+    }
+
+    public PageViewModel(){ }
 
     public void TryLoadOrganisationName(HttpContext httpContext, IUser user, ILogger logger)
     {
@@ -22,3 +33,4 @@ public class PageViewModel
         Page.OrganisationName = establishment.OrgName;
     }
 }
+

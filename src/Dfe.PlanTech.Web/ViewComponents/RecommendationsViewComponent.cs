@@ -21,7 +21,7 @@ namespace Dfe.PlanTech.Web.ViewComponents
         public IViewComponentResult Invoke(ICategory[] categories)
         {
             var allSectionsOfCombinedCategories = new List<ISection>();
-            var allSectionStatusesOfCombinedCategories = new List<SectionStatuses>();
+            var allSectionStatusesOfCombinedCategories = new List<SectionStatusDto>();
 
             var recommendationsAvailable = false;
             foreach (var category in categories)
@@ -46,7 +46,7 @@ namespace Dfe.PlanTech.Web.ViewComponents
         }
 
         private IEnumerable<RecommendationsViewComponentViewModel> _GetRecommendationsViewComponentViewModel(
-            ISection[] sections, List<SectionStatuses> sectionStatusesList)
+            ISection[] sections, List<SectionStatusDto> sectionStatusesList)
         {
             foreach (ISection section in sections)
             {

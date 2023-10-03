@@ -23,4 +23,6 @@ public interface ISection : IContentComponent
     public RecommendationPage? TryGetRecommendationForMaturity(Maturity maturity);
 
     public RecommendationPage? GetRecommendationForMaturity(string? maturity);
+
+    public IEnumerable<QuestionWithAnswer> GetAttachedQuestions(IEnumerable<QuestionWithAnswer> responses);
 }

@@ -1,20 +1,22 @@
+using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web;
 
 public static class PageRedirecter
 {
-    public const string PAGES_CONTROLLER = "Pages";
-    public const string GET_BY_ROUTE_ACTION = "GetByRoute";
-    public const string SELF_ASSESSMENT_ROUTE = "/self-assessment";
+  public const string SelfAssessmentRoute = "/self-assessment";
 
-    public const string CHECK_ANSWERS_ACTION = "CheckAnswersPage";
-    public const string CHECK_ANSWERS_CONTROLLER = "CheckAnswers";
+  public static RedirectToActionResult RedirectToSelfAssessment(this Controller controller)
+  => RedirectToPage(controller, SelfAssessmentRoute);
 
-    public static RedirectToActionResult RedirectToSelfAssessment(this Controller controller)
-      => controller.RedirectToAction(GET_BY_ROUTE_ACTION, PAGES_CONTROLLER, new { route = SELF_ASSESSMENT_ROUTE });
+  public static RedirectToActionResult RedirectToCheckAnswers(this Controller controller, string sectionSlug)
+    => controller.RedirectToAction(CheckAnswersController.CheckAnswersAction, CheckAnswersController.ControllerName , new { sectionSlug });
 
-    public static RedirectToActionResult RedirectToCheckAnswers(this Controller controller, string sectionSlug)
-      => controller.RedirectToAction(CHECK_ANSWERS_ACTION, CHECK_ANSWERS_CONTROLLER, new { sectionSlug });
+  public static RedirectToActionResult RedirectToInterstitialPage(this Controller controller, string sectionSlug)
+  => RedirectToPage(controller, sectionSlug);
+
+  private static RedirectToActionResult RedirectToPage(this Controller controller, string route)
+  => controller.RedirectToAction(PagesController.GetPageByRouteAction, PagesController.ControllerName, new { route });
 }
 

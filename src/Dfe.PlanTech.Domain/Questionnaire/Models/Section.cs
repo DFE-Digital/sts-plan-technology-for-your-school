@@ -26,6 +26,31 @@ public class Section : ContentComponent, ISection
         if (string.IsNullOrEmpty(maturity) || !Enum.TryParse(maturity, out Maturity maturityResponse)) return null;
 
         return TryGetRecommendationForMaturity(maturityResponse);
+    }
 
+    public IEnumerable<QuestionWithAnswer> GetAttachedQuestions(IEnumerable<QuestionWithAnswer> responses)
+    {
+        var questionWithAnswerMap = responses.ToDictionary(questionWithAnswer => questionWithAnswer.QuestionRef,
+                                                                                 questionWithAnswer => questionWithAnswer);
+
+        Question? node = Questions[0];
+
+        while (node != null)
+        {
+            if (!questionWithAnswerMap.TryGetValue(node.Sys.Id, out QuestionWithAnswer? questionWithAnswer)){
+                break;
+            }
+
+            var answer = Array.Find(node.Answers, answer => answer.Sys.Id == questionWithAnswer.AnswerRef);
+            questionWithAnswer = questionWithAnswer with
+            {
+                AnswerText = answer?.Text ?? questionWithAnswer.AnswerText,
+                QuestionText = node.Text,
+                QuestionSlug = node.Slug
+            };
+
+            yield return questionWithAnswer;
+            node = Array.Find(node.Answers, answer => answer.Sys.Id.Equals(questionWithAnswer.AnswerRef))?.NextQuestion;
+        }
     }
 }

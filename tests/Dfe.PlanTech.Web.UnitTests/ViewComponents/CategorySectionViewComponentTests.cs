@@ -60,7 +60,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public void Returns_CategorySectionInfo_If_Slug_Exists_And_SectionIsCompleted()
         {
-            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
+            _category.SectionStatuses.Add(new SectionStatusDto()
             {
                 SectionId = "Section1",
                 Completed = 1,
@@ -105,7 +105,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         {
             _category.Completed = 0;
 
-            _category.SectionStatuses.Add(new SectionStatuses()
+            _category.SectionStatuses.Add(new SectionStatusDto()
             {
                 SectionId = "Section1",
                 Completed = 0,
@@ -197,7 +197,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 }
             };
 
-            _category.SectionStatuses.Add(new SectionStatuses()
+            _category.SectionStatuses.Add(new SectionStatusDto()
             {
                 SectionId = "Section1",
                 Completed = 1,

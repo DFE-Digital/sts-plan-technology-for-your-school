@@ -12,16 +12,18 @@ namespace Dfe.PlanTech.Web.Controllers;
 
 public class PagesController : BaseController<PagesController>
 {
+    public const string ControllerName = "Pages";
+    public const string GetPageByRouteAction = nameof(GetByRoute);
+
     public PagesController(ILogger<PagesController> logger) : base(logger)
     {
     }
 
     [Authorize(Policy = PageModelAuthorisationPolicy.POLICY_NAME)]
     [HttpGet("/{route?}")]
-    [HttpGet("~/{sectionSlug}/recommendation/{route?}", Name = "GetPageByRouteAndSection")]
     public IActionResult GetByRoute([ModelBinder(typeof(PageModelBinder))] Page page, [FromServices] IUser user)
     {
-        var viewModel = CreatePageModel(page, user);
+        var viewModel = new PageViewModel(page, this, user, logger);
 
         return View("Page", viewModel);
     }
@@ -29,27 +31,9 @@ public class PagesController : BaseController<PagesController>
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     [HttpGet(UrlConstants.Error, Name = UrlConstants.Error)]
     public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-    }
+    => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 
     [HttpGet(UrlConstants.ServiceUnavailable, Name = UrlConstants.ServiceUnavailable)]
     public IActionResult ServiceUnavailable()
-    {
-        return View(new ServiceUnavailableViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-    }
-
-    private PageViewModel CreatePageModel(Page page, IUser user)
-    {
-        ViewData["Title"] = System.Net.WebUtility.HtmlDecode(page.Title?.Text) ?? "Plan Technology For Your School";
-
-        var viewModel = new PageViewModel()
-        {
-            Page = page,
-        };
-
-        viewModel.TryLoadOrganisationName(HttpContext, user, logger);
-
-        return viewModel;
-    }
+    => View(new ServiceUnavailableViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 }
