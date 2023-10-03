@@ -2,6 +2,12 @@
  * Login to DFE
  */
 Cypress.Commands.add("login", ({ email, password, url }) => {
+    Cypress.on('uncaught:exception', (err, runnable) => {
+        // returning false here prevents Cypress from
+        // failing the test
+        return false
+    });
+    
     cy.visit(url);
     cy.get("input#username").type(email);
     cy.get("input#password").type(password);

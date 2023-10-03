@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Application.Exceptions;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Responses.Interfaces;
 
@@ -13,7 +13,7 @@ public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand
         _getLatestResponseListForSubmissionQuery = getLatestResponseListForSubmissionQuery;
     }
 
-    public async Task<CheckAnswerDto?> GetCheckAnswerDtoForSection(int establishmentId, Section section, CancellationToken cancellationToken = default)
+    public async Task<CheckAnswerDto?> GetCheckAnswerDtoForSection(int establishmentId, ISection section, CancellationToken cancellationToken = default)
     {
         var checkAnswerDto = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(establishmentId, section.Sys.Id, cancellationToken);
         if (checkAnswerDto?.Responses == null || !checkAnswerDto.Responses.Any())
@@ -24,40 +24,12 @@ public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand
         return RemoveDetachedQuestions(checkAnswerDto, section);
     }
 
-    private static CheckAnswerDto RemoveDetachedQuestions(CheckAnswerDto checkAnswerDto, Section section)
+    private static CheckAnswerDto RemoveDetachedQuestions(CheckAnswerDto checkAnswerDto, ISection section)
     {
         if (checkAnswerDto == null) throw new ArgumentNullException(nameof(checkAnswerDto));
         if (section == null) throw new ArgumentNullException(nameof(section));
 
-
-        var questionWithAnswerMap = checkAnswerDto.Responses.ToDictionary(questionWithAnswer => questionWithAnswer.QuestionRef,
-                                                                        questionWithAnswer => questionWithAnswer);
-
-        var attachedQuestions = new List<QuestionWithAnswer>(checkAnswerDto.Responses.Count);
-
-        Question? node = section.Questions[0];
-
-        while (node != null)
-        {
-            if (questionWithAnswerMap.TryGetValue(node.Sys.Id, out QuestionWithAnswer? questionWithAnswer))
-            {
-                if (string.IsNullOrWhiteSpace(node.Slug)) throw new ContentfulDataUnavailableException($"Question Slug for Contentful ID {node.Sys.Id} is null, empty or whitespace.");
-
-                var answer = Array.Find(node.Answers, answer => answer.Sys.Id == questionWithAnswer.AnswerRef);
-
-                questionWithAnswer = questionWithAnswer with
-                {
-                    AnswerText = answer?.Text ?? questionWithAnswer.AnswerText,
-                    QuestionText = node.Text,
-                    QuestionSlug = node.Slug
-                };
-
-                attachedQuestions.Add(questionWithAnswer);
-
-                node = Array.Find(node.Answers, answer => answer.Sys.Id.Equals(questionWithAnswer.AnswerRef))?.NextQuestion;
-            }
-            else node = null;
-        }
+        var attachedQuestions = section.GetAttachedQuestions(checkAnswerDto.Responses).ToList();
 
         return new CheckAnswerDto()
         {

@@ -5,6 +5,7 @@ using Dfe.PlanTech.Domain.Responses.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Models;
+using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,13 +14,17 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Authorize]
 public class QuestionsController : BaseController<QuestionsController>
 {
+    public const string Controller = "Questions";
+    public const string GetQuestionBySlugActionName = nameof(GetQuestionBySlug);
+
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetLatestResponsesQuery _getResponseQuery;
     private readonly IUser _user;
+
     public QuestionsController(ILogger<QuestionsController> logger,
-                                IGetSectionQuery getSectionQuery,
-                                IGetLatestResponsesQuery getResponseQuery,
-                                IUser user) : base(logger)
+                               IGetSectionQuery getSectionQuery,
+                               IGetLatestResponsesQuery getResponseQuery,
+                               IUser user) : base(logger)
     {
         _getResponseQuery = getResponseQuery;
         _getSectionQuery = getSectionQuery;
@@ -29,13 +34,13 @@ public class QuestionsController : BaseController<QuestionsController>
     [HttpGet("{sectionSlug}/{questionSlug}")]
     public async Task<IActionResult> GetQuestionBySlug(string sectionSlug,
                                                         string questionSlug,
+                                                        [FromServices] IGetQuestionBySlugRouter router,
                                                         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
         if (string.IsNullOrEmpty(questionSlug)) throw new ArgumentNullException(nameof(questionSlug));
 
-        var viewModel = await GenerateViewModel(sectionSlug, questionSlug, cancellationToken);
-        return RenderView(viewModel);
+        return await router.ValidateRoute(sectionSlug, questionSlug, this, cancellationToken);
     }
 
 
@@ -83,9 +88,9 @@ public class QuestionsController : BaseController<QuestionsController>
         return RedirectToAction(nameof(GetNextUnansweredQuestion), new { sectionSlug });
     }
 
-    private IActionResult RenderView(QuestionViewModel viewModel) => View("Question", viewModel);
+    public IActionResult RenderView(QuestionViewModel viewModel) => View("Question", viewModel);
 
-    private async Task<QuestionViewModel> GenerateViewModel(string sectionSlug, string questionSlug, CancellationToken cancellationToken)
+    public async Task<QuestionViewModel> GenerateViewModel(string sectionSlug, string questionSlug, CancellationToken cancellationToken)
     {
         var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
                         throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
@@ -100,16 +105,23 @@ public class QuestionsController : BaseController<QuestionsController>
                                                                                 question.Sys.Id,
                                                                                 cancellationToken);
 
+        return GenerateViewModel(sectionSlug, question, section, latestResponseForQuestion?.AnswerRef);
+    }
+
+    public QuestionViewModel GenerateViewModel(string sectionSlug, Question question, ISection section, string? latestAnswerContentfulId)
+    {
         ViewData["Title"] = question.Text;
 
         return new QuestionViewModel()
         {
             Question = question,
-            AnswerRef = latestResponseForQuestion?.AnswerRef,
+            AnswerRef = latestAnswerContentfulId,
             SectionName = section.Name,
             SectionSlug = sectionSlug,
             SectionId = section.Sys.Id
         };
     }
 
+    public static IActionResult RedirectToQuestionBySlug(string sectionSlug, string questionSlug, Controller controller)
+    => controller.RedirectToAction(GetQuestionBySlugActionName, Controller, new { sectionSlug, questionSlug });
 }

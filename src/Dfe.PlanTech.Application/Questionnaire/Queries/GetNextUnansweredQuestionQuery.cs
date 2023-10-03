@@ -7,50 +7,32 @@ namespace Dfe.PlanTech.Application.Questionnaire.Queries;
 
 public class GetNextUnansweredQuestionQuery : IGetNextUnansweredQuestionQuery
 {
-    private readonly IGetLatestResponsesQuery _getResponseQuery;
+  private readonly IGetLatestResponsesQuery _getResponseQuery;
 
-    public GetNextUnansweredQuestionQuery(IGetLatestResponsesQuery getResponseQuery)
-    {
-        _getResponseQuery = getResponseQuery;
-    }
+  public GetNextUnansweredQuestionQuery(IGetLatestResponsesQuery getResponseQuery)
+  {
+    _getResponseQuery = getResponseQuery;
+  }
 
-    public async Task<Question?> GetNextUnansweredQuestion(int establishmentId, Section section, CancellationToken cancellationToken = default)
-    {
-        var answeredQuestions = await _getResponseQuery.GetLatestResponses(establishmentId, section.Sys.Id, cancellationToken);
+  public async Task<Question?> GetNextUnansweredQuestion(int establishmentId, Section section, CancellationToken cancellationToken = default)
+  {
+    var answeredQuestions = await _getResponseQuery.GetLatestResponses(establishmentId, section.Sys.Id, cancellationToken);
 
-        if (answeredQuestions == null) return section.Questions.FirstOrDefault();
+    if (answeredQuestions == null) return section.Questions.FirstOrDefault();
 
-        if (!answeredQuestions.Responses.Any()) throw new DatabaseException($"There are no responses in the database for ongoing submission {answeredQuestions.SubmissionId}, linked to establishment {establishmentId}");
+    if (!answeredQuestions.Responses.Any()) throw new DatabaseException($"There are no responses in the database for ongoing submission {answeredQuestions.SubmissionId}, linked to establishment {establishmentId}");
 
-        return GetNextUnansweredQuestion(section, answeredQuestions.Responses);
-    }
+    return GetNextUnansweredQuestion(section, answeredQuestions.Responses);
+  }
 
-    public static Question? GetNextUnansweredQuestion(Section section, List<QuestionWithAnswer> responses)
-    {
-        Question? node = section.Questions[0];
+  public static Question? GetNextUnansweredQuestion(Section section, List<QuestionWithAnswer> responses)
+  {
+    var lastAttachedResponse = section.GetAttachedQuestions(responses).Last();
 
-        while (node != null)
-        {
-            var response = responses.Find(response => response.QuestionRef == node.Sys.Id);
-            if (response != null)
-            {
-                var answer = Array.Find(node.Answers, answer => answer.Sys.Id == response.AnswerRef);
-
-                response = response with
-                {
-                    AnswerText = answer?.Text ?? response.AnswerText,
-                    QuestionText = node.Text,
-                    QuestionSlug = node.Slug
-                };
-
-                node = Array.Find(node.Answers, answer => answer.Sys.Id.Equals(response.AnswerRef))?.NextQuestion;
-            }
-            else
-            {
-                return node;
-            }
-        }
-
-        return null;
-    }
+    return section.Questions.Where(question => question.Sys.Id == lastAttachedResponse.QuestionRef)
+                          .SelectMany(question => question.Answers)
+                          .Where(answer => answer.Sys.Id == lastAttachedResponse.AnswerRef)
+                          .Select(answer => answer.NextQuestion)
+                          .FirstOrDefault();
+  }
 }

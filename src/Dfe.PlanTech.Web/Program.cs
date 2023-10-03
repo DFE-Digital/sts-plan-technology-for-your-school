@@ -1,8 +1,10 @@
 using Azure.Identity;
 using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Helpers;
+using Dfe.PlanTech.Application.Submissions.Queries;
 using Dfe.PlanTech.Domain.Establishments.Exceptions;
 using Dfe.PlanTech.Domain.SignIns.Enums;
+using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.SignIns;
 using Dfe.PlanTech.Web;
@@ -10,6 +12,7 @@ using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
+using Dfe.PlanTech.Web.Routing;
 using GovUk.Frontend.AspNetCore;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authorization;
@@ -28,6 +31,7 @@ builder.Services.AddGoogleTagManager();
 // Add services to the container.
 
 builder.Services.AddControllersWithViews();
+
 builder.Services.AddGovUkFrontend();
 
 if (!builder.Environment.IsDevelopment())
@@ -57,6 +61,15 @@ builder.Services.AddScoped<ComponentViewsFactory>();
 
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddSingleton<IAuthorizationHandler, PageModelAuthorisationPolicy>();
+
+builder.Services.AddTransient<ISubmissionStatusProcessor, SubmissionStatusProcessor>();
+builder.Services.AddTransient<IGetRecommendationRouter, GetRecommendationRouter>();
+builder.Services.AddTransient<IGetQuestionBySlugRouter, GetQuestionBySlugRouter>();
+builder.Services.AddTransient<ICheckAnswersRouter, CheckAnswersRouter>();
+
+builder.Services.AddTransient((_) => SectionCompleteStatusChecker.SectionComplete);
+builder.Services.AddTransient((_) => SectionNotStartedStatusChecker.SectionNotStarted);
+builder.Services.AddTransient((_) => CheckAnswersOrNextQuestionChecker.CheckAnswersOrNextQuestion);
 
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization(options =>
@@ -120,7 +133,6 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllerRoute(
     pattern: "{controller=Pages}/{action=GetByRoute}/{id?}",
     name: "default"
