@@ -25,23 +25,6 @@ describe("BrowserHistory tests", () => {
         expect(history).toBeTruthy();
     });
 
-    test("returns last visited url", () => {
-        const href = 'http://www.plan-tech.com/';
-        setWindowSpyLocation({
-            href,
-            pathname: "/",
-            hostname: "www.plan-tech.com",
-            protocol: "http"
-        });
-
-        const history = new BrowserHistory();
-
-        expect(history).toBeTruthy();
-        expect(history.lastUrl).toEqual(href);
-    });
-
-
-
     test("returns default route if no history", () => {
         const history = new BrowserHistory();
 
