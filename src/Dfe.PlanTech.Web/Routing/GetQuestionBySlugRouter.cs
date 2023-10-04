@@ -31,8 +31,7 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     return _router.Status switch
     {
       SubmissionStatus.CheckAnswers => await ProcessCheckAnswersStatus(sectionSlug, questionSlug, controller, cancellationToken),
-      SubmissionStatus.NextQuestion => ProcessQuestionStatus(sectionSlug, questionSlug, controller, () => QuestionsController.RedirectToQuestionBySlug(sectionSlug, _router.NextQuestion!.Slug, controller)),
-      SubmissionStatus.NotStarted or SubmissionStatus.Completed => ProcessQuestionStatus(sectionSlug, questionSlug, controller, () => PageRedirecter.RedirectToInterstitialPage(controller, sectionSlug)),
+      SubmissionStatus.NotStarted or SubmissionStatus.NextQuestion or SubmissionStatus.Completed => await ProcessQuestionStatus(sectionSlug, questionSlug, controller, cancellationToken),
       _ => throw new InvalidDataException($"Invalid journey state - state is {_router.Status}"),
     };
   }
@@ -46,14 +45,38 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
   /// <param name="controller"></param>
   /// <returns></returns>
   /// <exception cref="InvalidDataException"></exception>
-  private IActionResult ProcessQuestionStatus(string sectionSlug, string questionSlug, QuestionsController controller, Func<IActionResult> onMismatchedQustionSlugs)
+  private async Task<IActionResult> ProcessQuestionStatus(string sectionSlug, string questionSlug, QuestionsController controller, CancellationToken cancellationToken)
   {
     if (_router.NextQuestion == null) throw new InvalidDataException($"Next question is null, but shouldn't be for status '{_router.Status}'");
 
-    if (_router.NextQuestion!.Slug != questionSlug) return onMismatchedQustionSlugs();
+    if (_router.NextQuestion!.Slug == questionSlug)
+    {
+      var viewModel = controller.GenerateViewModel(sectionSlug, _router.NextQuestion!, _router.Section!, null);
+      return controller.RenderView(viewModel);
+    }
 
-    var viewModel = controller.GenerateViewModel(sectionSlug, _router.NextQuestion!, _router.Section!, null);
-    return controller.RenderView(viewModel);
+    if (_router.Status != SubmissionStatus.NextQuestion) return QuestionsController.RedirectToQuestionBySlug(sectionSlug, _router.NextQuestion!.Slug, controller);
+
+    var question = _router.Section!.Questions.FirstOrDefault(q => q.Slug == questionSlug) ??
+                   throw new ContentfulDataUnavailableException($"Could not find question '{questionSlug}' in section '{sectionSlug}'");
+
+    var latestResponses = await _getResponseQuery.GetLatestResponses(await _user.GetEstablishmentId(),
+                                                                              _router.Section.Sys.Id,
+                                                                              cancellationToken) ??
+                        throw new InvalidDataException($"Could not find latest response for '{questionSlug}' but is in CheckAnswers status");
+
+    var isAttachedQuestion = _router.Section.GetAttachedQuestions(latestResponses.Responses)
+                                                  .Any(response => response.QuestionRef == question.Sys.Id);
+
+    if (!isAttachedQuestion) return QuestionsController.RedirectToQuestionBySlug(sectionSlug, questionSlug, controller);
+
+    var latestResponseForQuestion = latestResponses.Responses.FirstOrDefault(response => response.QuestionRef == question.Sys.Id) ??
+                                    throw new InvalidDataException($"Could not find response for question '{question.Sys.Id}'");
+
+    return controller.RenderView(controller.GenerateViewModel(sectionSlug,
+                                                 question,
+                                                 _router.Section,
+                                                 latestResponseForQuestion.AnswerRef));
   }
 
   /// <summary>
