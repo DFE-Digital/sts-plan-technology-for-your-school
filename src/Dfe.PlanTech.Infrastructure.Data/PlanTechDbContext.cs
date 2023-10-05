@@ -31,7 +31,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
 
     public DbSet<Response> Responses { get; set; } = null!;
 
-    public DbSet<SectionStatusDto> sectionStatusesSp { get; set; } = null!;
+    public DbSet<SectionStatusDto> SectionStatusesSp { get; set; } = null!;
 
     public PlanTechDbContext() { }
 
@@ -106,9 +106,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
         });
     }
 
-    public IQueryable<User> GetUsers => Users;
-    public IQueryable<SignIn> SignIns => SignIn;
-    public IQueryable<SectionStatusDto> GetSectionStatuses(string sectionIds, int establishmentId) => sectionStatusesSp.FromSqlInterpolated($"{DatabaseConstants.GetSectionStatuses} {sectionIds} , {establishmentId}");
+    public IQueryable<SectionStatusDto> GetSectionStatuses(string sectionIds, int establishmentId) => SectionStatusesSp.FromSqlInterpolated($"{DatabaseConstants.GetSectionStatuses} {sectionIds} , {establishmentId}");
 
     public void AddUser(User user) => Users.Add(user);
 
@@ -116,21 +114,8 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
 
     public void AddSignIn(SignIn signIn) => SignIn.Add(signIn);
 
-    public IQueryable<Question> GetQuestions => Questions;
-    public void AddQuestion(Question question) => Questions.Add(question);
-    public Task<Question?> GetQuestion(Expression<Func<Question, bool>> predicate) => GetQuestions.FirstOrDefaultAsync(predicate);
-
-    public IQueryable<Answer> GetAnswers => Answers;
-    public void AddAnswer(Answer answer) => Answers.Add(answer);
-    public Task<Answer?> GetAnswer(Expression<Func<Answer, bool>> predicate) => GetAnswers.FirstOrDefaultAsync(predicate);
 
     public IQueryable<Submission> GetSubmissions => Submissions;
-    public void AddSubmission(Submission submission) => Submissions.Add(submission);
-
-    public IQueryable<Response> GetResponses => Responses;
-    public void AddResponse(Response response) => Responses.Add(response);
-    public Task<Response?> GetResponse(Expression<Func<Response, bool>> predicate) => GetResponses.FirstOrDefaultAsync(predicate);
-    public async Task<Response[]?> GetResponseList(Expression<Func<Response, bool>> predicate) => await GetResponses.Where(predicate).ToArrayAsync();
 
     public Task<int> SaveChangesAsync() => base.SaveChangesAsync();
 
