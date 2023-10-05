@@ -166,10 +166,14 @@ public class GetQuestionBySlugRouterTests
   }
 
   [Fact]
-  public async Task Should_Redirect_To_Correct_QuestionSlug_If_NextQuestion_DoesntMatch_Slug()
+  public async Task Should_Redirect_To_Correct_QuestionSlug_If_NextQuestion_DoesntMatch_Slug_And_Question_Is_Not_Attached()
   {
+    var thirdQuestion = _section.Questions[2];
     var secondQuestion = _section.Questions[1];
-    var nextQuestion = _section.Questions[0];
+    var firstQuestion = _section.Questions[0];
+
+    _getResponseQuery.GetLatestResponses(Arg.Any<int>(), _section.Sys.Id, Arg.Any<CancellationToken>())
+                     .Returns(_responses);
 
     _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
                               .Do(callinfo =>
@@ -179,7 +183,7 @@ public class GetQuestionBySlugRouterTests
                                 _submissionStatusProcessor.Section.Returns(_section);
                               });
 
-    var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, nextQuestion.Slug, _controller, default);
+    var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, thirdQuestion.Slug, _controller, default);
 
     var redirectResult = result as RedirectToActionResult;
 
@@ -196,6 +200,43 @@ public class GetQuestionBySlugRouterTests
     Assert.Equal(_section.InterstitialPage.Slug, sectionSlug);
     Assert.Equal(secondQuestion.Slug, questionSlug);
   }
+
+  [Fact]
+  public async Task Should_Show_Question_Page_If_Status_Is_NextQuestion_And_Is_PreviouslyAnsweredQuestion_In_Journey()
+  {
+    var thirdQuestion = _section.Questions[2];
+    var firstQuestion = _section.Questions[0];
+
+    var responseForQuestion = _responses.Responses.First(resp => resp.QuestionRef == firstQuestion.Sys.Id);
+
+    _getResponseQuery.GetLatestResponses(Arg.Any<int>(), _section.Sys.Id, Arg.Any<CancellationToken>())
+                     .Returns(_responses);
+
+    _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+                              .Do(callinfo =>
+                              {
+                                _submissionStatusProcessor.NextQuestion = thirdQuestion;
+                                _submissionStatusProcessor.Status = SubmissionStatus.NextQuestion;
+                                _submissionStatusProcessor.Section.Returns(_section);
+                              });
+
+    var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, firstQuestion.Slug, _controller, default);
+
+    var viewResult = result as ViewResult;
+
+    Assert.NotNull(viewResult);
+
+    var model = viewResult.Model as QuestionViewModel;
+
+    Assert.NotNull(model);
+
+    Assert.Equal(_section.Name, model.SectionName);
+    Assert.Equal(_section.InterstitialPage.Slug, model.SectionSlug);
+    Assert.Equal(_section.Sys.Id, model.SectionId);
+    Assert.Equal(responseForQuestion.AnswerRef, model.AnswerRef);
+    Assert.Equal(firstQuestion, model.Question);
+  }
+
 
   [Theory]
   [InlineData(SubmissionStatus.Completed)]
@@ -286,7 +327,7 @@ public class GetQuestionBySlugRouterTests
                               _submissionStatusProcessor.Section.Returns(_section);
                             });
 
-    await Assert.ThrowsAnyAsync<InvalidDataException>(() => _router.ValidateRoute(_section.InterstitialPage.Slug, _section.Questions[0].Slug, _controller, default));
+    await Assert.ThrowsAnyAsync<DatabaseException>(() => _router.ValidateRoute(_section.InterstitialPage.Slug, _section.Questions[0].Slug, _controller, default));
   }
 
   [Fact]
