@@ -83,7 +83,7 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
 
     var isAttachedQuestion = IsQuestionAttached(responses, question);
 
-    if (!isAttachedQuestion) return HandleNotAttachedQuestion(sectionSlug, questionSlug, controller);
+    if (!isAttachedQuestion) return HandleNotAttachedQuestion(sectionSlug, controller);
 
     var latestResponseForQuestion = GetLatestResponseForQuestion(responses, question);
 
@@ -151,11 +151,10 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
   /// Otherwise -> Throw exception as something has gone terribly wrong
   /// </remarks>
   /// <param name="sectionSlug"></param>
-  /// <param name="questionSlug"></param>
   /// <param name="controller"></param>
   /// <returns></returns>
   /// <exception cref="InvalidDataException"></exception>
-  private IActionResult HandleNotAttachedQuestion(string sectionSlug, string questionSlug, QuestionsController controller)
+  private IActionResult HandleNotAttachedQuestion(string sectionSlug, QuestionsController controller)
   => _router.Status switch
   {
     SubmissionStatus.CheckAnswers => controller.RedirectToCheckAnswers(sectionSlug),
