@@ -14,8 +14,8 @@ module "waf" {
 
   waf_targets = {
     "container-app-url" = {
-      domain                    = local.cdn_frontdoor_origin_host_header_override
       health_probe_request_type = "GET"
+      domain                    = module.main_hosting.fqdn
     }
   }
 

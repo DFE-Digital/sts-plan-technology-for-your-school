@@ -7,7 +7,8 @@ locals {
   environment         = var.environment
   azure_location      = var.azure_location
   resource_prefix     = "${local.environment}${local.project_name}"
-  resource_group_name = "${local.environment}${local.project_name}"
+  resource_group_name = module.main_hosting.azurerm_resource_group_default.name
+
   tags = {
     "Environment"      = var.az_tag_environment,
     "Service Offering" = var.az_tag_product,
@@ -20,22 +21,12 @@ locals {
   container_app_image_name = "plan-tech-app"
   container_app_name       = "${local.resource_prefix}-${local.container_app_image_name}"
   kestrel_endpoint         = var.az_app_kestrel_endpoint
-
-  ##############
-  # Front Door #
-  ##############
-  cdn_frontdoor_origin_host_header_override = var.cdn_frontdoor_origin_host_header_override
+  container_port        = var.az_container_port
 
   ####################
   # Managed Identity #
   ####################
   user_identity_name = "${local.resource_prefix}-mi"
-
-  ##############
-  # Networking #
-  ##############
-  vnet_name   = "${local.resource_prefix}default"
-  subnet_name = "${local.resource_prefix}containerappsinfra"
 
   #############
   # Azure SQL #
@@ -49,10 +40,4 @@ locals {
   # Azure KeyVault #
   ##################
   kv_name = "${local.environment}${local.project_name}-kv"
-
-  ###########
-  # Scripts #
-  ###########
-  container_app-assign-identity         = "timeout 15m ${path.module}/scripts/assign-user-identity-to-app.sh -n \"${local.container_app_name}\" -g \"${local.resource_group_name}\" -u \"${local.user_identity_name}\""
-  keyvault-add-vnet-restriction_command = "timeout 15m ${path.module}/scripts/add-keyvault-service-endpoint-to-app.sh -c \"${local.container_app_name}\" -g \"${local.resource_group_name}\" -v \"${local.vnet_name}\" -n \"${local.subnet_name}\" -k \"${local.kv_name}\""
 }
