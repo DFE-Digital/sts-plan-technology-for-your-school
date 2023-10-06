@@ -107,7 +107,7 @@ resource "azurerm_key_vault_secret" "vault_secret_sql_admin_password" {
   key_vault_id = azurerm_key_vault.vault.id
   name         = "sql-server-password"
   value        = random_password.az_sql_password.result
-  depends_on   = [azurerm_key_vault_access_policy.vault_access_policy_tf, null_resource.keyvault-add-vnet-restriction]
+  depends_on   = [azurerm_key_vault_access_policy.vault_access_policy_tf]
 
   lifecycle {
     ignore_changes = [
