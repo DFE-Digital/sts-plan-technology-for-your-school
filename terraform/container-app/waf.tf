@@ -16,9 +16,9 @@ module "waf" {
     "container-app-url" = {
       domain                    = local.cdn_frontdoor_origin_host_header_override
       health_probe_request_type = "GET"
-      domain                    = module.main_hosting.fqdn
+      domain                    = module.main_hosting.container_fqdn
       create_custom_domain      = local.cdn_create_custom_domain
-      custom_fqdn               = module.main_hosting.fqdn
+      custom_fqdn               = module.main_hosting.container_fqdn
     }
   }
 
@@ -36,18 +36,26 @@ module "waf" {
       overrides = {
         "SQLI" = {
           "942200" = {
-            action = "Log"
+            action  = "Log"
+            enabled = false
           },
           "942340" = {
-            action = "Log"
+            action  = "Log"
+            enabled = false
           },
           "942450" = {
-            action = "Log"
+            action  = "Log"
+            enabled = false
+          }
+          "942370" = {
+            action  = "Log"
+            enabled = false
           }
         },
         "RFI" = {
           "931130" = {
-            action = "Log"
+            action  = "Log"
+            enabled = false
           }
         }
       }

@@ -40,4 +40,9 @@ locals {
   # Azure KeyVault #
   ##################
   kv_name = "${local.environment}${local.project_name}-kv"
+
+  ##################
+  # CDN/Front Door #
+  ##################
+  cdn_create_custom_domain = var.cdn_create_custom_domain
 }
