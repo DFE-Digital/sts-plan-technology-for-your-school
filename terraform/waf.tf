@@ -1,5 +1,5 @@
 module "waf" {
-  source = "github.com/dfe-digital/terraform-azurerm-front-door-app-gateway-waf?ref=v0.3.2"
+  source = "github.com/dfe-digital/terraform-azurerm-front-door-app-gateway-waf?ref=v0.3.3"
 
   depends_on = [module.main_hosting]
 
@@ -14,7 +14,8 @@ module "waf" {
 
   waf_targets = {
     "container-app-url" = {
-      domain = local.cdn_frontdoor_origin_host_header_override
+      domain                    = local.cdn_frontdoor_origin_host_header_override
+      health_probe_request_type = "GET"
     }
   }
 
@@ -23,12 +24,30 @@ module "waf" {
   cdn_waf_enable_rate_limiting              = true
   cdn_waf_rate_limiting_duration_in_minutes = 5
   cdn_waf_rate_limiting_threshold           = 1000
-  cdn_waf_rate_limiting_action              = "Block" # one of "Allow", "Block", "Log"
+  cdn_waf_rate_limiting_action              = "Block"
 
   cdn_waf_managed_rulesets = {
     "Microsoft_DefaultRuleSet" = {
       version = "2.1",
-      action  = "Block"
+      action  = "Block",
+      overrides = {
+        "SQLI" = {
+          "942200" = {
+            action = "Log"
+          },
+          "942340" = {
+            action = "Log"
+          },
+          "942450" = {
+            action = "Log"
+          }
+        },
+        "RFI" = {
+          "931130" = {
+            action = "Log"
+          }
+        }
+      }
     },
     "Microsoft_BotManagerRuleSet" = {
       version = "1.0",
