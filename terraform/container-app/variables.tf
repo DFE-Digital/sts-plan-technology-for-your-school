@@ -91,7 +91,6 @@ variable "az_container_port" {
 ##################
 # CDN/Front Door #
 ##################
-
 variable "cdn_create_custom_domain" {
   description = "A flag to create the A and TXT records for the container app as part of setting up the cdn"
   type        = bool
