@@ -21,4 +21,6 @@ In addition, it downloads the Gov.UK & DFE stylings, bundles them and copies the
 3. Install all required Node packages by `npm install`
 4. Compile the JS + CSS files by running `npm run build`. This also copies the generated files into the correct places in the `~/src/Dfe.PlanTech.Web/wwwroot/` folder as well
 
+There is also a GitHub action setup that will automatically execute step 4 on a PR when changes have been made in this folder.
+
 You can also run the ```dotnet build``` command from ```Dfe.PlanTech.Web``` to build the project and the above dependencies.
