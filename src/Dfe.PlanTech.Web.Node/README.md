@@ -23,4 +23,4 @@ In addition, it downloads the Gov.UK & DFE stylings, bundles them and copies the
 
 There is also a GitHub action setup that will automatically execute step 4 on a PR when changes have been made in this folder.
 
-You can also run the ```dotnet build``` command from ```Dfe.PlanTech.Web``` to build the project and the above dependencies.
+You can also run the ```dotnet build /p:buildWebAssets=true``` command from ```Dfe.PlanTech.Web``` to build the project and the above dependencies.
