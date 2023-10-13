@@ -30,7 +30,7 @@ public class CalculateMaturityCommandTests
             throw new SqlTypeException("Invalid submission Id");
         });
     }
-    private CalculateMaturityCommand CreateStrut() => new CalculateMaturityCommand(_dbSubstitute);
+    private CalculateMaturityCommand CreateStrut() => new(_dbSubstitute);
 
     [Fact]
     public async Task CalculateMaturityReturnsEffectedRows_LargerThanOne()

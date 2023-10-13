@@ -33,17 +33,17 @@ public class FooterLinks : ViewComponent
     /// Gets links from Contentful using <see cref="IGetNavigationQuery"/> with basic error handling 
     /// </summary>
     /// <returns></returns>
-    private Task<IEnumerable<NavigationLink>> GetLinks()
+    private async Task<IEnumerable<NavigationLink>> GetLinks()
     {
         try
         {
-            return _getNavQuery.GetNavigationLinks();
+            return await _getNavQuery.GetNavigationLinks();
         }
         catch (Exception ex)
         {
             _logger.LogCritical(ex, "Error retrieving navigation links for footer");
 
-            return Task.FromResult(Array.Empty<NavigationLink>().AsEnumerable());
+            return await Task.FromResult(Array.Empty<NavigationLink>().AsEnumerable());
         }
     }
 }

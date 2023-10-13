@@ -12,7 +12,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Binders;
 public class PageModelBinderTests
 {
     [Fact]
-    public void Should_Get_Page_From_Items()
+    public async Task Should_Get_Page_From_Items()
     {
         var page = new Page()
         {
@@ -33,14 +33,14 @@ public class PageModelBinderTests
 
         modelBinderContext.HttpContext.Returns(httpContext);
 
-        pageModelBinder.BindModelAsync(modelBinderContext);
+        await pageModelBinder.BindModelAsync(modelBinderContext);
 
         Assert.True(modelBinderContext.Result.IsModelSet);
         Assert.Equal(page, modelBinderContext.Result.Model);
     }
 
     [Fact]
-    public void Should_LogError_When_Page_Not_Expected_Type()
+    public async Task Should_LogError_When_Page_Not_Expected_Type()
     {
         var logger = Substitute.For<ILogger<PageModelBinder>>();
         var pageModelBinder = new PageModelBinder(logger);
@@ -57,14 +57,14 @@ public class PageModelBinderTests
 
         modelBinderContext.HttpContext.Returns(httpContext);
 
-        pageModelBinder.BindModelAsync(modelBinderContext);
+        await pageModelBinder.BindModelAsync(modelBinderContext);
 
         logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
         Assert.False(modelBinderContext.Result.IsModelSet);
     }
 
     [Fact]
-    public void Should_LogError_When_Page_Not_Present()
+    public async Task Should_LogError_When_Page_Not_Present()
     {
         var logger = Substitute.For<ILogger<PageModelBinder>>();
         var pageModelBinder = new PageModelBinder(logger);
@@ -78,7 +78,7 @@ public class PageModelBinderTests
 
         modelBinderContext.HttpContext.Returns(httpContext);
 
-        pageModelBinder.BindModelAsync(modelBinderContext);
+        await pageModelBinder.BindModelAsync(modelBinderContext);
 
         logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
 
