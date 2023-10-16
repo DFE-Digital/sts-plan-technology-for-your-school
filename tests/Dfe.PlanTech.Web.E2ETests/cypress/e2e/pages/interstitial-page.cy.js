@@ -2,11 +2,14 @@
 describe("Interstitial page", () => {
     const url = "/broadband-connection";
 
-    beforeEach(() => {
+    before(() => {
         cy.loginWithEnv("/self-assessment");
+    });
+
+    beforeEach(() => {
+        cy.visit("/self-assessment");
         cy.clickFirstSection();
         cy.url().should("contain", url);
-
         cy.injectAxe();
     });
 

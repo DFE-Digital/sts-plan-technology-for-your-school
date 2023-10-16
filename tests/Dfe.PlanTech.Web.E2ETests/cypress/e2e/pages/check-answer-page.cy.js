@@ -1,11 +1,15 @@
 let selectedQuestionsWithAnswers = [];
-
 describe("Check answers page", () => {
   const url = "/self-assessment";
 
+  before(() => {
+    cy.loginWithEnv("/self-assessment");
+  }); 
+  
   beforeEach(() => {
-    cy.loginWithEnv(url);
 
+    cy.visit('/self-assessment'); 
+      
     cy.clickFirstSection();
     cy.clickContinueButton();
 
@@ -23,7 +27,7 @@ describe("Check answers page", () => {
       .should("exist")
       .and("have.length", selectedQuestionsWithAnswers.length)
       .each((row) => {
-        //Get question and answer tecxt for each row
+        //Get question and answer text for each row
         const questionWithAnswer = {
           question: null,
           answer: null,

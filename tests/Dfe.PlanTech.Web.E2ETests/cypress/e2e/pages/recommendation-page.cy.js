@@ -1,8 +1,12 @@
 describe("Recommendation Page", () => {
     const url = "/self-assessment";
 
-    beforeEach(() => {
+    before(() => {
         cy.loginWithEnv(url);
+    });
+    
+    beforeEach(() => {
+        cy.visit(url);
 
         cy.url().should("contain", "self-assessment");
 

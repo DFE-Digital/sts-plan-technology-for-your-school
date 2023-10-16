@@ -1,8 +1,12 @@
 describe("Self-assessment page", () => {
   const url = "/self-assessment";
 
-  beforeEach(() => {
+  before(() => {
     cy.loginWithEnv(url);
+  });
+  
+  beforeEach(() => {
+    cy.visit(url);
 
     cy.injectAxe();
 });
