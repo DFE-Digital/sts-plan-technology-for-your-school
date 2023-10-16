@@ -9,32 +9,32 @@ namespace Dfe.PlanTech.Application.Submissions.Queries;
 /// </summary>
 public static class CheckAnswersOrNextQuestionChecker
 {
-  public static readonly ISubmissionStatusChecker CheckAnswersOrNextQuestion = new SubmissionStatusChecker()
-  {
-    IsMatchingSubmissionStatusFunc = (userJourneyRouter) => userJourneyRouter.Section != null &&
-                                                    userJourneyRouter.SectionStatus != null &&
-                                                    userJourneyRouter.SectionStatus.Status > Status.NotStarted &&
-                                                    userJourneyRouter.SectionStatus.Status != Status.Completed,
-    ProcessSubmissionFunc = async (userJourneyRouter, cancellationToken) =>
+    public static readonly ISubmissionStatusChecker CheckAnswersOrNextQuestion = new SubmissionStatusChecker()
     {
-      var responses = await userJourneyRouter.GetResponsesQuery.GetLatestResponses(await userJourneyRouter.User.GetEstablishmentId(),
-                                                                            userJourneyRouter.Section!.Sys.Id,
-                                                                            cancellationToken) ?? throw new InvalidDataException("Missing responses");
+        IsMatchingSubmissionStatusFunc = (userJourneyRouter) => userJourneyRouter.Section != null &&
+                                                        userJourneyRouter.SectionStatus != null &&
+                                                        userJourneyRouter.SectionStatus.Status > Status.NotStarted &&
+                                                        userJourneyRouter.SectionStatus.Status != Status.Completed,
+        ProcessSubmissionFunc = async (userJourneyRouter, cancellationToken) =>
+        {
+            var responses = await userJourneyRouter.GetResponsesQuery.GetLatestResponses(await userJourneyRouter.User.GetEstablishmentId(),
+                                                                              userJourneyRouter.Section!.Sys.Id,
+                                                                              cancellationToken) ?? throw new InvalidDataException("Missing responses");
 
-      var lastResponseInUserJourney = userJourneyRouter.Section!.GetAttachedQuestions(responses.Responses).Last();
+            var lastResponseInUserJourney = userJourneyRouter.Section!.GetAttachedQuestions(responses.Responses).Last();
 
-      var lastSelectedAnswer = userJourneyRouter.Section!.Questions.First(question => question.Sys.Id == lastResponseInUserJourney.QuestionRef)
-                                                                    .Answers.First(answer => answer.Sys.Id == lastResponseInUserJourney.AnswerRef);
+            var lastSelectedAnswer = userJourneyRouter.Section!.Questions.First(question => question.Sys.Id == lastResponseInUserJourney.QuestionRef)
+                                                                      .Answers.First(answer => answer.Sys.Id == lastResponseInUserJourney.AnswerRef);
 
-      if (lastSelectedAnswer.NextQuestion == null)
-      {
-        userJourneyRouter.Status = SubmissionStatus.CheckAnswers;
-        return;
-      }
+            if (lastSelectedAnswer.NextQuestion == null)
+            {
+                userJourneyRouter.Status = SubmissionStatus.CheckAnswers;
+                return;
+            }
 
-      userJourneyRouter.Status = SubmissionStatus.NextQuestion;
-      userJourneyRouter.NextQuestion = lastSelectedAnswer.NextQuestion;
-    }
-  };
+            userJourneyRouter.Status = SubmissionStatus.NextQuestion;
+            userJourneyRouter.NextQuestion = lastSelectedAnswer.NextQuestion;
+        }
+    };
 }
 

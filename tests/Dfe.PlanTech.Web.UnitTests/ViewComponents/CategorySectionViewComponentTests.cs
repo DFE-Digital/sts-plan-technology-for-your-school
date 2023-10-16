@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Domain.CategorySection;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
@@ -82,7 +81,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal(1, unboxed.CompletedSectionCount);
             Assert.Equal(1, unboxed.TotalSectionCount);
 
-            var categorySectionDtoList = unboxed.CategorySectionDto as IEnumerable<CategorySectionDto>;
+            var categorySectionDtoList = unboxed.CategorySectionDto;
 
             Assert.NotNull(categorySectionDtoList);
 
@@ -127,7 +126,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal(0, unboxed.CompletedSectionCount);
             Assert.Equal(1, unboxed.TotalSectionCount);
 
-            var categorySectionDtoList = unboxed.CategorySectionDto as IEnumerable<CategorySectionDto>;
+            var categorySectionDtoList = unboxed.CategorySectionDto;
 
             Assert.NotNull(categorySectionDtoList);
 
@@ -166,7 +165,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal(0, unboxed.CompletedSectionCount);
             Assert.Equal(1, unboxed.TotalSectionCount);
 
-            var categorySectionDtoList = unboxed.CategorySectionDto as IEnumerable<CategorySectionDto>;
+            var categorySectionDtoList = unboxed.CategorySectionDto;
 
             Assert.NotNull(categorySectionDtoList);
 
@@ -219,7 +218,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal(1, unboxed.CompletedSectionCount);
             Assert.Equal(1, unboxed.TotalSectionCount);
 
-            var categorySectionDtoList = unboxed.CategorySectionDto as IEnumerable<CategorySectionDto>;
+            var categorySectionDtoList = unboxed.CategorySectionDto;
 
             Assert.NotNull(categorySectionDtoList);
 
@@ -257,7 +256,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.NotNull(unboxed);
             Assert.Equal("Unable to retrieve progress, please refresh your browser.", unboxed.ProgressRetrievalErrorMessage);
 
-            var categorySectionDtoList = unboxed.CategorySectionDto as IEnumerable<CategorySectionDto>;
+            var categorySectionDtoList = unboxed.CategorySectionDto;
 
             Assert.NotNull(categorySectionDtoList);
 
@@ -299,7 +298,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal("ServiceUnavailable", unboxed.NoSectionsErrorRedirectUrl);
             Assert.Equal(0, unboxed.TotalSectionCount);
 
-            var categorySectionDtoList = unboxed.CategorySectionDto as IEnumerable<CategorySectionDto>;
+            var categorySectionDtoList = unboxed.CategorySectionDto;
 
             Assert.NotNull(categorySectionDtoList);
 
@@ -331,7 +330,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal("ServiceUnavailable", unboxed.NoSectionsErrorRedirectUrl);
             Assert.Equal(0, unboxed.TotalSectionCount);
 
-            var categorySectionDtoList = unboxed.CategorySectionDto as IEnumerable<CategorySectionDto>;
+            var categorySectionDtoList = unboxed.CategorySectionDto;
 
             Assert.NotNull(categorySectionDtoList);
 
