@@ -6,11 +6,27 @@ describe("Question page", () => {
 
     //Navigate to first section
     cy.clickFirstSection();
+    
 
     //Navigate to first question
     cy.clickContinueButton();
 
     cy.injectAxe();
+  });
+
+  it("should have inline error when trying to submit without answering any questions", () => {
+    cy.url().then(firstUrl => { 
+      cy.get("form button.govuk-button")
+          .contains("Save and continue")
+          .click();
+
+      cy.location("pathname", { timeout: 60000 })
+          .should("not.equal", firstUrl)
+          .and("match", /broadband-connection\/broadband-contract-review/g)
+
+      cy.get("form div.govuk-form-group--error")
+          .should("exist"); 
+    });
   });
 
   it("should contain form", () => {
