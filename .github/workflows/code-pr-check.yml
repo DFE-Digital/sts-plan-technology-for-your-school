@@ -2,7 +2,7 @@ name: Code PR Check
 
 on:
   push:
-    branches: ["main", "Development"]
+    branches: ["main", "development"]
     paths:
       - 'src/**'
       - 'tests/**'

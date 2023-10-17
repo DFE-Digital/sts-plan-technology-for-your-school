@@ -2,7 +2,7 @@ name: Build and commit web assets (JS + CSS)
 
 on:
   pull_request:
-    branches: ["main", "Development"]
+    branches: ["main", "development"]
     paths:
       - 'src/Dfe.PlanTech.Web.Node/**'
 
