@@ -4,94 +4,93 @@ using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Dfe.PlanTech.Web.ViewComponents
+namespace Dfe.PlanTech.Web.ViewComponents;
+
+public class RecommendationsViewComponent : ViewComponent
 {
-    public class RecommendationsViewComponent : ViewComponent
+    private readonly ILogger<RecommendationsViewComponent> _logger;
+    private readonly IGetSubmissionStatusesQuery _query;
+
+    public RecommendationsViewComponent(ILogger<RecommendationsViewComponent> logger,
+        IGetSubmissionStatusesQuery query)
     {
-        private readonly ILogger<RecommendationsViewComponent> _logger;
-        private readonly IGetSubmissionStatusesQuery _query;
+        _logger = logger;
+        _query = query;
+    }
 
-        public RecommendationsViewComponent(ILogger<RecommendationsViewComponent> logger,
-            IGetSubmissionStatusesQuery query)
+    public IViewComponentResult Invoke(ICategory[] categories)
+    {
+        var allSectionsOfCombinedCategories = new List<ISection>();
+        var allSectionStatusesOfCombinedCategories = new List<SectionStatusDto>();
+
+        var recommendationsAvailable = false;
+        foreach (var category in categories)
         {
-            _logger = logger;
-            _query = query;
+            if (category.Completed >= 1)
+            {
+                recommendationsAvailable = true;
+            }
+
+            var categoryElement = RetrieveSectionStatuses(category);
+            allSectionsOfCombinedCategories.AddRange(categoryElement.Sections);
+            allSectionStatusesOfCombinedCategories.AddRange(categoryElement.SectionStatuses);
         }
 
-        public IViewComponentResult Invoke(ICategory[] categories)
+        var recommendationsViewComponentViewModel =
+            recommendationsAvailable
+                ? GetRecommendationsViewComponentViewModel(allSectionsOfCombinedCategories.ToArray(),
+                    allSectionStatusesOfCombinedCategories)
+                : null;
+
+        return View(recommendationsViewComponentViewModel);
+    }
+
+    private IEnumerable<RecommendationsViewComponentViewModel> GetRecommendationsViewComponentViewModel(
+        ISection[] sections, List<SectionStatusDto> sectionStatusesList)
+    {
+        foreach (ISection section in sections)
         {
-            var allSectionsOfCombinedCategories = new List<ISection>();
-            var allSectionStatusesOfCombinedCategories = new List<SectionStatusDto>();
+            var sectionMaturity = sectionStatusesList.Where(sectionStatus =>
+                    sectionStatus.SectionId == section.Sys.Id && sectionStatus.Completed == 1)
+                .Select(sectionStatus => sectionStatus.Maturity)
+                .FirstOrDefault();
 
-            var recommendationsAvailable = false;
-            foreach (var category in categories)
+            if (string.IsNullOrEmpty(sectionMaturity)) continue;
+
+            var recommendation = section.GetRecommendationForMaturity(sectionMaturity);
+
+            if (recommendation == null)
+                _logger.LogError("No Recommendation Found: Section - {sectionName}, Maturity - {sectionMaturity}",
+                    section.Name, sectionMaturity);
+
+            yield return new RecommendationsViewComponentViewModel()
             {
-                if (category.Completed >= 1)
-                {
-                    recommendationsAvailable = true;
-                }
-
-                var categoryElement = RetrieveSectionStatuses(category);
-                allSectionsOfCombinedCategories.AddRange(categoryElement.Sections);
-                allSectionStatusesOfCombinedCategories.AddRange(categoryElement.SectionStatuses);
-            }
-
-            var recommendationsViewComponentViewModel =
-                recommendationsAvailable
-                    ? _GetRecommendationsViewComponentViewModel(allSectionsOfCombinedCategories.ToArray(),
-                        allSectionStatusesOfCombinedCategories)
-                    : null;
-
-            return View(recommendationsViewComponentViewModel);
+                RecommendationSlug = recommendation?.Page.Slug,
+                RecommendationDisplayName = recommendation?.DisplayName,
+                SectionSlug = section.InterstitialPage.Slug,
+                NoRecommendationFoundErrorMessage = recommendation == null
+                    ? String.Format("Unable to retrieve {0} recommendation", section.Name)
+                    : null
+            };
         }
+    }
 
-        private IEnumerable<RecommendationsViewComponentViewModel> _GetRecommendationsViewComponentViewModel(
-            ISection[] sections, List<SectionStatusDto> sectionStatusesList)
+    public ICategory RetrieveSectionStatuses(ICategory category)
+    {
+        try
         {
-            foreach (ISection section in sections)
-            {
-                var sectionMaturity = sectionStatusesList.Where(sectionStatus =>
-                        sectionStatus.SectionId == section.Sys.Id && sectionStatus.Completed == 1)
-                    .Select(sectionStatus => sectionStatus.Maturity)
-                    .FirstOrDefault();
-
-                if (string.IsNullOrEmpty(sectionMaturity)) continue;
-
-                var recommendation = section.GetRecommendationForMaturity(sectionMaturity);
-
-                if (recommendation == null)
-                    _logger.LogError("No Recommendation Found: Section - {sectionName}, Maturity - {sectionMaturity}",
-                        section.Name, sectionMaturity);
-
-                yield return new RecommendationsViewComponentViewModel()
-                {
-                    RecommendationSlug = recommendation?.Page.Slug,
-                    RecommendationDisplayName = recommendation?.DisplayName,
-                    SectionSlug = section.InterstitialPage.Slug,
-                    NoRecommendationFoundErrorMessage = recommendation == null
-                        ? String.Format("Unable to retrieve {0} recommendation", section.Name)
-                        : null
-                };
-            }
+            category.SectionStatuses = _query.GetSectionSubmissionStatuses(category.Sections).ToList();
+            category.Completed = category.SectionStatuses.Count(x => x.Completed == 1);
+            category.RetrievalError = false;
+            return category;
         }
-
-        public ICategory RetrieveSectionStatuses(ICategory category)
+        catch (Exception e)
         {
-            try
-            {
-                category.SectionStatuses = _query.GetSectionSubmissionStatuses(category.Sections).ToList();
-                category.Completed = category.SectionStatuses.Count(x => x.Completed == 1);
-                category.RetrievalError = false;
-                return category;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(
-                    "An exception has occurred while trying to retrieve section progress with the following message - {}",
-                    e.Message);
-                category.RetrievalError = true;
-                return category;
-            }
+            _logger.LogError(
+                "An exception has occurred while trying to retrieve section progress with the following message - {}",
+                e.Message);
+            category.RetrievalError = true;
+            return category;
         }
     }
 }

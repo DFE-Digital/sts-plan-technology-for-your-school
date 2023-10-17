@@ -10,7 +10,7 @@ namespace Dfe.PlanTech.Web.TagHelpers;
 /// <remarks>Should be refactored in future to be any <see cref="NavigationLink"/>, and pass in HTML class used</remarks>
 public class FooterLinkTagHelper : TagHelper
 {
-    public const string FOOTER_CLASS = "govuk-footer__link";
+    public const string FOOTER_CLASS = "\"govuk-footer__link\"";
     private readonly ILogger<FooterLinkTagHelper> _logger;
 
     public NavigationLink? Link { get; set; }
@@ -52,7 +52,7 @@ public class FooterLinkTagHelper : TagHelper
 
     private void AppendOpenTag(StringBuilder stringBuilder)
     {
-        stringBuilder.Append("<a class=\"govuk-footer__link\" href=\"");
+        stringBuilder.Append("<a class=").Append(FOOTER_CLASS).Append(" href=\"");
         stringBuilder.Append(Link!.Href);
         stringBuilder.Append('"');
 
