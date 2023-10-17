@@ -2,17 +2,24 @@ describe("Question page", () => {
   const url = "/self-assessment";
 
   before(() => {
-    cy.loginWithEnv(url);
+    cy.loginWithEnv(url); 
   });
 
   beforeEach(() => {
     cy.visitSaPageWithRetry(url, 3);
-    //Navigate to first section
-    cy.clickFirstSection();
-    
 
-    //Navigate to first question
+    cy.clickFirstSection();
+
     cy.clickContinueButton();
+
+    //reset the state just incase there has been failures in previous test.
+    cy.url().then(currentUrl => {
+      if (currentUrl.includes("check-answers")) {
+        cy.submitAnswers();
+        cy.clickFirstSection();
+        cy.clickContinueButton();
+      }
+    });
 
     cy.injectAxe();
   });
