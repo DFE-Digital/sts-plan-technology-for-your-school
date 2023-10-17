@@ -6,8 +6,7 @@ describe("Self-assessment page", () => {
   });
   
   beforeEach(() => {
-    cy.visit(url);
-
+    cy.visitSaPageWithRetry(url, 3);
     cy.injectAxe();
 });
 

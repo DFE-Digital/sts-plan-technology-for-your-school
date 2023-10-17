@@ -1,96 +1,96 @@
 let selectedQuestionsWithAnswers = [];
 describe("Check answers page", () => {
-  const url = "/self-assessment";
+    const url = "/self-assessment";
 
-  before(() => {
-    cy.loginWithEnv("/self-assessment");
-  }); 
-  
-  beforeEach(() => {
+    before(() => {
+        cy.loginWithEnv("/self-assessment");
+    });
 
-    cy.visit('/self-assessment'); 
-      
-    cy.clickFirstSection();
-    cy.clickContinueButton();
+    beforeEach(() => {
 
-    cy.navigateToCheckAnswersPage(selectedQuestionsWithAnswers);
+        cy.visitSaPageWithRetry('/self-assessment', 3); 
+        
+        cy.clickFirstSection();
+        cy.clickContinueButton();
 
-    cy.log(selectedQuestionsWithAnswers);
+        cy.navigateToCheckAnswersPage(selectedQuestionsWithAnswers);
 
-    cy.url().should("contain", "check-answers");
+        cy.log(selectedQuestionsWithAnswers);
 
-    cy.injectAxe();
-  });
+        cy.url().should("contain", "check-answers");
 
-  it("should show each selected question with answer", () => {
-    cy.get("div.govuk-summary-list__row")
-      .should("exist")
-      .and("have.length", selectedQuestionsWithAnswers.length)
-      .each((row) => {
-        //Get question and answer text for each row
-        const questionWithAnswer = {
-          question: null,
-          answer: null,
-        };
+        cy.injectAxe();
+    });
 
-        cy.wrap(row)
-          .find("dt.govuk-summary-list__key.spacer")
-          .should("exist")
-          .invoke("text")
-          .then((question) => (questionWithAnswer.question = question.trim()));
+    it("should show each selected question with answer", () => {
+        cy.get("div.govuk-summary-list__row")
+            .should("exist")
+            .and("have.length", selectedQuestionsWithAnswers.length)
+            .each((row) => {
+                //Get question and answer text for each row
+                const questionWithAnswer = {
+                    question: null,
+                    answer: null,
+                };
 
-        cy.wrap(row)
-          .find("dd.govuk-summary-list__value.spacer")
-          .invoke("text")
-          .then((answer) => (questionWithAnswer.answer = answer.trim()));
+                cy.wrap(row)
+                    .find("dt.govuk-summary-list__key.spacer")
+                    .should("exist")
+                    .invoke("text")
+                    .then((question) => (questionWithAnswer.question = question.trim()));
 
-        //Ensure it matches one of the items in array
-        cy.wrap(questionWithAnswer).then(() => {
-          cy.log(JSON.stringify(selectedQuestionsWithAnswers));
+                cy.wrap(row)
+                    .find("dd.govuk-summary-list__value.spacer")
+                    .invoke("text")
+                    .then((answer) => (questionWithAnswer.answer = answer.trim()));
 
-          const matchingQuestionWithAnswer = selectedQuestionsWithAnswers.find(
-            (qwa) => {
-              cy.log("looking for ", qwa);
-              return qwa.question == questionWithAnswer.question.trim();
-            }
-          );
+                //Ensure it matches one of the items in array
+                cy.wrap(questionWithAnswer).then(() => {
+                    cy.log(JSON.stringify(selectedQuestionsWithAnswers));
 
-          expect(matchingQuestionWithAnswer.answer).to.equal(
-            questionWithAnswer.answer
-          );
+                    const matchingQuestionWithAnswer = selectedQuestionsWithAnswers.find(
+                        (qwa) => {
+                            cy.log("looking for ", qwa);
+                            return qwa.question == questionWithAnswer.question.trim();
+                        }
+                    );
 
-          //Has "Change" me link with accessibility attributes
-          cy.wrap(row)
-            .find("a")
-            .contains("Change")
-            .and("contain", questionWithAnswer.question)
-            .get('span[class="govuk-visually-hidden"]')
-            .invoke("text")
-            .should("have.length.greaterThan", 1);
+                    expect(matchingQuestionWithAnswer.answer).to.equal(
+                        questionWithAnswer.answer
+                    );
 
-          cy.wrap(row)
-            .find("a")
-            .contains("Change")
-            .and("have.attr", "title")
-            .and("equal", questionWithAnswer.question);
-        });
-      });
-  });
+                    //Has "Change" me link with accessibility attributes
+                    cy.wrap(row)
+                        .find("a")
+                        .contains("Change")
+                        .and("contain", questionWithAnswer.question)
+                        .get('span[class="govuk-visually-hidden"]')
+                        .invoke("text")
+                        .should("have.length.greaterThan", 1);
 
-  it("passes accessibility tests", () => {
-    cy.runAxe();
-  });
+                    cy.wrap(row)
+                        .find("a")
+                        .contains("Change")
+                        .and("have.attr", "title")
+                        .and("equal", questionWithAnswer.question);
+                });
+            });
+    });
 
-  it("navigates to correct page when clicking change", () => {
-    cy.get("a:nth-child(1)").contains("Change").click();
-    cy.url().should("contains", "broadband-contract-review");
-  });
+    it("passes accessibility tests", () => {
+        cy.runAxe();
+    });
 
-  //This needs to be last on this test run, so that the question-page tests have a clean slate to work from!
-  it("submits answers and shows notification", () => {
-    cy.submitAnswers();
+    it("navigates to correct page when clicking change", () => {
+        cy.get("a:nth-child(1)").contains("Change").click();
+        cy.url().should("contains", "broadband-contract-review");
+    });
 
-    cy.url().should("contain", "self-assessment");
-    cy.get("div.govuk-notification-banner__header").should("exist");
-  });
+    //This needs to be last on this test run, so that the question-page tests have a clean slate to work from!
+    it("submits answers and shows notification", () => {
+        cy.submitAnswers();
+
+        cy.url().should("contain", "self-assessment");
+        cy.get("div.govuk-notification-banner__header").should("exist");
+    });
 });

@@ -40,3 +40,22 @@ Cypress.Commands.add("loginWithEnv", (url) => {
 
     cy.visit(url);
 });
+
+Cypress.Commands.add('visitSaPageWithRetry', (url, maxRetries) => {
+    cy.log(`Visiting ${url}`);
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        cy.visit(url, { failOnStatusCode: false }); 
+
+        cy.get('h1.govuk-heading-xl')
+            .should('exist')
+            .and('have.text', 'Technology self‑assessment');
+
+        if (attempt < maxRetries) {
+            cy.log('navigating to page successful');
+            return; 
+        }
+    }
+    
+    cy.log(`failed to navigate to page after ${maxRetries} attempts`);
+    throw new Error(`Failed to visit ${url} after multiple retries`);
+});

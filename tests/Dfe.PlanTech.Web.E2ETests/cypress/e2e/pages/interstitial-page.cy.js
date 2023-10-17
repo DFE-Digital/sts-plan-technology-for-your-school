@@ -7,7 +7,7 @@ describe("Interstitial page", () => {
     });
 
     beforeEach(() => {
-        cy.visit("/self-assessment");
+        cy.visitSaPageWithRetry('/self-assessment', 3); 
         cy.clickFirstSection();
         cy.url().should("contain", url);
         cy.injectAxe();

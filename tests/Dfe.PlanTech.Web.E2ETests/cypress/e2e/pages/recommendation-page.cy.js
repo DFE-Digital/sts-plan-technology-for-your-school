@@ -6,8 +6,8 @@ describe("Recommendation Page", () => {
     });
     
     beforeEach(() => {
-        cy.visit(url);
-
+        cy.visitSaPageWithRetry(url, 3);
+        
         cy.url().should("contain", "self-assessment");
 
         cy.clickFirstSection();
