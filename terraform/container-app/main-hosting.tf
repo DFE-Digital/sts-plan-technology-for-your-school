@@ -40,6 +40,11 @@ module "main_hosting" {
   mssql_azuread_admin_username       = local.az_sql_azuread_admin_username
   mssql_azuread_admin_object_id      = local.az_sql_azuread_admin_objectid
   mssql_azuread_auth_only            = local.az_use_azure_ad_auth_only
+
+  ##############
+  # Networking #
+  ##############
+  container_apps_infra_subnet_service_endpoints = ["Microsoft.KeyVault"]
 }
 
 resource "random_password" "az_sql_password" {
