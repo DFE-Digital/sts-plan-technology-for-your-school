@@ -14,9 +14,6 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
 
     public GetSectionQuery(IContentRepository repository) : base(repository) { }
 
-    public Task<Section?> GetSectionById(string sectionId, CancellationToken cancellationToken = default)
-    => repository.GetEntityById<Section>(sectionId, 3, cancellationToken);
-
     public async Task<Section?> GetSectionBySlug(string sectionSlug, CancellationToken cancellationToken = default)
     {
         var options = new GetEntitiesOptions()

@@ -15,7 +15,7 @@ public class GetLatestResponsesQuery : IGetLatestResponsesQuery
         _db = db;
     }
 
-    public Task<QuestionWithAnswer?> GetLatestResponseForQuestion(int establishmentId, string sectionId, string questionId, CancellationToken cancellationToken = default)
+    public async Task<QuestionWithAnswer?> GetLatestResponseForQuestion(int establishmentId, string sectionId, string questionId, CancellationToken cancellationToken = default)
     {
         var responseListByDate = GetCurrentSubmission(establishmentId, sectionId)
                                         .SelectMany(submission => submission.Responses)
@@ -23,7 +23,7 @@ public class GetLatestResponsesQuery : IGetLatestResponsesQuery
                                         .OrderByDescending(response => response.DateCreated)
                                         .Select(ToQuestionWithAnswer());
 
-        return _db.FirstOrDefaultAsync(responseListByDate, cancellationToken);
+        return await _db.FirstOrDefaultAsync(responseListByDate, cancellationToken);
     }
 
     public async Task<CheckAnswerDto?> GetLatestResponses(int establishmentId, string sectionId, CancellationToken cancellationToken = default)
