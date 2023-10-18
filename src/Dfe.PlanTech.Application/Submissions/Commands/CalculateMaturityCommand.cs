@@ -29,4 +29,3 @@ public class CalculateMaturityCommand : ICalculateMaturityCommand
         return await _db.CallStoredProcedureWithReturnInt(sprocName, parms, cancellationToken);
     }
 }
-}
