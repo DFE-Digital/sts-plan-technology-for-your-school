@@ -23,7 +23,7 @@ env:
 jobs:
   build-test-web-app:  
     name: Build and run unit tests
-    runs-on: windows-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - name: Check out repository
