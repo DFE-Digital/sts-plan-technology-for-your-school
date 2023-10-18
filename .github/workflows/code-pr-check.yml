@@ -2,12 +2,12 @@ name: Code PR Check
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main", "development"]
     paths:
       - 'src/**'
       - 'tests/**'
   pull_request:
-    branches: [ "main" ]
+    branches: ["main", "development"]
     paths:
       - 'src/**'
       - 'tests/**'
