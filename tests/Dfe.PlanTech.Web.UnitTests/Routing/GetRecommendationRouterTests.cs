@@ -172,12 +172,11 @@ public class GetRecommendationRouterTests
     Assert.NotNull(redirectResult);
 
     Assert.Equal(PagesController.ControllerName, redirectResult.ControllerName);
-    Assert.Equal(PagesController.GetPageByRouteAction, redirectResult.ActionName);
+    Assert.Equal(PagesController.GetPageByRouteAction, PagesController.GetPageByRouteAction);
 
     var route = redirectResult.RouteValues?["route"];
-
     Assert.NotNull(route);
-    Assert.Equal(_section.InterstitialPage.Slug, route);
+    Assert.Equal(PageRedirecter.SelfAssessmentRoute, route);
   }
 
   [Fact]

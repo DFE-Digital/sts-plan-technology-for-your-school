@@ -35,7 +35,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
             SubmissionStatus.Completed => await HandleCompleteStatus(sectionSlug, recommendationSlug, controller, cancellationToken),
             SubmissionStatus.CheckAnswers => controller.RedirectToCheckAnswers(sectionSlug),
             SubmissionStatus.NextQuestion => HandleQuestionStatus(sectionSlug, controller),
-            SubmissionStatus.NotStarted => PageRedirecter.RedirectToInterstitialPage(controller, sectionSlug),
+            SubmissionStatus.NotStarted => PageRedirecter.RedirectToSelfAssessment(controller),
             _ => throw new InvalidOperationException($"Invalid journey status - {_router.Status}"),
         };
     }
