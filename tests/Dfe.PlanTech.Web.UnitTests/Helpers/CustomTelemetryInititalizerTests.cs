@@ -1,9 +1,7 @@
-using System.Diagnostics;
 using Dfe.PlanTech.Web.Helpers;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
-using NSubstitute.ReturnsExtensions;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Helpers;
@@ -12,7 +10,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Helpers;
 public class CustomTelemetryInitializerTests
 {
     private readonly IHttpContextAccessor _httpContextAccessor = Substitute.For<IHttpContextAccessor>();
-    
+
     [Fact]
     public void CustomInitializerAddsRequestIdToRequestTelemetry()
     {

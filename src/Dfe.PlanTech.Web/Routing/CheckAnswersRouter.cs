@@ -13,29 +13,29 @@ namespace Dfe.PlanTech.Web.Routing;
 
 public class CheckAnswersRouter : ICheckAnswersRouter
 {
-  private const string PageTitle = "Check Answers";
+    private const string PageTitle = "Check Answers";
 
-  private readonly IGetPageQuery _getPageQuery;
-  private readonly IProcessCheckAnswerDtoCommand _processCheckAnswerDtoCommand;
-  private readonly IUser _user;
-  private readonly ISubmissionStatusProcessor _router;
+    private readonly IGetPageQuery _getPageQuery;
+    private readonly IProcessCheckAnswerDtoCommand _processCheckAnswerDtoCommand;
+    private readonly IUser _user;
+    private readonly ISubmissionStatusProcessor _router;
 
-  public CheckAnswersRouter(IGetPageQuery getPageQuery,
-                            IProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand,
-                            IUser user,
-                            ISubmissionStatusProcessor router)
-  {
-    _getPageQuery = getPageQuery;
-    _processCheckAnswerDtoCommand = processCheckAnswerDtoCommand;
-    _user = user;
-    _router = router;
-  }
+    public CheckAnswersRouter(IGetPageQuery getPageQuery,
+                              IProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand,
+                              IUser user,
+                              ISubmissionStatusProcessor router)
+    {
+        _getPageQuery = getPageQuery;
+        _processCheckAnswerDtoCommand = processCheckAnswerDtoCommand;
+        _user = user;
+        _router = router;
+    }
 
-  public async Task<IActionResult> ValidateRoute(string sectionSlug, string? errorMessage, CheckAnswersController controller, CancellationToken cancellationToken)
-  {
-    if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
+    public async Task<IActionResult> ValidateRoute(string sectionSlug, string? errorMessage, CheckAnswersController controller, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
 
-    await _router.GetJourneyStatusForSection(sectionSlug, cancellationToken);
+        await _router.GetJourneyStatusForSection(sectionSlug, cancellationToken);
 
     return _router.Status switch
     {
@@ -45,34 +45,34 @@ public class CheckAnswersRouter : ICheckAnswersRouter
     };
   }
 
-  private async Task<IActionResult> ProcessCheckAnswers(string sectionSlug, string? errorMessage, CheckAnswersController controller, CancellationToken cancellationToken)
-  {
-    var establishmentId = await _user.GetEstablishmentId();
-    var checkAnswerDto = await _processCheckAnswerDtoCommand.GetCheckAnswerDtoForSection(establishmentId, _router.Section!, cancellationToken);
-
-    if (checkAnswerDto == null || checkAnswerDto.Responses == null) throw new DatabaseException("Could not retrieve the answered question list");
-
-    var checkAnswerPageContent = await _getPageQuery.GetPageBySlug(CheckAnswersController.CheckAnswersPageSlug, CancellationToken.None);
-    
-    var model = new CheckAnswersViewModel()
+    private async Task<IActionResult> ProcessCheckAnswers(string sectionSlug, string? errorMessage, CheckAnswersController controller, CancellationToken cancellationToken)
     {
-      Title = checkAnswerPageContent.Title ?? new Title() { Text = PageTitle },
-      SectionName = _router.Section!.Name,
-      CheckAnswerDto = checkAnswerDto,
-      Content = checkAnswerPageContent.Content,
-      SectionSlug = sectionSlug,
-      SubmissionId = checkAnswerDto.SubmissionId,
-      Slug = checkAnswerPageContent.Slug,
-      ErrorMessage = errorMessage
-    };
+        var establishmentId = await _user.GetEstablishmentId();
+        var checkAnswerDto = await _processCheckAnswerDtoCommand.GetCheckAnswerDtoForSection(establishmentId, _router.Section!, cancellationToken);
 
-    return controller.View(CheckAnswersController.CheckAnswersViewName, model);
-  }
+        if (checkAnswerDto == null || checkAnswerDto.Responses == null) throw new DatabaseException("Could not retrieve the answered question list");
 
-  private IActionResult ProcessQuestionStatus(string sectionSlug, Controller controller)
-  {
-    var nextQuestionSlug = _router.NextQuestion?.Slug ?? _router.Section!.Questions.Select(question => question.Slug).First();
+        var checkAnswerPageContent = await _getPageQuery.GetPageBySlug(CheckAnswersController.CheckAnswersPageSlug, CancellationToken.None);
 
-    return QuestionsController.RedirectToQuestionBySlug(sectionSlug, nextQuestionSlug, controller);
-  }
+        var model = new CheckAnswersViewModel()
+        {
+            Title = checkAnswerPageContent.Title ?? new Title() { Text = PageTitle },
+            SectionName = _router.Section!.Name,
+            CheckAnswerDto = checkAnswerDto,
+            Content = checkAnswerPageContent.Content,
+            SectionSlug = sectionSlug,
+            SubmissionId = checkAnswerDto.SubmissionId,
+            Slug = checkAnswerPageContent.Slug,
+            ErrorMessage = errorMessage
+        };
+
+        return controller.View(CheckAnswersController.CheckAnswersViewName, model);
+    }
+
+    private IActionResult ProcessQuestionStatus(string sectionSlug, Controller controller)
+    {
+        var nextQuestionSlug = _router.NextQuestion?.Slug ?? _router.Section!.Questions.Select(question => question.Slug).First();
+
+        return QuestionsController.RedirectToQuestionBySlug(sectionSlug, nextQuestionSlug, controller);
+    }
 }

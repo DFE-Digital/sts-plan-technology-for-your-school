@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Routing;
@@ -6,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using System.Diagnostics;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Controllers
@@ -41,7 +41,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public async Task CheckAnswersPage_Should_Call_CheckAnswersRouter_When_Args_Valid()
         {
             await _checkAnswersController.CheckAnswersPage(_sectionSlug, _checkAnswersRouter, default);
-            await _checkAnswersRouter.Received().ValidateRoute(_sectionSlug,  null, _checkAnswersController, Arg.Any<CancellationToken>());
+            await _checkAnswersRouter.Received().ValidateRoute(_sectionSlug, null, _checkAnswersController, Arg.Any<CancellationToken>());
         }
 
         [Theory]
@@ -96,13 +96,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.True(redirectToActionResult.RouteValues.ContainsKey("route"));
             Assert.True(redirectToActionResult.RouteValues["route"] is string s && s == "/self-assessment");
         }
-        
+
         [Fact]
         public async Task ConfirmAnswers_Should_Redirect_To_CheckAnswers()
         {
             _calculateMaturityCommand.CalculateMaturityAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
-                .Throws(new Exception());   
-            
+                .Throws(new Exception());
+
             var result = await _checkAnswersController.ConfirmCheckAnswers(_sectionSlug, 1, "section name", _calculateMaturityCommand);
 
             var redirectToActionResult = result as RedirectToActionResult;

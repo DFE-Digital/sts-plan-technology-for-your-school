@@ -18,7 +18,7 @@ public class FooterLinksComponentTests
     }
   };
 
-    private readonly ILogger<FooterLinks> _logger = new NullLoggerFactory().CreateLogger<FooterLinks>();
+    private readonly ILogger<FooterLinksViewComponent> _logger = new NullLoggerFactory().CreateLogger<FooterLinksViewComponent>();
 
     [Fact]
     public async Task It_Should_Retrieve_NavigationLinks()
@@ -28,7 +28,7 @@ public class FooterLinksComponentTests
         getNavQuery.GetNavigationLinks(Arg.Any<CancellationToken>())
                   .Returns(_navigationLinks);
 
-        var footerLinks = new FooterLinks(getNavQuery, _logger);
+        var footerLinks = new FooterLinksViewComponent(getNavQuery, _logger);
 
         var result = await footerLinks.InvokeAsync();
 
@@ -51,7 +51,7 @@ public class FooterLinksComponentTests
         getNavQuery.GetNavigationLinks(Arg.Any<CancellationToken>())
                   .Returns((callinfo) => getNavLinksWithError());
 
-        var footerLinks = new FooterLinks(getNavQuery, _logger);
+        var footerLinks = new FooterLinksViewComponent(getNavQuery, _logger);
 
         var result = await footerLinks.InvokeAsync();
 

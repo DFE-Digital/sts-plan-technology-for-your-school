@@ -4,7 +4,6 @@ using Contentful.Core.Search;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 using Microsoft.Extensions.Logging.Abstractions;
-using Newtonsoft.Json.Serialization;
 using NSubstitute;
 using System.Web;
 
@@ -13,8 +12,6 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
     public class ContentfulRepositoryTests
     {
         private IContentfulClient _clientSubstitute = Substitute.For<IContentfulClient>();
-
-        private IContractResolver _contractResolver = Substitute.For<IContractResolver>();
 
         private readonly List<TestClass> _substituteData = new() {
             new TestClass(), new TestClass("testId"), new TestClass("anotherId"), new TestClass("abcd1234")

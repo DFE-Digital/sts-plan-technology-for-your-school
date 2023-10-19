@@ -1,6 +1,6 @@
+using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Dfe.PlanTech.Web.Routing;
 
 namespace Dfe.PlanTech.Web.Controllers;
 

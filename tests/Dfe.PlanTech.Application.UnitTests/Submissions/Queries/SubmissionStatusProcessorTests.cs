@@ -14,114 +14,114 @@ namespace Dfe.PlanTech.Application.UnitTests.Submissions.Queries;
 
 public class SubmissionStatusProcessorTests
 {
-  private readonly IGetSectionQuery _getSectionQuery;
-  private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
-  private readonly IGetLatestResponsesQuery _getResponsesQuery;
-  private readonly IUser _user;
+    private readonly IGetSectionQuery _getSectionQuery;
+    private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
+    private readonly IGetLatestResponsesQuery _getResponsesQuery;
+    private readonly IUser _user;
 
-  private static readonly ISubmissionStatusChecker _failureStatusChecker = Substitute.For<ISubmissionStatusChecker>();
-  private readonly ISubmissionStatusChecker[] _statusCheckers = new[] { _failureStatusChecker };
+    private static readonly ISubmissionStatusChecker _failureStatusChecker = Substitute.For<ISubmissionStatusChecker>();
+    private readonly ISubmissionStatusChecker[] _statusCheckers = new[] { _failureStatusChecker };
 
-  private const int _establishmentId = 1;
+    private const int _establishmentId = 1;
 
-  private const string SectionSlug = "section-slug";
-  private static readonly ISection _section = new Section()
-  {
-    Sys = new SystemDetails()
+    private const string SectionSlug = "section-slug";
+    private static readonly ISection _section = new Section()
     {
-      Id = "section-id"
-    },
-    InterstitialPage = new Page()
+        Sys = new SystemDetails()
+        {
+            Id = "section-id"
+        },
+        InterstitialPage = new Page()
+        {
+            Slug = SectionSlug
+        }
+    };
+
+    private readonly ISection[] _sections = new[] { _section };
+
+    public SubmissionStatusProcessorTests()
     {
-      Slug = SectionSlug
+        _getSectionQuery = Substitute.For<IGetSectionQuery>();
+        _getSectionQuery.GetSectionBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                        .Returns((callinfo) =>
+                        {
+                            var sectionSlug = callinfo.ArgAt<string>(0);
+
+                            return _sections.FirstOrDefault(section => section.InterstitialPage.Slug == sectionSlug) as Section;
+                        });
+
+        _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
+        _getResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
+
+        _user = Substitute.For<IUser>();
+        _user.GetEstablishmentId().Returns(_establishmentId);
     }
-  };
 
-  private readonly ISection[] _sections = new[] { _section };
+    [Fact]
+    public async Task Should_Use_StatusCheckers()
+    {
+        ISubmissionStatusChecker successStatusChecker = Substitute.For<ISubmissionStatusChecker>();
+        successStatusChecker.IsMatchingSubmissionStatus(Arg.Any<SubmissionStatusProcessor>())
+                      .Returns((callinfo) =>
+                      {
+                          var processor = callinfo.ArgAt<SubmissionStatusProcessor>(0);
 
-  public SubmissionStatusProcessorTests()
-  {
-    _getSectionQuery = Substitute.For<IGetSectionQuery>();
-    _getSectionQuery.GetSectionBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                    .Returns((callinfo) =>
-                    {
-                      var sectionSlug = callinfo.ArgAt<string>(0);
+                          return processor.Section == _section;
+                      });
 
-                      return _sections.FirstOrDefault(section => section.InterstitialPage.Slug == sectionSlug) as Section;
-                    });
+        _failureStatusChecker.IsMatchingSubmissionStatus(Arg.Any<SubmissionStatusProcessor>()).Returns(false);
 
-    _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
-    _getResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
+        ISubmissionStatusProcessor processor = new SubmissionStatusProcessor(_getSectionQuery,
+                                                                             _getSubmissionStatusesQuery,
+                                                                             new[] { _statusCheckers[0], successStatusChecker },
+                                                                             _getResponsesQuery,
+                                                                             _user);
 
-    _user = Substitute.For<IUser>();
-    _user.GetEstablishmentId().Returns(_establishmentId);
-  }
+        _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(Arg.Any<int>(), Arg.Any<Section>(), Arg.Any<CancellationToken>())
+                                   .Returns(new SectionStatusNew());
 
-  [Fact]
-  public async Task Should_Use_StatusCheckers()
-  {
-    ISubmissionStatusChecker successStatusChecker = Substitute.For<ISubmissionStatusChecker>();
-    successStatusChecker.IsMatchingSubmissionStatus(Arg.Any<SubmissionStatusProcessor>())
-                  .Returns((callinfo) =>
-                  {
-                    var processor = callinfo.ArgAt<SubmissionStatusProcessor>(0);
+        await processor.GetJourneyStatusForSection(SectionSlug, default);
 
-                    return processor.Section == _section;
-                  });
+        _failureStatusChecker.Received(1).IsMatchingSubmissionStatus(processor);
+        await _failureStatusChecker.DidNotReceive().ProcessSubmission(processor, Arg.Any<CancellationToken>());
 
-    _failureStatusChecker.IsMatchingSubmissionStatus(Arg.Any<SubmissionStatusProcessor>()).Returns(false);
-
-    ISubmissionStatusProcessor processor = new SubmissionStatusProcessor(_getSectionQuery,
-                                                                         _getSubmissionStatusesQuery,
-                                                                         new[] { _statusCheckers[0], successStatusChecker },
-                                                                         _getResponsesQuery,
-                                                                         _user);
-
-    _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(Arg.Any<int>(), Arg.Any<Section>(), Arg.Any<CancellationToken>())
-                               .Returns(new SectionStatusNew());
-
-    await processor.GetJourneyStatusForSection(SectionSlug, default);
-
-    _failureStatusChecker.Received(1).IsMatchingSubmissionStatus(processor);
-    await _failureStatusChecker.DidNotReceive().ProcessSubmission(processor, Arg.Any<CancellationToken>());
-
-    successStatusChecker.Received(1).IsMatchingSubmissionStatus(processor);
-    await successStatusChecker.Received(1).ProcessSubmission(processor, Arg.Any<CancellationToken>());
-  }
+        successStatusChecker.Received(1).IsMatchingSubmissionStatus(processor);
+        await successStatusChecker.Received(1).ProcessSubmission(processor, Arg.Any<CancellationToken>());
+    }
 
 
 
-  [Fact]
-  public async Task Should_Throw_Exception_When_NoStatusChecker_Matches()
-  {
-    _failureStatusChecker.IsMatchingSubmissionStatus(Arg.Any<SubmissionStatusProcessor>()).Returns(false);
+    [Fact]
+    public async Task Should_Throw_Exception_When_NoStatusChecker_Matches()
+    {
+        _failureStatusChecker.IsMatchingSubmissionStatus(Arg.Any<SubmissionStatusProcessor>()).Returns(false);
 
-    ISubmissionStatusProcessor processor = new SubmissionStatusProcessor(_getSectionQuery,
-                                                                         _getSubmissionStatusesQuery,
-                                                                         _statusCheckers,
-                                                                         _getResponsesQuery,
-                                                                         _user);
+        ISubmissionStatusProcessor processor = new SubmissionStatusProcessor(_getSectionQuery,
+                                                                             _getSubmissionStatusesQuery,
+                                                                             _statusCheckers,
+                                                                             _getResponsesQuery,
+                                                                             _user);
 
-    _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(Arg.Any<int>(), Arg.Any<Section>(), Arg.Any<CancellationToken>())
-                               .Returns(new SectionStatusNew());
+        _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(Arg.Any<int>(), Arg.Any<Section>(), Arg.Any<CancellationToken>())
+                                   .Returns(new SectionStatusNew());
 
-    await Assert.ThrowsAnyAsync<InvalidDataException>(() => processor.GetJourneyStatusForSection(SectionSlug, default));
-  }
+        await Assert.ThrowsAnyAsync<InvalidDataException>(() => processor.GetJourneyStatusForSection(SectionSlug, default));
+    }
 
-  [Fact]
-  public async Task Should_ThrowException_When_Section_NotFound()
-  {
-    ISubmissionStatusProcessor processor = new SubmissionStatusProcessor(_getSectionQuery,
-                                                                         _getSubmissionStatusesQuery,
-                                                                         _statusCheckers,
-                                                                         _getResponsesQuery,
-                                                                         _user);
-    _user.GetEstablishmentId()
-         .Returns(1);
+    [Fact]
+    public async Task Should_ThrowException_When_Section_NotFound()
+    {
+        ISubmissionStatusProcessor processor = new SubmissionStatusProcessor(_getSectionQuery,
+                                                                             _getSubmissionStatusesQuery,
+                                                                             _statusCheckers,
+                                                                             _getResponsesQuery,
+                                                                             _user);
+        _user.GetEstablishmentId()
+             .Returns(1);
 
-    _getSectionQuery.GetSectionBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                    .Returns(null as Section);
+        _getSectionQuery.GetSectionBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                        .Returns(null as Section);
 
-    await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() => processor.GetJourneyStatusForSection("not matching section slug", default));
-  }
+        await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() => processor.GetJourneyStatusForSection("not matching section slug", default));
+    }
 }

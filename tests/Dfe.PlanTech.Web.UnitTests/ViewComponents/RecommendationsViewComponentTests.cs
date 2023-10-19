@@ -231,7 +231,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public void DoesNotReturn_RecommendationInfo_If_Section_IsNot_Completed()
         {
-            _category.Completed= 0;
+            _category.Completed = 0;
             _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
             {
                 SectionId = "Section1",
