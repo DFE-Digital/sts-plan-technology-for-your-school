@@ -15,6 +15,6 @@ public class GetNavigationQuery : ContentRetriever, IGetNavigationQuery
     {
     }
 
-    public Task<IEnumerable<NavigationLink>> GetNavigationLinks(CancellationToken cancellationToken = default)
-        => repository.GetEntities<NavigationLink>(cancellationToken);
+    public async Task<IEnumerable<NavigationLink>> GetNavigationLinks(CancellationToken cancellationToken = default)
+        => await repository.GetEntities<NavigationLink>(cancellationToken);
 }

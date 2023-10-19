@@ -16,8 +16,6 @@ public class PageViewModel
         TryLoadOrganisationName(controller.HttpContext, user, logger);
     }
 
-    public PageViewModel() { }
-
     public void TryLoadOrganisationName(HttpContext httpContext, IUser user, ILogger logger)
     {
         if (!Page.DisplayOrganisationName) return;
@@ -33,4 +31,3 @@ public class PageViewModel
         Page.OrganisationName = establishment.OrgName;
     }
 }
-

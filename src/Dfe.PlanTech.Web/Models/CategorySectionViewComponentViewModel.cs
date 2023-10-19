@@ -1,17 +1,16 @@
 using Dfe.PlanTech.Domain.CategorySection;
 
-namespace Dfe.PlanTech.Web.Models
+namespace Dfe.PlanTech.Web.Models;
+
+public class CategorySectionViewComponentViewModel
 {
-    public class CategorySectionViewComponentViewModel
-    {
-        public int CompletedSectionCount { get; init; }
+    public int CompletedSectionCount { get; init; }
 
-        public int TotalSectionCount { get; init; }
+    public int TotalSectionCount { get; init; }
 
-        public IEnumerable<CategorySectionDto> CategorySectionDto { get; init; } = null!;
+    public IEnumerable<CategorySectionDto> CategorySectionDto { get; init; } = null!;
 
-        public string? NoSectionsErrorRedirectUrl { get; set; }
+    public string? NoSectionsErrorRedirectUrl { get; set; }
 
-        public string? ProgressRetrievalErrorMessage { get; init; }
-    }
+    public string? ProgressRetrievalErrorMessage { get; init; }
 }

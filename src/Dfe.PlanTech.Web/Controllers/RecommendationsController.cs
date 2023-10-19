@@ -14,7 +14,7 @@ public class RecommendationsController : BaseController<RecommendationsControlle
     }
 
     [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}", Name = "GetRecommendation")]
-    public Task<IActionResult> GetRecommendation(string sectionSlug,
+    public async Task<IActionResult> GetRecommendation(string sectionSlug,
                                                        string recommendationSlug,
                                                        [FromServices] IGetRecommendationRouter getRecommendationValidator,
                                                        CancellationToken cancellationToken)
@@ -22,7 +22,7 @@ public class RecommendationsController : BaseController<RecommendationsControlle
         if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
         if (string.IsNullOrEmpty(recommendationSlug)) throw new ArgumentNullException(nameof(recommendationSlug));
 
-        return getRecommendationValidator.ValidateRoute(sectionSlug,
+        return await getRecommendationValidator.ValidateRoute(sectionSlug,
           recommendationSlug,
           this,
           cancellationToken);
