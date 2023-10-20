@@ -14,7 +14,7 @@ concurrency:
      cancel-in-progress: true
 
 env:
-    DOCKER_IMAGE: plan-tech-app
+    DOCKER_IMAGE: plan-technology-for-your-school
     NODE_VERSION: 18.x
 
 jobs:
@@ -28,13 +28,14 @@ jobs:
             checked-out-sha: ${{ steps.var.outputs.checked-out-sha }}
         
         steps:
+
             - uses: actions/checkout@v3
               with:
                 ref: ${{ github.ref }}
             
             - id: var
               run: |
-                GIT_REF=${{ github.ref }}
+                GIT_REF=${{ github.ref_name }}
                 GIT_BRANCH=${GIT_REF##*/}
                 CHECKED_OUT_SHA="$(git log -1 '--format=format:%H')"
                 echo "branch=$GIT_BRANCH" >> $GITHUB_OUTPUT
@@ -44,7 +45,7 @@ jobs:
 
         runs-on: ubuntu-22.04
         needs: [set-env]
-        name: Lint, Test, Build & Publish Image
+        name: Build & Publish Image
         
         steps:
 
@@ -66,20 +67,7 @@ jobs:
                 file: ./src/Dfe.PlanTech.Web/Dockerfile
                 build-args: COMMIT_SHA=${{ needs.set-env.outputs.checked-out-sha }}
                 tags: |
-                    ghcr.io/${{ env.DOCKER_IMAGE }}:${{ needs.set-env.outputs.branch }}
-                    ghcr.io/${{ env.DOCKER_IMAGE }}:sha-${{ needs.set-env.outputs.checked-out-sha }}
-                    ghcr.io/${{ env.DOCKER_IMAGE }}:latest
+                    ghcr.io/dfe-digital/${{ env.DOCKER_IMAGE }}:${{ needs.set-env.outputs.branch }}
+                    ghcr.io/dfe-digital/${{ env.DOCKER_IMAGE }}:sha-${{ needs.set-env.outputs.checked-out-sha }}
+                    ghcr.io/dfe-digital/${{ env.DOCKER_IMAGE }}:latest
                 push: true
-
-# TODO: Place this in build-and-deploy.yml
-# - name: Run Linter
-#   uses: super-linter/super-linter@v5
-#   env:
-      # VALIDATE_ALL_CODEBASE: false # TODO: True or False?
-      # IGNORE_GENERATED_FILES: true
-      # IGNORE_GITIGNORED_FILES: true
-      # VALIDATE_CSHARP: true
-      # VALIDATE_JAVASCRIPT_ES: true
-      # VALIDATE_HTML: true
-      # DEFAULT_BRANCH: main
-      # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
