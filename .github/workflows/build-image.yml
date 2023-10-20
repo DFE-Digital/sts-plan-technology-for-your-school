@@ -1,0 +1,85 @@
+name: Build Image and Publish to GCR
+
+on:
+    workflow_dispatch: # TODO: Evaluate whether this should be done as its own workflow or called from elsewhere (i.e., workflow_call et al.)
+    pull_request: # TODO: This will probably be on push instead of PR after testing
+        # branches: ["development", "main"] # TODO: Put back after testing
+        branches: "development"
+        paths:
+            - 'src/**'
+            - '.github/workflows/build-image.yml' 
+
+concurrency:
+     group: ${{ github.workflow }}-${{ github.ref_name }}
+     cancel-in-progress: true
+
+env:
+    DOCKER_IMAGE: plan-tech-app
+    NODE_VERSION: 18.x
+
+jobs:
+
+    set-env:
+
+        runs-on: ubuntu-22.04 # TODO: Specify version or use latest? A: Use Version
+        name: Set Environment
+        outputs:
+            branch: ${{ steps.var.outputs.branch }}
+            checked-out-sha: ${{ steps.var.outputs.checked-out-sha }}
+        
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                ref: ${{ github.ref }}
+            
+            - id: var
+              run: |
+                GIT_REF=${{ github.ref }}
+                GIT_BRANCH=${GIT_REF##*/}
+                CHECKED_OUT_SHA="$(git log -1 '--format=format:%H')"
+                echo "branch=$GIT_BRANCH" >> $GITHUB_OUTPUT
+                echo "checked-out-sha=${CHECKED_OUT_SHA}" >> $GITHUB_OUTPUT
+
+    build-image:
+
+        runs-on: ubuntu-22.04
+        needs: [set-env]
+        name: Lint, Test, Build & Publish Image
+        
+        steps:
+
+            - uses: actions/checkout@v3
+              with:
+                ref: ${{ github.ref }} # TODO: Fetch Depth for Super Linter?
+
+            - name: GitHub Container Registry Login
+              uses: docker/login-action@v3
+              with:
+                registry: ghcr.io
+                username: ${{ github.repository_owner }}
+                password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Build Image & Publish to GCR
+              uses: docker/build-push-action@v4
+              with:
+                context: ./
+                file: ./src/Dfe.PlanTech.Web/Dockerfile
+                build-args: COMMIT_SHA=${{ needs.set-env.outputs.checked-out-sha }}
+                tags: |
+                    ghcr.io/${{ env.DOCKER_IMAGE }}:${{ needs.set-env.outputs.branch }}
+                    ghcr.io/${{ env.DOCKER_IMAGE }}:sha-${{ needs.set-env.outputs.checked-out-sha }}
+                    ghcr.io/${{ env.DOCKER_IMAGE }}:latest
+                push: true
+
+# TODO: Place this in build-and-deploy.yml
+# - name: Run Linter
+#   uses: super-linter/super-linter@v5
+#   env:
+      # VALIDATE_ALL_CODEBASE: false # TODO: True or False?
+      # IGNORE_GENERATED_FILES: true
+      # IGNORE_GITIGNORED_FILES: true
+      # VALIDATE_CSHARP: true
+      # VALIDATE_JAVASCRIPT_ES: true
+      # VALIDATE_HTML: true
+      # DEFAULT_BRANCH: main
+      # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
