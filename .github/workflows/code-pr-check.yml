@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3 # TODO: Fetch Depth for Super Linter?
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
@@ -47,6 +47,18 @@ jobs:
         with:
           distribution: 'microsoft'
           java-version: '17'
+
+      - name: Run Linter # TODO: Does this also change the code, or does it need to have a commit step?
+        uses: super-linter/super-linter@v5
+        env:
+          VALIDATE_ALL_CODEBASE: false # TODO: True or False?
+          IGNORE_GENERATED_FILES: true
+          IGNORE_GITIGNORED_FILES: true
+          VALIDATE_CSHARP: true
+          VALIDATE_JAVASCRIPT_ES: true
+          VALIDATE_HTML: true
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Start SonarCloud scanner
         run: |
