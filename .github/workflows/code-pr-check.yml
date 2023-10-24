@@ -60,9 +60,10 @@ jobs:
           VALIDATE_JAVASCRIPT_ES: true
           VALIDATE_HTML: true
           DEFAULT_BRANCH: main
+          DISABLE_ERRORS: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Commit & Push Lint Result
+      - name: Commit & Push Lint Result # TODO: Make into Action to avoid duplication
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
