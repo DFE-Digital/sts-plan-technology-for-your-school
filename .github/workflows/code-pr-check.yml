@@ -61,6 +61,7 @@ jobs:
   build-test-web-app:  
     name: Build and run unit tests
     runs-on: ubuntu-20.04
+    needs: [lint-code]
 
     steps:
       - name: Check out repository
