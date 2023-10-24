@@ -28,8 +28,32 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+
+      - name: Run Linter
+        uses: super-linter/super-linter@v5
+        env:
+          VALIDATE_ALL_CODEBASE: false # TODO: True or False?
+          IGNORE_GENERATED_FILES: true
+          IGNORE_GITIGNORED_FILES: true
+          VALIDATE_CSHARP: true
+          DEFAULT_BRANCH: main
+          DISABLE_ERRORS: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+      - name: Commit & Push Lint Result # TODO: Make into Action to avoid duplication
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo `git status --porcelain`
+          if [[ `git status --porcelain` ]]; then
+            git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git config --local user.name "github-actions[bot]"
+            git commit -am "refactor: Lint Code"
+            git push
+            echo "Commited Changes"
+          else
+            echo "No Changes to Commit"
+          fi      
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
@@ -49,33 +73,6 @@ jobs:
         with:
           distribution: 'microsoft'
           java-version: '17'
-
-      - name: Run Linter # TODO: Does this also change the code, or does it need to have a commit step?
-        uses: super-linter/super-linter@v5
-        env:
-          VALIDATE_ALL_CODEBASE: false # TODO: True or False?
-          IGNORE_GENERATED_FILES: true
-          IGNORE_GITIGNORED_FILES: true
-          VALIDATE_CSHARP: true
-          VALIDATE_JAVASCRIPT_ES: true
-          VALIDATE_HTML: true
-          DEFAULT_BRANCH: main
-          DISABLE_ERRORS: true
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Commit & Push Lint Result # TODO: Make into Action to avoid duplication
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if [[ `git status --porcelain` ]]; then
-            git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git config --local user.name "github-actions[bot]"
-            git commit -am "refactor: Lint Code"
-            git push
-            echo "Commited Changes"
-          else
-            echo "No Changes to Commit"
-          fi
           
       - name: Start SonarCloud scanner
         run: |
