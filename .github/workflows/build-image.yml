@@ -1,8 +1,8 @@
 name: Build Image and Publish to GCR
 
 on:
-    workflow_dispatch: # TODO: Evaluate whether this should be done as its own workflow or called from elsewhere (i.e., workflow_call et al.)
-    pull_request:      # TODO: This will probably be on push instead of PR after testing
+    workflow_dispatch: # TODO: Ultimately, this will be called as part of a "build and deploy" workflow.
+    push:
         branches: ["development", "main"]
         paths:
             - 'src/**'
