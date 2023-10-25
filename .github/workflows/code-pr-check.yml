@@ -42,7 +42,7 @@ jobs:
           dotnet-version: "7.x"
       
       - name: Lint Code
-        uses: oxsecurity/megalinter@v7
+        uses: oxsecurity/megalinter/flavors/dotnet@v7.4.0
         env:
           ENABLE: CSHARP
           ENABLE_LINTERS: CSHARP_DOTNET_FORMAT
