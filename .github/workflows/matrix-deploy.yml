@@ -7,15 +7,27 @@ on:
     paths:
       - 'src/**'
       - '.github/workflows/matrix-deploy.yml'
+  pull_request:                               # TODO: Remove after testing
+    branches: ["development"]                 # TODO: Ditto
+    paths:                                    # TODO: Ditto
+      - 'src/**'                              # TODO: Ditto
+      - '.github/workflows/matrix-deploy.yml' # TODO: Ditto
     
 jobs:
+  create-and-publish-image:
+    uses: ./.github/workflows/build-image.yml
+    secrets: inherit
+
   deploy-to-environments:
+    needs: [create-and-publish-image]
     strategy:
       max-parallel: 1
       fail-fast: true
       matrix:
-        target: [ Dev, Tst, Staging, Production ]
-    uses: ./.github/workflows/build-and-deploy.yml
+        # target: [ Dev, Tst, Staging, Production ] TODO: Put back all environments after testing
+        target: [Dev, Tst]
+    # uses: ./.github/workflows/build-and-deploy.yml TODO: Ditto above
+    uses: ./.github/workflows/deploy-image.yml
     with:
       environment: ${{ matrix.target }}
     secrets: inherit

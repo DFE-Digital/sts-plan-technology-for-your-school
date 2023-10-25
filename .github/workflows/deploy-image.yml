@@ -1,0 +1,72 @@
+name: Deploy Image to Environment
+
+on:
+    workflow_call:
+      inputs:
+        environment:
+          type: string
+          required: true
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.inputs.environment }}
+    cancel-in-progress: true
+
+env:
+    GCR_DOCKER_IMAGE: plan-technology-for-your-school
+    ACR_DOCKER_IMAGE: plan-tech-app
+
+jobs:
+
+    set-env:
+
+        runs-on: ubuntu-22.04
+        name: Set Environment
+        outputs:
+            environment: ${{ steps.var.outputs.environment }}
+            image: ${{ steps.var.outputs.image }}
+        
+        steps:
+
+            - id: var
+              run: |
+                ENVIRONMENT=${{ inputs.environment }}
+                echo "environment=${ENVIRONMENT,,}" >> $GITHUB_OUTPUT
+
+    # database-upgrader:
+
+    #     runs-on: ubuntu-22.04
+    #     name: Run Database Upgrader
+    #     needs: [set-env]
+
+    #     # TODO: Database Upgrader
+    
+    pull-image-from-gcr-and-deploy-to-acr:
+
+        runs-on: ubuntu-22.04
+        name: Pull Image From GitHub Container Registry and Deploy to Azure Container Registry
+        # needs: [set-env, database-upgrader]
+        needs: [set-env]
+
+        steps:
+
+            - name: GitHub Container Registry Login
+              uses: docker/login-action@v3
+              with:
+                registry: ghcr.io
+                username: ${{ github.repository_owner }}
+                password: ${{ secrets.GITHUB_TOKEN }}
+            
+            - name: Pull Image From GCR
+              run: docker pull ghcr.io/dfe-digital/${{ env.GCR_DOCKER_IMAGE }}:latest
+
+            - name: Azure Container Registry Login
+              uses: docker/login-action@v3
+              with:
+                registry: ${{ secrets.AZ_ACR_URL }}
+                username: ${{ secrets.AZ_CLIENT_ID }}
+                password: ${{ secrets.AZ_CLIENT_SECRET }}
+            
+            - name: Push Image To ACR
+              run: |
+                docker tag ghcr.io/dfe-digital/${{ env.GCR_DOCKER_IMAGE }}:latest ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ needs.set-env.outputs.environment }}
+                docker push ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ needs.set-env.outputs.environment }}

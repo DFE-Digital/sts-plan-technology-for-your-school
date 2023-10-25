@@ -1,12 +1,7 @@
 name: Build Image and Publish to GCR
 
 on:
-    workflow_dispatch: # TODO: Ultimately, this will be called as part of a "build and deploy" workflow.
-    push:
-        branches: ["development", "main"]
-        paths:
-            - 'src/**'
-            - '.github/workflows/build-image.yml' 
+  workflow_call:
 
 concurrency:
      group: ${{ github.workflow }}-${{ github.ref_name }}
