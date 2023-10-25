@@ -1,10 +1,10 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Core;
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
-using Dfe.PlanTech.Application.Exceptions;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 

@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 

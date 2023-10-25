@@ -9,16 +9,16 @@ namespace Dfe.PlanTech.Application.Submissions.Queries;
 /// </summary>
 public static class SectionNotStartedStatusChecker
 {
-  public static readonly ISubmissionStatusChecker SectionNotStarted = new SubmissionStatusChecker()
-  {
-    IsMatchingSubmissionStatusFunc = (userJourneyRouter) => userJourneyRouter.SectionStatus != null &&
-                                                   !userJourneyRouter.SectionStatus.Completed &&
-                                                   userJourneyRouter.SectionStatus.Status == Status.NotStarted,
-    ProcessSubmissionFunc = (userJourneyRouter, cancellationToken) =>
+    public static readonly ISubmissionStatusChecker SectionNotStarted = new SubmissionStatusChecker()
     {
-      userJourneyRouter.Status = SubmissionStatus.NotStarted;
-      userJourneyRouter.NextQuestion = userJourneyRouter.Section!.Questions[0];
-      return Task.CompletedTask;
-    }
-  };
+        IsMatchingSubmissionStatusFunc = (userJourneyRouter) => userJourneyRouter.SectionStatus != null &&
+                                                       !userJourneyRouter.SectionStatus.Completed &&
+                                                       userJourneyRouter.SectionStatus.Status == Status.NotStarted,
+        ProcessSubmissionFunc = (userJourneyRouter, cancellationToken) =>
+        {
+            userJourneyRouter.Status = SubmissionStatus.NotStarted;
+            userJourneyRouter.NextQuestion = userJourneyRouter.Section!.Questions[0];
+            return Task.CompletedTask;
+        }
+    };
 }

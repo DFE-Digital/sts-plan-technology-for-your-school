@@ -33,10 +33,10 @@ graph TD
         A[User navigates to check answer page] --> B{Is section on check answers status?}
         B -- Yes --> C[Show check answers page]
         B -- No --> D{Is the section completed?}
-        D -- Yes --> E[Show interstitial page for section]
+        D -- Yes --> E[Show self-assessment page]
         D -- No --> F{Is section in progress?}
         F -- Yes --> G[Show next question for section]
-        F -- No --> H[Show interstitial page for section]
+        F -- No --> E
     end
 ```
 
@@ -45,14 +45,14 @@ graph TD
     subgraph Recommendation
         A[User navigates to a recommendation page] --> B{Is the section complete?}
         B -- Yes --> C{Is it the recommendation for their maturity?}
+        B -- No --> I
         C -- Yes --> D[Show recommendation page]
         C -- No --> E[Redirect to correct recommendation page]
         E --> D
-
         C -- No --> F{Is section on check answers status?}
         F -- Yes --> G[Show check answers page]
         F -- No --> H{Is section started?}
-        H -- No --> I[Show interstitial page for section]
+        H -- No --> I[Show self-assessment page]
         H -- Yes --> J[Show next question for user journey]
     end
 ```

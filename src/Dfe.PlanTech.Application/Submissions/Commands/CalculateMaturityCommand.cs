@@ -3,21 +3,21 @@ using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Microsoft.Data.SqlClient;
 
-namespace Dfe.PlanTech.Application.Submissions.Commands
+namespace Dfe.PlanTech.Application.Submissions.Commands;
+
+public class CalculateMaturityCommand : ICalculateMaturityCommand
 {
-    public class CalculateMaturityCommand : ICalculateMaturityCommand
+    private readonly IPlanTechDbContext _db;
+
+    public CalculateMaturityCommand(IPlanTechDbContext db)
     {
-        private readonly IPlanTechDbContext _db;
+        _db = db;
+    }
 
-        public CalculateMaturityCommand(IPlanTechDbContext db)
-        {
-            _db = db;
-        }
-
-        public Task<int> CalculateMaturityAsync(int submissionId, CancellationToken cancellationToken = default)
-        {
-            var sprocName = DatabaseConstants.CalculateMaturitySproc;
-            var parms = new List<SqlParameter>
+    public async Task<int> CalculateMaturityAsync(int submissionId, CancellationToken cancellationToken = default)
+    {
+        var sprocName = DatabaseConstants.CalculateMaturitySproc;
+        var parms = new List<SqlParameter>
             {
                 new() {
                     ParameterName = DatabaseConstants.CalculateMaturitySprocParam,
@@ -26,7 +26,6 @@ namespace Dfe.PlanTech.Application.Submissions.Commands
                 }
             };
 
-            return _db.CallStoredProcedureWithReturnInt(sprocName, parms, cancellationToken);
-        }
+        return await _db.CallStoredProcedureWithReturnInt(sprocName, parms, cancellationToken);
     }
 }
