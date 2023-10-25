@@ -35,18 +35,19 @@ jobs:
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
       
       - name: Lint Code
         uses: oxsecurity/megalinter@v7
         env:
-          ENABLE: CSHARP_DOTNET_FORMAT
+          ENABLE: CSHARP
+          ENABLE_LINTERS: CSHARP_DOTNET_FORMAT
           APPLY_FIXES: CSHARP_DOTNET_FORMAT
           APPLY_FIXES_EVENT: pull_request
           APPLY_FIXES_MODE: commit
           IGNORE_GENERATED_FILES: true
           IGNORE_GITIGNORED_FILES: true
-          VALIDATE_ALL_CODEBASE: false
+          VALIDATE_ALL_CODEBASE: true
+          REPORT_OUTPUT_FOLDER: none
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit & Push # TODO: Make into Action to avoid duplication
