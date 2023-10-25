@@ -4,7 +4,7 @@ on:
     workflow_call:
       inputs:
         environment:
-          type: environment
+          type: string
           required: true
 
 concurrency:
@@ -17,11 +17,27 @@ env:
 
 jobs:
 
+    set-env:
+
+        runs-on: ubuntu-22.04
+        name: Set Environment
+        outputs:
+            environment: ${{ steps.var.outputs.environment }}
+            image: ${{ steps.var.outputs.image }}
+        
+        steps:
+
+            - id: var
+              run: |
+                ENVIRONMENT=${{ inputs.environment }}
+                echo "environment=${ENVIRONMENT,,}" >> $GITHUB_OUTPUT
+
+
     # database-upgrader:
 
     #     runs-on: ubuntu-22.04
-    #     name: Upgrade Database For Environment ${{ inputs.environment }}
-    #     environment: ${{ inputs.environment }}
+    #     name: Upgrade Database For Environment ${{ needs.set-env.outputs.environment }}
+    #     environment: ${{ needs.set-env.outputs.environment }}
     #     needs: [set-env]
 
     #     # TODO: Database Upgrader
@@ -30,8 +46,9 @@ jobs:
 
         runs-on: ubuntu-22.04
         name: Pull Image From GitHub Container Registry and Deploy to Azure Container Registry
-        environment: ${{ inputs.environment }}
-        # needs: [database-upgrader]
+        environment: ${{ needs.set-env.outputs.environment }}
+        # needs: [set-env, database-upgrader]
+        needs: [set-env]
 
         steps:
 
@@ -54,5 +71,5 @@ jobs:
             
             - name: Push Image To ACR
               run: |
-                docker tag ghcr.io/dfe-digital/${{ env.GCR_DOCKER_IMAGE }}:latest ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ inputs.environment }}
-                docker push ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ inputs.environment }}
+                docker tag ghcr.io/dfe-digital/${{ env.GCR_DOCKER_IMAGE }}:latest ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ needs.set-env.outputs.environment }}
+                docker push ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ needs.set-env.outputs.environment }}
