@@ -22,6 +22,8 @@ public class Page : ContentComponent
 
     public string? Param { get; set; }
 
+    public IContentComponent[] BeforeTitleContent { get; init; } = Array.Empty<IContentComponent>();
+
     public Title? Title { get; init; }
 
     public string? OrganisationName { get; set; }
