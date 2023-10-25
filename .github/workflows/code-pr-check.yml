@@ -46,28 +46,37 @@ jobs:
         env:
           ENABLE: CSHARP
           ENABLE_LINTERS: CSHARP_DOTNET_FORMAT
+          DISABLE_LINTERS: CSHARP_CSHARPIER
           APPLY_FIXES: CSHARP_DOTNET_FORMAT
           APPLY_FIXES_EVENT: pull_request
           APPLY_FIXES_MODE: commit
           IGNORE_GENERATED_FILES: true
           IGNORE_GITIGNORED_FILES: true
           VALIDATE_ALL_CODEBASE: true
-          REPORT_OUTPUT_FOLDER: none
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Commit & Push # TODO: Make into Action to avoid duplication
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if [[ `git status --porcelain` ]]; then
-            git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git config --local user.name "github-actions[bot]"
-            git commit -am "refactor: Lint Code"
-            git push
-            echo "Commited Changes"
-          else
-            echo "No Changes to Commit"
-          fi
+      - name: Archive Lint Artifacts
+        if: ${{ success() }} || ${{ failure() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: linter-report
+          path: |
+            megalinter-reports
+            mega-linter.log
+
+      # - name: Commit & Push # TODO: Make into Action to avoid duplication
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     if [[ `git status --porcelain` ]]; then
+      #       git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      #       git config --local user.name "github-actions[bot]"
+      #       git commit -am "refactor: Lint Code"
+      #       git push
+      #       echo "Commited Changes"
+      #     else
+      #       echo "No Changes to Commit"
+      #     fi
 
   build-test-web-app:  
     name: Build and run unit tests
