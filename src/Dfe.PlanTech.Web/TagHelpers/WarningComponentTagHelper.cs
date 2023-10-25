@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using System.Text;
 
@@ -9,8 +8,6 @@ public class WarningComponentTagHelper : TagHelper
   public const string WarningIcon = """<span class="govuk-warning-text__icon" aria-hidden="true">!</span>""";
   public const string OpeningSpan = """<strong class="govuk-warning-text__text">""";
   public const string AssistiveText = """<span class="govuk-warning-text__assistive">Warning</span>""";
-
-  public WarningComponent? Warning { get; set; }
 
   public WarningComponentTagHelper()
   {
