@@ -29,7 +29,7 @@ jobs:
             
             - id: var
               run: |
-                GIT_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+                GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}
                 CHECKED_OUT_SHA="$(git log -1 '--format=format:%H')"
                 echo "branch=$GIT_BRANCH" >> $GITHUB_OUTPUT
                 echo "checked-out-sha=${CHECKED_OUT_SHA}" >> $GITHUB_OUTPUT
