@@ -12,9 +12,10 @@ module "main_hosting" {
   #################
   # Container App #
   #################
-  enable_container_registry = true
-  image_name                = local.container_app_image_name
-  container_port            = local.container_port
+  enable_container_registry           = true
+  use_external_container_registry_url = true
+  image_name                          = local.container_app_image_name
+  container_port                      = local.container_port
   container_secret_environment_variables = {
     "AZURE_CLIENT_ID" = azurerm_user_assigned_identity.user_assigned_identity.client_id,
     "KeyVaultName"    = local.kv_name
@@ -45,6 +46,15 @@ module "main_hosting" {
   # Networking #
   ##############
   container_apps_infra_subnet_service_endpoints = ["Microsoft.KeyVault"]
+
+  #############################
+  # Github Container Registry #
+  #############################
+  registry_server           = local.registry_server
+  registry_username         = local.registry_username
+  registry_password         = local.registry_password
+  registry_custom_image_url = local.registry_custom_image_url
+
 }
 
 resource "random_password" "az_sql_password" {

@@ -2,12 +2,16 @@ locals {
   ###########
   # General #
   ###########
-  current_user_id     = coalesce(var.msi_id, data.azurerm_client_config.current.object_id)
-  project_name        = var.project_name
-  environment         = var.environment
-  azure_location      = var.azure_location
-  resource_prefix     = "${local.environment}${local.project_name}"
-  resource_group_name = module.main_hosting.azurerm_resource_group_default.name
+  current_user_id           = coalesce(var.msi_id, data.azurerm_client_config.current.object_id)
+  project_name              = var.project_name
+  environment               = var.environment
+  azure_location            = var.azure_location
+  resource_prefix           = "${local.environment}${local.project_name}"
+  resource_group_name       = module.main_hosting.azurerm_resource_group_default.name
+  registry_server           = var.registry_server
+  registry_username         = var.registry_username
+  registry_password         = var.registry_password
+  registry_custom_image_url = var.registry_custom_image_url
 
   tags = {
     "Environment"      = var.az_tag_environment,

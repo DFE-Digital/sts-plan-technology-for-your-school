@@ -97,3 +97,28 @@ variable "cdn_create_custom_domain" {
   default     = false
 }
 
+
+###################
+# Github Registry #
+###################
+
+variable "registry_server" {
+  description = "Container registry server"
+  type        = string
+}
+
+variable "registry_username" {
+  description = "Container registry username"
+  type        = string
+}
+
+variable "registry_password" {
+  description = "Container registry password"
+  type        = string
+}
+
+variable "registry_custom_image_url" {
+  description = "Pass in the address to your image from your custom registry"
+  type        = string
+}
+
