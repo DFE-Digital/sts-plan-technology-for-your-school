@@ -14,19 +14,44 @@ on:
       - '.github/workflows/matrix-deploy.yml' # TODO: Ditto
     
 jobs:
+
+  get-branch:
+
+    runs-on: ubuntu-22.04
+    name: Get Target Branch Name
+    outputs:
+      branch: ${{ steps.var.outputs.branch }}
+    
+    steps:
+      - id: var
+        run: |
+          GIT_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+          echo "branch=$GIT_BRANCH" >> $GITHUB_OUTPUT
+
   create-and-publish-image:
+
     uses: ./.github/workflows/build-image.yml
     secrets: inherit
 
-  deploy-to-environments:
-    needs: [create-and-publish-image]
+  deploy-to-development-env:
+    needs: [get-branch, create-and-publish-image]
+    name: Deployment on Push to Development
+    if: ${{ needs.get-branch.outputs.branch }} == "development"
     strategy:
-      max-parallel: 1
-      fail-fast: true
       matrix:
-        # target: [ Dev, Tst, Staging, Production ] TODO: Put back all environments after testing
         target: [Dev, Tst]
-    # uses: ./.github/workflows/build-and-deploy.yml TODO: Ditto above
+    uses: ./.github/workflows/deploy-image.yml
+    with:
+      environment: ${{ matrix.target }}
+    secrets: inherit
+
+  deploy-to-main-env:
+    needs: [get-branch, create-and-publish-image]
+    name: Deployment on Push to Main
+    if: ${{ needs.get-branch.outputs.branch }} == "main"
+    strategy:
+        matrix:
+          target: [Dev, Tst, Staging, Production]
     uses: ./.github/workflows/deploy-image.yml
     with:
       environment: ${{ matrix.target }}

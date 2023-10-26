@@ -23,31 +23,56 @@ jobs:
         name: Set Environment
         outputs:
             environment: ${{ steps.var.outputs.environment }}
-            image: ${{ steps.var.outputs.image }}
+            branch: ${{ steps.var.outputs.branch }}
         
         steps:
 
             - id: var
               run: |
                 ENVIRONMENT=${{ inputs.environment }}
+                GIT_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
                 echo "environment=${ENVIRONMENT,,}" >> $GITHUB_OUTPUT
+                echo "branch=$GIT_BRANCH" >> $GITHUB_OUTPUT
 
 
-    # database-upgrader:
+    # database-upgrader: # TODO: Uncomment to use DB upgrader when ready
 
     #     runs-on: ubuntu-22.04
     #     name: Upgrade Database For Environment ${{ needs.set-env.outputs.environment }}
     #     environment: ${{ needs.set-env.outputs.environment }}
     #     needs: [set-env]
 
-    #     # TODO: Database Upgrader
+    #     steps:
+    #       - uses: actions/checkout@v3
+    #         with:
+    #           ref: ${{ github.ref }}
+            
+    #       - name: Azure CLI Login
+    #         uses: ./github/actions/azure-login
+    #         with:
+    #           az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+    #           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+    #           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+    #           az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+
+    #       - name: Build and Run Database Upgrader
+    #         uses: ./.github/actions/build-and-run-database-upgrader
+    #         with:
+    #           dotnet_version: ${{ vars.DOTNET_VERSION }}
+    #           az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
+    #           az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
+    #           az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+    #           az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+    #           environment: ${{ needs.set-env.outputs.environment }}
+    #           sql_analytics_username: ${{ secrets.ANALYTICS_USERNAME }}
+    #           sql_analytics_password: ${{ secrets.ANALYTICS_PASSWORD }}
     
     pull-image-from-gcr-and-deploy-to-acr:
 
         runs-on: ubuntu-22.04
         name: Pull Image From GitHub Container Registry and Deploy to Azure Container Registry
         environment: ${{ needs.set-env.outputs.environment }}
-        # needs: [set-env, database-upgrader]
+        # needs: [set-env, database-upgrader] TODO: Use this when activating DB upgrader
         needs: [set-env]
 
         steps:
