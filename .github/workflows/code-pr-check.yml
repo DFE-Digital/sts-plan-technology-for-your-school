@@ -39,10 +39,11 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: "7.0.100"
+          dotnet-version: "7.x.x"
       
       - name: Lint Code
-        uses: oxsecurity/megalinter/flavors/dotnet@v7.4.0
+        # uses: oxsecurity/megalinter/flavors/dotnet@v7.4.0
+        uses: oxsecurity/megalinter@v7
         env:
           ENABLE: CSHARP
           ENABLE_LINTERS: CSHARP_DOTNET_FORMAT
