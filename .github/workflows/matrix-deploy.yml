@@ -36,7 +36,7 @@ jobs:
   deploy-to-development-env:
     needs: [get-branch, create-and-publish-image]
     name: Deployment on Push to Development
-    if: ${{ needs.get-branch.outputs.branch }} == "development"
+    if: ${{ needs.get-branch.outputs.branch == 'development' }}
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -50,7 +50,7 @@ jobs:
   deploy-to-main-env:
     needs: [get-branch, create-and-publish-image]
     name: Deployment on Push to Main
-    if: ${{ needs.get-branch.outputs.branch }} == "main"
+    if: ${{ needs.get-branch.outputs.branch == 'main' }}
     strategy:
       max-parallel: 1
       fail-fast: true
