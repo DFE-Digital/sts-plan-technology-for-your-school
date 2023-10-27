@@ -1,5 +1,5 @@
 module "waf" {
-  source = "github.com/dfe-digital/terraform-azurerm-front-door-app-gateway-waf"
+  source = "github.com/dfe-digital/terraform-azurerm-front-door-app-gateway-waf?ref=v0.3.2"
 
   depends_on = [module.main_hosting]
 
