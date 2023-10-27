@@ -40,30 +40,36 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: "7.x.x"
-      
-      - name: Lint Code
-        # uses: oxsecurity/megalinter/flavors/dotnet@v7.4.0
-        uses: oxsecurity/megalinter@v7
-        env:
-          ENABLE: CSHARP
-          ENABLE_LINTERS: CSHARP_DOTNET_FORMAT
-          DISABLE_LINTERS: CSHARP_CSHARPIER
-          APPLY_FIXES: CSHARP_DOTNET_FORMAT
-          APPLY_FIXES_EVENT: pull_request
-          APPLY_FIXES_MODE: commit
-          IGNORE_GENERATED_FILES: true
-          IGNORE_GITIGNORED_FILES: true
-          VALIDATE_ALL_CODEBASE: true
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Archive Lint Artifacts
-        if: ${{ success() }} || ${{ failure() }}
-        uses: actions/upload-artifact@v3
+      - name: Lint Code
+        uses: wearerequired/lint-action@v2
         with:
-          name: linter-report
-          path: |
-            megalinter-reports
-            mega-linter.log
+          auto_fix: true
+          dotnet_format: true
+  
+      # - name: Lint Code
+      #   # uses: oxsecurity/megalinter/flavors/dotnet@v7.4.0
+      #   uses: oxsecurity/megalinter@v7
+      #   env:
+      #     ENABLE: CSHARP
+      #     ENABLE_LINTERS: CSHARP_DOTNET_FORMAT
+      #     DISABLE_LINTERS: CSHARP_CSHARPIER
+      #     APPLY_FIXES: CSHARP_DOTNET_FORMAT
+      #     APPLY_FIXES_EVENT: pull_request
+      #     APPLY_FIXES_MODE: commit
+      #     IGNORE_GENERATED_FILES: true
+      #     IGNORE_GITIGNORED_FILES: true
+      #     VALIDATE_ALL_CODEBASE: true
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Archive Lint Artifacts
+      #   if: ${{ success() }} || ${{ failure() }}
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: linter-report
+      #     path: |
+      #       megalinter-reports
+      #       mega-linter.log
 
       # - name: Commit & Push # TODO: Make into Action to avoid duplication
       #   env:
