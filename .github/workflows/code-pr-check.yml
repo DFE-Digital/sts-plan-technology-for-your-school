@@ -44,8 +44,11 @@ jobs:
       - name: Lint Code
         uses: wearerequired/lint-action@v2
         with:
-          auto_fix: true
+          git_name: github-actions[bot]
+          git_email: "41898282+github-actions[bot]@users.noreply.github.com"
+          dotnet_format_auto_fix: true
           dotnet_format: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
   
       # - name: Lint Code
       #   # uses: oxsecurity/megalinter/flavors/dotnet@v7.4.0
