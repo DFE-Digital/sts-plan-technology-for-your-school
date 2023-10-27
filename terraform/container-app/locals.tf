@@ -41,6 +41,13 @@ locals {
   ##################
   kv_name = "${local.environment}${local.project_name}-kv"
 
+  ###################
+  # Terraform State #
+  ###################
+  tf_rg_name = "${local.environment}${local.project_name}-tf"
+  tf_kv_name = "${local.environment}${local.project_name}-tf-kv"
+  tf_storage_account_name = "${trimsuffix("-", var.environment)}plantechtfstate"
+
   ##################
   # CDN/Front Door #
   ##################
