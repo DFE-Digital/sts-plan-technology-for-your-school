@@ -33,10 +33,9 @@ jobs:
     uses: ./.github/workflows/build-image.yml
     secrets: inherit
 
-  deploy-to-development-env:
+  deploy-to-dev-and-test:
     needs: [get-branch, create-and-publish-image]
-    name: Deployment on Push to Development
-    if: ${{ needs.get-branch.outputs.branch == 'development' }}
+    name: Deployment to Dev & Test
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -47,15 +46,15 @@ jobs:
       environment: ${{ matrix.target }}
     secrets: inherit
 
-  deploy-to-main-env:
-    needs: [get-branch, create-and-publish-image]
-    name: Deployment on Push to Main
+  deploy-to-staging-and-production:
+    needs: [get-branch, create-and-publish-image, deploy-to-dev-and-test]
+    name: Deployment to Staging & Production
     if: ${{ needs.get-branch.outputs.branch == 'main' }}
     strategy:
       max-parallel: 1
       fail-fast: true
       matrix:
-        target: [Dev, Tst, Staging, Production]
+        target: [Staging, Production]
     uses: ./.github/workflows/deploy-image.yml
     with:
       environment: ${{ matrix.target }}

@@ -42,7 +42,6 @@ jobs:
         runs-on: ubuntu-22.04
         name: Pull Image From GitHub Container Registry and Publish to Azure Container Registry
         environment: ${{ needs.set-env.outputs.environment }}
-        # needs: [set-env, database-upgrader] TODO: Use this when activating DB upgrader
         needs: [set-env]
 
         steps:
