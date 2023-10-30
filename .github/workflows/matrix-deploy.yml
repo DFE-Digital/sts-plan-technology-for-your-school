@@ -9,13 +9,48 @@ on:
       - '.github/workflows/matrix-deploy.yml'
     
 jobs:
-  deploy-to-environments:
+
+  get-branch:
+
+    runs-on: ubuntu-22.04
+    name: Get Target Branch Name
+    outputs:
+      branch: ${{ steps.var.outputs.branch }}
+    
+    steps:
+      - id: var
+        run: |
+          GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}
+          echo "branch=$GIT_BRANCH" >> $GITHUB_OUTPUT
+
+  create-and-publish-image:
+
+    uses: ./.github/workflows/build-image.yml
+    secrets: inherit
+
+  deploy-to-dev-and-test:
+    needs: [get-branch, create-and-publish-image]
+    name: Deployment to Dev & Test
     strategy:
       max-parallel: 1
       fail-fast: true
       matrix:
-        target: [ Dev, Tst, Staging, Production ]
-    uses: ./.github/workflows/build-and-deploy.yml
+        target: [Dev, Tst]
+    uses: ./.github/workflows/deploy-image.yml
+    with:
+      environment: ${{ matrix.target }}
+    secrets: inherit
+
+  deploy-to-staging-and-production:
+    needs: [get-branch, create-and-publish-image, deploy-to-dev-and-test]
+    name: Deployment to Staging & Production
+    if: ${{ needs.get-branch.outputs.branch == 'main' }}
+    strategy:
+      max-parallel: 1
+      fail-fast: true
+      matrix:
+        target: [Staging, Production]
+    uses: ./.github/workflows/deploy-image.yml
     with:
       environment: ${{ matrix.target }}
     secrets: inherit
