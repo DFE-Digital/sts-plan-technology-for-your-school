@@ -1,5 +1,5 @@
 module "waf" {
-  source = "github.com/dfe-digital/terraform-azurerm-front-door-app-gateway-waf?ref=v0.3.2"
+  source = "github.com/dfe-digital/terraform-azurerm-front-door-app-gateway-waf?ref=v0.3.6"
 
   depends_on = [module.main_hosting]
 
@@ -8,9 +8,10 @@ module "waf" {
   azure_location          = local.azure_location
   existing_resource_group = local.resource_group_name
 
-  enable_waf      = true
-  waf_mode        = "Prevention"
-  waf_application = "CDN"
+  enable_waf       = true
+  enable_waf_alert = false
+  waf_mode         = "Prevention"
+  waf_application  = "CDN"
 
   waf_targets = {
     "container-app-url" = {
