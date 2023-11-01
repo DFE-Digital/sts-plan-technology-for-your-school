@@ -36,7 +36,6 @@ module "main_hosting" {
   #############
   enable_mssql_database              = true
   mssql_database_name                = "${local.resource_prefix}-sqldb"
-  mssql_server_admin_password        = random_password.az_sql_password.result
   mssql_server_public_access_enabled = true
   mssql_azuread_admin_username       = local.az_sql_azuread_admin_username
   mssql_azuread_admin_object_id      = local.az_sql_azuread_admin_objectid
@@ -55,10 +54,4 @@ module "main_hosting" {
   registry_password         = local.registry_password
   registry_custom_image_url = local.registry_custom_image_url
 
-}
-
-resource "random_password" "az_sql_password" {
-  length           = 32
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
