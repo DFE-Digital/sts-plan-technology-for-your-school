@@ -129,7 +129,7 @@ jobs:
         with:
           azcliversion: 2.45.0
           inlineScript: |
-            az storage blob download -f currentstate.tfstate -c tfstate -n terraform.tfstate --account-name $STATE_ACCOUNT
+            az storage blob download -f currentstate.tfstate -c tfstate -n terraform.tfstate --account-name ${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
             
       - name: Update Terraform State File To Add Operational Insights
         run: |
