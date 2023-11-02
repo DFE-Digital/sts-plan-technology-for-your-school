@@ -1,0 +1,157 @@
+name: Terraform update state
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment (e.g., dev, Tst)'
+        required: true
+        default: 'dev'
+    
+env:
+  DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
+
+  ARM_TENANT_ID: ${{ secrets.AZ_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+  ARM_CLIENT_ID: ${{ secrets.AZ_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ secrets.AZ_CLIENT_SECRET }}
+
+  RESOURCE_GROUP: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
+  
+  AZ_KEYVAULT_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP	}}-kv
+  
+  TF_BACKEND_STORAGE_ACCOUNT_NAME: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
+  TF_BACKEND_CONTAINER_NAME: ${{ secrets.TF_BACKEND_CONTAINER_NAME }}
+  TF_BACKEND_KEY: ${{ secrets.TF_BACKEND_KEY }}
+  TF_BACKEND_RESOURCE_GROUP: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
+
+  TF_VAR_project_name: ${{ secrets.DFE_PROJECT_NAME }}
+  TF_VAR_environment: ${{ secrets.AZ_ENVIRONMENT }}
+  TF_VAR_azure_location: ${{ vars.AZ_LOCATION }}
+  TF_VAR_az_app_kestrel_endpoint: ${{ vars.KESTRELENDPOINT }}
+  TF_VAR_az_tag_environment: ${{ vars.AZ_TAG_ENVIRONMENT }}
+  TF_VAR_az_tag_product: ${{ vars.AZ_TAG_PRODUCT }}
+  TF_VAR_az_sql_admin_password: ${{secrets.AZ_SQL_ADMIN_PASSWORD}}
+  TF_VAR_az_sql_admin_userid_postfix: ${{secrets.AZ_SQL_ADMIN_USERID_POSTFIX}}
+  TF_VAR_registry_server: "ghcr.io"   # TODO: Need to feed this in via secrets or variables
+  TF_VAR_registry_username: "test"    # TODO: Need to feed this in via secrets or variables, dummy values for now need actuals for apply
+  TF_VAR_registry_custom_image_url: "ghcr.io/dfe-digital/plan-technology-for-your-school:latest" # TODO: Need to feed this in via secrets or variables
+  TF_VAR_registry_password: "test"    # TODO: Need to feed this in via secrets or variables dummy values for now need actuals for apply
+
+  TF_WORKING_DIRECTORY: terraform/container-app
+  
+jobs:
+  update-terraform-state:
+    name: Update Terraform State
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.environment == 'dev' || github.event.inputs.environment == 'Tst' }}  # Only enable for dev and Tst environments right now.
+    defaults:
+      run:
+        working-directory: ${{env.TF_WORKING_DIRECTORY}}
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+
+      - name: Get GitHub Runner IP
+        id: whats-my-ip
+        uses: ./.github/actions/whats-my-ip-address
+
+      - name: Set GitHub Runner IP to TF Var
+        shell: bash
+        run: |
+          echo "TF_VAR_github_ip=${{ steps.whats-my-ip.outputs.ip}}" >> $GITHUB_ENV
+
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+
+      - name: Add Runner to KV whitelist
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.45.0
+          inlineScript: |
+            az keyvault network-rule add --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+
+      - name: Terraform init
+        id: init
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ env.TF_BACKEND_RESOURCE_GROUP }}"  \
+            -backend-config="storage_account_name=${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}"  \
+            -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}"  \
+            -backend-config="key=${{ env.TF_BACKEND_KEY }}"
+
+      - name: Pre Update Terraform plan
+        id: plan
+        run: terraform plan -no-color
+        
+      - name: Import Container App Environment to State
+        run: |
+          terraform import \
+          module.main_hosting.azurerm_container_app_environment.container_app_env \
+          "/subscriptions/${{ env.AZ_SUBSCRIPTION_ID }}/resourceGroups/${{ env.RESOURCE_GROUP }}/providers/Microsoft.App/managedEnvironments/${{ env.RESOURCE_GROUP }}containerapp"
+
+      - name: Remove Old Container App Environment from State
+        run: |
+          terraform state rm \
+          module.main_hosting.azapi_resource.container_app_env
+      
+      - name: Import Container App to State
+        run: |
+          terraform import \
+          'module.main_hosting.azurerm_container_app.container_apps["main"]' \
+          "/subscriptions/${{ env.AZ_SUBSCRIPTION_ID }}/resourceGroups/${{ env.RESOURCE_GROUP }}/providers/Microsoft.App/containerApps/${{ env.RESOURCE_GROUP }}-plan-tech-app"
+          
+      - name: Remove Old Container App from State
+        run: |
+          terraform state rm \
+          module.main_hosting.azapi_resource.default
+
+      - name: Get Resource Group Prefix
+        run: |
+          RESOURCE_GROUP_PREFIX="${RESOURCE_GROUP%%-plantech}"
+          echo "RESOURCE_GROUP_PREFIX=$RESOURCE_GROUP_PREFIX" >> $GITHUB_ENV
+      
+      - name: Download Terraform State File
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.45.0
+          inlineScript: |
+            az storage blob download -f currentstate.tfstate -c tfstate -n terraform.tfstate --account-name $STATE_ACCOUNT
+            
+      - name: Update Terraform State File To Add Operational Insights
+        run: |
+          jq \
+          --arg analyticsid "/subscriptions/${{ env.AZ_SUBSCRIPTION_ID }}/resourceGroups/${{ env.RESOURCE_GROUP }}/providers/Microsoft.OperationalInsights/workspaces/${{ env.RESOURCE_GROUP_PREFIX }}-plantechcontainerapp" \
+          '.resources |= map(if .type == "azurerm_container_app_environment" then .instances[].attributes.log_analytics_workspace_id |= $analyticsid else . end)' \
+          currentstate.tfstate > newstate.tfstate
+      
+      - name: Upload Modified Terraform State File
+        run: |
+          az storage blob upload -f newstate.tfstate -c tfstate -n terraform.tfstate --account-name ${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }} --overwrite true
+          
+      - name: Post State Update Terraform plan
+        run: terraform plan -no-color
+        
+      - name: Remove Runner from KV whitelist
+        uses: azure/CLI@v1
+        if: always()
+        with:
+          azcliversion: 2.45.0
+          inlineScript: |
+            az keyvault network-rule remove --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+
+        
+
