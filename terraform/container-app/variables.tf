@@ -43,11 +43,6 @@ variable "az_sql_azuread_admin_username" {
   type        = string
 }
 
-variable "az_sql_admin_password" {
-  description = "Password for the admin listed in the 'az_sql_azuread_admin_username' variable"
-  type        = string
-}
-
 variable "az_sql_azuread_admin_objectid" {
   description = "Object ID for the admin listed in the 'az_sql_azuread_admin_username' variable"
   type        = string
