@@ -1,11 +1,12 @@
 name: Deploy Terraform
 
 on:
-  push:
-    branches: [ "main" ]
-    paths:
-      - 'terraform/**'
-      - '.github/workflows/terraform-deploy.yml'
+  workflow_dispatch: 
+#  push:
+#    branches: [ "main" ]
+#    paths:
+#      - 'terraform/**'
+#      - '.github/workflows/terraform-deploy.yml'
     
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
