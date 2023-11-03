@@ -13,7 +13,7 @@ resource "azurerm_api_management" "api_management" {
   }
 }
 
-resource "azurerm_api_management_backend" "apim_backend" {
+resource "azurerm_api_management_backend" "example" {
   name                = "${local.resource_prefix}-contentful-content-updates"
   resource_group_name = local.resource_group_name
   api_management_name = azurerm_api_management.api_management.name
