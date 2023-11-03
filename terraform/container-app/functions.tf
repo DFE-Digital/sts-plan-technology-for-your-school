@@ -1,5 +1,5 @@
 resource "azurerm_storage_account" "function_storage" {
-  name                     = "${local.resource_prefix}appservicestorage"
+  name                     = replace("${local.resource_prefix}funcstr", "-", "")
   resource_group_name      = local.resource_group_name
   location                 = local.azure_location
   account_tier             = "Standard"
@@ -39,7 +39,7 @@ resource "azurerm_linux_function_app" "contentful_function" {
   storage_uses_managed_identity = true
   service_plan_id               = azurerm_service_plan.function_plan.id
 
-  virtual_network_subnet_id = azurerm_subnet.function_subnet.name
+  virtual_network_subnet_id = azurerm_subnet.function_subnet.id
 
   site_config {}
 
@@ -47,4 +47,18 @@ resource "azurerm_linux_function_app" "contentful_function" {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.user_assigned_identity.id]
   }
+
+  auth_settings {
+    enabled = true
+    active_directory {
+      client_id                  = data.azurerm_client_config.current.client_id
+      client_secret_setting_name = "AZURE_AD_AUTH_CLIENT_SECRET" # We use an app setting to store a key vault reference.
+    }
+  }
+
+  app_settings = {
+    AZURE_AD_AUTH_CLIENT_SECRET = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=${azurerm_key_vault_secret.client_secret.name})"
+  }
+
+  key_vault_reference_identity_id = azurerm_user_assigned_identity.user_assigned_identity.id
 }
