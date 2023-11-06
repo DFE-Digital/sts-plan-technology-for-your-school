@@ -100,7 +100,8 @@ jobs:
 
       - name: Terraform plan 
         id: plan
-        run: terraform plan -no-color
+        run: terraform plan -no-color 2>&1 | tee plan.log
+        timeout-minutes: 5
 
       - name: Terraform fmt
         id: fmt
