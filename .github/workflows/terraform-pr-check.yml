@@ -118,9 +118,10 @@ jobs:
           git-push: "true"
           
       - name: Remove Backticks from Validate Output
+        env:
+          output: ${{ steps.validate.outputs.stdout }}
         run: |
-          ORIGINAL_VALIDATE_OUTPUT="${{ steps.validate.outputs.stdout }}"
-          CLEANED_VALIDATE_VAR=$(echo "$ORIGINAL_VALIDATE_OUTPUT" | sed 's/`//g')
+          CLEANED_VALIDATE_VAR=$(echo "$output" | sed 's/`//g')
           echo "VALIDATE_OUTPUT_VAR=$CLEANED_VALIDATE_VAR" >> $GITHUB_ENV
 
       - name: Update PR with Terraform results  
