@@ -59,7 +59,7 @@ runs:
           })
     
           // 2. Prepare format of the comment
-          const stdout = inputs.validate_stdout
+          const stdout = \`${{ inputs.validate_stdout }}\
           const formatStdout = stdout.replace(/`/g, "\\`"); 
           const output = `#### Terraform Format and Style 🖌\`${{ inputs.fmt_outcome }}\`
           #### Terraform Initialization ⚙️\`${{ inputs.init_outcome }}\`
