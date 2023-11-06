@@ -64,11 +64,6 @@ runs:
           #### Terraform Validation 🤖\`${{ inputs.validate_outcome }}\`
           <details><summary>Validation Output</summary>
     
-    
-          //\`\`\`\n
-          //${{ inputs.validate_stdout }}
-          //\`\`\`
-    
           </details>
     
           #### Terraform Plan 📖\`${{ inputs.plan_outcome }}\`
