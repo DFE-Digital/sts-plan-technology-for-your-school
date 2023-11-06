@@ -116,13 +116,6 @@ jobs:
           output-file: terraform-configuration.md
           output-method: inject
           git-push: "true"
-          
-      - name: Remove Backticks from Validate Output
-        env:
-          output: ${{ steps.validate.outputs.stdout }}
-        run: |
-          CLEANED_VALIDATE_VAR=$(echo "$output" | sed 's/`//g')
-          echo "VALIDATE_OUTPUT_VAR=$CLEANED_VALIDATE_VAR" >> $GITHUB_ENV
 
       - name: Update PR with Terraform results  
         uses: ./.github/actions/post-terraform-results
@@ -134,7 +127,7 @@ jobs:
           fmt_outcome: ${{ steps.fmt.outcome }}
           init_outcome: ${{ steps.init.outcome }}
           validate_outcome: ${{ steps.validate.outcome }}
-          validate_stdout: ${{ env.VALIDATE_OUTPUT_VAR }}
+          validate_stdout: ${{ steps.validate.outputs.stdout }}
           github_actor: ${{ github.actor }}
           github_event_name: ${{ github.event_name }}
           tf_working_directory: ${{ env.TF_WORKING_DIRECTORY }}
