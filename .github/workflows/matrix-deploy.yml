@@ -11,12 +11,10 @@ on:
 jobs:
 
   get-branch:
-
     runs-on: ubuntu-22.04
     name: Get Target Branch Name
     outputs:
       branch: ${{ steps.var.outputs.branch }}
-    
     steps:
       - id: var
         run: |
@@ -24,12 +22,50 @@ jobs:
           echo "branch=$GIT_BRANCH" >> $GITHUB_OUTPUT
 
   create-and-publish-image:
-
     uses: ./.github/workflows/build-image.yml
     secrets: inherit
 
+  check-for-terraform-changes:
+    needs: create-and-publish-image
+    runs-on: ubuntu-latest
+    name: Check for Terraform File Changes
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Check for Terraform File Changes
+        id: terraform_changes
+        run: |
+          changed_files="$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})"
+          echo "Changed files:"
+          echo "$changed_files"
+
+          if [[ "$changed_files" =~ terraform/container-app ]]; then
+            echo "Terraform files have changed. Running Terraform deploy..."
+            echo "run_terraform_deploy::true" >> $GITHUB_OUTPUT
+          else
+            echo "No Terraform file changes in terraform/container-app. Skipping Terraform deploy."
+            echo "run_terraform_deploy::false" >> $GITHUB_OUTPUT
+          fi
+          
+  deploy-terraform-for-dev-and-test:
+    needs: check-terraform-changes
+    name: Deploy Terraform Infrastructure for Dev & Test
+    if: ${{ needs.check-for-terraform-changes.outputs.run_terraform_deploy == 'true' }}
+    strategy:
+      max-parallel: 1
+      fail-fast: true
+      matrix:
+        target: [ Dev, Tst ]
+    uses: ./.github/workflows/terraform-deploy.yml
+    with:
+      environment: ${{ matrix.target }}
+    secrets: inherit
+
   deploy-to-dev-and-test:
-    needs: [get-branch, create-and-publish-image]
+    needs: [get-branch, create-and-publish-image, check-for-terraform-changes, deploy-terraform-for-dev-and-test]
     name: Deployment to Dev & Test
     strategy:
       max-parallel: 1
@@ -40,6 +76,8 @@ jobs:
     with:
       environment: ${{ matrix.target }}
     secrets: inherit
+    
+  # TODO: Job to deploy infrastructure for staging and production will go here
 
   deploy-to-staging-and-production:
     needs: [get-branch, create-and-publish-image, deploy-to-dev-and-test]

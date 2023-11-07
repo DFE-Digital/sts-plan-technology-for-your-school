@@ -1,12 +1,17 @@
 name: Deploy Terraform
 
 on:
-  workflow_dispatch: 
-#  push:
-#    branches: [ "main" ]
-#    paths:
-#      - 'terraform/**'
-#      - '.github/workflows/terraform-deploy.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: string
+        description: 'The environment to deploy to:'
+        required: true
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
     
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
@@ -47,12 +52,7 @@ jobs:
     defaults:
       run:
         working-directory: ${{env.TF_WORKING_DIRECTORY}}
-    strategy:
-      max-parallel: 1
-      fail-fast: true
-      matrix:
-        env: ['dev', 'Tst', 'Staging', 'Production']  
-    environment: ${{ matrix.env }}  
+    environment: ${{ github.event.inputs.environment }} 
     steps:
       - name: Clone repo
         uses: actions/checkout@v3
@@ -97,7 +97,7 @@ jobs:
         
       - name: Apply Terraform changes
         id: apply
-        run: terraform apply -auto-approve
+        run: terraform plan -auto-approve  # TODO: will change this to apply once we're happy with workflow and tested.
       
       - name: Remove Runner to KV whitelist
         uses: azure/CLI@v1
