@@ -9,16 +9,16 @@ namespace Dfe.PlanTech.Application.Submissions.Queries;
 /// </summary>
 public static class SectionCompleteStatusChecker
 {
-  public static readonly ISubmissionStatusChecker SectionComplete = new SubmissionStatusChecker()
-  {
-    IsMatchingSubmissionStatusFunc = (userJourneyRouter) => userJourneyRouter?.SectionStatus?.Completed == true,
-    ProcessSubmissionFunc = (userJourneyRouter, cancellationToken) =>
+    public static readonly ISubmissionStatusChecker SectionComplete = new SubmissionStatusChecker()
     {
-      userJourneyRouter.Status = SubmissionStatus.Completed;
-      userJourneyRouter.NextQuestion = userJourneyRouter.Section!.Questions[0];
-      
-      return Task.CompletedTask;
-    }
-  };
+        IsMatchingSubmissionStatusFunc = (userJourneyRouter) => userJourneyRouter?.SectionStatus?.Completed == true,
+        ProcessSubmissionFunc = (userJourneyRouter, cancellationToken) =>
+        {
+            userJourneyRouter.Status = SubmissionStatus.Completed;
+            userJourneyRouter.NextQuestion = userJourneyRouter.Section!.Questions[0];
+
+            return Task.CompletedTask;
+        }
+    };
 }
 

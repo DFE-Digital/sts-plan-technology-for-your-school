@@ -5,18 +5,18 @@ namespace Dfe.PlanTech.Web;
 
 public static class PageRedirecter
 {
-  public const string SelfAssessmentRoute = "/self-assessment";
+    public const string SelfAssessmentRoute = "/self-assessment";
 
-  public static RedirectToActionResult RedirectToSelfAssessment(this Controller controller)
-  => RedirectToPage(controller, SelfAssessmentRoute);
+    public static RedirectToActionResult RedirectToSelfAssessment(this Controller controller)
+    => RedirectToPage(controller, SelfAssessmentRoute);
 
-  public static RedirectToActionResult RedirectToCheckAnswers(this Controller controller, string sectionSlug)
-    => controller.RedirectToAction(CheckAnswersController.CheckAnswersAction, CheckAnswersController.ControllerName , new { sectionSlug });
+    public static RedirectToActionResult RedirectToCheckAnswers(this Controller controller, string sectionSlug)
+      => controller.RedirectToAction(CheckAnswersController.CheckAnswersAction, CheckAnswersController.ControllerName, new { sectionSlug });
 
-  public static RedirectToActionResult RedirectToInterstitialPage(this Controller controller, string sectionSlug)
-  => RedirectToPage(controller, sectionSlug);
+    public static RedirectToActionResult RedirectToInterstitialPage(this Controller controller, string sectionSlug)
+    => RedirectToPage(controller, sectionSlug);
 
-  private static RedirectToActionResult RedirectToPage(this Controller controller, string route)
-  => controller.RedirectToAction(PagesController.GetPageByRouteAction, PagesController.ControllerName, new { route });
+    private static RedirectToActionResult RedirectToPage(this Controller controller, string route)
+    => controller.RedirectToAction(PagesController.GetPageByRouteAction, PagesController.ControllerName, new { route });
 }
 

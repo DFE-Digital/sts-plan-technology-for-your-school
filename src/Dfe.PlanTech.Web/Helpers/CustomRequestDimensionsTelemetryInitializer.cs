@@ -1,4 +1,3 @@
-using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Extensibility;
@@ -7,7 +6,7 @@ namespace Dfe.PlanTech.Web.Helpers;
 
 public class CustomRequestDimensionsTelemetryInitializer : ITelemetryInitializer
 {
-    
+
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public CustomRequestDimensionsTelemetryInitializer(IHttpContextAccessor httpContextAccessor)
@@ -21,7 +20,7 @@ public class CustomRequestDimensionsTelemetryInitializer : ITelemetryInitializer
         var requestId = GetRequestId();
         requestTelemetry.Properties["RequestId"] = requestId;
     }
-    
+
     private string? GetRequestId()
     {
         return _httpContextAccessor.HttpContext?.TraceIdentifier;

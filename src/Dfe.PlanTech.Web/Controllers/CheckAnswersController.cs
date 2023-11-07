@@ -12,7 +12,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     public const string CheckAnswersAction = nameof(CheckAnswersPage);
     public const string CheckAnswersPageSlug = "check-answers";
     public const string CheckAnswersViewName = "CheckAnswers";
-    
+
     public const string InlineRecommendationUnavailableErrorMessage =
         "Unable to save. Please try again. If this problem continues you can";
 
@@ -26,7 +26,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
                                                       CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
-        
+
         var errorMessage = TempData["ErrorMessage"]?.ToString();
 
         return await checkAnswersValidator.ValidateRoute(sectionSlug, errorMessage, this, cancellationToken);

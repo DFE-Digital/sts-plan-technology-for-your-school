@@ -1,0 +1,104 @@
+name: Deploy Image to Environment
+
+on:
+    workflow_call:
+      inputs:
+        environment:
+          type: string
+          required: true
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.inputs.environment }}
+    cancel-in-progress: true
+
+env:
+    GCR_DOCKER_IMAGE: plan-technology-for-your-school
+    ACR_DOCKER_IMAGE: plan-tech-app
+
+jobs:
+
+    set-env:
+
+        runs-on: ubuntu-22.04
+        name: Set Environment
+        outputs:
+            environment: ${{ steps.var.outputs.environment }}
+            release: ${{ steps.var.outputs.release }}
+            branch: ${{ steps.var.outputs.branch }}
+        
+        steps:
+
+            - id: var
+              run: |
+                ENVIRONMENT=${{ inputs.environment }}
+                RELEASE=${ENVIRONMENT,,}-`date +%Y-%m-%d`.${{ github.run_number }}
+                GIT_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+                echo "environment=${ENVIRONMENT,,}" >> $GITHUB_OUTPUT
+                echo "release=${RELEASE}" >> $GITHUB_OUTPUT
+                echo "branch=$GIT_BRANCH" >> $GITHUB_OUTPUT
+    
+    pull-image-from-gcr-and-publish-to-acr:
+
+        runs-on: ubuntu-22.04
+        name: Pull Image From GitHub Container Registry and Publish to Azure Container Registry
+        environment: ${{ needs.set-env.outputs.environment }}
+        needs: [set-env]
+
+        steps:
+
+            - name: GitHub Container Registry Login
+              uses: docker/login-action@v3
+              with:
+                registry: ghcr.io
+                username: ${{ github.repository_owner }}
+                password: ${{ secrets.GITHUB_TOKEN }}
+            
+            - name: Pull Image From GCR
+              run: docker pull ghcr.io/dfe-digital/${{ env.GCR_DOCKER_IMAGE }}:latest
+
+            - name: Azure Container Registry Login
+              uses: docker/login-action@v3
+              with:
+                registry: ${{ secrets.AZ_ACR_URL }}
+                username: ${{ secrets.AZ_CLIENT_ID }}
+                password: ${{ secrets.AZ_CLIENT_SECRET }}
+            
+            - name: Push Image To ACR
+              run: |
+                docker tag ghcr.io/dfe-digital/${{ env.GCR_DOCKER_IMAGE }}:latest ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ needs.set-env.outputs.environment }}
+                docker push ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ needs.set-env.outputs.environment }}
+    
+    deploy-image:
+
+      runs-on: ubuntu-22.04
+      name: Deploy Image To ${{ needs.set-env.outputs.environment }} (${{ needs.set-env.outputs.release }})
+      environment: ${{ needs.set-env.outputs.environment }}
+      needs: [set-env, pull-image-from-gcr-and-publish-to-acr]
+
+      steps:
+
+        - uses: actions/checkout@v3
+          with:
+            ref: ${{ github.ref }}  
+        
+        - name: Azure CLI Login
+          uses: ./.github/actions/azure-login
+          with:
+            az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+            az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+            az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+            az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+        
+        - name: Update Azure Container Apps Revision
+          uses: azure/CLI@v1
+          id: azure
+          with:
+            azcliversion: 2.45.0
+            inlineScript: |
+              az config set extension.use_dynamic_install=yes_without_prompt
+              az containerapp update \
+                --name ${{ secrets.AZ_ACA_NAME }} \
+                --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP }} \
+                --image ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ needs.set-env.outputs.environment }} \
+                --output none
+                &> /dev/null

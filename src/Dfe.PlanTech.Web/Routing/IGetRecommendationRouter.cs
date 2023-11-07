@@ -8,17 +8,17 @@ namespace Dfe.PlanTech.Web.Routing;
 /// </summary>
 public interface IGetRecommendationRouter
 {
-  /// <summary>
-  /// Gets current user journey status, then either returns Recommendation page for slug (if appropriate), 
-  /// or redirects to correct next part of user journey
-  /// </summary>
-  /// <param name="sectionSlug"></param>
-  /// <param name="recommendationSlug"></param>
-  /// <param name="controller"></param>
-  /// <param name="cancellationToken"></param>
-  /// <returns></returns>
-  public Task<IActionResult> ValidateRoute(string sectionSlug,
-                                           string recommendationSlug,
-                                           RecommendationsController controller,
-                                           CancellationToken cancellationToken);
+    /// <summary>
+    /// Gets current user journey status, then either returns Recommendation page for slug (if appropriate), 
+    /// or redirects to correct next part of user journey
+    /// </summary>
+    /// <param name="sectionSlug"></param>
+    /// <param name="recommendationSlug"></param>
+    /// <param name="controller"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public Task<IActionResult> ValidateRoute(string sectionSlug,
+                                             string recommendationSlug,
+                                             RecommendationsController controller,
+                                             CancellationToken cancellationToken);
 }

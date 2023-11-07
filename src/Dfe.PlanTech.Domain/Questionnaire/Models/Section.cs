@@ -37,7 +37,8 @@ public class Section : ContentComponent, ISection
 
         while (node != null)
         {
-            if (!questionWithAnswerMap.TryGetValue(node.Sys.Id, out QuestionWithAnswer? questionWithAnswer)){
+            if (!questionWithAnswerMap.TryGetValue(node.Sys.Id, out QuestionWithAnswer? questionWithAnswer))
+            {
                 break;
             }
 

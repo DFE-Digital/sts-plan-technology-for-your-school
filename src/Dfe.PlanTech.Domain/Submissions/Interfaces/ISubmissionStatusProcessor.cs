@@ -13,12 +13,12 @@ namespace Dfe.PlanTech.Domain.Submissions.Interfaces;
 /// </summary>
 public interface ISubmissionStatusProcessor
 {
-  public IGetLatestResponsesQuery GetResponsesQuery { get; }
-  public IUser User { get; }
-  public SubmissionStatus Status { get; set; }
-  public Question? NextQuestion { get; set; }
-  public ISection? Section { get; }
-  public SectionStatusNew? SectionStatus { get; }
+    public IGetLatestResponsesQuery GetResponsesQuery { get; }
+    public IUser User { get; }
+    public SubmissionStatus Status { get; set; }
+    public Question? NextQuestion { get; set; }
+    public ISection? Section { get; }
+    public SectionStatusNew? SectionStatus { get; }
 
-  Task GetJourneyStatusForSection(string sectionSlug, CancellationToken cancellationToken);
+    Task GetJourneyStatusForSection(string sectionSlug, CancellationToken cancellationToken);
 }

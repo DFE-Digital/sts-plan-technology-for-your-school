@@ -1,0 +1,67 @@
+name: Build Image and Publish to GCR
+
+on:
+  workflow_call:
+
+concurrency:
+     group: ${{ github.workflow }}-${{ github.ref_name }}
+     cancel-in-progress: true
+
+env:
+    DOCKER_IMAGE: plan-technology-for-your-school
+    NODE_VERSION: 18.x
+
+jobs:
+
+    set-env:
+
+        runs-on: ubuntu-22.04
+        name: Set Environment
+        outputs:
+            branch: ${{ steps.var.outputs.branch }}
+            checked-out-sha: ${{ steps.var.outputs.checked-out-sha }}
+        
+        steps:
+
+            - uses: actions/checkout@v3
+              with:
+                ref: ${{ github.ref }}
+            
+            - id: var
+              run: |
+                GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}
+                CHECKED_OUT_SHA="$(git log -1 '--format=format:%H')"
+                echo "branch=$GIT_BRANCH" >> $GITHUB_OUTPUT
+                echo "checked-out-sha=${CHECKED_OUT_SHA}" >> $GITHUB_OUTPUT
+
+    build-image:
+
+        runs-on: ubuntu-22.04
+        needs: [set-env]
+        name: Build & Publish Image
+        
+        steps:
+
+            - name: Checkout Repository
+              uses: actions/checkout@v3
+              with:
+                ref: ${{ github.ref }}
+
+            - name: GitHub Container Registry Login
+              uses: docker/login-action@v3
+              with:
+                registry: ghcr.io
+                username: ${{ github.repository_owner }}
+                password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Build Image & Publish To GCR
+              uses: docker/build-push-action@v4
+              with:
+                context: ./
+                file: ./src/Dfe.PlanTech.Web/Dockerfile
+                build-args: COMMIT_SHA=${{ needs.set-env.outputs.checked-out-sha }}
+                tags: |
+                    ghcr.io/dfe-digital/${{ env.DOCKER_IMAGE }}:${{ needs.set-env.outputs.branch }}
+                    ghcr.io/dfe-digital/${{ env.DOCKER_IMAGE }}:sha-${{ needs.set-env.outputs.checked-out-sha }}
+                    ghcr.io/dfe-digital/${{ env.DOCKER_IMAGE }}:latest
+                push: true

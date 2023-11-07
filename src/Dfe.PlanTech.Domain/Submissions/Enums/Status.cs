@@ -1,6 +1,7 @@
 namespace Dfe.PlanTech.Domain.Submissions.Enums;
 
-public enum Status{
+public enum Status
+{
     NotStarted,
     InProgress,
     Completed
