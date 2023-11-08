@@ -1,14 +1,14 @@
-name: Run E2E Tests on an Environment
+name: Run E2E Testing on an Environment
 
 on:
     workflow_call:
-        inputs:
-            environment:
-                type: string
-                required: true
+      inputs:
+        environment:
+          type: string
+          required: true
 
 concurrency:
-    group: ${{ github.workflow }}-${{ github.event.inputs.environment }}
+    group: ${{ github.workflow }}-${{ github.event.inputs.environment }}-e2e
     cancel-in-progress: false
 
 jobs:

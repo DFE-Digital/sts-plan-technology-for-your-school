@@ -111,4 +111,10 @@ jobs:
       # needs: [set-env, pull-image-from-gcr-and-publish-to-acr, deploy-image] # TODO: Uncomment after implementing E2E testing
       needs: [set-env] # TODO: Remove after implementing E2E testing
       if: ${{ needs.set-env.outputs.environment == 'tst' || needs.set-env.outputs.environment == 'staging' }}
-      # TODO: Call e2e-test-environment.yml
+
+      steps:
+
+        - name: Run E2E Testing
+          uses: ./.github/workflows/e2e-test-environment.yml
+          with:
+            environment: ${{ needs.set-env.outputs.environment }}
