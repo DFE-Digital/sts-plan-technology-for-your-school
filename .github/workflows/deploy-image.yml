@@ -37,71 +37,71 @@ jobs:
                 echo "release=${RELEASE}" >> $GITHUB_OUTPUT
                 echo "branch=$GIT_BRANCH" >> $GITHUB_OUTPUT
     
-    # pull-image-from-gcr-and-publish-to-acr: # TODO: Uncomment after implementing E2E testing
+    pull-image-from-gcr-and-publish-to-acr:
 
-    #     runs-on: ubuntu-22.04
-    #     name: Pull Image From GitHub Container Registry and Publish to Azure Container Registry
-    #     environment: ${{ needs.set-env.outputs.environment }}
-    #     needs: [set-env]
+        runs-on: ubuntu-22.04
+        name: Pull Image From GitHub Container Registry and Publish to Azure Container Registry
+        environment: ${{ needs.set-env.outputs.environment }}
+        needs: [set-env]
 
-    #     steps:
+        steps:
 
-    #         - name: GitHub Container Registry Login
-    #           uses: docker/login-action@v3
-    #           with:
-    #             registry: ghcr.io
-    #             username: ${{ github.repository_owner }}
-    #             password: ${{ secrets.GITHUB_TOKEN }}
+            - name: GitHub Container Registry Login
+              uses: docker/login-action@v3
+              with:
+                registry: ghcr.io
+                username: ${{ github.repository_owner }}
+                password: ${{ secrets.GITHUB_TOKEN }}
             
-    #         - name: Pull Image From GCR
-    #           run: docker pull ghcr.io/dfe-digital/${{ env.GCR_DOCKER_IMAGE }}:latest
+            - name: Pull Image From GCR
+              run: docker pull ghcr.io/dfe-digital/${{ env.GCR_DOCKER_IMAGE }}:latest
 
-    #         - name: Azure Container Registry Login
-    #           uses: docker/login-action@v3
-    #           with:
-    #             registry: ${{ secrets.AZ_ACR_URL }}
-    #             username: ${{ secrets.AZ_CLIENT_ID }}
-    #             password: ${{ secrets.AZ_CLIENT_SECRET }}
+            - name: Azure Container Registry Login
+              uses: docker/login-action@v3
+              with:
+                registry: ${{ secrets.AZ_ACR_URL }}
+                username: ${{ secrets.AZ_CLIENT_ID }}
+                password: ${{ secrets.AZ_CLIENT_SECRET }}
             
-    #         - name: Push Image To ACR
-    #           run: |
-    #             docker tag ghcr.io/dfe-digital/${{ env.GCR_DOCKER_IMAGE }}:latest ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ needs.set-env.outputs.environment }}
-    #             docker push ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ needs.set-env.outputs.environment }}
+            - name: Push Image To ACR
+              run: |
+                docker tag ghcr.io/dfe-digital/${{ env.GCR_DOCKER_IMAGE }}:latest ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ needs.set-env.outputs.environment }}
+                docker push ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ needs.set-env.outputs.environment }}
     
-    # deploy-image: # TODO: Uncomment after implementing E2E testing
+    deploy-image:
 
-    #   runs-on: ubuntu-22.04
-    #   name: Deploy Image To ${{ needs.set-env.outputs.environment }} (${{ needs.set-env.outputs.release }})
-    #   environment: ${{ needs.set-env.outputs.environment }}
-    #   needs: [set-env, pull-image-from-gcr-and-publish-to-acr]
+      runs-on: ubuntu-22.04
+      name: Deploy Image To ${{ needs.set-env.outputs.environment }} (${{ needs.set-env.outputs.release }})
+      environment: ${{ needs.set-env.outputs.environment }}
+      needs: [set-env, pull-image-from-gcr-and-publish-to-acr]
 
-    #   steps:
+      steps:
 
-    #     - uses: actions/checkout@v3
-    #       with:
-    #         ref: ${{ github.ref }}  
+        - uses: actions/checkout@v3
+          with:
+            ref: ${{ github.ref }}  
         
-    #     - name: Azure CLI Login
-    #       uses: ./.github/actions/azure-login
-    #       with:
-    #         az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
-    #         az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
-    #         az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-    #         az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+        - name: Azure CLI Login
+          uses: ./.github/actions/azure-login
+          with:
+            az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+            az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+            az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+            az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
         
-    #     - name: Update Azure Container Apps Revision
-    #       uses: azure/CLI@v1
-    #       id: azure
-    #       with:
-    #         azcliversion: 2.45.0
-    #         inlineScript: |
-    #           az config set extension.use_dynamic_install=yes_without_prompt
-    #           az containerapp update \
-    #             --name ${{ secrets.AZ_ACA_NAME }} \
-    #             --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP }} \
-    #             --image ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ needs.set-env.outputs.environment }} \
-    #             --output none
-    #             &> /dev/null
+        - name: Update Azure Container Apps Revision
+          uses: azure/CLI@v1
+          id: azure
+          with:
+            azcliversion: 2.45.0
+            inlineScript: |
+              az config set extension.use_dynamic_install=yes_without_prompt
+              az containerapp update \
+                --name ${{ secrets.AZ_ACA_NAME }} \
+                --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP }} \
+                --image ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ needs.set-env.outputs.environment }} \
+                --output none
+                &> /dev/null
 
     run-e2e-testing:
 
@@ -109,8 +109,7 @@ jobs:
         if: ${{ needs.set-env.outputs.environment == 'dev' || needs.set-env.outputs.environment == 'staging' }}
         # TODO: Change 'dev' to 'tst' after testing, currently set this way due to branch protection rules!
         uses: ./.github/workflows/e2e-test-environment.yml
-        # needs: [set-env, pull-image-from-gcr-and-publish-to-acr, deploy-image] # TODO: Uncomment after implementing E2E testing
-        needs: [set-env] # TODO: Remove after implementing E2E testing
+        needs: [set-env, pull-image-from-gcr-and-publish-to-acr, deploy-image]
         with:
           environment: ${{ needs.set-env.outputs.environment }}
         secrets: inherit

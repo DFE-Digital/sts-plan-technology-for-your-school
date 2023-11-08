@@ -97,38 +97,11 @@ jobs:
         name: Run E2E Tests on ${{ needs.set-env.outputs.environment }}
         environment: ${{ needs.set-env.outputs.environment }}
         needs: [set-env, clear-database]
-        # env:
-        #     az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
-        #     az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-        #     az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-        #     SQL_IP_NAME: e2e-tests-pr
         
         steps:
             
             - name: Checkout Repository
               uses: actions/checkout@v3
-
-            # - name: Azure CLI Login
-            #   uses: ./.github/actions/azure-login
-            #   with:
-            #     az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
-            #     az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
-            #     az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-            #     az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
-            
-            # - name: Get Workflow IP Address
-            #   id: what-is-my-ip
-            #   uses: ./.github/actions/whats-my-ip-address
-
-            # - name: Add Azure Firewall Rules
-            #   uses: ./.github/actions/azure-ip-whitelist
-            #   with:
-            #     ip_address: ${{ steps.what-is-my-ip.outputs.ip }}
-            #     verb: "add"
-            #     az_keyvault_name: ${{ env.az_keyvault_name }}
-            #     az_ip_name: ${{ env.SQL_IP_NAME }}
-            #     az_resource_group: ${{ env.az_resource_group_name}}
-            #     az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
             
             - name: Cypress Testing
               uses: ./.github/actions/run-e2e-tests
@@ -137,14 +110,3 @@ jobs:
                 dsi_url: ${{ secrets.DSI_URL }}
                 dsi_username: ${{ secrets.DSI_USERNAME }}
                 dsi_password: ${{ secrets.DSI_PASSWORD }}
-
-            # - name: Remove Azure Firewall Rules
-            #   if: always()
-            #   uses: ./.github/actions/azure-ip-whitelist
-            #   with:
-            #     ip_address: ${{ steps.what-is-my-ip.outputs.ip }}
-            #     verb: "remove"
-            #     az_keyvault_name: ${{ env.az_keyvault_name }}
-            #     az_ip_name: ${{ env.SQL_IP_NAME }}
-            #     az_resource_group: ${{ env.az_resource_group_name}}
-            #     az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
