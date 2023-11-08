@@ -36,7 +36,7 @@ env:
   TF_VAR_az_tag_environment: ${{ vars.AZ_TAG_ENVIRONMENT }}
   TF_VAR_az_tag_product: ${{ vars.AZ_TAG_PRODUCT }}
   TF_VAR_az_sql_admin_userid_postfix: ${{secrets.AZ_SQL_ADMIN_USERID_POSTFIX}}
-  TF_VAR_az_sql_azuread_admin_username: ${{ secrets.AZ_ENVIRONMENT }}-terraform
+  TF_VAR_az_sql_azuread_admin_username: ${{ secrets.AZ_SERVICE_PRINCIPAL }}
   TF_VAR_az_sql_azuread_admin_objectid: ${{ secrets.AZ_CLIENT_ID }}
   TF_VAR_registry_server: "ghcr.io"   
   TF_VAR_registry_username: ${{ github.repository_owner }} 
