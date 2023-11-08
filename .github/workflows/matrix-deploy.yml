@@ -44,10 +44,10 @@ jobs:
 
           if [[ "$changed_files" =~ terraform/container-app ]]; then
             echo "Terraform files have changed. Running Terraform deploy..."
-            echo "run_terraform_deploy::true" >> $GITHUB_OUTPUT
+            echo "run_terraform_deploy=true" >> $GITHUB_OUTPUT
           else
             echo "No Terraform file changes in terraform/container-app. Skipping Terraform deploy."
-            echo "run_terraform_deploy::false" >> $GITHUB_OUTPUT
+            echo "run_terraform_deploy=false" >> $GITHUB_OUTPUT
           fi
           
   deploy-terraform-for-dev-and-test:
