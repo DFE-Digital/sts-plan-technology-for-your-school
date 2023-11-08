@@ -102,23 +102,15 @@ jobs:
     #             --image ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ needs.set-env.outputs.environment }} \
     #             --output none
     #             &> /dev/null
-    
+
     run-e2e-testing:
 
-      runs-on: ubuntu-22.04
-      name: Run E2E Testing
-      environment: ${{ needs.set-env.outputs.environment }}
-      # needs: [set-env, pull-image-from-gcr-and-publish-to-acr, deploy-image] # TODO: Uncomment after implementing E2E testing
-      needs: [set-env] # TODO: Remove after implementing E2E testing
-      if: ${{ needs.set-env.outputs.environment == 'dev' || needs.set-env.outputs.environment == 'staging' }}
-      # TODO: Change 'dev' to 'tst' after testing, currently set this way due to branch protection rules
-
-      steps:
-
-        - name: Checkout Repository
-          uses: actions/checkout@v3
-
-        - name: Run E2E Testing
-          uses: ./.github/workflows/e2e-test-environment.yml
-          with:
-            environment: ${{ needs.set-env.outputs.environment }}
+        name: Run E2E Testing
+        if: ${{ needs.set-env.outputs.environment == 'dev' || needs.set-env.outputs.environment == 'staging' }}
+        # TODO: Change 'dev' to 'tst' after testing, currently set this way due to branch protection rules!
+        uses: ./.github/workflows/e2e-test-environment.yml
+        # needs: [set-env, pull-image-from-gcr-and-publish-to-acr, deploy-image] # TODO: Uncomment after implementing E2E testing
+        needs: [set-env] # TODO: Remove after implementing E2E testing
+        with:
+          environment: ${{ needs.set-env.outputs.environment }}
+        secrets: inherit
