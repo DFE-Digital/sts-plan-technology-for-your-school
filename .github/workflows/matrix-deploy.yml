@@ -51,7 +51,7 @@ jobs:
           fi
           
   deploy-terraform-for-dev-and-test:
-    needs: check-terraform-changes
+    needs: check-for-terraform-changes
     name: Deploy Terraform Infrastructure for Dev & Test
     if: ${{ needs.check-for-terraform-changes.outputs.run_terraform_deploy == 'true' }}
     strategy:
