@@ -38,7 +38,10 @@ jobs:
       - name: Check for Terraform File Changes
         id: terraform_changes
         run: |
-          changed_files="$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})"
+          LAST_COMMIT_SHA=${{ github.sha }}
+          PENULTIMATE_COMMIT_SHA=$(git rev-list -n 1 --skip 1 $LAST_COMMIT_SHA | tail -n 1)
+          echo "Last commit SHA: $LAST_COMMIT_SHA and Penultimate commit SHA: $PENULTIMATE_COMMIT_SHA"
+          changed_files="$(git diff --name-only $PENULTIMATE_COMMIT_SHA $LAST_COMMIT_SHA)"
           echo "Changed files:"
           echo "$changed_files"
 
