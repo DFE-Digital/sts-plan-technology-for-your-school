@@ -97,7 +97,7 @@ jobs:
         
       - name: Apply Terraform changes
         id: apply
-        run: terraform plan -auto-approve  # TODO: will change this to apply once we're happy with workflow and tested.
+        run: terraform apply -auto-approve
       
       - name: Remove Runner to KV whitelist
         uses: azure/CLI@v1
