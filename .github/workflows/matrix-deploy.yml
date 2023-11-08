@@ -64,31 +64,31 @@ jobs:
       environment: ${{ matrix.target }}
     secrets: inherit
 
-  deploy-to-dev-and-test:
-    needs: [get-branch, create-and-publish-image, check-for-terraform-changes, deploy-terraform-for-dev-and-test]
-    name: Deployment to Dev & Test
-    strategy:
-      max-parallel: 1
-      fail-fast: true
-      matrix:
-        target: [Dev, Tst]
-    uses: ./.github/workflows/deploy-image.yml
-    with:
-      environment: ${{ matrix.target }}
-    secrets: inherit
-    
-  # TODO: Job to deploy infrastructure for staging and production will go here
-
-  deploy-to-staging-and-production:
-    needs: [get-branch, create-and-publish-image, deploy-to-dev-and-test]
-    name: Deployment to Staging & Production
-    if: ${{ needs.get-branch.outputs.branch == 'main' }}
-    strategy:
-      max-parallel: 1
-      fail-fast: true
-      matrix:
-        target: [Staging, Production]
-    uses: ./.github/workflows/deploy-image.yml
-    with:
-      environment: ${{ matrix.target }}
-    secrets: inherit
+#  deploy-to-dev-and-test:
+#    needs: [get-branch, create-and-publish-image, check-for-terraform-changes, deploy-terraform-for-dev-and-test]
+#    name: Deployment to Dev & Test
+#    strategy:
+#      max-parallel: 1
+#      fail-fast: true
+#      matrix:
+#        target: [Dev, Tst]
+#    uses: ./.github/workflows/deploy-image.yml
+#    with:
+#      environment: ${{ matrix.target }}
+#    secrets: inherit
+#    
+#  # TODO: Job to deploy infrastructure for staging and production will go here
+#
+#  deploy-to-staging-and-production:
+#    needs: [get-branch, create-and-publish-image, deploy-to-dev-and-test]
+#    name: Deployment to Staging & Production
+#    if: ${{ needs.get-branch.outputs.branch == 'main' }}
+#    strategy:
+#      max-parallel: 1
+#      fail-fast: true
+#      matrix:
+#        target: [Staging, Production]
+#    uses: ./.github/workflows/deploy-image.yml
+#    with:
+#      environment: ${{ matrix.target }}
+#    secrets: inherit
