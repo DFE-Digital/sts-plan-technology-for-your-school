@@ -114,6 +114,9 @@ jobs:
 
       steps:
 
+        - name: Checkout Repository
+          uses: actions/checkout@v3
+
         - name: Run E2E Testing
           uses: ./.github/workflows/e2e-test-environment.yml
           with:
