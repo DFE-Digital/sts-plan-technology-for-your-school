@@ -56,13 +56,6 @@ jobs:
             - name: Get Workflow IP Address
               id: what-is-my-ip
               uses: ./.github/actions/whats-my-ip-address
-
-            - name: Get Connection String
-              id: get-connection-string
-              uses: ./.github/actions/azure-get-db-connectionstring
-              with:
-                az_keyvault_name: ${{ env.az_keyvault_name }}
-                az_keyvault_database_connectionstring_name: ${{ env.az_keyvault_database_connectionstring_name }}
             
             - name: Add Azure Firewall Rules
               uses: ./.github/actions/azure-ip-whitelist
@@ -73,6 +66,13 @@ jobs:
                 az_ip_name: ${{ env.SQL_IP_NAME }}
                 az_resource_group: ${{ env.az_resource_group_name}}
                 az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
+
+            - name: Get Connection String
+              id: get-connection-string
+              uses: ./.github/actions/azure-get-db-connectionstring
+              with:
+                az_keyvault_name: ${{ env.az_keyvault_name }}
+                az_keyvault_database_connectionstring_name: ${{ env.az_keyvault_database_connectionstring_name }}
 
             - name: Execute Stored Procedure
               uses: azure/sql-action@v2.2
