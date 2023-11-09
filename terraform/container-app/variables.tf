@@ -48,6 +48,12 @@ variable "az_sql_azuread_admin_objectid" {
   type        = string
 }
 
+variable "az_sql_admin_password" {
+  description = "Password for the admin listed in the 'az_sql_azuread_admin_username' variable"
+  type        = string
+  sensitive   = true
+}
+
 ############
 # KeyVault #
 ############
