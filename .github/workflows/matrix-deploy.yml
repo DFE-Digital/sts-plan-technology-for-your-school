@@ -30,6 +30,7 @@ jobs:
 
   create-and-publish-image:
 
+    name: Create & Publish Image
     uses: ./.github/workflows/build-image.yml
     secrets: inherit
 
