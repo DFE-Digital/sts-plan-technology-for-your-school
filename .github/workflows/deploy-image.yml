@@ -14,13 +14,15 @@ concurrency:
 env:
     GCR_DOCKER_IMAGE: plan-technology-for-your-school
     ACR_DOCKER_IMAGE: plan-tech-app
+    GITHUB_CONTAINER_REGISTRY: ghcr.io
+    ORG_NAME: dfe-digital
 
 jobs:
 
     set-env:
 
         runs-on: ubuntu-22.04
-        name: Set Environment
+        name: Set Environment (Deploy Image)
         outputs:
             environment: ${{ steps.var.outputs.environment }}
             release: ${{ steps.var.outputs.release }}
@@ -49,12 +51,12 @@ jobs:
             - name: GitHub Container Registry Login
               uses: docker/login-action@v3
               with:
-                registry: ghcr.io
+                registry: ${{ env.GITHUB_CONTAINER_REGISTRY }}
                 username: ${{ github.repository_owner }}
                 password: ${{ secrets.GITHUB_TOKEN }}
             
             - name: Pull Image From GCR
-              run: docker pull ghcr.io/dfe-digital/${{ env.GCR_DOCKER_IMAGE }}:latest
+              run: docker pull ${{ env.GITHUB_CONTAINER_REGISTRY }}/${{ env.ORG_NAME }}/${{ env.GCR_DOCKER_IMAGE }}:latest
 
             - name: Azure Container Registry Login
               uses: docker/login-action@v3
@@ -65,7 +67,7 @@ jobs:
             
             - name: Push Image To ACR
               run: |
-                docker tag ghcr.io/dfe-digital/${{ env.GCR_DOCKER_IMAGE }}:latest ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ needs.set-env.outputs.environment }}
+                docker tag ${{ env.GITHUB_CONTAINER_REGISTRY }}/${{ env.ORG_NAME }}/${{ env.GCR_DOCKER_IMAGE }}:latest ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ needs.set-env.outputs.environment }}
                 docker push ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ needs.set-env.outputs.environment }}
     
     deploy-image:
@@ -108,7 +110,7 @@ jobs:
         name: Run E2E Testing
         if: ${{ needs.set-env.outputs.environment == 'dev' || needs.set-env.outputs.environment == 'staging' }}
         # TODO: Change 'dev' to 'tst' after testing, currently set this way due to branch protection rules!
-        uses: ./.github/workflows/e2e-test-environment.yml
+        uses: ./.github/workflows/e2e-tests-deployed-environment.yml
         needs: [set-env, pull-image-from-gcr-and-publish-to-acr, deploy-image]
         with:
           environment: ${{ needs.set-env.outputs.environment }}
