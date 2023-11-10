@@ -24,7 +24,6 @@ jobs:
         runs-on: ubuntu-22.04
         name: Set Environment (Deploy Image)
         outputs:
-            environment: ${{ steps.var.outputs.environment }}
             release: ${{ steps.var.outputs.release }}
             branch: ${{ steps.var.outputs.branch }}
         
@@ -32,10 +31,8 @@ jobs:
 
             - id: var
               run: |
-                ENVIRONMENT=${{ inputs.environment }}
                 RELEASE=${ENVIRONMENT,,}-`date +%Y-%m-%d`.${{ github.run_number }}
                 GIT_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
-                echo "environment=${ENVIRONMENT,,}" >> $GITHUB_OUTPUT
                 echo "release=${RELEASE}" >> $GITHUB_OUTPUT
                 echo "branch=$GIT_BRANCH" >> $GITHUB_OUTPUT
     
@@ -43,7 +40,7 @@ jobs:
 
         runs-on: ubuntu-22.04
         name: Pull Image From GitHub Container Registry and Publish to Azure Container Registry
-        environment: ${{ needs.set-env.outputs.environment }}
+        environment: ${{ inputs.environment }}
         needs: [set-env]
 
         steps:
@@ -73,8 +70,8 @@ jobs:
     deploy-image:
 
       runs-on: ubuntu-22.04
-      name: Deploy Image To ${{ needs.set-env.outputs.environment }} (${{ needs.set-env.outputs.release }})
-      environment: ${{ needs.set-env.outputs.environment }}
+      name: Deploy Image To ${{ inputs.environment }} (${{ needs.set-env.outputs.release }})
+      environment: ${{ inputs.environment }}
       needs: [set-env, pull-image-from-gcr-and-publish-to-acr]
 
       steps:
@@ -101,16 +98,17 @@ jobs:
               az containerapp update \
                 --name ${{ secrets.AZ_ACA_NAME }} \
                 --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP }} \
-                --image ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ needs.set-env.outputs.environment }} \
+                --image ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ inputs.environment }} \
                 --output none
                 &> /dev/null
       
     run-e2e-testing:
         
       runs-on: ubuntu-22.04
-      name: Clear Database & Run E2E Tests on ${{ needs.set-env.outputs.environment }}
-      if: ${{ needs.set-env.outputs.environment == 'tst' || needs.set-env.outputs.environment == 'staging' }}
-      environment: ${{ needs.set-env.outputs.environment }}
+      name: Clear Database & Run E2E Tests on ${{ inputs.environment }}
+      if: ${{ inputs.environment == 'dev' || inputs.environment == 'staging' }}
+      # TODO: REPLACE 'dev' WITH 'tst' AFTER TESTING!
+      environment: ${{ inputs.environment }}
       needs: [set-env, pull-image-from-gcr-and-publish-to-acr, deploy-image]
       env:
         az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
