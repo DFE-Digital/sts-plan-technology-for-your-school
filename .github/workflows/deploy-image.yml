@@ -106,8 +106,7 @@ jobs:
         
       runs-on: ubuntu-22.04
       name: Clear Database & Run E2E Tests on ${{ inputs.environment }}
-      if: ${{ inputs.environment == 'dev' || inputs.environment == 'staging' }}
-      # TODO: REPLACE 'dev' WITH 'tst' AFTER TESTING!
+      if: ${{ inputs.environment == 'tst' || inputs.environment == 'staging' }}
       environment: ${{ inputs.environment }}
       needs: [set-env, pull-image-from-gcr-and-publish-to-acr, deploy-image]
       env:
