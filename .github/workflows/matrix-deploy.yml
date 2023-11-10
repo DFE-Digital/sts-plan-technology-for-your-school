@@ -25,6 +25,7 @@ jobs:
 
   create-and-publish-image:
 
+    name: Create & Publish Image
     uses: ./.github/workflows/build-image.yml
     secrets: inherit
 
@@ -42,7 +43,7 @@ jobs:
     secrets: inherit
 
   deploy-to-staging-and-production:
-    needs: [get-branch, create-and-publish-image, deploy-to-dev-and-test]
+    needs: [get-branch, create-and-publish-image, deploy-to-dev-and-test] 
     name: Deployment to Staging & Production
     if: ${{ needs.get-branch.outputs.branch == 'main' }}
     strategy:
