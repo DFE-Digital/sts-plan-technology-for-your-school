@@ -65,7 +65,7 @@ jobs:
       fail-fast: true
       matrix:
         target: [ Dev, Tst ]
-    uses: ./.github/workflows/terraform-deploy.yml
+    uses: ./.github/workflows/terraform-plan.yml
     with:
       environment: ${{ matrix.target }}
     secrets: inherit

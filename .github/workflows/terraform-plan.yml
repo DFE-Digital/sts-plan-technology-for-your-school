@@ -7,6 +7,11 @@ on:
         type: string
         description: 'The environment to run terraform plan against:'
         required: true
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
         
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
