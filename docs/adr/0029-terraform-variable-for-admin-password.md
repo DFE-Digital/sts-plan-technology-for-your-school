@@ -1,4 +1,4 @@
-# 0028 - Command Line Arguments Parsing
+# 0029 - Terraform input variable for SQL password
 
 * **Status**: accepted
 
