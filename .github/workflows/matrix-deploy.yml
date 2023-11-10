@@ -7,6 +7,11 @@ on:
     paths:
       - 'src/**'
       - '.github/workflows/matrix-deploy.yml'
+  pull_request:
+    branches: ["development"]
+    paths:
+      - 'src/**'
+      - '.github/workflows/matrix-deploy.yml'
     
 jobs:
 
