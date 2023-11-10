@@ -78,6 +78,10 @@ jobs:
       needs: [set-env, pull-image-from-gcr-and-publish-to-acr]
 
       steps:
+
+        - uses: actions/checkout@v3
+          with:
+            ref: ${{ github.ref }}  
         
         - name: Azure CLI Login
           uses: ./.github/actions/azure-login
