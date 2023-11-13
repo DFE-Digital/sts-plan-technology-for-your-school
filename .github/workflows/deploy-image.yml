@@ -31,7 +31,7 @@ jobs:
 
             - id: var
               run: |
-                RELEASE=${ENVIRONMENT,,}-`date +%Y-%m-%d`.${{ github.run_number }}
+                RELEASE=${{ inputs.environment }}-`date +%Y-%m-%d`.${{ github.run_number }}
                 GIT_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
                 echo "release=${RELEASE}" >> $GITHUB_OUTPUT
                 echo "branch=$GIT_BRANCH" >> $GITHUB_OUTPUT
@@ -159,14 +159,23 @@ jobs:
         with:
           connection-string: ${{ steps.get-connection-string.outputs.connection_string }}
           path: "./.github/scripts/drop-establishment-data.sql"
-
-      - name: Cypress Testing
-        uses: ./.github/actions/run-e2e-tests
+        
+      - name: Run Cypress Tests
+        uses: cypress-io/github-action@v6
         with:
-          url: ${{ env.az_frontdoor_url }}
-          dsi_url: ${{ env.dsi_url }}
-          dsi_username: ${{ env.dsi_username }}
-          dsi_password: ${{ env.dsi_password }}
+          working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
+          browser: chrome
+          config: baseUrl=${{ env.az_frontdoor_url }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Cypress Testing
+      #   uses: ./.github/actions/run-e2e-tests
+      #   with:
+      #     url: ${{ env.az_frontdoor_url }}
+      #     dsi_url: ${{ env.dsi_url }}
+      #     dsi_username: ${{ env.dsi_username }}
+      #     dsi_password: ${{ env.dsi_password }}
         
       - name: Remove Azure Firewall Rules
         if: always()
@@ -178,3 +187,17 @@ jobs:
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.az_resource_group_name}}
           az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
+      
+      - name: Store Videos from Cypress Testing
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: cypress-videos
+          path: ./tests/Dfe.PlanTech.Web.E2ETests/cypress/videos
+      
+      - name: Store Screenshots from Cypress Testing on Failure
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: cypress-screenshots
+          path: ./tests/Dfe.PlanTech.Web.E2ETests/cypress/screenshots
