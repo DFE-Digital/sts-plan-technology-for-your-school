@@ -14,15 +14,16 @@ concurrency:
 env:
     GCR_DOCKER_IMAGE: plan-technology-for-your-school
     ACR_DOCKER_IMAGE: plan-tech-app
+    GITHUB_CONTAINER_REGISTRY: ghcr.io
+    ORG_NAME: dfe-digital
 
 jobs:
 
     set-env:
 
         runs-on: ubuntu-22.04
-        name: Set Environment
+        name: Set Environment (Deploy Image)
         outputs:
-            environment: ${{ steps.var.outputs.environment }}
             release: ${{ steps.var.outputs.release }}
             branch: ${{ steps.var.outputs.branch }}
         
@@ -30,10 +31,8 @@ jobs:
 
             - id: var
               run: |
-                ENVIRONMENT=${{ inputs.environment }}
                 RELEASE=${ENVIRONMENT,,}-`date +%Y-%m-%d`.${{ github.run_number }}
                 GIT_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
-                echo "environment=${ENVIRONMENT,,}" >> $GITHUB_OUTPUT
                 echo "release=${RELEASE}" >> $GITHUB_OUTPUT
                 echo "branch=$GIT_BRANCH" >> $GITHUB_OUTPUT
     
@@ -41,7 +40,7 @@ jobs:
 
         runs-on: ubuntu-22.04
         name: Pull Image From GitHub Container Registry and Publish to Azure Container Registry
-        environment: ${{ needs.set-env.outputs.environment }}
+        environment: ${{ inputs.environment }}
         needs: [set-env]
 
         steps:
@@ -49,12 +48,12 @@ jobs:
             - name: GitHub Container Registry Login
               uses: docker/login-action@v3
               with:
-                registry: ghcr.io
+                registry: ${{ env.GITHUB_CONTAINER_REGISTRY }}
                 username: ${{ github.repository_owner }}
                 password: ${{ secrets.GITHUB_TOKEN }}
             
             - name: Pull Image From GCR
-              run: docker pull ghcr.io/dfe-digital/${{ env.GCR_DOCKER_IMAGE }}:latest
+              run: docker pull ${{ env.GITHUB_CONTAINER_REGISTRY }}/${{ env.ORG_NAME }}/${{ env.GCR_DOCKER_IMAGE }}:latest
 
             - name: Azure Container Registry Login
               uses: docker/login-action@v3
@@ -65,14 +64,14 @@ jobs:
             
             - name: Push Image To ACR
               run: |
-                docker tag ghcr.io/dfe-digital/${{ env.GCR_DOCKER_IMAGE }}:latest ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ needs.set-env.outputs.environment }}
-                docker push ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ needs.set-env.outputs.environment }}
+                docker tag ${{ env.GITHUB_CONTAINER_REGISTRY }}/${{ env.ORG_NAME }}/${{ env.GCR_DOCKER_IMAGE }}:latest ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ inputs.environment }}
+                docker push ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ inputs.environment }}
     
     deploy-image:
 
       runs-on: ubuntu-22.04
-      name: Deploy Image To ${{ needs.set-env.outputs.environment }} (${{ needs.set-env.outputs.release }})
-      environment: ${{ needs.set-env.outputs.environment }}
+      name: Deploy Image To ${{ inputs.environment }} (${{ needs.set-env.outputs.release }})
+      environment: ${{ inputs.environment }}
       needs: [set-env, pull-image-from-gcr-and-publish-to-acr]
 
       steps:
@@ -99,6 +98,83 @@ jobs:
               az containerapp update \
                 --name ${{ secrets.AZ_ACA_NAME }} \
                 --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP }} \
-                --image ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ needs.set-env.outputs.environment }} \
+                --image ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ inputs.environment }} \
                 --output none
                 &> /dev/null
+      
+    run-e2e-testing:
+        
+      runs-on: ubuntu-22.04
+      name: Clear Database & Run E2E Tests on ${{ inputs.environment }}
+      if: ${{ inputs.environment == 'tst' || inputs.environment == 'staging' }}
+      environment: ${{ inputs.environment }}
+      needs: [set-env, pull-image-from-gcr-and-publish-to-acr, deploy-image]
+      env:
+        az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
+        az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
+        az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+        az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+        az_frontdoor_url: ${{ secrets.AZ_FRONTDOOR_URL }}
+        dsi_url: ${{ secrets.DSI_URL }}
+        dsi_username: ${{ secrets.DSI_USERNAME }}
+        dsi_password: ${{ secrets.DSI_PASSWORD }}
+        SQL_IP_NAME: e2e-tests-clear-db
+
+      steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Azure CLI Login
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+        
+      - name: Get Workflow IP Address
+        id: what-is-my-ip
+        uses: ./.github/actions/whats-my-ip-address
+
+      - name: Add Azure Firewall Rules
+        uses: ./.github/actions/azure-ip-whitelist
+        with:
+          ip_address: ${{ steps.what-is-my-ip.outputs.ip }}
+          verb: "add"
+          az_keyvault_name: ${{ env.az_keyvault_name }}
+          az_ip_name: ${{ env.SQL_IP_NAME }}
+          az_resource_group: ${{ env.az_resource_group_name}}
+          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
+
+      - name: Get Connection String
+        id: get-connection-string
+        uses: ./.github/actions/azure-get-db-connectionstring
+        with:
+          az_keyvault_name: ${{ env.az_keyvault_name }}
+          az_keyvault_database_connectionstring_name: ${{ env.az_keyvault_database_connectionstring_name }}
+
+      - name: Execute Clear Database Stored Procedure
+        uses: azure/sql-action@v2.2
+        with:
+          connection-string: ${{ steps.get-connection-string.outputs.connection_string }}
+          path: "./.github/scripts/drop-establishment-data.sql"
+
+      - name: Cypress Testing
+        uses: ./.github/actions/run-e2e-tests
+        with:
+          url: ${{ env.az_frontdoor_url }}
+          dsi_url: ${{ env.dsi_url }}
+          dsi_username: ${{ env.dsi_username }}
+          dsi_password: ${{ env.dsi_password }}
+        
+      - name: Remove Azure Firewall Rules
+        if: always()
+        uses: ./.github/actions/azure-ip-whitelist
+        with:
+          ip_address: ${{ steps.what-is-my-ip.outputs.ip }}
+          verb: "remove"
+          az_keyvault_name: ${{ env.az_keyvault_name }}
+          az_ip_name: ${{ env.SQL_IP_NAME }}
+          az_resource_group: ${{ env.az_resource_group_name}}
+          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
