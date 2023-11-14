@@ -12,6 +12,7 @@ concurrency:
     cancel-in-progress: true
 
 env:
+    AZ_FRONTDOOR_URL: ${{ inputs.environment == 'staging' && secrets.AZ_FRONTDOOR_URL_STAGING || secrets.AZ_FRONTDOOR_URL }}
     GCR_DOCKER_IMAGE: plan-technology-for-your-school
     ACR_DOCKER_IMAGE: plan-tech-app
     GITHUB_CONTAINER_REGISTRY: ghcr.io
@@ -160,7 +161,7 @@ jobs:
       - name: Cypress Testing
         uses: ./.github/actions/run-e2e-tests
         with:
-          url: ${{ secrets.AZ_FRONTDOOR_URL }}
+          url: ${{ env.AZ_FRONTDOOR_URL }}
           dsi_url: ${{ secrets.DSI_URL }}
           dsi_username: ${{ secrets.DSI_USERNAME }}
           dsi_password: ${{ secrets.DSI_PASSWORD }}
