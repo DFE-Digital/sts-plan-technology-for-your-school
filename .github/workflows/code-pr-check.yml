@@ -51,6 +51,12 @@ jobs:
         uses: wearerequired/lint-action@v2
         with:
           dotnet_format: true
+          dotnet_format_dir: "./Dfe.PlanTech.Web"
+          git_email: "41898282+github-actions[bot]@users.noreply.github.com"
+          git_name: "github-actions[bot]"
+          commit: false   # TODO: REPLACE false WITH true AFTER TESTING
+          auto_fix: false # TODO: REPLACE false WITH true AFTER TESTING
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       # - name: Commit & Push # TODO: Make into Action to avoid duplication
       #   env:
