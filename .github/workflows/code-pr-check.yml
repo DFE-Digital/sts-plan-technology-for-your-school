@@ -26,9 +26,11 @@ jobs:
     name: Lint Code and Commit Changes
     runs-on: ubuntu-22.04
     strategy:
-      max-parallel: 3
+      max-parallel: 1
+      fail-fast: true
       matrix:
-        workspace: ["Application", "Domain", "Web"]
+        workspace: ["Application", "Domain", "Infrastructure.Contentful", "Infrastructure.Data", "Infrastructure.SignIn", "Web"]
+        # TODO: Can/should this be programatically determined and populated?
     permissions:
       contents: write
       issues: write
