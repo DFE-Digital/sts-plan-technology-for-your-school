@@ -25,6 +25,10 @@ jobs:
   lint-code:
     name: Lint Code and Commit Changes
     runs-on: ubuntu-22.04
+    strategy:
+      max-parallel: 3
+      matrix:
+        workspace: ["Application", "Domain", "Web"]
     permissions:
       contents: write
       issues: write
@@ -51,26 +55,12 @@ jobs:
         uses: wearerequired/lint-action@v2
         with:
           dotnet_format: true
-          dotnet_format_dir: "./src/"
+          dotnet_format_dir: "./src/${{ matrix.workspace }}/"
           git_email: "41898282+github-actions[bot]@users.noreply.github.com"
           git_name: "github-actions[bot]"
           commit: false   # TODO: REPLACE false WITH true AFTER TESTING
           auto_fix: false # TODO: REPLACE false WITH true AFTER TESTING
           github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      # - name: Commit & Push # TODO: Make into Action to avoid duplication
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: |
-      #     if [[ `git status --porcelain` ]]; then
-      #       git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-      #       git config --local user.name "github-actions[bot]"
-      #       git commit -am "refactor: Lint Code"
-      #       git push
-      #       echo "Commited Changes"
-      #     else
-      #       echo "No Changes to Commit"
-      #     fi
 
   build-test-web-app:  
     name: Build and run unit tests
