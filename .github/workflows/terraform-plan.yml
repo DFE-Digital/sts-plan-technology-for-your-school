@@ -1,18 +1,18 @@
-name: Deploy Terraform
+name: Terraform Plan
 
 on:
   workflow_dispatch:
     inputs:
       environment:
         type: string
-        description: 'The environment to deploy to:'
+        description: 'The environment to run terraform plan against:'
         required: true
   workflow_call:
     inputs:
       environment:
         type: string
         required: true
-    
+        
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
 
@@ -47,17 +47,17 @@ env:
   TF_WORKING_DIRECTORY: terraform/container-app
 
 jobs:
-  deploy-terraform:  
-    name: Deploy Terraform 
+  terraform-plan:
+    name: Terraform plan
     runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: ${{env.TF_WORKING_DIRECTORY}}
-    environment: ${{ github.event.inputs.environment }} 
+    environment: ${{ inputs.environment }}
     steps:
       - name: Clone repo
         uses: actions/checkout@v3
-        
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
@@ -95,11 +95,11 @@ jobs:
             -backend-config="storage_account_name=${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}"  \
             -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}"  \
             -backend-config="key=${{ env.TF_BACKEND_KEY }}"
-        
-      - name: Apply Terraform changes
-        id: apply
-        run: terraform apply -auto-approve
-      
+
+      - name: Plan Terraform changes
+        id: plan
+        run: terraform plan
+
       - name: Remove Runner to KV whitelist
         uses: azure/CLI@v1
         if: always()

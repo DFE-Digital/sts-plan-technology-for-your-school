@@ -35,25 +35,23 @@ variable "msi_id" {
   default     = null
 }
 
-##############
-# Front Door #
-##############
-variable "cdn_frontdoor_origin_host_header_override" {
-  description = "Override the frontdoor origin host header"
-  type        = string
-}
-
 #############
 # Azure SQL #
 #############
-variable "az_sql_admin_password" {
-  description = "Azure SQL admin password"
+variable "az_sql_azuread_admin_username" {
+  description = "Username/email/service principal name/etc of the Azure AD account to use as admin for the SQL Server"
   type        = string
 }
 
-variable "az_sql_admin_userid_postfix" {
-  description = "Azure SQL admin userid postfix, used with `project_name` and `environment` to build userid"
+variable "az_sql_azuread_admin_objectid" {
+  description = "Object ID for the admin listed in the 'az_sql_azuread_admin_username' variable"
   type        = string
+}
+
+variable "az_sql_admin_password" {
+  description = "Password for the admin listed in the 'az_sql_azuread_admin_username' variable"
+  type        = string
+  sensitive   = true
 }
 
 ############
@@ -88,3 +86,45 @@ variable "az_app_kestrel_endpoint" {
   description = "Endpoint for Kestrel setup"
   type        = string
 }
+
+variable "az_container_port" {
+  description = "What port the container app is bound to"
+  type        = number
+  default     = 8080
+}
+
+
+##################
+# CDN/Front Door #
+##################
+variable "cdn_create_custom_domain" {
+  description = "A flag to create the A and TXT records for the container app as part of setting up the cdn"
+  type        = bool
+  default     = false
+}
+
+
+###################
+# Github Registry #
+###################
+
+variable "registry_server" {
+  description = "Container registry server"
+  type        = string
+}
+
+variable "registry_username" {
+  description = "Container registry username"
+  type        = string
+}
+
+variable "registry_password" {
+  description = "Container registry password"
+  type        = string
+}
+
+variable "registry_custom_image_url" {
+  description = "Pass in the address to your image from your custom registry"
+  type        = string
+}
+

@@ -12,6 +12,7 @@ concurrency:
     cancel-in-progress: true
 
 env:
+    AZ_FRONTDOOR_URL: ${{ inputs.environment == 'staging' && secrets.AZ_FRONTDOOR_URL_STAGING || secrets.AZ_FRONTDOOR_URL }}
     GCR_DOCKER_IMAGE: plan-technology-for-your-school
     ACR_DOCKER_IMAGE: plan-tech-app
     GITHUB_CONTAINER_REGISTRY: ghcr.io
@@ -31,7 +32,7 @@ jobs:
 
             - id: var
               run: |
-                RELEASE=${ENVIRONMENT,,}-`date +%Y-%m-%d`.${{ github.run_number }}
+                RELEASE=${{ inputs.environment }}-`date +%Y-%m-%d`.${{ github.run_number }}
                 GIT_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
                 echo "release=${RELEASE}" >> $GITHUB_OUTPUT
                 echo "branch=$GIT_BRANCH" >> $GITHUB_OUTPUT
@@ -114,10 +115,6 @@ jobs:
         az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
         az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
         az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-        az_frontdoor_url: ${{ secrets.AZ_FRONTDOOR_URL }}
-        dsi_url: ${{ secrets.DSI_URL }}
-        dsi_username: ${{ secrets.DSI_USERNAME }}
-        dsi_password: ${{ secrets.DSI_PASSWORD }}
         SQL_IP_NAME: e2e-tests-clear-db
 
       steps:
@@ -163,10 +160,10 @@ jobs:
       - name: Cypress Testing
         uses: ./.github/actions/run-e2e-tests
         with:
-          url: ${{ env.az_frontdoor_url }}
-          dsi_url: ${{ env.dsi_url }}
-          dsi_username: ${{ env.dsi_username }}
-          dsi_password: ${{ env.dsi_password }}
+          url: ${{ env.AZ_FRONTDOOR_URL }}
+          dsi_url: ${{ secrets.DSI_URL }}
+          dsi_username: ${{ secrets.DSI_USERNAME }}
+          dsi_password: ${{ secrets.DSI_PASSWORD }}
         
       - name: Remove Azure Firewall Rules
         if: always()
