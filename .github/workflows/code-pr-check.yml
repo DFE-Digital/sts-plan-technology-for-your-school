@@ -38,14 +38,14 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Temporary Global.JSON
-        run: echo '{"sdk":{"version":"7.x.x"}}' > ./temp-global.json
+        run: echo '{"sdk":{"version":"${{ env.DOTNET_VERSION }}"}}' > ./global.json
 
       - name: Set up .NET
         id: set-up-dotnet
         uses: actions/setup-dotnet@v3
         with:
-          global-json-file: ./temp-global.json
-          cache: true
+          global-json-file: ./global.json
+          cache: false
         env:
           DOTNET_INSTALL_DIR: "/usr/share/dotnet"
           DOTNET_CLI_TELEMETRY_OPTOUT: true
