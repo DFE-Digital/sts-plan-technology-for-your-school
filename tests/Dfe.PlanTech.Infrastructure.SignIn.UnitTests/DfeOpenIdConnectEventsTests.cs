@@ -76,7 +76,7 @@ public class DfeOpenIdConnectEventsTests
         var commandSubstitute = Substitute.For<IRecordUserSignInCommand>();
         var dbUserIdValue = 1234;
         var dbEstablishmentIdValue = 5678;
-        commandSubstitute.RecordSignIn(Arg.Any<RecordUserSignInDto>()).Returns(new SignIn()
+        commandSubstitute.RecordSignIn(Arg.Any<RecordUserSignInDto>()).Returns(new Domain.SignIns.Models.SignIn()
         {
             UserId = dbUserIdValue,
             EstablishmentId = dbEstablishmentIdValue,
@@ -96,6 +96,14 @@ public class DfeOpenIdConnectEventsTests
                     },
                     Name = "OtherRole",
                     Code = "OtherCode",
+                    NumericId = "OtherNumericId",
+                },
+                new Role(){
+                    Status = new Status() {
+                        Id = 2
+                    },
+                    Name = "OtherRole",
+                    Code = "plan_tech_for_school_estalishment_only",
                     NumericId = "OtherNumericId",
                 }
             }
