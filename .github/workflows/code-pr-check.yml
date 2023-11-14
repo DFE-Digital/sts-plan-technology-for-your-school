@@ -55,7 +55,7 @@ jobs:
         uses: wearerequired/lint-action@v2
         with:
           dotnet_format: true
-          dotnet_format_dir: "./src/${{ matrix.workspace }}/"
+          dotnet_format_dir: "./src/Dfe.PlanTech.${{ matrix.workspace }}/"
           git_email: "41898282+github-actions[bot]@users.noreply.github.com"
           git_name: "github-actions[bot]"
           commit: false   # TODO: REPLACE false WITH true AFTER TESTING
