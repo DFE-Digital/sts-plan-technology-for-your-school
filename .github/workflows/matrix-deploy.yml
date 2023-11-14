@@ -7,11 +7,6 @@ on:
     paths:
       - 'src/**'
       - '.github/workflows/matrix-deploy.yml'
-  pull_request: # TODO: REMOVE AFTER TESTING
-    branches: ["development"]
-    paths:
-      - 'src/**'
-      - '.github/workflows/matrix-deploy.yml'
     
 jobs:
 
