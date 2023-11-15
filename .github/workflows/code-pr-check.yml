@@ -72,7 +72,7 @@ jobs:
       - name: Echo Directory
         run: |
           echo ${{ matrix.workspace }}
-          echo $(basename(${{ matrix.workspace }}))
+          echo $(basename ${{ matrix.workspace }})
           echo $(pwd)
         
       - name: Run Linter
