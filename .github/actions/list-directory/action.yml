@@ -14,5 +14,8 @@ runs:
       id: list-dir
       shell: bash
       run: |
+        echo "$(pwd)"
         cd ${{ inputs.source }}
+        echo "$(pwd)"
+        echo "$(*/)"
         echo "$(jq -c -n '$ARGS.positional' --args ${*/})"
