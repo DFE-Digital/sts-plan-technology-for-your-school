@@ -70,7 +70,10 @@ jobs:
           DOTNET_CLI_TELEMETRY_OPTOUT: true
 
       - name: Echo Directory
-        run: echo ${{ matrix.workspace }}
+        run: |
+          echo ${{ matrix.workspace }}
+          echo $(basename(${{ matrix.workspace }}))
+          echo $(pwd)
         
       - name: Run Linter
         uses: wearerequired/lint-action@v2
