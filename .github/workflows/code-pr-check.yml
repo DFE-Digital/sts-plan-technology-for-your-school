@@ -74,13 +74,13 @@ jobs:
         run: |
           basename=$(basename ${{ matrix.workspace }})
           echo $basename
-          echo "basename=$basename" >> GITHUB_OUTPUT
+          echo "basename=$basename" >> $GITHUB_OUTPUT
 
       - name: Run Linter
         uses: wearerequired/lint-action@v2
         with:
           dotnet_format: true
-          dotnet_format_dir: ./src/${{ steps.get-basename.outputs.* }}/
+          dotnet_format_dir: ./src/${{ steps.get-basename.outputs.basename }}/
           git_email: "41898282+github-actions[bot]@users.noreply.github.com"
           git_name: "github-actions[bot]"
           commit: false   # TODO: REPLACE false WITH true AFTER TESTING
