@@ -69,18 +69,19 @@ jobs:
           DOTNET_INSTALL_DIR: "/usr/share/dotnet"
           DOTNET_CLI_TELEMETRY_OPTOUT: true
       
-      - name: Get Basename
-        id: get-basename
-        run: |
-          basename=$(basename ${{ matrix.workspace }})
-          echo $basename
-          echo "basename=$basename" >> $GITHUB_OUTPUT
+      # - name: Get Basename
+      #   id: get-basename
+      #   run: |
+      #     basename=$(basename ${{ matrix.workspace }})
+      #     echo $basename
+      #     echo "basename=$basename" >> $GITHUB_OUTPUT
 
       - name: Run Linter
         uses: wearerequired/lint-action@v2
         with:
           dotnet_format: true
-          dotnet_format_dir: ./src/${{ steps.get-basename.outputs.basename }}/
+          # dotnet_format_dir: ./src/${{ steps.get-basename.outputs.basename }}/
+          dotnet_format_dir: ./src/${{ matrix.workspace }}/
           git_email: "41898282+github-actions[bot]@users.noreply.github.com"
           git_name: "github-actions[bot]"
           commit: false   # TODO: REPLACE false WITH true AFTER TESTING
