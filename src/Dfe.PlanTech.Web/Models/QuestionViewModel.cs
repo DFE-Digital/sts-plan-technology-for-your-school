@@ -10,9 +10,11 @@ public class QuestionViewModel
 
     public string? AnswerRef { get; init; }
 
-    public string? Params { get; init; } = null!;
+    public IEnumerable<string>? ErrorMessages { get; set; }
 
-    public int? SubmissionId { get; init; }
+    public string SectionName { get; init; } = null!;
 
-    public string? QuestionErrorMessage { get; init; }
+    public string SectionSlug { get; init; } = null!;
+
+    public string SectionId { get; init; } = null!;
 }

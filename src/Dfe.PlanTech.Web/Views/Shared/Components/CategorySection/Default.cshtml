@@ -9,8 +9,10 @@
 
 @if (Model.ProgressRetrievalErrorMessage == null)
 {
+    bool plural = @Model.TotalSectionCount > 1;
+    string topic = plural ? "topics" : "topic"; 
     <p class="govuk-body govuk-!-margin-bottom-5">You have completed <strong>@Model.CompletedSectionCount of
-        @Model.TotalSectionCount</strong> sections.</p>
+        @Model.TotalSectionCount</strong> @topic.</p>
 }
 else
 {
@@ -25,7 +27,7 @@ else
             @if (categorySectionDtoItem.Slug != null)
             {
                 <task-list-item-name>
-                    <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@categorySectionDtoItem.Slug"
+                     <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@categorySectionDtoItem.Slug"
                         class="govuk-link">
                         @categorySectionDtoItem.Name
                     </a>

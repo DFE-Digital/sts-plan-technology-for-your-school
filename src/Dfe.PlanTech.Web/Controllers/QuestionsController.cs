@@ -1,144 +1,127 @@
-using Dfe.PlanTech.Application.Submission.Commands;
-using Dfe.PlanTech.Application.Submission.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Constants;
+using Dfe.PlanTech.Application.Exceptions;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Responses.Interfaces;
+using Dfe.PlanTech.Domain.Submissions.Interfaces;
+using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Models;
+using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
 [Authorize]
-[Route("/question")]
 public class QuestionsController : BaseController<QuestionsController>
 {
-    public QuestionsController(ILogger<QuestionsController> logger) : base(logger) { }
+    public const string Controller = "Questions";
+    public const string GetQuestionBySlugActionName = nameof(GetQuestionBySlug);
 
-    [HttpGet("{id?}")]
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="section">Name of current section (if starting new)</param>
-    /// <returns></returns>
-    public async Task<IActionResult> GetQuestionById(string? id, string? section, [FromServices] ISubmitAnswerCommand submitAnswerCommand, CancellationToken cancellationToken)
+    private readonly IGetSectionQuery _getSectionQuery;
+    private readonly IGetLatestResponsesQuery _getResponseQuery;
+    private readonly IUser _user;
+
+    public QuestionsController(ILogger<QuestionsController> logger,
+                               IGetSectionQuery getSectionQuery,
+                               IGetLatestResponsesQuery getResponseQuery,
+                               IUser user) : base(logger)
     {
-        var parameterQuestionPage = TempData[TempDataConstants.Questions] != null ? DeserialiseParameter<TempDataQuestions>(TempData[TempDataConstants.Questions]) : new TempDataQuestions();
-
-        if (string.IsNullOrEmpty(id)) id = parameterQuestionPage.QuestionRef;
-
-        TempData.TryGetValue("param", out object? parameters);
-        Params? param = _ParseParameters(parameters?.ToString());
-
-        var questionWithSubmission = await submitAnswerCommand.GetQuestionWithSubmission(parameterQuestionPage.SubmissionId, id, param?.SectionId ?? throw new NullReferenceException(nameof(param)), section, cancellationToken);
-
-        if (questionWithSubmission.Question == null)
-        {
-            TempData[TempDataConstants.CheckAnswers] = SerialiseParameter(new TempDataCheckAnswers() { SubmissionId = questionWithSubmission.Submission?.Id ?? throw new NullReferenceException(nameof(questionWithSubmission.Submission)), SectionId = param.SectionId, SectionName = param.SectionName });
-            return RedirectToAction("CheckAnswersPage", "CheckAnswers");
-        }
-        else
-        {
-            var viewModel = new QuestionViewModel()
-            {
-                Question = questionWithSubmission.Question,
-                AnswerRef = parameterQuestionPage.AnswerRef,
-                Params = parameters?.ToString(),
-                SubmissionId = questionWithSubmission.Submission == null ? parameterQuestionPage.SubmissionId : questionWithSubmission.Submission.Id,
-                QuestionErrorMessage = parameterQuestionPage.NoSelectedAnswerErrorMessage
-            };
-
-            return View("Question", viewModel);
-        }
+        _getResponseQuery = getResponseQuery;
+        _getSectionQuery = getSectionQuery;
+        _user = user;
     }
 
-    [HttpPost("SubmitAnswer")]
-    public async Task<IActionResult> SubmitAnswer(SubmitAnswerDto submitAnswerDto, [FromServices] ISubmitAnswerCommand submitAnswerCommand)
+    [HttpGet("{sectionSlug}/{questionSlug}")]
+    public async Task<IActionResult> GetQuestionBySlug(string sectionSlug,
+                                                        string questionSlug,
+                                                        [FromServices] IGetQuestionBySlugRouter router,
+                                                        CancellationToken cancellationToken = default)
     {
-        if (submitAnswerDto == null) throw new ArgumentNullException(nameof(submitAnswerDto));
+        if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
+        if (string.IsNullOrEmpty(questionSlug)) throw new ArgumentNullException(nameof(questionSlug));
 
-        Params param = new Params();
-        if (!string.IsNullOrEmpty(submitAnswerDto.Params))
-        {
-            param = _ParseParameters(submitAnswerDto.Params) ?? null!;
-            TempData["param"] = submitAnswerDto.Params;
-        }
+        return await router.ValidateRoute(sectionSlug, questionSlug, this, cancellationToken);
+    }
 
+
+    [HttpGet("{sectionSlug}/next-question")]
+    public async Task<IActionResult> GetNextUnansweredQuestion(string sectionSlug,
+                                                                [FromServices] IGetNextUnansweredQuestionQuery getQuestionQuery,
+                                                                CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
+
+        var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
+                        throw new ContentfulDataUnavailableException($"Could not find section with slug {sectionSlug}");
+
+        int establishmentId = await _user.GetEstablishmentId();
+
+        var nextQuestion = await getQuestionQuery.GetNextUnansweredQuestion(establishmentId, section, cancellationToken);
+
+        if (nextQuestion == null) return this.RedirectToCheckAnswers(sectionSlug);
+
+        return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = nextQuestion!.Slug });
+    }
+
+    [HttpPost("{sectionSlug}/{questionSlug}")]
+    public async Task<IActionResult> SubmitAnswer(string sectionSlug, string questionSlug, SubmitAnswerDto submitAnswerDto, [FromServices] ISubmitAnswerCommand submitAnswerCommand, CancellationToken cancellationToken = default)
+    {
         if (!ModelState.IsValid)
         {
-            TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions()
-            {
-                QuestionRef = submitAnswerDto.QuestionId,
-                SubmissionId = submitAnswerDto.SubmissionId,
-                NoSelectedAnswerErrorMessage = "You must select an answer to continue"
-            });
-            return RedirectToAction("GetQuestionById");
+            var viewModel = await GenerateViewModel(sectionSlug, questionSlug, cancellationToken);
+            viewModel.ErrorMessages = ModelState.Values.SelectMany(value => value.Errors.Select(err => err.ErrorMessage)).ToArray();
+            return RenderView(viewModel);
         }
 
-        int submissionId;
-        
         try
         {
-            submissionId = await submitAnswerCommand.SubmitAnswer(submitAnswerDto, param.SectionId, param.SectionName);
+            await submitAnswerCommand.SubmitAnswer(submitAnswerDto, cancellationToken);
         }
         catch (Exception e)
         {
             logger.LogError("An error has occurred while submitting an answer with the following message: {} ", e.Message);
-            
-            TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions()
-            {
-                QuestionRef = submitAnswerDto.QuestionId,
-                SubmissionId = submitAnswerDto.SubmissionId,
-                NoSelectedAnswerErrorMessage = "Save failed. Please try again later."
-            });
-            return RedirectToAction("GetQuestionById");
+            var viewModel = await GenerateViewModel(sectionSlug, questionSlug, cancellationToken);
+            viewModel.ErrorMessages = new[] { "Save failed. Please try again later." };
+            return RenderView(viewModel);
         }
 
-        string? nextQuestionId;
-        
-        try
-        {
-            nextQuestionId = await submitAnswerCommand.GetNextQuestionId(submitAnswerDto.QuestionId, submitAnswerDto.ChosenAnswerId);
-        }
-        catch (Exception e)
-        {
-            logger.LogError( "An error has occurred while retrieving the next question with the following message: {} ", e.Message);
-            return Redirect("/service-unavailable");
-        }
-        
-
-        if (string.IsNullOrEmpty(nextQuestionId) || await submitAnswerCommand.NextQuestionIsAnswered(submissionId, nextQuestionId))
-        {
-            TempData[TempDataConstants.CheckAnswers] = SerialiseParameter(new TempDataCheckAnswers() { SubmissionId = submissionId, SectionId = param.SectionId, SectionName = param.SectionName });
-            return RedirectToAction("CheckAnswersPage", "CheckAnswers");
-        }
-        else
-        {
-            TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions() { QuestionRef = nextQuestionId, SubmissionId = submissionId });
-            return RedirectToAction("GetQuestionById");
-        }
+        return RedirectToAction(nameof(GetNextUnansweredQuestion), new { sectionSlug });
     }
 
-    private static Params? _ParseParameters(string? parameters)
+    public IActionResult RenderView(QuestionViewModel viewModel) => View("Question", viewModel);
+
+    public async Task<QuestionViewModel> GenerateViewModel(string sectionSlug, string questionSlug, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(parameters))
-        {
-            return null;
-        }
+        var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
+                        throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
 
-        string[]? splitParams = parameters.Split('+');
+        var question = section.Questions.FirstOrDefault(question => question.Slug == questionSlug) ??
+                            throw new KeyNotFoundException($"Could not find question slug {questionSlug} under section {sectionSlug}");
 
-        if (splitParams is null)
-        {
-            return null;
-        }
-        else
-        {
-            return new Params
-            {
-                SectionName = splitParams.Length > 0 ? splitParams[0].ToString() : string.Empty,
-                SectionId = splitParams.Length > 1 ? splitParams[1].ToString() : string.Empty,
-            };
-        }
+        int establishmentId = await _user.GetEstablishmentId();
+
+        var latestResponseForQuestion = await _getResponseQuery.GetLatestResponseForQuestion(establishmentId,
+                                                                                section.Sys.Id,
+                                                                                question.Sys.Id,
+                                                                                cancellationToken);
+
+        return GenerateViewModel(sectionSlug, question, section, latestResponseForQuestion?.AnswerRef);
     }
+
+    public QuestionViewModel GenerateViewModel(string sectionSlug, Question question, ISection section, string? latestAnswerContentfulId)
+    {
+        ViewData["Title"] = question.Text;
+
+        return new QuestionViewModel()
+        {
+            Question = question,
+            AnswerRef = latestAnswerContentfulId,
+            SectionName = section.Name,
+            SectionSlug = sectionSlug,
+            SectionId = section.Sys.Id
+        };
+    }
+
+    public static IActionResult RedirectToQuestionBySlug(string sectionSlug, string questionSlug, Controller controller)
+    => controller.RedirectToAction(GetQuestionBySlugActionName, Controller, new { sectionSlug, questionSlug });
 }

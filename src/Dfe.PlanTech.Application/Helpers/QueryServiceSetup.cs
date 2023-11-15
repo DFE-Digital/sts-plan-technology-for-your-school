@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -7,7 +8,7 @@ namespace Dfe.PlanTech.Application.Helpers;
 /// <summary>
 /// Adds CQRS classes to application
 /// </summary>
-public static class CQRSServicesSetup
+public static class QueryServiceSetup
 {
     /// <summary>
     /// Adds CQRS commands/queries as services
@@ -22,6 +23,8 @@ public static class CQRSServicesSetup
         {
             services.AddScoped(query, query);
         }
+
+        services.AddScoped<IGetPageQuery, GetPageQuery>();
 
         return services;
     }

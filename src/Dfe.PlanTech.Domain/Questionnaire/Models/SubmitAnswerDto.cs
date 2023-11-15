@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
@@ -8,9 +9,17 @@ public class SubmitAnswerDto
     public string QuestionId { get; init; } = null!;
 
     [Required]
-    public string ChosenAnswerId { get; init; } = null!;
+    public string QuestionText { get; init; } = null!;
 
-    public string? Params { get; init; } = null!;
+    [Required(AllowEmptyStrings = false, ErrorMessage = "You must select an answer to continue")]
+    public string ChosenAnswerJson { get; init; } = null!;
 
-    public int? SubmissionId { get; init; }
+    public AnswerViewModelDto? ChosenAnswer => !string.IsNullOrEmpty(ChosenAnswerJson) ?
+                                                    JsonSerializer.Deserialize<AnswerViewModelDto>(ChosenAnswerJson) : null;
+
+    [Required]
+    public string SectionId { get; init; } = null!;
+
+    [Required]
+    public string SectionName { get; init; } = null!;
 }

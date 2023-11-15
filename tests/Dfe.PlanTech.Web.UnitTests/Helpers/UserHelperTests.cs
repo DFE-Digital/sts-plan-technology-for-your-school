@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Helper;
-using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Domain.Establishments.Models;
+using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Domain.Users.Models;
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
@@ -52,7 +52,7 @@ public class UserHelperTests
         _planTechDbContextSubstitute = Substitute.For<IPlanTechDbContext>();
         _createEstablishmentCommandSubstitute = Substitute.For<ICreateEstablishmentCommand>();
         _getUserIdQuerySubstitute = Substitute.For<IGetUserIdQuery>();
-        _getEstablishmentIdQuerySubstitute = Substitute.For<IGetEstablishmentIdQuery>(); 
+        _getEstablishmentIdQuerySubstitute = Substitute.For<IGetEstablishmentIdQuery>();
 
         SubstituteGetEstablishmentIdQuery();
         SubstituteGetUserIdQuery();
@@ -120,7 +120,7 @@ public class UserHelperTests
 
 
     [Fact]
-    public async Task GetEstablishmentId_Returns_1_When_Reference_Is_Not_Present()
+    public async Task GetEstablishmentId_Throws_Exception_When_Reference_Is_Not_Present()
     {
         var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
         {
@@ -133,9 +133,7 @@ public class UserHelperTests
 
         var userHelperWithMissingOrgData = new UserHelper(_httpContextAccessorSubstitute, _planTechDbContextSubstitute, _createEstablishmentCommandSubstitute, _getUserIdQuerySubstitute, _getEstablishmentIdQuerySubstitute);
 
-        var result = await userHelperWithMissingOrgData.GetEstablishmentId();
-
-        Assert.Equal(1, result);
+        await Assert.ThrowsAnyAsync<Exception>(() => userHelperWithMissingOrgData.GetEstablishmentId());
     }
 
 }

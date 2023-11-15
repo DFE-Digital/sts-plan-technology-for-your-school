@@ -1,5 +1,8 @@
-﻿using Dfe.PlanTech.Application.Content.Queries;
+﻿using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Users.Interfaces;
+using Dfe.PlanTech.Web.Authorisation;
+using Dfe.PlanTech.Web.Binders;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,86 +12,28 @@ namespace Dfe.PlanTech.Web.Controllers;
 
 public class PagesController : BaseController<PagesController>
 {
+    public const string ControllerName = "Pages";
+    public const string GetPageByRouteAction = nameof(GetByRoute);
+
     public PagesController(ILogger<PagesController> logger) : base(logger)
     {
     }
 
-    [HttpGet("/")]
-    public async Task<IActionResult> Index([FromServices] GetPageQuery query, CancellationToken cancellationToken)
-    {
-        var page = await query.GetPageBySlug("/", cancellationToken);
-
-        var viewModel = CreatePageModel(page);
-
-        return View("Page", viewModel);
-    }
-
-    [Authorize]
+    [Authorize(Policy = PageModelAuthorisationPolicy.POLICY_NAME)]
     [HttpGet("/{route?}")]
-    public async Task<IActionResult> GetByRoute(string route, [FromServices] GetPageQuery query, CancellationToken cancellationToken)
+    public IActionResult GetByRoute([ModelBinder(typeof(PageModelBinder))] Page page, [FromServices] IUser user)
     {
-        string slug = GetSlug(route);
-        string param = "";
-
-        if (TempData[slug] is string tempDataSlug) param = tempDataSlug;
-
-        if (!string.IsNullOrEmpty(param))
-            TempData["Param"] = param;
-
-        var page = await query.GetPageBySlug(slug, cancellationToken);
-
-        var viewModel = CreatePageModel(page, param);
-
-        return View("Page", viewModel);
-    }
-
-    [HttpGet("/accessibility")]
-    public async Task<IActionResult> GetAccessibilityPage([FromServices] GetPageQuery query)
-    {
-        var page = await query.GetPageBySlug("accessibility", CancellationToken.None);
-
-        var viewModel = CreatePageModel(page);
-
-        return View("Page", viewModel);
-    }
-
-    [HttpGet("/privacy-policy")]
-    public async Task<IActionResult> GetPrivacyPolicyPage([FromServices] GetPageQuery query)
-    {
-        var page = await query.GetPageBySlug("privacy-policy", CancellationToken.None);
-
-        var viewModel = CreatePageModel(page);
+        var viewModel = new PageViewModel(page, this, user, logger);
 
         return View("Page", viewModel);
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    [Route("/error")]
+    [HttpGet(UrlConstants.Error, Name = UrlConstants.Error)]
     public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-    }
+    => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 
-    [Route("/service-unavailable")]
+    [HttpGet(UrlConstants.ServiceUnavailable, Name = UrlConstants.ServiceUnavailable)]
     public IActionResult ServiceUnavailable()
-    {
-        return View(new ServiceUnavailableViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-    }
-
-    private PageViewModel CreatePageModel(Page page, string param = null!)
-    {
-        ViewData["Title"] = page.Title?.Text ?? "Plan Technology For Your School";
-
-        return new PageViewModel()
-        {
-            Page = page,
-            Param = param,
-        };
-    }
-
-    /// <summary>
-    /// Returns either the entire slug for the URL (if not null/empty), or "/"
-    /// </summary>
-    /// <param name="route">Route slug from route binding</param>
-    private string GetSlug(string? route) => (string.IsNullOrEmpty(route) ? Request.Path.Value : route) ?? "/";
+    => View(new ServiceUnavailableViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 }

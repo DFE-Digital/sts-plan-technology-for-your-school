@@ -1,11 +1,17 @@
 name: Deploy Terraform
 
 on:
-  push:
-    branches: [ "main" ]
-    paths:
-      - 'terraform/**'
-      - '.github/workflows/terraform-deploy.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: string
+        description: 'The environment to deploy to:'
+        required: true
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
     
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
@@ -28,25 +34,26 @@ env:
   TF_VAR_az_app_kestrel_endpoint: ${{ vars.KESTRELENDPOINT }}
   TF_VAR_az_tag_environment: ${{ vars.AZ_TAG_ENVIRONMENT }}
   TF_VAR_az_tag_product: ${{ vars.AZ_TAG_PRODUCT }}
-  TF_VAR_cdn_frontdoor_origin_host_header_override: ${{secrets.AZ_CDN_FRONTDOOR_ORIGIN_HOST_HEADER_OVERRIDE}}
+  TF_VAR_az_sql_azuread_admin_username: ${{ secrets.AZ_SERVICE_PRINCIPAL }}
   TF_VAR_az_sql_admin_password: ${{secrets.AZ_SQL_ADMIN_PASSWORD}}
+  TF_VAR_az_sql_azuread_admin_objectid: ${{ secrets.AZ_CLIENT_ID }}
+  TF_VAR_cdn_frontdoor_origin_host_header_override: ${{secrets.AZ_CDN_FRONTDOOR_ORIGIN_HOST_HEADER_OVERRIDE}}
   TF_VAR_az_sql_admin_userid_postfix: ${{secrets.AZ_SQL_ADMIN_USERID_POSTFIX}}
+  TF_VAR_registry_server: "ghcr.io"
+  TF_VAR_registry_username: ${{ github.repository_owner }}
+  TF_VAR_registry_custom_image_url: "ghcr.io/dfe-digital/plan-technology-for-your-school:latest"
+  TF_VAR_registry_password: ${{ secrets.GITHUB_TOKEN }}
 
   TF_WORKING_DIRECTORY: terraform/container-app
 
 jobs:
   deploy-terraform:  
     name: Deploy Terraform 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: ${{env.TF_WORKING_DIRECTORY}}
-    strategy:
-      max-parallel: 1
-      fail-fast: true
-      matrix:
-        env: ['dev', 'Tst', 'Staging', 'Production']  
-    environment: ${{ matrix.env }}  
+    environment: ${{ github.event.inputs.environment }} 
     steps:
       - name: Clone repo
         uses: actions/checkout@v3
@@ -54,7 +61,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.5.0
+          terraform_version: 1.6.2
 
       - name: Get GitHub Runner IP
         id: whats-my-ip

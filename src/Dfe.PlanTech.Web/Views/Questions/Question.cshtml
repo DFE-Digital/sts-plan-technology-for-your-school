@@ -1,4 +1,5 @@
 @model Dfe.PlanTech.Web.Models.QuestionViewModel
+@using System.Text.Json;
 
 @section BeforeContent {
     @{
@@ -6,12 +7,14 @@
     }
 }
 
-<form asp-controller="Questions" asp-action="SubmitAnswer" method="post">
+<form asp-controller="Questions" asp-action="SubmitAnswer" asp-route-sectionSlug=@Model.SectionSlug
+    asp-route-questionSlug=@Model.Question.Slug method="post">
+    <input id="QuestionText" hidden value="@Model.Question.Text" name="QuestionText" />
     <input id="QuestionId" hidden value=@Model.Question.Sys.Id name="QuestionId" />
-    <input id="Params" hidden value="@Model.Params" name="Params" />
-    <input id="SubmissionId" hidden value="@Model.SubmissionId" name="SubmissionId" />
-
-    <govuk-radios name="ChosenAnswerId">
+    <input id="SectionId" hidden value="@Model.SectionId" name="SectionId" />
+    <input id="SectionName" hidden value="@Model.SectionName" name="SectionName" />
+    
+    <govuk-radios name="ChosenAnswerJson">
         <govuk-radios-fieldset>
             <govuk-radios-fieldset-legend is-page-heading="true" class="govuk-fieldset__legend--l">
                 @Model.Question.Text
@@ -22,24 +25,19 @@
                 <govuk-radios-hint>@Model.Question.HelpText</govuk-radios-hint>
             }
 
-            @if (!string.IsNullOrEmpty(Model.QuestionErrorMessage))
+            @if (Model.ErrorMessages != null)
             {
-                <govuk-radios-error-message>@Model.QuestionErrorMessage</govuk-radios-error-message>
+                <govuk-radios-error-message>@string.Join(",", Model.ErrorMessages)</govuk-radios-error-message>
             }
 
             @{
                 foreach (var answer in Model.Question.Answers)
                 {
-                    var chosenAnswerId = answer.Sys.Id ?? "";
+                    var answerDto = answer.AsDto;
+                    var isChecked = Model.AnswerRef != null && Model.AnswerRef.Equals(answer.Sys.Id);
+                    var radioValue = JsonSerializer.Serialize(answerDto);
 
-                    if (Model.AnswerRef != null && Model.AnswerRef.Equals(chosenAnswerId))
-                    {
-                        <govuk-radios-item value=@chosenAnswerId checked="true">@answer.Text</govuk-radios-item>
-                    }
-                    else
-                    {
-                        <govuk-radios-item value=@chosenAnswerId>@answer.Text</govuk-radios-item>
-                    }
+                    <govuk-radios-item value="@radioValue" checked="@isChecked">@answer.Text</govuk-radios-item>
                 }
             }
 

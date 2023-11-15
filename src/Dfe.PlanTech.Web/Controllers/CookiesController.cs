@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Application.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -47,10 +47,10 @@ public class CookiesController : BaseController<CookiesController>
     {
         Page cookiesPageContent = await getPageQuery.GetPageBySlug("cookies", CancellationToken.None);
 
-        CookiesViewModel cookiesViewModel = new CookiesViewModel()
+        CookiesViewModel cookiesViewModel = new()
         {
-             Title = cookiesPageContent.Title ?? throw new NullReferenceException(nameof(cookiesPageContent.Title)),
-             Content = cookiesPageContent.Content
+            Title = cookiesPageContent.Title ?? new Title() { Text = "Cookies" },
+            Content = cookiesPageContent.Content
         };
 
 
@@ -75,7 +75,7 @@ public class CookiesController : BaseController<CookiesController>
         }
         else
         {
-            throw new ArgumentException("Can't convert preference", nameof(userPreference)); 
+            throw new ArgumentException("Can't convert preference", nameof(userPreference));
         }
     }
 }

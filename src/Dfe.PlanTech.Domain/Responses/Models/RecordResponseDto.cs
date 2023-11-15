@@ -1,17 +1,20 @@
-﻿namespace Dfe.PlanTech.Domain.Responses.Models
+﻿using Dfe.PlanTech.Domain.Questionnaire.Models;
+
+namespace Dfe.PlanTech.Domain.Responses.Models;
+
+public class RecordResponseDto
 {
-    public class RecordResponseDto
-    {
-        public int UserId { get; set; }
+    public int UserId { get; set; }
 
-        public int SubmissionId { get; set; }
+    public int EstablishmentId { get; set; }
 
-        public int QuestionId { get; set; }
+    public string SectionId { get; set; } = null!;
 
-        public int AnswerId { get; set; }
+    public string SectionName { get; set; } = null!;
 
-        public string Maturity { get; set; } = null!;
+    public IdWithText Question { get; init; }
 
-        public DateTime? DateCreated { get; set; }
-    }
+    public IdWithText Answer { get; init; }
+
+    public string Maturity { get; set; } = null!;
 }

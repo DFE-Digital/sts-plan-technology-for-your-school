@@ -5,35 +5,41 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-      <UserSecretsId>04e79986-156c-45e1-87d7-2f14405d0fe8</UserSecretsId>
-  </PropertyGroup>
+        <UserSecretsId>04e79986-156c-45e1-87d7-2f14405d0fe8</UserSecretsId>
+    </PropertyGroup>
 
     <ItemGroup>
-      <Content Update="Properties\launchSettings.json">
-        <CopyToPublishDirectory>Never</CopyToPublishDirectory>
-      </Content>
+        <Content Update="Properties\launchSettings.json">
+            <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+        </Content>
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\Dfe.PlanTech.Application\Dfe.PlanTech.Application.csproj" />
-      <ProjectReference Include="..\Dfe.PlanTech.Domain\Dfe.PlanTech.Domain.csproj" />
-      <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.Contentful\Dfe.PlanTech.Infrastructure.Contentful.csproj" />
-      <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.Data\Dfe.PlanTech.Infrastructure.Data.csproj" />
-      <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.SignIn\Dfe.PlanTech.Infrastructure.SignIn.csproj" />
+        <ProjectReference Include="..\Dfe.PlanTech.Application\Dfe.PlanTech.Application.csproj"/>
+        <ProjectReference Include="..\Dfe.PlanTech.Domain\Dfe.PlanTech.Domain.csproj"/>
+        <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.Contentful\Dfe.PlanTech.Infrastructure.Contentful.csproj"/>
+        <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.Data\Dfe.PlanTech.Infrastructure.Data.csproj"/>
+        <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.SignIn\Dfe.PlanTech.Infrastructure.SignIn.csproj"/>
     </ItemGroup>
     <ItemGroup>
-      <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.2.2" />
-      <PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Keys" Version="1.2.2" />
-      <PackageReference Include="Azure.Identity" Version="1.9.0" />
-      <PackageReference Include="GovUk.Frontend.AspNetCore" Version="1.0.0" />
-      <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.21.0" />
-      <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="7.0.8" />
-      <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="7.0.8" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.8" />
-      <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="7.0.5" />
+        <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.2.2"/>
+        <PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Keys" Version="1.2.2"/>
+        <PackageReference Include="Azure.Identity" Version="1.10.1"/>
+        <PackageReference Include="GovUk.Frontend.AspNetCore" Version="1.4.0"/>
+        <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.21.0"/>
+        <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="7.0.11"/>
+        <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="7.0.11"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.11"/>
+        <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="7.0.11"/>
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="Views\Recommendations\" />
+        <None Remove="Views\Recommendations\"/>
     </ItemGroup>
+
+    <Target Name="BuildWebAssets" BeforeTargets="Build" Condition="'$(buildWebAssets)' == 'true'">
+        <Exec Command="npm install" WorkingDirectory="../Dfe.PlanTech.Web.Node"/>
+        <Exec Command="npm run build" WorkingDirectory="../Dfe.PlanTech.Web.Node"/>
+    </Target>
+
 </Project>

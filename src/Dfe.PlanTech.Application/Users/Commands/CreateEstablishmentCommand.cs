@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Establishments.Models;
+using Dfe.PlanTech.Domain.Users.Interfaces;
 
 namespace Dfe.PlanTech.Application.Users.Commands;
 
@@ -19,28 +20,19 @@ public class CreateEstablishmentCommand : ICreateEstablishmentCommand
     /// <returns></returns>
     public async Task<int> CreateEstablishment(EstablishmentDto establishmentDto)
     {
-        if (establishmentDto == null)
-        {
-            throw new InvalidOperationException("Establishment dto cannot be null.");
-        }
-
-
-        if (establishmentDto.Urn == null && establishmentDto.Ukprn == null)
-        {
-            throw new InvalidOperationException("Both Urn and Ukprn cannot be null.");
-        }
+        if (establishmentDto == null) throw new ArgumentNullException(nameof(establishmentDto));
 
         var establishment = new Establishment()
         {
-            EstablishmentRef = establishmentDto.Urn ?? establishmentDto.Ukprn!,
-            EstablishmentType = establishmentDto.Type.Name,
+            EstablishmentRef = establishmentDto.Reference,
+            EstablishmentType = establishmentDto.Type?.Name,
             OrgName = establishmentDto.OrgName,
         };
 
         _db.AddEstablishment(establishment);
 
-        var establishmentId = await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
-        return establishmentId;
+        return establishment.Id;
     }
 }

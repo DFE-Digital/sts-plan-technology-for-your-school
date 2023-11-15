@@ -1,9 +1,5 @@
-using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Application.Response.Commands;
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Constants;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Web.Models;
+using Dfe.PlanTech.Domain.Submissions.Interfaces;
+using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,43 +8,49 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Authorize]
 public class CheckAnswersController : BaseController<CheckAnswersController>
 {
-    public CheckAnswersController(ILogger<CheckAnswersController> logger) : base(logger) { }
+    public const string ControllerName = "CheckAnswers";
+    public const string CheckAnswersAction = nameof(CheckAnswersPage);
+    public const string CheckAnswersPageSlug = "check-answers";
+    public const string CheckAnswersViewName = "CheckAnswers";
 
-    [HttpGet]
-    [Route("check-answers")]
-    public async Task<IActionResult> CheckAnswersPage([FromServices] ProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand, [FromServices] GetPageQuery getPageQuery)
+    public const string InlineRecommendationUnavailableErrorMessage =
+        "Unable to save. Please try again. If this problem continues you can";
+
+    public CheckAnswersController(ILogger<CheckAnswersController> logger) : base(logger)
     {
-        var parameterCheckAnswersPage = DeserialiseParameter<TempDataCheckAnswers>(TempData[TempDataConstants.CheckAnswers]);
-
-        Page checkAnswerPageContent = await getPageQuery.GetPageBySlug("check-answers", CancellationToken.None);
-
-        CheckAnswersViewModel checkAnswersViewModel = new CheckAnswersViewModel()
-        {
-            Title = checkAnswerPageContent.Title ?? throw new NullReferenceException(nameof(checkAnswerPageContent.Title)),
-            SectionName = parameterCheckAnswersPage.SectionName,
-            CheckAnswerDto = await processCheckAnswerDtoCommand.ProcessCheckAnswerDto(parameterCheckAnswersPage.SubmissionId, parameterCheckAnswersPage.SectionId),
-            Content = checkAnswerPageContent.Content,
-            SubmissionId = parameterCheckAnswersPage.SubmissionId
-        };
-
-        return View("CheckAnswers", checkAnswersViewModel);
     }
 
-    [HttpGet]
-    [Route("change-answer")]
-    public IActionResult ChangeAnswer(string questionRef, string answerRef, int submissionId)
+    [HttpGet("{sectionSlug}/check-answers")]
+    public async Task<IActionResult> CheckAnswersPage(string sectionSlug,
+                                                      [FromServices] ICheckAnswersRouter checkAnswersValidator,
+                                                      CancellationToken cancellationToken = default)
     {
-        TempData[TempDataConstants.Questions] = SerialiseParameter(new TempDataQuestions() { QuestionRef = questionRef, AnswerRef = answerRef, SubmissionId = submissionId });
-        return RedirectToAction("GetQuestionById", "Questions");
+        if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
+
+        var errorMessage = TempData["ErrorMessage"]?.ToString();
+
+        return await checkAnswersValidator.ValidateRoute(sectionSlug, errorMessage, this, cancellationToken);
     }
 
     [HttpPost("ConfirmCheckAnswers")]
-    public async Task<IActionResult> ConfirmCheckAnswers(int submissionId, string sectionName, [FromServices] ProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand)
+    public async Task<IActionResult> ConfirmCheckAnswers(string sectionSlug, int submissionId, string sectionName, [FromServices] ICalculateMaturityCommand calculateMaturityCommand, CancellationToken cancellationToken = default)
     {
-        await processCheckAnswerDtoCommand.CalculateMaturityAsync(submissionId);
+        if (submissionId <= 0) throw new ArgumentOutOfRangeException(nameof(submissionId));
+        if (string.IsNullOrEmpty(sectionName)) throw new ArgumentNullException(nameof(sectionName));
+
+        try
+        {
+            await calculateMaturityCommand.CalculateMaturityAsync(submissionId, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            logger.LogError("There has been an error while trying to calculate maturity", e);
+            TempData["ErrorMessage"] = InlineRecommendationUnavailableErrorMessage;
+            return this.RedirectToCheckAnswers(sectionSlug);
+        }
 
         TempData["SectionName"] = sectionName;
-        return RedirectToAction("GetByRoute", "Pages", new { route = "self-assessment" });
 
+        return this.RedirectToSelfAssessment();
     }
 }

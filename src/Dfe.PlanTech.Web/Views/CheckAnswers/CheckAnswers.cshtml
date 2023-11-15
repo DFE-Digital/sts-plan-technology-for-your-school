@@ -13,9 +13,9 @@
             await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Title);
         }
         <dl class="govuk-summary-list govuk-!-margin-bottom-9">
-            @foreach (var questionWithAnswer in Model.CheckAnswerDto.QuestionAnswerList)
+            @foreach (var questionWithAnswer in Model.CheckAnswerDto.Responses)
             {
-                var anchorLabel = $"Change your answer for {questionWithAnswer.QuestionText}";
+                var anchorLabel = $"your answer for {questionWithAnswer.QuestionText}";
 
                 <div class="govuk-summary-list__row">
                     <dt class="govuk-summary-list__key spacer">
@@ -25,11 +25,13 @@
                         @questionWithAnswer.AnswerText
                     </dd>
                     <dd class="govuk-summary-list__actions spacer">
-                        <a class="govuk-link" asp-controller="CheckAnswers" asp-action="ChangeAnswer"
-                            asp-route-questionRef="@questionWithAnswer.QuestionRef"
-                            asp-route-answerRef="@questionWithAnswer.AnswerRef" asp-route-submissionId="@Model.SubmissionId"
-                            aria-label=@anchorLabel
-                            title=@questionWithAnswer.QuestionText>Change</a>
+                        <a asp-controller="Questions" asp-action="GetQuestionBySlug"
+                            asp-route-questionSlug="@questionWithAnswer.QuestionSlug"
+                            asp-route-sectionSlug="@Model.SectionSlug" class="govuk-link"
+                            title="@questionWithAnswer.QuestionText">
+                            Change
+                            <span class="govuk-visually-hidden">@anchorLabel</span>
+                        </a>
                     </dd>
                 </div>
             }
@@ -37,13 +39,23 @@
         <form asp-controller="CheckAnswers" asp-action="ConfirmCheckAnswers" method="post">
             <input type="hidden" name="submissionId" value="@Model.SubmissionId" />
             <input type="hidden" name="sectionName" value="@Model.SectionName">
+            <input type="hidden" name="sectionSlug" value="@Model.SectionSlug">
+            
             @{
                 foreach (var content in Model.Content)
                 {
                     await Html.RenderPartialAsync("Components/PageComponentFactory", content);
                 }
             }
-            <govuk-button type="submit">Save and Submit</govuk-button>
+            <govuk-button type="submit">Save and submit</govuk-button>
+            
+            @if (Model.ErrorMessage != null)
+            {
+                <p class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span> @Model.ErrorMessage <a class="govuk-error-message" href="/self-assessment">return to the self-assessment page</a>
+                </p>
+            }
+            
         </form>
     </div>
 </div>

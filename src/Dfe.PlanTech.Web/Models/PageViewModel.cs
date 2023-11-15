@@ -1,9 +1,33 @@
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Users.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Models;
 
 public class PageViewModel
 {
-    public required Page Page { get; init; }
-    public string Param { get; set; } = null!;
+    public Page Page { get; init; } = null!;
+
+    public PageViewModel(Page page, Controller controller, IUser user, ILogger logger)
+    {
+        controller.ViewData["Title"] = System.Net.WebUtility.HtmlDecode(page.Title?.Text) ??
+                                       "Plan Technology For Your School";
+        Page = page;
+        TryLoadOrganisationName(controller.HttpContext, user, logger);
+    }
+
+    public void TryLoadOrganisationName(HttpContext httpContext, IUser user, ILogger logger)
+    {
+        if (!Page.DisplayOrganisationName) return;
+
+        if (httpContext.User.Identity?.IsAuthenticated == false)
+        {
+            logger.LogWarning("Tried to display establishment on {page} but user is not authenticated", Page.Title?.Text ?? Page.Sys.Id);
+            return;
+        }
+
+        var establishment = user.GetOrganisationData();
+
+        Page.OrganisationName = establishment.OrgName;
+    }
 }

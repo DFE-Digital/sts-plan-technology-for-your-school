@@ -18,11 +18,11 @@ public interface ISection : IContentComponent
 
     public Page InterstitialPage { get; }
 
-    public Sys Sys { get; }
-
     public RecommendationPage[] Recommendations { get; }
 
     public RecommendationPage? TryGetRecommendationForMaturity(Maturity maturity);
 
     public RecommendationPage? GetRecommendationForMaturity(string? maturity);
+
+    public IEnumerable<QuestionWithAnswer> GetAttachedQuestions(IEnumerable<QuestionWithAnswer> responses);
 }

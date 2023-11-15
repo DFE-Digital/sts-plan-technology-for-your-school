@@ -1,16 +1,19 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.2" />
+    <Compile Remove="Persistence\Commands\**" />
+    <EmbeddedResource Remove="Persistence\Commands\**" />
+    <None Remove="Persistence\Commands\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <None Remove="Persistence\Commands\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Persistence\Commands\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Dfe.PlanTech.Domain\Dfe.PlanTech.Domain.csproj" />

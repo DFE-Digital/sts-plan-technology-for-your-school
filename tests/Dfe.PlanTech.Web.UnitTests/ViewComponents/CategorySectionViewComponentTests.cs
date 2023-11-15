@@ -1,13 +1,12 @@
-using Dfe.PlanTech.Domain.CategorySection;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.ViewComponents;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -27,26 +26,28 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
             _loggerCategory = Substitute.For<ILogger<CategorySectionViewComponent>>();
 
-            var httpContext = new DefaultHttpContext();
-            var tempData = new TempDataDictionary(httpContext, Substitute.For<ITempDataProvider>());
             var viewContext = new ViewContext();
-            viewContext.TempData = tempData;
-            var viewComponentContext = new ViewComponentContext();
-            viewComponentContext.ViewContext = viewContext;
 
-            _categorySectionViewComponent = new CategorySectionViewComponent(_loggerCategory,_getSubmissionStatusesQuery);
-            _categorySectionViewComponent.ViewComponentContext = viewComponentContext;
+            var viewComponentContext = new ViewComponentContext
+            {
+                ViewContext = viewContext
+            };
+
+            _categorySectionViewComponent = new CategorySectionViewComponent(_loggerCategory, _getSubmissionStatusesQuery)
+            {
+                ViewComponentContext = viewComponentContext
+            };
 
             _category = new Category()
             {
                 Completed = 1,
                 Sections = new Section[]
                 {
-                    new Section()
+                    new ()
                     {
-                        Sys = new Sys() { Id = "Section1" },
+                        Sys = new SystemDetails() { Id = "Section1" },
                         Name = "Test Section 1",
-                        InterstitialPage = new Domain.Content.Models.Page()
+                        InterstitialPage = new Page()
                         {
                             Slug = "section-1",
                         }
@@ -58,7 +59,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public void Returns_CategorySectionInfo_If_Slug_Exists_And_SectionIsCompleted()
         {
-            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
+            _category.SectionStatuses.Add(new SectionStatusDto()
             {
                 SectionId = "Section1",
                 Completed = 1,
@@ -80,7 +81,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal(1, unboxed.CompletedSectionCount);
             Assert.Equal(1, unboxed.TotalSectionCount);
 
-            var categorySectionDtoList = unboxed.CategorySectionDto as IEnumerable<CategorySectionDto>;
+            var categorySectionDtoList = unboxed.CategorySectionDto;
 
             Assert.NotNull(categorySectionDtoList);
 
@@ -103,7 +104,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         {
             _category.Completed = 0;
 
-            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
+            _category.SectionStatuses.Add(new SectionStatusDto()
             {
                 SectionId = "Section1",
                 Completed = 0,
@@ -125,7 +126,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal(0, unboxed.CompletedSectionCount);
             Assert.Equal(1, unboxed.TotalSectionCount);
 
-            var categorySectionDtoList = unboxed.CategorySectionDto as IEnumerable<CategorySectionDto>;
+            var categorySectionDtoList = unboxed.CategorySectionDto;
 
             Assert.NotNull(categorySectionDtoList);
 
@@ -164,7 +165,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal(0, unboxed.CompletedSectionCount);
             Assert.Equal(1, unboxed.TotalSectionCount);
 
-            var categorySectionDtoList = unboxed.CategorySectionDto as IEnumerable<CategorySectionDto>;
+            var categorySectionDtoList = unboxed.CategorySectionDto;
 
             Assert.NotNull(categorySectionDtoList);
 
@@ -187,15 +188,15 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         {
             _category.Sections[0] = new Section()
             {
-                Sys = new Sys() { Id = "Section1" },
+                Sys = new SystemDetails() { Id = "Section1" },
                 Name = "Test Section 1",
-                InterstitialPage = new Domain.Content.Models.Page()
+                InterstitialPage = new Page()
                 {
                     Slug = null!,
                 }
             };
 
-            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatuses()
+            _category.SectionStatuses.Add(new SectionStatusDto()
             {
                 SectionId = "Section1",
                 Completed = 1,
@@ -217,7 +218,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal(1, unboxed.CompletedSectionCount);
             Assert.Equal(1, unboxed.TotalSectionCount);
 
-            var categorySectionDtoList = unboxed.CategorySectionDto as IEnumerable<CategorySectionDto>;
+            var categorySectionDtoList = unboxed.CategorySectionDto;
 
             Assert.NotNull(categorySectionDtoList);
 
@@ -255,7 +256,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.NotNull(unboxed);
             Assert.Equal("Unable to retrieve progress, please refresh your browser.", unboxed.ProgressRetrievalErrorMessage);
 
-            var categorySectionDtoList = unboxed.CategorySectionDto as IEnumerable<CategorySectionDto>;
+            var categorySectionDtoList = unboxed.CategorySectionDto;
 
             Assert.NotNull(categorySectionDtoList);
 
@@ -297,7 +298,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal("ServiceUnavailable", unboxed.NoSectionsErrorRedirectUrl);
             Assert.Equal(0, unboxed.TotalSectionCount);
 
-            var categorySectionDtoList = unboxed.CategorySectionDto as IEnumerable<CategorySectionDto>;
+            var categorySectionDtoList = unboxed.CategorySectionDto;
 
             Assert.NotNull(categorySectionDtoList);
 
@@ -329,7 +330,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal("ServiceUnavailable", unboxed.NoSectionsErrorRedirectUrl);
             Assert.Equal(0, unboxed.TotalSectionCount);
 
-            var categorySectionDtoList = unboxed.CategorySectionDto as IEnumerable<CategorySectionDto>;
+            var categorySectionDtoList = unboxed.CategorySectionDto;
 
             Assert.NotNull(categorySectionDtoList);
 

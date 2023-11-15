@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text.Encodings.Web;
 
-namespace Dfe.PlanTech.Infrastructure.SignIn.UnitTests;
+namespace Dfe.PlanTech.Infrastructure.SignIns.UnitTests;
 
 public class DummyAuthHandlerOptions : AuthenticationSchemeOptions
 {

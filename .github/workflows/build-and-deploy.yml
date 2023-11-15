@@ -100,6 +100,9 @@ jobs:
           az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
           az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
           az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+          environment: ${{ needs.set-env.outputs.environment }}
+          sql_analytics_username: ${{ secrets.ANALYTICS_USERNAME }}
+          sql_analytics_password: ${{ secrets.ANALYTICS_PASSWORD }}
 
   build-and-push-image:
     name: Build and push to ACR

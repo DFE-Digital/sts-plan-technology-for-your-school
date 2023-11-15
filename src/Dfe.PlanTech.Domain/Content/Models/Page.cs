@@ -14,11 +14,19 @@ public class Page : ContentComponent
 
     public bool DisplayTopicTitle { get; init; }
 
+    public bool DisplayOrganisationName { get; init; }
+
+    public bool RequiresAuthorisation { get; init; } = true;
+
     public string? SectionTitle { get; set; }
 
     public string? Param { get; set; }
 
+    public IContentComponent[] BeforeTitleContent { get; init; } = Array.Empty<IContentComponent>();
+
     public Title? Title { get; init; }
+
+    public string? OrganisationName { get; set; }
 
     public IContentComponent[] Content { get; init; } = Array.Empty<IContentComponent>();
 }

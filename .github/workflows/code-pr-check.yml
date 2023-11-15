@@ -2,12 +2,12 @@ name: Code PR Check
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main", "development"]
     paths:
       - 'src/**'
       - 'tests/**'
   pull_request:
-    branches: [ "main" ]
+    branches: ["main", "development"]
     paths:
       - 'src/**'
       - 'tests/**'
@@ -23,7 +23,7 @@ env:
 jobs:
   build-test-web-app:  
     name: Build and run unit tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - name: Check out repository
@@ -42,19 +42,25 @@ jobs:
       - name: Install SonarCloud scanners
         run: dotnet tool install --global dotnet-sonarscanner
 
+      - name: Install latest JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'microsoft'
+          java-version: '17'
+          
       - name: Start SonarCloud scanner
         run: |
           dotnet-sonarscanner begin \
-            /k:"DFE-Digital_plan-technology-for-your-school" \
-            /o:"dfe-digital" \
-            /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
-            /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml \
-            /d:sonar.coverage.exclusions=src/**/Program.cs,src/Dfe.PlanTech.Web/gulpfile.js,src/Dfe.PlanTech.Web/wwwroot/** \
-            /d:sonar.issue.ignore.multicriteria=e1 \
-            /d:sonar.issue.ignore.multicriteria.e1.ruleKey=csharpsquid:S6602 \
-            /d:sonar.issue.ignore.multicriteria.e1.resourceKey=src/**/*.cs
-          
+          /k:"DFE-Digital_plan-technology-for-your-school" \
+          /o:"dfe-digital" \
+          /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
+          /d:sonar.host.url="https://sonarcloud.io" \
+          /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml \
+          /d:sonar.coverage.exclusions=src/**/Program.cs,src/Dfe.PlanTech.Web/gulpfile.js,src/Dfe.PlanTech.Web/wwwroot/** \
+          /d:sonar.issue.ignore.multicriteria=e1 \
+          /d:sonar.issue.ignore.multicriteria.e1.ruleKey=csharpsquid:S6602 \
+          /d:sonar.issue.ignore.multicriteria.e1.resourceKey=src/**/*.cs
+      
       - name: Build web app  
         uses: ./.github/actions/build-dotnet-app
         with:

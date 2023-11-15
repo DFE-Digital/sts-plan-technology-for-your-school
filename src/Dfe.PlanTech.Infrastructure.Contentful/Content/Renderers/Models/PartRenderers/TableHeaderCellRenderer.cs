@@ -13,9 +13,9 @@ public class TableHeaderCellRenderer : BaseRichTextContentPartRender
     public override StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
         stringBuilder.Append("<th class=\"govuk-table__header\">");
-        
+
         stringBuilder.Append(content.Content[0].Content[0].Value);
-        
+
         stringBuilder.Append("</th>");
 
         return stringBuilder;

@@ -1,9 +1,9 @@
-using Dfe.PlanTech.Domain.SignIn.Enums;
-using Dfe.PlanTech.Domain.SignIn.Models;
+using Dfe.PlanTech.Domain.SignIns.Enums;
+using Dfe.PlanTech.Domain.SignIns.Models;
 using System.Security.Claims;
 using System.Text.Json;
 
-namespace Dfe.PlanTech.Infrastructure.SignIn.Extensions;
+namespace Dfe.PlanTech.Infrastructure.SignIns.Extensions;
 
 public static class UserClaimsExtensions
 {

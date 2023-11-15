@@ -5,38 +5,39 @@ namespace Dfe.PlanTech.Web.Middleware;
 /// </summary>
 public class SecurityHeadersMiddleware
 {
-  private readonly RequestDelegate _next;
+    private readonly RequestDelegate _next;
 
-  public SecurityHeadersMiddleware(RequestDelegate next)
-  {
-    _next = next;
-  }
+    public SecurityHeadersMiddleware(RequestDelegate next)
+    {
+        _next = next;
+    }
 
-  public async Task InvokeAsync(HttpContext context)
-  {
-    AddFramejackingPreventHeaders(context);
+    public async Task InvokeAsync(HttpContext context)
 
-    await _next(context);
-  }
+    {
+        AddFramejackingPreventHeaders(context);
 
-  /// <summary>
-  /// Adds headers that prevent framejacking vulnerability
-  /// </summary>
-  /// <param name="context"></param>
-  private static void AddFramejackingPreventHeaders(HttpContext context)
-  {
-    context.Response.Headers["X-Frame-Options"] = "Deny";
-    context.Response.Headers["Content-Security-Policy"] = "frame-ancestors 'none'";
-  }
+        await _next(context);
+    }
+
+    /// <summary>
+    /// Adds headers that prevent framejacking vulnerability
+    /// </summary>
+    /// <param name="context"></param>
+    private static void AddFramejackingPreventHeaders(HttpContext context)
+    {
+        context.Response.Headers["X-Frame-Options"] = "Deny";
+        context.Response.Headers["Content-Security-Policy"] = "frame-ancestors 'none'";
+    }
 }
 
 public static class SecurityHeadersMiddlewareExtensions
 {
-  /// <summary>
-  /// Extension method for adding the above middleware in a cleaner way.
-  /// </summary>
-  /// <param name="app"></param>
-  /// <returns></returns>
-  public static IApplicationBuilder UseSecurityHeaders(
-      this IApplicationBuilder app) => app.UseMiddleware<SecurityHeadersMiddleware>();
+    /// <summary>
+    /// Extension method for adding the above middleware in a cleaner way.
+    /// </summary>
+    /// <param name="app"></param>
+    /// <returns></returns>
+    public static IApplicationBuilder UseSecurityHeaders(
+        this IApplicationBuilder app) => app.UseMiddleware<SecurityHeadersMiddleware>();
 }

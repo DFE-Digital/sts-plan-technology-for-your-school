@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
+using System.ComponentModel;
 
 namespace Dfe.PlanTech.Web.Helpers;
 
@@ -16,6 +17,6 @@ public static class HeaderExtensions
         HeaderSize.Medium => MEDIUM,
         HeaderSize.Large => LARGE,
         HeaderSize.ExtraLarge => EXTRALARGE,
-        _ => throw new Exception($"Could not find header size for {header.Size}")
+        _ => throw new InvalidEnumArgumentException($"Could not find header size for {header.Size}")
     };
 }

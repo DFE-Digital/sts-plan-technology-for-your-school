@@ -1,32 +1,33 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Application.Cookie.Interfaces;
 using Dfe.PlanTech.Application.Cookie.Service;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Application.Response.Commands;
-using Dfe.PlanTech.Application.Response.Interface;
-using Dfe.PlanTech.Application.Response.Queries;
-using Dfe.PlanTech.Application.Submission.Commands;
-using Dfe.PlanTech.Application.Submission.Interface;
-using Dfe.PlanTech.Application.Submission.Interfaces;
-using Dfe.PlanTech.Application.Submission.Queries;
+using Dfe.PlanTech.Application.Questionnaire.Queries;
+using Dfe.PlanTech.Application.Responses.Commands;
+using Dfe.PlanTech.Application.Responses.Queries;
+using Dfe.PlanTech.Application.Submissions.Commands;
+using Dfe.PlanTech.Application.Submissions.Queries;
 using Dfe.PlanTech.Application.Users.Commands;
 using Dfe.PlanTech.Application.Users.Helper;
-using Dfe.PlanTech.Application.Users.Interfaces;
 using Dfe.PlanTech.Application.Users.Queries;
 using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models.Options;
+using Dfe.PlanTech.Domain.Cookie.Interfaces;
+using Dfe.PlanTech.Domain.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.Responses.Interfaces;
+using Dfe.PlanTech.Domain.Submissions.Interfaces;
+using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
+using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Web.Helpers;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics.CodeAnalysis;
-using Dfe.PlanTech.Domain.Interfaces;
-using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
 using Newtonsoft.Json.Serialization;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Web;
 
@@ -89,41 +90,20 @@ public static class ProgramExtensions
     {
         services.AddDbContext<IPlanTechDbContext, PlanTechDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("Database")));
 
-        services.AddTransient<IGetUserIdQuery, GetUserIdQuery>();
-        services.AddTransient<ICreateUserCommand, CreateUserCommand>();
-        services.AddTransient<ICreateEstablishmentCommand, CreateEstablishmentCommand>();
-        services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
-
-        services.AddTransient<ICreateQuestionCommand, CreateQuestionCommand>();
-        services.AddTransient<IRecordQuestionCommand, RecordQuestionCommand>();
-        services.AddTransient<IGetQuestionQuery, GetQuestionQuery>();
-        services.AddTransient<ICookieService, CookieService>();
-
-        services.AddTransient<ICreateAnswerCommand, CreateAnswerCommand>();
-        services.AddTransient<IRecordAnswerCommand, RecordAnswerCommand>();
-        services.AddTransient<IGetAnswerQuery, GetAnswerQuery>();
-
-        services.AddTransient<ICreateSubmissionCommand, CreateSubmissionCommand>();
-        services.AddTransient<IGetSubmissionQuery, GetSubmissionQuery>();
-
-        services.AddTransient<ICreateResponseCommand, CreateResponseCommand>();
-        services.AddTransient<IGetResponseQuery, GetResponseQuery>();
-        services.AddTransient<IGetLatestResponseListForSubmissionQuery, GetLatestResponseListForSubmissionQuery>();
-
         services.AddTransient<ICalculateMaturityCommand, CalculateMaturityCommand>();
-        services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
-
-        services.AddTransient<ProcessCheckAnswerDtoCommand>();
-
-        services.AddTransient<GetSubmitAnswerQueries>();
-        services.AddTransient<RecordSubmitAnswerCommands>();
-        services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
-
+        services.AddTransient<ICookieService, CookieService>();
+        services.AddTransient<ICreateEstablishmentCommand, CreateEstablishmentCommand>();
+        services.AddTransient<ICreateUserCommand, CreateUserCommand>();
         services.AddTransient<IGetEstablishmentIdQuery, GetEstablishmentIdQuery>();
-
-        services.AddTransient<Application.Questionnaire.Queries.GetSectionQuery>();
+        services.AddTransient<IGetLatestResponsesQuery, GetLatestResponsesQuery>();
         services.AddTransient<IGetNavigationQuery, GetNavigationQuery>();
-
+        services.AddTransient<IGetNextUnansweredQuestionQuery, GetNextUnansweredQuestionQuery>();
+        services.AddTransient<IGetSectionQuery, GetSectionQuery>();
+        services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
+        services.AddTransient<IGetUserIdQuery, GetUserIdQuery>();
+        services.AddTransient<IProcessCheckAnswerDtoCommand, ProcessCheckAnswerDtoCommand>();
+        services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
+        services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
         return services;
     }
 

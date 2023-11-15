@@ -1,6 +1,6 @@
 ﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Commands;
-using Dfe.PlanTech.Domain.SignIn.Models;
+using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 using NSubstitute;
 
@@ -26,8 +26,9 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
             User? createdUser = null;
 
             Db.When(x => x.AddUser(Arg.Any<User>()))
-                    .Do((callInfo) => {
-                    User user = (User)callInfo[0];
+                    .Do((callInfo) =>
+                    {
+                        User user = (User)callInfo[0];
                         createdUser = user;
                     });
 
@@ -59,6 +60,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
 
             //Assert
             Assert.Equal(expectedUserId, result);
+            Assert.NotNull(createdUser);
         }
     }
 }

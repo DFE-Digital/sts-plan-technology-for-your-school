@@ -7,7 +7,6 @@ namespace Dfe.PlanTech.Web.Models;
 
 public class CheckAnswersViewModel
 {
-
     [Required]
     public Title Title { get; init; } = null!;
 
@@ -21,4 +20,10 @@ public class CheckAnswersViewModel
     public IContentComponent[] Content { get; init; } = null!;
 
     public int? SubmissionId { get; init; }
+
+    public string? SectionSlug { get; init; } = null;
+
+    public string? Slug { get; init; } = null;
+
+    public string? ErrorMessage { get; set; } = null;
 }

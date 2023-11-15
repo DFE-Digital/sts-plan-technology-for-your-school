@@ -1,12 +1,21 @@
 using Azure.Identity;
+using Dfe.PlanTech.Application.Constants;
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Helpers;
+using Dfe.PlanTech.Application.Submissions.Queries;
+using Dfe.PlanTech.Domain.Establishments.Exceptions;
+using Dfe.PlanTech.Domain.SignIns.Enums;
+using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Infrastructure.Data;
-using Dfe.PlanTech.Infrastructure.SignIn;
+using Dfe.PlanTech.Infrastructure.SignIns;
 using Dfe.PlanTech.Web;
-using Dfe.PlanTech.Web.Exceptions;
+using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
+using Dfe.PlanTech.Web.Routing;
 using GovUk.Frontend.AspNetCore;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
@@ -14,10 +23,15 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplicationInsightsTelemetry();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<ITelemetryInitializer, CustomRequestDimensionsTelemetryInitializer>();
+
 builder.Services.AddGoogleTagManager();
 // Add services to the container.
 
 builder.Services.AddControllersWithViews();
+
 builder.Services.AddGovUkFrontend();
 
 if (!builder.Environment.IsDevelopment())
@@ -46,9 +60,26 @@ builder.Services.AddDfeSignIn(builder.Configuration);
 builder.Services.AddScoped<ComponentViewsFactory>();
 
 builder.Services.AddDatabase(builder.Configuration);
+builder.Services.AddSingleton<IAuthorizationHandler, PageModelAuthorisationPolicy>();
 
-builder.Services.AddAuthorization();
+builder.Services.AddTransient<ISubmissionStatusProcessor, SubmissionStatusProcessor>();
+builder.Services.AddTransient<IGetRecommendationRouter, GetRecommendationRouter>();
+builder.Services.AddTransient<IGetQuestionBySlugRouter, GetQuestionBySlugRouter>();
+builder.Services.AddTransient<ICheckAnswersRouter, CheckAnswersRouter>();
+
+builder.Services.AddTransient((_) => SectionCompleteStatusChecker.SectionComplete);
+builder.Services.AddTransient((_) => SectionNotStartedStatusChecker.SectionNotStarted);
+builder.Services.AddTransient((_) => CheckAnswersOrNextQuestionChecker.CheckAnswersOrNextQuestion);
+
 builder.Services.AddAuthentication();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(PageModelAuthorisationPolicy.POLICY_NAME, policy =>
+    {
+        policy.Requirements.Add(new PageAuthorisationRequirement());
+    });
+});
+
 builder.Services.AddContentfulServices(builder.Configuration);
 
 var app = builder.Build();
@@ -60,13 +91,12 @@ app.UseCookiePolicy(
     {
         Secure = CookieSecurePolicy.Always
     });
-    
+
 app.UseForwardedHeaders();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
@@ -76,15 +106,25 @@ app.UseExceptionHandler(exceptionHandlerApp =>
     exceptionHandlerApp.Run(context =>
     {
         var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
-
         var error = exceptionHandlerPathFeature?.Error;
 
-        if (error is ContentfulDataUnavailableException)
-        {
-            context.Response.Redirect("/service-unavailable");
-        }
+        string redirectUrl = GetRedirectUrlForException(error);
+
+        context.Response.Redirect(redirectUrl);
+
         return Task.CompletedTask;
     });
+
+    static string GetRedirectUrlForException(Exception? exception) =>
+        exception switch
+        {
+            null => UrlConstants.Error,
+            ContentfulDataUnavailableException => UrlConstants.ServiceUnavailable,
+            DatabaseException => UrlConstants.ServiceUnavailable,
+            InvalidEstablishmentException => UrlConstants.ServiceUnavailable,
+            KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) => UrlConstants.ServiceUnavailable,
+            _ => GetRedirectUrlForException(exception.InnerException)
+        };
 });
 
 app.UseStaticFiles();
@@ -93,7 +133,6 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllerRoute(
     pattern: "{controller=Pages}/{action=GetByRoute}/{id?}",
     name: "default"

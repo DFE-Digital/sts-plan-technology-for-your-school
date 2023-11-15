@@ -1,13 +1,9 @@
 ﻿using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
-using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Web.Models;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
 
 namespace Dfe.PlanTech.Web.UnitTests.Models
 {
@@ -86,7 +82,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             }
         };
 
-        private Question[] BuildQuestion()
+        private static Question[] BuildQuestion()
         {
             return new Question[]
             {
@@ -99,7 +95,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             };
         }
 
-        private Answer[] BuildAnswer()
+        private static Answer[] BuildAnswer()
         {
             return new Answer[]
             {
@@ -130,11 +126,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
                 Value = "Submit",
                 IsStartButton = false,
             };
-        }
-
-        private static IDictionary<string, string> GetSectionStatuses()
-        {
-            return new Dictionary<string, string> { { "3XQEHYfvEQkQwdrihDGagJ", "Completed" } };
         }
 
         private static Page BuildPage(string? param = null)

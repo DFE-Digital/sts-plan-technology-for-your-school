@@ -8,27 +8,27 @@ namespace Dfe.PlanTech.Application.UnitTests.Content.Queries;
 
 public class GetNavigationQueryTests
 {
-  private readonly IContentRepository _contentRepository;
-  private IList<NavigationLink> _links = new List<NavigationLink>(){
+    private readonly IContentRepository _contentRepository;
+    private IList<NavigationLink> _links = new List<NavigationLink>(){
     new NavigationLink(){
       Href = "Href",
       DisplayText = "DisplayText"
     }
   };
 
-  public GetNavigationQueryTests()
-  {
-    _contentRepository = Substitute.For<IContentRepository>();
-    _contentRepository.GetEntities<NavigationLink>(CancellationToken.None).Returns(_links);
-  }
+    public GetNavigationQueryTests()
+    {
+        _contentRepository = Substitute.For<IContentRepository>();
+        _contentRepository.GetEntities<NavigationLink>(CancellationToken.None).Returns(_links);
+    }
 
-  [Fact]
-  public async Task Should_Retrieve_Nav_Links()
-  {
-    IGetNavigationQuery navQuery = new GetNavigationQuery(_contentRepository);
+    [Fact]
+    public async Task Should_Retrieve_Nav_Links()
+    {
+        IGetNavigationQuery navQuery = new GetNavigationQuery(_contentRepository);
 
-    var result = await navQuery.GetNavigationLinks();
+        var result = await navQuery.GetNavigationLinks();
 
-    Assert.Equal(_links, result);
-  }
+        Assert.Equal(_links, result);
+    }
 }

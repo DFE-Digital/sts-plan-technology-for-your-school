@@ -1,4 +1,7 @@
-﻿namespace Dfe.PlanTech.Domain.Users.Models;
+﻿using Dfe.PlanTech.Domain.Responses.Models;
+using Dfe.PlanTech.Domain.SignIns.Models;
+
+namespace Dfe.PlanTech.Domain.Users.Models;
 
 public class User
 {
@@ -10,5 +13,7 @@ public class User
 
     public DateTime? DateLastUpdated { get; set; }
 
-    public ICollection<SignIn.Models.SignIn> SignIns { get; set; } = default!;
+    public List<SignIn> SignIns { get; set; } = new();
+
+    public List<Response> Responses { get; set; } = new();
 }

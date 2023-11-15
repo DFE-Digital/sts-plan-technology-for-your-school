@@ -14,8 +14,8 @@ public class QuestionnaireCacherTests
         cacherSubstitute.Get(Arg.Any<string>(), Arg.Any<Func<QuestionnaireCache>>())
             .Returns((callInfo) =>
             {
-                    Func<QuestionnaireCache> creator = (Func<QuestionnaireCache>)callInfo[1];
-                    return creator();
+                Func<QuestionnaireCache> creator = (Func<QuestionnaireCache>)callInfo[1];
+                return creator();
             });
 
         var questionnaireCacher = new QuestionnaireCacher(cacherSubstitute);

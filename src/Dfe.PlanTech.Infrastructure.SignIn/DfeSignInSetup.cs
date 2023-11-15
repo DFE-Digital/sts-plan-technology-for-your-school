@@ -1,5 +1,5 @@
-using Dfe.PlanTech.Domain.SignIn.Models;
-using Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;
+using Dfe.PlanTech.Domain.SignIns.Models;
+using Dfe.PlanTech.Infrastructure.SignIns.ConnectEvents;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Dfe.PlanTech.Infrastructure.SignIn;
+namespace Dfe.PlanTech.Infrastructure.SignIns;
 
 [ExcludeFromCodeCoverage]
 public static class DfeSignInSetup
@@ -78,7 +78,7 @@ public static class DfeSignInSetup
         {
             OnUserInformationReceived = OnUserInformationReceivedEvent.OnUserInformationReceived,
             OnRedirectToIdentityProvider = DfeOpenIdConnectEvents.OnRedirectToIdentityProvider,
-            OnRedirectToIdentityProviderForSignOut = DfeOpenIdConnectEvents.OnRedirectToIdentityProviderForSignOut
+            OnRedirectToIdentityProviderForSignOut = DfeOpenIdConnectEvents.OnRedirectToIdentityProviderForSignOut,
         };
     }
 

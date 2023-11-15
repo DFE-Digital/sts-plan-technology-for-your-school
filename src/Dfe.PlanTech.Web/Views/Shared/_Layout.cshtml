@@ -1,13 +1,13 @@
 ﻿@inject GovUk.Frontend.AspNetCore.PageTemplateHelper PageTemplateHelper
 @inject Dfe.PlanTech.Web.Helpers.GtmConfiguration GtmConfiguration
-
+@using System.Globalization;
 @section Head {
     <link rel="stylesheet" href="~/css/application.css">
-    @Html.Raw(GtmConfiguration.Head)
-    @RenderSection("Head", false)
-}
+        @Html.Raw(GtmConfiguration.Head)
+        @RenderSection("Head", false)
+    }
 
-@{
+    @{
     Layout = "_GovUkPageTemplate";
 
     if (ViewData["Title"] == null)
@@ -21,8 +21,12 @@
 
         if (lastSlug != null)
         {
+            //Replace hyphens with spaces, then convert to Title Case (i.e. capitalise words)
+            lastSlug = lastSlug.Replace("-", " ");
+            lastSlug = string.Concat(lastSlug[0].ToString().ToUpper(), lastSlug.AsSpan(1));
+
             //Add white space before every capital letter
-            lastSlug = string.Concat(lastSlug.Select(c => Char.IsUpper(c) ? " " + c : c.ToString())).TrimStart(' ');
+            lastSlug = string.Concat(lastSlug.Select(c => Char.IsUpper(c) ? " " + c : c.ToString())).Trim();
         }
 
         ViewData["Title"] = lastSlug?.ToString() ?? "Plan Technology For Your School";
@@ -32,22 +36,22 @@
 @section Header {
     @Html.Raw(GtmConfiguration.Body)
 
-    @{    
+    @{
         await Html.RenderPartialAsync("_CookieBanner");
         await Html.RenderPartialAsync("_Header");
     }
 
-    @RenderSection("Header", false)
-}
+@RenderSection("Header", false)
+    }
 
-@section BeforeContent{
+    @section BeforeContent{
     @{
         await Html.RenderPartialAsync("BetaHeader");
     }
-    @RenderSection("BeforeContent", required: false)
-}
+@RenderSection("BeforeContent", required: false)
+    }
 
-@RenderBody()
+    @RenderBody()
 
 @section Footer {
     @{

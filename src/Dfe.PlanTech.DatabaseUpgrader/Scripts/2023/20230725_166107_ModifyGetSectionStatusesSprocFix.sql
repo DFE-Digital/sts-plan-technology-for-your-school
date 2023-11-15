@@ -19,7 +19,6 @@ BEGIN
       select Top 1 sectionId, completed, maturity, dateCreated from submission 
 	  where sectionId = @val
 	  order by dateCreated desc
-
       FETCH NEXT FROM db_cursor INTO @val 
 END 
 

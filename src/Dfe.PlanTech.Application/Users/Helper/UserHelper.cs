@@ -1,84 +1,81 @@
 ﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Application.Users.Interfaces;
-using Dfe.PlanTech.Application.Users.Queries;
 using Dfe.PlanTech.Domain.Establishments.Models;
+using Dfe.PlanTech.Domain.SignIns.Enums;
+using Dfe.PlanTech.Domain.Users.Interfaces;
 using Microsoft.AspNetCore.Http;
 using System.Text.Json;
 
-namespace Dfe.PlanTech.Application.Users.Helper
+namespace Dfe.PlanTech.Application.Users.Helper;
+
+public class UserHelper : IUser
 {
-    public class UserHelper : IUser
+    private const string ORG_CLAIM_TYPE = "organisation";
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ICreateEstablishmentCommand _createEstablishmentCommand;
+    private readonly IGetUserIdQuery _getUserIdQuery;
+    private readonly IGetEstablishmentIdQuery _getEstablishmentIdQuery;
+
+    public UserHelper(IHttpContextAccessor httpContextAccessor,
+                        IPlanTechDbContext db,
+                        ICreateEstablishmentCommand createEstablishmentCommand,
+                        IGetUserIdQuery getUserIdQuery,
+                        IGetEstablishmentIdQuery getEstablishmentIdQuery)
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly ICreateEstablishmentCommand _createEstablishmentCommand;
-        private readonly IGetUserIdQuery _getUserIdQuery;
-        private readonly IGetEstablishmentIdQuery _getEstablishmentIdQuery;
+        _httpContextAccessor = httpContextAccessor;
+        _createEstablishmentCommand = createEstablishmentCommand;
+        _getUserIdQuery = getUserIdQuery;
+        _getEstablishmentIdQuery = getEstablishmentIdQuery;
+    }
 
-        public UserHelper(IHttpContextAccessor httpContextAccessor, 
-                            IPlanTechDbContext db,
-                            ICreateEstablishmentCommand createEstablishmentCommand,
-                            IGetUserIdQuery getUserIdQuery,
-                            IGetEstablishmentIdQuery getEstablishmentIdQuery)
-        {
-            _httpContextAccessor = httpContextAccessor;
-            _createEstablishmentCommand = createEstablishmentCommand;
-            _getUserIdQuery = getUserIdQuery;
-            _getEstablishmentIdQuery = getEstablishmentIdQuery;
-        }
+    public async Task<int?> GetCurrentUserId()
+    {
+        var dbUserId = GetDbIdFromClaim(ClaimConstants.DB_USER_ID);
+        if (dbUserId != null) return dbUserId;
 
-        public async Task<int?> GetCurrentUserId()
-        {
-            var claims = _httpContextAccessor.HttpContext.User.Claims.ToList();
-            var userId = claims?.Find(x => x.Type.Contains("nameidentifier"))?.Value;
+        var userId = _httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(x => x.Type.Contains("nameidentifier"))?.Value;
 
-            if (userId is null)
-                return null;
+        if (userId is null)
+            return null;
 
-            return await _getUserIdQuery.GetUserId(userId);
-        }
+        return await _getUserIdQuery.GetUserId(userId);
+    }
 
-        public async Task<int> GetEstablishmentId()
-        {
-            var establishmentDto = _GetOrganisationData();
+    public async Task<int> GetEstablishmentId()
+    {
+        var dbEstablishmentId = GetDbIdFromClaim(ClaimConstants.DB_ESTABLISHMENT_ID);
+        if (dbEstablishmentId != null) return dbEstablishmentId.Value;
 
-            var reference = establishmentDto.Urn ?? establishmentDto.Ukprn;
+        var establishmentDto = GetOrganisationData();
 
-            if (reference is null)
-                return 1;
+        var establishmentId = await _getEstablishmentIdQuery.GetEstablishmentId(establishmentDto.Reference) ?? await SetEstablishment();
 
-            var existingEstablishmentId = await _getEstablishmentIdQuery.GetEstablishmentId(reference);
+        return Convert.ToInt16(establishmentId);
+    }
 
-            if (existingEstablishmentId == null)
-            {
-                await SetEstablishment();
-                var newEstablishmentId = await _getEstablishmentIdQuery.GetEstablishmentId(reference);
-                return newEstablishmentId is null ? 1 : Convert.ToUInt16(newEstablishmentId);
-            }
+    public async Task<int> SetEstablishment()
+    {
+        var establishmentDto = GetOrganisationData();
 
-            return Convert.ToInt16(existingEstablishmentId);
-        }
+        var establishmentId = await _createEstablishmentCommand.CreateEstablishment(establishmentDto);
 
-        public async Task<int> SetEstablishment()
-        {
-            var establishmentDto = _GetOrganisationData();
+        return establishmentId;
+    }
 
-            var establishmentId = await _createEstablishmentCommand.CreateEstablishment(establishmentDto);
+    public EstablishmentDto GetOrganisationData()
+    {
+        var orgDetails = _httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(x => x.Type.Contains(ORG_CLAIM_TYPE))?.Value ??
+                    throw new KeyNotFoundException($"Could not find {ORG_CLAIM_TYPE} claim type");
 
-            return establishmentId;
-        }
+        var establishment = JsonSerializer.Deserialize<EstablishmentDto>(orgDetails);
+        if (establishment == null || !establishment.IsValid) throw new InvalidDataException("Establishment was not expected format");
 
-        private EstablishmentDto _GetOrganisationData()
-        {
+        return establishment;
+    }
 
-            var claims = _httpContextAccessor.HttpContext.User.Claims.ToList();
-            var orgDetails = claims?.Find(x => x.Type.Contains("organisation"))?.Value;
+    private int? GetDbIdFromClaim(string type)
+    {
+        var id = _httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == type)?.Value;
 
-            orgDetails ??= "{}";
-            var establishment = JsonSerializer.Deserialize<EstablishmentDto>(orgDetails);
-
-            establishment ??= new EstablishmentDto();
-
-            return establishment;
-        }
+        return id != null ? int.Parse(id) : null;
     }
 }
