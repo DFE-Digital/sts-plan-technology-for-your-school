@@ -22,47 +22,60 @@ env:
   
 jobs:
 
-  lint-code:
-    name: Lint Code and Commit Changes
+  get-src-dir-list:
+    name: Get Directory List in src
     runs-on: ubuntu-22.04
-    strategy:
-      max-parallel: 1
-      fail-fast: true
-      matrix:
-        workspace: ["Application", "Domain", "Infrastructure.Contentful", "Infrastructure.Data", "Infrastructure.SignIn", "Web"]
-        # TODO: Can/should this be programatically determined and populated?
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-
+    
     steps:
-
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Temporarily Update Global JSON
-        run: echo '{"sdk":{"version":"${{ env.DOTNET_VERSION }}"}}' > ./global.json
+      - name: Get Directories in Src
+        uses: ./.github/actions/list-directory
+        with:
+          source: ./src/
 
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          global-json-file: ./global.json
-          cache: false
-        env:
-          DOTNET_INSTALL_DIR: "/usr/share/dotnet"
-          DOTNET_CLI_TELEMETRY_OPTOUT: true
+  # lint-code:
+  #   name: Lint Code and Commit Changes
+  #   runs-on: ubuntu-22.04
+  #   strategy:
+  #     max-parallel: 1
+  #     fail-fast: true
+  #     matrix:
+  #       workspace: ["Application", "Domain", "Infrastructure.Contentful", "Infrastructure.Data", "Infrastructure.SignIn", "Web"]
+  #       # TODO: Can/should this be programatically determined and populated?
+  #   permissions:
+  #     contents: write
+  #     issues: write
+  #     pull-requests: write
+
+  #   steps:
+
+  #     - name: Checkout Repository
+  #       uses: actions/checkout@v3
+
+  #     - name: Temporarily Update Global JSON
+  #       run: echo '{"sdk":{"version":"${{ env.DOTNET_VERSION }}"}}' > ./global.json
+
+  #     - name: Set up .NET
+  #       uses: actions/setup-dotnet@v3
+  #       with:
+  #         global-json-file: ./global.json
+  #         cache: false
+  #       env:
+  #         DOTNET_INSTALL_DIR: "/usr/share/dotnet"
+  #         DOTNET_CLI_TELEMETRY_OPTOUT: true
         
-      - name: Run Linter
-        uses: wearerequired/lint-action@v2
-        with:
-          dotnet_format: true
-          dotnet_format_dir: "./src/Dfe.PlanTech.${{ matrix.workspace }}/"
-          git_email: "41898282+github-actions[bot]@users.noreply.github.com"
-          git_name: "github-actions[bot]"
-          commit: false   # TODO: REPLACE false WITH true AFTER TESTING
-          auto_fix: false # TODO: REPLACE false WITH true AFTER TESTING
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Run Linter
+  #       uses: wearerequired/lint-action@v2
+  #       with:
+  #         dotnet_format: true
+  #         dotnet_format_dir: "./src/Dfe.PlanTech.${{ matrix.workspace }}/"
+  #         git_email: "41898282+github-actions[bot]@users.noreply.github.com"
+  #         git_name: "github-actions[bot]"
+  #         commit: false   # TODO: REPLACE false WITH true AFTER TESTING
+  #         auto_fix: false # TODO: REPLACE false WITH true AFTER TESTING
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
 
   build-test-web-app:  
     name: Build and run unit tests

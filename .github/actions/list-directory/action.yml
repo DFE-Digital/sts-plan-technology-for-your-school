@@ -1,0 +1,22 @@
+name: List Directory
+description: Get a list of folders from a given input source directory as a JSON array.
+
+inputs:
+  source:
+    required: true
+    type: string
+
+runs:
+  using: composite
+
+steps:
+  - name: Install JQ
+    shell: bash
+    run: apt update && apt install jq -y
+
+  - name: Get List of Directories
+    id: list-dir
+    shell: bash
+    run: |
+      cd ${{ inputs.source }}
+      echo "$(jq -c -n '$ARGS.positional' --args ${*/})"
