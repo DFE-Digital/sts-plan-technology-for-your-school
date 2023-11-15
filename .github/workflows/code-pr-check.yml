@@ -54,34 +54,31 @@ jobs:
 
     steps:
 
-      - name: Debug Echo
-        run: echo ${{ matrix.workspace }}
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-      # - name: Checkout Repository
-      #   uses: actions/checkout@v3
+      - name: Temporarily Update Global JSON
+        run: echo '{"sdk":{"version":"${{ env.DOTNET_VERSION }}"}}' > ./global.json
 
-      # - name: Temporarily Update Global JSON
-      #   run: echo '{"sdk":{"version":"${{ env.DOTNET_VERSION }}"}}' > ./global.json
-
-      # - name: Set up .NET
-      #   uses: actions/setup-dotnet@v3
-      #   with:
-      #     global-json-file: ./global.json
-      #     cache: false
-      #   env:
-      #     DOTNET_INSTALL_DIR: "/usr/share/dotnet"
-      #     DOTNET_CLI_TELEMETRY_OPTOUT: true
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          global-json-file: ./global.json
+          cache: false
+        env:
+          DOTNET_INSTALL_DIR: "/usr/share/dotnet"
+          DOTNET_CLI_TELEMETRY_OPTOUT: true
         
-      # - name: Run Linter
-      #   uses: wearerequired/lint-action@v2
-      #   with:
-      #     dotnet_format: true
-      #     dotnet_format_dir: ${{ matrix.workspace }}
-      #     git_email: "41898282+github-actions[bot]@users.noreply.github.com"
-      #     git_name: "github-actions[bot]"
-      #     commit: false   # TODO: REPLACE false WITH true AFTER TESTING
-      #     auto_fix: false # TODO: REPLACE false WITH true AFTER TESTING
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run Linter
+        uses: wearerequired/lint-action@v2
+        with:
+          dotnet_format: true
+          dotnet_format_dir: ${{ matrix.workspace }}
+          git_email: "41898282+github-actions[bot]@users.noreply.github.com"
+          git_name: "github-actions[bot]"
+          commit: false   # TODO: REPLACE false WITH true AFTER TESTING
+          auto_fix: false # TODO: REPLACE false WITH true AFTER TESTING
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
   build-test-web-app:  
     name: Build and run unit tests
