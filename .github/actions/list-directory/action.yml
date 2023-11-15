@@ -17,6 +17,6 @@ runs:
         echo "$(pwd)"
         cd ${{ inputs.source }}
         echo "$(pwd)"
-        array=($(pwd)/*)
-        echo $array
-        echo "$(jq -c -n '$ARGS.positional' --args $array)"
+        array=($(pwd)/*/)
+        echo "${array[@]}"
+        echo "$(jq -c -n '$ARGS.positional' --args "${array[@]}")"
