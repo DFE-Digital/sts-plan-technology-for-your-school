@@ -2,12 +2,12 @@ name: Run E2E Tests
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches: ["main", "development"]
-    paths:
-      - "src/**"
-      - "tests/Dfe.PlanTech.Web.E2ETests/**"
-      - ".github/workflows/e2e-tests.yml"
+  # pull_request:
+  #   branches: ["main", "development"]
+  #   paths:
+  #     - "src/**"
+  #     - "tests/Dfe.PlanTech.Web.E2ETests/**"
+  #     - ".github/workflows/e2e-tests.yml"
 
 concurrency:
   group: "${{ github.workflow }}"
