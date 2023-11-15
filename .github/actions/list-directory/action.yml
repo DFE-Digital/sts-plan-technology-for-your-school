@@ -5,16 +5,19 @@ inputs:
   source:
     required: true
     type: string
+outputs:
+  directories:
+    value: ${{ steps.list-dir.outputs.directories }}
 
 runs:
   using: composite
 
   steps:
     - name: Get List of Directories
+      id: list-dir
       shell: bash
       run: |
         cd ${{ inputs.source }}
         array=($(pwd)/*/)
         directories="$(jq -c -n '$ARGS.positional' --args "${array[@]}")"
-        echo $directories
         echo "directories=$directories" >> $GITHUB_OUTPUT
