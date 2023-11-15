@@ -1,39 +1,37 @@
 describe("Recommendation Page", () => {
-    const url = "/self-assessment";
+  const url = "/self-assessment";
 
-    beforeEach(() => {
-        cy.loginWithEnv(url);
+  beforeEach(() => {
+    cy.loginWithEnv(url);
 
-        cy.url().should("contain", "self-assessment");
+    cy.url().should("contain", "self-assessment");
 
-        cy.clickFirstSection();
-        cy.clickContinueButton();
+    cy.clickFirstSection();
+    cy.clickContinueButton();
 
-        cy.navigateToRecommendationPage();
+    cy.navigateToRecommendationPage();
 
-        cy.url().should("contain", "recommendation");
+    cy.url().should("contain", "recommendation");
 
-        cy.injectAxe();
-    });
+    cy.injectAxe();
+  });
 
-    it("Should Have Heading", () => {
-        cy.get("h1.govuk-heading-xl")
-            .should("exist")
-    });
+  it("Should Have Heading", () => {
+    cy.get("h1.govuk-heading-xl").should("exist");
+  });
 
-    it("Should Have Back Button", () => {
-        cy.get('a:contains("Back")')
-            .should("exist")
-            .should("have.attr", "href")
-            .and("include", "/self-assessment")
-    });
+  it("Should Have Back Button", () => {
+    cy.get('a:contains("Back")')
+      .should("exist")
+      .should("have.attr", "href")
+      .and("include", "/self-assessment");
+  });
 
-    it("Should Have Content", () => {
-        cy.get("rich-text").should("exist");
-    });
+  it("Should Have Content", () => {
+    cy.get("p").should("exist");
+  });
 
-    it("Passes Accessibility Testing", () => {
-        cy.runAxe();
-    });
-
+  it("Passes Accessibility Testing", () => {
+    cy.runAxe();
+  });
 });

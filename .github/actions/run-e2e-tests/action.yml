@@ -22,23 +22,23 @@ runs:
     - name: Create Cypress config
       shell: bash
       run: |
-        echo "{\"URL\": \"${{inputs.url}}\", \"DSi_Url\": \"${{inputs.dsi_url}}\", \"DSi_Email\": \"${{inputs.dsi_username}}\", \"DSi_Password\": \"${{inputs.dsi_password}}\" }" >cypress.env.json 
+        echo "{\"URL\": \"${{ inputs.url }}\", \"DSi_Url\": \"${{ inputs.dsi_url }}\", \"DSi_Email\": \"${{ inputs.dsi_username }}\", \"DSi_Password\": \"${{inputs. dsi_password }}\" }" > cypress.env.json
       working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
 
     - name: Build and test project
-      uses: cypress-io/github-action@v5
+      uses: cypress-io/github-action@v6
       with:
-        working-directory:  ./tests/Dfe.PlanTech.Web.E2ETests/
+        working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
         browser: chrome
-        config: baseUrl=${{inputs.url}}
-      
+        config: baseUrl=${{ inputs.url }}
+
     - name: Store screenshots on test failure
       uses: actions/upload-artifact@v3
       if: failure()
       with:
         name: cypress-screenshots
         path: ./tests/Dfe.PlanTech.Web.E2ETests/cypress/screenshots
-          
+
     - name: Store videos
       uses: actions/upload-artifact@v3
       if: always()
