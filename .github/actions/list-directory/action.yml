@@ -11,12 +11,10 @@ runs:
 
   steps:
     - name: Get List of Directories
-      id: list-dir
       shell: bash
       run: |
-        echo "$(pwd)"
         cd ${{ inputs.source }}
-        echo "$(pwd)"
         array=($(pwd)/*/)
-        echo "${array[@]}"
-        echo "$(jq -c -n '$ARGS.positional' --args "${array[@]}")"
+        directories="$(jq -c -n '$ARGS.positional' --args "${array[@]}")"
+        echo $directories
+        echo "directories=$directories" >> $GITHUB_OUTPUT
