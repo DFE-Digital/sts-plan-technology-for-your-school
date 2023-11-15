@@ -10,10 +10,6 @@ runs:
   using: composite
 
   steps:
-    - name: Install JQ
-      shell: bash
-      run: apt update && apt install jq -y
-
     - name: Get List of Directories
       id: list-dir
       shell: bash
