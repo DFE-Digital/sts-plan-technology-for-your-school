@@ -121,11 +121,11 @@ app.UseExceptionHandler(exceptionHandlerApp =>
         {
             null => UrlConstants.Error,
             UserAccessUnavailableException => UrlConstants.ServiceUnavailable,
-            UserAccessRoleNotFoundException => UrlConstants.ServiceUnavailable,
+            UserAccessRoleNotFoundException => UrlConstants.RoleErrorPage,
             ContentfulDataUnavailableException => UrlConstants.ServiceUnavailable,
             DatabaseException => UrlConstants.ServiceUnavailable,
             InvalidEstablishmentException => UrlConstants.ServiceUnavailable,
-            KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) => UrlConstants.ServiceUnavailable,
+            KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) => UrlConstants.OrgErrorPage,
             _ => GetRedirectUrlForException(exception.InnerException),
         };
 });

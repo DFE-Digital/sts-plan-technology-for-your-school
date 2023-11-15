@@ -21,13 +21,8 @@ public static class OnUserInformationReceivedEvent
     public static async Task OnUserInformationReceived(UserInformationReceivedContext context)
     {
         await RecordUserSign(context);
-
-        var config = context.HttpContext.RequestServices.GetRequiredService<IDfeSignInConfiguration>();
-
-        if (true) //TODO investigate how i'm going to configure this...
-        {
-            await AddRoleClaimsFromDfePublicApi(context);
-        }
+        
+        await AddRoleClaimsFromDfePublicApi(context);
     }
 
     /// <summary>
@@ -88,8 +83,7 @@ public static class OnUserInformationReceivedEvent
         var userOrganization = context.Principal.Claims.GetOrganisation();
         if (userOrganization == null)
         {
-            context.Fail("User is not in an organisation.");
-            return;
+            throw new KeyNotFoundException(ClaimConstants.Organisation);
         }
 
         var userAccessToService = await dfePublicApi.GetUserAccessToService(userId, userOrganization.Id.ToString());
@@ -103,10 +97,10 @@ public static class OnUserInformationReceivedEvent
 
         if (!hasRole)
         {
-            throw new UserAccessUnavailableException("User does not have correct role to access to this service");
+            throw new UserAccessRoleNotFoundException("User does not have correct role to access to this service");
         }
 
-        var roleIdentity = new ClaimsIdentity(GetRoleClaims(context, userAccessToService!));
+        var roleIdentity = new ClaimsIdentity(GetRoleClaims(context, userAccessToService));
         context.Principal.AddIdentity(roleIdentity);
     }
 

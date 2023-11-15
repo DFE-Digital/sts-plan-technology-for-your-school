@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using Dfe.PlanTech.Application.SignIns.Interfaces;
 using Dfe.PlanTech.Domain.SignIns.Models;
+using Dfe.PlanTech.Domain.Users.Exceptions;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Dfe.PlanTech.Infrastructure.SignIn.Services;
@@ -37,7 +38,7 @@ public class DfePublicApiService : IDfePublicApi
             return userAccess;
         }
         
-        throw new HttpRequestException($"Error getting user access to service: {response.StatusCode}");
+        throw new UserAccessUnavailableException($"Error getting user access to service from API response code received: {response.StatusCode}");
     }
 
     public static string GenerateToken(string secret, string issuer)
