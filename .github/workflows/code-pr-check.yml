@@ -68,6 +68,9 @@ jobs:
         env:
           DOTNET_INSTALL_DIR: "/usr/share/dotnet"
           DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+      - name: Echo Directory
+        run: echo ${{ matrix.workspace }}
         
       - name: Run Linter
         uses: wearerequired/lint-action@v2
