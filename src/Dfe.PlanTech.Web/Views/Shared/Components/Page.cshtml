@@ -3,6 +3,11 @@
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
         @{
+            foreach (var content in Model.BeforeTitleContent)
+            {
+                await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+            }
+
             if (Model.DisplayTopicTitle)
             {
                 <span class="govuk-caption-xl">@Model.SectionTitle</span>
@@ -16,11 +21,11 @@
             var categoriesList = new List<Dfe.PlanTech.Domain.Questionnaire.Interfaces.ICategory>();
 
             var showRecommendations = false;
-            
+
             foreach (var content in Model.Content)
             {
                 await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-                
+
                 if (content is Dfe.PlanTech.Domain.Questionnaire.Interfaces.ICategory category)
                 {
                     showRecommendations = true;

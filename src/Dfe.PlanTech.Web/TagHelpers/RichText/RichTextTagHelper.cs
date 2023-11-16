@@ -25,6 +25,9 @@ public class RichTextTagHelper : TagHelper
             return;
         }
 
+        output.TagName = null;
+        output.TagMode = TagMode.StartTagAndEndTag;
+
         var html = _richTextRenderer.ToHtml(Content);
         output.Content.SetHtmlContent(html);
     }
