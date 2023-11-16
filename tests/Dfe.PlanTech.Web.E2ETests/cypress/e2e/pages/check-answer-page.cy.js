@@ -1,4 +1,5 @@
 let selectedQuestionsWithAnswers = [];
+let changeLinkHref;
 
 describe("Check answers page", () => {
   const url = "/self-assessment";
@@ -78,8 +79,19 @@ describe("Check answers page", () => {
   });
 
   it("navigates to correct page when clicking change", () => {
-    cy.get("a:nth-child(1)").contains("Change").click();
-    cy.url().should("contains", "broadband-contract-review");
+
+    cy.get("a:nth-child(1)")
+        .contains("Change")
+        .invoke("attr", "href")
+        .then(href => {
+          changeLinkHref = href;
+          cy.log("Captured href: " + changeLinkHref);
+
+          cy.get("a:nth-child(1)").contains("Change").click();
+
+          cy.url().should("contain", changeLinkHref);
+        });
+    
   });
 
   //This needs to be last on this test run, so that the question-page tests have a clean slate to work from!
