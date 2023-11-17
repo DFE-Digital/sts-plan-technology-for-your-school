@@ -7,6 +7,7 @@ using Dfe.PlanTech.Infrastructure.SignIns.Extensions;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
 using System.Security.Claims;
+using Dfe.PlanTech.Domain.Users.Exceptions;
 
 namespace Dfe.PlanTech.Infrastructure.SignIns.ConnectEvents;
 
@@ -20,13 +21,8 @@ public static class OnUserInformationReceivedEvent
     public static async Task OnUserInformationReceived(UserInformationReceivedContext context)
     {
         await RecordUserSign(context);
-
-        var config = context.HttpContext.RequestServices.GetRequiredService<IDfeSignInConfiguration>();
-
-        if (config.DiscoverRolesWithPublicApi)
-        {
-            await AddRoleClaimsFromDfePublicApi(context);
-        }
+        
+        await AddRoleClaimsFromDfePublicApi(context);
     }
 
     /// <summary>
@@ -56,7 +52,7 @@ public static class OnUserInformationReceivedEvent
         AddClaimsToPrincipal(context, signin);
     }
 
-    private static void AddClaimsToPrincipal(UserInformationReceivedContext context, SignIn signin)
+    private static void AddClaimsToPrincipal(UserInformationReceivedContext context, Domain.SignIns.Models.SignIn signin)
     {
         var principal = context.Principal;
 
@@ -77,7 +73,7 @@ public static class OnUserInformationReceivedEvent
     /// <returns></returns>
     private static async Task AddRoleClaimsFromDfePublicApi(UserInformationReceivedContext context)
     {
-        var dfePublicApi = context.HttpContext.RequestServices.GetRequiredService<IDfePublicApi>();
+         var dfePublicApi = context.HttpContext.RequestServices.GetRequiredService<IDfePublicApi>();
 
         if (context.Principal?.Identity == null || !context.Principal.Identity.IsAuthenticated)
             return;
@@ -87,18 +83,24 @@ public static class OnUserInformationReceivedEvent
         var userOrganization = context.Principal.Claims.GetOrganisation();
         if (userOrganization == null)
         {
-            context.Fail("User is not in an organisation.");
-            return;
+            throw new KeyNotFoundException(ClaimConstants.Organisation);
         }
 
         var userAccessToService = await dfePublicApi.GetUserAccessToService(userId, userOrganization.Id.ToString());
+        
         if (userAccessToService == null)
         {
-            // User account is not enrolled into service and has no roles.
-            return;
+            throw new UserAccessUnavailableException("Could not retrieve information for user access to service");
+        }
+        
+        bool hasRole = userAccessToService.Roles.Any(role => role.Code == "plan_tech_for_school_estalishment_only");
+
+        if (!hasRole)
+        {
+            throw new UserAccessRoleNotFoundException("User does not have correct role to access to this service");
         }
 
-        var roleIdentity = new ClaimsIdentity(GetRoleClaims(context, userAccessToService!));
+        var roleIdentity = new ClaimsIdentity(GetRoleClaims(context, userAccessToService));
         context.Principal.AddIdentity(roleIdentity);
     }
 

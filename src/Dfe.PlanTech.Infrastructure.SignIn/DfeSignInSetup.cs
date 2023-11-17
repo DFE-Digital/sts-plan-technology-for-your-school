@@ -10,6 +10,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Application.SignIns.Interfaces;
+using Dfe.PlanTech.Infrastructure.SignIn.Services;
 
 namespace Dfe.PlanTech.Infrastructure.SignIns;
 
@@ -20,6 +22,8 @@ public static class DfeSignInSetup
     {
         var config = GetDfeSignInConfig(configuration);
 
+        services.AddScoped<IDfePublicApi, DfePublicApiService>();
+        
         services.AddAuthentication(ConfigureAuthentication)
         .AddOpenIdConnect(options => ConfigureOpenIdConnect(options, config))
         .AddCookie(options => ConfigureCookie(options, config));
