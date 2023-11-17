@@ -76,8 +76,8 @@ jobs:
           dotnet_format_dir: ./src/${{ matrix.workspace }}
           git_email: "41898282+github-actions[bot]@users.noreply.github.com"
           git_name: "github-actions[bot]"
-          commit: false   # TODO: REPLACE false WITH true AFTER TESTING
-          auto_fix: false # TODO: REPLACE false WITH true AFTER TESTING
+          auto_fix: true # TODO: REPLACE false WITH true AFTER TESTING
+          commit:   false   # TODO: REPLACE false WITH true AFTER TESTING
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
   build-test-web-app:  
