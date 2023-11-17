@@ -16,7 +16,6 @@
     <None Remove="Users\Models\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Users\" />
     <Folder Include="Users\Models\" />
   </ItemGroup>
 </Project>

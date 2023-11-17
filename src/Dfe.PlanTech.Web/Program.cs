@@ -6,6 +6,7 @@ using Dfe.PlanTech.Application.Submissions.Queries;
 using Dfe.PlanTech.Domain.Establishments.Exceptions;
 using Dfe.PlanTech.Domain.SignIns.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
+using Dfe.PlanTech.Domain.Users.Exceptions;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.SignIns;
 using Dfe.PlanTech.Web;
@@ -119,11 +120,13 @@ app.UseExceptionHandler(exceptionHandlerApp =>
         exception switch
         {
             null => UrlConstants.Error,
+            UserAccessUnavailableException => UrlConstants.ServiceUnavailable,
+            UserAccessRoleNotFoundException => UrlConstants.RoleErrorPage,
             ContentfulDataUnavailableException => UrlConstants.ServiceUnavailable,
             DatabaseException => UrlConstants.ServiceUnavailable,
             InvalidEstablishmentException => UrlConstants.ServiceUnavailable,
-            KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) => UrlConstants.ServiceUnavailable,
-            _ => GetRedirectUrlForException(exception.InnerException)
+            KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) => UrlConstants.OrgErrorPage,
+            _ => GetRedirectUrlForException(exception.InnerException),
         };
 });
 
