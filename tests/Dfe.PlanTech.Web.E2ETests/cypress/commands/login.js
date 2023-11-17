@@ -12,11 +12,8 @@ Cypress.Commands.add("login", ({ email, password, url }) => {
     cy.get("input#username").type(email);
     cy.get("input#password").type(password);
     cy.get("div.govuk-button-group button.govuk-button").first().click();
-
-    cy.origin(Cypress.env("URL"), { args: { url } }, ({ url }) => {
-        cy.url().should("contain", url);
-    });
-});
+    cy.url().should("contain", url);
+}); 
 
 /**
  * Login to DFE using values from the environment variables
