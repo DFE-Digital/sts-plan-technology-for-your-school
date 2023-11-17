@@ -61,6 +61,7 @@ builder.Services.AddScoped<ComponentViewsFactory>();
 
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddSingleton<IAuthorizationHandler, PageModelAuthorisationPolicy>();
+builder.Services.AddSingleton<IExceptionHandlerMiddleware, ServiceExceptionHandlerMiddleWare>();
 
 builder.Services.AddTransient<ISubmissionStatusProcessor, SubmissionStatusProcessor>();
 builder.Services.AddTransient<IGetRecommendationRouter, GetRecommendationRouter>();
@@ -105,26 +106,11 @@ app.UseExceptionHandler(exceptionHandlerApp =>
 {
     exceptionHandlerApp.Run(context =>
     {
-        var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
-        var error = exceptionHandlerPathFeature?.Error;
-
-        string redirectUrl = GetRedirectUrlForException(error);
-
-        context.Response.Redirect(redirectUrl);
-
+        IExceptionHandlerMiddleware exceptionHandlerMiddleware = context.RequestServices.GetRequiredService<IExceptionHandlerMiddleware>();
+        exceptionHandlerMiddleware.ContextRedirect(context);
+        
         return Task.CompletedTask;
     });
-
-    static string GetRedirectUrlForException(Exception? exception) =>
-        exception switch
-        {
-            null => UrlConstants.Error,
-            ContentfulDataUnavailableException => UrlConstants.ServiceUnavailable,
-            DatabaseException => UrlConstants.ServiceUnavailable,
-            InvalidEstablishmentException => UrlConstants.ServiceUnavailable,
-            KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) => UrlConstants.ServiceUnavailable,
-            _ => GetRedirectUrlForException(exception.InnerException)
-        };
 });
 
 app.UseStaticFiles();
