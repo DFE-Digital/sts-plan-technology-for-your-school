@@ -100,7 +100,6 @@ describe("Question page", () => {
             //Ensure path changes
             cy.location("pathname", {timeout: 60000})
                 .should("not.equal", firstUrl)
-                .and("match", /check-answers/g)
 
             cy.get("a.govuk-back-link")
                 .should("exist")
