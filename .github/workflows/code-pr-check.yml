@@ -147,6 +147,7 @@ jobs:
   build-database-upgrader:  
     name: Build database upgrader
     runs-on: ubuntu-latest
+    needs: [lint-code]
 
     steps:
       - name: Check out repository
@@ -156,7 +157,7 @@ jobs:
         uses: ./.github/actions/build-dotnet-app
         with:
           dotnet_version: ${{ env.DOTNET_VERSION }}  
-          solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
+          solution_filename: Dfe.PlanTech.DatabaseUpgrader.csproj
 
   run-javascript-tests:
     runs-on: ubuntu-latest
