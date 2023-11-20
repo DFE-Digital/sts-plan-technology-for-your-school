@@ -19,4 +19,5 @@ public interface IDfeSignInConfiguration
     public string SignoutRedirectUrl { get; set; }
     public bool DiscoverRolesWithPublicApi { get; set; }
     public string FrontDoorUrl { get; init; }
+    public string ApiSecret { get; set; }
 }

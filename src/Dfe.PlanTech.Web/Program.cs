@@ -6,6 +6,7 @@ using Dfe.PlanTech.Application.Submissions.Queries;
 using Dfe.PlanTech.Domain.Establishments.Exceptions;
 using Dfe.PlanTech.Domain.SignIns.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
+using Dfe.PlanTech.Domain.Users.Exceptions;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.SignIns;
 using Dfe.PlanTech.Web;

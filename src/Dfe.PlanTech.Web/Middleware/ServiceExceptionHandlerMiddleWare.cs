@@ -2,6 +2,7 @@
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Establishments.Exceptions;
 using Dfe.PlanTech.Domain.SignIns.Enums;
+using Dfe.PlanTech.Domain.Users.Exceptions;
 using Dfe.PlanTech.Web.Middleware;
 using Microsoft.AspNetCore.Diagnostics;
 using Polly;
@@ -23,10 +24,12 @@ internal class ServiceExceptionHandlerMiddleWare : IExceptionHandlerMiddleware
         exception switch
         {
             null => UrlConstants.Error,
+            UserAccessUnavailableException => UrlConstants.ServiceUnavailable,
+            UserAccessRoleNotFoundException => UrlConstants.RoleErrorPage,
             ContentfulDataUnavailableException => UrlConstants.ServiceUnavailable,
             DatabaseException => UrlConstants.ServiceUnavailable,
             InvalidEstablishmentException => UrlConstants.ServiceUnavailable,
-            KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) => UrlConstants.ServiceUnavailable,
-            _ => GetRedirectUrlForException(exception.InnerException)
+            KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) => UrlConstants.OrgErrorPage,
+            _ => GetRedirectUrlForException(exception.InnerException),
         };
 }
