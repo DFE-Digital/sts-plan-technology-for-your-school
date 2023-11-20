@@ -21,7 +21,7 @@ public static class OnUserInformationReceivedEvent
     public static async Task OnUserInformationReceived(UserInformationReceivedContext context)
     {
         await RecordUserSign(context);
-        
+
         await AddRoleClaimsFromDfePublicApi(context);
     }
 
@@ -73,7 +73,7 @@ public static class OnUserInformationReceivedEvent
     /// <returns></returns>
     private static async Task AddRoleClaimsFromDfePublicApi(UserInformationReceivedContext context)
     {
-         var dfePublicApi = context.HttpContext.RequestServices.GetRequiredService<IDfePublicApi>();
+        var dfePublicApi = context.HttpContext.RequestServices.GetRequiredService<IDfePublicApi>();
 
         if (context.Principal?.Identity == null || !context.Principal.Identity.IsAuthenticated)
             return;
@@ -87,12 +87,12 @@ public static class OnUserInformationReceivedEvent
         }
 
         var userAccessToService = await dfePublicApi.GetUserAccessToService(userId, userOrganization.Id.ToString());
-        
+
         if (userAccessToService == null)
         {
             throw new UserAccessUnavailableException("Could not retrieve information for user access to service");
         }
-        
+
         bool hasRole = userAccessToService.Roles.Any(role => role.Code == "plan_tech_for_school_estalishment_only");
 
         if (!hasRole)

@@ -37,7 +37,7 @@ public class DfePublicApiService : IDfePublicApi
 
             return userAccess;
         }
-        
+
         throw new UserAccessUnavailableException($"Error getting user access to service from API response code received: {response.StatusCode}");
     }
 

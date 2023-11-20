@@ -23,7 +23,7 @@ public static class DfeSignInSetup
         var config = GetDfeSignInConfig(configuration);
 
         services.AddScoped<IDfePublicApi, DfePublicApiService>();
-        
+
         services.AddAuthentication(ConfigureAuthentication)
         .AddOpenIdConnect(options => ConfigureOpenIdConnect(options, config))
         .AddCookie(options => ConfigureCookie(options, config));
