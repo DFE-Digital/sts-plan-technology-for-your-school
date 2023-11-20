@@ -6,7 +6,7 @@ using Dfe.PlanTech.Domain.Users.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 namespace Dfe.PlanTech.Web.Middleware;
 
-internal class ServiceExceptionHandlerMiddleWare : IExceptionHandlerMiddleware
+public class ServiceExceptionHandlerMiddleWare : IExceptionHandlerMiddleware
 {
     public void ContextRedirect(HttpContext context)
     {
