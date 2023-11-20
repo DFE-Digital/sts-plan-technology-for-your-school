@@ -57,8 +57,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Temporarily Update Global JSON
-        run: echo '{"sdk":{"version":"${{ env.DOTNET_VERSION }}"}}' > ./global.json
+      # - name: Temporarily Update Global JSON
+      #   run: echo '{"sdk":{"version":"${{ env.DOTNET_VERSION }}"}}' > ./global.json
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v3
