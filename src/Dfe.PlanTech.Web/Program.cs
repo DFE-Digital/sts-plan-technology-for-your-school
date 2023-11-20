@@ -1,12 +1,7 @@
 using Azure.Identity;
-using Dfe.PlanTech.Application.Constants;
-using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Helpers;
 using Dfe.PlanTech.Application.Submissions.Queries;
-using Dfe.PlanTech.Domain.Establishments.Exceptions;
-using Dfe.PlanTech.Domain.SignIns.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
-using Dfe.PlanTech.Domain.Users.Exceptions;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.SignIns;
 using Dfe.PlanTech.Web;
@@ -18,7 +13,6 @@ using GovUk.Frontend.AspNetCore;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -109,7 +103,7 @@ app.UseExceptionHandler(exceptionHandlerApp =>
     {
         IExceptionHandlerMiddleware exceptionHandlerMiddleware = context.RequestServices.GetRequiredService<IExceptionHandlerMiddleware>();
         exceptionHandlerMiddleware.ContextRedirect(context);
-        
+
         return Task.CompletedTask;
     });
 });

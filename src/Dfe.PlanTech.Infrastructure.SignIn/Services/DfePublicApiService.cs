@@ -1,11 +1,11 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
 using Dfe.PlanTech.Application.SignIns.Interfaces;
 using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Users.Exceptions;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 
 namespace Dfe.PlanTech.Infrastructure.SignIn.Services;
 
@@ -37,7 +37,7 @@ public class DfePublicApiService : IDfePublicApi
 
             return userAccess;
         }
-        
+
         throw new UserAccessUnavailableException($"Error getting user access to service from API response code received: {response.StatusCode}");
     }
 
