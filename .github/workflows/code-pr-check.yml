@@ -73,13 +73,14 @@ jobs:
           dotnet_format_dir: ./src/${{ matrix.workspace }}
           git_email: "41898282+github-actions[bot]@users.noreply.github.com"
           git_name: "github-actions[bot]"
+          commit_message: "Linted Code in ${{ matrix.workspace }} with ${ linter }"
           auto_fix: true
           commit: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
   build-test-web-app:  
     name: Build and run unit tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [lint-code]
 
     steps:
@@ -143,7 +144,7 @@ jobs:
 
   build-database-upgrader:  
     name: Build database upgrader
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [lint-code]
 
     steps:
@@ -157,7 +158,7 @@ jobs:
           solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
 
   run-javascript-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Run javascript tests
 
     steps:

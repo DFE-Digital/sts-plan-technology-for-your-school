@@ -56,11 +56,6 @@ public class QuestionsController : BaseController<QuestionsController>
 
         int establishmentId = await _user.GetEstablishmentId();
 
-
-
-
-
-
         var nextQuestion = await getQuestionQuery.GetNextUnansweredQuestion(establishmentId, section, cancellationToken);
 
         if (nextQuestion == null) return this.RedirectToCheckAnswers(sectionSlug);
