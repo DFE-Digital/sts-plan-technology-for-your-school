@@ -51,8 +51,8 @@ jobs:
         workspace: ${{ fromJson(needs.get-src-dir-list.outputs.directories) }}
     permissions:
       contents: write
-      issues: write
       pull-requests: write
+      checks: write
 
     steps:
 
