@@ -23,7 +23,7 @@ env:
 jobs:
 
   get-src-dir-list:
-    name: Get Directory List in src
+    name: Get Directories for Linting
     runs-on: ubuntu-22.04
     outputs:
       directories: ${{ steps.list-dir.outputs.directories }}
@@ -32,14 +32,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Get Directories in Src
+      - name: Get Directories
         id: list-dir
         uses: ./.github/actions/list-directory
         with:
           source: ./src/
 
   lint-code:
-    name: Lint Code and Commit Changes
+    name: Lint & Commit
     runs-on: ubuntu-22.04
     needs: [get-src-dir-list]
     strategy:
@@ -76,8 +76,8 @@ jobs:
           dotnet_format_dir: ./src/${{ matrix.workspace }}
           git_email: "41898282+github-actions[bot]@users.noreply.github.com"
           git_name: "github-actions[bot]"
-          auto_fix: false # TODO: REPLACE false WITH true AFTER TESTING
-          commit: false   # TODO: REPLACE false WITH true AFTER TESTING
+          auto_fix: true
+          commit: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
   build-test-web-app:  
