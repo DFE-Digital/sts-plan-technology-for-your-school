@@ -6,5 +6,5 @@ public class UserAccessUnavailableException : Exception
         : base(message)
     {
     }
-    
+
 }

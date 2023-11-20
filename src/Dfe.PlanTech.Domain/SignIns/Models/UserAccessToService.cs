@@ -12,11 +12,11 @@ public sealed class UserAccessToService
 
     [JsonPropertyName("organisationId")]
     public Guid OrganisationId { get; set; }
-    
+
     [JsonPropertyName("roles")]
     public IList<Role> Roles { get; set; } = null!;
-    
+
     [JsonPropertyName("identifiers")]
     public IList<Identifier> Identifiers { get; set; } = null!;
-    
+
 }
