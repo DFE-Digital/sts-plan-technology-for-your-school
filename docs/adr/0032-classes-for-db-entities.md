@@ -1,4 +1,4 @@
-# 0031 - Classes for DB Entities
+# 0032 - Classes/Code Structure for DB Entities
 
 * **Status**: proposed
 
