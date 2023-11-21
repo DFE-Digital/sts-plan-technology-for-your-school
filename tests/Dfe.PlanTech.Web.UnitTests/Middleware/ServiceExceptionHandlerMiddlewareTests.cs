@@ -42,7 +42,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
 
             //Assert
             Assert.NotNull(context.Response);
-            Assert.Equal("/service-unavailable", context.Response.Headers.Values.FirstOrDefault());
+            Assert.Equal(UrlConstants.RoleErrorPage, context.Response.Headers.Values.FirstOrDefault());
         }
 
         [Fact]
