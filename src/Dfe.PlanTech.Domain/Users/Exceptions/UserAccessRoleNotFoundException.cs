@@ -6,5 +6,5 @@ public class UserAccessRoleNotFoundException : Exception
         : base(message)
     {
     }
-    
+
 }
