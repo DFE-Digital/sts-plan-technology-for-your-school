@@ -111,14 +111,14 @@ public class CheckAnswersRouterTests
 
         var redirectResult = result as RedirectToActionResult;
 
-    Assert.NotNull(redirectResult);
-    Assert.Equal(PagesController.ControllerName, redirectResult.ControllerName);
-    Assert.Equal(PagesController.GetPageByRouteAction, PagesController.GetPageByRouteAction);
+        Assert.NotNull(redirectResult);
+        Assert.Equal(PagesController.ControllerName, redirectResult.ControllerName);
+        Assert.Equal(PagesController.GetPageByRouteAction, PagesController.GetPageByRouteAction);
 
-    var route = redirectResult.RouteValues?["route"];
-    Assert.NotNull(route);
-    Assert.Equal(PageRedirecter.SelfAssessmentRoute, route);
-  }
+        var route = redirectResult.RouteValues?["route"];
+        Assert.NotNull(route);
+        Assert.Equal(PageRedirecter.SelfAssessmentRoute, route);
+    }
 
     [Fact]
     public async Task Should_Redirect_To_NextQuestion_When_Status_InProgresss()
