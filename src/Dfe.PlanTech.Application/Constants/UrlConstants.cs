@@ -6,9 +6,7 @@ public static class UrlConstants
 
     public const string Error = "/error";
 
-    public const string OrgErrorPage = "/organisation";
+    public const string OrgErrorPage = "/dsi-error-not-associated-organisation";
 
-    public const string RoleErrorPage = "/roles";
-
-
+    public const string RoleErrorPage = "/dsi-error-organisation-approval";
 }
