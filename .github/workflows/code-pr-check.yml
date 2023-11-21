@@ -25,8 +25,7 @@ jobs:
   get-src-dir-list:
     name: Get Directories for Linting
     runs-on: ubuntu-22.04
-    if: ${{ github.event_name == 'push' }}
-    # TODO: Change 'push' to 'pull_request' after testing
+    if: ${{ github.event_name == 'pull_request' }}
     outputs:
       directories: ${{ steps.list-dir.outputs.directories }}
     
@@ -43,8 +42,7 @@ jobs:
   lint-code:
     name: Lint & Commit
     runs-on: ubuntu-22.04
-    if: ${{ github.event_name == 'push' }}
-    # TODO: Change 'push' to 'pull_request' after testing
+    if: ${{ github.event_name == 'pull_request' }}
     needs: [get-src-dir-list]
     strategy:
       max-parallel: 1
