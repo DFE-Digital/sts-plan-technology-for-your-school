@@ -1,6 +1,6 @@
 # 0030 - Storing CMS Data In Database
 
-* **Status**: proposed/accepted/deprecated
+* **Status**: accepted
 
 ## Context and Problem Statement
 
