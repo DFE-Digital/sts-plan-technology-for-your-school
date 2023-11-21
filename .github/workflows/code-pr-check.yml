@@ -25,7 +25,8 @@ jobs:
   get-src-dir-list:
     name: Get Directories for Linting
     runs-on: ubuntu-22.04
-    if: ${{ github.event_name == 'pull_request' }}
+    if: ${{ github.event_name == 'push' }}
+    # TODO: Change 'push' to 'pull_request' after testing
     outputs:
       directories: ${{ steps.list-dir.outputs.directories }}
     
@@ -42,7 +43,8 @@ jobs:
   lint-code:
     name: Lint & Commit
     runs-on: ubuntu-22.04
-    if: ${{ github.event_name == 'pull_request' }}
+    if: ${{ github.event_name == 'push' }}
+    # TODO: Change 'push' to 'pull_request' after testing
     needs: [get-src-dir-list]
     strategy:
       max-parallel: 1
@@ -82,7 +84,9 @@ jobs:
   build-test-web-app:  
     name: Build and run unit tests
     runs-on: ubuntu-22.04
-    if: ${{ ( github.event_name == 'pull_request' && needs.lint-code.result == 'success' ) || ( github.event_name == 'push' && needs.lint-code.result == 'skipped' ) }}
+    # ${{ ( github.event_name == 'pull_request' && needs.lint-code.result == 'success' ) || ( github.event_name == 'push' && needs.lint-code.result == 'skipped' ) }}
+    if: ${{ ( github.event_name == 'pull_request' && needs.lint-code.result == 'skipped' ) }}
+    # TODO: Change 'pull_request' to 'push' after testing
     needs: [lint-code]
 
     steps:
