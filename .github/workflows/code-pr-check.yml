@@ -85,7 +85,7 @@ jobs:
     name: Build and run unit tests
     runs-on: ubuntu-22.04
     # ${{ ( github.event_name == 'pull_request' && needs.lint-code.result == 'success' ) || ( github.event_name == 'push' && needs.lint-code.result == 'skipped' ) }}
-    if: ${{ ( github.event_name == 'pull_request' && needs.lint-code.result == 'skipped' ) }}
+    if: ${{ ( github.event_name == 'pull_request' && needs.lint-code.result == 'skipped' && always() )}}
     # TODO: Change 'pull_request' to 'push' after testing
     needs: [lint-code]
 
