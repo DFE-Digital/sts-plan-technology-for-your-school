@@ -82,7 +82,7 @@ jobs:
   build-test-web-app:  
     name: Build and run unit tests
     runs-on: ubuntu-22.04
-    if: ${{ ( github.event_name == 'pull_request' && needs.lint-code.result == 'success' ) || ( github.event_name == 'push' && needs.lint-code.result == 'skipped' ) }}
+    if: ${{ always() && ( github.event_name == 'pull_request' && needs.lint-code.result == 'success' ) || ( github.event_name == 'push' && needs.lint-code.result == 'skipped' ) }}
     needs: [lint-code]
 
     steps:
@@ -147,7 +147,6 @@ jobs:
   build-database-upgrader:  
     name: Build database upgrader
     runs-on: ubuntu-22.04
-    needs: [build-test-web-app]
 
     steps:
       - name: Check out repository
