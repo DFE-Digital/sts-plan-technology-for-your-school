@@ -6,6 +6,12 @@ on:
         environment:
           type: string
           required: true
+        branch:
+          type: string
+          required: true
+        checked-out-sha:
+          type: string
+          required: true
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.inputs.environment }}
@@ -26,23 +32,85 @@ jobs:
         name: Set Environment (Deploy Image)
         outputs:
             release: ${{ steps.var.outputs.release }}
-            branch: ${{ steps.var.outputs.branch }}
-        
         steps:
-
             - id: var
               run: |
                 RELEASE=${{ inputs.environment }}-`date +%Y-%m-%d`.${{ github.run_number }}
-                GIT_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
                 echo "release=${RELEASE}" >> $GITHUB_OUTPUT
-                echo "branch=$GIT_BRANCH" >> $GITHUB_OUTPUT
+    
+    create-tag-release:
+      
+      runs-on: ubuntu-22.04
+      name: Tag & Create Release
+      needs: set-env
+
+      steps:
+        - uses: actions/checkout@v3
+          with:
+            ref: ${{ github.ref }}
+          
+        - name: Create Tag
+          run: |
+            git tag ${{ needs.set-env.outputs.release }}
+            git push origin ${{ needs.set-env.outputs.release }}
+          
+        - name: Create Release
+          uses: "actions/github-script@v7"
+          with:
+            github-token: "${{ secrets.GITHUB_TOKEN }}"
+            script: |
+              try {
+                await github.rest.repos.createRelease({
+                  draft: ${{ inputs.environment == 'staging' }},
+                  generate_release_notes: true,
+                  name: "${{ needs.set-env.outputs.release }}",
+                  owner: context.repo.owner,
+                  prerelease: ${{ inputs.environment == 'staging' }},
+                  repo: context.repo.repo,
+                  tag_name: "${{ needs.set-env.outputs.release }}",
+                });
+              } catch (error) {
+                core.setFailed(error.message);
+              }
+
+    upgrade-database:
+
+      runs-on: ubuntu-22.04
+      name: Update Database for ${{ inputs.environment }}
+      environment: ${{ inputs.environment }}
+      needs: set-env
+
+      steps:
+        - uses: actions/checkout@v3
+          with:
+            ref: ${{ github.ref }}
+        
+        - name: Azure CLI Login
+          uses: ./.github/actions/azure-login
+          with:
+            az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+            az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+            az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+            az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+        
+        - name: Build & Run Database Upgrader
+          uses: ./.github/actions/build-and-run-database-upgrader
+          with:
+            dotnet_version: ${{ vars.DOTNET_VERSION }}
+            az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
+            az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
+            az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+            az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+            environment: ${{ inputs.environment }}
+            sql_analytics_username: ${{ secrets.ANALYTICS_USERNAME }}
+            sql_analytics_password: ${{ secrets.ANALYTICS_PASSWORD }}
     
     pull-image-from-gcr-and-publish-to-acr:
 
         runs-on: ubuntu-22.04
         name: Pull Image From GitHub Container Registry and Publish to Azure Container Registry
         environment: ${{ inputs.environment }}
-        needs: [set-env]
+        needs: [set-env, upgrade-database]
 
         steps:
 
@@ -54,7 +122,7 @@ jobs:
                 password: ${{ secrets.GITHUB_TOKEN }}
             
             - name: Pull Image From GCR
-              run: docker pull ${{ env.GITHUB_CONTAINER_REGISTRY }}/${{ env.ORG_NAME }}/${{ env.GCR_DOCKER_IMAGE }}:latest
+              run: docker pull ${{ env.GITHUB_CONTAINER_REGISTRY }}/${{ env.ORG_NAME }}/${{ env.GCR_DOCKER_IMAGE }}:${{ inputs.branch }}-${{ inputs.checked-out-sha }}
 
             - name: Azure Container Registry Login
               uses: docker/login-action@v3
@@ -65,15 +133,15 @@ jobs:
             
             - name: Push Image To ACR
               run: |
-                docker tag ${{ env.GITHUB_CONTAINER_REGISTRY }}/${{ env.ORG_NAME }}/${{ env.GCR_DOCKER_IMAGE }}:latest ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ inputs.environment }}
-                docker push ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ inputs.environment }}
+                docker tag ${{ env.GITHUB_CONTAINER_REGISTRY }}/${{ env.ORG_NAME }}/${{ env.GCR_DOCKER_IMAGE }}:${{ inputs.branch }}-${{ inputs.checked-out-sha }} ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:${{ inputs.branch }}-${{ inputs.checked-out-sha }}-${{ inputs.environment }}
+                docker push ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:${{ inputs.branch }}-${{ inputs.checked-out-sha }}-${{ inputs.environment }}
     
     deploy-image:
 
       runs-on: ubuntu-22.04
       name: Deploy Image To ${{ inputs.environment }} (${{ needs.set-env.outputs.release }})
       environment: ${{ inputs.environment }}
-      needs: [set-env, pull-image-from-gcr-and-publish-to-acr]
+      needs: [set-env, upgrade-database, pull-image-from-gcr-and-publish-to-acr]
 
       steps:
 
@@ -99,7 +167,7 @@ jobs:
               az containerapp update \
                 --name ${{ secrets.AZ_ACA_NAME }} \
                 --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP }} \
-                --image ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ inputs.environment }} \
+                --image ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:${{ inputs.branch }}-${{ inputs.checked-out-sha }}-${{ inputs.environment }} \
                 --output none
                 &> /dev/null
       
@@ -109,7 +177,7 @@ jobs:
       name: Clear Database & Run E2E Tests on ${{ inputs.environment }}
       if: ${{ inputs.environment == 'tst' || inputs.environment == 'staging' }}
       environment: ${{ inputs.environment }}
-      needs: [set-env, pull-image-from-gcr-and-publish-to-acr, deploy-image]
+      needs: [set-env, upgrade-database, pull-image-from-gcr-and-publish-to-acr, deploy-image]
       env:
         az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
         az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
