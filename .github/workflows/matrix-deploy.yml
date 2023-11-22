@@ -22,6 +22,10 @@ jobs:
       branch: ${{ steps.var.outputs.branch }}
       checked-out-sha: ${{ steps.var.outputs.checked-out-sha }}
     steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+          
       - id: var
         run: |
           GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}
