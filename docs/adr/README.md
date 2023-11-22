@@ -11,7 +11,7 @@ General information about architectural decision records is available at <https:
 ## List
 
 | Title                                                                                                       | Status   |
-|-------------------------------------------------------------------------------------------------------------| -------- |
+| ----------------------------------------------------------------------------------------------------------- | -------- |
 | [0001 - Web Framework](./0001-web-framework.md)                                                             | Accepted |
 | [0002 - Application Framework](./0002-application-framework.md)                                             | Accepted |
 | [0003 - Build/Test/Deploy Environment](./0002-application-framework.md)                                     | Accepted |
@@ -40,3 +40,6 @@ General information about architectural decision records is available at <https:
 | [0027 - Accesibility Testing](./0027-accesibility-testing.md)                                               | Accepted |
 | [0028 - Command Line Arguments Parsing](./0028-command-line-arguments.md)                                   | Accepted |
 | [0029 - Terraform input variables](./0029-terraform-variable-for-admin-password.md)                         | Accepted |
+| [0030 - Storing CMS Data In Database][./0030-storing-cms-in-db.md]                                          | Accepted |
+| [0031 - CMS DB Structure][./0031-cms-db-structure.md]                                                       | Accepted |
+| [0032 - Classes/Code Structure for DB Entities][./0032-classes-for-db-entities.md]                          | Proposed |
