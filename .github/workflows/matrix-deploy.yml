@@ -10,21 +10,28 @@ on:
     
 jobs:
 
-  get-branch:
+  set-env:
     runs-on: ubuntu-22.04
-    name: Get Target Branch Name
+    name: Set Environment (Matrix Deploy)
     outputs:
       branch: ${{ steps.var.outputs.branch }}
+      checked-out-sha: ${{ steps.var.outputs.checked-out-sha }}
     steps:
       - id: var
         run: |
           GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}
+          CHECKED_OUT_SHA="$(git log -1 '--format=format:%H')"
           echo "branch=$GIT_BRANCH" >> $GITHUB_OUTPUT
+          echo "checked-out-sha=${CHECKED_OUT_SHA}" >> $GITHUB_OUTPUT
 
   create-and-publish-image:
+    needs: set-env
     name: Create & Publish Image
     uses: ./.github/workflows/build-image.yml
     secrets: inherit
+    with:
+      branch: ${{ needs.set-env.outputs.branch }}
+      checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
 
   check-for-terraform-changes:
     needs: create-and-publish-image
@@ -59,10 +66,9 @@ jobs:
           
   plan-terraform-for-dev-and-test:
     needs: check-for-terraform-changes
-    name: plan Terraform Infrastructure for Dev & Test
+    name: Plan Terraform Infrastructure for Dev & Test
     if: ${{ needs.check-for-terraform-changes.outputs.run_terraform_deploy == 'true' }}
     strategy:
-      max-parallel: 1
       fail-fast: true
       matrix:
         target: [ Dev, Tst ]
@@ -72,7 +78,7 @@ jobs:
     secrets: inherit
 
   deploy-to-dev-and-test:
-    needs: [get-branch, create-and-publish-image, check-for-terraform-changes]
+    needs: [set-env, create-and-publish-image, check-for-terraform-changes]
     name: Deployment to Dev & Test
     strategy:
       max-parallel: 1
@@ -82,12 +88,14 @@ jobs:
     uses: ./.github/workflows/deploy-image.yml
     with:
       environment: ${{ matrix.target }}
+      branch: ${{ needs.set-env.outputs.branch }}
+      checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
     secrets: inherit
 
   plan-terraform-for-staging:
-    needs: [deploy-to-dev-and-test, check-for-terraform-changes]
-    name: plan Terraform Infrastructure for staging
-    if: ${{ needs.check-for-terraform-changes.outputs.run_terraform_deploy == 'true' &&  needs.get-branch.outputs.branch == 'main' }}
+    needs: [set-env, deploy-to-dev-and-test, check-for-terraform-changes]
+    name: Plan Terraform Infrastructure for staging
+    if: ${{ needs.check-for-terraform-changes.outputs.run_terraform_deploy == 'true' &&  needs.set-env.outputs.branch == 'main' }}
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -99,23 +107,25 @@ jobs:
     secrets: inherit
     
   deploy-to-staging:
-    needs: [get-branch, create-and-publish-image, deploy-to-dev-and-test] 
+    needs: [set-env, create-and-publish-image, deploy-to-dev-and-test] 
     name: Deployment to Staging
-    if: ${{ needs.get-branch.outputs.branch == 'main' }}
+    if: ${{ needs.set-env.outputs.branch == 'main' }}
     strategy:
       max-parallel: 1
       fail-fast: true
       matrix:
-        target: [Staging ]
+        target: [ Staging ]
     uses: ./.github/workflows/deploy-image.yml
     with:
       environment: ${{ matrix.target }}
+      branch: ${{ needs.set-env.outputs.branch }}
+      checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
     secrets: inherit
     
   plan-terraform-for-production:
-    needs: [ deploy-to-dev-and-test, check-for-terraform-changes, deploy-to-staging ]
-    name: plan Terraform Infrastructure for production
-    if: ${{ needs.check-for-terraform-changes.outputs.run_terraform_deploy == 'true' && needs.get-branch.outputs.branch == 'main' }}
+    needs: [ set-env, deploy-to-dev-and-test, check-for-terraform-changes, deploy-to-staging ]
+    name: Plan Terraform Infrastructure for production
+    if: ${{ needs.check-for-terraform-changes.outputs.run_terraform_deploy == 'true' && needs.set-env.outputs.branch == 'main' }}
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -127,9 +137,9 @@ jobs:
     secrets: inherit
 
   deploy-to-production:
-    needs: [ get-branch, create-and-publish-image, deploy-to-dev-and-test, deploy-to-staging ]
+    needs: [ set-env, create-and-publish-image, deploy-to-dev-and-test, deploy-to-staging ]
     name: Deployment to Production
-    if: ${{ needs.get-branch.outputs.branch == 'main' }}
+    if: ${{ needs.set-env.outputs.branch == 'main' }}
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -138,4 +148,6 @@ jobs:
     uses: ./.github/workflows/deploy-image.yml
     with:
       environment: ${{ matrix.target }}
+      branch: ${{ needs.set-env.outputs.branch }}
+      checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
     secrets: inherit

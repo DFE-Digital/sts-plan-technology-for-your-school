@@ -2,6 +2,13 @@ name: Build Image and Publish to GCR
 
 on:
   workflow_call:
+    inputs:
+      branch:
+        type: string
+        required: true
+      checked-out-sha:
+        type: string
+        required: true
 
 concurrency:
      group: ${{ github.workflow }}-${{ github.event.inputs.environment }}
@@ -15,31 +22,9 @@ env:
 
 jobs:
 
-    set-env:
-
-        runs-on: ubuntu-22.04
-        name: Set Environment (Build Image)
-        outputs:
-            branch: ${{ steps.var.outputs.branch }}
-            checked-out-sha: ${{ steps.var.outputs.checked-out-sha }}
-        
-        steps:
-
-            - uses: actions/checkout@v3
-              with:
-                ref: ${{ github.ref }}
-            
-            - id: var
-              run: |
-                GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}
-                CHECKED_OUT_SHA="$(git log -1 '--format=format:%H')"
-                echo "branch=$GIT_BRANCH" >> $GITHUB_OUTPUT
-                echo "checked-out-sha=${CHECKED_OUT_SHA}" >> $GITHUB_OUTPUT
-
     build-image:
 
         runs-on: ubuntu-22.04
-        needs: [set-env]
         name: Build & Publish Image
         
         steps:
@@ -61,9 +46,7 @@ jobs:
               with:
                 context: ./
                 file: ./src/Dfe.PlanTech.Web/Dockerfile
-                build-args: COMMIT_SHA=${{ needs.set-env.outputs.checked-out-sha }}
+                build-args: COMMIT_SHA=${{ inputs.checked-out-sha }}
                 tags: |
-                    ${{ env.GITHUB_CONTAINER_REGISTRY }}/${{ env.ORG_NAME }}/${{ env.DOCKER_IMAGE }}:${{ needs.set-env.outputs.branch }}
-                    ${{ env.GITHUB_CONTAINER_REGISTRY }}/${{ env.ORG_NAME }}/${{ env.DOCKER_IMAGE }}:sha-${{ needs.set-env.outputs.checked-out-sha }}
-                    ${{ env.GITHUB_CONTAINER_REGISTRY }}/${{ env.ORG_NAME }}/${{ env.DOCKER_IMAGE }}:latest
+                    ${{ env.GITHUB_CONTAINER_REGISTRY }}/${{ env.ORG_NAME }}/${{ env.DOCKER_IMAGE }}:${{ inputs.branch }}-${{ inputs.checked-out-sha }}
                 push: true

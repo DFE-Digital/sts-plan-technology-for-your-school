@@ -6,6 +6,12 @@ on:
         environment:
           type: string
           required: true
+        branch:
+          type: string
+          required: true
+        checked-out-sha:
+          type: string
+          required: true
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.inputs.environment }}
@@ -26,16 +32,11 @@ jobs:
         name: Set Environment (Deploy Image)
         outputs:
             release: ${{ steps.var.outputs.release }}
-            branch: ${{ steps.var.outputs.branch }}
-        
         steps:
-
             - id: var
               run: |
                 RELEASE=${{ inputs.environment }}-`date +%Y-%m-%d`.${{ github.run_number }}
-                GIT_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
                 echo "release=${RELEASE}" >> $GITHUB_OUTPUT
-                echo "branch=$GIT_BRANCH" >> $GITHUB_OUTPUT
     
     pull-image-from-gcr-and-publish-to-acr:
 
@@ -54,7 +55,7 @@ jobs:
                 password: ${{ secrets.GITHUB_TOKEN }}
             
             - name: Pull Image From GCR
-              run: docker pull ${{ env.GITHUB_CONTAINER_REGISTRY }}/${{ env.ORG_NAME }}/${{ env.GCR_DOCKER_IMAGE }}:latest
+              run: docker pull ${{ env.GITHUB_CONTAINER_REGISTRY }}/${{ env.ORG_NAME }}/${{ env.GCR_DOCKER_IMAGE }}:${{ inputs.branch }}-${{ inputs.checked-out-sha }}
 
             - name: Azure Container Registry Login
               uses: docker/login-action@v3
@@ -65,8 +66,8 @@ jobs:
             
             - name: Push Image To ACR
               run: |
-                docker tag ${{ env.GITHUB_CONTAINER_REGISTRY }}/${{ env.ORG_NAME }}/${{ env.GCR_DOCKER_IMAGE }}:latest ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ inputs.environment }}
-                docker push ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ inputs.environment }}
+                docker tag ${{ env.GITHUB_CONTAINER_REGISTRY }}/${{ env.ORG_NAME }}/${{ env.GCR_DOCKER_IMAGE }}:${{ inputs.branch }}-${{ inputs.checked-out-sha }} ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:${{ inputs.branch }}-${{ inputs.checked-out-sha }}-${{ inputs.environment }}
+                docker push ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:${{ inputs.branch }}-${{ inputs.checked-out-sha }}-${{ inputs.environment }}
     
     deploy-image:
 
@@ -99,7 +100,7 @@ jobs:
               az containerapp update \
                 --name ${{ secrets.AZ_ACA_NAME }} \
                 --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP }} \
-                --image ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:latest-${{ inputs.environment }} \
+                --image ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:${{ inputs.branch }}-${{ inputs.checked-out-sha }}-${{ inputs.environment }} \
                 --output none
                 &> /dev/null
       
