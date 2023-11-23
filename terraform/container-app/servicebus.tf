@@ -1,5 +1,3 @@
-
-
 resource "azurerm_servicebus_namespace" "service_bus" {
   name                = "${local.resource_prefix}servicebus"
   location            = local.azure_location
