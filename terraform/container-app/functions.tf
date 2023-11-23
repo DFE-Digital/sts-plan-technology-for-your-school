@@ -6,7 +6,7 @@ resource "azurerm_storage_account" "function_storage" {
   account_replication_type = "LRS"
 
   public_network_access_enabled = false
-  shared_access_key_enabled     = false
+  shared_access_key_enabled     = true
 
   identity {
     type         = "UserAssigned"
