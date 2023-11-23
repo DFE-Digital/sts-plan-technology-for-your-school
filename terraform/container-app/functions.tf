@@ -31,7 +31,7 @@ resource "azurerm_linux_function_app" "contentful_function" {
   storage_uses_managed_identity = true
   service_plan_id               = azurerm_service_plan.function_plan.id
 
-  virtual_network_subnet_id = azurerm_subnet.function_subnet.id
+  key_vault_reference_identity_id = azurerm_user_assigned_identity.user_assigned_identity.id
 
   site_config {}
 
@@ -51,6 +51,4 @@ resource "azurerm_linux_function_app" "contentful_function" {
   app_settings = {
     AZURE_AD_AUTH_CLIENT_SECRET = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=${azurerm_key_vault_secret.client_secret.name})"
   }
-
-  key_vault_reference_identity_id = azurerm_user_assigned_identity.user_assigned_identity.id
 }
