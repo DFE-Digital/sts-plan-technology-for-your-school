@@ -4,5 +4,14 @@ resource "azurerm_subnet" "function_subnet" {
   resource_group_name  = local.resource_group_name
   address_prefixes     = [cidrsubnet("172.16.0.0/12", 23 - element(split("/", "172.16.0.0/12"), 1), 7)]
 
-  service_endpoints = ["Microsoft.Storage"]
+  service_endpoints = ["Microsoft.Storage", "Microsoft.KeyVault", "Microsoft.ServiceBus"]
+
+  delegation {
+    name = "delegation"
+
+    service_delegation {
+      name = "Microsoft.Web/serverFarms"
+    }
+  }
+
 }
