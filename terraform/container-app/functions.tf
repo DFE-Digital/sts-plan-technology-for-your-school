@@ -14,14 +14,6 @@ resource "azurerm_storage_account" "function_storage" {
   }
 }
 
-resource "azurerm_storage_account_network_rules" "app_service_storage_network_rules" {
-  storage_account_id = azurerm_storage_account.function_storage.id
-
-  default_action             = "Deny"
-  virtual_network_subnet_ids = [module.main_hosting.networking.subnet_id]
-  bypass                     = ["Logging", "Metrics"]
-}
-
 resource "azurerm_service_plan" "function_plan" {
   name                = "${local.resource_prefix}appserviceplan"
   resource_group_name = local.resource_group_name
