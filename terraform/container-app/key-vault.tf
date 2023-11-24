@@ -117,17 +117,3 @@ resource "azurerm_key_vault_key" "data_protection_key" {
     ignore_changes = all
   }
 }
-
-resource "azurerm_key_vault_secret" "client_secret" {
-  key_vault_id = azurerm_key_vault.vault.id
-  name         = "aad-client-secret"
-  value        = "temp value"
-
-  lifecycle {
-    ignore_changes = [
-      value,
-      expiration_date
-    ]
-  }
-}
-
