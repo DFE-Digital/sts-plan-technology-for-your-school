@@ -36,13 +36,18 @@ resource "azurerm_linux_function_app" "contentful_function" {
   storage_account_name       = azurerm_storage_account.function_storage.name
 
   site_config {
-    application_insights_key = azurerm_application_insights.functional_insights.instrumentation_key
+    api_management_api_id = azurerm_api_management_api.contentful_api.id
+    application_stack {
+      dotnet_version              = "7.0"
+      use_dotnet_isolated_runtime = true
+    }
   }
 
   identity {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.user_assigned_identity.id]
   }
+
 }
 
 data "azurerm_function_app_host_keys" "default" {
