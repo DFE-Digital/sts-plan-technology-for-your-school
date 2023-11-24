@@ -4,8 +4,8 @@ resource "azurerm_servicebus_namespace" "service_bus" {
   resource_group_name = local.resource_group_name
   sku                 = "Basic"
 
-  local_auth_enabled            = false
-  public_network_access_enabled = false
+  local_auth_enabled            = true
+  public_network_access_enabled = true
 
   tags = local.tags
 
