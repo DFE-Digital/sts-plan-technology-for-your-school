@@ -33,7 +33,7 @@ const navigateThroughQuestions = (selectedQuestionsWithAnswers) => {
 };
 
 const submitAnswers = () =>
-    cy.get("button.govuk-button").contains("Save and submit").click();
+    cy.get("button.govuk-button").contains("Save and continue").click();
 
 Cypress.Commands.add("navigateToRecommendationPage", navigateToRecommendationPage);
 Cypress.Commands.add("navigateToCheckAnswersPage", navigateToCheckAnswersPage);
