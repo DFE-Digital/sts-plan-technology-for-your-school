@@ -1,8 +1,10 @@
 using System.Net;
+using System.Text.Json;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.AzureFunctions.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions
@@ -10,12 +12,12 @@ namespace Dfe.PlanTech.AzureFunctions
     public class ContentfulWebHook
     {
         private readonly ILogger _logger;
-        private readonly ServiceBusClient _client;
+        private readonly ServiceBusSender _sender;
 
-        public ContentfulWebHook(ILoggerFactory loggerFactory, ServiceBusClient serviceBusClient)
+        public ContentfulWebHook(ILoggerFactory loggerFactory, IAzureClientFactory<ServiceBusSender> serviceBusSenderFactory)
         {
             _logger = loggerFactory.CreateLogger<ContentfulWebHook>();
-            _client = serviceBusClient;
+            _sender = serviceBusSenderFactory.CreateClient("contentful");
         }
 
         [Function("ContentfulWebHook")]
@@ -28,11 +30,9 @@ namespace Dfe.PlanTech.AzureFunctions
 
             try
             {
+                var serviceBusMessage = new ServiceBusMessage(body);
 
-                //todo - use DI
-                await using var sender = new QueueSender(_client, "contentful");
-
-                await sender.SendMessage(body);
+                await _sender.SendMessageAsync(serviceBusMessage);
 
                 var response = req.CreateResponse(HttpStatusCode.OK);
 
