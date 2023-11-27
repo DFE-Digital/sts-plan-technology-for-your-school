@@ -23,7 +23,7 @@ jobs:
         name: Validate SQL Scripts
         runs-on: ubuntu-22.04
         env:
-          FAKE_USERNAME: "Username"         # NB. This is OK to be plaintext as it's a made-up credential to give the locally hosted DB a "user"
+          FAKE_USERNAME: "sa"               # NB. This is OK to be plaintext as it's a made-up credential to give the locally hosted DB a "user"
           FAKE_PASSWORD: "T,m1*cG6#5gmJRS@" # NB. Ditto
     
         steps:
