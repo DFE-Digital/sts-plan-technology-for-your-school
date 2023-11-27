@@ -24,7 +24,7 @@ namespace Dfe.PlanTech.AzureFunctions
 
       services.AddAzureClients(builder =>
       {
-        builder.AddServiceBusClient("CONNECTION STRING");
+        builder.AddServiceBusClient(configuration["AzureWebJobsServiceBus"]);
       });
     }
   }
