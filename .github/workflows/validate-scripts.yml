@@ -53,7 +53,7 @@ jobs:
 
             - name: Connect to Azure SQL Edge Instance
               shell: bash
-              run: docker exec -it azuresqledge /opt/mssql-tools/bin/sqlcmd -S localhost -U ${{ env.FAKE_USERNAME }} -P ${{ env.FAKE_PASSWORD }}
+              run: docker exec azuresqledge /opt/mssql-tools/bin/sqlcmd -S localhost -U ${{ env.FAKE_USERNAME }} -P ${{ env.FAKE_PASSWORD }}
 
             - name: Run Database Upgrader
               shell: bash
