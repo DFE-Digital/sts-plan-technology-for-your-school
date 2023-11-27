@@ -17,6 +17,11 @@ namespace Dfe.PlanTech.AzureFunctions
   {
     private readonly ILogger _logger;
     private readonly CmsDbContext _db;
+    private readonly JsonSerializerOptions _jsonSerialiserOptions = new JsonSerializerOptions
+    {
+      PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+      WriteIndented = true
+    };
 
     public QueueReceiver(ILoggerFactory loggerFactory, CmsDbContext db)
     {
@@ -42,7 +47,7 @@ namespace Dfe.PlanTech.AzureFunctions
         var text = Encoding.UTF8.GetString(message.Body);
         _logger.LogInformation("Processing {text}", text);
 
-        var payload = JsonSerializer.Deserialize<CmsWebHookPayload>(text);
+        var payload = JsonSerializer.Deserialize<CmsWebHookPayload>(text, _jsonSerialiserOptions);
 
         if (payload == null)
         {
@@ -50,7 +55,9 @@ namespace Dfe.PlanTech.AzureFunctions
           await messageActions.DeadLetterMessageAsync(message);
         }
 
-        var existingEntity = await _db.ContentJson.FirstOrDefaultAsync(json => json.ContentTypeId == payload!.Sys.Id);
+        _logger.LogInformation("Payload ID is {id}", payload!.Sys.Id);
+
+        var existingEntity = await _db.ContentJson.FirstOrDefaultAsync(json => json.ContentId == payload!.Sys.Id);
 
         if (existingEntity != null)
         {
