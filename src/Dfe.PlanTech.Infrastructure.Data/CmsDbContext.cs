@@ -9,6 +9,11 @@ public class CmsDbContext : DbContext
 {
   public DbSet<JsonCmsDbEntity> ContentJson { get; private set; }
 
+  public CmsDbContext() { }
+
+  public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options) { }
+
+
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
     modelBuilder.Entity<JsonCmsDbEntity>(entity =>
