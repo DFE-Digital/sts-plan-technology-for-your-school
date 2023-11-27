@@ -25,17 +25,17 @@ namespace Dfe.PlanTech.AzureFunctions
     }
 
     [Function("QueueReceiver")]
-    public async Task QueueReceiverDbWriter([ServiceBusTrigger("contentful", IsBatched = true)] ServiceBusReceivedMessage[] messages, ServiceBusReceiver receiver)
+    public async Task QueueReceiverDbWriter([ServiceBusTrigger("contentful", IsBatched = true)] ServiceBusReceivedMessage[] messages, ServiceBusMessageActions messageActions)
     {
       _logger.LogInformation("Queue Receiver -> Db Writer started");
 
       foreach (ServiceBusReceivedMessage message in messages)
       {
-        await ProcessMessage(receiver, message);
+        await ProcessMessage(message, messageActions);
       }
     }
 
-    private async Task ProcessMessage(ServiceBusReceiver receiver, ServiceBusReceivedMessage message)
+    private async Task ProcessMessage(ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions)
     {
       try
       {
@@ -47,7 +47,7 @@ namespace Dfe.PlanTech.AzureFunctions
         if (payload == null)
         {
           _logger.LogError("Could not serialise value to expected payload. Value was {0}", text);
-          await receiver.DeadLetterMessageAsync(message);
+          await messageActions.DeadLetterMessageAsync(message);
         }
 
         var existingEntity = await _db.ContentJson.FirstOrDefaultAsync(json => json.ContentTypeId == payload!.Sys.Id);
@@ -73,12 +73,12 @@ namespace Dfe.PlanTech.AzureFunctions
 
         _logger.LogInformation("Wrote entity");
 
-        await receiver.CompleteMessageAsync(message);
+        await messageActions.CompleteMessageAsync(message);
       }
       catch (Exception ex)
       {
         _logger.LogError(ex.Message);
-        await receiver.DeadLetterMessageAsync(message);
+        await messageActions.DeadLetterMessageAsync(message);
       }
     }
   }
