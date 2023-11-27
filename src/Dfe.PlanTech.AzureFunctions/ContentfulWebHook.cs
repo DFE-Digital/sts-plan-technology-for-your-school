@@ -1,7 +1,5 @@
 using System.Net;
-using System.Text.Json;
 using Azure.Messaging.ServiceBus;
-using Dfe.PlanTech.AzureFunctions.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Azure;
