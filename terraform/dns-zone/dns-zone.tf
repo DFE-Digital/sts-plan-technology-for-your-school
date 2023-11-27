@@ -7,7 +7,7 @@ locals {
 }
 
 resource "azurerm_resource_group" "dns-zone" {
-  name     = "${var.project_name}-dns-zone"
+  name     = "s190p01-dns"
   location = var.azure_location
   tags     = local.tags
 }
