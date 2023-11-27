@@ -1,3 +1,5 @@
+using Azure.Identity;
+using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
@@ -9,22 +11,22 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Dfe.PlanTech.AzureFunctions
 {
-  public class Startup : FunctionsStartup
+  public static class Startup
   {
-    public override void Configure(IFunctionsHostBuilder builder)
-    {
-      var configuration = builder.GetContext().Configuration ?? throw new NullReferenceException("Configuration should not be null");
-
-      ConfigureServices(builder.Services, configuration);
-    }
-
-    public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+    public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
       services.AddDbContext<CmsDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("Database")));
 
       services.AddAzureClients(builder =>
       {
         builder.AddServiceBusClient(configuration["AzureWebJobsServiceBus"]);
+
+        builder.AddClient<ServiceBusSender, ServiceBusClientOptions>((_, _, provider) =>
+                provider.GetService<ServiceBusClient>()!.CreateSender("contentful")
+            )
+            .WithName("contentful");
+
+        builder.UseCredential(new DefaultAzureCredential());
       });
     }
   }
