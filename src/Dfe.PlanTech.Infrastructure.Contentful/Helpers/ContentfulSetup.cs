@@ -32,6 +32,10 @@ public static class ContentfulSetup
     {
         var options = configuration.GetSection(section).Get<ContentfulOptions>() ?? throw new KeyNotFoundException(nameof(ContentfulOptions));
 
+        if (options.Environment == "test")
+        {
+            options.UsePreviewApi = true;
+        }
         services.AddSingleton(options);
 
         services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
