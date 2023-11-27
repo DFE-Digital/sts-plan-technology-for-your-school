@@ -40,7 +40,7 @@ jobs:
             - name: Get DB Connection String
               id: connection-string
               run: |
-                CONNECTION_STRING="Server=tcp:localhost,1433;Initial Catalog=azuresqledge;Persist Security Info=False;User ID=${{ env.FAKE_USERNAME }};Password=${{ env.FAKE_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+                CONNECTION_STRING="Server=tcp:localhost,1433;Initial Catalog=azuresqledge;Persist Security Info=False;User ID=${{ env.FAKE_USERNAME }};Password=${{ env.FAKE_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;"
                 echo "CONNECTION_STRING=$CONNECTION_STRING" >> $GITHUB_OUTPUT
 
             - name: Pull Azure SQL Edge Docker Image
