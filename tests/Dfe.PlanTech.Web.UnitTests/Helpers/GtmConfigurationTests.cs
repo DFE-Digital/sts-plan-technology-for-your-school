@@ -15,6 +15,9 @@ public class GtmConfigurationTests
     private const string GTM_HEAD_KEY = "GTM:Head";
     private const string GTM_HEAD_VALUE = "<noscript>Google tag manager Head</noscript>";
 
+    private const string GTM_ANALYTICS_KEY = "GTM:Analytics";
+    private const string GTM_ANALYTICS_VALUE = "<meta name=\"google-site-verification\" content=\"TEST\" />";
+
     public readonly ICookieService CookieService;
     public readonly IConfiguration Configuration;
 
@@ -23,6 +26,7 @@ public class GtmConfigurationTests
         var inMemorySettings = new Dictionary<string, string?> {
       {GTM_BODY_KEY, GTM_BODY_VALUE},
       {GTM_HEAD_KEY, GTM_HEAD_VALUE},
+      {GTM_ANALYTICS_KEY, GTM_ANALYTICS_VALUE},
     };
 
         Configuration = new ConfigurationBuilder()
@@ -58,5 +62,35 @@ public class GtmConfigurationTests
 
         Assert.Empty(gtmConfiguration.Body);
         Assert.Empty(gtmConfiguration.Head);
+    }
+
+    [Fact]
+    public void Should_Return_Analytics_Regardless_Of_Cookies_Accepted()
+    {
+        CookieService.GetCookie().Returns((_) => new DfeCookie()
+        {
+            HasApproved = true
+        });
+
+        var gtmConfiguration = new GtmConfiguration(CookieService, Configuration);
+
+        Assert.Equal(GTM_BODY_VALUE, gtmConfiguration.Body);
+        Assert.Equal(GTM_HEAD_VALUE, gtmConfiguration.Head);
+        Assert.Equal(GTM_ANALYTICS_VALUE, gtmConfiguration.Analytics);
+    }
+
+    [Fact]
+    public void Should_Return_Analytics_Regardless_Of_Cookies_Declined()
+    {
+        CookieService.GetCookie().Returns((_) => new DfeCookie()
+        {
+            HasApproved = false
+        });
+
+        var gtmConfiguration = new GtmConfiguration(CookieService, Configuration);
+
+        Assert.Empty(gtmConfiguration.Body);
+        Assert.Empty(gtmConfiguration.Head);
+        Assert.Equal(GTM_ANALYTICS_VALUE, gtmConfiguration.Analytics);
     }
 }
