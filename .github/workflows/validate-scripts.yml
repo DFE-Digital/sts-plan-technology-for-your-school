@@ -57,4 +57,4 @@ jobs:
 
             - name: Run Database Upgrader
               shell: bash
-              run: dotnet ./build/Dfe.PlanTech.DatabaseUpgrader.dll -c ${{ steps.connection-string.outputs.CONNECTION_STRING }}
+              run: dotnet ./build/Dfe.PlanTech.DatabaseUpgrader.dll -c '${{ steps.connection-string.outputs.CONNECTION_STRING }}'
