@@ -37,23 +37,27 @@ jobs:
                 dotnet_version: ${{ vars.DOTNET_VERSION }}
                 solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln 
 
-            - name: Get DB Connection String
-              id: connection-string
-              run: |
-                CONNECTION_STRING="Server=tcp:localhost,1433;Initial Catalog=azuresqledge;Persist Security Info=False;User ID=${{ env.FAKE_USERNAME }};Password=${{ env.FAKE_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;"
-                echo "CONNECTION_STRING=$CONNECTION_STRING" >> $GITHUB_OUTPUT
-
             - name: Pull Azure SQL Edge Docker Image
               shell: bash
               run: docker pull mcr.microsoft.com/azure-sql-edge:latest
 
             - name: Start Azure SQL Edge Instance
               shell: bash
-              run: docker run --cap-add SYS_PTRACE -e 'ACCEPT_EULA=1' -e 'MSSQL_SA_PASSWORD=${{ env.FAKE_PASSWORD }}' -p 1433:1433 --name azuresqledge -d mcr.microsoft.com/azure-sql-edge
+              id: container-id
+              run: |
+                CONTAINER_ID=(`docker run --cap-add SYS_PTRACE -e 'ACCEPT_EULA=1' -e 'MSSQL_SA_PASSWORD=${{ env.FAKE_PASSWORD }}' -p 1433:1433 --name azuresqledge -d mcr.microsoft.com/azure-sql-edge`)
+                echo "CONTAINER_ID=$CONTAINER_ID" >> GITHUB_OUTPUT
 
             - name: Connect to Azure SQL Edge Instance
               shell: bash
-              run: docker exec azuresqledge /opt/mssql-tools/bin/sqlcmd -S localhost -U ${{ env.FAKE_USERNAME }} -P '${{ env.FAKE_PASSWORD }}'
+              run: docker exec ${{ steps.container-id.outputs.CONTAINER_ID }} /opt/mssql-tools/bin/sqlcmd -S localhost -U ${{ env.FAKE_USERNAME }} -P '${{ env.FAKE_PASSWORD }}'
+
+            - name: Get DB Connection String
+              shell: bash
+              id: connection-string
+              run: |
+                CONNECTION_STRING="Server=tcp:localhost,1433;Initial Catalog=${{ steps.container-id.outputs.CONTAINER_ID }};Persist Security Info=False;User ID=${{ env.FAKE_USERNAME }};Password=${{ env.FAKE_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;"
+                echo "CONNECTION_STRING=$CONNECTION_STRING" >> $GITHUB_OUTPUT
 
             - name: Run Database Upgrader
               shell: bash
