@@ -24,7 +24,7 @@ jobs:
         runs-on: ubuntu-22.04
         env:
           FAKE_USERNAME: "sa"               # NB. This is OK to be plaintext as it's a made-up credential to give the locally hosted DB a "user"
-          FAKE_PASSWORD: "T,m1*cG6#5gmJRS@" # NB. Ditto
+          FAKE_PASSWORD: "LWgqx62jIO2sRek8" # NB. Ditto
     
         steps:
 
@@ -51,8 +51,10 @@ jobs:
               shell: bash
               run: docker run --cap-add SYS_PTRACE -e 'ACCEPT_EULA=1' -e 'MSSQL_SA_PASSWORD=${{ env.FAKE_PASSWORD }}' -p 1433:1433 --name azuresqledge -d mcr.microsoft.com/azure-sql-edge
 
-            - name: Connect to Instance & Run Database Upgrader
+            - name: Connect to Azure SQL Edge Instance
               shell: bash
-              run: |
-                docker exec azuresqledge /opt/mssql-tools/bin/sqlcmd -S localhost -U ${{ env.FAKE_USERNAME }} -P ${{ env.FAKE_PASSWORD }}
-                dotnet ./build/Dfe.PlanTech.DatabaseUpgrader.dll -c "${{ steps.connection-string.outputs.CONNECTION_STRING }}"
+              run: docker exec azuresqledge /opt/mssql-tools/bin/sqlcmd -S localhost -U ${{ env.FAKE_USERNAME }} -P '${{ env.FAKE_PASSWORD }}'
+
+            - name: Run Database Upgrader
+              shell: bash
+              run: dotnet ./build/Dfe.PlanTech.DatabaseUpgrader.dll -c ${{ steps.connection-string.outputs.CONNECTION_STRING }}
