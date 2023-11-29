@@ -1,6 +1,7 @@
 name: Validate SQL Scripts
 
 on:
+    workflow_dispatch:
     push:
       branches: ["main", "development"]
       paths:
