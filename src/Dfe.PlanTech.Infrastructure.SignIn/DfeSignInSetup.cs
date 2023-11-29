@@ -21,8 +21,12 @@ public static class DfeSignInSetup
     public static IServiceCollection AddDfeSignIn(this IServiceCollection services, IConfiguration configuration)
     {
         var config = GetDfeSignInConfig(configuration);
-        
-        services.AddHttpClient<IDfePublicApi, DfePublicApiService>();
+
+        services.AddHttpClient<IDfePublicApi, DfePublicApiService>(client =>
+        {
+            client.DefaultRequestHeaders.Add("Authorization",
+                $"Bearer {DfePublicApiService.GenerateToken(config.ApiSecret, config.ClientId)}");
+        });
 
         services.AddAuthentication(ConfigureAuthentication)
         .AddOpenIdConnect(options => ConfigureOpenIdConnect(options, config))

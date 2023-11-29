@@ -25,8 +25,6 @@ public class DfePublicApiService : IDfePublicApi
     public async Task<UserAccessToService?> GetUserAccessToService(string userId, string organisationId)
     {
         var url = string.Format(_urlTemplate, _dfeSignInConfiguration.APIServiceProxyUrl, _dfeSignInConfiguration.ClientId, organisationId, userId);
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",
-            GenerateToken(_dfeSignInConfiguration.ApiSecret, _dfeSignInConfiguration.ClientId));
 
         HttpResponseMessage response = await _httpClient.GetAsync(url);
 
