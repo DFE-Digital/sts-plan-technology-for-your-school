@@ -5,11 +5,13 @@ on:
       branches: ["main", "development"]
       paths:
         - 'src/Dfe.PlanTech.DatabaseUpgrader/**'
+        - '.github/scripts/**'
         - '.github/workflows/validate-scripts.yml'
     pull_request:
       branches: ["main", "development"]
       paths:
         - 'src/Dfe.PlanTech.DatabaseUpgrader/**'
+        - '.github/scripts/**'
         - '.github/workflows/validate-scripts.yml'
 
 concurrency:
@@ -76,3 +78,4 @@ jobs:
             directories: |
               ./src/Dfe.PlanTech.DatabaseUpgrader/Scripts
               ./src/Dfe.PlanTech.DatabaseUpgrader/EnvironmentSpecificScripts
+              ./github/scripts
