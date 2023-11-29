@@ -1,13 +1,9 @@
-using System.Net;
 using System.Text;
 using System.Text.Json;
 using Azure.Messaging.ServiceBus;
-using Dfe.PlanTech.AzureFunctions.Auth;
-using Dfe.PlanTech.AzureFunctions.ServiceBus;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -17,11 +13,7 @@ namespace Dfe.PlanTech.AzureFunctions
   {
     private readonly ILogger _logger;
     private readonly CmsDbContext _db;
-    private readonly JsonSerializerOptions _jsonSerialiserOptions = new JsonSerializerOptions
-    {
-      PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-      WriteIndented = true
-    };
+    private readonly JsonSerializerOptions _jsonSerialiserOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
     public QueueReceiver(ILoggerFactory loggerFactory, CmsDbContext db)
     {
@@ -32,7 +24,7 @@ namespace Dfe.PlanTech.AzureFunctions
     [Function("QueueReceiver")]
     public async Task QueueReceiverDbWriter([ServiceBusTrigger("contentful", IsBatched = true)] ServiceBusReceivedMessage[] messages, ServiceBusMessageActions messageActions)
     {
-      _logger.LogInformation("Queue Receiver -> Db Writer started");
+      _logger.LogInformation("Queue Receiver -> Db Writer started. Processing {msgCount} messages", messages.Length);
 
       foreach (ServiceBusReceivedMessage message in messages)
       {
