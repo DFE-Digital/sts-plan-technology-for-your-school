@@ -71,8 +71,6 @@ jobs:
           with:
             post-comment: true
             token: ${{ secrets.GITHUB_TOKEN }}
-            risk-level: 1
-            verbose: true
             postfixes: |
               sql
             directories: |
