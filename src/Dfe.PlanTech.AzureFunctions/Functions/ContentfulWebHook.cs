@@ -21,28 +21,48 @@ namespace Dfe.PlanTech.AzureFunctions
         [Function("ContentfulWebHook")]
         public async Task<HttpResponseData> WebhookReceiver([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req)
         {
-            _logger.LogInformation("C# HTTP trigger function processed a request.");
+            _logger.LogInformation("Received webhook POST.");
 
             var stream = new StreamReader(req.Body);
             var body = stream.ReadToEnd();
 
+            if (string.IsNullOrEmpty(body))
+            {
+                return ReturnEmptyBodyError(req);
+            }
+
+            _logger.LogTrace("Logging message body: {body}", body);
+
             try
             {
-                var serviceBusMessage = new ServiceBusMessage(body);
+                await WriteToQueue(body);
 
-                await _sender.SendMessageAsync(serviceBusMessage);
-
-                var response = req.CreateResponse(HttpStatusCode.OK);
-
-                return response;
+                return ReturnOkResponse(req);
             }
             catch (Exception ex)
             {
-                var response = req.CreateResponse(HttpStatusCode.InternalServerError);
-                await response.WriteAsJsonAsync(ex.Message);
-
-                return response;
+                return ReturnServerErrorResponse(req, ex);
             }
+        }
+
+        private HttpResponseData ReturnServerErrorResponse(HttpRequestData req, Exception ex)
+        {
+            _logger.LogError("Error writing body to queue - {message} {stacktrace}", ex.Message, ex.StackTrace);
+            return req.CreateResponse(HttpStatusCode.InternalServerError);
+        }
+
+        private static HttpResponseData ReturnOkResponse(HttpRequestData req) => req.CreateResponse(HttpStatusCode.OK);
+
+        private async Task WriteToQueue(string body)
+        {
+            var serviceBusMessage = new ServiceBusMessage(body);
+            await _sender.SendMessageAsync(serviceBusMessage);
+        }
+
+        private HttpResponseData ReturnEmptyBodyError(HttpRequestData req)
+        {
+            _logger.LogError("Received null body.");
+            return req.CreateResponse(HttpStatusCode.BadRequest);
         }
     }
 }
