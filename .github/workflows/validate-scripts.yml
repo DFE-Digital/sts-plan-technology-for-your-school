@@ -72,7 +72,7 @@ jobs:
             post-comment: true
             token: ${{ secrets.GITHUB_TOKEN }}
             risk-level: 1
-            verbose: false
+            verbose: true
             postfixes: |
               sql
             directories: |
