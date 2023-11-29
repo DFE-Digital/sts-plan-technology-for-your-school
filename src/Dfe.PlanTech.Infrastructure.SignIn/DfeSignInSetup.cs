@@ -21,8 +21,8 @@ public static class DfeSignInSetup
     public static IServiceCollection AddDfeSignIn(this IServiceCollection services, IConfiguration configuration)
     {
         var config = GetDfeSignInConfig(configuration);
-
-        services.AddScoped<IDfePublicApi, DfePublicApiService>();
+        
+        services.AddHttpClient<IDfePublicApi, DfePublicApiService>();
 
         services.AddAuthentication(ConfigureAuthentication)
         .AddOpenIdConnect(options => ConfigureOpenIdConnect(options, config))
