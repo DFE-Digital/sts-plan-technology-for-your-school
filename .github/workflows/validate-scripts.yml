@@ -78,4 +78,4 @@ jobs:
             directories: |
               ./src/Dfe.PlanTech.DatabaseUpgrader/Scripts
               ./src/Dfe.PlanTech.DatabaseUpgrader/EnvironmentSpecificScripts
-              ./github/scripts
+              ./.github/scripts
