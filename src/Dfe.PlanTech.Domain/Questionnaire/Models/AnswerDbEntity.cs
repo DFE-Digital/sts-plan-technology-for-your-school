@@ -3,7 +3,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-public class AnswerDbEntity : IAnswer<Question>, IDbEntity
+public class AnswerDbEntity : IAnswer<QuestionDbEntity>, IDbEntity
 {
   public long Id { get; set; }
 
@@ -13,11 +13,11 @@ public class AnswerDbEntity : IAnswer<Question>, IDbEntity
 
   public long? NextQuestionId { get; set; }
 
-  public Question? NextQuestion { get; set; }
+  public QuestionDbEntity? NextQuestion { get; set; }
 
   public string Maturity { get; set; } = null!;
 
   public long? ParentQuestionId { get; set; }
 
-  public Question? ParentQuestion { get; set; }
+  public QuestionDbEntity? ParentQuestion { get; set; }
 }
