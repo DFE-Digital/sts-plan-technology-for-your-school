@@ -1,10 +1,10 @@
 using System.Net;
 using System.Text;
 using System.Text.Json.Nodes;
-using Azure.Messaging.ServiceBus;
+using AutoMapper;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions
@@ -12,11 +12,19 @@ namespace Dfe.PlanTech.AzureFunctions
   public class TestingJsonParser
   {
     private readonly ILogger _logger;
+    private readonly IMapper _mapper;
 
-    public TestingJsonParser(ILoggerFactory loggerFactory)
+    private List<Type> _allTypes;
+
+    public TestingJsonParser(ILoggerFactory loggerFactory, IMapper mapper)
     {
       _logger = loggerFactory.CreateLogger<TestingJsonParser>();
+      _mapper = mapper;
+
+      _allTypes = GetAllTypes();
     }
+
+    private List<Type> GetAllTypes() => AppDomain.CurrentDomain.GetAssemblies().SelectMany(assembley => assembley.GetTypes()).ToList();
 
     [Function("TestingJsonParser")]
     public async Task<HttpResponseData> WebhookReceiver([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req)
@@ -32,7 +40,10 @@ namespace Dfe.PlanTech.AzureFunctions
 
         var response = req.CreateResponse(responseType);
 
-        if (node != null) await response.WriteAsJsonAsync(node);
+        if (node != null)
+        {
+          await response.WriteAsJsonAsync(node);
+        }
 
         return response;
       }
@@ -76,7 +87,15 @@ namespace Dfe.PlanTech.AzureFunctions
         return false;
       }
 
-      var copy = JsonNode.Parse(text);
+      var sys = asJson["sys"];
+
+      if (sys == null)
+      {
+        _logger.LogError("Missing sys");
+        jsonNode = null;
+        return false;
+      }
+
       var fields = new JsonObject();
 
       foreach (var field in fieldsNode.AsObject())
@@ -97,14 +116,42 @@ namespace Dfe.PlanTech.AzureFunctions
 
         foreach (var child in fieldChildren)
         {
-          fields[field.Key] = JsonNode.Parse(child.Value.ToJsonString());
+          fields[FirstCharToUpperAsSpan(field.Key)] = JsonNode.Parse(child.Value!.ToJsonString());
         }
       }
 
-      copy!["fields"] = fields;
-      jsonNode = copy;
+      fields["ContentfulId"] = JsonNode.Parse(asJson["sys"]!["id"].ToJsonString());
 
+      var contentType = $"{FirstCharToUpperAsSpan(sys["contentType"]["sys"]["id"].ToString())}DbEntity";
+      fields["ContentType"] = contentType;
+
+      jsonNode = fields;
+
+      Type? contentTypeType = _allTypes.Find(type => type.Name == contentType);
+
+      if (contentTypeType == null)
+      {
+        throw new KeyNotFoundException($"Could not find matching type for {contentTypeType}");
+      }
+
+      var content = Activator.CreateInstance(contentTypeType);
+
+      var mapped = _mapper.Map(jsonNode, content!, jsonNode.GetType(), content!.GetType());
+
+      _logger.LogInformation(mapped.ToString());
       return true;
     }
+
+    public string FirstCharToUpperAsSpan(string input)
+    {
+      if (string.IsNullOrEmpty(input))
+      {
+        return string.Empty;
+      }
+      Span<char> destination = stackalloc char[1];
+      input.AsSpan(0, 1).ToUpperInvariant(destination);
+      return $"{destination}{input.AsSpan(1)}";
+    }
+
   }
 }

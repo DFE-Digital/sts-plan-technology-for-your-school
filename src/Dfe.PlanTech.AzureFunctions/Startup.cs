@@ -1,5 +1,7 @@
+using AutoMapper;
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
+using Dfe.PlanTech.Domain.Mappings;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
@@ -25,6 +27,14 @@ namespace Dfe.PlanTech.AzureFunctions
 
         builder.UseCredential(new DefaultAzureCredential());
       });
+
+      var config = new MapperConfiguration(cfg =>
+      {
+        cfg.AddProfile<CmsDbProfile>();
+      });
+
+      var mapper = config.CreateMapper();
+      services.AddTransient((services) => config.CreateMapper());
     }
   }
 }
