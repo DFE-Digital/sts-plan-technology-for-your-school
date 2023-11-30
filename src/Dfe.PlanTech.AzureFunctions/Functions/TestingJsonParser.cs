@@ -3,8 +3,10 @@ using System.Text;
 using System.Text.Json.Nodes;
 using AutoMapper;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions
@@ -14,17 +16,21 @@ namespace Dfe.PlanTech.AzureFunctions
     private readonly ILogger _logger;
     private readonly IMapper _mapper;
 
-    private List<Type> _allTypes;
+    private readonly List<Type> _allTypes;
 
-    public TestingJsonParser(ILoggerFactory loggerFactory, IMapper mapper)
+    private readonly CmsDbContext _db;
+
+
+    public TestingJsonParser(ILoggerFactory loggerFactory, IMapper mapper, CmsDbContext db)
     {
       _logger = loggerFactory.CreateLogger<TestingJsonParser>();
       _mapper = mapper;
 
       _allTypes = GetAllTypes();
+      _db = db;
     }
 
-    private List<Type> GetAllTypes() => AppDomain.CurrentDomain.GetAssemblies().SelectMany(assembley => assembley.GetTypes()).ToList();
+    private static List<Type> GetAllTypes() => AppDomain.CurrentDomain.GetAssemblies().SelectMany(assembley => assembley.GetTypes()).ToList();
 
     [Function("TestingJsonParser")]
     public async Task<HttpResponseData> WebhookReceiver([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req)
@@ -127,6 +133,17 @@ namespace Dfe.PlanTech.AzureFunctions
 
       jsonNode = fields;
 
+      object mapped = MapObjectToDbEntity(jsonNode, contentType);
+
+      _db.Add(mapped);
+      _db.SaveChanges();
+
+      return true;
+    }
+
+
+    private object MapObjectToDbEntity(JsonNode jsonNode, string contentType)
+    {
       Type? contentTypeType = _allTypes.Find(type => type.Name == contentType);
 
       if (contentTypeType == null)
@@ -138,8 +155,7 @@ namespace Dfe.PlanTech.AzureFunctions
 
       var mapped = _mapper.Map(jsonNode, content!, jsonNode.GetType(), content!.GetType());
 
-      _logger.LogInformation(mapped.ToString());
-      return true;
+      return mapped;
     }
 
     public string FirstCharToUpperAsSpan(string input)
