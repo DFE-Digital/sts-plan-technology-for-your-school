@@ -1,8 +1,9 @@
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-public class Question : ContentComponent
+public class Question : ContentComponent, IQuestion<Answer>
 {
     /// <summary>
     /// Actual question text
