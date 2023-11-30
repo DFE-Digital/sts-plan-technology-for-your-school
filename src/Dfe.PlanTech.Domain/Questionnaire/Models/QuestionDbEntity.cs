@@ -7,6 +7,8 @@ public class QuestionDbEntity : IQuestion<AnswerDbEntity>, IDbEntity
 {
     public long Id { get; set; }
 
+    public string ContentfulId { get; set; } = null!;
+
     public string Text { get; init; } = null!;
 
     public string? HelpText { get; init; }
@@ -16,5 +18,4 @@ public class QuestionDbEntity : IQuestion<AnswerDbEntity>, IDbEntity
     public string Param { get; init; } = null!;
 
     public string Slug { get; set; } = null!;
-
 }
