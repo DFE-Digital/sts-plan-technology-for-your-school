@@ -14,8 +14,16 @@ public class CmsDbContext : DbContext
 
   public CmsDbContext() { }
 
-  public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options) { }
+  public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
+  {
 
+  }
+
+  protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+  {
+    base.OnConfiguring(optionsBuilder);
+    optionsBuilder.UseSqlServer("CONNECTION STRING");
+  }
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
@@ -23,12 +31,18 @@ public class CmsDbContext : DbContext
     {
       entity.Property(e => e.ContentfulId).HasMaxLength(30);
       entity.HasKey(e => e.Id);
+      entity.HasOne(a => a.NextQuestion).WithMany(q => q.PreviousAnswers);
+      entity.HasOne(a => a.ParentQuestion).WithMany(q => q.Answers);
+
+      entity.ToTable("Answers", "Contentful", b => b.IsTemporal());
     });
 
     modelBuilder.Entity<QuestionDbEntity>(entity =>
     {
       entity.Property(e => e.ContentfulId).HasMaxLength(30);
       entity.HasKey(e => e.Id);
+
+      entity.ToTable("Questions", "Contentful", b => b.IsTemporal());
     });
   }
 }
