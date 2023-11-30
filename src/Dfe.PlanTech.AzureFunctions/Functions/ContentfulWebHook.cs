@@ -19,7 +19,7 @@ namespace Dfe.PlanTech.AzureFunctions
         }
 
         [Function("ContentfulWebHook")]
-        public async Task<HttpResponseData> WebhookReceiver([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req)
+        public async Task<HttpResponseData> WebhookReceiver([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)
         {
             _logger.LogInformation("Received webhook POST.");
 
