@@ -13,21 +13,20 @@ public class DfePublicApiService : IDfePublicApi
 {
     private readonly IDfeSignInConfiguration _dfeSignInConfiguration;
     private readonly string _urlTemplate = "{0}/services/{1}/organisations/{2}/users/{3}";
+    private readonly HttpClient _httpClient;
 
 
-    public DfePublicApiService(IDfeSignInConfiguration configuration)
+    public DfePublicApiService(IDfeSignInConfiguration configuration, HttpClient httpClient)
     {
+        _httpClient = httpClient;
         _dfeSignInConfiguration = configuration;
     }
 
     public async Task<UserAccessToService?> GetUserAccessToService(string userId, string organisationId)
     {
         var url = string.Format(_urlTemplate, _dfeSignInConfiguration.APIServiceProxyUrl, _dfeSignInConfiguration.ClientId, organisationId, userId);
-        var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",
-            GenerateToken(_dfeSignInConfiguration.ApiSecret, _dfeSignInConfiguration.ClientId));
 
-        HttpResponseMessage response = await httpClient.GetAsync(url);
+        HttpResponseMessage response = await _httpClient.GetAsync(url);
 
         if (response.IsSuccessStatusCode)
         {
