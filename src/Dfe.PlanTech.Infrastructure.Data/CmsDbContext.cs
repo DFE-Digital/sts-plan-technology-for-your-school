@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Domain.Caching.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
 
@@ -7,7 +8,9 @@ namespace Dfe.PlanTech.Infrastructure.Data;
 [ExcludeFromCodeCoverage]
 public class CmsDbContext : DbContext
 {
-  public DbSet<JsonCmsDbEntity> ContentJson { get; private set; }
+  public DbSet<QuestionDbEntity> Questions { get; set; }
+
+  public DbSet<AnswerDbEntity> Answers { get; set; }
 
   public CmsDbContext() { }
 
@@ -16,13 +19,15 @@ public class CmsDbContext : DbContext
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
-    modelBuilder.Entity<JsonCmsDbEntity>(entity =>
+    modelBuilder.Entity<AnswerDbEntity>(entity =>
     {
-      entity.UseTpcMappingStrategy()
-              .ToTable("JsonEntities", "Contentful", b => b.IsTemporal());
+      entity.Property(e => e.ContentfulId).HasMaxLength(30);
+      entity.HasKey(e => e.Id);
+    });
 
-      entity.Property(e => e.ContentTypeId).HasMaxLength(50);
-      entity.Property(e => e.ContentId).HasMaxLength(30);
+    modelBuilder.Entity<QuestionDbEntity>(entity =>
+    {
+      entity.Property(e => e.ContentfulId).HasMaxLength(30);
       entity.HasKey(e => e.Id);
     });
   }
