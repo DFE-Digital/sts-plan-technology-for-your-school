@@ -33,7 +33,7 @@ jobs:
               uses: ./.github/actions/build-dotnet-app
               with:
                 dotnet_version: ${{ env.DOTNET_VERSION }}
-                solution_filename: Dfe_PlanTech_AzureFunctions.csproj
+                solution_filename: ./src/Dfe.PlanTech.AzureFunctions/Dfe_PlanTech_AzureFunctions.csproj
             
             - name: Deploy Azure Function
               uses: Azure/functions-action@v1
