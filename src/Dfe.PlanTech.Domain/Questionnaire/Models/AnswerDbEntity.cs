@@ -3,7 +3,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-public class AnswerDbEntity : ContentComponentDbEntity, IAnswer<Question>
+public class AnswerDbEntity : ContentComponentDbEntity, IAnswer<QuestionDbEntity>
 {
   public string Text { get; set; } = null!;
 

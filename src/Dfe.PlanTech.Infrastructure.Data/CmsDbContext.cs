@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Domain.Caching.Models;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
@@ -8,9 +8,13 @@ namespace Dfe.PlanTech.Infrastructure.Data;
 [ExcludeFromCodeCoverage]
 public class CmsDbContext : DbContext
 {
+  public DbSet<AnswerDbEntity> Answers { get; set; }
+
+  public DbSet<PageDbEntity> Pages { get; set; }
+
   public DbSet<QuestionDbEntity> Questions { get; set; }
 
-  public DbSet<AnswerDbEntity> Answers { get; set; }
+  public DbSet<TitleDbEntity> Titles { get; set; }
 
   public CmsDbContext() { }
 
@@ -27,22 +31,36 @@ public class CmsDbContext : DbContext
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
+    modelBuilder.Entity<ContentComponentDbEntity>(entity =>
+    {
+      entity.Property(e => e.Id).HasMaxLength(30);
+    });
+
     modelBuilder.Entity<AnswerDbEntity>(entity =>
     {
-      entity.Property(e => e.ContentfulId).HasMaxLength(30);
-      entity.HasKey(e => e.Id);
       entity.HasOne(a => a.NextQuestion).WithMany(q => q.PreviousAnswers);
       entity.HasOne(a => a.ParentQuestion).WithMany(q => q.Answers);
 
-      entity.ToTable("Answers", "Contentful", b => b.IsTemporal());
+      entity.ToTable("Answers", "Contentful");
+    });
+
+    modelBuilder.Entity<PageDbEntity>(entity =>
+    {
+      entity.HasMany(page => page.BeforeTitleContent).WithMany(c => c.BeforeTitleContentPages);
+      entity.HasMany(page => page.Content).WithMany(c => c.ContentPages);
+
+      entity.ToTable("Pages", "Contentful");
     });
 
     modelBuilder.Entity<QuestionDbEntity>(entity =>
     {
-      entity.Property(e => e.ContentfulId).HasMaxLength(30);
-      entity.HasKey(e => e.Id);
+      entity.ToTable("Questions", "Contentful");
+    });
 
-      entity.ToTable("Questions", "Contentful", b => b.IsTemporal());
+    modelBuilder.Entity<TitleDbEntity>(entity =>
+    {
+      entity.HasMany(title => title.Pages).WithOne(p => p.Title);
+      entity.ToTable("Titles", "Contentful");
     });
   }
 }

@@ -10,4 +10,6 @@ public class TitleDbEntity : ContentComponentDbEntity, ITitle
     public string ContentfulId { get; set; } = null!;
 
     public string Text { get; set; } = null!;
+
+    public PageDbEntity[] Pages { get; set; } = Array.Empty<PageDbEntity>();
 }
