@@ -64,6 +64,8 @@ public class CmsDbContext : DbContext
             .WithMany(c => c.ContentPages)
             .UsingEntity<PageContentDbEntity>();
 
+      entity.HasOne(page => page.Title).WithMany(title => title.Pages);
+
       entity.ToTable("Pages", "Contentful");
     });
 
@@ -74,7 +76,6 @@ public class CmsDbContext : DbContext
 
     modelBuilder.Entity<TitleDbEntity>(entity =>
     {
-      entity.HasMany(title => title.Pages).WithOne(p => p.Title);
       entity.ToTable("Titles", "Contentful");
     });
   }
