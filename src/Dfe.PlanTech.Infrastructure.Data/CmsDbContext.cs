@@ -34,6 +34,8 @@ public class CmsDbContext : DbContext
     modelBuilder.Entity<ContentComponentDbEntity>(entity =>
     {
       entity.Property(e => e.Id).HasMaxLength(30);
+
+      entity.ToTable("ContentComponents", "Contentful");
     });
 
     modelBuilder.Entity<AnswerDbEntity>(entity =>
@@ -42,6 +44,11 @@ public class CmsDbContext : DbContext
       entity.HasOne(a => a.ParentQuestion).WithMany(q => q.Answers);
 
       entity.ToTable("Answers", "Contentful");
+    });
+
+    modelBuilder.Entity<PageContentDbEntity>(entity =>
+    {
+      entity.ToTable("PageContents", "Contentful");
     });
 
     modelBuilder.Entity<PageDbEntity>(entity =>
@@ -56,7 +63,6 @@ public class CmsDbContext : DbContext
       entity.HasMany(page => page.Content)
             .WithMany(c => c.ContentPages)
             .UsingEntity<PageContentDbEntity>();
-
 
       entity.ToTable("Pages", "Contentful");
     });
