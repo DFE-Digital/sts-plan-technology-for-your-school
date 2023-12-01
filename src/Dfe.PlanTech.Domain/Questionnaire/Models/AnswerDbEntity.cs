@@ -7,13 +7,13 @@ public class AnswerDbEntity : ContentComponentDbEntity, IAnswer<QuestionDbEntity
 {
   public string Text { get; set; } = null!;
 
-  public long? NextQuestionId { get; set; }
+  public string? NextQuestionId { get; set; }
 
   public QuestionDbEntity? NextQuestion { get; set; }
 
   public string Maturity { get; set; } = null!;
 
-  public long? ParentQuestionId { get; set; }
+  public string? ParentQuestionId { get; set; }
 
   public QuestionDbEntity? ParentQuestion { get; set; }
 }
