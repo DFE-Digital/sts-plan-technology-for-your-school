@@ -8,23 +8,23 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Dfe.PlanTech.AzureFunctions
 {
-  public static class Startup
-  {
-    public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+    public static class Startup
     {
-      services.AddDbContext<CmsDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("Database")));
+        public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddDbContext<CmsDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("Database")));
 
-      services.AddAzureClients(builder =>
-      {
-        builder.AddServiceBusClient(configuration["AzureWebJobsServiceBus"]);
+            services.AddAzureClients(builder =>
+            {
+                builder.AddServiceBusClient(configuration["AzureWebJobsServiceBus"]);
 
-        builder.AddClient<ServiceBusSender, ServiceBusClientOptions>((_, _, provider) =>
-                provider.GetService<ServiceBusClient>()!.CreateSender("contentful")
-            )
-            .WithName("contentful");
+                builder.AddClient<ServiceBusSender, ServiceBusClientOptions>((_, _, provider) =>
+                  provider.GetService<ServiceBusClient>()!.CreateSender("contentful")
+              )
+              .WithName("contentful");
 
-        builder.UseCredential(new DefaultAzureCredential());
-      });
+                builder.UseCredential(new DefaultAzureCredential());
+            });
+        }
     }
-  }
 }
