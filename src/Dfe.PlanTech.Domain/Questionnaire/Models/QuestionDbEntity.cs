@@ -1,9 +1,9 @@
-using Dfe.PlanTech.Domain.Database.Interfaces;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-public class QuestionDbEntity : IQuestion<AnswerDbEntity>, IDbEntity
+public class QuestionDbEntity : ContentComponentDbEntity, IQuestion<AnswerDbEntity>
 {
     public long Id { get; set; }
 
