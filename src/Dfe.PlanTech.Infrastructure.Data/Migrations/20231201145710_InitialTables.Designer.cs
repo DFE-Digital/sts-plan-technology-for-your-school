@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Dfe.PlanTech.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(CmsDbContext))]
-    [Migration("20231201142929_IdChangesAndPageAndTitle")]
-    partial class IdChangesAndPageAndTitle
+    [Migration("20231201145710_InitialTables")]
+    partial class InitialTables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,37 +39,13 @@ namespace Dfe.PlanTech.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Dfe.PlanTech.Domain.Content.Models.PageContentDbEntity", b =>
                 {
-                    b.Property<string>("BeforeTitleContentId")
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("BeforeTitleContentPagesId")
-                        .HasColumnType("nvarchar(30)");
-
                     b.Property<string>("ContentComponentId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("ContentId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("ContentPagesId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(30)");
 
                     b.Property<string>("PageId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(30)");
 
-                    b.HasKey("BeforeTitleContentId", "BeforeTitleContentPagesId");
-
-                    b.HasIndex("BeforeTitleContentPagesId");
-
-                    b.HasIndex("ContentComponentId");
-
-                    b.HasIndex("ContentId");
-
-                    b.HasIndex("ContentPagesId");
+                    b.HasKey("ContentComponentId", "PageId");
 
                     b.HasIndex("PageId");
 
@@ -181,40 +157,16 @@ namespace Dfe.PlanTech.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Dfe.PlanTech.Domain.Content.Models.PageContentDbEntity", b =>
                 {
-                    b.HasOne("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity", null)
-                        .WithMany()
-                        .HasForeignKey("BeforeTitleContentId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
-                        .IsRequired();
-
-                    b.HasOne("Dfe.PlanTech.Domain.Content.Models.PageDbEntity", null)
-                        .WithMany()
-                        .HasForeignKey("BeforeTitleContentPagesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity", "ContentComponent")
                         .WithMany()
                         .HasForeignKey("ContentComponentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity", null)
-                        .WithMany()
-                        .HasForeignKey("ContentId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
-                        .IsRequired();
-
-                    b.HasOne("Dfe.PlanTech.Domain.Content.Models.PageDbEntity", null)
-                        .WithMany()
-                        .HasForeignKey("ContentPagesId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Dfe.PlanTech.Domain.Content.Models.PageDbEntity", "Page")
                         .WithMany()
                         .HasForeignKey("PageId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("ContentComponent");
