@@ -6,8 +6,6 @@ public interface IQuestion
 
   public string? HelpText { get; }
 
-  public string Param { get; }
-
   public string Slug { get; }
 }
 

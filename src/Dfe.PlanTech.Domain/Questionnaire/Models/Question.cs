@@ -17,7 +17,5 @@ public class Question : ContentComponent, IQuestion<Answer>
 
     public Answer[] Answers { get; init; } = Array.Empty<Answer>();
 
-    public string Param { get; init; } = null!;
-
     public string Slug { get; set; } = null!;
 }

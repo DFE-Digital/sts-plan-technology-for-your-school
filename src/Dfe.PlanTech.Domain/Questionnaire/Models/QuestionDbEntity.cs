@@ -11,8 +11,6 @@ public class QuestionDbEntity : ContentComponentDbEntity, IQuestion<AnswerDbEnti
 
     public AnswerDbEntity[] Answers { get; init; } = Array.Empty<AnswerDbEntity>();
 
-    public string Param { get; init; } = null!;
-
     public string Slug { get; set; } = null!;
 
     public AnswerDbEntity[] PreviousAnswers { get; init; } = Array.Empty<AnswerDbEntity>();
