@@ -1,14 +1,10 @@
-using Dfe.PlanTech.Domain.Database.Interfaces;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-public class AnswerDbEntity : IAnswer<QuestionDbEntity>, IDbEntity
+public class AnswerDbEntity : ContentComponentDbEntity, IAnswer<Question>
 {
-  public long Id { get; set; }
-
-  public string ContentfulId { get; set; } = null!;
-
   public string Text { get; set; } = null!;
 
   public long? NextQuestionId { get; set; }
