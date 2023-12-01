@@ -46,8 +46,13 @@ public class CmsDbContext : DbContext
 
     modelBuilder.Entity<PageDbEntity>(entity =>
     {
-      entity.HasMany(page => page.BeforeTitleContent).WithMany(c => c.BeforeTitleContentPages);
-      entity.HasMany(page => page.Content).WithMany(c => c.ContentPages);
+      entity.HasMany(page => page.BeforeTitleContent)
+            .WithMany(c => c.BeforeTitleContentPages)
+            .UsingEntity<PageContentDbEntity>();
+
+      entity.HasMany(page => page.Content)
+            .WithMany(c => c.ContentPages)
+            .UsingEntity<PageContentDbEntity>();
 
       entity.ToTable("Pages", "Contentful");
     });

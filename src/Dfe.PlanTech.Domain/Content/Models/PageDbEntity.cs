@@ -24,7 +24,7 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
 
     public TitleDbEntity? Title { get; set; }
 
-    public long? TitleId { get; set; }
+    public string? TitleId { get; set; }
 
     public string? OrganisationName { get; set; }
 
