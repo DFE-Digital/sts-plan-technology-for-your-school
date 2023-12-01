@@ -1,0 +1,43 @@
+name: Build & Deploy .NET Azure Function
+
+on:
+    workflow_call: # TODO: Called from matrix-deploy OR ran as an independent workflow on push to main/development?
+        inputs:
+            environment:
+                type: string
+                required: true
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.inputs.environment }}
+    cancel-in-progress: true
+
+env:
+    DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
+
+jobs:
+
+    build-and-deploy:
+
+        runs-on: ubuntu-22.04
+        name: Build & Deploy .NET Azure Function
+        environment: ${{ inputs.environment }}
+        env:
+            AZURE_FUNCTIONAPP_NAME: "${{ secrets.AZ_ENVIRONMENT }}plantechcontentfulfunction"
+        
+        steps:
+
+            - name: Checkout Repository
+              uses: actions/checkout@v3
+            
+            - name: Build AzureFunctions
+              uses: ./.github/actions/build-dotnet-app
+              with:
+                dotnet-version: ${{ env.DOTNET_VERSION }}
+                solution_filename: Dfe_PlanTech_AzureFunctions.csproj
+            
+            - name: Deploy Azure Function
+              uses: Azure/functions-action@v1
+              with:
+                app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+                package: ./src/Dfe.PlanTech.AzureFunctions/build
+                publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }} # TODO: Investigate obtaining 'publish-profile' via Terraform
