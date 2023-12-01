@@ -2,11 +2,10 @@ using System.Net;
 using System.Text;
 using System.Text.Json.Nodes;
 using AutoMapper;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions
@@ -126,7 +125,7 @@ namespace Dfe.PlanTech.AzureFunctions
         }
       }
 
-      fields["ContentfulId"] = JsonNode.Parse(asJson["sys"]!["id"].ToJsonString());
+      fields["Id"] = JsonNode.Parse(sys["id"].ToJsonString());
 
       var contentType = $"{FirstCharToUpperAsSpan(sys["contentType"]["sys"]["id"].ToString())}DbEntity";
       fields["ContentType"] = contentType;
@@ -135,8 +134,26 @@ namespace Dfe.PlanTech.AzureFunctions
 
       object mapped = MapObjectToDbEntity(jsonNode, contentType);
 
-      _db.Add(mapped);
-      _db.SaveChanges();
+      if (mapped is ContentComponentDbEntity contentComponent)
+      {
+        var existing = _db.Find(mapped.GetType(), contentComponent.Id);
+
+        if (existing != null)
+        {
+          var properties = mapped.GetType().GetProperties();
+
+          foreach (var property in properties)
+          {
+            property.SetValue(existing, property.GetValue(mapped));
+          }
+        }
+        else
+        {
+          _db.Add(mapped);
+        }
+
+        _db.SaveChanges();
+      }
 
       return true;
     }
