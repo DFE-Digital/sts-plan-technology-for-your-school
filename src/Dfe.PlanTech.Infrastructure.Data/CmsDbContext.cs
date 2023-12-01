@@ -26,7 +26,7 @@ public class CmsDbContext : DbContext
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
   {
     base.OnConfiguring(optionsBuilder);
-    optionsBuilder.UseSqlServer("CONNECTION STRING");
+    optionsBuilder.UseSqlServer("Server=tcp:s190d01-plantech.database.windows.net,1433;Authentication=Active Directory Default; Database=s190d01-plantech-sqldb;");
   }
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -48,11 +48,15 @@ public class CmsDbContext : DbContext
     {
       entity.HasMany(page => page.BeforeTitleContent)
             .WithMany(c => c.BeforeTitleContentPages)
-            .UsingEntity<PageContentDbEntity>();
+            .UsingEntity<PageContentDbEntity>(
+              left => left.HasOne(pageContent => pageContent.ContentComponent).WithMany().OnDelete(DeleteBehavior.Restrict),
+              right => right.HasOne(pageContent => pageContent.Page).WithMany().OnDelete(DeleteBehavior.Restrict)
+            );
 
       entity.HasMany(page => page.Content)
             .WithMany(c => c.ContentPages)
             .UsingEntity<PageContentDbEntity>();
+
 
       entity.ToTable("Pages", "Contentful");
     });
