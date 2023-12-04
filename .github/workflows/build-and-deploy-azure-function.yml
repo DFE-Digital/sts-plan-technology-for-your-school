@@ -1,4 +1,4 @@
-name: Build & Deploy .NET Azure Function
+name: Build & Deploy .NET Azure Function App
 
 on:
     workflow_call: # TODO: Called from matrix-deploy OR ran as an independent workflow on push to main/development?
@@ -16,28 +16,57 @@ env:
 
 jobs:
 
-    build-and-deploy:
+    build:
 
         runs-on: ubuntu-22.04
-        name: Build & Deploy .NET Azure Function
+        name: Build .NET Azure Function App
+        
+        steps:
+
+            - name: Checkout Repository
+              uses: actions/checkout@v3
+
+            - name: Set up .NET
+              uses: actions/setup-dotnet@v3
+              with:
+                dotnet-version: ${{ env.DOTNET_VERSION }}
+                cache: false
+              env:
+                DOTNET_INSTALL_DIR: "/usr/share/dotnet"
+                DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+            - name: Install Dependencies
+              shell: bash
+              run: dotnet restore ./src/Dfe.PlanTech.AzureFunctions/Dfe_PlanTech_AzureFunctions.csproj
+
+            - name: Build Azure Function App
+              shell: bash
+              run: dotnet publish ./src/Dfe.PlanTech.AzureFunctions/Dfe_PlanTech_AzureFunctions.csproj --configuration Release --no-restore --output ./build
+
+            - name: Upload Artifact
+              uses: actions/upload-artifact@v2
+              with:
+                name: .dotnet-azure-function-app
+                path: ./build
+
+    deploy:
+
+        runs-on: ubuntu-22.04
+        name: Deploy .NET Azure Function App
         environment: ${{ inputs.environment }}
         env:
             AZURE_FUNCTIONAPP_NAME: "${{ secrets.AZ_ENVIRONMENT }}plantechcontentfulfunction"
         
         steps:
 
-            - name: Checkout Repository
-              uses: actions/checkout@v3
-            
-            - name: Build AzureFunctions
-              uses: ./.github/actions/build-dotnet-app
+            - name: Download artifact from build job
+              uses: actions/download-artifact@v2
               with:
-                dotnet_version: ${{ env.DOTNET_VERSION }}
-                solution_filename: ./src/Dfe.PlanTech.AzureFunctions/Dfe_PlanTech_AzureFunctions.csproj
+                name: .dotnet-azure-function-app
             
-            - name: Deploy Azure Function
+            - name: Deploy Azure Function App
               uses: Azure/functions-action@v1
               with:
                 app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
-                package: ./build
+                package: .
                 publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }} # TODO: Investigate obtaining 'publish-profile' via Terraform
