@@ -8,7 +8,6 @@ on:
       - "src/**"
       - ".github/workflows/matrix-deploy.yml"
 
-jobs:
   set-env:
     runs-on: ubuntu-22.04
     name: Set Environment (Matrix Deploy)
@@ -35,19 +34,6 @@ jobs:
     with:
       branch: ${{ needs.set-env.outputs.branch }}
       checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
-
-  build-and-deploy-azure-function:
-    needs: set-env
-    name: Build & Deploy Azure Function to Dev
-    strategy:
-      fail-fast: true
-      max-parallel: 1
-      matrix:
-        target: [Dev]
-    uses: ./.github/workflows/build-and-deploy-azure-function.yml
-    with:
-      environment: ${{ matrix.target }}
-    secrets: inherit
 
   check-for-terraform-changes:
     needs: create-and-publish-image
@@ -123,14 +109,14 @@ jobs:
     secrets: inherit
 
   deploy-to-staging:
-    needs: [set-env, create-and-publish-image, deploy-to-dev-and-test]
+    needs: [set-env, create-and-publish-image, deploy-to-dev-and-test] 
     name: Deployment to Staging
     if: ${{ needs.set-env.outputs.branch == 'main' }}
     strategy:
       max-parallel: 1
       fail-fast: true
       matrix:
-        target: [Staging]
+        target: [ Staging ]
     uses: ./.github/workflows/deploy-image.yml
     with:
       environment: ${{ matrix.target }}
@@ -139,13 +125,7 @@ jobs:
     secrets: inherit
 
   plan-terraform-for-production:
-    needs:
-      [
-        set-env,
-        deploy-to-dev-and-test,
-        check-for-terraform-changes,
-        deploy-to-staging,
-      ]
+    needs: [ set-env, deploy-to-dev-and-test, check-for-terraform-changes, deploy-to-staging ]
     name: Plan Terraform Infrastructure for production
     if: ${{ needs.check-for-terraform-changes.outputs.run_terraform_deploy == 'true' && needs.set-env.outputs.branch == 'main' }}
     strategy:
@@ -159,13 +139,7 @@ jobs:
     secrets: inherit
 
   deploy-to-production:
-    needs:
-      [
-        set-env,
-        create-and-publish-image,
-        deploy-to-dev-and-test,
-        deploy-to-staging,
-      ]
+    needs: [ set-env, create-and-publish-image, deploy-to-dev-and-test, deploy-to-staging ]
     name: Deployment to Production
     if: ${{ needs.set-env.outputs.branch == 'main' }}
     strategy:
