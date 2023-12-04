@@ -37,6 +37,10 @@ namespace Dfe.PlanTech.AzureFunctions
       AddMappers(services);
     }
 
+    /// <summary>
+    /// Finds all <see cref="JsonToDbMapper"/> mappers using reflection, and then injects them as dependencies 
+    /// </summary>
+    /// <param name="services"></param>
     private static void AddMappers(IServiceCollection services)
     {
       foreach (var mapper in GetMappers())
@@ -47,6 +51,10 @@ namespace Dfe.PlanTech.AzureFunctions
       services.AddScoped<JsonToEntityMappers>();
     }
 
+    /// <summary>
+    /// Get all <see cref="JsonToDbMapper"/> mappers using reflection 
+    /// </summary>
+    /// <returns></returns>
     private static IEnumerable<Type> GetMappers() => Assembly.GetEntryAssembly()!.GetTypes().Where(type => type.IsAssignableTo(typeof(JsonToDbMapper)) && !type.IsAbstract);
   }
 }
