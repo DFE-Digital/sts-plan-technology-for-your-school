@@ -12,9 +12,11 @@ public class CmsDbProfile : Profile
     CreateMap<JsonNode, AnswerDbEntity>()
       .ForAllMembers(answer => MapFromDestinationName(answer));
 
+    CreateMap<JsonNode, PageDbEntity>()
+          .ForAllMembers(page => MapFromDestinationName(page));
 
     CreateMap<JsonNode, QuestionDbEntity>()
-          .ForAllMembers(answer => MapFromDestinationName(answer));
+          .ForAllMembers(question => MapFromDestinationName(question));
 
     CreateMap<JsonNode, TitleDbEntity>()
       .ForAllMembers(title => MapFromDestinationName(title));
