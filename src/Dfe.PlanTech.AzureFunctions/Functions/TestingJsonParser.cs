@@ -5,7 +5,6 @@ using System.Text.Json.Nodes;
 using Dfe.PlanTech.AzureFunctions.Mappings;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -17,27 +16,17 @@ namespace Dfe.PlanTech.AzureFunctions
   {
     private readonly ILogger _logger;
 
-    private readonly List<Type> _allTypes;
-
     private readonly CmsDbContext _db;
 
-    private static JsonSerializerOptions _jsonOptions = new()
-    {
-      PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
+    private readonly Mappers _mappers;
 
-    private AnswerMapper _answerMapper;
-
-    public TestingJsonParser(ILoggerFactory loggerFactory, CmsDbContext db, AnswerMapper answerMapper)
+    public TestingJsonParser(ILoggerFactory loggerFactory, CmsDbContext db, Mappers mappers)
     {
       _logger = loggerFactory.CreateLogger<TestingJsonParser>();
-      _allTypes = GetAllTypes();
       _db = db;
 
-      _answerMapper = answerMapper;
+      _mappers = mappers;
     }
-
-    private static List<Type> GetAllTypes() => AppDomain.CurrentDomain.GetAssemblies().SelectMany(assembley => assembley.GetTypes()).ToList();
 
     [Function("TestingSerialisation")]
     public async Task<HttpResponseData> TestingSerialisation([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req)
@@ -47,12 +36,7 @@ namespace Dfe.PlanTech.AzureFunctions
 
       try
       {
-        var processed = JsonSerializer.Deserialize<CmsWebHookPayload>(body, new JsonSerializerOptions()
-        {
-          PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
-
-        var answerDbEntity = _answerMapper.MapToEntity(processed!);
+        var answerDbEntity = _mappers.ToEntity(body);
 
         return req.CreateResponse(HttpStatusCode.OK);
       }
@@ -114,12 +98,7 @@ namespace Dfe.PlanTech.AzureFunctions
 
     private bool TryNormaliseJson(string body)
     {
-      var processed = JsonSerializer.Deserialize<CmsWebHookPayload>(body, new JsonSerializerOptions()
-      {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-      });
-
-      var mapped = _answerMapper.MapToEntity(processed!);
+      var mapped = _mappers.ToEntity(body);
 
       if (mapped == null)
       {
@@ -152,67 +131,5 @@ namespace Dfe.PlanTech.AzureFunctions
 
       return true;
     }
-
-    public static bool TrySerialiseAsLinkEntry(JsonNode node, out CmsWebHookSystemDetailsInner? sys)
-    {
-      if (node is not JsonObject jsonObject)
-      {
-        sys = null;
-        return false;
-      }
-
-      var container = JsonSerializer.Deserialize<CmsWebHookSystemDetailsInnerContainer>(jsonObject, _jsonOptions);
-
-      if (container?.Sys == null)
-      {
-        sys = null;
-        return false;
-      }
-
-      sys = container.Sys;
-
-      return !string.IsNullOrEmpty(sys.Id) && !string.IsNullOrEmpty(sys.LinkType) && !string.IsNullOrEmpty(sys.Type);
-    }
-
-    private static bool SerialiseBody(string body, out CmsWebHookPayload? payload)
-    {
-      try
-      {
-        payload = JsonSerializer.Deserialize<CmsWebHookPayload>(body, _jsonOptions);
-
-        return payload != null;
-      }
-      catch (Exception ex)
-      {
-        throw new Exception($"Error serialising body to {typeof(CmsWebHookPayload)}", ex);
-      }
-    }
-
-    private object? MapObjectToDbEntity(Dictionary<string, object> fields, string contentType)
-    {
-      Type? contentTypeType = _allTypes.Find(type => type.Name == contentType);
-
-      if (contentTypeType == null)
-      {
-        throw new KeyNotFoundException($"Could not find matching type for {contentTypeType}");
-      }
-
-      var asJson = JsonSerializer.Serialize(fields);
-      var asConcreteType = JsonSerializer.Deserialize(asJson, contentTypeType);
-
-      return asConcreteType;
-    }
-
-    public string FirstCharToUpperAsSpan(string input)
-    {
-      if (string.IsNullOrEmpty(input))
-      {
-        return string.Empty;
-      }
-      Span<char> destination = stackalloc char[1];
-      input.AsSpan(0, 1).ToUpperInvariant(destination);
-      return $"{destination}{input.AsSpan(1)}";
-    }
-
   }
 }
