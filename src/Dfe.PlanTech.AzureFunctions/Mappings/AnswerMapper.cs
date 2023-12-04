@@ -11,23 +11,14 @@ public class AnswerMapper : JsonToDbMapper<AnswerDbEntity>
   {
   }
 
-  public override AnswerDbEntity MapEntityFields(CmsWebHookPayload payload, AnswerDbEntity entity)
+  public override Dictionary<string, object> PerformAdditionalMapping(Dictionary<string, object> values)
   {
-    var testing = new AnswerDbEntity();
-
-    var fields = GetEntityFields(payload).Where(kvp => kvp.HasValue)
-                                        .Select(kvp => kvp!.Value)
-                                        .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-
-    if (fields.TryGetValue("nextQuestion", out object? value) && value is CmsWebHookSystemDetailsInner systemDetailsInner)
+    if (values.TryGetValue("nextQuestion", out object? value) && value is CmsWebHookSystemDetailsInner systemDetailsInner)
     {
-      fields["nextQuestionId"] = systemDetailsInner.Id;
-      fields.Remove("nextQuestion");
+      values["nextQuestionId"] = systemDetailsInner.Id;
+      values.Remove("nextQuestion");
     }
 
-    var asJson = JsonSerializer.Serialize(fields);
-    testing = JsonSerializer.Deserialize<AnswerDbEntity>(asJson, JsonOptions);
-
-    return testing ?? throw new Exception("Null");
+    return values;
   }
 }
