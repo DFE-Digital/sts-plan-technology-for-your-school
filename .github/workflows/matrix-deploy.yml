@@ -7,11 +7,11 @@ on:
     paths:
       - 'src/**'
       - '.github/workflows/matrix-deploy.yml'
-  pull_request:                               # TODO: Remove after testing!
-    branches: ["development"]                 # TODO: Remove after testing!
-    paths:                                    # TODO: Remove after testing!
-      - 'src/**'                              # TODO: Remove after testing!
-      - '.github/workflows/matrix-deploy.yml' # TODO: Remove after testing!
+  # pull_request:                               # TODO: Remove after testing!
+  #   branches: ["development"]                 # TODO: Remove after testing!
+  #   paths:                                    # TODO: Remove after testing!
+  #     - 'src/**'                              # TODO: Remove after testing!
+  #     - '.github/workflows/matrix-deploy.yml' # TODO: Remove after testing!
     
 jobs:
 

@@ -1,14 +1,22 @@
 name: Build & Deploy .NET Azure Function App
 
-on:
-    workflow_call: # TODO: Called from matrix-deploy OR ran as an independent workflow on push to main/development?
-        inputs:
-            environment:
-                type: string
-                required: true
+# on:
+#     workflow_call: # TODO: Called from matrix-deploy OR ran as an independent workflow on push to main/development?
+#         inputs:
+#             environment:
+#                 type: string
+#                 required: true
+
+on:                                                                   # TODO: Remove after testing!
+    pull_request:                                                     # TODO: Remove after testing!
+        branches: ["development"]                                     # TODO: Remove after testing!
+        paths:                                                        # TODO: Remove after testing!
+            - 'src/**'                                                # TODO: Remove after testing!
+            - '.github/workflows/build-and-deploy-azure-function.yml' # TODO: Remove after testing!
 
 concurrency:
-    group: ${{ github.workflow }}-${{ github.event.inputs.environment }}
+    # group: ${{ github.workflow }}-${{ github.event.inputs.environment }}
+    group: ${{ github.workflow }}-${{ github.run_id }} # TODO: Remove after testing!
     cancel-in-progress: true
 
 env:
@@ -54,7 +62,8 @@ jobs:
         runs-on: ubuntu-22.04
         name: Deploy .NET Azure Function App
         needs: build
-        environment: ${{ inputs.environment }}
+        # environment: ${{ inputs.environment }}
+        environment: "Dev" # TODO: Remove after testing!
         env:
             AZURE_FUNCTIONAPP_NAME: "${{ secrets.AZ_ENVIRONMENT }}plantechcontentfulfunction"
         
