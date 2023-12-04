@@ -17,7 +17,6 @@ public class CmsWebHookSystemDetails
   public CmsWebHookSystemDetailsInnerContainer ContentType { get; init; } = null!;
   public CmsWebHookSystemDetailsInnerContainer CreatedBy { get; init; } = null!;
   public CmsWebHookSystemDetailsInnerContainer UpdatedBy { get; init; } = null!;
-
 }
 
 public class CmsWebHookSystemDetailsInnerContainer

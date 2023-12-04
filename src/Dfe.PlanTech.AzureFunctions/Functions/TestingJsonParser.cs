@@ -22,6 +22,10 @@ namespace Dfe.PlanTech.AzureFunctions
 
     private readonly CmsDbContext _db;
 
+    private static JsonSerializerOptions _jsonOptions = new()
+    {
+      PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
 
     public TestingJsonParser(ILoggerFactory loggerFactory, IMapper mapper, CmsDbContext db)
     {
@@ -113,9 +117,12 @@ namespace Dfe.PlanTech.AzureFunctions
     {
       var success = SerialiseBody(body, out CmsWebHookPayload? payload);
 
-      if (!success) return false;
+      if (!success || payload == null || payload.Sys == null) return false;
 
-      var fields = new Dictionary<string, object>();
+      var fields = new Dictionary<string, object>
+      {
+        ["Id"] = payload.Sys.Id
+      };
 
       foreach (var field in payload!.Fields)
       {
@@ -135,54 +142,80 @@ namespace Dfe.PlanTech.AzureFunctions
 
         foreach (var child in fieldChildren)
         {
-          fields[FirstCharToUpperAsSpan(field.Key)] = child.Value;
+          if (child.Value == null)
+          {
+            _logger.LogTrace($"Null value for {child.Key}");
+            continue;
+          }
+
+          fields[FirstCharToUpperAsSpan(field.Key)] = TrySerialiseAsLinkEntry(child.Value, out CmsWebHookSystemDetailsInner? sys) ? sys! : child.Value;
         }
       }
 
       fields["Id"] = payload.Sys.Id;
 
       var contentType = $"{FirstCharToUpperAsSpan(payload.Sys.ContentType.Sys.Id)}DbEntity";
-      fields["ContentType"] = contentType;
 
-      var serialised = JsonSerializer.Serialize(fields);
+      object? mapped = MapObjectToDbEntity(fields, contentType);
+
+      if (mapped == null)
+      {
+        _logger.LogError($"Received null object back");
+        return false;
+      }
+
+      if (mapped is not ContentComponentDbEntity contentComponent)
+      {
+        return false;
+      }
+
+      var existing = _db.Find(mapped.GetType(), contentComponent.Id);
+
+      if (existing != null)
+      {
+        var properties = mapped.GetType().GetProperties();
+
+        foreach (var property in properties)
+        {
+          property.SetValue(existing, property.GetValue(mapped));
+        }
+      }
+      else
+      {
+        _db.Add(mapped);
+      }
+
+      _db.SaveChanges();
 
       return true;
-      /*
-            object mapped = MapObjectToDbEntity(jsonNode, contentType);
+    }
 
-            if (mapped is ContentComponentDbEntity contentComponent)
-            {
-              var existing = _db.Find(mapped.GetType(), contentComponent.Id);
+    public static bool TrySerialiseAsLinkEntry(JsonNode node, out CmsWebHookSystemDetailsInner? sys)
+    {
+      if (node is not JsonObject jsonObject)
+      {
+        sys = null;
+        return false;
+      }
 
-              if (existing != null)
-              {
-                var properties = mapped.GetType().GetProperties();
+      var container = JsonSerializer.Deserialize<CmsWebHookSystemDetailsInnerContainer>(jsonObject, _jsonOptions);
 
-                foreach (var property in properties)
-                {
-                  property.SetValue(existing, property.GetValue(mapped));
-                }
-              }
-              else
-              {
-                _db.Add(mapped);
-              }
+      if (container?.Sys == null)
+      {
+        sys = null;
+        return false;
+      }
 
-              _db.SaveChanges();
-            }
+      sys = container.Sys;
 
-            return true;
-            */
+      return !string.IsNullOrEmpty(sys.Id) && !string.IsNullOrEmpty(sys.LinkType) && !string.IsNullOrEmpty(sys.Type);
     }
 
     private static bool SerialiseBody(string body, out CmsWebHookPayload? payload)
     {
       try
       {
-        payload = JsonSerializer.Deserialize<CmsWebHookPayload>(body, new JsonSerializerOptions()
-        {
-          PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
+        payload = JsonSerializer.Deserialize<CmsWebHookPayload>(body, _jsonOptions);
 
         return payload != null;
       }
@@ -192,7 +225,7 @@ namespace Dfe.PlanTech.AzureFunctions
       }
     }
 
-    private object MapObjectToDbEntity(JsonNode jsonNode, string contentType)
+    private object? MapObjectToDbEntity(Dictionary<string, object> fields, string contentType)
     {
       Type? contentTypeType = _allTypes.Find(type => type.Name == contentType);
 
@@ -201,11 +234,10 @@ namespace Dfe.PlanTech.AzureFunctions
         throw new KeyNotFoundException($"Could not find matching type for {contentTypeType}");
       }
 
-      var content = Activator.CreateInstance(contentTypeType);
+      var asJson = JsonSerializer.Serialize(fields);
+      var asConcreteType = JsonSerializer.Deserialize(asJson, contentTypeType);
 
-      var mapped = _mapper.Map(jsonNode, content!, jsonNode.GetType(), content!.GetType());
-
-      return mapped;
+      return asConcreteType;
     }
 
     public string FirstCharToUpperAsSpan(string input)

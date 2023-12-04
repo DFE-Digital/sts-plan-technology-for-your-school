@@ -27,14 +27,6 @@ namespace Dfe.PlanTech.AzureFunctions
 
         builder.UseCredential(new DefaultAzureCredential());
       });
-
-      var config = new MapperConfiguration(cfg =>
-      {
-        cfg.AddProfile<CmsDbProfile>();
-      });
-
-      var mapper = config.CreateMapper();
-      services.AddTransient((services) => config.CreateMapper());
     }
   }
 }
