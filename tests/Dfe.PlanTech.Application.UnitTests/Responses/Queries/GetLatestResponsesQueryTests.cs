@@ -66,7 +66,7 @@ public class GetLatestResponsesQueryTests
         var questionFaker = new Faker<Domain.Questionnaire.Models.Question>()
                             .RuleFor(question => question.Sys, generateSystemDetails)
                             .RuleFor(question => question.Text, faker => faker.Lorem.Sentence())
-                            .RuleFor(question => question.Answers, _ => answerFaker.Generate(ANSWER_PER_QUESTION_COUNT).ToArray());
+                            .RuleFor(question => question.Answers, _ => answerFaker.Generate(ANSWER_PER_QUESTION_COUNT).ToList());
 
         var sectionFaker = new Faker<Section>()
                                 .RuleFor(section => section.Sys, generateSystemDetails)
