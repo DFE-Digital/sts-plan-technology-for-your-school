@@ -1,7 +1,7 @@
-using AutoMapper;
+using System.Text.Json;
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
-using Dfe.PlanTech.Domain.Mappings;
+using Dfe.PlanTech.AzureFunctions.Mappings;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
@@ -27,6 +27,10 @@ namespace Dfe.PlanTech.AzureFunctions
 
         builder.UseCredential(new DefaultAzureCredential());
       });
+
+      services.AddSingleton(new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+
+      services.AddSingleton<AnswerMapper>();
     }
   }
 }
