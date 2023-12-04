@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.Json;
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
@@ -33,8 +34,20 @@ namespace Dfe.PlanTech.AzureFunctions
       services.AddScoped<JsonToDbMapper, AnswerMapper>();
       services.AddScoped<JsonToDbMapper, QuestionMapper>();
 
-      services.AddScoped<Mappers>();
-
+      AddMappers(services);
     }
+
+    private static void AddMappers(IServiceCollection services)
+    {
+      foreach (var mapper in GetMappers())
+      {
+        services.AddScoped(typeof(JsonToDbMapper), mapper);
+      }
+
+      services.AddScoped<JsonToEntityMappers>();
+    }
+
+    private static IEnumerable<Type> GetMappers() => Assembly.GetEntryAssembly()!.GetTypes().Where(type => type.IsAssignableTo(typeof(JsonToDbMapper)) && !type.IsAbstract);
+
   }
 }
