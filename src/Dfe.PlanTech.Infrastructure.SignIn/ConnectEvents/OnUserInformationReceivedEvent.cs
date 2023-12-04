@@ -22,7 +22,12 @@ public static class OnUserInformationReceivedEvent
     {
         await RecordUserSign(context);
 
-        await AddRoleClaimsFromDfePublicApi(context);
+        var config = context.HttpContext.RequestServices.GetRequiredService<IDfeSignInConfiguration>();
+
+        if (config.DiscoverRolesWithPublicApi)
+        {
+            await AddRoleClaimsFromDfePublicApi(context);
+        }
     }
 
     /// <summary>
