@@ -2,7 +2,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using AutoMapper;
+using Dfe.PlanTech.AzureFunctions.Mappings;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -16,7 +16,6 @@ namespace Dfe.PlanTech.AzureFunctions
   public class TestingJsonParser
   {
     private readonly ILogger _logger;
-    private readonly IMapper _mapper;
 
     private readonly List<Type> _allTypes;
 
@@ -27,13 +26,15 @@ namespace Dfe.PlanTech.AzureFunctions
       PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    public TestingJsonParser(ILoggerFactory loggerFactory, IMapper mapper, CmsDbContext db)
+    private AnswerMapper _answerMapper;
+
+    public TestingJsonParser(ILoggerFactory loggerFactory, CmsDbContext db, AnswerMapper answerMapper)
     {
       _logger = loggerFactory.CreateLogger<TestingJsonParser>();
-      _mapper = mapper;
-
       _allTypes = GetAllTypes();
       _db = db;
+
+      _answerMapper = answerMapper;
     }
 
     private static List<Type> GetAllTypes() => AppDomain.CurrentDomain.GetAssemblies().SelectMany(assembley => assembley.GetTypes()).ToList();
@@ -51,11 +52,9 @@ namespace Dfe.PlanTech.AzureFunctions
           PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         });
 
-        var responseType = HttpStatusCode.OK;
+        var answerDbEntity = _answerMapper.MapToEntity(processed!);
 
-        var response = req.CreateResponse(responseType);
-
-        return response;
+        return req.CreateResponse(HttpStatusCode.OK);
       }
       catch (Exception ex)
       {
@@ -115,48 +114,12 @@ namespace Dfe.PlanTech.AzureFunctions
 
     private bool TryNormaliseJson(string body)
     {
-      var success = SerialiseBody(body, out CmsWebHookPayload? payload);
-
-      if (!success || payload == null || payload.Sys == null) return false;
-
-      var fields = new Dictionary<string, object>
+      var processed = JsonSerializer.Deserialize<CmsWebHookPayload>(body, new JsonSerializerOptions()
       {
-        ["Id"] = payload.Sys.Id
-      };
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+      });
 
-      foreach (var field in payload!.Fields)
-      {
-        if (field.Value == null)
-        {
-          _logger.LogError("No value for {field}", field);
-          continue;
-        }
-
-        var fieldChildren = field.Value.AsObject();
-
-        if (fieldChildren.Count > 1)
-        {
-          _logger.LogError("Expected only one language - received {count}", fieldChildren.Count);
-          continue;
-        }
-
-        foreach (var child in fieldChildren)
-        {
-          if (child.Value == null)
-          {
-            _logger.LogTrace($"Null value for {child.Key}");
-            continue;
-          }
-
-          fields[FirstCharToUpperAsSpan(field.Key)] = TrySerialiseAsLinkEntry(child.Value, out CmsWebHookSystemDetailsInner? sys) ? sys! : child.Value;
-        }
-      }
-
-      fields["Id"] = payload.Sys.Id;
-
-      var contentType = $"{FirstCharToUpperAsSpan(payload.Sys.ContentType.Sys.Id)}DbEntity";
-
-      object? mapped = MapObjectToDbEntity(fields, contentType);
+      var mapped = _answerMapper.MapToEntity(processed!);
 
       if (mapped == null)
       {
