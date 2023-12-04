@@ -16,7 +16,7 @@ env:
 
 jobs:
 
-    build-and-deploy:
+    build:
 
         runs-on: windows-latest
         name: Build & Deploy .NET Azure Function App
