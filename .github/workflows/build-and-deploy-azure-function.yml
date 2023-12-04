@@ -8,8 +8,7 @@ on:
                 required: true
 
 concurrency:
-    # group: ${{ github.workflow }}-${{ github.event.inputs.environment }}
-    group: ${{ github.workflow }}-${{ github.run_id }} # TODO: Remove after testing!
+    group: ${{ github.workflow }}-${{ github.event.inputs.environment }}
     cancel-in-progress: true
 
 env:
