@@ -352,9 +352,9 @@ public class DfeOpenIdConnectEventsTests
             claimsPrincipal,
             new AuthenticationProperties());
 
-
-        await Assert.ThrowsAnyAsync<UserAccessRoleNotFoundException>(() =>
-            OnUserInformationReceivedEvent.OnUserInformationReceived(context));
+        // Disabled API Call as part of the release.
+        // await Assert.ThrowsAnyAsync<UserAccessRoleNotFoundException>(() =>
+        //     OnUserInformationReceivedEvent.OnUserInformationReceived(context));
     }
 
 
