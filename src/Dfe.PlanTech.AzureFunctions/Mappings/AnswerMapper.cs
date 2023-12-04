@@ -11,12 +11,27 @@ public class AnswerMapper : JsonToDbMapper<AnswerDbEntity>
   {
   }
 
-  public override Dictionary<string, object> PerformAdditionalMapping(Dictionary<string, object> values)
+  public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
   {
-    if (values.TryGetValue("nextQuestion", out object? value) && value is CmsWebHookSystemDetailsInner systemDetailsInner)
+    values = MoveKeyToNewValue(values, "nextQuestion", "nextQuestionId");
+    values = MoveKeyToNewValue(values, "parentQuestion", "parentQuestionId");
+
+    return values;
+  }
+
+  /// <summary>
+  /// Move the value from the current key to the new key
+  /// </summary>
+  /// <param name="values"></param>
+  /// <param name="currentKey"></param>
+  /// <param name="newKey"></param>
+  /// <returns></returns>
+  private static Dictionary<string, object?> MoveKeyToNewValue(Dictionary<string, object?> values, string currentKey, string newKey)
+  {
+    if (values.TryGetValue(currentKey, out object? value) && value is CmsWebHookSystemDetailsInner systemDetailsInner)
     {
-      values["nextQuestionId"] = systemDetailsInner.Id;
-      values.Remove("nextQuestion");
+      values[newKey] = systemDetailsInner.Id;
+      values.Remove(currentKey);
     }
 
     return values;

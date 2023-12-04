@@ -48,6 +48,5 @@ namespace Dfe.PlanTech.AzureFunctions
     }
 
     private static IEnumerable<Type> GetMappers() => Assembly.GetEntryAssembly()!.GetTypes().Where(type => type.IsAssignableTo(typeof(JsonToDbMapper)) && !type.IsAbstract);
-
   }
 }
