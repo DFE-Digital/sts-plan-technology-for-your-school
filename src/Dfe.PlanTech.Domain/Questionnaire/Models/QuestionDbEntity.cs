@@ -9,9 +9,9 @@ public class QuestionDbEntity : ContentComponentDbEntity, IQuestion<AnswerDbEnti
 
     public string? HelpText { get; init; }
 
-    public AnswerDbEntity[] Answers { get; init; } = Array.Empty<AnswerDbEntity>();
+    public List<AnswerDbEntity> Answers { get; init; } = new();
 
     public string Slug { get; set; } = null!;
 
-    public AnswerDbEntity[] PreviousAnswers { get; init; } = Array.Empty<AnswerDbEntity>();
+    public List<AnswerDbEntity> PreviousAnswers { get; init; } = new();
 }

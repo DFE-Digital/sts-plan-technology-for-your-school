@@ -15,7 +15,7 @@ public class Question : ContentComponent, IQuestion<Answer>
     /// </summary>
     public string? HelpText { get; init; }
 
-    public Answer[] Answers { get; init; } = Array.Empty<Answer>();
+    public List<Answer> Answers { get; init; } = new();
 
     public string Slug { get; set; } = null!;
 }

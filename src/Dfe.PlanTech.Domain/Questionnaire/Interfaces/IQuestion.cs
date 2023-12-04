@@ -12,5 +12,5 @@ public interface IQuestion
 public interface IQuestion<TAnswer> : IQuestion
 where TAnswer : IAnswer
 {
-  public TAnswer[] Answers { get; }
+  public List<TAnswer> Answers { get; }
 }
