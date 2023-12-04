@@ -30,7 +30,11 @@ namespace Dfe.PlanTech.AzureFunctions
 
       services.AddSingleton(new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
 
-      services.AddSingleton<AnswerMapper>();
+      services.AddScoped<JsonToDbMapper, AnswerMapper>();
+      services.AddScoped<JsonToDbMapper, QuestionMapper>();
+
+      services.AddScoped<Mappers>();
+
     }
   }
 }
