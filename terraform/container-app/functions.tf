@@ -5,8 +5,8 @@ resource "azurerm_storage_account" "function_storage" {
   account_tier             = "Standard"
   account_replication_type = "LRS"
 
-  public_network_access_enabled = false
-  shared_access_key_enabled     = false
+  public_network_access_enabled = true
+  shared_access_key_enabled     = true
 
   identity {
     type         = "UserAssigned"
@@ -33,7 +33,9 @@ resource "azurerm_linux_function_app" "contentful_function" {
 
   key_vault_reference_identity_id = azurerm_user_assigned_identity.user_assigned_identity.id
 
-  site_config {}
+  site_config {
+    application_insights_key = azurerm_application_insights.functional_insights.instrumentation_key
+  }
 
   identity {
     type         = "UserAssigned"
@@ -50,5 +52,8 @@ resource "azurerm_linux_function_app" "contentful_function" {
 
   app_settings = {
     AZURE_AD_AUTH_CLIENT_SECRET = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=${azurerm_key_vault_secret.client_secret.name})"
+    AZURE_SQL_CONNECTIONSTRING  = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=${azurerm_key_vault_secret.vault_secret_database_connectionstring.name})"
+    AzureWebJobsServiceBus      = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=${azurerm_key_vault_secret.vault_secret_servicebus_connectionstring.name})"
+
   }
 }
