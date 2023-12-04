@@ -38,10 +38,6 @@ jobs:
               uses: actions/setup-dotnet@v3
               with:
                 dotnet-version: ${{ env.DOTNET_VERSION }}
-                cache: false
-              env:
-                DOTNET_INSTALL_DIR: "/usr/share/dotnet"
-                DOTNET_CLI_TELEMETRY_OPTOUT: true
 
             - name: Install Dependencies
               shell: pwsh
