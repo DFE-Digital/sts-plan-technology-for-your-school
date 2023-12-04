@@ -4,12 +4,12 @@ using Dfe.PlanTech.Domain.Content.Models;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class Mappers
+public class JsonToEntityMappers
 {
   private readonly JsonSerializerOptions _jsonSerialiserOptions;
   private readonly HashSet<JsonToDbMapper> _mappers;
 
-  public Mappers(IEnumerable<JsonToDbMapper> mappers, JsonSerializerOptions jsonSerialiserOptions)
+  public JsonToEntityMappers(IEnumerable<JsonToDbMapper> mappers, JsonSerializerOptions jsonSerialiserOptions)
   {
     _jsonSerialiserOptions = jsonSerialiserOptions;
     _mappers = mappers.ToHashSet();
@@ -32,5 +32,5 @@ public class Mappers
   }
 
   private CmsWebHookPayload SerialiseToPayload(string requestBody)
-=> JsonSerializer.Deserialize<CmsWebHookPayload>(requestBody, _jsonSerialiserOptions) ?? throw new Exception($"Could not serialise body to {typeof(CmsWebHookPayload)}. Body was {requestBody}");
+    => JsonSerializer.Deserialize<CmsWebHookPayload>(requestBody, _jsonSerialiserOptions) ?? throw new Exception($"Could not serialise body to {typeof(CmsWebHookPayload)}. Body was {requestBody}");
 }
