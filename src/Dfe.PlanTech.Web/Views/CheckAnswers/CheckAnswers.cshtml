@@ -40,22 +40,23 @@
             <input type="hidden" name="submissionId" value="@Model.SubmissionId" />
             <input type="hidden" name="sectionName" value="@Model.SectionName">
             <input type="hidden" name="sectionSlug" value="@Model.SectionSlug">
-            
+
             @{
                 foreach (var content in Model.Content)
                 {
                     await Html.RenderPartialAsync("Components/PageComponentFactory", content);
                 }
             }
-            <govuk-button type="submit">Save and submit</govuk-button>
-            
+            <govuk-button type="submit">Save and continue</govuk-button>
+
             @if (Model.ErrorMessage != null)
             {
                 <p class="govuk-error-message">
-                    <span class="govuk-visually-hidden">Error:</span> @Model.ErrorMessage <a class="govuk-error-message" href="/self-assessment">return to the self-assessment page</a>
+                    <span class="govuk-visually-hidden">Error:</span> @Model.ErrorMessage <a class="govuk-error-message"
+                        href="/self-assessment">return to the self-assessment page</a>
                 </p>
             }
-            
+
         </form>
     </div>
 </div>

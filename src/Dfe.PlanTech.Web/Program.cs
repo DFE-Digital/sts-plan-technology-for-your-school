@@ -1,10 +1,6 @@
 using Azure.Identity;
-using Dfe.PlanTech.Application.Constants;
-using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Helpers;
 using Dfe.PlanTech.Application.Submissions.Queries;
-using Dfe.PlanTech.Domain.Establishments.Exceptions;
-using Dfe.PlanTech.Domain.SignIns.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.SignIns;
@@ -17,7 +13,6 @@ using GovUk.Frontend.AspNetCore;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -61,6 +56,7 @@ builder.Services.AddScoped<ComponentViewsFactory>();
 
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddSingleton<IAuthorizationHandler, PageModelAuthorisationPolicy>();
+builder.Services.AddSingleton<IExceptionHandlerMiddleware, ServiceExceptionHandlerMiddleWare>();
 
 builder.Services.AddTransient<ISubmissionStatusProcessor, SubmissionStatusProcessor>();
 builder.Services.AddTransient<IGetRecommendationRouter, GetRecommendationRouter>();
@@ -105,26 +101,11 @@ app.UseExceptionHandler(exceptionHandlerApp =>
 {
     exceptionHandlerApp.Run(context =>
     {
-        var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
-        var error = exceptionHandlerPathFeature?.Error;
-
-        string redirectUrl = GetRedirectUrlForException(error);
-
-        context.Response.Redirect(redirectUrl);
+        IExceptionHandlerMiddleware exceptionHandlerMiddleware = context.RequestServices.GetRequiredService<IExceptionHandlerMiddleware>();
+        exceptionHandlerMiddleware.ContextRedirect(context);
 
         return Task.CompletedTask;
     });
-
-    static string GetRedirectUrlForException(Exception? exception) =>
-        exception switch
-        {
-            null => UrlConstants.Error,
-            ContentfulDataUnavailableException => UrlConstants.ServiceUnavailable,
-            DatabaseException => UrlConstants.ServiceUnavailable,
-            InvalidEstablishmentException => UrlConstants.ServiceUnavailable,
-            KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) => UrlConstants.ServiceUnavailable,
-            _ => GetRedirectUrlForException(exception.InnerException)
-        };
 });
 
 app.UseStaticFiles();

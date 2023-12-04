@@ -21,9 +21,69 @@ env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
   
 jobs:
+
+  get-src-dir-list:
+    name: Get Directories for Linting
+    runs-on: ubuntu-22.04
+    if: ${{ github.event_name == 'pull_request' }}
+    outputs:
+      directories: ${{ steps.list-dir.outputs.directories }}
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Get Directories
+        id: list-dir
+        uses: ./.github/actions/list-directory
+        with:
+          source: ./src/
+
+  lint-code:
+    name: Lint & Commit
+    runs-on: ubuntu-22.04
+    if: ${{ github.event_name == 'pull_request' }}
+    needs: [get-src-dir-list]
+    strategy:
+      max-parallel: 1
+      fail-fast: true
+      matrix:
+        workspace: ${{ fromJson(needs.get-src-dir-list.outputs.directories) }}
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+          cache: false
+        env:
+          DOTNET_INSTALL_DIR: "/usr/share/dotnet"
+          DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+      - name: Run Linter
+        uses: wearerequired/lint-action@v2
+        with:
+          dotnet_format: true
+          dotnet_format_dir: ./src/${{ matrix.workspace }}
+          git_email: "41898282+github-actions[bot]@users.noreply.github.com"
+          git_name: "github-actions[bot]"
+          commit_message: "Linted Code in ${{ matrix.workspace }} with ${ linter }"
+          auto_fix: true
+          commit: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
   build-test-web-app:  
     name: Build and run unit tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
+    if: ${{ always() && ( github.event_name == 'pull_request' && needs.lint-code.result == 'success' ) || ( github.event_name == 'push' && needs.lint-code.result == 'skipped' ) }}
+    needs: [lint-code]
 
     steps:
       - name: Check out repository
@@ -86,7 +146,7 @@ jobs:
 
   build-database-upgrader:  
     name: Build database upgrader
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Check out repository
@@ -99,7 +159,7 @@ jobs:
           solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
 
   run-javascript-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Run javascript tests
 
     steps:

@@ -51,4 +51,5 @@ public sealed class DfeSignInConfiguration : IDfeSignInConfiguration
     public bool DiscoverRolesWithPublicApi { get; set; } = false;
 
     public string FrontDoorUrl { get; init; } = null!;
+    public string ApiSecret { get; set; } = null!;
 }

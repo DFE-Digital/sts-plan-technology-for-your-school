@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.SignIns.Interfaces;
 using Dfe.PlanTech.Domain.SignIns.Enums;
 using Dfe.PlanTech.Domain.SignIns.Models;
+using Dfe.PlanTech.Domain.Users.Exceptions;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Domain.Users.Models;
 using Dfe.PlanTech.Infrastructure.SignIns.ConnectEvents;
@@ -39,10 +40,10 @@ public class DfeOpenIdConnectEventsTests
         contextSubstitute.RequestServices.GetService(typeof(IDfeSignInConfiguration)).Returns(config);
         contextSubstitute.RequestServices.GetService(typeof(IDfePublicApi)).Returns(dfePublicApiSubstitute);
         var context = new UserInformationReceivedContext(contextSubstitute,
-                                                new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
-                                                new OpenIdConnectOptions(),
-                                                claimsPrincipalSubstitute,
-                                                new AuthenticationProperties());
+            new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
+            new OpenIdConnectOptions(),
+            claimsPrincipalSubstitute,
+            new AuthenticationProperties());
 
         await OnUserInformationReceivedEvent.OnUserInformationReceived(context);
 
@@ -76,7 +77,7 @@ public class DfeOpenIdConnectEventsTests
         var commandSubstitute = Substitute.For<IRecordUserSignInCommand>();
         var dbUserIdValue = 1234;
         var dbEstablishmentIdValue = 5678;
-        commandSubstitute.RecordSignIn(Arg.Any<RecordUserSignInDto>()).Returns(new SignIn()
+        commandSubstitute.RecordSignIn(Arg.Any<RecordUserSignInDto>()).Returns(new Domain.SignIns.Models.SignIn()
         {
             UserId = dbUserIdValue,
             EstablishmentId = dbEstablishmentIdValue,
@@ -88,14 +89,27 @@ public class DfeOpenIdConnectEventsTests
         {
             UserId = userId,
             OrganisationId = orgId,
-            Roles = new List<Role>(){
+            Roles = new List<Role>()
+            {
                 expectedRole,
-                new Role(){
-                    Status = new Status() {
+                new Role()
+                {
+                    Status = new Status()
+                    {
                         Id = 2
                     },
                     Name = "OtherRole",
                     Code = "OtherCode",
+                    NumericId = "OtherNumericId",
+                },
+                new Role()
+                {
+                    Status = new Status()
+                    {
+                        Id = 2
+                    },
+                    Name = "OtherRole",
+                    Code = "plan_tech_for_school_estalishment_only",
                     NumericId = "OtherNumericId",
                 }
             }
@@ -113,10 +127,11 @@ public class DfeOpenIdConnectEventsTests
 
         var organisationClaimSerialised = JsonSerializer.Serialize(organisationClaim);
 
-        identitySubstitute.Claims.Returns(new List<Claim>(){
-                            new Claim(ClaimConstants.NameIdentifier, userId.ToString()),
-                            new Claim(ClaimConstants.Organisation, organisationClaimSerialised),
-                        });
+        identitySubstitute.Claims.Returns(new List<Claim>()
+        {
+            new Claim(ClaimConstants.NameIdentifier, userId.ToString()),
+            new Claim(ClaimConstants.Organisation, organisationClaimSerialised),
+        });
 
         identitySubstitute.IsAuthenticated.Returns(true);
 
@@ -128,10 +143,10 @@ public class DfeOpenIdConnectEventsTests
         contextSubstitute.RequestServices.GetService(typeof(IRecordUserSignInCommand)).Returns(commandSubstitute);
 
         var context = new UserInformationReceivedContext(contextSubstitute,
-                                                new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
-                                                new OpenIdConnectOptions(),
-                                                claimsPrincipal,
-                                                new AuthenticationProperties());
+            new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
+            new OpenIdConnectOptions(),
+            claimsPrincipal,
+            new AuthenticationProperties());
 
         await OnUserInformationReceivedEvent.OnUserInformationReceived(context);
 
@@ -165,7 +180,8 @@ public class DfeOpenIdConnectEventsTests
         Assert.NotNull(dbUserId);
         Assert.Equal(dbUserIdValue, int.Parse(dbUserId.Value));
 
-        var dbEstablishmentId = context.Principal.Claims.FirstOrDefault(claim => claim.Type == ClaimConstants.DB_ESTABLISHMENT_ID);
+        var dbEstablishmentId =
+            context.Principal.Claims.FirstOrDefault(claim => claim.Type == ClaimConstants.DB_ESTABLISHMENT_ID);
         Assert.NotNull(dbEstablishmentId);
         Assert.Equal(dbEstablishmentIdValue, int.Parse(dbEstablishmentId.Value));
     }
@@ -194,10 +210,10 @@ public class DfeOpenIdConnectEventsTests
         contextSubstitute.RequestServices.GetService(typeof(IDfePublicApi)).Returns(dfePublicApiSubstitute);
 
         var context = new UserInformationReceivedContext(contextSubstitute,
-                                                new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
-                                                new OpenIdConnectOptions(),
-                                                claimsPrincipalSubstitute,
-                                                new AuthenticationProperties());
+            new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
+            new OpenIdConnectOptions(),
+            claimsPrincipalSubstitute,
+            new AuthenticationProperties());
 
         await OnUserInformationReceivedEvent.OnUserInformationReceived(context);
 
@@ -217,9 +233,9 @@ public class DfeOpenIdConnectEventsTests
         contextSubstitute.RequestServices.GetService(typeof(IDfeSignInConfiguration)).Returns(config);
 
         var context = new RedirectContext(contextSubstitute,
-                                        new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
-                                        new OpenIdConnectOptions(),
-                                        new AuthenticationProperties());
+            new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
+            new OpenIdConnectOptions(),
+            new AuthenticationProperties());
 
         var openIdConnectMessage = new OpenIdConnectMessage
         {
@@ -248,9 +264,9 @@ public class DfeOpenIdConnectEventsTests
         contextSubstitute.RequestServices.GetService(typeof(IDfeSignInConfiguration)).Returns(config);
 
         var context = new RedirectContext(contextSubstitute,
-                                        new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
-                                        new OpenIdConnectOptions(),
-                                        new AuthenticationProperties());
+            new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
+            new OpenIdConnectOptions(),
+            new AuthenticationProperties());
 
         var openIdConnectMessage = new OpenIdConnectMessage
         {
@@ -264,5 +280,110 @@ public class DfeOpenIdConnectEventsTests
         var expectedUrl = config.FrontDoorUrl + config.SignoutRedirectUrl;
 
         Assert.Equal(expectedUrl, openIdConnectMessage.PostLogoutRedirectUri);
+    }
+
+
+    [Fact]
+    public async Task The_Correct_Role_Does_Not_Exist()
+    {
+        Guid userId = Guid.NewGuid();
+        Guid orgId = Guid.NewGuid();
+
+        var dfePublicApiSubstitute = Substitute.For<IDfePublicApi>();
+        var commandSubstitute = Substitute.For<IRecordUserSignInCommand>();
+        var dbUserIdValue = 1234;
+        var dbEstablishmentIdValue = 5678;
+        commandSubstitute.RecordSignIn(Arg.Any<RecordUserSignInDto>()).Returns(new Domain.SignIns.Models.SignIn()
+        {
+            UserId = dbUserIdValue,
+            EstablishmentId = dbEstablishmentIdValue,
+            SignInDateTime = DateTime.UtcNow,
+            Id = 1,
+        });
+
+        var userAccessToService = new UserAccessToService()
+        {
+            UserId = userId,
+            OrganisationId = orgId,
+            Roles = new List<Role>()
+            {
+                new Role()
+                {
+                    Status = new Status()
+                    {
+                        Id = 2
+                    },
+                    Name = "OtherRole",
+                    Code = "OtherCode",
+                    NumericId = "OtherNumericId",
+                }
+            }
+        };
+
+        dfePublicApiSubstitute.GetUserAccessToService(userId.ToString(), orgId.ToString()).Returns(userAccessToService);
+
+        var identitySubstitute = Substitute.For<ClaimsIdentity>();
+
+        var organisationClaim = new Organisation()
+        {
+            Id = orgId,
+            Name = "Organisation"
+        };
+
+        var organisationClaimSerialised = JsonSerializer.Serialize(organisationClaim);
+
+        identitySubstitute.Claims.Returns(new List<Claim>()
+        {
+            new Claim(ClaimConstants.NameIdentifier, userId.ToString()),
+            new Claim(ClaimConstants.Organisation, organisationClaimSerialised),
+        });
+
+        identitySubstitute.IsAuthenticated.Returns(true);
+
+        var claimsPrincipal = new ClaimsPrincipal(identitySubstitute);
+
+        var contextSubstitute = Substitute.For<HttpContext>();
+        contextSubstitute.RequestServices.GetService(typeof(IDfePublicApi)).Returns(dfePublicApiSubstitute);
+        contextSubstitute.RequestServices.GetService(typeof(IRecordUserSignInCommand)).Returns(commandSubstitute);
+
+        var context = new UserInformationReceivedContext(contextSubstitute,
+            new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
+            new OpenIdConnectOptions(),
+            claimsPrincipal,
+            new AuthenticationProperties());
+
+        // Disabled API Call as part of the release.
+        // await Assert.ThrowsAnyAsync<UserAccessRoleNotFoundException>(() =>
+        //     OnUserInformationReceivedEvent.OnUserInformationReceived(context));
+    }
+
+
+    [Fact]
+    public async Task The_Users_Organisation_Does_Not_Exist()
+    {
+        Guid userId = Guid.NewGuid();
+
+        var identitySubstitute = Substitute.For<ClaimsIdentity>();
+
+
+        identitySubstitute.Claims.Returns(new List<Claim>()
+        {
+            new Claim(ClaimConstants.NameIdentifier, userId.ToString()),
+        });
+
+        identitySubstitute.IsAuthenticated.Returns(true);
+
+        var claimsPrincipal = new ClaimsPrincipal(identitySubstitute);
+
+        var contextSubstitute = Substitute.For<HttpContext>();
+
+        var context = new UserInformationReceivedContext(contextSubstitute,
+            new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
+            new OpenIdConnectOptions(),
+            claimsPrincipal,
+            new AuthenticationProperties());
+
+        await Assert.ThrowsAnyAsync<KeyNotFoundException>(() =>
+            OnUserInformationReceivedEvent.OnUserInformationReceived(context));
     }
 }

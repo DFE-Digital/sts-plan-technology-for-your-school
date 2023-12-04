@@ -37,13 +37,13 @@ public class CheckAnswersRouter : ICheckAnswersRouter
 
         await _router.GetJourneyStatusForSection(sectionSlug, cancellationToken);
 
-    return _router.Status switch
-    {
-      SubmissionStatus.CheckAnswers => await ProcessCheckAnswers(sectionSlug, errorMessage, controller, cancellationToken),
-      SubmissionStatus.Completed or SubmissionStatus.NotStarted => PageRedirecter.RedirectToSelfAssessment(controller),
-      _ => ProcessQuestionStatus(sectionSlug, controller),
-    };
-  }
+        return _router.Status switch
+        {
+            SubmissionStatus.CheckAnswers => await ProcessCheckAnswers(sectionSlug, errorMessage, controller, cancellationToken),
+            SubmissionStatus.Completed or SubmissionStatus.NotStarted => PageRedirecter.RedirectToSelfAssessment(controller),
+            _ => ProcessQuestionStatus(sectionSlug, controller),
+        };
+    }
 
     private async Task<IActionResult> ProcessCheckAnswers(string sectionSlug, string? errorMessage, CheckAnswersController controller, CancellationToken cancellationToken)
     {

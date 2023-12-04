@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.SignIns.Interfaces;
 using Dfe.PlanTech.Domain.SignIns.Enums;
 using Dfe.PlanTech.Domain.SignIns.Models;
+using Dfe.PlanTech.Domain.Users.Exceptions;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Domain.Users.Models;
 using Dfe.PlanTech.Infrastructure.SignIns.Extensions;
@@ -56,7 +57,7 @@ public static class OnUserInformationReceivedEvent
         AddClaimsToPrincipal(context, signin);
     }
 
-    private static void AddClaimsToPrincipal(UserInformationReceivedContext context, SignIn signin)
+    private static void AddClaimsToPrincipal(UserInformationReceivedContext context, Domain.SignIns.Models.SignIn signin)
     {
         var principal = context.Principal;
 
@@ -87,18 +88,24 @@ public static class OnUserInformationReceivedEvent
         var userOrganization = context.Principal.Claims.GetOrganisation();
         if (userOrganization == null)
         {
-            context.Fail("User is not in an organisation.");
-            return;
+            throw new KeyNotFoundException(ClaimConstants.Organisation);
         }
 
         var userAccessToService = await dfePublicApi.GetUserAccessToService(userId, userOrganization.Id.ToString());
+
         if (userAccessToService == null)
         {
-            // User account is not enrolled into service and has no roles.
-            return;
+            throw new UserAccessUnavailableException("Could not retrieve information for user access to service");
         }
 
-        var roleIdentity = new ClaimsIdentity(GetRoleClaims(context, userAccessToService!));
+        bool hasRole = userAccessToService.Roles.Any(role => role.Code == "plan_tech_for_school_estalishment_only");
+
+        if (!hasRole)
+        {
+            throw new UserAccessRoleNotFoundException("User does not have correct role to access to this service");
+        }
+
+        var roleIdentity = new ClaimsIdentity(GetRoleClaims(context, userAccessToService));
         context.Principal.AddIdentity(roleIdentity);
     }
 
