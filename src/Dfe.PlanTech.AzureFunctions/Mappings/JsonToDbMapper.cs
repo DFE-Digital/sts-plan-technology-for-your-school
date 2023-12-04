@@ -6,46 +6,65 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public abstract class JsonToDbMapper<TEntity>
+public abstract class JsonToDbMapper<TEntity> : JsonToDbMapper
 where TEntity : ContentComponentDbEntity, new()
 {
-  protected readonly ILogger<JsonToDbMapper<TEntity>> Logger;
+  public JsonToDbMapper(ILogger<JsonToDbMapper<TEntity>> logger, JsonSerializerOptions jsonSerialiserOptions) : base(typeof(TEntity), logger, jsonSerialiserOptions)
+  {
+  }
+
+  public TEntity ToEntity(CmsWebHookPayload payload)
+  {
+    var values = GetEntityValuesDictionary(payload);
+    values = PerformAdditionalMapping(values);
+
+    var asJson = JsonSerializer.Serialize(values);
+    var serialised = JsonSerializer.Deserialize<TEntity>(asJson, JsonOptions);
+
+    return serialised ?? throw new Exception("Null value");
+
+  }
+
+  public override ContentComponentDbEntity MapEntity(CmsWebHookPayload payload) => ToEntity(payload);
+
+  public abstract Dictionary<string, object> PerformAdditionalMapping(Dictionary<string, object> values);
+}
+
+
+public abstract class JsonToDbMapper
+{
+  protected readonly ILogger Logger;
   protected readonly JsonSerializerOptions JsonOptions;
 
-  public JsonToDbMapper(ILogger<JsonToDbMapper<TEntity>> logger, JsonSerializerOptions jsonSerialiserOptions)
+  private readonly Type _entityType;
+  public JsonToDbMapper(Type entityType, ILogger logger, JsonSerializerOptions jsonSerialiserOptions)
   {
+    _entityType = entityType;
     Logger = logger;
     JsonOptions = jsonSerialiserOptions;
   }
 
-  public virtual TEntity MapToEntity(CmsWebHookPayload payload)
-  {
-    var entity = new TEntity();
-    entity = MapSharedFields(payload, entity);
+  public bool AcceptsContentType(string contentType)
+    => _entityType.Name.ToLower().Contains(contentType);
 
-    return MapEntityFields(payload, entity);
-  }
+  public abstract ContentComponentDbEntity MapEntity(CmsWebHookPayload payload);
 
-  public abstract TEntity MapEntityFields(CmsWebHookPayload payload, TEntity entity);
+  protected Dictionary<string, object> GetEntityValuesDictionary(CmsWebHookPayload payload)
+  => GetEntityValues(payload).Where(kvp => kvp.HasValue)
+                                        .Select(kvp => kvp!.Value)
+                                        .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-  public virtual TEntity MapSharedFields(CmsWebHookPayload payload, TEntity entity)
-  {
-    entity.Id = payload.Sys.Id;
-
-    return entity;
-  }
-
-  public IEnumerable<KeyValuePair<string, object>?> GetEntityFields(CmsWebHookPayload payload)
+  protected virtual IEnumerable<KeyValuePair<string, object>?> GetEntityValues(CmsWebHookPayload payload)
   {
     yield return new KeyValuePair<string, object>("id", payload.Sys.Id);
 
-    foreach (var field in payload.Fields.SelectMany(GetFieldValues))
+    foreach (var field in payload.Fields.SelectMany(GetValuesFromFields))
     {
       yield return field;
     }
   }
 
-  private IEnumerable<KeyValuePair<string, object>?> GetFieldValues(KeyValuePair<string, JsonNode> field)
+  protected virtual IEnumerable<KeyValuePair<string, object>?> GetValuesFromFields(KeyValuePair<string, JsonNode> field)
   {
     if (field.Value == null)
     {
@@ -74,18 +93,7 @@ where TEntity : ContentComponentDbEntity, new()
     }
   }
 
-  protected string FirstCharToUpperAsSpan(string input)
-  {
-    if (string.IsNullOrEmpty(input))
-    {
-      return string.Empty;
-    }
-    Span<char> destination = stackalloc char[1];
-    input.AsSpan(0, 1).ToUpperInvariant(destination);
-    return $"{destination}{input.AsSpan(1)}";
-  }
-
-  protected bool TrySerialiseAsLinkEntry(JsonNode node, out CmsWebHookSystemDetailsInner? sys)
+  protected virtual bool TrySerialiseAsLinkEntry(JsonNode node, out CmsWebHookSystemDetailsInner? sys)
   {
     if (node is not JsonObject jsonObject)
     {
@@ -105,5 +113,4 @@ where TEntity : ContentComponentDbEntity, new()
 
     return !string.IsNullOrEmpty(sys.Id) && !string.IsNullOrEmpty(sys.LinkType) && !string.IsNullOrEmpty(sys.Type);
   }
-
 }
