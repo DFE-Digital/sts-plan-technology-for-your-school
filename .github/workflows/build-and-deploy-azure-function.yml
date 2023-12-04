@@ -53,6 +53,7 @@ jobs:
 
         runs-on: ubuntu-22.04
         name: Deploy .NET Azure Function App
+        needs: build
         environment: ${{ inputs.environment }}
         env:
             AZURE_FUNCTIONAPP_NAME: "${{ secrets.AZ_ENVIRONMENT }}plantechcontentfulfunction"
