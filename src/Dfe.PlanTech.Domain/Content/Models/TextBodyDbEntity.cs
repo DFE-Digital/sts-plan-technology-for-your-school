@@ -10,6 +10,4 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 public class TextBodyDbEntity : ContentComponentDbEntity, ITextBody<RichTextContentDbEntity>
 {
   public RichTextContentDbEntity RichText { get; set; } = null!;
-
-  public string RichTextId { get; set; } = null!;
 }
