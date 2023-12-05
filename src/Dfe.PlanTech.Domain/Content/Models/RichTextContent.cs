@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Interfaces;
-using System.Text;
 
 namespace Dfe.PlanTech.Domain.Content.Models;
 

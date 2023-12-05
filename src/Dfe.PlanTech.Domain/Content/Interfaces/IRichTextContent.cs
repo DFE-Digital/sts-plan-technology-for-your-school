@@ -18,6 +18,11 @@ public interface IRichTextContent
     /// NodeType for This node; e.g. paragraph, underordered-list, etc.
     /// </summary>
     public string NodeType { get; }
+
+    /// <summary>
+    /// Maps NodeType field to Enum, for easier parsing in views
+    /// </summary>
+    public RichTextNodeType MappedNodeType { get; }
 }
 
 public interface IRichTextContent<TMark, TContentType, TData> : IRichTextContent
@@ -29,12 +34,6 @@ where TData : IRichTextData, new()
     /// Collection of marks (e.g. underline, bold, etc.)
     /// </summary>
     public List<TMark> Marks { get; }
-
-    /// <summary>
-    /// Maps NodeType field to Enum, for easier parsing in views
-    /// </summary>
-    /// <typeparam name="NodeTypes"></typeparam>
-    public RichTextNodeType MappedNodeType { get; }
 
     /// <summary>
     /// Child content
