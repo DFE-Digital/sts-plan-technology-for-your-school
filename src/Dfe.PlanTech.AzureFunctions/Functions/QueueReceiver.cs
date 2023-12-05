@@ -1,7 +1,9 @@
 using System.Text;
 using System.Text.Json;
 using Azure.Messaging.ServiceBus;
+using Dfe.PlanTech.AzureFunctions.Mappings;
 using Dfe.PlanTech.Domain.Caching.Models;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.EntityFrameworkCore;
@@ -13,12 +15,13 @@ namespace Dfe.PlanTech.AzureFunctions
     {
         private readonly ILogger _logger;
         private readonly CmsDbContext _db;
-        private readonly JsonSerializerOptions _jsonSerialiserOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+        private readonly JsonToEntityMappers _mappers;
 
-        public QueueReceiver(ILoggerFactory loggerFactory, CmsDbContext db)
+        public QueueReceiver(ILoggerFactory loggerFactory, CmsDbContext db, JsonToEntityMappers mappers)
         {
             _logger = loggerFactory.CreateLogger<QueueReceiver>();
             _db = db;
+            _mappers = mappers;
         }
 
         [Function("QueueReceiver")]
@@ -39,11 +42,18 @@ namespace Dfe.PlanTech.AzureFunctions
                 var text = Encoding.UTF8.GetString(message.Body);
                 _logger.LogInformation("Processing {text}", text);
 
-                var payload = await SerialiseMessage(message, messageActions, text);
+                var mapped = _mappers.ToEntity(text);
 
-                if (payload == null) return;
+                var rowsChanged = await UpsertEntityInDatabase(mapped);
 
-                await ProcessContent(text, payload);
+                if (rowsChanged == 0)
+                {
+                    _logger.LogError("Changed no rows in database");
+                }
+                else
+                {
+                    _logger.LogInformation($"Updated {rowsChanged} rows in the database");
+                }
 
                 await messageActions.CompleteMessageAsync(message);
             }
@@ -54,61 +64,31 @@ namespace Dfe.PlanTech.AzureFunctions
             }
         }
 
-        private async Task<CmsWebHookPayload?> SerialiseMessage(ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions, string text)
+        private async Task<long> UpsertEntityInDatabase(ContentComponentDbEntity entity)
         {
-            try
+            var existing = _db.Find(entity.GetType(), entity.Id);
+
+            if (existing == null)
             {
-                var payload = JsonSerializer.Deserialize<CmsWebHookPayload>(text, _jsonSerialiserOptions);
-
-                if (payload != null)
-                {
-                    _logger.LogInformation("Payload ID is {id}", payload!.Sys.Id);
-                    return payload;
-                }
-
-                _logger.LogError("Could not serialise value to expected payload. Value was {0}", text);
-                await messageActions.DeadLetterMessageAsync(message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Error serialising payload - {message} {stacktrace}", ex.Message, ex.StackTrace);
-            }
-            return null;
-        }
-
-        private async Task ProcessContent(string text, CmsWebHookPayload? payload)
-        {
-            var existingEntity = await _db.ContentJson.FirstOrDefaultAsync(json => json.ContentId == payload!.Sys.Id);
-
-            if (existingEntity != null)
-            {
-                UpdateEntity(text, existingEntity);
+                _db.Add(entity);
             }
             else
             {
-                CreateNewEntity(text, payload);
+                UpdateProperties(entity, existing);
             }
 
-            await _db.SaveChangesAsync();
-            _logger.LogInformation("Wrote entity");
+            return await _db.SaveChangesAsync();
         }
 
-        private void CreateNewEntity(string text, CmsWebHookPayload? payload)
+        private static void UpdateProperties(ContentComponentDbEntity entity, object? existing)
         {
-            var entity = new JsonCmsDbEntity()
+            var properties = entity.GetType().GetProperties();
+
+            foreach (var property in properties)
             {
-                ContentTypeId = payload!.Sys.ContentType.Sys.Id,
-                ContentJson = text,
-                ContentId = payload!.Sys.Id,
-                IsPublished = true
-            };
-
-            _db.ContentJson.Add(entity);
-        }
-
-        private static void UpdateEntity(string text, JsonCmsDbEntity existingEntity)
-        {
-            existingEntity.ContentJson = text;
+                property.SetValue(existing, property.GetValue(entity));
+            }
         }
     }
 }
+

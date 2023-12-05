@@ -2,7 +2,7 @@ using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Content.Models;
 
-public class Page : ContentComponent
+public class Page : ContentComponent, IPage<ContentComponent, Title>
 {
     public string InternalName { get; init; } = null!;
 
@@ -20,13 +20,11 @@ public class Page : ContentComponent
 
     public string? SectionTitle { get; set; }
 
-    public string? Param { get; set; }
-
-    public IContentComponent[] BeforeTitleContent { get; init; } = Array.Empty<IContentComponent>();
+    public ContentComponent[] BeforeTitleContent { get; init; } = Array.Empty<ContentComponent>();
 
     public Title? Title { get; init; }
 
     public string? OrganisationName { get; set; }
 
-    public IContentComponent[] Content { get; init; } = Array.Empty<IContentComponent>();
+    public ContentComponent[] Content { get; init; } = Array.Empty<ContentComponent>();
 }

@@ -3,6 +3,7 @@ using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Dfe.PlanTech.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(CmsDbContext))]
-    partial class CmsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231201145938_RenameTables")]
+    partial class RenameTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -94,6 +97,10 @@ namespace Dfe.PlanTech.Infrastructure.Data.Migrations
                 {
                     b.HasBaseType("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity");
 
+                    b.Property<string>("ContentfulId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -131,6 +138,10 @@ namespace Dfe.PlanTech.Infrastructure.Data.Migrations
                     b.HasBaseType("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity");
 
                     b.Property<string>("HelpText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Param")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Slug")

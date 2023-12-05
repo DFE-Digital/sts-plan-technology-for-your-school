@@ -134,7 +134,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             InternalName = "Internal Name",
             Slug = "testing-page",
             SectionTitle = "Section Title",
-            Param = param,
             Title = BuildTitle(),
             Content = Array.Empty<IContentComponent>()
         };

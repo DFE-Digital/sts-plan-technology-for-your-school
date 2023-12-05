@@ -41,8 +41,8 @@ public class Section : ContentComponent, ISection
             {
                 break;
             }
+            Answer? answer = GetAnswerForRef(node, questionWithAnswer);
 
-            var answer = Array.Find(node.Answers, answer => answer.Sys.Id == questionWithAnswer.AnswerRef);
             questionWithAnswer = questionWithAnswer with
             {
                 AnswerText = answer?.Text ?? questionWithAnswer.AnswerText,
@@ -51,7 +51,10 @@ public class Section : ContentComponent, ISection
             };
 
             yield return questionWithAnswer;
-            node = Array.Find(node.Answers, answer => answer.Sys.Id.Equals(questionWithAnswer.AnswerRef))?.NextQuestion;
+            node = GetAnswerForRef(node, questionWithAnswer)?.NextQuestion;
         }
     }
+
+    private static Answer? GetAnswerForRef(Question node, QuestionWithAnswer questionWithAnswer)
+    => node.Answers.Find(answer => answer.Sys.Id.Equals(questionWithAnswer.AnswerRef));
 }

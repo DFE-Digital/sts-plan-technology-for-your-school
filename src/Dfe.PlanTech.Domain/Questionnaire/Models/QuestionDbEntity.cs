@@ -3,19 +3,15 @@ using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-public class Question : ContentComponent, IQuestion<Answer>
+public class QuestionDbEntity : ContentComponentDbEntity, IQuestion<AnswerDbEntity>
 {
-    /// <summary>
-    /// Actual question text
-    /// </summary>
     public string Text { get; init; } = null!;
 
-    /// <summary>
-    /// Optional help text
-    /// </summary>
     public string? HelpText { get; init; }
 
-    public List<Answer> Answers { get; init; } = new();
+    public List<AnswerDbEntity> Answers { get; init; } = new();
 
     public string Slug { get; set; } = null!;
+
+    public List<AnswerDbEntity> PreviousAnswers { get; init; } = new();
 }

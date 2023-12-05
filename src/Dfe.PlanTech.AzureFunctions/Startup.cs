@@ -1,5 +1,8 @@
+using System.Reflection;
+using System.Text.Json;
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
+using Dfe.PlanTech.AzureFunctions.Mappings;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
@@ -25,6 +28,33 @@ namespace Dfe.PlanTech.AzureFunctions
 
                 builder.UseCredential(new DefaultAzureCredential());
             });
+
+            services.AddSingleton(new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+
+            services.AddScoped<JsonToDbMapper, AnswerMapper>();
+            services.AddScoped<JsonToDbMapper, QuestionMapper>();
+
+            AddMappers(services);
         }
+
+        /// <summary>
+        /// Finds all <see cref="JsonToDbMapper"/> mappers using reflection, and then injects them as dependencies 
+        /// </summary>
+        /// <param name="services"></param>
+        private static void AddMappers(IServiceCollection services)
+        {
+            foreach (var mapper in GetMappers())
+            {
+                services.AddScoped(typeof(JsonToDbMapper), mapper);
+            }
+
+            services.AddScoped<JsonToEntityMappers>();
+        }
+
+        /// <summary>
+        /// Get all <see cref="JsonToDbMapper"/> mappers using reflection 
+        /// </summary>
+        /// <returns></returns>
+        private static IEnumerable<Type> GetMappers() => Assembly.GetEntryAssembly()!.GetTypes().Where(type => type.IsAssignableTo(typeof(JsonToDbMapper)) && !type.IsAbstract);
     }
 }
