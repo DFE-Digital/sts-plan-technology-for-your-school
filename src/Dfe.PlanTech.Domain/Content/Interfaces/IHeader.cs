@@ -2,6 +2,9 @@ using Dfe.PlanTech.Domain.Content.Enums;
 
 namespace Dfe.PlanTech.Domain.Content.Interfaces;
 
+/// <summary>
+/// Model for Header content type from Contentful
+/// </summary>
 public interface IHeader
 {
   /// <summary>

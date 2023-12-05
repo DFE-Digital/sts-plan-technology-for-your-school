@@ -4,8 +4,9 @@ using Dfe.PlanTech.Domain.Content.Interfaces;
 namespace Dfe.PlanTech.Domain.Content.Models;
 
 /// <summary>
-/// Model for Header content type
+/// Model for Header content type from Contentful
 /// </summary>
+/// <inheritdoc/>
 public class Header : ContentComponent, IHeader
 {
     public string Text { get; init; } = null!;
