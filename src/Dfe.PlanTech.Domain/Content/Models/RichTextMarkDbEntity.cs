@@ -7,9 +7,9 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 /// Mark type for the rich text (e.g. bold, underline)
 /// </summary>
 /// <inheritdoc/>
-public class RichTextMark : IRichTextMark
+public class RichTextMarkDbEntity : ContentComponentDbEntity, IRichTextMark
 {
-    public string Type { get; init; } = "";
+  public string Type { get; set; } = "";
 
-    public MarkType MarkType => Enum.TryParse(Type, true, out MarkType markType) ? markType : MarkType.Unknown;
+  public MarkType MarkType => Enum.TryParse(Type, true, out MarkType markType) ? markType : MarkType.Unknown;
 }

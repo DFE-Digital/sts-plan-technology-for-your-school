@@ -1,4 +1,4 @@
-namespace Dfe.PlanTech.Domain.Content.Models;
+namespace Dfe.PlanTech.Domain.Content.Enums;
 
 public enum RichTextNodeType
 {
