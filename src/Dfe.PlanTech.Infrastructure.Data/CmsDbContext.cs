@@ -8,6 +8,8 @@ namespace Dfe.PlanTech.Infrastructure.Data;
 [ExcludeFromCodeCoverage]
 public class CmsDbContext : DbContext
 {
+  private const string Schema = "Contentful";
+
   public DbSet<AnswerDbEntity> Answers { get; set; }
 
   public DbSet<ComponentDropDownDbEntity> ComponentDropDowns { get; set; }
@@ -37,11 +39,13 @@ public class CmsDbContext : DbContext
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
+    modelBuilder.HasDefaultSchema(Schema);
+
     modelBuilder.Entity<ContentComponentDbEntity>(entity =>
     {
       entity.Property(e => e.Id).HasMaxLength(30);
 
-      entity.ToTable("ContentComponents", "Contentful");
+      entity.ToTable("ContentComponents", Schema);
     });
 
     modelBuilder.Entity<AnswerDbEntity>(entity =>
@@ -49,12 +53,12 @@ public class CmsDbContext : DbContext
       entity.HasOne(a => a.NextQuestion).WithMany(q => q.PreviousAnswers);
       entity.HasOne(a => a.ParentQuestion).WithMany(q => q.Answers);
 
-      entity.ToTable("Answers", "Contentful");
+      entity.ToTable("Answers", Schema);
     });
 
     modelBuilder.Entity<PageContentDbEntity>(entity =>
     {
-      entity.ToTable("PageContents", "Contentful");
+      entity.ToTable("PageContents", Schema);
     });
 
     modelBuilder.Entity<PageDbEntity>(entity =>
@@ -72,17 +76,17 @@ public class CmsDbContext : DbContext
 
       entity.HasOne(page => page.Title).WithMany(title => title.Pages);
 
-      entity.ToTable("Pages", "Contentful");
+      entity.ToTable("Pages", Schema);
     });
 
     modelBuilder.Entity<QuestionDbEntity>(entity =>
     {
-      entity.ToTable("Questions", "Contentful");
+      entity.ToTable("Questions", Schema);
     });
 
     modelBuilder.Entity<TitleDbEntity>(entity =>
     {
-      entity.ToTable("Titles", "Contentful");
+      entity.ToTable("Titles", Schema);
     });
   }
 }
