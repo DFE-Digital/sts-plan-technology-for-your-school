@@ -57,6 +57,10 @@ public class CmsDbContext : DbContext
 
   public DbSet<NavigationLinkDbEntity> NavigationLink { get; set; }
 
+  public DbSet<HeaderDbEntity> Headers { get; set; }
+
+  public DbSet<InsetText> InsetTexts { get; set; }
+
   public DbSet<PageDbEntity> Pages { get; set; }
 
   public DbSet<QuestionDbEntity> Questions { get; set; }
