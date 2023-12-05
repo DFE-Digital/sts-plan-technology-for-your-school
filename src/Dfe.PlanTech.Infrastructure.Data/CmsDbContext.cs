@@ -63,7 +63,7 @@ public class CmsDbContext : DbContext
 
   public DbSet<InsetTextDbEntity> InsetTexts { get; set; }
 
-  public DbSet<NavigationLink> NavigationLink { get; set; }
+  public DbSet<NavigationLinkDbEntity> NavigationLink { get; set; }
 
   public DbSet<PageDbEntity> Pages { get; set; }
 
