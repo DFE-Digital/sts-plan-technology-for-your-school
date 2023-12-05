@@ -4,7 +4,7 @@ resource "azurerm_storage_account" "function_storage" {
   location                 = local.azure_location
   account_tier             = "Standard"
   account_replication_type = "LRS"
-  tags = local.tags
+  tags                     = local.tags
 
   public_network_access_enabled = true
   shared_access_key_enabled     = true
