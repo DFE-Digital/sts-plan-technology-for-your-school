@@ -59,7 +59,7 @@ public class CmsDbContext : DbContext
 
   public DbSet<HeaderDbEntity> Headers { get; set; }
 
-  public DbSet<InsetText> InsetTexts { get; set; }
+  public DbSet<InsetTextDbEntity> InsetTexts { get; set; }
 
   public DbSet<PageDbEntity> Pages { get; set; }
 
