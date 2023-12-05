@@ -26,7 +26,6 @@ public class CmsDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
-        optionsBuilder.UseSqlServer("Server=tcp:s190d01-plantech.database.windows.net,1433;Authentication=Active Directory Default; Database=s190d01-plantech-sqldb;");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
