@@ -21,12 +21,14 @@ resource "azurerm_service_plan" "function_plan" {
   location            = local.azure_location
   os_type             = "Linux"
   sku_name            = "Y1"
+  tags                = local.tags
 }
 
 resource "azurerm_linux_function_app" "contentful_function" {
   name                = "${local.resource_prefix}contentfulfunction"
   resource_group_name = local.resource_group_name
   location            = local.azure_location
+  tags                = local.tags
 
   storage_account_name          = azurerm_storage_account.function_storage.name
   storage_uses_managed_identity = true
@@ -61,4 +63,13 @@ resource "azurerm_linux_function_app" "contentful_function" {
 data "azurerm_function_app_host_keys" "default" {
   name                = azurerm_linux_function_app.contentful_function.name
   resource_group_name = local.resource_group_name
+}
+
+resource "azurerm_application_insights" "functional_insights" {
+  name                = "${local.resource_prefix}-function-insights"
+  location            = local.azure_location
+  resource_group_name = local.resource_group_name
+  application_type    = "web"
+  retention_in_days   = 30
+  tags                = local.tags
 }
