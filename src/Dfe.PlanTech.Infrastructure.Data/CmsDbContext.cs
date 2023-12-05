@@ -10,15 +10,21 @@ public class CmsDbContext : DbContext
 {
   public DbSet<AnswerDbEntity> Answers { get; set; }
 
+  public DbSet<ComponentDropDownDbEntity> ComponentDropDowns { get; set; }
+
   public DbSet<HeaderDbEntity> Headers { get; set; }
 
   public DbSet<InsetTextDbEntity> InsetTexts { get; set; }
+
+  public DbSet<NavigationLink> NavigationLink { get; set; }
 
   public DbSet<PageDbEntity> Pages { get; set; }
 
   public DbSet<QuestionDbEntity> Questions { get; set; }
 
   public DbSet<RichTextContentDbEntity> RichTextContents { get; set; }
+
+  public DbSet<TextBodyDbEntity> TextBodies { get; set; }
 
   public DbSet<TitleDbEntity> Titles { get; set; }
 
