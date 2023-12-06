@@ -58,7 +58,7 @@ resource "azurerm_linux_function_app" "contentful_function" {
     AZURE_KEYVAULT_CLIENTID         = azurerm_user_assigned_identity.user_assigned_identity.client_id
     AZURE_KEYVAULT_RESOURCEENDPOINT = "https://${local.resource_prefix}-kv.vault.azure.net/"
     AZURE_KEYVAULT_SCOPE            = "https://vault.azure.net/.default"
-    KeyVaultReferenceIdentity       = azurerm_user_assigned_identity.user_assigned_identity.principal_id
+    KeyVaultReferenceIdentity       = data.azurerm_user_assigned_identity.assigned_identity.id
   }
 }
 
@@ -70,6 +70,11 @@ data "azurerm_function_app_host_keys" "default" {
     azurerm_linux_function_app.contentful_function
   ]
 
+}
+
+data "azurerm_user_assigned_identity" "assigned_identity" {
+  name                = "${local.resource_prefix}-mi" 
+  resource_group_name = local.resource_prefix
 }
 
 resource "azurerm_application_insights" "functional_insights" {
