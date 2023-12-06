@@ -12,6 +12,8 @@ public class CmsDbContext : DbContext
 
   public DbSet<AnswerDbEntity> Answers { get; set; }
 
+  public DbSet<CategoryDbEntity> Categories { get; set; }
+
   public DbSet<ComponentDropDownDbEntity> ComponentDropDowns { get; set; }
 
   public DbSet<HeaderDbEntity> Headers { get; set; }
@@ -24,11 +26,17 @@ public class CmsDbContext : DbContext
 
   public DbSet<QuestionDbEntity> Questions { get; set; }
 
+  public DbSet<RecommendationPageDbEntity> RecommendationPages { get; set; }
+
   public DbSet<RichTextContentDbEntity> RichTextContents { get; set; }
+
+  public DbSet<SectionDbEntity> Sections { get; set; }
 
   public DbSet<TextBodyDbEntity> TextBodies { get; set; }
 
   public DbSet<TitleDbEntity> Titles { get; set; }
+
+  public DbSet<WarningComponentDbEntity> Warnings { get; set; }
 
   public CmsDbContext() { }
 
