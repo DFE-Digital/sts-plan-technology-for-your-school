@@ -12,7 +12,13 @@ public class SectionDbEntity : ContentComponentDbEntity, ISection<QuestionDbEnti
 
   public List<QuestionDbEntity> Questions { get; set; } = new();
 
-  public PageDbEntity InterstitialPage { get; set; } = null!;
+  public PageDbEntity? InterstitialPage { get; set; } = null!;
+
+  public string? InterstitialPageId { get; set; } = null!;
+
+  public CategoryDbEntity? Category { get; set; }
+
+  public string? CategoryId { get; set; }
 
   public List<RecommendationPageDbEntity> Recommendations { get; set; } = new();
 }

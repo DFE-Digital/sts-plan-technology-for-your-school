@@ -23,7 +23,7 @@ where TRecommendationPage : IRecommendationPage
 {
     public List<TQuestion> Questions { get; }
 
-    public TPage InterstitialPage { get; }
+    public TPage? InterstitialPage { get; }
 
     public List<TRecommendationPage> Recommendations { get; }
 }

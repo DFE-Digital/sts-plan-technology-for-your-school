@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
@@ -11,6 +12,12 @@ public class CmsDbContext : DbContext
   private const string Schema = "Contentful";
 
   public DbSet<AnswerDbEntity> Answers { get; set; }
+
+  public DbSet<ButtonDbEntity> Buttons { get; set; }
+
+  public DbSet<ButtonWithEntryReferenceDbEntity> ButtonWithEntryReferences { get; set; }
+
+  public DbSet<ButtonWithLinkDbEntity> ButtonWithLinks { get; set; }
 
   public DbSet<CategoryDbEntity> Categories { get; set; }
 
@@ -58,10 +65,19 @@ public class CmsDbContext : DbContext
 
     modelBuilder.Entity<AnswerDbEntity>(entity =>
     {
-      entity.HasOne(a => a.NextQuestion).WithMany(q => q.PreviousAnswers);
-      entity.HasOne(a => a.ParentQuestion).WithMany(q => q.Answers);
+      entity.HasOne(a => a.NextQuestion).WithMany(q => q.PreviousAnswers).OnDelete(DeleteBehavior.Restrict);
+      entity.HasOne(a => a.ParentQuestion).WithMany(q => q.Answers).OnDelete(DeleteBehavior.Restrict);
 
       entity.ToTable("Answers", Schema);
+    });
+
+    modelBuilder.Entity<CategoryDbEntity>(entity =>
+    {
+      entity.HasMany(category => category.Sections)
+              .WithOne(section => section.Category)
+              .OnDelete(DeleteBehavior.Restrict);
+
+      entity.ToTable("Categories", Schema);
     });
 
     modelBuilder.Entity<PageContentDbEntity>(entity =>
@@ -82,7 +98,7 @@ public class CmsDbContext : DbContext
             .WithMany(c => c.ContentPages)
             .UsingEntity<PageContentDbEntity>();
 
-      entity.HasOne(page => page.Title).WithMany(title => title.Pages);
+      entity.HasOne(page => page.Title).WithMany(title => title.Pages).OnDelete(DeleteBehavior.Restrict);
 
       entity.ToTable("Pages", Schema);
     });
@@ -94,12 +110,25 @@ public class CmsDbContext : DbContext
 
     modelBuilder.Entity<RecommendationPageDbEntity>(entity =>
     {
-      entity.HasOne(recommendation => recommendation.Page);
+      entity.HasOne(recommendation => recommendation.Page)
+            .WithOne(page => page.RecommendationPage)
+            .OnDelete(DeleteBehavior.Restrict);
     });
 
     modelBuilder.Entity<SectionDbEntity>(entity =>
     {
-      entity.HasOne(section => section.InterstitialPage);
+      entity.HasOne(section => section.InterstitialPage)
+            .WithOne(page => page.Section)
+            .HasForeignKey<SectionDbEntity>()
+            .OnDelete(DeleteBehavior.Restrict);
+
+      entity.HasOne(section => section.Category)
+            .WithMany(category => category.Sections)
+            .OnDelete(DeleteBehavior.Restrict);
+
+      entity.HasMany(section => section.Questions)
+            .WithOne(question => question.Section)
+            .OnDelete(DeleteBehavior.Restrict);
     });
 
     modelBuilder.Entity<TitleDbEntity>(entity =>

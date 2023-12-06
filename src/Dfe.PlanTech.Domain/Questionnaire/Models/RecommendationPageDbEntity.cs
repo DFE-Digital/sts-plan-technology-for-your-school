@@ -6,11 +6,13 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
 public class RecommendationPageDbEntity : ContentComponentDbEntity, IRecommendationPage<PageDbEntity>
 {
-    public string InternalName { get; init; } = null!;
+    public string InternalName { get; set; } = null!;
 
-    public string DisplayName { get; init; } = null!;
+    public string DisplayName { get; set; } = null!;
 
-    public Maturity Maturity { get; init; }
+    public Maturity Maturity { get; set; }
 
-    public PageDbEntity Page { get; init; } = null!;
+    public PageDbEntity Page { get; set; } = null!;
+
+    public string PageId { get; set; } = null!;
 }

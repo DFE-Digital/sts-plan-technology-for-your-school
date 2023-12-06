@@ -12,7 +12,7 @@ public abstract class ContentComponentDbEntity : IContentComponentDbEntity
 
   public bool Deleted { get; set; }
 
-  public PageDbEntity[] BeforeTitleContentPages { get; set; } = Array.Empty<PageDbEntity>();
+  public List<PageDbEntity> BeforeTitleContentPages { get; set; } = new();
 
-  public PageDbEntity[] ContentPages { get; set; } = Array.Empty<PageDbEntity>();
+  public List<PageDbEntity> ContentPages { get; set; } = new();
 }

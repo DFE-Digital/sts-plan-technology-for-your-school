@@ -14,4 +14,8 @@ public class QuestionDbEntity : ContentComponentDbEntity, IQuestion<AnswerDbEnti
     public string Slug { get; set; } = null!;
 
     public List<AnswerDbEntity> PreviousAnswers { get; set; } = new();
+
+    public SectionDbEntity? Section { get; set; }
+
+    public string? SectionId { get; set; }
 }

@@ -19,15 +19,17 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
 
     public bool RequiresAuthorisation { get; set; } = true;
 
-    public string? SectionTitle { get; set; }
-
     public ContentComponentDbEntity[] BeforeTitleContent { get; set; } = Array.Empty<ContentComponentDbEntity>();
 
     public TitleDbEntity? Title { get; set; }
 
     public string? TitleId { get; set; }
 
-    public string? OrganisationName { get; set; }
-
     public ContentComponentDbEntity[] Content { get; set; } = Array.Empty<ContentComponentDbEntity>();
+
+    public RecommendationPageDbEntity? RecommendationPage { get; set; }
+
+    public SectionDbEntity? Section { get; set; }
+
+    public string? SectionId { get; set; }
 }

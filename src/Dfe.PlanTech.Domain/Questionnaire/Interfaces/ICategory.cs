@@ -10,19 +10,16 @@ public interface ICategory
 
 }
 
-public interface ICategory<THeader, TContentComponent, TSection> : ICategory
+public interface ICategory<THeader, TSection> : ICategory
 where THeader : IHeader
-where TContentComponent : IContentComponentType
 where TSection : ISection
 {
     public THeader Header { get; }
 
-    public List<TContentComponent> Content { get; }
-
     public List<TSection> Sections { get; }
 }
 
-public interface ICategoryComponent : ICategory<Header, ContentComponent, Section>, IContentComponent
+public interface ICategoryComponent : ICategory<Header, Section>, IContentComponent
 {
     public IList<SectionStatusDto> SectionStatuses { get; set; }
 
