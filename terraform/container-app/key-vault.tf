@@ -131,6 +131,20 @@ resource "azurerm_key_vault_secret" "functionapp_possibleoutboundipaddresses" {
   }
 }
 
+resource "azurerm_key_vault_secret" "functionapp_default_key" {
+  key_vault_id = azurerm_key_vault.vault.id
+  name         = "functionapp--accesskey"
+  value        = data.azurerm_function_app_host_keys.default.default_function_key
+
+  lifecycle {
+    ignore_changes = [
+      value,
+      expiration_date
+    ]
+  }
+}
+
+
 resource "azurerm_key_vault_key" "data_protection_key" {
   name         = "dataprotection"
   key_vault_id = azurerm_key_vault.vault.id

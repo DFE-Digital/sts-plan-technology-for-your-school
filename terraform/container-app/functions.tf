@@ -65,6 +65,11 @@ resource "azurerm_linux_function_app" "contentful_function" {
 data "azurerm_function_app_host_keys" "default" {
   name                = azurerm_linux_function_app.contentful_function.name
   resource_group_name = local.resource_group_name
+
+  depends_on = [
+    azurerm_linux_function_app.contentful_function
+  ]
+
 }
 
 resource "azurerm_application_insights" "functional_insights" {
