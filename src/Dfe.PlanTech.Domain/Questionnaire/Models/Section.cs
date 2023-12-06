@@ -15,7 +15,7 @@ public class Section : ContentComponent, ISectionContentComponent
 
     public string FirstQuestionId => Questions.Select(question => question.Sys.Id).FirstOrDefault() ?? "";
 
-    public Page? InterstitialPage { get; init; } = null!;
+    public Page InterstitialPage { get; init; } = null!;
 
     public List<RecommendationPage> Recommendations { get; init; } = new();
 
