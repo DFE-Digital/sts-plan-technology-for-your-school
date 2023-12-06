@@ -7,19 +7,19 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 /// <summary>
 /// A sub-section of a <see chref="Category"/>
 /// </summary>
-public class Section : ContentComponent, ISection
+public class Section : ContentComponent, ISectionContentComponent
 {
     public string Name { get; init; } = null!;
 
-    public Question[] Questions { get; init; } = Array.Empty<Question>();
+    public List<Question> Questions { get; init; } = new();
 
     public string FirstQuestionId => Questions.Select(question => question.Sys.Id).FirstOrDefault() ?? "";
 
     public Page InterstitialPage { get; init; } = null!;
 
-    public RecommendationPage[] Recommendations { get; init; } = Array.Empty<RecommendationPage>();
+    public List<RecommendationPage> Recommendations { get; init; } = new();
 
-    public RecommendationPage? TryGetRecommendationForMaturity(Maturity maturity) => Array.Find(Recommendations, recommendation => recommendation.Maturity == maturity);
+    public RecommendationPage? TryGetRecommendationForMaturity(Maturity maturity) => Recommendations.Find(recommendation => recommendation.Maturity == maturity);
 
     public RecommendationPage? GetRecommendationForMaturity(string? maturity)
     {
