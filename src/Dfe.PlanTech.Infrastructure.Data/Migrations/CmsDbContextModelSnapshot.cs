@@ -64,53 +64,6 @@ namespace Dfe.PlanTech.Infrastructure.Data.Migrations
                     b.ToTable("PageContents", "Contentful");
                 });
 
-            modelBuilder.Entity("Dfe.PlanTech.Domain.Content.Models.Buttons.ButtonDbEntity", b =>
-                {
-                    b.HasBaseType("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity");
-
-                    b.Property<bool>("IsStartButton")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.ToTable("Buttons", "Contentful");
-                });
-
-            modelBuilder.Entity("Dfe.PlanTech.Domain.Content.Models.Buttons.ButtonWithEntryReferenceDbEntity", b =>
-                {
-                    b.HasBaseType("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity");
-
-                    b.Property<string>("ButtonId")
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("LinkToEntryId")
-                        .HasColumnType("nvarchar(30)");
-
-                    b.HasIndex("ButtonId");
-
-                    b.HasIndex("LinkToEntryId");
-
-                    b.ToTable("ButtonWithEntryReferences", "Contentful");
-                });
-
-            modelBuilder.Entity("Dfe.PlanTech.Domain.Content.Models.Buttons.ButtonWithLinkDbEntity", b =>
-                {
-                    b.HasBaseType("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity");
-
-                    b.Property<string>("ButtonId")
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("Href")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasIndex("ButtonId");
-
-                    b.ToTable("ButtonWithLinks", "Contentful");
-                });
-
             modelBuilder.Entity("Dfe.PlanTech.Domain.Content.Models.ComponentDropDownDbEntity", b =>
                 {
                     b.HasBaseType("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity");
@@ -436,30 +389,6 @@ namespace Dfe.PlanTech.Infrastructure.Data.Migrations
                     b.Navigation("ContentComponent");
 
                     b.Navigation("Page");
-                });
-
-            modelBuilder.Entity("Dfe.PlanTech.Domain.Content.Models.Buttons.ButtonWithEntryReferenceDbEntity", b =>
-                {
-                    b.HasOne("Dfe.PlanTech.Domain.Content.Models.Buttons.ButtonDbEntity", "Button")
-                        .WithMany()
-                        .HasForeignKey("ButtonId");
-
-                    b.HasOne("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity", "LinkToEntry")
-                        .WithMany()
-                        .HasForeignKey("LinkToEntryId");
-
-                    b.Navigation("Button");
-
-                    b.Navigation("LinkToEntry");
-                });
-
-            modelBuilder.Entity("Dfe.PlanTech.Domain.Content.Models.Buttons.ButtonWithLinkDbEntity", b =>
-                {
-                    b.HasOne("Dfe.PlanTech.Domain.Content.Models.Buttons.ButtonDbEntity", "Button")
-                        .WithMany()
-                        .HasForeignKey("ButtonId");
-
-                    b.Navigation("Button");
                 });
 
             modelBuilder.Entity("Dfe.PlanTech.Domain.Content.Models.ComponentDropDownDbEntity", b =>
