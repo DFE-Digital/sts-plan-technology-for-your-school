@@ -7,7 +7,7 @@ public interface ITextBody
 {
 }
 
-public interface ITextBody<TContent>
+public interface ITextBody<TContent> : ITextBody
 where TContent : IRichTextContent
 {
   public TContent RichText { get; }
