@@ -57,6 +57,8 @@ public class CmsDbContext : DbContext
 
   public DbSet<NavigationLinkDbEntity> NavigationLink { get; set; }
 
+  public DbSet<CategoryDbEntity> Categories { get; set; }
+
   public DbSet<ComponentDropDownDbEntity> ComponentDropDowns { get; set; }
 
   public DbSet<HeaderDbEntity> Headers { get; set; }
