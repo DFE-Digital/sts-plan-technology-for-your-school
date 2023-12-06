@@ -123,7 +123,7 @@ resource "azurerm_key_vault_secret" "functionapp_possibleoutboundipaddresses" {
   value        = join(",", azurerm_linux_function_app.contentful_function.possible_outbound_ip_address_list)
 
 
-lifecycle {
+  lifecycle {
     ignore_changes = [
       value,
       expiration_date

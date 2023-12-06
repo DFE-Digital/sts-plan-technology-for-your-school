@@ -37,7 +37,7 @@ resource "azurerm_linux_function_app" "contentful_function" {
 
   site_config {
     application_insights_key = azurerm_application_insights.functional_insights.instrumentation_key
-    api_management_api_id = azurerm_api_management_api.contentful_api.id
+    api_management_api_id    = azurerm_api_management_api.contentful_api.id
     application_stack {
       dotnet_version              = "7.0"
       use_dotnet_isolated_runtime = true
@@ -50,15 +50,15 @@ resource "azurerm_linux_function_app" "contentful_function" {
   }
 
   app_settings = {
-    AZURE_SQL_CONNECTIONSTRING  = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=${azurerm_key_vault_secret.vault_secret_database_connectionstring.name})"
-    AzureWebJobsServiceBus      = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=${azurerm_key_vault_secret.vault_secret_servicebus_connectionstring.name})"
+    AZURE_SQL_CONNECTIONSTRING      = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=${azurerm_key_vault_secret.vault_secret_database_connectionstring.name})"
+    AzureWebJobsServiceBus          = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=${azurerm_key_vault_secret.vault_secret_servicebus_connectionstring.name})"
     WEBSITE_ENABLE_SYNC_UPDATE_SITE = true
-    WEBSITE_MOUNT_ENABLED = 1
-    AZURE_CLIENT_ID = azurerm_user_assigned_identity.user_assigned_identity.client_id
-    AZURE_KEYVAULT_CLIENTID = azurerm_user_assigned_identity.user_assigned_identity.client_id
+    WEBSITE_MOUNT_ENABLED           = 1
+    AZURE_CLIENT_ID                 = azurerm_user_assigned_identity.user_assigned_identity.client_id
+    AZURE_KEYVAULT_CLIENTID         = azurerm_user_assigned_identity.user_assigned_identity.client_id
     AZURE_KEYVAULT_RESOURCEENDPOINT = "https://${local.resource_prefix}-kv.vault.azure.net/"
-    AZURE_KEYVAULT_SCOPE = "https://vault.azure.net/.default"
-    KeyVaultReferenceIdentity = azurerm_user_assigned_identity.user_assigned_identity.principal_id
+    AZURE_KEYVAULT_SCOPE            = "https://vault.azure.net/.default"
+    KeyVaultReferenceIdentity       = azurerm_user_assigned_identity.user_assigned_identity.principal_id
   }
 }
 
