@@ -73,7 +73,7 @@ data "azurerm_function_app_host_keys" "default" {
 }
 
 data "azurerm_user_assigned_identity" "assigned_identity" {
-  name                = "${local.resource_prefix}-mi" 
+  name                = "${local.resource_prefix}-mi"
   resource_group_name = local.resource_prefix
 }
 
