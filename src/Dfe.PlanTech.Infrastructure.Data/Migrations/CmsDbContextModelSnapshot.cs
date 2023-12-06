@@ -31,9 +31,6 @@ namespace Dfe.PlanTech.Infrastructure.Data.Migrations
                     b.Property<bool>("Archived")
                         .HasColumnType("bit");
 
-                    b.Property<string>("CategoryDbEntityId")
-                        .HasColumnType("nvarchar(30)");
-
                     b.Property<bool>("Deleted")
                         .HasColumnType("bit");
 
@@ -41,8 +38,6 @@ namespace Dfe.PlanTech.Infrastructure.Data.Migrations
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CategoryDbEntityId");
 
                     b.ToTable("ContentComponents", "Contentful");
 
@@ -242,18 +237,6 @@ namespace Dfe.PlanTech.Infrastructure.Data.Migrations
                     b.ToTable("Titles", "Contentful");
                 });
 
-            modelBuilder.Entity("Dfe.PlanTech.Domain.Content.Models.WarningComponentDbEntity", b =>
-                {
-                    b.HasBaseType("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity");
-
-                    b.Property<string>("TextId")
-                        .HasColumnType("nvarchar(30)");
-
-                    b.HasIndex("TextId");
-
-                    b.ToTable("Warnings", "Contentful");
-                });
-
             modelBuilder.Entity("Dfe.PlanTech.Domain.Questionnaire.Models.AnswerDbEntity", b =>
                 {
                     b.HasBaseType("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity");
@@ -279,27 +262,12 @@ namespace Dfe.PlanTech.Infrastructure.Data.Migrations
                     b.ToTable("Answers", "Contentful");
                 });
 
-            modelBuilder.Entity("Dfe.PlanTech.Domain.Questionnaire.Models.CategoryDbEntity", b =>
-                {
-                    b.HasBaseType("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity");
-
-                    b.Property<string>("HeaderId")
-                        .HasColumnType("nvarchar(30)");
-
-                    b.HasIndex("HeaderId");
-
-                    b.ToTable("Categories", "Contentful");
-                });
-
             modelBuilder.Entity("Dfe.PlanTech.Domain.Questionnaire.Models.QuestionDbEntity", b =>
                 {
                     b.HasBaseType("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity");
 
                     b.Property<string>("HelpText")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SectionDbEntityId")
-                        .HasColumnType("nvarchar(30)");
 
                     b.Property<string>("Slug")
                         .IsRequired()
@@ -309,67 +277,7 @@ namespace Dfe.PlanTech.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("SectionDbEntityId");
-
                     b.ToTable("Questions", "Contentful");
-                });
-
-            modelBuilder.Entity("Dfe.PlanTech.Domain.Questionnaire.Models.RecommendationPageDbEntity", b =>
-                {
-                    b.HasBaseType("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity");
-
-                    b.Property<string>("DisplayName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("InternalName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Maturity")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PageId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("SectionDbEntityId")
-                        .HasColumnType("nvarchar(30)");
-
-                    b.HasIndex("PageId");
-
-                    b.HasIndex("SectionDbEntityId");
-
-                    b.ToTable("RecommendationPages", "Contentful");
-                });
-
-            modelBuilder.Entity("Dfe.PlanTech.Domain.Questionnaire.Models.SectionDbEntity", b =>
-                {
-                    b.HasBaseType("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity");
-
-                    b.Property<string>("CategoryDbEntityId1")
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("InterstitialPageId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasIndex("CategoryDbEntityId1");
-
-                    b.HasIndex("InterstitialPageId");
-
-                    b.ToTable("Sections", "Contentful");
-                });
-
-            modelBuilder.Entity("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity", b =>
-                {
-                    b.HasOne("Dfe.PlanTech.Domain.Questionnaire.Models.CategoryDbEntity", null)
-                        .WithMany("Content")
-                        .HasForeignKey("CategoryDbEntityId");
                 });
 
             modelBuilder.Entity("Dfe.PlanTech.Domain.Content.Models.PageContentDbEntity", b =>
@@ -482,21 +390,6 @@ namespace Dfe.PlanTech.Infrastructure.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Dfe.PlanTech.Domain.Content.Models.WarningComponentDbEntity", b =>
-                {
-                    b.HasOne("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity", null)
-                        .WithOne()
-                        .HasForeignKey("Dfe.PlanTech.Domain.Content.Models.WarningComponentDbEntity", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Dfe.PlanTech.Domain.Content.Models.TextBodyDbEntity", "Text")
-                        .WithMany()
-                        .HasForeignKey("TextId");
-
-                    b.Navigation("Text");
-                });
-
             modelBuilder.Entity("Dfe.PlanTech.Domain.Questionnaire.Models.AnswerDbEntity", b =>
                 {
                     b.HasOne("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity", null)
@@ -518,21 +411,6 @@ namespace Dfe.PlanTech.Infrastructure.Data.Migrations
                     b.Navigation("ParentQuestion");
                 });
 
-            modelBuilder.Entity("Dfe.PlanTech.Domain.Questionnaire.Models.CategoryDbEntity", b =>
-                {
-                    b.HasOne("Dfe.PlanTech.Domain.Content.Models.HeaderDbEntity", "Header")
-                        .WithMany()
-                        .HasForeignKey("HeaderId");
-
-                    b.HasOne("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity", null)
-                        .WithOne()
-                        .HasForeignKey("Dfe.PlanTech.Domain.Questionnaire.Models.CategoryDbEntity", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Header");
-                });
-
             modelBuilder.Entity("Dfe.PlanTech.Domain.Questionnaire.Models.QuestionDbEntity", b =>
                 {
                     b.HasOne("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity", null)
@@ -540,52 +418,6 @@ namespace Dfe.PlanTech.Infrastructure.Data.Migrations
                         .HasForeignKey("Dfe.PlanTech.Domain.Questionnaire.Models.QuestionDbEntity", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Dfe.PlanTech.Domain.Questionnaire.Models.SectionDbEntity", null)
-                        .WithMany("Questions")
-                        .HasForeignKey("SectionDbEntityId");
-                });
-
-            modelBuilder.Entity("Dfe.PlanTech.Domain.Questionnaire.Models.RecommendationPageDbEntity", b =>
-                {
-                    b.HasOne("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity", null)
-                        .WithOne()
-                        .HasForeignKey("Dfe.PlanTech.Domain.Questionnaire.Models.RecommendationPageDbEntity", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Dfe.PlanTech.Domain.Content.Models.PageDbEntity", "Page")
-                        .WithMany()
-                        .HasForeignKey("PageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Dfe.PlanTech.Domain.Questionnaire.Models.SectionDbEntity", null)
-                        .WithMany("Recommendations")
-                        .HasForeignKey("SectionDbEntityId");
-
-                    b.Navigation("Page");
-                });
-
-            modelBuilder.Entity("Dfe.PlanTech.Domain.Questionnaire.Models.SectionDbEntity", b =>
-                {
-                    b.HasOne("Dfe.PlanTech.Domain.Questionnaire.Models.CategoryDbEntity", null)
-                        .WithMany("Sections")
-                        .HasForeignKey("CategoryDbEntityId1");
-
-                    b.HasOne("Dfe.PlanTech.Domain.Content.Models.ContentComponentDbEntity", null)
-                        .WithOne()
-                        .HasForeignKey("Dfe.PlanTech.Domain.Questionnaire.Models.SectionDbEntity", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Dfe.PlanTech.Domain.Content.Models.PageDbEntity", "InterstitialPage")
-                        .WithMany()
-                        .HasForeignKey("InterstitialPageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("InterstitialPage");
                 });
 
             modelBuilder.Entity("Dfe.PlanTech.Domain.Content.Models.RichTextContentDbEntity", b =>
@@ -600,25 +432,11 @@ namespace Dfe.PlanTech.Infrastructure.Data.Migrations
                     b.Navigation("Pages");
                 });
 
-            modelBuilder.Entity("Dfe.PlanTech.Domain.Questionnaire.Models.CategoryDbEntity", b =>
-                {
-                    b.Navigation("Content");
-
-                    b.Navigation("Sections");
-                });
-
             modelBuilder.Entity("Dfe.PlanTech.Domain.Questionnaire.Models.QuestionDbEntity", b =>
                 {
                     b.Navigation("Answers");
 
                     b.Navigation("PreviousAnswers");
-                });
-
-            modelBuilder.Entity("Dfe.PlanTech.Domain.Questionnaire.Models.SectionDbEntity", b =>
-                {
-                    b.Navigation("Questions");
-
-                    b.Navigation("Recommendations");
                 });
 #pragma warning restore 612, 618
         }
