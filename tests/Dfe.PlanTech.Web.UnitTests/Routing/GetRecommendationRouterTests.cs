@@ -27,7 +27,7 @@ public class GetRecommendationRouterTests
     private readonly RecommendationsController _controller;
     private readonly IGetRecommendationRouter _router;
 
-    private readonly ISection _section = new Section()
+    private readonly Section _section = new()
     {
         InterstitialPage = new Page()
         {
@@ -37,7 +37,7 @@ public class GetRecommendationRouterTests
         {
             Id = "section-id"
         },
-        Recommendations = new RecommendationPage[]{
+        Recommendations = new(){
       new(){
         Page = new Page(){
           Slug = "low-recommendation-slug"

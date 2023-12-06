@@ -15,7 +15,7 @@ public class CheckAnswersOrNextQuestionCheckerTests
 {
   public readonly ISubmissionStatusChecker StatusChecker = CheckAnswersOrNextQuestionChecker.CheckAnswersOrNextQuestion;
 
-  public static readonly Question[] Questions = new Question[] {
+  public static readonly List<Question> Questions = new() {
   new(){
     Sys = new SystemDetails(){ Id = "Question-One" },
     Answers = new()
@@ -150,7 +150,7 @@ public class CheckAnswersOrNextQuestionCheckerTests
                 .Returns(CheckAnswersDto);
     processor.GetResponsesQuery.Returns(getResponsesQuery);
 
-    var section = Substitute.For<ISection>();
+    var section = Substitute.For<Section>();
     section.GetAttachedQuestions(Arg.Any<IEnumerable<QuestionWithAnswer>>())
             .Returns(new[] {
               CheckAnswersDto.Responses[0],CheckAnswersDto.Responses[1],CheckAnswersDto.Responses[4]
@@ -185,7 +185,7 @@ public class CheckAnswersOrNextQuestionCheckerTests
                 .Returns(CheckAnswersDto);
     processor.GetResponsesQuery.Returns(getResponsesQuery);
 
-    var section = Substitute.For<ISection>();
+    var section = Substitute.For<Section>();
     section.GetAttachedQuestions(Arg.Any<IEnumerable<QuestionWithAnswer>>())
             .Returns(new[] {
               CheckAnswersDto.Responses[0],CheckAnswersDto.Responses[1]

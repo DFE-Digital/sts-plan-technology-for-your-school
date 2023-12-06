@@ -16,10 +16,10 @@ public class RichTextRendererTests
 
     public RichTextRendererTests()
     {
-        _partRenderer.Accepts(Arg.Any<IRichTextContent>())
+        _partRenderer.Accepts(Arg.Any<RichTextContent>())
                     .Returns((content) => ((IRichTextContent)content[0]).NodeType == "paragraph");
 
-        _partRenderer.AddHtml(Arg.Any<IRichTextContent>(), Arg.Any<IRichTextContentPartRendererCollection>(), Arg.Any<StringBuilder>())
+        _partRenderer.AddHtml(Arg.Any<RichTextContent>(), Arg.Any<IRichTextContentPartRendererCollection>(), Arg.Any<StringBuilder>())
                     .Returns((CallInfo) =>
                     {
                         IRichTextContent content = (IRichTextContent)CallInfo[0];
@@ -60,7 +60,7 @@ public class RichTextRendererTests
         var content = new RichTextContent()
         {
             NodeType = "document",
-            Content = new[] {
+            Content = new() {
                 new RichTextContent() {
                     NodeType = "paragraph",
                     Value = testHtml
@@ -69,7 +69,7 @@ public class RichTextRendererTests
         };
 
         var html = _renderer.ToHtml(content);
-        _partRenderer.Received().AddHtml(Arg.Any<IRichTextContent>(), Arg.Any<IRichTextContentPartRendererCollection>(), Arg.Any<StringBuilder>());
+        _partRenderer.Received().AddHtml(Arg.Any<RichTextContent>(), Arg.Any<IRichTextContentPartRendererCollection>(), Arg.Any<StringBuilder>());
 
         Assert.Equal(testHtml, html);
     }

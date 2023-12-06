@@ -15,6 +15,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         InsetText BuildInsetText();
         TextBody BuildTextBody();
         RecommendationPage BuildRecommendationsPage(Maturity maturity = Maturity.Unknown);
-        ISection[] BuildSections();
+        List<Section> BuildSections();
     }
 }

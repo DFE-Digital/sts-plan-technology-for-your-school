@@ -26,63 +26,56 @@ public class TableRendererTests
 
         var tableCell = new RichTextContent()
         {
-            Content = new RichTextContent[] { tableCellText },
-            NodeType = "paragraph",
-            Value = ""
-        };
-
-        var tableCellTwo = new RichTextContent()
-        {
-            Content = new RichTextContent[] { tableCellText },
+            Content = new() { tableCellText },
             NodeType = "paragraph",
             Value = ""
         };
 
         var tableCellContent = new RichTextContent()
         {
-            Content = new RichTextContent[] { tableCell },
+            Content = new() { tableCell },
             NodeType = "table-cell",
             Value = ""
         };
 
         var tableHeaderCellsContent = new RichTextContent()
         {
-            Content = new RichTextContent[] { tableCell },
+            Content = new() { tableCell },
             NodeType = "table-header-cell",
             Value = ""
         };
 
         var tableCellContentTwo = new RichTextContent()
         {
-            Content = new RichTextContent[] { tableCell },
+            Content = new() { tableCell },
             NodeType = "table-cell",
             Value = ""
         };
 
         var tableHeaderCellsContentTwo = new RichTextContent()
         {
-            Content = new RichTextContent[] { tableCell },
+            Content = new() { tableCell },
             NodeType = "table-header-cell",
             Value = ""
         };
 
         var tableHeaderRowContent = new RichTextContent()
         {
-            Content = new RichTextContent[] { tableHeaderCellsContent, tableHeaderCellsContentTwo },
+            Content = new() { tableHeaderCellsContent, tableHeaderCellsContentTwo },
             NodeType = "table-row",
             Value = "",
         };
 
         var tableBodyRowContent = new RichTextContent()
         {
-            Content = new RichTextContent[] { tableCellContent, tableCellContentTwo },
+            Content = new() { tableCellContent, tableCellContentTwo },
             NodeType = "table-row",
             Value = "",
         };
 
         var tableContent = new RichTextContent()
         {
-            Content = new RichTextContent[] { tableHeaderRowContent, tableBodyRowContent },
+            Content = new() { tableHeaderRowContent, tableBodyRowContent },
             NodeType = NODE_TYPE,
             Value = "",
         };

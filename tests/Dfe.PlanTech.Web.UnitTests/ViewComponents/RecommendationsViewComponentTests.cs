@@ -16,8 +16,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
     public class RecommendationsViewComponentTests
     {
         private readonly RecommendationsViewComponent _recommendationsComponent;
-        private readonly ICategory _category;
-        private readonly ICategory _categoryTwo;
+        private readonly Category _category;
+        private readonly Category _categoryTwo;
         private IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
         private ILogger<RecommendationsViewComponent> _loggerCategory;
 
@@ -31,14 +31,13 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category = new Category()
             {
                 Completed = 1,
-                Sections = new Section[]
+                Sections = new()
                 {
                     new()
                     {
                         Sys = new SystemDetails() { Id = "Section1" },
                         Name = "Test Section 1",
-                        Recommendations = new RecommendationPage[]
-                        {
+                        Recommendations = new(){
                             new RecommendationPage()
                             {
                                 InternalName = "High-Maturity-Recommendation-Page-InternalName",
@@ -58,14 +57,12 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _categoryTwo = new Category()
             {
                 Completed = 1,
-                Sections = new Section[]
-                {
+                Sections = new(){
                     new()
                     {
                         Sys = new SystemDetails() { Id = "Section1" },
                         Name = "Test Section 1",
-                        Recommendations = new RecommendationPage[]
-                        {
+                        Recommendations =new(){
                             new()
                             {
                                 InternalName = "High-Maturity-Recommendation-Page-InternalName-Two",
@@ -93,7 +90,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Maturity = "High"
             });
 
-            ICategory[] categories = new ICategory[] { _category };
+            Category[] categories = new Category[] { _category };
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
 
@@ -132,7 +129,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Maturity = "High"
             });
 
-            ICategory[] categories = new ICategory[] { _category, _categoryTwo };
+            Category[] categories = new Category[] { _category, _categoryTwo };
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
 
@@ -170,7 +167,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Maturity = "High"
             });
 
-            ICategory[] categories = new ICategory[] { _category };
+            Category[] categories = new Category[] { _category };
 
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Throws(new Exception("test"));
@@ -205,7 +202,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Maturity = "Low",
             });
 
-            ICategory[] categories = new ICategory[] { _category };
+            Category[] categories = new Category[] { _category };
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
 
@@ -239,7 +236,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Maturity = null
             });
 
-            ICategory[] categories = new ICategory[] { _category };
+            Category[] categories = new Category[] { _category };
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
 
@@ -257,7 +254,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         {
             _category.Completed = 0;
 
-            ICategory[] categories = new ICategory[] { _category };
+            Category[] categories = new Category[] { _category };
 
             var result = _recommendationsComponent.Invoke(categories) as ViewViewComponentResult;
 

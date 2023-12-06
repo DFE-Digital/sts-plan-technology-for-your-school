@@ -50,7 +50,7 @@ public class QuestionsControllerTests
         {
             Slug = SectionSlug,
         },
-        Questions = new Question[1],
+        Questions = new(1)
     };
 
     public QuestionsControllerTests()
