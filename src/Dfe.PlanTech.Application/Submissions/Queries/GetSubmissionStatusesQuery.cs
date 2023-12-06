@@ -1,5 +1,6 @@
 ﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Models;
@@ -19,7 +20,7 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
 
     }
 
-    public IList<SectionStatusDto> GetSectionSubmissionStatuses(IEnumerable<Section> sections)
+    public IList<SectionStatusDto> GetSectionSubmissionStatuses(IEnumerable<ISectionContentComponent> sections)
     {
         int establishmentId = _userHelper.GetEstablishmentId().Result;
 
@@ -29,7 +30,7 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
     }
 
     public async Task<SectionStatusNew> GetSectionSubmissionStatusAsync(int establishmentId,
-                                                                         Section section,
+                                                                         ISectionContentComponent section,
                                                                          CancellationToken cancellationToken)
     {
         var sectionStatus = _db.GetSubmissions.Where(submission => submission.EstablishmentId == establishmentId &&

@@ -31,7 +31,7 @@ where TRecommendationPage : IRecommendationPage
 /// <summary>
 /// Interface for the <see cref="ISection"/> for the Contentful data 
 /// </summary>
-public interface ISectionContentComponent : ISection<Question, Page, RecommendationPage>
+public interface ISectionContentComponent : IContentComponent, ISection<Question, Page, RecommendationPage>
 {
     public string FirstQuestionId { get; }
 

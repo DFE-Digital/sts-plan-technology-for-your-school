@@ -55,7 +55,7 @@ public class QuestionsControllerTests
 
     public QuestionsControllerTests()
     {
-        _validSection.Questions[0] = _validQuestion;
+        _validSection.Questions.Add(_validQuestion);
 
         _logger = Substitute.For<ILogger<QuestionsController>>();
 

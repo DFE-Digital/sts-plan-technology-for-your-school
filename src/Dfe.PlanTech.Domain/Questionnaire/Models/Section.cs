@@ -33,7 +33,7 @@ public class Section : ContentComponent, ISectionContentComponent
         var questionWithAnswerMap = responses.ToDictionary(questionWithAnswer => questionWithAnswer.QuestionRef,
                                                                                  questionWithAnswer => questionWithAnswer);
 
-        Question? node = Questions[0];
+        Question? node = Questions.FirstOrDefault();
 
         while (node != null)
         {
@@ -41,6 +41,7 @@ public class Section : ContentComponent, ISectionContentComponent
             {
                 break;
             }
+
             Answer? answer = GetAnswerForRef(node, questionWithAnswer);
 
             questionWithAnswer = questionWithAnswer with
