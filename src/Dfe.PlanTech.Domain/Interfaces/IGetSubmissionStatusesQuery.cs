@@ -6,10 +6,10 @@ namespace Dfe.PlanTech.Domain.Interfaces;
 
 public interface IGetSubmissionStatusesQuery
 {
-    IList<SectionStatusDto> GetSectionSubmissionStatuses(IEnumerable<ISectionContentComponent> sections);
+    IList<SectionStatusDto> GetSectionSubmissionStatuses(IEnumerable<ISectionComponent> sections);
 
     Task<SectionStatusNew> GetSectionSubmissionStatusAsync(int establishmentId,
-                                                           ISectionContentComponent section,
+                                                           ISectionComponent section,
                                                            CancellationToken cancellationToken);
 }
 

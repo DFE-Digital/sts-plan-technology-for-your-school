@@ -20,7 +20,7 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
 
     }
 
-    public IList<SectionStatusDto> GetSectionSubmissionStatuses(IEnumerable<ISectionContentComponent> sections)
+    public IList<SectionStatusDto> GetSectionSubmissionStatuses(IEnumerable<ISectionComponent> sections)
     {
         int establishmentId = _userHelper.GetEstablishmentId().Result;
 
@@ -30,7 +30,7 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
     }
 
     public async Task<SectionStatusNew> GetSectionSubmissionStatusAsync(int establishmentId,
-                                                                         ISectionContentComponent section,
+                                                                         ISectionComponent section,
                                                                          CancellationToken cancellationToken)
     {
         var sectionStatus = _db.GetSubmissions.Where(submission => submission.EstablishmentId == establishmentId &&

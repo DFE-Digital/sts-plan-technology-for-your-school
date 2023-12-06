@@ -7,7 +7,7 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 /// <summary>
 /// A sub-section of a <see chref="Category"/>
 /// </summary>
-public class Section : ContentComponent, ISectionContentComponent
+public class Section : ContentComponent, ISectionComponent
 {
     public string Name { get; init; } = null!;
 

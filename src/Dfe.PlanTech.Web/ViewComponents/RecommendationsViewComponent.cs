@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -19,9 +18,9 @@ public class RecommendationsViewComponent : ViewComponent
         _query = query;
     }
 
-    public IViewComponentResult Invoke(IEnumerable<Category> categories)
+    public IViewComponentResult Invoke(IEnumerable<ICategoryComponent> categories)
     {
-        var allSectionsOfCombinedCategories = new List<Section>();
+        var allSectionsOfCombinedCategories = new List<ISectionComponent>();
         var allSectionStatusesOfCombinedCategories = new List<SectionStatusDto>();
 
         var recommendationsAvailable = false;
@@ -47,7 +46,7 @@ public class RecommendationsViewComponent : ViewComponent
     }
 
     private IEnumerable<RecommendationsViewComponentViewModel> GetRecommendationsViewComponentViewModel(
-        IEnumerable<Section> sections, List<SectionStatusDto> sectionStatusesList)
+        IEnumerable<ISectionComponent> sections, List<SectionStatusDto> sectionStatusesList)
     {
         foreach (var section in sections)
         {
@@ -68,7 +67,7 @@ public class RecommendationsViewComponent : ViewComponent
             {
                 RecommendationSlug = recommendation?.Page.Slug,
                 RecommendationDisplayName = recommendation?.DisplayName,
-                SectionSlug = section.InterstitialPage.Slug,
+                SectionSlug = section.InterstitialPage?.Slug,
                 NoRecommendationFoundErrorMessage = recommendation == null
                     ? string.Format("Unable to retrieve {0} recommendation", section.Name)
                     : null
@@ -76,11 +75,11 @@ public class RecommendationsViewComponent : ViewComponent
         }
     }
 
-    public Category RetrieveSectionStatuses(Category category)
+    public ICategoryComponent RetrieveSectionStatuses(ICategoryComponent category)
     {
         try
         {
-            category.SectionStatuses = _query.GetSectionSubmissionStatuses(category.Sections).ToList();
+            category.SectionStatuses = _query.GetSectionSubmissionStatuses(category.Sections);
             category.Completed = category.SectionStatuses.Count(x => x.Completed == 1);
             category.RetrievalError = false;
 

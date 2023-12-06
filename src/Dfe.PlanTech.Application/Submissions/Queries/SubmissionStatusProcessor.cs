@@ -17,7 +17,7 @@ public class SubmissionStatusProcessor : ISubmissionStatusProcessor
     private readonly ISubmissionStatusChecker[] _statusCheckers;
 
     public IGetLatestResponsesQuery GetResponsesQuery { get; init; }
-    public ISectionContentComponent? Section { get; private set; }
+    public ISectionComponent? Section { get; private set; }
     public IUser User { get; init; }
     public Question? NextQuestion { get; set; }
     public SectionStatusNew? SectionStatus { get; private set; }
