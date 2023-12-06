@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Domain.Content.Models;
 

@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Responses.Interfaces;
 
@@ -13,7 +12,7 @@ public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand
         _getLatestResponseListForSubmissionQuery = getLatestResponseListForSubmissionQuery;
     }
 
-    public async Task<CheckAnswerDto?> GetCheckAnswerDtoForSection(int establishmentId, ISection section, CancellationToken cancellationToken = default)
+    public async Task<CheckAnswerDto?> GetCheckAnswerDtoForSection(int establishmentId, Section section, CancellationToken cancellationToken = default)
     {
         var checkAnswerDto = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(establishmentId, section.Sys.Id, cancellationToken);
         if (checkAnswerDto?.Responses == null || !checkAnswerDto.Responses.Any())
@@ -24,7 +23,7 @@ public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand
         return RemoveDetachedQuestions(checkAnswerDto, section);
     }
 
-    private static CheckAnswerDto RemoveDetachedQuestions(CheckAnswerDto checkAnswerDto, ISection section)
+    private static CheckAnswerDto RemoveDetachedQuestions(CheckAnswerDto checkAnswerDto, Section section)
     {
         if (checkAnswerDto == null) throw new ArgumentNullException(nameof(checkAnswerDto));
         if (section == null) throw new ArgumentNullException(nameof(section));

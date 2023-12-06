@@ -4,7 +4,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-public class RecommendationPageDbEntity : ContentComponentDbEntity, IRecommendationPage
+public class RecommendationPageDbEntity : ContentComponentDbEntity, IRecommendationPage<PageDbEntity>
 {
     public string InternalName { get; init; } = null!;
 
@@ -12,5 +12,5 @@ public class RecommendationPageDbEntity : ContentComponentDbEntity, IRecommendat
 
     public Maturity Maturity { get; init; }
 
-    public Page Page { get; init; } = null!;
+    public PageDbEntity Page { get; init; } = null!;
 }

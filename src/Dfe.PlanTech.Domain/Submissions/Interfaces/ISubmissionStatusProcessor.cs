@@ -17,7 +17,7 @@ public interface ISubmissionStatusProcessor
     public IUser User { get; }
     public SubmissionStatus Status { get; set; }
     public Question? NextQuestion { get; set; }
-    public ISection? Section { get; }
+    public Section? Section { get; }
     public SectionStatusNew? SectionStatus { get; }
 
     Task GetJourneyStatusForSection(string sectionSlug, CancellationToken cancellationToken);

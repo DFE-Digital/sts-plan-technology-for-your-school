@@ -92,6 +92,16 @@ public class CmsDbContext : DbContext
       entity.ToTable("Questions", Schema);
     });
 
+    modelBuilder.Entity<RecommendationPageDbEntity>(entity =>
+    {
+      entity.HasOne(recommendation => recommendation.Page);
+    });
+
+    modelBuilder.Entity<SectionDbEntity>(entity =>
+    {
+      entity.HasOne(section => section.InterstitialPage);
+    });
+
     modelBuilder.Entity<TitleDbEntity>(entity =>
     {
       entity.ToTable("Titles", Schema);
