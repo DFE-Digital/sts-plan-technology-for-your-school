@@ -41,6 +41,7 @@ public class Section : ContentComponent, ISectionComponent
             {
                 break;
             }
+
             Answer? answer = GetAnswerForRef(node, questionWithAnswer);
 
             Answer? answer = GetAnswerForRef(node, questionWithAnswer);

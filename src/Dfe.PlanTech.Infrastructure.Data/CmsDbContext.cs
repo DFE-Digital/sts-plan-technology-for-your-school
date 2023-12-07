@@ -31,7 +31,7 @@ public class CmsDbContext : DbContext
 
     public DbSet<PageDbEntity> Pages { get; set; }
 
-    public DbSet<QuestionDbEntity> Questions { get; set; }
+  public DbSet<ButtonDbEntity> Buttons { get; set; }
 
     public DbSet<RecommendationPageDbEntity> RecommendationPages { get; set; }
 
@@ -47,12 +47,51 @@ public class CmsDbContext : DbContext
 
     public CmsDbContext() { }
 
-    public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
+  public DbSet<CategoryDbEntity> Categories { get; set; }
+
+  public DbSet<ComponentDropDownDbEntity> ComponentDropDowns { get; set; }
+
+  public DbSet<HeaderDbEntity> Headers { get; set; }
+
+  public DbSet<InsetTextDbEntity> InsetTexts { get; set; }
+
+  public DbSet<NavigationLinkDbEntity> NavigationLink { get; set; }
+
+  public DbSet<PageDbEntity> Pages { get; set; }
+
+  public DbSet<QuestionDbEntity> Questions { get; set; }
+
+  public DbSet<RecommendationPageDbEntity> RecommendationPages { get; set; }
+
+  public DbSet<RichTextContentDbEntity> RichTextContents { get; set; }
+
+  public DbSet<SectionDbEntity> Sections { get; set; }
+
+  public DbSet<TextBodyDbEntity> TextBodies { get; set; }
+
+  public DbSet<TitleDbEntity> Titles { get; set; }
+
+  public DbSet<WarningComponentDbEntity> Warnings { get; set; }
+
+  public CmsDbContext() { }
+
+  public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
+  {
+
+  }
+
+  protected override void OnModelCreating(ModelBuilder modelBuilder)
+  {
+    modelBuilder.HasDefaultSchema(Schema);
+
+    modelBuilder.Entity<ContentComponentDbEntity>(entity =>
     {
+      entity.Property(e => e.Id).HasMaxLength(30);
 
-    }
+      entity.ToTable("ContentComponents", Schema);
+    });
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    modelBuilder.Entity<AnswerDbEntity>(entity =>
     {
         modelBuilder.HasDefaultSchema(Schema);
 
@@ -85,18 +124,18 @@ public class CmsDbContext : DbContext
             entity.ToTable("PageContents", Schema);
         });
 
-        modelBuilder.Entity<PageDbEntity>(entity =>
-        {
-            entity.HasMany(page => page.BeforeTitleContent)
-              .WithMany(c => c.BeforeTitleContentPages)
-              .UsingEntity<PageContentDbEntity>(
-                left => left.HasOne(pageContent => pageContent.ContentComponent).WithMany().OnDelete(DeleteBehavior.Restrict),
-                right => right.HasOne(pageContent => pageContent.Page).WithMany().OnDelete(DeleteBehavior.Restrict)
-              );
+    modelBuilder.Entity<PageDbEntity>(entity =>
+    {
+      entity.HasMany(page => page.BeforeTitleContent)
+            .WithMany(c => c.BeforeTitleContentPages)
+            .UsingEntity<PageContentDbEntity>(
+              left => left.HasOne(pageContent => pageContent.ContentComponent).WithMany().OnDelete(DeleteBehavior.Restrict),
+              right => right.HasOne(pageContent => pageContent.Page).WithMany().OnDelete(DeleteBehavior.Restrict)
+            );
 
-            entity.HasMany(page => page.Content)
-              .WithMany(c => c.ContentPages)
-              .UsingEntity<PageContentDbEntity>();
+      entity.HasMany(page => page.Content)
+            .WithMany(c => c.ContentPages)
+            .UsingEntity<PageContentDbEntity>();
 
             entity.HasOne(page => page.Title).WithMany(title => title.Pages).OnDelete(DeleteBehavior.Restrict);
 
