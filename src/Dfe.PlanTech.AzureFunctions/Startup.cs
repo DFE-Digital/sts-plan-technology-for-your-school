@@ -45,6 +45,8 @@ namespace Dfe.PlanTech.AzureFunctions
                 services.AddScoped(typeof(JsonToDbMapper), mapper);
             }
 
+            services.AddScoped<RichTextContentMapper>();
+
             services.AddScoped<JsonToEntityMappers>();
         }
 

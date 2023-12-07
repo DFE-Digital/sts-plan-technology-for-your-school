@@ -20,7 +20,7 @@ where TEntity : ContentComponentDbEntity, new()
   {
   }
 
-  public TEntity ToEntity(CmsWebHookPayload payload)
+  public virtual TEntity ToEntity(CmsWebHookPayload payload)
   {
     Payload = payload;
 

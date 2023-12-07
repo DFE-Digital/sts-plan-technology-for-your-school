@@ -7,9 +7,9 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
 public class TextBodyMapper : JsonToDbMapper<TextBodyDbEntity>
 {
-  private readonly JsonToDbMapper<RichTextContentDbEntity> _richTextMapper;
+  private readonly RichTextContentMapper _richTextMapper;
 
-  public TextBodyMapper(JsonToDbMapper<RichTextContentDbEntity> richTextMapper, ILogger<TextBodyMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : base(logger, jsonSerialiserOptions)
+  public TextBodyMapper(RichTextContentMapper richTextMapper, ILogger<TextBodyMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : base(logger, jsonSerialiserOptions)
   {
     _richTextMapper = richTextMapper;
   }
@@ -18,10 +18,9 @@ public class TextBodyMapper : JsonToDbMapper<TextBodyDbEntity>
   {
     var richText = (values["richText"] ?? throw new Exception($"No rich text value found")) as JsonNode;
 
-    var deserialised = richText.Deserialize<RichTextContent>(JsonOptions);
+    var deserialised = richText.Deserialize<RichTextContent>(JsonOptions) ?? throw new Exception($"Could not map to {typeof(RichTextContent)}");
 
-
-  }
+    values["richText"] = JsonNode.Parse(JsonSerializer.Serialize(_richTextMapper.MapContent(deserialised), JsonOptions));
 
     return values;
   }
