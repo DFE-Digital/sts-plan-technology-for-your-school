@@ -15,7 +15,7 @@ public class ComponentDropDownDbEntity : ContentComponentDbEntity, IComponentDro
   /// <summary>
   /// The Content to display.
   /// </summary>
-  public RichTextContentDbEntity Content { get; set; } = null!;
+  public RichTextContentDbEntity RichTextContent { get; set; } = null!;
 
-  public string ContentId { get; set; } = null!;
+  public long RichTextContentId { get; set; }
 }
