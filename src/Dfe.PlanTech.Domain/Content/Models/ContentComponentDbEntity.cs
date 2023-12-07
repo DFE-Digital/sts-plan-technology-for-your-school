@@ -6,7 +6,13 @@ public abstract class ContentComponentDbEntity : IContentComponentDbEntity
 {
   public string Id { get; set; } = null!;
 
-  public PageDbEntity[] BeforeTitleContentPages { get; set; } = Array.Empty<PageDbEntity>();
+  public bool Published { get; set; }
 
-  public PageDbEntity[] ContentPages { get; set; } = Array.Empty<PageDbEntity>();
+  public bool Archived { get; set; }
+
+  public bool Deleted { get; set; }
+
+  public List<PageDbEntity> BeforeTitleContentPages { get; set; } = new();
+
+  public List<PageDbEntity> ContentPages { get; set; } = new();
 }

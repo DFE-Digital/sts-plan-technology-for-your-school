@@ -45,7 +45,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             var actual = _componentBuilder.BuildCategory();
             Assert.True(actual != null);
             Assert.Equal("Category", actual.Header.Text);
-            Assert.True(actual.Content != null);
             Assert.Equal("Section", actual.Sections[0].Name);
             Assert.True(actual.Sections[0].Questions != null);
             Assert.Equal("Question Text", actual.Sections[0].Questions[0].Text);

@@ -15,7 +15,7 @@ public class GetNextUnansweredQuestionQueryTests
     {
       Id = "TestSection"
     },
-    Questions = new Question[]{ new()
+    Questions = new(){ new()
     {
       Text = "First question",
       Sys = new SystemDetails(){

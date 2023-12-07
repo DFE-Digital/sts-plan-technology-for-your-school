@@ -18,7 +18,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
         private readonly CategorySectionViewComponent _categorySectionViewComponent;
 
-        private ICategory _category;
+        private Category _category;
         private ILogger<CategorySectionViewComponent> _loggerCategory;
 
         public CategorySectionViewComponentTests()
@@ -41,7 +41,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category = new Category()
             {
                 Completed = 1,
-                Sections = new Section[]
+                Sections = new(){
                 {
                     new ()
                     {
@@ -53,6 +53,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                         }
                     }
                 }
+            }
             };
         }
 
@@ -312,7 +313,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category = new Category()
             {
                 Completed = 0,
-                Sections = Array.Empty<ISection>()
+                Sections = new()
             };
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);

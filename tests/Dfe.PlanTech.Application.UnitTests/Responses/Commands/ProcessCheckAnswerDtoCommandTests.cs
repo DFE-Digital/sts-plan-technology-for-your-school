@@ -43,7 +43,7 @@ public class ProcessCheckAnswerDtoCommandTests
       }
     };
 
-    var questions = new Question[] {new()
+    List<Question> questions = new() {new()
     {
       Sys = new SystemDetails()
       {

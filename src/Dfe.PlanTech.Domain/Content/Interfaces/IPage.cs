@@ -1,3 +1,5 @@
+using Dfe.PlanTech.Domain.Content.Models;
+
 namespace Dfe.PlanTech.Domain.Content.Interfaces;
 
 public interface IPage
@@ -15,10 +17,6 @@ public interface IPage
   public bool DisplayOrganisationName { get; }
 
   public bool RequiresAuthorisation { get; }
-
-  public string? SectionTitle { get; set; }
-
-  public string? OrganisationName { get; set; }
 }
 
 public interface IPage<TContentComponent, TTitle> : IPage
@@ -30,4 +28,11 @@ where TContentComponent : class, IContentComponentType
   public TContentComponent[] BeforeTitleContent { get; }
 
   public TContentComponent[] Content { get; }
+}
+
+public interface IPageContent : IPage<ContentComponent, Title>
+{
+  public string? SectionTitle { get; set; }
+
+  public string? OrganisationName { get; set; }
 }

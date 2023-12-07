@@ -27,7 +27,7 @@ public class GetQuestionBySlugRouterTests
 
     private readonly GetQuestionBySlugRouter _router;
 
-    private readonly ISection _section;
+    private readonly Section _section;
 
     private readonly CheckAnswerDto _responses;
 
@@ -43,7 +43,7 @@ public class GetQuestionBySlugRouterTests
             {
                 Id = "q2"
             },
-            Answers = new Answer[]{
+            Answers = new(){
         new(){
           Sys = new SystemDetails(){
             Id = "q2-a1"
@@ -59,7 +59,7 @@ public class GetQuestionBySlugRouterTests
             {
                 Id = "q1"
             },
-            Answers = new Answer[]{
+            Answers = new(){
         new(){
           Sys = new SystemDetails(){
             Id = "q1-a1"
@@ -76,7 +76,7 @@ public class GetQuestionBySlugRouterTests
             {
                 Id = "q3"
             },
-            Answers = new Answer[]{
+            Answers = new(){
         new(){
           Sys = new SystemDetails(){
             Id = "q3-a1"
@@ -87,7 +87,7 @@ public class GetQuestionBySlugRouterTests
 
         _section = new Section()
         {
-            Questions = new[] { firstQuestion, secondQuestion, thirdQuestion },
+            Questions = new() { firstQuestion, secondQuestion, thirdQuestion },
             Name = "section name",
             Sys = new SystemDetails()
             {

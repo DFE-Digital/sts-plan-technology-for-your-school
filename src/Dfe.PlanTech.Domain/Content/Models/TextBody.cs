@@ -1,10 +1,13 @@
 
+using Dfe.PlanTech.Domain.Content.Interfaces;
+
 namespace Dfe.PlanTech.Domain.Content.Models;
 
 /// <summary>
 /// Model for TextBody content type
 /// </summary>
-public class TextBody : ContentComponent
+/// <inheritdoc/>
+public class TextBody : ContentComponent, ITextBody<RichTextContent>
 {
     public RichTextContent RichText { get; init; } = null!;
 }

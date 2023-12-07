@@ -15,7 +15,7 @@ public class CheckAnswersOrNextQuestionCheckerTests
 {
   public readonly ISubmissionStatusChecker StatusChecker = CheckAnswersOrNextQuestionChecker.CheckAnswersOrNextQuestion;
 
-  public static readonly Question[] Questions = new Question[] {
+  public static readonly List<Question> Questions = new() {
   new(){
     Sys = new SystemDetails(){ Id = "Question-One" },
     Answers = new()
@@ -38,7 +38,7 @@ public class CheckAnswersOrNextQuestionCheckerTests
   },
   };
 
-  public readonly Answer[] Answers = new Answer[]{
+  public readonly List<Answer> Answers = new(){
           new(){
             Sys = new SystemDetails(){
               Id = "Answer-One"
@@ -94,10 +94,7 @@ public class CheckAnswersOrNextQuestionCheckerTests
   {
     foreach (var question in Questions)
     {
-      for (var x = 0; x < question.Answers.Count; x++)
-      {
-        question.Answers[x] = Answers[x];
-      }
+      question.Answers.AddRange(Answers);
     }
   }
 
@@ -145,12 +142,14 @@ public class CheckAnswersOrNextQuestionCheckerTests
     var user = Substitute.For<IUser>();
     user.GetEstablishmentId().Returns(1);
     processor.User.Returns(user);
+
     var getResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
     getResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
                 .Returns(CheckAnswersDto);
+
     processor.GetResponsesQuery.Returns(getResponsesQuery);
 
-    var section = Substitute.For<ISection>();
+    var section = Substitute.For<ISectionComponent>();
     section.GetAttachedQuestions(Arg.Any<IEnumerable<QuestionWithAnswer>>())
             .Returns(new[] {
               CheckAnswersDto.Responses[0],CheckAnswersDto.Responses[1],CheckAnswersDto.Responses[4]
@@ -182,10 +181,11 @@ public class CheckAnswersOrNextQuestionCheckerTests
 
     var getResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
     getResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(CheckAnswersDto);
+                     .Returns(CheckAnswersDto);
+
     processor.GetResponsesQuery.Returns(getResponsesQuery);
 
-    var section = Substitute.For<ISection>();
+    var section = Substitute.For<ISectionComponent>();
     section.GetAttachedQuestions(Arg.Any<IEnumerable<QuestionWithAnswer>>())
             .Returns(new[] {
               CheckAnswersDto.Responses[0],CheckAnswersDto.Responses[1]

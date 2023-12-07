@@ -1,9 +1,12 @@
+using Dfe.PlanTech.Domain.Content.Interfaces;
+
 namespace Dfe.PlanTech.Domain.Content.Models;
 
 /// <summary>
 /// Data for a RichText section
 /// </summary>
-public class RichTextData
+/// <inheritdoc/>
+public class RichTextData : IRichTextData
 {
     public string? Uri { get; init; }
 }

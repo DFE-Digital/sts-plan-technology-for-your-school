@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.Extensions.Logging;
 using System.Text;
 
@@ -7,6 +8,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 /// <summary>
 /// Parent class to render <see chref="IRichTextContent"/> RichTextContent
 /// </summary>
+/// <inheritdoc/>
 public class RichTextRenderer : IRichTextRenderer, IRichTextContentPartRendererCollection
 {
     private readonly ILogger<IRichTextRenderer> _logger;
@@ -20,7 +22,7 @@ public class RichTextRenderer : IRichTextRenderer, IRichTextContentPartRendererC
         _renderers = renderers.ToList();
     }
 
-    public string ToHtml(IRichTextContent content)
+    public string ToHtml(RichTextContent content)
     {
         var stringBuilder = new StringBuilder();
 
@@ -29,7 +31,7 @@ public class RichTextRenderer : IRichTextRenderer, IRichTextContentPartRendererC
         return stringBuilder.ToString();
     }
 
-    public void RenderChildren(IRichTextContent content, StringBuilder stringBuilder)
+    public void RenderChildren(RichTextContent content, StringBuilder stringBuilder)
     {
         foreach (var subContent in content.Content)
         {
@@ -45,12 +47,6 @@ public class RichTextRenderer : IRichTextRenderer, IRichTextContentPartRendererC
         }
     }
 
-
-    /// <summary>
-    /// Finds matching renderer for the given content, based on the content's node type
-    /// </summary>
-    /// <param name="content">Content to find renderer for</param>
-    /// <returns>Matching part renderer for content (or null if not found)</returns>
-    public IRichTextContentPartRenderer? GetRendererForContent(IRichTextContent content)
+    public IRichTextContentPartRenderer? GetRendererForContent(RichTextContent content)
     => _renderers.FirstOrDefault(renderer => renderer.Accepts(content));
 }

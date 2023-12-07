@@ -59,7 +59,7 @@ public class CheckAnswersRouterTests
                           }
     };
 
-    private readonly IContentComponent[] _checkAnswersPageContent = new[]{
+    private readonly ContentComponent[] _checkAnswersPageContent = new[]{
         new Title(){Text = "page title" }
       };
 

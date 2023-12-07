@@ -1,8 +1,9 @@
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Domain.Content.Models;
 
-public class Page : ContentComponent, IPage<ContentComponent, Title>
+public class Page : ContentComponent, IPageContent
 {
     public string InternalName { get; init; } = null!;
 
