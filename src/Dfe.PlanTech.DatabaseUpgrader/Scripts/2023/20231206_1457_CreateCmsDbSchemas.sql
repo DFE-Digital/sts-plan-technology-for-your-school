@@ -1,3 +1,6 @@
+BEGIN TRANSACTION;
+GO
+
 IF SCHEMA_ID(N'Contentful') IS NULL EXEC(N'CREATE SCHEMA [Contentful];');
 GO
 
@@ -43,6 +46,13 @@ CREATE TABLE [Contentful].[NavigationLink] (
 );
 GO
 
+CREATE TABLE [Contentful].[RichTextDataDbEntity] (
+    [Id] bigint NOT NULL IDENTITY,
+    [Uri] nvarchar(max) NULL,
+    CONSTRAINT [PK_RichTextDataDbEntity] PRIMARY KEY ([Id])
+);
+GO
+
 CREATE TABLE [Contentful].[ButtonWithLinks] (
     [Id] nvarchar(30) NOT NULL,
     [ButtonId] nvarchar(30) NULL,
@@ -59,14 +69,6 @@ CREATE TABLE [Contentful].[ButtonWithEntryReferences] (
     CONSTRAINT [PK_ButtonWithEntryReferences] PRIMARY KEY ([Id]),
     CONSTRAINT [FK_ButtonWithEntryReferences_Buttons_ButtonId] FOREIGN KEY ([ButtonId]) REFERENCES [Contentful].[Buttons] ([Id]),
     CONSTRAINT [FK_ButtonWithEntryReferences_ContentComponents_LinkToEntryId] FOREIGN KEY ([LinkToEntryId]) REFERENCES [Contentful].[ContentComponents] ([Id])
-);
-GO
-
-CREATE TABLE [Contentful].[RichTextDataDbEntity] (
-    [Id] nvarchar(30) NOT NULL,
-    [Uri] nvarchar(max) NULL,
-    CONSTRAINT [PK_RichTextDataDbEntity] PRIMARY KEY ([Id]),
-    CONSTRAINT [FK_RichTextDataDbEntity_ContentComponents_Id] FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE CASCADE
 );
 GO
 
@@ -88,13 +90,12 @@ CREATE TABLE [Contentful].[Categories] (
 GO
 
 CREATE TABLE [Contentful].[RichTextContents] (
-    [Id] nvarchar(30) NOT NULL,
+    [Id] bigint NOT NULL IDENTITY,
     [Value] nvarchar(max) NOT NULL,
     [NodeType] nvarchar(max) NOT NULL,
-    [DataId] nvarchar(30) NULL,
-    [RichTextContentDbEntityId] nvarchar(30) NULL,
+    [DataId] bigint NULL,
+    [RichTextContentDbEntityId] bigint NULL,
     CONSTRAINT [PK_RichTextContents] PRIMARY KEY ([Id]),
-    CONSTRAINT [FK_RichTextContents_ContentComponents_Id] FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE CASCADE,
     CONSTRAINT [FK_RichTextContents_RichTextContents_RichTextContentDbEntityId] FOREIGN KEY ([RichTextContentDbEntityId]) REFERENCES [Contentful].[RichTextContents] ([Id]),
     CONSTRAINT [FK_RichTextContents_RichTextDataDbEntity_DataId] FOREIGN KEY ([DataId]) REFERENCES [Contentful].[RichTextDataDbEntity] ([Id])
 );
@@ -120,28 +121,27 @@ GO
 CREATE TABLE [Contentful].[ComponentDropDowns] (
     [Id] nvarchar(30) NOT NULL,
     [Title] nvarchar(max) NOT NULL,
-    [ContentId] nvarchar(30) NOT NULL,
+    [RichTextContentId] bigint NOT NULL,
     CONSTRAINT [PK_ComponentDropDowns] PRIMARY KEY ([Id]),
-    CONSTRAINT [FK_ComponentDropDowns_RichTextContents_ContentId] FOREIGN KEY ([ContentId]) REFERENCES [Contentful].[RichTextContents] ([Id]) ON DELETE CASCADE
+    CONSTRAINT [FK_ComponentDropDowns_RichTextContents_RichTextContentId] FOREIGN KEY ([RichTextContentId]) REFERENCES [Contentful].[RichTextContents] ([Id]) ON DELETE CASCADE
 );
 GO
 
 CREATE TABLE [Contentful].[RichTextMarkDbEntity] (
-    [Id] nvarchar(30) NOT NULL,
+    [Id] bigint NOT NULL IDENTITY,
     [Type] nvarchar(max) NOT NULL,
-    [RichTextContentDbEntityId] nvarchar(30) NULL,
+    [RichTextContentDbEntityId] bigint NULL,
     CONSTRAINT [PK_RichTextMarkDbEntity] PRIMARY KEY ([Id]),
-    CONSTRAINT [FK_RichTextMarkDbEntity_ContentComponents_Id] FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE CASCADE,
     CONSTRAINT [FK_RichTextMarkDbEntity_RichTextContents_RichTextContentDbEntityId] FOREIGN KEY ([RichTextContentDbEntityId]) REFERENCES [Contentful].[RichTextContents] ([Id])
 );
 GO
 
 CREATE TABLE [Contentful].[TextBodies] (
     [Id] nvarchar(30) NOT NULL,
-    [RichTextId] nvarchar(30) NULL,
+    [RichTextId] bigint NOT NULL,
     CONSTRAINT [PK_TextBodies] PRIMARY KEY ([Id]),
     CONSTRAINT [FK_TextBodies_ContentComponents_Id] FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE CASCADE,
-    CONSTRAINT [FK_TextBodies_RichTextContents_RichTextId] FOREIGN KEY ([RichTextId]) REFERENCES [Contentful].[RichTextContents] ([Id])
+    CONSTRAINT [FK_TextBodies_RichTextContents_RichTextId] FOREIGN KEY ([RichTextId]) REFERENCES [Contentful].[RichTextContents] ([Id]) ON DELETE CASCADE
 );
 GO
 
@@ -232,7 +232,7 @@ GO
 CREATE INDEX [IX_Categories_HeaderId] ON [Contentful].[Categories] ([HeaderId]);
 GO
 
-CREATE INDEX [IX_ComponentDropDowns_ContentId] ON [Contentful].[ComponentDropDowns] ([ContentId]);
+CREATE INDEX [IX_ComponentDropDowns_RichTextContentId] ON [Contentful].[ComponentDropDowns] ([RichTextContentId]);
 GO
 
 CREATE INDEX [IX_PageContents_PageId] ON [Contentful].[PageContents] ([PageId]);
