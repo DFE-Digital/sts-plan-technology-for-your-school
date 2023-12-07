@@ -52,8 +52,8 @@ public abstract class JsonToDbMapper
     JsonOptions = jsonSerialiserOptions;
   }
 
-  public bool AcceptsContentType(string contentType)
-    => _entityType.Name.ToLower().Contains(contentType);
+  public virtual bool AcceptsContentType(string contentType)
+    => _entityType.Name.Contains(contentType, StringComparison.InvariantCultureIgnoreCase);
 
   public abstract ContentComponentDbEntity MapEntity(CmsWebHookPayload payload);
 
