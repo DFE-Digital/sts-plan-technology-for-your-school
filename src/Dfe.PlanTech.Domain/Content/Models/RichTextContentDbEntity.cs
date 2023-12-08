@@ -23,8 +23,8 @@ public class RichTextContentDbEntity : IRichTextContent<RichTextMarkDbEntity, Ri
 
     public List<RichTextMarkDbEntity> Marks { get; set; } = new();
 
-    public RichTextNodeType MappedNodeType
-     => Enum.GetValues<RichTextNodeType>().FirstOrDefault(value => value.ToString().ToLower() == NodeType.Replace("-", ""));
-
+    /// <summary>
+    /// Children
+    /// </summary>
     public List<RichTextContentDbEntity> Content { get; set; } = new();
 }

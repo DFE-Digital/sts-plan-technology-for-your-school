@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
 
@@ -7,7 +8,7 @@ namespace Dfe.PlanTech.Domain.Content.Interfaces;
 /// Content for a 'RichText' field in Contentful
 /// </summary>
 /// <inheritdoc/>
-public interface IRichTextContent
+public partial interface IRichTextContent
 {
     /// <summary>
     /// Actual value of this node.
@@ -19,10 +20,20 @@ public interface IRichTextContent
     /// </summary>
     public string NodeType { get; }
 
-    /// <summary>
-    /// Maps NodeType field to Enum, for easier parsing in views
-    /// </summary>
-    public RichTextNodeType MappedNodeType { get; }
+    public RichTextNodeType MappedNodeType
+    => Enum.GetValues<RichTextNodeType>().FirstOrDefault(value =>
+    {
+        string? enumName = GetNameForNodeType(value);
+        return MatchesNodeType(enumName);
+    });
+
+    public bool MatchesNodeType(string? enumName)
+    => string.Equals(enumName, RemoveHyphensRegEx().Replace(NodeType, ""), StringComparison.OrdinalIgnoreCase);
+
+    public string? GetNameForNodeType(RichTextNodeType value) => Enum.GetName(value);
+
+    [GeneratedRegex("-")]
+    private static partial Regex RemoveHyphensRegEx();
 }
 
 public interface IRichTextContent<TMark, TContentType, TData> : IRichTextContent
