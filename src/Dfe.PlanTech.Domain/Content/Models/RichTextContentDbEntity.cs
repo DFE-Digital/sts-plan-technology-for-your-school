@@ -19,12 +19,12 @@ public class RichTextContentDbEntity : IRichTextContent<RichTextMarkDbEntity, Ri
 
     public string NodeType { get; set; } = "";
 
+    public RichTextDataDbEntity? Data { get; set; }
+
     public List<RichTextMarkDbEntity> Marks { get; set; } = new();
 
     public RichTextNodeType MappedNodeType
      => Enum.GetValues<RichTextNodeType>().FirstOrDefault(value => value.ToString().ToLower() == NodeType.Replace("-", ""));
 
     public List<RichTextContentDbEntity> Content { get; set; } = new();
-
-    public RichTextDataDbEntity? Data { get; set; }
 }
