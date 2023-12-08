@@ -27,4 +27,8 @@ public class RichTextContentDbEntity : IRichTextContent<RichTextMarkDbEntity, Ri
     /// Children
     /// </summary>
     public List<RichTextContentDbEntity> Content { get; set; } = new();
+
+    public RichTextContentDbEntity? Parent { get; set; }
+
+    public long? ParentId { get; set; }
 }
