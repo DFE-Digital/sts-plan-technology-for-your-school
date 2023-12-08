@@ -15,9 +15,6 @@ public class RichTextContent : ContentComponent, IRichTextContent<RichTextMark, 
 
     public List<RichTextMark> Marks { get; init; } = new();
 
-    public RichTextNodeType MappedNodeType
-     => Enum.GetValues<RichTextNodeType>().FirstOrDefault(value => value.ToString().ToLower() == NodeType.Replace("-", ""));
-
     public List<RichTextContent> Content { get; init; } = new();
 
     public RichTextData? Data { get; init; }

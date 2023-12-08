@@ -10,7 +10,7 @@ public interface IRichTextContentPartRenderer
     /// </summary>
     /// <param name="content">Content to check for acceptance</param>
     /// <returns>True (can render), false (can't render)</returns>
-    public bool Accepts(RichTextContent content);
+    public bool Accepts(IRichTextContent content);
 
     /// <summary>
     /// Converts content to HTML string, and adds to string builder

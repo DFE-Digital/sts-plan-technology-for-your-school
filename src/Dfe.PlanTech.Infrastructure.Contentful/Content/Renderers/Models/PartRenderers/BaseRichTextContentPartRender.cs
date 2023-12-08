@@ -14,7 +14,7 @@ public abstract class BaseRichTextContentPartRender : IRichTextContentPartRender
         _nodeType = nodeType;
     }
 
-    public bool Accepts(RichTextContent content) => content.MappedNodeType == _nodeType;
+    public bool Accepts(IRichTextContent content) => content.MappedNodeType == _nodeType;
 
     public abstract StringBuilder AddHtml(RichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder);
 }
