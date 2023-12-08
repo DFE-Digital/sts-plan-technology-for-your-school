@@ -94,9 +94,9 @@ CREATE TABLE [Contentful].[RichTextContents] (
     [Value] nvarchar(max) NOT NULL,
     [NodeType] nvarchar(max) NOT NULL,
     [DataId] bigint NULL,
-    [RichTextContentDbEntityId] bigint NULL,
+    [ParentId] bigint NULL,
     CONSTRAINT [PK_RichTextContents] PRIMARY KEY ([Id]),
-    CONSTRAINT [FK_RichTextContents_RichTextContents_RichTextContentDbEntityId] FOREIGN KEY ([RichTextContentDbEntityId]) REFERENCES [Contentful].[RichTextContents] ([Id]),
+    CONSTRAINT [FK_RichTextContents_RichTextContents_ParentId] FOREIGN KEY ([ParentId]) REFERENCES [Contentful].[RichTextContents] ([Id]),
     CONSTRAINT [FK_RichTextContents_RichTextDataDbEntity_DataId] FOREIGN KEY ([DataId]) REFERENCES [Contentful].[RichTextDataDbEntity] ([Id])
 );
 GO
@@ -253,7 +253,7 @@ GO
 CREATE INDEX [IX_RichTextContents_DataId] ON [Contentful].[RichTextContents] ([DataId]);
 GO
 
-CREATE INDEX [IX_RichTextContents_RichTextContentDbEntityId] ON [Contentful].[RichTextContents] ([RichTextContentDbEntityId]);
+CREATE INDEX [IX_RichTextContents_ParentId] ON [Contentful].[RichTextContents] ([ParentId]);
 GO
 
 CREATE INDEX [IX_RichTextMarkDbEntity_RichTextContentDbEntityId] ON [Contentful].[RichTextMarkDbEntity] ([RichTextContentDbEntityId]);

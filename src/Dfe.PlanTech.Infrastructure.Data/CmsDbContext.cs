@@ -115,6 +115,12 @@ public class CmsDbContext : DbContext
             .OnDelete(DeleteBehavior.Restrict);
     });
 
+    modelBuilder.Entity<RichTextContentDbEntity>(entity =>
+    {
+      entity.HasOne(rt => rt.Parent)
+            .WithMany(rt => rt.Content);
+    });
+
     modelBuilder.Entity<SectionDbEntity>(entity =>
     {
       entity.HasOne(section => section.InterstitialPage)
