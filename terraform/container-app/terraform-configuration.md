@@ -39,7 +39,6 @@ We use two external modules to create the majority of the resources required:
 | Name | Version |
 |------|---------|
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.84.0 |
-| <a name="provider_external"></a> [external](#provider\_external) | 2.3.2 |
 
 ## Modules
 
@@ -75,7 +74,6 @@ We use two external modules to create the majority of the resources required:
 | [azurerm_user_assigned_identity.user_assigned_identity](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/user_assigned_identity) | resource |
 | [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) | data source |
 | [azurerm_function_app_host_keys.default](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/function_app_host_keys) | data source |
-| [external_external.latest-function-zip](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
 
 ## Inputs
 
