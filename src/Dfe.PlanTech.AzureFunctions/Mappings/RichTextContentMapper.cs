@@ -5,13 +5,25 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
 public class RichTextContentMapper
 {
-  public RichTextContentDbEntity MapContent(RichTextContent content)
+  public RichTextContentDbEntity MapToDbEntity(RichTextContent content)
+    => MapContent<RichTextMark, RichTextContent, RichTextData, RichTextMarkDbEntity, RichTextContentDbEntity, RichTextDataDbEntity>(content);
+
+  public RichTextContent MapToRichTextContent(RichTextContentDbEntity content)
+    => MapContent<RichTextMarkDbEntity, RichTextContentDbEntity, RichTextDataDbEntity, RichTextMark, RichTextContent, RichTextData>(content);
+
+  public TContentTypeOut MapContent<TMarkIn, TContentTypeIn, TDataIn, TMarkOut, TContentTypeOut, TDataOut>(IRichTextContent<TMarkIn, TContentTypeIn, TDataIn> content)
+  where TMarkIn : class, IRichTextMark, new()
+  where TContentTypeIn : class, IRichTextContent<TMarkIn, TContentTypeIn, TDataIn>, new()
+  where TDataIn : class, IRichTextData, new()
+  where TMarkOut : class, IRichTextMark, new()
+  where TContentTypeOut : class, IRichTextContent<TMarkOut, TContentTypeOut, TDataOut>, new()
+  where TDataOut : class, IRichTextData, new()
   {
-    var entity = new RichTextContentDbEntity()
+    var entity = new TContentTypeOut()
     {
-      Content = content.Content.Select(MapContent).ToList(),
-      Data = MapData<RichTextData, RichTextDataDbEntity>(content.Data),
-      Marks = content.Marks.Select(MapMark<RichTextMark, RichTextMarkDbEntity>).ToList(),
+      Content = content.Content.Select(MapContent<TMarkIn, TContentTypeIn, TDataIn, TMarkOut, TContentTypeOut, TDataOut>).ToList(),
+      Data = MapData<TDataIn, TDataOut>(content.Data),
+      Marks = content.Marks.Select(MapMark<TMarkIn, TMarkOut>).ToList(),
       Value = content.Value,
       NodeType = content.NodeType
     };

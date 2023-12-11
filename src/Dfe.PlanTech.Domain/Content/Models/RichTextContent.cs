@@ -9,13 +9,13 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 /// <inheritdoc/>
 public class RichTextContent : ContentComponent, IRichTextContent<RichTextMark, RichTextContent, RichTextData>
 {
-    public string Value { get; init; } = "";
+    public string Value { get; set; } = "";
 
-    public string NodeType { get; init; } = "";
+    public string NodeType { get; set; } = "";
 
-    public List<RichTextMark> Marks { get; init; } = new();
+    public List<RichTextMark> Marks { get; set; } = new();
 
-    public List<RichTextContent> Content { get; init; } = new();
+    public List<RichTextContent> Content { get; set; } = new();
 
-    public RichTextData? Data { get; init; }
+    public RichTextData? Data { get; set; }
 }
