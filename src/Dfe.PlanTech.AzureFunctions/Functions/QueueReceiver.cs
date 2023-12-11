@@ -1,12 +1,9 @@
 using System.Text;
-using System.Text.Json;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.AzureFunctions.Mappings;
-using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions
@@ -39,12 +36,41 @@ namespace Dfe.PlanTech.AzureFunctions
         {
             try
             {
+                string cmsEvent = message.Subject.AsSpan()[(message.Subject.LastIndexOf('.') + 1)..].ToString();
                 var text = Encoding.UTF8.GetString(message.Body);
+
+                _logger.LogInformation("Performing Action: {action}", cmsEvent);
                 _logger.LogInformation("Processing {text}", text);
 
                 var mapped = _mappers.ToEntity(text);
 
-                var rowsChanged = await UpsertEntityInDatabase(mapped);
+                switch (cmsEvent)
+                {
+                    case "create":
+                    case "save":
+                    case "auto_save":
+                        break;
+                    case "archive":
+                        mapped.Archived = true;
+                        break;
+                    case "unarchive":
+                        mapped.Archived = false;
+                        break;
+                    case "publish":
+                        mapped.Published = true;
+                        break;
+                    case "unpublish":
+                        mapped.Published = false;
+                        break;
+                    case "delete":
+                        mapped.Deleted = true;
+                        break;
+                    default:
+                        // TODO: Probably something more appropriate than ArgumentException? Custom?
+                        throw new ArgumentException(string.Format("Case \"{0}\" not implemented", cmsEvent));
+                }
+
+                long rowsChanged = await UpsertEntityInDatabase(mapped);
 
                 if (rowsChanged == 0)
                 {
@@ -64,6 +90,11 @@ namespace Dfe.PlanTech.AzureFunctions
             }
         }
 
+        private object? GetExistingDbEntity(ContentComponentDbEntity entity)
+        {
+            return _db.Find(entity.GetType(), entity.Id);
+        }
+
         private async Task<long> UpsertEntityInDatabase(ContentComponentDbEntity entity)
         {
             var existing = _db.Find(entity.GetType(), entity.Id);
@@ -80,15 +111,16 @@ namespace Dfe.PlanTech.AzureFunctions
             return await _db.SaveChangesAsync();
         }
 
-        private static void UpdateProperties(ContentComponentDbEntity entity, object? existing)
+        private void UpdateProperties(ContentComponentDbEntity entity, object? existing)
         {
             var properties = entity.GetType().GetProperties();
 
             foreach (var property in properties)
             {
+                _logger.LogInformation("Existing: {property}, {value}", property, property.GetValue(existing));
+                _logger.LogInformation("Property: {property}, {value}", property, property.GetValue(entity));
                 property.SetValue(existing, property.GetValue(entity));
             }
         }
     }
 }
-

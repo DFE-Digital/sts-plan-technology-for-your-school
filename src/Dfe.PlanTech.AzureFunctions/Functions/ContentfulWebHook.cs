@@ -25,17 +25,16 @@ namespace Dfe.PlanTech.AzureFunctions
 
             var stream = new StreamReader(req.Body);
             var body = stream.ReadToEnd();
+            var cmsEvent = req.Headers.GetValues("X-Contentful-Topic").FirstOrDefault();
 
-            if (string.IsNullOrEmpty(body))
+            if (string.IsNullOrEmpty(body) || string.IsNullOrEmpty(cmsEvent)) // TODO: contentfulAction bespoke error
             {
                 return ReturnEmptyBodyError(req);
             }
 
-            _logger.LogTrace("Logging message body: {body}", body);
-
             try
             {
-                await WriteToQueue(body);
+                await WriteToQueue(body, cmsEvent);
 
                 return ReturnOkResponse(req);
             }
@@ -53,9 +52,9 @@ namespace Dfe.PlanTech.AzureFunctions
 
         private static HttpResponseData ReturnOkResponse(HttpRequestData req) => req.CreateResponse(HttpStatusCode.OK);
 
-        private async Task WriteToQueue(string body)
+        private async Task WriteToQueue(string body, string contentfulAction)
         {
-            var serviceBusMessage = new ServiceBusMessage(body);
+            var serviceBusMessage = new ServiceBusMessage(body) { Subject = contentfulAction };
             await _sender.SendMessageAsync(serviceBusMessage);
         }
 
