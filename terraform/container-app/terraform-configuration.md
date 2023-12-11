@@ -36,9 +36,9 @@ We use two external modules to create the majority of the resources required:
 
 ## Providers
 
-| Name                                                          | Version |
-| ------------------------------------------------------------- | ------- |
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.82.0  |
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.83.0 |
 
 ## Modules
 
