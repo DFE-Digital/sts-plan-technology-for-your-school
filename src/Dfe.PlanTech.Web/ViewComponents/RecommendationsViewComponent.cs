@@ -18,9 +18,9 @@ public class RecommendationsViewComponent : ViewComponent
         _query = query;
     }
 
-    public IViewComponentResult Invoke(ICategory[] categories)
+    public IViewComponentResult Invoke(IEnumerable<ICategoryComponent> categories)
     {
-        var allSectionsOfCombinedCategories = new List<ISection>();
+        var allSectionsOfCombinedCategories = new List<ISectionComponent>();
         var allSectionStatusesOfCombinedCategories = new List<SectionStatusDto>();
 
         var recommendationsAvailable = false;
@@ -38,7 +38,7 @@ public class RecommendationsViewComponent : ViewComponent
 
         var recommendationsViewComponentViewModel =
             recommendationsAvailable
-                ? GetRecommendationsViewComponentViewModel(allSectionsOfCombinedCategories.ToArray(),
+                ? GetRecommendationsViewComponentViewModel(allSectionsOfCombinedCategories,
                     allSectionStatusesOfCombinedCategories)
                 : null;
 
@@ -46,9 +46,9 @@ public class RecommendationsViewComponent : ViewComponent
     }
 
     private IEnumerable<RecommendationsViewComponentViewModel> GetRecommendationsViewComponentViewModel(
-        ISection[] sections, List<SectionStatusDto> sectionStatusesList)
+        IEnumerable<ISectionComponent> sections, List<SectionStatusDto> sectionStatusesList)
     {
-        foreach (ISection section in sections)
+        foreach (var section in sections)
         {
             var sectionMaturity = sectionStatusesList.Where(sectionStatus =>
                     sectionStatus.SectionId == section.Sys.Id && sectionStatus.Completed == 1)
@@ -67,21 +67,22 @@ public class RecommendationsViewComponent : ViewComponent
             {
                 RecommendationSlug = recommendation?.Page.Slug,
                 RecommendationDisplayName = recommendation?.DisplayName,
-                SectionSlug = section.InterstitialPage.Slug,
+                SectionSlug = section.InterstitialPage?.Slug,
                 NoRecommendationFoundErrorMessage = recommendation == null
-                    ? String.Format("Unable to retrieve {0} recommendation", section.Name)
+                    ? string.Format("Unable to retrieve {0} recommendation", section.Name)
                     : null
             };
         }
     }
 
-    public ICategory RetrieveSectionStatuses(ICategory category)
+    public ICategoryComponent RetrieveSectionStatuses(ICategoryComponent category)
     {
         try
         {
-            category.SectionStatuses = _query.GetSectionSubmissionStatuses(category.Sections).ToList();
+            category.SectionStatuses = _query.GetSectionSubmissionStatuses(category.Sections);
             category.Completed = category.SectionStatuses.Count(x => x.Completed == 1);
             category.RetrievalError = false;
+
             return category;
         }
         catch (Exception e)

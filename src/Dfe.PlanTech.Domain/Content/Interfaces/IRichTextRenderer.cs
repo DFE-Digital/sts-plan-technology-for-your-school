@@ -1,3 +1,5 @@
+using Dfe.PlanTech.Domain.Content.Models;
+
 namespace Dfe.PlanTech.Domain.Content.Interfaces;
 
 /// <summary>
@@ -10,5 +12,5 @@ public interface IRichTextRenderer
     /// </summary>
     /// <param name="content">Content to convert</param>
     /// <returns>Content converted to HTML string (including tags, classes, etc.)</returns>
-    public string ToHtml(IRichTextContent content);
+    public string ToHtml(RichTextContent content);
 }

@@ -108,7 +108,7 @@ public class QuestionsController : BaseController<QuestionsController>
         return GenerateViewModel(sectionSlug, question, section, latestResponseForQuestion?.AnswerRef);
     }
 
-    public QuestionViewModel GenerateViewModel(string sectionSlug, Question question, ISection section, string? latestAnswerContentfulId)
+    public QuestionViewModel GenerateViewModel(string sectionSlug, Question question, ISectionComponent section, string? latestAnswerContentfulId)
     {
         ViewData["Title"] = question.Text;
 

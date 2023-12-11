@@ -1,3 +1,5 @@
+@using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+
 @model Dfe.PlanTech.Domain.Content.Models.Page;
 
 <div class="govuk-grid-row">
@@ -18,7 +20,7 @@
                 await Html.RenderPartialAsync("Components/Title", Model.Title);
             }
 
-            var categoriesList = new List<Dfe.PlanTech.Domain.Questionnaire.Interfaces.ICategory>();
+            var categoriesList = new List<ICategoryComponent>();
 
             var showRecommendations = false;
 
@@ -26,7 +28,7 @@
             {
                 await Html.RenderPartialAsync("Components/PageComponentFactory", content);
 
-                if (content is Dfe.PlanTech.Domain.Questionnaire.Interfaces.ICategory category)
+                if (content is ICategoryComponent category)
                 {
                     showRecommendations = true;
                     categoriesList.Add(category);

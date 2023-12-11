@@ -48,7 +48,7 @@ public class RichTextTagHelperTests
         var loggerSubstitute = Substitute.For<ILogger<RichTextTagHelper>>();
 
         var richTextRendererSubstitute = Substitute.For<IRichTextRenderer>();
-        richTextRendererSubstitute.ToHtml(Arg.Any<IRichTextContent>()).Returns(expectedHtml);
+        richTextRendererSubstitute.ToHtml(Arg.Any<RichTextContent>()).Returns(expectedHtml);
 
         var context = new TagHelperContext(tagName: "rich-text",
                                             allAttributes: new TagHelperAttributeList(),

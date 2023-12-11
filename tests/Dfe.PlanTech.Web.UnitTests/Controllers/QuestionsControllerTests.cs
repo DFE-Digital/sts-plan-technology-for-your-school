@@ -50,12 +50,12 @@ public class QuestionsControllerTests
         {
             Slug = SectionSlug,
         },
-        Questions = new Question[1],
+        Questions = new(1)
     };
 
     public QuestionsControllerTests()
     {
-        _validSection.Questions[0] = _validQuestion;
+        _validSection.Questions.Add(_validQuestion);
 
         _logger = Substitute.For<ILogger<QuestionsController>>();
 

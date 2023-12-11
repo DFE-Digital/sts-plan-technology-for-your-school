@@ -1,8 +1,9 @@
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-public class Question : ContentComponent
+public class Question : ContentComponent, IQuestion<Answer>
 {
     /// <summary>
     /// Actual question text
@@ -14,9 +15,7 @@ public class Question : ContentComponent
     /// </summary>
     public string? HelpText { get; init; }
 
-    public Answer[] Answers { get; init; } = Array.Empty<Answer>();
-
-    public string Param { get; init; } = null!;
+    public List<Answer> Answers { get; init; } = new();
 
     public string Slug { get; set; } = null!;
 }

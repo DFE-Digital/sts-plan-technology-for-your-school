@@ -7,19 +7,19 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 /// <summary>
 /// A sub-section of a <see chref="Category"/>
 /// </summary>
-public class Section : ContentComponent, ISection
+public class Section : ContentComponent, ISectionComponent
 {
     public string Name { get; init; } = null!;
 
-    public Question[] Questions { get; init; } = Array.Empty<Question>();
+    public List<Question> Questions { get; init; } = new();
 
     public string FirstQuestionId => Questions.Select(question => question.Sys.Id).FirstOrDefault() ?? "";
 
     public Page InterstitialPage { get; init; } = null!;
 
-    public RecommendationPage[] Recommendations { get; init; } = Array.Empty<RecommendationPage>();
+    public List<RecommendationPage> Recommendations { get; init; } = new();
 
-    public RecommendationPage? TryGetRecommendationForMaturity(Maturity maturity) => Array.Find(Recommendations, recommendation => recommendation.Maturity == maturity);
+    public RecommendationPage? TryGetRecommendationForMaturity(Maturity maturity) => Recommendations.Find(recommendation => recommendation.Maturity == maturity);
 
     public RecommendationPage? GetRecommendationForMaturity(string? maturity)
     {
@@ -33,7 +33,7 @@ public class Section : ContentComponent, ISection
         var questionWithAnswerMap = responses.ToDictionary(questionWithAnswer => questionWithAnswer.QuestionRef,
                                                                                  questionWithAnswer => questionWithAnswer);
 
-        Question? node = Questions[0];
+        Question? node = Questions.FirstOrDefault();
 
         while (node != null)
         {
@@ -42,7 +42,8 @@ public class Section : ContentComponent, ISection
                 break;
             }
 
-            var answer = Array.Find(node.Answers, answer => answer.Sys.Id == questionWithAnswer.AnswerRef);
+            Answer? answer = GetAnswerForRef(node, questionWithAnswer);
+
             questionWithAnswer = questionWithAnswer with
             {
                 AnswerText = answer?.Text ?? questionWithAnswer.AnswerText,
@@ -51,7 +52,10 @@ public class Section : ContentComponent, ISection
             };
 
             yield return questionWithAnswer;
-            node = Array.Find(node.Answers, answer => answer.Sys.Id.Equals(questionWithAnswer.AnswerRef))?.NextQuestion;
+            node = GetAnswerForRef(node, questionWithAnswer)?.NextQuestion;
         }
     }
+
+    private static Answer? GetAnswerForRef(Question node, QuestionWithAnswer questionWithAnswer)
+    => node.Answers.Find(answer => answer.Sys.Id.Equals(questionWithAnswer.AnswerRef));
 }

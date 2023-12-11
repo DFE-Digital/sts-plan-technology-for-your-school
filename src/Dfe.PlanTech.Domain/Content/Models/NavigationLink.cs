@@ -1,3 +1,5 @@
+using Dfe.PlanTech.Domain.Content.Interfaces;
+
 namespace Dfe.PlanTech.Domain.Content.Models;
 
 /// <summary>
@@ -6,7 +8,7 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 /// <remarks>
 /// Currently only used in footer. Could be extended to be both in future
 /// </remarks>
-public class NavigationLink : ContentComponent
+public class NavigationLink : ContentComponent, INavigationLink
 {
     /// <summary>
     /// Display text (i.e. <a>{DisplayText}</a>)
