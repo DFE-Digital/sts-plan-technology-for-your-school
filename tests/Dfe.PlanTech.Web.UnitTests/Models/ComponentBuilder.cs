@@ -30,7 +30,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             return new ComponentDropDown
             {
                 Title = "Dropdown",
-                RichTextContent = BuildRichContent()
+                Content = BuildRichContent()
             };
         }
 

@@ -28,7 +28,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             var actual = _componentBuilder.BuildDropDownComponent();
             Assert.True(actual != null);
             Assert.Equal("Dropdown", actual.Title);
-            Assert.Equal("Content", actual.RichTextContent.Value);
+            Assert.Equal("Content", actual.Content.Value);
         }
 
         [Fact]

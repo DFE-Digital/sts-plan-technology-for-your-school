@@ -44,8 +44,6 @@ public class Section : ContentComponent, ISectionComponent
 
             Answer? answer = GetAnswerForRef(node, questionWithAnswer);
 
-            Answer? answer = GetAnswerForRef(node, questionWithAnswer);
-
             questionWithAnswer = questionWithAnswer with
             {
                 AnswerText = answer?.Text ?? questionWithAnswer.AnswerText,
