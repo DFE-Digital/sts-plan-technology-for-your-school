@@ -137,7 +137,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
 
             //Assert
             Assert.NotNull(context.Response);
-            Assert.Equal(UrlConstants.OrgErrorPage, context.Response.Headers.Values.FirstOrDefault());
+            Assert.Equal(UrlConstants.ServiceUnavailable, context.Response.Headers.Values.FirstOrDefault());
         }
     }
 }
