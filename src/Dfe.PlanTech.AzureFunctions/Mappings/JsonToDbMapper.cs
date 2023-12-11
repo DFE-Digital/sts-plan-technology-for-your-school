@@ -132,7 +132,7 @@ public abstract class JsonToDbMapper
 
     if (TrySerialiseAsLinkEntry(asObject, out CmsWebHookSystemDetailsInner? sys) && sys != null)
     {
-      return sys;
+      return sys.Id;
     }
 
     return node;
@@ -159,15 +159,24 @@ public abstract class JsonToDbMapper
     return !string.IsNullOrEmpty(sys.Id) && !string.IsNullOrEmpty(sys.LinkType) && !string.IsNullOrEmpty(sys.Type);
   }
 
-  protected virtual object CopyProperties(object from, object to)
+  /// <summary>
+  /// Move the value from the current key to the new key
+  /// </summary>
+  /// <param name="values"></param>
+  /// <param name="currentKey"></param>
+  /// <param name="newKey"></param>
+  /// <returns></returns>
+  protected Dictionary<string, object?> MoveValueToNewKey(Dictionary<string, object?> values, string currentKey, string newKey)
   {
-    var properties = from.GetType().GetProperties();
-
-    foreach (var property in properties)
+    if (!values.TryGetValue(currentKey, out object? value))
     {
-      property.SetValue(to, property.GetValue(from));
+      Logger.LogWarning("COuld not find key {currentKey}", currentKey);
+      return values;
     }
 
-    return to;
+    values[newKey] = value;
+    values.Remove(currentKey);
+
+    return values;
   }
 }
