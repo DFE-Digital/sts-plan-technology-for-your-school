@@ -8,45 +8,45 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
 public class QuestionMapper : JsonToDbMapper<QuestionDbEntity>
 {
-  private readonly CmsDbContext _db;
+    private readonly CmsDbContext _db;
 
-  public QuestionMapper(CmsDbContext db, ILogger<JsonToDbMapper<QuestionDbEntity>> logger, JsonSerializerOptions jsonSerialiserOptions) : base(logger, jsonSerialiserOptions)
-  {
-    _db = db;
-  }
-
-  public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
-  {
-    UpdateAnswersParentQuestionIds(values);
-
-    return values;
-  }
-
-  private void UpdateAnswersParentQuestionIds(Dictionary<string, object?> values)
-  {
-    if (values.TryGetValue("answers", out object? answersArray) && answersArray is object[] inners)
+    public QuestionMapper(CmsDbContext db, ILogger<JsonToDbMapper<QuestionDbEntity>> logger, JsonSerializerOptions jsonSerialiserOptions) : base(logger, jsonSerialiserOptions)
     {
-      foreach (var inner in inners)
-      {
-        UpdateAnswerParentQuestionId(inner);
-      }
-
-      values.Remove("answers");
+        _db = db;
     }
-  }
 
-  private void UpdateAnswerParentQuestionId(object inner)
-  {
-    if (inner is CmsWebHookSystemDetailsInner sys)
+    public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
-      var answer = new AnswerDbEntity()
-      {
-        Id = sys.Id
-      };
+        UpdateAnswersParentQuestionIds(values);
 
-      _db.Answers.Attach(answer);
-
-      answer.ParentQuestionId = Payload!.Sys.Id;
+        return values;
     }
-  }
+
+    private void UpdateAnswersParentQuestionIds(Dictionary<string, object?> values)
+    {
+        if (values.TryGetValue("answers", out object? answersArray) && answersArray is object[] inners)
+        {
+            foreach (var inner in inners)
+            {
+                UpdateAnswerParentQuestionId(inner);
+            }
+
+            values.Remove("answers");
+        }
+    }
+
+    private void UpdateAnswerParentQuestionId(object inner)
+    {
+        if (inner is CmsWebHookSystemDetailsInner sys)
+        {
+            var answer = new AnswerDbEntity()
+            {
+                Id = sys.Id
+            };
+
+            _db.Answers.Attach(answer);
+
+            answer.ParentQuestionId = Payload!.Sys.Id;
+        }
+    }
 }
