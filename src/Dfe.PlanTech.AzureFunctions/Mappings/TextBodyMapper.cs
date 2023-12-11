@@ -20,7 +20,7 @@ public class TextBodyMapper : JsonToDbMapper<TextBodyDbEntity>
 
     var deserialised = richText.Deserialize<RichTextContent>(JsonOptions) ?? throw new Exception($"Could not map to {typeof(RichTextContent)}");
 
-    values["richText"] = JsonNode.Parse(JsonSerializer.Serialize(_richTextMapper.MapContent(deserialised), JsonOptions));
+    values["richText"] = JsonNode.Parse(JsonSerializer.Serialize(_richTextMapper.MapToDbEntity(deserialised), JsonOptions));
 
     return values;
   }
