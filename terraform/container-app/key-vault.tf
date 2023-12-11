@@ -103,20 +103,6 @@ resource "azurerm_key_vault_secret" "vault_secret_database_connectionstring" {
   }
 }
 
-
-resource "azurerm_key_vault_secret" "vault_secret_servicebus_connectionstring" {
-  key_vault_id = azurerm_key_vault.vault.id
-  name         = "connectionstrings--servicebusconnection"
-  value        = azurerm_servicebus_namespace.service_bus.default_primary_connection_string
-
-  lifecycle {
-    ignore_changes = [
-      value,
-      expiration_date
-    ]
-  }
-}
-
 resource "azurerm_key_vault_secret" "functionapp_possibleoutboundipaddresses" {
   key_vault_id = azurerm_key_vault.vault.id
   name         = "functionapp--possibleoutboundipaddresses"

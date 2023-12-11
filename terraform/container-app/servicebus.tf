@@ -19,3 +19,12 @@ resource "azurerm_servicebus_queue" "contentful_queue" {
   name         = "contentful"
   namespace_id = azurerm_servicebus_namespace.service_bus.id
 }
+
+
+resource "azurerm_servicebus_queue_authorization_rule" "azurefunction" {
+  name         = "azurefunction"
+  queue_id     = azurerm_servicebus_queue.contentful_queue.id
+  listen       = true
+  send         = true
+  manage       = false
+}

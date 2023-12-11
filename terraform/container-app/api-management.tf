@@ -5,6 +5,7 @@ resource "azurerm_api_management" "api_management" {
   publisher_name      = "DFE Digital"
   publisher_email     = "dfe-digital@education.gov.uk"
 
+  tags     = local.tags
   sku_name = "Consumption_0"
 
   identity {
