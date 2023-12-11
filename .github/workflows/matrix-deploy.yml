@@ -37,6 +37,19 @@ jobs:
       branch: ${{ needs.set-env.outputs.branch }}
       checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
 
+  build-and-deploy-azure-function:
+    needs: set-env
+    name: Build & Deploy Azure Function to Dev
+    strategy:
+      fail-fast: true
+      max-parallel: 1
+      matrix:
+        target: [ Dev ]
+    uses: ./.github/workflows/build-and-deploy-azure-function.yml
+    with:
+      environment:  ${{ matrix.target }}
+    secrets: inherit
+
   check-for-terraform-changes:
     needs: create-and-publish-image
     runs-on: ubuntu-22.04
@@ -88,7 +101,7 @@ jobs:
       max-parallel: 1
       fail-fast: true
       matrix:
-        target: [Dev, Tst]
+        target: [ Dev, Tst ]
     uses: ./.github/workflows/deploy-image.yml
     with:
       environment: ${{ matrix.target }}

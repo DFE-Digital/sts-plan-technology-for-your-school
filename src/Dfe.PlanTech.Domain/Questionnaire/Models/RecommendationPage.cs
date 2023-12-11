@@ -4,7 +4,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-public class RecommendationPage : ContentComponent, IRecommendationPage
+public class RecommendationPage : ContentComponent, IRecommendationPage<Page>
 {
     public string InternalName { get; init; } = null!;
 

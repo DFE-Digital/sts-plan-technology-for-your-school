@@ -1,11 +1,7 @@
-@model Dfe.PlanTech.Domain.Questionnaire.Interfaces.ICategory;
+@model Dfe.PlanTech.Domain.Questionnaire.Models.Category;
 
 @{
     await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Header);
-    foreach (var content in Model.Content)
-    {
-        await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-    }
 }
 
 @await Component.InvokeAsync("CategorySection", new { category = Model })

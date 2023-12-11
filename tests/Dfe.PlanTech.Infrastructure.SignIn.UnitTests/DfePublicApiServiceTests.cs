@@ -23,8 +23,9 @@ public class DfePublicApiServiceTests : IAsyncLifetime
         _configuration.APIServiceProxyUrl.Returns(_wireMockServer.Urls[0]);
         _configuration.ClientId.Returns("PLANTECH");
         _configuration.ApiSecret.Returns("This is an api secret that is very secret");
+        HttpClient httpClient = new HttpClient();
 
-        _dfePublicApiService = new DfePublicApiService(_configuration);
+        _dfePublicApiService = new DfePublicApiService(_configuration, httpClient);
         return Task.CompletedTask;
     }
 

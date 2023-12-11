@@ -6,6 +6,16 @@ variable "project_name" {
   type        = string
 }
 
+variable "environment_prefix" {
+  description = "variable used as a prefix for resource group"
+  type        = string
+}
+
+variable "frontdoor_url" {
+  description = "variable used as value for CNAME record"
+  type        = string
+}
+
 variable "environment" {
   description = "Environment name, used along with `project_name` as a prefix for all resources"
   type        = string

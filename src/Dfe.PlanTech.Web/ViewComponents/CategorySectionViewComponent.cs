@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Domain.CategorySection;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.TagHelpers.TaskList;
 using Microsoft.AspNetCore.Mvc;
@@ -19,16 +20,16 @@ public class CategorySectionViewComponent : ViewComponent
         _query = query;
     }
 
-    public IViewComponentResult Invoke(ICategory category)
+    public IViewComponentResult Invoke(Category category)
     {
-        bool sectionsExist = category.Sections != null && category.Sections?.Length > 0;
+        bool sectionsExist = category.Sections != null && category.Sections.Count > 0;
 
         category = RetrieveSectionStatuses(category);
 
         var categorySectionViewModel = new CategorySectionViewComponentViewModel()
         {
             CompletedSectionCount = category.Completed,
-            TotalSectionCount = category.Sections?.Length ?? 0,
+            TotalSectionCount = category.Sections?.Count ?? 0,
             CategorySectionDto = sectionsExist ? GetCategorySectionViewComponentViewModel(category) : Enumerable.Empty<CategorySectionDto>(),
             ProgressRetrievalErrorMessage = category.RetrievalError ? "Unable to retrieve progress, please refresh your browser." : null
         };
@@ -38,11 +39,11 @@ public class CategorySectionViewComponent : ViewComponent
         return View(categorySectionViewModel);
     }
 
-    private void LogErrorWithUserFeedback(ISection categorySection, ref CategorySectionDto categorySectionDto)
+    private void LogErrorWithUserFeedback(Section categorySection, ref CategorySectionDto categorySectionDto)
     {
         categorySectionDto.Slug = null;
         _logger.LogError("No Slug found for Subtopic with ID: {categorySectionId}", categorySection.Sys.Id);
-        categorySectionDto.NoSlugForSubtopicErrorMessage = String.Format("{0} unavailable", categorySection.Name);
+        categorySectionDto.NoSlugForSubtopicErrorMessage = string.Format("{0} unavailable", categorySection.Name);
     }
 
     private static void SetCategorySectionDtoTagWithRetrievalError(ref CategorySectionDto categorySectionDto)
@@ -51,7 +52,7 @@ public class CategorySectionViewComponent : ViewComponent
         categorySectionDto.TagText = "UNABLE TO RETRIEVE STATUS";
     }
 
-    private static void SetCategorySectionDtoTagWithCurrentStatus(ICategory category, ISection categorySection, ref CategorySectionDto categorySectionDto)
+    private static void SetCategorySectionDtoTagWithCurrentStatus(Category category, Section categorySection, ref CategorySectionDto categorySectionDto)
     {
         var sectionStatusCompleted = category.SectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId == categorySection.Sys.Id)?.Completed;
 
@@ -67,7 +68,7 @@ public class CategorySectionViewComponent : ViewComponent
         }
     }
 
-    private IEnumerable<CategorySectionDto> GetCategorySectionViewComponentViewModel(ICategory category)
+    private IEnumerable<CategorySectionDto> GetCategorySectionViewComponentViewModel(Category category)
     {
         foreach (var categorySection in category.Sections)
         {
@@ -85,7 +86,7 @@ public class CategorySectionViewComponent : ViewComponent
         }
     }
 
-    public ICategory RetrieveSectionStatuses(ICategory category)
+    public Category RetrieveSectionStatuses(Category category)
     {
         try
         {

@@ -67,7 +67,7 @@ public class TextRendererTests
         {
             NodeType = NODE_TYPE,
             Value = value,
-            Marks = new RichTextMark[] {
+            Marks = new() {
                 new RichTextMark() {
                     Type = boldType,
                 }
@@ -104,7 +104,7 @@ public class TextRendererTests
         {
             NodeType = NODE_TYPE,
             Value = value,
-            Marks = new RichTextMark[] {
+            Marks = new() {
                 new RichTextMark() {
                     Type = boldType,
                 }

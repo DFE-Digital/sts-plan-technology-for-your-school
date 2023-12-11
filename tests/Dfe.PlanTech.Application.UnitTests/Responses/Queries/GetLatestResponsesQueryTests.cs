@@ -66,11 +66,11 @@ public class GetLatestResponsesQueryTests
         var questionFaker = new Faker<Domain.Questionnaire.Models.Question>()
                             .RuleFor(question => question.Sys, generateSystemDetails)
                             .RuleFor(question => question.Text, faker => faker.Lorem.Sentence())
-                            .RuleFor(question => question.Answers, _ => answerFaker.Generate(ANSWER_PER_QUESTION_COUNT).ToArray());
+                            .RuleFor(question => question.Answers, _ => answerFaker.Generate(ANSWER_PER_QUESTION_COUNT).ToList());
 
         var sectionFaker = new Faker<Section>()
                                 .RuleFor(section => section.Sys, generateSystemDetails)
-                                .RuleFor(section => section.Questions, _ => questionFaker.Generate(QUESTION_PER_SECTION_COUNT).ToArray());
+                                .RuleFor(section => section.Questions, _ => questionFaker.Generate(QUESTION_PER_SECTION_COUNT).ToList());
 
 
         _incompleteSections = sectionFaker.Generate(SECTION_COUNT);
@@ -248,7 +248,7 @@ public class GetLatestResponsesQueryTests
 
         while (timesAnswered > 0)
         {
-            var responseCount = submission.Completed ? section.Questions.Length : faker.Random.Int(1, section.Questions.Length);
+            var responseCount = submission.Completed ? section.Questions.Count : faker.Random.Int(1, section.Questions.Count);
 
             for (var x = 0; x < responseCount; x++)
             {

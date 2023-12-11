@@ -65,7 +65,7 @@ resource "azurerm_linux_function_app" "contentful_function" {
     KeyVaultReferenceIdentity       = azurerm_user_assigned_identity.user_assigned_identity.id
     WEBSITE_RUN_FROM_PACKAGE        = "https://${azurerm_storage_account.function_storage.name}.blob.core.windows.net/function-releases/${data.external.latest-function-zip.result.zip}"
   }
-  
+
 }
 
 data "azurerm_function_app_host_keys" "default" {

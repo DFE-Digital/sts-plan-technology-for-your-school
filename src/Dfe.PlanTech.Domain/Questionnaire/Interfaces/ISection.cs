@@ -8,17 +8,32 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 /// <summary>
 /// A subsection of a <see chref="ICategory"/>
 /// </summary>
-public interface ISection : IContentComponent
+public interface ISection
 {
     public string Name { get; }
+}
 
-    public Question[] Questions { get; }
+/// <summary>
+/// A subsection of a <see chref="ICategory"/>
+/// </summary>
+public interface ISection<TQuestion, TPage, TRecommendationPage> : ISection
+where TQuestion : IQuestion
+where TPage : IPage
+where TRecommendationPage : IRecommendationPage
+{
+    public List<TQuestion> Questions { get; }
 
+    public TPage? InterstitialPage { get; }
+
+    public List<TRecommendationPage> Recommendations { get; }
+}
+
+/// <summary>
+/// Interface for the <see cref="ISection"/> for the Contentful data 
+/// </summary>
+public interface ISectionComponent : ISection<Question, Page, RecommendationPage>, IContentComponent
+{
     public string FirstQuestionId { get; }
-
-    public Page InterstitialPage { get; }
-
-    public RecommendationPage[] Recommendations { get; }
 
     public RecommendationPage? TryGetRecommendationForMaturity(Maturity maturity);
 

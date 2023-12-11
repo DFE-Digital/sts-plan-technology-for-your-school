@@ -1,4 +1,5 @@
 
+using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using System.Text;
@@ -11,7 +12,7 @@ public class UnorderedListRenderer : BaseRichTextContentPartRender
     {
     }
 
-    public override StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(RichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
         stringBuilder.Append("<ul>");
 

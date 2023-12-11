@@ -2,7 +2,6 @@
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Dfe.PlanTech.Domain.Questionnaire.Enums;
-using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Web.UnitTests.Models
@@ -11,15 +10,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
     {
         public Category BuildCategory()
         {
-
             return new Category()
             {
                 Header = new Header { Text = "Category" },
-                Content = BuildContent(),
                 Sections = BuildSections(),
-
             };
         }
+
         public TextBody BuildTextBody()
         {
             return new TextBody
@@ -67,14 +64,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             Text = "Inset Text"
         };
 
-        public ISection[] BuildSections()
-        => new ISection[]
+        public List<Section> BuildSections()
+        => new()
         {
             new Section
             {
                 Name = "Section",
-                Questions = BuildQuestion(),
-                Recommendations = new RecommendationPage[] {
+                Questions = BuildQuestions(),
+                Recommendations =new() {
                     BuildRecommendationsPage(Maturity.Low),
                     BuildRecommendationsPage(Maturity.Medium),
                     BuildRecommendationsPage(Maturity.High)
@@ -82,22 +79,22 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             }
         };
 
-        private static Question[] BuildQuestion()
+        private static List<Question> BuildQuestions()
         {
-            return new Question[]
+            return new()
             {
                 new Question
                 {
                     Text = "Question Text",
                     HelpText = "Help Text",
-                    Answers = BuildAnswer(),
+                    Answers = BuildAnswers(),
                 }
             };
         }
 
-        private static Answer[] BuildAnswer()
+        private static List<Answer> BuildAnswers()
         {
-            return new Answer[]
+            return new()
             {
                 new Answer
                 {
@@ -134,9 +131,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             InternalName = "Internal Name",
             Slug = "testing-page",
             SectionTitle = "Section Title",
-            Param = param,
             Title = BuildTitle(),
-            Content = Array.Empty<IContentComponent>()
+            Content = Array.Empty<ContentComponent>()
         };
 
         private static Title BuildTitle(string text = "Testing Title")
