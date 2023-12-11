@@ -61,7 +61,7 @@ resource "azurerm_linux_function_app" "contentful_function" {
     KeyVaultReferenceIdentity       = azurerm_user_assigned_identity.user_assigned_identity.id
     WEBSITE_RUN_FROM_PACKAGE        = ""
   }
-  
+
   lifecycle {
     ignore_changes = [
       app_settings["WEBSITE_RUN_FROM_PACKAGE"]
