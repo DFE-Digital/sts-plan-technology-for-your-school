@@ -8,15 +8,15 @@ public interface IComponentDropDown
   /// <summary>
   /// The title to display.
   /// </summary>
-  public string Title { get; }
+  public string Title { get; set; }
 }
 
-public interface IComponentDropDown<TContent>
+public interface IComponentDropDown<TContent> : IComponentDropDown
 where TContent : IRichTextContent
 {
 
   /// <summary>
   /// The Content to display.
   /// </summary>
-  public TContent RichTextContent { get; }
+  public TContent Content { get; set; }
 }
