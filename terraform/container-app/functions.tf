@@ -1,7 +1,3 @@
-data "external" "latest-function-zip" {
-  program = ["bash", "${path.module}/scripts/latest-function-zip.sh", azurerm_storage_account.function_storage.name]
-}
-
 resource "azurerm_storage_account" "function_storage" {
   name                     = replace("${local.resource_prefix}funcstr", "-", "")
   resource_group_name      = local.resource_group_name
@@ -63,7 +59,13 @@ resource "azurerm_linux_function_app" "contentful_function" {
     AZURE_KEYVAULT_RESOURCEENDPOINT = azurerm_key_vault.vault.vault_uri
     AZURE_KEYVAULT_SCOPE            = "https://vault.azure.net/.default"
     KeyVaultReferenceIdentity       = azurerm_user_assigned_identity.user_assigned_identity.id
-    WEBSITE_RUN_FROM_PACKAGE        = "https://${azurerm_storage_account.function_storage.name}.blob.core.windows.net/function-releases/${data.external.latest-function-zip.result.zip}"
+    WEBSITE_RUN_FROM_PACKAGE        = ""
+  }
+  
+  lifecycle {
+    ignore_changes = [
+      app_settings["WEBSITE_RUN_FROM_PACKAGE"]
+    ]
   }
 
 }
