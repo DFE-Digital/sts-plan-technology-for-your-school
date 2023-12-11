@@ -8,17 +8,17 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 /// </summary>
 public class SectionDbEntity : ContentComponentDbEntity, ISection<QuestionDbEntity, PageDbEntity, RecommendationPageDbEntity>
 {
-  public string Name { get; set; } = null!;
+    public string Name { get; set; } = null!;
 
-  public List<QuestionDbEntity> Questions { get; set; } = new();
+    public List<QuestionDbEntity> Questions { get; set; } = new();
 
-  public PageDbEntity? InterstitialPage { get; set; } = null!;
+    public PageDbEntity? InterstitialPage { get; set; } = null!;
 
-  public string? InterstitialPageId { get; set; } = null!;
+    public string? InterstitialPageId { get; set; } = null!;
 
-  public CategoryDbEntity? Category { get; set; }
+    public CategoryDbEntity? Category { get; set; }
 
-  public string? CategoryId { get; set; }
+    public string? CategoryId { get; set; }
 
-  public List<RecommendationPageDbEntity> Recommendations { get; set; } = new();
+    public List<RecommendationPageDbEntity> Recommendations { get; set; } = new();
 }

@@ -8,5 +8,5 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 /// <inheritdoc/>
 public class RichTextDataDbEntity : ContentComponentDbEntity, IRichTextData
 {
-  public string? Uri { get; init; }
+    public string? Uri { get; init; }
 }

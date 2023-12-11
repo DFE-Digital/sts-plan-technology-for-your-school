@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Domain.Content.Models.Buttons;
 /// <inheritdoc/>
 public class ButtonWithLinkDbEntity : ContentComponentDbEntity, IButtonWithLink<ButtonDbEntity>
 {
-  public ButtonDbEntity Button { get; set; } = null!;
+    public ButtonDbEntity Button { get; set; } = null!;
 
-  public string Href { get; set; } = null!;
+    public string Href { get; set; } = null!;
 }

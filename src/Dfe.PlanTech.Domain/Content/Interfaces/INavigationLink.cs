@@ -8,18 +8,18 @@ namespace Dfe.PlanTech.Domain.Content.Interfaces;
 /// </remarks>
 public interface INavigationLink
 {
-  /// <summary>
-  /// Display text (i.e. <a>{DisplayText}</a>)
-  /// </summary>
-  public string DisplayText { get; }
+    /// <summary>
+    /// Display text (i.e. <a>{DisplayText}</a>)
+    /// </summary>
+    public string DisplayText { get; }
 
-  /// <summary>
-  /// Href value (i.e. <a href="{Href}"></a>)
-  /// </summary>
-  public string Href { get; }
+    /// <summary>
+    /// Href value (i.e. <a href="{Href}"></a>)
+    /// </summary>
+    public string Href { get; }
 
-  /// <summary>
-  /// Should this link open in a new tab?
-  /// </summary>
-  public bool OpenInNewTab { get; }
+    /// <summary>
+    /// Should this link open in a new tab?
+    /// </summary>
+    public bool OpenInNewTab { get; }
 }

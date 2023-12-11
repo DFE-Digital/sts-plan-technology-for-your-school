@@ -9,7 +9,7 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 /// <inheritdoc/>
 public class RichTextMarkDbEntity : ContentComponentDbEntity, IRichTextMark
 {
-  public string Type { get; set; } = "";
+    public string Type { get; set; } = "";
 
-  public MarkType MarkType => Enum.TryParse(Type, true, out MarkType markType) ? markType : MarkType.Unknown;
+    public MarkType MarkType => Enum.TryParse(Type, true, out MarkType markType) ? markType : MarkType.Unknown;
 }

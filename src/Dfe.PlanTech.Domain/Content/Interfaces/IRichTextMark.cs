@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Domain.Content.Interfaces;
 /// </summary>
 public interface IRichTextMark
 {
-  public string Type { get; }
+    public string Type { get; }
 
-  public MarkType MarkType { get; }
+    public MarkType MarkType { get; }
 }

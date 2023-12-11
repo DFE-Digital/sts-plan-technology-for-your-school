@@ -12,8 +12,8 @@ public interface IWarningComponent
 public interface IWarningComponent<TTextBody> : IWarningComponent
 where TTextBody : ITextBody
 {
-  /// <summary>
-  /// Warning text
-  /// </summary>
-  public TTextBody Text { get; }
+    /// <summary>
+    /// Warning text
+    /// </summary>
+    public TTextBody Text { get; }
 }

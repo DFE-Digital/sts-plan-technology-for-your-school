@@ -6,8 +6,8 @@ namespace Dfe.PlanTech.Domain.Content.Interfaces;
 /// <inheritdoc/>
 public interface IRichTextData
 {
-  /// <summary>
-  /// URL for a link
-  /// </summary>
-  public string? Uri { get; init; }
+    /// <summary>
+    /// URL for a link
+    /// </summary>
+    public string? Uri { get; init; }
 }
