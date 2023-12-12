@@ -7,21 +7,19 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions
 {
-    public class ContentfulWebHook
+    public class ContentfulWebHook : BaseFunction
     {
-        private readonly ILogger _logger;
         private readonly ServiceBusSender _sender;
 
-        public ContentfulWebHook(ILoggerFactory loggerFactory, IAzureClientFactory<ServiceBusSender> serviceBusSenderFactory)
+        public ContentfulWebHook(ILoggerFactory loggerFactory, IAzureClientFactory<ServiceBusSender> serviceBusSenderFactory) : base(loggerFactory.CreateLogger<ContentfulWebHook>())
         {
-            _logger = loggerFactory.CreateLogger<ContentfulWebHook>();
             _sender = serviceBusSenderFactory.CreateClient("contentful");
         }
 
         [Function("ContentfulWebHook")]
         public async Task<HttpResponseData> WebhookReceiver([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)
         {
-            _logger.LogInformation("Received webhook POST.");
+            Logger.LogInformation("Received webhook POST.");
 
             var stream = new StreamReader(req.Body);
             var body = stream.ReadToEnd();
@@ -31,7 +29,7 @@ namespace Dfe.PlanTech.AzureFunctions
                 return ReturnEmptyBodyError(req);
             }
 
-            _logger.LogTrace("Logging message body: {body}", body);
+            Logger.LogTrace("Logging message body: {body}", body);
 
             try
             {
@@ -45,24 +43,10 @@ namespace Dfe.PlanTech.AzureFunctions
             }
         }
 
-        private HttpResponseData ReturnServerErrorResponse(HttpRequestData req, Exception ex)
-        {
-            _logger.LogError("Error writing body to queue - {message} {stacktrace}", ex.Message, ex.StackTrace);
-            return req.CreateResponse(HttpStatusCode.InternalServerError);
-        }
-
-        private static HttpResponseData ReturnOkResponse(HttpRequestData req) => req.CreateResponse(HttpStatusCode.OK);
-
-        private async Task WriteToQueue(string body)
+        protected async Task WriteToQueue(string body)
         {
             var serviceBusMessage = new ServiceBusMessage(body);
             await _sender.SendMessageAsync(serviceBusMessage);
-        }
-
-        private HttpResponseData ReturnEmptyBodyError(HttpRequestData req)
-        {
-            _logger.LogError("Received null body.");
-            return req.CreateResponse(HttpStatusCode.BadRequest);
         }
     }
 }
