@@ -107,7 +107,7 @@ namespace Dfe.PlanTech.AzureFunctions
         {
             if (existing == null)
             {
-                await _db.AddAsync(entity);
+                _db.Add(entity);
             }
             else
             {
