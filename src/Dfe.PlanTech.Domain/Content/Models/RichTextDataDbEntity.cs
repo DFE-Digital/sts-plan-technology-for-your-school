@@ -10,5 +10,9 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 /// <inheritdoc/>
 public class RichTextDataDbEntity : IRichTextData
 {
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public long Id { get; set; }
+
     public string? Uri { get; init; }
 }
