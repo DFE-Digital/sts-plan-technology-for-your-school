@@ -11,7 +11,7 @@ public interface IComponentDropDown
     public string Title { get; }
 }
 
-public interface IComponentDropDown<TContent>
+public interface IComponentDropDown<TContent> : IComponentDropDown
 where TContent : IRichTextContent
 {
 

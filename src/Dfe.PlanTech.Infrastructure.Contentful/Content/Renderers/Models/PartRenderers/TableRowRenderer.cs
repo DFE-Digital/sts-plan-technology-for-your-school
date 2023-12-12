@@ -15,7 +15,7 @@ public class TableRowRenderer : BaseRichTextContentPartRender
     {
         string bodyStartString = "<tbody class=\"govuk-table__body\">";
 
-        bool isHeaderRow = content.Content[0].MappedNodeType == RichTextNodeType.TableHeaderCell;
+        bool isHeaderRow = (content.Content[0] as IRichTextContent).MappedNodeType == RichTextNodeType.TableHeaderCell;
         bool isFirstBodyRow = !stringBuilder.ToString().Contains(bodyStartString) && !isHeaderRow;
 
         if (isHeaderRow)

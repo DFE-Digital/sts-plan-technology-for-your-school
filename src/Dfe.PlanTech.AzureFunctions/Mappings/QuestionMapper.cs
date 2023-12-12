@@ -37,16 +37,19 @@ public class QuestionMapper : JsonToDbMapper<QuestionDbEntity>
 
     private void UpdateAnswerParentQuestionId(object inner)
     {
-        if (inner is CmsWebHookSystemDetailsInner sys)
+        if (inner is not string id)
         {
-            var answer = new AnswerDbEntity()
-            {
-                Id = sys.Id
-            };
-
-            _db.Answers.Attach(answer);
-
-            answer.ParentQuestionId = Payload!.Sys.Id;
+            Logger.LogWarning("Expected string but received {innerType}", inner.GetType());
+            return;
         }
+
+        var answer = new AnswerDbEntity()
+        {
+            Id = id
+        };
+
+        _db.Answers.Attach(answer);
+
+        answer.ParentQuestionId = Payload!.Sys.Id;
     }
 }
