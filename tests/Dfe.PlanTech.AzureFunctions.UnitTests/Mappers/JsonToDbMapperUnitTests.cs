@@ -14,6 +14,7 @@ public class JsonToDbMapperUnitTests
   private const string StringValueTest = "string test";
   private readonly string[] ArrayValueTest = new[] { "one", "two", "three" };
   private const int NumberValueTest = 10000;
+  private const string EntityId = "Testing Id";
   private readonly CmsWebHookSystemDetailsInnerContainer[] ReferencesValueTest = new[] {
         new CmsWebHookSystemDetailsInnerContainer(){
           Sys = new(){
@@ -77,7 +78,7 @@ public class JsonToDbMapperUnitTests
     {
       Sys = new CmsWebHookSystemDetails()
       {
-        Id = "Testing Id"
+        Id = EntityId
       },
       Fields = asJsonNode!
     };
@@ -89,6 +90,8 @@ public class JsonToDbMapperUnitTests
 
     var concrete = mapped as ContentComponentDbEntityImplementation;
     Assert.NotNull(concrete);
+
+    Assert.Equal(EntityId, concrete.Id);
 
     Assert.Equal(StringValueTest, concrete.StringValue);
     Assert.Equal(NumberValueTest, concrete.NumberValue);
