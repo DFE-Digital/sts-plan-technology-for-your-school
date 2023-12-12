@@ -9,7 +9,7 @@ using NSubstitute;
 
 namespace Dfe.PlanTech.AzureFunctions.UnitTests.Mappers;
 
-public class JsonToDbMapperUnitTests
+public class JsonToDbMapperUnitTests : BaseMapperTests
 {
   private const string StringValueTest = "string test";
   private readonly string[] ArrayValueTest = new[] { "one", "two", "three" };
@@ -29,19 +29,13 @@ public class JsonToDbMapperUnitTests
 
   private readonly JsonToDbMapperImplementation _mapper;
 
-  private readonly ILogger _logger;
-  private readonly JsonSerializerOptions _jsonOptions = new()
-  {
-    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
-  };
-
   private readonly Type _type = typeof(ContentComponentDbEntityImplementation);
+
+  private readonly ILogger _logger = Substitute.For<ILogger>();
 
   public JsonToDbMapperUnitTests()
   {
-    _logger = Substitute.For<ILogger>();
-    _mapper = new JsonToDbMapperImplementation(_type, _logger, _jsonOptions);
+    _mapper = new JsonToDbMapperImplementation(_type, _logger, JsonOptions);
   }
 
   [Fact]
@@ -71,8 +65,8 @@ public class JsonToDbMapperUnitTests
       ["referenceIds"] = WrapWithLocalisation(ReferencesValueTest)
     };
 
-    var asJson = JsonSerializer.Serialize(fields, _jsonOptions);
-    var asJsonNode = JsonSerializer.Deserialize<Dictionary<string, JsonNode>>(asJson, _jsonOptions);
+    var asJson = JsonSerializer.Serialize(fields, JsonOptions);
+    var asJsonNode = JsonSerializer.Deserialize<Dictionary<string, JsonNode>>(asJson, JsonOptions);
 
     var payload = new CmsWebHookPayload()
     {

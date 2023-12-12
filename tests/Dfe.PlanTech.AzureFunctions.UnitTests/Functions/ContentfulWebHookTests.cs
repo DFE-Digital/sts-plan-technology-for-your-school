@@ -111,5 +111,4 @@ public class ContentfulWebHookTests
 
     Assert.True(result.StatusCode == HttpStatusCode.InternalServerError);
   }
-
 }
