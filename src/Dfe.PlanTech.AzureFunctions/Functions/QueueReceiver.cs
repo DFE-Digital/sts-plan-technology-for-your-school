@@ -42,7 +42,15 @@ namespace Dfe.PlanTech.AzureFunctions
                 _logger.LogInformation("Performing Action: {action}", cmsEvent);
                 _logger.LogInformation("Processing {text}", text);
 
-                var mapped = _mappers.ToEntity(text);
+                ContentComponentDbEntity mapped = _mappers.ToEntity(text);
+                ContentComponentDbEntity? existing = GetExistingDbEntity(mapped);
+
+                if (existing != null)
+                {
+                    mapped.Archived = existing.Archived;
+                    mapped.Published = existing.Published;
+                    mapped.Deleted = existing.Deleted;
+                }
 
                 switch (cmsEvent)
                 {
@@ -70,9 +78,9 @@ namespace Dfe.PlanTech.AzureFunctions
                         throw new ArgumentException(string.Format("Case \"{0}\" not implemented", cmsEvent));
                 }
 
-                long rowsChanged = await UpsertEntityInDatabase(mapped);
+                long rowsChanged = await UpsertEntityInDatabase(mapped, existing);
 
-                if (rowsChanged == 0)
+                if (rowsChanged == 0L)
                 {
                     _logger.LogError("Changed no rows in database");
                 }
@@ -90,18 +98,16 @@ namespace Dfe.PlanTech.AzureFunctions
             }
         }
 
-        private object? GetExistingDbEntity(ContentComponentDbEntity entity)
+        private ContentComponentDbEntity? GetExistingDbEntity(ContentComponentDbEntity entity)
         {
-            return _db.Find(entity.GetType(), entity.Id);
+            return _db.Find(entity.GetType(), entity.Id) as ContentComponentDbEntity ?? null;
         }
 
-        private async Task<long> UpsertEntityInDatabase(ContentComponentDbEntity entity)
+        private async Task<long> UpsertEntityInDatabase(ContentComponentDbEntity entity, ContentComponentDbEntity? existing)
         {
-            var existing = _db.Find(entity.GetType(), entity.Id);
-
             if (existing == null)
             {
-                _db.Add(entity);
+                await _db.AddAsync(entity);
             }
             else
             {
@@ -111,7 +117,7 @@ namespace Dfe.PlanTech.AzureFunctions
             return await _db.SaveChangesAsync();
         }
 
-        private void UpdateProperties(ContentComponentDbEntity entity, object? existing)
+        private void UpdateProperties(ContentComponentDbEntity entity, ContentComponentDbEntity existing)
         {
             var properties = entity.GetType().GetProperties();
 
