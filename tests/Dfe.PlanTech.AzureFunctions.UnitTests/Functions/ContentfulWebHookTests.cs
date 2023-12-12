@@ -90,4 +90,26 @@ public class ContentfulWebHookTests
     Assert.Equal(requestBody, messageBody);
   }
 
+  [Fact]
+  public async Task WebhookReceiver_Should_ReturnError_When_ExceptionThrown()
+  {
+    var errorMessage = "ERROR MESSAGE";
+
+    _serviceBusSender.SendMessageAsync(Arg.Any<ServiceBusMessage>(), Arg.Any<CancellationToken>())
+                      .Returns(callinfo =>
+                      {
+                        throw new Exception(errorMessage);
+                      });
+
+    var request = HttpHelpers.MockHttpRequest();
+
+    var requestBody = "request body";
+    var stream = GenerateStreamFromString(requestBody);
+    request.Body.Returns(stream);
+
+    var result = await _contentfulWebHook.WebhookReceiver(request);
+
+    Assert.True(result.StatusCode == HttpStatusCode.InternalServerError);
+  }
+
 }
