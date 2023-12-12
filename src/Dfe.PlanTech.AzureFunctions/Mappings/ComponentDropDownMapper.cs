@@ -6,12 +6,14 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
 public class ComponentDropDownMapper : JsonToDbMapper<ComponentDropDownDbEntity>
 {
-  public ComponentDropDownMapper(ILogger<JsonToDbMapper<ComponentDropDownDbEntity>> logger, JsonSerializerOptions jsonSerialiserOptions) : base(logger, jsonSerialiserOptions)
-  {
-  }
+    public ComponentDropDownMapper(ILogger<JsonToDbMapper<ComponentDropDownDbEntity>> logger, JsonSerializerOptions jsonSerialiserOptions) : base(logger, jsonSerialiserOptions)
+    {
+    }
 
-  public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
-  {
-    return values;
-  }
+    public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
+    {
+        values = MoveValueToNewKey(values, "content", "contentId");
+
+        return values;
+    }
 }
