@@ -20,7 +20,7 @@ where TEntity : ContentComponentDbEntity, new()
     {
     }
 
-    public TEntity ToEntity(CmsWebHookPayload payload)
+    public virtual TEntity ToEntity(CmsWebHookPayload payload)
     {
         Payload = payload;
 
@@ -52,8 +52,8 @@ public abstract class JsonToDbMapper
         JsonOptions = jsonSerialiserOptions;
     }
 
-    public bool AcceptsContentType(string contentType)
-      => _entityType.Name.ToLower().Contains(contentType);
+    public virtual bool AcceptsContentType(string contentType)
+      => _entityType.Name.Contains(contentType, StringComparison.InvariantCultureIgnoreCase);
 
     public abstract ContentComponentDbEntity MapEntity(CmsWebHookPayload payload);
 
@@ -130,9 +130,10 @@ public abstract class JsonToDbMapper
 
         var asObject = node.AsObject();
 
+        //If it's an entity reference, just us the Id field
         if (TrySerialiseAsLinkEntry(asObject, out CmsWebHookSystemDetailsInner? sys) && sys != null)
         {
-            return sys;
+            return sys.Id;
         }
 
         return node;
@@ -159,15 +160,24 @@ public abstract class JsonToDbMapper
         return !string.IsNullOrEmpty(sys.Id) && !string.IsNullOrEmpty(sys.LinkType) && !string.IsNullOrEmpty(sys.Type);
     }
 
-    protected virtual object CopyProperties(object from, object to)
+    /// <summary>
+    /// Move the value from the current key to the new key
+    /// </summary>
+    /// <param name="values"></param>
+    /// <param name="currentKey"></param>
+    /// <param name="newKey"></param>
+    /// <returns></returns>
+    protected Dictionary<string, object?> MoveValueToNewKey(Dictionary<string, object?> values, string currentKey, string newKey)
     {
-        var properties = from.GetType().GetProperties();
-
-        foreach (var property in properties)
+        if (!values.TryGetValue(currentKey, out object? value))
         {
-            property.SetValue(to, property.GetValue(from));
+            Logger.LogWarning("COuld not find key {currentKey}", currentKey);
+            return values;
         }
 
-        return to;
+        values[newKey] = value;
+        values.Remove(currentKey);
+
+        return values;
     }
 }

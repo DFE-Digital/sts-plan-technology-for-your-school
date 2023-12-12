@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
 
@@ -7,22 +8,32 @@ namespace Dfe.PlanTech.Domain.Content.Interfaces;
 /// Content for a 'RichText' field in Contentful
 /// </summary>
 /// <inheritdoc/>
-public interface IRichTextContent
+public partial interface IRichTextContent
 {
     /// <summary>
     /// Actual value of this node.
     /// </summary>
-    public string Value { get; }
+    public string Value { get; set; }
 
     /// <summary>
     /// NodeType for This node; e.g. paragraph, underordered-list, etc.
     /// </summary>
-    public string NodeType { get; }
+    public string NodeType { get; set; }
 
-    /// <summary>
-    /// Maps NodeType field to Enum, for easier parsing in views
-    /// </summary>
-    public RichTextNodeType MappedNodeType { get; }
+    public RichTextNodeType MappedNodeType
+    => Enum.GetValues<RichTextNodeType>().FirstOrDefault(value =>
+    {
+        string? enumName = GetNameForNodeType(value);
+        return MatchesNodeType(enumName);
+    });
+
+    public bool MatchesNodeType(string? enumName)
+    => string.Equals(enumName, RemoveHyphensRegEx().Replace(NodeType, ""), StringComparison.OrdinalIgnoreCase);
+
+    public string? GetNameForNodeType(RichTextNodeType value) => Enum.GetName(value);
+
+    [GeneratedRegex("-")]
+    private static partial Regex RemoveHyphensRegEx();
 }
 
 public interface IRichTextContent<TMark, TContentType, TData> : IRichTextContent
@@ -33,15 +44,15 @@ where TData : IRichTextData, new()
     /// <summary>
     /// Collection of marks (e.g. underline, bold, etc.)
     /// </summary>
-    public List<TMark> Marks { get; }
+    public List<TMark> Marks { get; set; }
 
     /// <summary>
     /// Child content
     /// </summary>
-    public List<TContentType> Content { get; }
+    public List<TContentType> Content { get; set; }
 
     /// <summary>
     /// Additional information for the text (e.g. HTML URL for a link)
     /// </summary>
-    public TData? Data { get; }
+    public TData? Data { get; set; }
 }

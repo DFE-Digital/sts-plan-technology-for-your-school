@@ -9,7 +9,7 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 /// <inheritdoc/>
 public class RichTextMark : IRichTextMark
 {
-    public string Type { get; init; } = "";
+    public string Type { get; set; } = "";
 
     public MarkType MarkType => Enum.TryParse(Type, true, out MarkType markType) ? markType : MarkType.Unknown;
 }
