@@ -157,7 +157,7 @@ public abstract class JsonToDbMapper
 
         sys = container.Sys;
 
-        return !string.IsNullOrEmpty(sys.Id) && !string.IsNullOrEmpty(sys.LinkType) && !string.IsNullOrEmpty(sys.Type);
+        return !string.IsNullOrEmpty(sys.Id);
     }
 
     /// <summary>
