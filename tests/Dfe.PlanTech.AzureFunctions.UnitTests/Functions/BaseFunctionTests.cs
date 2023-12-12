@@ -1,11 +1,8 @@
 using System.Net;
-using Azure;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 
 namespace Dfe.PlanTech.AzureFunctions.UnitTests;
@@ -22,37 +19,50 @@ public class BaseFunctionTests
     _baseFunction = new BaseFunction(_logger);
   }
 
-  public static HttpRequestData MockHttpRequest()
-  {
-    var serviceCollection = new ServiceCollection();
-    serviceCollection.AddScoped<ILoggerFactory, LoggerFactory>();
-    var serviceProvider = serviceCollection.BuildServiceProvider();
-
-    var context = Substitute.For<FunctionContext>();
-    context.InstanceServices.Returns(serviceProvider);
-
-    var request = Substitute.For<HttpRequestData>(context);
-
-    request.CreateResponse().Returns((callInfo) =>
-    {
-      var response = Substitute.For<HttpResponseData>(context);
-      response.Headers.Returns(new HttpHeadersCollection());
-      response.Body.Returns(new MemoryStream());
-
-      return response;
-    });
-
-    return request;
-  }
-
   [Fact]
   public void ReturnEmptyBodyError_Should_ReturnBadResponse_And_LogMessage()
   {
-    var request = MockHttpRequest();
+    var request = HttpHelpers.MockHttpRequest();
 
     var response = _baseFunction.ReturnEmptyBodyError(request);
 
     Assert.True(response.StatusCode == HttpStatusCode.BadRequest);
     _logger.ReceivedWithAnyArgs(1);
+  }
+
+  [Fact]
+  public void ReturnServerErrorResponse_Should_LogError()
+  {
+    var request = HttpHelpers.MockHttpRequest();
+
+    var errorMessage = "ERROR MESSAGE GOES HERE";
+    var exception = new Exception(errorMessage);
+
+    var response = _baseFunction.ReturnServerErrorResponse(request, exception);
+
+    Assert.True(response.StatusCode == HttpStatusCode.InternalServerError);
+
+    _logger.ReceivedWithAnyArgs(1);
+    var loggerArguments = _logger.ReceivedCalls().First().GetArguments();
+
+    var formattableStrings = loggerArguments[2] as IEnumerable<KeyValuePair<string, object>>;
+    Assert.NotNull(formattableStrings);
+    Assert.NotEmpty(formattableStrings);
+
+    var receivedErrorMessage = formattableStrings.Where(s => s.Key == "message").Select(s => s.Value).FirstOrDefault();
+
+    Assert.NotNull(receivedErrorMessage);
+    Assert.IsType<string>(receivedErrorMessage);
+    Assert.Equal(errorMessage, receivedErrorMessage);
+  }
+
+  [Fact]
+  public void ReturnOkResponse_Should_ReturnOkResponse()
+  {
+    var request = HttpHelpers.MockHttpRequest();
+
+    var response = BaseFunction.ReturnOkResponse(request);
+
+    Assert.True(response.StatusCode == HttpStatusCode.OK);
   }
 }
