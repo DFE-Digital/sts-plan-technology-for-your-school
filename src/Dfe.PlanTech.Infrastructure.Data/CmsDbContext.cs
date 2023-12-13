@@ -31,8 +31,6 @@ public class CmsDbContext : DbContext
 
     public DbSet<PageDbEntity> Pages { get; set; }
 
-    public DbSet<PageContentDbEntity> PageContents { get; set; }
-
     public DbSet<RecommendationPageDbEntity> RecommendationPages { get; set; }
 
     public DbSet<RichTextContentDbEntity> RichTextContents { get; set; }
@@ -146,6 +144,11 @@ public class CmsDbContext : DbContext
         modelBuilder.Entity<TitleDbEntity>(entity =>
         {
             entity.ToTable("Titles", Schema);
+        });
+
+        modelBuilder.Entity<WarningComponentDbEntity>(entity =>
+        {
+            entity.HasOne(warning => warning.Text).WithMany(text => text.Warnings).OnDelete(DeleteBehavior.Restrict);
         });
     }
 }
