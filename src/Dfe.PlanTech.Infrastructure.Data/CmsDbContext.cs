@@ -31,6 +31,8 @@ public class CmsDbContext : DbContext
 
     public DbSet<PageDbEntity> Pages { get; set; }
 
+    public DbSet<PageContentDbEntity> PageContents { get; set; }
+
     public DbSet<RecommendationPageDbEntity> RecommendationPages { get; set; }
 
     public DbSet<RichTextContentDbEntity> RichTextContents { get; set; }
