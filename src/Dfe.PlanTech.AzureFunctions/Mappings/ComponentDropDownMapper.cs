@@ -12,8 +12,6 @@ public class ComponentDropDownMapper : JsonToDbMapper<ComponentDropDownDbEntity>
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
-        values = MoveValueToNewKey(values, "content", "contentId");
-
         return values;
     }
 }
