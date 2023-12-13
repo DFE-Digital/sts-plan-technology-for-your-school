@@ -27,7 +27,7 @@ where TEntity : ContentComponentDbEntity, new()
         var values = GetEntityValuesDictionary(payload);
         values = PerformAdditionalMapping(values);
 
-        var asJson = JsonSerializer.Serialize(values);
+        var asJson = JsonSerializer.Serialize(values, JsonOptions);
         var serialised = JsonSerializer.Deserialize<TEntity>(asJson, JsonOptions) ?? throw new NullReferenceException("Null returned");
 
         return serialised;
@@ -157,7 +157,7 @@ public abstract class JsonToDbMapper
 
         sys = container.Sys;
 
-        return !string.IsNullOrEmpty(sys.Id) && !string.IsNullOrEmpty(sys.LinkType) && !string.IsNullOrEmpty(sys.Type);
+        return !string.IsNullOrEmpty(sys.Id);
     }
 
     /// <summary>
