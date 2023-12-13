@@ -4,22 +4,15 @@ resource "azurerm_storage_account" "function_storage" {
   location                 = local.azure_location
   account_tier             = "Standard"
   account_replication_type = "LRS"
+  tags                     = local.tags
 
-  public_network_access_enabled = false
-  shared_access_key_enabled     = false
+  public_network_access_enabled = true
+  shared_access_key_enabled     = true
 
   identity {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.user_assigned_identity.id]
   }
-}
-
-resource "azurerm_storage_account_network_rules" "app_service_storage_network_rules" {
-  storage_account_id = azurerm_storage_account.function_storage.id
-
-  default_action             = "Deny"
-  virtual_network_subnet_ids = [module.main_hosting.networking.subnet_id]
-  bypass                     = ["Logging", "Metrics"]
 }
 
 resource "azurerm_service_plan" "function_plan" {
@@ -28,37 +21,69 @@ resource "azurerm_service_plan" "function_plan" {
   location            = local.azure_location
   os_type             = "Linux"
   sku_name            = "Y1"
+  tags                = local.tags
 }
 
 resource "azurerm_linux_function_app" "contentful_function" {
   name                = "${local.resource_prefix}contentfulfunction"
   resource_group_name = local.resource_group_name
   location            = local.azure_location
+  tags                = local.tags
 
-  storage_account_name          = azurerm_storage_account.function_storage.name
-  storage_uses_managed_identity = true
-  service_plan_id               = azurerm_service_plan.function_plan.id
+  service_plan_id = azurerm_service_plan.function_plan.id
 
-  virtual_network_subnet_id = azurerm_subnet.function_subnet.id
+  storage_account_access_key = azurerm_storage_account.function_storage.primary_access_key
+  storage_account_name       = azurerm_storage_account.function_storage.name
 
-  site_config {}
+  site_config {
+    application_insights_key = azurerm_application_insights.functional_insights.instrumentation_key
+    application_stack {
+      dotnet_version              = "7.0"
+      use_dotnet_isolated_runtime = true
+    }
+  }
 
   identity {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.user_assigned_identity.id]
   }
 
-  auth_settings {
-    enabled = true
-    active_directory {
-      client_id                  = data.azurerm_client_config.current.client_id
-      client_secret_setting_name = "AZURE_AD_AUTH_CLIENT_SECRET" # We use an app setting to store a key vault reference.
-    }
-  }
-
   app_settings = {
-    AZURE_AD_AUTH_CLIENT_SECRET = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=${azurerm_key_vault_secret.client_secret.name})"
+    AZURE_SQL_CONNECTIONSTRING      = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=${azurerm_key_vault_secret.vault_secret_database_connectionstring.name})"
+    AzureWebJobsServiceBus          = azurerm_servicebus_namespace.service_bus.default_primary_connection_string
+    WEBSITE_ENABLE_SYNC_UPDATE_SITE = true
+    WEBSITE_MOUNT_ENABLED           = 1
+    AZURE_CLIENT_ID                 = azurerm_user_assigned_identity.user_assigned_identity.client_id
+    AZURE_KEYVAULT_CLIENTID         = azurerm_user_assigned_identity.user_assigned_identity.client_id
+    AZURE_KEYVAULT_RESOURCEENDPOINT = azurerm_key_vault.vault.vault_uri
+    AZURE_KEYVAULT_SCOPE            = "https://vault.azure.net/.default"
+    KeyVaultReferenceIdentity       = azurerm_user_assigned_identity.user_assigned_identity.id
+    WEBSITE_RUN_FROM_PACKAGE        = ""
   }
 
-  key_vault_reference_identity_id = azurerm_user_assigned_identity.user_assigned_identity.id
+  lifecycle {
+    ignore_changes = [
+      app_settings["WEBSITE_RUN_FROM_PACKAGE"]
+    ]
+  }
+
+}
+
+data "azurerm_function_app_host_keys" "default" {
+  name                = azurerm_linux_function_app.contentful_function.name
+  resource_group_name = local.resource_group_name
+
+  depends_on = [
+    azurerm_linux_function_app.contentful_function
+  ]
+
+}
+
+resource "azurerm_application_insights" "functional_insights" {
+  name                = "${local.resource_prefix}-function-insights"
+  location            = local.azure_location
+  resource_group_name = local.resource_group_name
+  application_type    = "web"
+  retention_in_days   = 30
+  tags                = local.tags
 }
