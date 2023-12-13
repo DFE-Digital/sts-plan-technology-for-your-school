@@ -64,19 +64,7 @@ public class JsonToDbMapperUnitTests : BaseMapperTests
       ["arrayValue"] = WrapWithLocalisation(ArrayValueTest),
       ["referenceIds"] = WrapWithLocalisation(ReferencesValueTest)
     };
-
-    var asJson = JsonSerializer.Serialize(fields, JsonOptions);
-    var asJsonNode = JsonSerializer.Deserialize<Dictionary<string, JsonNode>>(asJson, JsonOptions);
-
-    var payload = new CmsWebHookPayload()
-    {
-      Sys = new CmsWebHookSystemDetails()
-      {
-        Id = EntityId
-      },
-      Fields = asJsonNode!
-    };
-
+    CmsWebHookPayload payload = CreatePayload(fields, EntityId);
 
     var mapped = _mapper.MapEntity(payload);
 
@@ -96,14 +84,7 @@ public class JsonToDbMapperUnitTests : BaseMapperTests
       Assert.Contains(reference.Sys.Id, concrete.ReferenceIds);
     }
   }
-
-  public static Dictionary<string, object?> WrapWithLocalisation(object? toWrap, string localisation = "en-US")
-  => new()
-  {
-    [localisation] = toWrap
-  };
 }
-
 public class JsonToDbMapperImplementation : JsonToDbMapper
 {
   public JsonToDbMapperImplementation(Type entityType, ILogger logger, JsonSerializerOptions jsonSerialiserOptions) : base(entityType, logger, jsonSerialiserOptions)
