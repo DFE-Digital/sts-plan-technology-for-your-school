@@ -146,10 +146,11 @@ CREATE TABLE [Contentful].[TextBodies] (
 GO
 
 CREATE TABLE [Contentful].[PageContents] (
-    [Id] bigint NOT NULL PRIMARY KEY IDENTITY,
+    [Id] bigint NOT NULL IDENTITY,
     [BeforeContentComponentId] nvarchar(30) NULL,
     [ContentComponentId] nvarchar(30) NULL,
     [PageId] nvarchar(30) NOT NULL,
+    CONSTRAINT [PK_PageContents] PRIMARY KEY ([PageId], [ContentComponentId]),
     CONSTRAINT [FK_PageContents_ContentComponents_BeforeContentComponentId] FOREIGN KEY ([BeforeContentComponentId]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE NO ACTION,
     CONSTRAINT [FK_PageContents_ContentComponents_ContentComponentId] FOREIGN KEY ([ContentComponentId]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE NO ACTION,
     CONSTRAINT [FK_PageContents_Pages_PageId] FOREIGN KEY ([PageId]) REFERENCES [Contentful].[Pages] ([Id]) ON DELETE NO ACTION
