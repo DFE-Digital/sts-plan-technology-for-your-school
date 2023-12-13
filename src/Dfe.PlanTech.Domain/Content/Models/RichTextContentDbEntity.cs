@@ -30,4 +30,6 @@ public class RichTextContentDbEntity : IRichTextContent<RichTextMarkDbEntity, Ri
     public RichTextContentDbEntity? Parent { get; set; }
 
     public long? ParentId { get; set; }
+
+    public ComponentDropDownDbEntity? DropDown { get; set; }
 }
