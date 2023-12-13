@@ -27,7 +27,7 @@ where TEntity : ContentComponentDbEntity, new()
         var values = GetEntityValuesDictionary(payload);
         values = PerformAdditionalMapping(values);
 
-        var asJson = JsonSerializer.Serialize(values);
+        var asJson = JsonSerializer.Serialize(values, JsonOptions);
         var serialised = JsonSerializer.Deserialize<TEntity>(asJson, JsonOptions) ?? throw new NullReferenceException("Null returned");
 
         return serialised;
