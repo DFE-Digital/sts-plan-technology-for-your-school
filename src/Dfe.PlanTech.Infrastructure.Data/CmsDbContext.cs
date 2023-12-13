@@ -88,12 +88,6 @@ public class CmsDbContext : DbContext
             entity.ToTable("Categories", Schema);
         });
 
-        modelBuilder.Entity<PageContentDbEntity>(entity =>
-        {
-            entity.ToTable("PageContents", Schema);
-            entity.HasKey(pageContent => new { pageContent.PageId, pageContent.ContentComponentId });
-        });
-
         modelBuilder.Entity<PageDbEntity>(entity =>
         {
             entity.HasMany(page => page.BeforeTitleContent)
