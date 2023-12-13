@@ -1,7 +1,14 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Dfe.PlanTech.Domain.Content.Models;
 
 public class PageContentDbEntity
 {
+  [Key]
+  [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+  public long Id { get; set; }
+
   public string PageId { get; set; } = null!;
   public PageDbEntity Page { get; set; } = null!;
 
