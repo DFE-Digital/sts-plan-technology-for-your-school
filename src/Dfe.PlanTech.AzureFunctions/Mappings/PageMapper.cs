@@ -7,6 +7,8 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
 public class PageMapper : JsonToDbMapper<PageDbEntity>
 {
+    private const string BeforeTitleContentKey = "beforeTitleContent";
+    private const string ContentKey = "content";
     private readonly CmsDbContext _db;
 
     public PageMapper(CmsDbContext db, ILogger<PageMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : base(logger, jsonSerialiserOptions)
@@ -20,8 +22,8 @@ public class PageMapper : JsonToDbMapper<PageDbEntity>
 
         values = MoveValueToNewKey(values, "title", "titleId");
 
-        UpdateContentIds(values, id, "beforeTitleContent");
-        UpdateContentIds(values, id, "content");
+        UpdateContentIds(values, id, BeforeTitleContentKey);
+        UpdateContentIds(values, id, ContentKey);
 
         return values;
     }
@@ -32,27 +34,35 @@ public class PageMapper : JsonToDbMapper<PageDbEntity>
         {
             foreach (var inner in inners)
             {
-                UpdateBeforeTitleContentId(inner, pageId);
+                CreatePageContentEntity(inner, pageId, currentKey == BeforeTitleContentKey);
             }
 
             values.Remove(currentKey);
         }
     }
 
-    private void UpdateBeforeTitleContentId(object inner, string pageId)
+    private void CreatePageContentEntity(object inner, string pageId, bool isBeforeTitleContent)
     {
-        if (inner is not string id)
+        if (inner is not string contentId)
         {
             Logger.LogWarning("Expected string but received {innerType}", inner.GetType());
             return;
         }
 
-        var answer = new PageContentDbEntity()
+        var pageContent = new PageContentDbEntity()
         {
             PageId = pageId,
-            ContentComponentId = id
         };
 
-        _db.PageContent.Attach(answer);
+        if (isBeforeTitleContent)
+        {
+            pageContent.BeforeContentComponentId = contentId;
+        }
+        else
+        {
+            pageContent.ContentComponentId = contentId;
+        }
+
+        _db.PageContents.Attach(pageContent);
     }
 }
