@@ -146,9 +146,11 @@ CREATE TABLE [Contentful].[TextBodies] (
 GO
 
 CREATE TABLE [Contentful].[PageContents] (
-    [ContentComponentId] nvarchar(30) NOT NULL,
+    [Id] bigint NOT NULL PRIMARY KEY IDENTITY,
+    [BeforeContentComponentId] nvarchar(30) NULL,
+    [ContentComponentId] nvarchar(30) NULL,
     [PageId] nvarchar(30) NOT NULL,
-    CONSTRAINT [PK_PageContents] PRIMARY KEY ([ContentComponentId], [PageId]),
+    CONSTRAINT [FK_PageContents_ContentComponents_BeforeContentComponentId] FOREIGN KEY ([BeforeContentComponentId]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE NO ACTION,
     CONSTRAINT [FK_PageContents_ContentComponents_ContentComponentId] FOREIGN KEY ([ContentComponentId]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE NO ACTION,
     CONSTRAINT [FK_PageContents_Pages_PageId] FOREIGN KEY ([PageId]) REFERENCES [Contentful].[Pages] ([Id]) ON DELETE NO ACTION
 );
@@ -168,10 +170,10 @@ GO
 
 CREATE TABLE [Contentful].[Warnings] (
     [Id] nvarchar(30) NOT NULL,
-    [TextId] nvarchar(30) NULL,
+    [TextId] nvarchar(30) NOT NULL,
     CONSTRAINT [PK_Warnings] PRIMARY KEY ([Id]),
     CONSTRAINT [FK_Warnings_ContentComponents_Id] FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE CASCADE,
-    CONSTRAINT [FK_Warnings_TextBodies_TextId] FOREIGN KEY ([TextId]) REFERENCES [Contentful].[TextBodies] ([Id])
+    CONSTRAINT [FK_Warnings_TextBodies_TextId] FOREIGN KEY ([TextId]) REFERENCES [Contentful].[TextBodies] ([Id]) ON DELETE NO ACTION
 );
 GO
 
@@ -232,7 +234,13 @@ GO
 CREATE INDEX [IX_Categories_HeaderId] ON [Contentful].[Categories] ([HeaderId]);
 GO
 
-CREATE INDEX [IX_ComponentDropDowns_RichTextContentId] ON [Contentful].[ComponentDropDowns] ([RichTextContentId]);
+CREATE UNIQUE INDEX [IX_ComponentDropDowns_RichTextContentId] ON [Contentful].[ComponentDropDowns] ([RichTextContentId]) WHERE [RichTextContentId] IS NOT NULL;
+GO
+
+CREATE INDEX [IX_PageContents_BeforeContentComponentId] ON [Contentful].[PageContents] ([BeforeContentComponentId]);
+GO
+
+CREATE INDEX [IX_PageContents_ContentComponentId] ON [Contentful].[PageContents] ([ContentComponentId]);
 GO
 
 CREATE INDEX [IX_PageContents_PageId] ON [Contentful].[PageContents] ([PageId]);
