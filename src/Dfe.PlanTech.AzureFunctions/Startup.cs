@@ -16,7 +16,7 @@ namespace Dfe.PlanTech.AzureFunctions
     {
         public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<CmsDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("Database")));
+            services.AddDbContext<CmsDbContext>(options => options.UseSqlServer(configuration["AZURE_SQL_CONNECTIONSTRING"]));
 
             services.AddAzureClients(builder =>
             {
