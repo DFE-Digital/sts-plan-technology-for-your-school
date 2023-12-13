@@ -2,24 +2,20 @@ using System.Text;
 using System.Text.Json;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.AzureFunctions.Mappings;
-using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions
 {
-    public class QueueReceiver
+    public class QueueReceiver : BaseFunction
     {
-        private readonly ILogger _logger;
         private readonly CmsDbContext _db;
         private readonly JsonToEntityMappers _mappers;
 
-        public QueueReceiver(ILoggerFactory loggerFactory, CmsDbContext db, JsonToEntityMappers mappers)
+        public QueueReceiver(ILoggerFactory loggerFactory, CmsDbContext db, JsonToEntityMappers mappers) : base(loggerFactory.CreateLogger<QueueReceiver>())
         {
-            _logger = loggerFactory.CreateLogger<QueueReceiver>();
             _db = db;
             _mappers = mappers;
         }
@@ -27,7 +23,7 @@ namespace Dfe.PlanTech.AzureFunctions
         [Function("QueueReceiver")]
         public async Task QueueReceiverDbWriter([ServiceBusTrigger("contentful", IsBatched = true)] ServiceBusReceivedMessage[] messages, ServiceBusMessageActions messageActions)
         {
-            _logger.LogInformation("Queue Receiver -> Db Writer started. Processing {msgCount} messages", messages.Length);
+            Logger.LogInformation("Queue Receiver -> Db Writer started. Processing {msgCount} messages", messages.Length);
 
             foreach (ServiceBusReceivedMessage message in messages)
             {
@@ -40,7 +36,7 @@ namespace Dfe.PlanTech.AzureFunctions
             try
             {
                 var text = Encoding.UTF8.GetString(message.Body);
-                _logger.LogInformation("Processing {text}", text);
+                Logger.LogInformation("Processing {text}", text);
 
                 var mapped = _mappers.ToEntity(text);
 
@@ -48,18 +44,18 @@ namespace Dfe.PlanTech.AzureFunctions
 
                 if (rowsChanged == 0)
                 {
-                    _logger.LogError("Changed no rows in database");
+                    Logger.LogError("Changed no rows in database");
                 }
                 else
                 {
-                    _logger.LogInformation($"Updated {rowsChanged} rows in the database");
+                    Logger.LogInformation($"Updated {rowsChanged} rows in the database");
                 }
 
                 await messageActions.CompleteMessageAsync(message);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                Logger.LogError(ex.Message);
                 await messageActions.DeadLetterMessageAsync(message);
             }
         }
