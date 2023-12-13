@@ -10,8 +10,8 @@ public class ComponentDropDownMapper : JsonToDbMapper<ComponentDropDownDbEntity>
     {
     }
 
-  public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
-  {
-    return values;
-  }
+    public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
+    {
+        return values;
+    }
 }
