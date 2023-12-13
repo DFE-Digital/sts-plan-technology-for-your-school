@@ -5,16 +5,16 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 
 public class PageContentDbEntity
 {
-  [Key]
-  [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-  public long Id { get; set; }
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public long Id { get; set; }
 
-  public string PageId { get; set; } = null!;
-  public PageDbEntity Page { get; set; } = null!;
+    public string PageId { get; set; } = null!;
+    public PageDbEntity Page { get; set; } = null!;
 
-  public string? ContentComponentId { get; set; }
-  public ContentComponentDbEntity? ContentComponent { get; set; }
+    public string? ContentComponentId { get; set; }
+    public ContentComponentDbEntity? ContentComponent { get; set; }
 
-  public string? BeforeContentComponentId { get; set; }
-  public ContentComponentDbEntity? BeforeContentComponent { get; set; }
+    public string? BeforeContentComponentId { get; set; }
+    public ContentComponentDbEntity? BeforeContentComponent { get; set; }
 }
