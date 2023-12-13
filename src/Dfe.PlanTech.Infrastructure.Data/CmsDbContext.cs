@@ -31,6 +31,8 @@ public class CmsDbContext : DbContext
 
     public DbSet<PageDbEntity> Pages { get; set; }
 
+    public DbSet<PageContentDbEntity> PageContents { get; set; }
+
     public DbSet<RecommendationPageDbEntity> RecommendationPages { get; set; }
 
     public DbSet<RichTextContentDbEntity> RichTextContents { get; set; }
@@ -89,6 +91,7 @@ public class CmsDbContext : DbContext
         modelBuilder.Entity<PageContentDbEntity>(entity =>
         {
             entity.ToTable("PageContents", Schema);
+            entity.HasKey(pageContent => new { pageContent.PageId, pageContent.ContentComponentId });
         });
 
         modelBuilder.Entity<PageDbEntity>(entity =>
@@ -96,13 +99,16 @@ public class CmsDbContext : DbContext
             entity.HasMany(page => page.BeforeTitleContent)
               .WithMany(c => c.BeforeTitleContentPages)
               .UsingEntity<PageContentDbEntity>(
-                left => left.HasOne(pageContent => pageContent.ContentComponent).WithMany().OnDelete(DeleteBehavior.Restrict),
-                right => right.HasOne(pageContent => pageContent.Page).WithMany().OnDelete(DeleteBehavior.Restrict)
+                left => left.HasOne(pageContent => pageContent.BeforeContentComponent).WithMany().HasForeignKey("BeforeContentComponentId").OnDelete(DeleteBehavior.Restrict),
+                right => right.HasOne(pageContent => pageContent.Page).WithMany().HasForeignKey("PageId").OnDelete(DeleteBehavior.Restrict)
               );
 
             entity.HasMany(page => page.Content)
               .WithMany(c => c.ContentPages)
-              .UsingEntity<PageContentDbEntity>();
+              .UsingEntity<PageContentDbEntity>(
+                left => left.HasOne(pageContent => pageContent.ContentComponent).WithMany().HasForeignKey("ContentComponentId").OnDelete(DeleteBehavior.Restrict),
+                right => right.HasOne(pageContent => pageContent.Page).WithMany().HasForeignKey("PageId").OnDelete(DeleteBehavior.Restrict)
+              );
 
             entity.HasOne(page => page.Title).WithMany(title => title.Pages).OnDelete(DeleteBehavior.Restrict);
 
