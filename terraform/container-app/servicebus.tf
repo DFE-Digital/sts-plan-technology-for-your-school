@@ -1,13 +1,11 @@
-
-
 resource "azurerm_servicebus_namespace" "service_bus" {
   name                = "${local.resource_prefix}servicebus"
   location            = local.azure_location
   resource_group_name = local.resource_group_name
   sku                 = "Basic"
 
-  local_auth_enabled            = false
-  public_network_access_enabled = false
+  local_auth_enabled            = true
+  public_network_access_enabled = true
 
   tags = local.tags
 
@@ -15,13 +13,18 @@ resource "azurerm_servicebus_namespace" "service_bus" {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.user_assigned_identity.id]
   }
+}
 
-  network_rule_set {
-    public_network_access_enabled = false
-    trusted_services_allowed      = false
-    default_action                = "Deny"
-    network_rules {
-      subnet_id = azurerm_subnet.service_bus_subnet.id
-    }
-  }
+resource "azurerm_servicebus_queue" "contentful_queue" {
+  name         = "contentful"
+  namespace_id = azurerm_servicebus_namespace.service_bus.id
+}
+
+
+resource "azurerm_servicebus_queue_authorization_rule" "azurefunction" {
+  name     = "azurefunction"
+  queue_id = azurerm_servicebus_queue.contentful_queue.id
+  listen   = true
+  send     = true
+  manage   = false
 }

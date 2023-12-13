@@ -103,6 +103,34 @@ resource "azurerm_key_vault_secret" "vault_secret_database_connectionstring" {
   }
 }
 
+resource "azurerm_key_vault_secret" "functionapp_possibleoutboundipaddresses" {
+  key_vault_id = azurerm_key_vault.vault.id
+  name         = "functionapp--possibleoutboundipaddresses"
+  value        = join(",", azurerm_linux_function_app.contentful_function.possible_outbound_ip_address_list)
+
+
+  lifecycle {
+    ignore_changes = [
+      value,
+      expiration_date
+    ]
+  }
+}
+
+resource "azurerm_key_vault_secret" "functionapp_default_key" {
+  key_vault_id = azurerm_key_vault.vault.id
+  name         = "functionapp--accesskey"
+  value        = data.azurerm_function_app_host_keys.default.default_function_key
+
+  lifecycle {
+    ignore_changes = [
+      value,
+      expiration_date
+    ]
+  }
+}
+
+
 resource "azurerm_key_vault_key" "data_protection_key" {
   name         = "dataprotection"
   key_vault_id = azurerm_key_vault.vault.id
@@ -117,17 +145,3 @@ resource "azurerm_key_vault_key" "data_protection_key" {
     ignore_changes = all
   }
 }
-
-resource "azurerm_key_vault_secret" "client_secret" {
-  key_vault_id = azurerm_key_vault.vault.id
-  name         = "aad-client-secret"
-  value        = "temp value"
-
-  lifecycle {
-    ignore_changes = [
-      value,
-      expiration_date
-    ]
-  }
-}
-
