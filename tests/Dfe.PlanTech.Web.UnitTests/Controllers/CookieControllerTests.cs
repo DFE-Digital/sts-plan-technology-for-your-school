@@ -25,7 +25,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 Slug = "cookies",
                 Title = new Title() { Text = "Cookies" },
-                Content = new ContentComponent[] { new Header() { Tag = Domain.Content.Enums.HeaderTag.H1, Text = "Analytical Cookies" }}
+                Content = new List<ContentComponent> { new Header() { Tag = Domain.Content.Enums.HeaderTag.H1, Text = "Analytical Cookies" }}
             },
         };
 
