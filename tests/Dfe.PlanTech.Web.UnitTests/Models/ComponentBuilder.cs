@@ -132,7 +132,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             Slug = "testing-page",
             SectionTitle = "Section Title",
             Title = BuildTitle(),
-            Content = Array.Empty<ContentComponent>()
+            Content = new()
         };
 
         private static Title BuildTitle(string text = "Testing Title")

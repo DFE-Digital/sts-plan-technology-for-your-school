@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using System.ComponentModel.DataAnnotations;
@@ -17,7 +16,7 @@ public class CheckAnswersViewModel
     public CheckAnswerDto CheckAnswerDto { get; init; } = null!;
 
     [Required]
-    public IContentComponent[] Content { get; init; } = null!;
+    public List<ContentComponent> Content { get; init; } = null!;
 
     public int? SubmissionId { get; init; }
 

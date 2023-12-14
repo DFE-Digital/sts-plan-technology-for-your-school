@@ -25,9 +25,9 @@ where TContentComponent : class, IContentComponentType
 {
     public TTitle? Title { get; }
 
-    public TContentComponent[] BeforeTitleContent { get; }
+    public List<TContentComponent> BeforeTitleContent { get; }
 
-    public TContentComponent[] Content { get; }
+    public List<TContentComponent> Content { get; }
 }
 
 public interface IPageContent : IPage<ContentComponent, Title>
