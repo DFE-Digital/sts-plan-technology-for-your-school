@@ -37,7 +37,7 @@ namespace Dfe.PlanTech.AzureFunctions
                 string cmsEvent = message.Subject.AsSpan()[(message.Subject.LastIndexOf('.') + 1)..].ToString();
                 var text = Encoding.UTF8.GetString(message.Body);
 
-                _logger.LogInformation("Performing Action: {action}", cmsEvent);
+                Logger.LogInformation("Performing Action: {action}", cmsEvent);
                 Logger.LogInformation("Processing {text}", text);
 
                 ContentComponentDbEntity mapped = _mappers.ToEntity(text);
@@ -115,14 +115,12 @@ namespace Dfe.PlanTech.AzureFunctions
             return await _db.SaveChangesAsync();
         }
 
-        private void UpdateProperties(ContentComponentDbEntity entity, ContentComponentDbEntity existing)
+        private static void UpdateProperties(ContentComponentDbEntity entity, ContentComponentDbEntity existing)
         {
             var properties = entity.GetType().GetProperties();
 
             foreach (var property in properties)
             {
-                _logger.LogInformation("Existing: {property}, {value}", property, property.GetValue(existing));
-                _logger.LogInformation("Property: {property}, {value}", property, property.GetValue(entity));
                 property.SetValue(existing, property.GetValue(entity));
             }
         }

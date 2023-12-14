@@ -44,9 +44,9 @@ namespace Dfe.PlanTech.AzureFunctions
             }
         }
 
-        protected Task WriteToQueue(string body)
+        protected Task WriteToQueue(string body, string cmsEvent)
         {
-            var serviceBusMessage = new ServiceBusMessage(body);
+            var serviceBusMessage = new ServiceBusMessage(body) { Subject = cmsEvent };
             return _sender.SendMessageAsync(serviceBusMessage);
         }
     }
