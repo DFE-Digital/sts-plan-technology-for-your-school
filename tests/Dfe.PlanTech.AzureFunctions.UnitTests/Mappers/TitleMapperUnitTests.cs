@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 public class TitleMapperUnitTests : BaseMapperTests
 {
   private const string TitleText = "Title text";
-  private const string TitleId = "Header Id";
+  private const string TitleId = "Title Id";
 
   private readonly TitleMapper _mapper;
   private readonly ILogger<TitleMapper> _logger;
