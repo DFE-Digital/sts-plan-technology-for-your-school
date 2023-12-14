@@ -7,7 +7,7 @@ namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
 public class NavigationLinkMapperTests : BaseMapperTests
 {
-  private const string DisplayText = "Inset text goes here";
+  private const string DisplayText = "Nav link text goes here";
   private const string Href = "www.testing.com";
   private const string NavigationLinkId = "Header Id";
 
