@@ -9,5 +9,5 @@ public class TitleDbEntity : ContentComponentDbEntity, ITitle
 {
     public string Text { get; set; } = null!;
 
-    public PageDbEntity[] Pages { get; set; } = Array.Empty<PageDbEntity>();
+    public List<PageDbEntity> Pages { get; set; } = new();
 }
