@@ -9,7 +9,7 @@ namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 public class WarningComponentMapperTests : BaseMapperTests
 {
   private readonly CmsWebHookSystemDetailsInnerContainer WarningComponentText = new() { Sys = new() { Id = "Text Id" } };
-  private const string WarningComponentId = "Header Id";
+  private const string WarningComponentId = "Warning component Id";
 
   private readonly WarningComponentMapper _mapper;
   private readonly ILogger<WarningComponentMapper> _logger;
@@ -21,7 +21,7 @@ public class WarningComponentMapperTests : BaseMapperTests
   }
 
   [Fact]
-  public void Mapper_Should_Map_NavigationLink()
+  public void Mapper_Should_Map_WarningComponent()
   {
     var fields = new Dictionary<string, object?>()
     {
