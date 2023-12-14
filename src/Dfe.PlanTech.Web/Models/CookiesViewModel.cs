@@ -10,6 +10,6 @@ public class CookiesViewModel
     public Title Title { get; init; } = null!;
 
     [Required]
-    public IContentComponent[] Content { get; init; } = null!;
+    public List<ContentComponent> Content { get; init; } = null!;
 
 }
