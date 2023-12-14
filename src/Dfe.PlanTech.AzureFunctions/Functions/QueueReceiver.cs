@@ -1,6 +1,7 @@
 using System.Text;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.AzureFunctions.Mappings;
+using Dfe.PlanTech.Domain.Caching.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
@@ -72,8 +73,7 @@ namespace Dfe.PlanTech.AzureFunctions
                         mapped.Deleted = true;
                         break;
                     default:
-                        // TODO: Probably something more appropriate than ArgumentException? Custom?
-                        throw new ArgumentException(string.Format("Case \"{0}\" not implemented", cmsEvent));
+                        throw new CmsEventException(string.Format("CMS Event \"{0}\" not implemented", cmsEvent));
                 }
 
                 long rowsChanged = await UpsertEntityInDatabase(mapped, existing);

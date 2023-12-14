@@ -1,5 +1,6 @@
 using System.Net;
 using Azure.Messaging.ServiceBus;
+using Dfe.PlanTech.Domain.Caching.Exceptions;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Azure;
@@ -25,7 +26,12 @@ namespace Dfe.PlanTech.AzureFunctions
             var body = stream.ReadToEnd();
             var cmsEvent = req.Headers.GetValues("X-Contentful-Topic").FirstOrDefault();
 
-            if (string.IsNullOrEmpty(body) || string.IsNullOrEmpty(cmsEvent)) // TODO: contentfulAction bespoke error
+            if (string.IsNullOrEmpty(cmsEvent))
+            {
+                throw new CmsEventException("CMS Event is NULL or Empty");
+            }
+
+            if (string.IsNullOrEmpty(body))
             {
                 return ReturnEmptyBodyError(req);
             }
