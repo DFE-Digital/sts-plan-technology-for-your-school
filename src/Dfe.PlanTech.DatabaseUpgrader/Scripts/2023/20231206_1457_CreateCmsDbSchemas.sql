@@ -195,11 +195,11 @@ CREATE TABLE [Contentful].[RecommendationPages] (
     [DisplayName] nvarchar(max) NOT NULL,
     [Maturity] int NOT NULL,
     [PageId] nvarchar(30) NOT NULL,
-    [SectionDbEntityId] nvarchar(30) NULL,
+    [SectionId] nvarchar(30) NULL,
     CONSTRAINT [PK_RecommendationPages] PRIMARY KEY ([Id]),
     CONSTRAINT [FK_RecommendationPages_ContentComponents_Id] FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE CASCADE,
     CONSTRAINT [FK_RecommendationPages_Pages_PageId] FOREIGN KEY ([PageId]) REFERENCES [Contentful].[Pages] ([Id]) ON DELETE NO ACTION,
-    CONSTRAINT [FK_RecommendationPages_Sections_SectionDbEntityId] FOREIGN KEY ([SectionDbEntityId]) REFERENCES [Contentful].[Sections] ([Id])
+    CONSTRAINT [FK_RecommendationPages_Sections_SectionId] FOREIGN KEY ([SectionId]) REFERENCES [Contentful].[Sections] ([Id])
 );
 GO
 
