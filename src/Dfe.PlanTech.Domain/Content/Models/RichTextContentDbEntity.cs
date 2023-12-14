@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Content.Models;
@@ -31,4 +30,6 @@ public class RichTextContentDbEntity : IRichTextContent<RichTextMarkDbEntity, Ri
     public RichTextContentDbEntity? Parent { get; set; }
 
     public long? ParentId { get; set; }
+
+    public ComponentDropDownDbEntity? DropDown { get; set; }
 }
