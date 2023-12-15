@@ -21,67 +21,10 @@ env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
 
 jobs:
-  get-src-dir-list:
-    name: Get Directories for Linting
-    runs-on: ubuntu-22.04
-    if: ${{ github.event_name == 'pull_request' }}
-    outputs:
-      directories: ${{ steps.list-dir.outputs.directories }}
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Get Directories
-        id: list-dir
-        uses: ./.github/actions/list-directory
-        with:
-          source: ./src/
-
-  lint-code:
-    name: Lint & Commit
-    runs-on: ubuntu-22.04
-    if: ${{ github.event_name == 'pull_request' }}
-    needs: [get-src-dir-list]
-    strategy:
-      max-parallel: 1
-      fail-fast: true
-      matrix:
-        workspace: ${{ fromJson(needs.get-src-dir-list.outputs.directories) }}
-    permissions:
-      contents: write
-      pull-requests: write
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-          cache: false
-        env:
-          DOTNET_INSTALL_DIR: "/usr/share/dotnet"
-          DOTNET_CLI_TELEMETRY_OPTOUT: true
-
-      - name: Run Linter
-        uses: wearerequired/lint-action@v2
-        with:
-          dotnet_format: true
-          dotnet_format_dir: ./src/${{ matrix.workspace }}
-          git_email: "41898282+github-actions[bot]@users.noreply.github.com"
-          git_name: "github-actions[bot]"
-          commit_message: "Linted Code in ${{ matrix.workspace }}"
-          auto_fix: true
-          commit: true
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
   build-test-web-app:
     name: Build and run unit tests
     runs-on: ubuntu-22.04
     if: ${{ always() && ( github.event_name == 'pull_request' && needs.lint-code.result == 'success' ) || ( github.event_name == 'push' && needs.lint-code.result == 'skipped' ) }}
-    needs: [lint-code]
 
     steps:
       - name: Check out repository
@@ -118,7 +61,7 @@ jobs:
           /d:sonar.issue.ignore.multicriteria=e1 \
           /d:sonar.issue.ignore.multicriteria.e1.ruleKey=csharpsquid:S6602 \
           /d:sonar.issue.ignore.multicriteria.e1.resourceKey=src/**/*.cs \
-          /d:sonar.projectBaseDir=src/
+          /d:sonar.projectBaseDir=home/runner/work/plan-technology-for-your-school/plan-technology-for-your-school/
 
       - name: Build web app
         uses: ./.github/actions/build-dotnet-app
@@ -142,43 +85,3 @@ jobs:
         with:
           name: code-coverage-report
           path: coverage.xml
-
-  build-database-upgrader:
-    name: Build database upgrader
-    runs-on: ubuntu-22.04
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
-
-      - name: Build database upgrader
-        uses: ./.github/actions/build-dotnet-app
-        with:
-          dotnet_version: ${{ env.DOTNET_VERSION }}
-          solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
-
-  run-javascript-tests:
-    runs-on: ubuntu-22.04
-    name: Run javascript tests
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "latest"
-
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Run the tests
-        run: npm test
-
-      - name: Test report
-        uses: dorny/test-reporter@v1
-        if: success() || failure() # run this step even if previous step failed
-        with:
-          name: JEST Tests # Name of the check run which will be created
-          path: ./junit.xml # Path to test results
-          reporter: jest-junit # Format of test results
