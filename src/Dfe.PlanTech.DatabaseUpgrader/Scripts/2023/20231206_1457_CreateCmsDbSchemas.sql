@@ -255,7 +255,7 @@ GO
 CREATE UNIQUE INDEX [IX_RecommendationPages_PageId] ON [Contentful].[RecommendationPages] ([PageId]) WHERE [PageId] IS NOT NULL;
 GO
 
-CREATE INDEX [IX_RecommendationPages_SectionDbEntityId] ON [Contentful].[RecommendationPages] ([SectionDbEntityId]);
+CREATE INDEX [IX_RecommendationPages_SectionId] ON [Contentful].[RecommendationPages] ([SectionId]);
 GO
 
 CREATE INDEX [IX_RichTextContents_DataId] ON [Contentful].[RichTextContents] ([DataId]);
