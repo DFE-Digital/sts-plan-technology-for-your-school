@@ -6,14 +6,14 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
 public class RecommendationPageMapper : JsonToDbMapper<RecommendationPageDbEntity>
 {
-  public RecommendationPageMapper(ILogger<RecommendationPageMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : base(logger, jsonSerialiserOptions)
-  {
-  }
+    public RecommendationPageMapper(ILogger<RecommendationPageMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : base(logger, jsonSerialiserOptions)
+    {
+    }
 
-  public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
-  {
-    values = MoveValueToNewKey(values, "page", "pageId");
+    public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
+    {
+        values = MoveValueToNewKey(values, "page", "pageId");
 
-    return values;
-  }
+        return values;
+    }
 }
