@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using Dfe.PlanTech.AzureFunctions.Mappings;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
@@ -15,6 +16,7 @@ public class JsonToDbMapperUnitTests : BaseMapperTests
   private readonly string[] ArrayValueTest = new[] { "one", "two", "three" };
   private const int NumberValueTest = 10000;
   private const string EntityId = "Testing Id";
+
   private readonly CmsWebHookSystemDetailsInnerContainer[] ReferencesValueTest = new[] {
         new CmsWebHookSystemDetailsInnerContainer(){
           Sys = new(){
@@ -29,7 +31,7 @@ public class JsonToDbMapperUnitTests : BaseMapperTests
 
   private readonly JsonToDbMapperImplementation _mapper;
 
-  private readonly Type _type = typeof(ContentComponentDbEntityImplementation);
+  private readonly Type _type = typeof(ButtonWithLinkDbEntity);
 
   private readonly ILogger _logger = Substitute.For<ILogger>();
 
@@ -38,20 +40,15 @@ public class JsonToDbMapperUnitTests : BaseMapperTests
     _mapper = new JsonToDbMapperImplementation(_type, _logger, JsonOptions);
   }
 
-  [Fact]
-  public void AcceptsContentType_Should_Return_True_When_Matched()
+  [Theory]
+  [InlineData("ButtonWithLink", true)]
+  [InlineData("Button", false)]
+  [InlineData("ButtonWithEntryReference", false)]
+  public void AcceptsContentType_Should_Return_Correct_Output(string typeName, bool expectedResult)
   {
-    var acceptsContentType = _mapper.AcceptsContentType(_type.Name);
+    var acceptsContentType = _mapper.AcceptsContentType(typeName);
 
-    Assert.True(acceptsContentType);
-  }
-
-  [Fact]
-  public void AcceptsContentType_Should_Return_False_When_Not_Matched()
-  {
-    var acceptsContentType = _mapper.AcceptsContentType("Different content type");
-
-    Assert.False(acceptsContentType);
+    Assert.Equal(expectedResult, acceptsContentType);
   }
 
   [Fact]
