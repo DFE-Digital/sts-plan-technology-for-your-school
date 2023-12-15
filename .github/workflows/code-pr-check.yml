@@ -60,7 +60,7 @@ jobs:
           /d:sonar.issue.ignore.multicriteria=e1 \
           /d:sonar.issue.ignore.multicriteria.e1.ruleKey=csharpsquid:S6602 \
           /d:sonar.issue.ignore.multicriteria.e1.resourceKey=src/**/*.cs \
-          /d:sonar.projectBaseDir=home/runner/work/plan-technology-for-your-school/plan-technology-for-your-school/
+          /d:sonar.projectBaseDir=/home/runner/work/plan-technology-for-your-school/plan-technology-for-your-school/
 
       - name: Build web app
         uses: ./.github/actions/build-dotnet-app
