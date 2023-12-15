@@ -26,11 +26,6 @@ namespace Dfe.PlanTech.AzureFunctions
             var body = stream.ReadToEnd();
             var cmsEvent = req.Headers.GetValues("X-Contentful-Topic").FirstOrDefault();
 
-            if (string.IsNullOrEmpty(cmsEvent))
-            {
-                throw new CmsEventException("CMS Event is NULL or Empty");
-            }
-
             if (string.IsNullOrEmpty(body))
             {
                 return ReturnEmptyBodyError(req);
@@ -40,6 +35,11 @@ namespace Dfe.PlanTech.AzureFunctions
 
             try
             {
+                if (string.IsNullOrEmpty(cmsEvent))
+                {
+                    throw new CmsEventException("CMS Event is NULL or Empty");
+                }
+
                 await WriteToQueue(body, cmsEvent);
 
                 return ReturnOkResponse(req);
