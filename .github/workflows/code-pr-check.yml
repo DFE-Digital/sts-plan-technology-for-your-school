@@ -59,8 +59,7 @@ jobs:
           /d:sonar.coverage.exclusions=src/**/Program.cs,src/Dfe.PlanTech.Web/gulpfile.js,src/Dfe.PlanTech.Web/wwwroot/** \
           /d:sonar.issue.ignore.multicriteria=e1 \
           /d:sonar.issue.ignore.multicriteria.e1.ruleKey=csharpsquid:S6602 \
-          /d:sonar.issue.ignore.multicriteria.e1.resourceKey=src/**/*.cs \
-          /d:sonar.projectBaseDir=/home/runner/work/plan-technology-for-your-school/plan-technology-for-your-school/
+          /d:sonar.issue.ignore.multicriteria.e1.resourceKey=src/**/*.cs
 
       - name: Build web app
         uses: ./.github/actions/build-dotnet-app
