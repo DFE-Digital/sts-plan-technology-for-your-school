@@ -45,6 +45,5 @@ public class AnswerMapperTests : BaseMapperTests
     Assert.True(string.Equals(AnswerMaturity.ToString(), concrete.Maturity, StringComparison.InvariantCultureIgnoreCase));
     Assert.Equal(AnswerText, concrete.Text);
     Assert.Equal(NextQuestion.Sys.Id, concrete.NextQuestionId);
-
   }
 }

@@ -9,6 +9,10 @@ public class ButtonWithEntryReferenceDbEntity : ContentComponentDbEntity, IButto
 {
     public ButtonDbEntity Button { get; set; } = null!;
 
+    public string ButtonId { get; set; } = null!;
+
     public ContentComponentDbEntity LinkToEntry { get; set; } = null!;
+
+    public string LinkToEntryId { get; set; } = null!;
 }
 

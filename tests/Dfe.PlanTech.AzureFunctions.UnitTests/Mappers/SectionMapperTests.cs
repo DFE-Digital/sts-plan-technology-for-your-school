@@ -1,0 +1,85 @@
+using Dfe.PlanTech.AzureFunctions.Mappings;
+using Dfe.PlanTech.Domain.Answers.Models;
+using Dfe.PlanTech.Domain.Caching.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
+
+namespace Dfe.PlanTech.AzureFunctions.UnitTests;
+
+public class SectionMapperTests : BaseMapperTests
+{
+  private const string SectionName = "Section name";
+  private readonly CmsWebHookSystemDetailsInnerContainer[] Questions = new[]{
+    new CmsWebHookSystemDetailsInnerContainer() {Sys = new() { Id = "Question One Id" } },
+    new CmsWebHookSystemDetailsInnerContainer() {Sys = new() { Id = "Question Two Id" } },
+    new CmsWebHookSystemDetailsInnerContainer() {Sys = new() { Id = "Question Three Id" } },
+    };
+  private readonly CmsWebHookSystemDetailsInnerContainer InterstitialPage = new()
+  {
+    Sys = new()
+    {
+      Id = "Interstitial page id"
+    }
+  };
+
+  private const string SectionId = "Question Id";
+
+  private readonly CmsDbContext _db = Substitute.For<CmsDbContext>();
+  private readonly SectionMapper _mapper;
+  private readonly ILogger<SectionMapper> _logger;
+
+  private readonly DbSet<QuestionDbEntity> _questionsDbSet = Substitute.For<DbSet<QuestionDbEntity>>();
+  private readonly List<QuestionDbEntity> _attachedQuestions = new(4);
+
+  public SectionMapperTests()
+  {
+    _logger = Substitute.For<ILogger<SectionMapper>>();
+    _mapper = new SectionMapper(_db, _logger, JsonOptions);
+
+    _db.Questions = _questionsDbSet;
+
+    _questionsDbSet.WhenForAnyArgs(questionDbSet => questionDbSet.Attach(Arg.Any<QuestionDbEntity>()))
+                .Do(callinfo =>
+                {
+                  var question = callinfo.ArgAt<QuestionDbEntity>(0);
+                  _attachedQuestions.Add(question);
+                });
+  }
+
+  [Fact]
+  public void Mapper_Should_Map_Relationship()
+  {
+    var fields = new Dictionary<string, object?>()
+    {
+      ["name"] = WrapWithLocalisation(SectionName),
+      ["interstitialPage"] = WrapWithLocalisation(InterstitialPage),
+      ["questions"] = WrapWithLocalisation(Questions),
+    };
+
+    var payload = CreatePayload(fields, SectionId);
+
+    var mapped = _mapper.MapEntity(payload);
+
+    Assert.NotNull(mapped);
+
+    var concrete = mapped as SectionDbEntity;
+    Assert.NotNull(concrete);
+
+    Assert.Equal(SectionId, concrete.Id);
+    Assert.Equal(SectionName, concrete.Name);
+    Assert.Equal(InterstitialPage.Sys.Id, concrete.InterstitialPageId);
+
+    Assert.Equal(Questions.Length, _attachedQuestions.Count);
+
+    foreach (var question in Questions)
+    {
+      var contains = _attachedQuestions.Any(attached => attached.Id == question.Sys.Id);
+      Assert.True(contains);
+    }
+  }
+}

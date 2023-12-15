@@ -14,8 +14,8 @@ namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 public class QuestionMapperTests : BaseMapperTests
 {
   private const string QuestionText = "Question text goes here";
-  private const string QuestionHelpText = "";
-  private const string QuestionSlug = "";
+  private const string QuestionHelpText = "Question help text";
+  private const string QuestionSlug = "/question-slug";
   private readonly CmsWebHookSystemDetailsInnerContainer[] Answers = new[]{
     new CmsWebHookSystemDetailsInnerContainer() {Sys = new() { Id = "Answer One Id" } },
     new CmsWebHookSystemDetailsInnerContainer() {Sys = new() { Id = "Answer Two Id" } },
