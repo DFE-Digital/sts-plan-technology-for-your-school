@@ -4,7 +4,7 @@ namespace Dfe.PlanTech.Domain.Content.Models.Buttons;
 
 public class ButtonDbEntity : ContentComponentDbEntity, IButton
 {
-    public string Value { get; init; } = null!;
+    public string Value { get; set; } = null!;
 
-    public bool IsStartButton { get; init; }
+    public bool IsStartButton { get; set; }
 }

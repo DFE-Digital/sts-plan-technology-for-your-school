@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Extensions.Logging;
@@ -24,32 +23,6 @@ public class QuestionMapper : JsonToDbMapper<QuestionDbEntity>
 
     private void UpdateAnswersParentQuestionIds(Dictionary<string, object?> values)
     {
-        if (values.TryGetValue("answers", out object? answersArray) && answersArray is object[] inners)
-        {
-            foreach (var inner in inners)
-            {
-                UpdateAnswerParentQuestionId(inner);
-            }
-
-            values.Remove("answers");
-        }
-    }
-
-    private void UpdateAnswerParentQuestionId(object inner)
-    {
-        if (inner is not string id)
-        {
-            Logger.LogWarning("Expected string but received {innerType}", inner.GetType());
-            return;
-        }
-
-        var answer = new AnswerDbEntity()
-        {
-            Id = id
-        };
-
-        _db.Answers.Attach(answer);
-
-        answer.ParentQuestionId = Payload!.Sys.Id;
+        UpdateReferencesArray(values, "answers", _db.Answers, (id, answer) => answer.ParentQuestionId = Payload!.Sys.Id);
     }
 }

@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
@@ -36,6 +37,43 @@ where TEntity : ContentComponentDbEntity, new()
     public override ContentComponentDbEntity MapEntity(CmsWebHookPayload payload) => ToEntity(payload);
 
     public abstract Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values);
+
+    protected void UpdateReferencesArray<TRelatedEntity>(Dictionary<string, object?> values, string key, DbSet<TRelatedEntity> dbSet, Action<string, TRelatedEntity> updateEntity)
+        where TRelatedEntity : ContentComponentDbEntity, new()
+    {
+        if (values.TryGetValue(key, out object? referencesArray) && referencesArray is object[] inners)
+        {
+            foreach (var inner in inners)
+            {
+                UpdateRelatedEntity(inner, dbSet, updateEntity);
+            }
+
+            values.Remove(key);
+        }
+        else
+        {
+            Logger.LogError("Expected {key} to be references array but received {type}", key, referencesArray?.GetType());
+        }
+    }
+
+    protected void UpdateRelatedEntity<TRelatedEntity>(object inner, DbSet<TRelatedEntity> dbSet, Action<string, TRelatedEntity> updateEntity)
+        where TRelatedEntity : ContentComponentDbEntity, new()
+    {
+        if (inner is not string id)
+        {
+            Logger.LogWarning("Expected string but received {innerType}", inner.GetType());
+            return;
+        }
+
+        var relatedEntity = new TRelatedEntity()
+        {
+            Id = id
+        };
+
+        dbSet.Attach(relatedEntity);
+
+        updateEntity(id, relatedEntity);
+    }
 }
 
 public abstract class JsonToDbMapper
@@ -53,7 +91,7 @@ public abstract class JsonToDbMapper
     }
 
     public virtual bool AcceptsContentType(string contentType)
-      => _entityType.Name.Contains(contentType, StringComparison.InvariantCultureIgnoreCase);
+      => _entityType.Name.Equals($"{contentType}DbEntity", StringComparison.InvariantCultureIgnoreCase);
 
     public abstract ContentComponentDbEntity MapEntity(CmsWebHookPayload payload);
 
