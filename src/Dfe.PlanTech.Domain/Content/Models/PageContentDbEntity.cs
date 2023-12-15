@@ -12,4 +12,9 @@ public class PageContentDbEntity
 
     public string? BeforeContentComponentId { get; set; }
     public ContentComponentDbEntity? BeforeContentComponent { get; set; }
+
+    public void CodeChangeTesting()
+    {
+
+    }
 }
