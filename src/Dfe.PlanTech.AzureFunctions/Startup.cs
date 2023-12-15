@@ -37,6 +37,11 @@ namespace Dfe.PlanTech.AzureFunctions
             });
 
             AddMappers(services);
+
+            if (true)
+            {
+
+            }
         }
 
         /// <summary>
