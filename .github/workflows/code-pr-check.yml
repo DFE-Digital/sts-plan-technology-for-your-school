@@ -115,11 +115,12 @@ jobs:
           /o:"dfe-digital" \
           /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
           /d:sonar.host.url="https://sonarcloud.io" \
-          /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml \
+          /d:sonar.cs.vscoveragexml.reportsPaths=coverage.cobertura.xml \
           /d:sonar.coverage.exclusions=src/**/Program.cs,src/Dfe.PlanTech.Web/gulpfile.js,src/Dfe.PlanTech.Web/wwwroot/** \
           /d:sonar.issue.ignore.multicriteria=e1 \
           /d:sonar.issue.ignore.multicriteria.e1.ruleKey=csharpsquid:S6602 \
-          /d:sonar.issue.ignore.multicriteria.e1.resourceKey=src/**/*.cs
+          /d:sonar.issue.ignore.multicriteria.e1.resourceKey=src/**/*.cs \
+          /d:sonar.projectBaseDir=/home/runner/work/plan-technology-for-your-school/plan-technology-for-your-school/
 
       - name: Build web app
         uses: ./.github/actions/build-dotnet-app
@@ -144,22 +145,22 @@ jobs:
           name: code-coverage-report
           path: coverage.xml
 
-  build-database-upgrader:  
+  build-database-upgrader:
     name: Build database upgrader
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Build database upgrader  
+      - name: Build database upgrader
         uses: ./.github/actions/build-dotnet-app
         with:
-          dotnet_version: ${{ env.DOTNET_VERSION }}  
+          dotnet_version: ${{ env.DOTNET_VERSION }}
           solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
 
   run-javascript-tests:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     name: Run javascript tests
 
     steps:
@@ -178,8 +179,8 @@ jobs:
 
       - name: Test report
         uses: dorny/test-reporter@v1
-        if: success() || failure()    # run this step even if previous step failed
+        if: success() || failure() # run this step even if previous step failed
         with:
-          name: JEST Tests            # Name of the check run which will be created
-          path: ./junit.xml    # Path to test results
-          reporter: jest-junit        # Format of test results
+          name: JEST Tests # Name of the check run which will be created
+          path: ./junit.xml # Path to test results
+          reporter: jest-junit # Format of test results
