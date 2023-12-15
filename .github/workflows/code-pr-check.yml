@@ -115,6 +115,7 @@ jobs:
           /o:"dfe-digital" \
           /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
           /d:sonar.host.url="https://sonarcloud.io" \
+          /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml \
           /d:sonar.coverage.exclusions=src/**/Program.cs,src/Dfe.PlanTech.Web/gulpfile.js,src/Dfe.PlanTech.Web/wwwroot/** \
           /d:sonar.issue.ignore.multicriteria=e1 \
           /d:sonar.issue.ignore.multicriteria.e1.ruleKey=csharpsquid:S6602 \
@@ -126,8 +127,11 @@ jobs:
           dotnet_version: ${{ env.DOTNET_VERSION }}
           solution_filename: plan-technology-for-your-school.sln
 
+      - name: Run tests
+        run: dotnet test plan-technology-for-your-school.sln --verbosity normal --collect:"XPlat Code Coverage"
+
       - name: Merge test results
-        run: dotnet test --collect "Code Coverage" plan-technology-for-your-school.sln
+        run: dotnet-coverage merge -f xml -o "coverage.xml" -s "coverage.settings.xml" -r coverage.cobertura.xml
 
       - name: End SonarCloud Scanner
         run: dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
