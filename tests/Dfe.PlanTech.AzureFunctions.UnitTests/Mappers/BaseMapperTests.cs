@@ -19,7 +19,6 @@ public abstract class BaseMapperTests
     [localisation] = toWrap
   };
 
-
   protected CmsWebHookPayload CreatePayload(Dictionary<string, object?> fields, string entityId)
   {
     var asJson = JsonSerializer.Serialize(fields, JsonOptions);
