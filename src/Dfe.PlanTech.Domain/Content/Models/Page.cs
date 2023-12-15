@@ -21,11 +21,11 @@ public class Page : ContentComponent, IPageContent
 
     public string? SectionTitle { get; set; }
 
-    public ContentComponent[] BeforeTitleContent { get; init; } = Array.Empty<ContentComponent>();
+    public List<ContentComponent> BeforeTitleContent { get; init; } = new();
 
     public Title? Title { get; init; }
 
     public string? OrganisationName { get; set; }
 
-    public ContentComponent[] Content { get; init; } = Array.Empty<ContentComponent>();
+    public List<ContentComponent> Content { get; init; } = new();
 }
