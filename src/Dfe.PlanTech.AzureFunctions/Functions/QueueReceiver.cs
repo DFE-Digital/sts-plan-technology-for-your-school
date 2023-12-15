@@ -35,7 +35,7 @@ namespace Dfe.PlanTech.AzureFunctions
         {
             try
             {
-                string cmsEvent = message.Subject.AsSpan()[(message.Subject.LastIndexOf('.') + 1)..].ToString();
+                string cmsEvent = GetCmsEvent(message.Subject);
                 var text = Encoding.UTF8.GetString(message.Body);
 
                 Logger.LogInformation("Performing Action: {action}", cmsEvent);
@@ -99,6 +99,11 @@ namespace Dfe.PlanTech.AzureFunctions
         private ContentComponentDbEntity? GetExistingDbEntity(ContentComponentDbEntity entity)
         {
             return _db.Find(entity.GetType(), entity.Id) as ContentComponentDbEntity ?? null;
+        }
+
+        private static string GetCmsEvent(string subject)
+        {
+            return subject.AsSpan()[(subject.LastIndexOf('.') + 1)..].ToString();
         }
 
         private async Task<long> UpsertEntityInDatabase(ContentComponentDbEntity entity, ContentComponentDbEntity? existing)
