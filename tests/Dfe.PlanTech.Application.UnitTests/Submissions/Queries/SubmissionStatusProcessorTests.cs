@@ -25,7 +25,7 @@ public class SubmissionStatusProcessorTests
     private const int _establishmentId = 1;
 
     private const string SectionSlug = "section-slug";
-    private static readonly ISection _section = new Section()
+    private static readonly Section _section = new Section()
     {
         Sys = new SystemDetails()
         {
@@ -37,7 +37,7 @@ public class SubmissionStatusProcessorTests
         }
     };
 
-    private readonly ISection[] _sections = new[] { _section };
+    private readonly Section[] _sections = new[] { _section };
 
     public SubmissionStatusProcessorTests()
     {

@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using System.Text;
@@ -10,11 +11,11 @@ public class TableRowRenderer : BaseRichTextContentPartRender
     {
     }
 
-    public override StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(RichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
         string bodyStartString = "<tbody class=\"govuk-table__body\">";
 
-        bool isHeaderRow = content.Content[0].MappedNodeType == RichTextNodeType.TableHeaderCell;
+        bool isHeaderRow = (content.Content[0] as IRichTextContent).MappedNodeType == RichTextNodeType.TableHeaderCell;
         bool isFirstBodyRow = !stringBuilder.ToString().Contains(bodyStartString) && !isHeaderRow;
 
         if (isHeaderRow)

@@ -1,4 +1,5 @@
 
+using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Options;
@@ -15,9 +16,11 @@ public class TextRenderer : BaseRichTextContentPartRender
         _textRendererOptions = textRendererOptions;
     }
 
-    public override StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(RichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
-        var markOptions = content.Marks.Select(_textRendererOptions.GetMatchingOptionForMark).Where(option => option != null).ToArray();
+        var markOptions = content.Marks.Select(_textRendererOptions.GetMatchingOptionForMark)
+                                        .Where(option => option != null)
+                                        .ToArray();
 
         AppendOpenTags(stringBuilder, markOptions!);
 

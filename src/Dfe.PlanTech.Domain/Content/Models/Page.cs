@@ -1,8 +1,9 @@
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Domain.Content.Models;
 
-public class Page : ContentComponent
+public class Page : ContentComponent, IPageContent
 {
     public string InternalName { get; init; } = null!;
 
@@ -20,13 +21,11 @@ public class Page : ContentComponent
 
     public string? SectionTitle { get; set; }
 
-    public string? Param { get; set; }
-
-    public IContentComponent[] BeforeTitleContent { get; init; } = Array.Empty<IContentComponent>();
+    public List<ContentComponent> BeforeTitleContent { get; init; } = new();
 
     public Title? Title { get; init; }
 
     public string? OrganisationName { get; set; }
 
-    public IContentComponent[] Content { get; init; } = Array.Empty<IContentComponent>();
+    public List<ContentComponent> Content { get; init; } = new();
 }

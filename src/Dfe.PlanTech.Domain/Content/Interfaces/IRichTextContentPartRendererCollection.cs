@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.Extensions.Logging;
 using System.Text;
 
@@ -7,12 +8,17 @@ public interface IRichTextContentPartRendererCollection
 {
     public ILogger Logger { get; }
 
-    public IRichTextContentPartRenderer? GetRendererForContent(IRichTextContent content);
+    /// <summary>
+    /// Finds matching renderer for the given content, based on the content's node type
+    /// </summary>
+    /// <param name="content">Content to find renderer for</param>
+    /// <returns>Matching part renderer for content (or null if not found)</returns>
+    public IRichTextContentPartRenderer? GetRendererForContent(RichTextContent content);
 
     /// <summary>
     /// Renders all children of the content
     /// </summary>
     /// <param name="content"></param>
     /// <param name="stringBuilder"></param>
-    public void RenderChildren(IRichTextContent content, StringBuilder stringBuilder);
+    public void RenderChildren(RichTextContent content, StringBuilder stringBuilder);
 }

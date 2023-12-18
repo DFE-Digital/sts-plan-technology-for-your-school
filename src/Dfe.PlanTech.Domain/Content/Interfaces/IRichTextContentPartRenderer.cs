@@ -1,4 +1,5 @@
 using System.Text;
+using Dfe.PlanTech.Domain.Content.Models;
 
 namespace Dfe.PlanTech.Domain.Content.Interfaces;
 
@@ -18,5 +19,5 @@ public interface IRichTextContentPartRenderer
     /// <param name="rendererCollection"></param>
     /// <param name="stringBuilder"></param>
     /// <returns></returns>
-    public StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder);
+    public StringBuilder AddHtml(RichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder);
 }

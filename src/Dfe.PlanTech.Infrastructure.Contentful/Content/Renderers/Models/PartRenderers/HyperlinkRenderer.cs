@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Options;
@@ -15,7 +16,7 @@ public class HyperlinkRenderer : BaseRichTextContentPartRender
         _options = options;
     }
 
-    public override StringBuilder AddHtml(IRichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(RichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
         if (string.IsNullOrEmpty(content.Data?.Uri))
         {
@@ -40,7 +41,7 @@ public class HyperlinkRenderer : BaseRichTextContentPartRender
         return stringBuilder;
     }
 
-    private static void AddTagAndHref(IRichTextContent content, StringBuilder stringBuilder)
+    private static void AddTagAndHref(RichTextContent content, StringBuilder stringBuilder)
     {
         stringBuilder.Append("<a href=\"");
         stringBuilder.Append(content.Data?.Uri ?? "");
