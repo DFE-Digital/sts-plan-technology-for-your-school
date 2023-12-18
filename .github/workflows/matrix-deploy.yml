@@ -7,11 +7,6 @@ on:
     paths:
       - "src/**"
       - ".github/workflows/matrix-deploy.yml"
-  pull_request:                               # DEBUG --- REMOVE AFTER TESTING
-    branches: ["development"]                 # DEBUG --- REMOVE AFTER TESTING
-    paths:                                    # DEBUG --- REMOVE AFTER TESTING
-      - "src/**"                              # DEBUG --- REMOVE AFTER TESTING
-      - ".github/workflows/matrix-deploy.yml" # DEBUG --- REMOVE AFTER TESTING
 
 jobs:
   set-env:
