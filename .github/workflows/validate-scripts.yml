@@ -54,6 +54,10 @@ jobs:
           shell: bash
           run: docker run --cap-add SYS_PTRACE -e 'ACCEPT_EULA=1' -e 'MSSQL_SA_PASSWORD=${{ env.FAKE_PASSWORD }}' -p 1433:1433 --name azuresqledge -d mcr.microsoft.com/azure-sql-edge
 
+        - name: Wait for Docker Image to Startup
+          shell: bash
+          run: sleep 16s
+
         - name: Run Database Upgrader
           shell: bash
           run: dotnet ./build/Dfe.PlanTech.DatabaseUpgrader.dll -c "${{ steps.connection-string.outputs.CONNECTION_STRING }}"
