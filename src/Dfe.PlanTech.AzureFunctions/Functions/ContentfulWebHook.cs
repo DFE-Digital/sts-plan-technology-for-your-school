@@ -1,5 +1,6 @@
 using System.Net;
 using Azure.Messaging.ServiceBus;
+using Dfe.PlanTech.Domain.Caching.Exceptions;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Azure;
@@ -23,6 +24,7 @@ namespace Dfe.PlanTech.AzureFunctions
 
             var stream = new StreamReader(req.Body);
             var body = stream.ReadToEnd();
+            var cmsEvent = req.Headers.GetValues("X-Contentful-Topic").FirstOrDefault();
 
             if (string.IsNullOrEmpty(body))
             {
@@ -33,7 +35,12 @@ namespace Dfe.PlanTech.AzureFunctions
 
             try
             {
-                await WriteToQueue(body);
+                if (string.IsNullOrEmpty(cmsEvent))
+                {
+                    throw new CmsEventException("CMS Event is NULL or Empty");
+                }
+
+                await WriteToQueue(body, cmsEvent);
 
                 return ReturnOkResponse(req);
             }
@@ -43,9 +50,9 @@ namespace Dfe.PlanTech.AzureFunctions
             }
         }
 
-        protected Task WriteToQueue(string body)
+        protected Task WriteToQueue(string body, string cmsEvent)
         {
-            var serviceBusMessage = new ServiceBusMessage(body);
+            var serviceBusMessage = new ServiceBusMessage(body) { Subject = cmsEvent };
             return _sender.SendMessageAsync(serviceBusMessage);
         }
     }

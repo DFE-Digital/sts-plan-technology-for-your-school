@@ -1,7 +1,7 @@
 using System.Text;
-using System.Text.Json;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.AzureFunctions.Mappings;
+using Dfe.PlanTech.Domain.Caching.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
@@ -35,14 +35,50 @@ namespace Dfe.PlanTech.AzureFunctions
         {
             try
             {
+                string cmsEvent = GetCmsEvent(message.Subject);
                 var text = Encoding.UTF8.GetString(message.Body);
+
+                Logger.LogInformation("Performing Action: {action}", cmsEvent);
                 Logger.LogInformation("Processing {text}", text);
 
-                var mapped = _mappers.ToEntity(text);
+                ContentComponentDbEntity mapped = _mappers.ToEntity(text);
+                ContentComponentDbEntity? existing = GetExistingDbEntity(mapped);
 
-                var rowsChanged = await UpsertEntityInDatabase(mapped);
+                if (existing != null)
+                {
+                    mapped.Archived = existing.Archived;
+                    mapped.Published = existing.Published;
+                    mapped.Deleted = existing.Deleted;
+                }
 
-                if (rowsChanged == 0)
+                switch (cmsEvent)
+                {
+                    case "create":
+                    case "save":
+                    case "auto_save":
+                        break;
+                    case "archive":
+                        mapped.Archived = true;
+                        break;
+                    case "unarchive":
+                        mapped.Archived = false;
+                        break;
+                    case "publish":
+                        mapped.Published = true;
+                        break;
+                    case "unpublish":
+                        mapped.Published = false;
+                        break;
+                    case "delete":
+                        mapped.Deleted = true;
+                        break;
+                    default:
+                        throw new CmsEventException(string.Format("CMS Event \"{0}\" not implemented", cmsEvent));
+                }
+
+                long rowsChanged = await UpsertEntityInDatabase(mapped, existing);
+
+                if (rowsChanged == 0L)
                 {
                     Logger.LogError("Changed no rows in database");
                 }
@@ -60,10 +96,18 @@ namespace Dfe.PlanTech.AzureFunctions
             }
         }
 
-        private async Task<long> UpsertEntityInDatabase(ContentComponentDbEntity entity)
+        private ContentComponentDbEntity? GetExistingDbEntity(ContentComponentDbEntity entity)
         {
-            var existing = _db.Find(entity.GetType(), entity.Id);
+            return _db.Find(entity.GetType(), entity.Id) as ContentComponentDbEntity ?? null;
+        }
 
+        private static string GetCmsEvent(string subject)
+        {
+            return subject.AsSpan()[(subject.LastIndexOf('.') + 1)..].ToString();
+        }
+
+        private async Task<long> UpsertEntityInDatabase(ContentComponentDbEntity entity, ContentComponentDbEntity? existing)
+        {
             if (existing == null)
             {
                 _db.Add(entity);
@@ -76,7 +120,7 @@ namespace Dfe.PlanTech.AzureFunctions
             return await _db.SaveChangesAsync();
         }
 
-        private static void UpdateProperties(ContentComponentDbEntity entity, object? existing)
+        private static void UpdateProperties(ContentComponentDbEntity entity, ContentComponentDbEntity existing)
         {
             var properties = entity.GetType().GetProperties();
 
@@ -87,4 +131,3 @@ namespace Dfe.PlanTech.AzureFunctions
         }
     }
 }
-
