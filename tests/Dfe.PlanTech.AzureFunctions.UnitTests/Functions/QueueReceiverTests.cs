@@ -66,4 +66,43 @@ public class QueueReceiverTests
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>());
     }
+
+    [Fact]
+    public async Task QueueReceiverDbWriter_Should_DeadLetter_Failed_Operation()
+    {
+        ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
+        ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
+
+        string nonMappableJson = "\"INVALID\":\"CONTENT\"";
+
+        var subject = "ContentManagement.Entry.create";
+        var serviceBusMessage = new ServiceBusMessage(nonMappableJson) { Subject = subject };
+
+        ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
+
+        await _queueReceiver.QueueReceiverDbWriter(new ServiceBusReceivedMessage[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock);
+
+        await serviceBusMessageActionsMock.Received().DeadLetterMessageAsync(Arg.Any<ServiceBusReceivedMessage>());
+    }
+
+    [Fact]
+    public async Task QueueReceiverDbWriter_Should_MapExistingDbEntity_To_Message()
+    {
+        ContentComponentDbEntityImplementation contentComponent = new() { Archived = true, Published = true, Deleted = true };
+
+        _cmsDbContextMock.SaveChangesAsync().Returns(1);
+        _cmsDbContextMock.Find(Arg.Any<Type>(), Arg.Any<String>()).Returns(contentComponent);
+
+        ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
+        ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
+
+        var subject = "ContentManagement.Entry.save";
+        var serviceBusMessage = new ServiceBusMessage(bodyJsonStr) { Subject = subject };
+
+        ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
+
+        await _queueReceiver.QueueReceiverDbWriter(new ServiceBusReceivedMessage[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock);
+
+        await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>());
+    }
 }
