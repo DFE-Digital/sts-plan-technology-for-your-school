@@ -16,7 +16,7 @@ public class RecommendationPageDbEntity : ContentComponentDbEntity, IRecommendat
 
     public string PageId { get; set; } = null!;
 
-    public Section? Section { get; set; }
+    public SectionDbEntity? Section { get; set; }
 
     public string? SectionId { get; set; }
 }

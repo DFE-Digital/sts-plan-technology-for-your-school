@@ -65,14 +65,6 @@ public class CmsDbContext : DbContext
             entity.ToTable("ContentComponents", Schema);
         });
 
-
-        modelBuilder.Entity<ContentComponentDbEntity>(entity =>
-        {
-            entity.Property(e => e.Id).HasMaxLength(30);
-
-            entity.ToTable("ContentComponents", Schema);
-        });
-
         modelBuilder.Entity<AnswerDbEntity>(entity =>
         {
             entity.HasOne(a => a.NextQuestion).WithMany(q => q.PreviousAnswers).OnDelete(DeleteBehavior.Restrict);
