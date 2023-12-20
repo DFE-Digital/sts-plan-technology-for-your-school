@@ -7,6 +7,12 @@ local.settings.json
 # Config file used for contentful export
 config.json
 
+# Contentful export files
+contentful-export*.json
+
+# Virtual envs for python
+venv/
+
 # User-specific files
 *.suo
 *.user
