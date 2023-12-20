@@ -2,6 +2,11 @@
 
 ## Export entries from contentful
 
+### Prerequisite to running contenful export
+1. Install Contentful CLI - ``npm install -g contentful-cli``
+
+#### Configure export
+
 To export all entry data from contentful we make use of the contentful CLI which exports the entry data for us in JSON format, which we will use to invoke the contentful webhook.
 
 We configure which enviroment we want to export data from in a ``config.json`` file
@@ -14,6 +19,7 @@ We configure which enviroment we want to export data from in a ``config.json`` f
   "contentOnly" : true     #This will only export content data for us
 }
 ```
+#### Run export
 
 Use the following command to begin the export when you are happy with the config.
 
@@ -84,7 +90,7 @@ To give us some more control over the migration and aid reconciliation of export
 
 #### Make id's Empty
 
-```--make-ids-empty``` In some cases we have content types which are not self referential, this can cause issue in the migration process if the dependencies we require have not been migrated. To get around this issue we have enhanced the script strip out id which reference other content types
+```--make-ids-empty``` In some cases we have content types which are not self referential, this can cause issues in the migration process if the dependencies we require have not been migrated. To get around this issue we have enhanced the script to strip out id which reference other content types
 for example:
 
 When migrating questions from the export file we would need to strip out id's for answer content types as they would not exist in the database so we could run the script as follows:
