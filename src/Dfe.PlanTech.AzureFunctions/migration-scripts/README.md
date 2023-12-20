@@ -91,8 +91,9 @@ When migrating questions from the export file we would need to strip out id's fo
 
 ```python3 contentful-migtation.py <contentful-entry-export>.json "<contnetful-webhook-url>" --content-type question --make-ids-empty```
 
-#### Delays between entry migration
 Once the answer components have been migrated we could re run the question component migration by removing the ```make-ids-empty``` flag and this would update the question data and link to the correct answer data.
+
+#### Delays between entry migration
 
 ```--delay``` This optional argument is available to set a delay in between each call the default delay is `1.0` in `seconds`
 
