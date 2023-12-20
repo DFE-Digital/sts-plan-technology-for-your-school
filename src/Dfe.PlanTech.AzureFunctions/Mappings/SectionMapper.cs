@@ -19,9 +19,9 @@ public class SectionMapper : JsonToDbMapper<SectionDbEntity>
         values = MoveValueToNewKey(values, "interstitialPage", "interstitialPageId");
 
         UpdateReferencesArray(values, "questions", _db.Questions, (id, question) => question.SectionId = Payload!.Sys.Id);
-        
+
         UpdateReferencesArray(values, "recommendations", _db.RecommendationPages, (id, recommendationPage) => recommendationPage.SectionId = Payload!.Sys.Id);
-        
+
         return values;
     }
 }
