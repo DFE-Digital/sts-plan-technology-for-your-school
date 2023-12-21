@@ -6,6 +6,8 @@ local.settings.json
 
 # Config file used for contentful export
 config.json
+contentful-export*.json
+venv/
 
 # User-specific files
 *.suo
