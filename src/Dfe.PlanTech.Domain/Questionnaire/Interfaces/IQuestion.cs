@@ -9,7 +9,7 @@ public interface IQuestion
     public string Slug { get; }
 }
 
-public interface IQuestion<TAnswer> : IQuestion
+public interface IQuestion<out TAnswer> : IQuestion
 where TAnswer : IAnswer
 {
     public List<TAnswer> Answers { get; }

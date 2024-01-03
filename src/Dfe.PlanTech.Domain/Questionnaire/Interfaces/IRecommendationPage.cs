@@ -12,7 +12,7 @@ public interface IRecommendationPage
     public Maturity Maturity { get; }
 }
 
-public interface IRecommendationPage<TPage> : IRecommendationPage
+public interface IRecommendationPage<out TPage> : IRecommendationPage
 where TPage : IPage
 {
     public TPage Page { get; }

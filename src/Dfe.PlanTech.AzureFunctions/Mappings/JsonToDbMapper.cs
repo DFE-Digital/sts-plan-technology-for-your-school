@@ -17,7 +17,7 @@ where TEntity : ContentComponentDbEntity, new()
     protected readonly TEntity MappedEntity = new();
     protected CmsWebHookPayload? Payload;
 
-    public JsonToDbMapper(ILogger<JsonToDbMapper<TEntity>> logger, JsonSerializerOptions jsonSerialiserOptions) : base(typeof(TEntity), logger, jsonSerialiserOptions)
+    protected JsonToDbMapper(ILogger<JsonToDbMapper<TEntity>> logger, JsonSerializerOptions jsonSerialiserOptions) : base(typeof(TEntity), logger, jsonSerialiserOptions)
     {
     }
 
@@ -83,7 +83,7 @@ public abstract class JsonToDbMapper
 
     private readonly Type _entityType;
 
-    public JsonToDbMapper(Type entityType, ILogger logger, JsonSerializerOptions jsonSerialiserOptions)
+    protected JsonToDbMapper(Type entityType, ILogger logger, JsonSerializerOptions jsonSerialiserOptions)
     {
         _entityType = entityType;
         Logger = logger;

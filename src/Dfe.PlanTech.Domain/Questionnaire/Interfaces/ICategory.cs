@@ -10,7 +10,7 @@ public interface ICategory
 
 }
 
-public interface ICategory<THeader, TSection> : ICategory
+public interface ICategory<out THeader, TSection> : ICategory
 where THeader : IHeader
 where TSection : ISection
 {
