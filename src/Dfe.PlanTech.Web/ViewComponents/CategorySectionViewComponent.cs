@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Domain.CategorySection;
 using Dfe.PlanTech.Domain.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.TagHelpers.TaskList;

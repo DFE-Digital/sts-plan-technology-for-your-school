@@ -1,4 +1,3 @@
-using System.Net;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.Domain.Caching.Exceptions;
 using Microsoft.Azure.Functions.Worker;

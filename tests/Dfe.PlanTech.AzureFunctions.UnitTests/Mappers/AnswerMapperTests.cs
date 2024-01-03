@@ -9,41 +9,41 @@ namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
 public class AnswerMapperTests : BaseMapperTests
 {
-  private const string AnswerText = "Answer text goes here";
-  private const Maturity AnswerMaturity = Maturity.Low;
-  private const string AnswerId = "Answer Id";
-  private readonly CmsWebHookSystemDetailsInnerContainer NextQuestion = new CmsWebHookSystemDetailsInnerContainer() { Sys = new() { Id = "Answer Id" } };
+    private const string AnswerText = "Answer text goes here";
+    private const Maturity AnswerMaturity = Maturity.Low;
+    private const string AnswerId = "Answer Id";
+    private readonly CmsWebHookSystemDetailsInnerContainer NextQuestion = new CmsWebHookSystemDetailsInnerContainer() { Sys = new() { Id = "Answer Id" } };
 
-  private readonly AnswerMapper _mapper;
-  private readonly ILogger<JsonToDbMapper<AnswerDbEntity>> _logger;
-  public AnswerMapperTests()
-  {
-    _logger = Substitute.For<ILogger<JsonToDbMapper<AnswerDbEntity>>>();
-    _mapper = new AnswerMapper(_logger, JsonOptions);
-  }
-
-  [Fact]
-  public void Mapper_Should_Map_Relationship()
-  {
-    var fields = new Dictionary<string, object?>()
+    private readonly AnswerMapper _mapper;
+    private readonly ILogger<JsonToDbMapper<AnswerDbEntity>> _logger;
+    public AnswerMapperTests()
     {
-      ["maturity"] = WrapWithLocalisation(AnswerMaturity),
-      ["text"] = WrapWithLocalisation(AnswerText),
-      ["nextQuestion"] = WrapWithLocalisation(NextQuestion),
-    };
+        _logger = Substitute.For<ILogger<JsonToDbMapper<AnswerDbEntity>>>();
+        _mapper = new AnswerMapper(_logger, JsonOptions);
+    }
 
-    var payload = CreatePayload(fields, AnswerId);
+    [Fact]
+    public void Mapper_Should_Map_Relationship()
+    {
+        var fields = new Dictionary<string, object?>()
+        {
+            ["maturity"] = WrapWithLocalisation(AnswerMaturity),
+            ["text"] = WrapWithLocalisation(AnswerText),
+            ["nextQuestion"] = WrapWithLocalisation(NextQuestion),
+        };
 
-    var mapped = _mapper.MapEntity(payload);
+        var payload = CreatePayload(fields, AnswerId);
 
-    Assert.NotNull(mapped);
+        var mapped = _mapper.MapEntity(payload);
 
-    var concrete = mapped as AnswerDbEntity;
-    Assert.NotNull(concrete);
+        Assert.NotNull(mapped);
 
-    Assert.Equal(AnswerId, concrete.Id);
-    Assert.True(string.Equals(AnswerMaturity.ToString(), concrete.Maturity, StringComparison.InvariantCultureIgnoreCase));
-    Assert.Equal(AnswerText, concrete.Text);
-    Assert.Equal(NextQuestion.Sys.Id, concrete.NextQuestionId);
-  }
+        var concrete = mapped as AnswerDbEntity;
+        Assert.NotNull(concrete);
+
+        Assert.Equal(AnswerId, concrete.Id);
+        Assert.True(string.Equals(AnswerMaturity.ToString(), concrete.Maturity, StringComparison.InvariantCultureIgnoreCase));
+        Assert.Equal(AnswerText, concrete.Text);
+        Assert.Equal(NextQuestion.Sys.Id, concrete.NextQuestionId);
+    }
 }

@@ -1,7 +1,6 @@
 using Dfe.PlanTech.Application.SignIns.Interfaces;
 using Dfe.PlanTech.Domain.SignIns.Enums;
 using Dfe.PlanTech.Domain.SignIns.Models;
-using Dfe.PlanTech.Domain.Users.Exceptions;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Domain.Users.Models;
 using Dfe.PlanTech.Infrastructure.SignIns.ConnectEvents;

@@ -1,7 +1,6 @@
 using Azure.Identity;
 using Dfe.PlanTech.Application.Helpers;
 using Dfe.PlanTech.Application.Submissions.Queries;
-using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.SignIns;
