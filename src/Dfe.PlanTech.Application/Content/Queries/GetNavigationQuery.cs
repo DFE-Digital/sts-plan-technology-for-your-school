@@ -11,10 +11,19 @@ namespace Dfe.PlanTech.Application.Content.Queries;
 /// </summary>
 public class GetNavigationQuery : ContentRetriever, IGetNavigationQuery
 {
-    public GetNavigationQuery(IContentRepository repository) : base(repository)
+    private readonly ICmsDbContext _db;
+
+    public GetNavigationQuery(ICmsDbContext db, IContentRepository repository) : base(repository)
     {
+        _db = db;
     }
 
-    public async Task<IEnumerable<NavigationLink>> GetNavigationLinks(CancellationToken cancellationToken = default)
-        => await repository.GetEntities<NavigationLink>(cancellationToken);
+    public async Task<IEnumerable<INavigationLink>> GetNavigationLinks(CancellationToken cancellationToken = default)
+    {
+        var navigationLinks = await _db.ToListAsync(_db.NavigationLink);
+
+        if (navigationLinks.Count > 0) return navigationLinks;
+
+        return await repository.GetEntities<NavigationLink>(cancellationToken);
+    }
 }

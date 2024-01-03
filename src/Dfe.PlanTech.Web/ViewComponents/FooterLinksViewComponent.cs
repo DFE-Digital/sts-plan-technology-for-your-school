@@ -33,7 +33,7 @@ public class FooterLinksViewComponent : ViewComponent
     /// Gets links from Contentful using <see cref="IGetNavigationQuery"/> with basic error handling 
     /// </summary>
     /// <returns></returns>
-    private async Task<IEnumerable<NavigationLink>> GetLinks()
+    private async Task<IEnumerable<INavigationLink>> GetLinks()
     {
         try
         {
