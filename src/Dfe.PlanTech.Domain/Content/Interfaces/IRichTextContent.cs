@@ -1,6 +1,5 @@
-using System.Text.RegularExpressions;
 using Dfe.PlanTech.Domain.Content.Enums;
-using Dfe.PlanTech.Domain.Content.Models;
+using System.Text.RegularExpressions;
 
 namespace Dfe.PlanTech.Domain.Content.Interfaces;
 

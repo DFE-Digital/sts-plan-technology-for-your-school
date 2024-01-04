@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using System.ComponentModel.DataAnnotations;
 

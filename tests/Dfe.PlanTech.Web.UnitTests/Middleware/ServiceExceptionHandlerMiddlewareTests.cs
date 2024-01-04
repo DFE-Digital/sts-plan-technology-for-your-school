@@ -1,11 +1,11 @@
 ﻿using Dfe.PlanTech.Application.Constants;
-using Microsoft.AspNetCore.Http;
-using Dfe.PlanTech.Web.Middleware;
-using Xunit;
-using Microsoft.AspNetCore.Diagnostics;
-using Dfe.PlanTech.Domain.Users.Exceptions;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Establishments.Exceptions;
+using Dfe.PlanTech.Domain.Users.Exceptions;
+using Dfe.PlanTech.Web.Middleware;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
+using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Middleware
 {
