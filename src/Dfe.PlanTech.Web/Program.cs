@@ -68,6 +68,8 @@ builder.Services.AddTransient((_) => SectionCompleteStatusChecker.SectionComplet
 builder.Services.AddTransient((_) => SectionNotStartedStatusChecker.SectionNotStarted);
 builder.Services.AddTransient((_) => CheckAnswersOrNextQuestionChecker.CheckAnswersOrNextQuestion);
 
+builder.Services.AddAutoMapper(typeof(Dfe.PlanTech.Application.Mappings.CmsMappingProfile));
+
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization(options =>
 {

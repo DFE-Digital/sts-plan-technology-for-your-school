@@ -35,18 +35,41 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
     {
         try
         {
-            var buttons = await _db.ToListAsync(_db.Buttons.ProjectTo<Button>(_mapperConfiguration.ConfigurationProvider), cancellationToken);
-            var page = await _db.GetPageBySlug(slug, cancellationToken);
+            var matchingPage = await _db.GetPageBySlug(slug, cancellationToken);
 
-            if (page == null) return await GetFromContentful(slug, cancellationToken);
+            if (matchingPage == null) return await GetFromContentful(slug, cancellationToken);
 
-            var mapped = _mapperConfiguration.Map<PageDbEntity, Page>(page);
+            await LoadRichTextContents(matchingPage);
+
+            var mapped = _mapperConfiguration.Map<PageDbEntity, Page>(matchingPage);
 
             return mapped;
         }
         catch (Exception e)
         {
             throw new ContentfulDataUnavailableException($"Could not retrieve page with slug {slug}", e);
+        }
+    }
+
+    private async Task LoadRichTextContents(PageDbEntity page)
+    {
+        var textBodyContentIds = page.Content.Where(c => c is TextBodyDbEntity)
+                                            .Select(c => c as TextBodyDbEntity)
+                                            .Select(c => c!.RichTextId)
+                                            .ToList();
+
+        var getRichTextContentQueries = textBodyContentIds.Select(id => _db.RichTextContentsForParentId(id)).ToList();
+
+        var firstQuery = getRichTextContentQueries.FirstOrDefault();
+
+        if (firstQuery != null)
+        {
+            foreach (var query in getRichTextContentQueries.Skip(1))
+            {
+                firstQuery = firstQuery.Concat(query);
+            }
+
+            var results = await _db.ToListAsync(firstQuery);
         }
     }
 

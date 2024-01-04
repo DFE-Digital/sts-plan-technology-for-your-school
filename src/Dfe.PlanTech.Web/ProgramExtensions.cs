@@ -88,7 +88,10 @@ public static class ProgramExtensions
 
     public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<IPlanTechDbContext, PlanTechDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("Database")));
+        void databaseOptionsAction(DbContextOptionsBuilder options) => options.UseSqlServer(configuration.GetConnectionString("Database"));
+
+        services.AddDbContext<IPlanTechDbContext, PlanTechDbContext>(databaseOptionsAction);
+        services.AddDbContext<ICmsDbContext, CmsDbContext>(databaseOptionsAction);
 
         services.AddTransient<ICalculateMaturityCommand, CalculateMaturityCommand>();
         services.AddTransient<ICookieService, CookieService>();

@@ -11,5 +11,7 @@ public class TextBodyDbEntity : ContentComponentDbEntity, ITextBody<RichTextCont
 {
     public RichTextContentDbEntity RichText { get; set; } = null!;
 
+    public long RichTextId { get; set; }
+
     public List<WarningComponentDbEntity> Warnings { get; set; } = new();
 }

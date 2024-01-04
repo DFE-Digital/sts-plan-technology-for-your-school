@@ -2,6 +2,7 @@ using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
 
@@ -93,11 +94,22 @@ public class CmsDbContext : DbContext, ICmsDbContext
             entity.ToTable("Answers", Schema);
         });
 
+        modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>(entity =>
+        {
+            entity.Navigation(button => button.Button).AutoInclude();
+        });
+
+        modelBuilder.Entity<ButtonWithLinkDbEntity>()
+                    .Navigation(button => button.Button).AutoInclude();
+
         modelBuilder.Entity<CategoryDbEntity>(entity =>
         {
             entity.HasMany(category => category.Sections)
               .WithOne(section => section.Category)
               .OnDelete(DeleteBehavior.Restrict);
+
+            entity.Navigation(category => category.Sections)
+                  .AutoInclude();
 
             entity.ToTable("Categories", Schema);
         });
@@ -135,6 +147,14 @@ public class CmsDbContext : DbContext, ICmsDbContext
             .OnDelete(DeleteBehavior.Restrict);
         });
 
+
+
+        modelBuilder.Entity<RichTextContentDbEntity>(entity =>
+        {
+            entity.ToTable("RichTextContents", Schema);
+        });
+
+
         modelBuilder.Entity<SectionDbEntity>(entity =>
         {
             entity.HasOne(section => section.InterstitialPage)
@@ -151,6 +171,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
             .OnDelete(DeleteBehavior.Restrict);
         });
 
+
         modelBuilder.Entity<TitleDbEntity>(entity =>
         {
             entity.ToTable("Titles", Schema);
@@ -160,5 +181,21 @@ public class CmsDbContext : DbContext, ICmsDbContext
         {
             entity.HasOne(warning => warning.Text).WithMany(text => text.Warnings).OnDelete(DeleteBehavior.Restrict);
         });
+
+        modelBuilder.HasDbFunction(typeof(CmsDbContext).GetMethod(nameof(RichTextContentsForParentId), new[] { typeof(int) }))
+                    .HasName("SelectAllRichTextContentForParentId").HasSchema("Contentful");
+
     }
+
+    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+    => queryable.ToListAsync(cancellationToken: cancellationToken);
+
+    public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
+    => Pages.Include(page => page.Content)
+            .AsSplitQuery()
+            .Where(page => page.Slug == slug)
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+    public IQueryable<RichTextContentDbEntity> RichTextContentsForParentId(long parentId)
+        => FromExpression(() => RichTextContentsForParentId(parentId));
 }
