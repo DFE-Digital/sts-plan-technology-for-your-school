@@ -135,10 +135,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
             entity.ToTable("Pages", Schema);
         });
 
-        modelBuilder.Entity<QuestionDbEntity>(entity =>
-        {
-            entity.ToTable("Questions", Schema);
-        });
+        modelBuilder.Entity<QuestionDbEntity>().ToTable("Questions", Schema);
 
         modelBuilder.Entity<RecommendationPageDbEntity>(entity =>
         {
@@ -147,13 +144,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
             .OnDelete(DeleteBehavior.Restrict);
         });
 
-
-
-        modelBuilder.Entity<RichTextContentDbEntity>(entity =>
-        {
-            entity.ToTable("RichTextContents", Schema);
-        });
-
+        modelBuilder.Entity<RichTextContentDbEntity>().ToTable("RichTextContents", Schema);
 
         modelBuilder.Entity<SectionDbEntity>(entity =>
         {
@@ -180,6 +171,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
         modelBuilder.Entity<WarningComponentDbEntity>(entity =>
         {
             entity.HasOne(warning => warning.Text).WithMany(text => text.Warnings).OnDelete(DeleteBehavior.Restrict);
+
+            entity.Navigation(warningComponent => warningComponent.Text).AutoInclude();
         });
 
         modelBuilder.HasDbFunction(typeof(CmsDbContext).GetMethod(nameof(RichTextContentsForParentId), new[] { typeof(int) }))

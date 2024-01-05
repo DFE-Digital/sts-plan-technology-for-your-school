@@ -1,12 +1,10 @@
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
@@ -53,10 +51,24 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
 
     private async Task LoadRichTextContents(PageDbEntity page)
     {
-        var textBodyContentIds = page.Content.Where(c => c is TextBodyDbEntity)
-                                            .Select(c => c as TextBodyDbEntity)
-                                            .Select(c => c!.RichTextId)
-                                            .ToList();
+        var textBodyContentIds = page.Content.Select(content =>
+        {
+            switch (content)
+            {
+                case WarningComponentDbEntity warningComponent:
+                    {
+                        return warningComponent.Text.RichTextId;
+                    }
+
+                case TextBodyDbEntity textBody:
+                    {
+                        return textBody.RichTextId;
+                    }
+
+                default: return 0;
+            }
+        }).Where(id => id > 0)
+        .ToList();
 
         var getRichTextContentQueries = textBodyContentIds.Select(id => _db.RichTextContentsForParentId(id)).ToList();
 
@@ -77,7 +89,6 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
     {
         if (int.TryParse(_getEntityEnvVariable, out int getEntityValue))
         {
-
             var options = new GetEntitiesOptions(getEntityValue,
                 new[] { new ContentQueryEquals() { Field = "fields.slug", Value = slug } });
             var pages = await repository.GetEntities<Page>(options, cancellationToken);
