@@ -42,7 +42,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
 
             //Assert
             Assert.NotNull(context.Response);
-            Assert.Equal(UrlConstants.RoleErrorPage, context.Response.Headers.Values.FirstOrDefault());
+            Assert.Equal(UrlConstants.CombinedErrorPage, context.Response.Headers.Values.FirstOrDefault());
         }
 
         [Fact]
@@ -61,7 +61,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
 
             //Assert
             Assert.NotNull(context.Response);
-            Assert.Equal(UrlConstants.RoleErrorPage, context.Response.Headers.Values.FirstOrDefault());
+            Assert.Equal(UrlConstants.CombinedErrorPage, context.Response.Headers.Values.FirstOrDefault());
         }
 
         [Fact]
