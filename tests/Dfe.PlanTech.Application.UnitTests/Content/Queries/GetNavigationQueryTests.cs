@@ -1,34 +1,54 @@
+using System.Dynamic;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Content.Queries;
 
 public class GetNavigationQueryTests
 {
-    private readonly IContentRepository _contentRepository;
-    private IList<NavigationLink> _links = new List<NavigationLink>(){
-    new NavigationLink(){
+  private readonly IContentRepository _contentRepository;
+
+  private readonly IList<NavigationLink> _links = new List<NavigationLink>(){
+    new(){
       Href = "Href",
       DisplayText = "DisplayText"
     }
   };
 
-    public GetNavigationQueryTests()
+  private readonly ILogger<GetNavigationQuery> _logger = new NullLogger<GetNavigationQuery>();
+  private readonly ICmsDbContext _db = Substitute.For<ICmsDbContext>();
+
+  public GetNavigationQueryTests()
+  {
+    _contentRepository = Substitute.For<IContentRepository>();
+    _contentRepository.GetEntities<NavigationLink>(CancellationToken.None).Returns(_links);
+
+    _db.NavigationLink.Returns(_links.Select(link => new NavigationLinkDbEntity
     {
-        _contentRepository = Substitute.For<IContentRepository>();
-        _contentRepository.GetEntities<NavigationLink>(CancellationToken.None).Returns(_links);
-    }
+      Href = link.Href,
+      DisplayText = link.DisplayText
+    }).AsQueryable());
 
-    [Fact]
-    public async Task Should_Retrieve_Nav_Links()
+    _db.ToListAsync(Arg.Any<IQueryable<NavigationLinkDbEntity>>()).Returns(callInfo =>
     {
-        IGetNavigationQuery navQuery = new GetNavigationQuery(_contentRepository);
+      var queryable = callInfo.ArgAt<IQueryable<NavigationLinkDbEntity>>(1);
 
-        var result = await navQuery.GetNavigationLinks();
+      return Task.FromResult(queryable.ToList());
+    });
+  }
 
-        Assert.Equal(_links, result);
-    }
+  [Fact]
+  public async Task Should_Retrieve_Nav_Links()
+  {
+    IGetNavigationQuery navQuery = new GetNavigationQuery(_db, _logger, _contentRepository);
+
+    var result = await navQuery.GetNavigationLinks();
+
+    Assert.Equal(_links, result);
+  }
 }
