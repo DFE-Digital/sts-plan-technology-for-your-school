@@ -4,7 +4,9 @@ using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
@@ -40,6 +42,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
     public DbSet<RecommendationPageDbEntity> RecommendationPages { get; set; }
 
     public DbSet<RichTextContentDbEntity> RichTextContents { get; set; }
+    public IQueryable<RichTextDataDbEntity> RichTextDataDbEntity { get; set; }
+    public IQueryable<RichTextMarkDbEntity> RichTextMarkDbEntity { get; set; }
 
     public DbSet<SectionDbEntity> Sections { get; set; }
 
@@ -63,10 +67,13 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<QuestionDbEntity> ICmsDbContext.Questions => Questions;
     IQueryable<RecommendationPageDbEntity> ICmsDbContext.RecommendationPages => RecommendationPages;
     IQueryable<RichTextContentDbEntity> ICmsDbContext.RichTextContents => RichTextContents;
+    IQueryable<RichTextDataDbEntity> ICmsDbContext.RichTextDataDbEntity => RichTextDataDbEntity;
+    IQueryable<RichTextMarkDbEntity> ICmsDbContext.RichTextMarkDbEntity => RichTextMarkDbEntity;
     IQueryable<SectionDbEntity> ICmsDbContext.Sections => Sections;
     IQueryable<TextBodyDbEntity> ICmsDbContext.TextBodies => TextBodies;
     IQueryable<TitleDbEntity> ICmsDbContext.Titles => Titles;
     IQueryable<WarningComponentDbEntity> ICmsDbContext.Warnings => Warnings;
+
 
     public CmsDbContext() { }
 
@@ -144,7 +151,12 @@ public class CmsDbContext : DbContext, ICmsDbContext
             .OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<RichTextContentDbEntity>().ToTable("RichTextContents", Schema);
+        modelBuilder.Entity<RichTextContentDbEntity>(entity =>
+        {
+            entity.ToTable("RichTextContents", Schema);
+            entity.Navigation(rt => rt.Marks).AutoInclude();
+            entity.Navigation(rt => rt.Data).AutoInclude();
+        });
 
         modelBuilder.Entity<SectionDbEntity>(entity =>
         {
@@ -162,6 +174,10 @@ public class CmsDbContext : DbContext, ICmsDbContext
             .OnDelete(DeleteBehavior.Restrict);
         });
 
+        modelBuilder.Entity<TextBodyDbEntity>(entity =>
+        {
+            entity.Navigation(tb => tb.RichText).AutoInclude();
+        });
 
         modelBuilder.Entity<TitleDbEntity>(entity =>
         {
@@ -175,9 +191,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
             entity.Navigation(warningComponent => warningComponent.Text).AutoInclude();
         });
 
-        modelBuilder.HasDbFunction(typeof(CmsDbContext).GetMethod(nameof(RichTextContentsForParentId), new[] { typeof(int) }))
-                    .HasName("SelectAllRichTextContentForParentId").HasSchema("Contentful");
-
     }
 
     public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
@@ -189,6 +202,65 @@ public class CmsDbContext : DbContext, ICmsDbContext
             .Where(page => page.Slug == slug)
             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
-    public IQueryable<RichTextContentDbEntity> RichTextContentsForParentId(long parentId)
-        => FromExpression(() => RichTextContentsForParentId(parentId));
+
+    public IQueryable<RichTextContentDbEntity> LoadRichTextContentsByParentIds(IEnumerable<long> parentIds)
+    {
+        // Declare de Structure filter param
+        var dt = new DataTable();
+
+        var table = new DataTable();
+        table.Columns.Add(new DataColumn("Id", typeof(long)));
+
+        foreach (var id in parentIds)
+        {
+            DataRow row = table.NewRow();
+            row["Id"] = id;
+            table.Rows.Add(row);
+
+        }
+        var param = new SqlParameter("@ParentIds", table) { TypeName = "IdTableType", SqlDbType = SqlDbType.Structured };
+
+        return RichTextContents.FromSqlRaw("SELECT * FROM [Contentful].[SelectAllRichTextContentForParentIds](@ParentIds)", param);
+    }
+    public IQueryable<RichTextContentDbEntity> Testing(IEnumerable<long> ids)
+    {
+        return RichTextContents.Where(content => ids.Contains(content.Id))
+         .Select(IncludeChildren(4));
+    }
+
+    public async Task LoadRichTextContentChildren(IEnumerable<TextBodyDbEntity> textBodies)
+    {
+        foreach (var body in textBodies)
+        {
+            await Entry(body).Reference(body => body.RichText).LoadAsync();
+        }
+
+        await LoadRichTextChildren(textBodies.Select(tb => tb.RichText));
+    }
+
+    public async Task LoadRichTextChildren(IEnumerable<RichTextContentDbEntity> richTextContent)
+    {
+        foreach (var richText in richTextContent)
+        {
+            await Entry(richText).Collection(richText => richText.Content).LoadAsync();
+            await LoadRichTextChildren(richText.Content);
+        }
+    }
+    private static Expression<Func<RichTextContentDbEntity, RichTextContentDbEntity>> IncludeChildren(int maxDepth, int currentDepth = 0)
+    {
+        currentDepth++;
+
+        Expression<Func<RichTextContentDbEntity, RichTextContentDbEntity>> mapper = content => new RichTextContentDbEntity()
+        {
+            Id = content.Id,
+            Value = content.Value,
+            Data = content.Data,
+            Marks = content.Marks,
+            Content = currentDepth == maxDepth ?
+                        new List<RichTextContentDbEntity>() :
+                        content.Content.AsQueryable().Select(IncludeChildren(maxDepth, currentDepth)).ToList()
+        };
+
+        return mapper;
+    }
 }

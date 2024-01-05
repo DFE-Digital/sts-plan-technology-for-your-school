@@ -4,6 +4,7 @@ using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 
@@ -51,38 +52,11 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
 
     private async Task LoadRichTextContents(PageDbEntity page)
     {
-        var textBodyContentIds = page.Content.Select(content =>
-        {
-            switch (content)
-            {
-                case WarningComponentDbEntity warningComponent:
-                    {
-                        return warningComponent.Text.RichTextId;
-                    }
+        var textBodyContentIds = page.Content.Where(content => content is IHasRichText)
+                                            .Select(content => content as IHasRichText)
+                                            .Select(content => content!.RichTextId);
 
-                case TextBodyDbEntity textBody:
-                    {
-                        return textBody.RichTextId;
-                    }
-
-                default: return 0;
-            }
-        }).Where(id => id > 0)
-        .ToList();
-
-        var getRichTextContentQueries = textBodyContentIds.Select(id => _db.RichTextContentsForParentId(id)).ToList();
-
-        var firstQuery = getRichTextContentQueries.FirstOrDefault();
-
-        if (firstQuery != null)
-        {
-            foreach (var query in getRichTextContentQueries.Skip(1))
-            {
-                firstQuery = firstQuery.Concat(query);
-            }
-
-            var results = await _db.ToListAsync(firstQuery);
-        }
+        await _db.ToListAsync(_db.LoadRichTextContentsByParentIds(textBodyContentIds));
     }
 
     private async Task<Page> GetFromContentful(string slug, CancellationToken cancellationToken)
