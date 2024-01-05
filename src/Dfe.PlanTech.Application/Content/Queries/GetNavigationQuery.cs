@@ -15,7 +15,7 @@ public class GetNavigationQuery : ContentRetriever, IGetNavigationQuery
     private readonly ICmsDbContext _db;
     private readonly ILogger<GetNavigationQuery> _logger;
 
-    public GetNavigationQuery(ICmsDbContext db, IContentRepository repository, ILogger<GetNavigationQuery> logger) : base(repository)
+    public GetNavigationQuery(ICmsDbContext db, ILogger<GetNavigationQuery> logger, IContentRepository repository) : base(repository)
     {
         _db = db;
         _logger = logger;
@@ -35,6 +35,7 @@ public class GetNavigationQuery : ContentRetriever, IGetNavigationQuery
         try
         {
             var navigationLinks = await _db.ToListAsync(_db.NavigationLink);
+
             return navigationLinks;
         }
         catch (Exception ex)
