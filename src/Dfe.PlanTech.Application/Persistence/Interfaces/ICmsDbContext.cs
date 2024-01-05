@@ -41,4 +41,6 @@ public interface ICmsDbContext
   public IQueryable<TitleDbEntity> Titles { get; }
 
   public IQueryable<WarningComponentDbEntity> Warnings { get; }
+
+  public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable);
 }

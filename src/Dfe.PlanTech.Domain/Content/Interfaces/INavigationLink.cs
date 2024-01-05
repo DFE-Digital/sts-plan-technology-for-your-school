@@ -22,4 +22,9 @@ public interface INavigationLink
     /// Should this link open in a new tab?
     /// </summary>
     public bool OpenInNewTab { get; }
+
+    /// <summary>
+    /// Does this link contain all necessary information (Href + DisplayText)?
+    /// </summary>
+    public bool IsValid => !string.IsNullOrEmpty(DisplayText) && !string.IsNullOrEmpty(Href);
 }

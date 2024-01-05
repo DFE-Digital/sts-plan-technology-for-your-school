@@ -161,4 +161,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
             entity.HasOne(warning => warning.Text).WithMany(text => text.Warnings).OnDelete(DeleteBehavior.Restrict);
         });
     }
+
+    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable) => queryable.ToListAsync();
 }
