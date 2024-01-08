@@ -11,10 +11,25 @@
 
 ![Contentful to database architecture][/docs/diagrams/cms-to-db-process-flow.png]
 
-## Reading from database
+### Webhook -> Queue
+
+### Queue -> DB
 
 ### Mapping
 
+## DB Architecture
+
+### Schema
+
+### Functions
+
+## Reading from database
+
+- Uses EF Core
+
+### Mapping
+
+- Uses AutoMapper
 ### Read navigation links
 
 ### Read page
