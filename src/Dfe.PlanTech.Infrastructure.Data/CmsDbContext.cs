@@ -6,7 +6,6 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
