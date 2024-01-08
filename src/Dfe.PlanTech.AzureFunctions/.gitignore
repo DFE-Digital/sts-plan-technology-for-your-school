@@ -4,6 +4,17 @@
 # Azure Functions localsettings file
 local.settings.json
 
+# Config file used for contentful export
+config.json
+contentful-export*.json
+venv/
+
+# Contentful export files
+contentful-export*.json
+
+# Virtual envs for python
+venv/
+
 # User-specific files
 *.suo
 *.user
@@ -262,3 +273,4 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+
