@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -7,7 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace Dfe.PlanTech.Infrastructure.Data;
 
 [ExcludeFromCodeCoverage]
-public class CmsDbContext : DbContext
+public class CmsDbContext : DbContext, ICmsDbContext
 {
     private const string Schema = "Contentful";
 
@@ -46,6 +47,25 @@ public class CmsDbContext : DbContext
     public DbSet<TitleDbEntity> Titles { get; set; }
 
     public DbSet<WarningComponentDbEntity> Warnings { get; set; }
+
+    IQueryable<AnswerDbEntity> ICmsDbContext.Answers => Answers;
+    IQueryable<ButtonDbEntity> ICmsDbContext.Buttons => Buttons;
+    IQueryable<ButtonWithEntryReferenceDbEntity> ICmsDbContext.ButtonWithEntryReferences => ButtonWithEntryReferences;
+    IQueryable<ButtonWithLinkDbEntity> ICmsDbContext.ButtonWithLinks => ButtonWithLinks;
+    IQueryable<CategoryDbEntity> ICmsDbContext.Categories => Categories;
+    IQueryable<ComponentDropDownDbEntity> ICmsDbContext.ComponentDropDowns => ComponentDropDowns;
+    IQueryable<HeaderDbEntity> ICmsDbContext.Headers => Headers;
+    IQueryable<InsetTextDbEntity> ICmsDbContext.InsetTexts => InsetTexts;
+    IQueryable<NavigationLinkDbEntity> ICmsDbContext.NavigationLink => NavigationLink;
+    IQueryable<PageDbEntity> ICmsDbContext.Pages => Pages;
+    IQueryable<PageContentDbEntity> ICmsDbContext.PageContents => PageContents;
+    IQueryable<QuestionDbEntity> ICmsDbContext.Questions => Questions;
+    IQueryable<RecommendationPageDbEntity> ICmsDbContext.RecommendationPages => RecommendationPages;
+    IQueryable<RichTextContentDbEntity> ICmsDbContext.RichTextContents => RichTextContents;
+    IQueryable<SectionDbEntity> ICmsDbContext.Sections => Sections;
+    IQueryable<TextBodyDbEntity> ICmsDbContext.TextBodies => TextBodies;
+    IQueryable<TitleDbEntity> ICmsDbContext.Titles => Titles;
+    IQueryable<WarningComponentDbEntity> ICmsDbContext.Warnings => Warnings;
 
     public CmsDbContext() { }
 
@@ -141,4 +161,6 @@ public class CmsDbContext : DbContext
             entity.HasOne(warning => warning.Text).WithMany(text => text.Warnings).OnDelete(DeleteBehavior.Restrict);
         });
     }
+
+    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable) => queryable.ToListAsync();
 }

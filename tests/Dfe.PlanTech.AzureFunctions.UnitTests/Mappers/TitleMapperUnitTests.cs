@@ -7,36 +7,36 @@ namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
 public class TitleMapperUnitTests : BaseMapperTests
 {
-  private const string TitleText = "Title text";
-  private const string TitleId = "Title Id";
+    private const string TitleText = "Title text";
+    private const string TitleId = "Title Id";
 
-  private readonly TitleMapper _mapper;
-  private readonly ILogger<TitleMapper> _logger;
+    private readonly TitleMapper _mapper;
+    private readonly ILogger<TitleMapper> _logger;
 
-  public TitleMapperUnitTests()
-  {
-    _logger = Substitute.For<ILogger<TitleMapper>>();
-    _mapper = new TitleMapper(_logger, JsonOptions);
-  }
-
-  [Fact]
-  public void Mapper_Should_Map_NavigationLink()
-  {
-    var fields = new Dictionary<string, object?>()
+    public TitleMapperUnitTests()
     {
-      ["text"] = WrapWithLocalisation(TitleText),
-    };
+        _logger = Substitute.For<ILogger<TitleMapper>>();
+        _mapper = new TitleMapper(_logger, JsonOptions);
+    }
 
-    var payload = CreatePayload(fields, TitleId);
+    [Fact]
+    public void Mapper_Should_Map_NavigationLink()
+    {
+        var fields = new Dictionary<string, object?>()
+        {
+            ["text"] = WrapWithLocalisation(TitleText),
+        };
 
-    var mapped = _mapper.MapEntity(payload);
+        var payload = CreatePayload(fields, TitleId);
 
-    Assert.NotNull(mapped);
+        var mapped = _mapper.MapEntity(payload);
 
-    var concrete = mapped as TitleDbEntity;
-    Assert.NotNull(concrete);
+        Assert.NotNull(mapped);
 
-    Assert.Equal(TitleId, concrete.Id);
-    Assert.Equal(TitleText, concrete.Text);
-  }
+        var concrete = mapped as TitleDbEntity;
+        Assert.NotNull(concrete);
+
+        Assert.Equal(TitleId, concrete.Id);
+        Assert.Equal(TitleText, concrete.Text);
+    }
 }

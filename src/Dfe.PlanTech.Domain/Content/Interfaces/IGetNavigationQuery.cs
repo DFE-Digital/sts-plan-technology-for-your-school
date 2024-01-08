@@ -11,5 +11,5 @@ public interface IGetNavigationQuery
     /// Retrieve links
     /// </summary>
     /// <returns>Found navigation links</returns>
-    Task<IEnumerable<NavigationLink>> GetNavigationLinks(CancellationToken cancellationToken = default);
+    Task<IEnumerable<INavigationLink>> GetNavigationLinks(CancellationToken cancellationToken = default);
 }

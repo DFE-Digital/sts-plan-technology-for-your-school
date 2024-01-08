@@ -7,7 +7,7 @@ public interface IButtonWithEntryReference
 {
 }
 
-public interface IButtonWithEntryReference<TButton, TContent> : IButtonWithEntryReference
+public interface IButtonWithEntryReference<out TButton, out TContent> : IButtonWithEntryReference
 where TButton : IButton
 where TContent : IContentComponentType
 {

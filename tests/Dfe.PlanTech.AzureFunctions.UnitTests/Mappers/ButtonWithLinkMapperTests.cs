@@ -8,45 +8,45 @@ namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
 public class ButtonWithLinkMapperTests : BaseMapperTests
 {
-  private const string ButtonWithLinkId = "ButtonId Id";
-  private const string Href = "www.website.com";
-  private readonly CmsWebHookSystemDetailsInnerContainer ButtonReference = new()
-  {
-    Sys = new()
+    private const string ButtonWithLinkId = "ButtonId Id";
+    private const string Href = "www.website.com";
+    private readonly CmsWebHookSystemDetailsInnerContainer ButtonReference = new()
     {
-      Id = "Button reference Id"
-    }
-  };
-
-  private readonly ButtonWithLinkMapper _mapper;
-  private readonly ILogger<ButtonWithLinkMapper> _logger;
-
-  public ButtonWithLinkMapperTests()
-  {
-    _logger = Substitute.For<ILogger<ButtonWithLinkMapper>>();
-    _mapper = new ButtonWithLinkMapper(_logger, JsonOptions);
-  }
-
-  [Fact]
-  public void Mapper_Should_Map_ButtonWithEntryReference()
-  {
-    var fields = new Dictionary<string, object?>()
-    {
-      ["button"] = WrapWithLocalisation(ButtonReference),
-      ["href"] = WrapWithLocalisation(Href),
+        Sys = new()
+        {
+            Id = "Button reference Id"
+        }
     };
 
-    var payload = CreatePayload(fields, ButtonWithLinkId);
+    private readonly ButtonWithLinkMapper _mapper;
+    private readonly ILogger<ButtonWithLinkMapper> _logger;
 
-    var mapped = _mapper.MapEntity(payload);
+    public ButtonWithLinkMapperTests()
+    {
+        _logger = Substitute.For<ILogger<ButtonWithLinkMapper>>();
+        _mapper = new ButtonWithLinkMapper(_logger, JsonOptions);
+    }
 
-    Assert.NotNull(mapped);
+    [Fact]
+    public void Mapper_Should_Map_ButtonWithEntryReference()
+    {
+        var fields = new Dictionary<string, object?>()
+        {
+            ["button"] = WrapWithLocalisation(ButtonReference),
+            ["href"] = WrapWithLocalisation(Href),
+        };
 
-    var concrete = mapped as ButtonWithLinkDbEntity;
-    Assert.NotNull(concrete);
+        var payload = CreatePayload(fields, ButtonWithLinkId);
 
-    Assert.Equal(ButtonWithLinkId, concrete.Id);
-    Assert.Equal(Href, concrete.Href);
-    Assert.Equal(ButtonReference.Sys.Id, concrete.ButtonId);
-  }
+        var mapped = _mapper.MapEntity(payload);
+
+        Assert.NotNull(mapped);
+
+        var concrete = mapped as ButtonWithLinkDbEntity;
+        Assert.NotNull(concrete);
+
+        Assert.Equal(ButtonWithLinkId, concrete.Id);
+        Assert.Equal(Href, concrete.Href);
+        Assert.Equal(ButtonReference.Sys.Id, concrete.ButtonId);
+    }
 }

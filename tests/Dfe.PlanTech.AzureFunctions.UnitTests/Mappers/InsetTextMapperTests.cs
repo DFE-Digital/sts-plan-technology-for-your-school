@@ -7,36 +7,36 @@ namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
 public class InsetTextMapperTests : BaseMapperTests
 {
-  private const string InsetTextValue = "Inset text goes here";
-  private const string InsetTextId = "Header Id";
+    private const string InsetTextValue = "Inset text goes here";
+    private const string InsetTextId = "Header Id";
 
-  private readonly InsetTextMapper _mapper;
-  private readonly ILogger<InsetTextMapper> _logger;
+    private readonly InsetTextMapper _mapper;
+    private readonly ILogger<InsetTextMapper> _logger;
 
-  public InsetTextMapperTests()
-  {
-    _logger = Substitute.For<ILogger<InsetTextMapper>>();
-    _mapper = new InsetTextMapper(_logger, JsonOptions);
-  }
-
-  [Fact]
-  public void Mapper_Should_Map_Relationship()
-  {
-    var fields = new Dictionary<string, object?>()
+    public InsetTextMapperTests()
     {
-      ["text"] = WrapWithLocalisation(InsetTextValue),
-    };
+        _logger = Substitute.For<ILogger<InsetTextMapper>>();
+        _mapper = new InsetTextMapper(_logger, JsonOptions);
+    }
 
-    var payload = CreatePayload(fields, InsetTextId);
+    [Fact]
+    public void Mapper_Should_Map_Relationship()
+    {
+        var fields = new Dictionary<string, object?>()
+        {
+            ["text"] = WrapWithLocalisation(InsetTextValue),
+        };
 
-    var mapped = _mapper.MapEntity(payload);
+        var payload = CreatePayload(fields, InsetTextId);
 
-    Assert.NotNull(mapped);
+        var mapped = _mapper.MapEntity(payload);
 
-    var concrete = mapped as InsetTextDbEntity;
-    Assert.NotNull(concrete);
+        Assert.NotNull(mapped);
 
-    Assert.Equal(InsetTextId, concrete.Id);
-    Assert.Equal(InsetTextValue, concrete.Text);
-  }
+        var concrete = mapped as InsetTextDbEntity;
+        Assert.NotNull(concrete);
+
+        Assert.Equal(InsetTextId, concrete.Id);
+        Assert.Equal(InsetTextValue, concrete.Text);
+    }
 }

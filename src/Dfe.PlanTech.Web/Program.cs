@@ -1,7 +1,6 @@
 using Azure.Identity;
 using Dfe.PlanTech.Application.Helpers;
 using Dfe.PlanTech.Application.Submissions.Queries;
-using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.SignIns;
@@ -77,8 +76,6 @@ builder.Services.AddAuthorization(options =>
     });
 });
 
-builder.Services.AddDbContext<CmsDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Database"),
-                                                        builder => builder.MigrationsAssembly("Dfe.PlanTech.Web")));
 builder.Services.AddContentfulServices(builder.Configuration);
 
 var app = builder.Build();
