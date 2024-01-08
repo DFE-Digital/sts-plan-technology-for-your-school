@@ -115,8 +115,12 @@ public class CmsDbContext : DbContext, ICmsDbContext
               .WithOne(section => section.Category)
               .OnDelete(DeleteBehavior.Restrict);
 
-            entity.Navigation(category => category.Sections)
+            entity.Navigation(category => category.Header)
                   .AutoInclude();
+
+            entity.Navigation(category => category.Sections)
+                    .AutoInclude();
+
 
             entity.ToTable("Categories", Schema);
         });
@@ -199,17 +203,13 @@ public class CmsDbContext : DbContext, ICmsDbContext
     public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
     => Pages.Include(page => page.BeforeTitleContent)
             .Include(page => page.Content)
+            .Include(page => page.Content)
             .Include(page => page.Title)
             .AsSplitQuery()
-            .Where(page => page.Slug == slug)
-            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-
+            .FirstOrDefaultAsync(page => page.Slug == slug, cancellationToken);
 
     public IQueryable<RichTextContentDbEntity> LoadRichTextContentsByParentIds(IEnumerable<long> parentIds)
     {
-        // Declare de Structure filter param
-        var dt = new DataTable();
-
         var table = new DataTable();
         table.Columns.Add(new DataColumn("Id", typeof(long)));
 
@@ -224,21 +224,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         return RichTextContents.FromSqlRaw("SELECT * FROM [Contentful].[SelectAllRichTextContentForParentIds](@ParentIds)", param);
     }
-    public IQueryable<RichTextContentDbEntity> Testing(IEnumerable<long> ids)
-    {
-        return RichTextContents.Where(content => ids.Contains(content.Id))
-         .Select(IncludeChildren(4));
-    }
-
-    public async Task LoadRichTextContentChildren(IEnumerable<TextBodyDbEntity> textBodies)
-    {
-        foreach (var body in textBodies)
-        {
-            await Entry(body).Reference(body => body.RichText).LoadAsync();
-        }
-
-        await LoadRichTextChildren(textBodies.Select(tb => tb.RichText));
-    }
 
     public async Task LoadRichTextChildren(IEnumerable<RichTextContentDbEntity> richTextContent)
     {
@@ -248,23 +233,4 @@ public class CmsDbContext : DbContext, ICmsDbContext
             await LoadRichTextChildren(richText.Content);
         }
     }
-    private static Expression<Func<RichTextContentDbEntity, RichTextContentDbEntity>> IncludeChildren(int maxDepth, int currentDepth = 0)
-    {
-        currentDepth++;
-
-        Expression<Func<RichTextContentDbEntity, RichTextContentDbEntity>> mapper = content => new RichTextContentDbEntity()
-        {
-            Id = content.Id,
-            Value = content.Value,
-            Data = content.Data,
-            Marks = content.Marks,
-            Content = currentDepth == maxDepth ?
-                        new List<RichTextContentDbEntity>() :
-                        content.Content.AsQueryable().Select(IncludeChildren(maxDepth, currentDepth)).ToList()
-        };
-
-        return mapper;
-    }
-
-    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable) => queryable.ToListAsync();
 }

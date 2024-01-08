@@ -6,6 +6,7 @@ using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Microsoft.Extensions.Logging;
 
@@ -39,8 +40,8 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
 
         if (matchingPage == null) return await GetFromContentful(slug, cancellationToken);
 
-        await LoadRichTextContents(matchingPage);
-
+        await LoadRichTextContents(matchingPage, cancellationToken);
+        await LoadCategorySections(matchingPage, cancellationToken);
         var mapped = _mapperConfiguration.Map<PageDbEntity, Page>(matchingPage);
 
         UpdateSectionTitle(mapped);
@@ -65,7 +66,7 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
         }
     }
 
-    private async Task LoadRichTextContents(PageDbEntity page)
+    private async Task LoadRichTextContents(PageDbEntity page, CancellationToken cancellationToken)
     {
         try
         {
@@ -74,7 +75,7 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
                                                 .Select(content => content as IHasRichText)
                                                 .Select(content => content!.RichTextId);
 
-            await _db.ToListAsync(_db.LoadRichTextContentsByParentIds(textBodyContentIds));
+            await _db.ToListAsync(_db.LoadRichTextContentsByParentIds(textBodyContentIds), cancellationToken);
         }
         catch (Exception ex)
         {
@@ -82,6 +83,56 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
             throw;
         }
     }
+
+    private async Task LoadCategorySections(PageDbEntity page, CancellationToken cancellationToken)
+    {
+        var pageHasCategories = page.Content.Any(content => content is CategoryDbEntity);
+
+        if (!pageHasCategories) return;
+
+        var sections = await _db.ToListAsync(GetSectionsForPage(page), cancellationToken);
+
+        var sectionsGroupedByCategory = sections.GroupBy(section => section.CategoryId);
+
+        foreach (var cat in sectionsGroupedByCategory)
+        {
+            var matching = page.Content.Select(content => content as CategoryDbEntity)
+                                        .FirstOrDefault(category => category != null && category.Id == cat.Key);
+
+            if (matching == null)
+            {
+                continue;
+            }
+
+            matching.Sections = cat.ToList();
+        }
+    }
+
+    private IQueryable<SectionDbEntity> GetSectionsForPage(PageDbEntity page)
+   => _db.Sections.Where(section => section.Category != null && section.Category.ContentPages.Any(categoryPage => categoryPage.Slug == page.Slug))
+                .Select(section => new SectionDbEntity()
+                {
+                    CategoryId = section.CategoryId,
+                    Name = section.Name,
+                    Questions = section.Questions.Select(question => new QuestionDbEntity()
+                    {
+                        Slug = question.Slug,
+                        Id = question.Id,
+                    }).ToList(),
+                    Recommendations = section.Recommendations.Select(recommendation => new RecommendationPageDbEntity()
+                    {
+                        Page = new PageDbEntity()
+                        {
+                            Slug = recommendation.Page.Slug
+                        },
+                        Id = recommendation.Id
+                    }).ToList(),
+                    InterstitialPage = section.InterstitialPage == null ? null : new PageDbEntity()
+                    {
+                        Slug = section.InterstitialPage.Slug,
+                        Id = section.InterstitialPage.Id
+                    }
+                });
 
     private async Task<Page> GetFromContentful(string slug, CancellationToken cancellationToken)
     {
