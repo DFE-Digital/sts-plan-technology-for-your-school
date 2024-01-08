@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using System.Text;
@@ -13,7 +14,7 @@ public class FooterLinkTagHelper : TagHelper
     public const string FOOTER_CLASS = "\"govuk-footer__link\"";
     private readonly ILogger<FooterLinkTagHelper> _logger;
 
-    public NavigationLink? Link { get; set; }
+    public INavigationLink? Link { get; set; }
 
     public FooterLinkTagHelper(ILogger<FooterLinkTagHelper> logger)
     {
