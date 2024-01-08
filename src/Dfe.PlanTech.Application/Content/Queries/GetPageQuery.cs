@@ -201,6 +201,11 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
         }
     }
 
+    /// <summary>
+    /// Quer to get <see cref="ButtonWithEntryReferenceDbEntity">s for the given page, but with only necessary information we require
+    /// </summary>
+    /// <param name="page"></param>
+    /// <returns></returns>
     private IQueryable<ButtonWithEntryReferenceDbEntity> GetButtonWithEntryReferencesQuery(PageDbEntity page)
     => _db.ButtonWithEntryReferences.Where(button => button.ContentPages.Any(contentPage => contentPage.Id == page.Id))
                                                         .Select(button => new ButtonWithEntryReferenceDbEntity()
@@ -211,6 +216,12 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
                                                                 Slug = ((IHasSlug)button.LinkToEntry).Slug
                                                             } : null
                                                         });
+
+    /// <summary>
+    /// Quer to get <see cref="SectionDbEntity">s for the given page, but with only necessary information we require
+    /// </summary>
+    /// <param name="page"></param>
+    /// <returns></returns>
     private IQueryable<SectionDbEntity> GetSectionsForPageQuery(PageDbEntity page)
     => _db.Sections.Where(section => section.Category != null && section.Category.ContentPages.Any(categoryPage => categoryPage.Slug == page.Slug))
                 .Select(section => new SectionDbEntity()
