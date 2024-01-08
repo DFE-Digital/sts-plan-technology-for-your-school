@@ -17,6 +17,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Content.Queries;
 
 public class GetPageQueryTests
 {
+    private const string TEST_PAGE_SLUG = "test-page-slug";
     private const string SECTION_SLUG = "SectionSlugTest";
     private const string SECTION_TITLE = "SectionTitleTest";
     private const string LANDING_PAGE_SLUG = "LandingPage";
@@ -43,7 +44,14 @@ public class GetPageQueryTests
             DisplayTopicTitle = true,
             DisplayHomeButton= false,
             DisplayBackButton = false,
-        }
+        },
+        new Page(){
+            Slug = TEST_PAGE_SLUG,
+            Sys = new() {
+                Id = "test-page-id"
+            }
+        },
+
     };
 
     private readonly List<PageDbEntity> _pagesFromDb = new() {
@@ -52,6 +60,10 @@ public class GetPageQueryTests
             Content = new(){
                 new HeaderDbEntity()
             }
+        },
+        new PageDbEntity(){
+            Slug = TEST_PAGE_SLUG,
+            Id = "test-page-id"
         },
         new PageDbEntity(){
             Slug = LANDING_PAGE_SLUG,
@@ -440,6 +452,33 @@ public class GetPageQueryTests
         await _repoSubstitute.ReceivedWithAnyArgs(1).GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>());
         await _cmsDbSubstitute.ReceivedWithAnyArgs(1).GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
+
+
+    [Fact]
+    public async Task Should_Retrieve_Page_By_Slug_From_Contentful_When_Db_Page_Has_No_Content()
+    {
+
+        Environment.SetEnvironmentVariable("CONTENTFUL_GET_ENTITY_INT", "4");
+
+        GetPageQuery query = CreateGetPageQuery();
+
+        _cmsDbSubstitute.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                        .Returns(callinfo =>
+                        {
+                            var slug = callinfo.ArgAt<string>(0);
+
+                            return _cmsDbSubstitute.Pages.FirstOrDefault(page => string.Equals(page.Slug, slug));
+                        });
+
+        var result = await query.GetPageBySlug(TEST_PAGE_SLUG);
+
+        Assert.NotNull(result);
+        Assert.Equal(TEST_PAGE_SLUG, result.Slug);
+
+        await _repoSubstitute.ReceivedWithAnyArgs(1).GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>());
+        await _cmsDbSubstitute.ReceivedWithAnyArgs(1).GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>());
+    }
+
 
     [Fact]
     public async Task Should_ThrowException_When_SlugNotFound()
