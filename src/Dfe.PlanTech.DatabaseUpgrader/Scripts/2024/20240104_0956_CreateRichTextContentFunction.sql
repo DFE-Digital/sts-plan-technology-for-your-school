@@ -14,5 +14,5 @@ RETURNS TABLE AS RETURN (
     ON c.ParentId = t.Id 
   )
   
-  SELECT * FROM cte
+  SELECT SELECT [Id], [Value], [NodeType], [DataId], [ParentId] FROM cte
 )
