@@ -6,6 +6,7 @@ using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Microsoft.Extensions.Logging;
@@ -38,17 +39,51 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
     {
         var matchingPage = await GetPageFromDatabase(slug, cancellationToken);
 
-        if (matchingPage == null) return await GetFromContentful(slug, cancellationToken);
+        if (!IsValidPage(matchingPage, slug))
+        {
+            return await GetPageFromContentful(slug, cancellationToken);
+        }
 
-        await LoadRichTextContents(matchingPage, cancellationToken);
-        await LoadCategorySections(matchingPage, cancellationToken);
-        var mapped = _mapperConfiguration.Map<PageDbEntity, Page>(matchingPage);
+        await TryLoadButtonReferences(matchingPage!, cancellationToken);
+        await TryLoadCategorySections(matchingPage!, cancellationToken);
+        await TryLoadRichTextContents(matchingPage!, cancellationToken);
+
+        var mapped = _mapperConfiguration.Map<PageDbEntity, Page>(matchingPage!);
 
         UpdateSectionTitle(mapped);
 
         return mapped;
     }
 
+    /// <summary>
+    /// Checks the retrieved Page from the DB to ensure it is valid (e.g. not null, has content). If not, logs message and returns false.
+    /// </summary>
+    /// <param name="page"></param>
+    /// <param name="slug"></param>
+    /// <returns></returns>
+    private bool IsValidPage(PageDbEntity? page, string slug)
+    {
+        if (page == null)
+        {
+            _logger.LogInformation("Could not find page {slug} in DB - checking Contentful", slug);
+            return false;
+        }
+
+        if (page.Content == null || page.Content.Count == 0)
+        {
+            _logger.LogWarning("Page {slug} has no 'Content' in DB - checking Contentful", slug);
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Retrieve the page for the slug from the database
+    /// </summary>
+    /// <param name="slug"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     private async Task<PageDbEntity?> GetPageFromDatabase(string slug, CancellationToken cancellationToken)
     {
         try
@@ -66,14 +101,23 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
         }
     }
 
-    private async Task LoadRichTextContents(PageDbEntity page, CancellationToken cancellationToken)
+    /// <summary>
+    /// Load RichTextContents for page from database 
+    /// </summary>
+    /// <param name="page"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    private async Task TryLoadRichTextContents(PageDbEntity page, CancellationToken cancellationToken)
     {
         try
         {
             var textBodyContentIds = page.Content.Concat(page.BeforeTitleContent)
                                                 .Where(content => content is IHasRichText)
                                                 .Select(content => content as IHasRichText)
-                                                .Select(content => content!.RichTextId);
+                                                .Select(content => content!.RichTextId)
+                                                .ToArray();
+
+            if (textBodyContentIds.Length == 0) return;
 
             await _db.ToListAsync(_db.LoadRichTextContentsByParentIds(textBodyContentIds), cancellationToken);
         }
@@ -84,14 +128,38 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
         }
     }
 
-    private async Task LoadCategorySections(PageDbEntity page, CancellationToken cancellationToken)
+    /// <summary>
+    /// If tbere are any "Category" components in the Page.Content, then load the required Section information for each one.
+    /// </summary>
+    /// <param name="page"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    private async Task TryLoadCategorySections(PageDbEntity page, CancellationToken cancellationToken)
     {
-        var pageHasCategories = page.Content.Any(content => content is CategoryDbEntity);
+        try
+        {
+            var pageHasCategories = page.Content.Any(content => content is CategoryDbEntity);
 
-        if (!pageHasCategories) return;
+            if (!pageHasCategories) return;
 
-        var sections = await _db.ToListAsync(GetSectionsForPage(page), cancellationToken);
+            var sections = await _db.ToListAsync(GetSectionsForPageQuery(page), cancellationToken);
 
+            CopySectionsToPage(page, sections);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching categories for {page}", page.Id);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Copies the retrieved Sections from the database over the corresponding Category's section
+    /// </summary>
+    /// <param name="page">Page that contains categories</param>
+    /// <param name="sections">"Complete" section from database</param>
+    private static void CopySectionsToPage(PageDbEntity page, List<SectionDbEntity> sections)
+    {
         var sectionsGroupedByCategory = sections.GroupBy(section => section.CategoryId);
 
         foreach (var cat in sectionsGroupedByCategory)
@@ -108,11 +176,47 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
         }
     }
 
-    private IQueryable<SectionDbEntity> GetSectionsForPage(PageDbEntity page)
-   => _db.Sections.Where(section => section.Category != null && section.Category.ContentPages.Any(categoryPage => categoryPage.Slug == page.Slug))
+    /// <summary>
+    /// If the Page.Content has any <see cref="ButtonWithEntryReferenceDbEntity"/>s, load the link to entry reference from the database for it
+    /// </summary>
+    /// <param name="page"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public async Task TryLoadButtonReferences(PageDbEntity page, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var buttons = page.Content.Any(content => content is ButtonWithEntryReferenceDbEntity button);
+
+            if (!buttons) return;
+
+            var buttonQuery = GetButtonWithEntryReferencesQuery(page);
+
+            await _db.ToListAsync(buttonQuery, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading button references for {page}", page.Id);
+            throw;
+        }
+    }
+
+    private IQueryable<ButtonWithEntryReferenceDbEntity> GetButtonWithEntryReferencesQuery(PageDbEntity page)
+    => _db.ButtonWithEntryReferences.Where(button => button.ContentPages.Any(contentPage => contentPage.Id == page.Id))
+                                                        .Select(button => new ButtonWithEntryReferenceDbEntity()
+                                                        {
+                                                            Id = button.Id,
+                                                            LinkToEntry = (IHasSlug)button.LinkToEntry != null ? new PageDbEntity()
+                                                            {
+                                                                Slug = ((IHasSlug)button.LinkToEntry).Slug
+                                                            } : null
+                                                        });
+    private IQueryable<SectionDbEntity> GetSectionsForPageQuery(PageDbEntity page)
+    => _db.Sections.Where(section => section.Category != null && section.Category.ContentPages.Any(categoryPage => categoryPage.Slug == page.Slug))
                 .Select(section => new SectionDbEntity()
                 {
                     CategoryId = section.CategoryId,
+                    Id = section.Id,
                     Name = section.Name,
                     Questions = section.Questions.Select(question => new QuestionDbEntity()
                     {
@@ -121,11 +225,12 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
                     }).ToList(),
                     Recommendations = section.Recommendations.Select(recommendation => new RecommendationPageDbEntity()
                     {
+                        DisplayName = recommendation.DisplayName,
+                        Maturity = recommendation.Maturity,
                         Page = new PageDbEntity()
                         {
                             Slug = recommendation.Page.Slug
-                        },
-                        Id = recommendation.Id
+                        }
                     }).ToList(),
                     InterstitialPage = section.InterstitialPage == null ? null : new PageDbEntity()
                     {
@@ -134,7 +239,16 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
                     }
                 });
 
-    private async Task<Page> GetFromContentful(string slug, CancellationToken cancellationToken)
+    /// <summary>
+    /// Retrieves the page for the given slug from Contentful
+    /// </summary>
+    /// <param name="slug"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    /// <exception cref="FormatException"></exception>
+    /// <exception cref="KeyNotFoundException"></exception>
+    /// <exception cref="ContentfulDataUnavailableException"></exception>
+    private async Task<Page> GetPageFromContentful(string slug, CancellationToken cancellationToken)
     {
         if (!int.TryParse(_getEntityEnvVariable, out int getEntityValue))
         {

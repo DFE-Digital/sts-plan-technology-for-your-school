@@ -3,7 +3,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Domain.Content.Models;
 
-public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEntity, TitleDbEntity>
+public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEntity, TitleDbEntity>, IHasSlug
 {
     public string InternalName { get; set; } = null!;
 

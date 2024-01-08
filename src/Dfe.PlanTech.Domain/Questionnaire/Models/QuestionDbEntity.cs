@@ -1,9 +1,10 @@
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-public class QuestionDbEntity : ContentComponentDbEntity, IQuestion<AnswerDbEntity>
+public class QuestionDbEntity : ContentComponentDbEntity, IQuestion<AnswerDbEntity>, IHasSlug
 {
     public string Text { get; set; } = null!;
 
