@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Application.Caching.Interfaces;
+﻿using AutoMapper;
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -19,6 +20,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 {
     public class CookieControllerTests
     {
+        private readonly ICmsDbContext _db = Substitute.For<ICmsDbContext>();
+        private readonly ILogger<GetPageQuery> _getPageLogger = Substitute.For<ILogger<GetPageQuery>>();
+        private readonly IMapper _mapper = Substitute.For<IMapper>();
+
         private readonly Page[] _pages = new Page[]
         {
             new Page()
@@ -128,7 +133,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             IQuestionnaireCacher questionnaireCacherSubstitute = Substitute.For<IQuestionnaireCacher>();
             IContentRepository contentRepositorySubstitute = SetupRepositorySubstitute();
-            GetPageQuery _getPageQuerySubstitute = Substitute.For<GetPageQuery>(questionnaireCacherSubstitute, contentRepositorySubstitute);
+            GetPageQuery _getPageQuerySubstitute = Substitute.For<GetPageQuery>(_db, _getPageLogger, _mapper, questionnaireCacherSubstitute, contentRepositorySubstitute);
 
             CookiesController cookiesController = CreateStrut();
             var result = await cookiesController.GetCookiesPage(_getPageQuerySubstitute);
