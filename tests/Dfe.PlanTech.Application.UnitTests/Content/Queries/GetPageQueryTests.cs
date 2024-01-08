@@ -457,7 +457,6 @@ public class GetPageQueryTests
     [Fact]
     public async Task Should_Retrieve_Page_By_Slug_From_Contentful_When_Db_Page_Has_No_Content()
     {
-
         Environment.SetEnvironmentVariable("CONTENTFUL_GET_ENTITY_INT", "4");
 
         GetPageQuery query = CreateGetPageQuery();
