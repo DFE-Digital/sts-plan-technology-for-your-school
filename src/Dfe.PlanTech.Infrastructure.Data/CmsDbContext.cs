@@ -197,7 +197,9 @@ public class CmsDbContext : DbContext, ICmsDbContext
     => queryable.ToListAsync(cancellationToken: cancellationToken);
 
     public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
-    => Pages.Include(page => page.Content)
+    => Pages.Include(page => page.BeforeTitleContent)
+            .Include(page => page.Content)
+            .Include(page => page.Title)
             .AsSplitQuery()
             .Where(page => page.Slug == slug)
             .FirstOrDefaultAsync(cancellationToken: cancellationToken);

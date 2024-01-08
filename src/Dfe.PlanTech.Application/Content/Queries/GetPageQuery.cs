@@ -69,7 +69,8 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
     {
         try
         {
-            var textBodyContentIds = page.Content.Where(content => content is IHasRichText)
+            var textBodyContentIds = page.Content.Concat(page.BeforeTitleContent)
+                                                .Where(content => content is IHasRichText)
                                                 .Select(content => content as IHasRichText)
                                                 .Select(content => content!.RichTextId);
 

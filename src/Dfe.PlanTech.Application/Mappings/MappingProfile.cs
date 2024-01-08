@@ -36,6 +36,7 @@ public class CmsMappingProfile : Profile
         CreateMap<RichTextDataDbEntity, RichTextData>();
         CreateMap<RichTextMarkDbEntity, RichTextMark>();
 
+        CreateMap<TitleDbEntity, Title>();
         CreateMap<WarningComponentDbEntity, WarningComponent>();
     }
 }
