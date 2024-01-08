@@ -79,8 +79,6 @@ builder.Services.AddAuthorization(options =>
     });
 });
 
-builder.Services.AddDbContext<CmsDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Database"),
-                                                        builder => builder.MigrationsAssembly("Dfe.PlanTech.Web")));
 builder.Services.AddContentfulServices(builder.Configuration);
 
 var app = builder.Build();

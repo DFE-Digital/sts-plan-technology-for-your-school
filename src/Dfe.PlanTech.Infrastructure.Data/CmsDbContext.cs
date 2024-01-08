@@ -263,4 +263,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         return mapper;
     }
+
+    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable) => queryable.ToListAsync();
 }
