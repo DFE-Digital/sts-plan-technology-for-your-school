@@ -71,7 +71,7 @@ public class GetPageQueryTests
                             return queryable.ToList();
                         });
 
-        _mapperSubstitute.Map<Page>(Arg.Any<PageDbEntity>())
+        _mapperSubstitute.Map<PageDbEntity, Page>(Arg.Any<PageDbEntity>())
                         .Returns(callinfo =>
                         {
                             var page = callinfo.ArgAt<PageDbEntity>(0);
@@ -131,6 +131,13 @@ public class GetPageQueryTests
         GetPageQuery query = CreateGetPageQuery();
 
         _cmsDbSubstitute.Pages.Returns(_pagesFromDb.AsQueryable());
+        _cmsDbSubstitute.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                        .Returns(callinfo =>
+                        {
+                            var slug = callinfo.ArgAt<string>(0);
+
+                            return _cmsDbSubstitute.Pages.FirstOrDefault(page => string.Equals(page.Slug, slug));
+                        });
 
         var result = await query.GetPageBySlug(LANDING_PAGE_SLUG);
 
@@ -138,12 +145,14 @@ public class GetPageQueryTests
         Assert.Equal(LANDING_PAGE_SLUG, result.Slug);
 
         await _repoSubstitute.ReceivedWithAnyArgs(0).GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>());
-        await _cmsDbSubstitute.ReceivedWithAnyArgs(1).ToListAsync(Arg.Any<IQueryable<PageDbEntity>>());
+        await _cmsDbSubstitute.ReceivedWithAnyArgs(1).GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task Should_Retrieve_Page_By_Slug_From_Contentful_When_Db_Page_Not_Found()
     {
+        Environment.SetEnvironmentVariable("CONTENTFUL_GET_ENTITY_INT", "4");
+
         GetPageQuery query = CreateGetPageQuery();
 
         var emptyList = new List<PageDbEntity>(0);
@@ -155,7 +164,7 @@ public class GetPageQueryTests
         Assert.Equal(LANDING_PAGE_SLUG, result.Slug);
 
         await _repoSubstitute.ReceivedWithAnyArgs(1).GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>());
-        await _cmsDbSubstitute.Received(1).ToListAsync(Arg.Any<IQueryable<PageDbEntity>>());
+        await _cmsDbSubstitute.ReceivedWithAnyArgs(1).GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -197,7 +206,7 @@ public class GetPageQueryTests
 
         var query = CreateGetPageQuery();
 
-        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(async () => await query.GetPageBySlug(SECTION_SLUG));
+        await Assert.ThrowsAsync<FormatException>(async () => await query.GetPageBySlug(SECTION_SLUG));
     }
 
 }
