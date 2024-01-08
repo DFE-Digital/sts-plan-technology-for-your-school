@@ -18,6 +18,7 @@ public class CmsMappingProfile : Profile
         .Include<ButtonWithLinkDbEntity, ButtonWithLink>()
         .Include<CategoryDbEntity, Category>()
         .Include<HeaderDbEntity, Header>()
+        .Include<InsetTextDbEntity, InsetText>()
         .Include<QuestionDbEntity, Question>()
         .Include<RecommendationPageDbEntity, RecommendationPage>()
         .Include<SectionDbEntity, Section>()
@@ -34,6 +35,7 @@ public class CmsMappingProfile : Profile
         CreateMap<ButtonWithLinkDbEntity, ButtonWithLink>();
         CreateMap<CategoryDbEntity, Category>();
         CreateMap<HeaderDbEntity, Header>();
+        CreateMap<InsetTextDbEntity, InsetText>();
         CreateMap<QuestionDbEntity, Question>();
         CreateMap<RecommendationPageDbEntity, RecommendationPage>();
         CreateMap<SectionDbEntity, Section>();
