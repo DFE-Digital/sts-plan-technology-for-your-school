@@ -30,9 +30,17 @@
 ### Mapping
 
 - Uses AutoMapper
+
 ### Read navigation links
 
 ### Read page
+
+- Read page with content
+- Most navigations autoincluded
+- Some navigations left manually:
+  - RichTextContent: was causing cyclical queries
+  - ButtonWithEntryReference: need the LinkToEntry field but not ideal to autoinclude that entire piece. Done manually to minimise query
+  - Sections: Requires loading specific pieces of data for questions + recommendations. Not ideal to load all of it so loaded manually
 
 ## Caching
 
