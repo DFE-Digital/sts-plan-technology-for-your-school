@@ -7,43 +7,43 @@ namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
 public class NavigationLinkMapperTests : BaseMapperTests
 {
-  private const string DisplayText = "Nav link text goes here";
-  private const string Href = "www.testing.com";
-  private const string NavigationLinkId = "Nav link Id";
+    private const string DisplayText = "Nav link text goes here";
+    private const string Href = "www.testing.com";
+    private const string NavigationLinkId = "Nav link Id";
 
-  private readonly NavigationLinkMapper _mapper;
-  private readonly ILogger<NavigationLinkMapper> _logger;
+    private readonly NavigationLinkMapper _mapper;
+    private readonly ILogger<NavigationLinkMapper> _logger;
 
-  public NavigationLinkMapperTests()
-  {
-    _logger = Substitute.For<ILogger<NavigationLinkMapper>>();
-    _mapper = new NavigationLinkMapper(_logger, JsonOptions);
-  }
-
-  [Theory]
-  [InlineData(true)]
-  [InlineData(false)]
-  public void Mapper_Should_Map_NavigationLink(bool openInNewTab)
-  {
-    var fields = new Dictionary<string, object?>()
+    public NavigationLinkMapperTests()
     {
-      ["openInNewTab"] = WrapWithLocalisation(openInNewTab),
-      ["displayText"] = WrapWithLocalisation(DisplayText),
-      ["href"] = WrapWithLocalisation(Href),
-    };
+        _logger = Substitute.For<ILogger<NavigationLinkMapper>>();
+        _mapper = new NavigationLinkMapper(_logger, JsonOptions);
+    }
 
-    var payload = CreatePayload(fields, NavigationLinkId);
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Mapper_Should_Map_NavigationLink(bool openInNewTab)
+    {
+        var fields = new Dictionary<string, object?>()
+        {
+            ["openInNewTab"] = WrapWithLocalisation(openInNewTab),
+            ["displayText"] = WrapWithLocalisation(DisplayText),
+            ["href"] = WrapWithLocalisation(Href),
+        };
 
-    var mapped = _mapper.MapEntity(payload);
+        var payload = CreatePayload(fields, NavigationLinkId);
 
-    Assert.NotNull(mapped);
+        var mapped = _mapper.MapEntity(payload);
 
-    var concrete = mapped as NavigationLinkDbEntity;
-    Assert.NotNull(concrete);
+        Assert.NotNull(mapped);
 
-    Assert.Equal(NavigationLinkId, concrete.Id);
-    Assert.Equal(DisplayText, concrete.DisplayText);
-    Assert.Equal(Href, concrete.Href);
-    Assert.Equal(openInNewTab, concrete.OpenInNewTab);
-  }
+        var concrete = mapped as NavigationLinkDbEntity;
+        Assert.NotNull(concrete);
+
+        Assert.Equal(NavigationLinkId, concrete.Id);
+        Assert.Equal(DisplayText, concrete.DisplayText);
+        Assert.Equal(Href, concrete.Href);
+        Assert.Equal(openInNewTab, concrete.OpenInNewTab);
+    }
 }

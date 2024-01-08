@@ -9,7 +9,7 @@ public interface IWarningComponent
 }
 
 
-public interface IWarningComponent<TTextBody> : IWarningComponent
+public interface IWarningComponent<out TTextBody> : IWarningComponent
 where TTextBody : ITextBody
 {
     /// <summary>

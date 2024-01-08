@@ -9,50 +9,50 @@ namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
 public class RecommendationPageMapperTests : BaseMapperTests
 {
-  private const string RecommendationId = "Recommendation Id 1234";
-  private const string DisplayName = "Recommendation page display name";
-  private const string InternalName = "Recommendation page internal name";
-  private const Maturity RecommendationMaturity = Maturity.Medium;
-  private readonly CmsWebHookSystemDetailsInnerContainer Page = new()
-  {
-    Sys = new()
+    private const string RecommendationId = "Recommendation Id 1234";
+    private const string DisplayName = "Recommendation page display name";
+    private const string InternalName = "Recommendation page internal name";
+    private const Maturity RecommendationMaturity = Maturity.Medium;
+    private readonly CmsWebHookSystemDetailsInnerContainer Page = new()
     {
-      Id = "Page Reference Id"
-    }
-  };
-
-  private readonly RecommendationPageMapper _mapper;
-  private readonly ILogger<RecommendationPageMapper> _logger;
-
-  public RecommendationPageMapperTests()
-  {
-    _logger = Substitute.For<ILogger<RecommendationPageMapper>>();
-    _mapper = new RecommendationPageMapper(_logger, JsonOptions);
-  }
-
-  [Fact]
-  public void Mapper_Should_Map_Relationship()
-  {
-    var fields = new Dictionary<string, object?>()
-    {
-      ["displayName"] = WrapWithLocalisation(DisplayName),
-      ["internalName"] = WrapWithLocalisation(InternalName),
-      ["maturity"] = WrapWithLocalisation(RecommendationMaturity),
-      ["page"] = WrapWithLocalisation(Page),
+        Sys = new()
+        {
+            Id = "Page Reference Id"
+        }
     };
 
-    var payload = CreatePayload(fields, RecommendationId);
+    private readonly RecommendationPageMapper _mapper;
+    private readonly ILogger<RecommendationPageMapper> _logger;
 
-    var mapped = _mapper.MapEntity(payload);
+    public RecommendationPageMapperTests()
+    {
+        _logger = Substitute.For<ILogger<RecommendationPageMapper>>();
+        _mapper = new RecommendationPageMapper(_logger, JsonOptions);
+    }
 
-    Assert.NotNull(mapped);
+    [Fact]
+    public void Mapper_Should_Map_Relationship()
+    {
+        var fields = new Dictionary<string, object?>()
+        {
+            ["displayName"] = WrapWithLocalisation(DisplayName),
+            ["internalName"] = WrapWithLocalisation(InternalName),
+            ["maturity"] = WrapWithLocalisation(RecommendationMaturity),
+            ["page"] = WrapWithLocalisation(Page),
+        };
 
-    var concrete = mapped as RecommendationPageDbEntity;
-    Assert.NotNull(concrete);
+        var payload = CreatePayload(fields, RecommendationId);
 
-    Assert.Equal(RecommendationId, concrete.Id);
-    Assert.Equal(DisplayName, concrete.DisplayName);
-    Assert.Equal(InternalName, concrete.InternalName);
-    Assert.Equal(Page.Sys.Id, concrete.PageId);
-  }
+        var mapped = _mapper.MapEntity(payload);
+
+        Assert.NotNull(mapped);
+
+        var concrete = mapped as RecommendationPageDbEntity;
+        Assert.NotNull(concrete);
+
+        Assert.Equal(RecommendationId, concrete.Id);
+        Assert.Equal(DisplayName, concrete.DisplayName);
+        Assert.Equal(InternalName, concrete.InternalName);
+        Assert.Equal(Page.Sys.Id, concrete.PageId);
+    }
 }
