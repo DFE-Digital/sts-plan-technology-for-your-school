@@ -16,7 +16,7 @@ public interface ISection
 /// <summary>
 /// A subsection of a <see chref="ICategory"/>
 /// </summary>
-public interface ISection<TQuestion, TPage, TRecommendationPage> : ISection
+public interface ISection<TQuestion, out TPage, TRecommendationPage> : ISection
 where TQuestion : IQuestion
 where TPage : IPage
 where TRecommendationPage : IRecommendationPage

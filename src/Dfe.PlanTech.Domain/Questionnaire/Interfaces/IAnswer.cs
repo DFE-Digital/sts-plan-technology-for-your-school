@@ -8,7 +8,7 @@ public interface IAnswer
 }
 
 
-public interface IAnswer<TQuestion> : IAnswer
+public interface IAnswer<out TQuestion> : IAnswer
 where TQuestion : IQuestion
 {
     public TQuestion? NextQuestion { get; }

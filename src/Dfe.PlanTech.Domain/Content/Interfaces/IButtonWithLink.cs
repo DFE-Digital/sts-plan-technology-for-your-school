@@ -11,7 +11,7 @@ public interface IButtonWithLink
     public string Href { get; }
 }
 
-public interface IButtonWithLink<TButton> : IButtonWithLink
+public interface IButtonWithLink<out TButton> : IButtonWithLink
 where TButton : IButton
 {
     public TButton Button { get; }

@@ -1,7 +1,6 @@
 ﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;

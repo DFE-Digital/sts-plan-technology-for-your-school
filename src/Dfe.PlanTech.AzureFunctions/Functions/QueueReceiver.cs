@@ -1,4 +1,3 @@
-using System.Text;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.AzureFunctions.Mappings;
 using Dfe.PlanTech.Domain.Caching.Exceptions;
@@ -6,6 +5,7 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
+using System.Text;
 
 namespace Dfe.PlanTech.AzureFunctions
 {

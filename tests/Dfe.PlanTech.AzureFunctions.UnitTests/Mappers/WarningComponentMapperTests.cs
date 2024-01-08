@@ -8,36 +8,36 @@ namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
 public class WarningComponentMapperTests : BaseMapperTests
 {
-  private readonly CmsWebHookSystemDetailsInnerContainer WarningComponentText = new() { Sys = new() { Id = "Text Id" } };
-  private const string WarningComponentId = "Warning component Id";
+    private readonly CmsWebHookSystemDetailsInnerContainer WarningComponentText = new() { Sys = new() { Id = "Text Id" } };
+    private const string WarningComponentId = "Warning component Id";
 
-  private readonly WarningComponentMapper _mapper;
-  private readonly ILogger<WarningComponentMapper> _logger;
+    private readonly WarningComponentMapper _mapper;
+    private readonly ILogger<WarningComponentMapper> _logger;
 
-  public WarningComponentMapperTests()
-  {
-    _logger = Substitute.For<ILogger<WarningComponentMapper>>();
-    _mapper = new WarningComponentMapper(_logger, JsonOptions);
-  }
-
-  [Fact]
-  public void Mapper_Should_Map_WarningComponent()
-  {
-    var fields = new Dictionary<string, object?>()
+    public WarningComponentMapperTests()
     {
-      ["text"] = WrapWithLocalisation(WarningComponentText),
-    };
+        _logger = Substitute.For<ILogger<WarningComponentMapper>>();
+        _mapper = new WarningComponentMapper(_logger, JsonOptions);
+    }
 
-    var payload = CreatePayload(fields, WarningComponentId);
+    [Fact]
+    public void Mapper_Should_Map_WarningComponent()
+    {
+        var fields = new Dictionary<string, object?>()
+        {
+            ["text"] = WrapWithLocalisation(WarningComponentText),
+        };
 
-    var mapped = _mapper.MapEntity(payload);
+        var payload = CreatePayload(fields, WarningComponentId);
 
-    Assert.NotNull(mapped);
+        var mapped = _mapper.MapEntity(payload);
 
-    var concrete = mapped as WarningComponentDbEntity;
-    Assert.NotNull(concrete);
+        Assert.NotNull(mapped);
 
-    Assert.Equal(WarningComponentId, concrete.Id);
-    Assert.Equal(WarningComponentText.Sys.Id, concrete.TextId);
-  }
+        var concrete = mapped as WarningComponentDbEntity;
+        Assert.NotNull(concrete);
+
+        Assert.Equal(WarningComponentId, concrete.Id);
+        Assert.Equal(WarningComponentText.Sys.Id, concrete.TextId);
+    }
 }

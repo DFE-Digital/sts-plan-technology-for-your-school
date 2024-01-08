@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Content.Models;
