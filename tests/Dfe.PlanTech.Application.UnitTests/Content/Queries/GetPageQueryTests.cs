@@ -152,7 +152,7 @@ public class GetPageQueryTests
             }
     };
 
-    public static PageDbEntity _pageWithRichTextContent = new()
+    private static PageDbEntity _pageWithRichTextContent = new()
     {
         Slug = "rich_text_content",
         Content = new()

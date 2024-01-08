@@ -222,7 +222,7 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
     /// <param name="page"></param>
     /// <returns></returns>
     private IQueryable<SectionDbEntity> GetSectionsForPageQuery(PageDbEntity page)
-    => _db.Sections.Where(section => section.Category != null && section.Category.ContentPages.Exists(categoryPage => categoryPage.Slug == page.Slug))
+    => _db.Sections.Where(section => section.Category != null && section.Category.ContentPages.Any(categoryPage => categoryPage.Slug == page.Slug))
                 .Select(section => new SectionDbEntity()
                 {
                     CategoryId = section.CategoryId,
