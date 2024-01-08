@@ -112,8 +112,7 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
         try
         {
             var textBodyContentIds = page.Content.Concat(page.BeforeTitleContent)
-                                                .Where(content => content is IHasRichText)
-                                                .Select(content => content as IHasRichText)
+                                                .OfType<IHasRichText>()
                                                 .Select(content => content!.RichTextId)
                                                 .ToArray();
 
@@ -138,7 +137,7 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
     {
         try
         {
-            var pageHasCategories = page.Content.Any(content => content is CategoryDbEntity);
+            var pageHasCategories = page.Content.Exists(content => content is CategoryDbEntity);
 
             if (!pageHasCategories) return;
 
@@ -164,7 +163,7 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
 
         foreach (var cat in sectionsGroupedByCategory)
         {
-            var matching = page.Content.Select(content => content as CategoryDbEntity)
+            var matching = page.Content.OfType<CategoryDbEntity>()
                                         .FirstOrDefault(category => category != null && category.Id == cat.Key);
 
             if (matching == null)
@@ -186,7 +185,7 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
     {
         try
         {
-            var buttons = page.Content.Any(content => content is ButtonWithEntryReferenceDbEntity button);
+            var buttons = page.Content.Exists(content => content is ButtonWithEntryReferenceDbEntity);
 
             if (!buttons) return;
 
@@ -208,14 +207,14 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
     /// <returns></returns>
     private IQueryable<ButtonWithEntryReferenceDbEntity> GetButtonWithEntryReferencesQuery(PageDbEntity page)
     => _db.ButtonWithEntryReferences.Where(button => button.ContentPages.Any(contentPage => contentPage.Id == page.Id))
-                                                        .Select(button => new ButtonWithEntryReferenceDbEntity()
-                                                        {
-                                                            Id = button.Id,
-                                                            LinkToEntry = (IHasSlug)button.LinkToEntry != null ? new PageDbEntity()
-                                                            {
-                                                                Slug = ((IHasSlug)button.LinkToEntry).Slug
-                                                            } : null
-                                                        });
+                                    .Select(button => new ButtonWithEntryReferenceDbEntity()
+                                    {
+                                        Id = button.Id,
+                                        LinkToEntry = (IHasSlug)button.LinkToEntry != null ? new PageDbEntity()
+                                        {
+                                            Slug = ((IHasSlug)button.LinkToEntry).Slug
+                                        } : null
+                                    });
 
     /// <summary>
     /// Quer to get <see cref="SectionDbEntity">s for the given page, but with only necessary information we require
@@ -223,7 +222,7 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
     /// <param name="page"></param>
     /// <returns></returns>
     private IQueryable<SectionDbEntity> GetSectionsForPageQuery(PageDbEntity page)
-    => _db.Sections.Where(section => section.Category != null && section.Category.ContentPages.Any(categoryPage => categoryPage.Slug == page.Slug))
+    => _db.Sections.Where(section => section.Category != null && section.Category.ContentPages.Exists(categoryPage => categoryPage.Slug == page.Slug))
                 .Select(section => new SectionDbEntity()
                 {
                     CategoryId = section.CategoryId,
