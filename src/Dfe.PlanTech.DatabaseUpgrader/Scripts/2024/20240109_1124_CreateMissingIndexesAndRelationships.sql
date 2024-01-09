@@ -37,12 +37,6 @@ GO
 CREATE INDEX [IX_NavigationLink_Id] ON [Contentful].[NavigationLink] ([Id]);
 GO
 
--- Titles
-ALTER TABLE [Contentful].[Titles]
-ADD CONSTRAINT [FK_Titles_ContentComponents_Id]
-FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE CASCADE;
-GO
-
 -- RichTextContents
 ALTER TABLE [Contentful].[RichTextContents]
 ADD CONSTRAINT [FK_RichTextContents_ContentComponents_Id]
