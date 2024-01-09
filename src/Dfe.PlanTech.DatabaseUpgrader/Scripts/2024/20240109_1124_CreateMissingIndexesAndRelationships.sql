@@ -30,11 +30,5 @@ ADD CONSTRAINT [FK_NavigationLink_ContentComponents_Id]
 FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE CASCADE;
 GO
 
--- Warnings
-ALTER TABLE [Contentful].[Warnings]
-ADD CONSTRAINT [FK_Warnings_ContentComponents_Id]
-FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE CASCADE;
-GO
-
 COMMIT;
 GO
