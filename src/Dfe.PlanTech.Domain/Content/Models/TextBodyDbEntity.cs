@@ -7,9 +7,11 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 /// Model for TextBody content type table
 /// </summary>
 /// <inheritdoc/>
-public class TextBodyDbEntity : ContentComponentDbEntity, ITextBody<RichTextContentDbEntity>
+public class TextBodyDbEntity : ContentComponentDbEntity, ITextBody<RichTextContentDbEntity>, IHasRichText
 {
     public RichTextContentDbEntity RichText { get; set; } = null!;
+
+    public long RichTextId { get; set; }
 
     public List<WarningComponentDbEntity> Warnings { get; set; } = new();
 }
