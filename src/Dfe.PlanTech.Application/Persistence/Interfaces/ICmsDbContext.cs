@@ -34,6 +34,10 @@ public interface ICmsDbContext
 
     public IQueryable<RichTextContentDbEntity> RichTextContents { get; }
 
+    public IQueryable<RichTextDataDbEntity> RichTextDataDbEntity { get; }
+
+    public IQueryable<RichTextMarkDbEntity> RichTextMarkDbEntity { get; }
+
     public IQueryable<SectionDbEntity> Sections { get; }
 
     public IQueryable<TextBodyDbEntity> TextBodies { get; }
@@ -42,5 +46,9 @@ public interface ICmsDbContext
 
     public IQueryable<WarningComponentDbEntity> Warnings { get; }
 
-    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable);
+    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default);
+
+    public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default);
+
+    public IQueryable<RichTextContentDbEntity> LoadRichTextContentsByParentIds(IEnumerable<long> parentIds);
 }
