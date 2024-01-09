@@ -23,8 +23,8 @@ public class ServiceExceptionHandlerMiddleWare : IExceptionHandlerMiddleware
         exception switch
         {
             null => UrlConstants.Error,
-            UserAccessUnavailableException => UrlConstants.RoleErrorPage,
-            UserAccessRoleNotFoundException => UrlConstants.RoleErrorPage,
+            UserAccessUnavailableException => UrlConstants.CombinedErrorPage,
+            UserAccessRoleNotFoundException => UrlConstants.CombinedErrorPage,
             ContentfulDataUnavailableException => UrlConstants.ServiceUnavailable,
             DatabaseException => UrlConstants.ServiceUnavailable,
             InvalidEstablishmentException => UrlConstants.ServiceUnavailable,
