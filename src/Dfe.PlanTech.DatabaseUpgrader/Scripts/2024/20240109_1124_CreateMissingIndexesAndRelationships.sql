@@ -1,14 +1,6 @@
 BEGIN TRANSACTION;
 GO
 
-IF SCHEMA_ID(N'Contentful') IS NULL EXEC(N'CREATE SCHEMA [Contentful];');
-GO
-
--- Your existing table creation statements go here...
-
--- Add foreign key constraints for tables with "Id varchar(30)" column
--- The key name should be "FK_TABLENAME_ContentComponents_Id"
-
 -- Buttons
 ALTER TABLE [Contentful].[Buttons]
 ADD CONSTRAINT [FK_Buttons_ContentComponents_Id]
@@ -67,9 +59,6 @@ GO
 ALTER TABLE [Contentful].[TextBodies]
 ADD CONSTRAINT [FK_TextBodies_ContentComponents_Id]
 FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE CASCADE;
-GO
-
-CREATE INDEX [IX_TextBodies_Id] ON [Contentful].[TextBodies] ([Id]);
 GO
 
 -- Warnings
