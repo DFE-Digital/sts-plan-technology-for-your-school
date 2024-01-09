@@ -45,23 +45,36 @@
 
 ## Reading from database
 
-- Uses EF Core
+We use EF Core as our ORM for reading/writing to the database. The DbContext used is [/src/Dfe.PlanTech.Infrastructure.Data/CmsDbContext.cs](/src/Dfe.PlanTech.Infrastructure.Data/CmsDbContext.cs).
 
 ### Mapping
 
-- Uses AutoMapper
+AutoMapper is used for the majority of the mapping, as the DB models + Contentful models are 1-1 mapped for the vast majority of the fields/properties. The mapping profile for this is located in [/src/Dfe.PlanTech.Application/Mappings/MappingProfile.cs](/src/Dfe.PlanTech.Application/Mappings/MappingProfile.cs).
+
+There are _some_ custom mappings done using LINQ `select` projections, due to various issues such as cyclical navigations with certain tables, or simply to limit what data is returned. Currently these are all only in the [/src/Dfe.PlanTech.Application/Content/Queries/GetPageQuery.cs](/src/Dfe.PlanTech.Application/Content/Queries/GetPageQuery.cs) function, however these should be moved out where possible to their own separate queries.
 
 ### Read navigation links
 
+[/src/Dfe.PlanTech.Application/Content/Queries/GetNavigationQuery.cs] is where we retrieve navigation links for the footer. It is a simple query, merely returning the entire database table.
+
 ### Read page
 
-- Read page with content
-- Most navigations autoincluded
-- Some navigations left manually:
-  - RichTextContent: was causing cyclical queries
-  - ButtonWithEntryReference: need the LinkToEntry field but not ideal to autoinclude that entire piece. Done manually to minimise query
-  - Sections: Requires loading specific pieces of data for questions + recommendations. Not ideal to load all of it so loaded manually
+[/src/Dfe.PlanTech.Application/Content/Queries/GetPageQuery.cs](/src/Dfe.PlanTech.Application/Content/Queries/GetPageQuery.cs) is responsible for retrieving Page data.
+
+There are several steps to it:
+
+1. We retrieve the `Page` matching the Slug from the table, and Include all `BeforeTitleContent` and `Content`. Note: there are various AutoIncludes defined in the [/src/Dfe.PlanTech.Infrastructure.Data/CmsDbContext.cs](/src/Dfe.PlanTech.Infrastructure.Data/CmsDbContext.cs) for the majority of the content tables, to ensure all data is pulled in.
+  
+2. Due to various issues with certain navigations, we execute various other queries and then merge the data together.
+
+  - If there is any content which has a `RichTextContent` property (using the `IHasText` interface to check), we execute a query to retrieve all the `RichTextContent` for the Page. The `RichTextMark` and `RichTextData` tables are joined automatically.
+  
+  - If there is any `ButtonWithEntryReference` content, then we retrieve the `LinkToEntry` property from it manually. This is to ensure we do not have a cartesian explosion (i.e. retrieving that entire page, + content, etc.), and to minimise the data we retrieve from the database (we only retrieve the slug and Id fields for the `LinkToEntry` property)
+
+  - If there are any `Category` content, we retrieve the `Sections` for them manually. This is because we also need to retrieve the `Question`s and `Recommendation`s for each Section, but only certain pieces of information. To prevent execessive data being retrieved, we only query the necessary fields. 
+
+3. We then use AutoMapper to map the database models to the Contentful models, as previously described.
 
 ## Caching
 
-TO DO
+- Not implemented currently.
