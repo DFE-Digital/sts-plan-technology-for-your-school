@@ -4,64 +4,43 @@ GO
 -- Buttons
 ALTER TABLE [Contentful].[Buttons]
 ADD CONSTRAINT [FK_Buttons_ContentComponents_Id]
-FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]);
+FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE CASCADE;
 GO
 
-CREATE INDEX [IX_Buttons_Id] ON [Contentful].[Buttons] ([Id]);
-GO
+-- ComponentDropdowns
+ALTER TABLE [Contentful].[ComponentDropdowns]
+ADD CONSTRAINT [FK_ComponentDropdowns_ContentComponents_Id]
+FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE CASCADE;
 
 -- Headers
 ALTER TABLE [Contentful].[Headers]
 ADD CONSTRAINT [FK_Headers_ContentComponents_Id]
-FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]);
-GO
-
-CREATE INDEX [IX_Headers_Id] ON [Contentful].[Headers] ([Id]);
+FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE CASCADE;
 GO
 
 -- InsetTexts
 ALTER TABLE [Contentful].[InsetTexts]
 ADD CONSTRAINT [FK_InsetTexts_ContentComponents_Id]
-FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]);
+FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE CASCADE;
 GO 
-
-CREATE INDEX [IX_InsetTexts_Id] ON [Contentful].[InsetTexts] ([Id]);
-GO
 
 -- NavigationLink
 ALTER TABLE [Contentful].[NavigationLink]
 ADD CONSTRAINT [FK_NavigationLink_ContentComponents_Id]
-FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]);
+FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE CASCADE;
 GO
 
-CREATE INDEX [IX_NavigationLink_Id] ON [Contentful].[NavigationLink] ([Id]);
-GO
-
--- RichTextContents
-ALTER TABLE [Contentful].[RichTextContents]
-ADD CONSTRAINT [FK_RichTextContents_ContentComponents_Id]
-FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]);
-GO
-
-CREATE INDEX [IX_RichTextContents_Id] ON [Contentful].[RichTextContents] ([Id]);
-GO
 
 -- TextBodies
 ALTER TABLE [Contentful].[TextBodies]
 ADD CONSTRAINT [FK_TextBodies_ContentComponents_Id]
-FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]);
-GO
-
-CREATE INDEX [IX_TextBodies_Id] ON [Contentful].[TextBodies] ([Id]);
+FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE CASCADE;
 GO
 
 -- Warnings
 ALTER TABLE [Contentful].[Warnings]
 ADD CONSTRAINT [FK_Warnings_ContentComponents_Id]
-FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]);
-GO
-
-CREATE INDEX [IX_Warnings_Id] ON [Contentful].[Warnings] ([Id]);
+FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE CASCADE;
 GO
 
 COMMIT;
