@@ -10,9 +10,9 @@ RETURNS TABLE AS RETURN (
       c.Id, c.[Value], c.NodeType, c.DataId, c.ParentId
     FROM
       [Contentful].[RichTextContents] c
-    JOIN  cte t
+    JOIN cte t
     ON c.ParentId = t.Id 
   )
   
-  SELECT * FROM cte
+  SELECT [Id], [Value], [NodeType], [DataId], [ParentId] FROM cte
 )

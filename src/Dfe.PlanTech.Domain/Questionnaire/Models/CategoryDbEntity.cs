@@ -8,5 +8,7 @@ public class CategoryDbEntity : ContentComponentDbEntity, ICategory<HeaderDbEnti
     public string HeaderId { get; set; } = null!;
     public HeaderDbEntity Header { get; set; } = null!;
 
+    public string InternalName { get; set; } = null!;
+
     public List<SectionDbEntity> Sections { get; set; } = new();
 }

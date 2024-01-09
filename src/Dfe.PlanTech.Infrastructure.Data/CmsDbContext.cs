@@ -41,8 +41,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
     public DbSet<RecommendationPageDbEntity> RecommendationPages { get; set; }
 
     public DbSet<RichTextContentDbEntity> RichTextContents { get; set; }
-    public IQueryable<RichTextDataDbEntity> RichTextDataDbEntity { get; set; }
-    public IQueryable<RichTextMarkDbEntity> RichTextMarkDbEntity { get; set; }
+    public DbSet<RichTextDataDbEntity> RichTextDataDbEntity { get; set; }
+    public DbSet<RichTextMarkDbEntity> RichTextMarkDbEntity { get; set; }
 
     public DbSet<SectionDbEntity> Sections { get; set; }
 

@@ -24,3 +24,4 @@ Web application to help schools plan a technology roadmap
 - [GitHub Workflows](./docs/GitHub-Workflows.md)
 - [Terraform Main](./terraform/README.md)
 - [Terraform Configuration](./terraform/terraform-configuration.md)
+- [Migration Scripts](./migration-scripts/README.md)

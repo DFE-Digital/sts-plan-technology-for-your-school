@@ -498,3 +498,6 @@ junit.xml
 build/
 
 .vscode/
+
+migration-scripts/config.json
+migration-scripts/contentful-export-*.json
