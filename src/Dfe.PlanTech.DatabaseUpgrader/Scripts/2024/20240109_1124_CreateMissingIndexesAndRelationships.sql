@@ -43,9 +43,6 @@ ADD CONSTRAINT [FK_Titles_ContentComponents_Id]
 FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE CASCADE;
 GO
 
-CREATE INDEX [IX_Titles_Id] ON [Contentful].[Titles] ([Id]);
-GO
-
 -- RichTextContents
 ALTER TABLE [Contentful].[RichTextContents]
 ADD CONSTRAINT [FK_RichTextContents_ContentComponents_Id]
@@ -59,6 +56,9 @@ GO
 ALTER TABLE [Contentful].[TextBodies]
 ADD CONSTRAINT [FK_TextBodies_ContentComponents_Id]
 FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE CASCADE;
+GO
+
+CREATE INDEX [IX_TextBodies_Id] ON [Contentful].[TextBodies] ([Id]);
 GO
 
 -- Warnings
