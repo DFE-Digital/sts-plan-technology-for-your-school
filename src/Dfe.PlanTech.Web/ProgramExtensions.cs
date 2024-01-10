@@ -25,7 +25,9 @@ using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Web.Helpers;
+using EFCoreSecondLevelCacheInterceptor;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
 using System.Diagnostics.CodeAnalysis;
 
@@ -88,10 +90,30 @@ public static class ProgramExtensions
 
     public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
+        var serviceProvider = services.BuildServiceProvider();
+
         void databaseOptionsAction(DbContextOptionsBuilder options) => options.UseSqlServer(configuration.GetConnectionString("Database"));
 
+        services.AddDbContextPool<ICmsDbContext, CmsDbContext>((serviceProvider, optionsBuilder) =>
+                optionsBuilder
+                    .UseSqlServer(
+                        configuration.GetConnectionString("Database"),
+                        sqlServerOptionsBuilder =>
+                        {
+                            sqlServerOptionsBuilder
+                                .CommandTimeout((int)TimeSpan.FromSeconds(30).TotalSeconds)
+                                .EnableRetryOnFailure();
+                        })
+                    .AddInterceptors(serviceProvider.GetRequiredService<SecondLevelCacheInterceptor>()));
+
+        services.AddEFSecondLevelCache(options =>
+        {
+            options.UseMemoryCacheProvider().DisableLogging(false).UseCacheKeyPrefix("EF_");
+            options.CacheAllQueries(CacheExpirationMode.Absolute, TimeSpan.FromMinutes(30));
+            options.UseDbCallsIfCachingProviderIsDown(TimeSpan.FromMinutes(1));
+        });
+
         services.AddDbContext<IPlanTechDbContext, PlanTechDbContext>(databaseOptionsAction);
-        services.AddDbContext<ICmsDbContext, CmsDbContext>(databaseOptionsAction);
 
         services.AddTransient<ICalculateMaturityCommand, CalculateMaturityCommand>();
         services.AddTransient<ICookieService, CookieService>();
