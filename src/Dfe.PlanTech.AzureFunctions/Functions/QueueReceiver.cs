@@ -105,7 +105,7 @@ namespace Dfe.PlanTech.AzureFunctions
             var dbSet = GetIQueryableForEntity(model);
 
             var found = await dbSet.IgnoreAutoIncludes()
-                                    .FirstOrDefaultAsync(entity => entity.Id == entity.Id);
+                                    .FirstOrDefaultAsync(existing => existing.Id == entity.Id);
 
             return found ?? null;
         }
