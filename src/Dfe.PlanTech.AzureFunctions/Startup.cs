@@ -19,7 +19,6 @@ namespace Dfe.PlanTech.AzureFunctions
             services.AddDbContext<CmsDbContext>(options =>
             {
                 options.UseSqlServer(configuration["AZURE_SQL_CONNECTIONSTRING"]);
-                options.EnableSensitiveDataLogging();
             });
 
             services.AddAzureClients(builder =>
