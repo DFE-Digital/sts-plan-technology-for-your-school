@@ -16,7 +16,11 @@ namespace Dfe.PlanTech.AzureFunctions
     {
         public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<CmsDbContext>(options => options.UseSqlServer(configuration["AZURE_SQL_CONNECTIONSTRING"]));
+            services.AddDbContext<CmsDbContext>(options =>
+            {
+                options.UseSqlServer(configuration["AZURE_SQL_CONNECTIONSTRING"]);
+                options.EnableSensitiveDataLogging();
+            });
 
             services.AddAzureClients(builder =>
             {

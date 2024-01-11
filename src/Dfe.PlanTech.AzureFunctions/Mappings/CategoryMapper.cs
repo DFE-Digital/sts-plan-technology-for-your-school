@@ -16,9 +16,18 @@ public class CategoryMapper : JsonToDbMapper<CategoryDbEntity>
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
+        int position = 0;
         values = MoveValueToNewKey(values, "header", "headerId");
 
-        UpdateReferencesArray(values, "sections", _db.Sections, (id, section) => section.CategoryId = Payload!.Sys.Id);
+        // TODO: If this works, also apply to SectionMapper
+        UpdateReferencesArray(values, "sections", _db.Sections, (id, section) =>
+        {
+            section.CategoryId = Payload!.Sys.Id;
+            section.Order = position++;
+        });
+
+        // UpdateReferencesArray(values, "sections", _db.Sections, (id, section) => section.CategoryId = Payload!.Sys.Id); // TODO: Deal with
+        // UpdateReferencesArray(values, "sections", _db.Sections, (id, section) => section.Order = position++);           // TODO: Deal with
 
         return values;
     }
