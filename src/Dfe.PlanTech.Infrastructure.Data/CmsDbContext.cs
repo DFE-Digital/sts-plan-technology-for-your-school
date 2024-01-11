@@ -207,5 +207,5 @@ public class CmsDbContext : DbContext, ICmsDbContext
             .FirstOrDefaultAsync(page => page.Slug == slug, cancellationToken);
 
     public IQueryable<RichTextContentDbEntity> RichTextContentsByPageSlug(string pageSlug)
-        => RichTextContents.FromSql($"SELECT * FROM [Contentful].[SelectAllRichTextContentForParentIdsTest]({pageSlug})");
+        => RichTextContents.FromSql($"SELECT * FROM [Contentful].[SelectAllRichTextContentForPageSlug]({pageSlug})");
 }
