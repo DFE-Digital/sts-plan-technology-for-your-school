@@ -308,7 +308,7 @@ public class GetPageQueryTests
         await _cmsDbSubstitute.ReceivedWithAnyArgs(1).GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>());
         await _cmsDbSubstitute.ReceivedWithAnyArgs(0).ToListAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
         await _cmsDbSubstitute.ReceivedWithAnyArgs(0).ToListAsync(Arg.Any<IQueryable<ButtonWithEntryReferenceDbEntity>>(), Arg.Any<CancellationToken>());
-        _cmsDbSubstitute.ReceivedWithAnyArgs(0).LoadRichTextContentsByParentIds(Arg.Any<IEnumerable<long>>());
+        _cmsDbSubstitute.ReceivedWithAnyArgs(0).RichTextContentsByPageSlug(Arg.Any<string>());
     }
 
     [Fact]
@@ -406,7 +406,7 @@ public class GetPageQueryTests
 
         await _repoSubstitute.ReceivedWithAnyArgs(0).GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>());
         await _cmsDbSubstitute.ReceivedWithAnyArgs(1).GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>());
-        _cmsDbSubstitute.ReceivedWithAnyArgs(1).LoadRichTextContentsByParentIds(Arg.Any<IEnumerable<long>>());
+        _cmsDbSubstitute.ReceivedWithAnyArgs(1).RichTextContentsByPageSlug(Arg.Any<string>());
     }
 
     [Fact]

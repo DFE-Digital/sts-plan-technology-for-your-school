@@ -111,14 +111,13 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
     {
         try
         {
-            var textBodyContentIds = page.Content.Concat(page.BeforeTitleContent)
+            var textBodyContents = page.Content.Concat(page.BeforeTitleContent)
                                                 .OfType<IHasRichText>()
-                                                .Select(content => content!.RichTextId)
                                                 .ToArray();
 
-            if (textBodyContentIds.Length == 0) return;
+            if (!textBodyContents.Any()) return;
 
-            await _db.ToListAsync(_db.LoadRichTextContentsByParentIds(textBodyContentIds), cancellationToken);
+            await _db.ToListAsync(_db.RichTextContentsByPageSlug(page.Slug), cancellationToken);
         }
         catch (Exception ex)
         {
