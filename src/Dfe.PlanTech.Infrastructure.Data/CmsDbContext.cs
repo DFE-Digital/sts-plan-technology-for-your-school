@@ -202,34 +202,10 @@ public class CmsDbContext : DbContext, ICmsDbContext
     public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
     => Pages.Include(page => page.BeforeTitleContent)
             .Include(page => page.Content)
-            .Include(page => page.Content)
             .Include(page => page.Title)
             .AsSplitQuery()
             .FirstOrDefaultAsync(page => page.Slug == slug, cancellationToken);
 
-    public IQueryable<RichTextContentDbEntity> LoadRichTextContentsByParentIds(IEnumerable<long> parentIds)
-    {
-        var table = new DataTable();
-        table.Columns.Add(new DataColumn("Id", typeof(long)));
-
-        foreach (var id in parentIds)
-        {
-            DataRow row = table.NewRow();
-            row["Id"] = id;
-            table.Rows.Add(row);
-
-        }
-        var param = new SqlParameter("@ParentIds", table) { TypeName = "IdTableType", SqlDbType = SqlDbType.Structured };
-
-        return RichTextContents.FromSqlRaw("SELECT * FROM [Contentful].[SelectAllRichTextContentForParentIds](@ParentIds)", param);
-    }
-
-    public async Task LoadRichTextChildren(IEnumerable<RichTextContentDbEntity> richTextContent)
-    {
-        foreach (var richText in richTextContent)
-        {
-            await Entry(richText).Collection(richText => richText.Content).LoadAsync();
-            await LoadRichTextChildren(richText.Content);
-        }
-    }
+    public IQueryable<RichTextContentDbEntity> RichTextContentsByPageSlug(string pageSlug)
+        => RichTextContents.FromSql($"SELECT * FROM [Contentful].[SelectAllRichTextContentForParentIdsTest]({pageSlug})");
 }
