@@ -4,6 +4,8 @@ using Dfe.PlanTech.Domain.Caching.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
 using System.Text;
 
@@ -42,7 +44,7 @@ namespace Dfe.PlanTech.AzureFunctions
                 Logger.LogInformation("Processing {text}", text);
 
                 ContentComponentDbEntity mapped = _mappers.ToEntity(text);
-                ContentComponentDbEntity? existing = GetExistingDbEntity(mapped);
+                ContentComponentDbEntity? existing = await GetExistingDbEntity(mapped);
 
                 if (existing != null)
                 {
@@ -96,10 +98,24 @@ namespace Dfe.PlanTech.AzureFunctions
             }
         }
 
-        private ContentComponentDbEntity? GetExistingDbEntity(ContentComponentDbEntity entity)
+        private async Task<ContentComponentDbEntity?> GetExistingDbEntity(ContentComponentDbEntity entity)
         {
-            return _db.Find(entity.GetType(), entity.Id) as ContentComponentDbEntity ?? null;
+            var model = _db.Model.FindEntityType(entity.GetType()) ?? throw new Exception($"Could not find model in database for {entity.GetType()}");
+
+            var dbSet = GetIQueryableForEntity(model);
+
+            var found = await dbSet.IgnoreAutoIncludes()
+                                    .FirstOrDefaultAsync(entity => entity.Id == entity.Id);
+
+            return found ?? null;
         }
+
+        private IQueryable<ContentComponentDbEntity> GetIQueryableForEntity(IEntityType model)
+        => (IQueryable<ContentComponentDbEntity>)_db
+                                                .GetType()
+                                                .GetMethod("Set", 1, Type.EmptyTypes)!
+                                                .MakeGenericMethod(model!.ClrType)!
+                                                .Invoke(_db, null)!;
 
         private static string GetCmsEvent(string subject)
         {
@@ -124,7 +140,7 @@ namespace Dfe.PlanTech.AzureFunctions
         {
             var properties = entity.GetType().GetProperties();
 
-            foreach (var property in properties)
+            foreach (var property in properties.Where(property => property.Name != "Id"))
             {
                 property.SetValue(existing, property.GetValue(entity));
             }
