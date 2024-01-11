@@ -1,5 +1,5 @@
-DROP TYPE IdTableType;
+DROP FUNCTION [Contentful].[SelectAllRichTextContentForParentIds];
 GO;
 
-DROP FUNCTION [Contentful].[SelectAllRichTextContentForParentIds];
+DROP TYPE IdTableType;
 GO;
