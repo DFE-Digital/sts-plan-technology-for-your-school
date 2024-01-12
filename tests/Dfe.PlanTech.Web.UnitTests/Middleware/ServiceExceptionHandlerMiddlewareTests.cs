@@ -46,7 +46,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
         }
 
         [Fact]
-        public void Should_Get_Roles_Redirect_UserAccessRoleNotFoundException_Exception()
+        public void Should_Get_CombinedErrorPage_UserAccessRoleNotFoundException_Exception()
         {
             // Arrange
             var exception = new UserAccessRoleNotFoundException("roles exception");
@@ -122,7 +122,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
         }
 
         [Fact]
-        public void Should_Get_Organisation_Redirect_KeyNotFoundException_Exception()
+        public void Should_Get_CombinedError_Redirect_KeyNotFoundException_Exception()
         {
             // Arrange
             var exception = new KeyNotFoundException("organisation exception");
@@ -137,7 +137,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
 
             //Assert
             Assert.NotNull(context.Response);
-            Assert.Equal(UrlConstants.ServiceUnavailable, context.Response.Headers.Values.FirstOrDefault());
+            Assert.Equal(UrlConstants.CombinedErrorPage, context.Response.Headers.Values.FirstOrDefault());
         }
     }
 }
