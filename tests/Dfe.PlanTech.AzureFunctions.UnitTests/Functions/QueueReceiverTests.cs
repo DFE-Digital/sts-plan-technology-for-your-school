@@ -4,9 +4,12 @@ using Dfe.PlanTech.AzureFunctions.UnitTests.Mappers;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ReceivedExtensions;
+using System.Linq.Expressions;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -35,6 +38,29 @@ public class QueueReceiverTests
         });
 
         _cmsDbContextMock = Substitute.For<CmsDbContext>();
+        ContentComponentDbEntityImplementation contentComponent = new() { Archived = true, Published = true, Deleted = true, Id = "Testing" };
+
+        var list = new List<ContentComponentDbEntityImplementation>() { contentComponent };
+        IQueryable<ContentComponentDbEntityImplementation> queryable = list.AsQueryable();
+        _cmsDbContextMock.SaveChangesAsync().Returns(1);
+
+        var asyncProvider = new AsyncQueryProvider<ContentComponentDbEntityImplementation>(queryable.Provider);
+
+        var mockSet = Substitute.For<DbSet<ContentComponentDbEntityImplementation>, IQueryable<ContentComponentDbEntityImplementation>>();
+        ((IQueryable<ContentComponentDbEntityImplementation>)mockSet).Provider.Returns(asyncProvider);
+        ((IQueryable<ContentComponentDbEntityImplementation>)mockSet).Expression.Returns(queryable.Expression);
+        ((IQueryable<ContentComponentDbEntityImplementation>)mockSet).ElementType.Returns(queryable.ElementType);
+        ((IQueryable<ContentComponentDbEntityImplementation>)mockSet).GetEnumerator().Returns(queryable.GetEnumerator());
+
+        var entityTypeMock = Substitute.For<IEntityType>();
+        entityTypeMock.ClrType.Returns(typeof(ContentComponentDbEntityImplementation));
+
+        _cmsDbContextMock.Model.FindEntityType(Arg.Any<Type>()).Returns(callInfo =>
+        {
+            return entityTypeMock;
+        });
+
+        _cmsDbContextMock.Set<ContentComponentDbEntityImplementation>().Returns(mockSet);
 
         JsonSerializerOptions jsonOptions = new()
         {
@@ -85,14 +111,17 @@ public class QueueReceiverTests
         await serviceBusMessageActionsMock.Received().DeadLetterMessageAsync(Arg.Any<ServiceBusReceivedMessage>());
     }
 
+    static async IAsyncEnumerable<CategoryDbEntity> RangeAsync(int start, int count)
+    {
+        CategoryDbEntity contentComponent = new() { Archived = true, Published = true, Deleted = true };
+
+        yield return contentComponent;
+    }
+
+
     [Fact]
     public async Task QueueReceiverDbWriter_Should_MapExistingDbEntity_To_Message()
     {
-        ContentComponentDbEntityImplementation contentComponent = new() { Archived = true, Published = true, Deleted = true };
-
-        _cmsDbContextMock.SaveChangesAsync().Returns(1);
-        _cmsDbContextMock.Find(Arg.Any<Type>(), Arg.Any<String>()).Returns(contentComponent);
-
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
 
