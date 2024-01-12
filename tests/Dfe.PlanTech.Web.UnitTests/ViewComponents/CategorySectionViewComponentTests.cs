@@ -40,6 +40,10 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category = new Category()
             {
                 Completed = 1,
+                Sys = new()
+                {
+                    Id = "Category-Test-Id"
+                },
                 Sections = new(){
                 {
                     new ()
@@ -280,7 +284,11 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category = new Category()
             {
                 Completed = 0,
-                Sections = null!
+                Sections = null!,
+                Sys = new()
+                {
+                    Id = "missing-sections-category"
+                }
             };
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
@@ -300,10 +308,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             var categorySectionDtoList = unboxed.CategorySectionDto;
 
-            Assert.NotNull(categorySectionDtoList);
-
-            categorySectionDtoList = categorySectionDtoList.ToList();
-            Assert.Empty(categorySectionDtoList);
+            Assert.Null(categorySectionDtoList);
         }
 
         [Fact]
@@ -312,7 +317,11 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category = new Category()
             {
                 Completed = 0,
-                Sections = new()
+                Sections = new(),
+                Sys = new()
+                {
+                    Id = "empty-sections-category"
+                }
             };
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
@@ -332,10 +341,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             var categorySectionDtoList = unboxed.CategorySectionDto;
 
-            Assert.NotNull(categorySectionDtoList);
-
-            categorySectionDtoList = categorySectionDtoList.ToList();
-            Assert.Empty(categorySectionDtoList);
+            Assert.Null(categorySectionDtoList);
         }
     }
 }
