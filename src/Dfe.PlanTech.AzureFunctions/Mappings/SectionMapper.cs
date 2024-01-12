@@ -16,9 +16,14 @@ public class SectionMapper : JsonToDbMapper<SectionDbEntity>
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
+        int position = 0;
         values = MoveValueToNewKey(values, "interstitialPage", "interstitialPageId");
 
-        UpdateReferencesArray(values, "questions", _db.Questions, (id, question) => question.SectionId = Payload!.Sys.Id);
+        UpdateReferencesArray(values, "questions", _db.Questions, (id, question) =>
+        {
+            question.SectionId = Payload!.Sys.Id;
+            question.Order = position++;
+        });
 
         UpdateReferencesArray(values, "recommendations", _db.RecommendationPages, (id, recommendationPage) => recommendationPage.SectionId = Payload!.Sys.Id);
 

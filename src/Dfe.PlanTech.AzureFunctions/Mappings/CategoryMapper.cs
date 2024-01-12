@@ -19,15 +19,11 @@ public class CategoryMapper : JsonToDbMapper<CategoryDbEntity>
         int position = 0;
         values = MoveValueToNewKey(values, "header", "headerId");
 
-        // TODO: If this works, also apply to SectionMapper
         UpdateReferencesArray(values, "sections", _db.Sections, (id, section) =>
         {
             section.CategoryId = Payload!.Sys.Id;
             section.Order = position++;
         });
-
-        // UpdateReferencesArray(values, "sections", _db.Sections, (id, section) => section.CategoryId = Payload!.Sys.Id); // TODO: Deal with
-        // UpdateReferencesArray(values, "sections", _db.Sections, (id, section) => section.Order = position++);           // TODO: Deal with
 
         return values;
     }

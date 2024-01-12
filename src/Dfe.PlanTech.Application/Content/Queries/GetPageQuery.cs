@@ -228,7 +228,7 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
                     CategoryId = section.CategoryId,
                     Id = section.Id,
                     Name = section.Name,
-                    Questions = section.Questions.Select(question => new QuestionDbEntity()
+                    Questions = section.Questions.OrderBy(question => question.Order).Select(question => new QuestionDbEntity()
                     {
                         Slug = question.Slug,
                         Id = question.Id,
