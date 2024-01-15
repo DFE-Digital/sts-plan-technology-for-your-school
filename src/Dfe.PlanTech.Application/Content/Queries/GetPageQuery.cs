@@ -222,13 +222,14 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
     /// <returns></returns>
     private IQueryable<SectionDbEntity> GetSectionsForPageQuery(PageDbEntity page)
     => _db.Sections.Where(section => section.Category != null && section.Category.ContentPages.Any(categoryPage => categoryPage.Slug == page.Slug))
+                .Where(section => section.Order != null)
                 .OrderBy(section => section.Order)
                 .Select(section => new SectionDbEntity()
                 {
                     CategoryId = section.CategoryId,
                     Id = section.Id,
                     Name = section.Name,
-                    Questions = section.Questions.OrderBy(question => question.Order).Select(question => new QuestionDbEntity()
+                    Questions = section.Questions.Where(section => section.Order != null).OrderBy(question => question.Order).Select(question => new QuestionDbEntity()
                     {
                         Slug = question.Slug,
                         Id = question.Id,
