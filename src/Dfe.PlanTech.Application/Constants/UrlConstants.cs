@@ -10,5 +10,5 @@ public static class UrlConstants
 
     public const string RoleErrorPage = "/dsi-error-organisation-approval";
 
-    public const string CombinedErrorPage = "dsi-error-no-organisation-or-approval";
+    public const string CombinedErrorPage = "/dsi-error-no-organisation-or-approval";
 }
