@@ -111,14 +111,6 @@ public class QueueReceiverTests
         await serviceBusMessageActionsMock.Received().DeadLetterMessageAsync(Arg.Any<ServiceBusReceivedMessage>());
     }
 
-    static async IAsyncEnumerable<CategoryDbEntity> RangeAsync(int start, int count)
-    {
-        CategoryDbEntity contentComponent = new() { Archived = true, Published = true, Deleted = true };
-
-        yield return contentComponent;
-    }
-
-
     [Fact]
     public async Task QueueReceiverDbWriter_Should_MapExistingDbEntity_To_Message()
     {
