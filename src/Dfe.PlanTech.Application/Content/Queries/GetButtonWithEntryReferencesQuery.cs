@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
-public class GetButtonWithEntryReferencesQuery
+public class GetButtonWithEntryReferencesQuery : IGetPageChildrenQuery
 {
   private readonly ICmsDbContext _db;
   private readonly ILogger<GetButtonWithEntryReferencesQuery> _logger;
@@ -24,7 +24,7 @@ public class GetButtonWithEntryReferencesQuery
   /// <param name="page"></param>
   /// <param name="cancellationToken"></param>
   /// <returns></returns>
-  public async Task TryLoadButtonReferences(PageDbEntity page, CancellationToken cancellationToken)
+  public async Task TryLoadChildren(PageDbEntity page, CancellationToken cancellationToken)
   {
     try
     {

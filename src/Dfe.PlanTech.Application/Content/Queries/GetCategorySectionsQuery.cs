@@ -1,11 +1,12 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
-public class GetCategorySectionsQuery
+public class GetCategorySectionsQuery : IGetPageChildrenQuery
 {
     private readonly ICmsDbContext _db;
     private readonly ILogger<GetCategorySectionsQuery> _logger;
@@ -22,7 +23,7 @@ public class GetCategorySectionsQuery
     /// <param name="page"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task TryLoadCategorySections(PageDbEntity page, CancellationToken cancellationToken)
+    public async Task TryLoadChildren(PageDbEntity page, CancellationToken cancellationToken)
     {
         try
         {

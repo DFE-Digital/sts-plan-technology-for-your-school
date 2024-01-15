@@ -1,5 +1,7 @@
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Content.Queries;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -25,6 +27,9 @@ public static class QueryServiceSetup
         }
 
         services.AddScoped<IGetPageQuery, GetPageQuery>();
+        services.AddScoped<IGetPageChildrenQuery, GetButtonWithEntryReferencesQuery>();
+        services.AddScoped<IGetPageChildrenQuery, GetCategorySectionsQuery>();
+        services.AddScoped<IGetPageChildrenQuery, GetRichTextsQuery>();
 
         return services;
     }

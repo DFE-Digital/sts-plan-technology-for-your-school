@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
-public class GetRichTextsQuery
+public class GetRichTextsQuery : IGetPageChildrenQuery
 {
     private readonly ICmsDbContext _db;
     private readonly ILogger<GetRichTextsQuery> _logger;
@@ -16,14 +16,13 @@ public class GetRichTextsQuery
         _logger = logger;
     }
 
-
     /// <summary>
     /// Load RichTextContents for the given page from database 
     /// </summary>
     /// <param name="page"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task TryLoadRichTextContents(PageDbEntity page, CancellationToken cancellationToken)
+    public async Task TryLoadChildren(PageDbEntity page, CancellationToken cancellationToken)
     {
         try
         {
