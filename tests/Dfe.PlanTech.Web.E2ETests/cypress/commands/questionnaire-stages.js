@@ -13,19 +13,6 @@ const navigateToRecommendationPage = () => {
     });
 };
 
-const navigateThroughSection = () => {
-  let selectedQuestionsWithAnswers = []; // Not needed by the calling class so just define it here.
-  return cy
-    .navigateToCheckAnswersPage(selectedQuestionsWithAnswers)
-    .then((res) => cy.wrap(res))
-    .then(() => cy.submitAnswers())
-    .then((onSelfAssessmentPage) => {
-      if (!onSelfAssessmentPage) {
-        return Promise.resolve();
-      }
-    });
-};
-
 const navigateToCheckAnswersPage = (selectedQuestionsWithAnswers) => {
   return cy
     .navigateThroughQuestions(selectedQuestionsWithAnswers)
@@ -61,4 +48,3 @@ Cypress.Commands.add(
 Cypress.Commands.add("navigateToCheckAnswersPage", navigateToCheckAnswersPage);
 Cypress.Commands.add("navigateThroughQuestions", navigateThroughQuestions);
 Cypress.Commands.add("submitAnswers", submitAnswers);
-Cypress.Commands.add("navigateThroughSection", navigateThroughSection);

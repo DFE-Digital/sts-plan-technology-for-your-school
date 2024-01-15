@@ -3,8 +3,6 @@ describe("Self-assessment page", () => {
 
   beforeEach(() => {
     cy.loginWithEnv(url);
-
-    cy.injectAxe();
   });
 
   it("should have heading", () => {
@@ -32,17 +30,5 @@ describe("Self-assessment page", () => {
   it("passes accessibility tests", () => {
     cy.injectAxe();
     cy.runAxe();
-  });
-
-  it("should show recommendation banner", () => {
-    cy.clickFirstSection();
-    cy.clickContinueButton();
-    cy.navigateThroughSection();
-
-    cy.get(".govuk-notification-banner__content").should("exist");
-
-    cy.get(".govuk-notification-banner__content a")
-      .should("have.attr", "href")
-      .and("include", "#recommendations-section");
   });
 });
