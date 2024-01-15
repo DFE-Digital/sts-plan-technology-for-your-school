@@ -1,5 +1,6 @@
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.AzureFunctions.Mappings;
+using Dfe.PlanTech.Domain;
 using Dfe.PlanTech.Domain.Caching.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
@@ -7,6 +8,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
+using System.Reflection;
 using System.Text;
 
 namespace Dfe.PlanTech.AzureFunctions
@@ -15,6 +17,7 @@ namespace Dfe.PlanTech.AzureFunctions
     {
         private readonly CmsDbContext _db;
         private readonly JsonToEntityMappers _mappers;
+        private readonly Type _dontCopyValueAttribute = typeof(DontCopyValueAttribute);
 
         public QueueReceiver(ILoggerFactory loggerFactory, CmsDbContext db, JsonToEntityMappers mappers) : base(loggerFactory.CreateLogger<QueueReceiver>())
         {
@@ -136,14 +139,34 @@ namespace Dfe.PlanTech.AzureFunctions
             return await _db.SaveChangesAsync();
         }
 
-        private static void UpdateProperties(ContentComponentDbEntity entity, ContentComponentDbEntity existing)
+        private void UpdateProperties(ContentComponentDbEntity entity, ContentComponentDbEntity existing)
         {
-            var properties = entity.GetType().GetProperties();
-
-            foreach (var property in properties.Where(property => !property.Name.EndsWith("Id")))
+            foreach (var property in PropertiesToCopy(entity))
             {
                 property.SetValue(existing, property.GetValue(entity));
             }
         }
+
+        /// <summary>
+        /// Get properties to copy for the selected entity
+        /// </summary>
+        /// <remarks>
+        /// Returns all properties, except properties ending with "Id" (i.e. relationship fields), and properties that have
+        /// a <see cref="DontCopyValueAttribute"/> attribute.
+        /// </remarks>
+        /// <param name="entity">Entity to get copyable properties for</param>
+        /// <returns></returns>
+        private IEnumerable<PropertyInfo> PropertiesToCopy(ContentComponentDbEntity entity)
+        => entity.GetType()
+                .GetProperties()
+                .Where(property => !property.Name.EndsWith("Id") && !HasDontCopyValueAttribute(property));
+
+        /// <summary>
+        /// Does the property have a <see cref="DontCopyValueAttribute"/> property attached to it? 
+        /// </summary>
+        /// <param name="property"></param>
+        /// <returns></returns>
+        private bool HasDontCopyValueAttribute(PropertyInfo property)
+         => property.CustomAttributes.Any(attribute => attribute.AttributeType == _dontCopyValueAttribute);
     }
 }

@@ -12,6 +12,7 @@ public abstract class ContentComponentDbEntity : IContentComponentDbEntity
 
     public bool Deleted { get; set; }
 
+    [DontCopyValue]
     public long? Order { get; set; }
 
     public List<PageDbEntity> BeforeTitleContentPages { get; set; } = new();
