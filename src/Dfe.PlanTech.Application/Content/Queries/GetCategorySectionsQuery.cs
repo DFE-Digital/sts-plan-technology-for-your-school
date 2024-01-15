@@ -90,7 +90,8 @@ public class GetCategorySectionsQuery : IGetPageChildrenQuery
                         Page = new PageDbEntity()
                         {
                             Slug = recommendation.Page.Slug
-                        }
+                        },
+                        Id = recommendation.Id
                     }).ToList(),
                     InterstitialPage = section.InterstitialPage == null ? null : new PageDbEntity()
                     {
