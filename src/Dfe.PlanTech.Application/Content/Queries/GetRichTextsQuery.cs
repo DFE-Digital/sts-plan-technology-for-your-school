@@ -26,11 +26,11 @@ public class GetRichTextsQuery : IGetPageChildrenQuery
     {
         try
         {
-            var textBodyContents = page.Content.Concat(page.BeforeTitleContent)
+            var hasTextBodyContents = page.Content.Concat(page.BeforeTitleContent)
                                                 .OfType<IHasRichText>()
-                                                .ToArray();
+                                                .Any();
 
-            if (!textBodyContents.Any()) return;
+            if (!hasTextBodyContents) return;
 
             await _db.ToListAsync(_db.RichTextContentsByPageSlug(page.Slug), cancellationToken);
         }

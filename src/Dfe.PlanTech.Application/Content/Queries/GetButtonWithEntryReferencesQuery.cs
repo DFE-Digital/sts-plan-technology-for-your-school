@@ -12,7 +12,7 @@ public class GetButtonWithEntryReferencesQuery : IGetPageChildrenQuery
   private readonly ICmsDbContext _db;
   private readonly ILogger<GetButtonWithEntryReferencesQuery> _logger;
 
-  public GetButtonWithEntryReferencesQuery(ICmsDbContext db, ILogger<GetButtonWithEntryReferencesQuery> logger, IMapper mapperConfiguration)
+  public GetButtonWithEntryReferencesQuery(ICmsDbContext db, ILogger<GetButtonWithEntryReferencesQuery> logger)
   {
     _db = db;
     _logger = logger;
