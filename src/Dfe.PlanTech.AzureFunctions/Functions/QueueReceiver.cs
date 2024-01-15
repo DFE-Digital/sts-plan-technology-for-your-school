@@ -140,7 +140,7 @@ namespace Dfe.PlanTech.AzureFunctions
         {
             var properties = entity.GetType().GetProperties();
 
-            foreach (var property in properties.Where(property => !property.Name.EndsWith("Id")))
+            foreach (var property in properties.Where(property => !property.Name.EndsWith("Id") && !property.Name.Equals("Order")))
             {
                 property.SetValue(existing, property.GetValue(entity));
             }
