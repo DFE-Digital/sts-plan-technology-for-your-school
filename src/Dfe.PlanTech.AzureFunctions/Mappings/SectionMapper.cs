@@ -19,9 +19,28 @@ public class SectionMapper : JsonToDbMapper<SectionDbEntity>
         values = MoveValueToNewKey(values, "interstitialPage", "interstitialPageId");
 
         UpdateReferencesArray(values, "questions", _db.Questions, (id, question) => question.SectionId = Payload!.Sys.Id);
-
+        
         UpdateReferencesArray(values, "recommendations", _db.RecommendationPages, (id, recommendationPage) => recommendationPage.SectionId = Payload!.Sys.Id);
+        
+        UpdateInterstitialPage(values);
 
         return values;
+    }
+
+    private void UpdateInterstitialPage(Dictionary<string, object?> values)
+    {
+        if (values.TryGetValue("interstitialPageId", out var pageId) && pageId != null)
+        {
+            var interstitialPageId = pageId.ToString();
+
+            var interstitialPage = _db.Pages.FirstOrDefault(e => e.Id == interstitialPageId);
+
+            if (interstitialPage != null)
+            {
+                interstitialPage.SectionId = Payload!.Sys.Id;
+
+                _db.SaveChanges();
+            }
+        }
     }
 }

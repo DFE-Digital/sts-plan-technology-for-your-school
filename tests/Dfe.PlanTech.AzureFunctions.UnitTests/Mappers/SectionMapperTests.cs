@@ -1,5 +1,6 @@
 using Dfe.PlanTech.AzureFunctions.Mappings;
 using Dfe.PlanTech.Domain.Caching.Models;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -35,10 +36,28 @@ public class SectionMapperTests : BaseMapperTests
 
     public SectionMapperTests()
     {
+        PageDbEntity pageDbEntity = new PageDbEntity
+        {
+            Id = "Interstitial page id",
+        };
+        
+        var list = new List<PageDbEntity>() { pageDbEntity };
+        IQueryable<PageDbEntity> queryable = list.AsQueryable();
+
+        var asyncProvider = new AsyncQueryProvider<PageDbEntity>(queryable.Provider);
+
+        var mockPageDataSet = Substitute.For<DbSet<PageDbEntity>, IQueryable<PageDbEntity>>();
+        ((IQueryable<PageDbEntity>)mockPageDataSet).Provider.Returns(asyncProvider);
+        ((IQueryable<PageDbEntity>)mockPageDataSet).Expression.Returns(queryable.Expression);
+        ((IQueryable<PageDbEntity>)mockPageDataSet).ElementType.Returns(queryable.ElementType);
+        ((IQueryable<PageDbEntity>)mockPageDataSet).GetEnumerator().Returns(queryable.GetEnumerator());
+        
         _logger = Substitute.For<ILogger<SectionMapper>>();
         _mapper = new SectionMapper(_db, _logger, JsonOptions);
 
         _db.Questions = _questionsDbSet;
+
+        _db.Pages = mockPageDataSet;
 
         _questionsDbSet.WhenForAnyArgs(questionDbSet => questionDbSet.Attach(Arg.Any<QuestionDbEntity>()))
                     .Do(callinfo =>
@@ -72,6 +91,8 @@ public class SectionMapperTests : BaseMapperTests
         Assert.Equal(InterstitialPage.Sys.Id, concrete.InterstitialPageId);
 
         Assert.Equal(Questions.Length, _attachedQuestions.Count);
+        
+        _db.Received(1).SaveChanges();
 
         foreach (var question in Questions)
         {
