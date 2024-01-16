@@ -73,12 +73,14 @@ public class GetCategorySectionsQuery : IGetPageChildrenQuery
     /// <returns></returns>
     private IQueryable<SectionDbEntity> SectionsForPageQueryable(PageDbEntity page)
     => _db.Sections.Where(section => section.Category != null && section.Category.ContentPages.Any(categoryPage => categoryPage.Slug == page.Slug))
+                .Where(section => section.Order != null)
+                .OrderBy(section => section.Order)
                 .Select(section => new SectionDbEntity()
                 {
                     CategoryId = section.CategoryId,
                     Id = section.Id,
                     Name = section.Name,
-                    Questions = section.Questions.Select(question => new QuestionDbEntity()
+                    Questions = section.Questions.Where(question => question.Order != null).OrderBy(question => question.Order).Select(question => new QuestionDbEntity()
                     {
                         Slug = question.Slug,
                         Id = question.Id,

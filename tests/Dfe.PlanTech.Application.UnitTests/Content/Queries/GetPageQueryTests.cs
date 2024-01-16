@@ -114,6 +114,7 @@ public class GetPageQueryTests
                 new SectionDbEntity(){
                     Name = "sSection one",
                     CategoryId = CATEGORY_ID,
+                    Order = 0,
                     Recommendations = new(){
                         new RecommendationPageDbEntity(){
                             DisplayName = "Recommendation one",
@@ -132,9 +133,11 @@ public class GetPageQueryTests
                     },
                     Questions = new(){
                         new QuestionDbEntity(){
+                            Order = 0,
                             Slug = "question-one-slug",
                         },
                         new QuestionDbEntity(){
+                            Order = 1,
                             Slug = "question-two-slug"
                         }
                     }
