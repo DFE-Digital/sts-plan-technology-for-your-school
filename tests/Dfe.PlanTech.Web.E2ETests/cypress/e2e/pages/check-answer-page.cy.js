@@ -69,7 +69,9 @@ describe("Check answers page", () => {
             .find("a")
             .contains("Change")
             .and("have.attr", "title")
-            .and("equal", questionWithAnswer.question);
+            .then((title) =>
+              expect(title.trim()).to.equal(questionWithAnswer.question)
+            );
         });
       });
   });
@@ -79,19 +81,17 @@ describe("Check answers page", () => {
   });
 
   it("navigates to correct page when clicking change", () => {
-
     cy.get("a:nth-child(1)")
-        .contains("Change")
-        .invoke("attr", "href")
-        .then(href => {
-          changeLinkHref = href;
-          cy.log("Captured href: " + changeLinkHref);
+      .contains("Change")
+      .invoke("attr", "href")
+      .then((href) => {
+        changeLinkHref = href;
+        cy.log("Captured href: " + changeLinkHref);
 
-          cy.get("a:nth-child(1)").contains("Change").click();
+        cy.get("a:nth-child(1)").contains("Change").click();
 
-          cy.url().should("contain", changeLinkHref);
-        });
-    
+        cy.url().should("contain", changeLinkHref);
+      });
   });
 
   //This needs to be last on this test run, so that the question-page tests have a clean slate to work from!
@@ -100,5 +100,9 @@ describe("Check answers page", () => {
 
     cy.url().should("contain", "self-assessment");
     cy.get("div.govuk-notification-banner__header").should("exist");
+
+    cy.get(".govuk-notification-banner__content a")
+      .should("have.attr", "href")
+      .and("include", "#recommendations-section");
   });
 });
