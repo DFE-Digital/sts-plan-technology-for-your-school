@@ -92,8 +92,6 @@ public class SectionMapperTests : BaseMapperTests
 
         Assert.Equal(Questions.Length, _attachedQuestions.Count);
         
-        _db.Received(1).SaveChanges();
-
         foreach (var question in Questions)
         {
             var contains = _attachedQuestions.Any(attached => attached.Id == question.Sys.Id);

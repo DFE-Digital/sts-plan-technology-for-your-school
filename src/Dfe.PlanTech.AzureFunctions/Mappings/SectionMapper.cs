@@ -33,14 +33,7 @@ public class SectionMapper : JsonToDbMapper<SectionDbEntity>
         {
             var interstitialPageId = pageId.ToString();
 
-            var interstitialPage = _db.Pages.FirstOrDefault(e => e.Id == interstitialPageId);
-
-            if (interstitialPage != null)
-            {
-                interstitialPage.SectionId = Payload!.Sys.Id;
-
-                _db.SaveChanges();
-            }
+            UpdateRelatedEntity(interstitialPageId, _db.Pages, (id, interstitialPage) => interstitialPage.SectionId = Payload!.Sys.Id);
         }
     }
 }
