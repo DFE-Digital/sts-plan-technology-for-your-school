@@ -1,7 +1,7 @@
 
 using Dfe.PlanTech.Domain.Content.Models;
 
-namespace Dfe.PlanTech.Application.Content.Queries;
+namespace Dfe.PlanTech.Domain.Content.Queries;
 
 /// <summary>
 /// Retrieves a page from contentful

@@ -1,6 +1,6 @@
 @model IEnumerable<RecommendationsViewComponentViewModel>
 
-<h2 class="govuk-heading-m">Recommendations</h2>
+<h2 class="govuk-heading-m" id="recommendations-section">Recommendations</h2>
 
 @if (Model == null)
 {
@@ -16,13 +16,10 @@ else
                 <task-list-item-name>
                     @if (recommendationsViewComponentViewModel.RecommendationSlug != null)
                     {
-                        <a
-                            class="govuk-link"
-                            asp-route="GetRecommendation"
+                        <a class="govuk-link" asp-route="GetRecommendation"
                             asp-route-sectionSlug="@recommendationsViewComponentViewModel.SectionSlug"
-                            asp-route-recommendationSlug="@recommendationsViewComponentViewModel.RecommendationSlug"
-                        >
-                        @recommendationsViewComponentViewModel.RecommendationDisplayName
+                            asp-route-recommendationSlug="@recommendationsViewComponentViewModel.RecommendationSlug">
+                            @recommendationsViewComponentViewModel.RecommendationDisplayName
                         </a>
                     }
                     else

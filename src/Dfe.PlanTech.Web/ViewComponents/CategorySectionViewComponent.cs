@@ -21,21 +21,34 @@ public class CategorySectionViewComponent : ViewComponent
 
     public IViewComponentResult Invoke(Category category)
     {
+        var viewModel = GenerateViewModel(category);
+
+        return View(viewModel);
+    }
+
+    private CategorySectionViewComponentViewModel GenerateViewModel(Category category)
+    {
         bool sectionsExist = category.Sections != null && category.Sections.Count > 0;
+
+        if (!sectionsExist)
+        {
+            _logger.LogError("Found no sections for category {id}", category.Sys.Id);
+
+            return new CategorySectionViewComponentViewModel()
+            {
+                NoSectionsErrorRedirectUrl = "ServiceUnavailable"
+            };
+        }
 
         category = RetrieveSectionStatuses(category);
 
-        var categorySectionViewModel = new CategorySectionViewComponentViewModel()
+        return new CategorySectionViewComponentViewModel()
         {
             CompletedSectionCount = category.Completed,
             TotalSectionCount = category.Sections?.Count ?? 0,
-            CategorySectionDto = sectionsExist ? GetCategorySectionViewComponentViewModel(category) : Enumerable.Empty<CategorySectionDto>(),
+            CategorySectionDto = GetCategorySectionViewComponentViewModel(category),
             ProgressRetrievalErrorMessage = category.RetrievalError ? "Unable to retrieve progress, please refresh your browser." : null
         };
-
-        if (!sectionsExist) categorySectionViewModel.NoSectionsErrorRedirectUrl = "ServiceUnavailable";
-
-        return View(categorySectionViewModel);
     }
 
     private void LogErrorWithUserFeedback(Section categorySection, ref CategorySectionDto categorySectionDto)

@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Domain.Content.Queries;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
