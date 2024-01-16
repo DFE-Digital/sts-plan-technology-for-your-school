@@ -1,6 +1,7 @@
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.AzureFunctions.Mappings;
 using Dfe.PlanTech.AzureFunctions.UnitTests.Mappers;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
@@ -18,13 +19,24 @@ namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 public class QueueReceiverTests
 {
     private const string bodyJsonStr = "{\"metadata\":{\"tags\":[]},\"fields\":{\"internalName\":{\"en-US\":\"TestingQuestion\"},\"text\":{\"en-US\":\"TestingQuestion\"},\"helpText\":{\"en-US\":\"HelpText\"},\"answers\":{\"en-US\":[{\"sys\":{\"type\":\"Link\",\"linkType\":\"Entry\",\"id\":\"4QscetbCYG4MUsGdoDU0C3\"}}]},\"slug\":{\"en-US\":\"testing-slug\"}},\"sys\":{\"type\":\"Entry\",\"id\":\"2VSR0emw0SPy8dlR9XlgfF\",\"space\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"Space\",\"id\":\"py5afvqdlxgo\"}},\"environment\":{\"sys\":{\"id\":\"dev\",\"type\":\"Link\",\"linkType\":\"Environment\"}},\"contentType\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"ContentType\",\"id\":\"question\"}},\"createdBy\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"User\",\"id\":\"5yhMQOCN9P2vGpfjyZKiey\"}},\"updatedBy\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"User\",\"id\":\"4hiJvkyVWdhTt6c4ZoDkMf\"}},\"revision\":13,\"createdAt\":\"2023-12-04T14:36:46.614Z\",\"updatedAt\":\"2023-12-15T16:16:45.034Z\"}}";
-
+    private const string _contentId = "2VSR0emw0SPy8dlR9XlgfF";
     private readonly QueueReceiver _queueReceiver;
 
     private readonly ILoggerFactory _loggerFactoryMock;
     private readonly ILogger _loggerMock;
     private readonly CmsDbContext _cmsDbContextMock;
     private readonly JsonToEntityMappers _jsonToEntityMappers;
+
+    private object? _addedObject = null;
+
+    private readonly static ContentComponentDbEntityImplementation _contentComponent = new() { Archived = true, Published = true, Deleted = true, Id = _contentId };
+    private readonly static ContentComponentDbEntityImplementation _otherContentComponent = new() { Archived = true, Published = true, Deleted = true, Id = "other-content-component" };
+
+    private readonly List<ContentComponentDbEntityImplementation> _existing = new()
+    {
+        _otherContentComponent
+    };
+
 
     public QueueReceiverTests()
     {
@@ -37,10 +49,7 @@ public class QueueReceiverTests
         });
 
         _cmsDbContextMock = Substitute.For<CmsDbContext>();
-        ContentComponentDbEntityImplementation contentComponent = new() { Archived = true, Published = true, Deleted = true, Id = "Testing" };
-
-        var list = new List<ContentComponentDbEntityImplementation>() { contentComponent };
-        IQueryable<ContentComponentDbEntityImplementation> queryable = list.AsQueryable();
+        IQueryable<ContentComponentDbEntityImplementation> queryable = _existing.AsQueryable();
         _cmsDbContextMock.SaveChangesAsync().Returns(1);
 
         var asyncProvider = new AsyncQueryProvider<ContentComponentDbEntityImplementation>(queryable.Provider);
@@ -72,13 +81,19 @@ public class QueueReceiverTests
         _jsonToEntityMappers = Substitute.For<JsonToEntityMappers>(new JsonToDbMapper[] { new JsonToDbMapperImplementation(questionDbEntityType, _loggerMock, jsonOptions) }, jsonOptions);
 
         _queueReceiver = new QueueReceiver(_loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers);
+
+        _cmsDbContextMock.Add(Arg.Any<ContentComponentDbEntity>()).Returns(callinfo =>
+        {
+            var added = callinfo.ArgAt<ContentComponentDbEntity>(0);
+            _addedObject = added;
+
+            return null!;
+        });
     }
 
     [Fact]
     public async Task QueueReceiverDbWriter_Should_Execute_Successfully()
     {
-        _cmsDbContextMock.SaveChangesAsync().Returns(1);
-
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
 
@@ -90,6 +105,16 @@ public class QueueReceiverTests
         await _queueReceiver.QueueReceiverDbWriter(new ServiceBusReceivedMessage[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock);
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>());
+        await _cmsDbContextMock.ReceivedWithAnyArgs(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        _cmsDbContextMock.ReceivedWithAnyArgs(1).Add(Arg.Any<ContentComponentDbEntity>());
+
+        Assert.NotNull(_addedObject);
+
+        var asContentComponentDbEntity = _addedObject as ContentComponentDbEntity;
+
+        Assert.NotNull(asContentComponentDbEntity);
+
+        Assert.Equal(_contentId, asContentComponentDbEntity.Id);
     }
 
     [Fact]
@@ -110,17 +135,10 @@ public class QueueReceiverTests
         await serviceBusMessageActionsMock.Received().DeadLetterMessageAsync(Arg.Any<ServiceBusReceivedMessage>());
     }
 
-    static async IAsyncEnumerable<CategoryDbEntity> RangeAsync(int start, int count)
-    {
-        CategoryDbEntity contentComponent = new() { Archived = true, Published = true, Deleted = true };
-
-        yield return contentComponent;
-    }
-
-
     [Fact]
     public async Task QueueReceiverDbWriter_Should_MapExistingDbEntity_To_Message()
     {
+        _existing.Add(_contentComponent);
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
 
@@ -132,12 +150,13 @@ public class QueueReceiverTests
         await _queueReceiver.QueueReceiverDbWriter(new ServiceBusReceivedMessage[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock);
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>());
+        _cmsDbContextMock.ReceivedWithAnyArgs(0).Add(Arg.Any<ContentComponentDbEntity>());
     }
 
     [Fact]
     public async Task QueueRecieverDbWriter_Should_CompleteSuccessfully_After_Archive()
     {
-        _cmsDbContextMock.SaveChangesAsync().Returns(1);
+        _contentComponent.Archived = false;
 
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
@@ -150,12 +169,16 @@ public class QueueReceiverTests
         await _queueReceiver.QueueReceiverDbWriter(new ServiceBusReceivedMessage[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock);
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>());
+
+        var added = _addedObject as ContentComponentDbEntity;
+        Assert.NotNull(added);
+        Assert.True(added.Archived);
     }
 
     [Fact]
     public async Task QueueRecieverDbWriter_Should_CompleteSuccessfully_After_Unarchive()
     {
-        _cmsDbContextMock.SaveChangesAsync().Returns(1);
+        _contentComponent.Archived = true;
 
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
@@ -168,12 +191,16 @@ public class QueueReceiverTests
         await _queueReceiver.QueueReceiverDbWriter(new ServiceBusReceivedMessage[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock);
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>());
+
+        var added = _addedObject as ContentComponentDbEntity;
+        Assert.NotNull(added);
+        Assert.False(added.Archived);
     }
 
     [Fact]
     public async Task QueueRecieverDbWriter_Should_CompleteSuccessfully_After_Publish()
     {
-        _cmsDbContextMock.SaveChangesAsync().Returns(1);
+        _contentComponent.Published = false;
 
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
@@ -186,12 +213,16 @@ public class QueueReceiverTests
         await _queueReceiver.QueueReceiverDbWriter(new ServiceBusReceivedMessage[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock);
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>());
+
+        var added = _addedObject as ContentComponentDbEntity;
+        Assert.NotNull(added);
+        Assert.True(added.Published);
     }
 
     [Fact]
     public async Task QueueRecieverDbWriter_Should_CompleteSuccessfully_After_Unpublish()
     {
-        _cmsDbContextMock.SaveChangesAsync().Returns(1);
+        _contentComponent.Published = false;
 
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
@@ -204,12 +235,16 @@ public class QueueReceiverTests
         await _queueReceiver.QueueReceiverDbWriter(new ServiceBusReceivedMessage[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock);
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>());
+
+        var added = _addedObject as ContentComponentDbEntity;
+        Assert.NotNull(added);
+        Assert.False(added.Published);
     }
 
     [Fact]
     public async Task QueueRecieverDbWriter_Should_CompleteSuccessfully_After_Delete()
     {
-        _cmsDbContextMock.SaveChangesAsync().Returns(1);
+        _contentComponent.Deleted = false;
 
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
@@ -222,6 +257,10 @@ public class QueueReceiverTests
         await _queueReceiver.QueueReceiverDbWriter(new ServiceBusReceivedMessage[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock);
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>());
+
+        var added = _addedObject as ContentComponentDbEntity;
+        Assert.NotNull(added);
+        Assert.True(added.Deleted);
     }
 
     [Fact]

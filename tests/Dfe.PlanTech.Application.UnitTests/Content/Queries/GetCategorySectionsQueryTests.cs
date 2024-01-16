@@ -44,18 +44,21 @@ public class GetCategorySectionsQueryTests
       CategoryId = _category.Id,
       Id = "section-one",
       Name = "section-one-name",
+      Order = 0,
       Questions = new(){
         new(){
           Id = "Question-one",
           Slug = "/question-one",
           HelpText = "helptext-should-be-null",
-          Text = "text-should-be-null"
+          Text = "text-should-be-null",
+          Order = 0
           },
           new(){
             Id = "Question-two",
             Slug = "/question-two",
             HelpText = "helptext-should-be-null",
-            Text = "text-should-be-null"
+            Text = "text-should-be-null",
+            Order = 1
             }
           },
           Recommendations = new(){
@@ -92,18 +95,21 @@ public class GetCategorySectionsQueryTests
       CategoryId = _category.Id,
       Id = "section-two",
       Name = "section-two-name",
+      Order = 1,
       Questions = new(){
         new(){
           Id = "Question-three",
           Slug = "/question-three",
           HelpText = "helptext-should-be-null",
-          Text = "text-should-be-null"
+          Text = "text-should-be-null",
+          Order = 0
           },
           new(){
             Id = "Question-four",
             Slug = "/question-four",
             HelpText = "helptext-should-be-null",
-            Text = "text-should-be-null"
+            Text = "text-should-be-null",
+            Order = 1
             }
           },
           Recommendations = new(){

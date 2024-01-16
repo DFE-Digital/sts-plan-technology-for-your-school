@@ -16,9 +16,14 @@ public class CategoryMapper : JsonToDbMapper<CategoryDbEntity>
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
+        int order = 0;
         values = MoveValueToNewKey(values, "header", "headerId");
 
-        UpdateReferencesArray(values, "sections", _db.Sections, (id, section) => section.CategoryId = Payload!.Sys.Id);
+        UpdateReferencesArray(values, "sections", _db.Sections, (id, section) =>
+        {
+            section.CategoryId = Payload!.Sys.Id;
+            section.Order = order++;
+        });
 
         return values;
     }
