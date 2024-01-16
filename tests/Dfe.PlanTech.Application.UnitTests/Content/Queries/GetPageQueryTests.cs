@@ -4,8 +4,10 @@ using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
+using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
@@ -112,6 +114,7 @@ public class GetPageQueryTests
                 new SectionDbEntity(){
                     Name = "sSection one",
                     CategoryId = CATEGORY_ID,
+                    Order = 0,
                     Recommendations = new(){
                         new RecommendationPageDbEntity(){
                             DisplayName = "Recommendation one",
@@ -130,9 +133,11 @@ public class GetPageQueryTests
                     },
                     Questions = new(){
                         new QuestionDbEntity(){
+                            Order = 0,
                             Slug = "question-one-slug",
                         },
                         new QuestionDbEntity(){
+                            Order = 1,
                             Slug = "question-two-slug"
                         }
                     }
@@ -165,6 +170,8 @@ public class GetPageQueryTests
             },
         }
     };
+
+    private IGetPageChildrenQuery _getPageChildrenQuery = Substitute.For<IGetPageChildrenQuery>();
 
     public GetPageQueryTests()
     {
@@ -248,6 +255,9 @@ public class GetPageQueryTests
         _pageWithCategories.Content.Add(_category);
 
         _cmsDbSubstitute.Sections.Returns(_sections.AsQueryable());
+
+        _getPageChildrenQuery.TryLoadChildren(Arg.Any<PageDbEntity>(), Arg.Any<CancellationToken>())
+                            .Returns(Task.CompletedTask);
     }
 
     private void SetupRepository()
@@ -271,8 +281,8 @@ public class GetPageQueryTests
         });
     }
 
-    private GetPageQuery CreateGetPageQuery()
-        => new(_cmsDbSubstitute, _logger, _mapperSubstitute, _questionnaireCacherSubstitute, _repoSubstitute);
+    private IGetPageQuery CreateGetPageQuery()
+        => new GetPageQuery(_cmsDbSubstitute, _logger, _mapperSubstitute, _questionnaireCacherSubstitute, _repoSubstitute, new[] { _getPageChildrenQuery });
 
     private void SetupQuestionnaireCacher()
     {
@@ -288,7 +298,7 @@ public class GetPageQueryTests
     [Fact]
     public async Task Should_Retrieve_Page_By_Slug_From_Db()
     {
-        GetPageQuery query = CreateGetPageQuery();
+        var query = CreateGetPageQuery();
 
         _cmsDbSubstitute.Pages.Returns(_pagesFromDb.AsQueryable());
         _cmsDbSubstitute.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
@@ -309,128 +319,8 @@ public class GetPageQueryTests
         await _cmsDbSubstitute.ReceivedWithAnyArgs(0).ToListAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
         await _cmsDbSubstitute.ReceivedWithAnyArgs(0).ToListAsync(Arg.Any<IQueryable<ButtonWithEntryReferenceDbEntity>>(), Arg.Any<CancellationToken>());
         _cmsDbSubstitute.ReceivedWithAnyArgs(0).RichTextContentsByPageSlug(Arg.Any<string>());
-    }
 
-    [Fact]
-    public async Task Should_Retrieve_Buttons_For_Page_When_Existing()
-    {
-        GetPageQuery query = CreateGetPageQuery();
-
-        _cmsDbSubstitute.Pages.Returns(_pagesFromDb.AsQueryable());
-        _cmsDbSubstitute.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                        .Returns(callinfo =>
-                        {
-                            var slug = callinfo.ArgAt<string>(0);
-
-                            return _cmsDbSubstitute.Pages.FirstOrDefault(page => string.Equals(page.Slug, slug));
-                        });
-
-        var result = await query.GetPageBySlug(_pageWithButton.Slug);
-
-        Assert.NotNull(result);
-        Assert.Equal(_pageWithButton.Slug, result.Slug);
-
-        await _repoSubstitute.ReceivedWithAnyArgs(0).GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>());
-        await _cmsDbSubstitute.ReceivedWithAnyArgs(1).GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>());
-        await _cmsDbSubstitute.ReceivedWithAnyArgs(1).ToListAsync(Arg.Any<IQueryable<ButtonWithEntryReferenceDbEntity>>(), Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task Should_Retrieve_Sections_For_Page_When_Page_Has_Categories()
-    {
-        GetPageQuery query = CreateGetPageQuery();
-
-        _cmsDbSubstitute.Pages.Returns(_pagesFromDb.AsQueryable());
-        _cmsDbSubstitute.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                        .Returns(callinfo =>
-                        {
-                            var slug = callinfo.ArgAt<string>(0);
-
-                            return _cmsDbSubstitute.Pages.FirstOrDefault(page => string.Equals(page.Slug, slug));
-                        });
-
-        _cmsDbSubstitute.Sections.Returns(_sections.AsQueryable());
-
-        var result = await query.GetPageBySlug(_pageWithCategories.Slug);
-
-        Assert.NotNull(result);
-        Assert.Equal(_pageWithCategories.Slug, result.Slug);
-
-        await _repoSubstitute.ReceivedWithAnyArgs(0).GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>());
-        await _cmsDbSubstitute.ReceivedWithAnyArgs(1).GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>());
-        await _cmsDbSubstitute.ReceivedWithAnyArgs(1).ToListAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
-
-        var category = result.Content.Where(content => content is Category).Select(cat => cat as Category).FirstOrDefault();
-
-        Assert.NotNull(category);
-        Assert.Equal(_sections.Count, category.Sections.Count);
-
-        foreach (var section in _sections)
-        {
-            var matching = category.Sections.Find(pageSection => section.Id == pageSection.Sys.Id);
-
-            Assert.NotNull(matching);
-
-            foreach (var question in section.Questions)
-            {
-                var matchingQuestion = matching.Questions.Find(pageQuestion => pageQuestion.Sys.Id == question.Id);
-                Assert.NotNull(matchingQuestion);
-            }
-
-            foreach (var recommendation in section.Recommendations)
-            {
-                var matchingRecommendation = matching.Recommendations.Find(pageRecommendation => pageRecommendation.Sys.Id == recommendation.Id);
-                Assert.NotNull(matchingRecommendation);
-            }
-        }
-    }
-
-    [Fact]
-    public async Task Should_Retrieve_RichText_For_Page()
-    {
-        GetPageQuery query = CreateGetPageQuery();
-
-        _cmsDbSubstitute.Pages.Returns(_pagesFromDb.AsQueryable());
-        _cmsDbSubstitute.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                        .Returns(callinfo =>
-                        {
-                            var slug = callinfo.ArgAt<string>(0);
-
-                            return _cmsDbSubstitute.Pages.FirstOrDefault(page => string.Equals(page.Slug, slug));
-                        });
-
-        var result = await query.GetPageBySlug(_pageWithRichTextContent.Slug);
-
-        Assert.NotNull(result);
-        Assert.Equal(_pageWithRichTextContent.Slug, result.Slug);
-
-        await _repoSubstitute.ReceivedWithAnyArgs(0).GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>());
-        await _cmsDbSubstitute.ReceivedWithAnyArgs(1).GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>());
-        _cmsDbSubstitute.ReceivedWithAnyArgs(1).RichTextContentsByPageSlug(Arg.Any<string>());
-    }
-
-    [Fact]
-    public async Task Should_Retrieve_ButtonWithEntryReferences_For_Page_When_Existing()
-    {
-        GetPageQuery query = CreateGetPageQuery();
-
-        _cmsDbSubstitute.Pages.Returns(_pagesFromDb.AsQueryable());
-        _cmsDbSubstitute.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                        .Returns(callinfo =>
-                        {
-                            var slug = callinfo.ArgAt<string>(0);
-
-                            return _cmsDbSubstitute.Pages.FirstOrDefault(page => string.Equals(page.Slug, slug));
-                        });
-
-        var result = await query.GetPageBySlug(_pageWithButton.Slug);
-
-        Assert.NotNull(result);
-        Assert.Equal(_pageWithButton.Slug, result.Slug);
-
-        await _repoSubstitute.ReceivedWithAnyArgs(0).GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>());
-        await _cmsDbSubstitute.ReceivedWithAnyArgs(1).GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>());
-        await _cmsDbSubstitute.ReceivedWithAnyArgs(1).ToListAsync(Arg.Any<IQueryable<ButtonWithEntryReferenceDbEntity>>(), Arg.Any<CancellationToken>());
+        await _getPageChildrenQuery.ReceivedWithAnyArgs(1).TryLoadChildren(Arg.Any<PageDbEntity>(), Arg.Any<CancellationToken>());
     }
 
 
@@ -439,7 +329,7 @@ public class GetPageQueryTests
     {
         Environment.SetEnvironmentVariable("CONTENTFUL_GET_ENTITY_INT", "4");
 
-        GetPageQuery query = CreateGetPageQuery();
+        var query = CreateGetPageQuery();
 
         var emptyList = new List<PageDbEntity>(0);
         _cmsDbSubstitute.Pages.Returns(emptyList.AsQueryable());
@@ -459,7 +349,7 @@ public class GetPageQueryTests
     {
         Environment.SetEnvironmentVariable("CONTENTFUL_GET_ENTITY_INT", "4");
 
-        GetPageQuery query = CreateGetPageQuery();
+        var query = CreateGetPageQuery();
 
         _cmsDbSubstitute.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
                         .Returns(callinfo =>
@@ -520,5 +410,4 @@ public class GetPageQueryTests
 
         await Assert.ThrowsAsync<FormatException>(async () => await query.GetPageBySlug(SECTION_SLUG));
     }
-
 }

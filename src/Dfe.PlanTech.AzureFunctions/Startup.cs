@@ -6,17 +6,22 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Dfe.PlanTech.AzureFunctions
 {
+    [ExcludeFromCodeCoverage]
     public static class Startup
     {
         public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<CmsDbContext>(options => options.UseSqlServer(configuration["AZURE_SQL_CONNECTIONSTRING"]));
+            services.AddDbContext<CmsDbContext>(options =>
+            {
+                options.UseSqlServer(configuration["AZURE_SQL_CONNECTIONSTRING"]);
+            });
 
             services.AddAzureClients(builder =>
             {

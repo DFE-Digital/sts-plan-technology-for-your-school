@@ -10,7 +10,7 @@
         await Html.RenderPartialAsync("HomeButton", Model);
     }
     }
-@{
+    @{
     if (Model.Page.Slug == "self-assessment" && TempData.ContainsKey("SectionName"))
     {
         var sectionName = TempData["SectionName"] as string;
@@ -25,7 +25,7 @@
             {
                 <div class="govuk-notification-banner__content">
                     <h3 class="govuk-notification-banner__heading">
-                        You have one new recommendation for @sectionName
+                        You have one new <a href="#recommendations-section">recommendation for @sectionName</a>
                     </h3>
                 </div>
             }
