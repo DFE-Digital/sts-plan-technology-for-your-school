@@ -9,120 +9,120 @@ namespace Dfe.PlanTech.Application.UnitTests.Content.Queries;
 
 public class GetNavigationQueryTests
 {
-  private readonly IContentRepository _contentRepository = Substitute.For<IContentRepository>();
+    private readonly IContentRepository _contentRepository = Substitute.For<IContentRepository>();
 
-  private readonly IList<NavigationLink> _contentfulLinks = new List<NavigationLink>(){
+    private readonly IList<NavigationLink> _contentfulLinks = new List<NavigationLink>(){
     new(){
       Href = "ContentfulHref",
       DisplayText = "ContentfulDisplayText"
     }
   };
 
-  private readonly IList<NavigationLinkDbEntity> _dbLinks = new List<NavigationLinkDbEntity>(){
+    private readonly IList<NavigationLinkDbEntity> _dbLinks = new List<NavigationLinkDbEntity>(){
     new(){
       Href = "DatabaseHref",
       DisplayText = "DatabaseLink"
     }
   };
 
-  private readonly ILogger<GetNavigationQuery> _logger = Substitute.For<ILogger<GetNavigationQuery>>();
+    private readonly ILogger<GetNavigationQuery> _logger = Substitute.For<ILogger<GetNavigationQuery>>();
 
-  private readonly ICmsDbContext _db = Substitute.For<ICmsDbContext>();
+    private readonly ICmsDbContext _db = Substitute.For<ICmsDbContext>();
 
-  public GetNavigationQueryTests()
-  {
-  }
-
-  [Fact]
-  public async Task Should_Retrieve_Nav_Links_From_Database()
-  {
-    _db.NavigationLink.Returns(_dbLinks.AsQueryable());
-    _db.ToListAsync(Arg.Any<IQueryable<NavigationLinkDbEntity>>()).Returns(callInfo =>
+    public GetNavigationQueryTests()
     {
-      var queryable = callInfo.ArgAt<IQueryable<NavigationLinkDbEntity>>(0);
+    }
 
-      return queryable.ToList();
-    });
-
-    IGetNavigationQuery navQuery = new GetNavigationQuery(_db, _logger, _contentRepository);
-
-    var result = await navQuery.GetNavigationLinks();
-
-    Assert.Equal(_dbLinks, result);
-  }
-
-  [Fact]
-  public async Task Should_Retrieve_Nav_Links_From_Contentful_When_No_Db_Results()
-  {
-    _contentRepository.GetEntities<NavigationLink>(CancellationToken.None).Returns(_contentfulLinks);
-
-    var emptyNavLinksList = new List<NavigationLinkDbEntity>();
-    _db.NavigationLink.Returns(emptyNavLinksList.AsQueryable());
-    _db.ToListAsync(Arg.Any<IQueryable<NavigationLinkDbEntity>>()).Returns(callInfo =>
+    [Fact]
+    public async Task Should_Retrieve_Nav_Links_From_Database()
     {
-      var queryable = callInfo.ArgAt<IQueryable<NavigationLinkDbEntity>>(0);
+        _db.NavigationLink.Returns(_dbLinks.AsQueryable());
+        _db.ToListAsync(Arg.Any<IQueryable<NavigationLinkDbEntity>>()).Returns(callInfo =>
+        {
+            var queryable = callInfo.ArgAt<IQueryable<NavigationLinkDbEntity>>(0);
 
-      return queryable.ToList();
-    });
+            return queryable.ToList();
+        });
 
-    IGetNavigationQuery navQuery = new GetNavigationQuery(_db, _logger, _contentRepository);
+        IGetNavigationQuery navQuery = new GetNavigationQuery(_db, _logger, _contentRepository);
 
-    var result = await navQuery.GetNavigationLinks();
+        var result = await navQuery.GetNavigationLinks();
 
-    Assert.Equal(_contentfulLinks, result);
-  }
+        Assert.Equal(_dbLinks, result);
+    }
 
-  [Fact]
-  public async Task Should_LogError_When_DbException()
-  {
-    _contentRepository.GetEntities<NavigationLink>(CancellationToken.None).Returns(_contentfulLinks);
-
-    var emptyNavLinksList = new List<NavigationLinkDbEntity>();
-    _db.NavigationLink.Returns(emptyNavLinksList.AsQueryable());
-
-    _db.ToListAsync(Arg.Any<IQueryable<NavigationLinkDbEntity>>()).Returns(callInfo =>
+    [Fact]
+    public async Task Should_Retrieve_Nav_Links_From_Contentful_When_No_Db_Results()
     {
-      throw new Exception("Error occurred");
+        _contentRepository.GetEntities<NavigationLink>(CancellationToken.None).Returns(_contentfulLinks);
 
-      var queryable = callInfo.ArgAt<IQueryable<NavigationLinkDbEntity>>(0);
+        var emptyNavLinksList = new List<NavigationLinkDbEntity>();
+        _db.NavigationLink.Returns(emptyNavLinksList.AsQueryable());
+        _db.ToListAsync(Arg.Any<IQueryable<NavigationLinkDbEntity>>()).Returns(callInfo =>
+        {
+            var queryable = callInfo.ArgAt<IQueryable<NavigationLinkDbEntity>>(0);
 
-      return queryable.ToList();
-    });
+            return queryable.ToList();
+        });
 
-    IGetNavigationQuery navQuery = new GetNavigationQuery(_db, _logger, _contentRepository);
+        IGetNavigationQuery navQuery = new GetNavigationQuery(_db, _logger, _contentRepository);
 
-    var result = await navQuery.GetNavigationLinks();
+        var result = await navQuery.GetNavigationLinks();
 
-    _logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
-    Assert.Equal(_contentfulLinks, result);
-  }
+        Assert.Equal(_contentfulLinks, result);
+    }
 
-  [Fact]
-  public async Task Should_LogError_When_Contentful_Exception()
-  {
-    var emptyNavLinksList = new List<NavigationLinkDbEntity>();
-    _db.NavigationLink.Returns(emptyNavLinksList.AsQueryable());
-
-    _db.ToListAsync(Arg.Any<IQueryable<NavigationLinkDbEntity>>()).Returns(callInfo =>
+    [Fact]
+    public async Task Should_LogError_When_DbException()
     {
-      var queryable = callInfo.ArgAt<IQueryable<NavigationLinkDbEntity>>(0);
+        _contentRepository.GetEntities<NavigationLink>(CancellationToken.None).Returns(_contentfulLinks);
 
-      return queryable.ToList();
-    });
+        var emptyNavLinksList = new List<NavigationLinkDbEntity>();
+        _db.NavigationLink.Returns(emptyNavLinksList.AsQueryable());
 
-    _contentRepository.GetEntities<NavigationLink>(CancellationToken.None).Returns(callinfo =>
+        _db.ToListAsync(Arg.Any<IQueryable<NavigationLinkDbEntity>>()).Returns(callInfo =>
+        {
+            throw new Exception("Error occurred");
+
+            var queryable = callInfo.ArgAt<IQueryable<NavigationLinkDbEntity>>(0);
+
+            return queryable.ToList();
+        });
+
+        IGetNavigationQuery navQuery = new GetNavigationQuery(_db, _logger, _contentRepository);
+
+        var result = await navQuery.GetNavigationLinks();
+
+        _logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
+        Assert.Equal(_contentfulLinks, result);
+    }
+
+    [Fact]
+    public async Task Should_LogError_When_Contentful_Exception()
     {
-      throw new Exception("Contentful error");
-      return _contentfulLinks;
-    });
+        var emptyNavLinksList = new List<NavigationLinkDbEntity>();
+        _db.NavigationLink.Returns(emptyNavLinksList.AsQueryable());
+
+        _db.ToListAsync(Arg.Any<IQueryable<NavigationLinkDbEntity>>()).Returns(callInfo =>
+        {
+            var queryable = callInfo.ArgAt<IQueryable<NavigationLinkDbEntity>>(0);
+
+            return queryable.ToList();
+        });
+
+        _contentRepository.GetEntities<NavigationLink>(CancellationToken.None).Returns(callinfo =>
+        {
+            throw new Exception("Contentful error");
+            return _contentfulLinks;
+        });
 
 
-    IGetNavigationQuery navQuery = new GetNavigationQuery(_db, _logger, _contentRepository);
+        IGetNavigationQuery navQuery = new GetNavigationQuery(_db, _logger, _contentRepository);
 
-    var result = await navQuery.GetNavigationLinks();
+        var result = await navQuery.GetNavigationLinks();
 
-    _logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
-    Assert.Empty(result);
-  }
+        _logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
+        Assert.Empty(result);
+    }
 
 }

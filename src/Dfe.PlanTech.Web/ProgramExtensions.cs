@@ -27,7 +27,6 @@ using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Web.Helpers;
 using EFCoreSecondLevelCacheInterceptor;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
 using System.Diagnostics.CodeAnalysis;
 

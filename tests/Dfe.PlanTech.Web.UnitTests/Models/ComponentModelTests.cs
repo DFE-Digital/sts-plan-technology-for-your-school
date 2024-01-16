@@ -116,8 +116,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         {
             string? maturity = null;
             var section = _componentBuilder.BuildSections().First();
-
-#pragma warning disable CS8604 // Possible null reference argument.
             var recommendation = section.GetRecommendationForMaturity(maturity);
 
             Assert.Null(recommendation);
