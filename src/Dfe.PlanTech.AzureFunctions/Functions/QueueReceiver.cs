@@ -26,17 +26,17 @@ namespace Dfe.PlanTech.AzureFunctions
         }
 
         [Function("QueueReceiver")]
-        public async Task QueueReceiverDbWriter([ServiceBusTrigger("contentful", IsBatched = true)] ServiceBusReceivedMessage[] messages, ServiceBusMessageActions messageActions)
+        public async Task QueueReceiverDbWriter([ServiceBusTrigger("contentful", IsBatched = true)] ServiceBusReceivedMessage[] messages, ServiceBusMessageActions messageActions, CancellationToken cancellationToken)
         {
             Logger.LogInformation("Queue Receiver -> Db Writer started. Processing {msgCount} messages", messages.Length);
 
             foreach (ServiceBusReceivedMessage message in messages)
             {
-                await ProcessMessage(message, messageActions);
+                await ProcessMessage(message, messageActions, cancellationToken);
             }
         }
 
-        private async Task ProcessMessage(ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions)
+        private async Task ProcessMessage(ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions, CancellationToken cancellationToken)
         {
             try
             {
@@ -47,7 +47,7 @@ namespace Dfe.PlanTech.AzureFunctions
                 Logger.LogInformation("Processing {text}", text);
 
                 ContentComponentDbEntity mapped = _mappers.ToEntity(text);
-                ContentComponentDbEntity? existing = await GetExistingDbEntity(mapped);
+                ContentComponentDbEntity? existing = await GetExistingDbEntity(mapped, cancellationToken);
 
                 if (existing != null)
                 {
@@ -81,7 +81,7 @@ namespace Dfe.PlanTech.AzureFunctions
                         throw new CmsEventException(string.Format("CMS Event \"{0}\" not implemented", cmsEvent));
                 }
 
-                long rowsChanged = await UpsertEntityInDatabase(mapped, existing);
+                long rowsChanged = await UpsertEntityInDatabase(mapped, existing, cancellationToken);
 
                 if (rowsChanged == 0L)
                 {
@@ -92,23 +92,23 @@ namespace Dfe.PlanTech.AzureFunctions
                     Logger.LogInformation($"Updated {rowsChanged} rows in the database");
                 }
 
-                await messageActions.CompleteMessageAsync(message);
+                await messageActions.CompleteMessageAsync(message, cancellationToken);
             }
             catch (Exception ex)
             {
                 Logger.LogError(ex.Message);
-                await messageActions.DeadLetterMessageAsync(message);
+                await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace, cancellationToken);
             }
         }
 
-        private async Task<ContentComponentDbEntity?> GetExistingDbEntity(ContentComponentDbEntity entity)
+        private async Task<ContentComponentDbEntity?> GetExistingDbEntity(ContentComponentDbEntity entity, CancellationToken cancellationToken)
         {
             var model = _db.Model.FindEntityType(entity.GetType()) ?? throw new Exception($"Could not find model in database for {entity.GetType()}");
 
             var dbSet = GetIQueryableForEntity(model);
 
             var found = await dbSet.IgnoreAutoIncludes()
-                                    .FirstOrDefaultAsync(existing => existing.Id == entity.Id);
+                                    .FirstOrDefaultAsync(existing => existing.Id == entity.Id, cancellationToken);
 
             return found ?? null;
         }
@@ -125,7 +125,7 @@ namespace Dfe.PlanTech.AzureFunctions
             return subject.AsSpan()[(subject.LastIndexOf('.') + 1)..].ToString();
         }
 
-        private async Task<long> UpsertEntityInDatabase(ContentComponentDbEntity entity, ContentComponentDbEntity? existing)
+        private async Task<long> UpsertEntityInDatabase(ContentComponentDbEntity entity, ContentComponentDbEntity? existing, CancellationToken cancellationToken)
         {
             if (existing == null)
             {
@@ -136,7 +136,7 @@ namespace Dfe.PlanTech.AzureFunctions
                 UpdateProperties(entity, existing);
             }
 
-            return await _db.SaveChangesAsync();
+            return await _db.SaveChangesAsync(cancellationToken);
         }
 
         private void UpdateProperties(ContentComponentDbEntity entity, ContentComponentDbEntity existing)
