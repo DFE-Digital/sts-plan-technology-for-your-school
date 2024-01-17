@@ -2,7 +2,6 @@ using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
