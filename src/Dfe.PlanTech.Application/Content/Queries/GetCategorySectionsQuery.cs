@@ -47,7 +47,7 @@ public class GetCategorySectionsQuery : IGetPageChildrenQuery
     /// </summary>
     /// <param name="page">Page that contains categories</param>
     /// <param name="sections">"Complete" section from database</param>
-    private static void CopySectionsToPage(PageDbEntity page, List<SectionDbEntity> sections)
+    private void CopySectionsToPage(PageDbEntity page, List<SectionDbEntity> sections)
     {
         var sectionsGroupedByCategory = sections.GroupBy(section => section.CategoryId);
 
@@ -58,7 +58,15 @@ public class GetCategorySectionsQuery : IGetPageChildrenQuery
 
             if (matching == null)
             {
+                _logger.LogError("Could not find matching category {categoryId} in {pageSlug}", cat.Key, page.Slug);
                 continue;
+            }
+
+            var sectionsValid = !sections.Any(cat => cat.InterstitialPage == null);
+
+            if (!sectionsValid)
+            {
+                throw new MissingFieldException($"Missing InterstitialPage for sections in {cat.Key}");
             }
 
             matching.Sections = cat.ToList();

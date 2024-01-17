@@ -14,20 +14,16 @@ namespace Dfe.PlanTech.Application.Content.Queries;
 
 public class GetPageQuery : ContentRetriever, IGetPageQuery
 {
-    private readonly ICmsDbContext _db;
     private readonly ILogger<GetPageQuery> _logger;
     private readonly IQuestionnaireCacher _cacher;
-    private readonly IMapper _mapperConfiguration;
-    private readonly IEnumerable<IGetPageChildrenQuery> _getPageChildrenQueries;
+    private readonly IGetPageQuery _getPageFromDbQuery;
     readonly string _getEntityEnvVariable = Environment.GetEnvironmentVariable("CONTENTFUL_GET_ENTITY_INT") ?? "4";
 
-    public GetPageQuery(ICmsDbContext db, ILogger<GetPageQuery> logger, IMapper mapperConfiguration, IQuestionnaireCacher cacher, IContentRepository repository, IEnumerable<IGetPageChildrenQuery> getPageChildrenQueries) : base(repository)
+    public GetPageQuery(GetPageFromDbQuery getPageFromDbQuery, ILogger<GetPageQuery> logger, IQuestionnaireCacher cacher, IContentRepository repository) : base(repository)
     {
         _cacher = cacher;
-        _db = db;
         _logger = logger;
-        _mapperConfiguration = mapperConfiguration;
-        _getPageChildrenQueries = getPageChildrenQueries;
+        _getPageFromDbQuery = getPageFromDbQuery;
     }
 
     /// <summary>
@@ -35,71 +31,13 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
     /// </summary>
     /// <param name="slug">Slug for the Page</param>
     /// <returns>Page matching slug</returns>
-    public async Task<Page> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
+    public async Task<Page?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
     {
-        var matchingPage = await GetPageFromDatabase(slug, cancellationToken);
+        var page = await _getPageFromDbQuery.GetPageBySlug(slug, cancellationToken) ?? await GetPageFromContentful(slug, cancellationToken);
 
-        if (!IsValidPage(matchingPage, slug))
-        {
-            return await GetPageFromContentful(slug, cancellationToken);
-        }
+        UpdateSectionTitle(page);
 
-        foreach (var query in _getPageChildrenQueries)
-        {
-            await query.TryLoadChildren(matchingPage!, cancellationToken);
-        }
-
-        var mapped = _mapperConfiguration.Map<PageDbEntity, Page>(matchingPage!);
-
-        UpdateSectionTitle(mapped);
-
-        return mapped;
-    }
-
-    /// <summary>
-    /// Checks the retrieved Page from the DB to ensure it is valid (e.g. not null, has content). If not, logs message and returns false.
-    /// </summary>
-    /// <param name="page"></param>
-    /// <param name="slug"></param>
-    /// <returns></returns>
-    private bool IsValidPage(PageDbEntity? page, string slug)
-    {
-        if (page == null)
-        {
-            _logger.LogInformation("Could not find page {slug} in DB - checking Contentful", slug);
-            return false;
-        }
-
-        if (page.Content == null || page.Content.Count == 0)
-        {
-            _logger.LogWarning("Page {slug} has no 'Content' in DB - checking Contentful", slug);
-            return false;
-        }
-
-        return true;
-    }
-
-    /// <summary>
-    /// Retrieve the page for the slug from the database
-    /// </summary>
-    /// <param name="slug"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    private async Task<PageDbEntity?> GetPageFromDatabase(string slug, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var page = await _db.GetPageBySlug(slug, cancellationToken);
-
-            if (page == null) _logger.LogInformation("Found no matching page for {slug} in database", slug);
-
-            return page;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching {page} from database", slug);
-            throw;
-        }
+        return page;
     }
 
     /// <summary>
@@ -125,8 +63,6 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
             var pages = await repository.GetEntities<Page>(options, cancellationToken);
 
             var page = pages.FirstOrDefault() ?? throw new KeyNotFoundException($"Could not find page with slug {slug}");
-
-            UpdateSectionTitle(page);
 
             return page;
         }
