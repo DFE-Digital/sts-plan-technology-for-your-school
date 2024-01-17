@@ -1,3 +1,4 @@
+using AutoMapper;
 using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
@@ -11,10 +12,42 @@ namespace Dfe.PlanTech.Application.Questionnaire.Queries;
 public class GetSectionQuery : ContentRetriever, IGetSectionQuery
 {
     public const string SlugFieldPath = "fields.interstitialPage.fields.slug";
+    private readonly ICmsDbContext _db;
+    private readonly IMapper _mapper;
 
-    public GetSectionQuery(IContentRepository repository) : base(repository) { }
+    public GetSectionQuery(ICmsDbContext db, IContentRepository repository, IMapper mapper) : base(repository)
+    {
+        _db = db;
+        _mapper = mapper;
+    }
 
     public async Task<Section?> GetSectionBySlug(string sectionSlug, CancellationToken cancellationToken = default)
+    {
+        var section = await GetSectionFromDb(sectionSlug, cancellationToken);
+
+        return section ?? await GetSectionFromContentful(sectionSlug, cancellationToken);
+    }
+
+    private async Task<Section?> GetSectionFromDb(string sectionSlug, CancellationToken cancellationToken)
+    {
+        var query = _db.Sections.Select(section => new SectionDbEntity()
+        {
+            Name = section.Name,
+            Questions = section.Questions.Select(question => new QuestionDbEntity()
+            {
+                Slug = question.Slug,
+
+            }).ToList()
+        });
+
+        var section = await _db.FirstOrDefaultAsync(query, cancellationToken);
+
+        if (section == null) return null;
+
+        return _mapper.Map<Section>(section);
+    }
+
+    private async Task<Section?> GetSectionFromContentful(string sectionSlug, CancellationToken cancellationToken)
     {
         var options = new GetEntitiesOptions()
         {
