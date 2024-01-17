@@ -61,8 +61,7 @@ public class GetCategorySectionsQuery : IGetPageChildrenQuery
                 _logger.LogError("Could not find matching category {categoryId} in {pageSlug}", cat.Key, page.Slug);
                 continue;
             }
-
-            var sectionsValid = !sections.Any(cat => cat.InterstitialPage == null);
+            bool sectionsValid = AllSectionsValid(sections);
 
             if (!sectionsValid)
             {
@@ -72,6 +71,18 @@ public class GetCategorySectionsQuery : IGetPageChildrenQuery
             matching.Sections = cat.ToList();
         }
     }
+
+    /// <summary>
+    /// Are all sections in this collection valid?
+    /// </summary>
+    /// <remarks>
+    /// Currently just validates that they have an interstitial page, as this will cause errors
+    /// on the self-assessment page otherwise currently.
+    /// </remarks>
+    /// <param name="sections"></param>
+    /// <returns>All sections in the enumerable are valid (true) or ANY is invalid (false)</returns>
+    private static bool AllSectionsValid(IEnumerable<SectionDbEntity> sections)
+        => !sections.Any(cat => cat.InterstitialPage == null);
 
 
     /// <summary>
