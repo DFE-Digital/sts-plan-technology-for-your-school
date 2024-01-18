@@ -13,5 +13,5 @@ public interface IGetPageQuery
     /// </summary>
     /// <param name="slug">Slug for the Page</param>
     /// <returns>Page matching slug</returns>
-    public Task<Page> GetPageBySlug(string slug, CancellationToken cancellationToken = default);
+    public Task<Page?> GetPageBySlug(string slug, CancellationToken cancellationToken = default);
 }
