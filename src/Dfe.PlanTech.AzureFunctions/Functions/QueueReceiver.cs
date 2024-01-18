@@ -42,6 +42,8 @@ public class QueueReceiver : BaseFunction
         {
             string cmsEvent = GetCmsEvent(message.Subject);
 
+            Logger.LogInformation("CMS Event: {cmsEvent}", cmsEvent);
+
             ContentComponentDbEntity mapped = GetMapped(message);
             ContentComponentDbEntity? existing = await GetExisting(mapped, cancellationToken);
 
