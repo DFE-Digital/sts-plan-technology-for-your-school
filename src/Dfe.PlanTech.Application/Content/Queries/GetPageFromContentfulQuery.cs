@@ -12,10 +12,10 @@ namespace Dfe.PlanTech.Application.Content.Queries;
 public class GetPageFromContentfulQuery : IGetPageQuery
 {
     private readonly IContentRepository _repository;
-    private readonly ILogger<GetPageAuthenticationQuery> _logger;
+    private readonly ILogger<GetPageFromContentfulQuery> _logger;
     private readonly GetPageFromContentfulOptions _options;
 
-    public GetPageFromContentfulQuery(IContentRepository repository, ILogger<GetPageAuthenticationQuery> logger, GetPageFromContentfulOptions options)
+    public GetPageFromContentfulQuery(IContentRepository repository, ILogger<GetPageFromContentfulQuery> logger, GetPageFromContentfulOptions options)
     {
         _repository = repository;
         _logger = logger;
