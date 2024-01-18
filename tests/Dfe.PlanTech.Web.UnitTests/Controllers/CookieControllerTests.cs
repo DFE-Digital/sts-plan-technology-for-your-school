@@ -145,7 +145,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             GetPageQuery _getPageQuerySubstitute = Substitute.For<GetPageQuery>(_getPageFromDbQuery, _getPageLogger, questionnaireCacherSubstitute, contentRepositorySubstitute);
 
             CookiesController cookiesController = CreateStrut();
-            var result = await cookiesController.GetCookiesPage(_getPageQuerySubstitute);
+            var result = await cookiesController.GetCookiesPage(_getPageQuerySubstitute, CancellationToken.None);
             Assert.IsType<ViewResult>(result);
 
             var viewResult = result as ViewResult;
