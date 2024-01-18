@@ -11,13 +11,6 @@ using Microsoft.Extensions.Logging;
 using System.Reflection;
 using System.Text;
 
-// TODO: Notes for today!!!
-// 1. Rejig all this so mapping, updating, adding is all separate methods
-// 2. To deal with unpublished, essentially do 'if existing entity exists && not unpublished (do value copy)'
-// 3. And changed mapped.Published = False to existing.Published = False
-// 4. Because EF Core tracks 'existing' and understands that only that property has changed
-// 5. So the section will be unmodified, but the ContentComponent will get changed
-
 namespace Dfe.PlanTech.AzureFunctions;
 
 public class QueueReceiver : BaseFunction
