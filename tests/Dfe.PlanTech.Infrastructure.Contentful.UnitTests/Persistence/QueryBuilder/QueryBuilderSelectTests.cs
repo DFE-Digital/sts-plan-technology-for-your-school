@@ -25,4 +25,20 @@ public class QueryBuilderSelectTests
 
         Assert.Equal(expectedValue, built);
     }
+
+    [Fact]
+    public void Should_DoNothing_When_Select_Null()
+    {
+        var queryBuilder = new QueryBuilder<TestClass>();
+        var options = new GetEntitiesOptions()
+        {
+        };
+
+        queryBuilder = queryBuilder.WithSelect(options);
+
+        var built = queryBuilder.Build();
+
+        Assert.Empty(built);
+    }
+
 }
