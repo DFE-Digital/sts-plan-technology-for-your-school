@@ -103,7 +103,7 @@ namespace Dfe.PlanTech.AzureFunctions
 
         private async Task<ContentComponentDbEntity?> GetExistingDbEntity(ContentComponentDbEntity entity, CancellationToken cancellationToken)
         {
-            var model = _db.Model.FindEntityType(entity.GetType()) ?? throw new Exception($"Could not find model in database for {entity.GetType()}");
+            var model = _db.Model.FindEntityType(entity.GetType()) ?? throw new KeyNotFoundException($"Could not find model in database for {entity.GetType()}");
 
             var dbSet = GetIQueryableForEntity(model);
 
@@ -159,7 +159,7 @@ namespace Dfe.PlanTech.AzureFunctions
         private IEnumerable<PropertyInfo> PropertiesToCopy(ContentComponentDbEntity entity)
         => entity.GetType()
                 .GetProperties()
-                .Where(property => !HasDontCopyValueAttribute(property));
+                .Where(property => !property.Name.EndsWith("Id") && !HasDontCopyValueAttribute(property));
 
         /// <summary>
         /// Does the property have a <see cref="DontCopyValueAttribute"/> property attached to it? 

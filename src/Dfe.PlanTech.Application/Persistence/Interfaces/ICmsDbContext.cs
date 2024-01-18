@@ -51,4 +51,6 @@ public interface ICmsDbContext
     public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default);
 
     public IQueryable<RichTextContentDbEntity> RichTextContentsByPageSlug(string pageSlug);
+
+    public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default);
 }
