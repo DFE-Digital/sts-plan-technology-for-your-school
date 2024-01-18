@@ -4,6 +4,7 @@ using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace Dfe.PlanTech.Application.UnitTests.Content.Queries;
 
@@ -80,13 +81,9 @@ public class GetNavigationQueryTests
     var emptyNavLinksList = new List<NavigationLinkDbEntity>();
     _db.NavigationLink.Returns(emptyNavLinksList.AsQueryable());
 
-    _db.ToListAsync(Arg.Any<IQueryable<NavigationLinkDbEntity>>()).Returns(callInfo =>
+    _db.ToListAsync(Arg.Any<IQueryable<NavigationLinkDbEntity>>()).Throws(callInfo =>
     {
       throw new Exception("Error occurred");
-
-      var queryable = callInfo.ArgAt<IQueryable<NavigationLinkDbEntity>>(0);
-
-      return queryable.ToList();
     });
 
     IGetNavigationQuery navQuery = new GetNavigationQuery(_db, _logger, _contentRepository);
@@ -110,10 +107,9 @@ public class GetNavigationQueryTests
       return queryable.ToList();
     });
 
-    _contentRepository.GetEntities<NavigationLink>(CancellationToken.None).Returns(callinfo =>
+    _contentRepository.GetEntities<NavigationLink>(CancellationToken.None).Throws(callinfo =>
     {
       throw new Exception("Contentful error");
-      return _contentfulLinks;
     });
 
 
