@@ -1,19 +1,16 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Queries;
-using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
 public class GetPageQuery : IGetPageQuery
 {
-    private readonly IQuestionnaireCacher _cacher;
     private readonly IGetPageQuery _getPageFromDbQuery;
     private readonly IGetPageQuery _getPageFromContentfulQuery;
 
-    public GetPageQuery(GetPageFromContentfulQuery getPageFromContentfulQuery, GetPageFromDbQuery getPageFromDbQuery, ILogger<GetPageQuery> logger, IQuestionnaireCacher cacher)
+    public GetPageQuery(GetPageFromContentfulQuery getPageFromContentfulQuery, GetPageFromDbQuery getPageFromDbQuery)
     {
-        _cacher = cacher;
         _getPageFromDbQuery = getPageFromDbQuery;
         _getPageFromContentfulQuery = getPageFromContentfulQuery;
     }
@@ -27,20 +24,6 @@ public class GetPageQuery : IGetPageQuery
     {
         var page = await _getPageFromDbQuery.GetPageBySlug(slug, cancellationToken) ?? await _getPageFromContentfulQuery.GetPageBySlug(slug, cancellationToken);
 
-        if (page != null)
-        {
-            UpdateSectionTitle(page);
-        }
-
         return page;
-    }
-
-    private void UpdateSectionTitle(Page page)
-    {
-        if (page.DisplayTopicTitle)
-        {
-            var cached = _cacher.Cached!;
-            page.SectionTitle = cached.CurrentSectionTitle;
-        }
     }
 }
