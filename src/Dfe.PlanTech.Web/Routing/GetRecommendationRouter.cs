@@ -73,7 +73,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
 
         var viewModel = new PageViewModel(page, controller, _user, _logger);
 
-        return controller.View("~/Views/Shared/ServiceUnavailable.cshtml", viewModel);
+        return controller.View("~/Views/Pages/Page.cshtml", viewModel);
     }
 
     /// <summary>
