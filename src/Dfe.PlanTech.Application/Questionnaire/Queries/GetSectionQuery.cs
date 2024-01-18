@@ -5,6 +5,7 @@ using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
@@ -46,27 +47,36 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
     {
         Id = section.Id,
         Name = section.Name,
-        Questions = section.Questions.OrderBy(question => question.Order)
-                                    .Select(question => new QuestionDbEntity()
+        Questions = section.Questions
+                            .OrderBy(question => question.Order)
+                            .Select(question => new QuestionDbEntity()
+                            {
+                                Answers = question.Answers.OrderBy(answer => answer.Order)
+                                                        .Select(answer => new AnswerDbEntity()
+                                                        {
+                                                            Id = answer.Id,
+                                                            Maturity = answer.Maturity,
+                                                            NextQuestion = answer.NextQuestion == null ? null : new QuestionDbEntity()
+                                                            {
+                                                                Id = answer.NextQuestion.Id,
+                                                                Slug = answer.NextQuestion.Slug
+                                                            },
+                                                            NextQuestionId = answer.NextQuestionId,
+                                                            Text = answer.Text,
+                                                        }).ToList(),
+                                Id = question.Id,
+                                HelpText = question.HelpText,
+                                Text = question.Text,
+                                Slug = question.Slug,
+                            }).ToList(),
+        Recommendations = section.Recommendations
+                                .Select(recommendation => new RecommendationPageDbEntity()
+                                {
+                                    Page = new PageDbEntity()
                                     {
-                                        Answers = question.Answers.OrderBy(answer => answer.Order)
-                                                                .Select(answer => new AnswerDbEntity()
-                                                                {
-                                                                    Id = answer.Id,
-                                                                    Maturity = answer.Maturity,
-                                                                    NextQuestion = answer.NextQuestion == null ? null : new QuestionDbEntity()
-                                                                    {
-                                                                        Id = answer.NextQuestion.Id,
-                                                                        Slug = answer.NextQuestion.Slug
-                                                                    },
-                                                                    NextQuestionId = answer.NextQuestionId,
-                                                                    Text = answer.Text,
-                                                                }).ToList(),
-                                        Id = question.Id,
-                                        HelpText = question.HelpText,
-                                        Text = question.Text,
-                                        Slug = question.Slug,
-                                    }).ToList()
+                                        Slug = recommendation.Page.Slug
+                                    }
+                                }).ToList()
     };
 
     private static Expression<Func<SectionDbEntity, bool>> SlugMatchesInterstitialPage(string sectionSlug)
