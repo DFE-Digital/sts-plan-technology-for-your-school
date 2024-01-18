@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Queries;
 
