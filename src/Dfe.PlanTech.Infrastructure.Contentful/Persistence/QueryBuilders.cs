@@ -9,6 +9,8 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 
 public static class QueryBuilders
 {
+    private const string QueryBuilderStringValuesFieldName = "_querystringValues";
+
     /// <summary>
     /// Builds query builder, filtering by content type
     /// </summary>
@@ -84,28 +86,19 @@ public static class QueryBuilders
     {
         if (options.Select == null) return queryBuilder;
 
-        var queryStringValues = queryBuilder.GetQueryStringValues();
+        var queryStringValues = queryBuilder.QueryStringValues();
 
-        foreach (var propertyName in options.Select)
-        {
-            queryStringValues.Add(new KeyValuePair<string, string>("select", propertyName));
-        }
+        queryStringValues.Add(new KeyValuePair<string, string>("select", string.Join(',', options.Select)));
 
         return queryBuilder;
     }
 
-    private static List<KeyValuePair<string, string>> GetQueryStringValues<T>(this QueryBuilder<T> queryBuilder)
+    public static List<KeyValuePair<string, string>> QueryStringValues<T>(this QueryBuilder<T> queryBuilder)
     {
-        var fieldInfo = queryBuilder.GetType().GetField("_querystringValues", BindingFlags.NonPublic | BindingFlags.Instance);
+        var fieldInfo = queryBuilder.GetType().GetField(QueryBuilderStringValuesFieldName, BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new MissingFieldException($"Couldn't find field {QueryBuilderStringValuesFieldName}");
 
-        if (fieldInfo == null) throw new Exception("Couldn't find property for some reason");
+        var value = fieldInfo.GetValue(queryBuilder) ?? throw new NullReferenceException($"{QueryBuilderStringValuesFieldName} is null in QueryBuilder");
 
-        var value = fieldInfo.GetValue(queryBuilder);
-
-        if (value is List<KeyValuePair<string, string>> list)
-            return list;
-
-        throw new Exception("Err");
-
+        return value is List<KeyValuePair<string, string>> list ? list : throw new InvalidCastException($"Expected {value} to be {typeof(List<KeyValuePair<string, string>>)} but is actually {value!.GetType()}");
     }
 }
