@@ -27,7 +27,6 @@ using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Web.Helpers;
 using EFCoreSecondLevelCacheInterceptor;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
 using System.Diagnostics.CodeAnalysis;
 
@@ -129,6 +128,8 @@ public static class ProgramExtensions
         services.AddTransient<IProcessCheckAnswerDtoCommand, ProcessCheckAnswerDtoCommand>();
         services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
         services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
+
+        services.AddTransient<GetPageFromDbQuery>();
         return services;
     }
 

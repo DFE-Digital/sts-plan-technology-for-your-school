@@ -4,6 +4,7 @@ using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Web.Controllers;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using NSubstitute;
@@ -24,6 +26,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private readonly ICmsDbContext _db = Substitute.For<ICmsDbContext>();
         private readonly ILogger<GetPageQuery> _getPageLogger = Substitute.For<ILogger<GetPageQuery>>();
         private readonly IMapper _mapper = Substitute.For<IMapper>();
+        private readonly IGetPageQuery _getPageFromDbQuery;
 
         private readonly Page[] _pages = new Page[]
         {
@@ -44,6 +47,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 ControllerContext = ControllerHelpers.SubstituteControllerContext()
             };
+        }
+
+        public CookieControllerTests()
+        {
+            _getPageFromDbQuery = Substitute.For<GetPageFromDbQuery>(_db, new NullLogger<GetPageFromDbQuery>(), _mapper, Array.Empty<IGetPageChildrenQuery>());
         }
 
         [Theory]
@@ -134,7 +142,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             IQuestionnaireCacher questionnaireCacherSubstitute = Substitute.For<IQuestionnaireCacher>();
             IContentRepository contentRepositorySubstitute = SetupRepositorySubstitute();
-            GetPageQuery _getPageQuerySubstitute = Substitute.For<GetPageQuery>(_db, _getPageLogger, _mapper, questionnaireCacherSubstitute, contentRepositorySubstitute, Array.Empty<IGetPageChildrenQuery>());
+            GetPageQuery _getPageQuerySubstitute = Substitute.For<GetPageQuery>(_getPageFromDbQuery, _getPageLogger, questionnaireCacherSubstitute, contentRepositorySubstitute);
 
             CookiesController cookiesController = CreateStrut();
             var result = await cookiesController.GetCookiesPage(_getPageQuerySubstitute);

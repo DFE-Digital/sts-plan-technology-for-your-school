@@ -12,6 +12,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 
@@ -30,6 +31,7 @@ public class GetPageQueryTests
     private readonly ILogger<GetPageQuery> _logger = Substitute.For<ILogger<GetPageQuery>>();
     private readonly IMapper _mapperSubstitute = Substitute.For<IMapper>();
     private readonly IQuestionnaireCacher _questionnaireCacherSubstitute = Substitute.For<IQuestionnaireCacher>();
+    private readonly GetPageFromDbQuery _getPageFromDbQuery;
 
     private readonly List<Page> _pages = new() {
         new Page(){
@@ -175,6 +177,7 @@ public class GetPageQueryTests
 
     public GetPageQueryTests()
     {
+        _getPageFromDbQuery = new GetPageFromDbQuery(_cmsDbSubstitute, new NullLogger<GetPageFromDbQuery>(), _mapperSubstitute, new[] { _getPageChildrenQuery });
         _cmsDbSubstitute.ToListAsync(Arg.Any<IQueryable<SectionDbEntity>>())
                         .Returns(callinfo =>
                         {
@@ -282,7 +285,7 @@ public class GetPageQueryTests
     }
 
     private IGetPageQuery CreateGetPageQuery()
-        => new GetPageQuery(_cmsDbSubstitute, _logger, _mapperSubstitute, _questionnaireCacherSubstitute, _repoSubstitute, new[] { _getPageChildrenQuery });
+        => new GetPageQuery(_getPageFromDbQuery, _logger, _questionnaireCacherSubstitute, _repoSubstitute);
 
     private void SetupQuestionnaireCacher()
     {
