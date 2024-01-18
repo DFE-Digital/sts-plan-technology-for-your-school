@@ -26,8 +26,8 @@ public class SectionMapper : JsonToDbMapper<SectionDbEntity>
         });
 
         UpdateReferencesArray(values, "recommendations", _db.RecommendationPages, (id, recommendationPage) => recommendationPage.SectionId = Payload!.Sys.Id);
-        
+
         return values;
     }
-    
+
 }
