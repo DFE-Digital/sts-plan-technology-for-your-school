@@ -72,10 +72,12 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
         Recommendations = section.Recommendations
                                 .Select(recommendation => new RecommendationPageDbEntity()
                                 {
+                                    Maturity = recommendation.Maturity,
                                     Page = new PageDbEntity()
                                     {
                                         Slug = recommendation.Page.Slug
-                                    }
+                                    },
+                                    Id = recommendation.Id
                                 }).ToList()
     };
 
