@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.SignIns.Interfaces;
 using Dfe.PlanTech.Domain.SignIns.Enums;
 using Dfe.PlanTech.Domain.SignIns.Models;
+using Dfe.PlanTech.Domain.Users.Exceptions;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Domain.Users.Models;
 using Dfe.PlanTech.Infrastructure.SignIns.ConnectEvents;
@@ -331,19 +332,22 @@ public class DfeOpenIdConnectEventsTests
 
         var organisationClaimSerialised = JsonSerializer.Serialize(organisationClaim);
 
-        identitySubstitute.Claims.Returns(new List<Claim>()
+        _ = identitySubstitute.Claims.Returns(new List<Claim>()
         {
-            new Claim(ClaimConstants.NameIdentifier, userId.ToString()),
+            new(ClaimConstants.NameIdentifier, userId.ToString()),
             new Claim(ClaimConstants.Organisation, organisationClaimSerialised),
         });
 
         identitySubstitute.IsAuthenticated.Returns(true);
 
         var claimsPrincipal = new ClaimsPrincipal(identitySubstitute);
+        var configMock = Substitute.For<IDfeSignInConfiguration>();
+        configMock.DiscoverRolesWithPublicApi = true;
 
         var contextSubstitute = Substitute.For<HttpContext>();
         contextSubstitute.RequestServices.GetService(typeof(IDfePublicApi)).Returns(dfePublicApiSubstitute);
         contextSubstitute.RequestServices.GetService(typeof(IRecordUserSignInCommand)).Returns(commandSubstitute);
+        contextSubstitute.RequestServices.GetService(typeof(IDfeSignInConfiguration)).Returns(configMock);
 
         var context = new UserInformationReceivedContext(contextSubstitute,
             new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
@@ -351,9 +355,7 @@ public class DfeOpenIdConnectEventsTests
             claimsPrincipal,
             new AuthenticationProperties());
 
-        // Disabled API Call as part of the release.
-        // await Assert.ThrowsAnyAsync<UserAccessRoleNotFoundException>(() =>
-        //     OnUserInformationReceivedEvent.OnUserInformationReceived(context));
+        await Assert.ThrowsAnyAsync<UserAccessRoleNotFoundException>(() => OnUserInformationReceivedEvent.OnUserInformationReceived(context));
     }
 
 
