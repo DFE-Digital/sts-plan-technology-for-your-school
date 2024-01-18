@@ -82,17 +82,23 @@ public class CategorySectionViewComponent : ViewComponent
 
     private IEnumerable<CategorySectionDto> GetCategorySectionViewComponentViewModel(Category category)
     {
-        foreach (var categorySection in category.Sections)
+        foreach (var section in category.Sections)
         {
+            if (section.InterstitialPage == null)
+            {
+                _logger.LogError("Section {section} has no interstitial page", section.Sys.Id);
+                continue;
+            }
+
             var categorySectionDto = new CategorySectionDto()
             {
-                Slug = categorySection.InterstitialPage.Slug,
-                Name = categorySection.Name
+                Slug = section.InterstitialPage.Slug,
+                Name = section.Name
             };
 
-            if (string.IsNullOrWhiteSpace(categorySectionDto.Slug)) LogErrorWithUserFeedback(categorySection, ref categorySectionDto);
+            if (string.IsNullOrWhiteSpace(categorySectionDto.Slug)) LogErrorWithUserFeedback(section, ref categorySectionDto);
             else if (category.RetrievalError) SetCategorySectionDtoTagWithRetrievalError(ref categorySectionDto);
-            else SetCategorySectionDtoTagWithCurrentStatus(category, categorySection, ref categorySectionDto);
+            else SetCategorySectionDtoTagWithCurrentStatus(category, section, ref categorySectionDto);
 
             yield return categorySectionDto;
         }
