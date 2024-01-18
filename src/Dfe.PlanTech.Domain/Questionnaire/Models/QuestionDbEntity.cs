@@ -18,5 +18,6 @@ public class QuestionDbEntity : ContentComponentDbEntity, IQuestion<AnswerDbEnti
 
     public SectionDbEntity? Section { get; set; }
 
+    [DontCopyValue]
     public string? SectionId { get; set; }
 }
