@@ -159,7 +159,7 @@ namespace Dfe.PlanTech.AzureFunctions
         private IEnumerable<PropertyInfo> PropertiesToCopy(ContentComponentDbEntity entity)
         => entity.GetType()
                 .GetProperties()
-                .Where(property => !property.Name.EndsWith("Id") && !HasDontCopyValueAttribute(property));
+                .Where(property => !HasDontCopyValueAttribute(property));
 
         /// <summary>
         /// Does the property have a <see cref="DontCopyValueAttribute"/> property attached to it? 

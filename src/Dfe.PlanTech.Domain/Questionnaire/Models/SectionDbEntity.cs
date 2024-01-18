@@ -18,6 +18,7 @@ public class SectionDbEntity : ContentComponentDbEntity, ISection<QuestionDbEnti
 
     public CategoryDbEntity? Category { get; set; }
 
+    [DontCopyValue]
     public string? CategoryId { get; set; }
 
     public List<RecommendationPageDbEntity> Recommendations { get; set; } = new();
