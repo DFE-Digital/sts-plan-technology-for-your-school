@@ -2,6 +2,7 @@ using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
+using Dfe.PlanTech.Domain.Users.Exceptions;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
@@ -67,11 +68,12 @@ public class GetRecommendationRouter : IGetRecommendationRouter
                                                new { sectionSlug, recommendationSlug = recommendationForMaturity.Page.Slug });
         }
 
-        var page = await _getPageQuery.GetPageBySlug(recommendationSlug, cancellationToken);
+        var page = await _getPageQuery.GetPageBySlug(recommendationSlug, cancellationToken) ??
+                    throw new PageNotFoundException($"Could not find page for recommendation slug {recommendationSlug} under section {sectionSlug}");
 
         var viewModel = new PageViewModel(page, controller, _user, _logger);
 
-        return controller.View("~/Views/Pages/Page.cshtml", viewModel);
+        return controller.View("~/Views/Shared/ServiceUnavailable.cshtml", viewModel);
     }
 
     /// <summary>

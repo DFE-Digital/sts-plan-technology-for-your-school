@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
+using Dfe.PlanTech.Domain.Users.Exceptions;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,6 +10,7 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("/cookies")]
 public class CookiesController : BaseController<CookiesController>
 {
+    private const string CookiesSlug = "cookies";
     private readonly ICookieService _cookieService;
 
     public CookiesController(ILogger<CookiesController> logger, ICookieService cookieService) : base(logger)
@@ -43,16 +45,16 @@ public class CookiesController : BaseController<CookiesController>
         return Redirect(returnUrl);
     }
 
-    public async Task<IActionResult> GetCookiesPage([FromServices] GetPageQuery getPageQuery)
+    public async Task<IActionResult> GetCookiesPage([FromServices] GetPageQuery getPageQuery, CancellationToken cancellationToken)
     {
-        Page cookiesPageContent = await getPageQuery.GetPageBySlug("cookies", CancellationToken.None);
+        var cookiesPageContent = await getPageQuery.GetPageBySlug(CookiesSlug, cancellationToken) ??
+                                 throw new PageNotFoundException($"Could not find cookie page for slug {CookiesSlug}");
 
         CookiesViewModel cookiesViewModel = new()
         {
-            Title = cookiesPageContent.Title ?? new Title() { Text = "Cookies" },
-            Content = cookiesPageContent.Content
+            Title = cookiesPageContent?.Title ?? new Title() { Text = "Cookies" },
+            Content = cookiesPageContent?.Content ?? new List<ContentComponent>(0)
         };
-
 
         return View("Cookies", cookiesViewModel);
     }

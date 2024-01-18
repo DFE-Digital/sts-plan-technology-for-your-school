@@ -28,7 +28,7 @@ public class CategorySectionViewComponent : ViewComponent
 
     private CategorySectionViewComponentViewModel GenerateViewModel(Category category)
     {
-        bool sectionsExist = category.Sections != null && category.Sections.Count > 0;
+        bool sectionsExist = category.Sections?.Count > 0;
 
         if (!sectionsExist)
         {
@@ -51,20 +51,20 @@ public class CategorySectionViewComponent : ViewComponent
         };
     }
 
-    private void LogErrorWithUserFeedback(Section categorySection, ref CategorySectionDto categorySectionDto)
+    private void LogErrorWithUserFeedback(Section categorySection, CategorySectionDto categorySectionDto)
     {
         categorySectionDto.Slug = null;
         _logger.LogError("No Slug found for Subtopic with ID: {categorySectionId}", categorySection.Sys.Id);
         categorySectionDto.NoSlugForSubtopicErrorMessage = string.Format("{0} unavailable", categorySection.Name);
     }
 
-    private static void SetCategorySectionDtoTagWithRetrievalError(ref CategorySectionDto categorySectionDto)
+    private static void SetCategorySectionDtoTagWithRetrievalError(CategorySectionDto categorySectionDto)
     {
         categorySectionDto.TagColour = TagColour.Red.ToString();
         categorySectionDto.TagText = "UNABLE TO RETRIEVE STATUS";
     }
 
-    private static void SetCategorySectionDtoTagWithCurrentStatus(Category category, Section categorySection, ref CategorySectionDto categorySectionDto)
+    private static void SetCategorySectionDtoTagWithCurrentStatus(Category category, Section categorySection, CategorySectionDto categorySectionDto)
     {
         var sectionStatusCompleted = category.SectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId == categorySection.Sys.Id)?.Completed;
 
@@ -84,21 +84,15 @@ public class CategorySectionViewComponent : ViewComponent
     {
         foreach (var section in category.Sections)
         {
-            if (section.InterstitialPage == null)
-            {
-                _logger.LogError("Section {section} has no interstitial page", section.Sys.Id);
-                continue;
-            }
-
             var categorySectionDto = new CategorySectionDto()
             {
-                Slug = section.InterstitialPage.Slug,
+                Slug = section.InterstitialPage?.Slug,
                 Name = section.Name
             };
 
-            if (string.IsNullOrWhiteSpace(categorySectionDto.Slug)) LogErrorWithUserFeedback(section, ref categorySectionDto);
-            else if (category.RetrievalError) SetCategorySectionDtoTagWithRetrievalError(ref categorySectionDto);
-            else SetCategorySectionDtoTagWithCurrentStatus(category, section, ref categorySectionDto);
+            if (string.IsNullOrWhiteSpace(categorySectionDto.Slug)) LogErrorWithUserFeedback(section, categorySectionDto);
+            else if (category.RetrievalError) SetCategorySectionDtoTagWithRetrievalError(categorySectionDto);
+            else SetCategorySectionDtoTagWithCurrentStatus(category, section, categorySectionDto);
 
             yield return categorySectionDto;
         }
