@@ -44,6 +44,8 @@ public class GetPageFromContentfulQuery : IGetPageQuery
     /// <param name="fieldsToReturn"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
+    /// <exception cref="ContentfulDataUnavailableException"></exception>
+
     public async Task<Page?> GetPageBySlug(string slug, IEnumerable<string> fieldsToReturn, CancellationToken cancellationToken = default)
     {
         var options = CreateGetEntityOptions(slug);
@@ -52,6 +54,7 @@ public class GetPageFromContentfulQuery : IGetPageQuery
         return await FetchFromContentful(slug, options, cancellationToken);
     }
 
+    /// <exception cref="ContentfulDataUnavailableException"></exception>
     private async Task<Page?> FetchFromContentful(string slug, GetEntitiesOptions options, CancellationToken cancellationToken)
     {
         try
