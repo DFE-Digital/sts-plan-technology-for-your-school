@@ -26,24 +26,24 @@ public class QueueReceiver : BaseFunction
     }
 
     [Function("QueueReceiver")]
-    public async Task QueueReceiverDbWriter([ServiceBusTrigger("contentful", IsBatched = true)] ServiceBusReceivedMessage[] messages, ServiceBusMessageActions messageActions)
+    public async Task QueueReceiverDbWriter([ServiceBusTrigger("contentful", IsBatched = true)] ServiceBusReceivedMessage[] messages, ServiceBusMessageActions messageActions, CancellationToken cancellationToken)
     {
         Logger.LogInformation("Queue Receiver -> Db Writer started. Processing {msgCount} messages", messages.Length);
 
         foreach (ServiceBusReceivedMessage message in messages)
         {
-            await ProcessMessage(message, messageActions);
+            await ProcessMessage(message, messageActions, cancellationToken);
         }
     }
 
-    private async Task ProcessMessage(ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions)
+    private async Task ProcessMessage(ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions, CancellationToken cancellationToken)
     {
         try
         {
             string cmsEvent = GetCmsEvent(message.Subject);
 
             ContentComponentDbEntity mapped = GetMapped(message);
-            ContentComponentDbEntity? existing = await GetExisting(mapped);
+            ContentComponentDbEntity? existing = await GetExisting(mapped, cancellationToken);
 
             if (cmsEvent.Equals("unpublish") && existing != null)
             {
@@ -63,14 +63,14 @@ public class QueueReceiver : BaseFunction
                 }
             }
 
-            await DbSaveChanges();
+            await DbSaveChanges(cancellationToken);
 
-            await messageActions.CompleteMessageAsync(message);
+            await messageActions.CompleteMessageAsync(message, cancellationToken);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex.Message);
-            await messageActions.DeadLetterMessageAsync(message);
+            await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace, cancellationToken);
         }
     }
 
@@ -88,9 +88,9 @@ public class QueueReceiver : BaseFunction
         return _mappers.ToEntity(messageBody);
     }
 
-    private async Task<ContentComponentDbEntity?> GetExisting(ContentComponentDbEntity mapped)
+    private async Task<ContentComponentDbEntity?> GetExisting(ContentComponentDbEntity mapped, CancellationToken cancellationToken)
     {
-        ContentComponentDbEntity? existing = await GetExistingDbEntity(mapped);
+        ContentComponentDbEntity? existing = await GetExistingDbEntity(mapped, cancellationToken);
 
         if (existing != null)
         {
@@ -102,14 +102,14 @@ public class QueueReceiver : BaseFunction
         return existing;
     }
 
-    private async Task<ContentComponentDbEntity?> GetExistingDbEntity(ContentComponentDbEntity entity)
+    private async Task<ContentComponentDbEntity?> GetExistingDbEntity(ContentComponentDbEntity entity, CancellationToken cancellationToken)
     {
         var model = _db.Model.FindEntityType(entity.GetType()) ?? throw new Exception($"Could not find model in database for {entity.GetType()}");
 
         var dbSet = GetIQueryableForEntity(model);
 
         var found = await dbSet.IgnoreAutoIncludes()
-                                .FirstOrDefaultAsync(existing => existing.Id == entity.Id);
+                                .FirstOrDefaultAsync(existing => existing.Id == entity.Id, cancellationToken);
 
         return found ?? null;
     }
@@ -179,7 +179,7 @@ public class QueueReceiver : BaseFunction
     private IEnumerable<PropertyInfo> PropertiesToCopy(ContentComponentDbEntity entity)
     => entity.GetType()
             .GetProperties()
-            .Where(property => !property.Name.EndsWith("Id") && !HasDontCopyValueAttribute(property));
+            .Where(property => !HasDontCopyValueAttribute(property));
 
     /// <summary>
     /// Does the property have a <see cref="DontCopyValueAttribute"/> property attached to it? 
@@ -189,9 +189,9 @@ public class QueueReceiver : BaseFunction
     private bool HasDontCopyValueAttribute(PropertyInfo property)
      => property.CustomAttributes.Any(attribute => attribute.AttributeType == _dontCopyValueAttribute);
 
-    private async Task DbSaveChanges()
+    private async Task DbSaveChanges(CancellationToken cancellationToken)
     {
-        long rowsChangedInDatabase = await _db.SaveChangesAsync();
+        long rowsChangedInDatabase = await _db.SaveChangesAsync(cancellationToken);
 
         if (rowsChangedInDatabase == 0L)
         {
