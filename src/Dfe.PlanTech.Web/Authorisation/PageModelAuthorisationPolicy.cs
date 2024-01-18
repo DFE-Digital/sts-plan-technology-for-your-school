@@ -48,14 +48,10 @@ public class PageModelAuthorisationPolicy : AuthorizationHandler<PageAuthorisati
         var pageQuery = scope.ServiceProvider.GetRequiredService<IGetPageQuery>();
         var authQuery = scope.ServiceProvider.GetRequiredService<GetPageAuthenticationQuery>();
 
-
-        var requiresAuth = await authQuery.PageRequiresAuthentication(slug, CancellationToken.None);
+        var requiresAuth = await authQuery.PageRequiresAuthentication(slug, httpContext.RequestAborted);
 
         return !requiresAuth || UserIsAuthorised(httpContext, requiresAuth);
     }
-
-    private static async Task<Page> GetPageForSlug(HttpContext httpContext, string slug, IGetPageQuery pageQuery)
-    => await pageQuery.GetPageBySlug(slug, httpContext.RequestAborted) ?? throw new KeyNotFoundException($"Could not find page with slug {slug}");
 
     private static bool UserIsAuthorised(HttpContext httpContext, bool requiredAuth)
     => requiredAuth && httpContext.User.Identity?.IsAuthenticated == true;
