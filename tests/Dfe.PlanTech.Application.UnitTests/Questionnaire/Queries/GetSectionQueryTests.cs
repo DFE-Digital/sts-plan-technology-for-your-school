@@ -1,4 +1,5 @@
 
+using AutoMapper;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
@@ -73,7 +74,11 @@ public class GetSectionQueryTests
             return _sections.Where(section => section.InterstitialPage.Slug == slugQuery.Value);
         });
 
-        var getSectionQuery = new GetSectionQuery(repository);
+        var db = Substitute.For<ICmsDbContext>();
+
+        var mapper = Substitute.For<IMapper>();
+
+        var getSectionQuery = new GetSectionQuery(db, repository, mapper);
         var section = await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken);
 
         Assert.Equal(FirstSection.InterstitialPage.Slug, sectionSlug);
@@ -91,7 +96,11 @@ public class GetSectionQueryTests
             .When(repo => repo.GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), cancellationToken))
             .Throw(new Exception("Dummy Exception"));
 
-        var getSectionQuery = new GetSectionQuery(repository);
+        var db = Substitute.For<ICmsDbContext>();
+
+        var mapper = Substitute.For<IMapper>();
+
+        var getSectionQuery = new GetSectionQuery(db, repository, mapper);
 
         await Assert.ThrowsAsync<ContentfulDataUnavailableException>(
             async () => await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken)
