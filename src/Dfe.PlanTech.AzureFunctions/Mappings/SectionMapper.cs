@@ -26,22 +26,8 @@ public class SectionMapper : JsonToDbMapper<SectionDbEntity>
         });
 
         UpdateReferencesArray(values, "recommendations", _db.RecommendationPages, (id, recommendationPage) => recommendationPage.SectionId = Payload!.Sys.Id);
-
-        UpdateInterstitialPage(values);
-
+        
         return values;
     }
-
-    private void UpdateInterstitialPage(Dictionary<string, object?> values)
-    {
-        if (values.TryGetValue("interstitialPageId", out var pageId) && pageId != null)
-        {
-            var interstitialPageId = pageId.ToString();
-
-            if (!string.IsNullOrWhiteSpace(interstitialPageId))
-            {
-                UpdateRelatedEntity(interstitialPageId, _db.Pages, (id, interstitialPage) => interstitialPage.SectionId = Payload!.Sys.Id);
-            }
-        }
-    }
+    
 }

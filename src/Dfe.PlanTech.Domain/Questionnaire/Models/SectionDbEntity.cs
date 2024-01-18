@@ -14,7 +14,7 @@ public class SectionDbEntity : ContentComponentDbEntity, ISection<QuestionDbEnti
 
     public PageDbEntity? InterstitialPage { get; set; } = null!;
 
-    public string? InterstitialPageId { get; set; } = null!;
+    public string InterstitialPageId { get; set; } = null!;
 
     public CategoryDbEntity? Category { get; set; }
 

@@ -30,6 +30,5 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
     public RecommendationPageDbEntity? RecommendationPage { get; set; }
 
     public SectionDbEntity? Section { get; set; }
-
-    public string? SectionId { get; set; }
+    
 }
