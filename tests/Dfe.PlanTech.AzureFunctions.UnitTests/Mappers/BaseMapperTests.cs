@@ -28,7 +28,8 @@ public abstract class BaseMapperTests
         {
             Sys = new CmsWebHookSystemDetails()
             {
-                Id = entityId
+                Id = entityId,
+                Type = "Entry"
             },
             Fields = asJsonNode!
         };
