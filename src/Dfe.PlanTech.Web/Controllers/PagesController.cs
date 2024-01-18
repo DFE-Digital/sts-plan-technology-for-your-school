@@ -1,5 +1,6 @@
 ﻿using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Binders;
@@ -21,8 +22,12 @@ public class PagesController : BaseController<PagesController>
 
     [Authorize(Policy = PageModelAuthorisationPolicy.POLICY_NAME)]
     [HttpGet("/{route?}")]
-    public IActionResult GetByRoute([ModelBinder(typeof(PageModelBinder))] Page page, [FromServices] IUser user)
+    public async Task<IActionResult> GetByRoute(string route, [FromServices] IGetPageQuery getPageQuery, [FromServices] IUser user, CancellationToken cancellationToken)
     {
+        var page = await getPageQuery.GetPageBySlug(route, cancellationToken);
+
+        if (page == null) return new NotFoundResult();
+
         var viewModel = new PageViewModel(page, this, user, logger);
 
         return View("Page", viewModel);

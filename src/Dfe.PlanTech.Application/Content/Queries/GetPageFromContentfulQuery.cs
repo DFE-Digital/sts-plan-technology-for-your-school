@@ -32,9 +32,30 @@ public class GetPageFromContentfulQuery : IGetPageQuery
   /// <exception cref="ContentfulDataUnavailableException"></exception>
   public async Task<Page?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
   {
+    var options = CreateGetEntityOptions(slug);
+
+    return await FetchFromContentful(slug, options, cancellationToken);
+  }
+
+  /// <summary>
+  /// Get page by slug + only return specific fields
+  /// </summary>
+  /// <param name="slug"></param>
+  /// <param name="fieldsToReturn"></param>
+  /// <param name="cancellationToken"></param>
+  /// <returns></returns>
+  public async Task<Page?> GetPageBySlug(string slug, IEnumerable<string> fieldsToReturn, CancellationToken cancellationToken = default)
+  {
+    var options = CreateGetEntityOptions(slug);
+    options.Select = fieldsToReturn;
+
+    return await FetchFromContentful(slug, options, cancellationToken);
+  }
+
+  private async Task<Page?> FetchFromContentful(string slug, GetEntitiesOptions options, CancellationToken cancellationToken)
+  {
     try
     {
-      var options = CreateGetEntityOptions(slug);
       var pages = await _repository.GetEntities<Page>(options, cancellationToken);
 
       var page = pages.FirstOrDefault() ?? throw new KeyNotFoundException($"Could not find page with slug {slug}");

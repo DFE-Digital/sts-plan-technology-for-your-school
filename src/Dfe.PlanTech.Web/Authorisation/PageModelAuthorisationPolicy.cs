@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Queries;
 using Microsoft.AspNetCore.Authorization;
@@ -39,25 +40,25 @@ public class PageModelAuthorisationPolicy : AuthorizationHandler<PageAuthorisati
         }
     }
 
-    private async Task<bool> ProcessPage(HttpContext httpContext)
+    private static async Task<bool> ProcessPage(HttpContext httpContext)
     {
         string slug = GetRequestRoute(httpContext);
 
         using var scope = httpContext.RequestServices.CreateAsyncScope();
         var pageQuery = scope.ServiceProvider.GetRequiredService<IGetPageQuery>();
+        var authQuery = scope.ServiceProvider.GetRequiredService<GetPageAuthenticationQuery>();
 
-        Page page = await GetPageForSlug(httpContext, slug, pageQuery) ?? throw new KeyNotFoundException($"Could not find page for {slug}");
 
-        httpContext.Items.Add(nameof(Page), page);
+        var requiresAuth = await authQuery.PageRequiresAuthentication(slug, CancellationToken.None);
 
-        return !page.RequiresAuthorisation || UserIsAuthorised(httpContext, page);
+        return !requiresAuth || UserIsAuthorised(httpContext, requiresAuth);
     }
 
     private static async Task<Page> GetPageForSlug(HttpContext httpContext, string slug, IGetPageQuery pageQuery)
     => await pageQuery.GetPageBySlug(slug, httpContext.RequestAborted) ?? throw new KeyNotFoundException($"Could not find page with slug {slug}");
 
-    private static bool UserIsAuthorised(HttpContext httpContext, Page page)
-    => page.RequiresAuthorisation && httpContext.User.Identity?.IsAuthenticated == true;
+    private static bool UserIsAuthorised(HttpContext httpContext, bool requiredAuth)
+    => requiredAuth && httpContext.User.Identity?.IsAuthenticated == true;
 
     private static string GetRequestRoute(HttpContext httpContext)
     {

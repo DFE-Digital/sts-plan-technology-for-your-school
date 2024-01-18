@@ -1,3 +1,5 @@
+using System.Linq.Expressions;
+using System.Reflection;
 using Contentful.Core.Search;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Infrastructure.Application.Models;
@@ -58,6 +60,7 @@ public static class QueryBuilders
         if (options != null)
         {
             queryBuilder = queryBuilder.WithOptions(options);
+            queryBuilder = queryBuilder.WithSelect(options);
         }
 
         return queryBuilder;
@@ -75,5 +78,34 @@ public static class QueryBuilders
     {
         queryBuilder.Include(options.Include);
         return queryBuilder;
+    }
+
+    public static QueryBuilder<T> WithSelect<T>(this QueryBuilder<T> queryBuilder, IGetEntitiesOptions options)
+    {
+        if (options.Select == null) return queryBuilder;
+
+        var queryStringValues = queryBuilder.GetQueryStringValues();
+
+        foreach (var propertyName in options.Select)
+        {
+            queryStringValues.Add(new KeyValuePair<string, string>("select", propertyName));
+        }
+
+        return queryBuilder;
+    }
+
+    private static List<KeyValuePair<string, string>> GetQueryStringValues<T>(this QueryBuilder<T> queryBuilder)
+    {
+        var fieldInfo = queryBuilder.GetType().GetField("_querystringValues", BindingFlags.NonPublic | BindingFlags.Instance);
+
+        if (fieldInfo == null) throw new Exception("Couldn't find property for some reason");
+
+        var value = fieldInfo.GetValue(queryBuilder);
+
+        if (value is List<KeyValuePair<string, string>> list)
+            return list;
+
+        throw new Exception("Err");
+
     }
 }
