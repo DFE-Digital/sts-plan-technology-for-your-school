@@ -7,7 +7,6 @@ namespace Dfe.PlanTech.Application.Content.Queries;
 
 public class GetPageQuery : IGetPageQuery
 {
-    private readonly ILogger<GetPageQuery> _logger;
     private readonly IQuestionnaireCacher _cacher;
     private readonly IGetPageQuery _getPageFromDbQuery;
     private readonly IGetPageQuery _getPageFromContentfulQuery;
@@ -15,7 +14,6 @@ public class GetPageQuery : IGetPageQuery
     public GetPageQuery(GetPageFromContentfulQuery getPageFromContentfulQuery, GetPageFromDbQuery getPageFromDbQuery, ILogger<GetPageQuery> logger, IQuestionnaireCacher cacher)
     {
         _cacher = cacher;
-        _logger = logger;
         _getPageFromDbQuery = getPageFromDbQuery;
         _getPageFromContentfulQuery = getPageFromContentfulQuery;
     }
@@ -27,8 +25,7 @@ public class GetPageQuery : IGetPageQuery
     /// <returns>Page matching slug</returns>
     public async Task<Page?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
     {
-        var page = await _getPageFromDbQuery.GetPageBySlug(slug, cancellationToken) ??
-                    await _getPageFromContentfulQuery.GetPageBySlug(slug, cancellationToken);
+        var page = await _getPageFromDbQuery.GetPageBySlug(slug, cancellationToken) ?? await _getPageFromContentfulQuery.GetPageBySlug(slug, cancellationToken);
 
         if (page != null)
         {
