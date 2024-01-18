@@ -147,7 +147,6 @@ public static class ProgramExtensions
         services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
 
         services.AddTransient<GetPageFromDbQuery>();
-        services.AddTransient<GetPageAuthenticationQuery>();
         return services;
     }
 

@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Users.Exceptions;
 using Dfe.PlanTech.Web.Models;
@@ -45,7 +46,7 @@ public class CookiesController : BaseController<CookiesController>
         return Redirect(returnUrl);
     }
 
-    public async Task<IActionResult> GetCookiesPage([FromServices] GetPageQuery getPageQuery, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetCookiesPage([FromServices] IGetPageQuery getPageQuery, CancellationToken cancellationToken)
     {
         var cookiesPageContent = await getPageQuery.GetPageBySlug(CookiesSlug, cancellationToken) ??
                                  throw new PageNotFoundException($"Could not find cookie page for slug {CookiesSlug}");
