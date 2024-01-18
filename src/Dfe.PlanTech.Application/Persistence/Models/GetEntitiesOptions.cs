@@ -4,6 +4,8 @@ namespace Dfe.PlanTech.Application.Persistence.Models;
 
 public class GetEntitiesOptions : IGetEntitiesOptions
 {
+    public IEnumerable<string>? Select { get; set; }
+
     public GetEntitiesOptions(int include)
     {
         Include = include;
