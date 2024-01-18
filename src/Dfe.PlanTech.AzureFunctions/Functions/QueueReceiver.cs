@@ -111,6 +111,7 @@ public class QueueReceiver : BaseFunction
         var dbSet = GetIQueryableForEntity(model);
 
         var found = await dbSet.IgnoreAutoIncludes()
+                                .IgnoreQueryFilters()
                                 .FirstOrDefaultAsync(existing => existing.Id == entity.Id, cancellationToken);
 
         return found ?? null;
