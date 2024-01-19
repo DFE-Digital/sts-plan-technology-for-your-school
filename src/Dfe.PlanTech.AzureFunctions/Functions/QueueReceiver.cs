@@ -1,6 +1,7 @@
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.AzureFunctions.Mappings;
 using Dfe.PlanTech.Domain;
+using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
@@ -40,30 +41,19 @@ public class QueueReceiver : BaseFunction
     {
         try
         {
-            string cmsEvent = GetCmsEvent(message.Subject);
+            if (!Enum.TryParse(GetCmsEvent(message.Subject), out CmsEvent cmsEvent))
+            {
+                throw new CmsEventException(string.Format("Cannot parse header \"{0}\" into a valid CMS event", message.Subject));
+            }
 
-            Logger.LogInformation("CMS Event: {cmsEvent}", cmsEvent);
+            Logger.LogInformation("CMS Event: {cmsEvent}", cmsEvent.ToString());
 
             ContentComponentDbEntity mapped = GetMapped(message);
             ContentComponentDbEntity? existing = await GetExisting(mapped, cancellationToken);
 
-            if (cmsEvent.Equals("unpublish") && existing != null)
-            {
-                existing.Published = false;
-            }
-            else
-            {
-                ProcessCmsEvent(cmsEvent, ref mapped);
+            ProcessCmsEvent(cmsEvent, mapped, existing);
 
-                if (existing == null)
-                {
-                    DbAdd(mapped);
-                }
-                else
-                {
-                    DbUpdate(mapped, existing);
-                }
-            }
+            UpsertEntity(cmsEvent, mapped, existing);
 
             await DbSaveChanges(cancellationToken);
 
@@ -78,7 +68,7 @@ public class QueueReceiver : BaseFunction
 
     private static string GetCmsEvent(string subject)
     {
-        return subject.AsSpan()[(subject.LastIndexOf('.') + 1)..].ToString();
+        return subject.AsSpan()[(subject.LastIndexOf('.') + 1)..].ToString().ToUpper();
     }
 
     private ContentComponentDbEntity GetMapped(ServiceBusReceivedMessage message)
@@ -124,32 +114,47 @@ public class QueueReceiver : BaseFunction
                                     .MakeGenericMethod(model!.ClrType)!
                                     .Invoke(_db, null)!;
 
-    private void ProcessCmsEvent(string cmsEvent, ref ContentComponentDbEntity mapped)
+    private static void ProcessCmsEvent(CmsEvent cmsEvent, ContentComponentDbEntity mapped, ContentComponentDbEntity? existing)
     {
         switch (cmsEvent)
         {
-            case "create":
-            case "save":
-            case "auto_save":
+            case CmsEvent.CREATE:
+            case CmsEvent.SAVE:
+            case CmsEvent.AUTO_SAVE:
                 break;
-            case "archive":
+            case CmsEvent.ARCHIVE:
                 mapped.Archived = true;
                 break;
-            case "unarchive":
+            case CmsEvent.UNARCHIVE:
                 mapped.Archived = false;
                 break;
-            case "publish":
+            case CmsEvent.PUBLISH:
                 mapped.Published = true;
                 break;
-            case "unpublish":
-                Logger.LogWarning("Content with Id {id} has event 'unpublish' despite not existing in the database!", mapped.Id);
-                mapped.Published = false;
+            case CmsEvent.UNPUBLISH:
+                if (existing == null)
+                {
+                    throw new CmsEventException(string.Format("Content with Id \"{0}\" has event 'unpublish' despite not existing in the database!", mapped.Id));
+                }
+                existing.Published = false;
                 break;
-            case "delete":
+            case CmsEvent.DELETE:
                 mapped.Deleted = true;
                 break;
-            default:
-                throw new CmsEventException(string.Format("CMS Event \"{0}\" not implemented", cmsEvent));
+        }
+    }
+
+    private void UpsertEntity(CmsEvent cmsEvent, ContentComponentDbEntity mapped, ContentComponentDbEntity? existing)
+    {
+        if (cmsEvent == CmsEvent.UNPUBLISH) return;
+
+        if (existing == null)
+        {
+            DbAdd(mapped);
+        }
+        else
+        {
+            DbUpdate(mapped, existing);
         }
     }
 
