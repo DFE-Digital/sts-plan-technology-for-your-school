@@ -46,7 +46,7 @@ public class QueueReceiver : BaseFunction
                 throw new CmsEventException(string.Format("Cannot parse header \"{0}\" into a valid CMS event", message.Subject));
             }
 
-            Logger.LogInformation("CMS Event: {cmsEvent}", cmsEvent.ToString());
+            Logger.LogInformation("CMS Event: {cmsEvent}", cmsEvent);
 
             ContentComponentDbEntity mapped = GetMapped(message);
             ContentComponentDbEntity? existing = await GetExisting(mapped, cancellationToken);
