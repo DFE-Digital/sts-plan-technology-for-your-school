@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
@@ -33,10 +34,11 @@ public static class CheckAnswersOrNextQuestionChecker
             }
 
             userJourneyRouter.Status = SubmissionStatus.NextQuestion;
-
-            var nextQuestion = userJourneyRouter.Section.Questions.FirstOrDefault(question => question.Sys.Id == lastSelectedAnswer.NextQuestion.Sys.Id);
-            userJourneyRouter.NextQuestion = nextQuestion;
+            userJourneyRouter.NextQuestion = GetNextQuestion(userJourneyRouter, lastSelectedAnswer);
         }
     };
+
+    private static Question? GetNextQuestion(ISubmissionStatusProcessor userJourneyRouter, Answer lastSelectedAnswer)
+    => userJourneyRouter.Section?.Questions.Find(question => question.Sys.Id == lastSelectedAnswer.NextQuestion?.Sys.Id);
 }
 
