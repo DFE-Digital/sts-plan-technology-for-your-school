@@ -23,6 +23,12 @@ public class QuestionMapper : JsonToDbMapper<QuestionDbEntity>
 
     private void UpdateAnswersParentQuestionIds(Dictionary<string, object?> values)
     {
-        UpdateReferencesArray(values, "answers", _db.Answers, (id, answer) => answer.ParentQuestionId = Payload!.Sys.Id);
+        int order = 0;
+
+        UpdateReferencesArray(values, "answers", _db.Answers, (id, answer) =>
+        {
+            answer.ParentQuestionId = Payload!.Sys.Id;
+            answer.Order = order++;
+        });
     }
 }
