@@ -44,7 +44,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
         }
         catch (Exception e)
         {
-            logger.LogError("There has been an error while trying to calculate maturity", e);
+            logger.LogError(e, "There has been an error while trying to calculate maturity");
             TempData["ErrorMessage"] = InlineRecommendationUnavailableErrorMessage;
             return this.RedirectToCheckAnswers(sectionSlug);
         }

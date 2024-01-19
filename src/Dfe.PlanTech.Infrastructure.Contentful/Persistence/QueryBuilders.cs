@@ -1,3 +1,5 @@
+using System.Linq.Expressions;
+using System.Reflection;
 using Contentful.Core.Search;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Infrastructure.Application.Models;
@@ -7,6 +9,8 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 
 public static class QueryBuilders
 {
+    private const string QueryBuilderStringValuesFieldName = "_querystringValues";
+
     /// <summary>
     /// Builds query builder, filtering by content type
     /// </summary>
@@ -58,6 +62,7 @@ public static class QueryBuilders
         if (options != null)
         {
             queryBuilder = queryBuilder.WithOptions(options);
+            queryBuilder = queryBuilder.WithSelect(options);
         }
 
         return queryBuilder;
@@ -75,5 +80,25 @@ public static class QueryBuilders
     {
         queryBuilder.Include(options.Include);
         return queryBuilder;
+    }
+
+    public static QueryBuilder<T> WithSelect<T>(this QueryBuilder<T> queryBuilder, IGetEntitiesOptions options)
+    {
+        if (options.Select == null) return queryBuilder;
+
+        var queryStringValues = queryBuilder.QueryStringValues();
+
+        queryStringValues.Add(new KeyValuePair<string, string>("select", string.Join(',', options.Select)));
+
+        return queryBuilder;
+    }
+
+    public static List<KeyValuePair<string, string>> QueryStringValues<T>(this QueryBuilder<T> queryBuilder)
+    {
+        var fieldInfo = queryBuilder.GetType().GetField(QueryBuilderStringValuesFieldName, BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new MissingFieldException($"Couldn't find field {QueryBuilderStringValuesFieldName}");
+
+        var value = fieldInfo.GetValue(queryBuilder) ?? throw new NullReferenceException($"{QueryBuilderStringValuesFieldName} is null in QueryBuilder");
+
+        return value is List<KeyValuePair<string, string>> list ? list : throw new InvalidCastException($"Expected {value} to be {typeof(List<KeyValuePair<string, string>>)} but is actually {value!.GetType()}");
     }
 }

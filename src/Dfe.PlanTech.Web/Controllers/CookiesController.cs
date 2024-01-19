@@ -1,6 +1,8 @@
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
+using Dfe.PlanTech.Domain.Users.Exceptions;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,6 +11,7 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("/cookies")]
 public class CookiesController : BaseController<CookiesController>
 {
+    private const string CookiesSlug = "cookies";
     private readonly ICookieService _cookieService;
 
     public CookiesController(ILogger<CookiesController> logger, ICookieService cookieService) : base(logger)
@@ -44,9 +47,9 @@ public class CookiesController : BaseController<CookiesController>
         return Redirect(returnUrl);
     }
 
-    public async Task<IActionResult> GetCookiesPage([FromServices] GetPageQuery getPageQuery, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetCookiesPage([FromServices] IGetPageQuery getPageQuery, CancellationToken cancellationToken)
     {
-        var cookiesPageContent = await getPageQuery.GetPageBySlug("cookies", cancellationToken);
+        var cookiesPageContent = await getPageQuery.GetPageBySlug(CookiesSlug, cancellationToken);
 
         CookiesViewModel cookiesViewModel = new()
         {
