@@ -49,16 +49,16 @@ resource "azurerm_linux_function_app" "contentful_function" {
   }
 
   app_settings = {
-    AZURE_SQL_CONNECTIONSTRING      = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=${azurerm_key_vault_secret.vault_secret_database_connectionstring.name})"
-    AzureWebJobsServiceBus          = azurerm_servicebus_namespace.service_bus.default_primary_connection_string
-    WEBSITE_ENABLE_SYNC_UPDATE_SITE = true
-    WEBSITE_MOUNT_ENABLED           = 1
-    AZURE_CLIENT_ID                 = azurerm_user_assigned_identity.user_assigned_identity.client_id
-    AZURE_KEYVAULT_CLIENTID         = azurerm_user_assigned_identity.user_assigned_identity.client_id
-    AZURE_KEYVAULT_RESOURCEENDPOINT = azurerm_key_vault.vault.vault_uri
-    AZURE_KEYVAULT_SCOPE            = "https://vault.azure.net/.default"
-    KeyVaultReferenceIdentity       = azurerm_user_assigned_identity.user_assigned_identity.id
-    WEBSITE_RUN_FROM_PACKAGE        = ""
+    AZURE_SQL_AZURESQLCONNECTION_CONNECTIONSTRING           = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=${azurerm_key_vault_secret.vault_secret_database_connectionstring.name})"
+    AzureWebJobsServiceBus                                  = azurerm_servicebus_namespace.service_bus.default_primary_connection_string
+    WEBSITE_ENABLE_SYNC_UPDATE_SITE                         = true
+    WEBSITE_MOUNT_ENABLED                                   = 1
+    AZURE_CLIENT_ID                                         = azurerm_user_assigned_identity.user_assigned_identity.client_id
+    AZURE_KEYVAULT_AZUREKEYVAULTCONNECTION_CLIENTID         = azurerm_user_assigned_identity.user_assigned_identity.client_id
+    AZURE_KEYVAULT_AZUREKEYVAULTCONNECTION_RESOURCEENDPOINT = azurerm_key_vault.vault.vault_uri
+    AZURE_KEYVAULT_AZUREKEYVAULTCONNECTION_SCOPE            = "https://vault.azure.net/.default"
+    KeyVaultReferenceIdentity                               = azurerm_user_assigned_identity.user_assigned_identity.id
+    WEBSITE_RUN_FROM_PACKAGE                                = ""
   }
 
   lifecycle {
