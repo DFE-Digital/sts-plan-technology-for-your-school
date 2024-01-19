@@ -386,7 +386,7 @@ public class GetPageQueryTests
         var query = CreateGetPageQuery();
         var result = await query.GetPageBySlug(SECTION_SLUG);
 
-        Assert.Equal(SECTION_TITLE, result.SectionTitle);
+        Assert.Equal(SECTION_TITLE, result!.SectionTitle);
         _ = _questionnaireCacherSubstitute.Received(1).Cached;
     }
 

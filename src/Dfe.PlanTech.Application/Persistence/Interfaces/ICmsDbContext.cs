@@ -46,9 +46,11 @@ public interface ICmsDbContext
 
     public IQueryable<WarningComponentDbEntity> Warnings { get; }
 
-    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default);
 
     public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default);
 
     public IQueryable<RichTextContentDbEntity> RichTextContentsByPageSlug(string pageSlug);
+
+    public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default);
+    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default);
 }

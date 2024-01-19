@@ -194,10 +194,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
             entity.Navigation(warningComponent => warningComponent.Text).AutoInclude();
         });
 
+        modelBuilder.Entity<ContentComponentDbEntity>().HasQueryFilter(entity => entity.Published && !entity.Archived && !entity.Deleted);
     }
-
-    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
-    => queryable.ToListAsync(cancellationToken: cancellationToken);
 
     public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
     => Pages.Include(page => page.BeforeTitleContent)
@@ -208,4 +206,10 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public IQueryable<RichTextContentDbEntity> RichTextContentsByPageSlug(string pageSlug)
         => RichTextContents.FromSql($"SELECT * FROM [Contentful].[SelectAllRichTextContentForPageSlug]({pageSlug})");
+
+    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+=> queryable.ToListAsync(cancellationToken: cancellationToken);
+
+    public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+    => queryable.FirstOrDefaultAsync(cancellationToken);
 }

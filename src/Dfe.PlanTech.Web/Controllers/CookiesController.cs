@@ -44,16 +44,15 @@ public class CookiesController : BaseController<CookiesController>
         return Redirect(returnUrl);
     }
 
-    public async Task<IActionResult> GetCookiesPage([FromServices] GetPageQuery getPageQuery)
+    public async Task<IActionResult> GetCookiesPage([FromServices] GetPageQuery getPageQuery, CancellationToken cancellationToken)
     {
-        Page cookiesPageContent = await getPageQuery.GetPageBySlug("cookies", CancellationToken.None);
+        var cookiesPageContent = await getPageQuery.GetPageBySlug("cookies", cancellationToken);
 
         CookiesViewModel cookiesViewModel = new()
         {
-            Title = cookiesPageContent.Title ?? new Title() { Text = "Cookies" },
-            Content = cookiesPageContent.Content
+            Title = cookiesPageContent?.Title ?? new Title() { Text = "Cookies" },
+            Content = cookiesPageContent?.Content ?? new List<ContentComponent>(0)
         };
-
 
         return View("Cookies", cookiesViewModel);
     }
