@@ -69,7 +69,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
 
         var page = await _getPageQuery.GetPageBySlug(recommendationSlug, cancellationToken);
 
-        var viewModel = new PageViewModel(page, controller, _user, _logger);
+        var viewModel = new PageViewModel(page!, controller, _user, _logger);
 
         return controller.View("~/Views/Pages/Page.cshtml", viewModel);
     }
