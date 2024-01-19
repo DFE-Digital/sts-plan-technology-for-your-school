@@ -69,10 +69,11 @@ public class QuestionMapperTests : BaseMapperTests
 
         Assert.Equal(Answers.Length, _attachedAnswers.Count);
 
-        foreach (var answer in Answers)
+        foreach (var item in Answers.Select((answer, index) => new { answer, index }))
         {
-            var contains = _attachedAnswers.Any(attached => attached.Id == answer.Sys.Id);
-            Assert.True(contains);
+            var matchingAnswer = _attachedAnswers.Find(attached => attached.Id == item.answer.Sys.Id);
+            Assert.NotNull(matchingAnswer);
+            Assert.Equal(item.index, matchingAnswer.Order);
         }
     }
 }
