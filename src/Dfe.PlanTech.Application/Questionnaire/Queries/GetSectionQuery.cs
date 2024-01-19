@@ -59,7 +59,8 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
                                                             NextQuestion = answer.NextQuestion == null ? null : new QuestionDbEntity()
                                                             {
                                                                 Id = answer.NextQuestion.Id,
-                                                                Slug = answer.NextQuestion.Slug
+                                                                Slug = answer.NextQuestion.Slug,
+                                                                Text = answer.NextQuestion.Text
                                                             },
                                                             NextQuestionId = answer.NextQuestionId,
                                                             Text = answer.Text,
