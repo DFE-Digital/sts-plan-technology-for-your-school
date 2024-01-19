@@ -31,5 +31,4 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
 
     public SectionDbEntity? Section { get; set; }
 
-    public string? SectionId { get; set; }
 }
