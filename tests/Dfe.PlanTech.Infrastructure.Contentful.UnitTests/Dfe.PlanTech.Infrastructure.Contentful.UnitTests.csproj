@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
@@ -23,8 +23,10 @@
         </PackageReference>
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Dfe.PlanTech.Infrastructure.Contentful\Dfe.PlanTech.Infrastructure.Contentful.csproj" />
-        <ProjectReference Include="..\..\src\Dfe.PlanTech.Application\Dfe.PlanTech.Application.csproj" />
+        <ProjectReference
+            Include="..\..\src\Dfe.PlanTech.Infrastructure.Contentful\Dfe.PlanTech.Infrastructure.Contentful.csproj" />
+        <ProjectReference
+            Include="..\..\src\Dfe.PlanTech.Application\Dfe.PlanTech.Application.csproj" />
     </ItemGroup>
 
 
