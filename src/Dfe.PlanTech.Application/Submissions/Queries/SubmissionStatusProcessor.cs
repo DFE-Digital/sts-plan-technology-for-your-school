@@ -60,8 +60,6 @@ public class SubmissionStatusProcessor : ISubmissionStatusProcessor
                                                                                           Section,
                                                                                           cancellationToken);
 
-
-
         var matchingStatusChecker = _statusCheckers.FirstOrDefault(statusChecker => statusChecker.IsMatchingSubmissionStatus(this)) ??
                                     throw new InvalidDataException($"Could not find appropriate status checker for section status {SectionStatus}");
 

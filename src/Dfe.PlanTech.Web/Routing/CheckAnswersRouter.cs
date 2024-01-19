@@ -56,7 +56,7 @@ public class CheckAnswersRouter : ICheckAnswersRouter
 
         var model = new CheckAnswersViewModel()
         {
-            Title = checkAnswerPageContent.Title ?? new Title() { Text = PageTitle },
+            Title = checkAnswerPageContent!.Title ?? new Title() { Text = PageTitle },
             SectionName = _router.Section!.Name,
             CheckAnswerDto = checkAnswerDto,
             Content = checkAnswerPageContent.Content,

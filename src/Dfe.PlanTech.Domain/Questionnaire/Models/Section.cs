@@ -42,7 +42,7 @@ public class Section : ContentComponent, ISectionComponent
                 break;
             }
 
-            Answer? answer = GetAnswerForRef(node, questionWithAnswer);
+            Answer? answer = GetAnswerForRef(questionWithAnswer);
 
             questionWithAnswer = questionWithAnswer with
             {
@@ -52,10 +52,12 @@ public class Section : ContentComponent, ISectionComponent
             };
 
             yield return questionWithAnswer;
-            node = GetAnswerForRef(node, questionWithAnswer)?.NextQuestion;
+
+            node = answer?.NextQuestion;
         }
     }
 
-    private static Answer? GetAnswerForRef(Question node, QuestionWithAnswer questionWithAnswer)
-    => node.Answers.Find(answer => answer.Sys.Id.Equals(questionWithAnswer.AnswerRef));
+    private Answer? GetAnswerForRef(QuestionWithAnswer questionWithAnswer)
+        => Questions.Find(q => q.Sys.Id == questionWithAnswer.QuestionRef)?
+                    .Answers.Find(answer => answer.Sys.Id == questionWithAnswer.AnswerRef);
 }
