@@ -43,7 +43,9 @@ public class Section : ContentComponent, ISectionComponent
             }
 
             Answer? answer = GetAnswerForRef(questionWithAnswer);
+            var question = Questions.Find(q => q.Sys.Id == questionWithAnswer.QuestionRef);
 
+            var answerrr = question?.Answers.Find(answer => answer.Sys.Id == questionWithAnswer.AnswerRef);
             questionWithAnswer = questionWithAnswer with
             {
                 AnswerText = answer?.Text ?? questionWithAnswer.AnswerText,
@@ -53,7 +55,9 @@ public class Section : ContentComponent, ISectionComponent
 
             yield return questionWithAnswer;
 
-            node = answer?.NextQuestion;
+            //This ensures matching behaviour to current functionality.
+            var nextQuestion = answer?.NextQuestion != null ? Questions.Find(question => question.Sys.Id == answer.NextQuestion.Sys.Id) : null;
+            node = nextQuestion;//answer?.NextQuestion;
         }
     }
 
