@@ -87,3 +87,31 @@ resource "azurerm_application_insights" "functional_insights" {
   retention_in_days   = 30
   tags                = local.tags
 }
+
+
+data "azurerm_subscription" "subscription" {
+}
+
+resource "azurerm_app_service_connection" "azurekeyvaultconnector" {
+  name               = "azurekeyvaultconnection"
+  app_service_id     = azurerm_linux_function_app.contentful_function.id
+  target_resource_id = azurerm_key_vault.vault.id
+  client_type = "dotnet"
+  authentication {
+    type = "userAssignedIdentity"
+    client_id = azurerm_user_assigned_identity.user_assigned_identity.client_id
+    subscription_id = data.azurerm_subscription.subscription.subscription_id
+  }
+}
+
+resource "azurerm_app_service_connection" "azuresqlconnector" {
+  name               = "azuresqlconnection"
+  app_service_id     = azurerm_linux_function_app.contentful_function.id
+  target_resource_id = "/subscriptions/${data.azurerm_subscription.subscription.subscription_id}/resourceGroups/${local.resource_prefix}/providers/Microsoft.Sql/servers/${local.resource_prefix}/databases/${local.resource_prefix}-sqldb"
+  client_type = "dotnet"
+  authentication {
+    type = "userAssignedIdentity"
+    client_id = azurerm_user_assigned_identity.user_assigned_identity.client_id
+    subscription_id = data.azurerm_subscription.subscription.subscription_id
+  }
+}
