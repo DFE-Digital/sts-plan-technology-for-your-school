@@ -16,7 +16,7 @@ runs:
     - name: Setup .NET Core SDK ${{ inputs.dotnet_version }}
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: ${{ inputs.dotnet_version }}
     - name: Install dependencies
       shell: bash
       run: dotnet restore ${{ inputs.solution_filename }}
