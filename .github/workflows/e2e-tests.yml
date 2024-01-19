@@ -96,9 +96,9 @@ jobs:
           az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 7.0.x
+          dotnet-version: 8.0.x
 
       - name: Install dependencies
         shell: bash
