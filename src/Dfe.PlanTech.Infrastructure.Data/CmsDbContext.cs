@@ -2,9 +2,7 @@ using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using System.Data;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
@@ -194,10 +192,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
             entity.Navigation(warningComponent => warningComponent.Text).AutoInclude();
         });
 
+        modelBuilder.Entity<ContentComponentDbEntity>().HasQueryFilter(entity => entity.Published && !entity.Archived && !entity.Deleted);
     }
-
-    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
-    => queryable.ToListAsync(cancellationToken: cancellationToken);
 
     public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
     => Pages.Include(page => page.BeforeTitleContent)
@@ -208,4 +204,10 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public IQueryable<RichTextContentDbEntity> RichTextContentsByPageSlug(string pageSlug)
         => RichTextContents.FromSql($"SELECT * FROM [Contentful].[SelectAllRichTextContentForPageSlug]({pageSlug})");
+
+    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+=> queryable.ToListAsync(cancellationToken: cancellationToken);
+
+    public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+    => queryable.FirstOrDefaultAsync(cancellationToken);
 }

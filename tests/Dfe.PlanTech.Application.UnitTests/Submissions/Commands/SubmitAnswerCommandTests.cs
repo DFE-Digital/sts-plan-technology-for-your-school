@@ -33,12 +33,6 @@ public class SubmitAnswerCommandTests
             {
                 Id = "Id",
                 Text = "Text"
-            },
-            NextQuestion = new IdAndSlugAndText()
-            {
-                Id = "QId",
-                Text = "QText",
-                Slug = "QSlug"
             }
         };
 
