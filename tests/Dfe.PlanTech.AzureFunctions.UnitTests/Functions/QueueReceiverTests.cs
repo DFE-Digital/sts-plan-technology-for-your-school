@@ -223,6 +223,8 @@ public class QueueReceiverTests
     [Fact]
     public async Task QueueRecieverDbWriter_Should_CompleteSuccessfully_After_Unpublish()
     {
+        _existing.Add(_contentComponent);
+
         _contentComponent.Published = false;
 
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
@@ -236,10 +238,8 @@ public class QueueReceiverTests
         await _queueReceiver.QueueReceiverDbWriter(new ServiceBusReceivedMessage[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock, CancellationToken.None);
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
-
-        var added = _addedObject as ContentComponentDbEntity;
-        Assert.NotNull(added);
-        Assert.False(added.Published);
+        _cmsDbContextMock.ReceivedWithAnyArgs(0).Add(Arg.Any<ContentComponentDbEntity>());
+        await _cmsDbContextMock.ReceivedWithAnyArgs(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
