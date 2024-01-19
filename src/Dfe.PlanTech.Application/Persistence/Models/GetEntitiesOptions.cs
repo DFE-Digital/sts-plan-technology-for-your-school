@@ -24,6 +24,8 @@ public class GetEntitiesOptions : IGetEntitiesOptions
     {
     }
 
+    public IEnumerable<string>? Select { get; set; }
+
     public IEnumerable<IContentQuery>? Queries { get; init; }
 
     public int Include { get; init; } = 2;
