@@ -228,7 +228,7 @@ public class QueueReceiverTests
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
 
-        var subject = "ContentManagement.Entry.publish";
+        var subject = "ContentManagement.Entry.unpublish";
         var serviceBusMessage = new ServiceBusMessage(bodyJsonStr) { Subject = subject };
 
         ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
@@ -239,7 +239,7 @@ public class QueueReceiverTests
 
         var added = _addedObject as ContentComponentDbEntity;
         Assert.NotNull(added);
-        Assert.True(added.Published);
+        Assert.False(added.Published);
     }
 
     [Fact]
