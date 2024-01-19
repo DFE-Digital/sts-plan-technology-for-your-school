@@ -124,7 +124,7 @@ public class QueueReceiver : BaseFunction
                                     .MakeGenericMethod(model!.ClrType)!
                                     .Invoke(_db, null)!;
 
-    private static void ProcessCmsEvent(string cmsEvent, ref ContentComponentDbEntity mapped)
+    private void ProcessCmsEvent(string cmsEvent, ref ContentComponentDbEntity mapped)
     {
         switch (cmsEvent)
         {
@@ -142,6 +142,7 @@ public class QueueReceiver : BaseFunction
                 mapped.Published = true;
                 break;
             case "unpublish":
+                Logger.LogWarning("Content with Id {id} has event 'unpublish' despite not existing in the database!", mapped.Id);
                 mapped.Published = false;
                 break;
             case "delete":
