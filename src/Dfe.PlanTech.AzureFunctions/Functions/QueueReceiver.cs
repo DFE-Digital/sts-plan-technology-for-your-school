@@ -41,12 +41,7 @@ public class QueueReceiver : BaseFunction
     {
         try
         {
-            if (!Enum.TryParse(GetCmsEvent(message.Subject), out CmsEvent cmsEvent))
-            {
-                throw new CmsEventException(string.Format("Cannot parse header \"{0}\" into a valid CMS event", message.Subject));
-            }
-
-            Logger.LogInformation("CMS Event: {cmsEvent}", cmsEvent);
+            CmsEvent cmsEvent = GetCmsEvent(message.Subject);
 
             ContentComponentDbEntity mapped = GetMapped(message);
             ContentComponentDbEntity? existing = await GetExisting(mapped, cancellationToken);
@@ -66,9 +61,16 @@ public class QueueReceiver : BaseFunction
         }
     }
 
-    private static string GetCmsEvent(string subject)
+    private CmsEvent GetCmsEvent(string subject)
     {
-        return subject.AsSpan()[(subject.LastIndexOf('.') + 1)..].ToString().ToUpper();
+        if (!Enum.TryParse(subject.AsSpan()[(subject.LastIndexOf('.') + 1)..], true, out CmsEvent cmsEvent))
+        {
+            throw new CmsEventException(string.Format("Cannot parse header \"{0}\" into a valid CMS event", subject));
+        }
+
+        Logger.LogInformation("CMS Event: {cmsEvent}", cmsEvent);
+
+        return cmsEvent;
     }
 
     private ContentComponentDbEntity GetMapped(ServiceBusReceivedMessage message)
