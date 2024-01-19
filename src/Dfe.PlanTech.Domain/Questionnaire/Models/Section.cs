@@ -58,6 +58,6 @@ public class Section : ContentComponent, ISectionComponent
     }
 
     private Answer? GetAnswerForRef(QuestionWithAnswer questionWithAnswer)
-        => Questions.FirstOrDefault(q => q.Sys.Id == questionWithAnswer.QuestionRef)?
-                    .Answers.FirstOrDefault(answer => answer.Sys.Id == questionWithAnswer.AnswerRef);
+        => Questions.Find(q => q.Sys.Id == questionWithAnswer.QuestionRef)?
+                    .Answers.Find(answer => answer.Sys.Id == questionWithAnswer.AnswerRef);
 }
