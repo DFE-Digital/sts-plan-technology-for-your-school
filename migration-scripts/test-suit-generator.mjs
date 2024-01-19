@@ -42,22 +42,83 @@ for (const entry of entries) {
   }
 }
 
-for (const [id, question] of questions) {
-  question.fields.answers = copyRelationships(question.fields.answers, answers);
-}
+combineEntries();
+
+const sectionPaths = new Map();
 
 for (const [id, section] of sections) {
-  section.fields.questions = copyRelationships(
+  console.log(section.fields.name);
+
+  const firstQuestion = section.fields.questions[0];
+  const paths = getAllPaths(
     section.fields.questions,
-    questions
+    [],
+    firstQuestion,
+    section.fields.name
   );
+  const result = {
+    name: section.fields.name,
+    id: section.sys.id,
+    paths: paths,
+  };
 
-  section.fields.recommendations = copyRelationships(
-    section.fields.recommendations,
-    recommendations
-  );
+  console.log(result.paths);
 
-  console.log(section.fields.questions);
+  var stringified = JSON.stringify(result);
+  fs.writeFileSync(result.name + ".json", stringified);
+}
+
+fs.writeFileSync("paths.json", JSON.stringify(sectionPaths));
+function getAllPaths(questions, currentPath, currentQuestion, section) {
+  const paths = [];
+
+  if (!currentQuestion) {
+    if (section.indexOf("connection") > -1) {
+      console.log("no current question", currentPath, paths);
+    }
+    return paths;
+  }
+
+  currentQuestion.fields.answers.forEach((answer) => {
+    const newPath = [
+      ...currentPath,
+      { question: currentQuestion.fields.text, answer: answer.fields.text },
+    ];
+
+    const nextQuestion = questions.find(
+      (q) => q.sys.id === answer.fields.nextQuestion?.sys.id
+    );
+
+    const nextPaths = getAllPaths(questions, newPath, nextQuestion, section);
+    paths.push(...nextPaths);
+  });
+
+  if (section.indexOf("connection") > -1) {
+    console.log(paths.length);
+  }
+
+  return paths.length ? paths : [currentPath];
+}
+
+function combineEntries() {
+  for (const [id, question] of questions) {
+    question.fields.answers = copyRelationships(
+      question.fields.answers,
+      answers
+    );
+  }
+
+  for (const [id, section] of sections) {
+    section.fields.questions = copyRelationships(
+      section.fields.questions,
+      questions
+    );
+
+    section.fields.recommendations = copyRelationships(
+      section.fields.recommendations,
+      recommendations
+    );
+  }
 }
 
 function stripLocalisation(obj) {
@@ -66,4 +127,8 @@ function stripLocalisation(obj) {
 
 function copyRelationships(parent, children) {
   return parent.map((child) => children.get(child.sys.id));
+}
+
+function onlyUnique(value, index, array) {
+  return array.indexOf(value) === index;
 }
