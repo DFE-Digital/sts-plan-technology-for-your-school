@@ -195,7 +195,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
         });
 
         modelBuilder.Entity<ContentComponentDbEntity>().HasQueryFilter(entity => entity.Published && !entity.Archived && !entity.Deleted);
-
     }
 
     public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)

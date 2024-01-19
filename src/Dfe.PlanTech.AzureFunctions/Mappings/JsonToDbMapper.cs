@@ -26,7 +26,11 @@ where TEntity : ContentComponentDbEntity, new()
         Payload = payload;
 
         var values = GetEntityValuesDictionary(payload);
-        values = PerformAdditionalMapping(values);
+
+        if (!payload.Sys.Type.Equals("DeletedEntry"))
+        {
+            values = PerformAdditionalMapping(values);
+        }
 
         var asJson = JsonSerializer.Serialize(values, JsonOptions);
         var serialised = JsonSerializer.Deserialize<TEntity>(asJson, JsonOptions) ?? throw new NullReferenceException("Null returned");
