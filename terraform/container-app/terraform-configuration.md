@@ -38,7 +38,7 @@ We use two external modules to create the majority of the resources required:
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.86.0 |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.88.0 |
 | <a name="provider_null"></a> [null](#provider\_null) | 3.2.2 |
 
 ## Modules
@@ -52,6 +52,8 @@ We use two external modules to create the majority of the resources required:
 
 | Name | Type |
 |------|------|
+| [azurerm_app_service_connection.azurekeyvaultconnector](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/app_service_connection) | resource |
+| [azurerm_app_service_connection.azuresqlconnector](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/app_service_connection) | resource |
 | [azurerm_application_insights.functional_insights](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/application_insights) | resource |
 | [azurerm_key_vault.vault](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault) | resource |
 | [azurerm_key_vault_access_policy.vault_access_policy_mi](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_access_policy) | resource |
@@ -74,6 +76,7 @@ We use two external modules to create the majority of the resources required:
 | [null_resource.function-deployment](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) | data source |
 | [azurerm_function_app_host_keys.default](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/function_app_host_keys) | data source |
+| [azurerm_subscription.subscription](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subscription) | data source |
 
 ## Inputs
 
