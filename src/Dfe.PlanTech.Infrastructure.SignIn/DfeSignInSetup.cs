@@ -29,10 +29,11 @@ public static class DfeSignInSetup
         });
 
         services.AddAuthentication(ConfigureAuthentication)
-        .AddOpenIdConnect(options => ConfigureOpenIdConnect(options, config))
-        .AddCookie(options => ConfigureCookie(options, config));
+                .AddOpenIdConnect(options => ConfigureOpenIdConnect(options, config))
+                .AddCookie(options => ConfigureCookie(options, config));
 
         services.AddScoped((services) => config);
+        services.AddScoped<IDfeSignInConfiguration>((_) => config);
 
         services.Configure<ForwardedHeadersOptions>(options =>
         {
