@@ -201,6 +201,28 @@ public class QueueReceiverTests
     [Fact]
     public async Task QueueRecieverDbWriter_Should_CompleteSuccessfully_After_Publish()
     {
+        _contentComponent.Published = true;
+
+        ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
+        ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
+
+        var subject = "ContentManagement.Entry.publish";
+        var serviceBusMessage = new ServiceBusMessage(bodyJsonStr) { Subject = subject };
+
+        ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
+
+        await _queueReceiver.QueueReceiverDbWriter(new ServiceBusReceivedMessage[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock, CancellationToken.None);
+
+        await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
+
+        var added = _addedObject as ContentComponentDbEntity;
+        Assert.NotNull(added);
+        Assert.True(added.Published);
+    }
+
+    [Fact]
+    public async Task QueueRecieverDbWriter_Should_CompleteSuccessfully_After_New_Unpublish()
+    {
         _contentComponent.Published = false;
 
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
@@ -221,7 +243,7 @@ public class QueueReceiverTests
     }
 
     [Fact]
-    public async Task QueueRecieverDbWriter_Should_CompleteSuccessfully_After_Unpublish()
+    public async Task QueueRecieverDbWriter_Should_CompleteSuccessfully_After_Existing_Unpublish()
     {
         _existing.Add(_contentComponent);
 
