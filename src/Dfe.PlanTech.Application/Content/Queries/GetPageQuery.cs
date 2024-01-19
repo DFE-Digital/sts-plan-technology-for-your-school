@@ -15,7 +15,7 @@ public class GetPageQuery : ContentRetriever, IGetPageQuery
 {
     private readonly ILogger<GetPageQuery> _logger;
     private readonly IQuestionnaireCacher _cacher;
-    private readonly IGetPageQuery _getPageFromDbQuery;
+    private readonly GetPageFromDbQuery _getPageFromDbQuery;
     readonly string _getEntityEnvVariable = Environment.GetEnvironmentVariable("CONTENTFUL_GET_ENTITY_INT") ?? "4";
 
     public GetPageQuery(GetPageFromDbQuery getPageFromDbQuery, ILogger<GetPageQuery> logger, IQuestionnaireCacher cacher, IContentRepository repository) : base(repository)

@@ -90,7 +90,7 @@ public static class DfeSignInSetup
         };
     }
 
-    private static IDfeSignInConfiguration GetDfeSignInConfig(IConfiguration configuration)
+    private static DfeSignInConfiguration GetDfeSignInConfig(IConfiguration configuration)
     {
         var config = new DfeSignInConfiguration();
         configuration.GetSection("DfeSignIn").Bind(config);

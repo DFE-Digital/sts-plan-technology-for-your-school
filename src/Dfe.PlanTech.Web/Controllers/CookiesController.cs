@@ -37,9 +37,10 @@ public class CookiesController : BaseController<CookiesController>
         return RedirectToPlaceOfOrigin();
     }
 
-    private IActionResult RedirectToPlaceOfOrigin()
+    private RedirectResult RedirectToPlaceOfOrigin()
     {
-        var returnUrl = Request.Headers["Referer"].ToString();
+        var returnUrl = Request.Headers.Referer.ToString();
+
         return Redirect(returnUrl);
     }
 
