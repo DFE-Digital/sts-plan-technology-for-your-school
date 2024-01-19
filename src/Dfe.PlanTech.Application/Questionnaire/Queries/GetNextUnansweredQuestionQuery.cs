@@ -27,15 +27,7 @@ public class GetNextUnansweredQuestionQuery : IGetNextUnansweredQuestionQuery
 
     public static Question? GetNextUnansweredQuestion(Section section, List<QuestionWithAnswer> responses)
     {
-        var attachedQuestions = section.GetAttachedQuestions(responses);
         var lastAttachedResponse = section.GetAttachedQuestions(responses).Last();
-
-        var matchingQuestion = section.Questions.Where(question => question.Sys.Id == lastAttachedResponse.QuestionRef).ToList();
-
-        var questionAnswers = matchingQuestion.SelectMany(question => question.Answers).ToList();
-
-        var matching = questionAnswers.Where(answer => answer.Sys.Id == lastAttachedResponse.AnswerRef).ToList();
-        var nextQuestion = matching.Select(answer => answer.NextQuestion).FirstOrDefault();
 
         return section.Questions.Where(question => question.Sys.Id == lastAttachedResponse.QuestionRef)
                               .SelectMany(question => question.Answers)
