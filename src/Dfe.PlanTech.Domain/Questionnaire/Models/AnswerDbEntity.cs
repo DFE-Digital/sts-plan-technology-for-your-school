@@ -13,6 +13,7 @@ public class AnswerDbEntity : ContentComponentDbEntity, IAnswer<QuestionDbEntity
 
     public string Maturity { get; set; } = null!;
 
+    [DontCopyValue]
     public string? ParentQuestionId { get; set; }
 
     public QuestionDbEntity? ParentQuestion { get; set; }
