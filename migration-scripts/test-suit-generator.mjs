@@ -1,4 +1,5 @@
 import fs from "fs";
+import { Section } from "./section.mjs";
 
 const file = "contentful-export-py5afvqdlxgo-dev-2024-01-17T13-18-05.json";
 const fileContents = fs.readFileSync(file, "utf-8");
@@ -35,7 +36,7 @@ for (const entry of entries) {
       sections.set(id, entry);
       break;
     }
-    case "recommendation": {
+    case "recommendationPage": {
       recommendations.set(id, entry);
       break;
     }
@@ -44,38 +45,33 @@ for (const entry of entries) {
 
 combineEntries();
 
+const sectionClasses = new Map();
+
+for (const [id, section] of sections) {
+  const asClass = new Section(section);
+  console.log(asClass);
+}
+
 const sectionPaths = new Map();
 
 for (const [id, section] of sections) {
-  console.log(section.fields.name);
-
   const firstQuestion = section.fields.questions[0];
-  const paths = getAllPaths(
-    section.fields.questions,
-    [],
-    firstQuestion,
-    section.fields.name
-  );
+  const paths = getAllPaths(section.fields.questions, firstQuestion);
+
   const result = {
     name: section.fields.name,
     id: section.sys.id,
     paths: paths,
   };
 
-  console.log(result.paths);
-
   var stringified = JSON.stringify(result);
   fs.writeFileSync(result.name + ".json", stringified);
 }
 
 fs.writeFileSync("paths.json", JSON.stringify(sectionPaths));
-function getAllPaths(questions, currentPath, currentQuestion, section) {
-  const paths = [];
 
+function getAllPathsRecursion(questions, paths, currentPath, currentQuestion) {
   if (!currentQuestion) {
-    if (section.indexOf("connection") > -1) {
-      console.log("no current question", currentPath, paths);
-    }
     return paths;
   }
 
@@ -85,19 +81,53 @@ function getAllPaths(questions, currentPath, currentQuestion, section) {
       { question: currentQuestion.fields.text, answer: answer.fields.text },
     ];
 
+    console.log(newPath);
     const nextQuestion = questions.find(
       (q) => q.sys.id === answer.fields.nextQuestion?.sys.id
     );
 
-    const nextPaths = getAllPaths(questions, newPath, nextQuestion, section);
+    const nextPaths = getAllPaths(questions, paths, newPath, nextQuestion);
     paths.push(...nextPaths);
   });
 
-  if (section.indexOf("connection") > -1) {
-    console.log(paths.length);
+  return paths.length ? paths : [currentPath];
+}
+
+function getAllPaths(questions, currentQuestion) {
+  const paths = [];
+  const stack = [];
+
+  stack.push({
+    currentPath: [],
+    currentQuestion,
+  });
+
+  while (stack.length > 0) {
+    const { currentPath, currentQuestion } = stack.pop();
+
+    if (!currentQuestion) {
+      paths.push(currentPath);
+      continue;
+    }
+
+    currentQuestion.fields.answers.forEach((answer) => {
+      const newPath = [
+        ...currentPath,
+        { question: currentQuestion.fields.text, answer: answer.fields.text },
+      ];
+
+      const nextQuestion = questions.find(
+        (q) => q.sys.id === answer.fields.nextQuestion?.sys.id
+      );
+
+      stack.push({
+        currentPath: newPath,
+        currentQuestion: nextQuestion,
+      });
+    });
   }
 
-  return paths.length ? paths : [currentPath];
+  return paths;
 }
 
 function combineEntries() {
@@ -114,6 +144,8 @@ function combineEntries() {
       questions
     );
 
+    console.log(section.fields.recommendations);
+    console.log(recommendations);
     section.fields.recommendations = copyRelationships(
       section.fields.recommendations,
       recommendations
