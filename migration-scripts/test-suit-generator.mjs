@@ -49,11 +49,10 @@ const sectionClasses = new Map();
 
 for (const [id, section] of sections) {
   const asClass = new Section(section);
-  console.log(asClass);
+  console.log(asClass.paths);
 }
 
-const sectionPaths = new Map();
-
+/*
 for (const [id, section] of sections) {
   const firstQuestion = section.fields.questions[0];
   const paths = getAllPaths(section.fields.questions, firstQuestion);
@@ -70,66 +69,7 @@ for (const [id, section] of sections) {
 
 fs.writeFileSync("paths.json", JSON.stringify(sectionPaths));
 
-function getAllPathsRecursion(questions, paths, currentPath, currentQuestion) {
-  if (!currentQuestion) {
-    return paths;
-  }
-
-  currentQuestion.fields.answers.forEach((answer) => {
-    const newPath = [
-      ...currentPath,
-      { question: currentQuestion.fields.text, answer: answer.fields.text },
-    ];
-
-    console.log(newPath);
-    const nextQuestion = questions.find(
-      (q) => q.sys.id === answer.fields.nextQuestion?.sys.id
-    );
-
-    const nextPaths = getAllPaths(questions, paths, newPath, nextQuestion);
-    paths.push(...nextPaths);
-  });
-
-  return paths.length ? paths : [currentPath];
-}
-
-function getAllPaths(questions, currentQuestion) {
-  const paths = [];
-  const stack = [];
-
-  stack.push({
-    currentPath: [],
-    currentQuestion,
-  });
-
-  while (stack.length > 0) {
-    const { currentPath, currentQuestion } = stack.pop();
-
-    if (!currentQuestion) {
-      paths.push(currentPath);
-      continue;
-    }
-
-    currentQuestion.fields.answers.forEach((answer) => {
-      const newPath = [
-        ...currentPath,
-        { question: currentQuestion.fields.text, answer: answer.fields.text },
-      ];
-
-      const nextQuestion = questions.find(
-        (q) => q.sys.id === answer.fields.nextQuestion?.sys.id
-      );
-
-      stack.push({
-        currentPath: newPath,
-        currentQuestion: nextQuestion,
-      });
-    });
-  }
-
-  return paths;
-}
-
+*/
 function combineEntries() {
   for (const [id, question] of questions) {
     question.fields.answers = copyRelationships(
@@ -144,8 +84,6 @@ function combineEntries() {
       questions
     );
 
-    console.log(section.fields.recommendations);
-    console.log(recommendations);
     section.fields.recommendations = copyRelationships(
       section.fields.recommendations,
       recommendations
