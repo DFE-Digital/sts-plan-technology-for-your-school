@@ -20,7 +20,7 @@ namespace Dfe.PlanTech.AzureFunctions
         {
             services.AddDbContext<CmsDbContext>(options =>
             {
-                options.UseSqlServer(configuration["AZURE_SQL_AZURESQLCONNECTION_CONNECTIONSTRING"]);
+                options.UseSqlServer(configuration["AZURE_SQL_CONNECTIONSTRING"]);
             });
 
             services.AddAzureClients(builder =>
