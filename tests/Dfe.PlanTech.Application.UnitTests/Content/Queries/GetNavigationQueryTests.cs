@@ -81,10 +81,10 @@ public class GetNavigationQueryTests
         var emptyNavLinksList = new List<NavigationLinkDbEntity>();
         _db.NavigationLink.Returns(emptyNavLinksList.AsQueryable());
 
-    _db.ToListAsync(Arg.Any<IQueryable<NavigationLinkDbEntity>>()).Throws(callInfo =>
-    {
-      throw new Exception("Error occurred");
-    });
+        _db.ToListAsync(Arg.Any<IQueryable<NavigationLinkDbEntity>>()).Throws(callInfo =>
+        {
+            throw new Exception("Error occurred");
+        });
 
         IGetNavigationQuery navQuery = new GetNavigationQuery(_db, _logger, _contentRepository);
 
@@ -107,10 +107,10 @@ public class GetNavigationQueryTests
             return queryable.ToList();
         });
 
-    _contentRepository.GetEntities<NavigationLink>(CancellationToken.None).Throws(callinfo =>
-    {
-      throw new Exception("Contentful error");
-    });
+        _contentRepository.GetEntities<NavigationLink>(CancellationToken.None).Throws(callinfo =>
+        {
+            throw new Exception("Contentful error");
+        });
 
 
         IGetNavigationQuery navQuery = new GetNavigationQuery(_db, _logger, _contentRepository);
