@@ -1,0 +1,8 @@
+BEGIN TRANSACTION;
+GO
+
+ALTER TABLE [Contentful].[Pages]
+DROP COLUMN [SectionId];
+
+COMMIT;
+GO

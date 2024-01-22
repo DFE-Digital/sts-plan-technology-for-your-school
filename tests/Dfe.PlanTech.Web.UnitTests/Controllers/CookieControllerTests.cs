@@ -1,17 +1,17 @@
 ﻿using AutoMapper;
-using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
-using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using NSubstitute;
@@ -22,8 +22,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
     public class CookieControllerTests
     {
         private readonly ICmsDbContext _db = Substitute.For<ICmsDbContext>();
-        private readonly ILogger<GetPageQuery> _getPageLogger = Substitute.For<ILogger<GetPageQuery>>();
         private readonly IMapper _mapper = Substitute.For<IMapper>();
+        private readonly GetPageFromDbQuery _getPageFromDbQuery;
 
         private readonly Page[] _pages = new Page[]
         {
@@ -44,6 +44,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 ControllerContext = ControllerHelpers.SubstituteControllerContext()
             };
+        }
+
+        public CookieControllerTests()
+        {
+            _getPageFromDbQuery = Substitute.For<GetPageFromDbQuery>(_db, new NullLogger<GetPageFromDbQuery>(), _mapper, Array.Empty<IGetPageChildrenQuery>());
         }
 
         [Theory]
@@ -132,12 +137,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task CookiesPageDisplays()
         {
-            IQuestionnaireCacher questionnaireCacherSubstitute = Substitute.For<IQuestionnaireCacher>();
-            IContentRepository contentRepositorySubstitute = SetupRepositorySubstitute();
-            GetPageQuery _getPageQuerySubstitute = Substitute.For<GetPageQuery>(_db, _getPageLogger, _mapper, questionnaireCacherSubstitute, contentRepositorySubstitute, Array.Empty<IGetPageChildrenQuery>());
+            IGetPageQuery getPageQuery = SetupPageQueryMock();
 
             CookiesController cookiesController = CreateStrut();
-            var result = await cookiesController.GetCookiesPage(_getPageQuerySubstitute);
+            var result = await cookiesController.GetCookiesPage(getPageQuery, CancellationToken.None);
             Assert.IsType<ViewResult>(result);
 
             var viewResult = result as ViewResult;
@@ -191,25 +194,16 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.Contains("Can't convert preference", result.Message);
         }
 
-        private IContentRepository SetupRepositorySubstitute()
+        private IGetPageQuery SetupPageQueryMock()
         {
-            var repositorySubstitute = Substitute.For<IContentRepository>();
-            repositorySubstitute.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns((CallInfo) =>
-            {
-                IGetEntitiesOptions options = (IGetEntitiesOptions)CallInfo[0];
-                if (options?.Queries != null)
-                {
-                    foreach (var query in options.Queries)
-                    {
-                        if (query is ContentQueryEquals equalsQuery && query.Field == "fields.slug")
-                        {
-                            return _pages.Where(page => page.Slug == equalsQuery.Value);
-                        }
-                    }
-                }
-                return Array.Empty<Page>();
-            });
-            return repositorySubstitute;
+            var getPageQuery = Substitute.For<IGetPageQuery>();
+            getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                                .Returns(callinfo =>
+                                    {
+                                        var slug = callinfo.ArgAt<string>(0);
+                                        return _pages.FirstOrDefault(page => page.Slug == slug);
+                                    });
+            return getPageQuery;
         }
     }
 }

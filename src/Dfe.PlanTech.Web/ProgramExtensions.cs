@@ -46,7 +46,7 @@ public static class ProgramExtensions
             var logger = services.GetRequiredService<ILogger<TextRendererOptions>>();
 
             return new TextRendererOptions(logger, new List<MarkOption>() {
-                new MarkOption(){
+                new(){
                     Mark = "bold",
                     HtmlTag = "span",
                     Classes = "govuk-body govuk-!-font-weight-bold",
@@ -62,6 +62,23 @@ public static class ProgramExtensions
         {
             Classes = "govuk-link",
         });
+
+        services.AddSingleton((_) =>
+        {
+            var configValue = configuration["CONTENTFUL_GET_ENTITY_INT"] ?? "4";
+
+            if (!int.TryParse(configValue, out int include))
+            {
+                throw new FormatException($"Could not parse CONTENTFUL_GET_ENTITY_INT environment variable to int. Value: {configValue}");
+            }
+
+            return new GetPageFromContentfulOptions()
+            {
+                Include = include
+            };
+        });
+
+        services.AddTransient<GetPageFromContentfulQuery>();
 
         return services;
     }
@@ -128,6 +145,8 @@ public static class ProgramExtensions
         services.AddTransient<IProcessCheckAnswerDtoCommand, ProcessCheckAnswerDtoCommand>();
         services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
         services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
+
+        services.AddTransient<GetPageFromDbQuery>();
         return services;
     }
 
