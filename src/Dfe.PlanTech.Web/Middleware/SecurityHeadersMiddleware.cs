@@ -26,8 +26,8 @@ public class SecurityHeadersMiddleware
     /// <param name="context"></param>
     private static void AddFramejackingPreventHeaders(HttpContext context)
     {
-        context.Response.Headers["X-Frame-Options"] = "Deny";
-        context.Response.Headers["Content-Security-Policy"] = "frame-ancestors 'none'";
+        context.Response.Headers.XFrameOptions = "Deny";
+        context.Response.Headers.ContentSecurityPolicy = "frame-ancestors 'none'";
     }
 }
 

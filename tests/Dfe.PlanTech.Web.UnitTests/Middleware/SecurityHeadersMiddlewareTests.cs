@@ -20,10 +20,10 @@ public class SecurityHeadersMiddlewareTests
 
         var response = context.Response;
 
-        Assert.NotEmpty(context.Response.Headers.XFrameOptions);
+        Assert.True(context.Response.Headers.XFrameOptions.Count > 0);
         Assert.Equal("Deny", context.Response.Headers.XFrameOptions);
 
-        Assert.NotEmpty(context.Response.Headers.ContentSecurityPolicy);
+        Assert.True(context.Response.Headers.ContentSecurityPolicy.Count > 0);
         Assert.Equal("frame-ancestors 'none'", context.Response.Headers.ContentSecurityPolicy);
     }
 }

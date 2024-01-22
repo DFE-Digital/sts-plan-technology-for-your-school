@@ -25,7 +25,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
                                                       [FromServices] ICheckAnswersRouter checkAnswersValidator,
                                                       CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
+        ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug);
 
         var errorMessage = TempData["ErrorMessage"]?.ToString();
 
@@ -35,8 +35,8 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     [HttpPost("ConfirmCheckAnswers")]
     public async Task<IActionResult> ConfirmCheckAnswers(string sectionSlug, int submissionId, string sectionName, [FromServices] ICalculateMaturityCommand calculateMaturityCommand, CancellationToken cancellationToken = default)
     {
-        if (submissionId <= 0) throw new ArgumentOutOfRangeException(nameof(submissionId));
-        if (string.IsNullOrEmpty(sectionName)) throw new ArgumentNullException(nameof(sectionName));
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(submissionId);
+        ArgumentNullException.ThrowIfNullOrEmpty(sectionName);
 
         try
         {

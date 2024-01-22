@@ -3,15 +3,6 @@
 namespace Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 
 [Serializable]
-public class GetEntitiesException : Exception, ISerializable
+public class GetEntitiesException(string? message) : Exception(message), ISerializable
 {
-    public GetEntitiesException(string? message) : base(message)
-    {
-    }
-
-    public override void GetObjectData(SerializationInfo info, StreamingContext context)
-    {
-        base.GetObjectData(info, context);
-    }
-
 }

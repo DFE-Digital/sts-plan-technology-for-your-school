@@ -16,7 +16,7 @@ public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand
     public async Task<CheckAnswerDto?> GetCheckAnswerDtoForSection(int establishmentId, ISectionComponent section, CancellationToken cancellationToken = default)
     {
         var checkAnswerDto = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(establishmentId, section.Sys.Id, cancellationToken);
-        if (checkAnswerDto?.Responses == null || !checkAnswerDto.Responses.Any())
+        if (checkAnswerDto?.Responses == null || checkAnswerDto.Responses.Count == 0)
         {
             return null;
         }
@@ -26,8 +26,8 @@ public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand
 
     private static CheckAnswerDto RemoveDetachedQuestions(CheckAnswerDto checkAnswerDto, ISectionComponent section)
     {
-        if (checkAnswerDto == null) throw new ArgumentNullException(nameof(checkAnswerDto));
-        if (section == null) throw new ArgumentNullException(nameof(section));
+        ArgumentNullException.ThrowIfNull(checkAnswerDto);
+        ArgumentNullException.ThrowIfNull(section);
 
         var attachedQuestions = section.GetAttachedQuestions(checkAnswerDto.Responses).ToList();
 
