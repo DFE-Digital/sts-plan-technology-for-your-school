@@ -35,4 +35,11 @@
       Include="..\..\src\Dfe.PlanTech.Infrastructure.Data\Dfe.PlanTech.Infrastructure.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="contentful-export.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+
 </Project>

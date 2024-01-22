@@ -1,11 +1,14 @@
-using Dfe.PlanTech.DataValidation.Tests;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.AzureKeyVault;
 
-public static class TestsSetup
+namespace Dfe.PlanTech.DataValidation.Tests;
+
+public static class ConfigurationSetup
 {
+  public static readonly IConfiguration Configuration = BuildConfiguration();
+
   public static IConfiguration BuildConfiguration()
   {
     var builder = new ConfigurationBuilder();
