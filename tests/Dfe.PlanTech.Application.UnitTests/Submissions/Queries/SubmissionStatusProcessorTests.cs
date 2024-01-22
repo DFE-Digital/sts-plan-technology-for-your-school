@@ -47,7 +47,7 @@ public class SubmissionStatusProcessorTests
                         {
                             var sectionSlug = callinfo.ArgAt<string>(0);
 
-                            return _sections.FirstOrDefault(section => section.InterstitialPage.Slug == sectionSlug) as Section;
+                            return _sections.FirstOrDefault(section => section.InterstitialPage.Slug == sectionSlug);
                         });
 
         _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
