@@ -124,7 +124,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var featureCollection = new FeatureCollection();
 
             requestFeature.Headers = new HeaderDictionary();
-            requestFeature.Headers.Add(HeaderNames.Cookie, new StringValues(key + "=" + value));
+            requestFeature.Headers.Append(HeaderNames.Cookie, new StringValues(key + "=" + value));
 
             featureCollection.Set<IHttpRequestFeature>(requestFeature);
 

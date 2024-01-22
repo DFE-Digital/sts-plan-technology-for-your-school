@@ -20,7 +20,7 @@ public class CreateEstablishmentCommand : ICreateEstablishmentCommand
     /// <returns></returns>
     public async Task<int> CreateEstablishment(EstablishmentDto establishmentDto)
     {
-        if (establishmentDto == null) throw new ArgumentNullException(nameof(establishmentDto));
+        ArgumentNullException.ThrowIfNull(establishmentDto);
 
         var establishment = new Establishment()
         {
