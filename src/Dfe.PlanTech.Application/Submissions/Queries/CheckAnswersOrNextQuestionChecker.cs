@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
@@ -18,8 +19,8 @@ public static class CheckAnswersOrNextQuestionChecker
         ProcessSubmissionFunc = async (userJourneyRouter, cancellationToken) =>
         {
             var responses = await userJourneyRouter.GetResponsesQuery.GetLatestResponses(await userJourneyRouter.User.GetEstablishmentId(),
-                                                                              userJourneyRouter.Section!.Sys.Id,
-                                                                              cancellationToken) ?? throw new InvalidDataException("Missing responses");
+                                                                                        userJourneyRouter.Section!.Sys.Id,
+                                                                                        cancellationToken) ?? throw new InvalidDataException("Missing responses");
 
             var lastResponseInUserJourney = userJourneyRouter.Section!.GetAttachedQuestions(responses.Responses).Last();
 
@@ -33,8 +34,11 @@ public static class CheckAnswersOrNextQuestionChecker
             }
 
             userJourneyRouter.Status = SubmissionStatus.NextQuestion;
-            userJourneyRouter.NextQuestion = lastSelectedAnswer.NextQuestion;
+            userJourneyRouter.NextQuestion = GetNextQuestion(userJourneyRouter, lastSelectedAnswer);
         }
     };
+
+    private static Question? GetNextQuestion(ISubmissionStatusProcessor userJourneyRouter, Answer lastSelectedAnswer)
+    => userJourneyRouter.Section?.Questions.Find(question => question.Sys.Id == lastSelectedAnswer.NextQuestion?.Sys.Id);
 }
 

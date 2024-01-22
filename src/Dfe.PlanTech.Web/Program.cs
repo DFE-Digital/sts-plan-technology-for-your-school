@@ -70,13 +70,11 @@ builder.Services.AddTransient((_) => CheckAnswersOrNextQuestionChecker.CheckAnsw
 builder.Services.AddAutoMapper(typeof(Dfe.PlanTech.Application.Mappings.CmsMappingProfile));
 
 builder.Services.AddAuthentication();
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy(PageModelAuthorisationPolicy.POLICY_NAME, policy =>
-    {
-        policy.Requirements.Add(new PageAuthorisationRequirement());
-    });
-});
+builder.Services.AddAuthorizationBuilder()
+                .AddDefaultPolicy(PageModelAuthorisationPolicy.POLICY_NAME, policy =>
+                {
+                    policy.Requirements.Add(new PageAuthorisationRequirement());
+                });
 
 builder.Services.AddContentfulServices(builder.Configuration);
 

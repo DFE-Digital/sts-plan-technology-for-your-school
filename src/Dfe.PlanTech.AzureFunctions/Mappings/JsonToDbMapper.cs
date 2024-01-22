@@ -26,7 +26,11 @@ where TEntity : ContentComponentDbEntity, new()
         Payload = payload;
 
         var values = GetEntityValuesDictionary(payload);
-        values = PerformAdditionalMapping(values);
+
+        if (!payload.Sys.Type.Equals("DeletedEntry"))
+        {
+            values = PerformAdditionalMapping(values);
+        }
 
         var asJson = JsonSerializer.Serialize(values, JsonOptions);
         var serialised = JsonSerializer.Deserialize<TEntity>(asJson, JsonOptions) ?? throw new NullReferenceException("Null returned");
@@ -109,9 +113,12 @@ public abstract class JsonToDbMapper
     {
         yield return new KeyValuePair<string, object?>("id", payload.Sys.Id);
 
-        foreach (var field in payload.Fields.SelectMany(GetValuesFromFields))
+        if (!payload.Sys.Type.Equals("DeletedEntry"))
         {
-            yield return field;
+            foreach (var field in payload.Fields.SelectMany(GetValuesFromFields))
+            {
+                yield return field;
+            }
         }
     }
 

@@ -14,10 +14,7 @@ public static class UserClaimsExtensions
 
     public static string GetUserId(this IEnumerable<Claim> claims)
     {
-        if (claims == null)
-        {
-            throw new ArgumentNullException(nameof(claims));
-        }
+        ArgumentNullException.ThrowIfNull(claims);
 
         return claims
             .Where(c => c.Type.Contains(ClaimConstants.NameIdentifier))
@@ -37,10 +34,7 @@ public static class UserClaimsExtensions
     /// </exception>
     public static Organisation? GetOrganisation(this IEnumerable<Claim> claims)
     {
-        if (claims == null)
-        {
-            throw new ArgumentNullException(nameof(claims));
-        }
+        ArgumentNullException.ThrowIfNull(claims);
 
         var organisationJson = claims.Where(c => c.Type == ClaimConstants.Organisation)
             .Select(c => c.Value)

@@ -114,7 +114,7 @@ public class GetCategorySectionsQuery : IGetPageChildrenQuery
                         },
                         Id = recommendation.Id
                     }).ToList(),
-                    InterstitialPage = section.InterstitialPage == null ? null : new PageDbEntity()
+                    InterstitialPage = new PageDbEntity()
                     {
                         Slug = section.InterstitialPage.Slug,
                         Id = section.InterstitialPage.Id

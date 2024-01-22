@@ -20,7 +20,7 @@ public class GetNextUnansweredQuestionQuery : IGetNextUnansweredQuestionQuery
 
         if (answeredQuestions == null) return section.Questions.FirstOrDefault();
 
-        if (!answeredQuestions.Responses.Any()) throw new DatabaseException($"There are no responses in the database for ongoing submission {answeredQuestions.SubmissionId}, linked to establishment {establishmentId}");
+        if (answeredQuestions.Responses.Count == 0) throw new DatabaseException($"There are no responses in the database for ongoing submission {answeredQuestions.SubmissionId}, linked to establishment {establishmentId}");
 
         return GetNextUnansweredQuestion(section, answeredQuestions.Responses);
     }

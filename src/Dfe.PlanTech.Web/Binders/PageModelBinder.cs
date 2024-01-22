@@ -17,10 +17,7 @@ public class PageModelBinder : IModelBinder
 
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
-        if (bindingContext == null)
-        {
-            throw new ArgumentNullException(nameof(bindingContext));
-        }
+        ArgumentNullException.ThrowIfNull(bindingContext);
 
         if (!bindingContext.HttpContext.Items.ContainsKey(nameof(Page)))
         {
