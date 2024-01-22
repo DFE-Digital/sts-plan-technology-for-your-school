@@ -34,8 +34,8 @@ resource "azurerm_key_vault_access_policy" "vault_access_policy_mi" {
   tenant_id    = data.azurerm_client_config.current.tenant_id
   object_id    = azurerm_user_assigned_identity.user_assigned_identity.principal_id
 
-  secret_permissions = ["List", "Get"]
-  key_permissions    = ["List", "Get", "WrapKey", "UnwrapKey"]
+  secret_permissions = ["List", "Get", "Set", "Delete", "Recover", "Backup", "Restore"]
+  key_permissions    = ["List", "Get", "WrapKey", "UnwrapKey", "Decrypt", "Encrypt", "Verify", "Sign"]
 }
 
 resource "azurerm_key_vault_secret" "vault_secret_contentful_deliveryapikey" {
