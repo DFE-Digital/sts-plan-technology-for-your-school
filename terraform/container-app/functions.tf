@@ -38,7 +38,7 @@ resource "azurerm_linux_function_app" "contentful_function" {
   site_config {
     application_insights_key = azurerm_application_insights.functional_insights.instrumentation_key
     application_stack {
-      dotnet_version              = "7.0"
+      dotnet_version              = "8.0"
       use_dotnet_isolated_runtime = true
     }
   }
