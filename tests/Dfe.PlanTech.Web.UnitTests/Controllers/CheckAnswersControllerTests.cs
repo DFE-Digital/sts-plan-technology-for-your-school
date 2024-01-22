@@ -34,7 +34,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [InlineData(null)]
         public async Task CheckAnswersPage_Should_ThrowException_When_SectionSlug_NullOrEmpty(string? section)
         {
-            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _checkAnswersController.CheckAnswersPage(section!, _checkAnswersRouter, default));
+            await Assert.ThrowsAnyAsync<ArgumentException>(() => _checkAnswersController.CheckAnswersPage(section!, _checkAnswersRouter, default));
         }
 
         [Fact]
@@ -58,7 +58,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [InlineData("")]
         public async Task ConfirmAnswers_Should_ThrowException_When_SectionName_NullOrEmpty(string? sectionName)
         {
-            await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _checkAnswersController.ConfirmCheckAnswers(_sectionSlug, 1, sectionName!, _calculateMaturityCommand));
+            await Assert.ThrowsAnyAsync<ArgumentException>(() => _checkAnswersController.ConfirmCheckAnswers(_sectionSlug, 1, sectionName!, _calculateMaturityCommand));
         }
 
         [Fact]

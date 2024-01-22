@@ -35,10 +35,12 @@ resource "azurerm_linux_function_app" "contentful_function" {
   storage_account_access_key = azurerm_storage_account.function_storage.primary_access_key
   storage_account_name       = azurerm_storage_account.function_storage.name
 
+  key_vault_reference_identity_id = azurerm_user_assigned_identity.user_assigned_identity.id
+
   site_config {
     application_insights_key = azurerm_application_insights.functional_insights.instrumentation_key
     application_stack {
-      dotnet_version              = "7.0"
+      dotnet_version              = "8.0"
       use_dotnet_isolated_runtime = true
     }
   }
@@ -49,16 +51,16 @@ resource "azurerm_linux_function_app" "contentful_function" {
   }
 
   app_settings = {
-    AZURE_SQL_AZURESQLCONNECTION_CONNECTIONSTRING           = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=${azurerm_key_vault_secret.vault_secret_database_connectionstring.name})"
-    AzureWebJobsServiceBus                                  = azurerm_servicebus_namespace.service_bus.default_primary_connection_string
-    WEBSITE_ENABLE_SYNC_UPDATE_SITE                         = true
-    WEBSITE_MOUNT_ENABLED                                   = 1
-    AZURE_CLIENT_ID                                         = azurerm_user_assigned_identity.user_assigned_identity.client_id
-    AZURE_KEYVAULT_AZUREKEYVAULTCONNECTION_CLIENTID         = azurerm_user_assigned_identity.user_assigned_identity.client_id
-    AZURE_KEYVAULT_AZUREKEYVAULTCONNECTION_RESOURCEENDPOINT = azurerm_key_vault.vault.vault_uri
-    AZURE_KEYVAULT_AZUREKEYVAULTCONNECTION_SCOPE            = "https://vault.azure.net/.default"
-    KeyVaultReferenceIdentity                               = azurerm_user_assigned_identity.user_assigned_identity.id
-    WEBSITE_RUN_FROM_PACKAGE                                = ""
+    AZURE_SQL_CONNECTIONSTRING      = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=${azurerm_key_vault_secret.vault_secret_database_connectionstring.name})"
+    AzureWebJobsServiceBus          = azurerm_servicebus_namespace.service_bus.default_primary_connection_string
+    WEBSITE_ENABLE_SYNC_UPDATE_SITE = true
+    WEBSITE_MOUNT_ENABLED           = 1
+    AZURE_CLIENT_ID                 = azurerm_user_assigned_identity.user_assigned_identity.client_id
+    AZURE_KEYVAULT_CLIENTID         = azurerm_user_assigned_identity.user_assigned_identity.client_id
+    AZURE_KEYVAULT_RESOURCEENDPOINT = azurerm_key_vault.vault.vault_uri
+    AZURE_KEYVAULT_SCOPE            = "https://vault.azure.net/.default"
+    KeyVaultReferenceIdentity       = azurerm_user_assigned_identity.user_assigned_identity.id
+    WEBSITE_RUN_FROM_PACKAGE        = ""
   }
 
   lifecycle {
