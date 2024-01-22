@@ -31,14 +31,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Dfe.PlanTech.Application\Dfe.PlanTech.Application.csproj" />
     <ProjectReference Include="..\..\src\Dfe.PlanTech.Domain\Dfe.PlanTech.Domain.csproj" />
-    <ProjectReference Include="..\..\src\Dfe.PlanTech.Infrastructure.Data\Dfe.PlanTech.Infrastructure.Data.csproj" />
+    <ProjectReference
+      Include="..\..\src\Dfe.PlanTech.Infrastructure.Data\Dfe.PlanTech.Infrastructure.Data.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
 
 </Project>

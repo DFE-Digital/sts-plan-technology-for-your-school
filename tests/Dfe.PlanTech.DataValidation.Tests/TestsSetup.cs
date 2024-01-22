@@ -40,7 +40,7 @@ public static class TestsSetup
 
   public static ConfigurationBuilder AddAppSettings(this ConfigurationBuilder builder)
   {
-    builder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+    builder.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
     return builder;
   }
 }
