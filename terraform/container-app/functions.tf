@@ -35,7 +35,7 @@ resource "azurerm_linux_function_app" "contentful_function" {
   storage_account_access_key = azurerm_storage_account.function_storage.primary_access_key
   storage_account_name       = azurerm_storage_account.function_storage.name
 
-  key_vault_reference_identity_id = azurerm_user_assigned_identity.user_assigned_identity.client_id
+  key_vault_reference_identity_id = azurerm_user_assigned_identity.user_assigned_identity.id
 
   site_config {
     application_insights_key = azurerm_application_insights.functional_insights.instrumentation_key
