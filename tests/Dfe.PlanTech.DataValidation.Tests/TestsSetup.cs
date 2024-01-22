@@ -1,3 +1,4 @@
+using Dfe.PlanTech.DataValidation.Tests;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Extensions.Configuration;
@@ -9,8 +10,11 @@ public static class TestsSetup
   {
     var builder = new ConfigurationBuilder();
 
+    builder.SetBasePath(AppContext.BaseDirectory);
+
     return builder.AddAppSettings()
-                  .AddKeyVault()
+                  .AddUserSecrets<CachedDataComparisonTests>()
+                  // .AddKeyVault()
                   .Build();
   }
 

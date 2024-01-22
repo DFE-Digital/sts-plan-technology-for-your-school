@@ -17,8 +17,10 @@ public class CachedDataComparisonTests
   {
     var configuration = TestsSetup.BuildConfiguration();
 
+    var sqlServer = configuration.GetConnectionString("Database");
+
     var databaseOptionsBuilder = new DbContextOptionsBuilder<CmsDbContext>()
-                              .UseSqlServer(configuration.GetConnectionString("Database"));
+                              .UseSqlServer(sqlServer);
 
     return new CmsDbContext(databaseOptionsBuilder.Options);
   }
