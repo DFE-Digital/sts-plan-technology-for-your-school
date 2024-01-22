@@ -23,7 +23,7 @@ public class BaseFunctionTests
 
         var response = _baseFunction.ReturnEmptyBodyError(request);
 
-        Assert.True(response.StatusCode == HttpStatusCode.BadRequest);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         _logger.ReceivedWithAnyArgs(1);
     }
 
@@ -37,7 +37,7 @@ public class BaseFunctionTests
 
         var response = _baseFunction.ReturnServerErrorResponse(request, exception);
 
-        Assert.True(response.StatusCode == HttpStatusCode.InternalServerError);
+        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
 
         _logger.ReceivedWithAnyArgs(1);
         var loggerArguments = _logger.ReceivedCalls().First().GetArguments();
@@ -60,6 +60,7 @@ public class BaseFunctionTests
 
         var response = BaseFunction.ReturnOkResponse(request);
 
-        Assert.True(response.StatusCode == HttpStatusCode.OK);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
     }
 }

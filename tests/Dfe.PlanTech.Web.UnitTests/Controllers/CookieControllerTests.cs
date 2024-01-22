@@ -59,7 +59,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             //Arrange
             var strut = CreateStrut();
             var httpContext = new DefaultHttpContext();
-            httpContext.Request.Headers["Referer"] = url;
+            httpContext.Request.Headers.Referer = url;
 
             strut.ControllerContext = new ControllerContext
             {
@@ -82,7 +82,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             //Arrange
             var strut = CreateStrut();
             var httpContext = new DefaultHttpContext();
-            httpContext.Request.Headers["Referer"] = url;
+            httpContext.Request.Headers.Referer = url;
             strut.ControllerContext = new ControllerContext
             {
                 HttpContext = httpContext
@@ -104,7 +104,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             //Arrange
             var strut = CreateStrut();
             var httpContext = new DefaultHttpContext();
-            httpContext.Request.Headers["Referer"] = url;
+            httpContext.Request.Headers.Referer = url;
             strut.ControllerContext = new ControllerContext
             {
                 HttpContext = httpContext
@@ -173,8 +173,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             if (res != null)
             {
-                Assert.True(res.ActionName == "GetByRoute");
-                Assert.True(res.ControllerName == "Pages");
+                Assert.Equal("GetByRoute", res.ActionName);
+                Assert.Equal("Pages", res.ControllerName);
             }
         }
 

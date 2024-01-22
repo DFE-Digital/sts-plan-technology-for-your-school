@@ -2,6 +2,8 @@ using Dfe.PlanTech.AzureFunctions.UnitTests;
 using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 
+namespace Dfe.PlanTech.AzureFunctions.UnitTests;
+
 public class AsyncQueryProvider<TEntity> : IAsyncQueryProvider
 {
     private readonly IQueryProvider _inner;
