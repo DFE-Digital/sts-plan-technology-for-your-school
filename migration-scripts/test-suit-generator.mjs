@@ -1,7 +1,7 @@
 import fs from "fs";
 import { Section } from "./section.mjs";
 
-const file = "contentful-export-py5afvqdlxgo-dev-2024-01-17T13-18-05.json";
+const file = "contentful-export-py5afvqdlxgo-master-2024-01-22T09-11-46.json";
 const fileContents = fs.readFileSync(file, "utf-8");
 const asJsonObject = JSON.parse(fileContents);
 
@@ -11,6 +11,7 @@ const sections = new Map();
 const questions = new Map();
 const answers = new Map();
 const recommendations = new Map();
+const pages = new Map();
 
 for (const entry of entries) {
   const contentType = entry.sys.contentType.sys.id;
@@ -40,6 +41,10 @@ for (const entry of entries) {
       recommendations.set(id, entry);
       break;
     }
+    case "page": {
+      pages.set(id, entry);
+      break;
+    }
   }
 }
 
@@ -49,7 +54,11 @@ const sectionClasses = new Map();
 
 for (const [id, section] of sections) {
   const asClass = new Section(section);
-  console.log(asClass.paths);
+
+  asClass.writeFile("./output/");
+  //var stringified = JSON.stringify(asClass);
+  //fs.writeFileSync("./output/" + asClass.name + ".json", stringified);
+  //stringified = null;
 }
 
 /*
@@ -71,6 +80,10 @@ fs.writeFileSync("paths.json", JSON.stringify(sectionPaths));
 
 */
 function combineEntries() {
+  for (const [id, recommendation] of recommendations) {
+    recommendation.fields.page = pages.get(recommendation.fields.page.sys.id);
+  }
+
   for (const [id, question] of questions) {
     question.fields.answers = copyRelationships(
       question.fields.answers,
@@ -97,8 +110,4 @@ function stripLocalisation(obj) {
 
 function copyRelationships(parent, children) {
   return parent.map((child) => children.get(child.sys.id));
-}
-
-function onlyUnique(value, index, array) {
-  return array.indexOf(value) === index;
 }

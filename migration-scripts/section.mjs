@@ -1,20 +1,35 @@
+import fs from "fs";
 export class Section {
   recommendations;
   questions;
+  name;
   id;
 
   paths;
 
   constructor({ fields, sys }) {
-    this.recommendations = fields.recommendations.map((recommendation) => {
-      return new Recommendation(recommendation);
-    });
+    this.recommendations = fields.recommendations.map(
+      (recommendation) => new Recommendation(recommendation)
+    );
+
     this.questions = fields.questions.map((question) => new Question(question));
     this.id = sys.id;
+    this.name = fields.name;
 
     this.setNextQuestions();
-    this.paths = [];
-    this.paths = this.getAllPaths(this.questions[0]);
+    this.paths = this.getAllPaths(this.questions[0]).map((path) => {
+      const userJourney = new UserJourney(path, this);
+      userJourney.setRecommendation(this.recommendations);
+
+      return userJourney;
+    });
+  }
+
+  get stats() {
+    return this.paths.reduce((count, path) => {
+      const maturity = path.maturity;
+      return count[maturity] ? ++count[maturity] : (count[maturity] = 1), count;
+    }, {});
   }
 
   getAllPaths(currentQuestion) {
@@ -37,20 +52,13 @@ export class Section {
       currentQuestion.answers.forEach((answer) => {
         const newPath = [
           ...currentPath,
-          { question: currentQuestion.text, answer: answer.text },
+          { question: currentQuestion, answer: answer },
         ];
 
         const nextQuestion = this.questions.find(
           (q) => q.id === answer.nextQuestion?.id
         );
-        /*
-        console.log(
-          "next question for answer",
-          answer,
-          answer.nextQuestion?.Id,
-          nextQuestion
-        );
-        */
+
         stack.push({
           currentPath: newPath,
           currentQuestion: nextQuestion,
@@ -75,12 +83,46 @@ export class Section {
 
         if (matchingQuestions.length == 0) {
           console.error(
-            `Error finding question for ${nextQuestionId} in ${this.name}`
+            `Error finding question for ${nextQuestionId} in ${this.name} - answer ${answer.text} ${answer.id} in ${question.text} ${question.id}`
           );
+          console.log("");
+
+          answer.nextQuestion = null;
+          continue;
         }
+
         answer.nextQuestion = matchingQuestions[0];
       }
     }
+  }
+
+  writeFile(destinationFolder) {
+    const output = {
+      section: this.name,
+      stats: this.stats,
+      paths: this.paths.map((path) => {
+        var result = {
+          recommendation:
+            path.recommendation != null
+              ? {
+                  name: path.recommendation?.displayName,
+                  maturity: path.recommendation?.maturity,
+                }
+              : null,
+          path: path.path.map((s) => {
+            return {
+              question: s.question.text,
+              answer: s.answer.text,
+            };
+          }),
+        };
+
+        return result;
+      }),
+    };
+
+    const json = JSON.stringify(output);
+    fs.writeFileSync(`${destinationFolder}/${this.name}.json`, json);
   }
 }
 
@@ -115,21 +157,84 @@ export class Answer {
 export class Recommendation {
   slug;
   maturity;
-  name;
+  displayName;
   id;
+  page;
 
   constructor({ fields, sys }) {
     this.slug = fields.slug;
     this.maturity = fields.maturity;
-    this.name = fields.name;
+    this.displayName = fields.displayName;
     this.id = sys.id;
+    this.page = fields.page;
+    this.slug = fields.page?.fields.slug;
+  }
+}
+
+export class QuestionAnswer {
+  question;
+  answer;
+
+  constructor({ question, answer }) {
+    this.question = question;
+    this.answer = answer;
   }
 }
 
 export class UserJourney {
   path;
+  maturity;
+  section;
+  recommendation;
 
-  constructor() {
-    this.path = [];
+  constructor(path, section) {
+    this.path = path;
+    this.section = section;
+
+    this.maturity = this.maturityRanking(
+      path
+        .map((questionAnswer) => questionAnswer.answer.maturity)
+        .filter(onlyUnique)
+        .map(this.maturityRanking)
+        .filter((maturity) => maturity != null)
+        .sort()[0]
+    );
+  }
+
+  setRecommendation(recommendations) {
+    const recommendation = recommendations.filter(
+      (recommendation) => recommendation.maturity == this.maturity
+    );
+
+    if (recommendation == null || recommendation.length == 0) {
+      console.error(
+        `could not find recommendation for ${this.maturity} in ${this.section.name}`,
+        recommendations
+      );
+      return;
+    }
+
+    this.recommendation = recommendation[0];
+  }
+
+  maturityRanking(maturity) {
+    switch (maturity) {
+      case "Low":
+        return 0;
+      case "Medium":
+        return 1;
+      case "High":
+        return 2;
+      case 0:
+        return "Low";
+      case 1:
+        return "Medium";
+      case 2:
+        return "High";
+    }
+
+    return null;
   }
 }
+
+const onlyUnique = (value, index, array) => array.indexOf(value) === index;
