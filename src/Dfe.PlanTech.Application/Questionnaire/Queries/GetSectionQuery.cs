@@ -1,5 +1,3 @@
-using System.Linq;
-using System.Linq.Expressions;
 using AutoMapper;
 using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Exceptions;
@@ -9,6 +7,7 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
+using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Application.Questionnaire.Queries;
 
