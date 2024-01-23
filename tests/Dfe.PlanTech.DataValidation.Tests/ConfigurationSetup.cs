@@ -17,7 +17,6 @@ public static class ConfigurationSetup
 
     return builder.AddAppSettings()
                   .AddUserSecrets<CachedDataComparisonTests>()
-                  // .AddKeyVault()
                   .Build();
   }
 
