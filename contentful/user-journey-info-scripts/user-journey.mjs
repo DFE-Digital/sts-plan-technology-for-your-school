@@ -18,6 +18,11 @@ export class UserJourney {
     );
   }
 
+  /**
+   * Finds and sets the recommendation property from the recommendations received
+   *
+   * @param {Array} recommendations - the list of recommendations to look through
+   */
   setRecommendation(recommendations) {
     const recommendation = recommendations.filter(
       (recommendation) => recommendation.maturity == this.maturity
@@ -34,6 +39,12 @@ export class UserJourney {
     this.recommendation = recommendation[0];
   }
 
+  /**
+   * A function that maps maturity levels to integers, for comparing/sorting easily.
+   *
+   * @param {string|number} maturity - the maturity level to be ranked
+   * @return {number|string|null} the ranked maturity level or null if not found
+   */
   maturityRanking(maturity) {
     switch (maturity) {
       case "Low":
@@ -53,6 +64,12 @@ export class UserJourney {
     return null;
   }
 
+  /**
+   * Maps the path to only the question and answer texts.
+   *
+   * @param {type} pathPart - description of parameter
+   * @return {type} the mapped question and answer texts
+   */
   mapPathToOnlyQuestionAnswerTexts() {
     return this.path.map((pathPart) => {
       return {

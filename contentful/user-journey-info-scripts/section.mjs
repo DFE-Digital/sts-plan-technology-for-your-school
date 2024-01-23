@@ -34,6 +34,9 @@ export class Section {
     this.getMinimumPathsForRecommendations();
   }
 
+  /**
+   * Find the minimum amount of paths possible that allows a user to navigate through every question.
+   */
   getMinimumPathsForQuestions() {
     const sortedPaths = this.paths
       .slice()
@@ -44,6 +47,10 @@ export class Section {
     );
   }
 
+  /**
+   * Calculate the minimum amount of paths possible for each recommendation.
+   * Also tries to ensure the paths are as sort as possible.
+   */
   getMinimumPathsForRecommendations() {
     const pathsShortedByShortestFirst = this.paths
       .slice()
@@ -52,6 +59,13 @@ export class Section {
       this.calculateMinimumPathsForRecommendations(pathsShortedByShortestFirst);
   }
 
+  /**
+   * Calculate the minimum paths to answer all target questions.
+   *
+   * @param {array} sortedPaths - The sorted paths to be considered.
+   * @param {array} targetQuestions - The target questions to be answered.
+   * @return {array} An array containing the minimum paths to answer the target questions.
+   */
   calculateMinimumPaths(sortedPaths, targetQuestions) {
     const remainingQuestions = targetQuestions.map((question) => question.id);
     let minimumPaths = [];
@@ -105,6 +119,12 @@ export class Section {
     return minimumPaths;
   }
 
+  /**
+   * Calculate the minimum paths for recommendations.
+   *
+   * @param {Array} paths - The paths to calculate minimums for
+   * @return {Object} minimumPathsForRecommendations - The calculated minimum paths for recommendations
+   */
   calculateMinimumPathsForRecommendations(paths) {
     const possibleMaturities = ["Low", "Medium", "High"];
     const minimumPathsForRecommendations = {};
@@ -126,6 +146,13 @@ export class Section {
     return minimumPathsForRecommendations;
   }
 
+  /**
+   * Calculates the statistics of the paths.
+   * Currently just counts the number of paths for each maturity level.
+   *
+   * @param {type} paramName - description of parameter
+   * @return {type} description of return value
+   */
   get stats() {
     return this.paths.reduce((count, path) => {
       const maturity = path.maturity;
@@ -133,6 +160,12 @@ export class Section {
     }, {});
   }
 
+  /**
+   * Retrieves all possible paths from the current question.
+   *
+   * @param {Object} currentQuestion - The current question object
+   * @return {Array} An array of all possible paths
+   */
   getAllPaths(currentQuestion) {
     const paths = [];
     const stack = [];
@@ -170,6 +203,12 @@ export class Section {
     return paths;
   }
 
+  /**
+   * Get unique paths from the sorted paths array.
+   *
+   * @param {Array} sortedPaths - The array of sorted paths
+   * @return {Array} The array of unique paths
+   */
   getUniquePaths(sortedPaths) {
     const pathsWithQuestions = sortedPaths.map((path) => ({
       path: path.path,
@@ -182,6 +221,13 @@ export class Section {
     return uniquePaths;
   }
 
+  /**
+   * Find the first path containing the specified question ID.
+   *
+   * @param {array} sortedPaths - The array of sorted paths to search through.
+   * @param {number} questionId - The ID of the question to find in the paths.
+   * @return {object} The path containing the specified question ID, or undefined if not found.
+   */
   getFirstPathContainingQuestion(sortedPaths, questionId) {
     // Find the first path that contains the remaining question
     const pathsForQuestion = sortedPaths.find((path) =>
@@ -206,6 +252,10 @@ export class Section {
     return;
   }
 
+  /**
+   * For each answer, in each question (in the this.questions property),
+   * find the matching question for the 'nextQuestion' property, and set it if found
+   */
   setNextQuestions() {
     for (const question of this.questions) {
       for (const answer of question.answers) {
@@ -234,6 +284,13 @@ export class Section {
   }
 }
 
+/**
+ * Removes the first occurrence of the specified value from the array.
+ *
+ * @param {Array} arr - The array to remove the value from
+ * @param {any} value - The value to be removed from the array
+ * @return {Array} The array with the first occurrence of the value removed
+ */
 const removeFromArray = (arr, value) => {
   var index = arr.indexOf(value);
   if (index > -1) {
