@@ -26,7 +26,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
                                                       CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug);
-        
+
         ViewData["Title"] = "Check Answers";
 
         var errorMessage = TempData["ErrorMessage"]?.ToString();
