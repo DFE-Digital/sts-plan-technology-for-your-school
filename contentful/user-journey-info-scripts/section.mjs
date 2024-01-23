@@ -3,8 +3,6 @@ import { Recommendation } from "./recommendation.mjs";
 import { Question } from "./question.mjs";
 import { UserJourney } from "./user-journey.mjs";
 
-const WriteAllPossiblePaths = false;
-
 export class Section {
   recommendations;
   questions;
@@ -233,39 +231,6 @@ export class Section {
         answer.nextQuestion = matchingQuestions[0];
       }
     }
-  }
-
-  writeFile(destinationFolder) {
-    const output = {
-      section: this.name,
-      stats: this.stats,
-      minimumQuestionPaths: this.minimumPathsToNavigateQuestions,
-      minimumRecommendationPaths: this.minimumPathsForRecommendations,
-      allPossiblePaths: WriteAllPossiblePaths
-        ? this.paths.map((path) => {
-            var result = {
-              recommendation:
-                path.recommendation != null
-                  ? {
-                      name: path.recommendation?.displayName,
-                      maturity: path.recommendation?.maturity,
-                    }
-                  : null,
-              path: path.path.map((s) => {
-                return {
-                  question: s.question.text,
-                  answer: s.answer.text,
-                };
-              }),
-            };
-
-            return result;
-          })
-        : undefined,
-    };
-
-    const json = JSON.stringify(output);
-    fs.writeFileSync(`${destinationFolder}/${this.name}.json`, json);
   }
 }
 
