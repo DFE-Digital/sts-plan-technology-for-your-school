@@ -9,9 +9,13 @@ Javascript code that takes data that has been exported from Contentful, and for 
 3. The shortest possible user journey possible to get each possible recommendation page (for each maturity) for each section
 4. Optional: every single possible user journey.
 
-It will also check for potential data issues, and output them in the console. Currently it validates:
+This information is saved in JSON format, in the `output` sub-directory. A file is created per section, with the section name as the file name (e.g. for `Broadband connection` the result is `./output/Broadband connection.json`).
+
+It will also check for potential data issues. Currently it validates:
 1. That all questions for a section can be navigated to in at least one user journey.
 2. All maturities for each section can be reached from at least one user journey
+
+This information is output in the console.
 
 ## Running
 
