@@ -27,7 +27,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     {
         ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug);
 
-        ViewData["Title"] = "Check Answers";
+        // ViewData["Title"] = "Check Answers";
 
         var errorMessage = TempData["ErrorMessage"]?.ToString();
 
