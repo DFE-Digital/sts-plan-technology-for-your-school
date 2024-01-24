@@ -36,9 +36,9 @@ jobs:
       branch: ${{ needs.set-env.outputs.branch }}
       checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
 
-  build-and-deploy-azure-function:
+  build-and-deploy-azure-function-for-dev-test:
     needs: set-env
-    name: Build & Deploy Azure Function to Dev
+    name: Build & Deploy Azure Function
     strategy:
       fail-fast: true
       max-parallel: 1
@@ -108,6 +108,19 @@ jobs:
       checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
     secrets: inherit
 
+  build-and-deploy-azure-function-for-staging:
+    needs: [set-env, deploy-to-dev-and-test]
+    name: Build & Deploy Azure Function
+    strategy:
+      fail-fast: true
+      max-parallel: 1
+      matrix:
+        target: [Staging]
+    uses: ./.github/workflows/build-and-deploy-azure-function.yml
+    with:
+      environment: ${{ matrix.target }}
+    secrets: inherit
+
   plan-terraform-for-staging:
     needs: [set-env, deploy-to-dev-and-test, check-for-terraform-changes]
     name: Plan Terraform Infrastructure for staging
@@ -136,6 +149,19 @@ jobs:
       environment: ${{ matrix.target }}
       branch: ${{ needs.set-env.outputs.branch }}
       checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
+    secrets: inherit
+
+  build-and-deploy-azure-function-for-production:
+    needs: [set-env, deploy-to-dev-and-test, deploy-to-staging]
+    name: Build & Deploy Azure Function
+    strategy:
+      fail-fast: true
+      max-parallel: 1
+      matrix:
+        target: [Production]
+    uses: ./.github/workflows/build-and-deploy-azure-function.yml
+    with:
+      environment: ${{ matrix.target }}
     secrets: inherit
 
   plan-terraform-for-production:
