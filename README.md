@@ -17,6 +17,7 @@ Web application to help schools plan a technology roadmap
 ## Documentation 
 
 - [Architecture Decision Records](./docs/adr/README.md)
+- [Contentful Caching Process](./docs/Contentful-Caching-Process.md)
 - [Contentful Integration](./docs/Contentful-Integration.md)
 - [Conventions](./docs/Conventions.md)
 - [Database Upgrades](./src/Dfe.PlanTech.DatabaseUpgrader/README.md)
