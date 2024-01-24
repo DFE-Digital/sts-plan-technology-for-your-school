@@ -23,13 +23,12 @@ public class ServiceExceptionHandlerMiddleWare : IExceptionHandlerMiddleware
         exception switch
         {
             null => UrlConstants.Error,
-            UserAccessUnavailableException => UrlConstants.RoleErrorPage,
-            UserAccessRoleNotFoundException => UrlConstants.RoleErrorPage,
+            UserAccessUnavailableException => UrlConstants.CombinedErrorPage,
+            UserAccessRoleNotFoundException => UrlConstants.CombinedErrorPage,
             ContentfulDataUnavailableException => UrlConstants.ServiceUnavailable,
             DatabaseException => UrlConstants.ServiceUnavailable,
             InvalidEstablishmentException => UrlConstants.ServiceUnavailable,
-            PageNotFoundException => UrlConstants.ServiceUnavailable,
-            KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) => UrlConstants.ServiceUnavailable,
+            KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) => UrlConstants.CombinedErrorPage,
             _ => GetRedirectUrlForException(exception.InnerException),
         };
 }
