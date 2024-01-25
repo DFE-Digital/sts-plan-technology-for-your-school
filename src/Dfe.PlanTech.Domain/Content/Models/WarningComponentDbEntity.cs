@@ -9,7 +9,8 @@ public class WarningComponentDbEntity : ContentComponentDbEntity, IWarningCompon
     public string TextId { get; set; } = null!;
     public TextBodyDbEntity Text { get; set; } = null!;
 
-    [NotMapped][DontCopyValue]
+    [NotMapped]
+    [DontCopyValue]
     public RichTextContentDbEntity RichText
     {
         get => Text?.RichText;
@@ -22,7 +23,8 @@ public class WarningComponentDbEntity : ContentComponentDbEntity, IWarningCompon
         }
     }
 
-    [NotMapped][DontCopyValue]
+    [NotMapped]
+    [DontCopyValue]
     public long? RichTextId => Text?.RichTextId;
 
 }
