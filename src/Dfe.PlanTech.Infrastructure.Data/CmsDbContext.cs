@@ -76,6 +76,11 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     private readonly ContentfulOptions _contentfulOptions;
 
+    public CmsDbContext()
+    {
+        _contentfulOptions = new ContentfulOptions(false);
+    }
+
     public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
     {
         _contentfulOptions = this.GetService<ContentfulOptions>();
@@ -201,9 +206,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     /// Should the given entity be displayed? I.e. is it not archived, not deleted, and either published or use preview mode is enabled
     /// </summary>
     private Expression<Func<ContentComponentDbEntity, bool>> ShouldShowEntity()
-    {
-        return entity => (_contentfulOptions.UsePreview || entity.Published) && !entity.Archived && !entity.Deleted;
-    }
+        => entity => (_contentfulOptions.UsePreview || entity.Published) && !entity.Archived && !entity.Deleted;
 
     public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
     => Pages.Include(page => page.BeforeTitleContent)
