@@ -9,20 +9,15 @@ public class WarningComponentDbEntity : ContentComponentDbEntity, IWarningCompon
     public string TextId { get; set; } = null!;
     public TextBodyDbEntity Text { get; set; } = null!;
 
-    [NotMapped][DontCopyValue]
+    [NotMapped]
+    [DontCopyValue]
     public RichTextContentDbEntity RichText
     {
-        get => Text?.RichText;
-        set
-        {
-            if (Text != null)
-            {
-                Text.RichText = value;
-            }
-        }
+        get => Text.RichText;
+        set => Text.RichText = value;
     }
 
-    [NotMapped][DontCopyValue]
-    public long? RichTextId => Text?.RichTextId;
-
+    [NotMapped]
+    [DontCopyValue]
+    public long RichTextId => Text.RichTextId;
 }
