@@ -45,3 +45,4 @@ General information about architectural decision records is available at <https:
 | [0032 - Classes/Code Structure for DB Entities][./0032-classes-for-db-entities.md]                          | Accepted |
 | [0033 - Test data generation](./0033-test-data-generation.md)                                               | Accepted |
 | [0034 - Entity mapping](./0034-entity-mapping.md)                                                           | Accepted |
+| [0035 - Caching](./0035-caching.md)                                                                         | Accepted |
