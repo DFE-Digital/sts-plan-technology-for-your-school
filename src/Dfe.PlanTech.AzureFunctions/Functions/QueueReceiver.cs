@@ -69,8 +69,8 @@ public class QueueReceiver : BaseFunction
                 return;
             }
 
-            ContentComponentDbEntity mapped = MapMessageToEntity(message);
-            ContentComponentDbEntity? existing = await TryGetExistingEntity(mapped, cancellationToken);
+            ContentComponentDbEntity mapped = MapMessageToEntity(message, cmsEvent);
+            ContentComponentDbEntity? existing = await TryGetExistingEntity(mapped, cmsEvent, cancellationToken);
 
             UpdateEntityStatusByEvent(cmsEvent, mapped, existing);
 
@@ -123,13 +123,13 @@ public class QueueReceiver : BaseFunction
     /// <param name="message"></param>
     /// <returns></returns>
 
-    private ContentComponentDbEntity MapMessageToEntity(ServiceBusReceivedMessage message)
+    private ContentComponentDbEntity MapMessageToEntity(ServiceBusReceivedMessage message, CmsEvent cmsEvent)
     {
         string messageBody = Encoding.UTF8.GetString(message.Body);
 
         Logger.LogInformation("Processing = {messageBody}", messageBody);
 
-        return _mappers.ToEntity(messageBody);
+        return _mappers.ToEntity(messageBody, cmsEvent);
     }
 
     /// <summary>
@@ -138,8 +138,10 @@ public class QueueReceiver : BaseFunction
     /// <param name="mapped"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task<ContentComponentDbEntity?> TryGetExistingEntity(ContentComponentDbEntity mapped, CancellationToken cancellationToken)
+    private async Task<ContentComponentDbEntity?> TryGetExistingEntity(ContentComponentDbEntity mapped, CmsEvent cmsEvent, CancellationToken cancellationToken)
     {
+        if (cmsEvent == CmsEvent.CREATE) return null;
+
         ContentComponentDbEntity? existing = await GetExistingDbEntity(mapped, cancellationToken);
 
         if (existing != null)
