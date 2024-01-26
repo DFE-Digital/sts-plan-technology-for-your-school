@@ -22,9 +22,9 @@ public class QueueReceiver : BaseFunction
     private readonly JsonToEntityMappers _mappers;
     private readonly Type _dontCopyValueAttribute = typeof(DontCopyValueAttribute);
 
-    public QueueReceiver(ILoggerFactory loggerFactory, CmsDbContext db, JsonToEntityMappers mappers) : base(loggerFactory.CreateLogger<QueueReceiver>())
+    public QueueReceiver(ContentfulOptions contentfulOptions, ILoggerFactory loggerFactory, CmsDbContext db, JsonToEntityMappers mappers) : base(loggerFactory.CreateLogger<QueueReceiver>())
     {
-        //_contentfulOptions = contentfulOptions;
+        _contentfulOptions = contentfulOptions;
         _db = db;
         _mappers = mappers;
     }
@@ -89,9 +89,7 @@ public class QueueReceiver : BaseFunction
 
         Logger.LogInformation("Processing = {messageBody}", messageBody);
 
-        var entity = _mappers.ToEntity(messageBody);
-
-        return cmsEvent != CmsEvent.CREATE ? entity : new ContentComponentDbEntity() { Id = entity.Id };
+        return _mappers.ToEntity(messageBody);
     }
 
     private async Task<ContentComponentDbEntity?> GetExisting(ContentComponentDbEntity mapped, CancellationToken cancellationToken)
