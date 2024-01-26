@@ -40,6 +40,14 @@ public class QueueReceiver : BaseFunction
         }
     }
 
+    /// <summary>
+    /// Processes a message from the Service Bus, updating the corresponding database entities,
+    /// and completing or dead-lettering the message. 
+    /// </summary>
+    /// <param name="message">Service bus message to process</param>
+    /// <param name="messageActions">Service bus message actions for completing or dead-lettering</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     private async Task ProcessMessage(ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions, CancellationToken cancellationToken)
     {
         try
@@ -53,8 +61,8 @@ public class QueueReceiver : BaseFunction
                 return;
             }
 
-            ContentComponentDbEntity mapped = GetMapped(message, cmsEvent);
-            ContentComponentDbEntity? existing = await GetExisting(mapped, cancellationToken);
+            ContentComponentDbEntity mapped = MapMessageToEntity(message);
+            ContentComponentDbEntity? existing = await TryGetExistingEntity(mapped, cancellationToken);
 
             UpdateEntityStatusByEvent(cmsEvent, mapped, existing);
 
@@ -71,11 +79,17 @@ public class QueueReceiver : BaseFunction
         }
     }
 
-    private CmsEvent GetCmsEvent(string subject)
+    /// <summary>
+    /// Retrieves the CmsEvent based on the provided subject. 
+    /// </summary>
+    /// <param name="contentfulEvent">The Contentful event (from the service bus message subject)</param>
+    /// <returns></returns>
+    /// <exception cref="CmsEventException">Exception thrown if we are unable to parse the event to a valid <see cref="CmsEvent"/></exception>
+    private CmsEvent GetCmsEvent(string contentfulEvent)
     {
-        if (!Enum.TryParse(subject.AsSpan()[(subject.LastIndexOf('.') + 1)..], true, out CmsEvent cmsEvent))
+        if (!Enum.TryParse(contentfulEvent.AsSpan()[(contentfulEvent.LastIndexOf('.') + 1)..], true, out CmsEvent cmsEvent))
         {
-            throw new CmsEventException(string.Format("Cannot parse header \"{0}\" into a valid CMS event", subject));
+            throw new CmsEventException(string.Format("Cannot parse header \"{0}\" into a valid CMS event", contentfulEvent));
         }
 
         Logger.LogInformation("CMS Event: {cmsEvent}", cmsEvent);
@@ -83,7 +97,13 @@ public class QueueReceiver : BaseFunction
         return cmsEvent;
     }
 
-    private ContentComponentDbEntity GetMapped(ServiceBusReceivedMessage message, CmsEvent cmsEvent)
+    /// <summary>
+    /// Maps the incoming message to the appropriate <see cref="ContentComponentDbEntity"/>
+    /// </summary>
+    /// <param name="message"></param>
+    /// <returns></returns>
+
+    private ContentComponentDbEntity MapMessageToEntity(ServiceBusReceivedMessage message)
     {
         string messageBody = Encoding.UTF8.GetString(message.Body);
 
@@ -92,7 +112,13 @@ public class QueueReceiver : BaseFunction
         return _mappers.ToEntity(messageBody);
     }
 
-    private async Task<ContentComponentDbEntity?> GetExisting(ContentComponentDbEntity mapped, CancellationToken cancellationToken)
+    /// <summary>
+    /// Asynchronously tries to retrieve an existing ContentComponentDbEntity instance
+    /// </summary>
+    /// <param name="mapped"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    private async Task<ContentComponentDbEntity?> TryGetExistingEntity(ContentComponentDbEntity mapped, CancellationToken cancellationToken)
     {
         ContentComponentDbEntity? existing = await GetExistingDbEntity(mapped, cancellationToken);
 
@@ -106,9 +132,16 @@ public class QueueReceiver : BaseFunction
         return existing;
     }
 
+    /// <summary>
+    /// Gets the existing entity (if existing) from the database that matches the mapped entity
+    /// </summary>
+    /// <param name="entity"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    /// <exception cref="KeyNotFoundException">Exception thrown when we do not have a matching DbSet in our DbContext for the entity type</exception>
     private async Task<ContentComponentDbEntity?> GetExistingDbEntity(ContentComponentDbEntity entity, CancellationToken cancellationToken)
     {
-        var model = _db.Model.FindEntityType(entity.GetType()) ?? throw new Exception($"Could not find model in database for {entity.GetType()}");
+        var model = _db.Model.FindEntityType(entity.GetType()) ?? throw new KeyNotFoundException($"Could not find model in database for {entity.GetType()}");
 
         var dbSet = GetIQueryableForEntity(model);
 
@@ -119,6 +152,11 @@ public class QueueReceiver : BaseFunction
         return found ?? null;
     }
 
+    /// <summary>
+    /// Uses reflection to get the DbSet, as an IQueryable, for the provided entity 
+    /// </summary>
+    /// <param name="model">Entity type for the entity we have received</param>
+    /// <returns></returns>
     private IQueryable<ContentComponentDbEntity> GetIQueryableForEntity(IEntityType model)
     => (IQueryable<ContentComponentDbEntity>)_db
                                     .GetType()
@@ -126,6 +164,13 @@ public class QueueReceiver : BaseFunction
                                     .MakeGenericMethod(model!.ClrType)!
                                     .Invoke(_db, null)!;
 
+    /// <summary>
+    /// Updates the status of an entity based on the provided CMS event and entity information.
+    /// </summary>
+    /// <param name="cmsEvent"></param>
+    /// <param name="mapped"></param>
+    /// <param name="existing"></param>
+    /// <exception cref="CmsEventException"></exception>
     private static void UpdateEntityStatusByEvent(CmsEvent cmsEvent, ContentComponentDbEntity mapped, ContentComponentDbEntity? existing)
     {
         switch (cmsEvent)
@@ -156,6 +201,12 @@ public class QueueReceiver : BaseFunction
         }
     }
 
+    /// <summary>
+    /// Either add the entity to DB, or update the properties of the existing entity
+    /// </summary>
+    /// <param name="cmsEvent"></param>
+    /// <param name="mapped"></param>
+    /// <param name="existing"></param>
     private void UpsertEntity(CmsEvent cmsEvent, ContentComponentDbEntity mapped, ContentComponentDbEntity? existing)
     {
         if (cmsEvent == CmsEvent.UNPUBLISH) return;
@@ -166,7 +217,7 @@ public class QueueReceiver : BaseFunction
         }
         else
         {
-            DbUpdate(mapped, existing);
+            UpdateProperties(mapped, existing);
         }
     }
 
@@ -175,16 +226,17 @@ public class QueueReceiver : BaseFunction
         _db.Add(mapped);
     }
 
-    private void DbUpdate(ContentComponentDbEntity mapped, ContentComponentDbEntity existing)
+    private void UpdateProperties(ContentComponentDbEntity incoming, ContentComponentDbEntity existing)
     {
-        UpdateProperties(mapped, existing);
-    }
-
-    private void UpdateProperties(ContentComponentDbEntity entity, ContentComponentDbEntity existing)
-    {
-        foreach (var property in PropertiesToCopy(entity))
+        foreach (var property in PropertiesToCopy(incoming))
         {
-            property.SetValue(existing, property.GetValue(entity));
+            var newValue = property.GetValue(incoming);
+            var currentValue = property.GetValue(existing);
+            if (newValue?.Equals(currentValue) == true)
+            {
+                continue;
+            }
+            property.SetValue(existing, property.GetValue(incoming));
         }
     }
 
@@ -210,13 +262,18 @@ public class QueueReceiver : BaseFunction
     private bool HasDontCopyValueAttribute(PropertyInfo property)
      => property.CustomAttributes.Any(attribute => attribute.AttributeType == _dontCopyValueAttribute);
 
+    /// <summary>
+    /// Saves changes in database, and logs information about rows changed
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     private async Task DbSaveChanges(CancellationToken cancellationToken)
     {
         long rowsChangedInDatabase = await _db.SaveChangesAsync(cancellationToken);
 
         if (rowsChangedInDatabase == 0L)
         {
-            Logger.LogError("No rows changed in the database!");
+            Logger.LogWarning("No rows changed in the database!");
         }
         else
         {
