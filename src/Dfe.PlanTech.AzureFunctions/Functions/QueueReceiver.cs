@@ -4,6 +4,7 @@ using Dfe.PlanTech.Domain;
 using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.EntityFrameworkCore;
@@ -17,11 +18,13 @@ namespace Dfe.PlanTech.AzureFunctions;
 public class QueueReceiver : BaseFunction
 {
     private readonly CmsDbContext _db;
+    private readonly ContentfulOptions _contentfulOptions = new ContentfulOptions(true);
     private readonly JsonToEntityMappers _mappers;
     private readonly Type _dontCopyValueAttribute = typeof(DontCopyValueAttribute);
 
     public QueueReceiver(ILoggerFactory loggerFactory, CmsDbContext db, JsonToEntityMappers mappers) : base(loggerFactory.CreateLogger<QueueReceiver>())
     {
+        //_contentfulOptions = contentfulOptions;
         _db = db;
         _mappers = mappers;
     }
@@ -43,10 +46,17 @@ public class QueueReceiver : BaseFunction
         {
             CmsEvent cmsEvent = GetCmsEvent(message.Subject);
 
-            ContentComponentDbEntity mapped = GetMapped(message);
+            if ((cmsEvent == CmsEvent.SAVE || cmsEvent == CmsEvent.AUTO_SAVE) && !_contentfulOptions.UsePreview)
+            {
+                Logger.LogInformation("Receieved {event} but UsePreview is {usePreview} - dropping message", cmsEvent, _contentfulOptions.UsePreview);
+                await messageActions.CompleteMessageAsync(message, cancellationToken);
+                return;
+            }
+
+            ContentComponentDbEntity mapped = GetMapped(message, cmsEvent);
             ContentComponentDbEntity? existing = await GetExisting(mapped, cancellationToken);
 
-            ProcessCmsEvent(cmsEvent, mapped, existing);
+            UpdateEntityStatusByEvent(cmsEvent, mapped, existing);
 
             UpsertEntity(cmsEvent, mapped, existing);
 
@@ -73,13 +83,15 @@ public class QueueReceiver : BaseFunction
         return cmsEvent;
     }
 
-    private ContentComponentDbEntity GetMapped(ServiceBusReceivedMessage message)
+    private ContentComponentDbEntity GetMapped(ServiceBusReceivedMessage message, CmsEvent cmsEvent)
     {
         string messageBody = Encoding.UTF8.GetString(message.Body);
 
         Logger.LogInformation("Processing = {messageBody}", messageBody);
 
-        return _mappers.ToEntity(messageBody);
+        var entity = _mappers.ToEntity(messageBody);
+
+        return cmsEvent != CmsEvent.CREATE ? entity : new ContentComponentDbEntity() { Id = entity.Id };
     }
 
     private async Task<ContentComponentDbEntity?> GetExisting(ContentComponentDbEntity mapped, CancellationToken cancellationToken)
@@ -116,7 +128,7 @@ public class QueueReceiver : BaseFunction
                                     .MakeGenericMethod(model!.ClrType)!
                                     .Invoke(_db, null)!;
 
-    private static void ProcessCmsEvent(CmsEvent cmsEvent, ContentComponentDbEntity mapped, ContentComponentDbEntity? existing)
+    private static void UpdateEntityStatusByEvent(CmsEvent cmsEvent, ContentComponentDbEntity mapped, ContentComponentDbEntity? existing)
     {
         switch (cmsEvent)
         {
