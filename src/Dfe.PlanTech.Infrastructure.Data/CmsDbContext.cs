@@ -1,9 +1,11 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
+using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
@@ -72,11 +74,21 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<WarningComponentDbEntity> ICmsDbContext.Warnings => Warnings;
 
 
-    public CmsDbContext() { }
+    private readonly ContentfulOptions _contentfulOptions;
 
-    public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
+    public CmsDbContext()
     {
+        _contentfulOptions = new ContentfulOptions(false);
+    }
 
+    public CmsDbContext(ContentfulOptions contentfulOptions)
+    {
+        _contentfulOptions = contentfulOptions;
+    }
+
+    public CmsDbContext(DbContextOptions<CmsDbContext> options, ContentfulOptions contentfulOptions) : base(options)
+    {
+        _contentfulOptions = contentfulOptions;
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -192,7 +204,15 @@ public class CmsDbContext : DbContext, ICmsDbContext
             entity.Navigation(warningComponent => warningComponent.Text).AutoInclude();
         });
 
-        modelBuilder.Entity<ContentComponentDbEntity>().HasQueryFilter(entity => entity.Published && !entity.Archived && !entity.Deleted);
+        modelBuilder.Entity<ContentComponentDbEntity>().HasQueryFilter(ShouldShowEntity());
+    }
+
+    /// <summary>
+    /// Should the given entity be displayed? I.e. is it not archived, not deleted, and either published or use preview mode is enabled
+    /// </summary>
+    private Expression<Func<ContentComponentDbEntity, bool>> ShouldShowEntity()
+    {
+        return entity => (_contentfulOptions.UsePreview || entity.Published) && !entity.Archived && !entity.Deleted;
     }
 
     public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
