@@ -76,6 +76,11 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     private readonly ContentfulOptions _contentfulOptions;
 
+    public CmsDbContext()
+    {
+        _contentfulOptions = this.GetService<ContentfulOptions>();
+    }
+
     public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
     {
         _contentfulOptions = this.GetService<ContentfulOptions>();
