@@ -42,11 +42,7 @@ namespace Dfe.PlanTech.AzureFunctions
                 Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
             });
 
-            services.AddSingleton(() =>
-            {
-                var usePreview = bool.Parse(configuration["Contentful:UsePreview"] ?? "false");
-                return new ContentfulOptions(usePreview);
-            });
+            services.AddSingleton(new ContentfulOptions(bool.Parse(configuration["Contentful:UsePreview"] ?? bool.FalseString)));
 
             AddMappers(services);
         }
