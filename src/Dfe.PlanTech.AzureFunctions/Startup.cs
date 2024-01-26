@@ -1,6 +1,7 @@
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.AzureFunctions.Mappings;
+using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
@@ -39,6 +40,12 @@ namespace Dfe.PlanTech.AzureFunctions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+            });
+
+            services.AddSingleton(() =>
+            {
+                var usePreview = bool.Parse(configuration["Contentful:UsePreview"] ?? "false");
+                return new ContentfulOptions(usePreview);
             });
 
             AddMappers(services);
