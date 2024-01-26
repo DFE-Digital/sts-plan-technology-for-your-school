@@ -4,6 +4,7 @@ using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
@@ -73,22 +74,11 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<TitleDbEntity> ICmsDbContext.Titles => Titles;
     IQueryable<WarningComponentDbEntity> ICmsDbContext.Warnings => Warnings;
 
-
     private readonly ContentfulOptions _contentfulOptions;
 
-    public CmsDbContext()
+    public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
     {
-        _contentfulOptions = new ContentfulOptions(false);
-    }
-
-    public CmsDbContext(ContentfulOptions contentfulOptions)
-    {
-        _contentfulOptions = contentfulOptions;
-    }
-
-    public CmsDbContext(DbContextOptions<CmsDbContext> options, ContentfulOptions contentfulOptions) : base(options)
-    {
-        _contentfulOptions = contentfulOptions;
+        _contentfulOptions = this.GetService<ContentfulOptions>();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

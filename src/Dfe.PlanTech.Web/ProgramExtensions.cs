@@ -80,7 +80,7 @@ public static class ProgramExtensions
         });
 
         services.AddTransient<GetPageFromContentfulQuery>();
-        services.AddSingleton(() => new ContentfulOptions(configuration.GetValue<bool>("Contentful:UseePreview")));
+        services.AddSingleton(new ContentfulOptions(configuration.GetValue<bool>("Contentful:UsePreview")));
         return services;
     }
 
@@ -112,16 +112,17 @@ public static class ProgramExtensions
         void databaseOptionsAction(DbContextOptionsBuilder options) => options.UseSqlServer(configuration.GetConnectionString("Database"));
 
         services.AddDbContextPool<ICmsDbContext, CmsDbContext>((serviceProvider, optionsBuilder) =>
-                optionsBuilder
-                    .UseSqlServer(
-                        configuration.GetConnectionString("Database"),
-                        sqlServerOptionsBuilder =>
-                        {
-                            sqlServerOptionsBuilder
-                                .CommandTimeout((int)TimeSpan.FromSeconds(30).TotalSeconds)
-                                .EnableRetryOnFailure();
-                        })
-                    .AddInterceptors(serviceProvider.GetRequiredService<SecondLevelCacheInterceptor>()));
+            optionsBuilder
+                .UseSqlServer(
+                    configuration.GetConnectionString("Database"),
+                    sqlServerOptionsBuilder =>
+                    {
+                        sqlServerOptionsBuilder
+                            .CommandTimeout((int)TimeSpan.FromSeconds(30).TotalSeconds)
+                            .EnableRetryOnFailure();
+                    })
+                .AddInterceptors(serviceProvider.GetRequiredService<SecondLevelCacheInterceptor>())
+        );
 
         services.AddEFSecondLevelCache(options =>
         {
