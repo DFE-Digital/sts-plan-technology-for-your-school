@@ -29,6 +29,14 @@ public class QueueReceiver : BaseFunction
         _mappers = mappers;
     }
 
+    /// <summary>
+    /// Azure Function App function that processes messages from a Service Bus queue, converts them
+    /// to the appropriate <see cref="ContentComponentDbEntity"/> class, and adds/updates the database where appropriate.
+    /// </summary>
+    /// <param name="messages">Array of ServiceBusReceivedMessage objects representing the messages to be processed</param>
+    /// <param name="messageActions">object providing actions for handling the messages.</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     [Function("QueueReceiver")]
     public async Task QueueReceiverDbWriter([ServiceBusTrigger("contentful", IsBatched = true)] ServiceBusReceivedMessage[] messages, ServiceBusMessageActions messageActions, CancellationToken cancellationToken)
     {
@@ -54,7 +62,7 @@ public class QueueReceiver : BaseFunction
         {
             CmsEvent cmsEvent = GetCmsEvent(message.Subject);
 
-            if ((cmsEvent == CmsEvent.SAVE || cmsEvent == CmsEvent.AUTO_SAVE) && !_contentfulOptions.UsePreview)
+            if (ShouldIgnoreMessage(cmsEvent))
             {
                 Logger.LogInformation("Receieved {event} but UsePreview is {usePreview} - dropping message", cmsEvent, _contentfulOptions.UsePreview);
                 await messageActions.CompleteMessageAsync(message, cancellationToken);
@@ -78,6 +86,18 @@ public class QueueReceiver : BaseFunction
             await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace, cancellationToken);
         }
     }
+
+    /// <summary>
+    /// Checks if the message with the given CmsEvent should be ignored based on certain conditions.
+    /// </summary>
+    /// <remarks>
+    /// If we are NOT using preview mode (i.e. we are ignoring drafts), and the event is just a save or autosave,
+    /// then return true. Otherwise return false.
+    /// </remarks>
+    /// <param name="cmsEvent"></param>
+    /// <returns></returns>
+    private bool ShouldIgnoreMessage(CmsEvent cmsEvent)
+    => (cmsEvent == CmsEvent.SAVE || cmsEvent == CmsEvent.AUTO_SAVE) && !_contentfulOptions.UsePreview;
 
     /// <summary>
     /// Retrieves the CmsEvent based on the provided subject. 
