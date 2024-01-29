@@ -71,6 +71,12 @@ public class QueueReceiver : BaseFunction
             ContentComponentDbEntity mapped = MapMessageToEntity(message);
             ContentComponentDbEntity? existing = await TryGetExistingEntity(mapped, cancellationToken);
 
+            if (!IsNewAndValidComponent(mapped, existing))
+            {
+                await messageActions.CompleteMessageAsync(message, cancellationToken);
+                return;
+            }
+
             UpdateEntityStatusByEvent(cmsEvent, mapped, existing);
 
             UpsertEntity(cmsEvent, mapped, existing);
@@ -90,7 +96,7 @@ public class QueueReceiver : BaseFunction
     {
         if (cmsEvent == CmsEvent.CREATE)
         {
-            Logger.LogInformation("Dropping received event {cmsEvent}");
+            Logger.LogInformation("Dropping received event {cmsEvent}", cmsEvent);
             return true;
         }
 
@@ -102,6 +108,28 @@ public class QueueReceiver : BaseFunction
 
         return false;
     }
+
+    private bool IsNewAndValidComponent(ContentComponentDbEntity mapped, ContentComponentDbEntity? existing)
+    {
+        if (existing != null) return true;
+
+        if (AnyRequiredPropertyIsNull(mapped))
+        {
+            Logger.LogInformation("A required property of the component with ID {id} is null, so the message will be dropped!", mapped.Id);
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool AnyRequiredPropertyIsNull(ContentComponentDbEntity entity)
+    => _db.Model.FindEntityType(entity.GetType())!
+        .GetProperties()
+        .Where(prop => !prop.IsNullable)
+        .Select(prop => prop.PropertyInfo)
+        .Where(prop => !prop!.CustomAttributes.Any(atr => atr.GetType() == typeof(DontCopyValueAttribute)))
+        .Where(prop => prop!.GetValue(entity) == null)
+        .Any();
 
     /// <summary>
     /// Checks if the message with the given CmsEvent should be ignored based on certain conditions.
@@ -156,8 +184,6 @@ public class QueueReceiver : BaseFunction
     /// <returns></returns>
     private async Task<ContentComponentDbEntity?> TryGetExistingEntity(ContentComponentDbEntity mapped, CancellationToken cancellationToken)
     {
-        // if (cmsEvent == CmsEvent.CREATE) return null; TODO: Remove if not needed
-
         ContentComponentDbEntity? existing = await GetExistingDbEntity(mapped, cancellationToken);
 
         if (existing != null)
@@ -213,7 +239,6 @@ public class QueueReceiver : BaseFunction
     {
         switch (cmsEvent)
         {
-            // case CmsEvent.CREATE: TODO: Remove if not needed
             case CmsEvent.SAVE:
             case CmsEvent.AUTO_SAVE:
                 break;
