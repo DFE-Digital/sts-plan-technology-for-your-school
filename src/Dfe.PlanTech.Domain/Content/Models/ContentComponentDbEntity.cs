@@ -15,7 +15,7 @@ public abstract class ContentComponentDbEntity : IContentComponentDbEntity
     [DontCopyValue]
     public long? Order { get; set; }
 
-    public List<PageDbEntity> BeforeTitleContentPages { get; set; } = new();
+    public List<PageDbEntity> BeforeTitleContentPages { get; set; } = [];
 
-    public List<PageDbEntity> ContentPages { get; set; } = new();
+    public List<PageDbEntity> ContentPages { get; set; } = [];
 }

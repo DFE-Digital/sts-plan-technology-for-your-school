@@ -113,12 +113,11 @@ public abstract class JsonToDbMapper
     {
         yield return new KeyValuePair<string, object?>("id", payload.Sys.Id);
 
-        if (!payload.Sys.Type.Equals("DeletedEntry"))
+        if (payload.Sys.Type.Equals("DeletedEntry")) yield break;
+
+        foreach (var field in payload.Fields.SelectMany(GetValuesFromFields))
         {
-            foreach (var field in payload.Fields.SelectMany(GetValuesFromFields))
-            {
-                yield return field;
-            }
+            yield return field;
         }
     }
 

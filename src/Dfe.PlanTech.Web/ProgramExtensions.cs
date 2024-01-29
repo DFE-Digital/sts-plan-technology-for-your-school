@@ -17,6 +17,7 @@ using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Interfaces;
+using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Responses.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
@@ -79,7 +80,7 @@ public static class ProgramExtensions
         });
 
         services.AddTransient<GetPageFromContentfulQuery>();
-
+        services.AddSingleton(new ContentfulOptions(configuration.GetValue<bool>("Contentful:UsePreview")));
         return services;
     }
 
@@ -111,16 +112,17 @@ public static class ProgramExtensions
         void databaseOptionsAction(DbContextOptionsBuilder options) => options.UseSqlServer(configuration.GetConnectionString("Database"));
 
         services.AddDbContextPool<ICmsDbContext, CmsDbContext>((serviceProvider, optionsBuilder) =>
-                optionsBuilder
-                    .UseSqlServer(
-                        configuration.GetConnectionString("Database"),
-                        sqlServerOptionsBuilder =>
-                        {
-                            sqlServerOptionsBuilder
-                                .CommandTimeout((int)TimeSpan.FromSeconds(30).TotalSeconds)
-                                .EnableRetryOnFailure();
-                        })
-                    .AddInterceptors(serviceProvider.GetRequiredService<SecondLevelCacheInterceptor>()));
+            optionsBuilder
+                .UseSqlServer(
+                    configuration.GetConnectionString("Database"),
+                    sqlServerOptionsBuilder =>
+                    {
+                        sqlServerOptionsBuilder
+                            .CommandTimeout((int)TimeSpan.FromSeconds(30).TotalSeconds)
+                            .EnableRetryOnFailure();
+                    })
+                .AddInterceptors(serviceProvider.GetRequiredService<SecondLevelCacheInterceptor>())
+        );
 
         services.AddEFSecondLevelCache(options =>
         {

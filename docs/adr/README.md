@@ -42,4 +42,7 @@ General information about architectural decision records is available at <https:
 | [0029 - Terraform input variables](./0029-terraform-variable-for-admin-password.md)                         | Accepted |
 | [0030 - Storing CMS Data In Database][./0030-storing-cms-in-db.md]                                          | Accepted |
 | [0031 - CMS DB Structure][./0031-cms-db-structure.md]                                                       | Accepted |
-| [0032 - Classes/Code Structure for DB Entities][./0032-classes-for-db-entities.md]                          | Proposed |
+| [0032 - Classes/Code Structure for DB Entities][./0032-classes-for-db-entities.md]                          | Accepted |
+| [0033 - Test data generation](./0033-test-data-generation.md)                                               | Accepted |
+| [0034 - Entity mapping](./0034-entity-mapping.md)                                                           | Accepted |
+| [0035 - Caching](./0035-caching.md)                                                                         | Accepted |
