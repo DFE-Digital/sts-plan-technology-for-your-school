@@ -98,7 +98,7 @@ public class QueueReceiverTests
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
 
-        var subject = "ContentManagement.Entry.create";
+        var subject = "ContentManagement.Entry.save";
         var serviceBusMessage = new ServiceBusMessage(bodyJsonStr) { Subject = subject };
 
         ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
@@ -126,7 +126,7 @@ public class QueueReceiverTests
 
         string nonMappableJson = "\"INVALID\":\"CONTENT\"";
 
-        var subject = "ContentManagement.Entry.create";
+        var subject = "ContentManagement.Entry.save";
         var serviceBusMessage = new ServiceBusMessage(nonMappableJson) { Subject = subject };
 
         ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));

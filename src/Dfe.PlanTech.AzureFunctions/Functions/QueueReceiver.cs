@@ -18,7 +18,7 @@ namespace Dfe.PlanTech.AzureFunctions;
 public class QueueReceiver : BaseFunction
 {
     private readonly CmsDbContext _db;
-    private readonly ContentfulOptions _contentfulOptions = new ContentfulOptions(true);
+    private readonly ContentfulOptions _contentfulOptions = new(true);
     private readonly JsonToEntityMappers _mappers;
     private readonly Type _dontCopyValueAttribute = typeof(DontCopyValueAttribute);
 
@@ -62,15 +62,20 @@ public class QueueReceiver : BaseFunction
         {
             CmsEvent cmsEvent = GetCmsEvent(message.Subject);
 
-            if (ShouldIgnoreMessage(cmsEvent))
+            if (ShouldDropMessage(cmsEvent))
             {
-                Logger.LogInformation("Receieved {event} but UsePreview is {usePreview} - dropping message", cmsEvent, _contentfulOptions.UsePreview);
                 await messageActions.CompleteMessageAsync(message, cancellationToken);
                 return;
             }
 
             ContentComponentDbEntity mapped = MapMessageToEntity(message);
             ContentComponentDbEntity? existing = await TryGetExistingEntity(mapped, cancellationToken);
+
+            if (!IsNewAndValidComponent(mapped, existing))
+            {
+                await messageActions.CompleteMessageAsync(message, cancellationToken);
+                return;
+            }
 
             UpdateEntityStatusByEvent(cmsEvent, mapped, existing);
 
@@ -86,6 +91,45 @@ public class QueueReceiver : BaseFunction
             await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace, cancellationToken);
         }
     }
+
+    private bool ShouldDropMessage(CmsEvent cmsEvent)
+    {
+        if (cmsEvent == CmsEvent.CREATE)
+        {
+            Logger.LogInformation("Dropping received event {cmsEvent}", cmsEvent);
+            return true;
+        }
+
+        if (ShouldIgnoreMessage(cmsEvent))
+        {
+            Logger.LogInformation("Receieved {event} but UsePreview is {usePreview} - dropping message", cmsEvent, _contentfulOptions.UsePreview);
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool IsNewAndValidComponent(ContentComponentDbEntity mapped, ContentComponentDbEntity? existing)
+    {
+        if (existing != null) return true;
+
+        if (AnyRequiredPropertyIsNull(mapped))
+        {
+            Logger.LogInformation("A required property of the component with ID {id} is null, so the message will be dropped!", mapped.Id);
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool AnyRequiredPropertyIsNull(ContentComponentDbEntity entity)
+    => _db.Model.FindEntityType(entity.GetType())!
+        .GetProperties()
+        .Where(prop => !prop.IsNullable)
+        .Select(prop => prop.PropertyInfo)
+        .Where(prop => !prop!.CustomAttributes.Any(atr => atr.GetType() == typeof(DontCopyValueAttribute)))
+        .Where(prop => prop!.GetValue(entity) == null)
+        .Any();
 
     /// <summary>
     /// Checks if the message with the given CmsEvent should be ignored based on certain conditions.
@@ -195,7 +239,6 @@ public class QueueReceiver : BaseFunction
     {
         switch (cmsEvent)
         {
-            case CmsEvent.CREATE:
             case CmsEvent.SAVE:
             case CmsEvent.AUTO_SAVE:
                 break;
