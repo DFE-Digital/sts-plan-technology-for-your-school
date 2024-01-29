@@ -10,6 +10,7 @@ public class WarningComponentDbEntity : ContentComponentDbEntity, IWarningCompon
     public TextBodyDbEntity Text { get; set; } = null!;
 
     [NotMapped]
+    [DontCopyValue]
     public RichTextContentDbEntity RichText
     {
         get => Text.RichText;
@@ -17,5 +18,6 @@ public class WarningComponentDbEntity : ContentComponentDbEntity, IWarningCompon
     }
 
     [NotMapped]
+    [DontCopyValue]
     public long RichTextId => Text.RichTextId;
 }

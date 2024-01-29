@@ -31,20 +31,25 @@
 - The Azure Function reads the message from the queue and, for each message,
   1. Strips out unnecessary information from the JSON payload, converting the JSON to just be what the entry value is
   2. Adds necessary relationship data for an entry, if any, into the JSON
-  3. Deerialises the JSON to the _database entity model_
+  3. Desrialises the JSON to the _database entity model_
   4. Updates the entry status columns where appropriate (i.e. archived/published/deleted)
   5. Upserts the entry in the database
 
 #### Mapping
 
-- JSON is normalised
-- Main entity is deserialised to class from JSON
-- If the entity exists in DB, we copy values over
-  - Attribute ignores certain things
-  - Ignore properties ending in "Id"
-- Any related entities are created + attached to DB. Then we make the necessary changes.
-  - Where this is done
-  - Why this is done
+- We normalise the incoming entry JSON. This involves essentially just copying the children within the "fields" object to a new JSON object, along with the "id" field from the "sys" object.
+  - The end result of this is a JSON that should match the actual Contentful classes we use one-to-one.
+- We then deserialise this JSON to the appropriate database class for the content type
+- We retrieve the existing entity from our database, if it exists, using the id. 
+  - If it does exist, we use reflection to copy over the values from the _incoming_ mapped entity, to the found _existing_ entity.
+    - Certain properties are ignored during this, for a variety of reasons (e.g. they might be metadata, meaning they wouldn't exist on in the incoming data, which could cause errors or incorrect data copied over)
+      - This is done by using our custom [DontCopyValueAttribute](./src/Dfe.PlanTech.Domain/DontCopyValueAttribute.cs) on each property we do not wish to copy, and checking for its existance per property
+- Any relationship fields are mapped in the individual mapping classes per content type. If the relationship foreign key is on the _related_ entity, then we:
+    - Create an object of that content type
+    - Attach it to the EF Core context
+    - Make the changes to the relationship field
+  - This ensures that the changes to the relationship field are tracked by EF Core, without having to query the database for the existence of the row in the database
+- We then save the changes in EF Core.
 
 ## DB Architecture
 
@@ -88,4 +93,5 @@ There are several steps to it:
 
 ## Caching
 
-- Not implemented currently.
+- Caching is handled by the open-source [EFCoreSecondLevelCacheInterceptor](https://github.com/VahidN/EFCoreSecondLevelCacheInterceptor) C# package.
+- It is enabled only in the [web project](./src/Dfe.PlanTech.Web), and is enabled in the services configuration in [ProgramExtensions.cs](./src/Dfe.PlanTech.Web/ProgramExtensions.cs). We currently have no functionality setup to amend the configuration (e.g. caching length) via any sort of environment variables, but this should be added when possible.
