@@ -18,7 +18,7 @@ namespace Dfe.PlanTech.AzureFunctions;
 public class QueueReceiver : BaseFunction
 {
     private readonly CmsDbContext _db;
-    private readonly ContentfulOptions _contentfulOptions = new ContentfulOptions(true);
+    private readonly ContentfulOptions _contentfulOptions = new(true);
     private readonly JsonToEntityMappers _mappers;
     private readonly Type _dontCopyValueAttribute = typeof(DontCopyValueAttribute);
 
@@ -62,15 +62,14 @@ public class QueueReceiver : BaseFunction
         {
             CmsEvent cmsEvent = GetCmsEvent(message.Subject);
 
-            if (ShouldIgnoreMessage(cmsEvent))
+            if (ShouldDropMessage(cmsEvent))
             {
-                Logger.LogInformation("Receieved {event} but UsePreview is {usePreview} - dropping message", cmsEvent, _contentfulOptions.UsePreview);
                 await messageActions.CompleteMessageAsync(message, cancellationToken);
                 return;
             }
 
-            ContentComponentDbEntity mapped = MapMessageToEntity(message, cmsEvent);
-            ContentComponentDbEntity? existing = await TryGetExistingEntity(mapped, cmsEvent, cancellationToken);
+            ContentComponentDbEntity mapped = MapMessageToEntity(message);
+            ContentComponentDbEntity? existing = await TryGetExistingEntity(mapped, cancellationToken);
 
             UpdateEntityStatusByEvent(cmsEvent, mapped, existing);
 
@@ -85,6 +84,23 @@ public class QueueReceiver : BaseFunction
             Logger.LogError(ex.Message);
             await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace, cancellationToken);
         }
+    }
+
+    private bool ShouldDropMessage(CmsEvent cmsEvent)
+    {
+        if (cmsEvent == CmsEvent.CREATE)
+        {
+            Logger.LogInformation("Dropping received event {cmsEvent}");
+            return true;
+        }
+
+        if (ShouldIgnoreMessage(cmsEvent))
+        {
+            Logger.LogInformation("Receieved {event} but UsePreview is {usePreview} - dropping message", cmsEvent, _contentfulOptions.UsePreview);
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -123,13 +139,13 @@ public class QueueReceiver : BaseFunction
     /// <param name="message"></param>
     /// <returns></returns>
 
-    private ContentComponentDbEntity MapMessageToEntity(ServiceBusReceivedMessage message, CmsEvent cmsEvent)
+    private ContentComponentDbEntity MapMessageToEntity(ServiceBusReceivedMessage message)
     {
         string messageBody = Encoding.UTF8.GetString(message.Body);
 
         Logger.LogInformation("Processing = {messageBody}", messageBody);
 
-        return _mappers.ToEntity(messageBody, cmsEvent);
+        return _mappers.ToEntity(messageBody);
     }
 
     /// <summary>
@@ -138,9 +154,9 @@ public class QueueReceiver : BaseFunction
     /// <param name="mapped"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task<ContentComponentDbEntity?> TryGetExistingEntity(ContentComponentDbEntity mapped, CmsEvent cmsEvent, CancellationToken cancellationToken)
+    private async Task<ContentComponentDbEntity?> TryGetExistingEntity(ContentComponentDbEntity mapped, CancellationToken cancellationToken)
     {
-        if (cmsEvent == CmsEvent.CREATE) return null;
+        // if (cmsEvent == CmsEvent.CREATE) return null; TODO: Remove if not needed
 
         ContentComponentDbEntity? existing = await GetExistingDbEntity(mapped, cancellationToken);
 
@@ -197,7 +213,7 @@ public class QueueReceiver : BaseFunction
     {
         switch (cmsEvent)
         {
-            case CmsEvent.CREATE:
+            // case CmsEvent.CREATE: TODO: Remove if not needed
             case CmsEvent.SAVE:
             case CmsEvent.AUTO_SAVE:
                 break;

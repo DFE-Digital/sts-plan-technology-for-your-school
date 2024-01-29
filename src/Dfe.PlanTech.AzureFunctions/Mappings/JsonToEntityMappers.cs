@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using System.Text.Json;
@@ -16,14 +15,9 @@ public class JsonToEntityMappers
         _mappers = mappers.ToHashSet();
     }
 
-    public ContentComponentDbEntity ToEntity(string requestBody, CmsEvent cmsEvent)
+    public ContentComponentDbEntity ToEntity(string requestBody)
     {
         var payload = SerialiseToPayload(requestBody);
-
-        if (cmsEvent == CmsEvent.CREATE)
-        {
-            return new ContentComponentDbEntity() { Id = payload.Sys.Id };
-        }
 
         JsonToDbMapper mapper = GetMapperForPayload(payload);
 
