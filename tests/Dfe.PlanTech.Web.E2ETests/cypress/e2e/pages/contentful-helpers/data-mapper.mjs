@@ -159,12 +159,6 @@ export default class DataMapper {
     for (const [contentTypeId, contents] of Object.entries(this.contents)) {
       const contentType = this.contentTypes.get(contentTypeId);
 
-      if (contentTypeId == "recommendationPage") {
-        // console.log("rec page", contents);
-      } else {
-        // console.log("not rec page", contentTypeId);
-      }
-
       for (const [id, entry] of contents) {
         this.mapRelationshipsForEntry(entry, contentType);
       }
@@ -187,10 +181,6 @@ export default class DataMapper {
           referencedTypesForField,
           value
         );
-
-        if (contentType.id == "recommendationPage" && key == "page") {
-          console.log(`rec page`, entry.fields[key]);
-        }
       }
     });
   }
