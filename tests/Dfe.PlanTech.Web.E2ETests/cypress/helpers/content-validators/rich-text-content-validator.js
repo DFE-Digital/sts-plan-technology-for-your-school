@@ -1,5 +1,7 @@
 import { parse } from "node-html-parser";
-import ValidateTable from "./rich-text-validators/table-validator";
+import TableValidator from "./rich-text-validators/table-validator";
+
+const tableValidator = new TableValidator();
 
 function ValidateRichTextContent(parent) {
   if (!parent?.content) return;
@@ -20,7 +22,7 @@ function validateByNodeType(content) {
     }
 
     case "table": {
-      ValidateTable(content);
+      tableValidator.validateTable(content);
       break;
     }
 
