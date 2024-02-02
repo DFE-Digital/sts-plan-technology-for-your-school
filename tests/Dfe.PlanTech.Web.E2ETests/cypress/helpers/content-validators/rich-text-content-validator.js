@@ -1,19 +1,41 @@
 import { parse } from "node-html-parser";
+import ValidateTable from "./rich-text-validators/table-validator";
 
 function ValidateRichTextContent(parent) {
   if (!parent?.content) return;
 
   for (const child of parent.content) {
-    switch (child.nodeType) {
-      case "paragraph": {
-        validateParagraph(child);
-      }
-    }
+    validateByNodeType(child);
   }
 }
 
 export default ValidateRichTextContent;
 const regex = /(\r\n|\n|\r)/g;
+
+function validateByNodeType(content) {
+  switch (content.nodeType) {
+    case "paragraph": {
+      validateParagraph(content);
+      break;
+    }
+
+    case "table": {
+      ValidateTable(content);
+      break;
+    }
+
+    case "unordered-list": {
+      break;
+    }
+
+    case "ordered-list": {
+      break;
+    }
+    default: {
+      console.log(`not parsed nodetype ${content.nodeType}`);
+    }
+  }
+}
 
 function validateParagraph(content) {
   const children = Array.from(getChildrenRecursive(content));

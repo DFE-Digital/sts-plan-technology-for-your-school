@@ -1,8 +1,8 @@
-import DataMapper from "./contentful-helpers/data-mapper.mjs";
+import DataMapper from "./pages/contentful-helpers/data-mapper.mjs";
 
-import { contentful } from "./contentful.mjs";
-import ValidateContent from "../../helpers/content-validators/content-validator.mjs";
-import ValidateTitle from "../../helpers/content-validators/title-validator.mjs";
+import { contentful } from "./pages/contentful.mjs";
+import ValidateContent from "../helpers/content-validators/content-validator.mjs";
+import ValidateTitle from "../helpers/content-validators/title-validator.mjs";
 
 describe("Pages should have content", () => {
   let dataMapper;
