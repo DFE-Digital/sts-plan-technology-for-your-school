@@ -1,121 +1,85 @@
-class RichTextContentValidator {
-  validateContent() {
-    //For each content ->
-    //Build HTML for that content
-    //Then loop through children and add HTML
-    //When complete
-    //Find matching content
-  }
-}
+import { parse } from "node-html-parser";
 
-function ValidateRichTextContent(content) {
-  console.log(content);
-  const parent = content.content;
+function ValidateRichTextContent(parent) {
+  if (!parent?.content) return;
 
-  let html = "";
-  let lastNodeType = parent.nodeType;
-  for (const child of content.content) {
-    newFunction(child);
+  for (const child of parent.content) {
+    switch (child.nodeType) {
+      case "paragraph": {
+        validateParagraph(child);
+      }
+    }
   }
 }
 
 export default ValidateRichTextContent;
+const regex = /(\r\n|\n|\r)/g;
 
-function newFunction(child) {
-  const grandChildren = Array.from(GetAllContentsRecursive(child));
+function validateParagraph(content) {
+  const children = Array.from(getChildrenRecursive(content));
+  const values = children.map((child) => child.value);
 
-  switch (child.nodeType) {
-    case "paragraph": {
-      const expectedText = grandChildren
-        .map((c) => c.value)
-        .join("")
-        .trim();
+  const htmlValue = getContentValues(values);
 
-      if (expectedText == null || expectedText == "") return;
+  if (!htmlValue || htmlValue.length == 0) return;
 
-      cy.get("p").contains(expectedText);
+  cy.get("p").then(($p) => {
+    const htmls = Array.from(
+      $p.map((i, el) => {
+        return Cypress.$(el).text();
+      })
+    );
 
-      break;
+    const matched = htmls.find((paragraph) =>
+      htmlValue.every((html) => paragraph.indexOf(html) != -1)
+    );
+
+    if (matched) return;
+
+    const parsed = htmlValue.map((html) => parse(html)).map((p) => p.innerText);
+
+    const matchedHtmlContent = htmls
+      .map((html) => html.replace(/\&nbsp;/g, ""))
+      .some((paragraph) => {
+        const matches = parsed.every((html) => {
+          const m = paragraph.indexOf(html) != -1;
+          return m;
+        });
+
+        return matches;
+      });
+
+    if (!matchedHtmlContent) {
+      throw new Error(`Unable to find ${htmlValue}`);
     }
-
-    default: {
-      console.log("not mapped case " + child.nodeType);
-      break;
-    }
-  }
+  });
 }
 
-function* GetAllContentsRecursive(richTextContent) {
-  if (richTextContent.content) {
-    for (const child of richTextContent.content) {
-      yield child;
-    }
-  }
-}
-
-//TODO: Move to class
-//TODO: Generate expected HTMl based on tag helpers and check for that. OR start from the bottom -> up.
-function validateTextContent(textContent) {
-  if (textContent.nodeType == "paragraph") {
-    const innerTexts = Array.from(GetAllContentsRecursive(textContent))
-      .filter((content) => content.value != null)
-      .map((content) => content.value)
-      .join("")
-      .trim();
-
-    if (innerTexts == null || innerTexts == "") return;
-
-    cy.get("p").then(($p) => {
-      var matches = false;
-      for (const paragraph of $p) {
-        matches =
-          paragraph.innerHTML.indexOf(innerTexts) != -1 ||
-          paragraph.innerText.indexOf(innerTexts) != -1;
-
-        if (matches) {
-          break;
+function getContentValues(values) {
+  return Array.from(
+    values
+      .filter((value) => value != null && value != "<br>")
+      .map((value) => value.trim())
+      .filter((value) => value != null)
+      .flatMap((value) => {
+        if (value.match(regex)) {
+          return value.split(regex);
+        } else {
+          return [value];
         }
-      }
+      })
+      .filter(
+        (value) => value && value != "" && value != "\n" && value != "\r\n"
+      )
+  );
+}
 
-      if (!matches) {
-        console.error(`Couldn't find text`, innerTexts);
-        throw "not found";
-      }
-    });
+function* getChildrenRecursive(content) {
+  if (content.content) {
+    for (const child of content.content) {
+      yield child;
+
+      yield* getChildrenRecursive(child);
+    }
   }
-  if (textContent.nodeType == "table-header-cell") {
-    const contents = GetAllContentsRecursive(textContent);
-
-    const text = contents
-      .filter((content) => content.value)
-      .map((content) => content.value)
-      .join(" ");
-
-    cy.get("th.govuk-table__header").should("have.text", text);
-  } else if (
-    textContent.value &&
-    textContent.nodeType == "table-header-unordered-list"
-  ) {
-  } else if (textContent.value && textContent.nodeType == "list-item") {
-  } else {
-    // console.log(
-    //   "not text",
-    //   textContent.value,
-    //   textContent.nodeType,
-    //   textContent
-    // );
-  }
-
-  /*TYPES:
-    'paragraph',
-  'text',
-  'unordered-list',
-  'list-item',
-  'hyperlink',
-  'ordered-list',
-  'table',
-  'table-row',
-  'table-header-cell',
-  'table-cell'
-  */
 }
