@@ -1,0 +1,41 @@
+name: Build .NET Azure Function App
+
+on:
+  workflow_call:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.inputs.environment }}-azure-function
+  cancel-in-progress: true
+
+env:
+  DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
+
+jobs:
+  build-image:
+    runs-on: ubuntu-22.04
+    name: Build .NET Azure Function App & Upload Zip Artifact
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Install Dependencies
+        shell: bash
+        run: dotnet restore ./src/Dfe.PlanTech.AzureFunctions/Dfe_PlanTech_AzureFunctions.csproj
+
+      - name: Build Azure Function App
+        shell: bash
+        run: dotnet publish ./src/Dfe.PlanTech.AzureFunctions/Dfe_PlanTech_AzureFunctions.csproj --configuration Release --no-restore --output ./build
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Dfe-PlanTech-AzureFunctions
+          path: ./build

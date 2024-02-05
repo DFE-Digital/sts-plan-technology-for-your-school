@@ -1,4 +1,4 @@
-name: Multi stage build & deploy
+name: Multi-Stage Build & Deploy (Service)
 
 on:
   workflow_dispatch:
