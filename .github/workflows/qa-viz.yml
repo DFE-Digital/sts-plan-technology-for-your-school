@@ -34,4 +34,4 @@ jobs:
           path: ./test
           
       - name: Artifact ID for building downloadable link
-        run: echo 'Artifact ID is ${{ steps.artifact-upload-step.outputs.artifact-id }}'
+        run: echo 'Artifact ID is https://github.com/DFE-Digital/plan-technology-for-your-school/actions/runs/${{ github.run_id }}/artifacts/${{ steps.artifact-upload-step.outputs.artifact-id }}'
