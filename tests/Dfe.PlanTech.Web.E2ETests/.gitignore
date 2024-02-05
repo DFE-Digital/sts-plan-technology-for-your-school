@@ -4,3 +4,5 @@ videos/
 public/
 cypress/results/
 index.json
+
+cypress.env.*.json
