@@ -1,7 +1,7 @@
 import fs from "fs";
-import { Recommendation } from "./recommendation.mjs";
-import { Question } from "./question.mjs";
-import { UserJourney } from "./user-journey.mjs";
+import { Recommendation } from "./recommendation";
+import { Question } from "./question";
+import { UserJourney } from "./user-journey";
 
 export class Section {
   recommendations;

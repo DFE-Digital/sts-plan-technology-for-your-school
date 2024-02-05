@@ -1,5 +1,5 @@
-import ValidateHeader from "./header-validator.mjs";
-import { ValidateButtonWithLink } from "./button-validator.mjs";
+import ValidateHeader from "./header-validator";
+import { ValidateButtonWithLink } from "./button-validator";
 import ValidateRichTextContent from "./rich-text-content-validator";
 
 function ValidateContent(content) {

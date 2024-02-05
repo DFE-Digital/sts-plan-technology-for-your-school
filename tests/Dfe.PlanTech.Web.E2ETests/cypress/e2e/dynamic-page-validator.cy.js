@@ -1,17 +1,15 @@
-import DataMapper from "../helpers/contentful-helpers/data-mapper.mjs";
+import DataMapper from "../helpers/contentful-helpers/data-mapper";
 
-import { contentful } from "contentful.mjs";
-import ValidateContent from "../helpers/content-validators/content-validator.mjs";
-import ValidateTitle from "../helpers/content-validators/title-validator.mjs";
+import { contentful } from "contentful";
+import ValidateContent from "../helpers/content-validators/content-validator";
+import ValidateTitle from "../helpers/content-validators/title-validator";
 
 describe("Pages should have content", () => {
-  let dataMapper;
-
-  before(() => {
-    dataMapper = new DataMapper(contentful);
-  });
+  before(() => {});
 
   it.skip("Should work for unauthorised pages", () => {
+    const dataMapper = new DataMapper(contentful);
+
     for (const [pageId, page] of dataMapper.pages) {
       if (page.fields.requiresAuthorisation) {
         continue;

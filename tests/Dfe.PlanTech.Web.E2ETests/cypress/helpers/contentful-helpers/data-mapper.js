@@ -1,6 +1,6 @@
-import { Section } from "./section.mjs";
+import { Section } from "./section";
 import fs from "fs";
-import ContentType from "./content-type.mjs";
+import ContentType from "./content-type";
 
 /**
  * DataMapper class for mapping and combining data from a file

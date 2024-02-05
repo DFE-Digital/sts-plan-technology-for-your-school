@@ -1,5 +1,5 @@
 import fs from "fs";
-import DataMapper from "./data-mapper.mjs";
+import DataMapper from "./data-mapper";
 
 const { file, writeAllPossiblePaths } = getArguments();
 
