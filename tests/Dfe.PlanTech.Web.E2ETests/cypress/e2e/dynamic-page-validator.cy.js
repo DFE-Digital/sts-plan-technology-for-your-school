@@ -1,6 +1,6 @@
 import DataMapper from "../helpers/contentful-helpers/data-mapper";
 
-import { contentful } from "contentful";
+import { contentful } from "./contentful";
 import ValidateContent from "../helpers/content-validators/content-validator";
 import ValidateTitle from "../helpers/content-validators/title-validator";
 
