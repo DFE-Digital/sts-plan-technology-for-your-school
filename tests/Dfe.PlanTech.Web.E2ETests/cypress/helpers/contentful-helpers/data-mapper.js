@@ -1,5 +1,4 @@
 import { Section } from "./section";
-import fs from "fs";
 import ContentType from "./content-type";
 
 /**
