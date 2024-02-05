@@ -1,23 +1,4 @@
-﻿using AutoMapper;
-using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Content.Queries;
-using Dfe.PlanTech.Domain.Cookie.Interfaces;
-using Dfe.PlanTech.Web.Controllers;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Primitives;
-using Microsoft.Net.Http.Headers;
-using NSubstitute;
-using Xunit;
-
-namespace Dfe.PlanTech.Web.UnitTests.Controllers
+﻿namespace Dfe.PlanTech.Web.UnitTests.Controllers
 {
     public class CookieControllerTests
     {

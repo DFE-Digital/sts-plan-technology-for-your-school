@@ -1,12 +1,3 @@
-using Dfe.PlanTech.AzureFunctions.Mappings;
-using Dfe.PlanTech.Domain.Caching.Models;
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
-
 namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
 public class SectionMapperTests : BaseMapperTests
@@ -40,7 +31,7 @@ public class SectionMapperTests : BaseMapperTests
         {
             Id = "Interstitial page id",
         };
-        
+
         var list = new List<PageDbEntity>() { pageDbEntity };
         IQueryable<PageDbEntity> queryable = list.AsQueryable();
 
@@ -51,7 +42,7 @@ public class SectionMapperTests : BaseMapperTests
         ((IQueryable<PageDbEntity>)mockPageDataSet).Expression.Returns(queryable.Expression);
         ((IQueryable<PageDbEntity>)mockPageDataSet).ElementType.Returns(queryable.ElementType);
         ((IQueryable<PageDbEntity>)mockPageDataSet).GetEnumerator().Returns(queryable.GetEnumerator());
-        
+
         _logger = Substitute.For<ILogger<SectionMapper>>();
         _mapper = new SectionMapper(_db, _logger, JsonOptions);
 
@@ -91,7 +82,7 @@ public class SectionMapperTests : BaseMapperTests
         Assert.Equal(InterstitialPage.Sys.Id, concrete.InterstitialPageId);
 
         Assert.Equal(Questions.Length, _attachedQuestions.Count);
-        
+
         foreach (var question in Questions)
         {
             var contains = _attachedQuestions.Any(attached => attached.Id == question.Sys.Id);

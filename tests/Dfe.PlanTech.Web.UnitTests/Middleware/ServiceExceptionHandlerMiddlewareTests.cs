@@ -1,13 +1,4 @@
-﻿using Dfe.PlanTech.Application.Constants;
-using Dfe.PlanTech.Application.Exceptions;
-using Dfe.PlanTech.Domain.Establishments.Exceptions;
-using Dfe.PlanTech.Domain.Users.Exceptions;
-using Dfe.PlanTech.Web.Middleware;
-using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Http;
-using Xunit;
-
-namespace Dfe.PlanTech.Web.UnitTests.Middleware
+﻿namespace Dfe.PlanTech.Web.UnitTests.Middleware
 {
     public class ServiceExceptionHandlerMiddlewareTests
     {

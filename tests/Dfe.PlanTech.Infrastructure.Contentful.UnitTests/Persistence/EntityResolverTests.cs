@@ -1,7 +1,3 @@
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Microsoft.Extensions.Logging.Abstractions;
-
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
 {
     public class EntityResolverTests

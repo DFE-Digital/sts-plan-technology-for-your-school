@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Html;
-using System.Text.Encodings.Web;
-
 namespace Dfe.PlanTech.Web.UnitTests;
 
 public static class GetTagHelperString

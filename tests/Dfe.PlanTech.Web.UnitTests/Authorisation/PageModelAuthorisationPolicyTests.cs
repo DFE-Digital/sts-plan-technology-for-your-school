@@ -1,13 +1,3 @@
-using Dfe.PlanTech.Domain.Content.Queries;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
-using System.Security.Claims;
-using Xunit;
 using Page = Dfe.PlanTech.Domain.Content.Models.Page;
 
 namespace Dfe.PlanTech.Web.Authorisation;

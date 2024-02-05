@@ -1,13 +1,3 @@
-using Dfe.PlanTech.Domain.Submissions.Interfaces;
-using Dfe.PlanTech.Web.Controllers;
-using Dfe.PlanTech.Web.Routing;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
-using NSubstitute.ExceptionExtensions;
-using System.Diagnostics;
-using Xunit;
-
 namespace Dfe.PlanTech.Web.UnitTests.Controllers
 {
     public class CheckAnswersControllerTests

@@ -1,7 +1,3 @@
-using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Domain.Responses.Interfaces;
-
 namespace Dfe.PlanTech.Application.Responses.Commands;
 
 public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand

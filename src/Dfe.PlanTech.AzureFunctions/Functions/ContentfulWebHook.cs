@@ -1,10 +1,3 @@
-using Azure.Messaging.ServiceBus;
-using Dfe.PlanTech.Domain.Caching.Exceptions;
-using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Extensions.Azure;
-using Microsoft.Extensions.Logging;
-
 namespace Dfe.PlanTech.AzureFunctions
 {
     public class ContentfulWebHook : BaseFunction

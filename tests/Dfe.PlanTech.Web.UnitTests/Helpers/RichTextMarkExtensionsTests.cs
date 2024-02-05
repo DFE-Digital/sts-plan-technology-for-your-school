@@ -1,7 +1,3 @@
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Web.Helpers;
-using Xunit;
-
 namespace Dfe.PlanTech.Web.UnitTests.Helpers
 {
     public class RichTextMarkExtensionsTests

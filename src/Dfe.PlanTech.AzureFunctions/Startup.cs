@@ -1,16 +1,4 @@
-using Azure.Identity;
-using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.AzureFunctions.Mappings;
-using Dfe.PlanTech.Domain.Persistence.Models;
-using Dfe.PlanTech.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Azure;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Dfe.PlanTech.AzureFunctions
 {

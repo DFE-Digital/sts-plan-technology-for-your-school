@@ -1,7 +1,3 @@
-using Microsoft.Extensions.Logging;
-using NSubstitute;
-using System.Net;
-
 namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
 public class BaseFunctionTests

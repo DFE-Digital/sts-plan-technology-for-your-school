@@ -1,11 +1,4 @@
-﻿using Dfe.PlanTech.Domain.Establishments.Models;
-using Dfe.PlanTech.Domain.SignIns.Models;
-using Dfe.PlanTech.Domain.Submissions.Models;
-using Dfe.PlanTech.Domain.Users.Models;
-using Microsoft.Data.SqlClient;
-using System.Linq.Expressions;
-
-namespace Dfe.PlanTech.Application.Persistence.Interfaces;
+﻿namespace Dfe.PlanTech.Application.Persistence.Interfaces;
 
 public interface IPlanTechDbContext
 {

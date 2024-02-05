@@ -1,17 +1,4 @@
-using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.AzureFunctions.Mappings;
-using Dfe.PlanTech.Domain;
-using Dfe.PlanTech.Domain.Caching.Enums;
-using Dfe.PlanTech.Domain.Caching.Exceptions;
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Persistence.Models;
-using Dfe.PlanTech.Infrastructure.Data;
-using Microsoft.Azure.Functions.Worker;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.Extensions.Logging;
-using System.Reflection;
-using System.Text;
 
 namespace Dfe.PlanTech.AzureFunctions;
 

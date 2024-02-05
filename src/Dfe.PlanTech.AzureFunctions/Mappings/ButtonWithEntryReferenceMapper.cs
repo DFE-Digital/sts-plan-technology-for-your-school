@@ -1,7 +1,3 @@
-using Dfe.PlanTech.Domain.Content.Models.Buttons;
-using Microsoft.Extensions.Logging;
-using System.Text.Json;
-
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
 public class ButtonWithEntryReferenceMapper : JsonToDbMapper<ButtonWithEntryReferenceDbEntity>

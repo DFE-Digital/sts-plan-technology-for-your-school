@@ -1,7 +1,3 @@
-using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Microsoft.Extensions.Logging;
-using System.Text.Json;
-
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
 public class AnswerMapper : JsonToDbMapper<AnswerDbEntity>

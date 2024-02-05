@@ -1,7 +1,4 @@
-using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Web.Routing;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
 

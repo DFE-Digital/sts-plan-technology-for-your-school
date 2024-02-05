@@ -1,8 +1,3 @@
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Web.Helpers;
-using Microsoft.Extensions.Logging.Abstractions;
-using Xunit;
-
 namespace Dfe.PlanTech.Web.UnitTests.Helpers;
 
 public class ComponentViewsFactoryTests

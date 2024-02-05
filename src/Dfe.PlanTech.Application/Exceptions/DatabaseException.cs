@@ -1,5 +1,3 @@
-using System.Data.Common;
-
 namespace Dfe.PlanTech.Application.Exceptions;
 
 public class DatabaseException : DbException

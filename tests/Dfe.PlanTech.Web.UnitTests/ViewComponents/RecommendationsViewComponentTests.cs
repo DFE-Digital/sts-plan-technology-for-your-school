@@ -1,15 +1,3 @@
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Enums;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Web.Models;
-using Dfe.PlanTech.Web.ViewComponents;
-using Microsoft.AspNetCore.Mvc.ViewComponents;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
-using NSubstitute.ExceptionExtensions;
-using Xunit;
-
 namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 {
     public class RecommendationsViewComponentTests

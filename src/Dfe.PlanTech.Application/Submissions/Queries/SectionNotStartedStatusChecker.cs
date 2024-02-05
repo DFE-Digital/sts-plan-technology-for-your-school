@@ -1,7 +1,3 @@
-using Dfe.PlanTech.Domain.Submissions.Enums;
-using Dfe.PlanTech.Domain.Submissions.Interfaces;
-using Dfe.PlanTech.Domain.Submissions.Models;
-
 namespace Dfe.PlanTech.Application.Submissions.Queries;
 
 /// <summary>

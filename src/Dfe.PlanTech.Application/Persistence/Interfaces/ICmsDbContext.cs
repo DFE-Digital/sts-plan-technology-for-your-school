@@ -1,7 +1,3 @@
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Content.Models.Buttons;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
-
 namespace Dfe.PlanTech.Application.Persistence.Interfaces;
 
 public interface ICmsDbContext

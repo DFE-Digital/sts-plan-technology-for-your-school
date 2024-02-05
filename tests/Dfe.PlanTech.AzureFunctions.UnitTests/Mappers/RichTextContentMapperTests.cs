@@ -1,9 +1,3 @@
-using Bogus;
-using Dfe.PlanTech.AzureFunctions.Mappings;
-using Dfe.PlanTech.Domain.Content.Enums;
-using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
-
 namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
 public class RichTextContentMapperTests : BaseMapperTests

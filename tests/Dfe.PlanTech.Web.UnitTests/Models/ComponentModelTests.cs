@@ -1,7 +1,4 @@
-﻿using Dfe.PlanTech.Domain.Questionnaire.Enums;
-using Xunit;
-
-namespace Dfe.PlanTech.Web.UnitTests.Models
+﻿namespace Dfe.PlanTech.Web.UnitTests.Models
 {
     public class ComponentModelTests
     {

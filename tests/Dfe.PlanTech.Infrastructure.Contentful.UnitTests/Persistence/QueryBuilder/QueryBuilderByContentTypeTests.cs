@@ -1,5 +1,3 @@
-using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
-
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests;
 
 public class QueryBuilderByContentTypeTests

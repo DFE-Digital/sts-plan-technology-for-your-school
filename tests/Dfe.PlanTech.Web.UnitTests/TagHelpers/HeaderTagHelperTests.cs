@@ -1,12 +1,3 @@
-using Dfe.PlanTech.Domain.Content.Enums;
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Web.Helpers;
-using Dfe.PlanTech.Web.TagHelpers;
-using Microsoft.AspNetCore.Razor.TagHelpers;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
-using Xunit;
-
 namespace Dfe.PlanTech.Web.UnitTests.TagHelpers;
 
 public class HeaderComponentTagHelperTests

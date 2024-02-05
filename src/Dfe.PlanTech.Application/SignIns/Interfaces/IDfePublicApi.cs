@@ -1,5 +1,3 @@
-using Dfe.PlanTech.Domain.SignIns.Models;
-
 namespace Dfe.PlanTech.Application.SignIns.Interfaces;
 
 /// <summary>

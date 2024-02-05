@@ -1,6 +1,3 @@
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Content.Queries;
-
 namespace Dfe.PlanTech.Application.Content.Queries;
 
 public class GetPageQuery : IGetPageQuery

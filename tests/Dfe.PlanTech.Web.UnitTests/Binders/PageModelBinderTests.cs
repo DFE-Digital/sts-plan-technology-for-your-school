@@ -1,12 +1,3 @@
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Web.Binders;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using NSubstitute;
-using Xunit;
-
 namespace Dfe.PlanTech.Web.UnitTests.Binders;
 
 public class PageModelBinderTests

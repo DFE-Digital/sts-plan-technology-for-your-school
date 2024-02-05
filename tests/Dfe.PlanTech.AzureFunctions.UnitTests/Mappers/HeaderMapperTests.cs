@@ -1,9 +1,3 @@
-using Dfe.PlanTech.AzureFunctions.Mappings;
-using Dfe.PlanTech.Domain.Content.Enums;
-using Dfe.PlanTech.Domain.Content.Models;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
-
 namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
 public class HeaderMapperTests : BaseMapperTests

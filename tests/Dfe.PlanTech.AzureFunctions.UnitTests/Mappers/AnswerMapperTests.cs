@@ -1,10 +1,3 @@
-using Dfe.PlanTech.AzureFunctions.Mappings;
-using Dfe.PlanTech.Domain.Caching.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Enums;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
-
 namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
 public class AnswerMapperTests : BaseMapperTests

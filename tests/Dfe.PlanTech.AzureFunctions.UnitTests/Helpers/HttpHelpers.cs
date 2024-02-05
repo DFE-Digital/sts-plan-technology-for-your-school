@@ -1,8 +1,3 @@
-using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
-
 namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
 public static class HttpHelpers

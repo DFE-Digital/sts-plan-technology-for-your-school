@@ -1,9 +1,4 @@
-﻿using Dfe.PlanTech.Domain.Cookie;
-using Dfe.PlanTech.Domain.Cookie.Interfaces;
-using Microsoft.AspNetCore.Http;
-using System.Text.Json;
-
-namespace Dfe.PlanTech.Application.Cookie.Service;
+﻿namespace Dfe.PlanTech.Application.Cookie.Service;
 
 public class CookieService : ICookieService
 {

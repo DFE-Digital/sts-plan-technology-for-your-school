@@ -1,7 +1,3 @@
-using Contentful.Core.Search;
-using Dfe.PlanTech.Application.Persistence.Models;
-using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
-
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests;
 
 public class QueryBuilderSelectTests

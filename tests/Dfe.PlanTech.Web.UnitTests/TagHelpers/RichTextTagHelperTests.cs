@@ -1,11 +1,3 @@
-using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Web.TagHelpers.RichText;
-using Microsoft.AspNetCore.Razor.TagHelpers;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
-using Xunit;
-
 namespace Dfe.PlanTech.Web.UnitTests.TagHelpers;
 
 public class RichTextTagHelperTests

@@ -1,12 +1,3 @@
-using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Web.ViewComponents;
-using Microsoft.AspNetCore.Mvc.ViewComponents;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using NSubstitute;
-using Xunit;
-
 namespace Dfe.PlanTech.Web.UnitTests.ViewComponents;
 
 public class FooterLinksComponentTests

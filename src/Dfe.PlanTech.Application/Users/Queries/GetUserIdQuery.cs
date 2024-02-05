@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Domain.Users.Interfaces;
 
 namespace Dfe.PlanTech.Application.Users.Queries;
 

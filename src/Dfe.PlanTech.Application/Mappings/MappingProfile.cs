@@ -1,9 +1,3 @@
-using AutoMapper;
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Content.Models.Buttons;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
-using System.Diagnostics.CodeAnalysis;
-
 namespace Dfe.PlanTech.Application.Mappings;
 
 [ExcludeFromCodeCoverage]

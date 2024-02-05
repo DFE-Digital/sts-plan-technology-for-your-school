@@ -1,10 +1,3 @@
-using Dfe.PlanTech.Domain.Caching.Interfaces;
-using Dfe.PlanTech.Domain.Caching.Models;
-using Dfe.PlanTech.Web.Helpers;
-using Microsoft.Extensions.Caching.Memory;
-using NSubstitute;
-using Xunit;
-
 namespace Dfe.PlanTech.Web.UnitTests.Helpers;
 
 public class CacherTests

@@ -1,5 +1,3 @@
-using System.Linq.Expressions;
-
 namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
 public class AsyncEnumerable<T> : EnumerableQuery<T>, IAsyncEnumerable<T>, IQueryable<T>

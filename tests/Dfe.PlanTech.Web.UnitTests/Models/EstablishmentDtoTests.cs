@@ -1,6 +1,3 @@
-using Dfe.PlanTech.Domain.Establishments.Models;
-using Xunit;
-
 namespace Dfe.PlanTech.Web.UnitTests.Models;
 
 public class EstablishmentDtoTests

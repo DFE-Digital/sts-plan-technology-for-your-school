@@ -1,12 +1,3 @@
-using Bogus;
-using Dfe.PlanTech.AzureFunctions.Mappings;
-using Dfe.PlanTech.Domain.Caching.Models;
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
-
 namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
 public class PageMapperTests : BaseMapperTests

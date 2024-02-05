@@ -1,8 +1,3 @@
-using Dfe.PlanTech.AzureFunctions.Mappings;
-using Dfe.PlanTech.Domain.Content.Models.Buttons;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
-
 namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
 public class ButtonMapperTests : BaseMapperTests
