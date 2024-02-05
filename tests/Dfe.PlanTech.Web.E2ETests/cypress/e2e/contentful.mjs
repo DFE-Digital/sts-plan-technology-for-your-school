@@ -1,4 +1,4 @@
 export const contentful = {
-  contentTypes:[]
+  contentTypes: [],
   entries: [],
 };
