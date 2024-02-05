@@ -192,3 +192,4 @@ if __name__ == "__main__":
     question_data = json.loads(json_data_string)
     flowchart = create_questionnaire_flowchart(question_data)
     flowchart.render('test/test', cleanup=True)
+    print("completed image generation")
