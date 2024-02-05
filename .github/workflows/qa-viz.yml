@@ -23,3 +23,10 @@ jobs:
           pip install graphviz
       - name: Run Script
         run: python ./.github/scripts/test.py 
+        
+      - name: upload image
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: qa-visualisations
+          path: ./.github/scripts/test

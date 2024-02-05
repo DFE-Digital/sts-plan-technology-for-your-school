@@ -1,4 +1,5 @@
 import json
+import os
 from graphviz import Digraph
 
 def create_questionnaire_flowchart(question_data):
@@ -26,6 +27,10 @@ def create_questionnaire_flowchart(question_data):
     return tree
 
 if __name__ == "__main__":
+    imagesDir = 'test'
+    if not os.path.exists(imagesDir):
+        os.makedirs(imagesDir)
+        
     json_data_string = '''
     [      
         {
@@ -183,7 +188,7 @@ if __name__ == "__main__":
             "NextQuestionId": null
         }
     ]
-    '''
+    ''' 
     question_data = json.loads(json_data_string)
     flowchart = create_questionnaire_flowchart(question_data)
-    flowchart.render('test', cleanup=True)
+    flowchart.render('test/test', cleanup=True)
