@@ -11,7 +11,7 @@ describe("Pages should have content", () => {
     }
   });
 
-  it.skip("Should work for unauthorised pages", () => {
+  it("Should work for unauthorised pages", () => {
     if (dataMapper?.pages == null) {
       console.log("Datamapper has not processed data correctly");
       return;
@@ -28,7 +28,7 @@ describe("Pages should have content", () => {
     }
   });
 
-  it.skip("Should validate self-assessment page", () => {
+  it("Should validate self-assessment page", () => {
     if (dataMapper?.pages == null) {
       console.log("Datamapper has not processed data correctly");
       return;

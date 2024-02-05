@@ -65,27 +65,6 @@ function validateParagraph(content) {
         paragraph.parsed.innerText?.indexOf(parsedElement.innerText) != -1
     );
 
-    if (!anyMatches) {
-      const asObj = {
-        expectedHtml: expectedHtml,
-      };
-
-      console.log(`error finding`, asObj);
-      console.log(`error finding "${expectedHtml}" in:`);
-      console.log(
-        `checked in `,
-        Array.from(
-          paragraphHtmls.map((p) => {
-            return {
-              original: p.original,
-              html: p.parsed.innerHTML,
-              text: p.parsed.innerText,
-            };
-          })
-        )
-      );
-      console.log("-----");
-    }
     expect(anyMatches).to.exist;
   });
 }
@@ -115,26 +94,4 @@ function buildExpectedHtml(content) {
   }
 
   return html;
-}
-
-function cleanParagraphConent(values) {
-  if (values.some((value) => value.indexOf("With your permission") != -1)) {
-    console.log(values);
-  }
-  return Array.from(
-    values
-      .filter((value) => value != null && value != "<br>")
-      .map((value) => value.replace("&nbsp;", " ").trim())
-      .filter((value) => value != null)
-      .flatMap((value) => {
-        if (value.match(regex)) {
-          return value.split(regex);
-        } else {
-          return [value];
-        }
-      })
-      .filter(
-        (value) => value && value != "" && value != "\n" && value != "\r\n"
-      )
-  );
 }
