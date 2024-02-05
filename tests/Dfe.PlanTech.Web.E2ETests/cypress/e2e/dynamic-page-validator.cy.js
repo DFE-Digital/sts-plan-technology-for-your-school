@@ -1,6 +1,6 @@
 import DataMapper from "../helpers/contentful-helpers/data-mapper.mjs";
 
-import { contentful } from "../../../../contentful.mjs";
+import { contentful } from "contentful.mjs";
 import ValidateContent from "../helpers/content-validators/content-validator.mjs";
 import ValidateTitle from "../helpers/content-validators/title-validator.mjs";
 
