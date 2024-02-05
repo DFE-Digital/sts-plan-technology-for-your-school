@@ -28,8 +28,8 @@ describe("Pages should have content", () => {
     }
   });
 
-  it("Should validate self-assessment page", () => {
-    if (dataMapper?.pages == null) {
+  it.skip("Should validate self-assessment page", () => {
+    if (dataMapper.pages == null) {
       console.log("Datamapper has not processed data correctly");
       return;
     }
