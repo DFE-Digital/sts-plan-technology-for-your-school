@@ -16,6 +16,15 @@ function ValidateContent(content) {
       ValidateRichTextContent(content.fields.richText);
       break;
     }
+    //ButtonWithReference
+
+    //Category
+
+    //Section??
+
+    //Question?Answer?
+
+    //Recommendation Page
     default: {
       console.log(content.sys.contentType.sys.id, content);
       break;
