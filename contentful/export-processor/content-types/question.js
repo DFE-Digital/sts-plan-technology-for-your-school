@@ -1,4 +1,4 @@
-import { Answer } from "./answer.mjs";
+import { Answer } from "./answer.js";
 
 export class Question {
   answers;

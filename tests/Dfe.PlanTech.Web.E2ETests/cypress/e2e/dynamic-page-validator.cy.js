@@ -1,17 +1,22 @@
-import DataMapper from "../helpers/contentful-helpers/data-mapper.mjs";
-
-import { contentful } from "contentful.mjs";
-import ValidateContent from "../helpers/content-validators/content-validator.mjs";
-import ValidateTitle from "../helpers/content-validators/title-validator.mjs";
+import DataMapper from "../../../../contentful/export-processor/data-mapper";
+import { contentful } from "./contentful";
+import ValidatePage from "../helpers/content-validators/page-validator";
 
 describe("Pages should have content", () => {
   let dataMapper;
 
   before(() => {
-    dataMapper = new DataMapper(contentful);
+    if (contentful && contentful.entries && contentful.entries.length > 0) {
+      dataMapper = new DataMapper(contentful);
+    }
   });
 
   it.skip("Should work for unauthorised pages", () => {
+    if (dataMapper?.pages == null) {
+      console.log("Datamapper has not processed data correctly");
+      return;
+    }
+
     for (const [pageId, page] of dataMapper.pages) {
       if (page.fields.requiresAuthorisation) {
         continue;
@@ -19,23 +24,37 @@ describe("Pages should have content", () => {
 
       const slug = `/${page.fields.slug.replace("/", "")}`;
       cy.visit(slug);
-      ShouldMatchUrl(slug);
-
-      if (page.fields.title) {
-        ValidateTitle(page.fields.title);
-      }
-
-      const contents = page.fields.content;
-
-      for (const content of contents) {
-        ValidateContent(content);
-      }
+      ValidatePage(slug, page);
     }
+  });
+
+  it.skip("Should validate self-assessment page", () => {
+    if (dataMapper?.pages == null) {
+      console.log("Datamapper has not processed data correctly");
+      return;
+    }
+
+    const slug = "self-assessment";
+    cy.loginWithEnv(`/${slug}`);
+
+    const selfAssessmentPage = FindPageForSlug({ slug, dataMapper });
+
+    if (!selfAssessmentPage) {
+      throw new Error(
+        `Could not find self-assessment page; not found page with slug ${slug}`
+      );
+    }
+
+    ValidatePage(slug, selfAssessmentPage);
   });
 });
 
-function ShouldMatchUrl(url) {
-  cy.location().should((loc) => {
-    expect(loc.pathname).to.equal(url);
-  });
+function FindPageForSlug({ slug, dataMapper }) {
+  for (const [id, page] of dataMapper.pages) {
+    if (page.fields.slug == slug) {
+      return page;
+    }
+  }
+
+  return null;
 }

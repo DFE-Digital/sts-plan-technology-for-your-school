@@ -1,8 +1,15 @@
+import { ReplaceNonBreakingHyphen } from "../text-helpers.js";
+
 function ValidateHeader(content) {
   const tag = content.fields.tag;
   const expectedClass = GetExpectedClass(content.fields.size.toLowerCase());
 
-  cy.get(tag).contains(content.fields.text).should("have.class", expectedClass);
+  const expectedText = ReplaceNonBreakingHyphen(content.fields.text);
+
+  return cy
+    .get(`header-component ${tag}`)
+    .contains(expectedText)
+    .should("have.class", expectedClass);
 }
 
 function GetExpectedClass(size) {

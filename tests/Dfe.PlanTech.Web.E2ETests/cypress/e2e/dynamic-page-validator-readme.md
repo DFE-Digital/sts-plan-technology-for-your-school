@@ -14,19 +14,24 @@
 - [ ] Answer
 - [ ] ButtonWithEntryReference
 - [x] ButtonWithLink
-- [ ] Category
+- [x] Category
 - [ ] ComponentDropDown
 - [x] Headers
 - [ ] InsetText
 - [ ] NavigationLink
 - [ ] Question
 - [ ] RecommendationPage
-- [ ] Section
+- [x] Section *
 - [x] TextBody *
 - [x] Titles
 - [ ] WarningComponent
 
-* Haven't completed; missing certain validations.
+* Not fully complete. See below for notes.
+
+| Content Type | Status Notes                                                                                                                        |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Section      | Haven't added functionality to test current section status                                                                          |
+| TextBody     | Haven't added validations for all element types (e.g. hyperlinks, strong, italics, etc.), haven't validated classes for most things |
 
 ### Page routing validated
 
@@ -41,6 +46,10 @@
 
 - [ ] Do not fail if one error; run entire tests for issues.
 - [ ] Split tests up; not just one `it` function
+- [ ] Complete documentation:
+   - [ ] Merge with documentation in `contentful-helpers`
+- [ ] Make a Node project for the `contentful-helpers` to allow re-use, and prevent the fact that the code is copied and pasted into two places
+
 
 #### Integrate with CI/CD Pipeline
 

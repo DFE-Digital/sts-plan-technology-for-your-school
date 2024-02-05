@@ -1,9 +1,12 @@
 import fs from "fs";
-import DataMapper from "./data-mapper.mjs";
+import DataMapper from "../data-mapper";
+import fs from "fs";
 
 const { file, writeAllPossiblePaths } = getArguments();
 
-const dataMapper = new DataMapper(file);
+const contentfulData = fs.readFileSync(file, "utf8");
+const parsed = JSON.parse(contentfulData);
+const dataMapper = new DataMapper(parsed);
 
 for (const section of dataMapper.mappedSections) {
   const output = dataMapper.convertToMinimalSectionInfo(
