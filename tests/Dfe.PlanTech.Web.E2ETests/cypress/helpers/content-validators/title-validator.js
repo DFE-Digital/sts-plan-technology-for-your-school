@@ -1,4 +1,4 @@
-import { ReplaceNonBreakingHyphen } from "../text-helpers.js";
+import { ReplaceNonBreakingHyphen } from "../text-helpers";
 function ValidateTitle(title) {
   const expectedText = ReplaceNonBreakingHyphen(title.fields.text);
 
