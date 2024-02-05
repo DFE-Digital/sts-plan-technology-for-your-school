@@ -26,7 +26,6 @@ jobs:
         
       - name: upload image
         uses: actions/upload-artifact@v3
-        if: failure()
         with:
           name: qa-visualisations
           path: ./.github/scripts/test
