@@ -40,70 +40,58 @@ function validateByNodeType(content) {
 }
 
 function validateParagraph(content) {
-  const children = Array.from(getChildrenRecursive(content));
-  const values = children.map((child) => child.value);
+  const expectedHtml = buildExpectedHtml(content).trim();
 
-  const htmlValue = getContentValues(values);
+  const parsedElement = parse(expectedHtml);
 
-  if (!htmlValue || htmlValue.length == 0) return;
-
-  cy.get("p").then(($p) => {
-    const htmls = Array.from(
-      $p.map((i, el) => {
-        return Cypress.$(el).text();
-      })
+  cy.get("p").then(($paragraphs) => {
+    const paragraphHtmls = Array.from(
+      Array.from($paragraphs.map((i, el) => Cypress.$(el).html()))
+        .map((paragraph) => {
+          const withoutWhitespaceEscaped = paragraph.replace("&nbsp;", " ");
+          return {
+            original: withoutWhitespaceEscaped,
+            parsed: parse(withoutWhitespaceEscaped),
+          };
+        })
+        .filter((paragraph) => paragraph.original != "")
     );
 
-    const matched = htmls.find((paragraph) =>
-      htmlValue.every((html) => paragraph.indexOf(html) != -1)
+    const anyMatches = paragraphHtmls.find(
+      (paragraph) =>
+        paragraph.original == expectedHtml ||
+        paragraph.original.indexOf(expectedHtml) != -1 ||
+        paragraph.parsed.innerHTML?.indexOf(parsedElement.innerHTML) != -1 ||
+        paragraph.parsed.innerText?.indexOf(parsedElement.innerText) != -1
     );
 
-    if (matched) return;
-
-    const parsed = htmlValue.map((html) => parse(html)).map((p) => p.innerText);
-
-    const matchedHtmlContent = htmls
-      .map((html) => html.replace(/\&nbsp;/g, ""))
-      .some((paragraph) => {
-        const matches = parsed.every((html) => {
-          const m = paragraph.indexOf(html) != -1;
-          return m;
-        });
-
-        return matches;
-      });
-
-    if (!matchedHtmlContent) {
-      throw new Error(`Unable to find ${htmlValue}`);
-    }
+    expect(anyMatches).to.exist;
   });
 }
 
-function getContentValues(values) {
-  return Array.from(
-    values
-      .filter((value) => value != null && value != "<br>")
-      .map((value) => value.trim())
-      .filter((value) => value != null)
-      .flatMap((value) => {
-        if (value.match(regex)) {
-          return value.split(regex);
-        } else {
-          return [value];
+function buildExpectedHtml(content) {
+  let html = "";
+  for (const child of content.content) {
+    if (child.value) {
+      html += child.value.replace(/\r\n/g, "\n");
+    }
+
+    if (child.nodeType == "hyperlink") {
+      html += `<a href="${child.data.uri}" class="govuk-link">`;
+    }
+
+    if (child.content) {
+      for (const grandchild of child.content) {
+        if (grandchild.value) {
+          html += grandchild.value;
         }
-      })
-      .filter(
-        (value) => value && value != "" && value != "\n" && value != "\r\n"
-      )
-  );
-}
+      }
+    }
 
-function* getChildrenRecursive(content) {
-  if (content.content) {
-    for (const child of content.content) {
-      yield child;
-
-      yield* getChildrenRecursive(child);
+    if (child.nodeType == "hyperlink") {
+      html += `</a>`;
     }
   }
+
+  return html;
 }

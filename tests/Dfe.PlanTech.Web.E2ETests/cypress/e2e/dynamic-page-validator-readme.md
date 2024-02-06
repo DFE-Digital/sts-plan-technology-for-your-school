@@ -3,9 +3,9 @@
 ## Instructions
 
 1. Extract Contentful content using CLI
-2. Rename file to `contentful.mjs`, and make the JSON an object called Contentful. E.g. `const contentful = { ... JSON}`;
+2. Rename file to `contentful.js`, and make the JSON an object called Contentful. E.g. `const contentful = { ... JSON}`;
 3. Export that object
-4. Place the `contentful.mjs` in the same folder as `dynamic-page-validator.cy.js`
+4. Place the `contentful.js` in the same folder as `dynamic-page-validator.cy.js`
 5. Remove the `skip` command on line 14.
 
 

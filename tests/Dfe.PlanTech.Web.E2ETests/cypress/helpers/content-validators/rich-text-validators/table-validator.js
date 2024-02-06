@@ -17,9 +17,11 @@ const isRowType = (type) => (row) => row.every(isNodeType(type));
 const isTableHeaderRow = isRowType("table-header-cell");
 const isTableDataRow = isRowType("table-cell");
 
-class TableValidator {
-  foundTable;
+//Constants used for finding specific rows in a table
+const HEADER_ROW = "HEADER";
+const BODY_ROW = "BODY";
 
+class TableValidator {
   constructor() {}
 
   /**
@@ -27,67 +29,106 @@ class TableValidator {
    * @param {object} content - The content to validate.
    */
   validateTable(content) {
-    cy.get("table").then(($table) => {
-      for (const row of content.content) {
-        this.validateRow(row, $table);
-      }
+    const expectedHeaders = content.content.find(
+      (row) => this.getRowType(row.content) == HEADER_ROW
+    );
 
-      this.foundTable = null;
+    if (!expectedHeaders) {
+      throw new Error("Couldn't find headers");
+    }
+
+    const expectedRows = Array.from(
+      content.content.filter((row) => this.getRowType(row.content) == BODY_ROW)
+    );
+
+    cy.get("table").then(($table) => {
+      const mapped = $table.map((i, table) => {
+        const jqueryTable = Cypress.$(table);
+        const headerRow = jqueryTable.find("thead tr");
+        const bodyRows = jqueryTable.find("tbody tr");
+
+        return {
+          header: headerRow,
+          body: bodyRows,
+        };
+      });
+
+      const matchingTableFound = this.anyTableMatches(
+        mapped,
+        expectedHeaders,
+        expectedRows
+      );
+
+      expect(matchingTableFound).to.be.true;
     });
   }
 
   /**
-   * Validates a row of the table.
-   * @param {object} row - The row to validate.
-   * @param {object} tableElement - The table element.
+   * Checks if any table matches the expected headers and rows.
+   *
+   * @param {Array} tables - The mapped tables
+   * @param {Array} expectedHeaders - The expected headers
+   * @param {Array} expectedRows - The expected rows
+   * @return {boolean} Whether any table matches the expected headers and rows
    */
-  validateRow(row, tableElement) {
-    const cells = row.content;
+  anyTableMatches(tables, expectedHeaders, expectedRows) {
+    for (const table of tables) {
+      const { header, body } = table;
+      const headerCells = Cypress.$(header).children();
 
-    const rowType = this.getRowType(cells, row);
+      if (!this.rowMatches(expectedHeaders.content, headerCells)) {
+        continue;
+      }
 
-    for (let index = 0; index < cells.length; index++) {
-      const cellSelector = this.getCellSelector(rowType, index);
-      const cell = cells[index];
-      const tableToCheck = this.foundTable ?? cy.wrap(tableElement);
+      const matches = this.tableBodyMatches(body, expectedRows);
 
-      this.validateCell(cell, tableToCheck, cellSelector);
+      if (matches) {
+        return true;
+      }
     }
+    return false;
   }
 
   /**
-   * Method to validate a cell of the table.
-   * @param {object} cell - The cell to validate.
-   * @param {object} tableToCheck - The table to check.
-   * @param {string} cellSelector - The selector for the cell.
+   * Check if the table body matches the expected rows.
+   *
+   * @param {Array} body - the table body to compare
+   * @param {Array} expectedRows - the expected rows to match against
+   * @return {Boolean} true if the table body matches the expected rows, false otherwise
    */
-  validateCell(cell, tableToCheck, cellSelector) {
-    const cellText = this.getCellText(cell);
+  tableBodyMatches(body, expectedRows) {
+    for (let rowIndex = 0; rowIndex < body.length; rowIndex++) {
+      const rowCells = Cypress.$(body[rowIndex]).children();
+      const expectedCells = expectedRows[rowIndex].content;
 
-    tableToCheck
-      .get(cellSelector)
-      .contains(cellText)
-      .then((matchingTable) => {
-        if (this.foundTable == null) {
-          this.foundTable = matchingTable;
-        }
-      });
+      if (!this.rowMatches(expectedCells, rowCells)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /**
-   * Method to get the selector for a row based on its type and position.
-   * @param {string} rowType - The type of the row.
-   * @param {number} index - The position of the cell in the row.
-   * @returns {string} - The selector for the row.
+   * Checks if the cells in a row match the expected cells.
+   *
+   * @param {array} expectedCells - the array of expected cells
+   * @param {array} rowCells - the array of cells in the row
+   * @return {boolean} true if all row cells match the expected cells, false otherwise
    */
-  getCellSelector(rowType, index) {
-    if (rowType === "HEADER") {
-      return "thead tr th";
-    } else if (index === 0) {
-      return "tbody tr th";
-    } else {
-      return "tbody tr td";
+  rowMatches(expectedCells, rowCells) {
+    for (let index = 0; index < expectedCells.length; index++) {
+      const expectedCellText = this.getCellText(expectedCells[index]);
+      const actualCellText = Cypress.$(rowCells[index]).text();
+
+      const matches = actualCellText == expectedCellText;
+
+      if (!matches) {
+        return false;
+      }
     }
+
+    return true;
   }
 
   /**
@@ -96,9 +137,9 @@ class TableValidator {
    * @returns {string} - The type of the row.
    * @throws {Error} - If the row type is invalid.
    */
-  getRowType(rowCells, row) {
-    if (isTableHeaderRow(rowCells)) return "HEADER";
-    if (isTableDataRow(rowCells)) return "DATA";
+  getRowType(rowCells) {
+    if (isTableHeaderRow(rowCells)) return HEADER_ROW;
+    if (isTableDataRow(rowCells)) return BODY_ROW;
 
     throw new Error("Invalid row type", rowCells);
   }
@@ -113,7 +154,9 @@ class TableValidator {
 
     function traverseCellAndAppendTextContent(cell) {
       if (cell.value) {
-        text += cell.value;
+        //Strip out HTML tags due to unescaped characters in certain content
+        //E.g. cookies -> analytical cookies
+        text += cell.value.replace(/(<([^>]+)>)/gi, "");
       }
 
       if (cell.content) {

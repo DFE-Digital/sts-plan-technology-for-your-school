@@ -1,4 +1,4 @@
-import DataMapper from "../helpers/contentful-helpers/data-mapper";
+import DataMapper from "../../../../contentful/export-processor/data-mapper";
 import { contentful } from "./contentful";
 import ValidatePage from "../helpers/content-validators/page-validator";
 
@@ -6,11 +6,13 @@ describe("Pages should have content", () => {
   let dataMapper;
 
   before(() => {
-    dataMapper = new DataMapper(contentful);
+    if (contentful && contentful.entries && contentful.entries.length > 0) {
+      dataMapper = new DataMapper(contentful);
+    }
   });
 
-  it.skip("Should work for unauthorised pages", () => {
-    if (dataMapper.pages == null) {
+  it("Should work for unauthorised pages", () => {
+    if (dataMapper?.pages == null) {
       console.log("Datamapper has not processed data correctly");
       return;
     }

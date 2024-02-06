@@ -1,6 +1,5 @@
-import { Section } from "./section.mjs";
-import fs from "fs";
-import ContentType from "./content-type.mjs";
+import { Section } from "./content-types/section";
+import ContentType from "./content-types/content-type";
 
 /**
  * DataMapper class for mapping and combining data from a file
@@ -23,6 +22,10 @@ export default class DataMapper {
       );
 
     return this._alreadyMappedSections;
+  }
+
+  get pages() {
+    return this.contents["page"];
   }
 
   /**
@@ -155,12 +158,6 @@ export default class DataMapper {
     for (const [contentTypeId, contents] of Object.entries(this.contents)) {
       const contentType = this.contentTypes.get(contentTypeId);
 
-      if (contentTypeId == "recommendationPage") {
-        // console.log("rec page", contents);
-      } else {
-        // console.log("not rec page", contentTypeId);
-      }
-
       for (const [id, entry] of contents) {
         this.mapRelationshipsForEntry(entry, contentType);
       }
@@ -183,10 +180,6 @@ export default class DataMapper {
           referencedTypesForField,
           value
         );
-
-        if (contentType.id == "recommendationPage" && key == "page") {
-          console.log(`rec page`, entry.fields[key]);
-        }
       }
     });
   }
