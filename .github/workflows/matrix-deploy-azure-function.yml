@@ -7,19 +7,23 @@ on:
     paths:
       - "src/Dfe.PlanTech.AzureFunctions/**"
       - ".github/workflows/matrix-deploy-azure-function.yml"
+  pull_request: # TODO: REMOVE AFTER TESTING
+    branches: ["development"] # TODO: REMOVE AFTER TESTING
+    paths: # TODO: REMOVE AFTER TESTING
+      - ".github/workflows/matrix-deploy-azure-function.yml" # TODO: REMOVE AFTER TESTING
+      - ".github/workflows/build-azure-function.yml" # TODO: REMOVE AFTER TESTING
+      - ".github/workflows/deploy-azure-function.yml" # TODO: REMOVE AFTER TESTING
 
 jobs:
   set-env:
     runs-on: ubuntu-22.04
-    name: Set Environment (Matrix Deploy)
+    name: Set Environment (Matrix Deploy Azure Function)
     outputs:
       branch: ${{ steps.var.outputs.branch }}
-
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
-
       - id: var
         run: |
           GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}
@@ -34,7 +38,7 @@ jobs:
     name: Deploy Azure Function
     strategy:
       fail-fast: true
-      max-parallel: 1
+      max-parallel: 1 # TODO: Can this be 2?
       matrix:
         target: [Dev, Tst]
     uses: ./.github/workflows/deploy-azure-function.yml

@@ -1,5 +1,7 @@
 name: Multi-Stage Build & Deploy (Service)
 
+# TODO: Remove all the stuff about azure function deployments from this!
+
 on:
   workflow_dispatch:
   push:
