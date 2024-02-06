@@ -9,21 +9,34 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-
+        
       - name: Install Graphviz
         run: |
           sudo apt-get install graphviz 
           
+      - name: Install Microsoft ODBC
+        run: sudo ACCEPT_EULA=Y apt-get install msodbcsql17 -y
+          
+      - name: Install pyodbc
+        run: |
+          pip install pyodbc
+      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: 3.9
-          
-          
+    
       - name: Install dependencies
         run: |
           pip install graphviz
-      - name: Run Script
+          
+      - name: Run data script
+        run: |
+          python ./.github/scripts/qa-data.py
+        env:
+          SQL_CONNECTION_STRING: ${{ secrets.QA_VIZ_CONNECTION_STRING_DEV }}
+          
+      - name: Run Visaulisation Script
         run: python ./.github/scripts/test.py 
         
       - name: Upload image
