@@ -5,7 +5,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
 {
     public class ComponentModelTests
     {
-        private IComponentBuilder _componentBuilder;
+        private readonly IComponentBuilder _componentBuilder;
 
         public ComponentModelTests()
         {

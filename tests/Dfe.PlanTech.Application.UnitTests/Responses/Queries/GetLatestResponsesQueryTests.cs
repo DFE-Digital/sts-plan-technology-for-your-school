@@ -19,7 +19,7 @@ public class GetLatestResponsesQueryTests
     private const int QUESTION_PER_SECTION_COUNT = 5;
     private const int ANSWER_PER_QUESTION_COUNT = 4;
 
-    private IPlanTechDbContext _planTechDbContextSubstitute;
+    private readonly IPlanTechDbContext _planTechDbContextSubstitute;
     private readonly GetLatestResponsesQuery _getLatestResponseListForSubmissionQuery;
 
     private readonly List<Submission> _submissions;

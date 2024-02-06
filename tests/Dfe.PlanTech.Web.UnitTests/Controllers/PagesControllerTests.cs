@@ -21,8 +21,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private const string INDEX_SLUG = "/";
         private const string INDEX_TITLE = "Index";
         private const string SELF_ASSESSMENT_SLUG = "self-assessment";
-        ICookieService cookiesSubstitute = Substitute.For<ICookieService>();
-        IUser userSubstitute = Substitute.For<IUser>();
+        readonly ICookieService cookiesSubstitute = Substitute.For<ICookieService>();
+        readonly IUser userSubstitute = Substitute.For<IUser>();
 
         private readonly PagesController _controller;
         private readonly ControllerContext _controllerContext;

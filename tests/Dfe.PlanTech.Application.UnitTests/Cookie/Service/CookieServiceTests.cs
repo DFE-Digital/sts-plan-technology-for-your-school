@@ -9,7 +9,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Cookie.Service
 {
     public class CookieServiceTests
     {
-        IHttpContextAccessor Http = Substitute.For<IHttpContextAccessor>();
+        readonly IHttpContextAccessor Http = Substitute.For<IHttpContextAccessor>();
 
         private CookieService CreateStrut()
         {

@@ -15,7 +15,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
         public IGetUserIdQuery UserQuery = Substitute.For<IGetUserIdQuery>();
         public ICreateUserCommand CreateUserCommand = Substitute.For<ICreateUserCommand>();
         public IGetEstablishmentIdQuery GetEstablishmentIdQuery = Substitute.For<IGetEstablishmentIdQuery>();
-        private ICreateEstablishmentCommand CreateEstablishmentCommand = Substitute.For<ICreateEstablishmentCommand>();
+        private readonly ICreateEstablishmentCommand CreateEstablishmentCommand = Substitute.For<ICreateEstablishmentCommand>();
 
         public RecordUserSignInCommand CreateStrut()
         {

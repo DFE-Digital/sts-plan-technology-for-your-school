@@ -14,11 +14,11 @@ namespace Dfe.PlanTech.Web.Authorisation;
 
 public class PageModelAuthorisationPolicyTests
 {
-    private IGetPageQuery _getPageQuery;
-    private PageModelAuthorisationPolicy _policy;
+    private readonly IGetPageQuery _getPageQuery;
+    private readonly PageModelAuthorisationPolicy _policy;
     private AuthorizationHandlerContext _authContext;
-    private ILogger<PageModelAuthorisationPolicy> _logger;
-    private HttpContext _httpContext;
+    private readonly ILogger<PageModelAuthorisationPolicy> _logger;
+    private readonly HttpContext _httpContext;
 
     public PageModelAuthorisationPolicyTests()
     {

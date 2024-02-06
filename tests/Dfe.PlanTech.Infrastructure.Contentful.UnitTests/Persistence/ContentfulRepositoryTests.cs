@@ -11,7 +11,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
 {
     public class ContentfulRepositoryTests
     {
-        private IContentfulClient _clientSubstitute = Substitute.For<IContentfulClient>();
+        private readonly IContentfulClient _clientSubstitute = Substitute.For<IContentfulClient>();
 
         private readonly List<TestClass> _substituteData = new() {
             new TestClass(), new TestClass("testId"), new TestClass("anotherId"), new TestClass("abcd1234")
