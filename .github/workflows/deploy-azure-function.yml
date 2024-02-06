@@ -18,6 +18,11 @@ jobs:
       AZURE_FUNCTIONAPP_NAME: "${{ secrets.AZ_ENVIRONMENT }}plantechcontentfulfunction"
 
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
       - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
