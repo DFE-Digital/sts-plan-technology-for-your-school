@@ -36,6 +36,10 @@ jobs:
         env:
           SQL_CONNECTION_STRING: ${{ secrets.QA_VIZ_CONNECTION_STRING_DEV }}
           
+      - name: List data files
+        run: |
+          ls -l ./data
+            
       - name: Run Visaulisation Script
         run: python ./.github/scripts/test.py 
         
