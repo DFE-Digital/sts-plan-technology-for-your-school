@@ -1,3 +1,6 @@
+name: QA Visualisation Workflow
+
+
 on:
   push:
     branches:
@@ -49,6 +52,7 @@ jobs:
         with:
           name: qa-visualisations
           path: ./visualisations
-          
-      - name: Artifact ID for building downloadable link
-        run: echo 'Artifact ID is https://github.com/DFE-Digital/plan-technology-for-your-school/actions/runs/${{ github.run_id }}/artifacts/${{ steps.artifact-upload-step.outputs.artifact-id }}'
+        
+      - name: Call Teams Webhook
+        run: |
+            curl -X POST -H 'Content-Type: application/json' -d '{"text": "New Visualisations Available: https://github.com/DFE-Digital/plan-technology-for-your-school/actions/runs/${{ github.run_id }}/artifacts/${{ steps.artifact-upload-step.outputs.artifact-id }}' ${{ secrets.PLANTECH_TEAMS_WEBHOOK }}
