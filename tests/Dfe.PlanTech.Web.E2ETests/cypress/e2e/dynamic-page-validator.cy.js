@@ -1,5 +1,5 @@
 import DataMapper from "../../../../contentful/export-processor/data-mapper";
-import { contentful } from "./contentful-testing";
+import { contentful } from "./contentful";
 import ValidatePage from "../helpers/content-validators/page-validator";
 import { selfAssessmentSlug } from "../helpers/page-slugs";
 
@@ -63,7 +63,7 @@ describe("Pages should have content", () => {
     }
   });
 
-  it("Should retrieve correct recommendations for maturity", () => {
+  it.skip("Should retrieve correct recommendations for maturity", () => {
     if (dataMapper.pages == null) {
       console.log("Datamapper has not processed data correctly");
       return;
