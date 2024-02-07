@@ -11,7 +11,7 @@
 
 ### Components content validated
 
-- [ ] Answer
+- [x] Answer
 - [ ] ButtonWithEntryReference
 - [x] ButtonWithLink
 - [x] Category
@@ -19,7 +19,7 @@
 - [x] Headers
 - [ ] InsetText
 - [ ] NavigationLink
-- [ ] Question
+- [x] Question
 - [ ] RecommendationPage
 - [x] Section *
 - [x] TextBody *
@@ -48,7 +48,7 @@
 - [ ] Split tests up; not just one `it` function
 - [ ] Complete documentation:
    - [ ] Merge with documentation in `contentful-helpers`
-- [ ] Make a Node project for the `contentful-helpers` to allow re-use, and prevent the fact that the code is copied and pasted into two places
+- [x] Make a Node project for the `contentful-helpers` to allow re-use, and prevent the fact that the code is copied and pasted into two places
 
 
 #### Integrate with CI/CD Pipeline

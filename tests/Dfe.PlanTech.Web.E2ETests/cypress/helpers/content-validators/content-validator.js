@@ -21,6 +21,9 @@ function ValidateContent(content) {
       ValidateCategory(content);
       break;
     }
+    case "warningComponent": {
+      break;
+    }
     //ButtonWithReference
 
     //Category
