@@ -62,10 +62,86 @@ describe("Pages should have content", () => {
       validateSections(section, section.minimumPathsToNavigateQuestions);
     }
   });
+
+  it.skip("Should retrieve correct recommendations for maturity", () => {
+    if (dataMapper.pages == null) {
+      console.log("Datamapper has not processed data correctly");
+      return;
+    }
+
+    cy.loginWithEnv(`${selfAssessmentSlug}`);
+
+    const sections = dataMapper.mappedSections;
+
+    for (const section of Object.values(sections)) {
+      for (const [maturity, path] of Object.entries(
+        section.minimumPathsForRecommendations
+      )) {
+        validateSections(section, [path], () => {
+          validateRecommendationForMaturity(section, maturity);
+        });
+      }
+    }
+  });
 });
 
-function validateSections(section, paths) {
+/**
+ * Validates a recommendation for a specific maturity level.
+ *
+ * @param {Object} section - the section containing the recommendations
+ * @param {string} maturity - the maturity level to validate
+ * @throws {Error} if matching recommendation is not found
+ */
+function validateRecommendationForMaturity(section, maturity) {
+  //Validate recommendation banner
+  cy.get(
+    "div.govuk-notification-banner.govuk-notification-banner--success h3.govuk-notification-banner__heading"
+  ).contains(`You have one new recommendation for ${section.name}`);
+
+  const matchingRecommendation = section.recommendations.find(
+    (recommendation) => recommendation.maturity == maturity
+  );
+
+  if (!matchingRecommendation)
+    throw new Error(
+      `Couldn't find a recommendation for maturity ${maturity} in ${section.name}`,
+      section
+    );
+
+  const expectedPath =
+    `/${section.name.trim()}/recommendation/${matchingRecommendation.page.fields.slug.trim()}`
+      .toLowerCase()
+      .replace(/ /g, "-");
+
+  cy.get(
+    "ul.app-task-list__items li.app-task-list__item span.app-task-list__task-name a.govuk-link"
+  )
+    .contains(matchingRecommendation.displayName.trim())
+    .should("have.attr", "href")
+    .and("include", expectedPath);
+
+  cy.get(
+    "ul.app-task-list__items li.app-task-list__item span.app-task-list__task-name a.govuk-link"
+  )
+    .contains(matchingRecommendation.displayName.trim())
+    .click();
+
+  ValidatePage(
+    matchingRecommendation.page.fields.slug,
+    matchingRecommendation.page
+  );
+}
+
+/**
+ * Validates sections using the given paths
+ *
+ * @param {Object} section - the section to validate
+ * @param {Array} paths - the paths to navigate
+ * @param {Function} validator - optional validation function to call at the end of every path
+ */
+function validateSections(section, paths, validator) {
   cy.visit(`/${selfAssessmentSlug}`);
+
   for (const path of paths) {
     //Navigate through interstitial page
     cy.get("ul.app-task-list__items > li a").contains(section.name).click();
@@ -79,6 +155,10 @@ function validateSections(section, paths) {
     validateCheckAnswersPage(path, section);
 
     cy.url().should("include", selfAssessmentSlug);
+
+    if (validator) {
+      validator();
+    }
   }
 }
 
