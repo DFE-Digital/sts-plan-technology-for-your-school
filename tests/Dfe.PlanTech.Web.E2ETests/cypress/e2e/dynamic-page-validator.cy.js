@@ -117,8 +117,19 @@ function validateRecommendationForMaturity(section, maturity) {
     "ul.app-task-list__items li.app-task-list__item span.app-task-list__task-name a.govuk-link"
   )
     .contains(matchingRecommendation.displayName.trim())
-    .and("have.attr", "href")
+    .should("have.attr", "href")
     .and("include", expectedPath);
+
+  cy.get(
+    "ul.app-task-list__items li.app-task-list__item span.app-task-list__task-name a.govuk-link"
+  )
+    .contains(matchingRecommendation.displayName.trim())
+    .click();
+
+  ValidatePage(
+    matchingRecommendation.page.fields.slug,
+    matchingRecommendation.page
+  );
 }
 
 /**

@@ -8,7 +8,7 @@ function ValidateHeader(content) {
 
   return cy
     .get(`header-component ${tag}`)
-    .contains(expectedText)
+    .contains(expectedText.trim())
     .should("have.class", expectedClass);
 }
 

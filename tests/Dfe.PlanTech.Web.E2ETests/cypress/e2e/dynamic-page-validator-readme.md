@@ -20,7 +20,7 @@
 - [ ] InsetText
 - [ ] NavigationLink
 - [x] Question
-- [ ] RecommendationPage
+- [x] RecommendationPage
 - [x] Section *
 - [x] TextBody *
 - [x] Titles
@@ -35,8 +35,8 @@
 
 ### Page routing validated
 
-- [ ] Sub-topic routing
-- [ ] Recommendation routing
+- [x] Sub-topic routing
+- [x] Recommendation routing
 
 ### Other validated
 
@@ -49,7 +49,7 @@
 - [ ] Complete documentation:
    - [ ] Merge with documentation in `contentful-helpers`
 - [x] Make a Node project for the `contentful-helpers` to allow re-use, and prevent the fact that the code is copied and pasted into two places
-
+- [ ] Clear section status before each run
 
 #### Integrate with CI/CD Pipeline
 
