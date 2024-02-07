@@ -37,7 +37,7 @@ jobs:
         run: |
           python ./.github/scripts/qa-data.py
         env:
-          SQL_CONNECTION_STRING: ${{ secrets.QA_VIZ_CONNECTION_STRING_DEV }}
+          SQL_CONNECTION_STRING: ${{ secrets.QA_VIZ_CONNECTION_STRING_TEST }}
           
       - name: List data files
         run: |
