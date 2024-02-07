@@ -9,12 +9,6 @@ on:
       - ".github/workflows/matrix-deploy-azure-function.yml"
       - ".github/workflows/build-azure-function.yml"
       - ".github/workflows/deploy-azure-function.yml"
-  pull_request: # TODO: REMOVE AFTER TESTING
-    branches: ["development"] # TODO: REMOVE AFTER TESTING
-    paths: # TODO: REMOVE AFTER TESTING
-      - ".github/workflows/matrix-deploy-azure-function.yml" # TODO: REMOVE AFTER TESTING
-      - ".github/workflows/build-azure-function.yml" # TODO: REMOVE AFTER TESTING
-      - ".github/workflows/deploy-azure-function.yml" # TODO: REMOVE AFTER TESTING
 
 jobs:
   set-env:
