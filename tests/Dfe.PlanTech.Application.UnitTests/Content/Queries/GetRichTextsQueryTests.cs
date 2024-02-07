@@ -12,7 +12,7 @@ public class GetRichTextsQueryTests
     private readonly ICmsDbContext _db = Substitute.For<ICmsDbContext>();
     private readonly ILogger<GetRichTextsQuery> _logger = Substitute.For<ILogger<GetRichTextsQuery>>();
 
-    private readonly IGetPageChildrenQuery _getRichTextsQuery;
+    private readonly GetRichTextsQuery _getRichTextsQuery;
 
     private readonly static PageDbEntity _loadedPage = new()
     {

@@ -3,6 +3,6 @@
 namespace Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 
 [Serializable]
-public class GetEntitiesException(string? message) : Exception(message), ISerializable
+public class GetEntitiesException(string? message) : Exception(message)
 {
 }

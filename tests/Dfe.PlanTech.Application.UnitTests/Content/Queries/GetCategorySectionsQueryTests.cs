@@ -14,7 +14,7 @@ public class GetCategorySectionsQueryTests
     private readonly ICmsDbContext _db = Substitute.For<ICmsDbContext>();
     private readonly ILogger<GetCategorySectionsQuery> _logger = Substitute.For<ILogger<GetCategorySectionsQuery>>();
 
-    private readonly IGetPageChildrenQuery _getCategorySectionsQuery;
+    private readonly GetCategorySectionsQuery _getCategorySectionsQuery;
 
     private readonly static PageDbEntity _loadedPage = new()
     {

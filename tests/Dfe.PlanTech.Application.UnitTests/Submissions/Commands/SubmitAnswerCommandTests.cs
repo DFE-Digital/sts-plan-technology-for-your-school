@@ -12,7 +12,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Submissions.Commands;
 
 public class SubmitAnswerCommandTests
 {
-    private readonly ISubmitAnswerCommand _submitAnswerCommand;
+    private readonly SubmitAnswerCommand _submitAnswerCommand;
     private readonly IPlanTechDbContext _db;
     private readonly IUser _user;
 
