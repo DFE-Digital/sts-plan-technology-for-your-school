@@ -7,6 +7,8 @@ on:
     paths:
       - "src/Dfe.PlanTech.AzureFunctions/**"
       - ".github/workflows/matrix-deploy-azure-function.yml"
+      - ".github/workflows/build-azure-function.yml"
+      - ".github/workflows/deploy-azure-function.yml"
   pull_request: # TODO: REMOVE AFTER TESTING
     branches: ["development"] # TODO: REMOVE AFTER TESTING
     paths: # TODO: REMOVE AFTER TESTING
@@ -38,7 +40,7 @@ jobs:
     name: Deploy Azure Function
     strategy:
       fail-fast: true
-      max-parallel: 1 # TODO: Can this be 2?
+      max-parallel: 2
       matrix:
         target: [Dev, Tst]
     uses: ./.github/workflows/deploy-azure-function.yml
