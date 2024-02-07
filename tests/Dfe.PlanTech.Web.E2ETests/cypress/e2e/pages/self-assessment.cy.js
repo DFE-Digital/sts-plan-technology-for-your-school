@@ -1,7 +1,7 @@
 import { selfAssessmentSlug } from "../../helpers/page-slugs";
 
 describe("Self-assessment page", () => {
-  const url = selfAssessment;
+  const url = selfAssessmentSlug;
 
   beforeEach(() => {
     cy.loginWithEnv(url);
