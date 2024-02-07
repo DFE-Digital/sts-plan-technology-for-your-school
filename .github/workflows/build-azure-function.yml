@@ -2,9 +2,13 @@ name: Build .NET Azure Function App
 
 on:
   workflow_call:
+    inputs:
+      artifact:
+        type: string
+        required: true
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.inputs.environment }}-azure-function
+  group: ${{ github.workflow }}-build-azure-function
   cancel-in-progress: true
 
 env:
@@ -37,5 +41,5 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dfe-PlanTech-AzureFunctions
+          name: ${{ inputs.artifact }}
           path: ./build
