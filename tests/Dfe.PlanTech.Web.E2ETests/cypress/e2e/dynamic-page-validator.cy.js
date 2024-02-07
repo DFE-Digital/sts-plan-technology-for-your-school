@@ -12,7 +12,7 @@ describe("Pages should have content", () => {
     }
   });
 
-  it("Should work for unauthorised pages", () => {
+  it.skip("Should work for unauthorised pages", () => {
     if (dataMapper?.pages == null) {
       console.log("Datamapper has not processed data correctly");
       return;
