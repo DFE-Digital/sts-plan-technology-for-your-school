@@ -10,9 +10,11 @@ function ValidatePage(slug, page) {
     ValidateTitle(page.fields.title);
   }
 
-  const contents = page.fields.content;
+  for (const content of page.fields.beforeTitleContent) {
+    ValidateContent(content);
+  }
 
-  for (const content of contents) {
+  for (const content of page.fields.content) {
     ValidateContent(content);
   }
 }

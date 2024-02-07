@@ -6,6 +6,8 @@ export class Section {
   recommendations;
   questions;
   name;
+  interstitialPage;
+
   id;
 
   paths;
@@ -17,6 +19,7 @@ export class Section {
       (recommendation) => new Recommendation(recommendation)
     );
 
+    this.interstitialPage = fields.interstitialPage;
     this.questions = fields.questions.map((question) => new Question(question));
     this.id = sys.id;
     this.name = fields.name;
