@@ -4,9 +4,17 @@ name: QA Visualisation Workflow
 on:
   schedule:
     - cron: "*/30 * * * *" # Every 30 minutes for now - we'll fine tune frequency.
-  push:
+  workflow_dispatch: 
+    inputs: 
+      environment:
+        description: Environment to run the visualisation for
+        required: true
+        options: ['Dev', 'Tst', 'Staging']
+        default: 'Dev'
+  push: 
     branches:
       - qa-view-spike
+
 
 jobs:
   generate_images:
@@ -16,7 +24,7 @@ jobs:
       az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
       az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
       SQL_IP_NAME: qa-viz
-    environment: 'Dev'
+    environment: ${{ inputs.environment }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -66,7 +74,7 @@ jobs:
       - name: Run data script
         run: python ./.github/scripts/qa-data.py
         env:
-          SQL_CONNECTION_STRING: ${{ secrets.QA_VIZ_CONNECTION_STRING_DEV }}
+          SQL_CONNECTION_STRING: "Driver={ODBC Driver 17 for SQL Server};Server=tcp:${{ env.az_sql_database_server_name }}.database.windows.net,1433;Database=${{ env.az_sql_database_server_name }}-sqldb;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30"
           
       - name: List data files
         run: ls -l ./data
