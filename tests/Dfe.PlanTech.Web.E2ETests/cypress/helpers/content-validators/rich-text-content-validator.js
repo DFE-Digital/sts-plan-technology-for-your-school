@@ -44,8 +44,6 @@ function validateParagraph(content) {
 
   const parsedElement = parse(expectedHtml);
 
-  console.log("looking for content", content, expectedHtml, parsedElement);
-
   cy.get("p").then(($paragraphs) => {
     const paragraphHtmls = Array.from(
       Array.from($paragraphs.map((i, el) => Cypress.$(el).html()))
