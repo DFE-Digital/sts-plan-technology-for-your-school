@@ -90,7 +90,6 @@ function dataLoaded(contentMap) {
 
   if (!haveContent) {
     console.log("Data has not been loaded");
-    console.log(contentMap);
   }
 
   return haveContent;
