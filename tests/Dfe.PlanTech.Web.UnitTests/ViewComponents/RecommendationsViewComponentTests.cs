@@ -17,8 +17,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         private readonly RecommendationsViewComponent _recommendationsComponent;
         private readonly Category _category;
         private readonly Category _categoryTwo;
-        private IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
-        private ILogger<RecommendationsViewComponent> _loggerCategory;
+        private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
+        private readonly ILogger<RecommendationsViewComponent> _loggerCategory;
 
         public RecommendationsViewComponentTests()
         {

@@ -18,7 +18,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         private readonly CategorySectionViewComponent _categorySectionViewComponent;
 
         private Category _category;
-        private ILogger<CategorySectionViewComponent> _loggerCategory;
+        private readonly ILogger<CategorySectionViewComponent> _loggerCategory;
 
         public CategorySectionViewComponentTests()
         {

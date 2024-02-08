@@ -13,7 +13,7 @@ public class GetButtonWithEntryReferencesQueryTests
     private readonly ICmsDbContext _db = Substitute.For<ICmsDbContext>();
     private readonly ILogger<GetButtonWithEntryReferencesQuery> _logger = Substitute.For<ILogger<GetButtonWithEntryReferencesQuery>>();
 
-    private readonly IGetPageChildrenQuery _getButtonWithEntryReferencesQuery;
+    private readonly GetButtonWithEntryReferencesQuery _getButtonWithEntryReferencesQuery;
 
     private readonly static PageDbEntity _pageWithButton = new()
     {

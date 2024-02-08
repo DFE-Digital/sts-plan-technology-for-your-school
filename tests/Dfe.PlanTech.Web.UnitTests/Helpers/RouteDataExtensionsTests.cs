@@ -1,51 +1,54 @@
-using Microsoft.AspNetCore.Routing;
 using Dfe.PlanTech.Web.Helpers;
+using Microsoft.AspNetCore.Routing;
 using Xunit;
 
-public class RouteDataExtensionsTests
+namespace Dfe.PlanTech.Web.UnitTests.Helpers
 {
-  [Fact]
-  public void GetTitleForPage_WhenSectionSlugIsEmpty_ReturnsDefaultPageTitle()
-  {
-    var routeData = new RouteData();
+    public class RouteDataExtensionsTests
+    {
+        [Fact]
+        public void GetTitleForPage_WhenSectionSlugIsEmpty_ReturnsDefaultPageTitle()
+        {
+            var routeData = new RouteData();
 
-    var result = routeData.GetTitleForPage();
+            var result = routeData.GetTitleForPage();
 
-    Assert.Equal(RouteDataExtensions.DefaultPageTitle, result);
-  }
+            Assert.Equal(RouteDataExtensions.DefaultPageTitle, result);
+        }
 
-  [Fact]
-  public void GetTitleForPage_Returns_SectionSlug()
-  {
-    var routeData = new RouteData();
-    routeData.Values.Add("sectionSlug", "broadband-connection");
+        [Fact]
+        public void GetTitleForPage_Returns_SectionSlug()
+        {
+            var routeData = new RouteData();
+            routeData.Values.Add("sectionSlug", "broadband-connection");
 
-    var result = routeData.GetTitleForPage();
+            var result = routeData.GetTitleForPage();
 
-    Assert.Equal("Broadband connection", result);
-  }
+            Assert.Equal("Broadband connection", result);
+        }
 
-  [Fact]
-  public void GetTitleForPage_Ignores_ForwardSlashes()
-  {
-    var routeData = new RouteData();
-    routeData.Values.Add("sectionSlug", "broadband-connection");
-    routeData.Values.Add("route", "/");
+        [Fact]
+        public void GetTitleForPage_Ignores_ForwardSlashes()
+        {
+            var routeData = new RouteData();
+            routeData.Values.Add("sectionSlug", "broadband-connection");
+            routeData.Values.Add("route", "/");
 
-    var result = routeData.GetTitleForPage();
+            var result = routeData.GetTitleForPage();
 
-    Assert.Equal("Broadband connection", result);
-  }
+            Assert.Equal("Broadband connection", result);
+        }
 
-  [Fact]
-  public void GetTitleForPage_Ignores_Numbers()
-  {
-    var routeData = new RouteData();
-    routeData.Values.Add("sectionSlug", "broadband-connection");
-    routeData.Values.Add("route", "abcd-1234");
+        [Fact]
+        public void GetTitleForPage_Ignores_Numbers()
+        {
+            var routeData = new RouteData();
+            routeData.Values.Add("sectionSlug", "broadband-connection");
+            routeData.Values.Add("route", "abcd-1234");
 
-    var result = routeData.GetTitleForPage();
+            var result = routeData.GetTitleForPage();
 
-    Assert.Equal("Broadband connection", result);
-  }
+            Assert.Equal("Broadband connection", result);
+        }
+    }
 }

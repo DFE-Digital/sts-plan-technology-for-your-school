@@ -62,7 +62,7 @@ public class ContentfulWebHookTests
 
         var result = await _contentfulWebHook.WebhookReceiver(request);
 
-        Assert.True(result.StatusCode == HttpStatusCode.BadRequest);
+        Assert.Equal(HttpStatusCode.BadRequest, result.StatusCode);
     }
 
     [Fact]
@@ -87,7 +87,7 @@ public class ContentfulWebHookTests
 
         var result = await _contentfulWebHook.WebhookReceiver(request);
 
-        Assert.True(result.StatusCode == HttpStatusCode.OK);
+        Assert.Equal(HttpStatusCode.OK, result.StatusCode);
 
         Assert.NotNull(serviceBusMessage);
 
@@ -118,7 +118,7 @@ public class ContentfulWebHookTests
 
         var result = await _contentfulWebHook.WebhookReceiver(request);
 
-        Assert.True(result.StatusCode == HttpStatusCode.InternalServerError);
+        Assert.Equal(HttpStatusCode.InternalServerError, result.StatusCode);
     }
 
     [Fact]
@@ -143,6 +143,6 @@ public class ContentfulWebHookTests
 
         var result = await _contentfulWebHook.WebhookReceiver(request);
 
-        Assert.True(result.StatusCode == HttpStatusCode.InternalServerError);
+        Assert.Equal(HttpStatusCode.InternalServerError, result.StatusCode);
     }
 }
