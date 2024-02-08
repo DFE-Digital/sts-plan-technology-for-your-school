@@ -1,10 +1,11 @@
-import ValidateHeader from "./header-validator";
 import {
   ValidateButtonWithLink,
   ValidateButtonWithEntryReference,
 } from "./button-validator";
-import ValidateRichTextContent from "./rich-text-content-validator";
 import ValidateCategory from "./category-validator";
+import ValidateHeader from "./header-validator";
+import ValidateInsetTextContent from "./inset-text-validator";
+import ValidateRichTextContent from "./rich-text-content-validator";
 import ValidateWarningComponent from "./warning-validator";
 
 function ValidateContent(content) {
@@ -31,6 +32,10 @@ function ValidateContent(content) {
     }
     case "buttonWithEntryReference": {
       ValidateButtonWithEntryReference(content);
+      break;
+    }
+    case "insetText": {
+      ValidateInsetTextContent(content);
       break;
     }
     default: {

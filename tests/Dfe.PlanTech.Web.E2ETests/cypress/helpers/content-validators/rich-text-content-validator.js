@@ -1,5 +1,6 @@
 import { parse } from "node-html-parser";
 import TableValidator from "./rich-text-validators/table-validator";
+import { ReplaceWhiteSpace } from "../text-helpers";
 
 const tableValidator = new TableValidator();
 
@@ -48,7 +49,7 @@ function validateParagraph(content) {
     const paragraphHtmls = Array.from(
       Array.from($paragraphs.map((i, el) => Cypress.$(el).html()))
         .map((paragraph) => {
-          const withoutWhitespaceEscaped = replaceWhiteSpace(paragraph).trim();
+          const withoutWhitespaceEscaped = ReplaceWhiteSpace(paragraph).trim();
 
           return {
             original: withoutWhitespaceEscaped,
@@ -100,15 +101,5 @@ function buildExpectedHtml(content) {
     }
   }
 
-  return replaceWhiteSpace(html).trim();
-}
-
-function replaceWhiteSpace(string) {
-  return string
-    .replace(/\s/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/\s/g, " ")
-    .replace(" ", " ")
-    .replace(" ", " ")
-    .replace(" ", " ");
+  return ReplaceWhiteSpace(html).trim();
 }

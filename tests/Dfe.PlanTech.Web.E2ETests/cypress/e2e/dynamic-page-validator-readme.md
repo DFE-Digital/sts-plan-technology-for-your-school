@@ -11,19 +11,19 @@
 ### Components content validated
 
 - [x] Answer
-- [ ] ButtonWithEntryReference
+- [x] ButtonWithEntryReference
 - [x] ButtonWithLink
 - [x] Category
-- [ ] ComponentDropDown
+- [ ] ComponentDropDown; not currently used anywhere so unable to test.
 - [x] Headers
-- [ ] InsetText
+- [x] InsetText
 - [ ] NavigationLink
 - [x] Question
 - [x] RecommendationPage
 - [x] Section *
 - [x] TextBody *
 - [x] Titles
-- [ ] WarningComponent
+- [x] WarningComponent
 
 * Not fully complete. See below for notes.
 

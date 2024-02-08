@@ -19,7 +19,6 @@ function ValidateCategory({ fields, sys }) {
   const sections = fields.sections;
 
   appTaskList.find("li.app-task-list__item").then(($listItems) => {
-    console.log($listItems);
     expect($listItems).to.have.length(sections.length);
 
     for (let index = 0; index < sections.length; index++) {
