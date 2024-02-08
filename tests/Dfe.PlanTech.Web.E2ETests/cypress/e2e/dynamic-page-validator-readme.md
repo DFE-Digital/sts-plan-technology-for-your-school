@@ -8,23 +8,22 @@
 4. Place the `contentful.js` in the same folder as `dynamic-page-validator.cy.js`
 5. Remove the `skip` command on line 14.
 
-
 ### Components content validated
 
-- [ ] Answer
-- [ ] ButtonWithEntryReference
+- [x] Answer
+- [x] ButtonWithEntryReference
 - [x] ButtonWithLink
 - [x] Category
-- [ ] ComponentDropDown
+- [ ] ComponentDropDown; not currently used anywhere so unable to test.
 - [x] Headers
-- [ ] InsetText
-- [ ] NavigationLink
-- [ ] Question
-- [ ] RecommendationPage
+- [x] InsetText
+- [x] NavigationLink
+- [x] Question
+- [x] RecommendationPage
 - [x] Section *
 - [x] TextBody *
 - [x] Titles
-- [ ] WarningComponent
+- [x] WarningComponent
 
 * Not fully complete. See below for notes.
 
@@ -35,8 +34,8 @@
 
 ### Page routing validated
 
-- [ ] Sub-topic routing
-- [ ] Recommendation routing
+- [x] Sub-topic routing
+- [x] Recommendation routing
 
 ### Other validated
 
@@ -48,8 +47,8 @@
 - [ ] Split tests up; not just one `it` function
 - [ ] Complete documentation:
    - [ ] Merge with documentation in `contentful-helpers`
-- [ ] Make a Node project for the `contentful-helpers` to allow re-use, and prevent the fact that the code is copied and pasted into two places
-
+- [x] Make a Node project for the `contentful-helpers` to allow re-use, and prevent the fact that the code is copied and pasted into two places
+- [ ] Clear section status before each run
 
 #### Integrate with CI/CD Pipeline
 

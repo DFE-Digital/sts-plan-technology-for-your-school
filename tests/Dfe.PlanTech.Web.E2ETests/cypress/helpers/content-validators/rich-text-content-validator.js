@@ -1,5 +1,6 @@
 import { parse } from "node-html-parser";
 import TableValidator from "./rich-text-validators/table-validator";
+import { ReplaceWhiteSpace } from "../text-helpers";
 
 const tableValidator = new TableValidator();
 
@@ -48,7 +49,8 @@ function validateParagraph(content) {
     const paragraphHtmls = Array.from(
       Array.from($paragraphs.map((i, el) => Cypress.$(el).html()))
         .map((paragraph) => {
-          const withoutWhitespaceEscaped = paragraph.replace("&nbsp;", " ");
+          const withoutWhitespaceEscaped = ReplaceWhiteSpace(paragraph).trim();
+
           return {
             original: withoutWhitespaceEscaped,
             parsed: parse(withoutWhitespaceEscaped),
@@ -62,8 +64,14 @@ function validateParagraph(content) {
         paragraph.original == expectedHtml ||
         paragraph.original.indexOf(expectedHtml) != -1 ||
         paragraph.parsed.innerHTML?.indexOf(parsedElement.innerHTML) != -1 ||
-        paragraph.parsed.innerText?.indexOf(parsedElement.innerText) != -1
+        paragraph.parsed.innerText
+          ?.trim()
+          .indexOf(parsedElement.innerText.trim()) != -1
     );
+
+    if (!anyMatches) {
+      console.error(`Could not find match for content`, expectedHtml, content);
+    }
 
     expect(anyMatches).to.exist;
   });
@@ -93,5 +101,5 @@ function buildExpectedHtml(content) {
     }
   }
 
-  return html;
+  return ReplaceWhiteSpace(html).trim();
 }
