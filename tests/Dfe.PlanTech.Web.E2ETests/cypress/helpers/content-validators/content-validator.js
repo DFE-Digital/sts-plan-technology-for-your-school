@@ -1,7 +1,11 @@
 import ValidateHeader from "./header-validator";
-import { ValidateButtonWithLink } from "./button-validator";
+import {
+  ValidateButtonWithLink,
+  ValidateButtonWithEntryReference,
+} from "./button-validator";
 import ValidateRichTextContent from "./rich-text-content-validator";
 import ValidateCategory from "./category-validator";
+import ValidateWarningComponent from "./warning-validator";
 
 function ValidateContent(content) {
   switch (content.sys.contentType.sys.id) {
@@ -22,9 +26,13 @@ function ValidateContent(content) {
       break;
     }
     case "warningComponent": {
+      ValidateWarningComponent(content);
       break;
     }
-    //ButtonWithReference
+    case "buttonWithEntryReference": {
+      ValidateButtonWithEntryReference(content);
+      break;
+    }
     default: {
       console.log(content.sys.contentType.sys.id, content);
       break;

@@ -44,14 +44,14 @@ function validateParagraph(content) {
 
   const parsedElement = parse(expectedHtml);
 
+  console.log("looking for content", content, expectedHtml, parsedElement);
+
   cy.get("p").then(($paragraphs) => {
     const paragraphHtmls = Array.from(
       Array.from($paragraphs.map((i, el) => Cypress.$(el).html()))
         .map((paragraph) => {
-          const withoutWhitespaceEscaped = paragraph
-            .replace(/\s/g, " ")
-            .replace(/&nbsp;/g, " ")
-            .trim();
+          const withoutWhitespaceEscaped = replaceWhiteSpace(paragraph).trim();
+
           return {
             original: withoutWhitespaceEscaped,
             parsed: parse(withoutWhitespaceEscaped),
@@ -60,19 +60,15 @@ function validateParagraph(content) {
         .filter((paragraph) => paragraph.original != "")
     );
 
-    const anyMatches = paragraphHtmls.find((paragraph) => {
-      const result =
+    const anyMatches = paragraphHtmls.find(
+      (paragraph) =>
         paragraph.original == expectedHtml ||
         paragraph.original.indexOf(expectedHtml) != -1 ||
         paragraph.parsed.innerHTML?.indexOf(parsedElement.innerHTML) != -1 ||
-        paragraph.parsed.innerText?.indexOf(parsedElement.innerText) != -1;
-
-      if (!result && expectedHtml.indexOf("network switches") > -1) {
-        console.log(`not matched`, expectedHtml, paragraph);
-      }
-
-      return result;
-    });
+        paragraph.parsed.innerText
+          ?.trim()
+          .indexOf(parsedElement.innerText.trim()) != -1
+    );
 
     if (!anyMatches) {
       console.error(`Could not find match for content`, expectedHtml, content);
@@ -106,5 +102,15 @@ function buildExpectedHtml(content) {
     }
   }
 
-  return html.replace(/\s/g, " ");
+  return replaceWhiteSpace(html).trim();
+}
+
+function replaceWhiteSpace(string) {
+  return string
+    .replace(/\s/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s/g, " ")
+    .replace(" ", " ")
+    .replace(" ", " ")
+    .replace(" ", " ");
 }

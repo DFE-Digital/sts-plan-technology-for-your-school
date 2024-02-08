@@ -12,14 +12,14 @@ describe("Pages should have content", () => {
     }
   });
 
-  it.skip("Should work for unauthorised pages", () => {
+  it("Should work for unauthorised pages", () => {
     if (dataMapper?.pages == null) {
       console.log("Datamapper has not processed data correctly");
       return;
     }
 
     for (const [_, page] of dataMapper.pages) {
-      if (page.fields.requiresAuthorisation || page.fields.slug != "/") {
+      if (page.fields.requiresAuthorisation) {
         continue;
       }
 
@@ -29,19 +29,22 @@ describe("Pages should have content", () => {
     }
   });
 
-  it.skip("Should validate self-assessment page", () => {
+  it("Should validate self-assessment page", () => {
     if (dataMapper.pages == null) {
       console.log("Datamapper has not processed data correctly");
       return;
     }
 
     cy.loginWithEnv(`${selfAssessmentSlug}`);
-
-    const selfAssessmentPage = FindPageForSlug({ slug, dataMapper });
+    const slug = selfAssessmentSlug.replace("/", "");
+    const selfAssessmentPage = FindPageForSlug({
+      slug,
+      dataMapper,
+    });
 
     if (!selfAssessmentPage) {
       throw new Error(
-        `Could not find self-assessment page; not found page with slug ${slug}`
+        `Could not find self-assessment page; not found page with slug ${selfAssessmentSlug}`
       );
     }
 
@@ -67,7 +70,7 @@ describe("Pages should have content", () => {
     }
   });
 
-  it.skip("Should retrieve correct recommendations for maturity", () => {
+  it("Should retrieve correct recommendations for maturity", () => {
     if (dataMapper.pages == null) {
       console.log("Datamapper has not processed data correctly");
       return;
