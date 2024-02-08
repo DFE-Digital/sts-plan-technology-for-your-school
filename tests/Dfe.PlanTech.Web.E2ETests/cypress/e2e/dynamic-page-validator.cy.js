@@ -2,6 +2,7 @@ import DataMapper from "../../../../contentful/export-processor/data-mapper";
 import { contentful } from "./contentful";
 import ValidatePage from "../helpers/content-validators/page-validator";
 import { selfAssessmentSlug } from "../helpers/page-slugs";
+import ValidateContent from "../helpers/content-validators/content-validator";
 
 describe("Pages should have content", () => {
   let dataMapper;
@@ -12,6 +13,21 @@ describe("Pages should have content", () => {
     }
   });
 
+  it.skip("Should render navigation links", () => {
+    if (dataMapper?.pages == null) {
+      console.log("Datamapper has not processed data correctly");
+      return;
+    }
+
+    const navigationLinks = dataMapper.contents["navigationLink"];
+
+    const indexPage = cy.visit("/");
+
+    for (const [id, navigationLink] of navigationLinks) {
+      ValidateContent(navigationLink);
+    }
+  });
+
   it.skip("Should work for unauthorised pages", () => {
     if (dataMapper?.pages == null) {
       console.log("Datamapper has not processed data correctly");
@@ -19,7 +35,7 @@ describe("Pages should have content", () => {
     }
 
     for (const [_, page] of dataMapper.pages) {
-      if (page.fields.requiresAuthorisation || page.fields.slug != "/") {
+      if (page.fields.requiresAuthorisation) {
         continue;
       }
 
@@ -36,12 +52,15 @@ describe("Pages should have content", () => {
     }
 
     cy.loginWithEnv(`${selfAssessmentSlug}`);
-
-    const selfAssessmentPage = FindPageForSlug({ slug, dataMapper });
+    const slug = selfAssessmentSlug.replace("/", "");
+    const selfAssessmentPage = FindPageForSlug({
+      slug,
+      dataMapper,
+    });
 
     if (!selfAssessmentPage) {
       throw new Error(
-        `Could not find self-assessment page; not found page with slug ${slug}`
+        `Could not find self-assessment page; not found page with slug ${selfAssessmentSlug}`
       );
     }
 
@@ -59,7 +78,11 @@ describe("Pages should have content", () => {
     const sections = dataMapper.mappedSections;
 
     for (const section of Object.values(sections)) {
-      validateSections(section, section.minimumPathsToNavigateQuestions);
+      validateSections(
+        section,
+        section.minimumPathsToNavigateQuestions,
+        dataMapper
+      );
     }
   });
 
@@ -77,7 +100,7 @@ describe("Pages should have content", () => {
       for (const [maturity, path] of Object.entries(
         section.minimumPathsForRecommendations
       )) {
-        validateSections(section, [path], () => {
+        validateSections(section, [path], dataMapper, () => {
           validateRecommendationForMaturity(section, maturity);
         });
       }
@@ -139,7 +162,7 @@ function validateRecommendationForMaturity(section, maturity) {
  * @param {Array} paths - the paths to navigate
  * @param {Function} validator - optional validation function to call at the end of every path
  */
-function validateSections(section, paths, validator) {
+function validateSections(section, paths, dataMapper, validator) {
   cy.visit(`/${selfAssessmentSlug}`);
 
   for (const path of paths) {
@@ -147,6 +170,12 @@ function validateSections(section, paths, validator) {
     cy.get("ul.app-task-list__items > li a").contains(section.name).click();
 
     cy.url().should("include", section.interstitialPage.fields.slug);
+
+    const interstitialPage = FindPageForSlug({
+      slug: section.interstitialPage.fields.slug,
+      dataMapper,
+    });
+    ValidatePage(section.interstitialPage.fields.slug, interstitialPage);
 
     cy.get("a.govuk-button.govuk-link").contains("Continue").click();
 

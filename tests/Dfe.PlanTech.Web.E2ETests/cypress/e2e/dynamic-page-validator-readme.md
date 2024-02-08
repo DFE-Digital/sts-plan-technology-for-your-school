@@ -8,23 +8,22 @@
 4. Place the `contentful.js` in the same folder as `dynamic-page-validator.cy.js`
 5. Remove the `skip` command on line 14.
 
-
 ### Components content validated
 
 - [x] Answer
-- [ ] ButtonWithEntryReference
+- [x] ButtonWithEntryReference
 - [x] ButtonWithLink
 - [x] Category
-- [ ] ComponentDropDown
+- [ ] ComponentDropDown; not currently used anywhere so unable to test.
 - [x] Headers
-- [ ] InsetText
-- [ ] NavigationLink
+- [x] InsetText
+- [x] NavigationLink
 - [x] Question
 - [x] RecommendationPage
 - [x] Section *
 - [x] TextBody *
 - [x] Titles
-- [ ] WarningComponent
+- [x] WarningComponent
 
 * Not fully complete. See below for notes.
 
