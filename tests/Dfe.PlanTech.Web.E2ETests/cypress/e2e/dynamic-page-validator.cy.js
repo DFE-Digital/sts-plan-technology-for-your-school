@@ -4,8 +4,6 @@ import { selfAssessmentSlug } from "../helpers/page-slugs";
 import ValidateContent from "../helpers/content-validators/content-validator";
 
 describe("Pages should have content", () => {
-  const pages = Object.values(ContentfulData?.pages ?? []);
-
   before(() => {});
 
   it("Should render navigation links", () => {
