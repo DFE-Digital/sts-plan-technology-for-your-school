@@ -25,14 +25,6 @@ function ValidateContent(content) {
       break;
     }
     //ButtonWithReference
-
-    //Category
-
-    //Section??
-
-    //Question?Answer?
-
-    //Recommendation Page
     default: {
       console.log(content.sys.contentType.sys.id, content);
       break;

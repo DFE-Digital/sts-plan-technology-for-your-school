@@ -48,7 +48,7 @@ describe("Pages should have content", () => {
     ValidatePage(slug, selfAssessmentPage);
   });
 
-  it.skip("Should navigate through every question", () => {
+  it("Should navigate through every question", () => {
     if (dataMapper.pages == null) {
       console.log("Datamapper has not processed data correctly");
       return;
@@ -59,7 +59,11 @@ describe("Pages should have content", () => {
     const sections = dataMapper.mappedSections;
 
     for (const section of Object.values(sections)) {
-      validateSections(section, section.minimumPathsToNavigateQuestions);
+      validateSections(
+        section,
+        section.minimumPathsToNavigateQuestions,
+        dataMapper
+      );
     }
   });
 
@@ -77,7 +81,7 @@ describe("Pages should have content", () => {
       for (const [maturity, path] of Object.entries(
         section.minimumPathsForRecommendations
       )) {
-        validateSections(section, [path], () => {
+        validateSections(section, [path], dataMapper, () => {
           validateRecommendationForMaturity(section, maturity);
         });
       }
@@ -139,7 +143,7 @@ function validateRecommendationForMaturity(section, maturity) {
  * @param {Array} paths - the paths to navigate
  * @param {Function} validator - optional validation function to call at the end of every path
  */
-function validateSections(section, paths, validator) {
+function validateSections(section, paths, dataMapper, validator) {
   cy.visit(`/${selfAssessmentSlug}`);
 
   for (const path of paths) {
@@ -147,6 +151,12 @@ function validateSections(section, paths, validator) {
     cy.get("ul.app-task-list__items > li a").contains(section.name).click();
 
     cy.url().should("include", section.interstitialPage.fields.slug);
+
+    const interstitialPage = FindPageForSlug({
+      slug: section.interstitialPage.fields.slug,
+      dataMapper,
+    });
+    ValidatePage(section.interstitialPage.fields.slug, interstitialPage);
 
     cy.get("a.govuk-button.govuk-link").contains("Continue").click();
 

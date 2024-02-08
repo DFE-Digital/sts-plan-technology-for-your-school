@@ -48,7 +48,10 @@ function validateParagraph(content) {
     const paragraphHtmls = Array.from(
       Array.from($paragraphs.map((i, el) => Cypress.$(el).html()))
         .map((paragraph) => {
-          const withoutWhitespaceEscaped = paragraph.replace("&nbsp;", " ");
+          const withoutWhitespaceEscaped = paragraph
+            .replace(/\s/g, " ")
+            .replace(/&nbsp;/g, " ")
+            .trim();
           return {
             original: withoutWhitespaceEscaped,
             parsed: parse(withoutWhitespaceEscaped),
@@ -57,13 +60,23 @@ function validateParagraph(content) {
         .filter((paragraph) => paragraph.original != "")
     );
 
-    const anyMatches = paragraphHtmls.find(
-      (paragraph) =>
+    const anyMatches = paragraphHtmls.find((paragraph) => {
+      const result =
         paragraph.original == expectedHtml ||
         paragraph.original.indexOf(expectedHtml) != -1 ||
         paragraph.parsed.innerHTML?.indexOf(parsedElement.innerHTML) != -1 ||
-        paragraph.parsed.innerText?.indexOf(parsedElement.innerText) != -1
-    );
+        paragraph.parsed.innerText?.indexOf(parsedElement.innerText) != -1;
+
+      if (!result && expectedHtml.indexOf("network switches") > -1) {
+        console.log(`not matched`, expectedHtml, paragraph);
+      }
+
+      return result;
+    });
+
+    if (!anyMatches) {
+      console.error(`Could not find match for content`, expectedHtml, content);
+    }
 
     expect(anyMatches).to.exist;
   });
@@ -93,5 +106,5 @@ function buildExpectedHtml(content) {
     }
   }
 
-  return html;
+  return html.replace(/\s/g, " ");
 }
