@@ -17,7 +17,7 @@
 - [ ] ComponentDropDown; not currently used anywhere so unable to test.
 - [x] Headers
 - [x] InsetText
-- [ ] NavigationLink
+- [x] NavigationLink
 - [x] Question
 - [x] RecommendationPage
 - [x] Section *
