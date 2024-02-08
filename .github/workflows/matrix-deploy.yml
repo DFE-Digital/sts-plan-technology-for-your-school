@@ -44,7 +44,7 @@ jobs:
       run_terraform_deploy: ${{ steps.terraform_changes.outputs.run_terraform_deploy }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
           fetch-depth: 2
