@@ -24,7 +24,8 @@ public class BaseFunctionTests
         var response = _baseFunction.ReturnEmptyBodyError(request);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        _logger.ReceivedWithAnyArgs(1);
+        var x = _logger.ReceivedWithAnyArgs(1);
+        Assert.NotNull(x);
     }
 
     [Fact]
