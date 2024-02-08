@@ -11,42 +11,38 @@ on:
         required: true
 
 concurrency:
-     group: ${{ github.workflow }}-${{ github.event.inputs.environment }}
-     cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.inputs.environment }}
+  cancel-in-progress: true
 
 env:
-    DOCKER_IMAGE: plan-technology-for-your-school
-    GITHUB_CONTAINER_REGISTRY: ghcr.io
-    ORG_NAME: dfe-digital
-    NODE_VERSION: 18.x
+  DOCKER_IMAGE: plan-technology-for-your-school
+  GITHUB_CONTAINER_REGISTRY: ghcr.io
+  ORG_NAME: dfe-digital
 
 jobs:
+  build-image:
+    runs-on: ubuntu-22.04
+    name: Build & Publish Image
 
-    build-image:
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
 
-        runs-on: ubuntu-22.04
-        name: Build & Publish Image
-        
-        steps:
+      - name: GitHub Container Registry Login
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GITHUB_CONTAINER_REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Checkout Repository
-              uses: actions/checkout@v3
-              with:
-                ref: ${{ github.ref }}
-
-            - name: GitHub Container Registry Login
-              uses: docker/login-action@v3
-              with:
-                registry: ${{ env.GITHUB_CONTAINER_REGISTRY }}
-                username: ${{ github.repository_owner }}
-                password: ${{ secrets.GITHUB_TOKEN }}
-
-            - name: Build Image & Publish To GCR
-              uses: docker/build-push-action@v4
-              with:
-                context: ./
-                file: ./src/Dfe.PlanTech.Web/Dockerfile
-                build-args: COMMIT_SHA=${{ inputs.checked-out-sha }}
-                tags: |
-                    ${{ env.GITHUB_CONTAINER_REGISTRY }}/${{ env.ORG_NAME }}/${{ env.DOCKER_IMAGE }}:${{ inputs.branch }}-${{ inputs.checked-out-sha }}
-                push: true
+      - name: Build Image & Publish To GCR
+        uses: docker/build-push-action@v5
+        with:
+          context: ./
+          file: ./src/Dfe.PlanTech.Web/Dockerfile
+          build-args: COMMIT_SHA=${{ inputs.checked-out-sha }}
+          tags: |
+            ${{ env.GITHUB_CONTAINER_REGISTRY }}/${{ env.ORG_NAME }}/${{ env.DOCKER_IMAGE }}:${{ inputs.branch }}-${{ inputs.checked-out-sha }}
+          push: true
