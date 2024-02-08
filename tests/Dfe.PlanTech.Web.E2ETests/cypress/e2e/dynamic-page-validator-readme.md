@@ -8,7 +8,6 @@
 4. Place the `contentful.js` in the same folder as `dynamic-page-validator.cy.js`
 5. Remove the `skip` command on line 14.
 
-
 ### Components content validated
 
 - [x] Answer
