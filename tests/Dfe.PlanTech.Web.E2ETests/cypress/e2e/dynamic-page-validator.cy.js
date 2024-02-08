@@ -4,6 +4,8 @@ import { selfAssessmentSlug } from "../helpers/page-slugs";
 import ValidateContent from "../helpers/content-validators/content-validator";
 
 describe("Pages should have content", () => {
+  const pages = Object.values(ContentfulData?.pages ?? []);
+
   before(() => {});
 
   it("Should render navigation links", () => {
@@ -39,17 +41,19 @@ describe("Pages should have content", () => {
     ValidatePage(slug, selfAssessmentPage);
   });
 
-  Object.values(ContentfulData?.pages ?? []).forEach((page) => {
-    it(
-      "Should have correct content on non-authorised pages. Testing " +
-        page.fields.internalName,
-      () => {
-        const slug = `/${page.fields.slug.replace("/", "")}`;
-        cy.visit(slug);
-        ValidatePage(slug, page);
-      }
-    );
-  });
+  Array.from(ContentfulData?.pages ?? [])
+    .map(([_, page]) => page)
+    .forEach((page) => {
+      it(
+        "Should have correct content on non-authorised pages. Testing " +
+          page.fields.internalName,
+        () => {
+          const slug = `/${page.fields.slug.replace("/", "")}`;
+          cy.visit(slug);
+          ValidatePage(slug, page);
+        }
+      );
+    });
 
   Object.values(ContentfulData?.mappedSections ?? []).forEach((section) => {
     it(`${section.name} should have every question with correct content`, () => {
