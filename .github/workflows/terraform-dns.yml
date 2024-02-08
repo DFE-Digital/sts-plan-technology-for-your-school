@@ -5,22 +5,22 @@ on:
     inputs:
       environment:
         type: string
-        description: 'The environment to run terraform plan against:'
+        description: "The environment to run terraform plan against:"
         required: true
   workflow_call:
     inputs:
       environment:
         type: string
         required: true
-        
-env:  
+
+env:
   ARM_TENANT_ID: ${{ secrets.AZ_TENANT_ID }}
   ARM_SUBSCRIPTION_ID: ${{ secrets.AZ_SUBSCRIPTION_ID }}
   ARM_CLIENT_ID: ${{ secrets.AZ_CLIENT_ID }}
   ARM_CLIENT_SECRET: ${{ secrets.AZ_CLIENT_SECRET }}
 
   AZ_KEYVAULT_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP	}}-kv
-  
+
   TF_BACKEND_STORAGE_ACCOUNT_NAME: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
   TF_BACKEND_CONTAINER_NAME: ${{ secrets.TF_BACKEND_CONTAINER_NAME }}
   TF_BACKEND_KEY: "terraform-dns.tfstate"
@@ -30,7 +30,7 @@ env:
   TF_VAR_environment: ${{ secrets.AZ_ENVIRONMENT }}
   TF_VAR_azure_location: ${{ vars.AZ_LOCATION }}
   TF_VAR_primary_fqdn: "plan-technology-for-your-school.education.gov.uk"
-  TF_VAR_subdomains: ["staging"]
+  TF_VAR_subdomains: "staging"
 
   TF_WORKING_DIRECTORY: terraform/dns-zone
 
@@ -44,10 +44,10 @@ jobs:
     environment: ${{ inputs.environment }}
     steps:
       - name: Clone repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v2 # TODO: Upgrade to V3, will possibly require changes in "post-terraform-results" action
         with:
           terraform_version: 1.6.2
 

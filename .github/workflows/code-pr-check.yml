@@ -1,37 +1,36 @@
-name: Code PR Check 
+name: Code PR Check
 
 on:
   push:
     branches: ["main", "development"]
     paths:
-      - 'src/**'
-      - 'tests/**'
+      - "src/**"
+      - "tests/**"
   pull_request:
     branches: ["main", "development"]
     paths:
-      - 'src/**'
-      - 'tests/**'
-      - '.github/workflows/code-pr-check.yml'
+      - "src/**"
+      - "tests/**"
+      - ".github/workflows/code-pr-check.yml"
 
 concurrency:
-  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
   cancel-in-progress: true
-  
+
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
-  
-jobs:
 
+jobs:
   get-src-dir-list:
     name: Get Directories for Linting
     runs-on: ubuntu-22.04
     if: ${{ github.event_name == 'pull_request' }}
     outputs:
       directories: ${{ steps.list-dir.outputs.directories }}
-    
+
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Get Directories
         id: list-dir
@@ -54,12 +53,11 @@ jobs:
       pull-requests: write
 
     steps:
-
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
           cache: false
@@ -79,7 +77,7 @@ jobs:
           commit: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-  build-test-web-app:  
+  build-test-web-app:
     name: Build and run unit tests
     runs-on: ubuntu-22.04
     if: ${{ always() && ( github.event_name == 'pull_request' && needs.lint-code.result == 'success' ) || ( github.event_name == 'push' && needs.lint-code.result == 'skipped' ) }}
@@ -87,27 +85,27 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Cache SonarCloud packages
-        uses: actions/cache@v1
+        uses: actions/cache@v4
         with:
           path: ~\sonar\cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
       - name: Install dotnet coverage
-        run: dotnet tool install --global dotnet-coverage --version 17.9.3
-  
+        run: dotnet tool install --global dotnet-coverage --version 17.9.6
+
       - name: Install SonarCloud scanners
         run: dotnet tool install --global dotnet-sonarscanner
 
       - name: Install latest JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
-          distribution: 'microsoft'
-          java-version: '17'
-          
+          distribution: "microsoft"
+          java-version: "17"
+
       - name: Start SonarCloud scanner
         run: |
           dotnet-sonarscanner begin \
@@ -120,11 +118,11 @@ jobs:
           /d:sonar.issue.ignore.multicriteria=e1 \
           /d:sonar.issue.ignore.multicriteria.e1.ruleKey=csharpsquid:S6602 \
           /d:sonar.issue.ignore.multicriteria.e1.resourceKey=src/**/*.cs
-      
-      - name: Build web app  
+
+      - name: Build web app
         uses: ./.github/actions/build-dotnet-app
         with:
-          dotnet_version: ${{ env.DOTNET_VERSION }}  
+          dotnet_version: ${{ env.DOTNET_VERSION }}
           solution_filename: plan-technology-for-your-school.sln
 
       - name: Run unit tests
@@ -139,23 +137,23 @@ jobs:
         run: dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
       - name: Archive code coverage results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: code-coverage-report
           path: coverage.xml
 
-  build-database-upgrader:  
+  build-database-upgrader:
     name: Build database upgrader
     runs-on: ubuntu-22.04
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Build database upgrader  
+      - name: Build database upgrader
         uses: ./.github/actions/build-dotnet-app
         with:
-          dotnet_version: ${{ env.DOTNET_VERSION }}  
+          dotnet_version: ${{ env.DOTNET_VERSION }}
           solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
 
   run-javascript-tests:
@@ -163,10 +161,10 @@ jobs:
     name: Run javascript tests
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "latest"
 
@@ -178,8 +176,8 @@ jobs:
 
       - name: Test report
         uses: dorny/test-reporter@v1
-        if: success() || failure()    # run this step even if previous step failed
+        if: success() || failure() # run this step even if previous step failed
         with:
-          name: JEST Tests            # Name of the check run which will be created
-          path: ./junit.xml    # Path to test results
-          reporter: jest-junit        # Format of test results
+          name: JEST Tests # Name of the check run which will be created
+          path: ./junit.xml # Path to test results
+          reporter: jest-junit # Format of test results

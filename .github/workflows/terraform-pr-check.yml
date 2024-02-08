@@ -2,18 +2,18 @@ name: Terraform PR Check
 
 on:
   pull_request:
-    paths: 
-      - 'terraform/**'
-      - '.github/workflows/terraform-pr-check.yml'
+    paths:
+      - "terraform/**"
+      - ".github/workflows/terraform-pr-check.yml"
   push:
-    branches: [ "main" ]
-    paths: 
-      - 'terraform/**'
-    
+    branches: ["main"]
+    paths:
+      - "terraform/**"
+
 concurrency:
-  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
   cancel-in-progress: true
-      
+
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
 
@@ -23,7 +23,7 @@ env:
   ARM_CLIENT_SECRET: ${{ secrets.AZ_CLIENT_SECRET }}
 
   AZ_KEYVAULT_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP	}}-kv
-  
+
   TF_BACKEND_STORAGE_ACCOUNT_NAME: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
   TF_BACKEND_CONTAINER_NAME: ${{ secrets.TF_BACKEND_CONTAINER_NAME }}
   TF_BACKEND_KEY: ${{ secrets.TF_BACKEND_KEY }}
@@ -39,26 +39,26 @@ env:
   TF_VAR_az_sql_azuread_admin_username: ${{ secrets.AZ_SERVICE_PRINCIPAL }}
   TF_VAR_az_sql_admin_password: ${{secrets.AZ_SQL_ADMIN_PASSWORD}}
   TF_VAR_az_sql_azuread_admin_objectid: ${{ secrets.AZ_CLIENT_ID }}
-  TF_VAR_registry_server: "ghcr.io"   
-  TF_VAR_registry_username: ${{ github.repository_owner }} 
+  TF_VAR_registry_server: "ghcr.io"
+  TF_VAR_registry_username: ${{ github.repository_owner }}
   TF_VAR_registry_custom_image_url: "ghcr.io/dfe-digital/plan-technology-for-your-school:latest"
   TF_VAR_registry_password: ${{ secrets.GITHUB_TOKEN }}
 
   TF_WORKING_DIRECTORY: terraform/container-app
 
 jobs:
-  validate-terraform:  
-    name: Validate Terraform 
+  validate-terraform:
+    name: Validate Terraform
     runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: ${{env.TF_WORKING_DIRECTORY}}
     steps:
       - name: Clone repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
-        
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
@@ -87,7 +87,7 @@ jobs:
           azcliversion: 2.45.0
           inlineScript: |
             az keyvault network-rule add --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
-        
+
       - name: Terraform init
         id: init
         run: |
@@ -101,14 +101,14 @@ jobs:
         id: validate
         run: terraform validate -no-color -compact-warnings
 
-      - name: Terraform plan 
+      - name: Terraform plan
         id: plan
         run: terraform plan -no-color
 
       - name: Terraform fmt
         id: fmt
         run: terraform fmt -check -diff
-        
+
       - name: Validate Terraform docs
         uses: terraform-docs/gh-actions@v1.0.0
         with:
@@ -118,7 +118,7 @@ jobs:
           output-method: inject
           git-push: "true"
 
-      - name: Update PR with Terraform results  
+      - name: Update PR with Terraform results
         uses: ./.github/actions/post-terraform-results
         if: github.event_name == 'pull_request'
         with:
@@ -133,7 +133,7 @@ jobs:
           github_event_name: ${{ github.event_name }}
           tf_working_directory: ${{ env.TF_WORKING_DIRECTORY }}
           github_workflow: ${{ github.workflow }}
-      
+
       - name: Remove Runner to KV whitelist
         uses: azure/CLI@v1
         if: always()
@@ -141,7 +141,7 @@ jobs:
           azcliversion: 2.45.0
           inlineScript: |
             az keyvault network-rule remove --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
-  
+
   terraform-lint:
     name: Terraform Lint
     runs-on: ubuntu-22.04
@@ -150,10 +150,10 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIRECTORY }}
     steps:
       - name: Clone repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup TFLint
-        uses: terraform-linters/setup-tflint@v3
+        uses: terraform-linters/setup-tflint@v4
         with:
           tflint_version: v0.44.1
 
@@ -165,7 +165,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Clone repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: tfsec
         uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
