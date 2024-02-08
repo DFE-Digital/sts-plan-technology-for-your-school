@@ -5,6 +5,7 @@ import {
 import ValidateCategory from "./category-validator";
 import ValidateHeader from "./header-validator";
 import ValidateInsetTextContent from "./inset-text-validator";
+import ValidateNavigationLink from "./nav-link-validator";
 import ValidateRichTextContent from "./rich-text-content-validator";
 import ValidateWarningComponent from "./warning-validator";
 
@@ -36,6 +37,10 @@ function ValidateContent(content) {
     }
     case "insetText": {
       ValidateInsetTextContent(content);
+      break;
+    }
+    case "navigationLink": {
+      ValidateNavigationLink(content);
       break;
     }
     default: {

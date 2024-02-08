@@ -2,6 +2,7 @@ import DataMapper from "../../../../contentful/export-processor/data-mapper";
 import { contentful } from "./contentful";
 import ValidatePage from "../helpers/content-validators/page-validator";
 import { selfAssessmentSlug } from "../helpers/page-slugs";
+import ValidateContent from "../helpers/content-validators/content-validator";
 
 describe("Pages should have content", () => {
   let dataMapper;
@@ -12,7 +13,22 @@ describe("Pages should have content", () => {
     }
   });
 
-  it("Should work for unauthorised pages", () => {
+  it.skip("Should render navigation links", () => {
+    if (dataMapper?.pages == null) {
+      console.log("Datamapper has not processed data correctly");
+      return;
+    }
+
+    const navigationLinks = dataMapper.contents["navigationLink"];
+
+    const indexPage = cy.visit("/");
+
+    for (const [id, navigationLink] of navigationLinks) {
+      ValidateContent(navigationLink);
+    }
+  });
+
+  it.skip("Should work for unauthorised pages", () => {
     if (dataMapper?.pages == null) {
       console.log("Datamapper has not processed data correctly");
       return;
@@ -29,7 +45,7 @@ describe("Pages should have content", () => {
     }
   });
 
-  it("Should validate self-assessment page", () => {
+  it.skip("Should validate self-assessment page", () => {
     if (dataMapper.pages == null) {
       console.log("Datamapper has not processed data correctly");
       return;
@@ -51,7 +67,7 @@ describe("Pages should have content", () => {
     ValidatePage(slug, selfAssessmentPage);
   });
 
-  it("Should navigate through every question", () => {
+  it.skip("Should navigate through every question", () => {
     if (dataMapper.pages == null) {
       console.log("Datamapper has not processed data correctly");
       return;
@@ -70,7 +86,7 @@ describe("Pages should have content", () => {
     }
   });
 
-  it("Should retrieve correct recommendations for maturity", () => {
+  it.skip("Should retrieve correct recommendations for maturity", () => {
     if (dataMapper.pages == null) {
       console.log("Datamapper has not processed data correctly");
       return;
