@@ -4,17 +4,12 @@ name: QA Visualisation Workflow
 on:
   schedule:
     - cron: "*/30 * * * *" # Every 30 minutes for now - we'll fine tune frequency.
-  workflow_dispatch: 
+  workflow_dispatch:
     inputs: 
       environment:
         description: Environment to run the visualisation for
         required: true
         options: ['Dev', 'Tst', 'Staging']
-        default: 'Dev'
-  push: 
-    branches:
-      - qa-view-spike
-
 
 jobs:
   generate_images:
@@ -24,7 +19,7 @@ jobs:
       az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
       az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
       SQL_IP_NAME: qa-viz
-    environment: ${{ inputs.environment }}
+    environment: ${{ inputs.environment || 'Staging' }}  #Assuming default trigger is cron job so will set env to Staging.
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -102,5 +97,5 @@ jobs:
         
       - name: Call Teams Webhook
         run: |
-            curl -X POST -H 'Content-Type: application/json' -d '{"text": "New Visualisations Available: https://github.com/DFE-Digital/plan-technology-for-your-school/actions/runs/${{ github.run_id }}/artifacts/${{ steps.artifact-upload-step.outputs.artifact-id }}"}' ${{ secrets.PLANTECH_TEAMS_WEBHOOK }}
+            curl -X POST -H 'Content-Type: application/json' -d '{"text": "New Visualisations Available for ${{ inputs.environment }} : https://github.com/DFE-Digital/plan-technology-for-your-school/actions/runs/${{ github.run_id }}/artifacts/${{ steps.artifact-upload-step.outputs.artifact-id }}"}' ${{ secrets.PLANTECH_TEAMS_WEBHOOK }}
           
