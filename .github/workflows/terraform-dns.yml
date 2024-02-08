@@ -47,7 +47,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2 # TODO: Upgrade to V3, will possibly require changes in "post-terraform-results" action
+        uses: hashicorp/setup-terraform@v3 # TODO: Upgrade to V3, will possibly require changes in "post-terraform-results" action
         with:
           terraform_version: 1.6.2
 
