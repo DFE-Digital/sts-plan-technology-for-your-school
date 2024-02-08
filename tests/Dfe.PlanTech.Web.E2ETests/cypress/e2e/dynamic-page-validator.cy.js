@@ -21,6 +21,7 @@ describe("Pages should have content", () => {
     if (!dataLoaded(ContentfulData.pages)) {
       return;
     }
+
     cy.loginWithEnv(`${selfAssessmentSlug}`);
     const slug = selfAssessmentSlug.replace("/", "");
     const selfAssessmentPage = FindPageForSlug({
@@ -240,7 +241,6 @@ function validateAnswers(matchingQuestion) {
 }
 
 function FindPageForSlug({ slug, dataMapper }) {
-  console.log(dataMapper);
   for (const [id, page] of dataMapper.pages) {
     if (page.fields.slug == slug) {
       return page;
