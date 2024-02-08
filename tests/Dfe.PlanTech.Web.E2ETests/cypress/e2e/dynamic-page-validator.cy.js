@@ -1,53 +1,24 @@
-import DataMapper from "../../../../contentful/export-processor/data-mapper";
-import { contentful } from "./contentful";
+import ContentfulData from "../helpers/contentful-data-loader";
 import ValidatePage from "../helpers/content-validators/page-validator";
 import { selfAssessmentSlug } from "../helpers/page-slugs";
 import ValidateContent from "../helpers/content-validators/content-validator";
 
 describe("Pages should have content", () => {
-  let dataMapper;
-
-  before(() => {
-    if (contentful && contentful.entries && contentful.entries.length > 0) {
-      dataMapper = new DataMapper(contentful);
-    }
-  });
-
-  it.skip("Should render navigation links", () => {
-    if (dataMapper?.pages == null) {
-      console.log("Datamapper has not processed data correctly");
+  it("Should render navigation links", () => {
+    const navigationLinks = ContentfulData.contents["navigationLink"];
+    if (!dataLoaded(navigationLinks)) {
       return;
     }
 
-    const navigationLinks = dataMapper.contents["navigationLink"];
+    cy.visit("/");
 
-    const indexPage = cy.visit("/");
-
-    for (const [id, navigationLink] of navigationLinks) {
+    for (const [_, navigationLink] of navigationLinks) {
       ValidateContent(navigationLink);
     }
   });
 
-  it.skip("Should work for unauthorised pages", () => {
-    if (dataMapper?.pages == null) {
-      console.log("Datamapper has not processed data correctly");
-      return;
-    }
-
-    for (const [_, page] of dataMapper.pages) {
-      if (page.fields.requiresAuthorisation) {
-        continue;
-      }
-
-      const slug = `/${page.fields.slug.replace("/", "")}`;
-      cy.visit(slug);
-      ValidatePage(slug, page);
-    }
-  });
-
-  it.skip("Should validate self-assessment page", () => {
-    if (dataMapper.pages == null) {
-      console.log("Datamapper has not processed data correctly");
+  it("Should validate self-assessment page", () => {
+    if (!dataLoaded(ContentfulData.pages)) {
       return;
     }
 
@@ -55,7 +26,7 @@ describe("Pages should have content", () => {
     const slug = selfAssessmentSlug.replace("/", "");
     const selfAssessmentPage = FindPageForSlug({
       slug,
-      dataMapper,
+      dataMapper: ContentfulData,
     });
 
     if (!selfAssessmentPage) {
@@ -67,46 +38,62 @@ describe("Pages should have content", () => {
     ValidatePage(slug, selfAssessmentPage);
   });
 
-  it.skip("Should navigate through every question", () => {
-    if (dataMapper.pages == null) {
-      console.log("Datamapper has not processed data correctly");
-      return;
-    }
+  Array.from(ContentfulData?.pages ?? [])
+    .map(([_, page]) => page)
+    .filter((page) => !page.fields.requiresAuthorisation)
+    .forEach((page) => {
+      it(
+        "Should have correct content on non-authorised pages. Testing " +
+          page.fields.internalName,
+        () => {
+          const slug = `/${page.fields.slug.replace("/", "")}`;
+          cy.visit(slug);
+          ValidatePage(slug, page);
+        }
+      );
+    });
 
-    cy.loginWithEnv(`${selfAssessmentSlug}`);
+  Object.values(ContentfulData?.mappedSections ?? []).forEach((section) => {
+    it(`${section.name} should have every question with correct content`, () => {
+      cy.loginWithEnv(`${selfAssessmentSlug}`);
 
-    const sections = dataMapper.mappedSections;
-
-    for (const section of Object.values(sections)) {
       validateSections(
         section,
         section.minimumPathsToNavigateQuestions,
-        dataMapper
+        ContentfulData
       );
-    }
-  });
+    });
 
-  it.skip("Should retrieve correct recommendations for maturity", () => {
-    if (dataMapper.pages == null) {
-      console.log("Datamapper has not processed data correctly");
-      return;
-    }
+    Object.entries(section.minimumPathsForRecommendations).forEach(
+      ([maturity, path]) => {
+        it(`${section.name} should retrieve correct recommendation for ${maturity} maturity, and all content is valid`, () => {
+          cy.loginWithEnv(`${selfAssessmentSlug}`);
 
-    cy.loginWithEnv(`${selfAssessmentSlug}`);
-
-    const sections = dataMapper.mappedSections;
-
-    for (const section of Object.values(sections)) {
-      for (const [maturity, path] of Object.entries(
-        section.minimumPathsForRecommendations
-      )) {
-        validateSections(section, [path], dataMapper, () => {
-          validateRecommendationForMaturity(section, maturity);
+          validateSections(section, [path], ContentfulData, () => {
+            validateRecommendationForMaturity(section, maturity);
+          });
         });
       }
-    }
+    );
   });
 });
+
+/**
+ * Check if data has been loaded and log a message if not.
+ *
+ * @param {Array | Map} contentMap - the map of content
+ * @return {boolean} haveContent - whether data has been loaded
+ */
+function dataLoaded(contentMap) {
+  const haveContent =
+    contentMap && (contentMap.length > 0 || contentMap.size > 0);
+
+  if (!haveContent) {
+    console.log("Data has not been loaded");
+  }
+
+  return haveContent;
+}
 
 /**
  * Validates a recommendation for a specific maturity level.

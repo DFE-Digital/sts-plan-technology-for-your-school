@@ -110,6 +110,10 @@ export default class DataMapper {
    * @returns {IterableIterator<Section>} Iterator for mapped sections
    */
   *sectionsToClasses(sections) {
+    if (!sections || sections.length == 0) {
+      return;
+    }
+
     for (const [id, section] of sections) {
       yield new Section(section);
     }
