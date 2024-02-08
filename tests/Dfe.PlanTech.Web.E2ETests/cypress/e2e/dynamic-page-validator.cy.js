@@ -43,6 +43,7 @@ describe("Pages should have content", () => {
 
   Array.from(ContentfulData?.pages ?? [])
     .map(([_, page]) => page)
+    .filter((page) => !page.fields.requiresAuthorisation)
     .forEach((page) => {
       it(
         "Should have correct content on non-authorised pages. Testing " +
