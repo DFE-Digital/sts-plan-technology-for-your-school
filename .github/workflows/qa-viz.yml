@@ -11,6 +11,11 @@ on:
 jobs:
   generate_images:
     runs-on: ubuntu-latest
+    env:
+      az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
+      az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      SQL_IP_NAME: qa-viz
     environment: 'Dev'
     steps:
       - name: Checkout Repository
