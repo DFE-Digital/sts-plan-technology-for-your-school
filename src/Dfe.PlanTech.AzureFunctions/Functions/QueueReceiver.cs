@@ -71,7 +71,7 @@ public class QueueReceiver : BaseFunction
             ContentComponentDbEntity mapped = MapMessageToEntity(message);
             ContentComponentDbEntity? existing = await TryGetExistingEntity(mapped, cancellationToken);
 
-            if (!IsNewAndValidComponent(mapped, existing))
+            if (!IsValidComponent(mapped, existing))
             {
                 await messageActions.CompleteMessageAsync(message, cancellationToken);
                 return;
@@ -92,10 +92,8 @@ public class QueueReceiver : BaseFunction
         }
     }
 
-    private bool IsNewAndValidComponent(ContentComponentDbEntity mapped, ContentComponentDbEntity? existing)
+    private bool IsValidComponent(ContentComponentDbEntity mapped, ContentComponentDbEntity? existing)
     {
-        if (existing != null) return true;
-
         if (AnyRequiredPropertyIsNull(mapped, out List<PropertyInfo?> nullProperties))
         {
             Logger.LogInformation("Content Component with ID {id} is missing the following required properties: {nullProperties}", mapped.Id, string.Join(", ", nullProperties));
