@@ -90,7 +90,7 @@ public class GetRichTextsQueryTests
     await _getRichTextsQuery.TryLoadChildren(_loadedPage, CancellationToken.None);
 
     await _db.ReceivedWithAnyArgs(1)
-                 .ToListAsync(Arg.Any<IQueryable<RichTextContentDbEntity>>(), Arg.Any<CancellationToken>());
+                 .ToListAsync(Arg.Any<IQueryable<RichTextContentWithSlugDbEntity>>(), Arg.Any<CancellationToken>());
   }
 
   [Fact]
@@ -99,6 +99,6 @@ public class GetRichTextsQueryTests
     await _getRichTextsQuery.TryLoadChildren(_loadedPage, CancellationToken.None);
 
     await _db.ReceivedWithAnyArgs(0)
-                 .ToListAsync(Arg.Any<IQueryable<RichTextContentDbEntity>>(), Arg.Any<CancellationToken>());
+                 .ToListAsync(Arg.Any<IQueryable<RichTextContentWithSlugDbEntity>>(), Arg.Any<CancellationToken>());
   }
 }
