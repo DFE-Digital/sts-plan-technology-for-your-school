@@ -92,7 +92,7 @@ public class QueueReceiver : BaseFunction
         }
     }
 
-    private bool IsValidComponent(ContentComponentDbEntity mapped, ContentComponentDbEntity? existing)
+    private bool IsValidComponent(ContentComponentDbEntity mapped)
     {
         if (AnyRequiredPropertyIsNull(mapped, out List<PropertyInfo?> nullProperties))
         {
