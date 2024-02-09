@@ -96,23 +96,36 @@ public class QueueReceiver : BaseFunction
     {
         if (existing != null) return true;
 
-        if (AnyRequiredPropertyIsNull(mapped))
+        if (AnyRequiredPropertyIsNull(mapped, out List<PropertyInfo?> nullProperties))
         {
-            Logger.LogInformation("A required property of the component with ID {id} is null, so the message will be dropped!", mapped.Id);
+            Logger.LogInformation("Content Component with ID {id} is missing the following required properties: {nullProperties}", mapped.Id, string.Join(", ", nullProperties));
             return false;
         }
 
         return true;
     }
 
-    private bool AnyRequiredPropertyIsNull(ContentComponentDbEntity entity)
-    => _db.Model.FindEntityType(entity.GetType())!
-        .GetProperties()
-        .Where(prop => !prop.IsNullable)
-        .Select(prop => prop.PropertyInfo)
-        .Where(prop => !prop!.CustomAttributes.Any(atr => atr.GetType() == typeof(DontCopyValueAttribute)))
-        .Where(prop => prop!.GetValue(entity) == null)
-        .Any();
+    private bool AnyRequiredPropertyIsNull(ContentComponentDbEntity entity, out List<PropertyInfo?> nullProperties)
+    {
+        nullProperties = _db.Model.FindEntityType(entity.GetType())!
+                        .GetProperties()
+                        .Where(prop => !prop.IsNullable)
+                        .Select(prop => prop.PropertyInfo)
+                        .Where(prop => !prop!.CustomAttributes.Any(atr => atr.GetType() == typeof(DontCopyValueAttribute)))
+                        .Where(prop => prop!.GetValue(entity) == null)
+                        .ToList();
+
+        return nullProperties.Count > 0;
+    }
+
+    // private bool AnyRequiredPropertyIsNull(ContentComponentDbEntity entity)
+    // => _db.Model.FindEntityType(entity.GetType())!
+    //     .GetProperties()
+    //     .Where(prop => !prop.IsNullable)
+    //     .Select(prop => prop.PropertyInfo)
+    //     .Where(prop => !prop!.CustomAttributes.Any(atr => atr.GetType() == typeof(DontCopyValueAttribute)))
+    //     .Where(prop => prop!.GetValue(entity) == null)
+    //     .Any();
 
     /// <summary>
     /// Checks if the message with the given CmsEvent should be ignored based on certain conditions.
