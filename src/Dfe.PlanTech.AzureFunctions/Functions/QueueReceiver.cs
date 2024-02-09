@@ -71,7 +71,7 @@ public class QueueReceiver : BaseFunction
             ContentComponentDbEntity mapped = MapMessageToEntity(message);
             ContentComponentDbEntity? existing = await TryGetExistingEntity(mapped, cancellationToken);
 
-            if (!IsValidComponent(mapped, existing))
+            if (!IsValidComponent(mapped))
             {
                 await messageActions.CompleteMessageAsync(message, cancellationToken);
                 return;
