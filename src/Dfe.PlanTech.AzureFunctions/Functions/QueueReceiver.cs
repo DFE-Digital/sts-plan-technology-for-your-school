@@ -62,7 +62,7 @@ public class QueueReceiver : BaseFunction
         {
             CmsEvent cmsEvent = GetCmsEvent(message.Subject);
 
-            if (ShouldDropMessage(cmsEvent))
+            if (ShouldIgnoreMessage(cmsEvent))
             {
                 await messageActions.CompleteMessageAsync(message, cancellationToken);
                 return;
@@ -92,23 +92,6 @@ public class QueueReceiver : BaseFunction
         }
     }
 
-    private bool ShouldDropMessage(CmsEvent cmsEvent)
-    {
-        if (cmsEvent == CmsEvent.CREATE)
-        {
-            Logger.LogInformation("Dropping received event {cmsEvent}", cmsEvent);
-            return true;
-        }
-
-        if (ShouldIgnoreMessage(cmsEvent))
-        {
-            Logger.LogInformation("Receieved {event} but UsePreview is {usePreview} - dropping message", cmsEvent, _contentfulOptions.UsePreview);
-            return true;
-        }
-
-        return false;
-    }
-
     private bool IsNewAndValidComponent(ContentComponentDbEntity mapped, ContentComponentDbEntity? existing)
     {
         if (existing != null) return true;
@@ -135,13 +118,29 @@ public class QueueReceiver : BaseFunction
     /// Checks if the message with the given CmsEvent should be ignored based on certain conditions.
     /// </summary>
     /// <remarks>
-    /// If we are NOT using preview mode (i.e. we are ignoring drafts), and the event is just a save or autosave,
-    /// then return true. Otherwise return false.
+    /// If we recieve a create event, we return true.
+    /// If we are NOT using preview mode (i.e. we are ignoring drafts), and the event is just a save or autosave, then return true.
+    /// 
+    /// Else, we return false.
     /// </remarks>
     /// <param name="cmsEvent"></param>
     /// <returns></returns>
     private bool ShouldIgnoreMessage(CmsEvent cmsEvent)
-    => (cmsEvent == CmsEvent.SAVE || cmsEvent == CmsEvent.AUTO_SAVE) && !_contentfulOptions.UsePreview;
+    {
+        if (cmsEvent == CmsEvent.CREATE)
+        {
+            Logger.LogInformation("Dropping received event {cmsEvent}", cmsEvent);
+            return true;
+        }
+
+        if ((cmsEvent == CmsEvent.SAVE || cmsEvent == CmsEvent.AUTO_SAVE) && !_contentfulOptions.UsePreview)
+        {
+            Logger.LogInformation("Receieved {event} but UsePreview is {usePreview} - dropping message", cmsEvent, _contentfulOptions.UsePreview);
+            return true;
+        }
+
+        return false;
+    }
 
     /// <summary>
     /// Retrieves the CmsEvent based on the provided subject. 
