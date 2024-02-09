@@ -2,14 +2,17 @@ name: QA Visualisation Workflow
 
 
 on:
-  schedule:
-    - cron: "*/30 * * * *" # Every 30 minutes for now - we'll fine tune frequency.
   workflow_dispatch:
     inputs: 
       environment:
         description: Environment to run the visualisation for
         required: true
         options: ['Dev', 'Tst', 'Staging']
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
 
 jobs:
   generate_images:
@@ -19,7 +22,7 @@ jobs:
       az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
       az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
       SQL_IP_NAME: qa-viz
-    environment: ${{ inputs.environment || 'Staging' }}  #Assuming default trigger is cron job so will set env to Staging.
+    environment: ${{ inputs.environment || 'Staging' }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -47,7 +50,7 @@ jobs:
           az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
         
       - name: Install Graphviz
-        run: sudo apt-get install graphviz 
+        run: sudo apt-get install graphviz -y
           
       - name: Install Microsoft ODBC
         run: sudo ACCEPT_EULA=Y apt-get install msodbcsql17 -y
