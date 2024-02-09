@@ -118,15 +118,6 @@ public class QueueReceiver : BaseFunction
         return nullProperties.Count > 0;
     }
 
-    // private bool AnyRequiredPropertyIsNull(ContentComponentDbEntity entity)
-    // => _db.Model.FindEntityType(entity.GetType())!
-    //     .GetProperties()
-    //     .Where(prop => !prop.IsNullable)
-    //     .Select(prop => prop.PropertyInfo)
-    //     .Where(prop => !prop!.CustomAttributes.Any(atr => atr.GetType() == typeof(DontCopyValueAttribute)))
-    //     .Where(prop => prop!.GetValue(entity) == null)
-    //     .Any();
-
     /// <summary>
     /// Checks if the message with the given CmsEvent should be ignored based on certain conditions.
     /// </summary>
