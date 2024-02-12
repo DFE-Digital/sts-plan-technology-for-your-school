@@ -100,6 +100,9 @@ jobs:
       - name: Install SonarCloud scanners
         run: dotnet tool install --global dotnet-sonarscanner
 
+      - name: Install Coverlet
+        run: dotnet tool install --global coverlet.console
+
       - name: Install latest JDK
         uses: actions/setup-java@v4
         with:
@@ -135,7 +138,7 @@ jobs:
         run: dotnet-coverage merge -f xml -o "coverage.xml" -s "coverage.settings.xml" -r coverage.cobertura.xml
 
       - name: End SonarCloud Scanner
-        run: dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+        run: dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
       - name: Archive code coverage results
         uses: actions/upload-artifact@v4
