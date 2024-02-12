@@ -1,5 +1,5 @@
 name: Run Unit Tests
-description: Runs the unit tests and publishes them to the workflow runs 
+description: Runs the unit tests and publishes them to the workflow runs
 
 inputs:
   solution_filename:
@@ -12,12 +12,12 @@ runs:
   steps:
     - name: Test
       shell: bash
-      run: dotnet test ${{ inputs.solution_filename }} --no-restore --verbosity normal --collect:"XPlat Code Coverage" --logger:"trx;LogFileName=test-results.trx" || true
+      run: dotnet test ${{ inputs.solution_filename }} --no-restore --verbosity normal --collect:"Code Coverage;Format=cobertura" --logger:"trx;LogFileName=test-results.trx" || true
     - name: Test Report
       uses: dorny/test-reporter@v1
       if: always()
       with:
         name: DotNET Tests
-        path: "**/test-results.trx"                            
+        path: "**/test-results.trx"
         reporter: dotnet-trx
         fail-on-error: true
