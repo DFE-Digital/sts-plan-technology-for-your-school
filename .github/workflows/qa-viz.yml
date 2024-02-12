@@ -1,0 +1,104 @@
+name: QA Visualisation Workflow
+
+
+on:
+  workflow_dispatch:
+    inputs: 
+      environment:
+        description: Environment to run the visualisation for
+        required: true
+        options: ['Dev', 'Tst', 'Staging']
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+
+jobs:
+  generate_images:
+    runs-on: ubuntu-latest
+    env:
+      az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
+      az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      SQL_IP_NAME: qa-viz
+    environment: ${{ inputs.environment || 'Staging' }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+
+      - name: Get workflow IP address
+        id: whats-my-ip
+        uses: ./.github/actions/whats-my-ip-address
+
+      - name: Add Azure firewall rules
+        uses: ./.github/actions/azure-ip-whitelist
+        with:
+          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+          verb: "add"
+          az_keyvault_name: ${{ env.az_keyvault_name }}
+          az_ip_name: ${{ env.SQL_IP_NAME }}
+          az_resource_group: ${{ env.az_resource_group_name}}
+          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
+        
+      - name: Install Graphviz
+        run: sudo apt-get install graphviz -y
+          
+      - name: Install Microsoft ODBC
+        run: sudo ACCEPT_EULA=Y apt-get install msodbcsql17 -y
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.9
+          
+      - name: Install pyodbc
+        run: pip install pyodbc
+    
+      - name: Install graphviz
+        run: pip install graphviz
+          
+      - name: Install azure identity
+        run: pip install azure-identity
+          
+      - name: Run data script
+        run: python ./.github/scripts/qa-data.py
+        env:
+          SQL_CONNECTION_STRING: "Driver={ODBC Driver 17 for SQL Server};Server=tcp:${{ env.az_sql_database_server_name }}.database.windows.net,1433;Database=${{ env.az_sql_database_server_name }}-sqldb;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30"
+          
+      - name: List data files
+        run: ls -l ./data
+          
+      - name: Remove Azure firewall rules
+        if: always()
+        uses: ./.github/actions/azure-ip-whitelist
+        with:
+          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+          verb: "remove"
+          az_keyvault_name: ${{ env.az_keyvault_name }}
+          az_ip_name: ${{ env.SQL_IP_NAME }}
+          az_resource_group: ${{ env.az_resource_group_name}}
+          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
+            
+      - name: Run Visaulisation Script
+        run: python ./.github/scripts/qa-visualisations.py 
+        
+      - name: Upload image
+        id: artifact-upload-step
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-visualisations
+          path: ./visualisations
+        
+      - name: Call Teams Webhook
+        run: |
+            curl -X POST -H 'Content-Type: application/json' -d '{"text": "New Visualisations Available for ${{ inputs.environment }} : https://github.com/DFE-Digital/plan-technology-for-your-school/actions/runs/${{ github.run_id }}/artifacts/${{ steps.artifact-upload-step.outputs.artifact-id }}"}' ${{ secrets.PLANTECH_TEAMS_WEBHOOK }}
+          

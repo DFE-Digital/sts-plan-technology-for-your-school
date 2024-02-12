@@ -5,8 +5,10 @@
 1. Extract Contentful content using CLI
 2. Rename file to `contentful.js`, and make the JSON an object called Contentful. E.g. `const contentful = { ... JSON}`;
 3. Export that object
-4. Place the `contentful.js` in the same folder as `dynamic-page-validator.cy.js`
+4. Place the `contentful.js` in `helpers` folder in the parent folder. E.g. `Dfe.PlanTech.Web.E2ETests\cypress\helpers\contentful.js`
 5. Remove the `skip` command on line 14.
+
+_Note: Will look into automating the Contentful export for ease_
 
 ### Components content validated
 
@@ -43,8 +45,8 @@
 
 ### Other to do
 
-- [ ] Do not fail if one error; run entire tests for issues.
-- [ ] Split tests up; not just one `it` function
+- [x] Do not fail if one error; run entire tests for issues.
+- [x] Split tests up; not just one `it` function
 - [ ] Complete documentation:
    - [ ] Merge with documentation in `contentful-helpers`
 - [x] Make a Node project for the `contentful-helpers` to allow re-use, and prevent the fact that the code is copied and pasted into two places
