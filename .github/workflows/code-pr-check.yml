@@ -111,13 +111,14 @@ jobs:
           dotnet-sonarscanner begin \
           /k:"DFE-Digital_plan-technology-for-your-school" \
           /o:"dfe-digital" \
-          /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
+          /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
           /d:sonar.host.url="https://sonarcloud.io" \
-          /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml \
+          /d:sonar.cs.opencover.reportsPaths=coverage.xml \
           /d:sonar.coverage.exclusions=src/**/Program.cs,src/Dfe.PlanTech.Web/gulpfile.js,src/Dfe.PlanTech.Web/wwwroot/** \
           /d:sonar.issue.ignore.multicriteria=e1 \
           /d:sonar.issue.ignore.multicriteria.e1.ruleKey=csharpsquid:S6602 \
-          /d:sonar.issue.ignore.multicriteria.e1.resourceKey=src/**/*.cs
+          /d:sonar.issue.ignore.multicriteria.e1.resourceKey=src/**/*.cs \
+          /d:sonar.verbose=true
 
       - name: Build web app
         uses: ./.github/actions/build-dotnet-app
