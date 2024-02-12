@@ -12,7 +12,7 @@ runs:
   steps:
     - name: Test
       shell: bash
-      run: dotnet test ${{ inputs.solution_filename }} --no-restore --verbosity normal --collect:"Code Coverage;Format=cobertura" --logger:"trx;LogFileName=test-results.trx" || true
+      run: dotnet test ${{ inputs.solution_filename }} --no-restore --verbosity normal --collect:"Code Coverage;Format=cobertura" --logger:"trx;LogFileName=test-results.trx" --results-directory './coverage' || true
     - name: Test Report
       uses: dorny/test-reporter@v1
       if: always()
