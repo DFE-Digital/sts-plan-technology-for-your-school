@@ -95,7 +95,7 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
 
       - name: Install dotnet coverage
-        run: dotnet tool install --global dotnet-coverage --version 17.10.2
+        run: dotnet tool install --global dotnet-coverage --version 17.9.3
 
       - name: Install SonarCloud scanners
         run: dotnet tool install --global dotnet-sonarscanner
