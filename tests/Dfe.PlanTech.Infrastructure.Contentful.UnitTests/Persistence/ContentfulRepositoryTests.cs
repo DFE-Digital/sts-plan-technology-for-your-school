@@ -156,7 +156,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
 
             await Assert.ThrowsAsync<GetEntitiesException>(() => repository.GetEntityById<TestClass>(testId));
         }
-
+      
         [Fact]
         public async Task GetEntityById_Should_Throw_GetEntitiesIDException_With_Correct_Exception_Message_When_DuplicateIds()
         {
