@@ -94,27 +94,24 @@ public class QueueReceiver : BaseFunction
 
     private bool IsValidComponent(ContentComponentDbEntity mapped)
     {
-        if (AnyRequiredPropertyIsNull(mapped, out List<PropertyInfo?> nullProperties))
+        string? nullProperties = string.Join(", ", AnyRequiredPropertyIsNull(mapped));
+
+        if (!string.IsNullOrEmpty(nullProperties))
         {
-            Logger.LogInformation("Content Component with ID {id} is missing the following required properties: {nullProperties}", mapped.Id, string.Join(", ", nullProperties));
+            Logger.LogInformation("Content Component with ID {id} is missing the following required properties: {nullProperties}", mapped.Id, nullProperties);
             return false;
         }
 
         return true;
     }
 
-    private bool AnyRequiredPropertyIsNull(ContentComponentDbEntity entity, out List<PropertyInfo?> nullProperties)
-    {
-        nullProperties = _db.Model.FindEntityType(entity.GetType())!
-                        .GetProperties()
-                        .Where(prop => !prop.IsNullable)
-                        .Select(prop => prop.PropertyInfo)
-                        .Where(prop => !prop!.CustomAttributes.Any(atr => atr.GetType() == typeof(DontCopyValueAttribute)))
-                        .Where(prop => prop!.GetValue(entity) == null)
-                        .ToList();
-
-        return nullProperties.Count > 0;
-    }
+    private IEnumerable<PropertyInfo?> AnyRequiredPropertyIsNull(ContentComponentDbEntity entity)
+        => _db.Model.FindEntityType(entity.GetType())!
+        .GetProperties()
+        .Where(prop => !prop.IsNullable)
+        .Select(prop => prop.PropertyInfo)
+        .Where(prop => !prop!.CustomAttributes.Any(atr => atr.GetType() == typeof(DontCopyValueAttribute)))
+        .Where(prop => prop!.GetValue(entity) == null);
 
     /// <summary>
     /// Checks if the message with the given CmsEvent should be ignored based on certain conditions.
