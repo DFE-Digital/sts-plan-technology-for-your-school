@@ -1,6 +1,7 @@
 using Contentful.Core;
 using Contentful.Core.Models;
 using Contentful.Core.Search;
+using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
@@ -13,7 +14,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         private readonly IContentfulClient _clientSubstitute = Substitute.For<IContentfulClient>();
 
         private readonly List<TestClass> _substituteData = new() {
-            new TestClass(), new TestClass("testId"), new TestClass("anotherId"), new TestClass("abcd1234")
+            new TestClass(), new TestClass("testId"), new TestClass("anotherId"), new TestClass("abcd1234"), new TestClass("duplicateId"), new TestClass("duplicateId")
         };
 
         public ContentfulRepositoryTests()
@@ -144,6 +145,16 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
             var result = await repository.GetEntityById<TestClass>("not a real id");
 
             Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task GetEntityById_Should_Throw_GetEntitiesIDException_When_DuplicateIds()
+        {
+            var testId = "duplicateId";
+
+            ContentfulRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
+
+            await Assert.ThrowsAsync<GetEntitiesException>(() => repository.GetEntityById<TestClass>(testId));
         }
     }
 }
