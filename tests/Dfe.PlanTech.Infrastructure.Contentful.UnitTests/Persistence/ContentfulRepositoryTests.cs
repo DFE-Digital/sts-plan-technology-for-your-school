@@ -156,5 +156,16 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
 
             await Assert.ThrowsAsync<GetEntitiesException>(() => repository.GetEntityById<TestClass>(testId));
         }
+
+        [Fact]
+        public async Task GetEntityById_Should_Throw_GetEntitiesIDException_With_Correct_Exception_Message_When_DuplicateIds()
+        {
+            var testId = "duplicateId";
+
+            ContentfulRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
+
+            var exceptionMessage = await Assert.ThrowsAsync<GetEntitiesException>(() => repository.GetEntityById<TestClass>(testId));
+            Assert.Equal("Found more than 1 entity with id duplicateId", exceptionMessage.Message);
+        }
     }
 }
