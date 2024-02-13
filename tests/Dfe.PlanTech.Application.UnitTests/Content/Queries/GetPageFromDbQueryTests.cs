@@ -271,7 +271,6 @@ public class GetPageFromDbQueryTests
         await _cmsDbSubstitute.ReceivedWithAnyArgs(1).GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>());
         await _cmsDbSubstitute.ReceivedWithAnyArgs(0).ToListAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
         await _cmsDbSubstitute.ReceivedWithAnyArgs(0).ToListAsync(Arg.Any<IQueryable<ButtonWithEntryReferenceDbEntity>>(), Arg.Any<CancellationToken>());
-        _cmsDbSubstitute.ReceivedWithAnyArgs(0).RichTextContentsByPageSlug(Arg.Any<string>());
         await _getPageChildrenQuery.ReceivedWithAnyArgs(1).TryLoadChildren(Arg.Any<PageDbEntity>(), Arg.Any<CancellationToken>());
     }
 }
