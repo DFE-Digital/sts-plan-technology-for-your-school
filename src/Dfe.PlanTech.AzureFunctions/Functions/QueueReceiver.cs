@@ -62,7 +62,7 @@ public class QueueReceiver : BaseFunction
         {
             CmsEvent cmsEvent = GetCmsEvent(message.Subject);
 
-            if (ShouldDropMessage(cmsEvent))
+            if (ShouldIgnoreMessage(cmsEvent))
             {
                 await messageActions.CompleteMessageAsync(message, cancellationToken);
                 return;
@@ -71,7 +71,7 @@ public class QueueReceiver : BaseFunction
             ContentComponentDbEntity mapped = MapMessageToEntity(message);
             ContentComponentDbEntity? existing = await TryGetExistingEntity(mapped, cancellationToken);
 
-            if (!IsNewAndValidComponent(mapped, existing))
+            if (!IsValidComponent(mapped))
             {
                 await messageActions.CompleteMessageAsync(message, cancellationToken);
                 return;
@@ -92,7 +92,39 @@ public class QueueReceiver : BaseFunction
         }
     }
 
-    private bool ShouldDropMessage(CmsEvent cmsEvent)
+    private bool IsValidComponent(ContentComponentDbEntity mapped)
+    {
+        string? nullProperties = string.Join(", ", AnyRequiredPropertyIsNull(mapped));
+
+        if (!string.IsNullOrEmpty(nullProperties))
+        {
+            Logger.LogInformation("Content Component with ID {id} is missing the following required properties: {nullProperties}", mapped.Id, nullProperties);
+            return false;
+        }
+
+        return true;
+    }
+
+    private IEnumerable<PropertyInfo?> AnyRequiredPropertyIsNull(ContentComponentDbEntity entity)
+        => _db.Model.FindEntityType(entity.GetType())!
+        .GetProperties()
+        .Where(prop => !prop.IsNullable)
+        .Select(prop => prop.PropertyInfo)
+        .Where(prop => !prop!.CustomAttributes.Any(atr => atr.GetType() == typeof(DontCopyValueAttribute)))
+        .Where(prop => prop!.GetValue(entity) == null);
+
+    /// <summary>
+    /// Checks if the message with the given CmsEvent should be ignored based on certain conditions.
+    /// </summary>
+    /// <remarks>
+    /// If we recieve a create event, we return true.
+    /// If we are NOT using preview mode (i.e. we are ignoring drafts), and the event is just a save or autosave, then return true.
+    /// 
+    /// Else, we return false.
+    /// </remarks>
+    /// <param name="cmsEvent"></param>
+    /// <returns></returns>
+    private bool ShouldIgnoreMessage(CmsEvent cmsEvent)
     {
         if (cmsEvent == CmsEvent.CREATE)
         {
@@ -100,7 +132,7 @@ public class QueueReceiver : BaseFunction
             return true;
         }
 
-        if (ShouldIgnoreMessage(cmsEvent))
+        if ((cmsEvent == CmsEvent.SAVE || cmsEvent == CmsEvent.AUTO_SAVE) && !_contentfulOptions.UsePreview)
         {
             Logger.LogInformation("Receieved {event} but UsePreview is {usePreview} - dropping message", cmsEvent, _contentfulOptions.UsePreview);
             return true;
@@ -108,40 +140,6 @@ public class QueueReceiver : BaseFunction
 
         return false;
     }
-
-    private bool IsNewAndValidComponent(ContentComponentDbEntity mapped, ContentComponentDbEntity? existing)
-    {
-        if (existing != null) return true;
-
-        if (AnyRequiredPropertyIsNull(mapped))
-        {
-            Logger.LogInformation("A required property of the component with ID {id} is null, so the message will be dropped!", mapped.Id);
-            return false;
-        }
-
-        return true;
-    }
-
-    private bool AnyRequiredPropertyIsNull(ContentComponentDbEntity entity)
-    => _db.Model.FindEntityType(entity.GetType())!
-        .GetProperties()
-        .Where(prop => !prop.IsNullable)
-        .Select(prop => prop.PropertyInfo)
-        .Where(prop => !prop!.CustomAttributes.Any(atr => atr.GetType() == typeof(DontCopyValueAttribute)))
-        .Where(prop => prop!.GetValue(entity) == null)
-        .Any();
-
-    /// <summary>
-    /// Checks if the message with the given CmsEvent should be ignored based on certain conditions.
-    /// </summary>
-    /// <remarks>
-    /// If we are NOT using preview mode (i.e. we are ignoring drafts), and the event is just a save or autosave,
-    /// then return true. Otherwise return false.
-    /// </remarks>
-    /// <param name="cmsEvent"></param>
-    /// <returns></returns>
-    private bool ShouldIgnoreMessage(CmsEvent cmsEvent)
-    => (cmsEvent == CmsEvent.SAVE || cmsEvent == CmsEvent.AUTO_SAVE) && !_contentfulOptions.UsePreview;
 
     /// <summary>
     /// Retrieves the CmsEvent based on the provided subject. 
