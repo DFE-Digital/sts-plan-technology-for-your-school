@@ -1,10 +1,10 @@
-import { ReplaceNonBreakingHyphen } from "../text-helpers.js";
+import { CleanText } from "../text-helpers.js";
 
 function ValidateHeader(content) {
   const tag = content.fields.tag;
   const expectedClass = GetExpectedClass(content.fields.size.toLowerCase());
 
-  const expectedText = ReplaceNonBreakingHyphen(content.fields.text);
+  const expectedText = CleanText(content.fields.text);
 
   return cy
     .get(`header-component ${tag}`)
