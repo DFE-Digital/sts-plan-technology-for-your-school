@@ -12,12 +12,20 @@ function ValidatePage(slug, page) {
 
   if (page.fields.beforeTitleContent) {
     for (const content of page.fields.beforeTitleContent) {
+      if (!content) {
+        console.log(`Before title content is missing in page.`, page);
+        continue;
+      }
       ValidateContent(content);
     }
   }
 
   if (page.fields.content) {
     for (const content of page.fields.content) {
+      if (!content) {
+        console.log(`Content is missing in page.`, page);
+        continue;
+      }
       ValidateContent(content);
     }
   }
