@@ -9,4 +9,7 @@ const ReplaceWhiteSpace = (string) =>
     .replace(" ", " ")
     .replace(" ", " ");
 
-export { ReplaceNonBreakingHyphen, ReplaceWhiteSpace };
+const CleanText = (text) =>
+  ReplaceNonBreakingHyphen(ReplaceWhiteSpace(text)).trim();
+
+export { ReplaceNonBreakingHyphen, ReplaceWhiteSpace, CleanText };

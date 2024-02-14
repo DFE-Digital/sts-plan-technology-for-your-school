@@ -115,6 +115,14 @@ export default class DataMapper {
     }
 
     for (const [id, section] of sections) {
+      if (
+        !section.fields.recommendations ||
+        section.fields.recommendations.length == 0 ||
+        !section.fields.questions ||
+        section.fields.questions.length == 0
+      )
+        continue;
+
       yield new Section(section);
     }
   }
