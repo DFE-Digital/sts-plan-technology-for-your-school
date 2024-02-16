@@ -13,10 +13,10 @@ jobs:
     runs-on: ubuntu-22.04
     name: Tag & Create Release
     permissions:
-      contents: write # Publish Release
-      issues: write # Comment on Release Issues
-      pull-requests: write # Comment on released Pull Requests
-      id-token: write # OIDC for NPM Provenance
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
 
     steps:
       - name: Checkout Repository
@@ -30,8 +30,8 @@ jobs:
         with:
           node-version: "lts/*"
 
-      - name: Install Dependencies
-        run: npm clean-install
+      - name: Install NPX
+        run: npm i npx
 
       - name: Verify Integrity of Installed Dependencies
         run: npm audit signatures
