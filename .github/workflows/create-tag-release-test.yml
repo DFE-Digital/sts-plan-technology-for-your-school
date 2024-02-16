@@ -1,6 +1,6 @@
 name: Create & Tag Release TEST
 
-# TODO: Remove after testing !!!
+# TODO: Remove after testing !!
 
 on:
   push:
