@@ -32,8 +32,11 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          npm i npx
-          npm i @semantic-release/exec
+          npm i npx@10
+          npm i @semantic-release/commit-analyzer@11
+          npm i @semantic-release/release-notes-generator@12
+          npm i @semantic-release/github@9
+          npm i @semantic-release/exec@6
 
       - name: Verify Integrity of Installed Dependencies
         run: npm audit signatures
@@ -41,5 +44,5 @@ jobs:
       - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release --dry-run --branches development # TODO: Replace with commented line after testing
+        run: npx semantic-release@23 --dry-run --branches development # TODO: Replace with commented line after testing
         # run: npx semantic-release --dry-run --branches ${{ inputs.branch }} # TODO: Remove --dry-run after testing
