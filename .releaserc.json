@@ -10,5 +10,9 @@
         "publishCmd": "publish-package"
       }
     ]
+  ],
+  "branches": [
+    { "name": "main" },
+    { "name": "development", "prerelease": true }
   ]
 }

@@ -1,12 +1,7 @@
-name: Create & Tag Release TEST
-
-# TODO: Remove after testing !!
+name: Create & Tag Release
 
 on:
-  push:
-    branches: ["refactor/semantic-releases"]
-    paths:
-      - ".github/workflows/create-tag-release-test.yml"
+  workflow_call:
 
 jobs:
   create-tag-release:
@@ -44,4 +39,4 @@ jobs:
       - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release@23 --dry-run --branches refactor/semantic-releases
+        run: npx semantic-release@23

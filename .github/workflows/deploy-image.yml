@@ -25,43 +25,6 @@ env:
   ORG_NAME: dfe-digital
 
 jobs:
-  # create-tag-release: # TODO: Put Back after Testing
-  #   runs-on: ubuntu-22.04
-  #   name: Tag & Create Release
-  #   permissions:
-  #     contents: write
-  #     issues: write
-  #     pull-requests: write
-  #     id-token: write
-
-  #   steps:
-  #     - name: Checkout Repository
-  #       uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0
-  #         persist-credentials: false
-
-  #     - name: Setup Node.JS
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: "lts/*"
-
-  #     - name: Install Dependencies
-  #       run: |
-  #         npm i npx@10
-  #         npm i @semantic-release/commit-analyzer@11
-  #         npm i @semantic-release/release-notes-generator@12
-  #         npm i @semantic-release/github@9
-  #         npm i @semantic-release/exec@6
-
-  #     - name: Verify Integrity of Installed Dependencies
-  #       run: npm audit signatures
-
-  #     - name: Create Release
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       run: npx semantic-release@23 --branches ${{ inputs.branch }}
-
   upgrade-database:
     runs-on: ubuntu-22.04
     name: Update Database for ${{ inputs.environment }}
