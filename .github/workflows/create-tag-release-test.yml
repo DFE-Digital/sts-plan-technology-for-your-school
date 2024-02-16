@@ -1,0 +1,43 @@
+name: Create & Tag Release TEST
+
+# TODO: Remove this workflow after testing and replace the create-tag-release job in deploy-image with this one!
+
+on:
+  pull_request:
+    branches: ["development"]
+    paths:
+      - ".github/workflows/create-tag-release-test.yml"
+
+jobs:
+  create-tag-release:
+    runs-on: ubuntu-22.04
+    name: Tag & Create Release
+    permissions:
+      contents: write # Publish Release
+      issues: write # Comment on Release Issues
+      pull-requests: write # Comment on released Pull Requests
+      id-token: write # OIDC for NPM Provenance
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.JS
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+
+      - name: Install Dependencies
+        run: npm clean-install
+
+      - name: Verify Integrity of Installed Dependencies
+        run: npm audit signatures
+
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release --dry-run --branches development # TODO: Replace with commented line after testing
+        # run: npx semantic-release --dry-run --branches ${{ inputs.branch }} # TODO: Remove --dry-run after testing
