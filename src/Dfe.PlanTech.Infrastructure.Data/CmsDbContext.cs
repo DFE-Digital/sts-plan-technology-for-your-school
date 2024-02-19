@@ -71,7 +71,9 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<QuestionDbEntity> ICmsDbContext.Questions => Questions;
     IQueryable<RecommendationPageDbEntity> ICmsDbContext.RecommendationPages => RecommendationPages;
     IQueryable<RichTextContentDbEntity> ICmsDbContext.RichTextContents => RichTextContents;
-    IQueryable<RichTextContentWithSlugDbEntity> ICmsDbContext.RichTextContentWithSlugs => RichTextContentWithSlugs;
+    IQueryable<RichTextContentWithSlugDbEntity> ICmsDbContext.RichTextContentWithSlugs => RichTextContentWithSlugs
+                                                                                                .Include(rt => rt.Data)
+                                                                                                .Include(rt => rt.Marks);
     IQueryable<RichTextDataDbEntity> ICmsDbContext.RichTextDataDbEntity => RichTextDataDbEntity;
     IQueryable<RichTextMarkDbEntity> ICmsDbContext.RichTextMarkDbEntity => RichTextMarkDbEntity;
     IQueryable<SectionDbEntity> ICmsDbContext.Sections => Sections;
@@ -221,7 +223,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
             .Include(page => page.Title)
             .AsSplitQuery()
             .FirstOrDefaultAsync(page => page.Slug == slug, cancellationToken);
-
 
     public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
 => queryable.ToListAsync(cancellationToken: cancellationToken);
