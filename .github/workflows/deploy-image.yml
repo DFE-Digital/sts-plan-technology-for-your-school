@@ -25,56 +25,10 @@ env:
   ORG_NAME: dfe-digital
 
 jobs:
-  set-env:
-    runs-on: ubuntu-22.04
-    name: Set Environment (Deploy Image)
-    outputs:
-      release: ${{ steps.var.outputs.release }}
-    steps:
-      - id: var
-        run: |
-          RELEASE=${{ inputs.environment }}-`date +%Y-%m-%d`.${{ github.run_number }}
-          echo "release=${RELEASE}" >> $GITHUB_OUTPUT
-
-  create-tag-release:
-    runs-on: ubuntu-22.04
-    name: Tag & Create Release
-    needs: set-env
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
-
-      - name: Create Tag
-        run: |
-          git tag ${{ needs.set-env.outputs.release }}
-          git push origin ${{ needs.set-env.outputs.release }}
-
-      - name: Create Release
-        uses: actions/github-script@v7
-        with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
-          script: |
-            try {
-              await github.rest.repos.createRelease({
-                draft: ${{ inputs.environment == 'staging' }},
-                generate_release_notes: true,
-                name: "${{ needs.set-env.outputs.release }}",
-                owner: context.repo.owner,
-                prerelease: ${{ inputs.environment == 'staging' }},
-                repo: context.repo.repo,
-                tag_name: "${{ needs.set-env.outputs.release }}",
-              });
-            } catch (error) {
-              core.setFailed(error.message);
-            }
-
   upgrade-database:
     runs-on: ubuntu-22.04
     name: Update Database for ${{ inputs.environment }}
     environment: ${{ inputs.environment }}
-    needs: set-env
 
     steps:
       - uses: actions/checkout@v4
@@ -105,7 +59,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Pull Image From GitHub Container Registry and Publish to Azure Container Registry
     environment: ${{ inputs.environment }}
-    needs: [set-env, upgrade-database]
+    needs: upgrade-database
 
     steps:
       - name: GitHub Container Registry Login
@@ -132,9 +86,9 @@ jobs:
 
   deploy-image:
     runs-on: ubuntu-22.04
-    name: Deploy Image To ${{ inputs.environment }} (${{ needs.set-env.outputs.release }})
+    name: Deploy Image To ${{ inputs.environment }}
     environment: ${{ inputs.environment }}
-    needs: [set-env, upgrade-database, pull-image-from-gcr-and-publish-to-acr]
+    needs: [upgrade-database, pull-image-from-gcr-and-publish-to-acr]
 
     steps:
       - uses: actions/checkout@v4
@@ -169,12 +123,7 @@ jobs:
     if: ${{ inputs.environment == 'tst' || inputs.environment == 'staging' }}
     environment: ${{ inputs.environment }}
     needs:
-      [
-        set-env,
-        upgrade-database,
-        pull-image-from-gcr-and-publish-to-acr,
-        deploy-image,
-      ]
+      [upgrade-database, pull-image-from-gcr-and-publish-to-acr, deploy-image]
     env:
       az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
       az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
