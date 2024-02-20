@@ -12,7 +12,7 @@ public interface IRecommendationIntro<THeader, TContentComponent> : IRecommendat
 where THeader : IHeader
 where TContentComponent : IContentComponent
 {
-    public Header Header { get; }
+    public THeader Header { get; }
 
     public List<TContentComponent> Content { get; }
 }
