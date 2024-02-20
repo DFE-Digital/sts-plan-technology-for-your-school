@@ -23,7 +23,9 @@ const selectFirstRadioButton = () => {
             .invoke("text")
             .then((answer) => (questionWithAnswer.answer = answer.trim()));
 
-          cy.wrap(item).find("input").click();
+          cy.wrap(item).find("input", { force: true }).should("exist");
+
+          cy.wrap(item).find("label").click();
         });
     })
     .then(() => cy.wrap(questionWithAnswer));
