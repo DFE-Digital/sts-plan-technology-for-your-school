@@ -28,9 +28,9 @@ public class JsonToEntityMappers
     {
         var contentType = payload.Sys.ContentType.Sys.Id;
 
-        return _mappers.FirstOrDefault(mapper => mapper.AcceptsContentType(contentType)) ?? throw new Exception($"Could not find mapper for {contentType}");
+        return _mappers.FirstOrDefault(mapper => mapper.AcceptsContentType(contentType)) ?? throw new MapperException($"Could not find mapper for {contentType}");
     }
 
     private CmsWebHookPayload SerialiseToPayload(string requestBody)
-      => JsonSerializer.Deserialize<CmsWebHookPayload>(requestBody, _jsonSerialiserOptions) ?? throw new Exception($"Could not serialise body to {typeof(CmsWebHookPayload)}. Body was {requestBody}");
+      => JsonSerializer.Deserialize<CmsWebHookPayload>(requestBody, _jsonSerialiserOptions) ?? throw new MapperException($"Could not serialise body to {typeof(CmsWebHookPayload)}. Body was {requestBody}");
 }

@@ -18,7 +18,7 @@ public class PageMapper : JsonToDbMapper<PageDbEntity>
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
-        var id = values["id"]?.ToString() ?? throw new Exception("Not found id");
+        var id = values["id"]?.ToString() ?? throw new MapperException("Not found id");
 
         values = MoveValueToNewKey(values, "title", "titleId");
 

@@ -30,9 +30,7 @@ public class GetRichTextsForPageQuery(ICmsDbContext db, ILogger<GetRichTextsForP
 
             if (!hasTextBodyContents) return;
 
-            var richTextContentQuery = _db.RichTextContentWithSlugs.Where(PageMatchesSlugAndPublishedOrIsPreview(page));
-
-            var richTexts = await _db.ToListAsync(richTextContentQuery, cancellationToken);
+            var richTextContentQuery = await _db.RichTextContentWithSlugs.Where(PageMatchesSlugAndPublishedOrIsPreview(page));
         }
         catch (Exception ex)
         {
