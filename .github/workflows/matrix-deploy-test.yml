@@ -1,12 +1,11 @@
 name: Multi stage build & deploy
 
 on:
-  workflow_dispatch:
   push:
     branches: ["main", "development", "fix/semver-release"]
     paths:
       - "src/**"
-      - ".github/workflows/matrix-deploy.yml"
+      - ".github/workflows/matrix-deploy-test.yml"
 
 jobs:
   set-env:
