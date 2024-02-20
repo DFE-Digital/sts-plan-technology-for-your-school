@@ -1,58 +1,75 @@
-import * as esbuild from 'esbuild';
-import { sassPlugin } from 'esbuild-sass-plugin';
-import { cpSync, readdirSync } from 'fs';
+import * as esbuild from "esbuild";
+import { sassPlugin } from "esbuild-sass-plugin";
+import { copyFileSync, cpSync, readdirSync } from "fs";
+
+import { parse } from "path";
 
 //Build JS
 await esbuild.build({
-  entryPoints: ['scripts/app.js'],
+  entryPoints: ["scripts/app.js"],
   bundle: true,
   minify: true,
   sourcemap: true,
-  target: ['chrome58', 'firefox57', 'safari11', 'edge16'],
-  outfile: 'out/js/app.js',
-})
+  outfile: "out/js/app.js",
+});
 
 //Builds SASS
 await esbuild.build({
-  entryPoints: ['styles/scss/application.scss'],
+  entryPoints: ["styles/scss/application.scss"],
   bundle: true,
   minify: true,
   sourcemap: true,
-  target: ['chrome58', 'firefox57', 'safari11', 'edge16'],
-  external: ['/assets/*'],
-  plugins: [sassPlugin({
-    loader: { ".woff2": "file", ".png": "file" },
-  })],
-  outfile: 'out/css/application.css'
+  target: ["chrome58", "firefox57", "safari11", "edge16"],
+  external: ["/assets/*"],
+  plugins: [
+    sassPlugin({
+      loader: { ".woff2": "file", ".png": "file" },
+    }),
+  ],
+  outfile: "out/css/application.css",
 });
 
 //Copy assets
 //DFE
 const dfeDir = "./node_modules/dfe-frontend-alpha/packages/assets";
-readdirSync(dfeDir).forEach(file => {
+readdirSync(dfeDir).forEach((file) => {
   if (file.indexOf(".png") == -1) {
     return;
   }
 
-  cpSync(dfeDir + "/" + file, "./out/assets/images/" + file, { overwrite: true });
+  cpSync(dfeDir + "/" + file, "./out/assets/images/" + file, {
+    overwrite: true,
+  });
 });
 
 //GOVUK
-const govukDir = "./node_modules/govuk-frontend/govuk/assets/";
+const govukDir = "./node_modules/govuk-frontend/dist/govuk/assets/";
 const targetFolders = ["images", "fonts"];
 const ignoreFiles = ["favicon.ico"];
 
 for (const folder of targetFolders) {
   const path = govukDir + folder;
 
-  readdirSync(path).forEach(file => {
-    if (ignoreFiles.some(ignoreFile => ignoreFile == file)) {
+  readdirSync(path).forEach((file) => {
+    if (ignoreFiles.some((ignoreFile) => ignoreFile == file)) {
       return;
     }
 
-    cpSync(`${path}/${file}`, `./out/assets/${folder}/${file}`, { overwrite: true });
-  })
+    cpSync(`${path}/${file}`, `./out/assets/${folder}/${file}`, {
+      overwrite: true,
+    });
+  });
 }
+
+copyFileSync(
+  "./node_modules/govuk-frontend/dist/govuk/govuk-frontend.min.js",
+  "./out/js/govuk-frontend.min.js"
+);
+
+copyFileSync(
+  ".//node_modules/govuk-frontend/dist/govuk/govuk-frontend.min.css",
+  "./out/css/govuk-frontend.min.css"
+);
 
 //Copy to Dfe.PlanTech.Web
 const targetDir = "../Dfe.PlanTech.Web/wwwroot";
@@ -63,4 +80,3 @@ for (const folder of folders) {
 
   cpSync(path, `${targetDir}/${folder}`, { recursive: true, overwrite: true });
 }
-

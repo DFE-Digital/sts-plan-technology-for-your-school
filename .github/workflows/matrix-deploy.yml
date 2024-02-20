@@ -36,6 +36,12 @@ jobs:
       branch: ${{ needs.set-env.outputs.branch }}
       checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
 
+  create-and-tag-release:
+    needs: [set-env, create-and-publish-image]
+    name: Create & Tag Release
+    uses: ./.github/workflows/create-tag-release.yml
+    secrets: inherit
+
   check-for-terraform-changes:
     needs: create-and-publish-image
     runs-on: ubuntu-22.04
@@ -94,21 +100,21 @@ jobs:
       branch: ${{ needs.set-env.outputs.branch }}
       checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
     secrets: inherit
-    
+
   generate-subtopic-visualisations:
-    needs: [ set-env, deploy-to-dev-and-test ]
+    needs: [set-env, deploy-to-dev-and-test]
     name: Run the visualisation workflow again staging content.
     if: ${{ needs.set-env.outputs.branch == 'main' }}
     strategy:
       max-parallel: 1
       fail-fast: true
       matrix:
-        target: [ Staging ]
+        target: [Staging]
     uses: ./.github/workflows/qa-viz.yml
     with:
       environment: ${{ matrix.target }}
     secrets: inherit
-  
+
   plan-terraform-for-staging:
     needs: [set-env, deploy-to-dev-and-test, check-for-terraform-changes]
     name: Plan Terraform Infrastructure for staging
