@@ -3,13 +3,13 @@
 @using Dfe.PlanTech.Web.Helpers;
 
 @using System.Globalization;
+
 @section Head {
     <link rel="stylesheet" href="~/css/application.css">
-    <link rel="stylesheet" href="~/css/govuk-frontend.min.css">
 
-            @Html.Raw(GtmConfiguration.Analytics)
-            @Html.Raw(GtmConfiguration.Head)
-            @RenderSection("Head", false)
+    @Html.Raw(GtmConfiguration.Analytics)
+    @Html.Raw(GtmConfiguration.Head)
+    @RenderSection("Head", false)
 }
 
 @{
@@ -30,7 +30,7 @@
         await Html.RenderPartialAsync("_Header");
     }
 
-@RenderSection("Header", false)
+    @RenderSection("Header", false)
 }
 
 @section BeforeContent {
