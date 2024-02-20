@@ -111,15 +111,22 @@ public class GetSubmissionStatusesQueryTests
                 return queryable.FirstOrDefault();
             });
 
+        Db.ToListAsync(Arg.Any<IQueryable<SectionStatusDto>>(), Arg.Any<CancellationToken>()).Returns((callinfo) =>
+        {
+            var query = callinfo.ArgAt<IQueryable<SectionStatusDto>>(0);
+
+            return query.ToList();
+        });
+
         user.GetEstablishmentId().Returns(establishmentId);
     }
 
     [Fact]
-    public void GetSectionSubmissionStatuses_ReturnsListOfStatuses()
+    public async Task GetSectionSubmissionStatuses_ReturnsListOfStatuses()
     {
         var sections = new Section[2] { new() { Sys = new SystemDetails { Id = "1" } }, new() { Sys = new SystemDetails { Id = "3" } } };
 
-        var result = CreateStrut().GetSectionSubmissionStatuses(sections);
+        var result = await CreateStrut().GetSectionSubmissionStatuses(sections);
 
         Assert.Equal(result.Count, sections.Length);
 
