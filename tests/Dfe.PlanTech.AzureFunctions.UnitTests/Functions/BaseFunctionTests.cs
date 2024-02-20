@@ -24,8 +24,8 @@ public class BaseFunctionTests
         var response = _baseFunction.ReturnEmptyBodyError(request);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        var x = _logger.ReceivedWithAnyArgs(1);
-        Assert.NotNull(x);
+        var loggerResults = _logger.ReceivedWithAnyArgs(1);
+        Assert.NotNull(loggerResults);
     }
 
     [Fact]
@@ -40,7 +40,8 @@ public class BaseFunctionTests
 
         Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
 
-        _logger.ReceivedWithAnyArgs(1);
+        var loggerResults = _logger.ReceivedWithAnyArgs(1);
+        Assert.NotNull(loggerResults);
         var loggerArguments = _logger.ReceivedCalls().First().GetArguments();
 
         var formattableStrings = loggerArguments[2] as IEnumerable<KeyValuePair<string, object>>;
