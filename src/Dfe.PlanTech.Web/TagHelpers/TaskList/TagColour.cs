@@ -10,5 +10,8 @@ public static class TagColour
 
     private readonly static string[] _colours = [Blue, Grey, LightBlue, Red];
 
-    public static string GetMatchingColour(string? toMatch) => string.IsNullOrEmpty(toMatch) ? Default : _colours.FirstOrDefault(colour => colour == toMatch, Default);
+    public static string GetMatchingColour(string? toMatch)
+    => string.IsNullOrEmpty(toMatch) ?
+        Default :
+        _colours.FirstOrDefault(colour => string.Equals(colour, toMatch, StringComparison.InvariantCultureIgnoreCase), Default);
 }
