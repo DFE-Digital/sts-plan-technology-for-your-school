@@ -1,0 +1,19 @@
+@model IEnumerable<Dfe.PlanTech.Domain.Content.Interfaces.IAccordion>
+
+<div class="govuk-grid-column-one-third">
+    <div class="govuk-accordion" data-module="govuk-accordion" id="accordion-default">
+        @foreach (var accordion in Model)
+        {
+            <div class="govuk-accordion__section">
+                <div class="govuk-accordion__section-header">
+                    <h2 class="govuk-accordion__section-heading">
+                        <span class="govuk-accordion__section-button">@accordion.Header</span>
+                    </h2>
+                </div>
+                <div class="govuk-accordion__section-content">
+                    <p class="govuk-body">@accordion.Link</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
