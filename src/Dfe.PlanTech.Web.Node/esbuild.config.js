@@ -1,10 +1,9 @@
 import * as esbuild from "esbuild";
 import { sassPlugin } from "esbuild-sass-plugin";
 import { copyFileSync, cpSync, readdirSync } from "fs";
-
 import { parse } from "path";
 
-//Build JS
+//Build main JS
 await esbuild.build({
   entryPoints: ["scripts/app.js"],
   bundle: true,
@@ -13,7 +12,24 @@ await esbuild.build({
   outfile: "out/js/app.js",
 });
 
-//Builds SASS
+//Build extra JS
+const jsFilePaths = [
+  "./node_modules/@govuk-prototype-kit/step-by-step/javascripts/step-by-step-navigation.js",
+  "./node_modules/@govuk-prototype-kit/step-by-step/javascripts/step-by-step-polyfills.js",
+];
+
+const jsEntryPoints = Object.fromEntries(
+  new Map(jsFilePaths.map((path) => [parse(path).name, path]))
+);
+
+await esbuild.build({
+  entryPoints: jsEntryPoints,
+  bundle: true,
+  minify: true,
+  sourcemap: true,
+  outdir: "out/js/",
+});
+
 await esbuild.build({
   entryPoints: ["styles/scss/application.scss"],
   bundle: true,
