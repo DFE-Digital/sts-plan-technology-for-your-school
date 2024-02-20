@@ -2,6 +2,7 @@
 $govuk-global-styles: true;
 $govuk-new-link-styles: true;
 
+@use "../../node_modules/govuk-frontend/dist/govuk/all.scss";
 @use "../../node_modules/dfe-frontend-alpha/packages/dfefrontend";
 @import "overrides";
 @import "app-task-list";

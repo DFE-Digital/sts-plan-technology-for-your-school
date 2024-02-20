@@ -2,8 +2,6 @@ import * as esbuild from "esbuild";
 import { sassPlugin } from "esbuild-sass-plugin";
 import { copyFileSync, cpSync, readdirSync } from "fs";
 
-import { parse } from "path";
-
 //Build JS
 await esbuild.build({
   entryPoints: ["scripts/app.js"],
