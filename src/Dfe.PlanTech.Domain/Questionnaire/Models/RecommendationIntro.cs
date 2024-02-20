@@ -8,7 +8,7 @@ public class RecommendationIntro : ContentComponent, IRecommendationIntro<Title,
 {
     public Title Title { get; init; } = null!;
 
-    public Maturity Maturity { get; init; }
+    public string Maturity { get; init; } = null!;
 
     public List<ContentComponent> Content { get; init; } = [];
 }
