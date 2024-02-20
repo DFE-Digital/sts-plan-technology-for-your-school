@@ -1,158 +1,56 @@
 @model IEnumerable<Dfe.PlanTech.Domain.Content.Interfaces.IAccordion>
 
 <div class="govuk-grid-column-one-third">
-
-    <div class="app-step-nav-related app-step-nav-related--singular">
-      <h2 class="app-step-nav-related__heading">
-        <span class="app-step-nav-related__pretitle">Part of</span>
-        <a href="install-fibre-broadband-f-1.html">
-          Broadband Recommendations
-        </a>
-      </h2>
-    </div>
-
+    
     <div data-module="appstepnav" id="step-by-step-navigation" class="app-step-nav govuk-!-display-none-print app-step-nav--active" data-show-text="Show" data-hide-text="Hide" data-show-all-text="Show all actions" data-hide-all-text="Hide all steps">
-      <div class="app-step-nav__controls govuk-!-display-none-print"><button aria-expanded="false" class="app-step-nav__button app-step-nav__button--controls js-step-controls-button" aria-controls="step-panel-check-you-re-allowed-to-drive-1"><span class="app-step-nav__chevron js-step-controls-button-icon app-step-nav__chevron--down"></span><span class="app-step-nav__button-text app-step-nav__button-text--all js-step-controls-button-text">Show all actions</span></button></div><ol class="app-step-nav__steps">
-        <li class="app-step-nav__step js-step" aria-current="step" id="check-you-re-allowed-to-drive">
-          <div class="app-step-nav__header js-toggle-panel" data-position="1">
-            <h3 class="app-step-nav__title">
-              <span class="app-step-nav__circle app-step-nav__circle--number">
-                <span class="app-step-nav__circle-inner">
-                  <span class="app-step-nav__circle-background">
-                    <span class="govuk-visually-hidden govuk-!-display-none-print">Step</span> 1<span class="govuk-visually-hidden govuk-!-display-none-print" aria-hidden="true">:</span>
-                  </span>
-                </span>
-              </span>
+        <div class="app-step-nav__controls govuk-!-display-none-print">
+            <button aria-expanded="false" class="app-step-nav__button app-step-nav__button--controls js-step-controls-button">
+                <span class="app-step-nav__chevron js-step-controls-button-icon app-step-nav__chevron--down"></span><span class="app-step-nav__button-text app-step-nav__button-text--all js-step-controls-button-text">Show all actions</span>
+            </button>
+        </div>
+        <ol class="app-step-nav__steps">
+            @foreach (var accordion in Model)
+            {
+                <li class="app-step-nav__step js-step" aria-current="step">
+                    <div class="app-step-nav__header js-toggle-panel">
+                        <h3 class="app-step-nav__title">
+                            <span class="app-step-nav__circle app-step-nav__circle--number">
+                                <span class="app-step-nav__circle-inner">
+                                    <span class="app-step-nav__circle-background">
+                                        <span class="govuk-visually-hidden govuk-!-display-none-print">Step</span>@accordion.Order<span class="govuk-visually-hidden govuk-!-display-none-print" aria-hidden="true">:</span>
+                                    </span>
+                                </span>
+                            </span>
 
-              <span class="js-step-title"><button class="app-step-nav__button app-step-nav__button--title js-step-title-button" aria-expanded="false" aria-controls="step-panel-check-you-re-allowed-to-drive-1"><span class="app-step-nav____title-text-focus"><span class="app-step-nav__title-text js-step-title-text">
-                Document
-              </span><span class="govuk-visually-hidden app-step-nav__section-heading-divider">, </span></span><span class="app-step-nav__toggle-link js-toggle-link govuk-!-display-none-print"><span class="app-step-nav__toggle-link-focus"><span class="app-step-nav__chevron js-toggle-link-icon app-step-nav__chevron--down"></span><span class="app-step-nav__button-text js-toggle-link-text">Show</span></span><span class="govuk-visually-hidden"> this section</span></span></button></span>
-            </h3>
-          </div>
+                            <span class="js-step-title">
+                                <button class="app-step-nav__button app-step-nav__button--title js-step-title-button" aria-expanded="false">
+                                    <span class="app-step-nav____title-text-focus">
+                                        <span class="app-step-nav__title-text js-step-title-text">
+                                            @accordion.Header
+                                        </span><span class="govuk-visually-hidden app-step-nav__section-heading-divider">, </span>
+                                    </span>
+                                    <span class="app-step-nav__toggle-link js-toggle-link govuk-!-display-none-print">
+                                        <span class="app-step-nav__toggle-link-focus">
+                                            <span class="app-step-nav__chevron js-toggle-link-icon app-step-nav__chevron--down"></span><span class="app-step-nav__button-text js-toggle-link-text">Show</span>
+                                        </span>
+                                    </span>
+                                </button>
+                            </span>
+                        </h3>
+                    </div>
 
-          <div class="app-step-nav__panel js-panel js-hidden" id="step-panel-check-you-re-allowed-to-drive-1">
-            <p class="app-step-nav__paragraph">Take a step  back and look at your schools current broadband provision</p>
+                    <div class="app-step-nav__panel js-panel js-hidden">
+                        <ol class="app-step-nav__list " data-length="3">
+                            <li class="app-step-nav__list-item js-list-item ">
+                                <a class="app-step-nav__link js-link" href="@accordion.Link">
+                                    @accordion.Link
+                                </a>
+                            </li>
+                        </ol>
 
-            <ol class="app-step-nav__list " data-length="3">
-              <li class="app-step-nav__list-item js-list-item ">
-                <a data-position="2.1" class="app-step-nav__link js-link" href="install-fibre-broadband-f-2.html">
-                  <span class="app-step-nav__link-active-context govuk-visually-hidden">You are currently viewing: </span>Document information about your broadband contract</a>
-              </li>
-                 </ol>
-
-          </div>
-
-        </li>
-        
-        <li class="app-step-nav__step js-step" id="prepare-for-your-theory-test">
-          <div class="app-step-nav__header js-toggle-panel" data-position="4">
-            <h3 class="app-step-nav__title">
-              <span class="app-step-nav__circle app-step-nav__circle--logic">
-                <span class="app-step-nav__circle-inner">
-                  <span class="app-step-nav__circle-background">
-                    and
-                  </span>
-                </span>
-              </span>
-
-              <span class="js-step-title"><button class="app-step-nav__button app-step-nav__button--title js-step-title-button" aria-expanded="false" aria-controls="step-panel-prepare-for-your-theory-test-4"><span class="app-step-nav____title-text-focus"><span class="app-step-nav__title-text js-step-title-text">
-             Purchase
-              </span><span class="govuk-visually-hidden app-step-nav__section-heading-divider">, </span></span><span class="app-step-nav__toggle-link js-toggle-link govuk-!-display-none-print"><span class="app-step-nav__toggle-link-focus"><span class="app-step-nav__chevron js-toggle-link-icon app-step-nav__chevron--down"></span><span class="app-step-nav__button-text js-toggle-link-text">Show</span></span><span class="govuk-visually-hidden"> this section</span></span></button></span>
-            </h3>
-          </div>
-
-          <div class="app-step-nav__panel js-panel js-hidden" id="step-panel-prepare-for-your-theory-test-4">
-            <ol class="app-step-nav__list " data-length="3">
-              <li class="app-step-nav__list-item js-list-item ">
-                <a data-position="4.1" class="app-step-nav__link js-link" href="install-fibre-broadband-f-5.html">How to purchase broadband</a>
-              </li>
-				
-				 </ol>
-			  
-			  <p class="app-step-nav__paragraph">Resources external to this service</p>
-			  <ol class="app-step-nav__list " data-length="4">
-				
-              <li class="app-step-nav__list-item js-list-item ">
-                <a data-position="4.2" class="app-step-nav__link js-link" href="#">Get help buying for schools service </a> 
-              </li>
-              <li class="app-step-nav__list-item js-list-item ">
-                <a rel="external" data-position="4.3" class="app-step-nav__link js-link" href="#">filtering and monitoring standards for schools and colleges </a> 
-              </li>
-            </ol>
-          </div>
-
-        </li>
-        <li class="app-step-nav__step js-step" id="book-and-manage-your-theory-test">
-          <div class="app-step-nav__header js-toggle-panel" data-position="5">
-            <h3 class="app-step-nav__title">
-              <span class="app-step-nav__circle app-step-nav__circle--logic">
-                <span class="app-step-nav__circle-inner">
-                       <span class="app-step-nav__circle-background">
-                    or
-                  </span>
-                </span>
-              </span>
-
-              <span class="js-step-title"><button class="app-step-nav__button app-step-nav__button--title js-step-title-button" aria-expanded="false" aria-controls="step-panel-book-and-manage-your-theory-test-5"><span class="app-step-nav____title-text-focus"><span class="app-step-nav__title-text js-step-title-text">
-               Switch
-              </span><span class="govuk-visually-hidden app-step-nav__section-heading-divider">, </span></span><span class="app-step-nav__toggle-link js-toggle-link govuk-!-display-none-print"><span class="app-step-nav__toggle-link-focus"><span class="app-step-nav__chevron js-toggle-link-icon app-step-nav__chevron--down"></span><span class="app-step-nav__button-text js-toggle-link-text">Show</span></span><span class="govuk-visually-hidden"> this section</span></span></button></span>
-            </h3>
-          </div>
-
-          <div class="app-step-nav__panel js-panel js-hidden" id="step-panel-book-and-manage-your-theory-test-5">
-     
-            <ol class="app-step-nav__list " data-length="5">
-              <li class="app-step-nav__list-item js-list-item ">
-                <a data-position="5.1" class="app-step-nav__link js-link" href="install-fibre-broadband-f-6.html">How to prepare for switching suppliers</a>
-              </li>
-            </ol>
-			  
-			  
-			   
-			  
-			  <p class="app-step-nav__paragraph">Resources external to this service</p>
-			  <ol class="app-step-nav__list " data-length="4">
-              <li class="app-step-nav__list-item js-list-item ">
-                <a data-position="3.2" class="app-step-nav__link js-link" href="#">Filtering and monitoring standards for schools</a> 
-              </li>
- 
-            </ol>
-			  
-		
-          </div>
-
-        </li>
-        <li class="app-step-nav__step js-step" id="book-and-manage-your-driving-test">
-          <div class="app-step-nav__header js-toggle-panel" data-position="6">
-            <h3 class="app-step-nav__title">
-              <span class="app-step-nav__circle app-step-nav__circle--number">
-                <span class="app-step-nav__circle-inner">
-                  <span class="app-step-nav__circle-background">
-                    <span class="govuk-visually-hidden govuk-!-display-none-print">Step</span> 4<span class="govuk-visually-hidden govuk-!-display-none-print" aria-hidden="true">:</span>
-                  </span>
-                </span>
-              </span>
-
-              <span class="js-step-title"><button class="app-step-nav__button app-step-nav__button--title js-step-title-button" aria-expanded="false" aria-controls="step-panel-book-and-manage-your-driving-test-6"><span class="app-step-nav____title-text-focus"><span class="app-step-nav__title-text js-step-title-text">
-                Review
-              </span><span class="govuk-visually-hidden app-step-nav__section-heading-divider">, </span></span><span class="app-step-nav__toggle-link js-toggle-link govuk-!-display-none-print"><span class="app-step-nav__toggle-link-focus"><span class="app-step-nav__chevron js-toggle-link-icon app-step-nav__chevron--down"></span><span class="app-step-nav__button-text js-toggle-link-text">Show</span></span><span class="govuk-visually-hidden"> this section</span></span></button></span>
-            </h3>
-          </div>
-
-          <div class="app-step-nav__panel js-panel js-hidden" id="step-panel-book-and-manage-your-driving-test-6">
-
-            <ol class="app-step-nav__list " data-length="5">
-              <li class="app-step-nav__list-item js-list-item ">
-                <a data-position="6.1" class="app-step-nav__link js-link" href="install-fibre-broadband-f-8.html">Review your broadband contract at least once a year </a>
-              </li>
-            </ol>
-
-          </div>
-
-        </li>
-        
-      </ol>
+                    </div>
+                </li>
+            }
+        </ol>
     </div>
-
-
-  </div>
+</div>
