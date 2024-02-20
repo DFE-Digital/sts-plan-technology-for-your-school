@@ -6,7 +6,7 @@ public interface ISubTopicRecommendation<TRecommendationIntro, TRecommendationSe
 where TRecommendationIntro : IRecommendationIntro
 where TRecommendationSection : IRecommendationSection<Answer, RecommendationChunk>
 {
-    public List<TRecommendationIntro> RecommendationIntros { get; }
+    public List<TRecommendationIntro> Intros { get; }
 
-    public TRecommendationSection RecommendationSection { get; }
+    public TRecommendationSection Section { get; }
 }

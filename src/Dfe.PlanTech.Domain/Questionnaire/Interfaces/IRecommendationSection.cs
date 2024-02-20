@@ -9,5 +9,5 @@ where TRecommendationChunk : IRecommendationChunk<Header, ContentComponent, Answ
 {
     public List<TAnswer> Answers { get; }
 
-    public List<TRecommendationChunk> RecommendationChunks { get; }
+    public List<TRecommendationChunk> Chunks { get; }
 }

@@ -7,5 +7,5 @@ public class RecommendationSection : ContentComponent, IRecommendationSection<An
 {
     public List<Answer> Answers { get; init; } = [];
 
-    public List<RecommendationChunk> RecommendationChunks { get; init; } = [];
+    public List<RecommendationChunk> Chunks { get; init; } = [];
 }
