@@ -83,12 +83,10 @@ describe("Question page", () => {
   it("should have back button that navigates to last question once submitted", () => {
     cy.url().then((firstUrl) => {
       //Select first radio button
-      cy.get("form div.govuk-radios div.govuk-radios__item input")
-        .first()
-        .click();
+      cy.selectFirstRadioButton();
 
-      //Submit
-      cy.get("form button.govuk-button").contains("Save and continue").click();
+      //continue
+      cy.saveAndContinue();
 
       //Ensure path changes
       cy.location("pathname", { timeout: 60000 }).should("not.equal", firstUrl);
