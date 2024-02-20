@@ -35,7 +35,8 @@
 
 @section BeforeContent {
     <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
-
+    <script src="/js/step-by-step-navigation.js"></script>
+    <script src="/js/step-by-step-polyfills.js"></script>
     @{
         await Html.RenderPartialAsync("BetaHeader");
     }
@@ -53,12 +54,12 @@
 @section BodyEnd {
     <script src="~/js/app.js"></script>
     <script src="~/js/govuk-frontend.min.js" type="module"></script>
-    <script src="~/js/step-by-step-navigation.js" type="module"></script>
-    <script src="~/js/step-by-step-polyfills.js" type="module"></script>
   
     <script type="module">
         import { initAll } from '/js/govuk-frontend.min.js';
 
         initAll();
+        var $element = document.querySelector('#step-by-step-navigation')
+        var stepByStepNavigation = new GOVUK.Modules.AppStepNav($element).init()
     </script>
 }
