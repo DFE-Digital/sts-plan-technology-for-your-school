@@ -45,6 +45,21 @@ await esbuild.build({
   outfile: "out/css/application.css",
 });
 
+await esbuild.build({
+  entryPoints: ["styles/scss/step-by-step.scss"],
+  bundle: true,
+  minify: true,
+  sourcemap: true,
+  target: ["chrome58", "firefox57", "safari11", "edge16"],
+  external: ["/assets/*"],
+  plugins: [
+    sassPlugin({
+      loader: { ".woff2": "file", ".png": "file" },
+    }),
+  ],
+  outfile: "out/css/step-by-step.css",
+});
+
 //Copy assets
 //DFE
 const dfeDir = "./node_modules/dfe-frontend-alpha/packages/assets";
@@ -80,11 +95,6 @@ for (const folder of targetFolders) {
 copyFileSync(
   "./node_modules/govuk-frontend/dist/govuk/govuk-frontend.min.js",
   "./out/js/govuk-frontend.min.js"
-);
-
-copyFileSync(
-  ".//node_modules/govuk-frontend/dist/govuk/govuk-frontend.min.css",
-  "./out/css/govuk-frontend.min.css"
 );
 
 //Copy to Dfe.PlanTech.Web

@@ -1,10 +1,5 @@
-@import "../../node_modules/govuk-frontend/dist/govuk/all.scss";
-@import "../../node_modules/dfe-frontend-alpha/packages/dfefrontend";
-
-//Step-by-step navigation pattern. See https://design-system.service.gov.uk/patterns/step-by-step-navigation/
-@import "../../node_modules/@govuk-prototype-kit/step-by-step/sass/_step-by-step-navigation.scss";
-@import "../../node_modules/@govuk-prototype-kit/step-by-step/sass/_step-by-step-navigation-related.scss";
-@import "../../node_modules/@govuk-prototype-kit/step-by-step/sass/_step-by-step-navigation-header.scss";
+@use "../../node_modules/govuk-frontend/dist/govuk/all.scss";
+@use "../../node_modules/dfe-frontend-alpha/packages/dfefrontend";
 
 @import "overrides";
 @import "app-task-list";
