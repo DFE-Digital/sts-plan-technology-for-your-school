@@ -5,7 +5,7 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 public interface IRecommendationSection<TAnswer, TRecommendationChunk>
 where TAnswer : IAnswer
-where TRecommendationChunk : IRecommendationChunk<Header, ContentComponent, Answer>
+where TRecommendationChunk : IRecommendationChunk<Title, Header, ContentComponent, Answer>
 {
     public List<TAnswer> Answers { get; }
 
