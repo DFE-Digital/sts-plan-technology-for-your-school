@@ -8,11 +8,11 @@ public interface IRecommendationIntro
     public string Maturity { get; }
 }
 
-public interface IRecommendationIntro<TTitle, TContentComponent> : IRecommendationIntro
-where TTitle : ITitle
+public interface IRecommendationIntro<THeader, TContentComponent> : IRecommendationIntro
+where THeader : IHeader
 where TContentComponent : IContentComponent
 {
-    public Title Title { get; }
+    public Header Header { get; }
 
     public List<TContentComponent> Content { get; }
 }
