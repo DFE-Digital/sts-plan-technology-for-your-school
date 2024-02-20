@@ -6,19 +6,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewComponents;
 
-public class RecommendationsViewComponent : ViewComponent
+public class RecommendationsViewComponent(ILogger<RecommendationsViewComponent> logger,
+    IGetSubmissionStatusesQuery query) : ViewComponent
 {
-    private readonly ILogger<RecommendationsViewComponent> _logger;
-    private readonly IGetSubmissionStatusesQuery _query;
+    private readonly ILogger<RecommendationsViewComponent> _logger = logger;
+    private readonly IGetSubmissionStatusesQuery _query = query;
 
-    public RecommendationsViewComponent(ILogger<RecommendationsViewComponent> logger,
-        IGetSubmissionStatusesQuery query)
-    {
-        _logger = logger;
-        _query = query;
-    }
-
-    public IViewComponentResult Invoke(IEnumerable<ICategoryComponent> categories)
+    public async Task<IViewComponentResult> InvokeAsync(IEnumerable<ICategoryComponent> categories)
     {
         var allSectionsOfCombinedCategories = new List<ISectionComponent>();
         var allSectionStatusesOfCombinedCategories = new List<SectionStatusDto>();
@@ -31,7 +25,7 @@ public class RecommendationsViewComponent : ViewComponent
                 recommendationsAvailable = true;
             }
 
-            var categoryElement = RetrieveSectionStatuses(category);
+            var categoryElement = await RetrieveSectionStatuses(category);
             allSectionsOfCombinedCategories.AddRange(categoryElement.Sections);
             allSectionStatusesOfCombinedCategories.AddRange(categoryElement.SectionStatuses);
         }
@@ -75,11 +69,11 @@ public class RecommendationsViewComponent : ViewComponent
         }
     }
 
-    public ICategoryComponent RetrieveSectionStatuses(ICategoryComponent category)
+    public async Task<ICategoryComponent> RetrieveSectionStatuses(ICategoryComponent category)
     {
         try
         {
-            category.SectionStatuses = _query.GetSectionSubmissionStatuses(category.Sections);
+            category.SectionStatuses = await _query.GetSectionSubmissionStatuses(category.Sections);
             category.Completed = category.SectionStatuses.Count(x => x.Completed == 1);
             category.RetrievalError = false;
 

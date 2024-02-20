@@ -7,26 +7,19 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewComponents;
 
-public class CategorySectionViewComponent : ViewComponent
+public class CategorySectionViewComponent(ILogger<CategorySectionViewComponent> logger, IGetSubmissionStatusesQuery query) : ViewComponent
 {
-    private readonly ILogger<CategorySectionViewComponent> _logger;
-    private readonly IGetSubmissionStatusesQuery _query;
+    private readonly ILogger<CategorySectionViewComponent> _logger = logger;
+    private readonly IGetSubmissionStatusesQuery _query = query;
 
-
-    public CategorySectionViewComponent(ILogger<CategorySectionViewComponent> logger, IGetSubmissionStatusesQuery query)
+    public async Task<IViewComponentResult> InvokeAsync(Category category)
     {
-        _logger = logger;
-        _query = query;
-    }
-
-    public IViewComponentResult Invoke(Category category)
-    {
-        var viewModel = GenerateViewModel(category);
+        var viewModel = await GenerateViewModel(category);
 
         return View(viewModel);
     }
 
-    private CategorySectionViewComponentViewModel GenerateViewModel(Category category)
+    private async Task<CategorySectionViewComponentViewModel> GenerateViewModel(Category category)
     {
         bool sectionsExist = category.Sections?.Count > 0;
 
@@ -40,7 +33,7 @@ public class CategorySectionViewComponent : ViewComponent
             };
         }
 
-        category = RetrieveSectionStatuses(category);
+        category = await RetrieveSectionStatuses(category);
 
         return new CategorySectionViewComponentViewModel()
         {
@@ -98,11 +91,11 @@ public class CategorySectionViewComponent : ViewComponent
         }
     }
 
-    public Category RetrieveSectionStatuses(Category category)
+    public async Task<Category> RetrieveSectionStatuses(Category category)
     {
         try
         {
-            category.SectionStatuses = _query.GetSectionSubmissionStatuses(category.Sections);
+            category.SectionStatuses = await _query.GetSectionSubmissionStatuses(category.Sections);
             category.Completed = category.SectionStatuses.Count(x => x.Completed == 1);
             category.RetrievalError = false;
             return category;
