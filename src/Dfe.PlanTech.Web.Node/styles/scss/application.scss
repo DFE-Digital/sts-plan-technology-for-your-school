@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 @import "../../node_modules/govuk-frontend/dist/govuk/all.scss";
 @import "../../node_modules/dfe-frontend-alpha/packages/dfefrontend";
 
@@ -6,10 +5,7 @@
 @import "../../node_modules/@govuk-prototype-kit/step-by-step/sass/_step-by-step-navigation.scss";
 @import "../../node_modules/@govuk-prototype-kit/step-by-step/sass/_step-by-step-navigation-related.scss";
 @import "../../node_modules/@govuk-prototype-kit/step-by-step/sass/_step-by-step-navigation-header.scss";
-=======
-@use "../../node_modules/govuk-frontend/dist/govuk/all.scss";
-@use "../../node_modules/dfe-frontend-alpha/packages/dfefrontend";
->>>>>>> 12918e13a1a123f1c7f7a689fe36cf10b20ca4a6
+
 
 @import "overrides";
 @import "app-task-list";
