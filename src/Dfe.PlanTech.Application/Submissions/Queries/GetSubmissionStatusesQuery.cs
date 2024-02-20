@@ -19,7 +19,7 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
 
     }
 
-    public IList<SectionStatusDto> GetSectionSubmissionStatuses(IEnumerable<ISectionComponent> sections)
+    public List<SectionStatusDto> GetSectionSubmissionStatuses(IEnumerable<ISectionComponent> sections)
     {
         int establishmentId = _userHelper.GetEstablishmentId().Result;
 

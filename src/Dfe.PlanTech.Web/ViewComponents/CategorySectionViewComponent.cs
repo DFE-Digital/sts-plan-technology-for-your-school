@@ -70,7 +70,7 @@ public class CategorySectionViewComponent : ViewComponent
 
         if (sectionStatusCompleted != null)
         {
-            categorySectionDto.TagColour = sectionStatusCompleted == 1 ? TagColour.DarkBlue.ToString() : TagColour.Blue.ToString();
+            categorySectionDto.TagColour = sectionStatusCompleted == 1 ? TagColour.Blue : TagColour.LightBlue;
             categorySectionDto.TagText = sectionStatusCompleted == 1 ? "COMPLETE" : "IN PROGRESS";
         }
         else
@@ -102,7 +102,7 @@ public class CategorySectionViewComponent : ViewComponent
     {
         try
         {
-            category.SectionStatuses = _query.GetSectionSubmissionStatuses(category.Sections).ToList();
+            category.SectionStatuses = _query.GetSectionSubmissionStatuses(category.Sections);
             category.Completed = category.SectionStatuses.Count(x => x.Completed == 1);
             category.RetrievalError = false;
             return category;

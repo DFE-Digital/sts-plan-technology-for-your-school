@@ -1,10 +1,14 @@
 namespace Dfe.PlanTech.Web.TagHelpers.TaskList;
 
-public enum TagColour
+public static class TagColour
 {
-    Default,
-    Blue,
-    Grey,
-    Red,
-    DarkBlue,
+    public readonly static string Default = "blue";
+    public readonly static string Blue = "blue";
+    public readonly static string Grey = "grey";
+    public readonly static string LightBlue = "light-blue";
+    public readonly static string Red = "red";
+
+    private readonly static string[] _colours = [Blue, Grey, LightBlue, Red];
+
+    public static string GetMatchingColour(string? toMatch) => string.IsNullOrEmpty(toMatch) ? Default : _colours.FirstOrDefault(colour => colour == toMatch, Default);
 }
