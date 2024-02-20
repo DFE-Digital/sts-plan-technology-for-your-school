@@ -2,7 +2,9 @@ using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
-public interface IRecommendationChunk<TTitle, THeader, TContentComponent, TAnswer>
+public interface IRecommendationChunk { }
+
+public interface IRecommendationChunk<TTitle, THeader, TContentComponent, TAnswer> : IRecommendationChunk
 where TTitle : ITitle
 where THeader : IHeader
 where TContentComponent : IContentComponent
