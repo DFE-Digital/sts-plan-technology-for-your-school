@@ -43,6 +43,22 @@ await esbuild.build({
     }),
   ],
   outfile: "out/css/application.css",
+
+});
+
+await esbuild.build({
+  entryPoints: ["styles/scss/step-by-step.scss"],
+  bundle: true,
+  minify: true,
+  sourcemap: true,
+  target: ["chrome58", "firefox57", "safari11", "edge16"],
+  external: ["/assets/*"],
+  plugins: [
+    sassPlugin({
+      loader: { ".woff2": "file", ".png": "file" },
+    }),
+  ],
+  outfile: "out/css/step-by-step.css",
 });
 
 //Copy assets

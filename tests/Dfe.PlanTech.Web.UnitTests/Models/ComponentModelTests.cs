@@ -5,7 +5,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
 {
     public class ComponentModelTests
     {
-        private readonly IComponentBuilder _componentBuilder;
+        private readonly ComponentBuilder _componentBuilder;
 
         public ComponentModelTests()
         {
@@ -46,12 +46,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             Assert.NotNull(actual);
             Assert.Equal("Category", actual.Header.Text);
             Assert.Equal("Section", actual.Sections[0].Name);
-            Assert.True(actual.Sections[0].Questions != null);
+            Assert.NotNull(actual.Sections[0].Questions);
             Assert.Equal("Question Text", actual.Sections[0].Questions[0].Text);
             Assert.Equal("Help Text", actual.Sections[0].Questions[0].HelpText);
-            Assert.True(actual.Sections[0].Questions[0].Answers[0] != null);
+            Assert.NotNull(actual.Sections[0].Questions[0].Answers[0]);
             Assert.Equal("Answer", actual.Sections[0].Questions[0].Answers[0].Text);
-            Assert.True(actual.Completed == 0);
+            Assert.Equal(0, actual.Completed);
         }
 
 
