@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
@@ -26,6 +27,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     public DbSet<CategoryDbEntity> Categories { get; set; }
 
     public DbSet<ComponentDropDownDbEntity> ComponentDropDowns { get; set; }
+    public DbSet<ContentComponentDbEntity> ContentComponents { get; set; }
 
     public DbSet<HeaderDbEntity> Headers { get; set; }
 
@@ -42,6 +44,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
     public DbSet<RecommendationPageDbEntity> RecommendationPages { get; set; }
 
     public DbSet<RichTextContentDbEntity> RichTextContents { get; set; }
+    public DbSet<RichTextContentWithSlugDbEntity> RichTextContentWithSlugs { get; set; }
+
     public DbSet<RichTextDataDbEntity> RichTextDataDbEntity { get; set; }
     public DbSet<RichTextMarkDbEntity> RichTextMarkDbEntity { get; set; }
 
@@ -67,6 +71,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<QuestionDbEntity> ICmsDbContext.Questions => Questions;
     IQueryable<RecommendationPageDbEntity> ICmsDbContext.RecommendationPages => RecommendationPages;
     IQueryable<RichTextContentDbEntity> ICmsDbContext.RichTextContents => RichTextContents;
+    IQueryable<RichTextContentWithSlugDbEntity> ICmsDbContext.RichTextContentWithSlugs => RichTextContentWithSlugs;
     IQueryable<RichTextDataDbEntity> ICmsDbContext.RichTextDataDbEntity => RichTextDataDbEntity;
     IQueryable<RichTextMarkDbEntity> ICmsDbContext.RichTextMarkDbEntity => RichTextMarkDbEntity;
     IQueryable<SectionDbEntity> ICmsDbContext.Sections => Sections;
@@ -161,10 +166,13 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         modelBuilder.Entity<RichTextContentDbEntity>(entity =>
         {
-            entity.ToTable("RichTextContents", Schema);
-            entity.Navigation(rt => rt.Marks).AutoInclude();
-            entity.Navigation(rt => rt.Data).AutoInclude();
         });
+
+        modelBuilder.Entity<RichTextContentWithSlugDbEntity>(entity =>
+        {
+            entity.ToView("RichTextContentsBySlug");
+        });
+
 
         modelBuilder.Entity<SectionDbEntity>(entity =>
         {
@@ -184,7 +192,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         modelBuilder.Entity<TextBodyDbEntity>(entity =>
         {
-            entity.Navigation(tb => tb.RichText).AutoInclude();
         });
 
         modelBuilder.Entity<TitleDbEntity>(entity =>
@@ -215,8 +222,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
             .AsSplitQuery()
             .FirstOrDefaultAsync(page => page.Slug == slug, cancellationToken);
 
-    public IQueryable<RichTextContentDbEntity> RichTextContentsByPageSlug(string pageSlug)
-        => RichTextContents.FromSql($"SELECT * FROM [Contentful].[SelectAllRichTextContentForPageSlug]({pageSlug})");
 
     public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
 => queryable.ToListAsync(cancellationToken: cancellationToken);

@@ -95,7 +95,7 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
 
       - name: Install dotnet coverage
-        run: dotnet tool install --global dotnet-coverage --version 17.9.6
+        run: dotnet tool install --global dotnet-coverage --version 17.9.3
 
       - name: Install SonarCloud scanners
         run: dotnet tool install --global dotnet-sonarscanner
@@ -169,9 +169,11 @@ jobs:
           node-version: "latest"
 
       - name: Install Dependencies
+        working-directory: ./tests/Dfe.PlanTech.Web.Node.UnitTests/
         run: npm install
 
       - name: Run the tests
+        working-directory: ./tests/Dfe.PlanTech.Web.Node.UnitTests/
         run: npm test
 
       - name: Test report
@@ -179,5 +181,5 @@ jobs:
         if: success() || failure() # run this step even if previous step failed
         with:
           name: JEST Tests # Name of the check run which will be created
-          path: ./junit.xml # Path to test results
+          path: ./tests/Dfe.PlanTech.Web.Node.UnitTests/junit.xml # Path to test results
           reporter: jest-junit # Format of test results
