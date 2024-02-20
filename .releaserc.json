@@ -6,7 +6,6 @@
   ],
   "branches": [
     { "name": "main" },
-    { "name": "development", "prerelease": true },
-    { "name": "fix/semver-release", "prerelease": "pre-dev" }
+    { "name": "development", "prerelease": true }
   ]
 }
