@@ -1,6 +1,7 @@
 /* STANDARD COLOURS */
 * {
-    font-family: BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif !important;
+  font-family: BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu,
+    Cantarell, "Helvetica Neue", sans-serif !important;
 }
 
 .logo {
@@ -10,21 +11,15 @@
 }
 
 .govuk-table {
-    margin-top: 30px;
-    margin-bottom: 30px;
-}
-
-@media (min-width: 40.0625em) {
-    .govuk-button--start {
-        margin-bottom: 0 !important;
-    }
+  margin-top: 30px;
+  margin-bottom: 30px;
 }
 
 a.govuk-home-link {
-    position: relative;
-    display: inline-block;
-    margin-top: 15px;
-    margin-bottom: 15px;
+  position: relative;
+  display: inline-block;
+  margin-top: 15px;
+  margin-bottom: 15px;
 }
 
 /* DFE CARD COMPONENT - NEW
