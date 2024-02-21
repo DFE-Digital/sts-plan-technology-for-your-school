@@ -7,9 +7,9 @@
 @section Head {
     <link rel="stylesheet" href="~/css/application.css">
 
-    @Html.Raw(GtmConfiguration.Analytics)
-    @Html.Raw(GtmConfiguration.Head)
-    @RenderSection("Head", false)
+        @Html.Raw(GtmConfiguration.Analytics)
+        @Html.Raw(GtmConfiguration.Head)
+        @RenderSection("Head", false)
 }
 
 @{
@@ -30,12 +30,10 @@
         await Html.RenderPartialAsync("_Header");
     }
 
-    @RenderSection("Header", false)
+@RenderSection("Header", false)
 }
 
 @section BeforeContent {
-    <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
-
     @{
         await Html.RenderPartialAsync("BetaHeader");
     }
