@@ -1,0 +1,42 @@
+name: Multi stage build & deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main", "development", "refactor/semver-comment-disable"]
+    paths:
+      - "src/**"
+      - ".github/workflows/matrix-deploy-test.yml"
+
+jobs:
+  set-env:
+    runs-on: ubuntu-22.04
+    name: Set Environment (Matrix Deploy)
+    outputs:
+      branch: ${{ steps.var.outputs.branch }}
+      checked-out-sha: ${{ steps.var.outputs.checked-out-sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - id: var
+        run: |
+          GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}
+          CHECKED_OUT_SHA="$(git log -1 '--format=format:%H')"
+          echo "branch=$GIT_BRANCH" >> $GITHUB_OUTPUT
+          echo "checked-out-sha=${CHECKED_OUT_SHA}" >> $GITHUB_OUTPUT
+  create-and-publish-image:
+    needs: set-env
+    name: Create & Publish Image
+    uses: ./.github/workflows/build-image.yml
+    secrets: inherit
+    with:
+      branch: ${{ needs.set-env.outputs.branch }}
+      checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
+
+  create-and-tag-release:
+    needs: [set-env, create-and-publish-image]
+    name: Create & Tag Release
+    uses: ./.github/workflows/create-tag-release.yml
+    secrets: inherit

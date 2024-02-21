@@ -2,10 +2,16 @@
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
-    "@semantic-release/github"
+    [
+      "@semantic-release/github",
+      {
+        "successComment": false
+      }
+    ]
   ],
   "branches": [
     { "name": "main" },
-    { "name": "development", "prerelease": true }
+    { "name": "development", "prerelease": true },
+    { "name": "refactor/semver-comment-disable", "prerelease": "pre-dev" }
   ]
 }
