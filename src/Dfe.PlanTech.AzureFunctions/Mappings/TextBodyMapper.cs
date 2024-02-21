@@ -17,9 +17,9 @@ public class TextBodyMapper : JsonToDbMapper<TextBodyDbEntity>
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
-        var richText = (values["richText"] ?? throw new MapperException($"No rich text value found")) as JsonNode;
+        var richText = (values["richText"] ?? throw new KeyNotFoundException($"No rich text value found")) as JsonNode;
 
-        var deserialised = richText.Deserialize<RichTextContent>(JsonOptions) ?? throw new MapperException($"Could not map to {typeof(RichTextContent)}");
+        var deserialised = richText.Deserialize<RichTextContent>(JsonOptions) ?? throw new InvalidOperationException($"Could not map to {typeof(RichTextContent)}");
 
         values["richText"] = JsonNode.Parse(JsonSerializer.Serialize(_richTextMapper.MapToDbEntity(deserialised), JsonOptions));
 
