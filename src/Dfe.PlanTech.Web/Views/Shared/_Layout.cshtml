@@ -3,11 +3,13 @@
 @using Dfe.PlanTech.Web.Helpers;
 
 @using System.Globalization;
+
 @section Head {
     <link rel="stylesheet" href="~/css/application.css">
-        @Html.Raw(GtmConfiguration.Analytics)
-        @Html.Raw(GtmConfiguration.Head)
-        @RenderSection("Head", false)
+
+    @Html.Raw(GtmConfiguration.Analytics)
+    @Html.Raw(GtmConfiguration.Head)
+    @RenderSection("Head", false)
 }
 
 @{
@@ -28,18 +30,20 @@
         await Html.RenderPartialAsync("_Header");
     }
 
-@RenderSection("Header", false)
+    @RenderSection("Header", false)
 }
 
 @section BeforeContent {
+    <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
+
     @{
         await Html.RenderPartialAsync("BetaHeader");
     }
 @RenderSection("BeforeContent", required: false)
 }
 
-@RenderBody()
 
+@RenderBody()
 @section Footer {
     @{
         await Html.RenderPartialAsync("_Footer");
@@ -48,4 +52,10 @@
 
 @section BodyEnd {
     <script src="~/js/app.js"></script>
+    <script src="~/js/govuk-frontend.min.js" type="module"></script>
+    <script type="module">
+        import { initAll } from '/js/govuk-frontend.min.js';
+
+        initAll();
+    </script>
 }
