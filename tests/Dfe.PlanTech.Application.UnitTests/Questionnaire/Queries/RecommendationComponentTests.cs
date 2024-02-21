@@ -30,9 +30,14 @@ public class RecommendationComponentTests
             }
         };
 
+        Section section = new()
+        {
+            Name = "Subtopic Name"
+        };
+
         _recommendationChunk = new()
         {
-            Title = new() { Text = "Title Text" },
+            Title = "Title Text",
             Header = new() { Text = "Header Chunk Text" },
             Content = [textBody],
             Answers = [answer]
@@ -54,14 +59,15 @@ public class RecommendationComponentTests
         _subTopicRecommendation = new SubTopicRecommendation()
         {
             Intros = [_recommendationIntro],
-            Section = _recommendationSection
+            Section = _recommendationSection,
+            Subtopic = section
         };
     }
 
     [Fact]
     public void RecommendationChunk_Contains_Elements()
     {
-        Assert.Equal("Title Text", _recommendationChunk.Title.Text);
+        Assert.Equal("Title Text", _recommendationChunk.Title);
 
         Assert.Equal("Header Chunk Text", _recommendationChunk.Header.Text);
 
@@ -109,5 +115,7 @@ public class RecommendationComponentTests
         Assert.Equal(_recommendationIntro, _subTopicRecommendation.Intros[0]);
 
         Assert.Equal(_recommendationSection, _subTopicRecommendation.Section);
+
+        Assert.Equal("Subtopic Name", _subTopicRecommendation.Subtopic.Name);
     }
 }

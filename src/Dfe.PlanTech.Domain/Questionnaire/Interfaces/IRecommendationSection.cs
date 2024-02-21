@@ -7,7 +7,7 @@ public interface IRecommendationSection { }
 
 public interface IRecommendationSection<TAnswer, TRecommendationChunk> : IRecommendationSection
 where TAnswer : IAnswer
-where TRecommendationChunk : IRecommendationChunk<Title, Header, ContentComponent, Answer>
+where TRecommendationChunk : IRecommendationChunk<Header, ContentComponent, Answer>
 {
     public List<TAnswer> Answers { get; }
 
