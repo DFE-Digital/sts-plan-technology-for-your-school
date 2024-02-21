@@ -7,6 +7,8 @@ on:
     paths:
       - "src/**"
       - ".github/workflows/matrix-deploy-test.yml"
+      - ".github/workflows/create-tag-release.yml"
+      - ".releaserc.json"
 
 jobs:
   set-env:
