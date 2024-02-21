@@ -6,10 +6,11 @@
 
 @section Head {
     <link rel="stylesheet" href="~/css/application.css">
+    <link rel="stylesheet" href="~/css/govuk-frontend.min.css">
 
-        @Html.Raw(GtmConfiguration.Analytics)
-        @Html.Raw(GtmConfiguration.Head)
-        @RenderSection("Head", false)
+    @Html.Raw(GtmConfiguration.Analytics)
+    @Html.Raw(GtmConfiguration.Head)
+    @RenderSection("Head", false)
 }
 
 @{
@@ -51,9 +52,13 @@
 @section BodyEnd {
     <script src="~/js/app.js"></script>
     <script src="~/js/govuk-frontend.min.js" type="module"></script>
+    <script src="/js/step-by-step-navigation.js"></script>
+    <script src="/js/step-by-step-polyfills.js"></script>
     <script type="module">
         import { initAll } from '/js/govuk-frontend.min.js';
 
         initAll();
+        var $element = document.querySelector('#step-by-step-navigation')
+        var stepByStepNavigation = new GOVUK.Modules.AppStepNav($element).init()
     </script>
 }
