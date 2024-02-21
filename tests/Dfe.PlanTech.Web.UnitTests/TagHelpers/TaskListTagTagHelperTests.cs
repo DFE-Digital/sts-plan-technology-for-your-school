@@ -18,7 +18,7 @@ namespace Dfe.PlanTech.Web.UnitTests.TagHelpers
         [Fact]
         public void Should_Create_CorrectColour_When_ValidColour()
         {
-            var colour = "Grey";
+            var colour = "grey";
 
             var tagHelper = new TaskListTagTagHelper
             {
@@ -49,7 +49,7 @@ namespace Dfe.PlanTech.Web.UnitTests.TagHelpers
         [Fact]
         public void Should_Float_To_Right()
         {
-            var colour = "Grey";
+            var colour = "grey";
 
             var tagHelper = new TaskListTagTagHelper
             {
@@ -113,7 +113,7 @@ namespace Dfe.PlanTech.Web.UnitTests.TagHelpers
         {
             var tagHelper = new TaskListTagTagHelper
             {
-                Colour = "Grey"
+                Colour = "grey"
             };
 
             var context = new TagHelperContext(tagName: "task-list-tag",
