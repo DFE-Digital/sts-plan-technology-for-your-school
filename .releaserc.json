@@ -12,6 +12,6 @@
   "branches": [
     { "name": "main" },
     { "name": "development", "prerelease": true },
-    { "name": "refactor/semver-comment-disable", "prerelease": "pre-dev" }
+    { "name": "refactor/semver-comment-disable", "prerelease": "pre-dev-dev" }
   ]
 }
