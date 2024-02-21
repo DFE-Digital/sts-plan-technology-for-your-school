@@ -16,7 +16,7 @@ public class TaskListTagTagHelper : BaseTaskListTagHelper
         TagName = "strong";
     }
 
-    protected TagColour TagColour => Enum.TryParse(Colour, true, out TagColour colour) ? colour : TagColour.Default;
+    protected string TagClassColour => TagColour.GetMatchingColour(Colour);
 
     protected override string CreateClassesAttribute()
     {
@@ -40,13 +40,12 @@ public class TaskListTagTagHelper : BaseTaskListTagHelper
 
     private void AppendTagColour(StringBuilder stringBuilder)
     {
-        var tagColour = TagColour;
-        if (tagColour != TagColour.Default)
+        if (TagClassColour != TagColour.Default)
         {
             stringBuilder.Append(' ');
             stringBuilder.Append(_class);
             stringBuilder.Append("--");
-            stringBuilder.Append(tagColour.ToString().ToLower());
+            stringBuilder.Append(TagClassColour);
         }
     }
 

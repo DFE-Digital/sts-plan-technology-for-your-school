@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Web.Models;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
@@ -61,7 +63,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         }
 
         [Fact]
-        public void Returns_CategorySectionInfo_If_Slug_Exists_And_SectionIsCompleted()
+        public async Task Returns_CategorySectionInfo_If_Slug_Exists_And_SectionIsCompleted()
         {
             _category.SectionStatuses.Add(new SectionStatusDto()
             {
@@ -69,9 +71,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Completed = 1,
             });
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
 
-            var result = _categorySectionViewComponent.Invoke(_category) as ViewViewComponentResult;
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -98,13 +100,13 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Equal("DarkBlue", categorySectionDto.TagColour);
+            Assert.Equal("blue", categorySectionDto.TagColour);
             Assert.Equal("COMPLETE", categorySectionDto.TagText);
             Assert.Null(categorySectionDto.NoSlugForSubtopicErrorMessage);
         }
 
         [Fact]
-        public void Returns_CategorySelectionInfo_If_Slug_Exists_And_SectionIsNotCompleted()
+        public async Task Returns_CategorySelectionInfo_If_Slug_Exists_And_SectionIsNotCompleted()
         {
             _category.Completed = 0;
 
@@ -114,9 +116,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Completed = 0,
             });
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
 
-            var result = _categorySectionViewComponent.Invoke(_category) as ViewViewComponentResult;
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -143,19 +145,19 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Equal("Blue", categorySectionDto.TagColour);
+            Assert.Equal("light-blue", categorySectionDto.TagColour);
             Assert.Equal("IN PROGRESS", categorySectionDto.TagText);
             Assert.Null(categorySectionDto.NoSlugForSubtopicErrorMessage);
         }
 
         [Fact]
-        public void Returns_CategorySelectionInfo_If_Section_IsNotStarted()
+        public async Task Returns_CategorySelectionInfo_If_Section_IsNotStarted()
         {
             _category.Completed = 0;
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
 
-            var result = _categorySectionViewComponent.Invoke(_category) as ViewViewComponentResult;
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -182,13 +184,13 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Equal("Grey", categorySectionDto.TagColour);
+            Assert.Equal("grey", categorySectionDto.TagColour);
             Assert.Equal("NOT STARTED", categorySectionDto.TagText);
             Assert.Null(categorySectionDto.NoSlugForSubtopicErrorMessage);
         }
 
         [Fact]
-        public void Returns_NullSlug_And_ErrorMessage_In_CategorySectionInfo_If_SlugDoesNotExist()
+        public async Task Returns_NullSlug_And_ErrorMessage_In_CategorySectionInfo_If_SlugDoesNotExist()
         {
             _category.Sections[0] = new Section()
             {
@@ -206,9 +208,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Completed = 1,
             });
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
+            _ = _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
 
-            var result = _categorySectionViewComponent.Invoke(_category) as ViewViewComponentResult;
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -242,13 +244,12 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         }
 
         [Fact]
-        public void Returns_ProgressRetrievalError_When_ProgressCanNotBeRetrieved()
+        public async Task Returns_ProgressRetrievalError_When_ProgressCanNotBeRetrieved()
         {
-            _category.SectionStatuses = null!;
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(Arg.Any<IEnumerable<ISectionComponent>>())
+                                        .ThrowsAsync(new Exception("Error occurred fection sections"));
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
-
-            var result = _categorySectionViewComponent.Invoke(_category) as ViewViewComponentResult;
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -273,13 +274,13 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Equal("Red", categorySectionDto.TagColour);
+            Assert.Equal("red", categorySectionDto.TagColour);
             Assert.Equal("UNABLE TO RETRIEVE STATUS", categorySectionDto.TagText);
             Assert.Null(categorySectionDto.NoSlugForSubtopicErrorMessage);
         }
 
         [Fact]
-        public void Returns_NoSectionsErrorRedirectUrl_If_SectionsAreNull()
+        public async Task Returns_NoSectionsErrorRedirectUrl_If_SectionsAreNull()
         {
             _category = new Category()
             {
@@ -291,9 +292,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 }
             };
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
 
-            var result = _categorySectionViewComponent.Invoke(_category) as ViewViewComponentResult;
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -312,7 +313,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         }
 
         [Fact]
-        public void Returns_NoSectionsErrorRedirectUrl_If_SectionsAreEmpty()
+        public async Task Returns_NoSectionsErrorRedirectUrl_If_SectionsAreEmpty()
         {
             _category = new Category()
             {
@@ -324,9 +325,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 }
             };
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
 
-            var result = _categorySectionViewComponent.Invoke(_category) as ViewViewComponentResult;
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
