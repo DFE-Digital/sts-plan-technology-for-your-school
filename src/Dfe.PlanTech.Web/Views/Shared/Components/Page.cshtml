@@ -34,6 +34,7 @@
                     categoriesList.Add(category);
                 }
             }
+
             if (showRecommendations)
             {
                 @await Component.InvokeAsync("Recommendations", new { categories = categoriesList.ToArray() })

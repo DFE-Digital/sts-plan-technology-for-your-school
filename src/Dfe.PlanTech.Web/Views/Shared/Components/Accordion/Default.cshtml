@@ -1,0 +1,41 @@
+@model IEnumerable<Dfe.PlanTech.Domain.Content.Interfaces.IAccordion>
+
+<div class="govuk-grid-column-one-third">
+
+    <div data-module="appstepnav" id="step-by-step-navigation" class="app-step-nav govuk-!-display-none-print app-step-nav--active" data-show-text="Show" data-hide-text="Hide" data-show-all-text="Show all actions" data-hide-all-text="Hide all steps">
+        <ol class="app-step-nav__steps">
+            @foreach (var accordion in Model)
+            {
+                <li class="app-step-nav__step js-step" aria-current="step">
+                    <div class="app-step-nav__header js-toggle-panel" data-position="1">
+                        <h3 class="app-step-nav__title">
+                            <span class="app-step-nav__circle app-step-nav__circle--number">
+                                <span class="app-step-nav__circle-inner">
+                                    <span class="app-step-nav__circle-background">
+                                        <span class="govuk-visually-hidden govuk-!-display-none-print">Step</span>@accordion.Order<span class="govuk-visually-hidden govuk-!-display-none-print" aria-hidden="true">:</span>
+                                    </span>
+                                </span>
+                            </span>
+
+                            <span class="js-step-title">
+                                @accordion.Title
+                            </span>
+                        </h3>
+                    </div>
+                    
+                    <div class="app-step-nav__panel js-panel js-hidden">
+                        
+                        <ol class="app-step-nav__list " data-length="3">
+                            <li class="app-step-nav__list-item js-list-item ">
+                                <a class="app-step-nav__link js-link" href="#@accordion.Heading">
+                                    @accordion.Heading
+                                </a>
+                            </li>
+                        </ol>
+
+                    </div>
+                </li>
+            }
+        </ol>
+    </div>
+</div>
