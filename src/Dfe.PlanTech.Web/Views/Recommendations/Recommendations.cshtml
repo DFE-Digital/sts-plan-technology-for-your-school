@@ -1,0 +1,57 @@
+@using Dfe.PlanTech.Domain.Content.Interfaces
+@using Dfe.PlanTech.Domain.Content.Models
+@model Dfe.PlanTech.Web.Models.RecommendationsViewModel
+
+@section BeforeContent {
+    @{
+        await Html.RenderPartialAsync("BackButton");
+    }
+}
+<div class="govuk-grid-row">
+    <div class="app-step-nav-header">
+        <span class="app-step-nav-header__part-of">Part of</span>
+        <a class="app-step-nav-header__title" href="#">
+            @Model.SectionName
+        </a>
+    </div>
+    <div class="govuk-grid-column-two-thirds">
+        @{
+            await Html.RenderPartialAsync("Components/Header", Model.RecommendationIntro.Header);
+        }
+
+        @foreach (var content in Model.RecommendationIntro.Content)
+        {
+            await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+        }
+
+        @foreach (var recomendationChunk in Model.RecommendationChunks)
+        {
+            await Html.RenderPartialAsync("Components/Header", recomendationChunk.Header);
+
+            @foreach (var content in recomendationChunk.Content)
+            {
+                await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+            }
+        }
+    </div>
+    <div class="govuk-grid-column-one-thirds">
+
+        <div class="app-step-nav-related app-step-nav-related--singular">
+            <h2 class="app-step-nav-related__heading">
+                <span class="app-step-nav-related__pretitle">Part of</span>
+                <a href="#">
+                    @Model.SectionName
+                </a>
+            </h2>
+        </div>
+
+        @await Component.InvokeAsync("Accordion", new List<IAccordion>
+        {
+            new Accordion() { Order = 1, Title = "Test Header 1", Heading = "Heading 1" },
+            new Accordion() { Order = 2, Title = "Test Header 2", Heading = "Heading 2" },
+            new Accordion() { Order = 3, Title = "Test Header 3", Heading = "Heading 3" },
+            new Accordion() { Order = 4, Title = "Test Header 4", Heading = "Heading 4" }
+        })
+
+    </div>
+</div>
