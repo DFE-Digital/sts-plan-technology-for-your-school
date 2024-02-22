@@ -1,27 +1,20 @@
 name: Clear user data from DB
+
 on:
   workflow_dispatch:
     inputs:
       environment:
         description: "What environment to clear"
         required: true
-        type: environment
-
-env:
-  DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
+        type: choice
+        options:
+          - development
+          - tst
+          - staging
 
 jobs:
-  disallow-prod-message:
-    if: inputs.environment == 'Production'
-    name: Disallow production message
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Disallow production message
-        run: echo "This action is not allowed in production"
-
   clear-db:
-    if: inputs.environment != 'Production'
+    if: ${{ inputs.environment != 'Production' }}
     environment: ${{ inputs.environment }}
     name: Clear user data from DB
     runs-on: ubuntu-latest
@@ -35,6 +28,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Log Environment
+        run: |
+          echo "Environment: ${{ inputs.environment }}"
 
       - name: Login with AZ
         uses: ./.github/actions/azure-login
@@ -65,7 +62,7 @@ jobs:
           az_keyvault_name: ${{ env.az_keyvault_name }}
           az_keyvault_database_connectionstring_name: ${{ env.az_keyvault_database_connectionstring_name }}
 
-      - name: Execute stored procedure
+      - name: Run clear DB SQL script
         uses: azure/sql-action@v2.2
         with:
           connection-string: ${{ steps.get-connection-string.outputs.connection_string }}
