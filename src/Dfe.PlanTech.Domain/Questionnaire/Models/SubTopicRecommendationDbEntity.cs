@@ -1,0 +1,13 @@
+using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+
+namespace Dfe.PlanTech.Domain.Questionnaire.Models;
+
+public class SubTopicRecommendationDbEntity : ContentComponentDbEntity, ISubTopicRecommendation<AnswerDbEntity, ContentComponentDbEntity, HeaderDbEntity, RecommendationChunkDbEntity, RecommendationIntroDbEntity, RecommendationSectionDbEntity, SectionDbEntity>
+{
+    public List<RecommendationIntroDbEntity> Intros { get; init; } = [];
+
+    public RecommendationSectionDbEntity Section { get; init; } = null!;
+
+    public SectionDbEntity Subtopic { get; init; } = null!;
+}
