@@ -1,5 +1,7 @@
 name: Clear user data from DB
 on:
+  pull_request:
+
   workflow_dispatch:
     inputs:
       environment:
@@ -21,8 +23,8 @@ jobs:
         run: echo "This action is not allowed in production"
 
   clear-db:
-    if: inputs.environment != 'Production'
-    environment: ${{ inputs.environment }}
+    if: inputs.environment != 'Production' && inputs.environment != ''
+    environment: ${{ inputs.environment != '' && inputs.environment || 'development' }}
     name: Clear user data from DB
     runs-on: ubuntu-latest
     env:
