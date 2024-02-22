@@ -31,14 +31,19 @@
         await Html.RenderPartialAsync("_Header");
     }
 
-@RenderSection("Header", false)
+    @RenderSection("Header", false)
 }
 
 @section BeforeContent {
     @{
         await Html.RenderPartialAsync("BetaHeader");
     }
-@RenderSection("BeforeContent", required: false)
+    @RenderSection("BeforeContent", required: false)
+
+    @{
+        //Add relevant tags for GovUK front-end CSS to body
+    }
+        <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
 }
 
 
@@ -52,7 +57,7 @@
 @section BodyEnd {
     <script src="~/js/app.js"></script>
     <script src="~/js/govuk-frontend.min.js" type="module"></script>
-    
+
     <script type="module">
         import { initAll } from '/js/govuk-frontend.min.js';
 
