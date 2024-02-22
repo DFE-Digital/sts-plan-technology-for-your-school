@@ -3,9 +3,9 @@ using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
-public class GetRecommendationChunksQuery(GetSubTopicRecommendationFromContentfulQuery getSubTopicRecommendationFromContentfulQuery) : IGetRecommendationChunks
+public class GetRecommendationChunksQuery(IGetSubTopicRecommendation getSubTopicRecommendationFromContentfulQuery) : IGetRecommendationChunks
 {
-    private readonly GetSubTopicRecommendationFromContentfulQuery _getSubTopicRecommendationFromContentfulQuery = getSubTopicRecommendationFromContentfulQuery;
+    private readonly IGetSubTopicRecommendation _getSubTopicRecommendationFromContentfulQuery = getSubTopicRecommendationFromContentfulQuery;
 
     public async Task<IEnumerable<RecommendationChunk>> GetRecommendationChunksFromAnswers(Section subTopic, IEnumerable<Answer> answers, CancellationToken cancellationToken = default)
     {
