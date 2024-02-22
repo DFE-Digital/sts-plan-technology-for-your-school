@@ -7,7 +7,7 @@ public class SubTopicRecommendation : ContentComponent, ISubTopicRecommendation<
 {
     public List<RecommendationIntro> Intros { get; init; } = [];
 
-    public RecommendationSection RecommendationSection { get; init; } = null!;
+    public RecommendationSection Section { get; init; } = null!;
 
     public Section Subtopic { get; init; } = null!;
 }
