@@ -9,4 +9,3 @@ BEGIN TRANSACTION;
   DELETE FROM [dbo].[establishment];
 
 COMMIT;
-GO;
