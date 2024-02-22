@@ -46,6 +46,30 @@ GO;
   );
   GO;
 
+  CREATE TABLE [Contentful].[RecommendationSections](
+    [Id] NVARCHAR(30) NOT NULL,
+    CONSTRAINT [PK_RecommendationSections] PRIMARY KEY ([Id]),
+  );
+  GO;
+
+  CREATE TABLE [Contentful].[RecommendationSectionChunks] (
+      [Id] bigint NOT NULL PRIMARY KEY IDENTITY,
+      [RecommendationSectionId] NVARCHAR(30) NULL,
+      [RecommendationChunkId] NVARCHAR(30) NULL,
+      CONSTRAINT [FK_RecommendationSectionContents_RecommendationSectionId] FOREIGN KEY ([RecommendationSectionId]) REFERENCES [Contentful].[RecommendationSections] ([Id]) ON DELETE NO ACTION,
+      CONSTRAINT [FK_RecommendationSectionContents_RecommendationChunkId] FOREIGN KEY ([RecommendationChunkId]) REFERENCES [Contentful].[RecommendationChunks] ([Id]) ON DELETE NO ACTION,
+  );
+  GO;
+
+  CREATE TABLE [Contentful].[RecommendationSectionAnswers] (
+      [Id] bigint NOT NULL PRIMARY KEY IDENTITY,
+      [RecommendationSectionId] NVARCHAR(30) NULL,
+      [AnswerId] NVARCHAR(30) NULL,
+      CONSTRAINT [FK_RecommendationSectionContents_RecommendationSectionId] FOREIGN KEY ([RecommendationSectionId]) REFERENCES [Contentful].[RecommendationSections] ([Id]) ON DELETE NO ACTION,
+      CONSTRAINT [FK_RecommendationSectionContents_AnswerId] FOREIGN KEY ([AnswerId]) REFERENCES [Contentful].[Answers] ([Id]) ON DELETE NO ACTION,
+  );
+  GO;
+  
 
 COMMIT;
 GO;
