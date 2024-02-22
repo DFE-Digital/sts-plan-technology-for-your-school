@@ -8,11 +8,14 @@ public class GetRecommendationChunksForSection(IContentRepository repository) //
 {
     private readonly IContentRepository _repository = repository;
 
-    private async Task<SubTopicRecommendation> GetSubTopicRecommendationFromContentful(Section subtopic, CancellationToken cancellationToken)
+    public async Task<RecommendationIntro> GetRecommendationIntroForSubtopic(Section subTopic, Maturity maturity, CancellationToken cancellationToken)
+        => (await GetSubTopicRecommendationFromContentful(subTopic, cancellationToken)).Intros.Where(intro => intro.Maturity.Equals(maturity)).First();
+
+    private async Task<SubTopicRecommendation> GetSubTopicRecommendationFromContentful(Section subTopic, CancellationToken cancellationToken)
     {
         IEnumerable<SubTopicRecommendation> subTopicRecommendations = await _repository.GetEntities<SubTopicRecommendation>(cancellationToken);
 
-        SubTopicRecommendation subTopicRecommendation = subTopicRecommendations.Where(subTopicRecommendation => subTopicRecommendation.Subtopic.Sys.Id.Equals(subtopic.Sys.Id)).First();
+        SubTopicRecommendation subTopicRecommendation = subTopicRecommendations.Where(subTopicRecommendation => subTopicRecommendation.Subtopic.Sys.Id.Equals(subTopic.Sys.Id)).First();
 
         return subTopicRecommendation;
     }
