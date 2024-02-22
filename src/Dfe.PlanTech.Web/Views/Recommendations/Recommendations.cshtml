@@ -4,9 +4,16 @@
 
 @section BeforeContent {
     @{
+        <script src="/js/step-by-step-navigation.js"></script>
+        <script src="/js/step-by-step-polyfills.js"></script>
+        <script type="module">
+        var $element = document.querySelector('#step-by-step-navigation')
+        var stepByStepNavigation = new GOVUK.Modules.AppStepNav($element).init()
+        </script>
         await Html.RenderPartialAsync("BackButton");
     }
 }
+
 <div class="govuk-grid-row">
     <div class="app-step-nav-header">
         <span class="app-step-nav-header__part-of">Part of</span>
@@ -15,12 +22,12 @@
         </a>
     </div>
     <div class="govuk-grid-column-two-thirds">
-       
+
         @await Component.InvokeAsync("RecommendationIntro", Model.RecommendationIntro)
-        
-        
+
+
         @await Component.InvokeAsync("RecommendationChunks", Model.RecommendationChunks)
-        
+
     </div>
     <div class="govuk-grid-column-one-thirds">
 
