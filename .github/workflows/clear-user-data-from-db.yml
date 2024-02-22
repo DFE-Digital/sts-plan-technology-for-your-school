@@ -1,7 +1,6 @@
 name: Clear user data from DB
-on:
-  pull_request:
 
+on:
   workflow_dispatch:
     inputs:
       environment:
@@ -29,6 +28,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Log Environment
+        run: |
+          echo "Environment: ${{ inputs.environment }}"
 
       - name: Login with AZ
         uses: ./.github/actions/azure-login
