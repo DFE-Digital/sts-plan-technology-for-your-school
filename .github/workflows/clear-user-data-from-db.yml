@@ -11,23 +11,12 @@ on:
         options:
           - development
           - tst
-
-env:
-  ENVIRONMENT: ${{ inputs.environment != '' && inputs.environment || 'development' }}
+          - staging
 
 jobs:
-  disallow-prod-message:
-    if: ${{ env.ENVIRONMENT == 'Production' }}
-    name: Disallow production message
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Disallow production message
-        run: echo "This action is not allowed in production"
-
   clear-db:
-    if: ${{ env.ENVIRONMENT != 'Production' }}
-    environment: env.ENVIRONMENT
+    if: ${{ inputs.environment != 'Production' }}
+    environment: ${{ inputs.environment }}
     name: Clear user data from DB
     runs-on: ubuntu-latest
     env:
