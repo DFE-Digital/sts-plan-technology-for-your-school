@@ -15,24 +15,12 @@
         </a>
     </div>
     <div class="govuk-grid-column-two-thirds">
-        @{
-            await Html.RenderPartialAsync("Components/Header", Model.RecommendationIntro.Header);
-        }
-
-        @foreach (var content in Model.RecommendationIntro.Content)
-        {
-            await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-        }
-
-        @foreach (var recomendationChunk in Model.RecommendationChunks)
-        {
-            await Html.RenderPartialAsync("Components/Header", recomendationChunk.Header);
-
-            @foreach (var content in recomendationChunk.Content)
-            {
-                await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-            }
-        }
+       
+        @await Component.InvokeAsync("RecommendationIntro", Model.RecommendationIntro)
+        
+        
+        @await Component.InvokeAsync("RecommendationChunks", Model.RecommendationChunks)
+        
     </div>
     <div class="govuk-grid-column-one-thirds">
 
