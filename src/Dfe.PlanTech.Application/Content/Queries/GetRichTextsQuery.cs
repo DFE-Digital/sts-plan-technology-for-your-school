@@ -1,10 +1,9 @@
-using System.Linq;
-using System.Linq.Expressions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 

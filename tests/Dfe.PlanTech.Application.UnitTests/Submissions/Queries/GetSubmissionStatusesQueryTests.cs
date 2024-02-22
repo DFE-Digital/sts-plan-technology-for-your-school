@@ -17,10 +17,10 @@ public class GetSubmissionStatusesQueryTests
 
     private readonly List<SectionStatusDto> SectionStatuses = [
             new SectionStatusDto { Completed = 1, SectionId = "1", Maturity = "Low", DateCreated = DateTime.UtcNow },
-            new SectionStatusDto { Completed = 1, SectionId = "2", Maturity = "High", DateCreated = DateTime.UtcNow },
-            new SectionStatusDto { Completed = 0, SectionId = "3", DateCreated = DateTime.UtcNow },
-            new SectionStatusDto { Completed = 0, SectionId = "4",  DateCreated = DateTime.UtcNow },
-        ];
+        new SectionStatusDto { Completed = 1, SectionId = "2", Maturity = "High", DateCreated = DateTime.UtcNow },
+        new SectionStatusDto { Completed = 0, SectionId = "3", DateCreated = DateTime.UtcNow },
+        new SectionStatusDto { Completed = 0, SectionId = "4", DateCreated = DateTime.UtcNow },
+    ];
 
     private const int establishmentId = 1;
     private const string maturity = "High";

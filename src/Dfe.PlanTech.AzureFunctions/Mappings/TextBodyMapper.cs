@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Users.Exceptions;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using System.Text.Json.Nodes;
