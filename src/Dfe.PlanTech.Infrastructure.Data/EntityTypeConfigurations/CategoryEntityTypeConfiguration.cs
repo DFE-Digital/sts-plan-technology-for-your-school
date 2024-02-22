@@ -6,14 +6,14 @@ namespace Dfe.PlanTech.Infrastructure.Data.EntityTypeConfigurations;
 
 public class CategoryEntityTypeConfiguration : IEntityTypeConfiguration<CategoryDbEntity>
 {
-  public void Configure(EntityTypeBuilder<CategoryDbEntity> builder)
-  {
-    builder.HasMany(category => category.Sections)
-            .WithOne(section => section.Category)
-            .OnDelete(DeleteBehavior.Restrict);
+    public void Configure(EntityTypeBuilder<CategoryDbEntity> builder)
+    {
+        builder.HasMany(category => category.Sections)
+                .WithOne(section => section.Category)
+                .OnDelete(DeleteBehavior.Restrict);
 
-    builder.Navigation(category => category.Header).AutoInclude();
+        builder.Navigation(category => category.Header).AutoInclude();
 
-    builder.Navigation(category => category.Sections).AutoInclude();
-  }
+        builder.Navigation(category => category.Sections).AutoInclude();
+    }
 }
