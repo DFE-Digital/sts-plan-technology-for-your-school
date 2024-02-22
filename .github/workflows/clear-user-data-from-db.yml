@@ -7,14 +7,17 @@ on:
       environment:
         description: "What environment to clear"
         required: true
-        type: environment
+        type: choice
+        options:
+          - development
+          - tst
 
 env:
-  DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
+  ENVIRONMENT: ${{ inputs.environment != '' && inputs.environment || 'development' }}
 
 jobs:
   disallow-prod-message:
-    if: inputs.environment == 'Production'
+    if: ${{ env.ENVIRONMENT == 'Production' }}
     name: Disallow production message
     runs-on: ubuntu-latest
 
@@ -23,8 +26,8 @@ jobs:
         run: echo "This action is not allowed in production"
 
   clear-db:
-    if: inputs.environment != 'Production' && inputs.environment != ''
-    environment: ${{ inputs.environment != '' && inputs.environment || 'development' }}
+    if: ${{ env.ENVIRONMENT != 'Production' }}
+    environment: env.ENVIRONMENT
     name: Clear user data from DB
     runs-on: ubuntu-latest
     env:
