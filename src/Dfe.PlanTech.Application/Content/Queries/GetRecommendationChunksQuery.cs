@@ -1,13 +1,13 @@
+using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
-// TODO: Make interfaces
-public class GetRecommendationChunksQuery(GetSubTopicRecommendationFromContentfulQuery getSubTopicRecommendationFromContentfulQuery)
+public class GetRecommendationChunksQuery(GetSubTopicRecommendationFromContentfulQuery getSubTopicRecommendationFromContentfulQuery) : IGetRecommendationChunks
 {
     private readonly GetSubTopicRecommendationFromContentfulQuery _getSubTopicRecommendationFromContentfulQuery = getSubTopicRecommendationFromContentfulQuery;
 
-    public async Task<IEnumerable<RecommendationChunk>> GetRecommendationChunksFromAnswers(Section subTopic, IEnumerable<Answer> answers, CancellationToken cancellationToken)
+    public async Task<IEnumerable<RecommendationChunk>> GetRecommendationChunksFromAnswers(Section subTopic, IEnumerable<Answer> answers, CancellationToken cancellationToken = default)
     {
         SubTopicRecommendation subTopicRecommendation = await _getSubTopicRecommendationFromContentfulQuery.GetSubTopicRecommendation(subTopic, cancellationToken);
 

@@ -153,6 +153,7 @@ public static class ProgramExtensions
 
         services.AddTransient<IGetSubTopicRecommendation, GetSubTopicRecommendationFromContentfulQuery>();
         services.AddTransient<IGetRecommendationIntro, GetRecommendationIntroQuery>();
+        services.AddTransient<IGetRecommendationChunks, GetRecommendationChunksQuery>();
 
         return services;
     }
