@@ -3,7 +3,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Models;
 namespace Dfe.PlanTech.Application.Content.Queries;
 
 // TODO: Make interfaces
-public class GetRecommendationChunksForSection(GetSubTopicRecommendationFromContentfulQuery getSubTopicRecommendationFromContentfulQuery)
+public class GetRecommendationChunksQuery(GetSubTopicRecommendationFromContentfulQuery getSubTopicRecommendationFromContentfulQuery)
 {
     private readonly GetSubTopicRecommendationFromContentfulQuery _getSubTopicRecommendationFromContentfulQuery = getSubTopicRecommendationFromContentfulQuery;
 
