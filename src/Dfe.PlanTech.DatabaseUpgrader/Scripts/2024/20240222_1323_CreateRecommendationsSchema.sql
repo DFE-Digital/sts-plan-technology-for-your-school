@@ -69,8 +69,26 @@ GO;
       CONSTRAINT [FK_RecommendationSectionContents_AnswerId] FOREIGN KEY ([AnswerId]) REFERENCES [Contentful].[Answers] ([Id]) ON DELETE NO ACTION,
   );
   GO;
-  
 
+  CREATE TABLE [Contentful].[SubtopicRecommendations](
+    [Id] NVARCHAR(30) NOT NULL,
+    [RecommendationSectionId] NVARCHAR(30) NULL,
+    [SectionId] NVARCHAR(30) NULL,
+    CONSTRAINT [PK_SubtopicRecommendations] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_SubtopicRecommendations_RecommendationSectionId] FOREIGN KEY ([RecommendationSectionId]) REFERENCES [Contentful].[RecommendationSections] ([Id]) ON DELETE NO ACTION,
+    CONSTRAINT [FK_SubtopicRecommendations_SectionId] FOREIGN KEY ([SectionId]) REFERENCES [Contentful].[Sections] ([Id]) ON DELETE NO ACTION,
+  );
+  GO;
+ 
+  CREATE TABLE [Contentful].[SubtopicRecommendationIntros](
+      [Id] bigint NOT NULL PRIMARY KEY IDENTITY,
+      [SubtopicRecommendationId] NVARCHAR(30) NULL,
+      [RecommendationIntroId] NVARCHAR(30) NULL,
+      CONSTRAINT [FK_SubtopicRecommendationIntros_SubtopicRecommendationId] FOREIGN KEY ([SubtopicRecommendationId]) REFERENCES [Contentful].[SubtopicRecommendations] ([Id]) ON DELETE NO ACTION,
+      CONSTRAINT [FK_SubtopicRecommendationIntros_RecommendationIntroId] FOREIGN KEY ([RecommendationIntroId]) REFERENCES [Contentful].[RecommendationIntros] ([Id]) ON DELETE NO ACTION,
+  );
+  GO;
+  
 COMMIT;
 GO;
 
