@@ -152,6 +152,7 @@ public static class ProgramExtensions
         services.AddTransient<GetPageFromDbQuery>();
 
         services.AddTransient<IGetSubTopicRecommendation, GetSubTopicRecommendationFromContentfulQuery>();
+        services.AddTransient<IGetRecommendationIntro, GetRecommendationIntroQuery>();
 
         return services;
     }
