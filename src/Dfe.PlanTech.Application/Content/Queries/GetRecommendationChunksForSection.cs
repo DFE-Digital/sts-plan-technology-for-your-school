@@ -1,10 +1,8 @@
-using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
 // TODO: Make interfaces
-// TODO: Split "GetRecommendationIntroForSubtopic" into its own class
 public class GetRecommendationChunksForSection(GetSubTopicRecommendationFromContentfulQuery getSubTopicRecommendationFromContentfulQuery)
 {
     private readonly GetSubTopicRecommendationFromContentfulQuery _getSubTopicRecommendationFromContentfulQuery = getSubTopicRecommendationFromContentfulQuery;
@@ -24,7 +22,4 @@ public class GetRecommendationChunksForSection(GetSubTopicRecommendationFromCont
 
         return recommendationChunks.Where(chunk => chunk.Answers.IntersectBy(answers.Select(answer => answer.Sys.Id), chunkAns => chunkAns.Sys.Id).Any());
     }
-
-    public async Task<RecommendationIntro> GetRecommendationIntroForSubtopic(Section subTopic, Maturity maturity, CancellationToken cancellationToken)
-        => (await _getSubTopicRecommendationFromContentfulQuery.GetSubTopicRecommendation(subTopic, cancellationToken)).Intros.Where(intro => intro.Maturity.Equals(maturity)).First();
 }
