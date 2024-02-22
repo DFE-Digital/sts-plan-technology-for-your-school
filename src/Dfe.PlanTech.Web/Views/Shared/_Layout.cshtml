@@ -43,11 +43,12 @@
     @{
         //Add relevant tags for GovUK front-end CSS to body
     }
-        <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
+    <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
 }
 
 
 @RenderBody()
+
 @section Footer {
     @{
         await Html.RenderPartialAsync("_Footer");
@@ -63,4 +64,5 @@
 
         initAll();
     </script>
+    @RenderSection("BodyEnd", required: false)
 }

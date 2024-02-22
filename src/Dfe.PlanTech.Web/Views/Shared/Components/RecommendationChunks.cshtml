@@ -1,6 +1,7 @@
 @model IEnumerable<Dfe.PlanTech.Domain.Questionnaire.Models.RecommendationChunk>
 
-@foreach (var recommendationChunk in Model)
+<div>
+    @foreach (var recommendationChunk in Model)
     {
         await Html.RenderPartialAsync("Components/Header", recommendationChunk.Header);
 
@@ -9,3 +10,4 @@
             await Html.RenderPartialAsync("Components/PageComponentFactory", content);
         }
     }
+</div>
