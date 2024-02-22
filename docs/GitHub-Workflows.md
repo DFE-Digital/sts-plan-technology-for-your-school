@@ -1,5 +1,9 @@
 # GitHub Workflows
 
+- [PR Checks](#pr-checks)
+- [Deployment pipelines](#deployment-pipelines)
+- [Other workflows](#other-workflows)
+  
 ## PR Checks
 
 The following GitHub workflows are used during the PR process to validate the changes being merged into the `main` branch
