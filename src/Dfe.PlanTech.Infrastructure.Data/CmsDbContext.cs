@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
+using System.Numerics;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
@@ -26,6 +27,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     public DbSet<CategoryDbEntity> Categories { get; set; }
 
     public DbSet<ComponentDropDownDbEntity> ComponentDropDowns { get; set; }
+
     public DbSet<ContentComponentDbEntity> ContentComponents { get; set; }
 
     public DbSet<HeaderDbEntity> Headers { get; set; }
@@ -42,10 +44,20 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public DbSet<RecommendationPageDbEntity> RecommendationPages { get; set; }
 
+    public DbSet<RecommendationChunkDbEntity> RecommendationChunks { get; set; }
+
+    public DbSet<RecommendationIntroDbEntity> RecommendationIntros { get; set; }
+
+    public DbSet<RecommendationSectionDbEntity> RecommendationSections { get; set; }
+
+    public DbSet<SubTopicRecommendationDbEntity> SubtopicRecommendations { get; set; }
+
     public DbSet<RichTextContentDbEntity> RichTextContents { get; set; }
+
     public DbSet<RichTextContentWithSlugDbEntity> RichTextContentWithSlugs { get; set; }
 
     public DbSet<RichTextDataDbEntity> RichTextDataDbEntity { get; set; }
+
     public DbSet<RichTextMarkDbEntity> RichTextMarkDbEntity { get; set; }
 
     public DbSet<SectionDbEntity> Sections { get; set; }
@@ -69,6 +81,11 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<PageContentDbEntity> ICmsDbContext.PageContents => PageContents;
     IQueryable<QuestionDbEntity> ICmsDbContext.Questions => Questions;
     IQueryable<RecommendationPageDbEntity> ICmsDbContext.RecommendationPages => RecommendationPages;
+    IQueryable<RecommendationChunkDbEntity> ICmsDbContext.RecommendationChunks => RecommendationChunks;
+    IQueryable<RecommendationIntroDbEntity> ICmsDbContext.RecommendationIntros => RecommendationIntros;
+    IQueryable<SubTopicRecommendationDbEntity> ICmsDbContext.SubtopicRecommendations => SubtopicRecommendations;
+    IQueryable<RecommendationSectionDbEntity> ICmsDbContext.RecommendationSections => RecommendationSections;
+
     IQueryable<RichTextContentDbEntity> ICmsDbContext.RichTextContents => RichTextContents;
     IQueryable<RichTextContentWithSlugDbEntity> ICmsDbContext.RichTextContentWithSlugs => RichTextContentWithSlugs
                                                                                                 .Include(rt => rt.Data)
@@ -165,9 +182,75 @@ public class CmsDbContext : DbContext, ICmsDbContext
             .OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<RichTextContentDbEntity>(entity =>
+        modelBuilder.Entity<RecommendationChunkDbEntity>(entity =>
         {
+            entity.HasMany(chunk => chunk.Content)
+                    .WithMany()
+                    .UsingEntity(join =>
+                    {
+                        join.ToTable("RecommendationChunkContents");
+                        join.HasOne(typeof(RecommendationChunkDbEntity)).WithMany().HasForeignKey("RecommendationChunkId").HasPrincipalKey("Id");
+                        join.HasOne(typeof(ContentComponentDbEntity)).WithMany().HasForeignKey("ContentComponentId").HasPrincipalKey("Id");
+                        join.Property<long>("Id");
+                        join.HasIndex("Id");
+                    });
+
         });
+
+        modelBuilder.Entity<RecommendationIntroDbEntity>(entity =>
+        {
+            entity.HasMany(intro => intro.Content)
+                    .WithMany()
+                    .UsingEntity(join =>
+                    {
+                        join.ToTable("RecommendationIntroContents");
+                        join.HasOne(typeof(RecommendationIntroDbEntity)).WithMany().HasForeignKey("RecommendationIntroId").HasPrincipalKey("Id");
+                        join.HasOne(typeof(ContentComponentDbEntity)).WithMany().HasForeignKey("ContentComponentId").HasPrincipalKey("Id");
+                        join.Property<long>("Id");
+                        join.HasIndex("Id");
+                    });
+        });
+
+        modelBuilder.Entity<RecommendationSectionDbEntity>(entity =>
+        {
+            entity.HasMany(section => section.Chunks)
+                .WithMany(chunk => chunk.RecommendationSections)
+                .UsingEntity(join =>
+                {
+                    join.ToTable("RecommendationSectionChunks");
+                    join.HasOne(typeof(RecommendationSectionDbEntity)).WithMany().HasForeignKey("RecommendationSectionId").HasPrincipalKey("Id");
+                    join.HasOne(typeof(RecommendationChunkDbEntity)).WithMany().HasForeignKey("RecommendationChunkId").HasPrincipalKey("Id");
+                    join.Property<long>("Id");
+                    join.HasIndex("Id");
+                });
+
+            entity.HasMany(section => section.Answers)
+                .WithMany(answer => answer.RecommendationSections)
+                .UsingEntity(join =>
+                {
+                    join.ToTable("RecommendationSectionAnswers");
+                    join.HasOne(typeof(RecommendationSectionDbEntity)).WithMany().HasForeignKey("RecommendationSectionId").HasPrincipalKey("Id");
+                    join.HasOne(typeof(AnswerDbEntity)).WithMany().HasForeignKey("AnswerId").HasPrincipalKey("Id");
+                    join.Property<long>("Id");
+                    join.HasIndex("Id");
+                });
+        });
+
+
+        modelBuilder.Entity<SubTopicRecommendationDbEntity>(entity =>
+        {
+            entity.HasMany(subtopicRecommendation => subtopicRecommendation.Intros)
+                .WithMany()
+                .UsingEntity(join =>
+                {
+                    join.ToTable("SubtopicRecommendationIntros");
+                    join.HasOne(typeof(SubTopicRecommendationDbEntity)).WithMany().HasForeignKey("SubtopicRecommendationId").HasPrincipalKey("Id");
+                    join.HasOne(typeof(RecommendationIntroDbEntity)).WithMany().HasForeignKey("RecommendationIntroId").HasPrincipalKey("Id");
+                    join.Property<long>("Id");
+                    join.HasIndex("Id");
+                });
+        });
+
 
         modelBuilder.Entity<RichTextContentWithSlugDbEntity>(entity =>
         {
@@ -183,16 +266,12 @@ public class CmsDbContext : DbContext, ICmsDbContext
             .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(section => section.Category)
-            .WithMany(category => category.Sections)
-            .OnDelete(DeleteBehavior.Restrict);
+                        .WithMany(category => category.Sections)
+                        .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasMany(section => section.Questions)
-            .WithOne(question => question.Section)
-            .OnDelete(DeleteBehavior.Restrict);
-        });
-
-        modelBuilder.Entity<TextBodyDbEntity>(entity =>
-        {
+                        .WithOne(question => question.Section)
+                        .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<TitleDbEntity>(entity =>
@@ -224,7 +303,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
             .FirstOrDefaultAsync(page => page.Slug == slug, cancellationToken);
 
     public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
-=> queryable.ToListAsync(cancellationToken: cancellationToken);
+    => queryable.ToListAsync(cancellationToken: cancellationToken);
 
     public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     => queryable.FirstOrDefaultAsync(cancellationToken);

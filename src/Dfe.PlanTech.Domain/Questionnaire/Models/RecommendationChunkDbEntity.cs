@@ -7,9 +7,13 @@ public class RecommendationChunkDbEntity : ContentComponentDbEntity, IRecommenda
 {
     public string Title { get; init; } = null!;
 
+    public string HeaderId { get; set; } = null!;
+
     public HeaderDbEntity Header { get; init; } = null!;
 
     public List<ContentComponentDbEntity> Content { get; init; } = [];
 
     public List<AnswerDbEntity> Answers { get; init; } = [];
+
+    public List<RecommendationSectionDbEntity> RecommendationSections { get; set; } = [];
 }

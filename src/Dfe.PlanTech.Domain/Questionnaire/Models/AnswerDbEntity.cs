@@ -17,4 +17,6 @@ public class AnswerDbEntity : ContentComponentDbEntity, IAnswer<QuestionDbEntity
     public string? ParentQuestionId { get; set; }
 
     public QuestionDbEntity? ParentQuestion { get; set; }
+
+    public List<RecommendationSectionDbEntity> RecommendationSections { get; set; } = [];
 }
