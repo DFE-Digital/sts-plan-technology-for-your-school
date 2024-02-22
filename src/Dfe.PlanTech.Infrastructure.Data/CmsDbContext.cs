@@ -115,192 +115,40 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         modelBuilder.Entity<ContentComponentDbEntity>(entity =>
         {
-            entity.Property(e => e.Id).HasMaxLength(30);
-
             entity.ToTable("ContentComponents", Schema);
+            entity.Property(e => e.Id).HasMaxLength(30);
+            entity.HasQueryFilter(ShouldShowEntity());
         });
 
         modelBuilder.Entity<AnswerDbEntity>(entity =>
         {
             entity.HasOne(a => a.NextQuestion).WithMany(q => q.PreviousAnswers).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(a => a.ParentQuestion).WithMany(q => q.Answers).OnDelete(DeleteBehavior.Restrict);
-
-            entity.ToTable("Answers", Schema);
         });
 
-        modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>(entity =>
-        {
-            entity.Navigation(button => button.Button).AutoInclude();
-        });
+        modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>().Navigation(button => button.Button).AutoInclude();
 
-        modelBuilder.Entity<ButtonWithLinkDbEntity>()
-                    .Navigation(button => button.Button).AutoInclude();
-
-        modelBuilder.Entity<CategoryDbEntity>(entity =>
-        {
-            entity.HasMany(category => category.Sections)
-              .WithOne(section => section.Category)
-              .OnDelete(DeleteBehavior.Restrict);
-
-            entity.Navigation(category => category.Header)
-                  .AutoInclude();
-
-            entity.Navigation(category => category.Sections)
-                    .AutoInclude();
-
-
-            entity.ToTable("Categories", Schema);
-        });
-
-        modelBuilder.Entity<PageDbEntity>(entity =>
-        {
-            entity.HasMany(page => page.BeforeTitleContent)
-              .WithMany(c => c.BeforeTitleContentPages)
-              .UsingEntity<PageContentDbEntity>(
-                left => left.HasOne(pageContent => pageContent.BeforeContentComponent).WithMany().HasForeignKey("BeforeContentComponentId").OnDelete(DeleteBehavior.Restrict),
-                right => right.HasOne(pageContent => pageContent.Page).WithMany().HasForeignKey("PageId").OnDelete(DeleteBehavior.Restrict)
-              );
-
-            entity.HasMany(page => page.Content)
-              .WithMany(c => c.ContentPages)
-              .UsingEntity<PageContentDbEntity>(
-                left => left.HasOne(pageContent => pageContent.ContentComponent).WithMany().HasForeignKey("ContentComponentId").OnDelete(DeleteBehavior.Restrict),
-                right => right.HasOne(pageContent => pageContent.Page).WithMany().HasForeignKey("PageId").OnDelete(DeleteBehavior.Restrict)
-              );
-
-            entity.HasOne(page => page.Title).WithMany(title => title.Pages).OnDelete(DeleteBehavior.Restrict);
-
-            entity.ToTable("Pages", Schema);
-        });
-
-        modelBuilder.Entity<QuestionDbEntity>().ToTable("Questions", Schema);
+        modelBuilder.Entity<ButtonWithLinkDbEntity>().Navigation(button => button.Button).AutoInclude();
 
         modelBuilder.Entity<RecommendationPageDbEntity>(entity =>
         {
             entity.HasOne(recommendation => recommendation.Page)
-            .WithOne(page => page.RecommendationPage)
-            .OnDelete(DeleteBehavior.Restrict);
+                    .WithOne(page => page.RecommendationPage)
+                    .OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<RecommendationChunkDbEntity>(entity =>
-        {
-            entity.HasBaseType<ContentComponentDbEntity>();
-
-            entity.HasMany(chunk => chunk.Content)
-                    .WithMany()
-                    .UsingEntity(join =>
-                    {
-                        join.ToTable("RecommendationChunkContents");
-                        join.HasOne(typeof(RecommendationChunkDbEntity)).WithMany().HasForeignKey("RecommendationChunkId").HasPrincipalKey("Id");
-                        join.HasOne(typeof(ContentComponentDbEntity)).WithMany().HasForeignKey("ContentComponentId").HasPrincipalKey("Id");
-                        join.Property<long>("Id");
-                        join.HasIndex("Id");
-                    });
-
-            entity.HasMany(chunk => chunk.Answers)
-                .WithMany()
-                .UsingEntity(join =>
-                {
-                    join.ToTable("RecommendationChunkAnswers");
-                    join.HasOne(typeof(RecommendationChunkDbEntity)).WithMany().HasForeignKey("RecommendationChunkId").HasPrincipalKey("Id");
-                    join.HasOne(typeof(AnswerDbEntity)).WithMany().HasForeignKey("AnswerId").HasPrincipalKey("Id");
-                    join.Property<long>("Id");
-                    join.HasIndex("Id");
-                });
-        });
-
-        modelBuilder.Entity<RecommendationIntroDbEntity>(entity =>
-        {
-            entity.HasBaseType<ContentComponentDbEntity>();
-
-            entity.HasMany(intro => intro.Content)
-                    .WithMany()
-                    .UsingEntity(join =>
-                    {
-                        join.ToTable("RecommendationIntroContents");
-                        join.HasOne(typeof(RecommendationIntroDbEntity)).WithMany().HasForeignKey("RecommendationIntroId").HasPrincipalKey("Id");
-                        join.HasOne(typeof(ContentComponentDbEntity)).WithMany().HasForeignKey("ContentComponentId").HasPrincipalKey("Id");
-                        join.Property<long>("Id");
-                        join.HasIndex("Id");
-                    });
-        });
-
-        modelBuilder.Entity<RecommendationSectionDbEntity>(entity =>
-        {
-            entity.HasMany(section => section.Chunks)
-                .WithMany(chunk => chunk.RecommendationSections)
-                .UsingEntity(join =>
-                {
-                    join.ToTable("RecommendationSectionChunks");
-                    join.HasOne(typeof(RecommendationSectionDbEntity)).WithMany().HasForeignKey("RecommendationSectionId").HasPrincipalKey("Id");
-                    join.HasOne(typeof(RecommendationChunkDbEntity)).WithMany().HasForeignKey("RecommendationChunkId").HasPrincipalKey("Id");
-                    join.Property<long>("Id");
-                    join.HasIndex("Id");
-                });
-
-            entity.HasMany(section => section.Answers)
-                .WithMany()
-                .UsingEntity(join =>
-                {
-                    join.ToTable("RecommendationSectionAnswers");
-                    join.HasOne(typeof(RecommendationSectionDbEntity)).WithMany().HasForeignKey("RecommendationSectionId").HasPrincipalKey("Id");
-                    join.HasOne(typeof(AnswerDbEntity)).WithMany().HasForeignKey("AnswerId").HasPrincipalKey("Id");
-                    join.Property<long>("Id");
-                    join.HasIndex("Id");
-                });
-        });
-
-
-        modelBuilder.Entity<SubTopicRecommendationDbEntity>(entity =>
-        {
-            entity.HasMany(subtopicRecommendation => subtopicRecommendation.Intros)
-                .WithMany()
-                .UsingEntity(join =>
-                {
-                    join.ToTable("SubtopicRecommendationIntros");
-                    join.HasOne(typeof(SubTopicRecommendationDbEntity)).WithMany().HasForeignKey("SubtopicRecommendationId").HasPrincipalKey("Id");
-                    join.HasOne(typeof(RecommendationIntroDbEntity)).WithMany().HasForeignKey("RecommendationIntroId").HasPrincipalKey("Id");
-                    join.Property<long>("Id");
-                    join.HasIndex("Id");
-                });
-        });
-
-
-        modelBuilder.Entity<RichTextContentWithSlugDbEntity>(entity =>
-        {
-            entity.ToView("RichTextContentsBySlug");
-        });
-
-
-        modelBuilder.Entity<SectionDbEntity>(entity =>
-        {
-            entity.HasOne(section => section.InterstitialPage)
-            .WithOne(page => page.Section)
-            .HasForeignKey<SectionDbEntity>()
-            .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(section => section.Category)
-                        .WithMany(category => category.Sections)
-                        .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasMany(section => section.Questions)
-                        .WithOne(question => question.Section)
-                        .OnDelete(DeleteBehavior.Restrict);
-        });
-
-        modelBuilder.Entity<TitleDbEntity>(entity =>
-        {
-            entity.ToTable("Titles", Schema);
-        });
+        modelBuilder.Entity<RichTextContentWithSlugDbEntity>().ToView("RichTextContentsBySlug");
 
         modelBuilder.Entity<WarningComponentDbEntity>(entity =>
         {
-            entity.HasOne(warning => warning.Text).WithMany(text => text.Warnings).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(warning => warning.Text)
+                .WithMany(text => text.Warnings)
+                .OnDelete(DeleteBehavior.Restrict);
 
             entity.Navigation(warningComponent => warningComponent.Text).AutoInclude();
         });
 
-        modelBuilder.Entity<ContentComponentDbEntity>().HasQueryFilter(ShouldShowEntity());
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(CmsDbContext).Assembly);
     }
 
     /// <summary>
@@ -309,27 +157,15 @@ public class CmsDbContext : DbContext, ICmsDbContext
     private Expression<Func<ContentComponentDbEntity, bool>> ShouldShowEntity()
         => entity => (_contentfulOptions.UsePreview || entity.Published) && !entity.Archived && !entity.Deleted;
 
-    public async Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
-    {
-        var page = await Pages.Select(page => new
-        {
-            page,
-            contentIds = page.Content.Select(content => content.Id),
-            beforeContentIds = page.BeforeTitleContent.Select(content => content.Id),
-        }).FirstOrDefaultAsync(cancellationToken);
-
-        if (page?.page == null)
-        {
-            return null;
-        }
-
-        var contents = await ContentComponents.Where(cc => page.contentIds.Any(id => id == cc.Id)).ToListAsync();
-
-        return page.page;
-    }
+    public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
+        => Pages.Include(page => page.BeforeTitleContent)
+                .Include(page => page.Content)
+                .Include(page => page.Title)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(page => page.Slug == slug, cancellationToken);
 
     public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
-    => queryable.ToListAsync(cancellationToken: cancellationToken);
+        => queryable.ToListAsync(cancellationToken: cancellationToken);
 
     public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     => queryable.FirstOrDefaultAsync(cancellationToken);
