@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Web.Models;
 
 public class PageViewModel
 {
-    public Page Page { get; init; } = null!;
+    public Page Page { get; init; }
 
     public PageViewModel(Page page, Controller controller, IUser user, ILogger logger)
     {
