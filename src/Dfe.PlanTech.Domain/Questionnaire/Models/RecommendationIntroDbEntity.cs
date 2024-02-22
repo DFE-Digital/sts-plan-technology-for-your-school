@@ -5,6 +5,8 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
 public class RecommendationIntroDbEntity : ContentComponentDbEntity, IRecommendationIntro<HeaderDbEntity, ContentComponentDbEntity>
 {
+    public string HeaderId { get; set; } = null!;
+
     public HeaderDbEntity Header { get; init; } = null!;
 
     public string Maturity { get; init; } = null!;

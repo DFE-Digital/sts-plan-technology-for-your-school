@@ -2,7 +2,8 @@ BEGIN TRANSACTION;
 
   CREATE TABLE [Contentful].[RecommendationChunks](
     [Id] NVARCHAR(30) NOT NULL,
-    [HeaderId] nvarchar(30) NULL,
+    [HeaderId] NVARCHAR(30) NULL,
+    [Title] NVARCHAR(150) NOT NULL,
     CONSTRAINT [PK_RecommendationChunks] PRIMARY KEY ([Id]),
     CONSTRAINT [FK_RecommendationChunks_ContentComponents_Id] FOREIGN KEY ([Id]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE CASCADE,
     CONSTRAINT [FK_RecommendationChunks_Headers_HeaderId] FOREIGN KEY ([HeaderId]) REFERENCES [Contentful].[Headers] ([Id])
@@ -63,11 +64,11 @@ BEGIN TRANSACTION;
   
   CREATE TABLE [Contentful].[SubtopicRecommendations](
     [Id] NVARCHAR(30) NOT NULL,
-    [RecommendationSectionId] NVARCHAR(30) NULL,
     [SectionId] NVARCHAR(30) NULL,
+    [SubtopicId] NVARCHAR(30) NULL,
     CONSTRAINT [PK_SubtopicRecommendations] PRIMARY KEY ([Id]),
-    CONSTRAINT [FK_SubtopicRecommendations_RecommendationSectionId] FOREIGN KEY ([RecommendationSectionId]) REFERENCES [Contentful].[RecommendationSections] ([Id]) ON DELETE NO ACTION,
-    CONSTRAINT [FK_SubtopicRecommendations_SectionId] FOREIGN KEY ([SectionId]) REFERENCES [Contentful].[Sections] ([Id]) ON DELETE NO ACTION,
+    CONSTRAINT [FK_SubtopicRecommendations_SectionId] FOREIGN KEY ([SectionId]) REFERENCES [Contentful].[RecommendationSections] ([Id]) ON DELETE NO ACTION,
+    CONSTRAINT [FK_SubtopicRecommendations_SubtopicId] FOREIGN KEY ([SubtopicId]) REFERENCES [Contentful].[Sections] ([Id]) ON DELETE NO ACTION,
   );
   
 

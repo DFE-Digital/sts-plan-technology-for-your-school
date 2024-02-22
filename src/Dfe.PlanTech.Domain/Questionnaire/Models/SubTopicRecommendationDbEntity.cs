@@ -7,7 +7,11 @@ public class SubTopicRecommendationDbEntity : ContentComponentDbEntity, ISubTopi
 {
     public List<RecommendationIntroDbEntity> Intros { get; init; } = [];
 
+    public string SectionId { get; set; } = null!;
+
     public RecommendationSectionDbEntity Section { get; init; } = null!;
+
+    public string SubtopicId { get; set; } = null!;
 
     public SectionDbEntity Subtopic { get; init; } = null!;
 }

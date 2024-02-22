@@ -184,6 +184,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         modelBuilder.Entity<RecommendationChunkDbEntity>(entity =>
         {
+            entity.HasBaseType<ContentComponentDbEntity>();
+
             entity.HasMany(chunk => chunk.Content)
                     .WithMany()
                     .UsingEntity(join =>
@@ -195,10 +197,22 @@ public class CmsDbContext : DbContext, ICmsDbContext
                         join.HasIndex("Id");
                     });
 
+            entity.HasMany(chunk => chunk.Answers)
+                .WithMany()
+                .UsingEntity(join =>
+                {
+                    join.ToTable("RecommendationChunkAnswers");
+                    join.HasOne(typeof(RecommendationChunkDbEntity)).WithMany().HasForeignKey("RecommendationChunkId").HasPrincipalKey("Id");
+                    join.HasOne(typeof(AnswerDbEntity)).WithMany().HasForeignKey("AnswerId").HasPrincipalKey("Id");
+                    join.Property<long>("Id");
+                    join.HasIndex("Id");
+                });
         });
 
         modelBuilder.Entity<RecommendationIntroDbEntity>(entity =>
         {
+            entity.HasBaseType<ContentComponentDbEntity>();
+
             entity.HasMany(intro => intro.Content)
                     .WithMany()
                     .UsingEntity(join =>
@@ -225,7 +239,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
                 });
 
             entity.HasMany(section => section.Answers)
-                .WithMany(answer => answer.RecommendationSections)
+                .WithMany()
                 .UsingEntity(join =>
                 {
                     join.ToTable("RecommendationSectionAnswers");
@@ -295,12 +309,24 @@ public class CmsDbContext : DbContext, ICmsDbContext
     private Expression<Func<ContentComponentDbEntity, bool>> ShouldShowEntity()
         => entity => (_contentfulOptions.UsePreview || entity.Published) && !entity.Archived && !entity.Deleted;
 
-    public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
-    => Pages.Include(page => page.BeforeTitleContent)
-            .Include(page => page.Content)
-            .Include(page => page.Title)
-            .AsSplitQuery()
-            .FirstOrDefaultAsync(page => page.Slug == slug, cancellationToken);
+    public async Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
+    {
+        var page = await Pages.Select(page => new
+        {
+            page,
+            contentIds = page.Content.Select(content => content.Id),
+            beforeContentIds = page.BeforeTitleContent.Select(content => content.Id),
+        }).FirstOrDefaultAsync(cancellationToken);
+
+        if (page?.page == null)
+        {
+            return null;
+        }
+
+        var contents = await ContentComponents.Where(cc => page.contentIds.Any(id => id == cc.Id)).ToListAsync();
+
+        return page.page;
+    }
 
     public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     => queryable.ToListAsync(cancellationToken: cancellationToken);
