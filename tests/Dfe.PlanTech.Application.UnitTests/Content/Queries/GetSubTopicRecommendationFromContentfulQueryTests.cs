@@ -4,6 +4,8 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using NSubstitute;
 
+namespace Dfe.PlanTech.Application.UnitTests.Content.Queries;
+
 public class GetSubTopicRecommendationFromContentfulQueryTests
 {
     private readonly IContentRepository _repoSubstitute = Substitute.For<IContentRepository>();

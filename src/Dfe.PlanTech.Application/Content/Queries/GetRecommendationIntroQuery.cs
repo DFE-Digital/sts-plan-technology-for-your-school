@@ -9,5 +9,5 @@ public class GetRecommendationIntroQuery(IGetSubTopicRecommendation getSubTopicR
     private readonly IGetSubTopicRecommendation _getSubTopicRecommendationFromContentfulQuery = getSubTopicRecommendationFromContentfulQuery;
 
     public async Task<RecommendationIntro> GetRecommendationIntroForSubtopic(Section subTopic, Maturity maturity, CancellationToken cancellationToken = default)
-        => (await _getSubTopicRecommendationFromContentfulQuery.GetSubTopicRecommendation(subTopic, cancellationToken)).Intros.Where(intro => intro.Maturity.Equals(maturity)).First();
+        => (await _getSubTopicRecommendationFromContentfulQuery.GetSubTopicRecommendation(subTopic, cancellationToken)).Intros.Where(intro => intro.Maturity.Equals(maturity.ToString())).First();
 }
