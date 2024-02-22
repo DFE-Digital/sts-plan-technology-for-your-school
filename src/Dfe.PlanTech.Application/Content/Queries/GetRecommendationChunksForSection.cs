@@ -4,7 +4,10 @@ using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
-public class GetRecommendationChunksForSection(IContentRepository repository) // TODO: Make an interface for it
+// TODO: Make interfaces
+// TODO: Split "GetSubTopicRecommendationFromContentful" into its own class, e.g., "GetSubTopicRecommendationFromContentfulQuery", leaving room for a "..FromDbQuery"
+// TODO: Split "GetRecommendationIntroForSubtopic" into its own class
+public class GetRecommendationChunksForSection(IContentRepository repository)
 {
     private readonly IContentRepository _repository = repository;
 
