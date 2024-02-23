@@ -12,6 +12,6 @@ public class GetSubTopicRecommendationFromContentfulQuery(IContentRepository rep
     {
         IEnumerable<SubTopicRecommendation> subTopicRecommendations = await _repository.GetEntities<SubTopicRecommendation>(cancellationToken);
 
-        return subTopicRecommendations.Where(subTopicRecommendation => subTopicRecommendation.Subtopic.Sys.Id.Equals(subTopic.Sys.Id)).First();
+        return subTopicRecommendations.First(subTopicRecommendation => subTopicRecommendation.Subtopic.Sys.Id.Equals(subTopic.Sys.Id));
     }
 }

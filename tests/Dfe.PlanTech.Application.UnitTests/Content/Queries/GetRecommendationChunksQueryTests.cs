@@ -189,7 +189,7 @@ public class GetRecommendationChunksQueryTests
 
         Assert.NotNull(recommendationChunks);
         Assert.NotEmpty(recommendationChunks);
-        Assert.Equal(4, recommendationChunks.Count());
+        Assert.Equal(4, recommendationChunks.Count);
 
         Assert.Equal(_recommendationChunkOne, recommendationChunks[0]);
         Assert.Equal(_recommendationChunkTwo, recommendationChunks[1]);
@@ -263,7 +263,7 @@ public class GetRecommendationChunksQueryTests
 
         Assert.NotNull(recommendationChunks);
         Assert.NotEmpty(recommendationChunks);
-        Assert.Equal(2, recommendationChunks.Count());
+        Assert.Equal(2, recommendationChunks.Count);
 
         Assert.Equal(_recommendationChunkOne, recommendationChunks[0]);
         Assert.Equal(_recommendationChunkThree, recommendationChunks[1]);
@@ -311,7 +311,7 @@ public class GetRecommendationChunksQueryTests
 
         Assert.Equal(_recommendationChunkFour, recommendationChunks[0]);
 
-        Assert.Equal(2, recommendationChunks[0].Answers.Count());
+        Assert.Equal(2, recommendationChunks[0].Answers.Count);
 
         Assert.Equal("Chunk Four", recommendationChunks[0].Title);
         Assert.Equal("Header Four", recommendationChunks[0].Header.Text);
@@ -328,7 +328,7 @@ public class GetRecommendationChunksQueryTests
 
         Assert.NotNull(recommendationChunks);
         Assert.NotEmpty(recommendationChunks);
-        Assert.Equal(2, recommendationChunks.Count());
+        Assert.Equal(2, recommendationChunks.Count);
 
         Assert.Equal(_recommendationChunkOne, recommendationChunks[0]);
         Assert.Equal(_recommendationChunkFour, recommendationChunks[1]);
@@ -338,7 +338,7 @@ public class GetRecommendationChunksQueryTests
         Assert.Equal(_chunkContentOne, recommendationChunks[0].Content[0]);
         Assert.Equal("answerWithLinkOne", recommendationChunks[0].Answers[0].Sys.Id);
 
-        Assert.Equal(2, recommendationChunks[1].Answers.Count());
+        Assert.Equal(2, recommendationChunks[1].Answers.Count);
 
         Assert.Equal("Chunk Four", recommendationChunks[1].Title);
         Assert.Equal("Header Four", recommendationChunks[1].Header.Text);
