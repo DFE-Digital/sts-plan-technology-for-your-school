@@ -6,7 +6,6 @@ using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Content.Queries;
 
-// TODO: This, Intro Test & SubTopic Test mean the temporary "RecommendationComponentTests" can be removed as those classes are now tested properly.
 public class GetRecommendationChunksQueryTests
 {
     private readonly IGetSubTopicRecommendation _getSubTopicRecommendationSubstitute = Substitute.For<IGetSubTopicRecommendation>();
@@ -344,6 +343,27 @@ public class GetRecommendationChunksQueryTests
         Assert.Equal("Header Four", recommendationChunks[1].Header.Text);
         Assert.Equal("answerWithLinkFour", recommendationChunks[1].Answers[0].Sys.Id);
         Assert.Equal("answerWithLinkFive", recommendationChunks[1].Answers[1].Sys.Id);
+    }
+
+    [Fact]
+    public async Task GetRecommendationChunksFromAnswers_Removes_Duplicates_FromReturn()
+    {
+        IEnumerable<Answer> answers = [_answerWithLinkFour, _answerWithLinkFive];
+
+        List<RecommendationChunk>? recommendationChunks = (await _getRecommendationChunksQuery.GetRecommendationChunksFromAnswers(_subTopic, answers)).ToList();
+
+        Assert.NotNull(recommendationChunks);
+        Assert.NotEmpty(recommendationChunks);
+        Assert.Single(recommendationChunks);
+
+        Assert.Equal(_recommendationChunkFour, recommendationChunks[0]);
+
+        Assert.Equal(2, recommendationChunks[0].Answers.Count);
+
+        Assert.Equal("Chunk Four", recommendationChunks[0].Title);
+        Assert.Equal("Header Four", recommendationChunks[0].Header.Text);
+        Assert.Equal("answerWithLinkFour", recommendationChunks[0].Answers[0].Sys.Id);
+        Assert.Equal("answerWithLinkFive", recommendationChunks[0].Answers[1].Sys.Id);
     }
 
     [Fact]
