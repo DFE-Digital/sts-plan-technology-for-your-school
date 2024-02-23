@@ -9,7 +9,7 @@ describe("Self-assessment page", () => {
 
   it("should have heading", () => {
     cy.get("h1.govuk-heading-xl")
-      .should("exist")
+      .should("exist");
   });
 
   it("should contain categories", () => {
