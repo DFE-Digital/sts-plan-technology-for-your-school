@@ -14,7 +14,7 @@ public class GetAllAnswersForSubmissionQuery(IPlanTechDbContext db) : IGetAllAns
     public async Task<List<Answer>> GetAllAnswersForLatestSubmission(string section, int establishmentId)
     {
         var answers = await db.GetAnswersForLatestSubmissionBySectionId(section, establishmentId);
-        
+
         return answers;
     }
 }
