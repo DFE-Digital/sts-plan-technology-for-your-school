@@ -153,6 +153,7 @@ public static class ProgramExtensions
         services.AddTransient<IProcessCheckAnswerDtoCommand, ProcessCheckAnswerDtoCommand>();
         services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
         services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
+        services.AddTransient<IGetAllAnswersForLatestSubmissionQuery, GetAllAnswersForSubmissionQuery>();
 
         services.AddTransient<GetPageFromDbQuery>();
 

@@ -4,6 +4,7 @@ using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 using Microsoft.Data.SqlClient;
 using System.Linq.Expressions;
+using Dfe.PlanTech.Domain.Answers.Models;
 
 namespace Dfe.PlanTech.Application.Persistence.Interfaces;
 
@@ -33,4 +34,6 @@ public interface IPlanTechDbContext
     Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default);
 
     Task<int> ExecuteRaw(FormattableString sql, CancellationToken cancellationToken = default);
+
+    Task<List<Answer>> GetAnswersForLatestSubmissionBySectionId(string sectionId, int establishmentId);
 }
