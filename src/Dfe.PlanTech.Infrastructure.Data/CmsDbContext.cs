@@ -232,9 +232,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(page => page.Slug == slug, cancellationToken);
 
-    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
-=> queryable.ToListAsync(cancellationToken: cancellationToken);
+    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default) => queryable.ToListAsync(cancellationToken: cancellationToken);
 
-    public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
-    => queryable.FirstOrDefaultAsync(cancellationToken);
+    public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default) => queryable.FirstOrDefaultAsync(cancellationToken);
 }
