@@ -49,7 +49,7 @@ public class GetPageFromDbQueryTests
                     Id = HEADER_ID
                 }
             ],
-            PageContents = [
+            AllPageContents = [
                 new PageContentDbEntity(){
                     Id = 1,
                     PageId = LANDING_PAGE_ID,

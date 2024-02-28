@@ -162,7 +162,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
             entity.HasOne(pc => pc.ContentComponent).WithMany(c => c.ContentPagesJoins);
 
-            entity.HasOne(pc => pc.Page).WithMany(p => p.PageContents);
+            entity.HasOne(pc => pc.Page).WithMany(p => p.AllPageContents);
         });
 
         modelBuilder.Entity<QuestionDbEntity>().ToTable("Questions", Schema);

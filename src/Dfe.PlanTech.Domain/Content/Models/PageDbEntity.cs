@@ -35,7 +35,7 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
     /// <summary>
     /// Combined joins for <see cref="Content"/> and <see cref="BeforeTitleContent"/> 
     /// </summary>
-    public List<PageContentDbEntity> PageContents { get; set; } = [];
+    public List<PageContentDbEntity> AllPageContents { get; set; } = [];
 
     public void OrderContents()
     {
@@ -44,7 +44,7 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
     }
 
     private IEnumerable<ContentComponentDbEntity> OrderContents(List<ContentComponentDbEntity> contents, Func<PageContentDbEntity, string?> idSelector)
-        => contents.Join(PageContents,
+        => contents.Join(AllPageContents,
                             content => content.Id,
                             idSelector,
                             (content, pageContent) => new

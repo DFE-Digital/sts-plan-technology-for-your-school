@@ -37,7 +37,7 @@ public class GetPageQueryTests
                 Id="QuestionId"
             }
         ],
-        PageContents = [
+        AllPageContents = [
             new PageContentDbEntity(){
                 Id = 1,
                 PageId = "PageId",
