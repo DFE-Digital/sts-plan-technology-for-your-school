@@ -132,4 +132,32 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default) => queryable.FirstOrDefaultAsync(cancellationToken);
 
     public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default) => queryable.ToListAsync(cancellationToken);
+
+    public async Task<List<Answer>> GetAnswersForLatestSubmissionBySectionId(string sectionId, int establishmentId)
+    {
+        var latestSubmissionIdQuery = Submissions
+            .Where(s => s.SectionId == sectionId && s.EstablishmentId == establishmentId && s.Completed)
+            .OrderByDescending(s => s.DateCreated)
+            .Select(s => s.Id)
+            .FirstOrDefaultAsync();
+
+        var latestSubmissionId = await latestSubmissionIdQuery;
+
+        if (latestSubmissionId == null)
+        {
+            return null;
+        }
+
+        var answersQuery = Responses
+            .Where(r => r.SubmissionId == latestSubmissionId)
+            .Join(
+                Answers,
+                response => response.AnswerId,
+                answer => answer.Id,
+                (response, answer) => answer)
+            .ToListAsync();
+
+        return await answersQuery;
+    }
+
 }
