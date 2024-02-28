@@ -226,22 +226,11 @@ public class CmsDbContext : DbContext, ICmsDbContext
         => entity => (_contentfulOptions.UsePreview || entity.Published) && !entity.Archived && !entity.Deleted;
 
     public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
-    {
-
-        var test = Model.FindEntityType(typeof(PageDbEntity));
-
-        var navigations = test.GetNavigations().ToList();
-
-        var testing = Model.FindEntityType(typeof(PageContentDbEntity));
-
-        var navigations2 = testing.GetNavigations().ToList();
-
-        return Pages.Include(page => page.BeforeTitleContent)
-            .Include(page => page.Content)
-            .Include(page => page.Title)
-            .AsSplitQuery()
-            .FirstOrDefaultAsync(page => page.Slug == slug, cancellationToken);
-    }
+    => Pages.Include(page => page.BeforeTitleContent)
+                .Include(page => page.Content)
+                .Include(page => page.Title)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(page => page.Slug == slug, cancellationToken);
 
     public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
 => queryable.ToListAsync(cancellationToken: cancellationToken);
