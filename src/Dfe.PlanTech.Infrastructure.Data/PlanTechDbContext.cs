@@ -143,7 +143,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
 
         var latestSubmissionId = await latestSubmissionIdQuery;
         
-        if (latestSubmissionId == null)
+        if (latestSubmissionId == 0)
         {
             return null;
         }
