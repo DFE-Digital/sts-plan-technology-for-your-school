@@ -46,4 +46,22 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
     public IEnumerable<ContentComponentDbEntity> OrderedContent => PageContents.Where(content => content.BeforeContentComponent == null && content.ContentComponent != null)
                                                                                     .OrderBy(content => content.Order)
                                                                                     .Select(content => content.ContentComponent!);
+
+    public void OrderContents()
+    {
+        BeforeTitleContent = OrderContents(BeforeTitleContent, pageContent => pageContent.BeforeContentComponentId).ToList();
+        Content = OrderContents(Content, pageContent => pageContent.ContentComponentId).ToList();
+    }
+
+    private IEnumerable<ContentComponentDbEntity> OrderContents(List<ContentComponentDbEntity> contents, Func<PageContentDbEntity, string?> idSelector)
+        => contents.Join(PageContents,
+                            content => content.Id,
+                            idSelector,
+                            (content, pageContent) => new
+                            {
+                                content,
+                                order = pageContent.Order
+                            })
+                    .OrderBy(content => content.order)
+                    .Select(content => content.content);
 }
