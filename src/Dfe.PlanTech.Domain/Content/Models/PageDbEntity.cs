@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 
@@ -35,4 +36,14 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
     /// Combined joins for <see cref="Content"/> and <see cref="BeforeTitleContent"/> 
     /// </summary>
     public List<PageContentDbEntity> PageContents { get; set; } = [];
+
+    [NotMapped]
+    public IEnumerable<ContentComponentDbEntity> OrderedBeforeTitleContent => PageContents.Where(content => content.BeforeContentComponent != null && content.ContentComponent == null)
+                                                                                    .OrderBy(content => content.Order)
+                                                                                    .Select(content => content.BeforeContentComponent!);
+
+    [NotMapped]
+    public IEnumerable<ContentComponentDbEntity> OrderedContent => PageContents.Where(content => content.BeforeContentComponent == null && content.ContentComponent != null)
+                                                                                    .OrderBy(content => content.Order)
+                                                                                    .Select(content => content.ContentComponent!);
 }

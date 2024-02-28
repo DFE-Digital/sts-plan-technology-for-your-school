@@ -48,16 +48,33 @@ public class GetPageFromDbQuery : IGetPageQuery
     {
         var page = await GetPageFromDb(slug, cancellationToken);
 
+        if (!IsValidPage(page, slug))
+        {
+            return null;
+        }
+
         await LoadPageChildrenFromDatabase(page, cancellationToken);
+
+        _logger.LogTrace("Successfully retrieved {page} from DB", slug);
 
         return page;
     }
 
-    private Task<PageDbEntity?> GetPageFromDb(string slug, CancellationToken cancellationToken)
+    private async Task<PageDbEntity?> GetPageFromDb(string slug, CancellationToken cancellationToken)
     {
         try
         {
-            return _db.GetPageBySlug(slug, cancellationToken);
+            var page = await _db.GetPageBySlug(slug, cancellationToken);
+
+            if (page == null)
+            {
+                return null;
+            }
+
+            page.BeforeTitleContent = page.OrderedBeforeTitleContent.ToList();
+            page.Content = page.OrderedContent.ToList();
+
+            return page;
         }
         catch (Exception ex)
         {
