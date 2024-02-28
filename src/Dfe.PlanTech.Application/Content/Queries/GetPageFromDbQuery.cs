@@ -71,8 +71,7 @@ public class GetPageFromDbQuery : IGetPageQuery
                 return null;
             }
 
-            page.BeforeTitleContent = page.OrderedBeforeTitleContent.ToList();
-            page.Content = page.OrderedContent.ToList();
+            page.OrderContents();
 
             return page;
         }

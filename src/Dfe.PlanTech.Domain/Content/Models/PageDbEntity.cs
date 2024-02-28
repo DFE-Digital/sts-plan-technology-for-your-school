@@ -37,16 +37,6 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
     /// </summary>
     public List<PageContentDbEntity> PageContents { get; set; } = [];
 
-    [NotMapped]
-    public IEnumerable<ContentComponentDbEntity> OrderedBeforeTitleContent => PageContents.Where(content => content.BeforeContentComponent != null && content.ContentComponent == null)
-                                                                                    .OrderBy(content => content.Order)
-                                                                                    .Select(content => content.BeforeContentComponent!);
-
-    [NotMapped]
-    public IEnumerable<ContentComponentDbEntity> OrderedContent => PageContents.Where(content => content.BeforeContentComponent == null && content.ContentComponent != null)
-                                                                                    .OrderBy(content => content.Order)
-                                                                                    .Select(content => content.ContentComponent!);
-
     public void OrderContents()
     {
         BeforeTitleContent = OrderContents(BeforeTitleContent, pageContent => pageContent.BeforeContentComponentId).ToList();
