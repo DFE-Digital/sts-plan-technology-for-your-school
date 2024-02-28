@@ -15,45 +15,24 @@ public class GetPageFromDbQueryTests
 {
     private const string TEST_PAGE_SLUG = "test-page-slug";
     private const string SECTION_SLUG = "SectionSlugTest";
-    private const string SECTION_TITLE = "SectionTitleTest";
     private const string LANDING_PAGE_SLUG = "LandingPage";
     private const string BUTTON_REF_SLUG = "ButtonReferences";
     private const string CATEGORY_ID = "category-one";
+    private const string LANDING_PAGE_ID = "LANDING_PAGE_ID";
+    private const string HEADER_ID = "Header-Id";
     private readonly ICmsDbContext _cmsDbSubstitute = Substitute.For<ICmsDbContext>();
     private readonly ILogger<GetPageFromDbQuery> _logger = Substitute.For<ILogger<GetPageFromDbQuery>>();
     private readonly IMapper _mapperSubstitute = Substitute.For<IMapper>();
     private readonly GetPageFromDbQuery _getPageFromDbQuery;
 
-    private readonly List<Page> _pages = new() {
-        new Page(){
-            Slug = "Index"
-        },
-        new Page(){
-            Slug = LANDING_PAGE_SLUG,
-        },
-        new Page(){
-            Slug = "AuditStart"
-        },
-        new Page(){
-            Slug = SECTION_SLUG,
-            DisplayTopicTitle = true,
-            DisplayHomeButton= false,
-            DisplayBackButton = false,
-        },
-        new Page(){
-            Slug = TEST_PAGE_SLUG,
-            Sys = new() {
-                Id = "test-page-id"
-            }
-        },
-    };
-
-    private readonly List<PageDbEntity> _pagesFromDb = new() {
+    private readonly List<PageDbEntity> _pagesFromDb = [
         new PageDbEntity(){
             Slug = "Index",
-            Content = new(){
-                new HeaderDbEntity()
-            }
+            Content = [
+                new HeaderDbEntity(){
+                    Id = "Header-Id"
+                }
+            ]
         },
         new PageDbEntity(){
             Slug = TEST_PAGE_SLUG,
@@ -61,9 +40,22 @@ public class GetPageFromDbQueryTests
         },
         new PageDbEntity(){
             Slug = LANDING_PAGE_SLUG,
-            Content = new(){
-                new HeaderDbEntity(),
-            }
+            Id = LANDING_PAGE_ID,
+            BeforeTitleContent = [
+
+            ],
+            Content = [
+                new HeaderDbEntity(){
+                    Id = HEADER_ID
+                }
+            ],
+            PageContents = [
+                new PageContentDbEntity(){
+                    Id = 1,
+                    PageId = LANDING_PAGE_ID,
+                    ContentComponentId = HEADER_ID
+                }
+            ]
         },
         new PageDbEntity(){
             Slug = "AuditStart",
@@ -78,36 +70,28 @@ public class GetPageFromDbQueryTests
         _pageWithButton,
         _pageWithCategories,
         _pageWithRichTextContent,
-    };
+    ];
 
     private readonly static PageDbEntity _pageWithCategories = new()
     {
         Slug = "categories_page",
         Id = CATEGORY_ID,
-        Content = new()
-        {
-        }
+        Content = []
     };
 
     private readonly static CategoryDbEntity _category = new()
     {
         Id = CATEGORY_ID,
-        ContentPages = new()
-        {
-
-        },
-        Sections = new()
-        {
-
-        }
+        ContentPages = [],
+        Sections = []
     };
 
-    private readonly static List<SectionDbEntity> _sections = new(){
+    private readonly static List<SectionDbEntity> _sections = [
                 new SectionDbEntity(){
                     Name = "sSection one",
                     CategoryId = CATEGORY_ID,
                     Order = 0,
-                    Recommendations = new(){
+                    Recommendations = [
                         new RecommendationPageDbEntity(){
                             DisplayName = "Recommendation one",
                             Maturity = Maturity.High,
@@ -122,8 +106,8 @@ public class GetPageFromDbQueryTests
                                 Slug = "recommendation-medium"
                             }
                         }
-                    },
-                    Questions = new(){
+                    ],
+                    Questions = [
                         new QuestionDbEntity(){
                             Order = 0,
                             Slug = "question-one-slug",
@@ -132,35 +116,35 @@ public class GetPageFromDbQueryTests
                             Order = 1,
                             Slug = "question-two-slug"
                         }
-                    }
+                    ]
                 },
-            };
+            ];
 
     private readonly static PageDbEntity _pageWithButton = new()
     {
         Slug = BUTTON_REF_SLUG,
-        Content = new(){
+        Content = [
                 new ButtonWithEntryReferenceDbEntity(){
                     Button = new ButtonDbEntity(){
                         Value = "Button value",
                         IsStartButton = true
                     }
                 }
-            }
+            ]
     };
 
     private static readonly PageDbEntity _pageWithRichTextContent = new()
     {
         Slug = "rich_text_content",
-        Content = new()
-        {
+        Content =
+        [
             new TextBodyDbEntity(){
                 RichTextId = 1
             },
             new TextBodyDbEntity(){
                 RichTextId = 2
             },
-        }
+        ]
     };
 
     private readonly IGetPageChildrenQuery _getPageChildrenQuery = Substitute.For<IGetPageChildrenQuery>();
@@ -237,9 +221,9 @@ public class GetPageFromDbQueryTests
             });
         }
 
-        _category.ContentPages = new(){
+        _category.ContentPages = [
             _pageWithCategories
-        };
+        ];
 
         _pageWithCategories.Content.Add(_category);
 
