@@ -19,16 +19,20 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
 
     public bool RequiresAuthorisation { get; set; } = true;
 
-    public List<ContentComponentDbEntity> BeforeTitleContent { get; set; } = new();
+    public List<ContentComponentDbEntity> BeforeTitleContent { get; set; } = [];
 
     public TitleDbEntity? Title { get; set; }
 
     public string? TitleId { get; set; }
 
-    public List<ContentComponentDbEntity> Content { get; set; } = new();
+    public List<ContentComponentDbEntity> Content { get; set; } = [];
 
     public RecommendationPageDbEntity? RecommendationPage { get; set; }
 
     public SectionDbEntity? Section { get; set; }
 
+    /// <summary>
+    /// Combined joins for <see cref="Content"/> and <see cref="BeforeTitleContent"/> 
+    /// </summary>
+    public List<PageContentDbEntity> PageContents { get; set; } = [];
 }
