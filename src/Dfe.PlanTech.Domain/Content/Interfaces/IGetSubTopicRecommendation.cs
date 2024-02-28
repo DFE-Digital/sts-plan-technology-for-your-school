@@ -4,5 +4,5 @@ namespace Dfe.PlanTech.Domain.Content.Queries;
 
 public interface IGetSubTopicRecommendation
 {
-    public Task<SubTopicRecommendation> GetSubTopicRecommendation(Section subTopic, CancellationToken cancellationToken = default);
+    public Task<SubtopicRecommendation> GetSubTopicRecommendation(string subTopic, CancellationToken cancellationToken = default);
 }
