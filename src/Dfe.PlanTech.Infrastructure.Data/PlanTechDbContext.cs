@@ -141,12 +141,12 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
             .Select(s => s.Id)
             .FirstOrDefaultAsync();
 
-        if (latestSubmissionIdQuery == null)
+        var latestSubmissionId = await latestSubmissionIdQuery;
+        
+        if (latestSubmissionId == null)
         {
             return null;
         }
-
-        var latestSubmissionId = await latestSubmissionIdQuery;
 
         var answersQuery = Responses
             .Where(r => r.SubmissionId == latestSubmissionId)
