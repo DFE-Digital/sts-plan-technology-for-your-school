@@ -8,7 +8,7 @@ public class RecommendationSection : ContentComponent, IRecommendationSection<An
     public List<Answer> Answers { get; init; } = [];
 
     public List<RecommendationChunk> Chunks { get; init; } = [];
-    
+
     public List<RecommendationChunk> GetRecommendationChunksByAnswerIds(IEnumerable<string> answerIds)
     {
         return Chunks

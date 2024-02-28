@@ -11,10 +11,10 @@ public class SubtopicRecommendation : ContentComponent, ISubTopicRecommendation<
     public RecommendationSection Section { get; init; } = null!;
 
     public Section Subtopic { get; init; } = null!;
-    
+
     public RecommendationIntro GetRecommendationByMaturity(Maturity maturity)
     {
         return Intros.FirstOrDefault(intro => intro.Maturity == maturity.ToString()) ?? throw new KeyNotFoundException($"Could not find intro for given maturity:  {maturity}");
     }
-    
+
 }
