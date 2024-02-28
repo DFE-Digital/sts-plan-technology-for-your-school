@@ -142,7 +142,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
             .FirstOrDefaultAsync();
 
         var latestSubmissionId = await latestSubmissionIdQuery;
-        
+
         if (latestSubmissionId == 0)
         {
             return null;
