@@ -12,7 +12,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Mod
 public class RichTextRendererTests
 {
     private readonly RichTextRenderer _renderer;
-    private IRichTextContentPartRenderer _partRenderer = Substitute.For<IRichTextContentPartRenderer>();
+    private readonly IRichTextContentPartRenderer _partRenderer = Substitute.For<IRichTextContentPartRenderer>();
 
     public RichTextRendererTests()
     {

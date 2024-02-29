@@ -46,24 +46,55 @@ public class GetPageFromDbQuery : IGetPageQuery
 
     private async Task<PageDbEntity?> RetrievePageFromDatabase(string slug, CancellationToken cancellationToken)
     {
-        var page = await _db.GetPageBySlug(slug, cancellationToken);
+        var page = await GetPageFromDb(slug, cancellationToken);
 
         if (!IsValidPage(page, slug))
         {
-            _logger.LogError("Retrieved page {slug} is invalid", slug);
             return null;
         }
 
         await LoadPageChildrenFromDatabase(page, cancellationToken);
 
+        _logger.LogTrace("Successfully retrieved {page} from DB", slug);
+
         return page;
+    }
+
+    private async Task<PageDbEntity?> GetPageFromDb(string slug, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var page = await _db.GetPageBySlug(slug, cancellationToken);
+
+            if (page == null)
+            {
+                return null;
+            }
+
+            page.OrderContents();
+
+            return page;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching {page} from database", slug);
+            throw;
+        }
     }
 
     private async Task LoadPageChildrenFromDatabase(PageDbEntity? page, CancellationToken cancellationToken)
     {
-        foreach (var query in _getPageChildrenQueries)
+        try
         {
-            await query.TryLoadChildren(page!, cancellationToken);
+            foreach (var query in _getPageChildrenQueries)
+            {
+                await query.TryLoadChildren(page!, cancellationToken);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading children from database for {page}", page!.Id);
+            throw;
         }
     }
 

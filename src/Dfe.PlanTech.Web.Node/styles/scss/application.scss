@@ -1,8 +1,10 @@
-//@use "sass:map";
-$govuk-global-styles: true;
-$govuk-new-link-styles: true;
+@use "../../node_modules/govuk-frontend/dist/govuk/all.scss";
+@use "../../node_modules/dfe-frontend-alpha/packages/dfefrontend.scss";
 
-@use "../../node_modules/govuk-frontend/govuk/all";
-@use "../../node_modules/dfe-frontend-alpha/packages/dfefrontend";
-@import "overrides";
 @import "app-task-list";
+@import "aside";
+@import "card-component";
+@import "error-message";
+@import "govuk-header";
+@import "hero-banner";
+@import "overrides";

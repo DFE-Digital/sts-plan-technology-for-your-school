@@ -16,7 +16,7 @@ jobs:
       branch: ${{ steps.var.outputs.branch }}
       checked-out-sha: ${{ steps.var.outputs.checked-out-sha }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
 
@@ -36,17 +36,10 @@ jobs:
       branch: ${{ needs.set-env.outputs.branch }}
       checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
 
-  build-and-deploy-azure-function-for-dev-test:
-    needs: set-env
-    name: Build & Deploy Azure Function
-    strategy:
-      fail-fast: true
-      max-parallel: 1
-      matrix:
-        target: [Dev, Tst]
-    uses: ./.github/workflows/build-and-deploy-azure-function.yml
-    with:
-      environment: ${{ matrix.target }}
+  create-and-tag-release:
+    needs: [set-env, create-and-publish-image]
+    name: Create & Tag Release
+    uses: ./.github/workflows/create-tag-release.yml
     secrets: inherit
 
   check-for-terraform-changes:
@@ -57,7 +50,7 @@ jobs:
       run_terraform_deploy: ${{ steps.terraform_changes.outputs.run_terraform_deploy }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
           fetch-depth: 2
@@ -108,16 +101,16 @@ jobs:
       checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
     secrets: inherit
 
-  build-and-deploy-azure-function-for-staging:
+  generate-subtopic-visualisations:
     needs: [set-env, deploy-to-dev-and-test]
-    name: Build & Deploy Azure Function
+    name: Run the visualisation workflow again staging content.
     if: ${{ needs.set-env.outputs.branch == 'main' }}
     strategy:
-      fail-fast: true
       max-parallel: 1
+      fail-fast: true
       matrix:
         target: [Staging]
-    uses: ./.github/workflows/build-and-deploy-azure-function.yml
+    uses: ./.github/workflows/qa-viz.yml
     with:
       environment: ${{ matrix.target }}
     secrets: inherit
@@ -150,20 +143,6 @@ jobs:
       environment: ${{ matrix.target }}
       branch: ${{ needs.set-env.outputs.branch }}
       checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
-    secrets: inherit
-
-  build-and-deploy-azure-function-for-production:
-    needs: [set-env, deploy-to-dev-and-test, deploy-to-staging]
-    name: Build & Deploy Azure Function
-    if: ${{ needs.set-env.outputs.branch == 'main' }}
-    strategy:
-      fail-fast: true
-      max-parallel: 1
-      matrix:
-        target: [Production]
-    uses: ./.github/workflows/build-and-deploy-azure-function.yml
-    with:
-      environment: ${{ matrix.target }}
     secrets: inherit
 
   plan-terraform-for-production:

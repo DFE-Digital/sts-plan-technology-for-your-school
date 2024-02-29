@@ -28,7 +28,7 @@ jobs:
       SQL_IP_NAME: e2e-tests-clear-db
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Login with AZ
         uses: ./.github/actions/azure-login
@@ -88,7 +88,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Azure CLI Login
         uses: ./.github/actions/azure-login
@@ -99,7 +99,7 @@ jobs:
           az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 

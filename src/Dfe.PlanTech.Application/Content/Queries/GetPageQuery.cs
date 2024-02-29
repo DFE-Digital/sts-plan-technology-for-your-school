@@ -21,7 +21,8 @@ public class GetPageQuery : IGetPageQuery
     /// <returns>Page matching slug</returns>
     public async Task<Page?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
     {
-        var page = await _getPageFromDbQuery.GetPageBySlug(slug, cancellationToken) ?? await _getPageFromContentfulQuery.GetPageBySlug(slug, cancellationToken);
+        var page = await _getPageFromDbQuery.GetPageBySlug(slug, cancellationToken) ??
+                    await _getPageFromContentfulQuery.GetPageBySlug(slug, cancellationToken);
 
         return page;
     }

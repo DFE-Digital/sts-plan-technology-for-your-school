@@ -7,7 +7,7 @@ namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
 public class TextBodyMapperTests : BaseMapperTests
 {
-    private string TextBodyId = "text body id";
+    private readonly string TextBodyId = "text body id";
     private readonly TextBodyMapper _mapper;
     private readonly ILogger<TextBodyMapper> _logger;
     private readonly RichTextContentMapper _richTextMapper = new();

@@ -21,3 +21,8 @@ public class WarningComponentDbEntity : ContentComponentDbEntity, IWarningCompon
     [DontCopyValue]
     public long RichTextId => Text.RichTextId;
 }
+
+public class RichTextContentWithPageSlug
+{
+
+}

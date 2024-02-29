@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Dfe.PlanTech.Domain.Content.Models;
-
 /// <summary>
 /// Content for a 'RichText' field in Contentful
 /// </summary>
@@ -20,16 +19,17 @@ public class RichTextContentDbEntity : IRichTextContent<RichTextMarkDbEntity, Ri
 
     public RichTextDataDbEntity? Data { get; set; }
 
-    public List<RichTextMarkDbEntity> Marks { get; set; } = new();
+    public List<RichTextMarkDbEntity> Marks { get; set; } = [];
 
     /// <summary>
     /// Children
     /// </summary>
-    public List<RichTextContentDbEntity> Content { get; set; } = new();
+    public List<RichTextContentDbEntity> Content { get; set; } = [];
 
     public RichTextContentDbEntity? Parent { get; set; }
 
     public long? ParentId { get; set; }
 
     public ComponentDropDownDbEntity? DropDown { get; set; }
+
 }

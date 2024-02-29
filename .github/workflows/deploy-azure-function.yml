@@ -1,0 +1,47 @@
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+      artifact:
+        type: string
+        required: true
+
+concurrency:
+  group: ${{ github.workflow }}-deploy-${{ inputs.environment }}-azure-function
+  cancel-in-progress: true
+
+jobs:
+  deploy-image:
+    runs-on: ubuntu-22.04
+    name: Deploy .NET Azure Function App
+    environment: ${{  inputs.environment }}
+    env:
+      AZURE_FUNCTIONAPP_NAME: "${{ secrets.AZ_ENVIRONMENT }}plantechcontentfulfunction"
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact }}
+          path: ./build
+
+      - name: Azure CLI Login
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+
+      - name: Deploy Azure Function App
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+          package: ./build

@@ -24,7 +24,7 @@ public class GetRecommendationRouterTests
     private readonly IUser _user;
 
     private readonly RecommendationsController _controller;
-    private readonly IGetRecommendationRouter _router;
+    private readonly GetRecommendationRouter _router;
 
     private readonly Section _section = new()
     {

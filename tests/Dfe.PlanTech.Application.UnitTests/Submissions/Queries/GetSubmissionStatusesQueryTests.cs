@@ -15,12 +15,12 @@ public class GetSubmissionStatusesQueryTests
     private readonly IPlanTechDbContext Db = Substitute.For<IPlanTechDbContext>();
     private readonly IUser user = Substitute.For<IUser>();
 
-    private readonly List<SectionStatusDto> SectionStatuses = new() {
+    private readonly List<SectionStatusDto> SectionStatuses = [
             new SectionStatusDto { Completed = 1, SectionId = "1", Maturity = "Low", DateCreated = DateTime.UtcNow },
-            new SectionStatusDto { Completed = 1, SectionId = "2", Maturity = "High", DateCreated = DateTime.UtcNow },
-            new SectionStatusDto { Completed = 0, SectionId = "3", DateCreated = DateTime.UtcNow },
-            new SectionStatusDto { Completed = 0, SectionId = "4",  DateCreated = DateTime.UtcNow },
-        };
+        new SectionStatusDto { Completed = 1, SectionId = "2", Maturity = "High", DateCreated = DateTime.UtcNow },
+        new SectionStatusDto { Completed = 0, SectionId = "3", DateCreated = DateTime.UtcNow },
+        new SectionStatusDto { Completed = 0, SectionId = "4", DateCreated = DateTime.UtcNow },
+    ];
 
     private const int establishmentId = 1;
     private const string maturity = "High";
@@ -111,15 +111,22 @@ public class GetSubmissionStatusesQueryTests
                 return queryable.FirstOrDefault();
             });
 
+        Db.ToListAsync(Arg.Any<IQueryable<SectionStatusDto>>(), Arg.Any<CancellationToken>()).Returns((callinfo) =>
+        {
+            var query = callinfo.ArgAt<IQueryable<SectionStatusDto>>(0);
+
+            return query.ToList();
+        });
+
         user.GetEstablishmentId().Returns(establishmentId);
     }
 
     [Fact]
-    public void GetSectionSubmissionStatuses_ReturnsListOfStatuses()
+    public async Task GetSectionSubmissionStatuses_ReturnsListOfStatuses()
     {
         var sections = new Section[2] { new() { Sys = new SystemDetails { Id = "1" } }, new() { Sys = new SystemDetails { Id = "3" } } };
 
-        var result = CreateStrut().GetSectionSubmissionStatuses(sections);
+        var result = await CreateStrut().GetSectionSubmissionStatuses(sections);
 
         Assert.Equal(result.Count, sections.Length);
 

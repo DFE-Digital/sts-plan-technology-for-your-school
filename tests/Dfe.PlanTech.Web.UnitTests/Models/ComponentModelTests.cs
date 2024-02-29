@@ -5,7 +5,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
 {
     public class ComponentModelTests
     {
-        private IComponentBuilder _componentBuilder;
+        private readonly ComponentBuilder _componentBuilder;
 
         public ComponentModelTests()
         {
@@ -16,7 +16,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         public void Should_render_button_component()
         {
             var actual = _componentBuilder.BuildButtonWithLink();
-            Assert.True(actual != null);
+            Assert.NotNull(actual);
             Assert.Equal("Submit", actual.Button.Value);
             Assert.False(actual.Button.IsStartButton);
             Assert.Equal("/FakeLink", actual.Href);
@@ -26,7 +26,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         public void Should_render_dropdown_component()
         {
             var actual = _componentBuilder.BuildDropDownComponent();
-            Assert.True(actual != null);
+            Assert.NotNull(actual);
             Assert.Equal("Dropdown", actual.Title);
             Assert.Equal("Content", actual.Content.Value);
         }
@@ -35,7 +35,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         public void Should_render_textbody_component()
         {
             var actual = _componentBuilder.BuildTextBody();
-            Assert.True(actual != null);
+            Assert.NotNull(actual);
             Assert.Equal("Content", actual.RichText.Value);
         }
 
@@ -43,15 +43,15 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         public void Should_render_category_component()
         {
             var actual = _componentBuilder.BuildCategory();
-            Assert.True(actual != null);
+            Assert.NotNull(actual);
             Assert.Equal("Category", actual.Header.Text);
             Assert.Equal("Section", actual.Sections[0].Name);
-            Assert.True(actual.Sections[0].Questions != null);
+            Assert.NotNull(actual.Sections[0].Questions);
             Assert.Equal("Question Text", actual.Sections[0].Questions[0].Text);
             Assert.Equal("Help Text", actual.Sections[0].Questions[0].HelpText);
-            Assert.True(actual.Sections[0].Questions[0].Answers[0] != null);
+            Assert.NotNull(actual.Sections[0].Questions[0].Answers[0]);
             Assert.Equal("Answer", actual.Sections[0].Questions[0].Answers[0].Text);
-            Assert.True(actual.Completed == 0);
+            Assert.Equal(0, actual.Completed);
         }
 
 
@@ -59,7 +59,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         public void Should_Render_ButtonWithEntryReference()
         {
             var actual = _componentBuilder.BuildButtonWithEntryReference();
-            Assert.True(actual != null);
+            Assert.NotNull(actual);
             Assert.Equal("Submit", actual.Button.Value);
             Assert.False(actual.Button.IsStartButton);
             Assert.NotNull(actual.LinkToEntry);
@@ -70,7 +70,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         {
             var actual = _componentBuilder.BuildInsetText();
 
-            Assert.True(actual != null);
+            Assert.NotNull(actual);
             Assert.Equal("Inset Text", actual.Text);
         }
 

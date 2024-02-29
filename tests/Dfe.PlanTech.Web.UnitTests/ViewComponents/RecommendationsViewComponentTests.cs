@@ -17,8 +17,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         private readonly RecommendationsViewComponent _recommendationsComponent;
         private readonly Category _category;
         private readonly Category _categoryTwo;
-        private IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
-        private ILogger<RecommendationsViewComponent> _loggerCategory;
+        private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
+        private readonly ILogger<RecommendationsViewComponent> _loggerCategory;
 
         public RecommendationsViewComponentTests()
         {
@@ -30,13 +30,13 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category = new Category()
             {
                 Completed = 1,
-                Sections = new()
-                {
+                Sections =
+                [
                     new()
                     {
                         Sys = new SystemDetails() { Id = "Section1" },
                         Name = "Test Section 1",
-                        Recommendations = new(){
+                        Recommendations = [
                             new RecommendationPage()
                             {
                                 InternalName = "High-Maturity-Recommendation-Page-InternalName",
@@ -44,24 +44,24 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                                 Maturity = Maturity.High,
                                 Page = new Page() { Slug = "High-Maturity-Recommendation-Page-Slug" }
                             }
-                        },
+                        ],
                         InterstitialPage = new Page
                         {
                             Slug = "test-slug"
                         }
                     }
-                }
+                ]
             };
 
             _categoryTwo = new Category()
             {
                 Completed = 1,
-                Sections = new(){
+                Sections = [
                     new()
                     {
                         Sys = new SystemDetails() { Id = "Section1" },
                         Name = "Test Section 1",
-                        Recommendations =new(){
+                        Recommendations = [
                             new()
                             {
                                 InternalName = "High-Maturity-Recommendation-Page-InternalName-Two",
@@ -69,18 +69,18 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                                 Maturity = Maturity.High,
                                 Page = new Page() { Slug = "High-Maturity-Recommendation-Page-Slug-Two" }
                             }
-                        },
+                        ],
                         InterstitialPage = new Page
                         {
                             Slug = "test-slug"
                         }
                     }
-                }
+                ]
             };
         }
 
         [Fact]
-        public void Returns_RecommendationInfo_If_It_Exists_ForMaturity()
+        public async Task Returns_RecommendationInfo_If_It_Exists_ForMaturity()
         {
             _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
             {
@@ -91,9 +91,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Category[] categories = new Category[] { _category };
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses.ToList());
 
-            var result = _recommendationsComponent.Invoke(categories) as ViewViewComponentResult;
+            var result = await _recommendationsComponent.InvokeAsync(categories) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -113,7 +113,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         }
 
         [Fact]
-        public void Returns_RecommendationInfo_For_Multiple_Categories_If_It_Exists_ForMaturity()
+        public async Task Returns_RecommendationInfo_For_Multiple_Categories_If_It_Exists_ForMaturity()
         {
             _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
             {
@@ -128,11 +128,12 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Maturity = "High"
             });
 
-            Category[] categories = new Category[] { _category, _categoryTwo };
+            Category[] categories = [_category, _categoryTwo];
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_categoryTwo.Sections).Returns([.. _categoryTwo.SectionStatuses]);
 
-            var result = _recommendationsComponent.Invoke(categories) as ViewViewComponentResult;
+            var result = await _recommendationsComponent.InvokeAsync(categories) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -152,12 +153,10 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal(_categoryTwo.Sections[0].Recommendations[0].DisplayName, unboxed.Skip(1).First().RecommendationDisplayName);
             Assert.Null(unboxed.First().NoRecommendationFoundErrorMessage);
             Assert.Null(unboxed.Skip(1).First().NoRecommendationFoundErrorMessage);
-
-
         }
 
         [Fact]
-        public void Returns_RecommendationInfo_And_Logs_Error_If_Exception_Thrown_By_Get_Category()
+        public async Task Returns_RecommendationInfo_And_Logs_Error_If_Exception_Thrown_By_Get_Category()
         {
             _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
             {
@@ -166,12 +165,11 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Maturity = "High"
             });
 
-            Category[] categories = new Category[] { _category };
-
+            Category[] categories = [_category];
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Throws(new Exception("test"));
 
-            var result = _recommendationsComponent.Invoke(categories) as ViewViewComponentResult;
+            var result = await _recommendationsComponent.InvokeAsync(categories) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -192,7 +190,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         }
 
         [Fact]
-        public void Returns_NullRecommendationInfo_If_No_RecommendationPage_Exists_ForMaturity()
+        public async Task Returns_NullRecommendationInfo_If_No_RecommendationPage_Exists_ForMaturity()
         {
             _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
             {
@@ -203,9 +201,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Category[] categories = new Category[] { _category };
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses.ToList());
 
-            var result = _recommendationsComponent.Invoke(categories) as ViewViewComponentResult;
+            var result = await _recommendationsComponent.InvokeAsync(categories) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -225,7 +223,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         }
 
         [Fact]
-        public void DoesNotReturn_RecommendationInfo_If_Section_IsNot_Completed()
+        public async Task DoesNotReturn_RecommendationInfo_If_Section_IsNot_Completed()
         {
             _category.Completed = 0;
             _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
@@ -235,11 +233,11 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Maturity = null
             });
 
-            Category[] categories = new Category[] { _category };
+            Category[] categories = [_category];
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses.ToList());
 
-            var result = _recommendationsComponent.Invoke(categories) as ViewViewComponentResult;
+            var result = await _recommendationsComponent.InvokeAsync(categories) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -249,13 +247,14 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         }
 
         [Fact]
-        public void Returns_Null_If_Category_IsNot_Completed()
+        public async Task Returns_Null_If_Category_IsNot_Completed()
         {
             _category.Completed = 0;
 
-            Category[] categories = new Category[] { _category };
+            Category[] categories = [_category];
 
-            var result = _recommendationsComponent.Invoke(categories) as ViewViewComponentResult;
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
+            var result = await _recommendationsComponent.InvokeAsync(categories) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);

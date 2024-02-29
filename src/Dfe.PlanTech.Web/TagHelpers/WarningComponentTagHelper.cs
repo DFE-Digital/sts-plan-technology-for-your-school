@@ -7,7 +7,7 @@ public class WarningComponentTagHelper : TagHelper
     public const string OpeningDiv = """<div class="govuk-warning-text">""";
     public const string WarningIcon = """<span class="govuk-warning-text__icon" aria-hidden="true">!</span>""";
     public const string OpeningSpan = """<strong class="govuk-warning-text__text">""";
-    public const string AssistiveText = """<span class="govuk-warning-text__assistive">Warning</span>""";
+    public const string AssistiveText = """<span class="govuk-visually-hidden">Warning</span>""";
 
     public WarningComponentTagHelper()
     {

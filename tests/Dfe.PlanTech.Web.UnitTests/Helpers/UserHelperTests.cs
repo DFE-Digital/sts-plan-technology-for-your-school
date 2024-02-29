@@ -17,13 +17,13 @@ public class UserHelperTests
     private const string FIRST_ESTABLISHMENT_REF = "131";
 
     private readonly UserHelper _userHelper;
-    private IHttpContextAccessor _httpContextAccessorSubstitute;
-    private IPlanTechDbContext _planTechDbContextSubstitute;
-    private ICreateEstablishmentCommand _createEstablishmentCommandSubstitute;
+    private readonly IHttpContextAccessor _httpContextAccessorSubstitute;
+    private readonly IPlanTechDbContext _planTechDbContextSubstitute;
+    private readonly ICreateEstablishmentCommand _createEstablishmentCommandSubstitute;
     private IGetUserIdQuery _getUserIdQuerySubstitute;
     private IGetEstablishmentIdQuery _getEstablishmentIdQuerySubstitute;
 
-    private List<User> _users = new(){
+    private readonly List<User> _users = new(){
         new User(){
             DfeSignInRef = FIRST_USER_REF,
             Id = 1
@@ -34,7 +34,7 @@ public class UserHelperTests
         }
     };
 
-    private List<Establishment> _establishments = new(){
+    private readonly List<Establishment> _establishments = new(){
        new Establishment(){
         EstablishmentRef = FIRST_ESTABLISHMENT_REF,
         Id = 1

@@ -26,6 +26,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     public DbSet<CategoryDbEntity> Categories { get; set; }
 
     public DbSet<ComponentDropDownDbEntity> ComponentDropDowns { get; set; }
+    public DbSet<ContentComponentDbEntity> ContentComponents { get; set; }
 
     public DbSet<HeaderDbEntity> Headers { get; set; }
 
@@ -42,6 +43,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
     public DbSet<RecommendationPageDbEntity> RecommendationPages { get; set; }
 
     public DbSet<RichTextContentDbEntity> RichTextContents { get; set; }
+    public DbSet<RichTextContentWithSlugDbEntity> RichTextContentWithSlugs { get; set; }
+
     public DbSet<RichTextDataDbEntity> RichTextDataDbEntity { get; set; }
     public DbSet<RichTextMarkDbEntity> RichTextMarkDbEntity { get; set; }
 
@@ -67,6 +70,9 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<QuestionDbEntity> ICmsDbContext.Questions => Questions;
     IQueryable<RecommendationPageDbEntity> ICmsDbContext.RecommendationPages => RecommendationPages;
     IQueryable<RichTextContentDbEntity> ICmsDbContext.RichTextContents => RichTextContents;
+    IQueryable<RichTextContentWithSlugDbEntity> ICmsDbContext.RichTextContentWithSlugs => RichTextContentWithSlugs
+                                                                                                .Include(rt => rt.Data)
+                                                                                                .Include(rt => rt.Marks);
     IQueryable<RichTextDataDbEntity> ICmsDbContext.RichTextDataDbEntity => RichTextDataDbEntity;
     IQueryable<RichTextMarkDbEntity> ICmsDbContext.RichTextMarkDbEntity => RichTextMarkDbEntity;
     IQueryable<SectionDbEntity> ICmsDbContext.Sections => Sections;
@@ -132,11 +138,11 @@ public class CmsDbContext : DbContext, ICmsDbContext
         modelBuilder.Entity<PageDbEntity>(entity =>
         {
             entity.HasMany(page => page.BeforeTitleContent)
-              .WithMany(c => c.BeforeTitleContentPages)
-              .UsingEntity<PageContentDbEntity>(
-                left => left.HasOne(pageContent => pageContent.BeforeContentComponent).WithMany().HasForeignKey("BeforeContentComponentId").OnDelete(DeleteBehavior.Restrict),
-                right => right.HasOne(pageContent => pageContent.Page).WithMany().HasForeignKey("PageId").OnDelete(DeleteBehavior.Restrict)
-              );
+                .WithMany(c => c.BeforeTitleContentPages)
+                .UsingEntity<PageContentDbEntity>(
+                  left => left.HasOne(pageContent => pageContent.BeforeContentComponent).WithMany().HasForeignKey("BeforeContentComponentId").OnDelete(DeleteBehavior.Restrict),
+                  right => right.HasOne(pageContent => pageContent.Page).WithMany().HasForeignKey("PageId").OnDelete(DeleteBehavior.Restrict)
+                );
 
             entity.HasMany(page => page.Content)
               .WithMany(c => c.ContentPages)
@@ -150,6 +156,15 @@ public class CmsDbContext : DbContext, ICmsDbContext
             entity.ToTable("Pages", Schema);
         });
 
+        modelBuilder.Entity<PageContentDbEntity>(entity =>
+        {
+            entity.HasOne(pc => pc.BeforeContentComponent).WithMany(c => c.BeforeTitleContentPagesJoins);
+
+            entity.HasOne(pc => pc.ContentComponent).WithMany(c => c.ContentPagesJoins);
+
+            entity.HasOne(pc => pc.Page).WithMany(p => p.AllPageContents);
+        });
+
         modelBuilder.Entity<QuestionDbEntity>().ToTable("Questions", Schema);
 
         modelBuilder.Entity<RecommendationPageDbEntity>(entity =>
@@ -161,10 +176,13 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         modelBuilder.Entity<RichTextContentDbEntity>(entity =>
         {
-            entity.ToTable("RichTextContents", Schema);
-            entity.Navigation(rt => rt.Marks).AutoInclude();
-            entity.Navigation(rt => rt.Data).AutoInclude();
         });
+
+        modelBuilder.Entity<RichTextContentWithSlugDbEntity>(entity =>
+        {
+            entity.ToView("RichTextContentsBySlug");
+        });
+
 
         modelBuilder.Entity<SectionDbEntity>(entity =>
         {
@@ -184,7 +202,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         modelBuilder.Entity<TextBodyDbEntity>(entity =>
         {
-            entity.Navigation(tb => tb.RichText).AutoInclude();
         });
 
         modelBuilder.Entity<TitleDbEntity>(entity =>
@@ -210,17 +227,12 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
     => Pages.Include(page => page.BeforeTitleContent)
-            .Include(page => page.Content)
-            .Include(page => page.Title)
-            .AsSplitQuery()
-            .FirstOrDefaultAsync(page => page.Slug == slug, cancellationToken);
+                .Include(page => page.Content)
+                .Include(page => page.Title)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(page => page.Slug == slug, cancellationToken);
 
-    public IQueryable<RichTextContentDbEntity> RichTextContentsByPageSlug(string pageSlug)
-        => RichTextContents.FromSql($"SELECT * FROM [Contentful].[SelectAllRichTextContentForPageSlug]({pageSlug})");
+    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default) => queryable.ToListAsync(cancellationToken: cancellationToken);
 
-    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
-=> queryable.ToListAsync(cancellationToken: cancellationToken);
-
-    public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
-    => queryable.FirstOrDefaultAsync(cancellationToken);
+    public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default) => queryable.FirstOrDefaultAsync(cancellationToken);
 }

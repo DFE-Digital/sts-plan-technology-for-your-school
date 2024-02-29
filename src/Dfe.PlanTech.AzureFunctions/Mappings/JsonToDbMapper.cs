@@ -33,7 +33,7 @@ where TEntity : ContentComponentDbEntity, new()
         }
 
         var asJson = JsonSerializer.Serialize(values, JsonOptions);
-        var serialised = JsonSerializer.Deserialize<TEntity>(asJson, JsonOptions) ?? throw new NullReferenceException("Null returned");
+        var serialised = JsonSerializer.Deserialize<TEntity>(asJson, JsonOptions) ?? throw new ArgumentNullException("Null returned");
 
         return serialised;
     }

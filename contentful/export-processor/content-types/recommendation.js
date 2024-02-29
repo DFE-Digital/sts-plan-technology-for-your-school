@@ -11,6 +11,11 @@ export class Recommendation {
     this.displayName = fields.displayName;
     this.id = sys.id;
     this.page = fields.page;
+
+    if (!fields.page?.fields?.slug) {
+      console.error(this);
+      return;
+    }
     this.slug = fields.page?.fields.slug;
   }
 }

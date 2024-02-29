@@ -1,52 +1,56 @@
-import { Section } from "./section.mjs";
-import fs from "fs";
+import { Section } from "./content-types/section";
+import ContentType from "./content-types/content-type";
 
 /**
  * DataMapper class for mapping and combining data from a file
  */
 export default class DataMapper {
   // Maps for different content types
-  answers = new Map();
-  pages = new Map();
-  questions = new Map();
-  recommendations = new Map();
-  sections = new Map();
+  contents = new Map();
 
-  // Map of content type to corresponding Map
-  contentTypeMappings = {
-    answer: this.answers,
-    page: this.pages,
-    question: this.questions,
-    recommendationPage: this.recommendations,
-    section: this.sections,
-  };
+  contentTypes = new Map();
 
+  _alreadyMappedSections;
   /**
    * Get the mapped sections
    * @returns {IterableIterator<Section>} Iterator for mapped sections
    */
   get mappedSections() {
-    return this.sectionsToClasses(this.sections);
+    if (!this._alreadyMappedSections)
+      this._alreadyMappedSections = Array.from(
+        this.sectionsToClasses(this.contents["section"])
+      );
+
+    return this._alreadyMappedSections;
+  }
+
+  get pages() {
+    return this.contents["page"];
   }
 
   /**
    * Constructor for DataMapper
    * @param {string} filePath - Path to the file to map data from
    */
-  constructor(filePath) {
-    this.mapData(filePath);
+  constructor({ entries, contentTypes }) {
+    this.mapData(entries, contentTypes);
   }
 
   /**
    * Map data from the provided file
    * @param {string} filePath - Path to the file to map data from
    */
-  mapData(filePath) {
-    const fileContents = fs.readFileSync(filePath, "utf-8");
-    const jsonObject = JSON.parse(fileContents);
-
-    this.mapEntries(jsonObject.entries);
+  mapData(entries, contentTypes) {
+    this.mapContentTypes(contentTypes);
+    this.mapEntries(entries);
     this.combineEntries();
+  }
+
+  mapContentTypes(contentTypes) {
+    for (const contentType of contentTypes) {
+      const mapped = new ContentType(contentType);
+      this.contentTypes.set(mapped.id, mapped);
+    }
   }
 
   /**
@@ -68,13 +72,24 @@ export default class DataMapper {
     const contentType = entry.sys.contentType.sys.id;
 
     // Get the set for the content type
-    const setForContentType = this.contentTypeMappings[contentType];
-    if (!setForContentType) return;
-
+    const setForContentType = this.getContentTypeSet(contentType);
     // Add the entry to the set
     const id = entry.sys.id;
+
     this.stripLocalisationFromAllFields(entry);
+
     setForContentType.set(id, entry);
+  }
+
+  getContentTypeSet(contentType) {
+    let setForContentType = this.contents[contentType];
+
+    if (!setForContentType) {
+      setForContentType = new Map();
+      this.contents[contentType] = setForContentType;
+    }
+
+    return setForContentType;
   }
 
   /**
@@ -95,6 +110,10 @@ export default class DataMapper {
    * @returns {IterableIterator<Section>} Iterator for mapped sections
    */
   *sectionsToClasses(sections) {
+    if (!sections || sections.length == 0) {
+      return;
+    }
+
     for (const [id, section] of sections) {
       yield new Section(section);
     }
@@ -140,30 +159,61 @@ export default class DataMapper {
    * Combine entries for all tracked content types (i.e. answers, pages, questions, recommendations, sections)
    */
   combineEntries() {
-    for (const [id, recommendation] of this.recommendations) {
-      recommendation.fields.page = this.pages.get(
-        recommendation.fields.page.sys.id
-      );
+    for (const [contentTypeId, contents] of Object.entries(this.contents)) {
+      const contentType = this.contentTypes.get(contentTypeId);
+
+      for (const [id, entry] of contents) {
+        this.mapRelationshipsForEntry(entry, contentType);
+      }
+    }
+  }
+
+  mapRelationshipsForEntry(entry, contentType) {
+    Object.entries(entry.fields).forEach(([key, value]) => {
+      const referencedTypesForField =
+        contentType.getReferencedTypesForField(key);
+
+      if (!referencedTypesForField) return;
+
+      if (Array.isArray(value)) {
+        entry.fields[key] = value.map((item) =>
+          this.getMatchingContentForReference(referencedTypesForField, item)
+        );
+      } else {
+        entry.fields[key] = this.getMatchingContentForReference(
+          referencedTypesForField,
+          value
+        );
+      }
+    });
+  }
+
+  getContentForFieldId(referencedTypesForField, id) {
+    const matchingItem = referencedTypesForField
+      .map((type) => {
+        const matchingContents = this.contents[type];
+        const matchingContent = matchingContents.get(id);
+
+        return matchingContent;
+      })
+      .find((matching) => matching != null);
+
+    if (!matchingItem) {
+      console.error(`Error finding ${id} for ${referencedTypesForField}`);
     }
 
-    for (const [id, question] of this.questions) {
-      question.fields.answers = this.copyRelationships(
-        question.fields.answers,
-        this.answers
-      );
+    return matchingItem;
+  }
+
+  getMatchingContentForReference(referencedTypesForField, reference) {
+    const referenceId = reference["sys"]?.["id"];
+
+    if (!referenceId) {
+      console.log("no reference", reference);
+      return;
     }
 
-    for (const [id, section] of this.sections) {
-      section.fields.questions = this.copyRelationships(
-        section.fields.questions,
-        this.questions
-      );
-
-      section.fields.recommendations = this.copyRelationships(
-        section.fields.recommendations,
-        this.recommendations
-      );
-    }
+    return this.getContentForFieldId(referencedTypesForField, referenceId);
   }
 
   /**

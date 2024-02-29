@@ -12,8 +12,7 @@ public static class RouteDataExtensions
     // DefaultPageTitle.
     public static string GetTitleForPage(this RouteData routeData)
     {
-        var sectionSlug = routeData.Values.OrderByDescending(routePart => routePart.Key)
-                                        .Where(routePart =>
+        var sectionSlug = routeData.Values.Where(routePart =>
                                         {
                                             if (routePart.Key == SectionSlugKey)
                                             {
@@ -25,6 +24,7 @@ public static class RouteDataExtensions
 
                                             return !string.IsNullOrEmpty(routePartValue) && routePartValue != "/" && !routePartValue.Any(char.IsNumber);
                                         })
+                                        .OrderByDescending(routePart => routePart.Key)
                                         .Select(routePart => routePart.Value!.ToString())
                                         .FirstOrDefault();
 

@@ -1,12 +1,13 @@
-import fs from "fs";
-import { Recommendation } from "./recommendation.mjs";
-import { Question } from "./question.mjs";
-import { UserJourney } from "./user-journey.mjs";
+import { Recommendation } from "./recommendation";
+import { Question } from "./question";
+import { UserJourney } from "../user-journey/user-journey";
 
 export class Section {
   recommendations;
   questions;
   name;
+  interstitialPage;
+
   id;
 
   paths;
@@ -18,6 +19,7 @@ export class Section {
       (recommendation) => new Recommendation(recommendation)
     );
 
+    this.interstitialPage = fields.interstitialPage;
     this.questions = fields.questions.map((question) => new Question(question));
     this.id = sys.id;
     this.name = fields.name;

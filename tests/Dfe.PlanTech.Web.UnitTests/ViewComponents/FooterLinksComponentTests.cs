@@ -11,7 +11,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents;
 
 public class FooterLinksComponentTests
 {
-    private NavigationLink[] _navigationLinks = new[]{
+    private readonly NavigationLink[] _navigationLinks = new[]{
     new NavigationLink(){
       DisplayText = "Testing",
       Href = "/testing"

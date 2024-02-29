@@ -26,7 +26,7 @@ public class CheckAnswersRouterTests
 
     private readonly CheckAnswersController _controller = new(new NullLogger<CheckAnswersController>());
 
-    private readonly ICheckAnswersRouter _router;
+    private readonly CheckAnswersRouter _router;
 
     private const int establishmentId = 1;
 

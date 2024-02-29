@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Persistence.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
@@ -10,9 +10,9 @@ namespace Dfe.PlanTech.Application.UnitTests.Content.Queries;
 public class GetRichTextsQueryTests
 {
     private readonly ICmsDbContext _db = Substitute.For<ICmsDbContext>();
-    private readonly ILogger<GetRichTextsQuery> _logger = Substitute.For<ILogger<GetRichTextsQuery>>();
+    private readonly ILogger<GetRichTextsForPageQuery> _logger = Substitute.For<ILogger<GetRichTextsForPageQuery>>();
 
-    private readonly IGetPageChildrenQuery _getRichTextsQuery;
+    private readonly GetRichTextsForPageQuery _getRichTextsQuery;
 
     private readonly static PageDbEntity _loadedPage = new()
     {
@@ -21,12 +21,6 @@ public class GetRichTextsQueryTests
         {
 
         }
-    };
-
-    private readonly static TextBodyDbEntity _textBody = new()
-    {
-        Id = "ABCD",
-        RichTextId = 1,
     };
 
     private readonly static List<RichTextContentDbEntity> _richTextContents = new(){
@@ -47,18 +41,34 @@ public class GetRichTextsQueryTests
       },
       Value = "rich-text",
       Id = 1,
-    }
+          },new()
+    {
+      Data = new()
+      {
+        Uri = "uri"
+      },
+      Marks = [
+        new(){
+          Type = "Bold",
+        }
+      ],
+      Content = [],
+      Value = "rich-text",
+      Id = 2
+          }
   };
 
     private readonly List<RichTextContentDbEntity> _returnedRichTextContents = new();
+
+    private readonly ContentfulOptions _contentfulOptions = new(false);
 
     public GetRichTextsQueryTests()
     {
         _loadedPage.Content.Clear();
 
-        _getRichTextsQuery = new GetRichTextsQuery(_db, _logger);
+        _getRichTextsQuery = new GetRichTextsForPageQuery(_db, _logger, _contentfulOptions);
 
-        _db.RichTextContentsByPageSlug(Arg.Any<string>()).Returns(_richTextContents.AsQueryable());
+        _db.RichTextContents.Returns(_richTextContents.AsQueryable());
 
         _db.ToListAsync(Arg.Any<IQueryable<RichTextContentDbEntity>>(), Arg.Any<CancellationToken>())
             .Returns(callinfo =>
@@ -70,7 +80,7 @@ public class GetRichTextsQueryTests
     }
 
     [Fact]
-    public async Task Should_Retrieve_ButtonWithEntryReferences_For_Page_When_Existing()
+    public async Task Should_Retrieve_RichTextContents_When_Matching()
     {
         _loadedPage.Content.Add(new TextBodyDbEntity()
         {
@@ -80,15 +90,15 @@ public class GetRichTextsQueryTests
         await _getRichTextsQuery.TryLoadChildren(_loadedPage, CancellationToken.None);
 
         await _db.ReceivedWithAnyArgs(1)
-                     .ToListAsync(Arg.Any<IQueryable<RichTextContentDbEntity>>(), Arg.Any<CancellationToken>());
+                     .ToListAsync(Arg.Any<IQueryable<RichTextContentWithSlugDbEntity>>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task Should_Not_Retrieve_ButtonWithEntryReferences_For_Page_When_NoButtons()
+    public async Task Should_Retrieve_RichTextContents_When_Not_Matching()
     {
         await _getRichTextsQuery.TryLoadChildren(_loadedPage, CancellationToken.None);
 
         await _db.ReceivedWithAnyArgs(0)
-                     .ToListAsync(Arg.Any<IQueryable<RichTextContentDbEntity>>(), Arg.Any<CancellationToken>());
+                     .ToListAsync(Arg.Any<IQueryable<RichTextContentWithSlugDbEntity>>(), Arg.Any<CancellationToken>());
     }
 }

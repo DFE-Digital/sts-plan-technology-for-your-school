@@ -71,7 +71,7 @@ public class SubmissionStatusProcessorTests
 
         _failureStatusChecker.IsMatchingSubmissionStatus(Arg.Any<SubmissionStatusProcessor>()).Returns(false);
 
-        ISubmissionStatusProcessor processor = new SubmissionStatusProcessor(_getSectionQuery,
+        SubmissionStatusProcessor processor = new SubmissionStatusProcessor(_getSectionQuery,
                                                                              _getSubmissionStatusesQuery,
                                                                              new[] { _statusCheckers[0], successStatusChecker },
                                                                              _getResponsesQuery,
@@ -96,7 +96,7 @@ public class SubmissionStatusProcessorTests
     {
         _failureStatusChecker.IsMatchingSubmissionStatus(Arg.Any<SubmissionStatusProcessor>()).Returns(false);
 
-        ISubmissionStatusProcessor processor = new SubmissionStatusProcessor(_getSectionQuery,
+        SubmissionStatusProcessor processor = new SubmissionStatusProcessor(_getSectionQuery,
                                                                              _getSubmissionStatusesQuery,
                                                                              _statusCheckers,
                                                                              _getResponsesQuery,
@@ -111,7 +111,7 @@ public class SubmissionStatusProcessorTests
     [Fact]
     public async Task Should_ThrowException_When_Section_NotFound()
     {
-        ISubmissionStatusProcessor processor = new SubmissionStatusProcessor(_getSectionQuery,
+        SubmissionStatusProcessor processor = new SubmissionStatusProcessor(_getSectionQuery,
                                                                              _getSubmissionStatusesQuery,
                                                                              _statusCheckers,
                                                                              _getResponsesQuery,

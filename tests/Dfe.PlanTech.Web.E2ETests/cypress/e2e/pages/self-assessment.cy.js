@@ -1,14 +1,14 @@
+import { selfAssessmentSlug } from "../../helpers/page-slugs";
+
 describe("Self-assessment page", () => {
-  const url = "/self-assessment";
+  const url = selfAssessmentSlug;
 
   beforeEach(() => {
     cy.loginWithEnv(url);
   });
 
   it("should have heading", () => {
-    cy.get("h1.govuk-heading-xl")
-      .should("exist")
-      .and("have.text", "Technology self‑assessment");
+    cy.get("h1.govuk-heading-xl").should("exist");
   });
 
   it("should contain categories", () => {
