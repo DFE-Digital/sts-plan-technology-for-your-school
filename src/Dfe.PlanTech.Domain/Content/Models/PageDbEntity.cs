@@ -44,14 +44,15 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
     }
 
     private IEnumerable<ContentComponentDbEntity> OrderContents(List<ContentComponentDbEntity> contents, Func<PageContentDbEntity, string?> idSelector)
-        => contents.Join(AllPageContents,
+        => contents.GroupJoin(AllPageContents,
                             content => content.Id,
-                            idSelector,
+                            pageContent => pageContent.ContentComponentId,
                             (content, pageContent) => new
                             {
                                 content,
-                                order = pageContent.Order
+                                joins = pageContent
                             })
-                    .OrderBy(content => content.order)
-                    .Select(content => content.content);
+                    .SelectMany(combined => combined.joins.Select(j => new { combined.content, order = j.Order }))
+                    .OrderBy(combined => combined.order)
+                    .Select(combined => combined.content);
 }
