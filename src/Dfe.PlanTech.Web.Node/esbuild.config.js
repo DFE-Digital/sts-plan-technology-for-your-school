@@ -43,7 +43,6 @@ await esbuild.build({
     }),
   ],
   outfile: "out/css/application.css",
-
 });
 
 await esbuild.build({
@@ -96,11 +95,6 @@ for (const folder of targetFolders) {
 copyFileSync(
   "./node_modules/govuk-frontend/dist/govuk/govuk-frontend.min.js",
   "./out/js/govuk-frontend.min.js"
-);
-
-copyFileSync(
-  ".//node_modules/govuk-frontend/dist/govuk/govuk-frontend.min.css",
-  "./out/css/govuk-frontend.min.css"
 );
 
 //Copy to Dfe.PlanTech.Web
