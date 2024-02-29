@@ -46,13 +46,12 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
     private IEnumerable<ContentComponentDbEntity> OrderContents(List<ContentComponentDbEntity> contents, Func<PageContentDbEntity, string?> idSelector)
         => contents.GroupJoin(AllPageContents,
                             content => content.Id,
-                            pageContent => pageContent.ContentComponentId,
+                            idSelector,
                             (content, pageContent) => new
                             {
                                 content,
-                                joins = pageContent
+                                order = pageContent.OrderByDescending(pc => pc.Id).Select(join => join.Order).First()
                             })
-                    .SelectMany(combined => combined.joins.Select(j => new { combined.content, order = j.Order }))
-                    .OrderBy(combined => combined.order)
-                    .Select(combined => combined.content);
+                            .OrderBy(joined => joined.order)
+                            .Select(joined => joined.content);
 }
