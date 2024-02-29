@@ -57,7 +57,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Check for changes - PR
-        if: github.event_name == 'pull request'
         env:
           start_ref: ${{github.event_name == 'pull request' && github.head_ref || 'before'}}
           end_ref: ${{github.event_name == 'pull request' && github.base_ref || 'ref'}}
