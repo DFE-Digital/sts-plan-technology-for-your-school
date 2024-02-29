@@ -19,6 +19,7 @@ runs:
       env:
         start_ref: ${{github.event_name == 'pull request' && github.head_ref || 'before'}}
         end_ref: ${{github.event_name == 'pull request' && github.base_ref || 'ref'}}
+      shell: sh
       run: |
         if git diff --name-only ${{env.start_ref}}^${{env.end_ref}} | grep ${{inputs.directory}}; then
           echo "::notice title=Changes in directory::Linting ${{inputs.directory}} as there are changes in the directory"
