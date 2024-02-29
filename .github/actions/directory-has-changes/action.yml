@@ -1,0 +1,28 @@
+name: Check that a directory has had changes
+description: Check that a directory has had changes, and output a true/false. Used to prevent certain jobs/steps running if unnecessary
+
+inputs:
+  directory:
+    required: true
+    type: string
+
+outputs:
+  has_had_changes:
+    value: ${{ steps.check-for-changes.outputs.has_had_changes }}
+
+runs:
+  using: composite
+
+  steps:
+    - name: Check for changes - PR
+      id: check-for-changes
+      env:
+        start_ref: ${{github.event_name == 'pull request' && github.head_ref || 'before'}}
+        end_ref: ${{github.event_name == 'pull request' && github.base_ref || 'ref'}}
+      run: |
+        if git diff --name-only ${{env.start_ref}}^${{env.end_ref}} | grep ${{inputs.directory}}; then
+          echo "::notice title=Changes in directory::Linting ${{inputs.directory}} as there are changes in the directory"
+          echo "directory_has_changes=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "directory_has_changes=false" >> "$GITHUB_OUTPUT"
+        fi
