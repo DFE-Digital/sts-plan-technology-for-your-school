@@ -44,7 +44,7 @@ jobs:
     if: ${{ github.event_name == 'pull_request' }}
     needs: [get-src-dir-list]
     strategy:
-      max-parallel: 4
+      max-parallel: 1
       fail-fast: true
       matrix:
         workspace: ${{ fromJson(needs.get-src-dir-list.outputs.directories) }}
@@ -55,18 +55,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-
-      - name: Check for changes - PR
-        if: github.event_name == 'pull request'
-        env:
-          start_ref: ${{github.event_name == 'pull request' && github.head_ref || 'head'}}
-        run: |
-          if [git diff --name-only ${{env.start_ref}}^.. | grep src/${{matrix.workspace}}/] then
-            echo "::notice title=Changes in directory::Linting ${{matrix.workspace}} as there are changes in the directory"
-            echo "directory_has_changes=true" >> "$GITHUB_ENV"
-          else
-            echo "directory_has_changes=false" >> "$GITHUB_ENV"
-          fi
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
