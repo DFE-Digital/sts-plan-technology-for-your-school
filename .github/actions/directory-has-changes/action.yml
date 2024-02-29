@@ -21,7 +21,7 @@ runs:
         end_ref: ${{github.event_name == 'pull request' && github.base_ref || github.event.after }}
       shell: sh
       run: |
-        if git diff --name-only ${{env.start_ref}}^${{env.end_ref}} | grep ${{inputs.directory}}; then
+        if git diff --name-only ${{env.start_ref}}..${{env.end_ref}} | grep ${{inputs.directory}}; then
           echo "::notice title=Changes in directory::Linting ${{inputs.directory}} as there are changes in the directory"
           echo "directory_has_changes=true" >> "$GITHUB_OUTPUT"
         else
