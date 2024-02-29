@@ -2,43 +2,39 @@
 
 @model Dfe.PlanTech.Domain.Content.Models.Page;
 
-<div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
-        @{
-            foreach (var content in Model.BeforeTitleContent)
-            {
-                await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-            }
+@{
+    foreach (var content in Model.BeforeTitleContent)
+    {
+        await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+    }
 
-            if (Model.DisplayTopicTitle)
-            {
-                <span class="govuk-caption-xl">@Model.SectionTitle</span>
-            }
+    if (Model.DisplayTopicTitle)
+    {
+        <span class="govuk-caption-xl">@Model.SectionTitle</span>
+    }
 
-            if (Model.Title != null)
-            {
-                await Html.RenderPartialAsync("Components/Title", Model.Title);
-            }
+    if (Model.Title != null)
+    {
+        await Html.RenderPartialAsync("Components/Title", Model.Title);
+    }
 
-            var categoriesList = new List<ICategoryComponent>();
+    var categoriesList = new List<ICategoryComponent>();
 
-            var showRecommendations = false;
+    var showRecommendations = false;
 
-            foreach (var content in Model.Content)
-            {
-                await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+    foreach (var content in Model.Content)
+    {
+        await Html.RenderPartialAsync("Components/PageComponentFactory", content);
 
-                if (content is ICategoryComponent category)
-                {
-                    showRecommendations = true;
-                    categoriesList.Add(category);
-                }
-            }
-
-            if (showRecommendations)
-            {
-                @await Component.InvokeAsync("Recommendations", new { categories = categoriesList.ToArray() })
-            }
+        if (content is ICategoryComponent category)
+        {
+            showRecommendations = true;
+            categoriesList.Add(category);
         }
-    </div>
-</div>
+    }
+
+    if (showRecommendations)
+    {
+        @await Component.InvokeAsync("Recommendations", new { categories = categoriesList.ToArray() })
+    }
+}
