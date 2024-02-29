@@ -1,0 +1,36 @@
+/* OVERRIDE GOVUK ERROR MESSAGE FOR INLINE ERRORS IN TASK LIST
+----------------------------------------------- */
+strong.app-task-list__task-name > p.govuk-error-message {
+  margin-bottom: 0px;
+}
+
+rich-text > p.govuk-body {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+@media (min-width: 40.0625em) {
+  .govuk-body,
+  .govuk-body-m {
+    margin-bottom: 10px;
+  }
+
+  h2,
+  .dfe-heading-l,
+  .govuk-heading-l {
+    margin-top: 45px;
+  }
+
+  h3,
+  .dfe-heading-s,
+  .govuk-heading-s,
+  .dfe-headin-m {
+    padding-top: 10px;
+    margin-top: 35px;
+  }
+
+  rich-text > p.govuk-body {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+}
