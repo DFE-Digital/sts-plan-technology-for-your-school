@@ -14,10 +14,7 @@ public class GetPageFromContentfulQueryTests
 {
     private const string TEST_PAGE_SLUG = "test-page-slug";
     private const string SECTION_SLUG = "SectionSlugTest";
-    private const string SECTION_TITLE = "SectionTitleTest";
     private const string LANDING_PAGE_SLUG = "LandingPage";
-    private const string BUTTON_REF_SLUG = "ButtonReferences";
-    private const string CATEGORY_ID = "category-one";
 
     private readonly IContentRepository _repoSubstitute = Substitute.For<IContentRepository>();
     private readonly ILogger<GetPageFromContentfulQuery> _logger = Substitute.For<ILogger<GetPageFromContentfulQuery>>();
@@ -70,7 +67,7 @@ public class GetPageFromContentfulQueryTests
                 }
             }
 
-            return Array.Empty<Page>();
+            return [];
         });
     }
 
