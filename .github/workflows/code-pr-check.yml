@@ -178,22 +178,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Check for changes in directory
+        id: check-for-changes
+        uses: ./.github/actions/directory-has-changes
         with:
-          node-version: "latest"
+          directory: src/Dfe.PlanTech.
 
       - name: Install Dependencies
         working-directory: ./tests/Dfe.PlanTech.Web.Node.UnitTests/
+        if: steps.check-for-changes.outputs.has_had_changes == 'true'
         run: npm install
 
       - name: Run the tests
         working-directory: ./tests/Dfe.PlanTech.Web.Node.UnitTests/
+        if: steps.check-for-changes.outputs.has_had_changes == 'true'
         run: npm test
 
       - name: Test report
         uses: dorny/test-reporter@v1
-        if: success() || failure() # run this step even if previous step failed
+        if: steps.check-for-changes.outputs.has_had_changes == 'true' && (success() || failure())
         with:
           name: JEST Tests # Name of the check run which will be created
           path: ./tests/Dfe.PlanTech.Web.Node.UnitTests/junit.xml # Path to test results
