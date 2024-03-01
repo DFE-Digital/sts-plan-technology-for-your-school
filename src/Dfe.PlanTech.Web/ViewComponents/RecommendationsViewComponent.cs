@@ -1,16 +1,21 @@
+using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewComponents;
 
-public class RecommendationsViewComponent(ILogger<RecommendationsViewComponent> logger,
-    IGetSubmissionStatusesQuery query) : ViewComponent
+public class RecommendationsViewComponent(
+    ILogger<RecommendationsViewComponent> logger,
+    IGetSubmissionStatusesQuery query,
+    IGetSubTopicRecommendation getSubTopicRecommendation) : ViewComponent
 {
     private readonly ILogger<RecommendationsViewComponent> _logger = logger;
     private readonly IGetSubmissionStatusesQuery _query = query;
+    private readonly IGetSubTopicRecommendation _getSubTopicRecommendation = getSubTopicRecommendation;
 
     public async Task<IViewComponentResult> InvokeAsync(IEnumerable<ICategoryComponent> categories)
     {
@@ -44,23 +49,29 @@ public class RecommendationsViewComponent(ILogger<RecommendationsViewComponent> 
     {
         foreach (var section in sections)
         {
-            var sectionMaturity = sectionStatusesList.Where(sectionStatus =>
-                    sectionStatus.SectionId == section.Sys.Id && sectionStatus.Completed == 1)
+            var sectionMaturity = sectionStatusesList
+                .Where(sectionStatus => sectionStatus.SectionId == section.Sys.Id && sectionStatus.Completed == 1)
                 .Select(sectionStatus => sectionStatus.Maturity)
                 .FirstOrDefault();
 
             if (string.IsNullOrEmpty(sectionMaturity)) continue;
 
-            var recommendation = section.GetRecommendationForMaturity(sectionMaturity);
+            SubtopicRecommendation recommendation = null;
+
+
+            recommendation = getSubTopicRecommendation.GetSubTopicRecommendation(section.Sys.Id).Result;
+
 
             if (recommendation == null)
                 _logger.LogError("No Recommendation Found: Section - {sectionName}, Maturity - {sectionMaturity}",
                     section.Name, sectionMaturity);
 
+            var recommendationIntro = recommendation?.GetRecommendationByMaturity(sectionMaturity);
+
             yield return new RecommendationsViewComponentViewModel()
             {
-                RecommendationSlug = recommendation?.Page.Slug,
-                RecommendationDisplayName = recommendation?.DisplayName,
+                RecommendationSlug = recommendationIntro?.Slug,
+                RecommendationDisplayName = recommendationIntro?.Header.Text,
                 SectionSlug = section.InterstitialPage?.Slug,
                 NoRecommendationFoundErrorMessage = recommendation == null
                     ? string.Format("Unable to retrieve {0} recommendation", section.Name)

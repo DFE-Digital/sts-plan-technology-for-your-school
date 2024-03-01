@@ -7,5 +7,5 @@ public class Accordion : IAccordion
     public int Order { get; set; }
     public string Title { get; set; }
 
-    public string Heading { get; set; }
+    public string Header { get; set; }
 }

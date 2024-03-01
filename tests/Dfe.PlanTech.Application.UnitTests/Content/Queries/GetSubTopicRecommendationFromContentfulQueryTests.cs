@@ -176,20 +176,10 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
 
         SubtopicRecommendation? subTopicRecommendation = await _getSubTopicRecommendationFromContentfulQuery.GetSubTopicRecommendation(_subTopicOne.Sys.Id);
         
-        var intro =  subTopicRecommendation.GetRecommendationByMaturity(Maturity.Medium);
+        var intro =  subTopicRecommendation.GetRecommendationByMaturity(Maturity.Medium.ToString());
 
         Assert.NotNull(intro);
         Assert.Equal(Maturity.Medium.ToString(), intro.Maturity);
-    }
-    
-    [Fact]
-    public async Task GetSubTopicRecommendationIntro_Throw_Error_When_Intro_Does_Not_Exist_In_SubTopicRecommendation_From_SectionTwo()
-    {
-        _repoSubstitute.GetEntities<SubtopicRecommendation>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns(new List<SubtopicRecommendation>() { _subtopicRecommendationTwo });
-
-        SubtopicRecommendation? subTopicRecommendation = await _getSubTopicRecommendationFromContentfulQuery.GetSubTopicRecommendation(_subTopicTwo.Sys.Id);
-        
-        Assert.Throws<KeyNotFoundException>(() => subTopicRecommendation.GetRecommendationByMaturity(Maturity.Medium));
     }
     
     

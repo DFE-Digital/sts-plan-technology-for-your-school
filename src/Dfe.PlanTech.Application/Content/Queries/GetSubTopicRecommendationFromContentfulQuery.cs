@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Content.Queries;
@@ -17,7 +18,7 @@ public class GetSubTopicRecommendationFromContentfulQuery(IContentRepository rep
 
         IEnumerable<SubtopicRecommendation> subTopicRecommendations = await _repository.GetEntities<SubtopicRecommendation>(options, cancellationToken);
 
-        var subtopicRecommendation = subTopicRecommendations.FirstOrDefault() ?? throw new KeyNotFoundException($"Could not find subtopic recommendation for:  {subTopicId}");
+        var subtopicRecommendation = subTopicRecommendations.FirstOrDefault();
 
         return subtopicRecommendation;
     }

@@ -3,6 +3,9 @@
 @model Dfe.PlanTech.Web.Models.RecommendationsViewModel
 
 <div class="govuk-grid-row">
+    @{
+        await Html.RenderPartialAsync("BackButton");
+    }
     <div class="app-step-nav-header">
         <span class="app-step-nav-header__part-of">Part of</span>
         <a class="app-step-nav-header__title" href="#">
@@ -26,25 +29,18 @@
             </h2>
         </div>
 
-        @await Component.InvokeAsync("Accordion", new List<IAccordion>
-        {
-            new Accordion() { Order = 1, Title = "Test Header 1", Heading = "Heading 1" },
-            new Accordion() { Order = 2, Title = "Test Header 2", Heading = "Heading 2" },
-            new Accordion() { Order = 3, Title = "Test Header 3", Heading = "Heading 3" },
-            new Accordion() { Order = 4, Title = "Test Header 4", Heading = "Heading 4" }
-        })
+        @await Component.InvokeAsync("Accordion", Model.RecommendationChunks)
 
     </div>
 </div>
 
 @section BodyEnd {
-     @{
-            <script src="/js/step-by-step-navigation.js"></script>
-            <script src="/js/step-by-step-polyfills.js"></script>
-            <script type="module">
+    @{
+        <script src="/js/step-by-step-navigation.js"></script>
+        <script src="/js/step-by-step-polyfills.js"></script>
+        <script type="module">
             var $element = document.querySelector('#step-by-step-navigation')
             var stepByStepNavigation = new GOVUK.Modules.AppStepNav($element).init()
             </script>
-            await Html.RenderPartialAsync("BackButton");
-        }
+    }
 }

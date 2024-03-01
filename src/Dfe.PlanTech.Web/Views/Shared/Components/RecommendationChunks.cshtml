@@ -3,8 +3,11 @@
 <div>
     @foreach (var recommendationChunk in Model)
     {
-        await Html.RenderPartialAsync("Components/Header", recommendationChunk.Header);
-
+        <div id="@recommendationChunk.Header.Text">
+            @{
+            await Html.RenderPartialAsync("Components/Header", recommendationChunk.Header);
+            }
+        </div>
         @foreach (var content in recommendationChunk.Content)
         {
             await Html.RenderPartialAsync("Components/PageComponentFactory", content);
