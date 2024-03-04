@@ -16,7 +16,9 @@ public interface IPlanTechDbContext
 
     // Submission Table
     public IQueryable<Submission> GetSubmissions { get; }
-
+    
+    public IQueryable<Answer> GetAnswers { get; }
+    
     public void AddEstablishment(Establishment establishment);
 
     public Task<int> SaveChangesAsync();
@@ -34,6 +36,4 @@ public interface IPlanTechDbContext
     Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default);
 
     Task<int> ExecuteRaw(FormattableString sql, CancellationToken cancellationToken = default);
-
-    Task<List<Answer>> GetAnswersForLatestSubmissionBySectionId(string sectionId, int establishmentId);
 }

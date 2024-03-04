@@ -28,7 +28,7 @@ public class GetRecommendationRouterTests
     private readonly GetRecommendationRouter _router;
 
     private readonly IGetAllAnswersForLatestSubmissionQuery _getAllAnswersForSubmissionQuery;
-    private readonly IGetSubTopicRecommendation _getSubTopicRecommendation;
+    private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
 
     private readonly Section _section = new()
     {
@@ -127,15 +127,14 @@ public class GetRecommendationRouterTests
         _submissionStatusProcessor = Substitute.For<ISubmissionStatusProcessor>();
         _user = Substitute.For<IUser>();
         _getAllAnswersForSubmissionQuery = Substitute.For<IGetAllAnswersForLatestSubmissionQuery>();
-        _getSubTopicRecommendation = Substitute.For<IGetSubTopicRecommendation>();
+        _getSubTopicRecommendationQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
 
         _controller = new RecommendationsController(new NullLogger<RecommendationsController>());
 
         _getPageQuery.GetPageBySlug(_section.Recommendations[0].Page.Slug, Arg.Any<CancellationToken>())
             .Returns(_section.Recommendations[0].Page);
 
-        _router = new GetRecommendationRouter(_getPageQuery, new NullLogger<GetRecommendationRouter>(), _user,
-            _submissionStatusProcessor, _getAllAnswersForSubmissionQuery, _getSubTopicRecommendation);
+        _router = new GetRecommendationRouter(_submissionStatusProcessor, _getAllAnswersForSubmissionQuery, _getSubTopicRecommendationQuery);
     }
 
     [Theory]
@@ -323,7 +322,7 @@ public class GetRecommendationRouterTests
             });
 
 
-        _getSubTopicRecommendation.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
+        _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
 
         await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() =>
             _router.ValidateRoute(_section.InterstitialPage.Slug, _section.Recommendations[0].Page.Slug, _controller,
@@ -357,7 +356,7 @@ public class GetRecommendationRouterTests
             });
 
 
-        _getSubTopicRecommendation.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
+        _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
 
         var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, _section.Recommendations[0].Page.Slug,
             _controller, default);

@@ -4,5 +4,5 @@ namespace Dfe.PlanTech.Domain.Users.Interfaces;
 
 public interface IGetAllAnswersForLatestSubmissionQuery
 {
-    Task<List<Answer>> GetAllAnswersForLatestSubmission(string section, int establishmentId);
+    Task<List<Answer>> GetAllAnswersForLatestSubmission(string sectionId, int establishmentId);
 }

@@ -19,7 +19,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         private readonly Category _category;
         private readonly Category _categoryTwo;
         private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
-        private readonly IGetSubTopicRecommendation _getSubTopicRecommendation;
+        private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
         private readonly ILogger<RecommendationsViewComponent> _loggerCategory;
 
         private readonly SubtopicRecommendation _subtopic = new SubtopicRecommendation()
@@ -138,9 +138,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         {
             _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
             _loggerCategory = Substitute.For<ILogger<RecommendationsViewComponent>>();
-            _getSubTopicRecommendation = Substitute.For<IGetSubTopicRecommendation>();
+            _getSubTopicRecommendationQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
 
-            _recommendationsComponent = new RecommendationsViewComponent(_loggerCategory, _getSubmissionStatusesQuery, _getSubTopicRecommendation);
+            _recommendationsComponent = new RecommendationsViewComponent(_loggerCategory, _getSubmissionStatusesQuery, _getSubTopicRecommendationQuery);
 
             _category = new Category()
             {
@@ -206,7 +206,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Category[] categories = new Category[] { _category };
 
-            _getSubTopicRecommendation.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
+            _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses.ToList());
 
@@ -250,7 +250,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_categoryTwo.Sections).Returns([.. _categoryTwo.SectionStatuses]);
             
-            _getSubTopicRecommendation.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic, _subtopicTwo);
+            _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic, _subtopicTwo);
 
             var result = await _recommendationsComponent.InvokeAsync(categories) as ViewViewComponentResult;
 
@@ -286,7 +286,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Category[] categories = [_category];
 
-            _getSubTopicRecommendation.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
+            _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Throws(new Exception("test"));
 
             var result = await _recommendationsComponent.InvokeAsync(categories) as ViewViewComponentResult;

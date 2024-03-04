@@ -83,7 +83,7 @@ public static class ProgramExtensions
         services.AddTransient<GetPageFromContentfulQuery>();
         services.AddSingleton(new ContentfulOptions(configuration.GetValue<bool>("Contentful:UsePreview")));
 
-        services.AddTransient<IGetSubTopicRecommendation, GetSubTopicRecommendationFromContentfulQuery>();
+        services.AddTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationFromContentfulQuery>();
 
         return services;
     }
@@ -151,7 +151,7 @@ public static class ProgramExtensions
         services.AddTransient<IProcessCheckAnswerDtoCommand, ProcessCheckAnswerDtoCommand>();
         services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
         services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
-        services.AddTransient<IGetAllAnswersForLatestSubmissionQuery, GetAllAnswersForSubmissionQuery>();
+        services.AddTransient<IGetAllAnswersForLatestSubmissionQuery, GetAllAnswersForLatestSubmissionQuery>();
 
         services.AddTransient<GetPageFromDbQuery>();
 

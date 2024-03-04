@@ -11,11 +11,11 @@ namespace Dfe.PlanTech.Web.ViewComponents;
 public class RecommendationsViewComponent(
     ILogger<RecommendationsViewComponent> logger,
     IGetSubmissionStatusesQuery query,
-    IGetSubTopicRecommendation getSubTopicRecommendation) : ViewComponent
+    IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery) : ViewComponent
 {
     private readonly ILogger<RecommendationsViewComponent> _logger = logger;
     private readonly IGetSubmissionStatusesQuery _query = query;
-    private readonly IGetSubTopicRecommendation _getSubTopicRecommendation = getSubTopicRecommendation;
+    private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery = getSubTopicRecommendationQuery;
 
     public async Task<IViewComponentResult> InvokeAsync(IEnumerable<ICategoryComponent> categories)
     {
@@ -59,7 +59,7 @@ public class RecommendationsViewComponent(
             SubtopicRecommendation recommendation = null;
 
 
-            recommendation = getSubTopicRecommendation.GetSubTopicRecommendation(section.Sys.Id).Result;
+            recommendation = getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id).Result;
 
 
             if (recommendation == null)

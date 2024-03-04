@@ -11,21 +11,15 @@ namespace Dfe.PlanTech.Web.Routing;
 
 public class GetRecommendationRouter : IGetRecommendationRouter
 {
-    private readonly IGetPageQuery _getPageQuery;
-    private readonly ILogger<GetRecommendationRouter> _logger;
-    private readonly IUser _user;
     private readonly ISubmissionStatusProcessor _router;
     private readonly IGetAllAnswersForLatestSubmissionQuery _getAllAnswersForLatestSubmissionQuery;
-    private readonly IGetSubTopicRecommendation _getSubTopicRecommendation;
+    private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
 
-    public GetRecommendationRouter(IGetPageQuery getPageQuery, ILogger<GetRecommendationRouter> logger, IUser user, ISubmissionStatusProcessor router, IGetAllAnswersForLatestSubmissionQuery getAllAnswersForLatestSubmissionQuery, IGetSubTopicRecommendation getSubTopicRecommendation)
+    public GetRecommendationRouter(ISubmissionStatusProcessor router, IGetAllAnswersForLatestSubmissionQuery getAllAnswersForLatestSubmissionQuery, IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery)
     {
-        _getPageQuery = getPageQuery;
-        _logger = logger;
-        _user = user;
         _router = router;
         _getAllAnswersForLatestSubmissionQuery = getAllAnswersForLatestSubmissionQuery;
-        _getSubTopicRecommendation = getSubTopicRecommendation;
+        _getSubTopicRecommendationQuery = getSubTopicRecommendationQuery;
     }
 
     public async Task<IActionResult> ValidateRoute(string sectionSlug, string recommendationSlug, RecommendationsController controller, CancellationToken cancellationToken)
@@ -45,8 +39,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     }
 
     /// <summary>
-    /// Either render the recommendation page (if correct recommendation for section + maturity),
-    /// or redirect user to correct recommendation page
+    /// Render the recommendation page (if correct recommendation for section + maturity),
     /// </summary>
     /// <param name="controller"></param>
     /// <param name="cancellationToken"></param>
@@ -61,7 +54,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
             await _getAllAnswersForLatestSubmissionQuery.GetAllAnswersForLatestSubmission(_router.Section.Sys.Id,
                 _router.User.GetEstablishmentId().Result);
         
-        var subTopicRecommendation = await _getSubTopicRecommendation.GetSubTopicRecommendation(_router.Section.Sys.Id, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {_router.Section.Name}");
+        var subTopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(_router.Section.Sys.Id, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {_router.Section.Name}");
 
         var subTopicIntro = subTopicRecommendation.GetRecommendationByMaturity(_router.SectionStatus?.Maturity) ?? throw new ContentfulDataUnavailableException($"Could not find recommendation intro for maturity:  {_router.SectionStatus?.Maturity}");
 

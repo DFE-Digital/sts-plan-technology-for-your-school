@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Content.Queries;
@@ -7,7 +6,7 @@ using Dfe.PlanTech.Infrastructure.Application.Models;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
-public class GetSubTopicRecommendationFromContentfulQuery(IContentRepository repository) : IGetSubTopicRecommendation
+public class GetSubTopicRecommendationFromContentfulQuery(IContentRepository repository) : IGetSubTopicRecommendationQuery
 {
     private readonly IContentRepository _repository = repository;
 
