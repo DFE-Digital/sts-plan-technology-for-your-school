@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Exceptions;
+using Dfe.PlanTech.Domain.Answers.Models;
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
@@ -51,7 +52,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
         if (_router.SectionStatus?.Maturity == null) throw new DatabaseException("Maturity is null, but shouldn't be for a completed section");
         
         var usersAnswers =
-            await _getAllAnswersForLatestSubmissionQuery.GetAllAnswersForLatestSubmission(_router.Section.Sys.Id,
+            await _getAllAnswersForLatestSubmissionQuery.GetAllAnswersForLatestSubmission(_router.Section?.Sys.Id,
                 _router.User.GetEstablishmentId().Result);
         
         var subTopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(_router.Section.Sys.Id, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {_router.Section.Name}");

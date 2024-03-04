@@ -56,7 +56,7 @@ public class RecommendationsViewComponent(
 
             if (string.IsNullOrEmpty(sectionMaturity)) continue;
 
-            SubtopicRecommendation recommendation = null;
+            SubtopicRecommendation? recommendation = null;
 
 
             recommendation = getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id).Result;

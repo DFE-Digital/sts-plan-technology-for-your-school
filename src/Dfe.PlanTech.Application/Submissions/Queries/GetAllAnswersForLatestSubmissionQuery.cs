@@ -12,7 +12,7 @@ public class GetAllAnswersForLatestSubmissionQuery(IPlanTechDbContext db) : IGet
     /// <param name="sectionId"></param>
     /// <param name="establishmentId"></param>
     /// <returns></returns>
-    public async Task<List<Answer>> GetAllAnswersForLatestSubmission(string sectionId, int establishmentId)
+    public async Task<List<Answer>?> GetAllAnswersForLatestSubmission(string sectionId, int establishmentId)
     {
         var latestSubmissionIdQuery =  db.GetSubmissions
             .Where(s => s.SectionId == sectionId && s.EstablishmentId == establishmentId && s.Completed)
