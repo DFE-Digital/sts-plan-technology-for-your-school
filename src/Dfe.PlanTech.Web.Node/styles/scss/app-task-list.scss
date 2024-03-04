@@ -11,6 +11,10 @@
   }
 }
 
+.app-task-list__items {
+  width: 44em;
+}
+
 .app-task-list__section {
   display: table;
   font-family: "GDS Transport", arial, sans-serif;
@@ -135,7 +139,6 @@
 }
 
 @media (min-width: 28.125em) {
-
   .app-task-list__tag,
   .app-task-list__task-completed {
     float: right;
@@ -145,7 +148,7 @@
 }
 
 #checkYourAnswers-page .spacer {
-  content: ' ' !important;
+  content: " " !important;
   display: block !important;
 }
 

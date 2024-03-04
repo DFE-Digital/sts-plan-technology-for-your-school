@@ -34,7 +34,6 @@ public class PageMapperTests : BaseMapperTests
                         var pageContent = callinfo.ArgAt<PageContentDbEntity>(0);
                         _attachedPageContents.Add(pageContent);
                     });
-
     }
 
     [Fact]
@@ -60,16 +59,18 @@ public class PageMapperTests : BaseMapperTests
 
         Assert.Equal(PageId, concrete.Id);
 
-        foreach (var beforeTitle in beforeTitleContent)
-        {
-            var matching = _attachedPageContents.FirstOrDefault(pageContent => pageContent.BeforeContentComponentId == beforeTitle.Sys.Id);
-            Assert.NotNull(matching);
-        }
+        ContentsExistAndAreCorrect(beforeTitleContent, content => content.BeforeContentComponentId);
+        ContentsExistAndAreCorrect(content, content => content.ContentComponentId);
+    }
 
-        foreach (var afterTitleContent in content)
+    private void ContentsExistAndAreCorrect(CmsWebHookSystemDetailsInnerContainer[] content, Func<PageContentDbEntity, string?> idSelector)
+    {
+        for (var index = 0; index < content.Length; index++)
         {
-            var matching = _attachedPageContents.FirstOrDefault(pageContent => pageContent.ContentComponentId == afterTitleContent.Sys.Id);
+            var beforeTitle = content[index];
+            var matching = _attachedPageContents.FirstOrDefault(pc => idSelector(pc) == beforeTitle.Sys.Id);
             Assert.NotNull(matching);
+            Assert.Equal(index, matching.Order);
         }
     }
 

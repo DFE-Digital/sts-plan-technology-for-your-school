@@ -1,0 +1,72 @@
+/* DFE HEADER - CODE FROM DFE DESIGN GUIDE AND WITH EDITS --------------------------------------------------------- */
+.govuk-header {
+  background-color: #003a69;
+}
+
+.govuk-header__container {
+  position: relative;
+  margin-bottom: -10px;
+  padding-top: 25px;
+  padding-bottom: 15px;
+  border-bottom: 10px solid #347ca9;
+}
+
+.govuk-header__product-name,
+.govuk-header__logotype-text {
+  line-height: 2.5rem !important;
+  font-size: 1.2rem;
+}
+
+.app-header .govuk-header__logo {
+  width: 85%;
+}
+
+.app-header .govuk-header__content {
+  width: 0;
+}
+
+.govuk-header__logotype-crown-fallback-image {
+  height: 45px;
+  width: 45px;
+}
+
+.govuk-header__logotype-text::after {
+  content: "|";
+}
+
+.govuk-header__logotype {
+  margin-right: 0;
+}
+
+.govuk-header__navigation-item--active a:link,
+.govuk-header__navigation-item--active a:hover,
+.govuk-header__navigation-item--active a:visited {
+  color: #f3f2f1;
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 0.1em;
+}
+
+.edf-hero-banner {
+  margin-top: -10px !important;
+  margin-bottom: 40px;
+}
+
+@media (max-width: 40.0625em) {
+  .govuk-header__product-name {
+    max-width: 80%;
+    line-height: 1.2rem !important;
+    font-size: 1rem;
+  }
+
+  .govuk-header__logotype-text {
+    min-width: 100%;
+    line-height: 2.2rem !important;
+    font-size: 1rem;
+  }
+
+  .edf-hero-banner {
+    margin-top: 0px !important;
+    margin-bottom: 20px;
+  }
+}

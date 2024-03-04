@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 
@@ -19,16 +20,38 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
 
     public bool RequiresAuthorisation { get; set; } = true;
 
-    public List<ContentComponentDbEntity> BeforeTitleContent { get; set; } = new();
+    public List<ContentComponentDbEntity> BeforeTitleContent { get; set; } = [];
 
     public TitleDbEntity? Title { get; set; }
 
     public string? TitleId { get; set; }
 
-    public List<ContentComponentDbEntity> Content { get; set; } = new();
+    public List<ContentComponentDbEntity> Content { get; set; } = [];
 
     public RecommendationPageDbEntity? RecommendationPage { get; set; }
 
     public SectionDbEntity? Section { get; set; }
 
+    /// <summary>
+    /// Combined joins for <see cref="Content"/> and <see cref="BeforeTitleContent"/> 
+    /// </summary>
+    public List<PageContentDbEntity> AllPageContents { get; set; } = [];
+
+    public void OrderContents()
+    {
+        BeforeTitleContent = OrderContents(BeforeTitleContent, pageContent => pageContent.BeforeContentComponentId).ToList();
+        Content = OrderContents(Content, pageContent => pageContent.ContentComponentId).ToList();
+    }
+
+    private IEnumerable<ContentComponentDbEntity> OrderContents(List<ContentComponentDbEntity> contents, Func<PageContentDbEntity, string?> idSelector)
+        => contents.GroupJoin(AllPageContents,
+                            content => content.Id,
+                            idSelector,
+                            (content, pageContent) => new
+                            {
+                                content,
+                                order = pageContent.OrderByDescending(pc => pc.Id).Select(join => join.Order).First()
+                            })
+                            .OrderBy(joined => joined.order)
+                            .Select(joined => joined.content);
 }

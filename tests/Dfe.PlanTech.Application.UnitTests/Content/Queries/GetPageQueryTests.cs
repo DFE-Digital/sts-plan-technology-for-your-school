@@ -30,12 +30,20 @@ public class GetPageQueryTests
 
     private readonly PageDbEntity _pageDbEntity = new()
     {
+        Id = "PageId",
         Slug = DbPageSlug,
-        Content = new(){
+        Content = [
             new QuestionDbEntity(){
-
+                Id="QuestionId"
             }
-        }
+        ],
+        AllPageContents = [
+            new PageContentDbEntity(){
+                Id = 1,
+                PageId = "PageId",
+                ContentComponentId = "QuestionId"
+            }
+        ]
     };
 
     public GetPageQueryTests()
