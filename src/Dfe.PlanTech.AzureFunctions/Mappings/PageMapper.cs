@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
@@ -9,11 +10,9 @@ public class PageMapper : JsonToDbMapper<PageDbEntity>
 {
     private const string BeforeTitleContentKey = "beforeTitleContent";
     private const string ContentKey = "content";
-    private readonly CmsDbContext _db;
 
-    public PageMapper(CmsDbContext db, ILogger<PageMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : base(logger, jsonSerialiserOptions)
+    public PageMapper(EntityUpdater updater, PageEntityRetriever retriever, ILogger<PageMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : base(retriever, updater, logger, jsonSerialiserOptions)
     {
-        _db = db;
     }
 
     /// <summary>
@@ -78,7 +77,5 @@ public class PageMapper : JsonToDbMapper<PageDbEntity>
         {
             pageContent.ContentComponentId = contentId;
         }
-
-        _db.PageContents.Attach(pageContent);
     }
 }

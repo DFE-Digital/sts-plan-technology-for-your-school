@@ -1,3 +1,5 @@
+using Dfe.PlanTech.AzureFunctions.Models;
+using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using System.Text.Json;
@@ -8,6 +10,7 @@ public class JsonToEntityMappers
 {
     private readonly JsonSerializerOptions _jsonSerialiserOptions;
     private readonly HashSet<JsonToDbMapper> _mappers;
+    private JsonToDbMapper? _mapper;
 
     public JsonToEntityMappers(IEnumerable<JsonToDbMapper> mappers, JsonSerializerOptions jsonSerialiserOptions)
     {
@@ -15,13 +18,13 @@ public class JsonToEntityMappers
         _mappers = mappers.ToHashSet();
     }
 
-    public ContentComponentDbEntity ToEntity(string requestBody)
+    public Task<MappedEntity> ToEntity(string requestBody, CmsEvent cmsEvent, CancellationToken cancellationToken)
     {
         var payload = SerialiseToPayload(requestBody);
 
         JsonToDbMapper mapper = GetMapperForPayload(payload);
 
-        return mapper.MapEntity(payload);
+        return mapper.MapEntity(payload, cmsEvent, cancellationToken);
     }
 
     private JsonToDbMapper GetMapperForPayload(CmsWebHookPayload payload)

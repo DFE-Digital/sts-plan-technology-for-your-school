@@ -1,16 +1,13 @@
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.AzureFunctions.Mappings;
-using Dfe.PlanTech.Domain;
+using Dfe.PlanTech.AzureFunctions.Models;
 using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
-using System.Reflection;
 using System.Text;
 
 namespace Dfe.PlanTech.AzureFunctions;
@@ -20,7 +17,6 @@ public class QueueReceiver : BaseFunction
     private readonly CmsDbContext _db;
     private readonly ContentfulOptions _contentfulOptions = new(true);
     private readonly JsonToEntityMappers _mappers;
-    private readonly Type _dontCopyValueAttribute = typeof(DontCopyValueAttribute);
 
     public QueueReceiver(ContentfulOptions contentfulOptions, ILoggerFactory loggerFactory, CmsDbContext db, JsonToEntityMappers mappers) : base(loggerFactory.CreateLogger<QueueReceiver>())
     {
@@ -68,18 +64,15 @@ public class QueueReceiver : BaseFunction
                 return;
             }
 
-            ContentComponentDbEntity mapped = MapMessageToEntity(message);
-            ContentComponentDbEntity? existing = await TryGetExistingEntity(mapped, cancellationToken);
+            MappedEntity mapped = await MapMessageToEntity(message, cmsEvent, cancellationToken);
 
-            if (!IsValidComponent(mapped))
+            if (!mapped.IsValid)
             {
                 await messageActions.CompleteMessageAsync(message, cancellationToken);
                 return;
             }
 
-            UpdateEntityStatusByEvent(cmsEvent, mapped, existing);
-
-            UpsertEntity(cmsEvent, mapped, existing);
+            UpsertEntity(cmsEvent, mapped);
 
             await DbSaveChanges(cancellationToken);
 
@@ -91,27 +84,6 @@ public class QueueReceiver : BaseFunction
             await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace, cancellationToken);
         }
     }
-
-    private bool IsValidComponent(ContentComponentDbEntity mapped)
-    {
-        string? nullProperties = string.Join(", ", AnyRequiredPropertyIsNull(mapped));
-
-        if (!string.IsNullOrEmpty(nullProperties))
-        {
-            Logger.LogInformation("Content Component with ID {id} is missing the following required properties: {nullProperties}", mapped.Id, nullProperties);
-            return false;
-        }
-
-        return true;
-    }
-
-    private IEnumerable<PropertyInfo?> AnyRequiredPropertyIsNull(ContentComponentDbEntity entity)
-        => _db.Model.FindEntityType(entity.GetType())!
-        .GetProperties()
-        .Where(prop => !prop.IsNullable)
-        .Select(prop => prop.PropertyInfo)
-        .Where(prop => !prop!.CustomAttributes.Any(atr => atr.GetType() == typeof(DontCopyValueAttribute)))
-        .Where(prop => prop!.GetValue(entity) == null);
 
     /// <summary>
     /// Checks if the message with the given CmsEvent should be ignored based on certain conditions.
@@ -165,101 +137,13 @@ public class QueueReceiver : BaseFunction
     /// <param name="message"></param>
     /// <returns></returns>
 
-    private ContentComponentDbEntity MapMessageToEntity(ServiceBusReceivedMessage message)
+    private Task<MappedEntity> MapMessageToEntity(ServiceBusReceivedMessage message, CmsEvent cmsEvent, CancellationToken cancellationToken)
     {
         string messageBody = Encoding.UTF8.GetString(message.Body);
 
         Logger.LogInformation("Processing = {messageBody}", messageBody);
 
-        return _mappers.ToEntity(messageBody);
-    }
-
-    /// <summary>
-    /// Asynchronously tries to retrieve an existing ContentComponentDbEntity instance
-    /// </summary>
-    /// <param name="mapped"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    private async Task<ContentComponentDbEntity?> TryGetExistingEntity(ContentComponentDbEntity mapped, CancellationToken cancellationToken)
-    {
-        ContentComponentDbEntity? existing = await GetExistingDbEntity(mapped, cancellationToken);
-
-        if (existing != null)
-        {
-            mapped.Archived = existing.Archived;
-            mapped.Published = existing.Published;
-            mapped.Deleted = existing.Deleted;
-        }
-
-        return existing;
-    }
-
-    /// <summary>
-    /// Gets the existing entity (if existing) from the database that matches the mapped entity
-    /// </summary>
-    /// <param name="entity"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    /// <exception cref="KeyNotFoundException">Exception thrown when we do not have a matching DbSet in our DbContext for the entity type</exception>
-    private async Task<ContentComponentDbEntity?> GetExistingDbEntity(ContentComponentDbEntity entity, CancellationToken cancellationToken)
-    {
-        var model = _db.Model.FindEntityType(entity.GetType()) ?? throw new KeyNotFoundException($"Could not find model in database for {entity.GetType()}");
-
-        var dbSet = GetIQueryableForEntity(model);
-
-        var found = await dbSet.IgnoreAutoIncludes()
-                                .IgnoreQueryFilters()
-                                .FirstOrDefaultAsync(existing => existing.Id == entity.Id, cancellationToken);
-
-        return found ?? null;
-    }
-
-    /// <summary>
-    /// Uses reflection to get the DbSet, as an IQueryable, for the provided entity 
-    /// </summary>
-    /// <param name="model">Entity type for the entity we have received</param>
-    /// <returns></returns>
-    private IQueryable<ContentComponentDbEntity> GetIQueryableForEntity(IEntityType model)
-    => (IQueryable<ContentComponentDbEntity>)_db
-                                    .GetType()
-                                    .GetMethod("Set", 1, Type.EmptyTypes)!
-                                    .MakeGenericMethod(model!.ClrType)!
-                                    .Invoke(_db, null)!;
-
-    /// <summary>
-    /// Updates the status of an entity based on the provided CMS event and entity information.
-    /// </summary>
-    /// <param name="cmsEvent"></param>
-    /// <param name="mapped"></param>
-    /// <param name="existing"></param>
-    /// <exception cref="CmsEventException"></exception>
-    private static void UpdateEntityStatusByEvent(CmsEvent cmsEvent, ContentComponentDbEntity mapped, ContentComponentDbEntity? existing)
-    {
-        switch (cmsEvent)
-        {
-            case CmsEvent.SAVE:
-            case CmsEvent.AUTO_SAVE:
-                break;
-            case CmsEvent.ARCHIVE:
-                mapped.Archived = true;
-                break;
-            case CmsEvent.UNARCHIVE:
-                mapped.Archived = false;
-                break;
-            case CmsEvent.PUBLISH:
-                mapped.Published = true;
-                break;
-            case CmsEvent.UNPUBLISH:
-                if (existing == null)
-                {
-                    throw new CmsEventException(string.Format("Content with Id \"{0}\" has event 'unpublish' despite not existing in the database!", mapped.Id));
-                }
-                existing.Published = false;
-                break;
-            case CmsEvent.DELETE:
-                mapped.Deleted = true;
-                break;
-        }
+        return _mappers.ToEntity(messageBody, cmsEvent, cancellationToken);
     }
 
     /// <summary>
@@ -268,60 +152,15 @@ public class QueueReceiver : BaseFunction
     /// <param name="cmsEvent"></param>
     /// <param name="mapped"></param>
     /// <param name="existing"></param>
-    private void UpsertEntity(CmsEvent cmsEvent, ContentComponentDbEntity mapped, ContentComponentDbEntity? existing)
+    private void UpsertEntity(CmsEvent cmsEvent, MappedEntity mappedEntity)
     {
         if (cmsEvent == CmsEvent.UNPUBLISH) return;
 
-        if (existing == null)
+        if (!mappedEntity.AlreadyExistsInDatabase)
         {
-            DbAdd(mapped);
-        }
-        else
-        {
-            UpdateProperties(mapped, existing);
+            _db.Add(mappedEntity.IncomingEntity);
         }
     }
-
-    private void DbAdd(ContentComponentDbEntity mapped)
-    {
-        _db.Add(mapped);
-    }
-
-    private void UpdateProperties(ContentComponentDbEntity incoming, ContentComponentDbEntity existing)
-    {
-        foreach (var property in PropertiesToCopy(incoming))
-        {
-            var newValue = property.GetValue(incoming);
-            var currentValue = property.GetValue(existing);
-            if (newValue?.Equals(currentValue) == true)
-            {
-                continue;
-            }
-            property.SetValue(existing, property.GetValue(incoming));
-        }
-    }
-
-    /// <summary>
-    /// Get properties to copy for the selected entity
-    /// </summary>
-    /// <remarks>
-    /// Returns all properties, except properties ending with "Id" (i.e. relationship fields), and properties that have
-    /// a <see cref="DontCopyValueAttribute"/> attribute.
-    /// </remarks>
-    /// <param name="entity">Entity to get copyable properties for</param>
-    /// <returns></returns>
-    private IEnumerable<PropertyInfo> PropertiesToCopy(ContentComponentDbEntity entity)
-    => entity.GetType()
-            .GetProperties()
-            .Where(property => !HasDontCopyValueAttribute(property));
-
-    /// <summary>
-    /// Does the property have a <see cref="DontCopyValueAttribute"/> property attached to it? 
-    /// </summary>
-    /// <param name="property"></param>
-    /// <returns></returns>
-    private bool HasDontCopyValueAttribute(PropertyInfo property)
-     => property.CustomAttributes.Any(attribute => attribute.AttributeType == _dontCopyValueAttribute);
 
     /// <summary>
     /// Saves changes in database, and logs information about rows changed
