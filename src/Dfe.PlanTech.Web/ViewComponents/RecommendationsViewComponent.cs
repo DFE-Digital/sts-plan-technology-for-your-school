@@ -37,14 +37,14 @@ public class RecommendationsViewComponent(
 
         var recommendationsViewComponentViewModel =
             recommendationsAvailable
-                ? GetRecommendationsViewComponentViewModel(allSectionsOfCombinedCategories,
+                ?  GetRecommendationsViewComponentViewModel(allSectionsOfCombinedCategories,
                     allSectionStatusesOfCombinedCategories)
                 : null;
 
         return View(recommendationsViewComponentViewModel);
     }
 
-    private IEnumerable<RecommendationsViewComponentViewModel> GetRecommendationsViewComponentViewModel(
+    private async IAsyncEnumerable<RecommendationsViewComponentViewModel> GetRecommendationsViewComponentViewModel(
         IEnumerable<ISectionComponent> sections, List<SectionStatusDto> sectionStatusesList)
     {
         foreach (var section in sections)
@@ -59,7 +59,7 @@ public class RecommendationsViewComponent(
             SubtopicRecommendation? recommendation = null;
 
 
-            recommendation = getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id).Result;
+            recommendation = await getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id);
 
 
             if (recommendation == null)

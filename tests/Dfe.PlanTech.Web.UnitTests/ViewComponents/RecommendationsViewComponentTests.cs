@@ -217,16 +217,22 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             var model = result.ViewData.Model;
             Assert.NotNull(model);
-
-            var unboxed = model as IEnumerable<RecommendationsViewComponentViewModel>;
+            
+            var unboxed = model as IAsyncEnumerable<RecommendationsViewComponentViewModel>;
             Assert.NotNull(unboxed);
+            
+            var list = new List<RecommendationsViewComponentViewModel>();
+            await foreach (var item in unboxed)
+            {
+                list.Add(item);
+            }
 
-            unboxed = unboxed.ToList();
-            Assert.NotEmpty(unboxed);
 
-            Assert.Equal(_subtopic.Intros[0].Slug, unboxed.First().RecommendationSlug);
-            Assert.Equal(_subtopic.Intros[0].Header.Text, unboxed.First().RecommendationDisplayName);
-            Assert.Null(unboxed.First().NoRecommendationFoundErrorMessage);
+            Assert.NotEmpty(list);
+
+            Assert.Equal(_subtopic.Intros[0].Slug, list.First().RecommendationSlug);
+            Assert.Equal(_subtopic.Intros[0].Header.Text, list.First().RecommendationDisplayName);
+            Assert.Null(list.First().NoRecommendationFoundErrorMessage);
         }
 
         [Fact]
@@ -252,7 +258,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             
             _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic, _subtopicTwo);
 
-            var result = await _recommendationsComponent.InvokeAsync(categories) as ViewViewComponentResult;
+            var result = _recommendationsComponent.InvokeAsync(categories).Result as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -260,18 +266,23 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var model = result.ViewData.Model;
             Assert.NotNull(model);
 
-            var unboxed = model as IEnumerable<RecommendationsViewComponentViewModel>;
+            var unboxed = model as IAsyncEnumerable<RecommendationsViewComponentViewModel>;
             Assert.NotNull(unboxed);
-
-            unboxed = unboxed.ToList();
-            Assert.NotEmpty(unboxed);
-
-            Assert.Equal(_subtopic.Intros[0].Slug, unboxed.First().RecommendationSlug);
-            Assert.Equal(_subtopic.Intros[0].Header.Text, unboxed.First().RecommendationDisplayName);
-            Assert.Equal(_subtopicTwo.Intros[0].Slug, unboxed.Skip(1).First().RecommendationSlug);
-            Assert.Equal(_subtopicTwo.Intros[0].Header.Text, unboxed.Skip(1).First().RecommendationDisplayName);
-            Assert.Null(unboxed.First().NoRecommendationFoundErrorMessage);
-            Assert.Null(unboxed.Skip(1).First().NoRecommendationFoundErrorMessage);
+            
+            var list = new List<RecommendationsViewComponentViewModel>();
+            await foreach (var item in unboxed)
+            {
+                list.Add(item);
+            }
+            
+            Assert.NotEmpty(list);
+            
+            Assert.Equal(_subtopic.Intros[0].Slug, list.First().RecommendationSlug);
+            Assert.Equal(_subtopic.Intros[0].Header.Text, list.First().RecommendationDisplayName);
+            Assert.Equal(_subtopicTwo.Intros[0].Slug, list.Skip(1).First().RecommendationSlug);
+            Assert.Equal(_subtopicTwo.Intros[0].Header.Text, list.Skip(1).First().RecommendationDisplayName);
+            Assert.Null(list.First().NoRecommendationFoundErrorMessage);
+            Assert.Null(list.Skip(1).First().NoRecommendationFoundErrorMessage);
         }
 
         [Fact]
@@ -297,15 +308,20 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var model = result.ViewData.Model;
             Assert.NotNull(model);
 
-            var unboxed = model as IEnumerable<RecommendationsViewComponentViewModel>;
+            var unboxed = model as IAsyncEnumerable<RecommendationsViewComponentViewModel>;
             Assert.NotNull(unboxed);
+            
+            var list = new List<RecommendationsViewComponentViewModel>();
+            await foreach (var item in unboxed)
+            {
+                list.Add(item);
+            }
+            
+            Assert.NotEmpty(list);
 
-            unboxed = unboxed.ToList();
-            Assert.NotEmpty(unboxed);
-
-            Assert.Equal(_subtopic.Intros[0].Slug, unboxed.First().RecommendationSlug);
-            Assert.Equal(_subtopic.Intros[0].Header.Text, unboxed.First().RecommendationDisplayName);
-            Assert.Null(unboxed.First().NoRecommendationFoundErrorMessage);
+            Assert.Equal(_subtopic.Intros[0].Slug, list.First().RecommendationSlug);
+            Assert.Equal(_subtopic.Intros[0].Header.Text, list.First().RecommendationDisplayName);
+            Assert.Null(list.First().NoRecommendationFoundErrorMessage);
             _loggerCategory.ReceivedWithAnyArgs(1).LogError("An exception has occurred while trying to retrieve section progress with the following message - test");
         }
 
@@ -331,15 +347,20 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var model = result.ViewData.Model;
             Assert.NotNull(model);
 
-            var unboxed = model as IEnumerable<RecommendationsViewComponentViewModel>;
+            var unboxed = model as IAsyncEnumerable<RecommendationsViewComponentViewModel>;
             Assert.NotNull(unboxed);
+            
+            var list = new List<RecommendationsViewComponentViewModel>();
+            await foreach (var item in unboxed)
+            {
+                list.Add(item);
+            }
+            
+            Assert.NotEmpty(list);
 
-            unboxed = unboxed.ToList();
-            Assert.NotEmpty(unboxed);
-
-            Assert.Null(unboxed.First().RecommendationSlug);
-            Assert.Null(unboxed.First().RecommendationDisplayName);
-            Assert.NotNull(unboxed.First().NoRecommendationFoundErrorMessage);
+            Assert.Null(list.First().RecommendationSlug);
+            Assert.Null(list.First().RecommendationDisplayName);
+            Assert.NotNull(list.First().NoRecommendationFoundErrorMessage);
         }
 
         [Fact]
