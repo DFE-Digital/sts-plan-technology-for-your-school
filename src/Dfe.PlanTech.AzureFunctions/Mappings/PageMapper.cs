@@ -6,14 +6,10 @@ using System.Text.Json;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class PageMapper : JsonToDbMapper<PageDbEntity>
+public class PageMapper(EntityUpdater updater, PageEntityRetriever retriever, ILogger<PageMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<PageDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
     private const string BeforeTitleContentKey = "beforeTitleContent";
     private const string ContentKey = "content";
-
-    public PageMapper(EntityUpdater updater, PageEntityRetriever retriever, ILogger<PageMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : base(retriever, updater, logger, jsonSerialiserOptions)
-    {
-    }
 
     /// <summary>
     /// Create joins for content, and before title content, and map the title ID to the correct expected name.

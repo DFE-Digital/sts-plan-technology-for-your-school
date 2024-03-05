@@ -37,6 +37,8 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
 
     mappedEntity.IsValidComponent(_db, _dontCopyValueAttribute, _logger);
 
+    mappedEntity = UpdateEntityConcrete(mappedEntity);
+
     return mappedEntity;
   }
 

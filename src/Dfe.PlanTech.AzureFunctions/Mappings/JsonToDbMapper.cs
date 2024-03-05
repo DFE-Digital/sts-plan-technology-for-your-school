@@ -15,17 +15,12 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 /// Maps a JSON payload to the given entity type
 /// </summary>
 /// <typeparam name="TEntity"></typeparam>
-public abstract class JsonToDbMapper<TEntity> : JsonToDbMapper
+public abstract class JsonToDbMapper<TEntity>(EntityRetriever entityRetriever, EntityUpdater entityUpdater, ILogger<JsonToDbMapper<TEntity>> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper(entityRetriever, typeof(TEntity), logger, jsonSerialiserOptions)
 where TEntity : ContentComponentDbEntity, new()
 {
     protected readonly TEntity MappedEntity = new();
     protected CmsWebHookPayload? Payload;
-    protected EntityUpdater _entityUpdater;
-
-    protected JsonToDbMapper(EntityRetriever entityRetriever, EntityUpdater entityUpdater, ILogger<JsonToDbMapper<TEntity>> logger, JsonSerializerOptions jsonSerialiserOptions) : base(entityRetriever, typeof(TEntity), logger, jsonSerialiserOptions)
-    {
-        _entityUpdater = entityUpdater;
-    }
+    protected EntityUpdater _entityUpdater = entityUpdater;
 
     public virtual TEntity ToEntity(CmsWebHookPayload payload)
     {
