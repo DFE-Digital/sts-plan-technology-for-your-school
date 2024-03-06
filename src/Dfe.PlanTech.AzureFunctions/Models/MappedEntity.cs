@@ -19,7 +19,7 @@ public class MappedEntity
   {
     string? nullProperties = string.Join(", ", AnyRequiredPropertyIsNull(db, dontCopyAttribute));
 
-    IsValid = !string.IsNullOrEmpty(nullProperties);
+    IsValid = string.IsNullOrEmpty(nullProperties);
 
     if (!IsValid)
     {

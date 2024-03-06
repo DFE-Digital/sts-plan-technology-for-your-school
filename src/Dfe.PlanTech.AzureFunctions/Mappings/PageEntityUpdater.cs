@@ -19,20 +19,36 @@ public class PageEntityUpdater(ILogger<PageEntityUpdater> logger, CmsDbContext d
       throw new InvalidCastException($"Entities are not expected page types. Received {entity.IncomingEntity.GetType()} and {entity.ExistingEntity!.GetType()}");
     }
 
-    var pageContentsJoined = incomingPage.AllPageContents.GroupJoin(existingPage.AllPageContents, KeySelector, KeySelector,
-    (pageContent, inner) =>
-    {
-      return new
-      {
-        pageContent,
-        existing = inner
-      };
-    });
+    AddOrUpdate(incomingPage, existingPage);
+    RemoveOld(incomingPage, existingPage);
+
+    return entity;
   }
 
-  private static readonly Func<PageContentDbEntity, CompositeKey> KeySelector = pageContent => new CompositeKey(pageContent.BeforeContentComponentId, pageContent.ContentComponentId);
-}
+  private static void RemoveOld(PageDbEntity incomingPage, PageDbEntity existingPage)
+  {
+    existingPage.AllPageContents.RemoveAll(pc => !incomingPage.AllPageContents.Exists(apc => apc.Matches(pc)));
+  }
 
-public record CompositeKey(string? BeforeContentComponentId, string? ContentComponentId)
-{
+  private void AddOrUpdate(PageDbEntity incomingPage, PageDbEntity existingPage)
+  {
+    foreach (var pageContent in incomingPage.AllPageContents)
+    {
+      var matching = existingPage.AllPageContents.Where(pc => pc.Matches(pageContent)).ToList();
+
+      if (matching.Count == 0)
+      {
+        existingPage.AllPageContents.Add(pageContent);
+      }
+      else
+      {
+        if (matching.Count > 1)
+        {
+          Db.RemoveRange(matching[1..]);
+        }
+
+        matching.First().Order = pageContent.Order;
+      }
+    }
+  }
 }

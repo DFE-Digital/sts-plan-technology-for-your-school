@@ -1,15 +1,24 @@
+using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class PageMapper(EntityUpdater updater, PageEntityRetriever retriever, ILogger<PageMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<PageDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
+public class PageMapper(PageEntityUpdater updater, PageEntityRetriever retriever, ILogger<PageMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<PageDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
     private const string BeforeTitleContentKey = "beforeTitleContent";
     private const string ContentKey = "content";
+
+    public List<PageContentDbEntity> PageContents = [];
+
+    public override PageDbEntity ToEntity(CmsWebHookPayload payload)
+    {
+        var mappedPage = base.ToEntity(payload);
+        mappedPage.AllPageContents = PageContents;
+
+        return mappedPage;
+    }
 
     /// <summary>
     /// Create joins for content, and before title content, and map the title ID to the correct expected name.
@@ -73,5 +82,7 @@ public class PageMapper(EntityUpdater updater, PageEntityRetriever retriever, IL
         {
             pageContent.ContentComponentId = contentId;
         }
+
+        PageContents.Add(pageContent);
     }
 }

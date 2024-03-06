@@ -20,21 +20,27 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
 
     public bool RequiresAuthorisation { get; set; } = true;
 
+    [DontCopyValue]
     public List<ContentComponentDbEntity> BeforeTitleContent { get; set; } = [];
 
+    [DontCopyValue]
     public TitleDbEntity? Title { get; set; }
 
     public string? TitleId { get; set; }
 
+    [DontCopyValue]
     public List<ContentComponentDbEntity> Content { get; set; } = [];
 
+    [DontCopyValue]
     public RecommendationPageDbEntity? RecommendationPage { get; set; }
 
+    [DontCopyValue]
     public SectionDbEntity? Section { get; set; }
 
     /// <summary>
     /// Combined joins for <see cref="Content"/> and <see cref="BeforeTitleContent"/> 
     /// </summary>
+    [DontCopyValue]
     public List<PageContentDbEntity> AllPageContents { get; set; } = [];
 
     public void OrderContents()

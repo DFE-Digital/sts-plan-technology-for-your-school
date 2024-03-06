@@ -6,17 +6,10 @@ using System.Text.Json;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class JsonToEntityMappers
+public class JsonToEntityMappers(IEnumerable<JsonToDbMapper> mappers, JsonSerializerOptions jsonSerialiserOptions)
 {
-    private readonly JsonSerializerOptions _jsonSerialiserOptions;
-    private readonly HashSet<JsonToDbMapper> _mappers;
-    private JsonToDbMapper? _mapper;
-
-    public JsonToEntityMappers(IEnumerable<JsonToDbMapper> mappers, JsonSerializerOptions jsonSerialiserOptions)
-    {
-        _jsonSerialiserOptions = jsonSerialiserOptions;
-        _mappers = mappers.ToHashSet();
-    }
+    private readonly JsonSerializerOptions _jsonSerialiserOptions = jsonSerialiserOptions;
+    private readonly HashSet<JsonToDbMapper> _mappers = mappers.ToHashSet();
 
     public Task<MappedEntity> ToEntity(string requestBody, CmsEvent cmsEvent, CancellationToken cancellationToken)
     {

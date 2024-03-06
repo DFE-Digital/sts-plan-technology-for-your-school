@@ -13,9 +13,9 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
 {
   private readonly Type _dontCopyValueAttribute = typeof(DontCopyValueAttribute);
   private readonly ILogger<EntityUpdater> _logger = logger;
-  private readonly CmsDbContext _db = db;
-
   private MappedEntity? _mappedEntity;
+
+  protected readonly CmsDbContext Db = db;
 
   public MappedEntity UpdateEntity(ContentComponentDbEntity incoming, ContentComponentDbEntity? existing, CmsEvent cmsEvent)
   {
@@ -35,7 +35,7 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
 
     UpdateEntityStatusByEvent(cmsEvent);
 
-    mappedEntity.IsValidComponent(_db, _dontCopyValueAttribute, _logger);
+    mappedEntity.IsValidComponent(Db, _dontCopyValueAttribute, _logger);
 
     mappedEntity = UpdateEntityConcrete(mappedEntity);
 
