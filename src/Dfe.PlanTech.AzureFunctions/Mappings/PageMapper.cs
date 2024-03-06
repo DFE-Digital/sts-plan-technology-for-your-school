@@ -10,12 +10,14 @@ public class PageMapper(PageEntityRetriever retriever, PageEntityUpdater updater
     private const string BeforeTitleContentKey = "beforeTitleContent";
     private const string ContentKey = "content";
 
-    public List<PageContentDbEntity> PageContents = [];
+    private readonly List<PageContentDbEntity> _pageContents = [];
+
+    public List<PageContentDbEntity> PageContents => _pageContents;
 
     public override PageDbEntity ToEntity(CmsWebHookPayload payload)
     {
         var mappedPage = base.ToEntity(payload);
-        mappedPage.AllPageContents = PageContents;
+        mappedPage.AllPageContents = _pageContents;
 
         return mappedPage;
     }
@@ -83,6 +85,6 @@ public class PageMapper(PageEntityRetriever retriever, PageEntityUpdater updater
             pageContent.ContentComponentId = contentId;
         }
 
-        PageContents.Add(pageContent);
+        _pageContents.Add(pageContent);
     }
 }

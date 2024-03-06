@@ -80,7 +80,7 @@ public class QueueReceiver : BaseFunction
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex.Message);
+            Logger.LogError(ex, "Error processing message ID {message}", message.MessageId);
             await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace, cancellationToken);
         }
     }
@@ -177,7 +177,7 @@ public class QueueReceiver : BaseFunction
         }
         else
         {
-            Logger.LogInformation($"Updated {rowsChangedInDatabase} rows in the database");
+            Logger.LogInformation("Updated {rowsChangedInDatabase} rows in the database", rowsChangedInDatabase);
         }
     }
 }

@@ -50,7 +50,7 @@ public class PageEntityUpdater(ILogger<PageEntityUpdater> logger, CmsDbContext d
         Db.PageContents.RemoveRange(matchingContents[1..]);
       }
 
-      var remainingMatchingContent = matchingContents.First();
+      var remainingMatchingContent = matchingContents[0];
       if (remainingMatchingContent.Order != pageContent.Order)
       {
         remainingMatchingContent.Order = pageContent.Order;

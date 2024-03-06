@@ -63,7 +63,8 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
   /// <exception cref="CmsEventException"></exception>
   public void UpdateEntityStatusByEvent(CmsEvent cmsEvent)
   {
-    if (_mappedEntity == null) throw new NullReferenceException($"{nameof(_mappedEntity)} is null");
+    if (_mappedEntity == null) throw new InvalidDataException($"{nameof(_mappedEntity)} is null");
+
     switch (cmsEvent)
     {
       case CmsEvent.SAVE:
