@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class PageMapper(PageEntityUpdater updater, PageEntityRetriever retriever, ILogger<PageMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<PageDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
+public class PageMapper(PageEntityRetriever retriever, PageEntityUpdater updater, ILogger<PageMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<PageDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
     private const string BeforeTitleContentKey = "beforeTitleContent";
     private const string ContentKey = "content";
