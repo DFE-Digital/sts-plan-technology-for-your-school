@@ -17,7 +17,7 @@ public class WarningComponentMapperTests : BaseMapperTests
     public WarningComponentMapperTests()
     {
         _logger = Substitute.For<ILogger<WarningComponentMapper>>();
-        _mapper = new WarningComponentMapper(_logger, JsonOptions);
+        _mapper = new WarningComponentMapper(MapperHelpers.CreateMockEntityRetriever(), MapperHelpers.CreateMockEntityUpdater(), _logger, JsonOptions);
     }
 
     [Fact]
@@ -30,14 +30,11 @@ public class WarningComponentMapperTests : BaseMapperTests
 
         var payload = CreatePayload(fields, WarningComponentId);
 
-        var mapped = _mapper.MapEntity(payload);
+        var mapped = _mapper.ToEntity(payload);
 
         Assert.NotNull(mapped);
 
-        var concrete = mapped as WarningComponentDbEntity;
-        Assert.NotNull(concrete);
-
-        Assert.Equal(WarningComponentId, concrete.Id);
-        Assert.Equal(WarningComponentText.Sys.Id, concrete.TextId);
+        Assert.Equal(WarningComponentId, mapped.Id);
+        Assert.Equal(WarningComponentText.Sys.Id, mapped.TextId);
     }
 }

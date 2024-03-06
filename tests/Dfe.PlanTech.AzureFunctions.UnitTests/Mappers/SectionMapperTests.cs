@@ -53,7 +53,7 @@ public class SectionMapperTests : BaseMapperTests
         ((IQueryable<PageDbEntity>)mockPageDataSet).GetEnumerator().Returns(queryable.GetEnumerator());
 
         _logger = Substitute.For<ILogger<SectionMapper>>();
-        _mapper = new SectionMapper(_db, _logger, JsonOptions);
+        _mapper = new SectionMapper(MapperHelpers.CreateMockEntityRetriever(), MapperHelpers.CreateMockEntityUpdater(), _db, _logger, JsonOptions);
 
         _db.Questions = _questionsDbSet;
 
@@ -79,16 +79,13 @@ public class SectionMapperTests : BaseMapperTests
 
         var payload = CreatePayload(fields, SectionId);
 
-        var mapped = _mapper.MapEntity(payload);
+        var mapped = _mapper.ToEntity(payload);
 
         Assert.NotNull(mapped);
 
-        var concrete = mapped as SectionDbEntity;
-        Assert.NotNull(concrete);
-
-        Assert.Equal(SectionId, concrete.Id);
-        Assert.Equal(SectionName, concrete.Name);
-        Assert.Equal(InterstitialPage.Sys.Id, concrete.InterstitialPageId);
+        Assert.Equal(SectionId, mapped.Id);
+        Assert.Equal(SectionName, mapped.Name);
+        Assert.Equal(InterstitialPage.Sys.Id, mapped.InterstitialPageId);
 
         Assert.Equal(Questions.Length, _attachedQuestions.Count);
 

@@ -7,20 +7,20 @@ namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
 public class ComponentDropDownMapperTests : BaseMapperTests
 {
-    private const string DropdownTitle = "Dropdown title test";
-    private const string DropdownId = "Dropdown Id";
-    private readonly RichTextContent DropdownContent = new()
+  private const string DropdownTitle = "Dropdown title test";
+  private const string DropdownId = "Dropdown Id";
+  private readonly RichTextContent DropdownContent = new()
+  {
+    Data = new RichTextData()
     {
-        Data = new RichTextData()
-        {
-            Uri = "Test URI"
-        },
-        Marks = new(){
+      Uri = "Test URI"
+    },
+    Marks = new(){
       new(){
         Type = "Bold"
       }
     },
-        Content = new(){
+    Content = new(){
       new(){
         Data = new(),
         Marks = new(),
@@ -40,37 +40,37 @@ public class ComponentDropDownMapperTests : BaseMapperTests
         }
       }
     },
-        NodeType = "document"
+    NodeType = "document"
+  };
+
+  private readonly ComponentDropDownMapper _mapper;
+  private readonly ILogger<JsonToDbMapper<ComponentDropDownDbEntity>> _logger;
+
+  public ComponentDropDownMapperTests()
+  {
+    _logger = Substitute.For<ILogger<JsonToDbMapper<ComponentDropDownDbEntity>>>();
+    _mapper = new ComponentDropDownMapper(MapperHelpers.CreateMockEntityRetriever(), MapperHelpers.CreateMockEntityUpdater(), _logger, JsonOptions);
+  }
+
+  [Fact]
+  public void Mapper_Should_Map_Relationship()
+  {
+    var fields = new Dictionary<string, object?>()
+    {
+      ["title"] = WrapWithLocalisation(DropdownTitle),
+      ["content"] = WrapWithLocalisation(DropdownContent),
     };
 
-    private readonly ComponentDropDownMapper _mapper;
-    private readonly ILogger<JsonToDbMapper<ComponentDropDownDbEntity>> _logger;
+    var payload = CreatePayload(fields, DropdownId);
 
-    public ComponentDropDownMapperTests()
-    {
-        _logger = Substitute.For<ILogger<JsonToDbMapper<ComponentDropDownDbEntity>>>();
-        _mapper = new ComponentDropDownMapper(_logger, JsonOptions);
-    }
+    var mapped = _mapper.ToEntity(payload);
 
-    [Fact]
-    public void Mapper_Should_Map_Relationship()
-    {
-        var fields = new Dictionary<string, object?>()
-        {
-            ["title"] = WrapWithLocalisation(DropdownTitle),
-            ["content"] = WrapWithLocalisation(DropdownContent),
-        };
+    Assert.NotNull(mapped);
 
-        var payload = CreatePayload(fields, DropdownId);
+    var concrete = mapped;
+    Assert.NotNull(concrete);
 
-        var mapped = _mapper.MapEntity(payload);
-
-        Assert.NotNull(mapped);
-
-        var concrete = mapped as ComponentDropDownDbEntity;
-        Assert.NotNull(concrete);
-
-        Assert.Equal(DropdownId, concrete.Id);
-        Assert.Equal(DropdownTitle, concrete.Title);
-    }
+    Assert.Equal(DropdownId, concrete.Id);
+    Assert.Equal(DropdownTitle, concrete.Title);
+  }
 }

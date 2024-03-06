@@ -18,7 +18,7 @@ public class HeaderMapperTests : BaseMapperTests
     public HeaderMapperTests()
     {
         _logger = Substitute.For<ILogger<JsonToDbMapper<HeaderDbEntity>>>();
-        _mapper = new HeaderMapper(_logger, JsonOptions);
+        _mapper = new HeaderMapper(MapperHelpers.CreateMockEntityRetriever(), MapperHelpers.CreateMockEntityUpdater(), _logger, JsonOptions);
     }
 
     [Fact]
@@ -33,11 +33,11 @@ public class HeaderMapperTests : BaseMapperTests
 
         var payload = CreatePayload(fields, HeaderId);
 
-        var mapped = _mapper.MapEntity(payload);
+        var mapped = _mapper.ToEntity(payload);
 
         Assert.NotNull(mapped);
 
-        var concrete = mapped as HeaderDbEntity;
+        var concrete = mapped;
         Assert.NotNull(concrete);
 
         Assert.Equal(HeaderId, concrete.Id);

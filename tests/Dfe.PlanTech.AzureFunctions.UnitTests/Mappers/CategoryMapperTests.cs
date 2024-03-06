@@ -34,7 +34,7 @@ public class CategoryMapperTests : BaseMapperTests
     public CategoryMapperTests()
     {
         _logger = Substitute.For<ILogger<CategoryMapper>>();
-        _mapper = new CategoryMapper(_db, _logger, JsonOptions);
+        _mapper = new CategoryMapper(MapperHelpers.CreateMockEntityRetriever(), MapperHelpers.CreateMockEntityUpdater(), _db, _logger, JsonOptions);
 
         _db.Sections = _sectionsDbSet;
 
@@ -57,11 +57,11 @@ public class CategoryMapperTests : BaseMapperTests
 
         var payload = CreatePayload(fields, CategoryId);
 
-        var mapped = _mapper.MapEntity(payload);
+        var mapped = _mapper.ToEntity(payload);
 
         Assert.NotNull(mapped);
 
-        var concrete = mapped as CategoryDbEntity;
+        var concrete = mapped;
         Assert.NotNull(concrete);
 
         Assert.Equal(CategoryId, concrete.Id);
