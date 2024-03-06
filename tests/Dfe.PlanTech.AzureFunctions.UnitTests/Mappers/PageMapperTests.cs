@@ -69,7 +69,7 @@ public class PageMapperTests : BaseMapperTests
         for (var index = 0; index < content.Length; index++)
         {
             var beforeTitle = content[index];
-            var matching = _attachedPageContents.FirstOrDefault(pc => idSelector(pc) == beforeTitle.Sys.Id);
+            var matching = _mapper.PageContents.FirstOrDefault(pc => idSelector(pc) == beforeTitle.Sys.Id);
             Assert.NotNull(matching);
             Assert.Equal(index, matching.Order);
         }

@@ -13,11 +13,11 @@ namespace Dfe.PlanTech.AzureFunctions.UnitTests.Mappers;
 public class JsonToDbMapperUnitTests : BaseMapperTests
 {
   private const string StringValueTest = "string test";
-  private readonly string[] ArrayValueTest = new[] { "one", "two", "three" };
+  private readonly string[] ArrayValueTest = ["one", "two", "three"];
   private const int NumberValueTest = 10000;
   private const string EntityId = "Testing Id";
 
-  private readonly CmsWebHookSystemDetailsInnerContainer[] ReferencesValueTest = new[] {
+  private readonly CmsWebHookSystemDetailsInnerContainer[] ReferencesValueTest = [
         new CmsWebHookSystemDetailsInnerContainer(){
           Sys = new(){
             Id = "First reference"
@@ -27,13 +27,11 @@ public class JsonToDbMapperUnitTests : BaseMapperTests
             Id = "Second reference"
           }
         }
-      };
+      ];
 
   private readonly JsonToDbMapperImplementation _mapper;
 
-  private readonly Type _type = typeof(ButtonWithLinkDbEntity);
-
-  private readonly ILogger<JsonToDbMapper<ContentComponentDbEntityImplementation>> _logger = Substitute.For<ILogger<JsonToDbMapper<ContentComponentDbEntityImplementation>>>();
+  private readonly ILogger<JsonToDbMapper<ContentComponentImplementationDbEntity>> _logger = Substitute.For<ILogger<JsonToDbMapper<ContentComponentImplementationDbEntity>>>();
 
   public JsonToDbMapperUnitTests()
   {
@@ -41,7 +39,7 @@ public class JsonToDbMapperUnitTests : BaseMapperTests
   }
 
   [Theory]
-  [InlineData("ButtonWithLink", true)]
+  [InlineData("ContentComponentImplementation", true)]
   [InlineData("Button", false)]
   [InlineData("ButtonWithEntryReference", false)]
   public void AcceptsContentType_Should_Return_Correct_Output(string typeName, bool expectedResult)
@@ -83,9 +81,9 @@ public class JsonToDbMapperUnitTests : BaseMapperTests
   }
 }
 
-public class JsonToDbMapperImplementation : JsonToDbMapper<ContentComponentDbEntityImplementation>
+public class JsonToDbMapperImplementation : JsonToDbMapper<ContentComponentImplementationDbEntity>
 {
-  public JsonToDbMapperImplementation(ILogger<JsonToDbMapper<ContentComponentDbEntityImplementation>> logger, JsonSerializerOptions jsonSerialiserOptions) : base(MapperHelpers.CreateMockEntityRetriever(), MapperHelpers.CreateMockEntityUpdater(), logger, jsonSerialiserOptions)
+  public JsonToDbMapperImplementation(ILogger<JsonToDbMapper<ContentComponentImplementationDbEntity>> logger, JsonSerializerOptions jsonSerialiserOptions) : base(MapperHelpers.CreateMockEntityRetriever(), MapperHelpers.CreateMockEntityUpdater(), logger, jsonSerialiserOptions)
   {
   }
 
@@ -95,7 +93,7 @@ public class JsonToDbMapperImplementation : JsonToDbMapper<ContentComponentDbEnt
   }
 }
 
-public class ContentComponentDbEntityImplementation : ContentComponentDbEntity
+public class ContentComponentImplementationDbEntity : ContentComponentDbEntity
 {
   public string StringValue { get; init; } = null!;
   public int NumberValue { get; init; }
