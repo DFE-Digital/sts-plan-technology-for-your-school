@@ -19,42 +19,41 @@ public class PageEntityUpdater(ILogger<PageEntityUpdater> logger, CmsDbContext d
       throw new InvalidCastException($"Entities are not expected page types. Received {entity.IncomingEntity.GetType()} and {entity.ExistingEntity!.GetType()}");
     }
 
-    AddOrUpdate(incomingPage, existingPage);
-    RemoveOld(incomingPage, existingPage);
+    AddOrUpdatePageContents(incomingPage, existingPage);
+    RemoveOldPageContents(incomingPage, existingPage);
 
     return entity;
   }
 
-  private void RemoveOld(PageDbEntity incomingPage, PageDbEntity existingPage)
+  private void RemoveOldPageContents(PageDbEntity incomingPage, PageDbEntity existingPage)
   {
     var removedPageContents = existingPage.AllPageContents.Where(pc => !incomingPage.AllPageContents.Exists(apc => apc.Matches(pc)));
     Db.PageContents.RemoveRange(removedPageContents);
   }
 
-  private void AddOrUpdate(PageDbEntity incomingPage, PageDbEntity existingPage)
+  private void AddOrUpdatePageContents(PageDbEntity incomingPage, PageDbEntity existingPage)
   {
     foreach (var pageContent in incomingPage.AllPageContents)
     {
       var matchingContents = existingPage.AllPageContents.Where(pc => pc.Matches(pageContent))
-                                                  .OrderByDescending(pc => pc.Id)
-                                                  .ToList();
+                                                        .OrderByDescending(pc => pc.Id)
+                                                        .ToList();
 
       if (matchingContents.Count == 0)
       {
         existingPage.AllPageContents.Add(pageContent);
+        continue;
       }
-      else
-      {
-        if (matchingContents.Count > 1)
-        {
-          Db.PageContents.RemoveRange(matchingContents[1..]);
-        }
 
-        var remainingMatchingContent = matchingContents.First();
-        if (remainingMatchingContent.Order != pageContent.Order)
-        {
-          remainingMatchingContent.Order = pageContent.Order;
-        }
+      if (matchingContents.Count > 1)
+      {
+        Db.PageContents.RemoveRange(matchingContents[1..]);
+      }
+
+      var remainingMatchingContent = matchingContents.First();
+      if (remainingMatchingContent.Order != pageContent.Order)
+      {
+        remainingMatchingContent.Order = pageContent.Order;
       }
     }
   }
