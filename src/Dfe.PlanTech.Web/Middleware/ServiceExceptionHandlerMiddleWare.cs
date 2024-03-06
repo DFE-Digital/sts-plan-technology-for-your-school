@@ -28,8 +28,7 @@ public class ServiceExceptionHandlerMiddleWare : IExceptionHandlerMiddleware
             ContentfulDataUnavailableException => UrlConstants.ServiceUnavailable,
             DatabaseException => UrlConstants.ServiceUnavailable,
             InvalidEstablishmentException => UrlConstants.ServiceUnavailable,
-            PageNotFoundException => UrlConstants.ServiceUnavailable,
-            KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) => UrlConstants.ServiceUnavailable,
+            KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) => UrlConstants.CombinedErrorPage,
             _ => GetRedirectUrlForException(exception.InnerException),
         };
 }
