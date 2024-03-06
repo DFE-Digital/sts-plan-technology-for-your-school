@@ -25,29 +25,36 @@ public class PageEntityUpdater(ILogger<PageEntityUpdater> logger, CmsDbContext d
     return entity;
   }
 
-  private static void RemoveOld(PageDbEntity incomingPage, PageDbEntity existingPage)
+  private void RemoveOld(PageDbEntity incomingPage, PageDbEntity existingPage)
   {
-    existingPage.AllPageContents.RemoveAll(pc => !incomingPage.AllPageContents.Exists(apc => apc.Matches(pc)));
+    var removedPageContents = existingPage.AllPageContents.Where(pc => !incomingPage.AllPageContents.Exists(apc => apc.Matches(pc)));
+    Db.PageContents.RemoveRange(removedPageContents);
   }
 
   private void AddOrUpdate(PageDbEntity incomingPage, PageDbEntity existingPage)
   {
     foreach (var pageContent in incomingPage.AllPageContents)
     {
-      var matching = existingPage.AllPageContents.Where(pc => pc.Matches(pageContent)).ToList();
+      var matchingContents = existingPage.AllPageContents.Where(pc => pc.Matches(pageContent))
+                                                  .OrderByDescending(pc => pc.Id)
+                                                  .ToList();
 
-      if (matching.Count == 0)
+      if (matchingContents.Count == 0)
       {
         existingPage.AllPageContents.Add(pageContent);
       }
       else
       {
-        if (matching.Count > 1)
+        if (matchingContents.Count > 1)
         {
-          Db.RemoveRange(matching[1..]);
+          Db.PageContents.RemoveRange(matchingContents[1..]);
         }
 
-        matching.First().Order = pageContent.Order;
+        var remainingMatchingContent = matchingContents.First();
+        if (remainingMatchingContent.Order != pageContent.Order)
+        {
+          remainingMatchingContent.Order = pageContent.Order;
+        }
       }
     }
   }
