@@ -23,17 +23,22 @@ public class PageEntityRetrieverTests
 
     _pages.Add(_existingPage);
 
-    _db.Pages.FirstOrDefaultAsync(Arg.Any<Expression<Func<PageDbEntity, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(callinfo =>
-            {
-              var expression = callinfo.ArgAt<Expression<Func<PageDbEntity, bool>>>(0);
+    MockPageDbSet();
 
-              var compiled = expression.Compile();
+  }
 
-              var results = _pages.FirstOrDefault(compiled);
+  private void MockPageDbSet()
+  {
+    IQueryable<PageDbEntity> queryable = _pages.AsQueryable();
 
-              return results;
-            });
+    var asyncProvider = new AsyncQueryProvider<PageDbEntity>(queryable.Provider);
+
+    var mockPageDataSet = Substitute.For<DbSet<PageDbEntity>, IQueryable<PageDbEntity>>();
+    ((IQueryable<PageDbEntity>)mockPageDataSet).Provider.Returns(asyncProvider);
+    ((IQueryable<PageDbEntity>)mockPageDataSet).Expression.Returns(queryable.Expression);
+    ((IQueryable<PageDbEntity>)mockPageDataSet).ElementType.Returns(queryable.ElementType);
+    ((IQueryable<PageDbEntity>)mockPageDataSet).GetEnumerator().Returns(queryable.GetEnumerator());
+    _db.Pages = mockPageDataSet;
   }
 
   [Theory]
@@ -44,8 +49,8 @@ public class PageEntityRetrieverTests
     var incomingPage = new PageDbEntity() { Id = pageId };
     var result = await _retriever.GetExistingDbEntity(incomingPage, CancellationToken.None);
 
-    var isNull = result == null;
+    var resultFound = result != null;
 
-    Assert.Equal(shouldBeFound, isNull);
+    Assert.Equal(shouldBeFound, resultFound);
   }
 }
