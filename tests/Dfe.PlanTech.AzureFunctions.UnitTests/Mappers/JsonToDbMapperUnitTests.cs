@@ -1,9 +1,6 @@
 using Dfe.PlanTech.AzureFunctions.Mappings;
-using Dfe.PlanTech.AzureFunctions.Models;
-using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using System.Text.Json;
