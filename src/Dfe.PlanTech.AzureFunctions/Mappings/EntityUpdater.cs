@@ -17,6 +17,13 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
 
   protected readonly CmsDbContext Db = db;
 
+  /// <summary>
+  /// Updates properties on the existing component (if any) based on the incoming component and the CmsEvent
+  /// </summary>
+  /// <param name="incoming"></param>
+  /// <param name="existing"></param>
+  /// <param name="cmsEvent"></param>
+  /// <returns></returns>
   public MappedEntity UpdateEntity(ContentComponentDbEntity incoming, ContentComponentDbEntity? existing, CmsEvent cmsEvent)
   {
     var mappedEntity = new MappedEntity()
@@ -42,6 +49,11 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
     return mappedEntity;
   }
 
+  /// <summary>
+  /// Overridable method to allow bespoke updating by entity type if needed
+  /// </summary>
+  /// <param name="entity"></param>
+  /// <returns></returns>
   public virtual MappedEntity UpdateEntityConcrete(MappedEntity entity)
   {
     return entity;
