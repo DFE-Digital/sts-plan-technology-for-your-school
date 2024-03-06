@@ -24,7 +24,6 @@ public class PageEntityRetrieverTests
     _pages.Add(_existingPage);
 
     MockPageDbSet();
-
   }
 
   private void MockPageDbSet()
