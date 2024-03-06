@@ -26,6 +26,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     public DbSet<CategoryDbEntity> Categories { get; set; }
 
     public DbSet<ComponentDropDownDbEntity> ComponentDropDowns { get; set; }
+
     public DbSet<ContentComponentDbEntity> ContentComponents { get; set; }
 
     public DbSet<HeaderDbEntity> Headers { get; set; }
@@ -42,10 +43,22 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public DbSet<RecommendationPageDbEntity> RecommendationPages { get; set; }
 
+    public DbSet<RecommendationChunkDbEntity> RecommendationChunks { get; set; }
+    
+    public DbSet<RecommendationChunkContentDbEntity> RecommendationChunkContents { get; set; }
+
+    public DbSet<RecommendationIntroDbEntity> RecommendationIntros { get; set; }
+
+    public DbSet<RecommendationSectionDbEntity> RecommendationSections { get; set; }
+
+    public DbSet<SubTopicRecommendationDbEntity> SubtopicRecommendations { get; set; }
+
     public DbSet<RichTextContentDbEntity> RichTextContents { get; set; }
+
     public DbSet<RichTextContentWithSlugDbEntity> RichTextContentWithSlugs { get; set; }
 
     public DbSet<RichTextDataDbEntity> RichTextDataDbEntity { get; set; }
+
     public DbSet<RichTextMarkDbEntity> RichTextMarkDbEntity { get; set; }
 
     public DbSet<SectionDbEntity> Sections { get; set; }
@@ -69,6 +82,11 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<PageContentDbEntity> ICmsDbContext.PageContents => PageContents;
     IQueryable<QuestionDbEntity> ICmsDbContext.Questions => Questions;
     IQueryable<RecommendationPageDbEntity> ICmsDbContext.RecommendationPages => RecommendationPages;
+    IQueryable<RecommendationChunkDbEntity> ICmsDbContext.RecommendationChunks => RecommendationChunks;
+    IQueryable<RecommendationChunkContentDbEntity> ICmsDbContext.RecommendationChunkContents => RecommendationChunkContents;
+    IQueryable<RecommendationIntroDbEntity> ICmsDbContext.RecommendationIntros => RecommendationIntros;
+    IQueryable<SubTopicRecommendationDbEntity> ICmsDbContext.SubtopicRecommendations => SubtopicRecommendations;
+    IQueryable<RecommendationSectionDbEntity> ICmsDbContext.RecommendationSections => RecommendationSections;
     IQueryable<RichTextContentDbEntity> ICmsDbContext.RichTextContents => RichTextContents;
     IQueryable<RichTextContentWithSlugDbEntity> ICmsDbContext.RichTextContentWithSlugs => RichTextContentWithSlugs
                                                                                                 .Include(rt => rt.Data)
@@ -98,9 +116,9 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         modelBuilder.Entity<ContentComponentDbEntity>(entity =>
         {
-            entity.Property(e => e.Id).HasMaxLength(30);
-
             entity.ToTable("ContentComponents", Schema);
+            entity.Property(e => e.Id).HasMaxLength(30);
+            entity.HasQueryFilter(ShouldShowEntity());
         });
 
         modelBuilder.Entity<AnswerDbEntity>(entity =>
@@ -135,6 +153,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
             entity.ToTable("Categories", Schema);
         });
 
+        modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>().Navigation(button => button.Button).AutoInclude();
         modelBuilder.Entity<PageDbEntity>(entity =>
         {
             entity.HasMany(page => page.BeforeTitleContent)
@@ -144,6 +163,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
                   right => right.HasOne(pageContent => pageContent.Page).WithMany().HasForeignKey("PageId").OnDelete(DeleteBehavior.Restrict)
                 );
 
+        modelBuilder.Entity<ButtonWithLinkDbEntity>().Navigation(button => button.Button).AutoInclude();
             entity.HasMany(page => page.Content)
               .WithMany(c => c.ContentPages)
               .UsingEntity<PageContentDbEntity>(
@@ -182,7 +202,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
         {
             entity.ToView("RichTextContentsBySlug");
         });
-
 
         modelBuilder.Entity<SectionDbEntity>(entity =>
         {
@@ -234,5 +253,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default) => queryable.ToListAsync(cancellationToken: cancellationToken);
 
-    public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default) => queryable.FirstOrDefaultAsync(cancellationToken);
+    public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+    => queryable.FirstOrDefaultAsync(cancellationToken);
 }

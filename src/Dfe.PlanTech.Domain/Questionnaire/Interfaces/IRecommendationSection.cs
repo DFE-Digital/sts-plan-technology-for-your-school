@@ -1,13 +1,14 @@
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 public interface IRecommendationSection { }
 
-public interface IRecommendationSection<TAnswer, TRecommendationChunk> : IRecommendationSection
+public interface IRecommendationSection<TAnswer, TContentComponent, THeader, TRecommendationChunk> : IRecommendationSection
 where TAnswer : IAnswer
-where TRecommendationChunk : IRecommendationChunk<Header, ContentComponent, Answer>
+where TContentComponent : IContentComponentType
+where TRecommendationChunk : IRecommendationChunk<TAnswer, TContentComponent, THeader>
+where THeader : IHeader
 {
     public List<TAnswer> Answers { get; }
 
