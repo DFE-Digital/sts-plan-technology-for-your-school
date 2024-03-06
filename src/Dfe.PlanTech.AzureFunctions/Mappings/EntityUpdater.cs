@@ -73,6 +73,11 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
         _mappedEntity.IncomingEntity.Archived = true;
         break;
       case CmsEvent.UNARCHIVE:
+        if (_mappedEntity.ExistingEntity == null)
+        {
+          throw new CmsEventException(string.Format("Content with Id \"{0}\" has event 'unarchive' despite not existing in the database!", _mappedEntity.IncomingEntity.Id));
+        }
+
         _mappedEntity.IncomingEntity.Archived = false;
         break;
       case CmsEvent.PUBLISH:
@@ -88,7 +93,7 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
       case CmsEvent.DELETE:
         if (_mappedEntity.ExistingEntity == null)
         {
-          throw new CmsEventException(string.Format("Content with Id \"{0}\" has event 'unpublish' despite not existing in the database!", _mappedEntity.IncomingEntity.Id));
+          throw new CmsEventException(string.Format("Content with Id \"{0}\" has event 'delete' despite not existing in the database!", _mappedEntity.IncomingEntity.Id));
         }
         _mappedEntity.ExistingEntity.Deleted = true;
         break;
