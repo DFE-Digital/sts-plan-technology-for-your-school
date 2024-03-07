@@ -16,7 +16,7 @@ public class InsetTextMapperTests : BaseMapperTests
     public InsetTextMapperTests()
     {
         _logger = Substitute.For<ILogger<InsetTextMapper>>();
-        _mapper = new InsetTextMapper(_logger, JsonOptions);
+        _mapper = new InsetTextMapper(MapperHelpers.CreateMockEntityRetriever(), MapperHelpers.CreateMockEntityUpdater(), _logger, JsonOptions);
     }
 
     [Fact]
@@ -29,11 +29,11 @@ public class InsetTextMapperTests : BaseMapperTests
 
         var payload = CreatePayload(fields, InsetTextId);
 
-        var mapped = _mapper.MapEntity(payload);
+        var mapped = _mapper.ToEntity(payload);
 
         Assert.NotNull(mapped);
 
-        var concrete = mapped as InsetTextDbEntity;
+        var concrete = mapped;
         Assert.NotNull(concrete);
 
         Assert.Equal(InsetTextId, concrete.Id);

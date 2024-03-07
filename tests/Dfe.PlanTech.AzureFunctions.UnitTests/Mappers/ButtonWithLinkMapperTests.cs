@@ -24,7 +24,7 @@ public class ButtonWithLinkMapperTests : BaseMapperTests
     public ButtonWithLinkMapperTests()
     {
         _logger = Substitute.For<ILogger<ButtonWithLinkMapper>>();
-        _mapper = new ButtonWithLinkMapper(_logger, JsonOptions);
+        _mapper = new ButtonWithLinkMapper(MapperHelpers.CreateMockEntityRetriever(), MapperHelpers.CreateMockEntityUpdater(), _logger, JsonOptions);
     }
 
     [Fact]
@@ -38,11 +38,11 @@ public class ButtonWithLinkMapperTests : BaseMapperTests
 
         var payload = CreatePayload(fields, ButtonWithLinkId);
 
-        var mapped = _mapper.MapEntity(payload);
+        var mapped = _mapper.ToEntity(payload);
 
         Assert.NotNull(mapped);
 
-        var concrete = mapped as ButtonWithLinkDbEntity;
+        var concrete = mapped;
         Assert.NotNull(concrete);
 
         Assert.Equal(ButtonWithLinkId, concrete.Id);

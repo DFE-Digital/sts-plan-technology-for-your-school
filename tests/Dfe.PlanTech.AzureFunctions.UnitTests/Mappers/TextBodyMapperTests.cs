@@ -15,7 +15,7 @@ public class TextBodyMapperTests : BaseMapperTests
     public TextBodyMapperTests()
     {
         _logger = Substitute.For<ILogger<TextBodyMapper>>();
-        _mapper = new TextBodyMapper(_richTextMapper, _logger, JsonOptions);
+        _mapper = new TextBodyMapper(MapperHelpers.CreateMockEntityRetriever(), MapperHelpers.CreateMockEntityUpdater(), _richTextMapper, _logger, JsonOptions);
     }
 
     [Fact]
@@ -29,13 +29,9 @@ public class TextBodyMapperTests : BaseMapperTests
 
         var payload = CreatePayload(fields, TextBodyId);
 
-        var mapped = _mapper.MapEntity(payload);
+        var mapped = _mapper.ToEntity(payload);
 
         Assert.NotNull(mapped);
-
-        var concrete = mapped as TextBodyDbEntity;
-        Assert.NotNull(concrete);
-
-        Assert.True(RichTextContentMapperTests.ContentMatches<RichTextContent, RichTextData, RichTextMark, RichTextContentDbEntity, RichTextDataDbEntity, RichTextMarkDbEntity>(richText, concrete.RichText));
+        Assert.True(RichTextContentMapperTests.ContentMatches<RichTextContent, RichTextData, RichTextMark, RichTextContentDbEntity, RichTextDataDbEntity, RichTextMarkDbEntity>(richText, mapped.RichText));
     }
 }

@@ -5,14 +5,9 @@ using System.Text.Json;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class CategoryMapper : JsonToDbMapper<CategoryDbEntity>
+public class CategoryMapper(EntityRetriever retriever, EntityUpdater updater, CmsDbContext db, ILogger<CategoryMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<CategoryDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
-    private readonly CmsDbContext _db;
-
-    public CategoryMapper(CmsDbContext db, ILogger<CategoryMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : base(logger, jsonSerialiserOptions)
-    {
-        _db = db;
-    }
+    private readonly CmsDbContext _db = db;
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {

@@ -59,8 +59,12 @@ namespace Dfe.PlanTech.AzureFunctions
             }
 
             services.AddScoped<RichTextContentMapper>();
-
             services.AddScoped<JsonToEntityMappers>();
+
+            services.AddTransient<PageEntityUpdater>();
+            services.AddTransient<PageEntityRetriever>();
+            services.AddTransient<EntityRetriever>();
+            services.AddTransient<EntityUpdater>();
         }
 
         /// <summary>
