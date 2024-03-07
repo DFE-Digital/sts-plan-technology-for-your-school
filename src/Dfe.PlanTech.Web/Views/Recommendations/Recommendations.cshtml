@@ -3,6 +3,21 @@
     <link rel="stylesheet" href="~/css/step-by-step.css">
 }
 
+@{
+    IEnumerable<Dfe.PlanTech.Domain.Questionnaire.Interfaces.IHeaderWithContent> content =
+    [Model.RecommendationIntro, .. Model.RecommendationChunks];
+
+    Dfe.PlanTech.Domain.Content.Models.Accordion[] accordions = [new Dfe.PlanTech.Domain.Content.Models.Accordion() {
+Title = Model.RecommendationIntro.Header.Text,
+Order = 1,
+Header = Model.RecommendationIntro.Header.Text
+}, .. Model.RecommendationChunks.Select((chunk, index) => new Dfe.PlanTech.Domain.Content.Models.Accordion() {
+Title = chunk.Title,
+Header = chunk.Header.Text,
+Order = index + 2
+})];
+
+}
 <div class="govuk-grid-row" id="top">
     @{
         await Html.RenderPartialAsync("BackButton");
@@ -14,11 +29,7 @@
         </a>
     </div>
     <div class="govuk-grid-column-two-thirds recommendation-content">
-        @{
-            IEnumerable<Dfe.PlanTech.Domain.Questionnaire.Interfaces.IHeaderWithContent> content =
-            [Model.RecommendationIntro, .. Model.RecommendationChunks];
-            <partial name="RecommendationContent" model="@content" />
-        }
+        <partial name="RecommendationContent" model="@content" />
     </div>
     <div class="govuk-grid-column-one-thirds">
 
@@ -31,7 +42,7 @@
             </h2>
         </div>
 
-        @await Component.InvokeAsync("Accordion", Model.RecommendationChunks)
+        @await Component.InvokeAsync("Accordion", accordions)
 
     </div>
 </div>
