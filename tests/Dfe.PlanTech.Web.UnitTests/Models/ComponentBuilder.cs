@@ -116,6 +116,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             return new RichTextContent { Value = "Content" };
         }
 
+        private static RichTextContent BuildRichContent(string text)
+        {
+            return new RichTextContent { Value = text };
+        }
+
         private static Button BuildButton()
         {
             return new Button
@@ -141,11 +146,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             Text = text
         };
 
-        public WarningComponent BuildWarningComponent()
+        public WarningComponent BuildWarningComponent(string text)
         {
             return new WarningComponent
             {
-                Text = BuildTextBody()
+                Text = new TextBody
+                {
+                    RichText = BuildRichContent(text)
+                }
             };
         }
     }

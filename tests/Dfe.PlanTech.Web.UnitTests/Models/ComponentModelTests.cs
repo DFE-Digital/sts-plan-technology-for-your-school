@@ -135,9 +135,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         [Fact]
         public void Should_render_warning_component()
         {
-            var actual = _componentBuilder.BuildWarningComponent();
+            var text = "test text";
+            var actual = _componentBuilder.BuildWarningComponent(text);
             Assert.NotNull(actual);
-            Assert.Equal("Content", actual.Text.RichText.Value);
+            Assert.Equal("test text", actual.Text.RichText.Value);
         }
     }
 }
