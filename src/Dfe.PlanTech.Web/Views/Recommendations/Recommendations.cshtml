@@ -1,7 +1,6 @@
 @model Dfe.PlanTech.Web.Models.RecommendationsViewModel
-
 @section Header {
-        <link rel="stylesheet" href="~/css/step-by-step.css">
+    <link rel="stylesheet" href="~/css/step-by-step.css">
 }
 
 <div class="govuk-grid-row">
@@ -14,10 +13,11 @@
             @Model.SectionName
         </a>
     </div>
-    <div class="govuk-grid-column-two-thirds">
+    <div class="govuk-grid-column-two-thirds recommendation-content">
         @{
-            await Html.RenderPartialAsync("Components/RecommendationIntro", Model.RecommendationIntro);
-            await Html.RenderPartialAsync("Components/RecommendationChunks", Model.RecommendationChunks);
+            IEnumerable<Dfe.PlanTech.Domain.Questionnaire.Interfaces.IHeaderWithContent> content =
+            [Model.RecommendationIntro, .. Model.RecommendationChunks];
+            <partial name="RecommendationContent" model="@content" />
         }
     </div>
     <div class="govuk-grid-column-one-thirds">
@@ -43,6 +43,6 @@
         <script type="module">
             var $element = document.querySelector('#step-by-step-navigation')
             var stepByStepNavigation = new GOVUK.Modules.AppStepNav($element).init()
-            </script>
+        </script>
     }
 }
