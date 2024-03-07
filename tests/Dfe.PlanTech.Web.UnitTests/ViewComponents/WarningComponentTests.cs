@@ -17,8 +17,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public void WarningComponent_Sets_Text()
         {
-            //Arrange
-            var x = new WarningComponent
+            //Arrange/Act
+            var warningComponent = new WarningComponent
             {
                 Text = new TextBody
                 {
@@ -28,11 +28,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                     }
                 }
             };
-            
-            //Act
 
             //Assert
-            Assert.Equal("test", x.Text.RichText.Value);
+            Assert.Equal("test", warningComponent.Text.RichText.Value);
 
         }
     }
