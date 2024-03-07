@@ -5,13 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace Dfe.PlanTech.Web.Controllers;
 
 [Authorize]
-public class RecommendationsController : BaseController<RecommendationsController>
+public class RecommendationsController(ILogger<RecommendationsController> logger)
+    : BaseController<RecommendationsController>(logger)
 {
     public const string GetRecommendationAction = nameof(GetRecommendation);
-
-    public RecommendationsController(ILogger<RecommendationsController> logger) : base(logger)
-    {
-    }
 
     [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}", Name = "GetRecommendation")]
     public async Task<IActionResult> GetRecommendation(string sectionSlug,

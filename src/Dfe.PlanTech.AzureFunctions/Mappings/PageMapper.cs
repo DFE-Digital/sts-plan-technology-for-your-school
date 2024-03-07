@@ -1,19 +1,25 @@
+using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class PageMapper : JsonToDbMapper<PageDbEntity>
+public class PageMapper(PageEntityRetriever retriever, PageEntityUpdater updater, ILogger<PageMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<PageDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
     private const string BeforeTitleContentKey = "beforeTitleContent";
     private const string ContentKey = "content";
-    private readonly CmsDbContext _db;
 
-    public PageMapper(CmsDbContext db, ILogger<PageMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : base(logger, jsonSerialiserOptions)
+    private readonly List<PageContentDbEntity> _pageContents = [];
+
+    public List<PageContentDbEntity> PageContents => _pageContents;
+
+    public override PageDbEntity ToEntity(CmsWebHookPayload payload)
     {
-        _db = db;
+        var mappedPage = base.ToEntity(payload);
+        mappedPage.AllPageContents = _pageContents;
+
+        return mappedPage;
     }
 
     /// <summary>
@@ -79,6 +85,6 @@ public class PageMapper : JsonToDbMapper<PageDbEntity>
             pageContent.ContentComponentId = contentId;
         }
 
-        _db.PageContents.Attach(pageContent);
+        _pageContents.Add(pageContent);
     }
 }

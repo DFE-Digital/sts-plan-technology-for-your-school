@@ -4,12 +4,8 @@ using System.Text.Json;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class ButtonDbMapper : JsonToDbMapper<ButtonDbEntity>
+public class ButtonDbMapper(EntityRetriever retriever, EntityUpdater updater, ILogger<ButtonDbMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<ButtonDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
-    public ButtonDbMapper(ILogger<ButtonDbMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : base(logger, jsonSerialiserOptions)
-    {
-    }
-
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
         return values;

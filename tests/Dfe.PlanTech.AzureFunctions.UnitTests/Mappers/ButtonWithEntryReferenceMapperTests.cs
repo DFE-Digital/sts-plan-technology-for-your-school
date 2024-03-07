@@ -30,7 +30,7 @@ public class ButtonWithEntryReferenceMapperTests : BaseMapperTests
     public ButtonWithEntryReferenceMapperTests()
     {
         _logger = Substitute.For<ILogger<ButtonWithEntryReferenceMapper>>();
-        _mapper = new ButtonWithEntryReferenceMapper(_logger, JsonOptions);
+        _mapper = new ButtonWithEntryReferenceMapper(MapperHelpers.CreateMockEntityRetriever(), MapperHelpers.CreateMockEntityUpdater(), _logger, JsonOptions);
     }
 
     [Fact]
@@ -44,11 +44,11 @@ public class ButtonWithEntryReferenceMapperTests : BaseMapperTests
 
         var payload = CreatePayload(fields, ButtonWithEntryReferenceId);
 
-        var mapped = _mapper.MapEntity(payload);
+        var mapped = _mapper.ToEntity(payload);
 
         Assert.NotNull(mapped);
 
-        var concrete = mapped as ButtonWithEntryReferenceDbEntity;
+        var concrete = mapped;
         Assert.NotNull(concrete);
 
         Assert.Equal(ButtonWithEntryReferenceId, concrete.Id);

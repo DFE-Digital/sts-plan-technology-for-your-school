@@ -5,6 +5,7 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
 public class RecommendationIntro : ContentComponent, IRecommendationIntro<Header, ContentComponent>
 {
+    public string Slug { get; init; } = null!;
     public Header Header { get; init; } = null!;
 
     public string Maturity { get; init; } = null!;

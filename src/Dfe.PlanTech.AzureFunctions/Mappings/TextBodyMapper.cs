@@ -5,14 +5,9 @@ using System.Text.Json.Nodes;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class TextBodyMapper : JsonToDbMapper<TextBodyDbEntity>
+public class TextBodyMapper(EntityRetriever retriever, EntityUpdater updater, RichTextContentMapper richTextMapper, ILogger<TextBodyMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<TextBodyDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
-    private readonly RichTextContentMapper _richTextMapper;
-
-    public TextBodyMapper(RichTextContentMapper richTextMapper, ILogger<TextBodyMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : base(logger, jsonSerialiserOptions)
-    {
-        _richTextMapper = richTextMapper;
-    }
+    private readonly RichTextContentMapper _richTextMapper = richTextMapper;
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {

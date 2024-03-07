@@ -5,14 +5,9 @@ using System.Text.Json;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class QuestionMapper : JsonToDbMapper<QuestionDbEntity>
+public class QuestionMapper(EntityRetriever retriever, EntityUpdater updater, CmsDbContext db, ILogger<JsonToDbMapper<QuestionDbEntity>> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<QuestionDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
-    private readonly CmsDbContext _db;
-
-    public QuestionMapper(CmsDbContext db, ILogger<JsonToDbMapper<QuestionDbEntity>> logger, JsonSerializerOptions jsonSerialiserOptions) : base(logger, jsonSerialiserOptions)
-    {
-        _db = db;
-    }
+    private readonly CmsDbContext _db = db;
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {

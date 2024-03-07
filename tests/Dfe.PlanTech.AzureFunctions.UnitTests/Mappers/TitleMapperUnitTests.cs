@@ -16,7 +16,7 @@ public class TitleMapperUnitTests : BaseMapperTests
     public TitleMapperUnitTests()
     {
         _logger = Substitute.For<ILogger<TitleMapper>>();
-        _mapper = new TitleMapper(_logger, JsonOptions);
+        _mapper = new TitleMapper(MapperHelpers.CreateMockEntityRetriever(), MapperHelpers.CreateMockEntityUpdater(), _logger, JsonOptions);
     }
 
     [Fact]
@@ -29,14 +29,11 @@ public class TitleMapperUnitTests : BaseMapperTests
 
         var payload = CreatePayload(fields, TitleId);
 
-        var mapped = _mapper.MapEntity(payload);
+        var mapped = _mapper.ToEntity(payload);
 
         Assert.NotNull(mapped);
 
-        var concrete = mapped as TitleDbEntity;
-        Assert.NotNull(concrete);
-
-        Assert.Equal(TitleId, concrete.Id);
-        Assert.Equal(TitleText, concrete.Text);
+        Assert.Equal(TitleId, mapped.Id);
+        Assert.Equal(TitleText, mapped.Text);
     }
 }

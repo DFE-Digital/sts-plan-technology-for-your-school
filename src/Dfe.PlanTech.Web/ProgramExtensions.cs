@@ -15,6 +15,7 @@ using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models.Options;
+using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
@@ -81,6 +82,9 @@ public static class ProgramExtensions
 
         services.AddTransient<GetPageFromContentfulQuery>();
         services.AddSingleton(new ContentfulOptions(configuration.GetValue<bool>("Contentful:UsePreview")));
+
+        services.AddTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationFromContentfulQuery>();
+
         return services;
     }
 
@@ -147,8 +151,10 @@ public static class ProgramExtensions
         services.AddTransient<IProcessCheckAnswerDtoCommand, ProcessCheckAnswerDtoCommand>();
         services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
         services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
+        services.AddTransient<IGetAllAnswersForLatestSubmissionQuery, GetAllAnswersForLatestSubmissionQuery>();
 
         services.AddTransient<GetPageFromDbQuery>();
+
         return services;
     }
 

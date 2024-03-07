@@ -1,6 +1,10 @@
+using Dfe.PlanTech.AzureFunctions.Models;
+using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -11,15 +15,12 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 /// Maps a JSON payload to the given entity type
 /// </summary>
 /// <typeparam name="TEntity"></typeparam>
-public abstract class JsonToDbMapper<TEntity> : JsonToDbMapper
+public abstract class JsonToDbMapper<TEntity>(EntityRetriever entityRetriever, EntityUpdater entityUpdater, ILogger<JsonToDbMapper<TEntity>> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper(entityRetriever, typeof(TEntity), logger, jsonSerialiserOptions)
 where TEntity : ContentComponentDbEntity, new()
 {
     protected readonly TEntity MappedEntity = new();
     protected CmsWebHookPayload? Payload;
-
-    protected JsonToDbMapper(ILogger<JsonToDbMapper<TEntity>> logger, JsonSerializerOptions jsonSerialiserOptions) : base(typeof(TEntity), logger, jsonSerialiserOptions)
-    {
-    }
+    protected EntityUpdater _entityUpdater = entityUpdater;
 
     public virtual TEntity ToEntity(CmsWebHookPayload payload)
     {
@@ -38,7 +39,14 @@ where TEntity : ContentComponentDbEntity, new()
         return serialised;
     }
 
-    public override ContentComponentDbEntity MapEntity(CmsWebHookPayload payload) => ToEntity(payload);
+    public override async Task<MappedEntity> MapEntity(CmsWebHookPayload payload, CmsEvent cmsEvent, CancellationToken cancellationToken)
+    {
+        var incomingEntity = ToEntity(payload);
+
+        var existingEntity = await EntityRetriever.GetExistingDbEntity(incomingEntity, cancellationToken);
+
+        return _entityUpdater.UpdateEntity(incomingEntity, existingEntity, cmsEvent);
+    }
 
     public abstract Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values);
 
@@ -82,13 +90,14 @@ where TEntity : ContentComponentDbEntity, new()
 
 public abstract class JsonToDbMapper
 {
+    protected readonly EntityRetriever EntityRetriever;
     protected readonly ILogger Logger;
     protected readonly JsonSerializerOptions JsonOptions;
-
     private readonly Type _entityType;
 
-    protected JsonToDbMapper(Type entityType, ILogger logger, JsonSerializerOptions jsonSerialiserOptions)
+    protected JsonToDbMapper(EntityRetriever entityRetriever, Type entityType, ILogger logger, JsonSerializerOptions jsonSerialiserOptions)
     {
+        EntityRetriever = entityRetriever;
         _entityType = entityType;
         Logger = logger;
         JsonOptions = jsonSerialiserOptions;
@@ -97,7 +106,7 @@ public abstract class JsonToDbMapper
     public virtual bool AcceptsContentType(string contentType)
       => _entityType.Name.Equals($"{contentType}DbEntity", StringComparison.InvariantCultureIgnoreCase);
 
-    public abstract ContentComponentDbEntity MapEntity(CmsWebHookPayload payload);
+    public abstract Task<MappedEntity> MapEntity(CmsWebHookPayload payload, CmsEvent cmsEvent, CancellationToken cancellationToken);
 
     protected Dictionary<string, object?> GetEntityValuesDictionary(CmsWebHookPayload payload)
     => GetEntityValues(payload).Where(kvp => kvp.HasValue)
@@ -224,4 +233,11 @@ public abstract class JsonToDbMapper
 
         return values;
     }
+
+    public virtual Task<ContentComponentDbEntity?> RetrieveEntityFromDatabase(ContentComponentDbEntity incomingEntity, CancellationToken cancellationToken)
+    {
+        return EntityRetriever.GetExistingDbEntity(incomingEntity, cancellationToken);
+    }
+
+
 }

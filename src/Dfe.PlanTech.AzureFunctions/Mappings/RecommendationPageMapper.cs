@@ -4,12 +4,8 @@ using System.Text.Json;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class RecommendationPageMapper : JsonToDbMapper<RecommendationPageDbEntity>
+public class RecommendationPageMapper(EntityRetriever retriever, EntityUpdater updater, ILogger<RecommendationPageMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<RecommendationPageDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
-    public RecommendationPageMapper(ILogger<RecommendationPageMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : base(logger, jsonSerialiserOptions)
-    {
-    }
-
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
         values = MoveValueToNewKey(values, "page", "pageId");

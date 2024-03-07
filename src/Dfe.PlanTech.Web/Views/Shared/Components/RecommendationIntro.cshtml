@@ -1,0 +1,13 @@
+@model Dfe.PlanTech.Domain.Questionnaire.Models.RecommendationIntro
+
+
+<div>
+    @{
+        await Html.RenderPartialAsync("Components/Header", Model.Header);
+    }
+
+    @foreach (var content in Model.Content)
+    {
+        await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+    }
+</div>

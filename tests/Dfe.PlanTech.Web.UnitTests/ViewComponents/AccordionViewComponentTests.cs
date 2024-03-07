@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.ViewComponents;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
 using Xunit;
@@ -11,20 +12,50 @@ public class AccordionViewComponentTest
     [Fact]
     public void Accordion_view_component_not_null()
     {
-        IEnumerable<IAccordion> accordionBlock = new List<IAccordion>
+
+        IEnumerable<RecommendationChunk> recommendationChunks = new[]
+        {
+            new RecommendationChunk()
             {
-                new Accordion() { Order = 1, Title = "Test Header 1", Heading = "Heading 1" },
-                new Accordion() { Order = 2, Title = "Test Header 2", Heading = "Heading 2" },
-                new Accordion() { Order = 3, Title = "Test Header 3", Heading = "Heading 3" },
-                new Accordion() { Order = 4, Title = "Test Header 4", Heading = "Heading 4" }
-            };
+                Title = "Test Header 1",
+                Header = new Header() { Text = "Header 1" },
+                Content = new List<ContentComponent>(),
+                Answers = new List<Answer>()
+            },
+            new RecommendationChunk()
+            {
+                Title = "Test Header 2",
+                Header = new Header() { Text = "Header 2" },
+                Content = new List<ContentComponent>(),
+                Answers = new List<Answer>()
+            },
+            new RecommendationChunk()
+            {
+                Title = "Test Header 3",
+                Header = new Header() { Text = "Header 3" },
+                Content = new List<ContentComponent>(),
+                Answers = new List<Answer>()
+            },
+            new RecommendationChunk()
+            {
+                Title = "Test Header 4",
+                Header = new Header() { Text = "Header 4" },
+                Content = new List<ContentComponent>(),
+                Answers = new List<Answer>()
+            }
+        };
 
         var accordionComponent = new AccordionViewComponent();
 
-        var result = accordionComponent.Invoke(accordionBlock);
+        var result = accordionComponent.Invoke(recommendationChunks);
 
         var model = (result as ViewViewComponentResult)?.ViewData?.Model;
         
         Assert.NotNull(model);
+        Assert.Equal(4, (model as List<Accordion>)?.Count);
+        Assert.Equal("Test Header 1", (model as List<Accordion>)?[0].Title);
+        Assert.Equal("Header 1", (model as List<Accordion>)?[0].Header);
+
+        
     }
 }
