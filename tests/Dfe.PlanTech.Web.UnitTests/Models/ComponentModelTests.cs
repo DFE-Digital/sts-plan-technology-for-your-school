@@ -131,5 +131,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
 
             Assert.Null(unknownMaturityRecommendation);
         }
+
+        [Fact]
+        public void Should_render_warning_component()
+        {
+            var actual = _componentBuilder.BuildWarningComponent();
+            Assert.NotNull(actual);
+            Assert.Equal("Content", actual.Text.RichText.Value);
+        }
     }
 }
