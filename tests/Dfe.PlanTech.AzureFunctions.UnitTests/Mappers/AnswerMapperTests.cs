@@ -2,6 +2,7 @@ using Dfe.PlanTech.AzureFunctions.Mappings;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
@@ -16,10 +17,13 @@ public class AnswerMapperTests : BaseMapperTests
 
     private readonly AnswerMapper _mapper;
     private readonly ILogger<JsonToDbMapper<AnswerDbEntity>> _logger;
+    private readonly CmsDbContext _db = Substitute.For<CmsDbContext>();
+    private readonly ILogger<EntityUpdater> _entityUpdaterLogger = Substitute.For<ILogger<EntityUpdater>>();
+
     public AnswerMapperTests()
     {
         _logger = Substitute.For<ILogger<JsonToDbMapper<AnswerDbEntity>>>();
-        _mapper = new AnswerMapper(_logger, JsonOptions);
+        _mapper = new AnswerMapper(new EntityRetriever(_db), new EntityUpdater(_entityUpdaterLogger, _db), _logger, JsonOptions);
     }
 
     [Fact]
@@ -34,11 +38,11 @@ public class AnswerMapperTests : BaseMapperTests
 
         var payload = CreatePayload(fields, AnswerId);
 
-        var mapped = _mapper.MapEntity(payload);
+        var mapped = _mapper.ToEntity(payload);
 
         Assert.NotNull(mapped);
 
-        var concrete = mapped as AnswerDbEntity;
+        var concrete = mapped;
         Assert.NotNull(concrete);
 
         Assert.Equal(AnswerId, concrete.Id);

@@ -93,7 +93,7 @@ public class RecommendationsViewComponent(
         catch (Exception e)
         {
             _logger.LogError(
-                "An exception has occurred while trying to retrieve section progress with the following message - {}",
+                "An exception has occurred while trying to retrieve section progress with the following message - {errorMessage}",
                 e.Message);
             category.RetrievalError = true;
             return category;

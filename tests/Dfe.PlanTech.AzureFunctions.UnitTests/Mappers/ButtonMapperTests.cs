@@ -15,7 +15,7 @@ public class ButtonMapperTests : BaseMapperTests
     public ButtonMapperTests()
     {
         _logger = Substitute.For<ILogger<ButtonDbMapper>>();
-        _mapper = new ButtonDbMapper(_logger, JsonOptions);
+        _mapper = new ButtonDbMapper(MapperHelpers.CreateMockEntityRetriever(), MapperHelpers.CreateMockEntityUpdater(), _logger, JsonOptions);
     }
 
     [Theory]
@@ -33,11 +33,11 @@ public class ButtonMapperTests : BaseMapperTests
 
         var payload = CreatePayload(fields, ButtonId);
 
-        var mapped = _mapper.MapEntity(payload);
+        var mapped = _mapper.ToEntity(payload);
 
         Assert.NotNull(mapped);
 
-        var concrete = mapped as ButtonDbEntity;
+        var concrete = mapped;
         Assert.NotNull(concrete);
 
         Assert.Equal(ButtonId, concrete.Id);
