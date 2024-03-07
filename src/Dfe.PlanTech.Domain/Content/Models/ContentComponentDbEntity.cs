@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Domain.Content.Models;
 
@@ -28,5 +29,10 @@ public abstract class ContentComponentDbEntity : IContentComponentDbEntity
     /// Joins for <see cref="ContentPages"/> 
     /// </summary>
     public List<PageContentDbEntity> ContentPagesJoins { get; set; } = [];
-
+    
+    
+    public List<RecommendationChunkDbEntity> RecommendationChunk { get; set; } = [];
+    
+    public List<RecommendationChunkContentDbEntity> RecommendationChunkContentJoins { get; set; } = [];
+    
 }

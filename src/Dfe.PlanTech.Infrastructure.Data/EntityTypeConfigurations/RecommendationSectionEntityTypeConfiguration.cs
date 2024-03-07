@@ -18,7 +18,7 @@ public class RecommendationSectionEntityTypeConfiguration : IEntityTypeConfigura
             join.Property<long>("Id");
             join.HasIndex("Id");
         });
-
+        
         builder.HasMany(section => section.Answers)
             .WithMany()
             .UsingEntity(join =>

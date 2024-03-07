@@ -21,7 +21,7 @@ public class RecommendationChunkMapper : JsonToDbMapper<RecommendationChunkDbEnt
         values = MoveValueToNewKey(values, "header", "headerId");
         
         UpdateContentIds(values, id, "content");
-        UpdateContentIds(values, id, "answers");
+        UpdateAnswerIds(values, id, "answers");
 
         return values;
     }
@@ -45,10 +45,32 @@ public class RecommendationChunkMapper : JsonToDbMapper<RecommendationChunkDbEnt
     {
         if (values.TryGetValue(currentKey, out object? contents) && contents is object[] inners)
         {
+            for (var index = 0; index < inners.Length; index++)
+            {
+                CreateRecommendationAnswerEntity(inners[index], index, recommendationChunkId);
+            }
+            
             values.Remove(currentKey);
         }
     }
-    
+
+    private void CreateRecommendationAnswerEntity(object inner, int index, string recommendationChunkId)
+    {
+        if (inner is not string answerId)
+        {
+            Logger.LogWarning("Expected string but received {innerType}", inner.GetType());
+            return;
+        }
+
+        var recommendationChunkAnswer = new RecommendationChunkAnswerDbEntity()
+        {
+            RecommendationChunkId = recommendationChunkId,
+            AnswerId = answerId
+        };
+
+        _db.RecommendationChunkAnswers.Attach(recommendationChunkAnswer);
+    }
+
     private void CreateRecommendationContentEntity(object inner, int order, string recommendationChunkId)
     {
         if (inner is not string contentId)

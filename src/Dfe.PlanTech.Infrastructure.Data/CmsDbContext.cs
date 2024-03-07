@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
+using Dfe.PlanTech.Infrastructure.Data.EntityTypeConfigurations;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
@@ -47,11 +48,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     
     public DbSet<RecommendationChunkContentDbEntity> RecommendationChunkContents { get; set; }
 
-    public DbSet<RecommendationIntroDbEntity> RecommendationIntros { get; set; }
-
-    public DbSet<RecommendationSectionDbEntity> RecommendationSections { get; set; }
-
-    public DbSet<SubTopicRecommendationDbEntity> SubtopicRecommendations { get; set; }
+    public DbSet<RecommendationChunkAnswerDbEntity> RecommendationChunkAnswers { get; set; }
 
     public DbSet<RichTextContentDbEntity> RichTextContents { get; set; }
 
@@ -84,9 +81,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<RecommendationPageDbEntity> ICmsDbContext.RecommendationPages => RecommendationPages;
     IQueryable<RecommendationChunkDbEntity> ICmsDbContext.RecommendationChunks => RecommendationChunks;
     IQueryable<RecommendationChunkContentDbEntity> ICmsDbContext.RecommendationChunkContents => RecommendationChunkContents;
-    IQueryable<RecommendationIntroDbEntity> ICmsDbContext.RecommendationIntros => RecommendationIntros;
-    IQueryable<SubTopicRecommendationDbEntity> ICmsDbContext.SubtopicRecommendations => SubtopicRecommendations;
-    IQueryable<RecommendationSectionDbEntity> ICmsDbContext.RecommendationSections => RecommendationSections;
+    IQueryable<RecommendationChunkAnswerDbEntity> ICmsDbContext.RecommendationChunkAnswers => RecommendationChunkAnswers;
     IQueryable<RichTextContentDbEntity> ICmsDbContext.RichTextContents => RichTextContents;
     IQueryable<RichTextContentWithSlugDbEntity> ICmsDbContext.RichTextContentWithSlugs => RichTextContentWithSlugs
                                                                                                 .Include(rt => rt.Data)
@@ -112,6 +107,12 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.ApplyConfiguration(new RecommendationSectionEntityTypeConfiguration());
+        
+        modelBuilder.Entity<RecommendationChunkContentDbEntity>()
+            .ToTable("RecommendationChunkContents", Schema);
+        
+        
         modelBuilder.HasDefaultSchema(Schema);
 
         modelBuilder.Entity<ContentComponentDbEntity>(entity =>
@@ -183,6 +184,14 @@ public class CmsDbContext : DbContext, ICmsDbContext
             entity.HasOne(pc => pc.ContentComponent).WithMany(c => c.ContentPagesJoins);
 
             entity.HasOne(pc => pc.Page).WithMany(p => p.AllPageContents);
+        });
+        
+        
+        modelBuilder.Entity<RecommendationChunkContentDbEntity>(entity =>
+        {
+
+            entity.HasOne(pc => pc.ContentComponent).WithMany(c => c.RecommendationChunkContentJoins);
+
         });
 
         modelBuilder.Entity<QuestionDbEntity>().ToTable("Questions", Schema);
