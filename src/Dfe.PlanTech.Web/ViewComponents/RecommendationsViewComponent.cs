@@ -37,7 +37,7 @@ public class RecommendationsViewComponent(
 
         var recommendationsViewComponentViewModel =
             recommendationsAvailable
-                ?  GetRecommendationsViewComponentViewModel(allSectionsOfCombinedCategories,
+                ? GetRecommendationsViewComponentViewModel(allSectionsOfCombinedCategories,
                     allSectionStatusesOfCombinedCategories)
                 : null;
 
@@ -59,7 +59,7 @@ public class RecommendationsViewComponent(
             SubtopicRecommendation? recommendation = null;
 
 
-            recommendation = await getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id);
+            recommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id);
 
 
             if (recommendation == null)
