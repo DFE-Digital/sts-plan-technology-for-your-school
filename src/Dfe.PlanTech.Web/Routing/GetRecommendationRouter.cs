@@ -49,19 +49,19 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     private async Task<IActionResult> HandleCompleteStatus(RecommendationsController controller, CancellationToken cancellationToken)
     {
         if (_router.SectionStatus?.Maturity == null) throw new DatabaseException("Maturity is null, but shouldn't be for a completed section");
-        
+
         if (_router.Section == null) throw new DatabaseException("Section is null, but shouldn't be.");
-        
+
         var usersAnswers =
             await _getAllAnswersForLatestSubmissionQuery.GetAllAnswersForLatestSubmission(_router.Section.Sys.Id,
-                await _router.User.GetEstablishmentId());
-        
+                await _router.User.GetEstablishmentId()) ?? throw new DatabaseException($"Could not find users answers for:  {_router.Section.Name}");
+
         var subTopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(_router.Section.Sys.Id, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {_router.Section.Name}");
 
         var subTopicIntro = subTopicRecommendation.GetRecommendationByMaturity(_router.SectionStatus.Maturity) ?? throw new ContentfulDataUnavailableException($"Could not find recommendation intro for maturity:  {_router.SectionStatus?.Maturity}");
 
         var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(usersAnswers.Select(answer => answer.ContentfulRef));
-        
+
         var viewModel = new RecommendationsViewModel()
         {
             SectionName = subTopicRecommendation.Subtopic.Name,
@@ -70,7 +70,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
         };
 
         return controller.View("~/Views/Recommendations/Recommendations.cshtml", viewModel);
-        
+
     }
 
     /// <summary>
