@@ -80,7 +80,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             }
         ];
 
-        public RecommendationsViewModel BuildRecommendationViewModel()
+        public static RecommendationsViewModel BuildRecommendationViewModel()
         => new()
         {
             Intro = BuildRecommendationIntro("intro"),

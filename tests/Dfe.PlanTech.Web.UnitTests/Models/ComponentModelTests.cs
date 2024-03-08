@@ -157,7 +157,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         [Fact]
         public void RecommendationViewModel_Should_Return_Accordions_And_All_Content()
         {
-            var recommendationViewModel = _componentBuilder.BuildRecommendationViewModel();
+            var recommendationViewModel = ComponentBuilder.BuildRecommendationViewModel();
 
             var allContent = recommendationViewModel.AllContent.ToList();
 
