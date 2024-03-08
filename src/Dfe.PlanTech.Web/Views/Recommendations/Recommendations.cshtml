@@ -3,25 +3,8 @@
     <link rel="stylesheet" as="style" href="~/css/step-by-step.css">
 }
 
-@{
-    IEnumerable<Dfe.PlanTech.Domain.Questionnaire.Interfaces.IHeaderWithContent> content =
-    [Model.RecommendationIntro, .. Model.RecommendationChunks];
-
-    Dfe.PlanTech.Domain.Content.Models.Accordion[] accordions = [new Dfe.PlanTech.Domain.Content.Models.Accordion() {
-Title = Model.RecommendationIntro.Header.Text,
-Order = 1,
-Header = Model.RecommendationIntro.Header.Text
-}, .. Model.RecommendationChunks.Select((chunk, index) => new Dfe.PlanTech.Domain.Content.Models.Accordion() {
-Title = chunk.Title,
-Header = chunk.Header.Text,
-Order = index + 2
-})];
-}
-
 <div class="govuk-grid-row" id="top">
-    @{
-        await Html.RenderPartialAsync("BackButton");
-    }
+    <partial name="BackButton" />
     <div class="app-step-nav-header">
         <span class="app-step-nav-header__part-of">Part of</span>
         <a class="app-step-nav-header__title" href="/self-assessment#recommendations-section">
@@ -29,10 +12,9 @@ Order = index + 2
         </a>
     </div>
     <div class="govuk-grid-column-two-thirds recommendation-content">
-        <partial name="RecommendationContent" model="@content" />
+        <partial name="RecommendationContent" model="@Model.AllContent" />
     </div>
-    <div class="govuk-grid-column-one-thirds">
-
+    <div>
         <div class="app-step-nav-related app-step-nav-related--singular">
             <h2 class="app-step-nav-related__heading">
                 <span class="app-step-nav-related__pretitle">Part of</span>
@@ -42,18 +24,16 @@ Order = index + 2
             </h2>
         </div>
 
-        @await Component.InvokeAsync("Accordion", accordions)
+        @await Component.InvokeAsync("Accordion", Model.Accordions)
 
     </div>
 </div>
 
 @section BodyEnd {
-    @{
-        <script async src="/js/step-by-step-navigation.js"></script>
-        <script defer src="/js/step-by-step-polyfills.js"></script>
-        <script async type="module">
-            var $element = document.querySelector('#step-by-step-navigation')
-            var stepByStepNavigation = new GOVUK.Modules.AppStepNav($element).init()
-        </script>
-    }
+    <script async src="/js/step-by-step-navigation.js"></script>
+    <script defer src="/js/step-by-step-polyfills.js"></script>
+    <script async type="module">
+        var $element = document.querySelector('#step-by-step-navigation')
+        var stepByStepNavigation = new GOVUK.Modules.AppStepNav($element).init()
+    </script>
 }

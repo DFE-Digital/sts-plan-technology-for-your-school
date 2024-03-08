@@ -1,5 +1,4 @@
 @model IEnumerable<Dfe.PlanTech.Domain.Content.Interfaces.IAccordion>
-@using static Dfe.PlanTech.Web.Helpers.ViewHelpers;
 
 <div class="govuk-grid-column-one-third accordion-parent">
 
@@ -33,7 +32,7 @@
 
                         <ol class="app-step-nav__list " data-length="3">
                             <li class="app-step-nav__list-item js-list-item ">
-                                <a class="app-step-nav__link js-link" href="#@accordion.Header.Slugify()    ">
+                                <a class="app-step-nav__link js-link" href="#@accordion.Slug">
                                     @accordion.Header
                                 </a>
                             </li>
