@@ -150,7 +150,7 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
     [Fact]
     public async Task GetSubTopicRecommendation_Returns_Correct_SubTopicRecommendation_From_SectionOne()
     {
-        _repoSubstitute.GetEntities<SubtopicRecommendation>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns(new List<SubtopicRecommendation?>() { _subtopicRecommendationOne });
+        _repoSubstitute.GetEntities<SubtopicRecommendation?>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns([_subtopicRecommendationOne]);
 
         SubtopicRecommendation? subTopicRecommendation = await _getSubTopicRecommendationFromContentfulQuery.GetSubTopicRecommendation(_subTopicOne.Sys.Id);
 
@@ -161,7 +161,7 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
     [Fact]
     public async Task GetSubTopicRecommendation_Returns_Correct_SubTopicRecommendation_From_SectionTwo()
     {
-        _repoSubstitute.GetEntities<SubtopicRecommendation>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns(new List<SubtopicRecommendation?>() { _subtopicRecommendationTwo });
+        _repoSubstitute.GetEntities<SubtopicRecommendation?>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns([_subtopicRecommendationTwo]);
 
         SubtopicRecommendation? subTopicRecommendation = await _getSubTopicRecommendationFromContentfulQuery.GetSubTopicRecommendation(_subTopicTwo.Sys.Id);
 
@@ -172,7 +172,7 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
     [Fact]
     public async Task GetSubTopicRecommendationIntro_Returns_Intro_When_Exists_In_SubTopicRecommendation_From_SectionOne()
     {
-        _repoSubstitute.GetEntities<SubtopicRecommendation>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns(new List<SubtopicRecommendation?>() { _subtopicRecommendationOne });
+        _repoSubstitute.GetEntities<SubtopicRecommendation?>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns([_subtopicRecommendationOne]);
 
         SubtopicRecommendation? subTopicRecommendation = await _getSubTopicRecommendationFromContentfulQuery.GetSubTopicRecommendation(_subTopicOne.Sys.Id);
 
@@ -185,7 +185,7 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
     [Fact]
     public async Task GetSubTopicRecommendationChunk_When_List_Of_Answers_Passed_To_RecommendationSection_From_SectionOne()
     {
-        _repoSubstitute.GetEntities<SubtopicRecommendation>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns(new List<SubtopicRecommendation?>() { _subtopicRecommendationOne });
+        _repoSubstitute.GetEntities<SubtopicRecommendation?>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns([_subtopicRecommendationOne]);
 
         SubtopicRecommendation? subTopicRecommendation = await _getSubTopicRecommendationFromContentfulQuery.GetSubTopicRecommendation(_subTopicOne.Sys.Id);
 
@@ -197,7 +197,7 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
     [Fact]
     public async Task GetSubTopicRecommendationChunk_When_List_Of_Answers_Passed_To_RecommendationSection_From_SectionOne_No_Duplicate_Chunks_Returned()
     {
-        _repoSubstitute.GetEntities<SubtopicRecommendation>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns(new List<SubtopicRecommendation?>() { _subtopicRecommendationOne });
+        _repoSubstitute.GetEntities<SubtopicRecommendation?>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns([_subtopicRecommendationOne]);
 
         SubtopicRecommendation? subTopicRecommendation = await _getSubTopicRecommendationFromContentfulQuery.GetSubTopicRecommendation(_subTopicOne.Sys.Id);
 
@@ -209,7 +209,7 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
     [Fact]
     public async Task GetSubTopicRecommendationChunks_Returns_Empty_When_List_Of_Answers_Passed_To_RecommendationSection_From_SectionOne_Does_Not_Have_Any_Chunks_Associated()
     {
-        _repoSubstitute.GetEntities<SubtopicRecommendation>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns(new List<SubtopicRecommendation?>() { _subtopicRecommendationOne });
+        _repoSubstitute.GetEntities<SubtopicRecommendation?>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns([_subtopicRecommendationOne]);
 
         SubtopicRecommendation? subTopicRecommendation = await _getSubTopicRecommendationFromContentfulQuery.GetSubTopicRecommendation(_subTopicOne.Sys.Id);
 
