@@ -15,7 +15,7 @@ public class RecommendationsViewModel
 
     public IEnumerable<IHeaderWithContent> AllContent => GetAllContent();
 
-    public IEnumerable<IAccordion> Accordions => AllContent.Select(ConvertToAccordion);
+    public IEnumerable<IAccordion> Accordions => RecommendationChunks.Select(ConvertToAccordion);
 
     private static Accordion ConvertToAccordion(IHeaderWithContent content, int index)
     => new()

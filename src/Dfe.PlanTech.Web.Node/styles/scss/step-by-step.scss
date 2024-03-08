@@ -5,22 +5,16 @@
 @import "../../node_modules/@govuk-prototype-kit/step-by-step/sass/_step-by-step-navigation-related.scss";
 @import "../../node_modules/@govuk-prototype-kit/step-by-step/sass/_step-by-step-navigation-header.scss";
 
-/*
-  ViewData["ParentContainerClass"] = "recommendation-piece-container";
-  ViewData["HeaderClass"] = "recommendation-piece-header";
-  ViewData["ContentClass"] = "recommendation-piece-content";
-*/
-
 html {
   scroll-behavior: smooth;
 }
 
 .recommendation-content {
-    &:not(:has(:target)){
-      .recommendation-piece-container:first-child{
-        display: block;
-      }
+  &:not(:has(:target)){
+    .recommendation-piece-container:first-child{
+      display: block;
     }
+  }
 }
 
 .recommendation-piece-container {
@@ -31,38 +25,10 @@ html {
   }
 }
 
-.recommendation-piece-header {
-
+.app-step-nav__panel {
+  padding-bottom: 0px;
 }
 
-.recommendation-piece-content {
-
-}
-
-$scrollLength: 120vh;
-
-.app-back-to-top{ 
-  // uncomment to visualize "track"
-  // outline: 1px solid red;
-  position: absolute;
-  top: $scrollLength;
-  right: 0.25rem;
-  bottom: -5em;
-  pointer-events: none;
-
-  .app-back-to-top__link { 
-    position: fixed;
-    // @link https://caniuse.com/#search=position%3A%20sticky
-    position: sticky;
-    pointer-events: all;
-    top: calc(100vh - 5rem);
-
-
-  }
-}
-
-main {
-  // required to make sure the `absolute` positioning of
-  // the anchor wrapper is indeed `relative` to this element vs. the body
-  position: relative;
+.app-step-nav__list {
+  margin-bottom: 0px;
 }

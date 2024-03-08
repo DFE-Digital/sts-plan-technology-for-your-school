@@ -34,16 +34,13 @@
 }
 
 @section BeforeContent {
+    <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
+    
     @{
         await Html.RenderPartialAsync("BetaHeader");
     }
     @RenderSection("BeforeContent", required: false)
-
-    @{
-        //Add relevant tags for GovUK front-end CSS to body
-    }
     
-    <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
 }
 
 

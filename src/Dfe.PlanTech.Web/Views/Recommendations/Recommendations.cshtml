@@ -3,23 +3,26 @@
     <link rel="stylesheet" as="style" href="~/css/step-by-step.css">
 }
 
-<div class="govuk-grid-row" id="top">
-    <partial name="BackButton" />
-    <div class="app-step-nav-header">
+@section BeforeContent {
+     <div class="app-step-nav-header">
         <span class="app-step-nav-header__part-of">Part of</span>
         <a class="app-step-nav-header__title" href="/self-assessment#recommendations-section">
             @Model.SectionName
         </a>
     </div>
+}
+
+<div class="govuk-grid-row" id="top">
     <div class="govuk-grid-column-two-thirds recommendation-content">
         <partial name="RecommendationContent" model="@Model.AllContent" />
     </div>
-    <div>
+
+    <div class="govuk-grid-column-one-third">
         <div class="app-step-nav-related app-step-nav-related--singular">
             <h2 class="app-step-nav-related__heading">
                 <span class="app-step-nav-related__pretitle">Part of</span>
-                <a href="/self-assessment#recommendations-section">
-                    @Model.SectionName
+                <a href="#top">
+                    @Model.SectionName Recommendations
                 </a>
             </h2>
         </div>
