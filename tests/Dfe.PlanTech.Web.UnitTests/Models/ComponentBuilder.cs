@@ -65,50 +65,44 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         };
 
         public List<Section> BuildSections()
-        => new()
-        {
+        =>
+        [
             new Section
             {
                 Name = "Section",
                 Questions = BuildQuestions(),
-                Recommendations =new() {
+                Recommendations = [
                     BuildRecommendationsPage(Maturity.Low),
                     BuildRecommendationsPage(Maturity.Medium),
                     BuildRecommendationsPage(Maturity.High)
-                }
+                ]
             }
-        };
+        ];
+
+        public static RecommendationChunk BuildRecommendationChunk(string header) => new() { Header = new Header() { Text = header } };
 
         private static List<Question> BuildQuestions()
         {
-            return new()
-            {
+            return
+            [
                 new Question
                 {
                     Text = "Question Text",
                     HelpText = "Help Text",
                     Answers = BuildAnswers(),
                 }
-            };
+            ];
         }
 
         private static List<Answer> BuildAnswers()
         {
-            return new()
-            {
+            return
+            [
                 new Answer
                 {
                     Text = "Answer"
                 }
-            };
-        }
-
-        private static IContentComponent[] BuildContent()
-        {
-            return new IContentComponent[]
-            {
-                BuildButton()
-            };
+            ];
         }
 
         private static RichTextContent BuildRichContent()
@@ -132,7 +126,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             Slug = "testing-page",
             SectionTitle = "Section Title",
             Title = BuildTitle(),
-            Content = new()
+            Content = []
         };
 
         private static Title BuildTitle(string text = "Testing Title")
