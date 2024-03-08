@@ -28,9 +28,8 @@ public class RecommendationChunkMapper(EntityRetriever retriever, EntityUpdater 
         {
             for (var index = 0; index < inners.Length; index++)
             {
-                CreateRecommendationContentEntity(inners[index], index, recommendationChunkId);
+                CreateRecommendationContentEntity(inners[index], recommendationChunkId);
             }
-
             values.Remove(currentKey);
         }
     }
@@ -42,18 +41,17 @@ public class RecommendationChunkMapper(EntityRetriever retriever, EntityUpdater 
         {
             for (var index = 0; index < inners.Length; index++)
             {
-                CreateRecommendationAnswerEntity(inners[index], index, recommendationChunkId);
+                CreateRecommendationAnswerEntity(inners[index], recommendationChunkId);
             }
-            
             values.Remove(currentKey);
         }
     }
 
-    private void CreateRecommendationAnswerEntity(object inner, int index, string recommendationChunkId)
+    private void CreateRecommendationAnswerEntity(object inner, string recommendationChunkId)
     {
         if (inner is not string answerId)
         {
-            Logger.LogWarning("Expected string but received {innerType}", inner.GetType());
+            Logger.LogWarning("Expected string but received {InnerType}", inner.GetType());
             return;
         }
 
@@ -66,11 +64,11 @@ public class RecommendationChunkMapper(EntityRetriever retriever, EntityUpdater 
         _db.RecommendationChunkAnswers.Attach(recommendationChunkAnswer);
     }
 
-    private void CreateRecommendationContentEntity(object inner, int order, string recommendationChunkId)
+    private void CreateRecommendationContentEntity(object inner, string recommendationChunkId)
     {
         if (inner is not string contentId)
         {
-            Logger.LogWarning("Expected string but received {innerType}", inner.GetType());
+            Logger.LogWarning("Expected string but received {InnerType}", inner.GetType());
             return;
         }
 
