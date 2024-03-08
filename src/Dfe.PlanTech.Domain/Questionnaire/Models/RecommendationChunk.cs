@@ -12,4 +12,6 @@ public class RecommendationChunk : ContentComponent, IRecommendationChunk<Header
     public List<ContentComponent> Content { get; init; } = [];
 
     public List<Answer> Answers { get; init; } = [];
+
+    public string SlugifiedHeader => Header.Text.Slugify();
 }
