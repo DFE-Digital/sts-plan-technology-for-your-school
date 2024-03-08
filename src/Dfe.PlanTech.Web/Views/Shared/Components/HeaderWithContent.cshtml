@@ -1,16 +1,12 @@
 @model Dfe.PlanTech.Domain.Questionnaire.Interfaces.IHeaderWithContent;
-@using static Dfe.PlanTech.Web.Helpers.ViewHelpers;
 
 @{
   var parentContainerClass = ViewData["ParentContainerClass"] ?? "header-with-content-container";
   var headerClass = ViewData["HeaderClass"] ?? "header-with-content-header";
   var contentClass = ViewData["ContentClass"] ?? "header-with-content-content";
-
-  var containerId = ViewData["ParentContainerId"] ?? @Model.Header.Text.Slugify();
 }
 
-
-<div class="@parentContainerClass" id="@Model.Header.Text.Slugify()">
+<div class="@parentContainerClass" id="@Model.SlugifiedHeader">
   <div class="@headerClass">
     @{
       await Html.RenderPartialAsync("Components/Header", Model.Header);

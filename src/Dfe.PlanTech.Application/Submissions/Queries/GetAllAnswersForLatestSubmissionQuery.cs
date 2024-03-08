@@ -14,13 +14,13 @@ public class GetAllAnswersForLatestSubmissionQuery(IPlanTechDbContext db) : IGet
     /// <returns></returns>
     public async Task<List<Answer>?> GetAllAnswersForLatestSubmission(string sectionId, int establishmentId)
     {
-        var latestSubmissionIdQuery =  db.GetSubmissions
+        var latestSubmissionIdQuery = db.GetSubmissions
             .Where(s => s.SectionId == sectionId && s.EstablishmentId == establishmentId && s.Completed)
             .OrderByDescending(s => s.DateCreated)
             .Select(s => s.Id);
- 
+
         var latestSubmissionId = await db.FirstOrDefaultAsync(latestSubmissionIdQuery);
-        
+
         if (latestSubmissionId == 0)
         {
             return null;
@@ -36,7 +36,7 @@ public class GetAllAnswersForLatestSubmissionQuery(IPlanTechDbContext db) : IGet
                 (response, answer) => answer);
 
         var answers = await db.ToListAsync(answersQuery);
-        
+
         return answers;
     }
 }
