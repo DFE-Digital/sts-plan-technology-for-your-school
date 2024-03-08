@@ -7,9 +7,9 @@
 @section Head {
     <link rel="stylesheet" as="style" href="~/css/application.css">
 
-        @Html.Raw(GtmConfiguration.Analytics)
-        @Html.Raw(GtmConfiguration.Head)
-        @RenderSection("Head", false)
+    @Html.Raw(GtmConfiguration.Analytics)
+    @Html.Raw(GtmConfiguration.Head)
+    @RenderSection("Head", false)
 }
 
 @{
@@ -30,19 +30,20 @@
         await Html.RenderPartialAsync("_Header");
     }
 
-@RenderSection("Header", false)
+    @RenderSection("Header", false)
 }
 
 @section BeforeContent {
     @{
         await Html.RenderPartialAsync("BetaHeader");
     }
-@RenderSection("BeforeContent", required: false)
+    @RenderSection("BeforeContent", required: false)
 
-@{
+    @{
         //Add relevant tags for GovUK front-end CSS to body
     }
-<script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
+    
+    <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
 }
 
 
@@ -62,6 +63,7 @@
         import { initAll } from '/js/govuk-frontend.min.js';
 
         initAll();
-    </script>
+        </script>
+
     @RenderSection("BodyEnd", required: false)
 }
