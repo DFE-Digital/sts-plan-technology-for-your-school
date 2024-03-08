@@ -5,7 +5,7 @@
 @using System.Globalization;
 
 @section Head {
-    <link rel="stylesheet" href="~/css/application.css">
+    <link rel="stylesheet" as="style" href="~/css/application.css">
 
         @Html.Raw(GtmConfiguration.Analytics)
         @Html.Raw(GtmConfiguration.Head)
@@ -30,7 +30,7 @@
         await Html.RenderPartialAsync("_Header");
     }
 
-    @RenderSection("Header", false)
+@RenderSection("Header", false)
 }
 
 @section BeforeContent {
@@ -42,7 +42,7 @@
 @{
         //Add relevant tags for GovUK front-end CSS to body
     }
-    <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
+<script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
 }
 
 
@@ -55,10 +55,10 @@
 }
 
 @section BodyEnd {
-    <script src="~/js/app.js"></script>
-    <script src="~/js/govuk-frontend.min.js" type="module"></script>
+    <script async src="~/js/app.js"></script>
+    <script defer src="~/js/govuk-frontend.min.js" type="module"></script>
 
-    <script type="module">
+    <script async type="module">
         import { initAll } from '/js/govuk-frontend.min.js';
 
         initAll();

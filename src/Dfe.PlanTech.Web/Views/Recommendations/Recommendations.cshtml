@@ -1,6 +1,6 @@
 @model Dfe.PlanTech.Web.Models.RecommendationsViewModel
 @section Header {
-    <link rel="stylesheet" href="~/css/step-by-step.css">
+    <link rel="stylesheet" as="style" href="~/css/step-by-step.css">
 }
 
 @{
@@ -16,8 +16,8 @@ Title = chunk.Title,
 Header = chunk.Header.Text,
 Order = index + 2
 })];
-
 }
+
 <div class="govuk-grid-row" id="top">
     @{
         await Html.RenderPartialAsync("BackButton");
@@ -49,9 +49,9 @@ Order = index + 2
 
 @section BodyEnd {
     @{
-        <script src="/js/step-by-step-navigation.js"></script>
-        <script src="/js/step-by-step-polyfills.js"></script>
-        <script type="module">
+        <script async src="/js/step-by-step-navigation.js"></script>
+        <script defer src="/js/step-by-step-polyfills.js"></script>
+        <script async type="module">
             var $element = document.querySelector('#step-by-step-navigation')
             var stepByStepNavigation = new GOVUK.Modules.AppStepNav($element).init()
         </script>
