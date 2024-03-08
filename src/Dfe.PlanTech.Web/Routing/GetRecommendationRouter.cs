@@ -65,8 +65,8 @@ public class GetRecommendationRouter : IGetRecommendationRouter
         var viewModel = new RecommendationsViewModel()
         {
             SectionName = subTopicRecommendation.Subtopic.Name,
-            RecommendationIntro = subTopicIntro,
-            RecommendationChunks = subTopicChunks
+            Intro = subTopicIntro,
+            Chunks = subTopicChunks
         };
 
         return controller.View("~/Views/Recommendations/Recommendations.cshtml", viewModel);

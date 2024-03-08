@@ -9,13 +9,13 @@ public class RecommendationsViewModel
 {
     public string SectionName { get; init; } = null!;
 
-    public RecommendationIntro RecommendationIntro { get; init; } = null!;
+    public RecommendationIntro Intro { get; init; } = null!;
 
-    public List<RecommendationChunk> RecommendationChunks { get; init; } = null!;
+    public List<RecommendationChunk> Chunks { get; init; } = null!;
 
     public IEnumerable<IHeaderWithContent> AllContent => GetAllContent();
 
-    public IEnumerable<IAccordion> Accordions => RecommendationChunks.Select(ConvertToAccordion);
+    public IEnumerable<IAccordion> Accordions => Chunks.Select(ConvertToAccordion);
 
     private static Accordion ConvertToAccordion(IHeaderWithContent content, int index)
     => new()
@@ -28,8 +28,8 @@ public class RecommendationsViewModel
 
     private IEnumerable<IHeaderWithContent> GetAllContent()
     {
-        yield return RecommendationIntro;
-        foreach (var chunk in RecommendationChunks)
+        yield return Intro;
+        foreach (var chunk in Chunks)
         {
             yield return chunk;
         }

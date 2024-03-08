@@ -366,6 +366,6 @@ public class GetRecommendationRouterTests
         var model = viewResult.Model as RecommendationsViewModel;
 
         Assert.NotNull(model);
-        Assert.Equal(_subtopic.Intros[0], model.RecommendationIntro);
+        Assert.Equal(_subtopic!.Intros[0], model.Intro);
     }
 }

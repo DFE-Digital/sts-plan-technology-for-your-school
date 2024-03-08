@@ -3,6 +3,7 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Web.Models;
 
 namespace Dfe.PlanTech.Web.UnitTests.Models
 {
@@ -79,7 +80,16 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             }
         ];
 
-        public static RecommendationChunk BuildRecommendationChunk(string header) => new() { Header = new Header() { Text = header } };
+        public RecommendationsViewModel BuildRecommendationViewModel()
+        => new()
+        {
+            Intro = BuildRecommendationIntro("intro"),
+            Chunks = [BuildRecommendationChunk("First", "Title one"), BuildRecommendationChunk("Second", "Title two"), BuildRecommendationChunk("Third", "Title three")]
+        };
+
+        public static RecommendationIntro BuildRecommendationIntro(string header) => new() { Header = new Header() { Text = header } };
+
+        public static RecommendationChunk BuildRecommendationChunk(string header, string title = "Title") => new() { Header = new Header() { Text = header }, Title = title };
 
         private static List<Question> BuildQuestions()
         {

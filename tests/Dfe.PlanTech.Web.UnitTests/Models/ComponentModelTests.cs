@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Domain.Questionnaire.Enums;
+﻿using Contentful.Core.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Models
@@ -140,6 +141,40 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             var recommendationChunk = ComponentBuilder.BuildRecommendationChunk(header);
 
             Assert.Equal(expectedResult, recommendationChunk.SlugifiedHeader);
+        }
+
+        [Theory]
+        [InlineData("Random test Topic", "random-test-topic")]
+        [InlineData("Y867as ()&ycj Cool Thing", "y867as-ycj-cool-thing")]
+        public void RecommendationIntro_Should_Return_Correct_Header_And_Title(string header, string expectedResult)
+        {
+            var recommendationIntro = ComponentBuilder.BuildRecommendationIntro(header);
+
+            Assert.Equal(header, recommendationIntro.Title);
+            Assert.Equal(expectedResult, recommendationIntro.SlugifiedHeader);
+        }
+
+        [Fact]
+        public void RecommendationViewModel_Should_Return_Accordions_And_All_Content()
+        {
+            var recommendationViewModel = _componentBuilder.BuildRecommendationViewModel();
+
+            var allContent = recommendationViewModel.AllContent.ToList();
+
+            Assert.Contains(recommendationViewModel.Intro, allContent);
+
+            foreach (var chunk in recommendationViewModel.Chunks)
+            {
+                Assert.Contains(chunk, allContent);
+            }
+
+            var accordions = recommendationViewModel.Accordions.ToList();
+            Assert.Equal(recommendationViewModel.Chunks.Count, accordions.Count);
+
+            foreach (var chunk in recommendationViewModel.Chunks.Select((chunk, index) => new { chunk, index }))
+            {
+                Assert.Contains(accordions, accordion => accordion.Header == chunk.chunk.Header.Text && accordion.Order == chunk.index + 1);
+            }
         }
     }
 }
