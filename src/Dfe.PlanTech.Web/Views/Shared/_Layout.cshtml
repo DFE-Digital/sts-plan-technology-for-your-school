@@ -34,7 +34,7 @@
 }
 
 @section BeforeContent {
-    <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
+    <script defer>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
     
     @{
         await Html.RenderPartialAsync("BetaHeader");
@@ -53,10 +53,10 @@
 }
 
 @section BodyEnd {
-    <script async src="~/js/app.js"></script>
-    <script defer src="~/js/govuk-frontend.min.js" type="module"></script>
+    <script defer src="~/js/app.js"></script>
+    <script async src="~/js/govuk-frontend.min.js" type="module"></script>
 
-    <script async type="module">
+    <script defer type="module">
         import { initAll } from '/js/govuk-frontend.min.js';
 
         initAll();
