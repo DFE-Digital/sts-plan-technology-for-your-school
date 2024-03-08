@@ -7,7 +7,9 @@
         <ol class="app-step-nav__steps">
             @foreach (var accordion in Model)
             {
-                <partial name="Components/Accordion/AccordionSegment" model="@accordion" />
+                <li class="app-step-nav__step js-step" aria-current="step">
+                    <partial name="Components/Accordion/AccordionSegment" model="@accordion" />
+                </li>
             }
         </ol>
     </div>
