@@ -27,16 +27,28 @@
             </h2>
         </div>
 
-        @await Component.InvokeAsync("Accordion", Model.Accordions)
-
+        <partial name="Components/Accordion/AccordionParent" model="@Model.Accordions"/>
     </div>
 </div>
 
 @section BodyEnd {
     <script async src="/js/step-by-step-navigation.js"></script>
     <script defer src="/js/step-by-step-polyfills.js"></script>
-    <script defer type="module">
-        var $element = document.querySelector('#step-by-step-navigation')
-        var stepByStepNavigation = new GOVUK.Modules.AppStepNav($element).init()
+
+    <script async type="module">
+        function waitForGOVUK(callback, interval = 100) {
+            if (GOVUK !== 'undefined' && GOVUK.Modules?.AppStepNav !== undefined) {
+                callback();
+            } else {
+                setTimeout(function() {
+                    waitForGOVUK(callback);
+                }, interval);
+            }
+        }
+        waitForGOVUK(function() {
+            console.log(GOVUK);
+            const $element = document.querySelector('#step-by-step-navigation');
+            new GOVUK.Modules.AppStepNav($element).init();
+        });
     </script>
 }
