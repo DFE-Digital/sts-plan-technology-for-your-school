@@ -3,7 +3,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-public class RecommendationChunk : ContentComponent, IRecommendationChunk<Header, ContentComponent, Answer>, IHeaderWithContent
+public class RecommendationChunk : ContentComponent, IRecommendationChunk<Answer, ContentComponent, Header>
 {
     public string Title { get; init; } = null!;
 

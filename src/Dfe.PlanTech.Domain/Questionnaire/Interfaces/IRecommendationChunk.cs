@@ -7,10 +7,10 @@ public interface IRecommendationChunk
     public string Title { get; }
 }
 
-public interface IRecommendationChunk<THeader, TContentComponent, TAnswer> : IRecommendationChunk
-where THeader : IHeader
-where TContentComponent : IContentComponent
+public interface IRecommendationChunk<TAnswer, TContentComponent, THeader> : IRecommendationChunk
 where TAnswer : IAnswer
+where TContentComponent : IContentComponentType
+where THeader : IHeader
 {
     public THeader Header { get; }
 

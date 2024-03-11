@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
+using System.Numerics;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
@@ -26,6 +27,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     public DbSet<CategoryDbEntity> Categories { get; set; }
 
     public DbSet<ComponentDropDownDbEntity> ComponentDropDowns { get; set; }
+
     public DbSet<ContentComponentDbEntity> ContentComponents { get; set; }
 
     public DbSet<HeaderDbEntity> Headers { get; set; }
@@ -42,10 +44,20 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public DbSet<RecommendationPageDbEntity> RecommendationPages { get; set; }
 
+    public DbSet<RecommendationChunkDbEntity> RecommendationChunks { get; set; }
+
+    public DbSet<RecommendationIntroDbEntity> RecommendationIntros { get; set; }
+
+    public DbSet<RecommendationSectionDbEntity> RecommendationSections { get; set; }
+
+    public DbSet<SubTopicRecommendationDbEntity> SubtopicRecommendations { get; set; }
+
     public DbSet<RichTextContentDbEntity> RichTextContents { get; set; }
+
     public DbSet<RichTextContentWithSlugDbEntity> RichTextContentWithSlugs { get; set; }
 
     public DbSet<RichTextDataDbEntity> RichTextDataDbEntity { get; set; }
+
     public DbSet<RichTextMarkDbEntity> RichTextMarkDbEntity { get; set; }
 
     public DbSet<SectionDbEntity> Sections { get; set; }
@@ -69,6 +81,11 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<PageContentDbEntity> ICmsDbContext.PageContents => PageContents;
     IQueryable<QuestionDbEntity> ICmsDbContext.Questions => Questions;
     IQueryable<RecommendationPageDbEntity> ICmsDbContext.RecommendationPages => RecommendationPages;
+    IQueryable<RecommendationChunkDbEntity> ICmsDbContext.RecommendationChunks => RecommendationChunks;
+    IQueryable<RecommendationIntroDbEntity> ICmsDbContext.RecommendationIntros => RecommendationIntros;
+    IQueryable<SubTopicRecommendationDbEntity> ICmsDbContext.SubtopicRecommendations => SubtopicRecommendations;
+    IQueryable<RecommendationSectionDbEntity> ICmsDbContext.RecommendationSections => RecommendationSections;
+
     IQueryable<RichTextContentDbEntity> ICmsDbContext.RichTextContents => RichTextContents;
     IQueryable<RichTextContentWithSlugDbEntity> ICmsDbContext.RichTextContentWithSlugs => RichTextContentWithSlugs
                                                                                                 .Include(rt => rt.Data)
@@ -98,125 +115,40 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         modelBuilder.Entity<ContentComponentDbEntity>(entity =>
         {
-            entity.Property(e => e.Id).HasMaxLength(30);
-
             entity.ToTable("ContentComponents", Schema);
+            entity.Property(e => e.Id).HasMaxLength(30);
+            entity.HasQueryFilter(ShouldShowEntity());
         });
 
         modelBuilder.Entity<AnswerDbEntity>(entity =>
         {
             entity.HasOne(a => a.NextQuestion).WithMany(q => q.PreviousAnswers).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(a => a.ParentQuestion).WithMany(q => q.Answers).OnDelete(DeleteBehavior.Restrict);
-
-            entity.ToTable("Answers", Schema);
         });
 
-        modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>(entity =>
-        {
-            entity.Navigation(button => button.Button).AutoInclude();
-        });
+        modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>().Navigation(button => button.Button).AutoInclude();
 
-        modelBuilder.Entity<ButtonWithLinkDbEntity>()
-                    .Navigation(button => button.Button).AutoInclude();
-
-        modelBuilder.Entity<CategoryDbEntity>(entity =>
-        {
-            entity.HasMany(category => category.Sections)
-              .WithOne(section => section.Category)
-              .OnDelete(DeleteBehavior.Restrict);
-
-            entity.Navigation(category => category.Header)
-                  .AutoInclude();
-
-            entity.Navigation(category => category.Sections)
-                    .AutoInclude();
-
-
-            entity.ToTable("Categories", Schema);
-        });
-
-        modelBuilder.Entity<PageDbEntity>(entity =>
-        {
-            entity.HasMany(page => page.BeforeTitleContent)
-                .WithMany(c => c.BeforeTitleContentPages)
-                .UsingEntity<PageContentDbEntity>(
-                  left => left.HasOne(pageContent => pageContent.BeforeContentComponent).WithMany().HasForeignKey("BeforeContentComponentId").OnDelete(DeleteBehavior.Restrict),
-                  right => right.HasOne(pageContent => pageContent.Page).WithMany().HasForeignKey("PageId").OnDelete(DeleteBehavior.Restrict)
-                );
-
-            entity.HasMany(page => page.Content)
-              .WithMany(c => c.ContentPages)
-              .UsingEntity<PageContentDbEntity>(
-                left => left.HasOne(pageContent => pageContent.ContentComponent).WithMany().HasForeignKey("ContentComponentId").OnDelete(DeleteBehavior.Restrict),
-                right => right.HasOne(pageContent => pageContent.Page).WithMany().HasForeignKey("PageId").OnDelete(DeleteBehavior.Restrict)
-              );
-
-            entity.HasOne(page => page.Title).WithMany(title => title.Pages).OnDelete(DeleteBehavior.Restrict);
-
-            entity.ToTable("Pages", Schema);
-        });
-
-        modelBuilder.Entity<PageContentDbEntity>(entity =>
-        {
-            entity.HasOne(pc => pc.BeforeContentComponent).WithMany(c => c.BeforeTitleContentPagesJoins);
-
-            entity.HasOne(pc => pc.ContentComponent).WithMany(c => c.ContentPagesJoins);
-
-            entity.HasOne(pc => pc.Page).WithMany(p => p.AllPageContents);
-        });
-
-        modelBuilder.Entity<QuestionDbEntity>().ToTable("Questions", Schema);
+        modelBuilder.Entity<ButtonWithLinkDbEntity>().Navigation(button => button.Button).AutoInclude();
 
         modelBuilder.Entity<RecommendationPageDbEntity>(entity =>
         {
             entity.HasOne(recommendation => recommendation.Page)
-            .WithOne(page => page.RecommendationPage)
-            .OnDelete(DeleteBehavior.Restrict);
+                    .WithOne(page => page.RecommendationPage)
+                    .OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<RichTextContentDbEntity>(entity =>
-        {
-        });
-
-        modelBuilder.Entity<RichTextContentWithSlugDbEntity>(entity =>
-        {
-            entity.ToView("RichTextContentsBySlug");
-        });
-
-
-        modelBuilder.Entity<SectionDbEntity>(entity =>
-        {
-            entity.HasOne(section => section.InterstitialPage)
-            .WithOne(page => page.Section)
-            .HasForeignKey<SectionDbEntity>()
-            .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(section => section.Category)
-            .WithMany(category => category.Sections)
-            .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasMany(section => section.Questions)
-            .WithOne(question => question.Section)
-            .OnDelete(DeleteBehavior.Restrict);
-        });
-
-        modelBuilder.Entity<TextBodyDbEntity>(entity =>
-        {
-        });
-
-        modelBuilder.Entity<TitleDbEntity>(entity =>
-        {
-            entity.ToTable("Titles", Schema);
-        });
+        modelBuilder.Entity<RichTextContentWithSlugDbEntity>().ToView("RichTextContentsBySlug");
 
         modelBuilder.Entity<WarningComponentDbEntity>(entity =>
         {
-            entity.HasOne(warning => warning.Text).WithMany(text => text.Warnings).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(warning => warning.Text)
+                .WithMany(text => text.Warnings)
+                .OnDelete(DeleteBehavior.Restrict);
 
             entity.Navigation(warningComponent => warningComponent.Text).AutoInclude();
         });
 
-        modelBuilder.Entity<ContentComponentDbEntity>().HasQueryFilter(ShouldShowEntity());
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(CmsDbContext).Assembly);
     }
 
     /// <summary>
