@@ -39,8 +39,12 @@ public class CmsMappingProfile : Profile
         CreateMap<HeaderDbEntity, Header>();
         CreateMap<InsetTextDbEntity, InsetText>();
         CreateMap<QuestionDbEntity, Question>();
+        CreateMap<RecommendationChunkDbEntity, RecommendationChunk>();
+        CreateMap<RecommendationIntroDbEntity, RecommendationIntro>();
         CreateMap<RecommendationPageDbEntity, RecommendationPage>();
+        CreateMap<RecommendationSectionDbEntity, RecommendationSectionDbEntity>();
         CreateMap<SectionDbEntity, Section>();
+        CreateMap<SubTopicRecommendationDbEntity, SubTopicRecommendation>();
         CreateMap<TextBodyDbEntity, TextBody>();
         CreateMap<TitleDbEntity, Title>();
         CreateMap<WarningComponentDbEntity, WarningComponent>();
