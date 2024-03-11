@@ -17,13 +17,13 @@ runs:
     - name: Check for changes - PR
       id: check-for-changes
       env:
-        start_ref: ${{github.event_name == 'pull_request' && github.head.sha || github.event.after }}
         end_ref: ${{github.event_name == 'pull_request' && github.base.sha || github.event.before }}
       shell: sh
       run: |
-        if git diff --name-only ${{env.start_ref}}..${{env.end_ref}} | grep ${{inputs.directory}}; then
+        if git diff --name-only ${{env.end_ref}} | grep ${{inputs.directory}}; then
           echo "::notice title=Changes in directory::Linting ${{inputs.directory}} as there are changes in the directory"
           echo "directory_has_changes=true" >> "$GITHUB_OUTPUT"
         else
           echo "directory_has_changes=false" >> "$GITHUB_OUTPUT"
         fi
+github pu
