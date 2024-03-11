@@ -26,4 +26,3 @@ runs:
         else
           echo "directory_has_changes=false" >> "$GITHUB_OUTPUT"
         fi
-github pu
