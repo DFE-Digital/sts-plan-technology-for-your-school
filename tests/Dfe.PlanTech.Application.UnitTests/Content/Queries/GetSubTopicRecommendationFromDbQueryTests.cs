@@ -2,10 +2,8 @@ using AutoMapper;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Mappings;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -25,11 +23,14 @@ public class GetSubTopicRecommendationFromDbQueryTests
     private readonly IMapper _mapper;
     private readonly ILogger<GetSubTopicRecommendationFromDbQuery> _logger = Substitute.For<ILogger<GetSubTopicRecommendationFromDbQuery>>();
 
+    private readonly List<SubTopicRecommendationDbEntity> _subtopicRecommendations = [];
+
     public GetSubTopicRecommendationFromDbQueryTests()
     {
         _mapper = new MapperConfiguration(cfg =>
         {
             cfg.AddProfile<CmsMappingProfile>();
+            cfg.AllowNullCollections = true;
         }).CreateMapper();
 
         var recommendationSectionOne = new RecommendationSectionDbEntity()
@@ -59,14 +60,18 @@ public class GetSubTopicRecommendationFromDbQueryTests
                              Id = "3"
                         }
                     ],
-
                     Header = new HeaderDbEntity()
                     {
                         Tag = HeaderTag.H1,
                         Size = HeaderSize.Large,
-                        Text = "chunk1"
-                    }
-
+                        Text = "chunk1",
+                        Id = "Header-one"
+                    },
+                    Content = [
+                        new TextBodyDbEntity(){
+                            Id = "Chunk-one"
+                        }
+                    ]
                 },
                 new RecommendationChunkDbEntity()
                 {
@@ -89,8 +94,14 @@ public class GetSubTopicRecommendationFromDbQueryTests
                     {
                         Tag = HeaderTag.H1,
                         Size = HeaderSize.Large,
-                        Text = "chunk3"
-                    }
+                        Text = "chunk2",
+                        Id = "Header-two"
+                    },
+                    Content = [
+                        new TextBodyDbEntity(){
+                            Id = "Chunk-two"
+                        }
+                    ]
                 },
                 new RecommendationChunkDbEntity()
                 {
@@ -109,15 +120,21 @@ public class GetSubTopicRecommendationFromDbQueryTests
                             Id = "9"
                         }
                     ],
-
                     Header = new HeaderDbEntity()
                     {
                         Tag = HeaderTag.H1,
                         Size = HeaderSize.Large,
-                        Text = "chunk2"
-                    }
+                        Text = "chunk3",
+                        Id = "Header-three"
+                    },
+                    Content = [
+                        new TextBodyDbEntity(){
+                            Id = "Chunk-three"
+                        }
+                    ]
                 }
-            ]
+            ],
+            Id = "recommendation-section-one"
         };
 
         _subTopicOne = new() { Id = "SubTopicId" };
@@ -128,49 +145,51 @@ public class GetSubTopicRecommendationFromDbQueryTests
         {
             Intros =
             [
-                new RecommendationIntroDbEntity(){ Maturity = "Low"},
-                new RecommendationIntroDbEntity(){ Maturity = "Medium"},
-                new RecommendationIntroDbEntity(){ Maturity = "High"},
+                new RecommendationIntroDbEntity(){ Maturity = "Low", Id = "Intro-One" },
+                new RecommendationIntroDbEntity(){ Maturity = "Medium", Id = "Intro-Two"},
+                new RecommendationIntroDbEntity(){ Maturity = "High", Id = "Intro-Three"},
             ],
             Section = recommendationSectionOne,
+            SectionId = recommendationSectionOne.Id,
             Subtopic = _subTopicOne,
+            SubtopicId = _subTopicOne.Id,
+            Id = "subtopic-recommendation-one"
         };
 
         _subtopicRecommendationTwo = new()
         {
-            Subtopic = _subTopicTwo
+            Subtopic = _subTopicTwo,
+            Section = new RecommendationSectionDbEntity()
+            {
+                Chunks = [],
+                Answers = [],
+            },
+            Intros = [],
+            Id = "subtopic-recommendation-two"
         };
 
         _query = new(_db, _logger, _mapper);
+
+        _subtopicRecommendations.Add(_subtopicRecommendationOne);
+        _subtopicRecommendations.Add(_subtopicRecommendationTwo);
+
+        _db.SubtopicRecommendations.Returns(_subtopicRecommendations.AsQueryable());
+        _db.FirstOrDefaultAsync(Arg.Any<IQueryable<SubTopicRecommendationDbEntity>>(), Arg.Any<CancellationToken>())
+            .Returns(callinfo =>
+            {
+                var queryable = callinfo.ArgAt<IQueryable<SubTopicRecommendationDbEntity>>(0);
+
+                return queryable.FirstOrDefault();
+            });
     }
 
     [Fact]
     public async Task GetSubTopicRecommendation_Returns_Correct_SubTopicRecommendation_From_SectionOne()
     {
-    }
+        var subtopicRecommendation = await _query.GetSubTopicRecommendation(_subtopicRecommendationOne!.SubtopicId, CancellationToken.None);
 
-    [Fact]
-    public async Task GetSubTopicRecommendation_Returns_Correct_SubTopicRecommendation_From_SectionTwo()
-    {
-    }
-
-    [Fact]
-    public async Task GetSubTopicRecommendationIntro_Returns_Intro_When_Exists_In_SubTopicRecommendation_From_SectionOne()
-    {
-    }
-
-    [Fact]
-    public async Task GetSubTopicRecommendationChunk_When_List_Of_Answers_Passed_To_RecommendationSection_From_SectionOne()
-    {
-    }
-
-    [Fact]
-    public async Task GetSubTopicRecommendationChunk_When_List_Of_Answers_Passed_To_RecommendationSection_From_SectionOne_No_Duplicate_Chunks_Returned()
-    {
-    }
-
-    [Fact]
-    public async Task GetSubTopicRecommendationChunks_Returns_Empty_When_List_Of_Answers_Passed_To_RecommendationSection_From_SectionOne_Does_Not_Have_Any_Chunks_Associated()
-    {
+        Assert.NotNull(subtopicRecommendation);
+        Assert.Equal(subtopicRecommendation.Sys.Id, _subtopicRecommendationOne!.Id);
+        Assert.Equal(subtopicRecommendation.Subtopic.Sys.Id, _subtopicRecommendationOne!.Subtopic.Id);
     }
 }
