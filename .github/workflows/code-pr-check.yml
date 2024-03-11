@@ -60,6 +60,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Checkout base reference on PR
+        if: ${{ github.event_name == 'pull_request' }}
+        run: git fetch origin ${{ github.base_ref }}
+
       - name: Check for changes in directory
         id: check-for-changes
         uses: ./.github/actions/directory-has-changes
@@ -98,6 +102,10 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+      
+      - name: Checkout base reference on PR
+        if: ${{ github.event_name == 'pull_request' }}
+        run: git fetch origin ${{ github.base_ref }}
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v4
@@ -162,6 +170,10 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Checkout base reference on PR
+        if: ${{ github.event_name == 'pull_request' }}
+        run: git fetch origin ${{ github.base_ref }}
+
       - name: Check for changes in directory
         id: check-for-changes
         uses: ./.github/actions/directory-has-changes
@@ -181,6 +193,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Checkout base reference on PR
+        if: ${{ github.event_name == 'pull_request' }}
+        run: git fetch origin ${{ github.base_ref }}
 
       - name: Check for changes in directory
         id: check-for-changes
