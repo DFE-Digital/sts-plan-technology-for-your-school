@@ -35,4 +35,9 @@ public class ContentComponentDbEntity : IContentComponentDbEntity
     
     public List<RecommendationChunkContentDbEntity> RecommendationChunkContentJoins { get; set; } = [];
     
+        
+    public List<RecommendationIntroDbEntity> RecommendationIntro { get; set; } = [];
+    
+    public List<RecommendationIntroContentDbEntity> RecommendationIntroContentJoins { get; set; } = [];
+    
 }

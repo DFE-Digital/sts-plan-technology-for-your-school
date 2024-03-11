@@ -41,7 +41,13 @@ public interface ICmsDbContext
     public IQueryable<RecommendationSectionChunkDbEntity> RecommendationSectionChunks { get; }
 
     public IQueryable<RecommendationSectionAnswerDbEntity> RecommendationSectionAnswers { get; }
-
+    
+    public IQueryable<RecommendationIntroDbEntity> RecommendationIntros { get; }
+    
+    public IQueryable<RecommendationIntroContentDbEntity> RecommendationIntroContents { get; }
+    
+    public IQueryable<SubtopicRecommendationIntroDbEntity> SubtopicRecommendationIntros { get; }
+    
     public IQueryable<RichTextContentDbEntity> RichTextContents { get; }
     public IQueryable<RichTextContentWithSlugDbEntity> RichTextContentWithSlugs { get; }
 

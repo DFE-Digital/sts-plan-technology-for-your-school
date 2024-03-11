@@ -4,7 +4,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
 public class SubTopicRecommendationDbEntity : ContentComponentDbEntity, ISubTopicRecommendation<AnswerDbEntity, ContentComponentDbEntity, HeaderDbEntity, RecommendationChunkDbEntity, RecommendationIntroDbEntity, RecommendationSectionDbEntity, SectionDbEntity>
-{
+{ 
     public List<RecommendationIntroDbEntity> Intros { get; init; } = [];
 
     public string SectionId { get; set; } = null!;

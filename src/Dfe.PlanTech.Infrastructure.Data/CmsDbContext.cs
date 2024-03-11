@@ -27,6 +27,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     public DbSet<CategoryDbEntity> Categories { get; set; }
 
     public DbSet<ComponentDropDownDbEntity> ComponentDropDowns { get; set; }
+    
 
     public DbSet<ContentComponentDbEntity> ContentComponents { get; set; }
 
@@ -51,8 +52,15 @@ public class CmsDbContext : DbContext, ICmsDbContext
     public DbSet<RecommendationChunkAnswerDbEntity> RecommendationChunkAnswers { get; set; }
 
     public DbSet<RecommendationSectionAnswerDbEntity> RecommendationSectionAnswers { get; set; }
+    
+    public DbSet<RecommendationIntroDbEntity> RecommendationIntros { get; set; }
 
+    public DbSet<RecommendationIntroContentDbEntity> RecommendationIntroContents { get; set; }
+    
     public DbSet<RecommendationSectionChunkDbEntity> RecommendationSectionChunks { get; set; }
+    
+    public DbSet<SubtopicRecommendationIntroDbEntity> SubtopicRecommendationIntros { get; set; }
+    
     public DbSet<RichTextContentDbEntity> RichTextContents { get; set; }
 
     public DbSet<RichTextContentWithSlugDbEntity> RichTextContentWithSlugs { get; set; }
@@ -95,6 +103,16 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     IQueryable<RecommendationSectionChunkDbEntity> ICmsDbContext.RecommendationSectionChunks =>
         RecommendationSectionChunks;
+    
+    IQueryable<RecommendationIntroDbEntity> ICmsDbContext.RecommendationIntros =>
+        RecommendationIntros;
+    
+    IQueryable<RecommendationIntroContentDbEntity> ICmsDbContext.RecommendationIntroContents =>
+        RecommendationIntroContents;
+    
+    
+    IQueryable<SubtopicRecommendationIntroDbEntity> ICmsDbContext.SubtopicRecommendationIntros =>
+        SubtopicRecommendationIntros;
 
     IQueryable<RichTextContentDbEntity> ICmsDbContext.RichTextContents => RichTextContents;
 
@@ -124,12 +142,31 @@ public class CmsDbContext : DbContext, ICmsDbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new RecommendationSectionEntityTypeConfiguration());
-
+        
         modelBuilder.Entity<RecommendationChunkContentDbEntity>()
             .ToTable("RecommendationChunkContents", Schema);
         
+        modelBuilder.Entity<RecommendationIntroDbEntity>()
+            .ToTable("RecommendationIntros", Schema);
+        
         modelBuilder.Entity<RecommendationSectionDbEntity>()
             .ToTable("RecommendationSections", Schema);
+        
+        modelBuilder.Entity<SubTopicRecommendationDbEntity>()
+            .ToTable("SubtopicRecommendations", Schema);
+
+        modelBuilder.Entity<SubtopicRecommendationIntroDbEntity>()
+            .ToTable("SubtopicRecommendationIntros", Schema);
+
+        modelBuilder.Entity<SubtopicRecommendationIntroDbEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasOne(e => e.SubTopicRecommendation);
+
+            entity.HasOne(e => e.RecommendationIntro);
+        });
+
 
         modelBuilder.HasDefaultSchema(Schema);
 
@@ -212,6 +249,11 @@ public class CmsDbContext : DbContext, ICmsDbContext
         modelBuilder.Entity<RecommendationChunkContentDbEntity>(entity =>
         {
             entity.HasOne(pc => pc.ContentComponent).WithMany(c => c.RecommendationChunkContentJoins);
+        });
+        
+        modelBuilder.Entity<RecommendationIntroContentDbEntity>(entity =>
+        {
+            entity.HasOne(pc => pc.ContentComponent).WithMany(c => c.RecommendationIntroContentJoins);
         });
 
         modelBuilder.Entity<QuestionDbEntity>().ToTable("Questions", Schema);
