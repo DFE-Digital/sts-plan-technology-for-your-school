@@ -15,7 +15,12 @@ public class GetSubTopicRecommendationFromDbQuery(ICmsDbContext db, ILogger<GetS
 
     public async Task<SubTopicRecommendation?> GetSubTopicRecommendation(string subTopicId, CancellationToken cancellationToken = default)
     {
-        var dbEntity = await GetFromDb(subTopicId, cancellationToken) ?? throw new DatabaseException($"Could not find recommendation for subtopic {subTopicId}");
+        var dbEntity = await GetFromDb(subTopicId, cancellationToken);
+
+        if (dbEntity == null)
+        {
+            return null;
+        }
 
         return MapRecommendation(dbEntity);
     }
