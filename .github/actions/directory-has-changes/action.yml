@@ -17,8 +17,8 @@ runs:
     - name: Check for changes - PR
       id: check-for-changes
       env:
-        start_ref: ${{github.event_name == 'pull request' && github.head_ref || github.event.before }}
-        end_ref: ${{github.event_name == 'pull request' && github.base_ref || github.event.after }}
+        start_ref: ${{github.event_name == 'pull_request' && github.head_ref || github.event.after }}
+        end_ref: ${{github.event_name == 'pull_request' && github.base_ref || github.event.before }}
       shell: sh
       run: |
         if git diff --name-only ${{env.start_ref}}..${{env.end_ref}} | grep ${{inputs.directory}}; then
