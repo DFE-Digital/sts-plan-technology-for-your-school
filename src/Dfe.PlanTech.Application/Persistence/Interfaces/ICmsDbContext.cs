@@ -46,6 +46,7 @@ public interface ICmsDbContext
     
     public IQueryable<RecommendationIntroContentDbEntity> RecommendationIntroContents { get; }
     
+    public IQueryable<SubtopicRecommendationDbEntity> SubTopicRecommendations { get; }
     public IQueryable<SubtopicRecommendationIntroDbEntity> SubtopicRecommendationIntros { get; }
     
     public IQueryable<RichTextContentDbEntity> RichTextContents { get; }

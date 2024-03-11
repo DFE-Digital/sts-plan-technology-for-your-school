@@ -10,7 +10,7 @@ public class SubtopicRecommendationIntroDbEntity
     public long Id { get; set; }
     public string SubtopicRecommendationId { get; set; } = null!;
 
-    public SubTopicRecommendationDbEntity SubTopicRecommendation { get; set; } = null!;
+    public SubtopicRecommendationDbEntity SubtopicRecommendation { get; set; } = null!;
     public string? RecommendationIntroId { get; set; }
 
     public RecommendationIntroDbEntity? RecommendationIntro { get; set; }

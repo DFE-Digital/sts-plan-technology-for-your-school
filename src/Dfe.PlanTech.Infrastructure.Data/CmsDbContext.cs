@@ -59,6 +59,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
     
     public DbSet<RecommendationSectionChunkDbEntity> RecommendationSectionChunks { get; set; }
     
+    public DbSet<SubtopicRecommendationDbEntity> SubtopicRecommendations { get; set; }
+    
     public DbSet<SubtopicRecommendationIntroDbEntity> SubtopicRecommendationIntros { get; set; }
     
     public DbSet<RichTextContentDbEntity> RichTextContents { get; set; }
@@ -110,6 +112,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<RecommendationIntroContentDbEntity> ICmsDbContext.RecommendationIntroContents =>
         RecommendationIntroContents;
     
+    IQueryable<SubtopicRecommendationDbEntity> ICmsDbContext.SubTopicRecommendations =>
+        SubtopicRecommendations;
     
     IQueryable<SubtopicRecommendationIntroDbEntity> ICmsDbContext.SubtopicRecommendationIntros =>
         SubtopicRecommendationIntros;
@@ -143,6 +147,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
     {
         modelBuilder.ApplyConfiguration(new RecommendationSectionEntityTypeConfiguration());
         
+        modelBuilder.ApplyConfiguration(new SubtopicRecommendationEntityTypeConfiguration());
+        
         modelBuilder.Entity<RecommendationChunkContentDbEntity>()
             .ToTable("RecommendationChunkContents", Schema);
         
@@ -152,21 +158,15 @@ public class CmsDbContext : DbContext, ICmsDbContext
         modelBuilder.Entity<RecommendationSectionDbEntity>()
             .ToTable("RecommendationSections", Schema);
         
-        modelBuilder.Entity<SubTopicRecommendationDbEntity>()
-            .ToTable("SubtopicRecommendations", Schema);
-
+        modelBuilder.Entity<SubtopicRecommendationDbEntity>(entity =>
+        {
+            entity.ToTable("SubtopicRecommendations", Schema);
+            entity.Property(e => e.Id).HasMaxLength(30);
+            entity.HasMany(entity => entity.Intros);
+        });
+        
         modelBuilder.Entity<SubtopicRecommendationIntroDbEntity>()
             .ToTable("SubtopicRecommendationIntros", Schema);
-
-        modelBuilder.Entity<SubtopicRecommendationIntroDbEntity>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-
-            entity.HasOne(e => e.SubTopicRecommendation);
-
-            entity.HasOne(e => e.RecommendationIntro);
-        });
-
 
         modelBuilder.HasDefaultSchema(Schema);
 

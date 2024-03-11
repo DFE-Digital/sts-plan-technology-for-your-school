@@ -11,7 +11,7 @@ public class SubtopicRecommendationMapper(
     CmsDbContext db,
     ILogger<SubtopicRecommendationMapper> logger,
     JsonSerializerOptions jsonSerialiserOptions)
-    : JsonToDbMapper<SubTopicRecommendationDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
+    : JsonToDbMapper<SubtopicRecommendationDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
     private readonly CmsDbContext _db = db;
 
