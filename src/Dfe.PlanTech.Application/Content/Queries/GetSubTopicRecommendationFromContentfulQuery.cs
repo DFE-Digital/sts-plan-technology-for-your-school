@@ -10,12 +10,12 @@ public class GetSubTopicRecommendationFromContentfulQuery(IContentRepository rep
 {
     private readonly IContentRepository _repository = repository;
 
-    public async Task<SubtopicRecommendation?> GetSubTopicRecommendation(string subTopicId, CancellationToken cancellationToken = default)
+    public async Task<SubTopicRecommendation?> GetSubTopicRecommendation(string subTopicId, CancellationToken cancellationToken = default)
     {
 
         var options = CreateGetEntityOptions(subTopicId);
 
-        IEnumerable<SubtopicRecommendation> subTopicRecommendations = await _repository.GetEntities<SubtopicRecommendation>(options, cancellationToken);
+        IEnumerable<SubTopicRecommendation> subTopicRecommendations = await _repository.GetEntities<SubTopicRecommendation>(options, cancellationToken);
 
         var subtopicRecommendation = subTopicRecommendations.FirstOrDefault();
 
@@ -23,5 +23,5 @@ public class GetSubTopicRecommendationFromContentfulQuery(IContentRepository rep
     }
 
     private static GetEntitiesOptions CreateGetEntityOptions(string sectionId) =>
-        new(4, new[] { new ContentQueryEquals() { Field = "fields.subtopic.en-US.sys.id", Value = sectionId } });
+        new(4, [new ContentQueryEquals() { Field = "fields.subtopic.en-US.sys.id", Value = sectionId }]);
 }
