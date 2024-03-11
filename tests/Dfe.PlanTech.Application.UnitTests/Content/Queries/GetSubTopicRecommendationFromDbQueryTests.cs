@@ -7,6 +7,7 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace Dfe.PlanTech.Application.UnitTests.Content.Queries;
 
@@ -201,4 +202,14 @@ public class GetSubTopicRecommendationFromDbQueryTests
         Assert.Null(subtopicRecommendation);
     }
 
+    [Fact]
+    public async Task LogsError_When_Exception()
+    {
+        _db.FirstOrDefaultAsync(Arg.Any<IQueryable<SubTopicRecommendationDbEntity>>(), Arg.Any<CancellationToken>())
+            .ThrowsAsync(new Exception("Error"));
+
+        await Assert.ThrowsAnyAsync<Exception>(() => _query.GetSubTopicRecommendation(_subtopicRecommendationOne!.SubtopicId, CancellationToken.None));
+
+        _logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
+    }
 }
