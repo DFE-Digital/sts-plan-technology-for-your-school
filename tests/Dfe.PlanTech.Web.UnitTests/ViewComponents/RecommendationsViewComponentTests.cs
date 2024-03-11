@@ -258,7 +258,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic, _subtopicTwo);
 
-            var result = _recommendationsComponent.InvokeAsync(categories).Result as ViewViewComponentResult;
+            var result = (await _recommendationsComponent.InvokeAsync(categories)) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
