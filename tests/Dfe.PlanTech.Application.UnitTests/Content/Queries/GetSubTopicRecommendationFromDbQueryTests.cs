@@ -192,4 +192,13 @@ public class GetSubTopicRecommendationFromDbQueryTests
         Assert.Equal(subtopicRecommendation.Sys.Id, _subtopicRecommendationOne!.Id);
         Assert.Equal(subtopicRecommendation.Subtopic.Sys.Id, _subtopicRecommendationOne!.Subtopic.Id);
     }
+
+    [Fact]
+    public async Task GetSubTopicRecommendation_Returns_Null_When_Not_Found()
+    {
+        var subtopicRecommendation = await _query.GetSubTopicRecommendation("not a real id", CancellationToken.None);
+
+        Assert.Null(subtopicRecommendation);
+    }
+
 }
