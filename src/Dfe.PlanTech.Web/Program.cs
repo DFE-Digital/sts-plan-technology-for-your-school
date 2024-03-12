@@ -17,6 +17,11 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+});
+
 builder.Services.AddApplicationInsightsTelemetry();
 
 builder.Services.AddHttpContextAccessor();

@@ -1,0 +1,20 @@
+/* DFE CARD COMPONENT - NEW
+--------------------------- */
+.dfe-section-card {
+  padding: 16px;
+  margin-bottom: 20px;
+  flex: 1;
+  background-color: #f3f2f1;
+}
+
+.dfe-section-card__container {
+  display: flex;
+  width: 100;
+}
+
+@media (max-width: 40.0525em) {
+  .dfe-section-card__container {
+    display: grid;
+    width: 100;
+  }
+}

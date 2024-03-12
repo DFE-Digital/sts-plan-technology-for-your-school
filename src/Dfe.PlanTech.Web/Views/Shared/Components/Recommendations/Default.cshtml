@@ -1,4 +1,4 @@
-@model IEnumerable<RecommendationsViewComponentViewModel>
+@model IAsyncEnumerable<RecommendationsViewComponentViewModel>
 
 <h2 class="govuk-heading-m" id="recommendations-section">Recommendations</h2>
 
@@ -10,7 +10,7 @@
 else
 {
     <task-list>
-    @foreach (var recommendationsViewComponentViewModel in Model)
+    @await foreach (var recommendationsViewComponentViewModel in Model)
         {
             <task-list-item>
                 <task-list-item-name>

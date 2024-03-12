@@ -16,6 +16,7 @@ public class PageMapperTests : BaseMapperTests
     private readonly PageMapper _mapper;
     private readonly CmsDbContext _db = Substitute.For<CmsDbContext>();
     private readonly ILogger<PageMapper> _logger;
+    private readonly ILogger<PageEntityUpdater> _entityUpdaterLogger = Substitute.For<ILogger<PageEntityUpdater>>();
     private readonly DbSet<PageContentDbEntity> _pageContentsDbSet = Substitute.For<DbSet<PageContentDbEntity>>();
     private readonly List<PageContentDbEntity> _attachedPageContents = new(10);
 
@@ -24,7 +25,7 @@ public class PageMapperTests : BaseMapperTests
     public PageMapperTests()
     {
         _logger = Substitute.For<ILogger<PageMapper>>();
-        _mapper = new PageMapper(_db, _logger, JsonOptions);
+        _mapper = new PageMapper(new PageEntityRetriever(_db), new PageEntityUpdater(_entityUpdaterLogger, _db), _logger, JsonOptions);
 
         _db.PageContents = _pageContentsDbSet;
 
@@ -34,7 +35,6 @@ public class PageMapperTests : BaseMapperTests
                         var pageContent = callinfo.ArgAt<PageContentDbEntity>(0);
                         _attachedPageContents.Add(pageContent);
                     });
-
     }
 
     [Fact]
@@ -51,25 +51,27 @@ public class PageMapperTests : BaseMapperTests
 
         var payload = CreatePayload(fields, PageId);
 
-        var mapped = _mapper.MapEntity(payload);
+        var mapped = _mapper.ToEntity(payload);
 
         Assert.NotNull(mapped);
 
-        var concrete = mapped as PageDbEntity;
+        var concrete = mapped;
         Assert.NotNull(concrete);
 
         Assert.Equal(PageId, concrete.Id);
 
-        foreach (var beforeTitle in beforeTitleContent)
-        {
-            var matching = _attachedPageContents.FirstOrDefault(pageContent => pageContent.BeforeContentComponentId == beforeTitle.Sys.Id);
-            Assert.NotNull(matching);
-        }
+        ContentsExistAndAreCorrect(beforeTitleContent, content => content.BeforeContentComponentId);
+        ContentsExistAndAreCorrect(content, content => content.ContentComponentId);
+    }
 
-        foreach (var afterTitleContent in content)
+    private void ContentsExistAndAreCorrect(CmsWebHookSystemDetailsInnerContainer[] content, Func<PageContentDbEntity, string?> idSelector)
+    {
+        for (var index = 0; index < content.Length; index++)
         {
-            var matching = _attachedPageContents.FirstOrDefault(pageContent => pageContent.ContentComponentId == afterTitleContent.Sys.Id);
+            var beforeTitle = content[index];
+            var matching = _mapper.PageContents.FirstOrDefault(pc => idSelector(pc) == beforeTitle.Sys.Id);
             Assert.NotNull(matching);
+            Assert.Equal(index, matching.Order);
         }
     }
 

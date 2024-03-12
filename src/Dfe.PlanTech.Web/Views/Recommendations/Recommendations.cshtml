@@ -1,0 +1,54 @@
+@model Dfe.PlanTech.Web.Models.RecommendationsViewModel
+@section Header {
+    <link rel="stylesheet" as="style" href="~/css/step-by-step.css">
+}
+
+@section BeforeContent {
+     <div class="app-step-nav-header">
+        <span class="app-step-nav-header__part-of">Part of</span>
+        <a class="app-step-nav-header__title" href="/self-assessment#recommendations-section">
+            @Model.SectionName
+        </a>
+    </div>
+}
+
+<div class="govuk-grid-row" id="top">
+    <div class="govuk-grid-column-two-thirds recommendation-content">
+        <partial name="RecommendationContent" model="@Model.AllContent" />
+    </div>
+
+    <div class="govuk-grid-column-one-third">
+        <div class="app-step-nav-related app-step-nav-related--singular">
+            <h2 class="app-step-nav-related__heading">
+                <span class="app-step-nav-related__pretitle">Part of</span>
+                <a href="#top">
+                    @Model.SectionName Recommendations
+                </a>
+            </h2>
+        </div>
+
+        <partial name="Components/Accordion/AccordionParent" model="@Model.Accordions"/>
+    </div>
+</div>
+
+@section BodyEnd {
+    <script async src="/js/step-by-step-navigation.js"></script>
+    <script defer src="/js/step-by-step-polyfills.js"></script>
+
+    <script async type="module">
+        function waitForGOVUK(callback, interval = 100) {
+            if (typeof GOVUK !== 'undefined' && GOVUK.Modules?.AppStepNav !== undefined) {
+                callback();
+            } else {
+                setTimeout(function() {
+                    waitForGOVUK(callback);
+                }, interval);
+            }
+        }
+
+        waitForGOVUK(function() {
+            const $element = document.querySelector('#step-by-step-navigation');
+            new GOVUK.Modules.AppStepNav($element).init();
+        });
+    </script>
+}

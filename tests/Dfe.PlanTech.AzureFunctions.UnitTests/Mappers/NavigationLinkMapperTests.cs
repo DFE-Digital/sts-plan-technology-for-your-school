@@ -17,7 +17,7 @@ public class NavigationLinkMapperTests : BaseMapperTests
     public NavigationLinkMapperTests()
     {
         _logger = Substitute.For<ILogger<NavigationLinkMapper>>();
-        _mapper = new NavigationLinkMapper(_logger, JsonOptions);
+        _mapper = new NavigationLinkMapper(MapperHelpers.CreateMockEntityRetriever(), MapperHelpers.CreateMockEntityUpdater(), _logger, JsonOptions);
     }
 
     [Theory]
@@ -34,11 +34,11 @@ public class NavigationLinkMapperTests : BaseMapperTests
 
         var payload = CreatePayload(fields, NavigationLinkId);
 
-        var mapped = _mapper.MapEntity(payload);
+        var mapped = _mapper.ToEntity(payload);
 
         Assert.NotNull(mapped);
 
-        var concrete = mapped as NavigationLinkDbEntity;
+        var concrete = mapped;
         Assert.NotNull(concrete);
 
         Assert.Equal(NavigationLinkId, concrete.Id);

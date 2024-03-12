@@ -17,4 +17,16 @@ public class PageContentDbEntity
 
     public string? BeforeContentComponentId { get; set; }
     public ContentComponentDbEntity? BeforeContentComponent { get; set; }
+
+    /// <summary>
+    /// What order the component should be in in its respective section (e.g. before/after)
+    /// </summary>
+    public int Order { get; set; }
+
+    public bool Matches(PageContentDbEntity other)
+    {
+        return other.PageId == PageId &&
+                other.ContentComponentId == ContentComponentId &&
+                other.BeforeContentComponentId == BeforeContentComponentId;
+    }
 }

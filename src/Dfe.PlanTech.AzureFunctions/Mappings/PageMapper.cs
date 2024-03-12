@@ -1,21 +1,33 @@
+using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class PageMapper : JsonToDbMapper<PageDbEntity>
+public class PageMapper(PageEntityRetriever retriever, PageEntityUpdater updater, ILogger<PageMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<PageDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
     private const string BeforeTitleContentKey = "beforeTitleContent";
     private const string ContentKey = "content";
-    private readonly CmsDbContext _db;
 
-    public PageMapper(CmsDbContext db, ILogger<PageMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : base(logger, jsonSerialiserOptions)
+    private readonly List<PageContentDbEntity> _pageContents = [];
+
+    public List<PageContentDbEntity> PageContents => _pageContents;
+
+    public override PageDbEntity ToEntity(CmsWebHookPayload payload)
     {
-        _db = db;
+        var mappedPage = base.ToEntity(payload);
+        mappedPage.AllPageContents = _pageContents;
+
+        return mappedPage;
     }
 
+    /// <summary>
+    /// Create joins for content, and before title content, and map the title ID to the correct expected name.
+    /// </summary>
+    /// <param name="values"></param>
+    /// <returns></returns>
+    /// <exception cref="KeyNotFoundException"></exception>
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
         var id = values["id"]?.ToString() ?? throw new KeyNotFoundException("Not found id");
@@ -30,18 +42,27 @@ public class PageMapper : JsonToDbMapper<PageDbEntity>
 
     private void UpdateContentIds(Dictionary<string, object?> values, string pageId, string currentKey)
     {
+        bool isBeforeTitleContent = currentKey == BeforeTitleContentKey;
+
         if (values.TryGetValue(currentKey, out object? contents) && contents is object[] inners)
         {
-            foreach (var inner in inners)
+            for (var index = 0; index < inners.Length; index++)
             {
-                CreatePageContentEntity(inner, pageId, currentKey == BeforeTitleContentKey);
+                CreatePageContentEntity(inners[index], index, pageId, isBeforeTitleContent);
             }
 
             values.Remove(currentKey);
         }
     }
 
-    private void CreatePageContentEntity(object inner, string pageId, bool isBeforeTitleContent)
+    /// <summary>
+    /// Creates the necessary <see cref="PageContentDbEntity"/> for the relationship 
+    /// </summary>
+    /// <param name="inner">The child content ID.</param>
+    /// <param name="order">Order of the content for the page</param>
+    /// <param name="pageId"></param>
+    /// <param name="isBeforeTitleContent"></param>
+    private void CreatePageContentEntity(object inner, int order, string pageId, bool isBeforeTitleContent)
     {
         if (inner is not string contentId)
         {
@@ -52,6 +73,7 @@ public class PageMapper : JsonToDbMapper<PageDbEntity>
         var pageContent = new PageContentDbEntity()
         {
             PageId = pageId,
+            Order = order
         };
 
         if (isBeforeTitleContent)
@@ -63,6 +85,6 @@ public class PageMapper : JsonToDbMapper<PageDbEntity>
             pageContent.ContentComponentId = contentId;
         }
 
-        _db.PageContents.Attach(pageContent);
+        _pageContents.Add(pageContent);
     }
 }

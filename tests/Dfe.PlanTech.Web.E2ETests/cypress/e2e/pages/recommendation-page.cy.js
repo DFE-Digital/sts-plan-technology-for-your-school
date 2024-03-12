@@ -1,14 +1,16 @@
 describe("Recommendation Page", () => {
   const url = "/self-assessment";
 
-  beforeEach(() => {
+  before(() => {
     cy.loginWithEnv(url);
 
     cy.url().should("contain", "self-assessment");
 
-    cy.clickFirstSection();
-    cy.clickContinueButton();
-
+    cy.completeFirstSubtopic();
+  });
+  
+  beforeEach(() => {
+    cy.loginWithEnv(url);
     cy.navigateToRecommendationPage();
 
     cy.url().should("contain", "recommendation");
@@ -16,15 +18,8 @@ describe("Recommendation Page", () => {
     cy.injectAxe();
   });
 
-  it("Should Have Heading", () => {
-    cy.get("h1.govuk-heading-xl").should("exist");
-  });
-
-  it("Should Have Back Button", () => {
-    cy.get('a:contains("Back")')
-      .should("exist")
-      .should("have.attr", "href")
-      .and("include", "/self-assessment");
+  it("Should Have a part of header", () => {
+    cy.get("span.app-step-nav-header__part-of").should("exist");
   });
 
   it("Should Have Content", () => {

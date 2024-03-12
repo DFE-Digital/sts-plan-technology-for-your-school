@@ -2,7 +2,6 @@ using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
-using Dfe.PlanTech.Domain.Users.Exceptions;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
@@ -12,17 +11,15 @@ namespace Dfe.PlanTech.Web.Routing;
 
 public class GetRecommendationRouter : IGetRecommendationRouter
 {
-    private readonly IGetPageQuery _getPageQuery;
-    private readonly ILogger<GetRecommendationRouter> _logger;
-    private readonly IUser _user;
     private readonly ISubmissionStatusProcessor _router;
+    private readonly IGetAllAnswersForLatestSubmissionQuery _getAllAnswersForLatestSubmissionQuery;
+    private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
 
-    public GetRecommendationRouter(IGetPageQuery getPageQuery, ILogger<GetRecommendationRouter> logger, IUser user, ISubmissionStatusProcessor router)
+    public GetRecommendationRouter(ISubmissionStatusProcessor router, IGetAllAnswersForLatestSubmissionQuery getAllAnswersForLatestSubmissionQuery, IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery)
     {
-        _getPageQuery = getPageQuery;
-        _logger = logger;
-        _user = user;
         _router = router;
+        _getAllAnswersForLatestSubmissionQuery = getAllAnswersForLatestSubmissionQuery;
+        _getSubTopicRecommendationQuery = getSubTopicRecommendationQuery;
     }
 
     public async Task<IActionResult> ValidateRoute(string sectionSlug, string recommendationSlug, RecommendationsController controller, CancellationToken cancellationToken)
@@ -33,7 +30,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
         await _router.GetJourneyStatusForSection(sectionSlug, cancellationToken);
         return _router.Status switch
         {
-            SubmissionStatus.Completed => await HandleCompleteStatus(sectionSlug, recommendationSlug, controller, cancellationToken),
+            SubmissionStatus.Completed => await HandleCompleteStatus(controller, cancellationToken),
             SubmissionStatus.CheckAnswers => controller.RedirectToCheckAnswers(sectionSlug),
             SubmissionStatus.NextQuestion => HandleQuestionStatus(sectionSlug, controller),
             SubmissionStatus.NotStarted => PageRedirecter.RedirectToSelfAssessment(controller),
@@ -42,38 +39,38 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     }
 
     /// <summary>
-    /// Either render the recommendation page (if correct recommendation for section + maturity),
-    /// or redirect user to correct recommendation page
+    /// Render the recommendation page (if correct recommendation for section + maturity),
     /// </summary>
-    /// <param name="sectionSlug"></param>
-    /// <param name="recommendationSlug"></param>
     /// <param name="controller"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="DatabaseException"></exception>
     /// <exception cref="ContentfulDataUnavailableException"></exception>
-    private async Task<IActionResult> HandleCompleteStatus(string sectionSlug, string recommendationSlug, RecommendationsController controller, CancellationToken cancellationToken)
+    private async Task<IActionResult> HandleCompleteStatus(RecommendationsController controller, CancellationToken cancellationToken)
     {
         if (_router.SectionStatus?.Maturity == null) throw new DatabaseException("Maturity is null, but shouldn't be for a completed section");
 
-        var recommendationForSlug = _router.Section!.Recommendations.FirstOrDefault(recommendation => recommendation.Page.Slug == recommendationSlug) ??
-                                      throw new ContentfulDataUnavailableException($"Couldn't find recommendation with slug {recommendationSlug} under '{sectionSlug}'");
+        if (_router.Section == null) throw new DatabaseException("Section is null, but shouldn't be.");
 
-        var recommendationForMaturity = _router.Section.GetRecommendationForMaturity(_router.SectionStatus.Maturity) ??
-                                        throw new ContentfulDataUnavailableException($"Missing recommendation page for {_router.SectionStatus.Maturity} in section '{sectionSlug}'");
+        var usersAnswers =
+            await _getAllAnswersForLatestSubmissionQuery.GetAllAnswersForLatestSubmission(_router.Section.Sys.Id,
+                await _router.User.GetEstablishmentId()) ?? throw new DatabaseException($"Could not find users answers for:  {_router.Section.Name}");
 
-        if (recommendationForMaturity.Sys.Id != recommendationForSlug.Sys.Id)
+        var subTopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(_router.Section.Sys.Id, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {_router.Section.Name}");
+
+        var subTopicIntro = subTopicRecommendation.GetRecommendationByMaturity(_router.SectionStatus.Maturity) ?? throw new ContentfulDataUnavailableException($"Could not find recommendation intro for maturity:  {_router.SectionStatus?.Maturity}");
+
+        var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(usersAnswers.Select(answer => answer.ContentfulRef));
+
+        var viewModel = new RecommendationsViewModel()
         {
-            return controller.RedirectToAction(RecommendationsController.GetRecommendationAction,
-                                               new { sectionSlug, recommendationSlug = recommendationForMaturity.Page.Slug });
-        }
+            SectionName = subTopicRecommendation.Subtopic.Name,
+            Intro = subTopicIntro,
+            Chunks = subTopicChunks
+        };
 
-        var page = await _getPageQuery.GetPageBySlug(recommendationSlug, cancellationToken) ??
-                    throw new PageNotFoundException($"Could not find page for recommendation slug {recommendationSlug} under section {sectionSlug}");
+        return controller.View("~/Views/Recommendations/Recommendations.cshtml", viewModel);
 
-        var viewModel = new PageViewModel(page!, controller, _user, _logger);
-
-        return controller.View("~/Views/Pages/Page.cshtml", viewModel);
     }
 
     /// <summary>

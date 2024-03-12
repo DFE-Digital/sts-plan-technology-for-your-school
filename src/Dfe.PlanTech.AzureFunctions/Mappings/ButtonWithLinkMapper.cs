@@ -4,12 +4,8 @@ using System.Text.Json;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class ButtonWithLinkMapper : JsonToDbMapper<ButtonWithLinkDbEntity>
+public class ButtonWithLinkMapper(EntityRetriever retriever, EntityUpdater updater, ILogger<ButtonWithLinkMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<ButtonWithLinkDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
-    public ButtonWithLinkMapper(ILogger<ButtonWithLinkMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : base(logger, jsonSerialiserOptions)
-    {
-    }
-
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
         values = MoveValueToNewKey(values, "button", "buttonId");

@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using Xunit;
+using Answer = Dfe.PlanTech.Domain.Answers.Models.Answer;
 
 namespace Dfe.PlanTech.Web.UnitTests.Routing;
 
@@ -21,10 +22,12 @@ public class GetRecommendationRouterTests
 {
     private readonly IGetPageQuery _getPageQuery;
     private readonly ISubmissionStatusProcessor _submissionStatusProcessor;
-    private readonly IUser _user;
 
     private readonly RecommendationsController _controller;
     private readonly GetRecommendationRouter _router;
+
+    private readonly IGetAllAnswersForLatestSubmissionQuery _getAllAnswersForSubmissionQuery;
+    private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
 
     private readonly Section _section = new()
     {
@@ -36,41 +39,100 @@ public class GetRecommendationRouterTests
         {
             Id = "section-id"
         },
-        Recommendations = new(){
-      new(){
-        Page = new Page(){
-          Slug = "low-recommendation-slug"
-        },
-        Maturity = Maturity.Low,
-        Sys = new SystemDetails(){
-          Id = "low-id"
+        Recommendations = new()
+        {
+            new()
+            {
+                Page = new Page()
+                {
+                    Slug = "low-recommendation-slug"
+                },
+                Maturity = Maturity.Low,
+                Sys = new SystemDetails()
+                {
+                    Id = "low-id"
+                }
+            },
+            new()
+            {
+                Page = new Page()
+                {
+                    Slug = "high-recommendation-slug"
+                },
+                Maturity = Maturity.High,
+                Sys = new SystemDetails()
+                {
+                    Id = "high-id"
+                }
+            }
         }
-      },
-      new(){
-        Page = new Page(){
-          Slug = "high-recommendation-slug"
-        },
-        Maturity = Maturity.High,
-        Sys = new SystemDetails(){
-          Id = "high-id"
-        }
-      }
+    };
 
-    }
+    private readonly SubtopicRecommendation? _subtopic = new SubtopicRecommendation()
+    {
+        Intros = new List<RecommendationIntro>()
+        {
+            new RecommendationIntro()
+            {
+                Slug = "intro-slug",
+                Maturity = "High",
+            }
+        },
+        Section = new RecommendationSection()
+        {
+            Chunks = new List<RecommendationChunk>()
+            {
+                new RecommendationChunk()
+                {
+                    Answers = new List<Domain.Questionnaire.Models.Answer>()
+                    {
+                        new Domain.Questionnaire.Models.Answer()
+                        {
+                            Sys = new SystemDetails()
+                            {
+                                Id = "ref1"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        Subtopic = new Section()
+        {
+            InterstitialPage = new Page()
+            {
+                Slug = "subtopic-slug"
+            },
+            Sys = new SystemDetails()
+            {
+                Id = "subtopic-id"
+            },
+            Recommendations = new List<RecommendationPage>()
+            {
+                new RecommendationPage()
+                {
+                    Page = new Page()
+                    {
+                        Slug = "subtopic-recommendation-slug"
+                    }
+                }
+            }
+        }
     };
 
     public GetRecommendationRouterTests()
     {
         _getPageQuery = Substitute.For<IGetPageQuery>();
         _submissionStatusProcessor = Substitute.For<ISubmissionStatusProcessor>();
-        _user = Substitute.For<IUser>();
+        _getAllAnswersForSubmissionQuery = Substitute.For<IGetAllAnswersForLatestSubmissionQuery>();
+        _getSubTopicRecommendationQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
 
         _controller = new RecommendationsController(new NullLogger<RecommendationsController>());
 
         _getPageQuery.GetPageBySlug(_section.Recommendations[0].Page.Slug, Arg.Any<CancellationToken>())
-                     .Returns(_section.Recommendations[0].Page);
+            .Returns(_section.Recommendations[0].Page);
 
-        _router = new GetRecommendationRouter(_getPageQuery, new NullLogger<GetRecommendationRouter>(), _user, _submissionStatusProcessor);
+        _router = new GetRecommendationRouter(_submissionStatusProcessor, _getAllAnswersForSubmissionQuery, _getSubTopicRecommendationQuery);
     }
 
     [Theory]
@@ -78,7 +140,8 @@ public class GetRecommendationRouterTests
     [InlineData("")]
     public async Task Should_ThrowException_When_SectionSlug_NullOrEmpty(string? sectionSlug)
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _router.ValidateRoute(sectionSlug!, "recommendation-slug", _controller, default));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() =>
+            _router.ValidateRoute(sectionSlug!, "recommendation-slug", _controller, default));
     }
 
 
@@ -87,19 +150,19 @@ public class GetRecommendationRouterTests
     [InlineData("")]
     public async Task Should_ThrowException_When_RecommendationSlug_NullOrEmpty(string? recommendationSlug)
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _router.ValidateRoute("section-slug", recommendationSlug!, _controller, default));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() =>
+            _router.ValidateRoute("section-slug", recommendationSlug!, _controller, default));
     }
 
     [Fact]
     public async Task Should_Redirect_To_CheckAnswersPage_When_Status_CheckAnswers()
     {
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
-                                  .Do((callinfo) =>
-                                  {
-                                      _submissionStatusProcessor.Status = SubmissionStatus.CheckAnswers;
-                                  });
+        _submissionStatusProcessor.When(processor =>
+                processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+            .Do((callinfo) => { _submissionStatusProcessor.Status = SubmissionStatus.CheckAnswers; });
 
-        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, "recommendation-slug", _controller, default);
+        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, "recommendation-slug", _controller,
+            default);
 
         var redirectResult = result as RedirectToActionResult;
 
@@ -122,14 +185,16 @@ public class GetRecommendationRouterTests
             Slug = "next-question"
         };
 
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
-                                  .Do((callinfo) =>
-                                  {
-                                      _submissionStatusProcessor.Status = SubmissionStatus.NextQuestion;
-                                      _submissionStatusProcessor.NextQuestion = nextQuestion;
-                                  });
+        _submissionStatusProcessor.When(processor =>
+                processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+            .Do((callinfo) =>
+            {
+                _submissionStatusProcessor.Status = SubmissionStatus.NextQuestion;
+                _submissionStatusProcessor.NextQuestion = nextQuestion;
+            });
 
-        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, "recommendation-slug", _controller, default);
+        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, "recommendation-slug", _controller,
+            default);
 
         var redirectResult = result as RedirectToActionResult;
 
@@ -157,14 +222,16 @@ public class GetRecommendationRouterTests
             Slug = "next-question"
         };
 
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
-                                  .Do((callinfo) =>
-                                  {
-                                      _submissionStatusProcessor.Status = SubmissionStatus.NotStarted;
-                                      _submissionStatusProcessor.NextQuestion = nextQuestion;
-                                  });
+        _submissionStatusProcessor.When(processor =>
+                processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+            .Do((callinfo) =>
+            {
+                _submissionStatusProcessor.Status = SubmissionStatus.NotStarted;
+                _submissionStatusProcessor.NextQuestion = nextQuestion;
+            });
 
-        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, "recommendation-slug", _controller, default);
+        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, "recommendation-slug", _controller,
+            default);
 
         var redirectResult = result as RedirectToActionResult;
 
@@ -181,112 +248,124 @@ public class GetRecommendationRouterTests
     [Fact]
     public async Task Should_Throw_Exception_When_Maturity_Null()
     {
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
-                                  .Do((callinfo) =>
-                                  {
-                                      _submissionStatusProcessor.Status = SubmissionStatus.Completed;
-                                      _submissionStatusProcessor.SectionStatus.Returns(new SectionStatusNew()
-                                      {
-                                          Maturity = null
-                                      });
-                                  });
+        _submissionStatusProcessor.When(processor =>
+                processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+            .Do((callinfo) =>
+            {
+                _submissionStatusProcessor.Status = SubmissionStatus.Completed;
+                _submissionStatusProcessor.SectionStatus.Returns(new SectionStatusNew()
+                {
+                    Maturity = null
+                });
+            });
 
-        await Assert.ThrowsAnyAsync<DatabaseException>(() => _router.ValidateRoute(_section.InterstitialPage.Slug, "recommendation-slug", _controller, default));
+        await Assert.ThrowsAnyAsync<DatabaseException>(() =>
+            _router.ValidateRoute(_section.InterstitialPage.Slug, "recommendation-slug", _controller, default));
     }
 
     [Fact]
     public async Task Should_Throw_Exception_When_Recommendation_Not_In_Section()
     {
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
-                                  .Do((callinfo) =>
-                                  {
-                                      _submissionStatusProcessor.Status = SubmissionStatus.Completed;
-                                      _submissionStatusProcessor.Section.Returns(_section);
-                                      _submissionStatusProcessor.SectionStatus.Returns(new SectionStatusNew()
-                                      {
-                                          Maturity = "High"
-                                      });
-                                  });
+        _submissionStatusProcessor.When(processor =>
+                processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+            .Do((callinfo) =>
+            {
+                _submissionStatusProcessor.Status = SubmissionStatus.Completed;
+                _submissionStatusProcessor.Section.Returns(_section);
+                _submissionStatusProcessor.SectionStatus.Returns(new SectionStatusNew()
+                {
+                    Maturity = "High"
+                });
+            });
 
-        await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() => _router.ValidateRoute(_section.InterstitialPage.Slug, "other-recommendation-slug", _controller, default));
+        _getAllAnswersForSubmissionQuery.GetAllAnswersForLatestSubmission(Arg.Any<string>(), Arg.Any<int>()).Returns(
+            new List<Answer>()
+            {
+                new Answer()
+                {
+                    Id = 1,
+                    AnswerText = "Answer 1",
+                    ContentfulRef = "ref1"
+                }
+            });
+
+        await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() =>
+            _router.ValidateRoute(_section.InterstitialPage.Slug, "other-recommendation-slug", _controller, default));
     }
 
     [Fact]
     public async Task Should_Throw_Exception_When_NotFind_Recommendation_For_Maturity()
     {
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
-                                  .Do((callinfo) =>
-                                  {
-                                      _submissionStatusProcessor.Status = SubmissionStatus.Completed;
-                                      _submissionStatusProcessor.Section.Returns(_section);
-                                      _submissionStatusProcessor.SectionStatus.Returns(new SectionStatusNew()
-                                      {
-                                          Maturity = "not a real maturity"
-                                      });
-                                  });
+        _submissionStatusProcessor.When(processor =>
+                processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+            .Do((callinfo) =>
+            {
+                _submissionStatusProcessor.Status = SubmissionStatus.Completed;
+                _submissionStatusProcessor.Section.Returns(_section);
+                _submissionStatusProcessor.SectionStatus.Returns(new SectionStatusNew()
+                {
+                    Maturity = "not a real maturity"
+                });
+            });
 
-        await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() => _router.ValidateRoute(_section.InterstitialPage.Slug, _section.Recommendations[0].Page.Slug, _controller, default));
-    }
+        _getAllAnswersForSubmissionQuery.GetAllAnswersForLatestSubmission(Arg.Any<string>(), Arg.Any<int>()).Returns(
+            new List<Answer>()
+            {
+                new Answer()
+                {
+                    Id = 1,
+                    AnswerText = "Answer 1",
+                    ContentfulRef = "ref1"
+                }
+            });
 
-    [Fact]
-    public async Task Should_Redirect_To_Correct_Recommendation_Page_When_Recommendation_Not_Match()
-    {
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
-                                  .Do((callinfo) =>
-                                  {
-                                      _submissionStatusProcessor.Status = SubmissionStatus.Completed;
-                                      _submissionStatusProcessor.Section.Returns(_section);
-                                      _submissionStatusProcessor.SectionStatus.Returns(new SectionStatusNew()
-                                      {
-                                          Maturity = "High"
-                                      });
-                                  });
 
-        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, _section.Recommendations[0].Page.Slug, _controller, default);
+        _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
 
-        var redirectResult = result as RedirectToActionResult;
-
-        Assert.NotNull(redirectResult);
-
-        Assert.Equal(RecommendationsController.GetRecommendationAction, redirectResult.ActionName);
-
-        var section = redirectResult.RouteValues?["sectionSlug"];
-
-        Assert.NotNull(section);
-        Assert.Equal(_section.InterstitialPage.Slug, section);
-
-        var recommendationSlug = redirectResult.RouteValues?["recommendationSlug"];
-
-        Assert.NotNull(recommendationSlug);
-        Assert.Equal(_section.Recommendations[1].Page.Slug, recommendationSlug);
+        await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() =>
+            _router.ValidateRoute(_section.InterstitialPage.Slug, _section.Recommendations[0].Page.Slug, _controller,
+                default));
     }
 
     [Fact]
     public async Task Should_Show_RecommendationPage_When_Status_Is_Recommendation_And_All_Valid()
     {
-        var recommendation = _section.Recommendations[0];
+        _submissionStatusProcessor.When(processor =>
+                processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+            .Do((callinfo) =>
+            {
+                _submissionStatusProcessor.Status = SubmissionStatus.Completed;
+                _submissionStatusProcessor.Section.Returns(_section);
+                _submissionStatusProcessor.SectionStatus.Returns(new SectionStatusNew()
+                {
+                    Maturity = "High"
+                });
+            });
 
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
-                                  .Do((callinfo) =>
-                                  {
-                                      _submissionStatusProcessor.Status = SubmissionStatus.Completed;
-                                      _submissionStatusProcessor.Section.Returns(_section);
-                                      _submissionStatusProcessor.SectionStatus.Returns(new SectionStatusNew()
-                                      {
-                                          Maturity = "Low"
-                                      });
-                                  });
+        _getAllAnswersForSubmissionQuery.GetAllAnswersForLatestSubmission(Arg.Any<string>(), Arg.Any<int>()).Returns(
+            new List<Answer>()
+            {
+                new Answer()
+                {
+                    Id = 1,
+                    AnswerText = "Answer 1",
+                    ContentfulRef = "ref1"
+                }
+            });
 
-        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, recommendation.Page.Slug, _controller, default);
+
+        _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
+
+        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, _section.Recommendations[0].Page.Slug,
+            _controller, default);
 
         var viewResult = result as ViewResult;
 
         Assert.NotNull(viewResult);
 
-        var model = viewResult.Model as PageViewModel;
+        var model = viewResult.Model as RecommendationsViewModel;
 
         Assert.NotNull(model);
-        Assert.Equal(model.Page, recommendation.Page);
+        Assert.Equal(_subtopic!.Intros[0], model.Intro);
     }
-
 }

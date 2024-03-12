@@ -20,11 +20,11 @@ public class Page : ContentComponent, IPageContent
 
     public string? SectionTitle { get; set; }
 
-    public List<ContentComponent> BeforeTitleContent { get; init; } = new();
+    public List<ContentComponent> BeforeTitleContent { get; init; } = [];
 
     public Title? Title { get; init; }
 
     public string? OrganisationName { get; set; }
 
-    public List<ContentComponent> Content { get; init; } = new();
+    public List<ContentComponent> Content { get; init; } = [];
 }

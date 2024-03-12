@@ -30,7 +30,7 @@ public class QuestionMapperTests : BaseMapperTests
     public QuestionMapperTests()
     {
         _logger = Substitute.For<ILogger<JsonToDbMapper<QuestionDbEntity>>>();
-        _mapper = new QuestionMapper(_db, _logger, JsonOptions);
+        _mapper = new QuestionMapper(MapperHelpers.CreateMockEntityRetriever(), MapperHelpers.CreateMockEntityUpdater(), _db, _logger, JsonOptions);
     }
 
     [Fact]
@@ -55,11 +55,11 @@ public class QuestionMapperTests : BaseMapperTests
 
         var payload = CreatePayload(fields, QuestionId);
 
-        var mapped = _mapper.MapEntity(payload);
+        var mapped = _mapper.ToEntity(payload);
 
         Assert.NotNull(mapped);
 
-        var concrete = mapped as QuestionDbEntity;
+        var concrete = mapped;
         Assert.NotNull(concrete);
 
         Assert.Equal(QuestionId, concrete.Id);

@@ -2,7 +2,7 @@ using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Content.Models;
 
-public abstract class ContentComponentDbEntity : IContentComponentDbEntity
+public class ContentComponentDbEntity : IContentComponentDbEntity
 {
     public string Id { get; set; } = null!;
 
@@ -17,5 +17,16 @@ public abstract class ContentComponentDbEntity : IContentComponentDbEntity
 
     public List<PageDbEntity> BeforeTitleContentPages { get; set; } = [];
 
+    /// <summary>
+    /// Joins for <see cref="BeforeTitleContentPages"/> 
+    /// </summary>
+    public List<PageContentDbEntity> BeforeTitleContentPagesJoins { get; set; } = [];
+
     public List<PageDbEntity> ContentPages { get; set; } = [];
+
+    /// <summary>
+    /// Joins for <see cref="ContentPages"/> 
+    /// </summary>
+    public List<PageContentDbEntity> ContentPagesJoins { get; set; } = [];
+
 }

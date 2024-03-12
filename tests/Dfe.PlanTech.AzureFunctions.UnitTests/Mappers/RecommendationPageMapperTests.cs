@@ -27,7 +27,7 @@ public class RecommendationPageMapperTests : BaseMapperTests
     public RecommendationPageMapperTests()
     {
         _logger = Substitute.For<ILogger<RecommendationPageMapper>>();
-        _mapper = new RecommendationPageMapper(_logger, JsonOptions);
+        _mapper = new RecommendationPageMapper(MapperHelpers.CreateMockEntityRetriever(), MapperHelpers.CreateMockEntityUpdater(), _logger, JsonOptions);
     }
 
     [Fact]
@@ -43,16 +43,14 @@ public class RecommendationPageMapperTests : BaseMapperTests
 
         var payload = CreatePayload(fields, RecommendationId);
 
-        var mapped = _mapper.MapEntity(payload);
+        var mapped = _mapper.ToEntity(payload);
 
         Assert.NotNull(mapped);
+        Assert.NotNull(mapped);
 
-        var concrete = mapped as RecommendationPageDbEntity;
-        Assert.NotNull(concrete);
-
-        Assert.Equal(RecommendationId, concrete.Id);
-        Assert.Equal(DisplayName, concrete.DisplayName);
-        Assert.Equal(InternalName, concrete.InternalName);
-        Assert.Equal(Page.Sys.Id, concrete.PageId);
+        Assert.Equal(RecommendationId, mapped.Id);
+        Assert.Equal(DisplayName, mapped.DisplayName);
+        Assert.Equal(InternalName, mapped.InternalName);
+        Assert.Equal(Page.Sys.Id, mapped.PageId);
     }
 }
