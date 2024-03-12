@@ -1,17 +1,17 @@
 const navigateToRecommendationPage = () => {
-  let selectedQuestionsWithAnswers = []; // Not needed by the calling class so just define it here.
+    cy.get('a[href*="/recommendation/"]').first().click();
+};
+
+const completeFirstSubtopic = () => {
+  let selectedQuestionsWithAnswers = [];
+    cy.clickFirstSection();
+    cy.clickContinueButton();
+
   return cy
     .navigateToCheckAnswersPage(selectedQuestionsWithAnswers)
     .then((res) => cy.wrap(res))
-    .then(() => cy.submitAnswers())
-    .then((onSelfAssessmentPage) => {
-      if (!onSelfAssessmentPage) {
-        return Promise.resolve();
-      }
-
-      cy.get('a[href*="/recommendation/"]').first().click();
-    });
-};
+    .then(() => cy.submitAnswers());
+}
 
 const navigateToCheckAnswersPage = (selectedQuestionsWithAnswers) => {
   return cy
@@ -45,6 +45,7 @@ Cypress.Commands.add(
   "navigateToRecommendationPage",
   navigateToRecommendationPage
 );
+Cypress.Commands.add("completeFirstSubtopic", completeFirstSubtopic);
 Cypress.Commands.add("navigateToCheckAnswersPage", navigateToCheckAnswersPage);
 Cypress.Commands.add("navigateThroughQuestions", navigateThroughQuestions);
 Cypress.Commands.add("submitAnswers", submitAnswers);

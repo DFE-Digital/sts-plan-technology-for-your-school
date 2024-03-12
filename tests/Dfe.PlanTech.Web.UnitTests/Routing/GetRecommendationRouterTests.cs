@@ -22,7 +22,6 @@ public class GetRecommendationRouterTests
 {
     private readonly IGetPageQuery _getPageQuery;
     private readonly ISubmissionStatusProcessor _submissionStatusProcessor;
-    private readonly IUser _user;
 
     private readonly RecommendationsController _controller;
     private readonly GetRecommendationRouter _router;
@@ -68,7 +67,7 @@ public class GetRecommendationRouterTests
             }
         }
     };
-    
+
     private readonly SubtopicRecommendation? _subtopic = new SubtopicRecommendation()
     {
         Intros = new List<RecommendationIntro>()
@@ -125,7 +124,6 @@ public class GetRecommendationRouterTests
     {
         _getPageQuery = Substitute.For<IGetPageQuery>();
         _submissionStatusProcessor = Substitute.For<ISubmissionStatusProcessor>();
-        _user = Substitute.For<IUser>();
         _getAllAnswersForSubmissionQuery = Substitute.For<IGetAllAnswersForLatestSubmissionQuery>();
         _getSubTopicRecommendationQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
 
@@ -279,7 +277,7 @@ public class GetRecommendationRouterTests
                     Maturity = "High"
                 });
             });
-        
+
         _getAllAnswersForSubmissionQuery.GetAllAnswersForLatestSubmission(Arg.Any<string>(), Arg.Any<int>()).Returns(
             new List<Answer>()
             {
@@ -309,7 +307,7 @@ public class GetRecommendationRouterTests
                     Maturity = "not a real maturity"
                 });
             });
-        
+
         _getAllAnswersForSubmissionQuery.GetAllAnswersForLatestSubmission(Arg.Any<string>(), Arg.Any<int>()).Returns(
             new List<Answer>()
             {
@@ -362,12 +360,12 @@ public class GetRecommendationRouterTests
             _controller, default);
 
         var viewResult = result as ViewResult;
-        
+
         Assert.NotNull(viewResult);
 
         var model = viewResult.Model as RecommendationsViewModel;
 
         Assert.NotNull(model);
-        Assert.Equal(_subtopic.Intros[0], model.RecommendationIntro);
+        Assert.Equal(_subtopic!.Intros[0], model.Intro);
     }
 }
