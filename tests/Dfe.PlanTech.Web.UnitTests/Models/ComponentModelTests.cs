@@ -1,5 +1,4 @@
-﻿using Contentful.Core.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Enums;
+﻿using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Models

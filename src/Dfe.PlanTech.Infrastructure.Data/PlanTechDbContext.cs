@@ -116,7 +116,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
 
 
     public IQueryable<Submission> GetSubmissions => Submissions;
-    
+
     public IQueryable<Answer> GetAnswers => Answers;
 
     public Task<int> SaveChangesAsync() => base.SaveChangesAsync();
