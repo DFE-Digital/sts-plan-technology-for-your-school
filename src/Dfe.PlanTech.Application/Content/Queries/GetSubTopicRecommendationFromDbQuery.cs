@@ -1,5 +1,4 @@
 using AutoMapper;
-using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -9,6 +8,8 @@ namespace Dfe.PlanTech.Application.Content.Queries;
 
 public class GetSubTopicRecommendationFromDbQuery(ICmsDbContext db, ILogger<GetSubTopicRecommendationFromDbQuery> logger, IMapper mapperConfiguration) : IGetSubTopicRecommendationQuery
 {
+    public const string ServiceKey = "Database";
+
     private readonly ICmsDbContext _db = db;
     private readonly ILogger<GetSubTopicRecommendationFromDbQuery> _logger = logger;
     private readonly IMapper _mapperConfiguration = mapperConfiguration;

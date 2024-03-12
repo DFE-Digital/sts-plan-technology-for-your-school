@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Submissions.Enums;
@@ -9,18 +10,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Routing;
 
-public class GetRecommendationRouter : IGetRecommendationRouter
+public class GetRecommendationRouter(ISubmissionStatusProcessor router,
+                                    IGetAllAnswersForLatestSubmissionQuery getAllAnswersForLatestSubmissionQuery,
+                                    [FromKeyedServices(GetSubTopicRecommendationQuery.ServiceKey)] IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery) : IGetRecommendationRouter
 {
-    private readonly ISubmissionStatusProcessor _router;
-    private readonly IGetAllAnswersForLatestSubmissionQuery _getAllAnswersForLatestSubmissionQuery;
-    private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
-
-    public GetRecommendationRouter(ISubmissionStatusProcessor router, IGetAllAnswersForLatestSubmissionQuery getAllAnswersForLatestSubmissionQuery, IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery)
-    {
-        _router = router;
-        _getAllAnswersForLatestSubmissionQuery = getAllAnswersForLatestSubmissionQuery;
-        _getSubTopicRecommendationQuery = getSubTopicRecommendationQuery;
-    }
+    private readonly ISubmissionStatusProcessor _router = router;
+    private readonly IGetAllAnswersForLatestSubmissionQuery _getAllAnswersForLatestSubmissionQuery = getAllAnswersForLatestSubmissionQuery;
+    private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery = getSubTopicRecommendationQuery;
 
     public async Task<IActionResult> ValidateRoute(string sectionSlug, string recommendationSlug, RecommendationsController controller, CancellationToken cancellationToken)
     {

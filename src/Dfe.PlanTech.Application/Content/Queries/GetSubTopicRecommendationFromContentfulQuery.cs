@@ -8,6 +8,8 @@ namespace Dfe.PlanTech.Application.Content.Queries;
 
 public class GetSubTopicRecommendationFromContentfulQuery(IContentRepository repository) : IGetSubTopicRecommendationQuery
 {
+    public const string ServiceKey = "Contentful";
+
     private readonly IContentRepository _repository = repository;
 
     public async Task<SubTopicRecommendation?> GetSubTopicRecommendation(string subTopicId, CancellationToken cancellationToken = default)

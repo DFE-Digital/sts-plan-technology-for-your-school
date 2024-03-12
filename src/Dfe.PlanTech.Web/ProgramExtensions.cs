@@ -83,7 +83,9 @@ public static class ProgramExtensions
         services.AddTransient<GetPageFromContentfulQuery>();
         services.AddSingleton(new ContentfulOptions(configuration.GetValue<bool>("Contentful:UsePreview")));
 
-        services.AddTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationFromContentfulQuery>();
+        services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationFromContentfulQuery>(GetSubTopicRecommendationFromContentfulQuery.ServiceKey);
+        services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationFromDbQuery>(GetSubTopicRecommendationFromDbQuery.ServiceKey);
+        services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationQuery>(GetSubTopicRecommendationQuery.ServiceKey);
 
         return services;
     }
