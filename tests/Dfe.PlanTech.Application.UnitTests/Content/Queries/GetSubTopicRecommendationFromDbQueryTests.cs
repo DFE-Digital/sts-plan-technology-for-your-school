@@ -1,5 +1,6 @@
 using AutoMapper;
 using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Mappings;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Enums;
@@ -175,6 +176,11 @@ public class GetSubTopicRecommendationFromDbQueryTests
         _subtopicRecommendations.Add(_subtopicRecommendationTwo);
 
         _db.SubtopicRecommendations.Returns(_subtopicRecommendations.AsQueryable());
+        SetupFirstOrDefaultAsyncSuccess();
+    }
+
+    private void SetupFirstOrDefaultAsyncSuccess()
+    {
         _db.FirstOrDefaultAsync(Arg.Any<IQueryable<SubTopicRecommendationDbEntity>>(), Arg.Any<CancellationToken>())
             .Returns(callinfo =>
             {
@@ -197,6 +203,7 @@ public class GetSubTopicRecommendationFromDbQueryTests
     [Fact]
     public async Task GetSubTopicRecommendation_Returns_Null_When_Not_Found()
     {
+
         var subtopicRecommendation = await _query.GetSubTopicRecommendation("not a real id", CancellationToken.None);
 
         Assert.Null(subtopicRecommendation);
@@ -206,10 +213,18 @@ public class GetSubTopicRecommendationFromDbQueryTests
     public async Task LogsError_When_Exception()
     {
         _db.FirstOrDefaultAsync(Arg.Any<IQueryable<SubTopicRecommendationDbEntity>>(), Arg.Any<CancellationToken>())
-            .ThrowsAsync(new Exception("Error"));
+            .Throws((callinfo) => new DatabaseException("Error first or default here"));
 
-        await Assert.ThrowsAnyAsync<Exception>(() => _query.GetSubTopicRecommendation(_subtopicRecommendationOne!.SubtopicId, CancellationToken.None));
+        var exception = await Assert.ThrowsAnyAsync<Exception>(async () => await _query.GetSubTopicRecommendation(_subtopicRecommendationOne!.SubtopicId, CancellationToken.None));
 
-        _logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
+        var loggedMessages = _logger.ReceivedCalls().ToArray();
+
+        Assert.Single(loggedMessages);
+
+        var arguments = loggedMessages.First().GetArguments().ToArray();
+
+        var logLevel = arguments[0];
+
+        Assert.Equal(LogLevel.Error, logLevel);
     }
 }
