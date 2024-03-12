@@ -21,7 +21,6 @@ public class RecommendationChunkMapper(EntityRetriever retriever, EntityUpdater 
         return values;
     }
     
-    
     private void UpdateContentIds(Dictionary<string, object?> values, string recommendationChunkId, string currentKey)
     {
         if (values.TryGetValue(currentKey, out object? contents) && contents is object[] inners)
@@ -33,7 +32,6 @@ public class RecommendationChunkMapper(EntityRetriever retriever, EntityUpdater 
             values.Remove(currentKey);
         }
     }
-    
     
     private void UpdateAnswerIds(Dictionary<string, object?> values, string recommendationChunkId, string currentKey)
     {
@@ -80,6 +78,5 @@ public class RecommendationChunkMapper(EntityRetriever retriever, EntityUpdater 
 
         _db.RecommendationChunkContents.Attach(recommendationChunkContent);
     }
-    
     
 }
