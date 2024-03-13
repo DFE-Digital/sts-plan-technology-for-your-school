@@ -38,8 +38,6 @@ public interface ICmsDbContext
 
     public IQueryable<RecommendationSectionDbEntity> RecommendationSections { get; }
 
-    public IQueryable<RecommendationChunkDbEntity> RecommendationChunks { get; }
-
     public IQueryable<RecommendationChunkContentDbEntity> RecommendationChunkContents { get; }
 
     public IQueryable<RecommendationChunkAnswerDbEntity> RecommendationChunkAnswers { get; }
@@ -47,8 +45,6 @@ public interface ICmsDbContext
     public IQueryable<RecommendationSectionChunkDbEntity> RecommendationSectionChunks { get; }
 
     public IQueryable<RecommendationSectionAnswerDbEntity> RecommendationSectionAnswers { get; }
-
-    public IQueryable<RecommendationIntroDbEntity> RecommendationIntros { get; }
 
     public IQueryable<RecommendationIntroContentDbEntity> RecommendationIntroContents { get; }
 
@@ -63,8 +59,6 @@ public interface ICmsDbContext
     public IQueryable<RichTextMarkDbEntity> RichTextMarkDbEntity { get; }
 
     public IQueryable<SectionDbEntity> Sections { get; }
-
-    public IQueryable<SubTopicRecommendationDbEntity> SubtopicRecommendations { get; }
 
     public IQueryable<TextBodyDbEntity> TextBodies { get; }
 

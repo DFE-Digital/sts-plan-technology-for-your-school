@@ -41,25 +41,29 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public DbSet<QuestionDbEntity> Questions { get; set; }
 
+    #region Recommendation DbSets
     public DbSet<RecommendationPageDbEntity> RecommendationPages { get; set; }
 
     public DbSet<RecommendationChunkDbEntity> RecommendationChunks { get; set; }
 
-    public DbSet<RecommendationChunkContentDbEntity> RecommendationChunkContents { get; set; }
-
     public DbSet<RecommendationChunkAnswerDbEntity> RecommendationChunkAnswers { get; set; }
 
-    public DbSet<RecommendationSectionAnswerDbEntity> RecommendationSectionAnswers { get; set; }
+    public DbSet<RecommendationChunkContentDbEntity> RecommendationChunkContents { get; set; }
 
     public DbSet<RecommendationIntroDbEntity> RecommendationIntros { get; set; }
 
     public DbSet<RecommendationIntroContentDbEntity> RecommendationIntroContents { get; set; }
+
+    public DbSet<RecommendationSectionDbEntity> RecommendationSections { get; set; }
+
+    public DbSet<RecommendationSectionAnswerDbEntity> RecommendationSectionAnswers { get; set; }
 
     public DbSet<RecommendationSectionChunkDbEntity> RecommendationSectionChunks { get; set; }
 
     public DbSet<SubtopicRecommendationDbEntity> SubtopicRecommendations { get; set; }
 
     public DbSet<SubtopicRecommendationIntroDbEntity> SubtopicRecommendationIntros { get; set; }
+    #endregion
 
     public DbSet<RichTextContentDbEntity> RichTextContents { get; set; }
 
@@ -103,6 +107,10 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     IQueryable<RecommendationSectionChunkDbEntity> ICmsDbContext.RecommendationSectionChunks =>
         RecommendationSectionChunks;
+
+    IQueryable<RecommendationSectionDbEntity> ICmsDbContext.RecommendationSections =>
+        RecommendationSections;
+
 
     IQueryable<RecommendationIntroDbEntity> ICmsDbContext.RecommendationIntros =>
         RecommendationIntros;
