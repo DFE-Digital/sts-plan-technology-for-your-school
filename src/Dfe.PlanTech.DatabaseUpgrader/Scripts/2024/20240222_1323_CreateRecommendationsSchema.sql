@@ -1,6 +1,6 @@
 BEGIN TRANSACTION;
 
-  CREATE TABLE [Contentful].[RecommendationChunks](
+  CREATE OR ALTER TABLE [Contentful].[RecommendationChunks](
     [Id] NVARCHAR(30) NOT NULL,
     [HeaderId] NVARCHAR(30) NULL,
     [Title] NVARCHAR(150) NOT NULL,
@@ -9,7 +9,7 @@ BEGIN TRANSACTION;
     CONSTRAINT [FK_RecommendationChunks_Headers_HeaderId] FOREIGN KEY ([HeaderId]) REFERENCES [Contentful].[Headers] ([Id])
   );
 
-  CREATE TABLE [Contentful].[RecommendationChunkContents] (
+  CREATE OR ALTER TABLE [Contentful].[RecommendationChunkContents] (
       [Id] bigint NOT NULL PRIMARY KEY IDENTITY,
       [RecommendationChunkId] NVARCHAR(30) NULL,
       [ContentComponentId] NVARCHAR(30) NULL,
@@ -17,7 +17,7 @@ BEGIN TRANSACTION;
       CONSTRAINT [FK_RecommendationChunkContents_ContentComponentId] FOREIGN KEY ([ContentComponentId]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE NO ACTION,
   );
   
-  CREATE TABLE [Contentful].[RecommendationChunkAnswers] (
+  CREATE OR ALTER TABLE [Contentful].[RecommendationChunkAnswers] (
       [Id] bigint NOT NULL PRIMARY KEY IDENTITY,
       [RecommendationChunkId] NVARCHAR(30) NULL,
       [AnswerId] NVARCHAR(30) NULL,
@@ -25,7 +25,7 @@ BEGIN TRANSACTION;
       CONSTRAINT [FK_RecommendationChunkAnswers_AnswerId] FOREIGN KEY ([AnswerId]) REFERENCES [Contentful].[Answers] ([Id]) ON DELETE NO ACTION,
   );
 
-  CREATE TABLE [Contentful].[RecommendationIntros](
+  CREATE OR ALTER TABLE [Contentful].[RecommendationIntros](
     [Id] NVARCHAR(30) NOT NULL,
     [HeaderId] NVARCHAR(30) NULL,
     [Maturity] NVARCHAR(40) NOT NULL,
@@ -33,7 +33,7 @@ BEGIN TRANSACTION;
     CONSTRAINT [FK_RecommendationIntros_Headers_HeaderId] FOREIGN KEY ([HeaderId]) REFERENCES [Contentful].[Headers] ([Id])
   );
 
-  CREATE TABLE [Contentful].[RecommendationIntroContents] (
+  CREATE OR ALTER TABLE [Contentful].[RecommendationIntroContents] (
       [Id] bigint NOT NULL PRIMARY KEY IDENTITY,
       [RecommendationIntroId] NVARCHAR(30) NULL,
       [ContentComponentId] NVARCHAR(30) NULL,
@@ -41,12 +41,12 @@ BEGIN TRANSACTION;
       CONSTRAINT [FK_RecommendationIntroContents_ContentComponentId] FOREIGN KEY ([ContentComponentId]) REFERENCES [Contentful].[ContentComponents] ([Id]) ON DELETE NO ACTION,
   );
 
-  CREATE TABLE [Contentful].[RecommendationSections](
+  CREATE OR ALTER TABLE [Contentful].[RecommendationSections](
     [Id] NVARCHAR(30) NOT NULL,
     CONSTRAINT [PK_RecommendationSections] PRIMARY KEY ([Id]),
   );
 
-  CREATE TABLE [Contentful].[RecommendationSectionChunks] (
+  CREATE OR ALTER TABLE [Contentful].[RecommendationSectionChunks] (
       [Id] bigint NOT NULL PRIMARY KEY IDENTITY,
       [RecommendationSectionId] NVARCHAR(30) NULL,
       [RecommendationChunkId] NVARCHAR(30) NULL,
@@ -54,7 +54,7 @@ BEGIN TRANSACTION;
       CONSTRAINT [FK_RecommendationSectionContents_RecommendationChunkId] FOREIGN KEY ([RecommendationChunkId]) REFERENCES [Contentful].[RecommendationChunks] ([Id]) ON DELETE NO ACTION,
   );
 
-  CREATE TABLE [Contentful].[RecommendationSectionAnswers] (
+  CREATE OR ALTER TABLE [Contentful].[RecommendationSectionAnswers] (
       [Id] bigint NOT NULL PRIMARY KEY IDENTITY,
       [RecommendationSectionId] NVARCHAR(30) NULL,
       [AnswerId] NVARCHAR(30) NULL,
@@ -62,7 +62,7 @@ BEGIN TRANSACTION;
       CONSTRAINT [FK_RecommendationSectionAnswers_AnswerId] FOREIGN KEY ([AnswerId]) REFERENCES [Contentful].[Answers] ([Id]) ON DELETE NO ACTION,
   );
   
-  CREATE TABLE [Contentful].[SubtopicRecommendations](
+  CREATE OR ALTER TABLE [Contentful].[SubtopicRecommendations](
     [Id] NVARCHAR(30) NOT NULL,
     [SectionId] NVARCHAR(30) NULL,
     [SubtopicId] NVARCHAR(30) NULL,
@@ -72,7 +72,7 @@ BEGIN TRANSACTION;
   );
   
 
-  CREATE TABLE [Contentful].[SubtopicRecommendationIntros](
+  CREATE OR ALTER TABLE [Contentful].[SubtopicRecommendationIntros](
       [Id] bigint NOT NULL PRIMARY KEY IDENTITY,
       [SubtopicRecommendationId] NVARCHAR(30) NULL,
       [RecommendationIntroId] NVARCHAR(30) NULL,
