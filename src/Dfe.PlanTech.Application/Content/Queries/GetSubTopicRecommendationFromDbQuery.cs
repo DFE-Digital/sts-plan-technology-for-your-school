@@ -26,10 +26,10 @@ public class GetSubTopicRecommendationFromDbQuery(ICmsDbContext db, ILogger<GetS
         return MapRecommendation(dbEntity);
     }
 
-    private SubTopicRecommendation MapRecommendation(SubTopicRecommendationDbEntity dbEntity)
-    => _mapperConfiguration.Map<SubTopicRecommendationDbEntity, SubTopicRecommendation>(dbEntity);
+    private SubTopicRecommendation MapRecommendation(SubtopicRecommendationDbEntity dbEntity)
+    => _mapperConfiguration.Map<SubtopicRecommendationDbEntity, SubTopicRecommendation>(dbEntity);
 
-    private Task<SubTopicRecommendationDbEntity?> GetFromDb(string subTopicId, CancellationToken cancellationToken)
+    private Task<SubtopicRecommendationDbEntity?> GetFromDb(string subTopicId, CancellationToken cancellationToken)
     {
         try
         {

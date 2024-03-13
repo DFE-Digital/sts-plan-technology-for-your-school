@@ -11,6 +11,7 @@ public class SubtopicRecommendationEntityTypeConfiguration : IEntityTypeConfigur
     public void Configure(EntityTypeBuilder<SubtopicRecommendationDbEntity> builder)
     {
         builder.HasMany(subtopicRecommendation => subtopicRecommendation.Intros)
-              .WithMany();
+              .WithMany(intro => intro.SubtopicRecommendations)
+              .UsingEntity<SubtopicRecommendationIntroDbEntity>();
     }
 }

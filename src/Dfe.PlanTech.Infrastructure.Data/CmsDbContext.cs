@@ -118,7 +118,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<RecommendationIntroContentDbEntity> ICmsDbContext.RecommendationIntroContents =>
         RecommendationIntroContents;
 
-    IQueryable<SubtopicRecommendationDbEntity> ICmsDbContext.SubTopicRecommendations =>
+    IQueryable<SubtopicRecommendationDbEntity> ICmsDbContext.SubtopicRecommendations =>
         SubtopicRecommendations;
 
     IQueryable<SubtopicRecommendationIntroDbEntity> ICmsDbContext.SubtopicRecommendationIntros =>
