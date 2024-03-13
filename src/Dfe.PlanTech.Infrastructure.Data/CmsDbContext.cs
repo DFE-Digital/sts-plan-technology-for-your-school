@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
-using Dfe.PlanTech.Infrastructure.Data.EntityTypeConfigurations;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
@@ -145,9 +144,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfiguration(new RecommendationSectionEntityTypeConfiguration());
-        
-        modelBuilder.ApplyConfiguration(new SubtopicRecommendationEntityTypeConfiguration());
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(CmsDbContext).Assembly);
         
         modelBuilder.Entity<RecommendationChunkContentDbEntity>()
             .ToTable("RecommendationChunkContents", Schema);
@@ -193,48 +190,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
         modelBuilder.Entity<ButtonWithLinkDbEntity>()
             .Navigation(button => button.Button).AutoInclude();
 
-        modelBuilder.Entity<CategoryDbEntity>(entity =>
-        {
-            entity.HasMany(category => category.Sections)
-                .WithOne(section => section.Category)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.Navigation(category => category.Header)
-                .AutoInclude();
-
-            entity.Navigation(category => category.Sections)
-                .AutoInclude();
-
-
-            entity.ToTable("Categories", Schema);
-        });
-
         modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>().Navigation(button => button.Button).AutoInclude();
-        modelBuilder.Entity<PageDbEntity>(entity =>
-        {
-            entity.HasMany(page => page.BeforeTitleContent)
-                .WithMany(c => c.BeforeTitleContentPages)
-                .UsingEntity<PageContentDbEntity>(
-                    left => left.HasOne(pageContent => pageContent.BeforeContentComponent).WithMany()
-                        .HasForeignKey("BeforeContentComponentId").OnDelete(DeleteBehavior.Restrict),
-                    right => right.HasOne(pageContent => pageContent.Page).WithMany().HasForeignKey("PageId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                );
-
-            modelBuilder.Entity<ButtonWithLinkDbEntity>().Navigation(button => button.Button).AutoInclude();
-            entity.HasMany(page => page.Content)
-                .WithMany(c => c.ContentPages)
-                .UsingEntity<PageContentDbEntity>(
-                    left => left.HasOne(pageContent => pageContent.ContentComponent).WithMany()
-                        .HasForeignKey("ContentComponentId").OnDelete(DeleteBehavior.Restrict),
-                    right => right.HasOne(pageContent => pageContent.Page).WithMany().HasForeignKey("PageId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                );
-
-            entity.HasOne(page => page.Title).WithMany(title => title.Pages).OnDelete(DeleteBehavior.Restrict);
-
-            entity.ToTable("Pages", Schema);
-        });
 
         modelBuilder.Entity<PageContentDbEntity>(entity =>
         {
@@ -268,22 +224,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
         modelBuilder.Entity<RichTextContentDbEntity>(entity => { });
 
         modelBuilder.Entity<RichTextContentWithSlugDbEntity>(entity => { entity.ToView("RichTextContentsBySlug"); });
-
-        modelBuilder.Entity<SectionDbEntity>(entity =>
-        {
-            entity.HasOne(section => section.InterstitialPage)
-                .WithOne(page => page.Section)
-                .HasForeignKey<SectionDbEntity>()
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(section => section.Category)
-                .WithMany(category => category.Sections)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasMany(section => section.Questions)
-                .WithOne(question => question.Section)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
 
         modelBuilder.Entity<TextBodyDbEntity>(entity => { });
 
