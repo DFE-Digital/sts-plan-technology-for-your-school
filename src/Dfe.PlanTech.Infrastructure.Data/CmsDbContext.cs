@@ -45,11 +45,21 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public DbSet<RecommendationChunkDbEntity> RecommendationChunks { get; set; }
 
+    public DbSet<RecommendationChunkContentDbEntity> RecommendationChunkContents { get; set; }
+
+    public DbSet<RecommendationChunkAnswerDbEntity> RecommendationChunkAnswers { get; set; }
+
+    public DbSet<RecommendationSectionAnswerDbEntity> RecommendationSectionAnswers { get; set; }
+
     public DbSet<RecommendationIntroDbEntity> RecommendationIntros { get; set; }
 
-    public DbSet<RecommendationSectionDbEntity> RecommendationSections { get; set; }
+    public DbSet<RecommendationIntroContentDbEntity> RecommendationIntroContents { get; set; }
 
-    public DbSet<SubTopicRecommendationDbEntity> SubtopicRecommendations { get; set; }
+    public DbSet<RecommendationSectionChunkDbEntity> RecommendationSectionChunks { get; set; }
+
+    public DbSet<SubtopicRecommendationDbEntity> SubtopicRecommendations { get; set; }
+
+    public DbSet<SubtopicRecommendationIntroDbEntity> SubtopicRecommendationIntros { get; set; }
 
     public DbSet<RichTextContentDbEntity> RichTextContents { get; set; }
 
@@ -81,14 +91,37 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<QuestionDbEntity> ICmsDbContext.Questions => Questions;
     IQueryable<RecommendationPageDbEntity> ICmsDbContext.RecommendationPages => RecommendationPages;
     IQueryable<RecommendationChunkDbEntity> ICmsDbContext.RecommendationChunks => RecommendationChunks;
-    IQueryable<RecommendationIntroDbEntity> ICmsDbContext.RecommendationIntros => RecommendationIntros;
-    IQueryable<SubTopicRecommendationDbEntity> ICmsDbContext.SubtopicRecommendations => SubtopicRecommendations;
-    IQueryable<RecommendationSectionDbEntity> ICmsDbContext.RecommendationSections => RecommendationSections;
+
+    IQueryable<RecommendationChunkContentDbEntity> ICmsDbContext.RecommendationChunkContents =>
+        RecommendationChunkContents;
+
+    IQueryable<RecommendationChunkAnswerDbEntity> ICmsDbContext.RecommendationChunkAnswers =>
+        RecommendationChunkAnswers;
+
+    IQueryable<RecommendationSectionAnswerDbEntity> ICmsDbContext.RecommendationSectionAnswers =>
+        RecommendationSectionAnswers;
+
+    IQueryable<RecommendationSectionChunkDbEntity> ICmsDbContext.RecommendationSectionChunks =>
+        RecommendationSectionChunks;
+
+    IQueryable<RecommendationIntroDbEntity> ICmsDbContext.RecommendationIntros =>
+        RecommendationIntros;
+
+    IQueryable<RecommendationIntroContentDbEntity> ICmsDbContext.RecommendationIntroContents =>
+        RecommendationIntroContents;
+
+    IQueryable<SubtopicRecommendationDbEntity> ICmsDbContext.SubTopicRecommendations =>
+        SubtopicRecommendations;
+
+    IQueryable<SubtopicRecommendationIntroDbEntity> ICmsDbContext.SubtopicRecommendationIntros =>
+        SubtopicRecommendationIntros;
 
     IQueryable<RichTextContentDbEntity> ICmsDbContext.RichTextContents => RichTextContents;
+
     IQueryable<RichTextContentWithSlugDbEntity> ICmsDbContext.RichTextContentWithSlugs => RichTextContentWithSlugs
-                                                                                                .Include(rt => rt.Data)
-                                                                                                .Include(rt => rt.Marks);
+        .Include(rt => rt.Data)
+        .Include(rt => rt.Marks);
+
     IQueryable<RichTextDataDbEntity> ICmsDbContext.RichTextDataDbEntity => RichTextDataDbEntity;
     IQueryable<RichTextMarkDbEntity> ICmsDbContext.RichTextMarkDbEntity => RichTextMarkDbEntity;
     IQueryable<SectionDbEntity> ICmsDbContext.Sections => Sections;
@@ -110,6 +143,27 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(CmsDbContext).Assembly);
+
+        modelBuilder.Entity<RecommendationChunkContentDbEntity>()
+            .ToTable("RecommendationChunkContents", Schema);
+
+        modelBuilder.Entity<RecommendationIntroDbEntity>()
+            .ToTable("RecommendationIntros", Schema);
+
+        modelBuilder.Entity<RecommendationSectionDbEntity>()
+            .ToTable("RecommendationSections", Schema);
+
+        modelBuilder.Entity<SubtopicRecommendationDbEntity>(entity =>
+        {
+            entity.ToTable("SubtopicRecommendations", Schema);
+            entity.Property(e => e.Id).HasMaxLength(30);
+            entity.HasMany(entity => entity.Intros);
+        });
+
+        modelBuilder.Entity<SubtopicRecommendationIntroDbEntity>()
+            .ToTable("SubtopicRecommendationIntros", Schema);
+
         modelBuilder.HasDefaultSchema(Schema);
 
         modelBuilder.Entity<ContentComponentDbEntity>(entity =>
@@ -127,7 +181,32 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>().Navigation(button => button.Button).AutoInclude();
 
-        modelBuilder.Entity<ButtonWithLinkDbEntity>().Navigation(button => button.Button).AutoInclude();
+        modelBuilder.Entity<ButtonWithLinkDbEntity>()
+            .Navigation(button => button.Button).AutoInclude();
+
+        modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>().Navigation(button => button.Button).AutoInclude();
+
+        modelBuilder.Entity<PageContentDbEntity>(entity =>
+        {
+            entity.HasOne(pc => pc.BeforeContentComponent).WithMany(c => c.BeforeTitleContentPagesJoins);
+
+            entity.HasOne(pc => pc.ContentComponent).WithMany(c => c.ContentPagesJoins);
+
+            entity.HasOne(pc => pc.Page).WithMany(p => p.AllPageContents);
+        });
+
+
+        modelBuilder.Entity<RecommendationChunkContentDbEntity>(entity =>
+        {
+            entity.HasOne(pc => pc.ContentComponent).WithMany(c => c.RecommendationChunkContentJoins);
+        });
+
+        modelBuilder.Entity<RecommendationIntroContentDbEntity>(entity =>
+        {
+            entity.HasOne(pc => pc.ContentComponent).WithMany(c => c.RecommendationIntroContentJoins);
+        });
+
+        modelBuilder.Entity<QuestionDbEntity>().ToTable("Questions", Schema);
 
         modelBuilder.Entity<RecommendationPageDbEntity>(entity =>
         {
@@ -136,7 +215,13 @@ public class CmsDbContext : DbContext, ICmsDbContext
                     .OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<RichTextContentWithSlugDbEntity>().ToView("RichTextContentsBySlug");
+        modelBuilder.Entity<RichTextContentDbEntity>(entity => { });
+
+        modelBuilder.Entity<RichTextContentWithSlugDbEntity>(entity => { entity.ToView("RichTextContentsBySlug"); });
+
+        modelBuilder.Entity<TextBodyDbEntity>(entity => { });
+
+        modelBuilder.Entity<TitleDbEntity>(entity => { entity.ToTable("Titles", Schema); });
 
         modelBuilder.Entity<WarningComponentDbEntity>(entity =>
         {
@@ -157,13 +242,15 @@ public class CmsDbContext : DbContext, ICmsDbContext
         => entity => (_contentfulOptions.UsePreview || entity.Published) && !entity.Archived && !entity.Deleted;
 
     public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
-    => Pages.Include(page => page.BeforeTitleContent)
-                .Include(page => page.Content)
-                .Include(page => page.Title)
-                .AsSplitQuery()
-                .FirstOrDefaultAsync(page => page.Slug == slug, cancellationToken);
+        => Pages.Include(page => page.BeforeTitleContent)
+            .Include(page => page.Content)
+            .Include(page => page.Title)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(page => page.Slug == slug, cancellationToken);
 
-    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default) => queryable.ToListAsync(cancellationToken: cancellationToken);
+    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default) =>
+        queryable.ToListAsync(cancellationToken: cancellationToken);
 
-    public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default) => queryable.FirstOrDefaultAsync(cancellationToken);
+    public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+        => queryable.FirstOrDefaultAsync(cancellationToken);
 }

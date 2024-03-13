@@ -12,7 +12,6 @@ public class CategoryEntityTypeConfiguration : IEntityTypeConfiguration<Category
     {
         builder.HasMany(category => category.Sections)
                 .WithOne(section => section.Category)
-                .HasForeignKey(section => section.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
         builder.Navigation(category => category.Header).AutoInclude();
