@@ -23,5 +23,4 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
                                                           .Select(subtopicRecommendation => subtopicRecommendation.Intros.FirstOrDefault(intro => intro.Maturity == maturity))
                                                           .Select(intro => new RecommendationsViewDto(intro!.Slug, intro.Header.Text))
                                                           .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-
 }
