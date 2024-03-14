@@ -18,7 +18,8 @@ public class RecommendationIntroMapperTests : BaseMapperTests
     {
         var values = new Dictionary<string, object?>
         {
-            ["id"] = "ChunkId",
+            ["id"] = "introId",
+            ["slug"] = "test-slug",
             ["header"] =  "HeaderId",
             ["content"] = new string[] { "content1", "content2", "content3" },
         };
