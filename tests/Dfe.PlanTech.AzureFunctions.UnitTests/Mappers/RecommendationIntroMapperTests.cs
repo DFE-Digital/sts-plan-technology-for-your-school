@@ -13,6 +13,10 @@ public class RecommendationIntroMapperTests : BaseMapperTests
         
     private readonly DbSet<RecommendationIntroContentDbEntity> _introContentDbSet = Substitute.For<DbSet<RecommendationIntroContentDbEntity>>();
     
+    private static readonly CmsDbContext _db = Substitute.For<CmsDbContext>();
+    private static readonly ILogger<RecommendationIntroUpdater> _logger = Substitute.For<ILogger<RecommendationIntroUpdater>>();
+    private static RecommendationIntroUpdater CreateMockRecommendationIntroUpdater() => new(_logger, _db);
+    
     [Fact]
     public void RecommendationIntrosAreMappedCorrectly()
     {
@@ -23,19 +27,18 @@ public class RecommendationIntroMapperTests : BaseMapperTests
             ["content"] = new string[] { "content1", "content2", "content3" },
         };
 
-        var dbSubstitute = Substitute.For<CmsDbContext>();
         var loggerSubstitute = Substitute.For<ILogger<RecommendationIntroMapper>>();
         var jsonSerializerOptions = new JsonSerializerOptions();
 
-        dbSubstitute.RecommendationIntroContents = _introContentDbSet;
+        _db.RecommendationIntroContents = _introContentDbSet;
 
         var mapper = new RecommendationIntroMapper(MapperHelpers.CreateMockEntityRetriever(),
-            MapperHelpers.CreateMockEntityUpdater(), dbSubstitute, loggerSubstitute, jsonSerializerOptions);
+            CreateMockRecommendationIntroUpdater(), _db, loggerSubstitute, jsonSerializerOptions);
 
         var recommendationIntro = mapper.PerformAdditionalMapping(values);
 
         Assert.NotNull(recommendationIntro);
         
-        dbSubstitute.RecommendationIntroContents.Received(3).Attach(Arg.Any<RecommendationIntroContentDbEntity>());
+        _db.RecommendationIntroContents.Received(3).Attach(Arg.Any<RecommendationIntroContentDbEntity>());
     }
 }

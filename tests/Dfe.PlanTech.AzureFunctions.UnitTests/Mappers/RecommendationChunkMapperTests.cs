@@ -13,6 +13,10 @@ public class RecommendationChunkMapperTests : BaseMapperTests
     
     private readonly DbSet<RecommendationChunkAnswerDbEntity> _chunkAnswerDbSet = Substitute.For<DbSet<RecommendationChunkAnswerDbEntity>>();
     private readonly DbSet<RecommendationChunkContentDbEntity> _chunkContentDbSet = Substitute.For<DbSet<RecommendationChunkContentDbEntity>>();
+    
+    private static readonly CmsDbContext _db = Substitute.For<CmsDbContext>();
+    private static readonly ILogger<RecommendationChunkUpdater> _logger = Substitute.For<ILogger<RecommendationChunkUpdater>>();
+    private static RecommendationChunkUpdater CreateMockRecommendationChunkUpdater() => new(_logger, _db);
 
 
     [Fact]
@@ -25,22 +29,21 @@ public class RecommendationChunkMapperTests : BaseMapperTests
             ["content"] = new string[] { "content1", "content2", "content3" },
             ["answers"] = new string[] { "answer1", "answer2", "answer3" }
         };
-
-        var dbSubstitute = Substitute.For<CmsDbContext>();
+        
         var loggerSubstitute = Substitute.For<ILogger<RecommendationChunkMapper>>();
         var jsonSerializerOptions = new JsonSerializerOptions();
 
-        dbSubstitute.RecommendationChunkContents = _chunkContentDbSet;
-        dbSubstitute.RecommendationChunkAnswers = _chunkAnswerDbSet;
+        _db.RecommendationChunkContents = _chunkContentDbSet;
+        _db.RecommendationChunkAnswers = _chunkAnswerDbSet;
 
         var mapper = new RecommendationChunkMapper(MapperHelpers.CreateMockEntityRetriever(),
-            MapperHelpers.CreateMockEntityUpdater(), dbSubstitute, loggerSubstitute, jsonSerializerOptions);
+            CreateMockRecommendationChunkUpdater(), _db, loggerSubstitute, jsonSerializerOptions);
 
         var recommendationChunk = mapper.PerformAdditionalMapping(values);
 
         Assert.NotNull(recommendationChunk);
         
-        dbSubstitute.RecommendationChunkContents.Received(3).Attach(Arg.Any<RecommendationChunkContentDbEntity>());
-        dbSubstitute.RecommendationChunkAnswers.Received(3).Attach(Arg.Any<RecommendationChunkAnswerDbEntity>());
+        _db.RecommendationChunkContents.Received(3).Attach(Arg.Any<RecommendationChunkContentDbEntity>());
+        _db.RecommendationChunkAnswers.Received(3).Attach(Arg.Any<RecommendationChunkAnswerDbEntity>());
     }
 }
