@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -14,5 +13,9 @@ public class RecommendationChunkEntityTypeConfiguration : IEntityTypeConfigurati
     builder.HasMany(chunk => chunk.Answers)
           .WithMany(content => content.RecommendationChunks)
           .UsingEntity<RecommendationChunkAnswerDbEntity>();
+
+    builder.HasMany(chunk => chunk.Content)
+          .WithMany(content => content.RecommendationChunk)
+          .UsingEntity<RecommendationChunkContentDbEntity>();
   }
 }

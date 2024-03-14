@@ -33,7 +33,7 @@ public class GetSubTopicRecommendationFromDbQuery(IRecommendationsRepository rep
     {
         try
         {
-            return _repo.GetRecommendationsForSubtopic(subtopicId, cancellationToken);
+            return _repo.GetCompleteRecommendationsForSubtopic(subtopicId, cancellationToken);
         }
         catch (Exception ex)
         {

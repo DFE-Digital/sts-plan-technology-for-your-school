@@ -69,7 +69,6 @@ public class RecommendationsViewComponent(
             {
                 RecommendationSlug = recommendationIntro?.Slug,
                 RecommendationDisplayName = recommendationIntro?.Header.Text,
-                SectionSlug = section.InterstitialPage?.Slug,
                 NoRecommendationFoundErrorMessage = recommendation == null
                     ? string.Format("Unable to retrieve {0} recommendation", section.Name)
                     : null

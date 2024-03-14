@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Questionnaire.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Repositories;
@@ -9,27 +10,18 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
 {
   private readonly ICmsDbContext _db = db;
 
-  public async Task<SubtopicRecommendationDbEntity?> GetRecommendationsForSubtopic(string subtopicId, CancellationToken cancellationToken)
-  {
-    try
-    {
-      var recommendation = await _db.SubtopicRecommendations.Include(rec => rec.Intros)
+  public Task<SubtopicRecommendationDbEntity?> GetCompleteRecommendationsForSubtopic(string subtopicId, CancellationToken cancellationToken)
+  => _db.SubtopicRecommendations.Include(rec => rec.Intros)
                                                             .ThenInclude(intro => intro.Content)
                                                             .Include(rec => rec.Section)
+                                                            .ThenInclude(section => section.Chunks)
+                                                            .ThenInclude(chunk => chunk.Content)
                                                             .FirstOrDefaultAsync(subtopicRecommendation => subtopicRecommendation.SubtopicId == subtopicId, cancellationToken: cancellationToken);
 
-      if (recommendation == null)
-      {
-        return null;
-      }
-
-      return recommendation;
-    }
-    catch (Exception ex)
-    {
-      //_logger.LogError(ex, "Error retrieving recommendation for {Subtopic} from DB", subtopicId);
-      throw;
-    }
-  }
+  public Task<RecommendationsViewDto?> GetRecommenationsViewDtoForSubtopicAndMaturity(string subtopicId, string maturity, CancellationToken cancellationToken)
+  => _db.SubtopicRecommendations.Where(subtopicRecommendation => subtopicRecommendation.SubtopicId == subtopicId)
+                                                          .Select(subtopicRecommendation => subtopicRecommendation.Intros.FirstOrDefault(intro => intro.Maturity == maturity))
+                                                          .Select(intro => new RecommendationsViewDto(intro!.Slug, intro.Header.Text))
+                                                          .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
 }

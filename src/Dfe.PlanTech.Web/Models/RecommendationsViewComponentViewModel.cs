@@ -7,7 +7,5 @@ namespace Dfe.PlanTech.Web.Models
         public string? RecommendationDisplayName { get; init; }
 
         public string? NoRecommendationFoundErrorMessage { get; init; }
-
-        public string? SectionSlug { get; init; }
     }
 }

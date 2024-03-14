@@ -11,11 +11,11 @@ public class RecommendationSectionEntityTypeConfiguration : IEntityTypeConfigura
     public void Configure(EntityTypeBuilder<RecommendationSectionDbEntity> builder)
     {
         builder.HasMany(section => section.Chunks)
-                .WithMany(chunk => chunk.RecommendationSections);
+                .WithMany(chunk => chunk.RecommendationSections)
+                .UsingEntity<RecommendationSectionChunkDbEntity>();
 
         builder.HasMany(section => section.Answers)
                 .WithMany(answer => answer.RecommendationSections)
                 .UsingEntity<RecommendationSectionAnswerDbEntity>();
-
     }
 }
