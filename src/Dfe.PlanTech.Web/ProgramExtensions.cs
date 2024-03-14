@@ -26,6 +26,7 @@ using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
 using Dfe.PlanTech.Infrastructure.Data;
+using Dfe.PlanTech.Infrastructure.Data.Repositories;
 using Dfe.PlanTech.Web.Helpers;
 using EFCoreSecondLevelCacheInterceptor;
 using Microsoft.EntityFrameworkCore;
@@ -85,8 +86,8 @@ public static class ProgramExtensions
 
         services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationFromContentfulQuery>(GetSubTopicRecommendationFromContentfulQuery.ServiceKey);
         services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationFromDbQuery>(GetSubTopicRecommendationFromDbQuery.ServiceKey);
-        services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationQuery>(GetSubTopicRecommendationQuery.ServiceKey);
-
+        services.AddTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationQuery>();
+        services.AddTransient<IRecommendationsRepository, RecommendationsRepository>();
         return services;
     }
 

@@ -1,18 +1,18 @@
 using AutoMapper;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Queries;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
-public class GetSubTopicRecommendationFromDbQuery(ICmsDbContext db, ILogger<GetSubTopicRecommendationFromDbQuery> logger, IMapper mapperConfiguration) : IGetSubTopicRecommendationQuery
+public class GetSubTopicRecommendationFromDbQuery(IRecommendationsRepository repo, ILogger<GetSubTopicRecommendationFromDbQuery> logger, IMapper mapperConfiguration) : IGetSubTopicRecommendationQuery
 {
     public const string ServiceKey = "Database";
 
-    private readonly ICmsDbContext _db = db;
     private readonly ILogger<GetSubTopicRecommendationFromDbQuery> _logger = logger;
     private readonly IMapper _mapperConfiguration = mapperConfiguration;
+    private readonly IRecommendationsRepository _repo = repo;
 
     public async Task<SubTopicRecommendation?> GetSubTopicRecommendation(string subTopicId, CancellationToken cancellationToken = default)
     {
@@ -29,17 +29,15 @@ public class GetSubTopicRecommendationFromDbQuery(ICmsDbContext db, ILogger<GetS
     private SubTopicRecommendation MapRecommendation(SubtopicRecommendationDbEntity dbEntity)
     => _mapperConfiguration.Map<SubtopicRecommendationDbEntity, SubTopicRecommendation>(dbEntity);
 
-    private Task<SubtopicRecommendationDbEntity?> GetFromDb(string subTopicId, CancellationToken cancellationToken)
+    private Task<SubtopicRecommendationDbEntity?> GetFromDb(string subtopicId, CancellationToken cancellationToken)
     {
         try
         {
-            var query = _db.SubtopicRecommendations.Where(subtopicRecommendation => subtopicRecommendation.SubtopicId == subTopicId);
-
-            return _db.FirstOrDefaultAsync(query, cancellationToken);
+            return _repo.GetRecommendationsForSubtopic(subtopicId, cancellationToken);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving recommendation for {Subtopic} from DB", subTopicId);
+            _logger.LogError(ex, "Error retrieving recommendation for {Subtopic} from DB", subtopicId);
             throw;
         }
     }

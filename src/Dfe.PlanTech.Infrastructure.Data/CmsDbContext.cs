@@ -207,6 +207,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
         modelBuilder.Entity<RecommendationChunkContentDbEntity>(entity =>
         {
             entity.HasOne(pc => pc.ContentComponent).WithMany(c => c.RecommendationChunkContentJoins);
+            entity.HasOne(pc => pc.RecommendationChunk).WithMany(chunk => chunk.ChunkContentJoins);
         });
 
         modelBuilder.Entity<RecommendationIntroContentDbEntity>(entity =>

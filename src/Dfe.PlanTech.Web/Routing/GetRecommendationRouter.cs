@@ -12,7 +12,7 @@ namespace Dfe.PlanTech.Web.Routing;
 
 public class GetRecommendationRouter(ISubmissionStatusProcessor router,
                                     IGetAllAnswersForLatestSubmissionQuery getAllAnswersForLatestSubmissionQuery,
-                                    [FromKeyedServices(GetSubTopicRecommendationQuery.ServiceKey)] IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery) : IGetRecommendationRouter
+                                    IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery) : IGetRecommendationRouter
 {
     private readonly ISubmissionStatusProcessor _router = router;
     private readonly IGetAllAnswersForLatestSubmissionQuery _getAllAnswersForLatestSubmissionQuery = getAllAnswersForLatestSubmissionQuery;
