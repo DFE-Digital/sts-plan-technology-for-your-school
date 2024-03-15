@@ -225,7 +225,7 @@ public class GetSubTopicRecommendationQueryTests
 
         Assert.Equal(LogLevel.Error, logLevel);
 
-        static Func<NSubstitute.Core.CallInfo, SubtopicRecommendation> ReturnNullSubtopicRecommendation()
+        static Func<NSubstitute.Core.CallInfo, SubtopicRecommendation?> ReturnNullSubtopicRecommendation()
         {
             return (callinfo) =>
             {

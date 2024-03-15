@@ -55,25 +55,24 @@ public class RecommendationsViewComponent(
 
             if (string.IsNullOrEmpty(sectionMaturity)) continue;
 
-            SubtopicRecommendation? recommendation = null;
 
-            recommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id);
+            var recommendation = await _getSubTopicRecommendationQuery.GetRecommendationsViewDto(section.Sys.Id, sectionMaturity, default);
 
             if (recommendation == null)
+            {
                 _logger.LogError("No Recommendation Found: Section - {sectionName}, Maturity - {sectionMaturity}",
                     section.Name, sectionMaturity);
 
-            var recommendationIntro = recommendation?.GetRecommendationByMaturity(sectionMaturity);
+                yield return new RecommendationsViewComponentViewModel(string.Format("Unable to retrieve {0} recommendation", section.Name));
+                continue;
+            }
 
-            yield return new RecommendationsViewComponentViewModel()
+            if (section.InterstitialPage?.Slug == null)
             {
-                SectionSlug = section.InterstitialPage?.Slug,
-                RecommendationSlug = recommendationIntro?.Slug,
-                RecommendationDisplayName = recommendationIntro?.Header.Text,
-                NoRecommendationFoundErrorMessage = recommendation == null
-                    ? string.Format("Unable to retrieve {0} recommendation", section.Name)
-                    : null
-            };
+                _logger.LogError("No Slug found for Subtopic with ID: {SectionId}  / name: {SectionName}", section.Sys.Id, section.Name);
+            }
+
+            yield return new RecommendationsViewComponentViewModel(recommendation, section.InterstitialPage?.Slug ?? "");
         }
     }
 
