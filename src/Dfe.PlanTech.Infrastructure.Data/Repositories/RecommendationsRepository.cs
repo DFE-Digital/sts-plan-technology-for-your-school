@@ -56,11 +56,21 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
                                                 })
                                                 .ToListAsync(cancellationToken);
 
-    var contents = await _db.ContentComponents.Where(cc => cc.RecommendationChunk.Any(chunk => chunk.RecommendationSections.Any(section => section.Id == recommendation.SectionId)) ||
-                                                            cc.RecommendationIntro.Any(intro => intro.SubtopicRecommendations.Any(subtopicRecommendation => subtopicRecommendation.Id == recommendation.Id)))
-                                              .ToListAsync(cancellationToken);
+    var introContent = await _db.RecommendationIntroContents.Where(introContent => introContent.RecommendationIntro.SubtopicRecommendations.Any(rec => rec.Id == recommendation.Id))
+                                                            .Select(introContent => new
+                                                            {
+                                                              intro = introContent.RecommendationIntroId,
+                                                              content = introContent.ContentComponent
+                                                            })
+                                                            .ToListAsync();
 
-    var textBodyIds = contents.OfType<TextBodyDbEntity>().Select(tb => tb.RichTextId);
+    var chunkContent = await _db.RecommendationChunkContents.Where(chunkContent => chunkContent.RecommendationChunk.RecommendationSections.Any(section => section.Id == recommendation.SectionId))
+                                                            .Select(chunkContent => new
+                                                            {
+                                                              chunk = chunkContent.RecommendationChunkId,
+                                                              content = chunkContent.ContentComponent
+                                                            })
+                                                            .ToListAsync();
 
     var richTextContents = await _db.RichTextContentWithSubtopicRecommendationIds
                                       .Where(rt => rt.SubtopicRecommendationId == recommendation.Id)
@@ -68,10 +78,24 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
 
     return new SubtopicRecommendationDbEntity()
     {
-      Intros = intros,
+      Intros = intros.Select(intro => new RecommendationIntroDbEntity()
+      {
+        Id = intro.Id,
+        Header = intro.Header,
+        HeaderId = intro.HeaderId,
+        Maturity = intro.Maturity,
+        Content = introContent.Where(content => content.intro == intro.Id).Select(content => content.content).ToList()
+      }).ToList(),
       Section = new RecommendationSectionDbEntity()
       {
-        Chunks = chunks,
+        Chunks = chunks.Select(chunk => new RecommendationChunkDbEntity()
+        {
+          Id = chunk.Id,
+          Header = chunk.Header,
+          HeaderId = chunk.HeaderId,
+          Answers = chunk.Answers,
+          Content = chunkContent.Where(content => content.chunk == chunk.Id).Select(content => content.content).ToList()
+        }).ToList(),
         Answers = recommendation.Section.Answers
       },
       Subtopic = recommendation.Subtopic,
