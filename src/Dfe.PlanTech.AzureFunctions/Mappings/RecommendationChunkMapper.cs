@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class RecommendationChunkMapper(EntityRetriever retriever, EntityUpdater updater, CmsDbContext db, ILogger<RecommendationChunkMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<RecommendationChunkDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
+public class RecommendationChunkMapper(EntityRetriever retriever, RecommendationChunkUpdater updater, CmsDbContext db, ILogger<RecommendationChunkMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<RecommendationChunkDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
     private readonly CmsDbContext _db = db;
 
