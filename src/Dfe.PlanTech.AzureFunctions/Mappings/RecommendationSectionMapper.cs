@@ -7,7 +7,7 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
 public class RecommendationSectionMapper(
     EntityRetriever retriever,
-    EntityUpdater updater,
+    RecommendationSectionUpdater updater,
     CmsDbContext db,
     ILogger<RecommendationSectionMapper> logger,
     JsonSerializerOptions jsonSerialiserOptions)

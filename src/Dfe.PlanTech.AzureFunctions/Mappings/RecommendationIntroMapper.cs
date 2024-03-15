@@ -7,7 +7,7 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
 public class RecommendationIntroMapper(
     EntityRetriever retriever,
-    EntityUpdater updater,
+    RecommendationIntroUpdater updater,
     CmsDbContext db,
     ILogger<RecommendationIntroMapper> logger,
     JsonSerializerOptions jsonSerialiserOptions)

@@ -7,7 +7,7 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
 public class SubtopicRecommendationMapper(
     EntityRetriever retriever,
-    EntityUpdater updater,
+    SubtopicRecommendationUpdater updater,
     CmsDbContext db,
     ILogger<SubtopicRecommendationMapper> logger,
     JsonSerializerOptions jsonSerialiserOptions)

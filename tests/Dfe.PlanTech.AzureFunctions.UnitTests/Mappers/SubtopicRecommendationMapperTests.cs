@@ -12,6 +12,9 @@ public class SubtopicRecommendationMapperTests : BaseMapperTests
 {
     private readonly DbSet<SubtopicRecommendationIntroDbEntity> _subtopicIntroDbSet = Substitute.For<DbSet<SubtopicRecommendationIntroDbEntity>>();
     
+    private static readonly CmsDbContext _db = Substitute.For<CmsDbContext>();
+    private static readonly ILogger<SubtopicRecommendationUpdater> _logger = Substitute.For<ILogger<SubtopicRecommendationUpdater>>();
+    private static SubtopicRecommendationUpdater CreateMockSubTopicRecommendationUpdater() => new(_logger, _db);
     [Fact]
     public void SubtopicRecommendationsAreMappedCorrectly()
     {
@@ -23,20 +26,20 @@ public class SubtopicRecommendationMapperTests : BaseMapperTests
             ["intros"] = new string[] { "intro1", "intro2", "intro3" },
         };
         
-        var dbSubstitute = Substitute.For<CmsDbContext>();
+        var _db = Substitute.For<CmsDbContext>();
         var loggerSubstitute = Substitute.For<ILogger<SubtopicRecommendationMapper>>();
         var jsonSerializerOptions = new JsonSerializerOptions();
 
-        dbSubstitute.SubtopicRecommendationIntros = _subtopicIntroDbSet;
+        _db.SubtopicRecommendationIntros = _subtopicIntroDbSet;
 
         var mapper = new SubtopicRecommendationMapper(MapperHelpers.CreateMockEntityRetriever(),
-            MapperHelpers.CreateMockEntityUpdater(), dbSubstitute, loggerSubstitute, jsonSerializerOptions);
+            CreateMockSubTopicRecommendationUpdater(), _db, loggerSubstitute, jsonSerializerOptions);
 
         var subtopicRecommendationContents = mapper.PerformAdditionalMapping(values);
 
         Assert.NotNull(subtopicRecommendationContents);
         
-        dbSubstitute.SubtopicRecommendationIntros.Received(3).Attach(Arg.Any<SubtopicRecommendationIntroDbEntity>());
+        _db.SubtopicRecommendationIntros.Received(3).Attach(Arg.Any<SubtopicRecommendationIntroDbEntity>());
     }
     
 }
