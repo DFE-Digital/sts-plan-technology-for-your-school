@@ -2,10 +2,11 @@ using AutoMapper;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Mappings;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -14,7 +15,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Content.Queries;
 
 public class GetSubTopicRecommendationFromDbQueryTests
 {
-    private readonly ICmsDbContext _db = Substitute.For<ICmsDbContext>();
+    private readonly IRecommendationsRepository _recommendationsRepository = Substitute.For<IRecommendationsRepository>();
     private readonly GetSubTopicRecommendationFromDbQuery _query;
     private readonly SectionDbEntity _subTopicOne;
     private readonly SectionDbEntity _subTopicTwo;
@@ -24,8 +25,8 @@ public class GetSubTopicRecommendationFromDbQueryTests
 
     private readonly IMapper _mapper;
     private readonly ILogger<GetSubTopicRecommendationFromDbQuery> _logger = Substitute.For<ILogger<GetSubTopicRecommendationFromDbQuery>>();
-
     private readonly List<SubtopicRecommendationDbEntity> _subtopicRecommendations = [];
+
 
     public GetSubTopicRecommendationFromDbQueryTests()
     {
@@ -170,24 +171,30 @@ public class GetSubTopicRecommendationFromDbQueryTests
             Id = "subtopic-recommendation-two"
         };
 
-        _query = new(_db, _logger, _mapper);
+
+        _query = new(_recommendationsRepository, _logger, _mapper);
 
         _subtopicRecommendations.Add(_subtopicRecommendationOne);
         _subtopicRecommendations.Add(_subtopicRecommendationTwo);
 
-        _db.SubtopicRecommendations.Returns(_subtopicRecommendations.AsQueryable());
-        SetupFirstOrDefaultAsyncSuccess();
-    }
+        _recommendationsRepository.GetCompleteRecommendationsForSubtopic(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                                  .Returns((callinfo) =>
+                                  {
+                                      var subtopicId = callinfo.ArgAt<string>(0);
 
-    private void SetupFirstOrDefaultAsyncSuccess()
-    {
-        _db.FirstOrDefaultAsync(Arg.Any<IQueryable<SubTopicRecommendationDbEntity>>(), Arg.Any<CancellationToken>())
-            .Returns(callinfo =>
-            {
-                var queryable = callinfo.ArgAt<IQueryable<SubTopicRecommendationDbEntity>>(0);
+                                      return _subtopicRecommendations.FirstOrDefault(rec => rec.SubtopicId == subtopicId);
+                                  });
 
-                return queryable.FirstOrDefault();
-            });
+        _recommendationsRepository.GetRecommenationsViewDtoForSubtopicAndMaturity(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+                         .Returns((callinfo) =>
+                         {
+                             var subtopicId = callinfo.ArgAt<string>(0);
+                             var maturity = callinfo.ArgAt<string>(1);
+
+                             return _subtopicRecommendations.Select(subtopicRecommendation => subtopicRecommendation.Intros.FirstOrDefault(intro => intro.Maturity == maturity))
+                                                             .Select(intro => intro != null ? new RecommendationsViewDto(intro.Slug, intro.Header.Text) : null)
+                                                             .FirstOrDefault();
+                         });
     }
 
     [Fact]
@@ -203,7 +210,6 @@ public class GetSubTopicRecommendationFromDbQueryTests
     [Fact]
     public async Task GetSubTopicRecommendation_Returns_Null_When_Not_Found()
     {
-
         var subtopicRecommendation = await _query.GetSubTopicRecommendation("not a real id", CancellationToken.None);
 
         Assert.Null(subtopicRecommendation);
@@ -212,8 +218,8 @@ public class GetSubTopicRecommendationFromDbQueryTests
     [Fact]
     public async Task LogsError_When_Exception()
     {
-        _db.FirstOrDefaultAsync(Arg.Any<IQueryable<SubTopicRecommendationDbEntity>>(), Arg.Any<CancellationToken>())
-            .Throws((callinfo) => new DatabaseException("Error first or default here"));
+        _recommendationsRepository.GetCompleteRecommendationsForSubtopic(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                                    .ThrowsAsync((callinfo) => new Exception("Error getting recommendations for subtopic"));
 
         var exception = await Assert.ThrowsAnyAsync<Exception>(async () => await _query.GetSubTopicRecommendation(_subtopicRecommendationOne!.SubtopicId, CancellationToken.None));
 
