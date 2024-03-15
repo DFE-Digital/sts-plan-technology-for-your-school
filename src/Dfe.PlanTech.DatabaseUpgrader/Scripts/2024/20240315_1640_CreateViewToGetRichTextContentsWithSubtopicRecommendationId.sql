@@ -1,5 +1,5 @@
 CREATE 
-OR ALTER VIEW [Contentful].[RichTextContentsBySubtopicReccomendationId] AS (
+OR ALTER VIEW [Contentful].[RichTextContentsBySubtopicRecommendationId] AS (
   SELECT 
     [ContentComponentId], 
     [RichTextContentsWithSlug].[RichTextId], 
