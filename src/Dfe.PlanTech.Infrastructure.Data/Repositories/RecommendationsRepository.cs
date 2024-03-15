@@ -62,7 +62,7 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
                                                               intro = introContent.RecommendationIntroId,
                                                               content = introContent.ContentComponent
                                                             })
-                                                            .ToListAsync();
+                                                            .ToListAsync(cancellationToken);
 
     var chunkContent = await _db.RecommendationChunkContents.Where(chunkContent => chunkContent.RecommendationChunk.RecommendationSections.Any(section => section.Id == recommendation.SectionId))
                                                             .Select(chunkContent => new
@@ -70,11 +70,11 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
                                                               chunk = chunkContent.RecommendationChunkId,
                                                               content = chunkContent.ContentComponent
                                                             })
-                                                            .ToListAsync();
+                                                            .ToListAsync(cancellationToken);
 
     var richTextContents = await _db.RichTextContentWithSubtopicRecommendationIds
                                       .Where(rt => rt.SubtopicRecommendationId == recommendation.Id)
-                                      .ToListAsync();
+                                      .ToListAsync(cancellationToken);
 
     return new SubtopicRecommendationDbEntity()
     {
