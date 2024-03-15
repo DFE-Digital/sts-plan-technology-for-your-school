@@ -6,13 +6,8 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 /// <remarks>
 /// Is loaded by a view
 /// </remarks>
-public class RichTextContentWithSlugDbEntity : RichTextContentDbEntity
+public class RichTextContentWithSubtopicRecommendationId : RichTextContentDbEntity
 {
     //Loaded from page that the parent entity (e.g. TextBodyDbEntity) belongs to
-    public string Slug { get; set; } = null!;
-
-    //Loaded from the parent entity
-    public bool Archived { get; set; }
-    public bool Deleted { get; set; }
-    public bool Published { get; set; }
+    public string SubtopicRecommendationId { get; set; } = null!;
 }

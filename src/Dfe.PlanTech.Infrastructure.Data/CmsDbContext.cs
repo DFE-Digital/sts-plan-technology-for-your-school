@@ -61,6 +61,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public DbSet<RichTextContentDbEntity> RichTextContents { get; set; }
 
+    public DbSet<RichTextContentWithSubtopicRecommendationId> RichTextContentWithSubtopicRecommendationIds { get; set; }
+
     public DbSet<RichTextContentWithSlugDbEntity> RichTextContentWithSlugs { get; set; }
 
     public DbSet<RichTextDataDbEntity> RichTextDataDbEntity { get; set; }
@@ -100,6 +102,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<RecommendationSectionChunkDbEntity> ICmsDbContext.RecommendationSectionChunks => RecommendationSectionChunks;
     IQueryable<RecommendationSectionDbEntity> ICmsDbContext.RecommendationSections => RecommendationSections;
     IQueryable<RichTextContentDbEntity> ICmsDbContext.RichTextContents => RichTextContents;
+    IQueryable<RichTextContentWithSubtopicRecommendationId> ICmsDbContext.RichTextContentWithSubtopicRecommendationIds => RichTextContentWithSubtopicRecommendationIds;
     IQueryable<RichTextContentWithSlugDbEntity> ICmsDbContext.RichTextContentWithSlugs => RichTextContentWithSlugs.Include(rt => rt.Data).Include(rt => rt.Marks);
     IQueryable<RichTextDataDbEntity> ICmsDbContext.RichTextDataDbEntity => RichTextDataDbEntity;
     IQueryable<RichTextMarkDbEntity> ICmsDbContext.RichTextMarkDbEntity => RichTextMarkDbEntity;
@@ -195,11 +198,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<RichTextContentDbEntity>(entity => { });
-
         modelBuilder.Entity<RichTextContentWithSlugDbEntity>(entity => { entity.ToView("RichTextContentsBySlug"); });
-
-        modelBuilder.Entity<TextBodyDbEntity>(entity => { });
+        modelBuilder.Entity<RichTextContentWithSubtopicRecommendationId>(entity => { entity.ToView("RichTextContentsBySlug"); });
 
         modelBuilder.Entity<TitleDbEntity>(entity => { entity.ToTable("Titles", Schema); });
 

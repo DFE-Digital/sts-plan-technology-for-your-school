@@ -17,7 +17,9 @@ public interface ICmsDbContext
     public IQueryable<CategoryDbEntity> Categories { get; }
 
     public IQueryable<ComponentDropDownDbEntity> ComponentDropDowns { get; }
+
     public IQueryable<ContentComponentDbEntity> ContentComponents { get; }
+
     public IQueryable<HeaderDbEntity> Headers { get; }
 
     public IQueryable<InsetTextDbEntity> InsetTexts { get; }
@@ -49,10 +51,14 @@ public interface ICmsDbContext
     public IQueryable<RecommendationIntroContentDbEntity> RecommendationIntroContents { get; }
 
     public IQueryable<SubtopicRecommendationDbEntity> SubtopicRecommendations { get; }
+
     public IQueryable<SubtopicRecommendationIntroDbEntity> SubtopicRecommendationIntros { get; }
 
     public IQueryable<RichTextContentDbEntity> RichTextContents { get; }
+
     public IQueryable<RichTextContentWithSlugDbEntity> RichTextContentWithSlugs { get; }
+
+    public IQueryable<RichTextContentWithSubtopicRecommendationId> RichTextContentWithSubtopicRecommendationIds { get; }
 
     public IQueryable<RichTextDataDbEntity> RichTextDataDbEntity { get; }
 

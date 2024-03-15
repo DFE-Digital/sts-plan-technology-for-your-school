@@ -60,6 +60,12 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
                                                             cc.RecommendationIntro.Any(intro => intro.SubtopicRecommendations.Any(subtopicRecommendation => subtopicRecommendation.Id == recommendation.Id)))
                                               .ToListAsync(cancellationToken);
 
+    var textBodyIds = contents.OfType<TextBodyDbEntity>().Select(tb => tb.RichTextId);
+
+    var richTextContents = await _db.RichTextContentWithSubtopicRecommendationIds
+                                      .Where(rt => rt.SubtopicRecommendationId == recommendation.Id)
+                                      .ToListAsync();
+
     return new SubtopicRecommendationDbEntity()
     {
       Intros = intros,
