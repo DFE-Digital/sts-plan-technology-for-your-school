@@ -19,13 +19,13 @@ public class GetSubTopicRecommendationFromDbQueryTests
     private readonly SectionDbEntity _subTopicOne;
     private readonly SectionDbEntity _subTopicTwo;
 
-    private readonly SubTopicRecommendationDbEntity? _subtopicRecommendationOne;
-    private readonly SubTopicRecommendationDbEntity? _subtopicRecommendationTwo;
+    private readonly SubtopicRecommendationDbEntity? _subtopicRecommendationOne;
+    private readonly SubtopicRecommendationDbEntity? _subtopicRecommendationTwo;
 
     private readonly IMapper _mapper;
     private readonly ILogger<GetSubTopicRecommendationFromDbQuery> _logger = Substitute.For<ILogger<GetSubTopicRecommendationFromDbQuery>>();
 
-    private readonly List<SubTopicRecommendationDbEntity> _subtopicRecommendations = [];
+    private readonly List<SubtopicRecommendationDbEntity> _subtopicRecommendations = [];
 
     public GetSubTopicRecommendationFromDbQueryTests()
     {
