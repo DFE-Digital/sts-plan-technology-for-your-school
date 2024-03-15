@@ -38,6 +38,7 @@ public class GetSubTopicRecommendationFromDbQuery(IRecommendationsRepository rep
     public Task<RecommendationsViewDto?> GetRecommendationsViewDto(string subtopicId, string maturity, CancellationToken cancellationToken = default)
     => _repo.GetRecommenationsViewDtoForSubtopicAndMaturity(subtopicId, maturity, cancellationToken);
 
+
     private SubtopicRecommendation MapRecommendation(SubtopicRecommendationDbEntity dbEntity)
     => _mapperConfiguration.Map<SubtopicRecommendationDbEntity, SubtopicRecommendation>(dbEntity);
 }

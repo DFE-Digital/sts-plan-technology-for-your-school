@@ -17,7 +17,7 @@ public interface ICmsDbContext
     public IQueryable<CategoryDbEntity> Categories { get; }
 
     public IQueryable<ComponentDropDownDbEntity> ComponentDropDowns { get; }
-
+    public IQueryable<ContentComponentDbEntity> ContentComponents { get; }
     public IQueryable<HeaderDbEntity> Headers { get; }
 
     public IQueryable<InsetTextDbEntity> InsetTexts { get; }

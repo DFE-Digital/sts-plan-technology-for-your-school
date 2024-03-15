@@ -82,6 +82,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<ButtonWithLinkDbEntity> ICmsDbContext.ButtonWithLinks => ButtonWithLinks;
     IQueryable<CategoryDbEntity> ICmsDbContext.Categories => Categories;
     IQueryable<ComponentDropDownDbEntity> ICmsDbContext.ComponentDropDowns => ComponentDropDowns;
+    IQueryable<ContentComponentDbEntity> ICmsDbContext.ContentComponents => ContentComponents;
+
     IQueryable<HeaderDbEntity> ICmsDbContext.Headers => Headers;
     IQueryable<InsetTextDbEntity> ICmsDbContext.InsetTexts => InsetTexts;
     IQueryable<NavigationLinkDbEntity> ICmsDbContext.NavigationLink => NavigationLink;
@@ -133,13 +135,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         modelBuilder.Entity<RecommendationSectionDbEntity>()
             .ToTable("RecommendationSections", Schema);
-
-        modelBuilder.Entity<SubtopicRecommendationDbEntity>(entity =>
-        {
-            entity.ToTable("SubtopicRecommendations", Schema);
-            entity.Property(e => e.Id).HasMaxLength(30);
-            entity.HasMany(entity => entity.Intros);
-        });
 
         modelBuilder.Entity<SubtopicRecommendationIntroDbEntity>()
             .ToTable("SubtopicRecommendationIntros", Schema);
