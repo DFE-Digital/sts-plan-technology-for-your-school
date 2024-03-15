@@ -67,6 +67,7 @@ public class RecommendationsViewComponent(
 
             yield return new RecommendationsViewComponentViewModel()
             {
+                SectionSlug = section.InterstitialPage?.Slug,
                 RecommendationSlug = recommendationIntro?.Slug,
                 RecommendationDisplayName = recommendationIntro?.Header.Text,
                 NoRecommendationFoundErrorMessage = recommendation == null
