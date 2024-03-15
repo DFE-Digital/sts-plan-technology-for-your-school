@@ -76,6 +76,7 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
 
     return new SubtopicRecommendationDbEntity()
     {
+      Id = recommendation.Id,
       Intros = intros.Select(intro => new RecommendationIntroDbEntity()
       {
         Id = intro.Id,
@@ -94,7 +95,8 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
           Answers = chunk.Answers,
           Content = chunkContent.Where(content => content.chunk == chunk.Id).Select(content => content.content).ToList()
         }).ToList(),
-        Answers = recommendation.Section.Answers
+        Answers = recommendation.Section.Answers,
+        Id = recommendation.Section.Id,
       },
       Subtopic = recommendation.Subtopic,
       SubtopicId = recommendation.SubtopicId

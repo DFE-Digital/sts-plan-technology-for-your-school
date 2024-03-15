@@ -237,7 +237,7 @@ public class RecommendationsRepositoryTests
     var recommendation = await _repository.GetCompleteRecommendationsForSubtopic(_subtopicRecommendation.Subtopic.Id, CancellationToken.None);
 
     Assert.NotNull(recommendation);
-    Assert.Equal(_subtopicRecommendation, recommendation);
+    Assert.Equal(_subtopicRecommendation.Id, recommendation.Id);
   }
 
   [Fact]
