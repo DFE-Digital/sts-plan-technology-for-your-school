@@ -10,6 +10,8 @@ public class SubtopicRecommendationEntityTypeConfiguration : IEntityTypeConfigur
 {
     public void Configure(EntityTypeBuilder<SubtopicRecommendationDbEntity> builder)
     {
+        builder.ToTable("SubtopicRecommendations");
+
         builder.HasMany(subtopicRecommendation => subtopicRecommendation.Intros)
               .WithMany(intro => intro.SubtopicRecommendations)
               .UsingEntity<SubtopicRecommendationIntroDbEntity>();
