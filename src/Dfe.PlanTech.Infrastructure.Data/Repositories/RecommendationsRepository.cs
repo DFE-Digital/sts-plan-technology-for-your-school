@@ -35,8 +35,6 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
                                           })
                                           .FirstOrDefaultAsync(cancellationToken);
 
-    //var recommendation = await _db.SubtopicRecommendations.Include(subtopicRec => subtopicRec.Section).FirstOrDefaultAsync(subtopicRec => subtopicRec.SubtopicId == subtopicId, cancellationToken);
-
     if (recommendation == null)
     {
       return null;

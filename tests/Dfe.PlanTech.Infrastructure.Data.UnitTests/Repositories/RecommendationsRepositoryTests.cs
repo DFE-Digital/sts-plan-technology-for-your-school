@@ -1,12 +1,10 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data.Repositories;
-using Microsoft.EntityFrameworkCore;
 using MockQueryable.NSubstitute;
 using NSubstitute;
 
@@ -23,7 +21,6 @@ public class RecommendationsRepositoryTests
   private readonly List<AnswerDbEntity> _answers = [];
   private readonly List<RecommendationChunkDbEntity> _chunks = [];
   private readonly List<RecommendationIntroDbEntity> _intros = [];
-  private readonly List<RecommendationSectionDbEntity> _recommendationSections = [];
   private readonly List<SectionDbEntity> _sections = [];
   private readonly List<SubtopicRecommendationDbEntity> _subtopicRecommendations = [];
 
@@ -42,9 +39,30 @@ public class RecommendationsRepositoryTests
 
     var mockContext = Substitute.For<ICmsDbContext>();
 
-    var dbSetMock = _subtopicRecommendations.BuildMock();
+    var subtopicRecDbSetMock = _subtopicRecommendations.BuildMock();
+    _db.SubtopicRecommendations.Returns(subtopicRecDbSetMock);
 
-    _db.SubtopicRecommendations.Returns(dbSetMock);
+    var sectionsDbSetMock = _sections.BuildMock();
+    _db.Sections.Returns(sectionsDbSetMock);
+
+    var introsMockSet = _intros.BuildMock();
+    _db.RecommendationIntros.Returns(introsMockSet);
+
+    var chunksMockSet = _chunks.BuildMock();
+    _db.RecommendationChunks.Returns(chunksMockSet);
+
+    List<RecommendationIntroContentDbEntity> introContent = [];
+    var introContentMock = introContent.BuildMock();
+    _db.RecommendationIntroContents.Returns(introContentMock);
+
+    List<RecommendationChunkContentDbEntity> chunkContent = [];
+    var chunkContentMock = chunkContent.BuildMock();
+    _db.RecommendationChunkContents.Returns(chunkContentMock);
+
+
+    List<RichTextContentWithSubtopicRecommendationId> richTexts = [];
+    var richTextsMock = richTexts.BuildMock();
+    _db.RichTextContentWithSubtopicRecommendationIds.Returns(richTextsMock);
 
     _repository = new RecommendationsRepository(_db);
   }
@@ -166,7 +184,7 @@ public class RecommendationsRepositoryTests
 
     var subtopic = new SectionDbEntity() { Id = "SubTopicId" };
 
-    return new SubtopicRecommendationDbEntity()
+    var recommendation = new SubtopicRecommendationDbEntity()
     {
       Intros =
         [
@@ -180,6 +198,10 @@ public class RecommendationsRepositoryTests
       SubtopicId = subtopic.Id,
       Id = "subtopic-recommendation-one"
     };
+
+    subtopic.SubtopicRecommendation = recommendation;
+
+    return recommendation;
   }
 
   [Theory]
