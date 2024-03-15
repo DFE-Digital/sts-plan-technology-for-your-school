@@ -15,7 +15,7 @@ public class GetSubTopicRecommendationFromDbQuery(IRecommendationsRepository rep
     private readonly IMapper _mapperConfiguration = mapperConfiguration;
     private readonly IRecommendationsRepository _repo = repo;
 
-    public async Task<SubTopicRecommendation?> GetSubTopicRecommendation(string subtopicId, CancellationToken cancellationToken = default)
+    public async Task<SubtopicRecommendation?> GetSubTopicRecommendation(string subtopicId, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -38,6 +38,6 @@ public class GetSubTopicRecommendationFromDbQuery(IRecommendationsRepository rep
     public Task<RecommendationsViewDto?> GetRecommendationsViewDto(string subtopicId, string maturity, CancellationToken cancellationToken = default)
     => _repo.GetRecommenationsViewDtoForSubtopicAndMaturity(subtopicId, maturity, cancellationToken);
 
-    private SubTopicRecommendation MapRecommendation(SubtopicRecommendationDbEntity dbEntity)
-    => _mapperConfiguration.Map<SubtopicRecommendationDbEntity, SubTopicRecommendation>(dbEntity);
+    private SubtopicRecommendation MapRecommendation(SubtopicRecommendationDbEntity dbEntity)
+    => _mapperConfiguration.Map<SubtopicRecommendationDbEntity, SubtopicRecommendation>(dbEntity);
 }

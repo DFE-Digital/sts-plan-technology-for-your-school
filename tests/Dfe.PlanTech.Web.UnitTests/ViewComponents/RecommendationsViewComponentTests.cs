@@ -22,7 +22,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
         private readonly ILogger<RecommendationsViewComponent> _loggerCategory;
 
-        private readonly SubTopicRecommendation? _subtopic = new SubTopicRecommendation()
+        private readonly SubtopicRecommendation? _subtopic = new SubtopicRecommendation()
         {
             Intros = new List<RecommendationIntro>()
             {
@@ -78,7 +78,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             }
         };
 
-        private readonly SubTopicRecommendation? _subtopicTwo = new SubTopicRecommendation()
+        private readonly SubtopicRecommendation? _subtopicTwo = new SubtopicRecommendation()
         {
             Intros = new List<RecommendationIntro>()
             {

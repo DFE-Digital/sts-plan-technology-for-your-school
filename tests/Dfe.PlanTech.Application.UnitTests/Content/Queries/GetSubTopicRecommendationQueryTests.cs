@@ -14,8 +14,8 @@ public class GetSubTopicRecommendationQueryTests
     private readonly ILogger<GetSubTopicRecommendationQuery> _logger = Substitute.For<ILogger<GetSubTopicRecommendationQuery>>();
     private readonly IGetSubTopicRecommendationQuery _contentfulQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
     private readonly IGetSubTopicRecommendationQuery _dbQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
-    private readonly SubTopicRecommendation _subtopicRecommendation;
-    private readonly List<SubTopicRecommendation> _subtopicRecommendations = [];
+    private readonly SubtopicRecommendation _subtopicRecommendation;
+    private readonly List<SubtopicRecommendation> _subtopicRecommendations = [];
 
     private readonly List<string> _loggedMessages = [];
     public GetSubTopicRecommendationQueryTests()
@@ -169,7 +169,7 @@ public class GetSubTopicRecommendationQueryTests
     {
         _dbQuery.GetSubTopicRecommendation(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((callinfo) =>
         {
-            SubTopicRecommendation? recommendation = null;
+            SubtopicRecommendation? recommendation = null;
 
             return recommendation;
         });
@@ -225,11 +225,11 @@ public class GetSubTopicRecommendationQueryTests
 
         Assert.Equal(LogLevel.Error, logLevel);
 
-        static Func<NSubstitute.Core.CallInfo, SubTopicRecommendation> ReturnNullSubtopicRecommendation()
+        static Func<NSubstitute.Core.CallInfo, SubtopicRecommendation> ReturnNullSubtopicRecommendation()
         {
             return (callinfo) =>
             {
-                SubTopicRecommendation? recommendation = null;
+                SubtopicRecommendation? recommendation = null;
 
                 return recommendation;
             };

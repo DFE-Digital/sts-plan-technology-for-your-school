@@ -1,11 +1,12 @@
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Questionnaire.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
-public class GetSubTopicRecommendationQuery([FromKeyedServices(GetSubTopicRecommendationFromContentfulQuery.ServiceKey)] IGetSubTopicRecommendationQuery getFromContentfulQuery,
+public class GetSubTopicRecommendationQuery([FromKeyedServices(GetSubtopicRecommendationFromContentfulQuery.ServiceKey)] IGetSubTopicRecommendationQuery getFromContentfulQuery,
                                             [FromKeyedServices(GetSubTopicRecommendationFromDbQuery.ServiceKey)] IGetSubTopicRecommendationQuery getFromDbQuery,
                                             ILogger<GetSubTopicRecommendationQuery> logger) : IGetSubTopicRecommendationQuery
 {
@@ -15,26 +16,53 @@ public class GetSubTopicRecommendationQuery([FromKeyedServices(GetSubTopicRecomm
   private readonly IGetSubTopicRecommendationQuery _getFromDbQuery = getFromDbQuery;
   private readonly ILogger<GetSubTopicRecommendationQuery> _logger = logger;
 
-  public async Task<SubTopicRecommendation?> GetSubTopicRecommendation(string subTopicId, CancellationToken cancellationToken)
+  public async Task<RecommendationsViewDto?> GetRecommendationsViewDto(string subtopicId, string maturity, CancellationToken cancellationToken = default)
   {
-    var fromDb = await _getFromDbQuery.GetSubTopicRecommendation(subTopicId, cancellationToken);
+    Task<RecommendationsViewDto?> func(IGetSubTopicRecommendationQuery repository) => repository.GetRecommendationsViewDto(subtopicId, maturity, cancellationToken);
+
+    var recommendationsView = await GetFromDbOrContentfulIfNotFound(func, subtopicId);
+
+    if (recommendationsView == null)
+    {
+      _logger.LogError("Was unable to find a subtopic recommendation for {SubtopicId} from DB or Contentful", subtopicId);
+    }
+
+    return recommendationsView;
+  }
+
+  public async Task<SubtopicRecommendation?> GetSubTopicRecommendation(string subtopicId, CancellationToken cancellationToken)
+  {
+    Task<SubtopicRecommendation?> func(IGetSubTopicRecommendationQuery repository) => repository.GetSubTopicRecommendation(subtopicId, cancellationToken);
+
+    var recommendation = await GetFromDbOrContentfulIfNotFound(func, subtopicId);
+
+    if (recommendation == null)
+    {
+      _logger.LogError("Was unable to find a subtopic recommendation for {SubtopicId} from DB or Contentful", subtopicId);
+    }
+
+    return recommendation;
+  }
+
+  private async Task<T?> GetFromDbOrContentfulIfNotFound<T>(Func<IGetSubTopicRecommendationQuery, Task<T>> getFromInterface, string subtopicId)
+  {
+    var fromDb = await getFromInterface(_getFromDbQuery);
 
     if (fromDb != null)
     {
-      LogRetrievalTrace(subTopicId, "database");
+      LogRetrievalTrace(subtopicId, "database");
       return fromDb;
     }
 
-    var fromContentful = await _getFromContentfulQuery.GetSubTopicRecommendation(subTopicId, cancellationToken);
+    var fromContentful = await getFromInterface(_getFromDbQuery);
 
     if (fromContentful != null)
     {
-      LogRetrievalTrace(subTopicId, "Contentful");
+      LogRetrievalTrace(subtopicId, "Contentful");
       return fromContentful;
     }
 
-    _logger.LogError("Was unable to find a subtopic recommendation for {SubtopicId} from DB or Contentful", subTopicId);
-    return null;
+    return default;
   }
 
   private void LogRetrievalTrace(string subtopicId, string retrievedFrom)

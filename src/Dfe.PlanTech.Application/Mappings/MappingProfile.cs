@@ -27,7 +27,7 @@ public class CmsMappingProfile : Profile
         .Include<RecommendationPageDbEntity, RecommendationPage>()
         .Include<RecommendationSectionDbEntity, RecommendationSection>()
         .Include<SectionDbEntity, Section>()
-        .Include<SubtopicRecommendationDbEntity, SubTopicRecommendation>()
+        .Include<SubtopicRecommendationDbEntity, SubtopicRecommendation>()
         .Include<TextBodyDbEntity, TextBody>()
         .Include<TitleDbEntity, Title>()
         .Include<WarningComponentDbEntity, WarningComponent>()
@@ -48,7 +48,7 @@ public class CmsMappingProfile : Profile
         CreateMap<RecommendationPageDbEntity, RecommendationPage>();
         CreateMap<RecommendationSectionDbEntity, RecommendationSection>();
         CreateMap<SectionDbEntity, Section>();
-        CreateMap<SubtopicRecommendationDbEntity, SubTopicRecommendation>();
+        CreateMap<SubtopicRecommendationDbEntity, SubtopicRecommendation>();
         CreateMap<TextBodyDbEntity, TextBody>();
         CreateMap<TitleDbEntity, Title>();
         CreateMap<WarningComponentDbEntity, WarningComponent>();

@@ -68,7 +68,7 @@ public class GetRecommendationRouterTests
         }
     };
 
-    private readonly SubTopicRecommendation? _subtopic = new SubTopicRecommendation()
+    private readonly SubtopicRecommendation? _subtopic = new SubtopicRecommendation()
     {
         Intros = new List<RecommendationIntro>()
         {
