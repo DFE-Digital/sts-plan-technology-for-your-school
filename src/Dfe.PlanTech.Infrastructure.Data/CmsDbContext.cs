@@ -199,7 +199,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
         });
 
         modelBuilder.Entity<RichTextContentWithSlugDbEntity>(entity => { entity.ToView("RichTextContentsBySlug"); });
-        modelBuilder.Entity<RichTextContentWithSubtopicRecommendationId>(entity => { entity.ToView("RichTextContentsBySlug"); });
+        modelBuilder.Entity<RichTextContentWithSubtopicRecommendationId>(entity => { entity.ToView("RichTextContentsBySubtopicRecommendationId"); });
 
         modelBuilder.Entity<TitleDbEntity>(entity => { entity.ToTable("Titles", Schema); });
 
