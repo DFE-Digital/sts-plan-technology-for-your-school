@@ -2,6 +2,7 @@ using AutoMapper;
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
@@ -14,26 +15,18 @@ public class GetSubTopicRecommendationFromDbQuery(IRecommendationsRepository rep
     private readonly IMapper _mapperConfiguration = mapperConfiguration;
     private readonly IRecommendationsRepository _repo = repo;
 
-    public async Task<SubTopicRecommendation?> GetSubTopicRecommendation(string subTopicId, CancellationToken cancellationToken = default)
-    {
-        var dbEntity = await GetFromDb(subTopicId, cancellationToken);
-
-        if (dbEntity == null)
-        {
-            return null;
-        }
-
-        return MapRecommendation(dbEntity);
-    }
-
-    private SubTopicRecommendation MapRecommendation(SubtopicRecommendationDbEntity dbEntity)
-    => _mapperConfiguration.Map<SubtopicRecommendationDbEntity, SubTopicRecommendation>(dbEntity);
-
-    private Task<SubtopicRecommendationDbEntity?> GetFromDb(string subtopicId, CancellationToken cancellationToken)
+    public async Task<SubTopicRecommendation?> GetSubTopicRecommendation(string subtopicId, CancellationToken cancellationToken = default)
     {
         try
         {
-            return _repo.GetCompleteRecommendationsForSubtopic(subtopicId, cancellationToken);
+            var recommendation = await _repo.GetCompleteRecommendationsForSubtopic(subtopicId, cancellationToken);
+
+            if (recommendation == null)
+            {
+                return null;
+            }
+
+            return MapRecommendation(recommendation);
         }
         catch (Exception ex)
         {
@@ -41,4 +34,10 @@ public class GetSubTopicRecommendationFromDbQuery(IRecommendationsRepository rep
             throw;
         }
     }
+
+    public Task<RecommendationsViewDto?> GetRecommendationsViewDto(string subtopicId, string maturity, CancellationToken cancellationToken = default)
+    => _repo.GetRecommenationsViewDtoForSubtopicAndMaturity(subtopicId, maturity, cancellationToken);
+
+    private SubTopicRecommendation MapRecommendation(SubtopicRecommendationDbEntity dbEntity)
+    => _mapperConfiguration.Map<SubtopicRecommendationDbEntity, SubTopicRecommendation>(dbEntity);
 }
