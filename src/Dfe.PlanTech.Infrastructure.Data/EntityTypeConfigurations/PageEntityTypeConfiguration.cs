@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Dfe.PlanTech.Infrastructure.Data.EntityTypeConfigurations;
-
 [ExcludeFromCodeCoverage]
 public class PageEntityTypeConfiguration : IEntityTypeConfiguration<PageDbEntity>
 {

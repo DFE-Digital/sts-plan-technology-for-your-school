@@ -41,27 +41,21 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public DbSet<QuestionDbEntity> Questions { get; set; }
 
-    #region Recommendation DbSets
+
+    #region RECOMMENDATIONS
+    //Old
     public DbSet<RecommendationPageDbEntity> RecommendationPages { get; set; }
 
-    public DbSet<RecommendationChunkDbEntity> RecommendationChunks { get; set; }
-
+    //New
     public DbSet<RecommendationChunkAnswerDbEntity> RecommendationChunkAnswers { get; set; }
-
     public DbSet<RecommendationChunkContentDbEntity> RecommendationChunkContents { get; set; }
-
-    public DbSet<RecommendationIntroDbEntity> RecommendationIntros { get; set; }
-
+    public DbSet<RecommendationChunkDbEntity> RecommendationChunks { get; set; }
     public DbSet<RecommendationIntroContentDbEntity> RecommendationIntroContents { get; set; }
-
-    public DbSet<RecommendationSectionDbEntity> RecommendationSections { get; set; }
-
+    public DbSet<RecommendationIntroDbEntity> RecommendationIntros { get; set; }
     public DbSet<RecommendationSectionAnswerDbEntity> RecommendationSectionAnswers { get; set; }
-
     public DbSet<RecommendationSectionChunkDbEntity> RecommendationSectionChunks { get; set; }
-
+    public DbSet<RecommendationSectionDbEntity> RecommendationSections { get; set; }
     public DbSet<SubtopicRecommendationDbEntity> SubtopicRecommendations { get; set; }
-
     public DbSet<SubtopicRecommendationIntroDbEntity> SubtopicRecommendationIntros { get; set; }
     #endregion
 
@@ -81,6 +75,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public DbSet<WarningComponentDbEntity> Warnings { get; set; }
 
+    #region IQueryables from interface
     IQueryable<AnswerDbEntity> ICmsDbContext.Answers => Answers;
     IQueryable<ButtonDbEntity> ICmsDbContext.Buttons => Buttons;
     IQueryable<ButtonWithEntryReferenceDbEntity> ICmsDbContext.ButtonWithEntryReferences => ButtonWithEntryReferences;
@@ -90,52 +85,29 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<HeaderDbEntity> ICmsDbContext.Headers => Headers;
     IQueryable<InsetTextDbEntity> ICmsDbContext.InsetTexts => InsetTexts;
     IQueryable<NavigationLinkDbEntity> ICmsDbContext.NavigationLink => NavigationLink;
-    IQueryable<PageDbEntity> ICmsDbContext.Pages => Pages;
     IQueryable<PageContentDbEntity> ICmsDbContext.PageContents => PageContents;
+    IQueryable<PageDbEntity> ICmsDbContext.Pages => Pages;
     IQueryable<QuestionDbEntity> ICmsDbContext.Questions => Questions;
-    IQueryable<RecommendationPageDbEntity> ICmsDbContext.RecommendationPages => RecommendationPages;
+    IQueryable<RecommendationChunkAnswerDbEntity> ICmsDbContext.RecommendationChunkAnswers => RecommendationChunkAnswers;
+    IQueryable<RecommendationChunkContentDbEntity> ICmsDbContext.RecommendationChunkContents => RecommendationChunkContents;
     IQueryable<RecommendationChunkDbEntity> ICmsDbContext.RecommendationChunks => RecommendationChunks;
-
-    IQueryable<RecommendationChunkContentDbEntity> ICmsDbContext.RecommendationChunkContents =>
-        RecommendationChunkContents;
-
-    IQueryable<RecommendationChunkAnswerDbEntity> ICmsDbContext.RecommendationChunkAnswers =>
-        RecommendationChunkAnswers;
-
-    IQueryable<RecommendationSectionAnswerDbEntity> ICmsDbContext.RecommendationSectionAnswers =>
-        RecommendationSectionAnswers;
-
-    IQueryable<RecommendationSectionChunkDbEntity> ICmsDbContext.RecommendationSectionChunks =>
-        RecommendationSectionChunks;
-
-    IQueryable<RecommendationSectionDbEntity> ICmsDbContext.RecommendationSections =>
-        RecommendationSections;
-
-
-    IQueryable<RecommendationIntroDbEntity> ICmsDbContext.RecommendationIntros =>
-        RecommendationIntros;
-
-    IQueryable<RecommendationIntroContentDbEntity> ICmsDbContext.RecommendationIntroContents =>
-        RecommendationIntroContents;
-
-    IQueryable<SubtopicRecommendationDbEntity> ICmsDbContext.SubtopicRecommendations =>
-        SubtopicRecommendations;
-
-    IQueryable<SubtopicRecommendationIntroDbEntity> ICmsDbContext.SubtopicRecommendationIntros =>
-        SubtopicRecommendationIntros;
-
+    IQueryable<RecommendationIntroContentDbEntity> ICmsDbContext.RecommendationIntroContents => RecommendationIntroContents;
+    IQueryable<RecommendationIntroDbEntity> ICmsDbContext.RecommendationIntros => RecommendationIntros;
+    IQueryable<RecommendationPageDbEntity> ICmsDbContext.RecommendationPages => RecommendationPages;
+    IQueryable<RecommendationSectionAnswerDbEntity> ICmsDbContext.RecommendationSectionAnswers => RecommendationSectionAnswers;
+    IQueryable<RecommendationSectionChunkDbEntity> ICmsDbContext.RecommendationSectionChunks => RecommendationSectionChunks;
+    IQueryable<RecommendationSectionDbEntity> ICmsDbContext.RecommendationSections => RecommendationSections;
     IQueryable<RichTextContentDbEntity> ICmsDbContext.RichTextContents => RichTextContents;
-
-    IQueryable<RichTextContentWithSlugDbEntity> ICmsDbContext.RichTextContentWithSlugs => RichTextContentWithSlugs
-        .Include(rt => rt.Data)
-        .Include(rt => rt.Marks);
-
+    IQueryable<RichTextContentWithSlugDbEntity> ICmsDbContext.RichTextContentWithSlugs => RichTextContentWithSlugs.Include(rt => rt.Data).Include(rt => rt.Marks);
     IQueryable<RichTextDataDbEntity> ICmsDbContext.RichTextDataDbEntity => RichTextDataDbEntity;
     IQueryable<RichTextMarkDbEntity> ICmsDbContext.RichTextMarkDbEntity => RichTextMarkDbEntity;
     IQueryable<SectionDbEntity> ICmsDbContext.Sections => Sections;
+    IQueryable<SubtopicRecommendationDbEntity> ICmsDbContext.SubtopicRecommendations => SubtopicRecommendations;
+    IQueryable<SubtopicRecommendationIntroDbEntity> ICmsDbContext.SubtopicRecommendationIntros => SubtopicRecommendationIntros;
     IQueryable<TextBodyDbEntity> ICmsDbContext.TextBodies => TextBodies;
     IQueryable<TitleDbEntity> ICmsDbContext.Titles => Titles;
     IQueryable<WarningComponentDbEntity> ICmsDbContext.Warnings => Warnings;
+    #endregion
 
     private readonly ContentfulOptions _contentfulOptions;
 
@@ -185,9 +157,14 @@ public class CmsDbContext : DbContext, ICmsDbContext
         {
             entity.HasOne(a => a.NextQuestion).WithMany(q => q.PreviousAnswers).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(a => a.ParentQuestion).WithMany(q => q.Answers).OnDelete(DeleteBehavior.Restrict);
+
+            entity.ToTable("Answers", Schema);
         });
 
-        modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>().Navigation(button => button.Button).AutoInclude();
+        modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>(entity =>
+        {
+            entity.Navigation(button => button.Button).AutoInclude();
+        });
 
         modelBuilder.Entity<ButtonWithLinkDbEntity>()
             .Navigation(button => button.Button).AutoInclude();
@@ -207,7 +184,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
         modelBuilder.Entity<RecommendationChunkContentDbEntity>(entity =>
         {
             entity.HasOne(pc => pc.ContentComponent).WithMany(c => c.RecommendationChunkContentJoins);
-            entity.HasOne(pc => pc.RecommendationChunk).WithMany(chunk => chunk.ChunkContentJoins);
         });
 
         modelBuilder.Entity<RecommendationIntroContentDbEntity>(entity =>
@@ -220,8 +196,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
         modelBuilder.Entity<RecommendationPageDbEntity>(entity =>
         {
             entity.HasOne(recommendation => recommendation.Page)
-                    .WithOne(page => page.RecommendationPage)
-                    .OnDelete(DeleteBehavior.Restrict);
+                .WithOne(page => page.RecommendationPage)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<RichTextContentDbEntity>(entity => { });
@@ -234,14 +210,12 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         modelBuilder.Entity<WarningComponentDbEntity>(entity =>
         {
-            entity.HasOne(warning => warning.Text)
-                .WithMany(text => text.Warnings)
-                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(warning => warning.Text).WithMany(text => text.Warnings).OnDelete(DeleteBehavior.Restrict);
 
             entity.Navigation(warningComponent => warningComponent.Text).AutoInclude();
         });
 
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(CmsDbContext).Assembly);
+        modelBuilder.Entity<ContentComponentDbEntity>().HasQueryFilter(ShouldShowEntity());
     }
 
     /// <summary>
