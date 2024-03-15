@@ -54,7 +54,7 @@ public class GetSubTopicRecommendationQuery([FromKeyedServices(GetSubtopicRecomm
       return fromDb;
     }
 
-    var fromContentful = await getFromInterface(_getFromDbQuery);
+    var fromContentful = await getFromInterface(_getFromContentfulQuery);
 
     if (fromContentful != null)
     {
