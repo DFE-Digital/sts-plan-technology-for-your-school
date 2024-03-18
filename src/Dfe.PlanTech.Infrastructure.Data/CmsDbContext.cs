@@ -16,74 +16,39 @@ public class CmsDbContext : DbContext, ICmsDbContext
     private const string Schema = "Contentful";
 
     public DbSet<AnswerDbEntity> Answers { get; set; }
-
     public DbSet<ButtonDbEntity> Buttons { get; set; }
-
     public DbSet<ButtonWithEntryReferenceDbEntity> ButtonWithEntryReferences { get; set; }
-
     public DbSet<ButtonWithLinkDbEntity> ButtonWithLinks { get; set; }
-
     public DbSet<CategoryDbEntity> Categories { get; set; }
-
     public DbSet<ComponentDropDownDbEntity> ComponentDropDowns { get; set; }
-
-
     public DbSet<ContentComponentDbEntity> ContentComponents { get; set; }
-
     public DbSet<HeaderDbEntity> Headers { get; set; }
-
     public DbSet<InsetTextDbEntity> InsetTexts { get; set; }
-
     public DbSet<NavigationLinkDbEntity> NavigationLink { get; set; }
-
-    public DbSet<PageDbEntity> Pages { get; set; }
-
     public DbSet<PageContentDbEntity> PageContents { get; set; }
-
+    public DbSet<PageDbEntity> Pages { get; set; }
     public DbSet<QuestionDbEntity> Questions { get; set; }
-
-
-    #region RECOMMENDATIONS
-    //Old
-    public DbSet<RecommendationPageDbEntity> RecommendationPages { get; set; }
-
-    //New
     public DbSet<RecommendationChunkAnswerDbEntity> RecommendationChunkAnswers { get; set; }
     public DbSet<RecommendationChunkContentDbEntity> RecommendationChunkContents { get; set; }
     public DbSet<RecommendationChunkDbEntity> RecommendationChunks { get; set; }
     public DbSet<RecommendationIntroContentDbEntity> RecommendationIntroContents { get; set; }
     public DbSet<RecommendationIntroDbEntity> RecommendationIntros { get; set; }
+    public DbSet<RecommendationPageDbEntity> RecommendationPages { get; set; }
     public DbSet<RecommendationSectionAnswerDbEntity> RecommendationSectionAnswers { get; set; }
-
-    public DbSet<RecommendationSectionDbEntity> RecommendationSections { get; set; }
-
-    public DbSet<RecommendationIntroDbEntity> RecommendationIntros { get; set; }
-
-    public DbSet<RecommendationIntroContentDbEntity> RecommendationIntroContents { get; set; }
-
     public DbSet<RecommendationSectionChunkDbEntity> RecommendationSectionChunks { get; set; }
-
-    public DbSet<SubtopicRecommendationDbEntity> SubtopicRecommendations { get; set; }
-
-    public DbSet<SubtopicRecommendationIntroDbEntity> SubtopicRecommendationIntros { get; set; }
-
+    public DbSet<RecommendationSectionDbEntity> RecommendationSections { get; set; }
     public DbSet<RichTextContentDbEntity> RichTextContents { get; set; }
-
-    public DbSet<RichTextContentWithSubtopicRecommendationId> RichTextContentWithSubtopicRecommendationIds { get; set; }
-
     public DbSet<RichTextContentWithSlugDbEntity> RichTextContentWithSlugs { get; set; }
-
+    public DbSet<RichTextContentWithSubtopicRecommendationId> RichTextContentWithSubtopicRecommendationIds { get; set; }
     public DbSet<RichTextDataDbEntity> RichTextDataDbEntity { get; set; }
-
     public DbSet<RichTextMarkDbEntity> RichTextMarkDbEntity { get; set; }
-
     public DbSet<SectionDbEntity> Sections { get; set; }
-
+    public DbSet<SubtopicRecommendationDbEntity> SubtopicRecommendations { get; set; }
+    public DbSet<SubtopicRecommendationIntroDbEntity> SubtopicRecommendationIntros { get; set; }
     public DbSet<TextBodyDbEntity> TextBodies { get; set; }
-
     public DbSet<TitleDbEntity> Titles { get; set; }
-
     public DbSet<WarningComponentDbEntity> Warnings { get; set; }
+
 
     #region IQueryables from interface
     IQueryable<AnswerDbEntity> ICmsDbContext.Answers => Answers;
@@ -93,7 +58,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<CategoryDbEntity> ICmsDbContext.Categories => Categories;
     IQueryable<ComponentDropDownDbEntity> ICmsDbContext.ComponentDropDowns => ComponentDropDowns;
     IQueryable<ContentComponentDbEntity> ICmsDbContext.ContentComponents => ContentComponents;
-
     IQueryable<HeaderDbEntity> ICmsDbContext.Headers => Headers;
     IQueryable<InsetTextDbEntity> ICmsDbContext.InsetTexts => InsetTexts;
     IQueryable<NavigationLinkDbEntity> ICmsDbContext.NavigationLink => NavigationLink;
@@ -103,34 +67,15 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<RecommendationChunkAnswerDbEntity> ICmsDbContext.RecommendationChunkAnswers => RecommendationChunkAnswers;
     IQueryable<RecommendationChunkContentDbEntity> ICmsDbContext.RecommendationChunkContents => RecommendationChunkContents;
     IQueryable<RecommendationChunkDbEntity> ICmsDbContext.RecommendationChunks => RecommendationChunks;
-
-    IQueryable<RecommendationChunkContentDbEntity> ICmsDbContext.RecommendationChunkContents =>
-        RecommendationChunkContents;
-
-    IQueryable<RecommendationChunkAnswerDbEntity> ICmsDbContext.RecommendationChunkAnswers =>
-        RecommendationChunkAnswers;
-
-    IQueryable<RecommendationSectionAnswerDbEntity> ICmsDbContext.RecommendationSectionAnswers =>
-        RecommendationSectionAnswers;
-
-    IQueryable<RecommendationSectionChunkDbEntity> ICmsDbContext.RecommendationSectionChunks =>
-        RecommendationSectionChunks;
-
-    IQueryable<RecommendationIntroDbEntity> ICmsDbContext.RecommendationIntros =>
-        RecommendationIntros;
-
-    IQueryable<RecommendationIntroContentDbEntity> ICmsDbContext.RecommendationIntroContents =>
-        RecommendationIntroContents;
-
-    IQueryable<SubtopicRecommendationDbEntity> ICmsDbContext.SubTopicRecommendations =>
-        SubtopicRecommendations;
-
-    IQueryable<SubtopicRecommendationIntroDbEntity> ICmsDbContext.SubtopicRecommendationIntros =>
-        SubtopicRecommendationIntros;
-
+    IQueryable<RecommendationIntroDbEntity> ICmsDbContext.RecommendationIntros => RecommendationIntros;
+    IQueryable<RecommendationIntroContentDbEntity> ICmsDbContext.RecommendationIntroContents => RecommendationIntroContents;
+    IQueryable<RecommendationPageDbEntity> ICmsDbContext.RecommendationPages => RecommendationPages;
+    IQueryable<RecommendationSectionDbEntity> ICmsDbContext.RecommendationSections => RecommendationSections;
+    IQueryable<RecommendationSectionAnswerDbEntity> ICmsDbContext.RecommendationSectionAnswers => RecommendationSectionAnswers;
+    IQueryable<RecommendationSectionChunkDbEntity> ICmsDbContext.RecommendationSectionChunks => RecommendationSectionChunks;
     IQueryable<RichTextContentDbEntity> ICmsDbContext.RichTextContents => RichTextContents;
-    IQueryable<RichTextContentWithSubtopicRecommendationId> ICmsDbContext.RichTextContentWithSubtopicRecommendationIds => RichTextContentWithSubtopicRecommendationIds;
     IQueryable<RichTextContentWithSlugDbEntity> ICmsDbContext.RichTextContentWithSlugs => RichTextContentWithSlugs.Include(rt => rt.Data).Include(rt => rt.Marks);
+    IQueryable<RichTextContentWithSubtopicRecommendationId> ICmsDbContext.RichTextContentWithSubtopicRecommendationIds => RichTextContentWithSubtopicRecommendationIds;
     IQueryable<RichTextDataDbEntity> ICmsDbContext.RichTextDataDbEntity => RichTextDataDbEntity;
     IQueryable<RichTextMarkDbEntity> ICmsDbContext.RichTextMarkDbEntity => RichTextMarkDbEntity;
     IQueryable<SectionDbEntity> ICmsDbContext.Sections => Sections;

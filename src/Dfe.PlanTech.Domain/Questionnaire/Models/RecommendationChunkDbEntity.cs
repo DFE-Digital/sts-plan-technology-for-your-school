@@ -1,9 +1,10 @@
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-public class RecommendationChunkDbEntity : ContentComponentDbEntity, IRecommendationChunk<AnswerDbEntity, ContentComponentDbEntity, HeaderDbEntity>
+public class RecommendationChunkDbEntity : ContentComponentDbEntity, IRecommendationChunk<AnswerDbEntity, ContentComponentDbEntity, HeaderDbEntity>, IComparableDbEntity<RecommendationChunkDbEntity, string>
 {
     public string Title { get; init; } = null!;
 
@@ -12,9 +13,12 @@ public class RecommendationChunkDbEntity : ContentComponentDbEntity, IRecommenda
     public HeaderDbEntity Header { get; init; } = null!;
 
     public List<ContentComponentDbEntity> Content { get; init; } = [];
+
     public List<RecommendationChunkContentDbEntity> ChunkContentJoins { get; init; } = [];
 
     public List<AnswerDbEntity> Answers { get; init; } = [];
 
     public List<RecommendationSectionDbEntity> RecommendationSections { get; set; } = [];
+
+    public bool Matches(RecommendationChunkDbEntity other) => base.Matches(other);
 }

@@ -28,7 +28,7 @@ public class RecommendationSectionUpdater(ILogger<RecommendationSectionUpdater> 
     {
         static List<AnswerDbEntity> selectAnswers(RecommendationSectionDbEntity incoming) => incoming.Answers;
 
-        AddNewRelationshipsAndRemoveDuplicates(incoming, existing, selectAnswers);
+        AddNewRelationshipsAndRemoveDuplicates<RecommendationSectionDbEntity, AnswerDbEntity, string>(incoming, existing, selectAnswers);
     }
 
 
@@ -36,7 +36,7 @@ public class RecommendationSectionUpdater(ILogger<RecommendationSectionUpdater> 
     {
         static List<RecommendationChunkDbEntity> selectChunks(RecommendationSectionDbEntity incoming) => incoming.Chunks;
 
-        AddNewRelationshipsAndRemoveDuplicates(incoming, existing, selectChunks);
+        AddNewRelationshipsAndRemoveDuplicates<RecommendationSectionDbEntity, RecommendationChunkDbEntity, string>(incoming, existing, selectChunks);
     }
 
     private static void RemoveOldAssociatedRecommendationChunks(RecommendationSectionDbEntity incoming, RecommendationSectionDbEntity existing)

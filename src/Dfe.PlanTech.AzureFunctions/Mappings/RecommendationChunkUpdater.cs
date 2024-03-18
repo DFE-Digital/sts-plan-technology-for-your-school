@@ -26,31 +26,24 @@ public class RecommendationChunkUpdater(ILogger<RecommendationChunkUpdater> logg
         return entity;
     }
 
-    private void RemoveOldAssociatedChunkAnswers(RecommendationChunkDbEntity incoming, RecommendationChunkDbEntity existing)
+    private static void RemoveOldAssociatedChunkAnswers(RecommendationChunkDbEntity incoming, RecommendationChunkDbEntity existing)
         => existing.Answers.RemoveAll(existingAnswer => !incoming.Answers.Exists(incomingAnswer => existing.Id == incomingAnswer.Id));
 
-    private void RemoveOldAssociatedChunkContents(RecommendationChunkDbEntity incoming, RecommendationChunkDbEntity existing)
+    private static void RemoveOldAssociatedChunkContents(RecommendationChunkDbEntity incoming, RecommendationChunkDbEntity existing)
         => existing.Content.RemoveAll(existingContent => !incoming.Content.Exists(incomingContent => existing.Id == incomingContent.Id));
 
 
-    private void AddOrUpdateRecommendationChunkAnswers(RecommendationChunkDbEntity incoming, RecommendationChunkDbEntity existing)
+    private static void AddOrUpdateRecommendationChunkAnswers(RecommendationChunkDbEntity incoming, RecommendationChunkDbEntity existing)
     {
         static List<AnswerDbEntity> selectAnswers(RecommendationChunkDbEntity incoming) => incoming.Answers;
 
-        AddNewRelationshipsAndRemoveDuplicates(incoming, existing, selectAnswers);
+        AddNewRelationshipsAndRemoveDuplicates<RecommendationChunkDbEntity, AnswerDbEntity, string>(incoming, existing, selectAnswers);
     }
 
-    private void AddOrUpdateRecommendationChunkContents(RecommendationChunkDbEntity incoming, RecommendationChunkDbEntity existing)
+    private static void AddOrUpdateRecommendationChunkContents(RecommendationChunkDbEntity incoming, RecommendationChunkDbEntity existing)
     {
         static List<ContentComponentDbEntity> selectContent(RecommendationChunkDbEntity incoming) => incoming.Content;
-        static void UpdateContentOrder(ContentComponentDbEntity incoming, ContentComponentDbEntity existing)
-        {
-            if (existing.Order != incoming.Order)
-            {
-                existing.Order = incoming.Order;
-            }
-        }
 
-        AddNewRelationshipsAndRemoveDuplicates(incoming, existing, selectContent, UpdateContentOrder);
+        AddNewRelationshipsAndRemoveDuplicates<RecommendationChunkDbEntity, ContentComponentDbEntity, string>(incoming, existing, selectContent);
     }
 }

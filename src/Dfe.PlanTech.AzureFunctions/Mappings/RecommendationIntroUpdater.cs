@@ -31,14 +31,6 @@ public class RecommendationIntroUpdater(ILogger<RecommendationIntroUpdater> logg
     {
         static List<ContentComponentDbEntity> selectContent(RecommendationIntroDbEntity incoming) => incoming.Content;
 
-        static void UpdateContentOrder(ContentComponentDbEntity incoming, ContentComponentDbEntity existing)
-        {
-            if (existing.Order != incoming.Order)
-            {
-                existing.Order = incoming.Order;
-            }
-        }
-
-        AddNewRelationshipsAndRemoveDuplicates(incoming, existing, selectContent, UpdateContentOrder);
+        AddNewRelationshipsAndRemoveDuplicates<RecommendationIntroDbEntity, ContentComponentDbEntity, string>(incoming, existing, selectContent);
     }
 }

@@ -11,7 +11,7 @@ public class RecommendationIntroEntityTypeConfiguration : IEntityTypeConfigurati
   public void Configure(EntityTypeBuilder<RecommendationIntroDbEntity> builder)
   {
     builder.HasMany(intro => intro.Content)
-            .WithMany(content => content.RecommendationIntro)
-            .UsingEntity<RecommendationIntroContentDbEntity>();
+        .WithMany(content => content.RecommendationIntro)
+        .UsingEntity<RecommendationIntroContentDbEntity>();
   }
 }

@@ -1,9 +1,10 @@
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Domain.Content.Models;
 
-public class ContentComponentDbEntity : IContentComponentDbEntity
+public class ContentComponentDbEntity : IContentComponentDbEntity, IComparableDbEntity<ContentComponentDbEntity, string>
 {
     public string Id { get; set; } = null!;
 
@@ -40,4 +41,5 @@ public class ContentComponentDbEntity : IContentComponentDbEntity
 
     public List<RecommendationIntroContentDbEntity> RecommendationIntroContentJoins { get; set; } = [];
 
+    public bool Matches(ContentComponentDbEntity other) => other.GetType() == GetType() && other.Id == Id;
 }

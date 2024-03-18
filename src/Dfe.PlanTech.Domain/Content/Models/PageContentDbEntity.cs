@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Content.Models;
 
-public class PageContentDbEntity
+public class PageContentDbEntity : IRelationshipJoinTable<PageContentDbEntity>
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -24,9 +25,7 @@ public class PageContentDbEntity
     public int Order { get; set; }
 
     public bool Matches(PageContentDbEntity other)
-    {
-        return other.PageId == PageId &&
+    => other.PageId == PageId &&
                 other.ContentComponentId == ContentComponentId &&
                 other.BeforeContentComponentId == BeforeContentComponentId;
-    }
 }

@@ -10,16 +10,17 @@ public class SubtopicRecommendationRetriever(CmsDbContext db) : EntityRetriever(
   public override async Task<ContentComponentDbEntity?> GetExistingDbEntity(ContentComponentDbEntity entity, CancellationToken cancellationToken)
   {
     var recommendationIntro = await Db.SubtopicRecommendations.IgnoreQueryFilters()
-                            .Select(subtopicRecommendation => new SubtopicRecommendationDbEntity()
-                            {
-                              Deleted = subtopicRecommendation.Deleted,
-                              Archived = subtopicRecommendation.Archived,
-                              Published = subtopicRecommendation.Published,
-                              SectionId = subtopicRecommendation.SectionId,
-                              SubtopicId = subtopicRecommendation.SubtopicId,
-                              Intros = subtopicRecommendation.Intros.Select(content => new RecommendationIntroDbEntity() { Id = content.Id }).ToList(),
-                            })
-                            .FirstOrDefaultAsync(page => page.Id == entity.Id, cancellationToken);
+                                                            .Select(subtopicRecommendation => new SubtopicRecommendationDbEntity()
+                                                            {
+                                                              Id = subtopicRecommendation.Id,
+                                                              Deleted = subtopicRecommendation.Deleted,
+                                                              Archived = subtopicRecommendation.Archived,
+                                                              Published = subtopicRecommendation.Published,
+                                                              SectionId = subtopicRecommendation.SectionId,
+                                                              SubtopicId = subtopicRecommendation.SubtopicId,
+                                                              Intros = subtopicRecommendation.Intros.Select(content => new RecommendationIntroDbEntity() { Id = content.Id }).ToList(),
+                                                            })
+                                                            .FirstOrDefaultAsync(subtopicRecommendation => subtopicRecommendation.Id == entity.Id, cancellationToken);
 
     if (recommendationIntro == null)
     {

@@ -4,7 +4,7 @@ using Dfe.PlanTech.Domain.Persistence.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-public class RecommendationSectionAnswerDbEntity : IDbEntity
+public class RecommendationSectionAnswerDbEntity : IRelationshipJoinTable<RecommendationSectionAnswerDbEntity>
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -18,6 +18,6 @@ public class RecommendationSectionAnswerDbEntity : IDbEntity
 
     public AnswerDbEntity? Answer { get; set; }
 
-    public bool Matches(RecommendationSectionDbEntity section, AnswerDbEntity answer)
-        => RecommendationSectionId == section.Id && AnswerId == answer.Id;
+    public bool Matches(RecommendationSectionAnswerDbEntity other)
+        => RecommendationSectionId == other.RecommendationSectionId && AnswerId == other.AnswerId;
 }

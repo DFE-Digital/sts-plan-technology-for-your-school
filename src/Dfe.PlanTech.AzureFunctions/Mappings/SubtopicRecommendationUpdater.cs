@@ -28,7 +28,7 @@ public class SubtopicRecommendationUpdater(ILogger<SubtopicRecommendationUpdater
     {
         static List<RecommendationIntroDbEntity> selectIntros(SubtopicRecommendationDbEntity incoming) => incoming.Intros;
 
-        AddNewRelationshipsAndRemoveDuplicates(incoming, existing, selectIntros);
+        AddNewRelationshipsAndRemoveDuplicates<SubtopicRecommendationDbEntity, RecommendationIntroDbEntity, string>(incoming, existing, selectIntros);
     }
 
     private static void RemoveOldRemovedIntros(SubtopicRecommendationDbEntity incoming, SubtopicRecommendationDbEntity existing)

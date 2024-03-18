@@ -1,9 +1,10 @@
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-public class RecommendationIntroDbEntity : ContentComponentDbEntity, IRecommendationIntro<HeaderDbEntity, ContentComponentDbEntity>
+public class RecommendationIntroDbEntity : ContentComponentDbEntity, IRecommendationIntro<HeaderDbEntity, ContentComponentDbEntity>, IComparableDbEntity<RecommendationIntroDbEntity, string>
 {
     public string Slug { get; init; } = null!;
 
@@ -13,8 +14,9 @@ public class RecommendationIntroDbEntity : ContentComponentDbEntity, IRecommenda
 
     public string Maturity { get; init; } = null!;
 
-
     public List<ContentComponentDbEntity> Content { get; init; } = [];
 
     public List<SubtopicRecommendationDbEntity> SubtopicRecommendations { get; set; } = [];
+
+    public bool Matches(RecommendationIntroDbEntity other) => base.Matches(other);
 }

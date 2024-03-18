@@ -1,9 +1,10 @@
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-public class AnswerDbEntity : ContentComponentDbEntity, IAnswer<QuestionDbEntity>
+public class AnswerDbEntity : ContentComponentDbEntity, IAnswer<QuestionDbEntity>, IComparableDbEntity<AnswerDbEntity, string>
 {
     public string Text { get; set; } = null!;
 
@@ -20,4 +21,6 @@ public class AnswerDbEntity : ContentComponentDbEntity, IAnswer<QuestionDbEntity
 
     public List<RecommendationChunkDbEntity> RecommendationChunks { get; set; } = [];
     public List<RecommendationSectionDbEntity> RecommendationSections { get; set; } = [];
+
+    public bool Matches(AnswerDbEntity other) => base.Matches(other);
 }

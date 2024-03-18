@@ -3,6 +3,7 @@ using Dfe.PlanTech.AzureFunctions.Models;
 using Dfe.PlanTech.Domain;
 using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Exceptions;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Infrastructure.Data;
@@ -107,17 +108,18 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
     }
   }
 
-  protected static void AddNewRelationshipsAndRemoveDuplicates<TIncomingEntity, TRelationshipEntity>(TIncomingEntity incoming,
+  protected static void AddNewRelationshipsAndRemoveDuplicates<TIncomingEntity, TRelationshipEntity, TId>(TIncomingEntity incoming,
                                                                                                       TIncomingEntity existing,
                                                                                                       Func<TIncomingEntity, List<TRelationshipEntity>> selectRelationships,
                                                                                                       Action<TRelationshipEntity, TRelationshipEntity>? callback = null)
-    where TRelationshipEntity : ContentComponentDbEntity, new()
+    where TRelationshipEntity : class, IComparableDbEntity<TRelationshipEntity, TId>
+    where TId : IComparable, IComparable<TId>, IEquatable<TId>
   {
     var existingRelationships = selectRelationships(existing);
 
     foreach (var incomingRelatedEntity in selectRelationships(incoming))
     {
-      var matching = existingRelationships.Where(existingRelatedEntity => existingRelatedEntity.Id == incomingRelatedEntity.Id)
+      var matching = existingRelationships.Where(existingRelatedEntity => existingRelatedEntity.Matches(incomingRelatedEntity))
                                           .OrderBy(existingRelatedEntity => existingRelatedEntity.Id)
                                           .ToArray();
 
@@ -129,17 +131,10 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
 
       if (matching.Length > 1)
       {
-        bool skippedOne = false;
-        existingRelationships.RemoveAll(relatedEntity =>
+        foreach (var match in matching.Skip(1))
         {
-          if (!skippedOne)
-          {
-            skippedOne = true;
-            return false;
-          }
-
-          return true;
-        });
+          existingRelationships.Remove(match);
+        }
       }
 
       callback?.Invoke(incomingRelatedEntity, matching[0]);

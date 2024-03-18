@@ -22,37 +22,22 @@ public class PageEntityUpdater(ILogger<PageEntityUpdater> logger, CmsDbContext d
     return entity;
   }
 
-  private void RemoveOldPageContents(PageDbEntity incomingPage, PageDbEntity existingPage)
+  private static void RemoveOldPageContents(PageDbEntity incoming, PageDbEntity existing)
   {
-    var removedPageContents = existingPage.AllPageContents.Where(pc => !incomingPage.AllPageContents.Exists(apc => apc.Matches(pc)));
-    Db.PageContents.RemoveRange(removedPageContents);
+    existing.AllPageContents.RemoveAll(pc => !incoming.AllPageContents.Exists(apc => apc.Matches(pc)));
   }
 
-  private void AddOrUpdatePageContents(PageDbEntity incomingPage, PageDbEntity existingPage)
+  private void AddOrUpdatePageContents(PageDbEntity incoming, PageDbEntity existing)
   {
-    foreach (var pageContent in incomingPage.AllPageContents)
-    {
-      var matchingContents = existingPage.AllPageContents.Where(pc => pc.Matches(pageContent))
-                                                        .OrderByDescending(pc => pc.Id)
-                                                        .ToList();
-
-      if (matchingContents.Count == 0)
-      {
-        existingPage.AllPageContents.Add(pageContent);
-        continue;
-      }
-
-      if (matchingContents.Count > 1)
-      {
-        Db.PageContents.RemoveRange(matchingContents[1..]);
-      }
-
-      var remainingMatchingContent = matchingContents[0];
-
-      if (remainingMatchingContent.Order != pageContent.Order)
-      {
-        remainingMatchingContent.Order = pageContent.Order;
-      }
-    }
+    AddNewRelationshipsAndRemoveDuplicates<PageDbEntity, PageContentDbEntity, long>(incoming, existing, (page) => page.AllPageContents, UpdateOrder);
   }
+
+  private static Action<PageContentDbEntity, PageContentDbEntity> UpdateOrder
+  = (incoming, existing) =>
+      {
+        if (existing.Order != incoming.Order)
+        {
+          existing.Order = incoming.Order;
+        }
+      };
 }

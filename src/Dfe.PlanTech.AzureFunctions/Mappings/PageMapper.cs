@@ -10,14 +10,19 @@ public class PageMapper(PageEntityRetriever retriever, PageEntityUpdater updater
     private const string BeforeTitleContentKey = "beforeTitleContent";
     private const string ContentKey = "content";
 
-    private readonly List<PageContentDbEntity> _pageContents = [];
+    private readonly List<PageContentDbEntity> _allPageContents = [];
 
-    public List<PageContentDbEntity> PageContents => _pageContents;
+    private readonly List<ContentComponentDbEntity> _beforeTitlePageContents = [];
+    private readonly List<ContentComponentDbEntity> _pageContents = [];
+
 
     public override PageDbEntity ToEntity(CmsWebHookPayload payload)
     {
         var mappedPage = base.ToEntity(payload);
-        mappedPage.AllPageContents = _pageContents;
+
+        mappedPage.AllPageContents = _allPageContents;
+        mappedPage.BeforeTitleContent = _beforeTitlePageContents;
+        mappedPage.Content = _pageContents;
 
         return mappedPage;
     }
@@ -70,21 +75,26 @@ public class PageMapper(PageEntityRetriever retriever, PageEntityUpdater updater
             return;
         }
 
-        var pageContent = new PageContentDbEntity()
+        var pageContentJoin = new PageContentDbEntity()
         {
             PageId = pageId,
             Order = order
         };
 
+        var pageContent = new ContentComponentDbEntity() { Id = contentId };
+
         if (isBeforeTitleContent)
         {
-            pageContent.BeforeContentComponentId = contentId;
+            _beforeTitlePageContents.Add(pageContent);
+            pageContentJoin.BeforeContentComponentId = contentId;
         }
         else
         {
-            pageContent.ContentComponentId = contentId;
+            _pageContents.Add(pageContent);
+            pageContentJoin.ContentComponentId = contentId;
         }
 
-        _pageContents.Add(pageContent);
+        _allPageContents.Add(pageContentJoin);
+
     }
 }
