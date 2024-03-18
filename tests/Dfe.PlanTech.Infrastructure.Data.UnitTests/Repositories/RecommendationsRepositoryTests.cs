@@ -12,7 +12,10 @@ namespace Dfe.PlanTech.Infrastructure.Data.UnitTests;
 
 public class RecommendationsRepositoryTests
 {
+#pragma warning disable CA1859 // Use concrete type
   private readonly IRecommendationsRepository _repository;
+#pragma warning disable CA1859 // Use concrete type
+
   private readonly ICmsDbContext _db = Substitute.For<ICmsDbContext>();
 
   private readonly SubtopicRecommendationDbEntity _subtopicRecommendation;

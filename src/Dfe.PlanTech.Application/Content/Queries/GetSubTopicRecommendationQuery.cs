@@ -44,7 +44,8 @@ public class GetSubTopicRecommendationQuery([FromKeyedServices(GetSubtopicRecomm
     return recommendation;
   }
 
-  private async Task<T?> GetFromDbOrContentfulIfNotFound<T>(Func<IGetSubTopicRecommendationQuery, Task<T>> getFromInterface, string subtopicId)
+  private async Task<T?> GetFromDbOrContentfulIfNotFound<T>(Func<IGetSubTopicRecommendationQuery, Task<T?>> getFromInterface, string subtopicId)
+    where T : class
   {
     var fromDb = await getFromInterface(_getFromDbQuery);
 
