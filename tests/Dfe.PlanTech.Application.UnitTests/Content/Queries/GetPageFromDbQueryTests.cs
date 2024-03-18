@@ -232,7 +232,7 @@ public class GetPageFromDbQueryTests
         _getPageChildrenQuery.TryLoadChildren(Arg.Any<PageDbEntity>(), Arg.Any<CancellationToken>())
                             .Returns(Task.CompletedTask);
 
-        _getPageFromDbQuery = new GetPageFromDbQuery(_cmsDbSubstitute, _logger, _mapperSubstitute, new[] { _getPageChildrenQuery });
+        _getPageFromDbQuery = new GetPageFromDbQuery(_cmsDbSubstitute, _logger, _mapperSubstitute, [_getPageChildrenQuery]);
     }
 
     [Fact]

@@ -5,13 +5,13 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
 public class SubtopicRecommendationDbEntity : ContentComponentDbEntity, ISubTopicRecommendation<AnswerDbEntity, ContentComponentDbEntity, HeaderDbEntity, RecommendationChunkDbEntity, RecommendationIntroDbEntity, RecommendationSectionDbEntity, SectionDbEntity>
 {
-    public List<RecommendationIntroDbEntity> Intros { get; init; } = [];
+  public List<RecommendationIntroDbEntity> Intros { get; init; } = [];
 
-    public string SectionId { get; set; } = null!;
+  public string SectionId { get; set; } = null!;
 
-    public RecommendationSectionDbEntity Section { get; init; } = null!;
+  public RecommendationSectionDbEntity Section { get; init; } = null!;
 
-    public string SubtopicId { get; set; } = null!;
+  public string SubtopicId { get; set; } = null!;
 
-    public SectionDbEntity Subtopic { get; init; } = null!;
+  public SectionDbEntity Subtopic { get; init; } = null!;
 }

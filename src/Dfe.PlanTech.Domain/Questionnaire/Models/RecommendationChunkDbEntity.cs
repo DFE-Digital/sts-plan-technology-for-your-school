@@ -12,8 +12,9 @@ public class RecommendationChunkDbEntity : ContentComponentDbEntity, IRecommenda
     public HeaderDbEntity Header { get; init; } = null!;
 
     public List<ContentComponentDbEntity> Content { get; init; } = [];
+    public List<RecommendationChunkContentDbEntity> ChunkContentJoins { get; init; } = [];
 
     public List<AnswerDbEntity> Answers { get; init; } = [];
-    
+
     public List<RecommendationSectionDbEntity> RecommendationSections { get; set; } = [];
 }

@@ -18,7 +18,4 @@ public class RecommendationChunkContentDbEntity : IDbEntity, IContentComponentRe
     public string? ContentComponentId { get; set; }
 
     public ContentComponentDbEntity? ContentComponent { get; set; }
-
-    public bool Matches(RecommendationChunkDbEntity chunk, ContentComponentDbEntity content)
-        => RecommendationChunkId == chunk.Id && ContentComponentId == content.Id;
 }
