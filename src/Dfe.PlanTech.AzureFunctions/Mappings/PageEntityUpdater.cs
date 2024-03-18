@@ -7,22 +7,19 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
 public class PageEntityUpdater(ILogger<PageEntityUpdater> logger, CmsDbContext db) : EntityUpdater(logger, db)
 {
-  public override Task<MappedEntity> UpdateEntityConcrete(MappedEntity entity)
+  public override MappedEntity UpdateEntityConcrete(MappedEntity entity)
   {
     if (!entity.AlreadyExistsInDatabase)
     {
-      return Task.FromResult(entity);
+      return entity;
     }
 
-    if (entity.IncomingEntity is not PageDbEntity incomingPage || entity.ExistingEntity is not PageDbEntity existingPage)
-    {
-      throw new InvalidCastException($"Entities are not expected page types. Received {entity.IncomingEntity.GetType()} and {entity.ExistingEntity!.GetType()}");
-    }
+    var (incoming, existing) = MapToConcreteType<PageDbEntity>(entity);
 
-    AddOrUpdatePageContents(incomingPage, existingPage);
-    RemoveOldPageContents(incomingPage, existingPage);
+    AddOrUpdatePageContents(incoming, existing);
+    RemoveOldPageContents(incoming, existing);
 
-    return Task.FromResult(entity);
+    return entity;
   }
 
   private void RemoveOldPageContents(PageDbEntity incomingPage, PageDbEntity existingPage)
@@ -51,6 +48,7 @@ public class PageEntityUpdater(ILogger<PageEntityUpdater> logger, CmsDbContext d
       }
 
       var remainingMatchingContent = matchingContents[0];
+
       if (remainingMatchingContent.Order != pageContent.Order)
       {
         remainingMatchingContent.Order = pageContent.Order;

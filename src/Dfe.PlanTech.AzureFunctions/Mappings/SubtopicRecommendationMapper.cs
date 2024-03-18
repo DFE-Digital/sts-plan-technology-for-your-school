@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
 public class SubtopicRecommendationMapper(
-    EntityRetriever retriever,
+    SubtopicRecommendationRetriever retriever,
     SubtopicRecommendationUpdater updater,
     CmsDbContext db,
     ILogger<SubtopicRecommendationMapper> logger,
@@ -18,16 +18,16 @@ public class SubtopicRecommendationMapper(
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
         var id = values["id"]?.ToString() ?? throw new KeyNotFoundException("Not found id");
-        
+
         values = MoveValueToNewKey(values, "section", "sectionId");
 
         values = MoveValueToNewKey(values, "subtopic", "subtopicId");
-        
+
         UpdateContentIds(values, id, "intros");
 
         return values;
     }
-    
+
     private void UpdateContentIds(Dictionary<string, object?> values, string subtopicRecommendationId, string currentKey)
     {
         if (values.TryGetValue(currentKey, out object? intros) && intros is object[] inners)
@@ -39,8 +39,8 @@ public class SubtopicRecommendationMapper(
             values.Remove(currentKey);
         }
     }
-    
-    
+
+
     private void CreateSubtopicRecommendationIntroEntity(object inner, string subtopicRecommendationId)
     {
         if (inner is not string recommendationIntroId)

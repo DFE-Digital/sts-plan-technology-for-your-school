@@ -52,6 +52,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public DbSet<RecommendationSectionAnswerDbEntity> RecommendationSectionAnswers { get; set; }
 
+    public DbSet<RecommendationSectionDbEntity> RecommendationSections { get; set; }
+
     public DbSet<RecommendationIntroDbEntity> RecommendationIntros { get; set; }
 
     public DbSet<RecommendationIntroContentDbEntity> RecommendationIntroContents { get; set; }

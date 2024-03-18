@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
 public class RecommendationSectionMapper(
-    EntityRetriever retriever,
+    RecommendationSectionRetriever retriever,
     RecommendationSectionUpdater updater,
     CmsDbContext db,
     ILogger<RecommendationSectionMapper> logger,
@@ -18,7 +18,7 @@ public class RecommendationSectionMapper(
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
         var id = values["id"]?.ToString() ?? throw new KeyNotFoundException("Not found id");
-        
+
         UpdateChunkIds(values, id, "chunks");
         UpdateAnswerIds(values, id, "answers");
 
@@ -85,5 +85,5 @@ public class RecommendationSectionMapper(
 
         _db.RecommendationSectionAnswers.Attach(recommendationSectionAnswer);
     }
-    
+
 }

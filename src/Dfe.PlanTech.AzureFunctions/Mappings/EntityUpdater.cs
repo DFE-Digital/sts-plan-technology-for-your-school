@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using System.Reflection;
 using Dfe.PlanTech.AzureFunctions.Models;
 using Dfe.PlanTech.Domain;
@@ -7,7 +6,6 @@ using Dfe.PlanTech.Domain.Caching.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
@@ -47,7 +45,7 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
 
     mappedEntity.IsValidComponent(Db, _dontCopyValueAttribute, _logger);
 
-    mappedEntity = await UpdateEntityConcrete(mappedEntity);
+    mappedEntity = UpdateEntityConcrete(mappedEntity);
 
     return mappedEntity;
   }
@@ -57,9 +55,9 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
   /// </summary>
   /// <param name="entity"></param>
   /// <returns></returns>
-  public virtual Task<MappedEntity> UpdateEntityConcrete(MappedEntity entity)
+  public virtual MappedEntity UpdateEntityConcrete(MappedEntity entity)
   {
-    return Task.FromResult(entity);
+    return entity;
   }
 
   /// <summary>
@@ -109,43 +107,42 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
     }
   }
 
-  protected void RemoveOldRelationships<TIncomingEntity, TRelationshipTableEntity>(TIncomingEntity incoming, Func<CmsDbContext, DbSet<TRelationshipTableEntity>> getRelationshipsTable, Func<TRelationshipTableEntity, TIncomingEntity, bool> relationshipExists)
-    where TRelationshipTableEntity : class, IDbEntity
+  protected static void AddNewRelationshipsAndRemoveDuplicates<TIncomingEntity, TRelationshipEntity>(TIncomingEntity incoming,
+                                                                                                      TIncomingEntity existing,
+                                                                                                      Func<TIncomingEntity, List<TRelationshipEntity>> selectRelationships,
+                                                                                                      Action<TRelationshipEntity, TRelationshipEntity>? callback = null)
+    where TRelationshipEntity : ContentComponentDbEntity, new()
   {
-    var relationalDbSet = getRelationshipsTable(Db);
+    var existingRelationships = selectRelationships(existing);
 
-    var relationsToRemove = relationalDbSet.Where(relation => !relationshipExists(relation, incoming));
-
-    relationalDbSet.RemoveRange(relationsToRemove);
-  }
-
-  protected async Task AddNewRelationshipsAndRemoveDuplicates<TIncomingEntity, TRelationshipEntity, TRelationshipTableEntity>(TIncomingEntity incoming,
-                                                                                                                              TIncomingEntity existing,
-                                                                                                                              Func<CmsDbContext, DbSet<TRelationshipTableEntity>> getRelationshipsTable,
-                                                                                                                              Func<TIncomingEntity, List<TRelationshipEntity>> selectRelationships,
-                                                                                                                              Func<DbSet<TRelationshipTableEntity>, TIncomingEntity, TRelationshipEntity, IQueryable<TRelationshipTableEntity>> getExistingRelationships,
-                                                                                                                              Action<TRelationshipEntity, TRelationshipTableEntity>? callbackForMatchedRelationship = null)
-    where TRelationshipTableEntity : class, IDbEntity
-    where TRelationshipEntity : class, new()
-  {
-    var dbSet = getRelationshipsTable(Db);
-
-    foreach (var relationship in selectRelationships(incoming))
+    foreach (var incomingRelatedEntity in selectRelationships(incoming))
     {
-      var matching = await getExistingRelationships(dbSet, incoming, relationship).OrderBy(relation => relation.Id).ToArrayAsync();
+      var matching = existingRelationships.Where(existingRelatedEntity => existingRelatedEntity.Id == incomingRelatedEntity.Id)
+                                          .OrderBy(existingRelatedEntity => existingRelatedEntity.Id)
+                                          .ToArray();
 
       if (matching.Length == 0)
       {
-        selectRelationships(existing).Add(relationship);
+        existingRelationships.Add(incomingRelatedEntity);
         continue;
       }
 
       if (matching.Length > 1)
       {
-        dbSet.RemoveRange(matching[1..]);
+        bool skippedOne = false;
+        existingRelationships.RemoveAll(relatedEntity =>
+        {
+          if (!skippedOne)
+          {
+            skippedOne = true;
+            return false;
+          }
+
+          return true;
+        });
       }
 
-      callbackForMatchedRelationship?.Invoke(relationship, matching[0]);
+      callback?.Invoke(incomingRelatedEntity, matching[0]);
     }
   }
 
