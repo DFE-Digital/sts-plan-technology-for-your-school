@@ -13,25 +13,20 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
 
   public async Task<SubtopicRecommendationDbEntity?> GetCompleteRecommendationsForSubtopic(string subtopicId, CancellationToken cancellationToken)
   {
-    var recommendation = await _db.Sections.Where(section => section.Id == subtopicId)
-                                          .Select(section => new
-                                          {
-                                            name = section.Name,
-                                            recommendation = section.SubtopicRecommendation
-                                          })
-                                          .Select(recWithName => new SubtopicRecommendationDbEntity()
+    var recommendation = await _db.SubtopicRecommendations.Where(subtopicRecommendation => subtopicRecommendation.SubtopicId == subtopicId)
+                                          .Select(subtopicRecommendation => new SubtopicRecommendationDbEntity()
                                           {
                                             Subtopic = new SectionDbEntity()
                                             {
-                                              Name = recWithName.name
+                                              Name = subtopicRecommendation.Subtopic.Name
                                             },
                                             Section = new RecommendationSectionDbEntity()
                                             {
-                                              Id = recWithName.recommendation!.Section.Id,
-                                              Answers = recWithName.recommendation!.Section.Answers.Select(answer => new AnswerDbEntity() { Id = answer.Id }).ToList(),
+                                              Id = subtopicRecommendation.Section.Id,
+                                              Answers = subtopicRecommendation!.Section.Answers.Select(answer => new AnswerDbEntity() { Id = answer.Id }).ToList(),
                                             },
-                                            SectionId = recWithName.recommendation!.SectionId,
-                                            Id = recWithName.recommendation.Id
+                                            SectionId = subtopicRecommendation!.SectionId,
+                                            Id = subtopicRecommendation.Id
                                           })
                                           .FirstOrDefaultAsync(cancellationToken);
 
