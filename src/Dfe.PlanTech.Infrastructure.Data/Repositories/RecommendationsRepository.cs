@@ -95,6 +95,7 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
           Header = chunk.Header,
           HeaderId = chunk.HeaderId,
           Answers = chunk.Answers,
+          Title = chunk.Title,
           Content = chunkContent.Where(content => content.chunk == chunk.Id).Select(content => content.content!).ToList()
         }).ToList(),
         Answers = recommendation.Section.Answers,
