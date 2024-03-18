@@ -5,6 +5,7 @@ on:
   push:
     branches: ["main", "development"]
     paths:
+      - "src/Dfe.PlanTech.Domain/**"
       - "src/Dfe.PlanTech.AzureFunctions/**"
       - ".github/workflows/matrix-deploy-azure-function.yml"
       - ".github/workflows/build-azure-function.yml"

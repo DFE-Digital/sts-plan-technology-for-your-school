@@ -499,5 +499,5 @@ build/
 
 .vscode/
 
-migration-scripts/config.json
-migration-scripts/contentful-export-*.json
+contentful/migration-scripts/config.json
+contentful/migration-scripts/contentful-export-*.json

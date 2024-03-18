@@ -3,7 +3,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-public class SubtopicRecommendation : ContentComponent, ISubTopicRecommendation<RecommendationIntro, RecommendationSection, Section>
+public class SubtopicRecommendation : ContentComponent, ISubTopicRecommendation<Answer, ContentComponent, Header, RecommendationChunk, RecommendationIntro, RecommendationSection, Section>
 {
     public List<RecommendationIntro> Intros { get; init; } = [];
 
