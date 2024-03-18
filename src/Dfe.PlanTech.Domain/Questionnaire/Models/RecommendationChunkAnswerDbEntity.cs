@@ -9,9 +9,13 @@ public class RecommendationChunkAnswerDbEntity
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
     public string RecommendationChunkId { get; set; } = null!;
-    
+
     public RecommendationChunkDbEntity RecommendationChunk { get; set; } = null!;
+
     public string? AnswerId { get; set; }
-    
+
     public AnswerDbEntity? Answer { get; set; }
+
+    public bool Matches(RecommendationChunkDbEntity chunk, AnswerDbEntity answer)
+        => RecommendationChunkId == chunk.Id && AnswerId == answer.Id;
 }

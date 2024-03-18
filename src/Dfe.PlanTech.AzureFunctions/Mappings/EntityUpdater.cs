@@ -5,6 +5,7 @@ using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
@@ -59,13 +60,6 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
     return entity;
   }
 
-  private void CopyEntityStatus()
-  {
-    _mappedEntity!.IncomingEntity.Archived = _mappedEntity.ExistingEntity!.Archived;
-    _mappedEntity!.IncomingEntity.Published = _mappedEntity.ExistingEntity!.Published;
-    _mappedEntity!.IncomingEntity.Deleted = _mappedEntity.ExistingEntity!.Deleted;
-  }
-
   /// <summary>
   /// Updates the status of an entity based on the provided CMS event and entity information.
   /// </summary>
@@ -113,6 +107,21 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
     }
   }
 
+  protected void RemoveOldRelationships<TIncomingEntity, TRelationshipEntity>(TIncomingEntity incoming, Func<TRelationshipEntity, TIncomingEntity, bool> relationshipExists)
+    where TRelationshipEntity : class
+  {
+    var relationalDbSet = Db.Set<TRelationshipEntity>();
+
+    if (relationalDbSet == null)
+    {
+      _logger.LogError("Couldn't find a matching DB set in {DB} for type {TRelationshipEntity}", Db, typeof(TRelationshipEntity));
+      throw new MissingFieldException($"Couldn't find a matching DB set in DB for type {typeof(TRelationshipEntity)}");
+    }
+    var relationsToRemove = relationalDbSet.Where(relation => !relationshipExists(relation, incoming));
+
+    relationalDbSet.RemoveRange(relationsToRemove);
+  }
+
   private void UpdateProperties(ContentComponentDbEntity incoming, ContentComponentDbEntity existing)
   {
     foreach (var property in PropertiesToCopy(incoming))
@@ -151,4 +160,14 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
   /// <returns></returns>
   private bool HasDontCopyValueAttribute(PropertyInfo property)
    => property.CustomAttributes.Any(attribute => attribute.AttributeType == _dontCopyValueAttribute);
+
+  /// <summary>
+  /// Copies the status of the entity from the existing entity to the incoming entity.
+  /// </summary>
+  private void CopyEntityStatus()
+  {
+    _mappedEntity!.IncomingEntity.Archived = _mappedEntity.ExistingEntity!.Archived;
+    _mappedEntity!.IncomingEntity.Published = _mappedEntity.ExistingEntity!.Published;
+    _mappedEntity!.IncomingEntity.Deleted = _mappedEntity.ExistingEntity!.Deleted;
+  }
 }
