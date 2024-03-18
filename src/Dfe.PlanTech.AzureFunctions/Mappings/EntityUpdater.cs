@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using System.Reflection;
 using Dfe.PlanTech.AzureFunctions.Models;
 using Dfe.PlanTech.Domain;
@@ -108,10 +109,10 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
     }
   }
 
-  protected void RemoveOldRelationships<TIncomingEntity, TRelationshipTableEntity>(TIncomingEntity incoming, Func<TRelationshipTableEntity, TIncomingEntity, bool> relationshipExists)
+  protected void RemoveOldRelationships<TIncomingEntity, TRelationshipTableEntity>(TIncomingEntity incoming, Func<CmsDbContext, DbSet<TRelationshipTableEntity>> getRelationshipsTable, Func<TRelationshipTableEntity, TIncomingEntity, bool> relationshipExists)
     where TRelationshipTableEntity : class, IDbEntity
   {
-    var relationalDbSet = GetDbSetForRelationship<TRelationshipTableEntity>();
+    var relationalDbSet = getRelationshipsTable(Db);
 
     var relationsToRemove = relationalDbSet.Where(relation => !relationshipExists(relation, incoming));
 
@@ -120,17 +121,18 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
 
   protected async Task AddNewRelationshipsAndRemoveDuplicates<TIncomingEntity, TRelationshipEntity, TRelationshipTableEntity>(TIncomingEntity incoming,
                                                                                                                               TIncomingEntity existing,
+                                                                                                                              Func<CmsDbContext, DbSet<TRelationshipTableEntity>> getRelationshipsTable,
                                                                                                                               Func<TIncomingEntity, List<TRelationshipEntity>> selectRelationships,
-                                                                                                                              Func<TIncomingEntity, TRelationshipEntity, TRelationshipTableEntity, bool> relationshipMatches,
+                                                                                                                              Func<DbSet<TRelationshipTableEntity>, TIncomingEntity, TRelationshipEntity, IQueryable<TRelationshipTableEntity>> getExistingRelationships,
                                                                                                                               Action<TRelationshipEntity, TRelationshipTableEntity>? callbackForMatchedRelationship = null)
     where TRelationshipTableEntity : class, IDbEntity
-    where TRelationshipEntity : class
+    where TRelationshipEntity : class, new()
   {
-    var dbSet = GetDbSetForRelationship<TRelationshipTableEntity>();
+    var dbSet = getRelationshipsTable(Db);
 
     foreach (var relationship in selectRelationships(incoming))
     {
-      var matching = await dbSet.Where(relation => relationshipMatches(incoming, relationship, relation)).OrderBy(relation => relation.Id).ToArrayAsync();
+      var matching = await getExistingRelationships(dbSet, incoming, relationship).OrderBy(relation => relation.Id).ToArrayAsync();
 
       if (matching.Length == 0)
       {
@@ -162,19 +164,6 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
     }
 
     return (incoming, existing);
-  }
-
-  private DbSet<TRelationshipEntity> GetDbSetForRelationship<TRelationshipEntity>() where TRelationshipEntity : class
-  {
-    var relationalDbSet = Db.Set<TRelationshipEntity>();
-
-    if (relationalDbSet == null)
-    {
-      _logger.LogError("Couldn't find a matching DB set in {DB} for type {TRelationshipEntity}", Db, typeof(TRelationshipEntity));
-      throw new MissingFieldException($"Couldn't find a matching DB set in DB for type {typeof(TRelationshipEntity)}");
-    }
-
-    return relationalDbSet;
   }
 
   private void UpdateProperties(ContentComponentDbEntity incoming, ContentComponentDbEntity existing)

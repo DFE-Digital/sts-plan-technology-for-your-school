@@ -1,6 +1,8 @@
+using System.Linq.Expressions;
 using Dfe.PlanTech.AzureFunctions.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
@@ -25,9 +27,10 @@ public class SubtopicRecommendationUpdater(ILogger<SubtopicRecommendationUpdater
     private async Task AddOrRemoveSubtopicRecommendationIntros(SubtopicRecommendationDbEntity incoming, SubtopicRecommendationDbEntity existing)
     {
         static List<RecommendationIntroDbEntity> selectIntros(SubtopicRecommendationDbEntity incoming) => incoming.Intros;
-        static bool answerMatches(SubtopicRecommendationDbEntity incoming, RecommendationIntroDbEntity answer, SubtopicRecommendationIntroDbEntity subtopicRecommendationIntro) => subtopicRecommendationIntro.Matches(incoming, answer);
+        static IQueryable<SubtopicRecommendationIntroDbEntity> getMatchingRelationships(DbSet<SubtopicRecommendationIntroDbEntity> dbSet, SubtopicRecommendationDbEntity incoming, RecommendationIntroDbEntity incomingIntro)
+        => dbSet.Where(subtopicRec => subtopicRec.SubtopicRecommendationId == incoming.Id && subtopicRec.RecommendationIntroId == incomingIntro.Id);
 
-        await AddNewRelationshipsAndRemoveDuplicates<SubtopicRecommendationDbEntity, RecommendationIntroDbEntity, SubtopicRecommendationIntroDbEntity>(incoming, existing, selectIntros, answerMatches);
+        await AddNewRelationshipsAndRemoveDuplicates(incoming, existing, GetSubtopicRecommendationIntros, selectIntros, getMatchingRelationships);
     }
 
     private void RemoveOldRemovedIntros(SubtopicRecommendationDbEntity incoming)
@@ -35,6 +38,10 @@ public class SubtopicRecommendationUpdater(ILogger<SubtopicRecommendationUpdater
         static bool introAlreadyExists(SubtopicRecommendationIntroDbEntity recommendationIntro, SubtopicRecommendationDbEntity incoming)
             => incoming.RecommendationIntro.Exists(incomingChunk => recommendationIntro.Matches(incoming, incomingChunk));
 
-        RemoveOldRelationships<SubtopicRecommendationDbEntity, SubtopicRecommendationIntroDbEntity>(incoming, introAlreadyExists);
+        RemoveOldRelationships(incoming, GetSubtopicRecommendationIntros, introAlreadyExists);
     }
+
+    private static DbSet<SubtopicRecommendationIntroDbEntity> GetSubtopicRecommendationIntros(CmsDbContext db)
+    => db.SubtopicRecommendationIntros;
+
 }

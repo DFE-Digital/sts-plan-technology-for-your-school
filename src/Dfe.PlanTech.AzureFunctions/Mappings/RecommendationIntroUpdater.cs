@@ -2,6 +2,7 @@ using Dfe.PlanTech.AzureFunctions.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
@@ -29,13 +30,16 @@ public class RecommendationIntroUpdater(ILogger<RecommendationIntroUpdater> logg
         static bool ContentExistsAlready(RecommendationIntroContentDbEntity introContent, RecommendationIntroDbEntity incoming)
             => incoming.Content.Exists(incomingContent => introContent.Matches(incoming, incomingContent));
 
-        RemoveOldRelationships<RecommendationIntroDbEntity, RecommendationIntroContentDbEntity>(incoming, ContentExistsAlready);
+        RemoveOldRelationships(incoming, GetRecommendationIntroContents, ContentExistsAlready);
     }
 
     private async Task AddOrUpdateRecommendationIntroContents(RecommendationIntroDbEntity incoming, RecommendationIntroDbEntity existing)
     {
         static List<ContentComponentDbEntity> selectContent(RecommendationIntroDbEntity incoming) => incoming.Content;
-        static bool contentMatches(RecommendationIntroDbEntity incoming, ContentComponentDbEntity content, RecommendationIntroContentDbEntity introContent) => introContent.Matches(incoming, content);
+
+        static IQueryable<RecommendationIntroContentDbEntity> getMatchingRelationships(DbSet<RecommendationIntroContentDbEntity> dbSet, RecommendationIntroDbEntity incoming, ContentComponentDbEntity incomingContent)
+        => dbSet.Where(introContent => introContent.RecommendationIntroId == incoming.Id && introContent.ContentComponentId == incomingContent.Id);
+
         static void UpdateContentOrder(ContentComponentDbEntity content, RecommendationIntroContentDbEntity relationship)
         {
             if (relationship.ContentComponent!.Order != content.Order)
@@ -44,6 +48,10 @@ public class RecommendationIntroUpdater(ILogger<RecommendationIntroUpdater> logg
             }
         }
 
-        await AddNewRelationshipsAndRemoveDuplicates<RecommendationIntroDbEntity, ContentComponentDbEntity, RecommendationIntroContentDbEntity>(incoming, existing, selectContent, contentMatches, UpdateContentOrder);
+        await AddNewRelationshipsAndRemoveDuplicates(incoming, existing, GetRecommendationIntroContents, selectContent, getMatchingRelationships, UpdateContentOrder);
     }
+
+    private static DbSet<RecommendationIntroContentDbEntity> GetRecommendationIntroContents(CmsDbContext db)
+        => db.RecommendationIntroContents;
+
 }
