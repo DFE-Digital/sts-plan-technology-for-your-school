@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-public class RecommendationIntroContentDbEntity
+public class RecommendationIntroContentDbEntity : IDbEntity, IContentComponentRelationship
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

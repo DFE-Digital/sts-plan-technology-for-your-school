@@ -4,6 +4,7 @@ using Dfe.PlanTech.Domain;
 using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -108,7 +109,45 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
   }
 
   protected void RemoveOldRelationships<TIncomingEntity, TRelationshipEntity>(TIncomingEntity incoming, Func<TRelationshipEntity, TIncomingEntity, bool> relationshipExists)
+    where TRelationshipEntity : class, IDbEntity
+  {
+    var relationalDbSet = GetDbSetForRelationship<TRelationshipEntity>();
+
+    var relationsToRemove = relationalDbSet.Where(relation => !relationshipExists(relation, incoming));
+
+    relationalDbSet.RemoveRange(relationsToRemove);
+  }
+
+  protected async Task AddNewRelationshipsAndRemoveDuplicates<TIncomingEntity, TRelationshipEntity, TRelationshipTableEntity>(TIncomingEntity incoming,
+                                                                                                                              TIncomingEntity existing,
+                                                                                                                              Func<TIncomingEntity, List<TRelationshipEntity>> selectRelationships,
+                                                                                                                              Func<TRelationshipEntity, TRelationshipTableEntity, bool> relationshipMatches,
+                                                                                                                              Action<TRelationshipEntity, TRelationshipTableEntity>? callbackForMatchedRelationship = null)
+    where TRelationshipTableEntity : class, IDbEntity
     where TRelationshipEntity : class
+  {
+    var dbSet = GetDbSetForRelationship<TRelationshipTableEntity>();
+
+    foreach (var relationship in selectRelationships(incoming))
+    {
+      var matching = await dbSet.Where(relation => relationshipMatches(relationship, relation)).OrderBy(relation => relation.Id).ToArrayAsync();
+
+      if (matching.Length == 0)
+      {
+        selectRelationships(existing).Add(relationship);
+        continue;
+      }
+
+      if (matching.Length > 1)
+      {
+        dbSet.RemoveRange(matching[1..]);
+      }
+
+      callbackForMatchedRelationship?.Invoke(relationship, matching[0]);
+    }
+  }
+
+  private DbSet<TRelationshipEntity> GetDbSetForRelationship<TRelationshipEntity>() where TRelationshipEntity : class
   {
     var relationalDbSet = Db.Set<TRelationshipEntity>();
 
@@ -117,9 +156,8 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
       _logger.LogError("Couldn't find a matching DB set in {DB} for type {TRelationshipEntity}", Db, typeof(TRelationshipEntity));
       throw new MissingFieldException($"Couldn't find a matching DB set in DB for type {typeof(TRelationshipEntity)}");
     }
-    var relationsToRemove = relationalDbSet.Where(relation => !relationshipExists(relation, incoming));
 
-    relationalDbSet.RemoveRange(relationsToRemove);
+    return relationalDbSet;
   }
 
   private void UpdateProperties(ContentComponentDbEntity incoming, ContentComponentDbEntity existing)

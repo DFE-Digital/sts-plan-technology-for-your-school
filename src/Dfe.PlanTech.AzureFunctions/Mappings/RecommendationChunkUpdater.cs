@@ -1,4 +1,5 @@
 using Dfe.PlanTech.AzureFunctions.Models;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Extensions.Logging;
@@ -39,32 +40,18 @@ public class RecommendationChunkUpdater(ILogger<RecommendationChunkUpdater> logg
         RemoveOldRelationships(incoming, (RecommendationChunkContentDbEntity content, RecommendationChunkDbEntity incoming) => incoming.Content.Exists(incomingContent => content.Matches(incoming, incomingContent)));
     }
 
-    private void AddOrUpdateRecommendationChunkContents(RecommendationChunkDbEntity incoming, RecommendationChunkDbEntity existing)
+    private async Task AddOrUpdateRecommendationChunkContents(RecommendationChunkDbEntity incoming, RecommendationChunkDbEntity existing)
     {
-        foreach (var content in incoming.Content)
+        static List<ContentComponentDbEntity> selectContent(RecommendationChunkDbEntity incoming) => incoming.Content;
+        static bool contentMatches(ContentComponentDbEntity content, RecommendationChunkContentDbEntity chunkContent) => chunkContent.RecommendationChunkId == content.Id && chunkContent.ContentComponentId == content.Id;
+        static void UpdateContentOrder(ContentComponentDbEntity content, RecommendationChunkContentDbEntity relationship)
         {
-            var matchingContents = Db.RecommendationChunkContents.Where(rcc => rcc.RecommendationChunkId == incoming.Id &&
-                                                                                rcc.ContentComponentId == content.Id)
-                                                                .OrderByDescending(pc => pc.Id)
-                                                                .ToList();
-
-            if (matchingContents.Count == 0)
+            if (relationship.ContentComponent!.Order != content.Order)
             {
-                existing.Content.Add(content);
-                continue;
-            }
-
-            if (matchingContents.Count > 1)
-            {
-                Db.RecommendationChunkContents.RemoveRange(matchingContents[1..]);
-            }
-
-            var remainingMatchingContent = matchingContents[0];
-
-            if (remainingMatchingContent.ContentComponent!.Order != content.Order)
-            {
-                remainingMatchingContent.ContentComponent.Order = content.Order;
+                relationship.ContentComponent.Order = content.Order;
             }
         }
+
+        await AddNewRelationshipsAndRemoveDuplicates(incoming, existing, selectContent, (Func<ContentComponentDbEntity, RecommendationChunkContentDbEntity, bool>)contentMatches, UpdateContentOrder);
     }
 }
