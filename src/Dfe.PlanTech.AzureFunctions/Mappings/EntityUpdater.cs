@@ -3,7 +3,6 @@ using Dfe.PlanTech.AzureFunctions.Models;
 using Dfe.PlanTech.Domain;
 using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Exceptions;
-using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Infrastructure.Data;
@@ -39,10 +38,10 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
     if (mappedEntity.AlreadyExistsInDatabase)
     {
       CopyEntityStatus();
+      UpdateEntityStatusByEvent(cmsEvent);
       UpdateProperties(incoming, existing!);
     }
 
-    UpdateEntityStatusByEvent(cmsEvent);
 
     mappedEntity.IsValidComponent(Db, _dontCopyValueAttribute, _logger);
 
@@ -96,28 +95,29 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
         {
           throw new CmsEventException(string.Format("Content with Id \"{0}\" has event 'unpublish' despite not existing in the database!", _mappedEntity.IncomingEntity.Id));
         }
-        _mappedEntity.ExistingEntity.Published = false;
+        _mappedEntity.IncomingEntity.Published = false;
         break;
       case CmsEvent.DELETE:
         if (_mappedEntity.ExistingEntity == null)
         {
           throw new CmsEventException(string.Format("Content with Id \"{0}\" has event 'delete' despite not existing in the database!", _mappedEntity.IncomingEntity.Id));
         }
-        _mappedEntity.ExistingEntity.Deleted = true;
+        _mappedEntity.IncomingEntity.Deleted = true;
         break;
     }
   }
 
   protected static void AddNewRelationshipsAndRemoveDuplicates<TIncomingEntity, TRelationshipEntity, TId>(TIncomingEntity incoming,
-                                                                                                      TIncomingEntity existing,
-                                                                                                      Func<TIncomingEntity, List<TRelationshipEntity>> selectRelationships,
-                                                                                                      Action<TRelationshipEntity, TRelationshipEntity>? callback = null)
+                                                                                                          TIncomingEntity existing,
+                                                                                                          Func<TIncomingEntity, List<TRelationshipEntity>> selectRelationships,
+                                                                                                          Action<TRelationshipEntity, TRelationshipEntity>? callback = null)
     where TRelationshipEntity : class, IComparableDbEntity<TRelationshipEntity, TId>
     where TId : IComparable, IComparable<TId>, IEquatable<TId>
   {
     var existingRelationships = selectRelationships(existing);
+    var incomingRelationships = selectRelationships(incoming);
 
-    foreach (var incomingRelatedEntity in selectRelationships(incoming))
+    foreach (var incomingRelatedEntity in incomingRelationships)
     {
       var matching = existingRelationships.Where(existingRelatedEntity => existingRelatedEntity.Matches(incomingRelatedEntity))
                                           .OrderBy(existingRelatedEntity => existingRelatedEntity.Id)
@@ -131,7 +131,8 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
 
       if (matching.Length > 1)
       {
-        foreach (var match in matching.Skip(1))
+        var toRemove = matching.Skip(1).ToArray();
+        foreach (var match in toRemove)
         {
           existingRelationships.Remove(match);
         }
@@ -171,6 +172,7 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
       {
         continue;
       }
+
       property.SetValue(existing, property.GetValue(incoming));
     }
   }

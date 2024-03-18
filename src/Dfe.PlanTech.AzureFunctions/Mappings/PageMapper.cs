@@ -95,6 +95,5 @@ public class PageMapper(PageEntityRetriever retriever, PageEntityUpdater updater
         }
 
         _allPageContents.Add(pageContentJoin);
-
     }
 }

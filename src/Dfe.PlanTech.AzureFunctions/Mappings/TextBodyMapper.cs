@@ -5,12 +5,14 @@ using System.Text.Json.Nodes;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class TextBodyMapper(EntityRetriever retriever, EntityUpdater updater, RichTextContentMapper richTextMapper, ILogger<TextBodyMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<TextBodyDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
+public class TextBodyMapper(TextBodyRetriever retriever, EntityUpdater updater, RichTextContentMapper richTextMapper, ILogger<TextBodyMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<TextBodyDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
     private readonly RichTextContentMapper _richTextMapper = richTextMapper;
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
+        var id = values["id"]?.ToString() ?? throw new KeyNotFoundException("Not found id");
+
         var richText = (values["richText"] ?? throw new KeyNotFoundException($"No rich text value found")) as JsonNode;
 
         var deserialised = richText.Deserialize<RichTextContent>(JsonOptions) ?? throw new InvalidOperationException($"Could not map to {typeof(RichTextContent)}");

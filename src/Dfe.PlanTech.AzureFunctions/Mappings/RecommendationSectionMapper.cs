@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Extensions.Logging;
@@ -8,12 +9,22 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 public class RecommendationSectionMapper(
     RecommendationSectionRetriever retriever,
     RecommendationSectionUpdater updater,
-    CmsDbContext db,
     ILogger<RecommendationSectionMapper> logger,
     JsonSerializerOptions jsonSerialiserOptions)
     : JsonToDbMapper<RecommendationSectionDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
-    private readonly CmsDbContext _db = db;
+    private readonly List<RecommendationChunkDbEntity> _sectionChunks = [];
+    private readonly List<AnswerDbEntity> _sectionAnswers = [];
+
+    public override RecommendationSectionDbEntity ToEntity(CmsWebHookPayload payload)
+    {
+        var recommendationSection = base.ToEntity(payload);
+
+        recommendationSection.Answers.AddRange(_sectionAnswers);
+        recommendationSection.Chunks.AddRange(_sectionChunks);
+
+        return recommendationSection;
+    }
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
@@ -24,7 +35,6 @@ public class RecommendationSectionMapper(
 
         return values;
     }
-
 
     private void UpdateChunkIds(Dictionary<string, object?> values, string recommendationChunkId, string currentKey)
     {
@@ -47,13 +57,12 @@ public class RecommendationSectionMapper(
             return;
         }
 
-        var recommendationSectionChunk = new RecommendationSectionChunkDbEntity()
+        var recommendationSectionChunk = new RecommendationChunkDbEntity()
         {
-            RecommendationSectionId = recommendationSectionId,
-            RecommendationChunkId = chunkId
+            Id = chunkId
         };
 
-        _db.RecommendationSectionChunks.Attach(recommendationSectionChunk);
+        _sectionChunks.Add(recommendationSectionChunk);
     }
 
     private void UpdateAnswerIds(Dictionary<string, object?> values, string recommendationChunkId, string currentKey)
@@ -77,13 +86,11 @@ public class RecommendationSectionMapper(
             return;
         }
 
-        var recommendationSectionAnswer = new RecommendationSectionAnswerDbEntity()
+        var recommendationSectionAnswer = new AnswerDbEntity()
         {
-            RecommendationSectionId = recommendationChunkId,
-            AnswerId = answerId
+            Id = answerId
         };
 
-        _db.RecommendationSectionAnswers.Attach(recommendationSectionAnswer);
+        _sectionAnswers.Add(recommendationSectionAnswer);
     }
-
 }

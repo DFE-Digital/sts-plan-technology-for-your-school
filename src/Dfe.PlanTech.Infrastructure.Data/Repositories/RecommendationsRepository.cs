@@ -44,6 +44,8 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
                                               .Include(intro => intro.Header)
                                               .ToListAsync(cancellationToken);
 
+    var test = await _db.RecommendationChunks.Include(chunk => chunk.RecommendationSections).ToListAsync(cancellationToken: cancellationToken);
+
     var chunks = await _db.RecommendationChunks.Where(chunk => chunk.RecommendationSections.Any(section => section.Id == recommendation.SectionId))
                                                 .Select(chunk => new RecommendationChunkDbEntity()
                                                 {

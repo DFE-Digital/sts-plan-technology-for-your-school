@@ -40,6 +40,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     public DbSet<RichTextContentDbEntity> RichTextContents { get; set; }
     public DbSet<RichTextContentWithSlugDbEntity> RichTextContentWithSlugs { get; set; }
     public DbSet<RichTextContentWithSubtopicRecommendationId> RichTextContentWithSubtopicRecommendationIds { get; set; }
+    public DbSet<RichTextContentIdWithContentComponentId> RichTextContentIdWithContentComponentIds { get; set; }
     public DbSet<RichTextDataDbEntity> RichTextDataDbEntity { get; set; }
     public DbSet<RichTextMarkDbEntity> RichTextMarkDbEntity { get; set; }
     public DbSet<SectionDbEntity> Sections { get; set; }
@@ -182,6 +183,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         modelBuilder.Entity<RichTextContentWithSlugDbEntity>(entity => { entity.ToView("RichTextContentsBySlug"); });
         modelBuilder.Entity<RichTextContentWithSubtopicRecommendationId>(entity => { entity.ToView("RichTextContentsBySubtopicRecommendationId"); });
+        modelBuilder.Entity<RichTextContentIdWithContentComponentId>(entity => { entity.ToView("RichTextContentIdsWithContentComponentId"); });
 
         modelBuilder.Entity<TitleDbEntity>(entity => { entity.ToTable("Titles", Schema); });
 

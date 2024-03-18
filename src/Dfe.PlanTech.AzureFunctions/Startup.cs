@@ -74,6 +74,8 @@ namespace Dfe.PlanTech.AzureFunctions
             services.AddTransient<RecommendationIntroRetriever>();
             services.AddTransient<RecommendationSectionRetriever>();
             services.AddTransient<SubtopicRecommendationRetriever>();
+
+            services.AddTransient<TextBodyRetriever>();
         }
 
         /// <summary>

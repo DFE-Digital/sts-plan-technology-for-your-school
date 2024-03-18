@@ -31,11 +31,9 @@ public class ContentComponentDbEntity : IContentComponentDbEntity, IComparableDb
     /// </summary>
     public List<PageContentDbEntity> ContentPagesJoins { get; set; } = [];
 
-
     public List<RecommendationChunkDbEntity> RecommendationChunk { get; set; } = [];
 
     public List<RecommendationChunkContentDbEntity> RecommendationChunkContentJoins { get; set; } = [];
-
 
     public List<RecommendationIntroDbEntity> RecommendationIntro { get; set; } = [];
 
