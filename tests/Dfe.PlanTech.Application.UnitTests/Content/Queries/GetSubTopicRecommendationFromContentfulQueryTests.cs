@@ -5,6 +5,7 @@ using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Infrastructure.Application.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
@@ -20,6 +21,7 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
     private readonly SubtopicRecommendation? _subtopicRecommendationOne;
     private readonly SubtopicRecommendation? _subtopicRecommendationTwo;
 
+    private readonly List<SubtopicRecommendation> _subtopicRecommendations = [];
     private readonly ILogger<GetSubtopicRecommendationFromContentfulQuery> _logger = Substitute.For<ILogger<GetSubtopicRecommendationFromContentfulQuery>>();
 
     public GetSubTopicRecommendationFromContentfulQueryTests()
@@ -132,12 +134,12 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
 
         _subtopicRecommendationOne = new()
         {
-            Intros = new List<RecommendationIntro>()
-            {
-                new RecommendationIntro(){ Maturity = "Low"},
-                new RecommendationIntro(){ Maturity = "Medium"},
-                new RecommendationIntro(){ Maturity = "High"},
-            },
+            Intros =
+            [
+                new RecommendationIntro(){ Maturity = "Low", Header = new Header() { Text = "Low-Maturity-Intro"}},
+                new RecommendationIntro(){ Maturity = "Medium",Header = new Header() { Text = "Medium-Maturity-Intro"}},
+                new RecommendationIntro(){ Maturity = "High",Header = new Header() { Text = "High-Maturity-Intro"}},
+            ],
             Section = recommendationSectionOne,
             Subtopic = _subTopicOne,
         };
@@ -146,6 +148,9 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
         {
             Subtopic = _subTopicTwo
         };
+
+        _subtopicRecommendations.Add(_subtopicRecommendationOne);
+        _subtopicRecommendations.Add(_subtopicRecommendationTwo);
 
         _getSubtopicRecommendationFromContentfulQuery = new(_repoSubstitute, _logger);
     }
@@ -159,6 +164,19 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
 
         Assert.NotNull(subTopicRecommendation);
         Assert.Equal(_subtopicRecommendationOne, subTopicRecommendation);
+    }
+
+
+
+    [Fact]
+    public async Task GetSubTopicRecommendation_Returns_Null_When_Not_Found()
+    {
+        _repoSubstitute.GetEntities<SubtopicRecommendation?>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns([null]);
+
+        SubtopicRecommendation? subTopicRecommendation = await _getSubtopicRecommendationFromContentfulQuery.GetSubTopicRecommendation("not a real id");
+
+        Assert.Null(subTopicRecommendation);
+        Assert.Single(_logger.ReceivedCalls());
     }
 
     [Fact]
@@ -219,5 +237,68 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
         var chunks = subTopicRecommendation!.Section.GetRecommendationChunksByAnswerIds(["10"]);
 
         Assert.Empty(chunks);
+    }
+
+    [Fact]
+    public async Task GetRecommendationsViewDto_Retrieves_Correct_Information_When_Existing()
+    {
+        _repoSubstitute.GetEntities<SubtopicRecommendation>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>())
+                        .Returns((callinfo) =>
+                        {
+                            var options = callinfo.ArgAt<GetEntitiesOptions>(0);
+                            var idFilter = options.Queries!.Where(query => query.Field == "fields.subtopic.sys.id")
+                                                            .Select(query => query as ContentQueryEquals)
+                                                            .Select(query => query!.Value).FirstOrDefault();
+
+                            var maturityFilter = options.Queries!.Where(query => query.Field == "fields.intro.fields.maturity")
+                                                        .Select(query => query as ContentQueryEquals)
+                                                        .Select(query => query!.Value).FirstOrDefault();
+
+                            var test = _subtopicRecommendations.Where(rec => rec.Subtopic.Sys.Id == idFilter)
+                                                            .Select(rec => new SubtopicRecommendation()
+                                                            {
+                                                                Intros = rec.Intros,
+                                                                Sys = rec.Sys
+                                                            }).ToList();
+
+                            var testTwo = _subtopicRecommendations.Where(rec => rec.Subtopic.Sys.Id == idFilter)
+                                                                            .Select(rec => new SubtopicRecommendation()
+                                                                            {
+                                                                                Intros = rec.Intros,
+                                                                                Sys = rec.Sys
+                                                                            }).ToList();
+
+                            return _subtopicRecommendations.Where(rec => rec.Subtopic.Sys.Id == idFilter)
+                                                            .Select(rec => new SubtopicRecommendation()
+                                                            {
+                                                                Intros = rec.Intros,
+                                                                Sys = rec.Sys
+                                                            })
+                                                            .Where(rec => rec.Intros.Any(intro => intro.Maturity == maturityFilter));
+                        });
+
+        var maturity = "Low";
+        var expectedIntro = _subtopicRecommendationOne!.Intros.FirstOrDefault(intro => intro.Maturity == maturity);
+
+        Assert.NotNull(expectedIntro);
+
+        var result = await _getSubtopicRecommendationFromContentfulQuery.GetRecommendationsViewDto(_subtopicRecommendationOne!.Subtopic.Sys.Id, maturity);
+
+        Assert.NotNull(result);
+        Assert.Equal(result.RecommendationSlug, expectedIntro.Slug);
+        Assert.Equal(result.DisplayName, expectedIntro.Header.Text);
+    }
+
+    [Fact]
+    public async Task GetRecommendationsViewDto_Returns_Null_When_No_Match()
+    {
+        _repoSubstitute.GetEntities<SubtopicRecommendation>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>())
+                        .Returns((callinfo) => []);
+
+        var result = await _getSubtopicRecommendationFromContentfulQuery.GetRecommendationsViewDto("any id", "Low");
+
+        Assert.Null(result);
+
+        Assert.Single(_logger.ReceivedCalls());
     }
 }

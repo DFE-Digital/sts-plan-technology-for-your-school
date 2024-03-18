@@ -33,8 +33,7 @@ public class GetSubtopicRecommendationFromContentfulQuery(IContentRepository rep
 
     public async Task<RecommendationsViewDto?> GetRecommendationsViewDto(string subtopicId, string maturity, CancellationToken cancellationToken = default)
     {
-        var options = CreateGetEntityOptions(subtopicId, 2);
-        options.Queries!.Append(new ContentQueryEquals() { Field = "fields.intro.fields.maturity", Value = maturity });
+        var options = CreateGetEntityOptions(subtopicId, 2, new ContentQueryEquals() { Field = "fields.intro.fields.maturity", Value = maturity });
         options.Select = ["fields.intros", "sys"];
 
         var subtopicRecommendation = (await _repository.GetEntities<SubtopicRecommendation>(options, cancellationToken)).FirstOrDefault();
@@ -57,7 +56,7 @@ public class GetSubtopicRecommendationFromContentfulQuery(IContentRepository rep
     }
 
     private static GetEntitiesOptions CreateGetEntityOptions(string sectionId, int depth = 4, params IContentQuery[] additionalQueries) =>
-        new(depth, [new ContentQueryEquals() { Field = "fields.subtopic.sys.id", Value = sectionId }]);
+        new(depth, [new ContentQueryEquals() { Field = "fields.subtopic.sys.id", Value = sectionId }, .. additionalQueries]);
 
     private void LogMissingRecommendationError(string subtopicId)
     => _logger.LogError("Could not find subtopic recommendation in Contentful for {SubtopicId}", subtopicId);
