@@ -1,37 +1,49 @@
 using Dfe.PlanTech.AzureFunctions.Models;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class RecommendationIntroUpdater(ILogger<RecommendationIntroUpdater> logger, CmsDbContext db) :EntityUpdater(logger, db)
+public class RecommendationIntroUpdater(ILogger<RecommendationIntroUpdater> logger, CmsDbContext db) : EntityUpdater(logger, db)
 {
-    
-    public override MappedEntity UpdateEntityConcrete(MappedEntity entity)
+
+    public override async Task<MappedEntity> UpdateEntityConcrete(MappedEntity entity)
     {
         if (!entity.AlreadyExistsInDatabase)
         {
             return entity;
         }
 
-        if (entity.ExistingEntity is not RecommendationIntroDbEntity existingRecommendationIntro)
-        {
-            throw new InvalidCastException($"Entity is not the expected type. {entity.ExistingEntity!.GetType()}");
-        }
-        
-        RemoveOldAssociatedIntroContents(existingRecommendationIntro);
+        var (incoming, existing) = MapToConcreteType<RecommendationIntroDbEntity>(entity);
+
+        await AddOrUpdateRecommendationIntroContents(incoming, existing);
+        RemoveOldAssociatedIntroContents(existing);
 
         return entity;
     }
-    
-    private void RemoveOldAssociatedIntroContents(RecommendationIntroDbEntity existingRecommendationIntro)
-    {
-        var contentsToRemove = Db.RecommendationIntroContents
-            .Where(content => content.RecommendationIntroId == existingRecommendationIntro.Id)
-            .ToList();
 
-        Db.RecommendationIntroContents.RemoveRange(contentsToRemove);
+    private void RemoveOldAssociatedIntroContents(RecommendationIntroDbEntity incoming)
+    {
+        static bool ContentExistsAlready(RecommendationIntroContentDbEntity introContent, RecommendationIntroDbEntity incoming)
+            => incoming.Content.Exists(incomingContent => introContent.Matches(incoming, incomingContent));
+
+        RemoveOldRelationships<RecommendationIntroDbEntity, RecommendationIntroContentDbEntity>(incoming, ContentExistsAlready);
     }
-    
+
+    private async Task AddOrUpdateRecommendationIntroContents(RecommendationIntroDbEntity incoming, RecommendationIntroDbEntity existing)
+    {
+        static List<ContentComponentDbEntity> selectContent(RecommendationIntroDbEntity incoming) => incoming.Content;
+        static bool contentMatches(RecommendationIntroDbEntity incoming, ContentComponentDbEntity content, RecommendationIntroContentDbEntity introContent) => introContent.Matches(incoming, content);
+        static void UpdateContentOrder(ContentComponentDbEntity content, RecommendationIntroContentDbEntity relationship)
+        {
+            if (relationship.ContentComponent!.Order != content.Order)
+            {
+                relationship.ContentComponent.Order = content.Order;
+            }
+        }
+
+        await AddNewRelationshipsAndRemoveDuplicates<RecommendationIntroDbEntity, ContentComponentDbEntity, RecommendationIntroContentDbEntity>(incoming, existing, selectContent, contentMatches, UpdateContentOrder);
+    }
 }

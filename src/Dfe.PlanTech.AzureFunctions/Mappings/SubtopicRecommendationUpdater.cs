@@ -5,31 +5,36 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class SubtopicRecommendationUpdater(ILogger<SubtopicRecommendationUpdater> logger, CmsDbContext db) :EntityUpdater(logger, db)
+public class SubtopicRecommendationUpdater(ILogger<SubtopicRecommendationUpdater> logger, CmsDbContext db) : EntityUpdater(logger, db)
 {
-    public override MappedEntity UpdateEntityConcrete(MappedEntity entity)
+    public override async Task<MappedEntity> UpdateEntityConcrete(MappedEntity entity)
     {
         if (!entity.AlreadyExistsInDatabase)
         {
             return entity;
         }
 
-        if (entity.ExistingEntity is not SubtopicRecommendationDbEntity existingSubtopicRecommendation)
-        {
-            throw new InvalidCastException($"Entity is not the expected type. {entity.ExistingEntity!.GetType()}");
-        }
-        
-        RemoveOldAssociatedRecommendationIntros(existingSubtopicRecommendation);
-        
+        var (incoming, existing) = MapToConcreteType<SubtopicRecommendationDbEntity>(entity);
+
+        await AddOrRemoveSubtopicRecommendationIntros(incoming, existing);
+        RemoveOldRemovedIntros(incoming);
+
         return entity;
     }
 
-    private void RemoveOldAssociatedRecommendationIntros(SubtopicRecommendationDbEntity existingSubtopicRecommendation)
+    private async Task AddOrRemoveSubtopicRecommendationIntros(SubtopicRecommendationDbEntity incoming, SubtopicRecommendationDbEntity existing)
     {
-        var introsToRemove = Db.SubtopicRecommendationIntros
-            .Where(content => content.SubtopicRecommendationId == existingSubtopicRecommendation.Id)
-            .ToList();
+        static List<RecommendationIntroDbEntity> selectIntros(SubtopicRecommendationDbEntity incoming) => incoming.Intros;
+        static bool answerMatches(SubtopicRecommendationDbEntity incoming, RecommendationIntroDbEntity answer, SubtopicRecommendationIntroDbEntity subtopicRecommendationIntro) => subtopicRecommendationIntro.Matches(incoming, answer);
 
-        Db.SubtopicRecommendationIntros.RemoveRange(introsToRemove);
+        await AddNewRelationshipsAndRemoveDuplicates<SubtopicRecommendationDbEntity, RecommendationIntroDbEntity, SubtopicRecommendationIntroDbEntity>(incoming, existing, selectIntros, answerMatches);
+    }
+
+    private void RemoveOldRemovedIntros(SubtopicRecommendationDbEntity incoming)
+    {
+        static bool introAlreadyExists(SubtopicRecommendationIntroDbEntity recommendationIntro, SubtopicRecommendationDbEntity incoming)
+            => incoming.RecommendationIntro.Exists(incomingChunk => recommendationIntro.Matches(incoming, incomingChunk));
+
+        RemoveOldRelationships<SubtopicRecommendationDbEntity, SubtopicRecommendationIntroDbEntity>(incoming, introAlreadyExists);
     }
 }

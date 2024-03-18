@@ -2,9 +2,7 @@ using Dfe.PlanTech.AzureFunctions.Models;
 using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -45,7 +43,7 @@ where TEntity : ContentComponentDbEntity, new()
 
         var existingEntity = await EntityRetriever.GetExistingDbEntity(incomingEntity, cancellationToken);
 
-        return _entityUpdater.UpdateEntity(incomingEntity, existingEntity, cmsEvent);
+        return await _entityUpdater.UpdateEntity(incomingEntity, existingEntity, cmsEvent);
     }
 
     public abstract Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values);

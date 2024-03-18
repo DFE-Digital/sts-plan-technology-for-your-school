@@ -5,45 +5,55 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class RecommendationSectionUpdater(ILogger<RecommendationSectionUpdater> logger, CmsDbContext db) :EntityUpdater(logger, db)
+public class RecommendationSectionUpdater(ILogger<RecommendationSectionUpdater> logger, CmsDbContext db) : EntityUpdater(logger, db)
 {
-    public override MappedEntity UpdateEntityConcrete(MappedEntity entity)
+    public override async Task<MappedEntity> UpdateEntityConcrete(MappedEntity entity)
     {
         if (!entity.AlreadyExistsInDatabase)
         {
             return entity;
         }
 
-        if (entity.ExistingEntity is not RecommendationSectionDbEntity existingRecommendationSection)
-        {
-            throw new InvalidCastException($"Entity is not the expected type. {entity.ExistingEntity!.GetType()}");
-        }
-        
-        RemoveOldAssociatedRecommendationChunks(existingRecommendationSection);
-        RemoveOldAssociatedRecommendationAnswers(existingRecommendationSection);
+        var (incoming, existing) = MapToConcreteType<RecommendationSectionDbEntity>(entity);
 
+        await AddOrUpdateRecommendationSectionAnswers(incoming, existing);
+        await AddOrUpdateRecommendationSectionChunks(incoming, existing);
+        RemoveOldAssociatedRecommendationChunks(incoming);
+        RemoveOldAssociatedRecommendationAnswers(incoming);
 
         return entity;
     }
-    
-    
-    private void RemoveOldAssociatedRecommendationChunks(RecommendationSectionDbEntity existingRecommendationSection)
-    {
-        var chunksToRemove = Db.RecommendationSectionChunks
-            .Where(content => content.RecommendationSectionId == existingRecommendationSection.Id)
-            .ToList();
 
-        Db.RecommendationSectionChunks.RemoveRange(chunksToRemove);
-    }
-    
-    private void RemoveOldAssociatedRecommendationAnswers(RecommendationSectionDbEntity existingRecommendationSection)
+    private async Task AddOrUpdateRecommendationSectionAnswers(RecommendationSectionDbEntity incoming, RecommendationSectionDbEntity existing)
     {
-        var chunksToRemove = Db.RecommendationSectionAnswers
-            .Where(content => content.RecommendationSectionId == existingRecommendationSection.Id)
-            .ToList();
+        static List<AnswerDbEntity> selectAnswers(RecommendationSectionDbEntity incoming) => incoming.Answers;
+        static bool answerMatches(RecommendationSectionDbEntity incoming, AnswerDbEntity answer, RecommendationSectionAnswerDbEntity sectionAnswer) => sectionAnswer.Matches(incoming, answer);
 
-        Db.RecommendationSectionAnswers.RemoveRange(chunksToRemove);
+        await AddNewRelationshipsAndRemoveDuplicates<RecommendationSectionDbEntity, AnswerDbEntity, RecommendationSectionAnswerDbEntity>(incoming, existing, selectAnswers, answerMatches);
     }
 
-    
+
+    private async Task AddOrUpdateRecommendationSectionChunks(RecommendationSectionDbEntity incoming, RecommendationSectionDbEntity existing)
+    {
+        static List<RecommendationChunkDbEntity> selectChunks(RecommendationSectionDbEntity incoming) => incoming.Chunks;
+        static bool chunkMatches(RecommendationSectionDbEntity incoming, RecommendationChunkDbEntity chunk, RecommendationSectionChunkDbEntity sectionChunk) => sectionChunk.Matches(incoming, chunk);
+
+        await AddNewRelationshipsAndRemoveDuplicates<RecommendationSectionDbEntity, RecommendationChunkDbEntity, RecommendationSectionChunkDbEntity>(incoming, existing, selectChunks, chunkMatches);
+    }
+
+    private void RemoveOldAssociatedRecommendationChunks(RecommendationSectionDbEntity incomingSection)
+    {
+        static bool ChunkExistsAlready(RecommendationSectionChunkDbEntity sectionChunk, RecommendationSectionDbEntity incoming)
+            => incoming.Chunks.Exists(incomingChunk => sectionChunk.Matches(incoming, incomingChunk));
+
+        RemoveOldRelationships<RecommendationSectionDbEntity, RecommendationSectionChunkDbEntity>(incomingSection, ChunkExistsAlready);
+    }
+
+    private void RemoveOldAssociatedRecommendationAnswers(RecommendationSectionDbEntity incomingSection)
+    {
+        static bool AnswerExistsAlready(RecommendationSectionAnswerDbEntity sectionAnswer, RecommendationSectionDbEntity incoming)
+            => incoming.Answers.Exists(incomingAnswer => sectionAnswer.Matches(incoming, incomingAnswer));
+
+        RemoveOldRelationships<RecommendationSectionDbEntity, RecommendationSectionAnswerDbEntity>(incomingSection, AnswerExistsAlready);
+    }
 }

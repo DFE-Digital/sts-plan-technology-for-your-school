@@ -26,7 +26,7 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
   /// <param name="existing"></param>
   /// <param name="cmsEvent"></param>
   /// <returns></returns>
-  public MappedEntity UpdateEntity(ContentComponentDbEntity incoming, ContentComponentDbEntity? existing, CmsEvent cmsEvent)
+  public async Task<MappedEntity> UpdateEntity(ContentComponentDbEntity incoming, ContentComponentDbEntity? existing, CmsEvent cmsEvent)
   {
     var mappedEntity = new MappedEntity()
     {
@@ -46,7 +46,7 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
 
     mappedEntity.IsValidComponent(Db, _dontCopyValueAttribute, _logger);
 
-    mappedEntity = UpdateEntityConcrete(mappedEntity);
+    mappedEntity = await UpdateEntityConcrete(mappedEntity);
 
     return mappedEntity;
   }
@@ -56,9 +56,9 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
   /// </summary>
   /// <param name="entity"></param>
   /// <returns></returns>
-  public virtual MappedEntity UpdateEntityConcrete(MappedEntity entity)
+  public virtual Task<MappedEntity> UpdateEntityConcrete(MappedEntity entity)
   {
-    return entity;
+    return Task.FromResult(entity);
   }
 
   /// <summary>
@@ -108,10 +108,10 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
     }
   }
 
-  protected void RemoveOldRelationships<TIncomingEntity, TRelationshipEntity>(TIncomingEntity incoming, Func<TRelationshipEntity, TIncomingEntity, bool> relationshipExists)
-    where TRelationshipEntity : class, IDbEntity
+  protected void RemoveOldRelationships<TIncomingEntity, TRelationshipTableEntity>(TIncomingEntity incoming, Func<TRelationshipTableEntity, TIncomingEntity, bool> relationshipExists)
+    where TRelationshipTableEntity : class, IDbEntity
   {
-    var relationalDbSet = GetDbSetForRelationship<TRelationshipEntity>();
+    var relationalDbSet = GetDbSetForRelationship<TRelationshipTableEntity>();
 
     var relationsToRemove = relationalDbSet.Where(relation => !relationshipExists(relation, incoming));
 
@@ -121,7 +121,7 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
   protected async Task AddNewRelationshipsAndRemoveDuplicates<TIncomingEntity, TRelationshipEntity, TRelationshipTableEntity>(TIncomingEntity incoming,
                                                                                                                               TIncomingEntity existing,
                                                                                                                               Func<TIncomingEntity, List<TRelationshipEntity>> selectRelationships,
-                                                                                                                              Func<TRelationshipEntity, TRelationshipTableEntity, bool> relationshipMatches,
+                                                                                                                              Func<TIncomingEntity, TRelationshipEntity, TRelationshipTableEntity, bool> relationshipMatches,
                                                                                                                               Action<TRelationshipEntity, TRelationshipTableEntity>? callbackForMatchedRelationship = null)
     where TRelationshipTableEntity : class, IDbEntity
     where TRelationshipEntity : class
@@ -130,7 +130,7 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
 
     foreach (var relationship in selectRelationships(incoming))
     {
-      var matching = await dbSet.Where(relation => relationshipMatches(relationship, relation)).OrderBy(relation => relation.Id).ToArrayAsync();
+      var matching = await dbSet.Where(relation => relationshipMatches(incoming, relationship, relation)).OrderBy(relation => relation.Id).ToArrayAsync();
 
       if (matching.Length == 0)
       {
@@ -145,6 +145,23 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
 
       callbackForMatchedRelationship?.Invoke(relationship, matching[0]);
     }
+  }
+
+  protected static (TEntity incoming, TEntity existing) MapToConcreteType<TEntity>(MappedEntity mapped)
+  {
+    static string generateErrorMessage(ContentComponentDbEntity entity) => $"Entity is not the expected type. Expected {typeof(TEntity)} but is actually {entity!.GetType()}";
+
+    if (mapped.ExistingEntity is not TEntity existing)
+    {
+      throw new InvalidCastException(generateErrorMessage(mapped.ExistingEntity!));
+    }
+
+    if (mapped.IncomingEntity is not TEntity incoming)
+    {
+      throw new InvalidCastException(generateErrorMessage(mapped.ExistingEntity!));
+    }
+
+    return (incoming, existing);
   }
 
   private DbSet<TRelationshipEntity> GetDbSetForRelationship<TRelationshipEntity>() where TRelationshipEntity : class

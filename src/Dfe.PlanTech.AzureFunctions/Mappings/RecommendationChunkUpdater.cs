@@ -9,23 +9,18 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 public class RecommendationChunkUpdater(ILogger<RecommendationChunkUpdater> logger, CmsDbContext db) : EntityUpdater(logger, db)
 {
 
-    public override MappedEntity UpdateEntityConcrete(MappedEntity entity)
+    public override async Task<MappedEntity> UpdateEntityConcrete(MappedEntity entity)
     {
         if (!entity.AlreadyExistsInDatabase)
         {
             return entity;
         }
 
-        if (entity.ExistingEntity is not RecommendationChunkDbEntity existingRecommendationChunk ||
-            entity.IncomingEntity is not RecommendationChunkDbEntity incomingRecommendationChunk)
-        {
-            throw new InvalidCastException($"Entity is not the expected type. {entity.ExistingEntity!.GetType()}");
-        }
+        var (incoming, existing) = MapToConcreteType<RecommendationChunkDbEntity>(entity);
 
-
-        AddOrUpdateRecommendationChunkContents(incomingRecommendationChunk, existingRecommendationChunk); ;
-        RemoveOldAssociatedChunkContents(incomingRecommendationChunk);
-        RemoveOldAssociatedChunkAnswers(incomingRecommendationChunk);
+        await AddOrUpdateRecommendationChunkContents(incoming, existing);
+        RemoveOldAssociatedChunkContents(incoming);
+        RemoveOldAssociatedChunkAnswers(incoming);
 
         return entity;
     }
@@ -43,7 +38,7 @@ public class RecommendationChunkUpdater(ILogger<RecommendationChunkUpdater> logg
     private async Task AddOrUpdateRecommendationChunkContents(RecommendationChunkDbEntity incoming, RecommendationChunkDbEntity existing)
     {
         static List<ContentComponentDbEntity> selectContent(RecommendationChunkDbEntity incoming) => incoming.Content;
-        static bool contentMatches(ContentComponentDbEntity content, RecommendationChunkContentDbEntity chunkContent) => chunkContent.RecommendationChunkId == content.Id && chunkContent.ContentComponentId == content.Id;
+        static bool contentMatches(RecommendationChunkDbEntity incoming, ContentComponentDbEntity content, RecommendationChunkContentDbEntity chunkContent) => chunkContent.Matches(incoming, content);
         static void UpdateContentOrder(ContentComponentDbEntity content, RecommendationChunkContentDbEntity relationship)
         {
             if (relationship.ContentComponent!.Order != content.Order)
@@ -52,6 +47,6 @@ public class RecommendationChunkUpdater(ILogger<RecommendationChunkUpdater> logg
             }
         }
 
-        await AddNewRelationshipsAndRemoveDuplicates(incoming, existing, selectContent, (Func<ContentComponentDbEntity, RecommendationChunkContentDbEntity, bool>)contentMatches, UpdateContentOrder);
+        await AddNewRelationshipsAndRemoveDuplicates<RecommendationChunkDbEntity, ContentComponentDbEntity, RecommendationChunkContentDbEntity>(incoming, existing, selectContent, contentMatches, UpdateContentOrder);
     }
 }

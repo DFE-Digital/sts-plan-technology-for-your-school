@@ -7,11 +7,11 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
 public class PageEntityUpdater(ILogger<PageEntityUpdater> logger, CmsDbContext db) : EntityUpdater(logger, db)
 {
-  public override MappedEntity UpdateEntityConcrete(MappedEntity entity)
+  public override Task<MappedEntity> UpdateEntityConcrete(MappedEntity entity)
   {
     if (!entity.AlreadyExistsInDatabase)
     {
-      return entity;
+      return Task.FromResult(entity);
     }
 
     if (entity.IncomingEntity is not PageDbEntity incomingPage || entity.ExistingEntity is not PageDbEntity existingPage)
@@ -22,7 +22,7 @@ public class PageEntityUpdater(ILogger<PageEntityUpdater> logger, CmsDbContext d
     AddOrUpdatePageContents(incomingPage, existingPage);
     RemoveOldPageContents(incomingPage, existingPage);
 
-    return entity;
+    return Task.FromResult(entity);
   }
 
   private void RemoveOldPageContents(PageDbEntity incomingPage, PageDbEntity existingPage)
