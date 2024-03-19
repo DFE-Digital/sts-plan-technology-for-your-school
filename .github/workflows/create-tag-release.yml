@@ -2,7 +2,10 @@ name: Create & Tag Release
 
 on:
   workflow_call:
-
+  pull_request:
+    branches:
+      ['development']
+      
 jobs:
   create-tag-release:
     runs-on: ubuntu-22.04
@@ -25,18 +28,14 @@ jobs:
         with:
           node-version: "lts/*"
 
-      - name: Install Dependencies
+      - name: Install and audit dependency signatures
+        working-directory: ./.github/semver-release
         run: |
-          npm i npx@10
-          npm i @semantic-release/commit-analyzer@11
-          npm i @semantic-release/release-notes-generator@12
-          npm i @semantic-release/github@9
-          npm i @semantic-release/exec@6
-
-      - name: Verify Integrity of Installed Dependencies
-        run: npm audit signatures
+          npm ci
+          npm audit signatures
 
       - name: Create Release
+        working-directory: ./.github/semver-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release@23
+        run: npm run release

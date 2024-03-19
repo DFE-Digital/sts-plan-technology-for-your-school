@@ -2,9 +2,8 @@
   "name": "semver-release",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "release" : "semantic-release --branches next"
+    "release" : "semantic-release -e ./.releaserc.json"
   },
   "keywords": [],
   "author": "",
