@@ -1,7 +1,6 @@
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -37,7 +36,7 @@ public class RecommendationsViewComponent(
 
         var recommendationsViewComponentViewModel =
             recommendationsAvailable
-                ?  GetRecommendationsViewComponentViewModel(allSectionsOfCombinedCategories,
+                ? GetRecommendationsViewComponentViewModel(allSectionsOfCombinedCategories,
                     allSectionStatusesOfCombinedCategories)
                 : null;
 
@@ -49,34 +48,30 @@ public class RecommendationsViewComponent(
     {
         foreach (var section in sections)
         {
-            var sectionMaturity = sectionStatusesList
-                .Where(sectionStatus => sectionStatus.SectionId == section.Sys.Id && sectionStatus.Completed == 1)
-                .Select(sectionStatus => sectionStatus.Maturity)
-                .FirstOrDefault();
+            var sectionMaturity = sectionStatusesList.Where(sectionStatus => sectionStatus.SectionId == section.Sys.Id && sectionStatus.Completed == 1)
+                                                    .Select(sectionStatus => sectionStatus.Maturity)
+                                                    .FirstOrDefault();
 
             if (string.IsNullOrEmpty(sectionMaturity)) continue;
 
-            SubtopicRecommendation? recommendation = null;
 
-
-            recommendation = await getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id);
-
+            var recommendation = await _getSubTopicRecommendationQuery.GetRecommendationsViewDto(section.Sys.Id, sectionMaturity, default);
 
             if (recommendation == null)
+            {
                 _logger.LogError("No Recommendation Found: Section - {sectionName}, Maturity - {sectionMaturity}",
                     section.Name, sectionMaturity);
 
-            var recommendationIntro = recommendation?.GetRecommendationByMaturity(sectionMaturity);
+                yield return new RecommendationsViewComponentViewModel(string.Format("Unable to retrieve {0} recommendation", section.Name));
+                continue;
+            }
 
-            yield return new RecommendationsViewComponentViewModel()
+            if (section.InterstitialPage?.Slug == null)
             {
-                RecommendationSlug = recommendationIntro?.Slug,
-                RecommendationDisplayName = recommendationIntro?.Header.Text,
-                SectionSlug = section.InterstitialPage?.Slug,
-                NoRecommendationFoundErrorMessage = recommendation == null
-                    ? string.Format("Unable to retrieve {0} recommendation", section.Name)
-                    : null
-            };
+                _logger.LogError("No Slug found for Subtopic with ID: {SectionId}  / name: {SectionName}", section.Sys.Id, section.Name);
+            }
+
+            yield return new RecommendationsViewComponentViewModel(recommendation, section.InterstitialPage?.Slug ?? "");
         }
     }
 

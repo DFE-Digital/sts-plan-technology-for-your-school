@@ -21,5 +21,7 @@ public class SectionDbEntity : ContentComponentDbEntity, ISection<QuestionDbEnti
     [DontCopyValue]
     public string? CategoryId { get; set; }
 
-    public List<RecommendationPageDbEntity> Recommendations { get; set; } = new();
+    public List<RecommendationPageDbEntity> Recommendations { get; set; } = [];
+
+    public SubtopicRecommendationDbEntity? SubtopicRecommendation { get; set; }
 }

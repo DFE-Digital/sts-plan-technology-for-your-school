@@ -5,7 +5,7 @@
 @using System.Globalization;
 
 @section Head {
-    <link rel="stylesheet" href="~/css/application.css">
+    <link rel="stylesheet" as="style" href="~/css/application.css">
 
         @Html.Raw(GtmConfiguration.Analytics)
         @Html.Raw(GtmConfiguration.Head)
@@ -25,43 +25,32 @@
 @section Header {
     @Html.Raw(GtmConfiguration.Body)
 
-    @{
-        await Html.RenderPartialAsync("_CookieBanner");
-        await Html.RenderPartialAsync("_Header");
-    }
+    <partial name="_CookieBanner" />
+    <partial name="_Header" />
 
     @RenderSection("Header", false)
 }
 
 @section BeforeContent {
-    @{
-        await Html.RenderPartialAsync("BetaHeader");
-    }
-@RenderSection("BeforeContent", required: false)
+    <script
+        defer>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
+    <partial name="BetaHeader" />
 
-@{
-        //Add relevant tags for GovUK front-end CSS to body
-    }
-    <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
+    @RenderSection("BeforeContent", required: false)
 }
-
 
 @RenderBody()
 
 @section Footer {
-    @{
-        await Html.RenderPartialAsync("_Footer");
-    }
+    <partial name="_Footer" />
 }
 
 @section BodyEnd {
-    <script src="~/js/app.js"></script>
-    <script src="~/js/govuk-frontend.min.js" type="module"></script>
-
-    <script type="module">
-        import { initAll } from '/js/govuk-frontend.min.js';
-
-        initAll();
+    <script async src="~/js/app.js"></script>
+    <script defer type="module">
+        import * as govuk from '/js/govuk-frontend.min.js';
+        govuk.initAll();
     </script>
+
     @RenderSection("BodyEnd", required: false)
 }

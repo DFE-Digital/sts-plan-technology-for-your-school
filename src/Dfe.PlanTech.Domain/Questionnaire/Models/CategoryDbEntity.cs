@@ -10,5 +10,5 @@ public class CategoryDbEntity : ContentComponentDbEntity, ICategory<HeaderDbEnti
 
     public string InternalName { get; set; } = null!;
 
-    public List<SectionDbEntity> Sections { get; set; } = new();
+    public List<SectionDbEntity> Sections { get; set; } = [];
 }

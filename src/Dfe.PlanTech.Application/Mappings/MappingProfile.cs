@@ -22,8 +22,12 @@ public class CmsMappingProfile : Profile
         .Include<HeaderDbEntity, Header>()
         .Include<InsetTextDbEntity, InsetText>()
         .Include<QuestionDbEntity, Question>()
+        .Include<RecommendationChunkDbEntity, RecommendationChunk>()
+        .Include<RecommendationIntroDbEntity, RecommendationIntro>()
         .Include<RecommendationPageDbEntity, RecommendationPage>()
+        .Include<RecommendationSectionDbEntity, RecommendationSection>()
         .Include<SectionDbEntity, Section>()
+        .Include<SubtopicRecommendationDbEntity, SubtopicRecommendation>()
         .Include<TextBodyDbEntity, TextBody>()
         .Include<TitleDbEntity, Title>()
         .Include<WarningComponentDbEntity, WarningComponent>()
@@ -39,8 +43,12 @@ public class CmsMappingProfile : Profile
         CreateMap<HeaderDbEntity, Header>();
         CreateMap<InsetTextDbEntity, InsetText>();
         CreateMap<QuestionDbEntity, Question>();
+        CreateMap<RecommendationChunkDbEntity, RecommendationChunk>();
+        CreateMap<RecommendationIntroDbEntity, RecommendationIntro>();
         CreateMap<RecommendationPageDbEntity, RecommendationPage>();
+        CreateMap<RecommendationSectionDbEntity, RecommendationSection>();
         CreateMap<SectionDbEntity, Section>();
+        CreateMap<SubtopicRecommendationDbEntity, SubtopicRecommendation>();
         CreateMap<TextBodyDbEntity, TextBody>();
         CreateMap<TitleDbEntity, Title>();
         CreateMap<WarningComponentDbEntity, WarningComponent>();
@@ -48,6 +56,5 @@ public class CmsMappingProfile : Profile
         CreateMap<RichTextContentDbEntity, RichTextContent>();
         CreateMap<RichTextDataDbEntity, RichTextData>();
         CreateMap<RichTextMarkDbEntity, RichTextMark>();
-
     }
 }

@@ -33,12 +33,14 @@ public class GetPageQueryTests
         Id = "PageId",
         Slug = DbPageSlug,
         Content = [
-            new QuestionDbEntity(){
-                Id="QuestionId"
+            new QuestionDbEntity()
+            {
+                Id = "QuestionId"
             }
         ],
         AllPageContents = [
-            new PageContentDbEntity(){
+            new PageContentDbEntity()
+            {
                 Id = 1,
                 PageId = "PageId",
                 ContentComponentId = "QuestionId"

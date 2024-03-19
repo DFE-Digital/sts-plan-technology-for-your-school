@@ -26,6 +26,7 @@ using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
 using Dfe.PlanTech.Infrastructure.Data;
+using Dfe.PlanTech.Infrastructure.Data.Repositories;
 using Dfe.PlanTech.Web.Helpers;
 using EFCoreSecondLevelCacheInterceptor;
 using Microsoft.EntityFrameworkCore;
@@ -83,8 +84,10 @@ public static class ProgramExtensions
         services.AddTransient<GetPageFromContentfulQuery>();
         services.AddSingleton(new ContentfulOptions(configuration.GetValue<bool>("Contentful:UsePreview")));
 
-        services.AddTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationFromContentfulQuery>();
-
+        services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubtopicRecommendationFromContentfulQuery>(GetSubtopicRecommendationFromContentfulQuery.ServiceKey);
+        services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationFromDbQuery>(GetSubTopicRecommendationFromDbQuery.ServiceKey);
+        services.AddTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationQuery>();
+        services.AddTransient<IRecommendationsRepository, RecommendationsRepository>();
         return services;
     }
 

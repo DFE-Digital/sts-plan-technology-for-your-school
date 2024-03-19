@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Submissions.Enums;
@@ -9,18 +10,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Routing;
 
-public class GetRecommendationRouter : IGetRecommendationRouter
+public class GetRecommendationRouter(ISubmissionStatusProcessor router,
+                                    IGetAllAnswersForLatestSubmissionQuery getAllAnswersForLatestSubmissionQuery,
+                                    IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery) : IGetRecommendationRouter
 {
-    private readonly ISubmissionStatusProcessor _router;
-    private readonly IGetAllAnswersForLatestSubmissionQuery _getAllAnswersForLatestSubmissionQuery;
-    private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
-
-    public GetRecommendationRouter(ISubmissionStatusProcessor router, IGetAllAnswersForLatestSubmissionQuery getAllAnswersForLatestSubmissionQuery, IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery)
-    {
-        _router = router;
-        _getAllAnswersForLatestSubmissionQuery = getAllAnswersForLatestSubmissionQuery;
-        _getSubTopicRecommendationQuery = getSubTopicRecommendationQuery;
-    }
+    private readonly ISubmissionStatusProcessor _router = router;
+    private readonly IGetAllAnswersForLatestSubmissionQuery _getAllAnswersForLatestSubmissionQuery = getAllAnswersForLatestSubmissionQuery;
+    private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery = getSubTopicRecommendationQuery;
 
     public async Task<IActionResult> ValidateRoute(string sectionSlug, string recommendationSlug, RecommendationsController controller, CancellationToken cancellationToken)
     {
@@ -49,28 +45,28 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     private async Task<IActionResult> HandleCompleteStatus(RecommendationsController controller, CancellationToken cancellationToken)
     {
         if (_router.SectionStatus?.Maturity == null) throw new DatabaseException("Maturity is null, but shouldn't be for a completed section");
-        
+
         if (_router.Section == null) throw new DatabaseException("Section is null, but shouldn't be.");
-        
+
         var usersAnswers =
             await _getAllAnswersForLatestSubmissionQuery.GetAllAnswersForLatestSubmission(_router.Section.Sys.Id,
-                await _router.User.GetEstablishmentId());
-        
+                await _router.User.GetEstablishmentId()) ?? throw new DatabaseException($"Could not find users answers for:  {_router.Section.Name}");
+
         var subTopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(_router.Section.Sys.Id, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {_router.Section.Name}");
 
         var subTopicIntro = subTopicRecommendation.GetRecommendationByMaturity(_router.SectionStatus.Maturity) ?? throw new ContentfulDataUnavailableException($"Could not find recommendation intro for maturity:  {_router.SectionStatus?.Maturity}");
 
         var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(usersAnswers.Select(answer => answer.ContentfulRef));
-        
+
         var viewModel = new RecommendationsViewModel()
         {
             SectionName = subTopicRecommendation.Subtopic.Name,
-            RecommendationIntro = subTopicIntro,
-            RecommendationChunks = subTopicChunks
+            Intro = subTopicIntro,
+            Chunks = subTopicChunks
         };
 
         return controller.View("~/Views/Recommendations/Recommendations.cshtml", viewModel);
-        
+
     }
 
     /// <summary>

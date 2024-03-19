@@ -26,43 +26,50 @@ public class GetPageFromDbQueryTests
     private readonly GetPageFromDbQuery _getPageFromDbQuery;
 
     private readonly List<PageDbEntity> _pagesFromDb = [
-        new PageDbEntity(){
+        new PageDbEntity()
+        {
             Slug = "Index",
             Content = [
-                new HeaderDbEntity(){
+                new HeaderDbEntity()
+                {
                     Id = "Header-Id"
                 }
             ]
         },
-        new PageDbEntity(){
+        new PageDbEntity()
+        {
             Slug = TEST_PAGE_SLUG,
             Id = "test-page-id"
         },
-        new PageDbEntity(){
+        new PageDbEntity()
+        {
             Slug = LANDING_PAGE_SLUG,
             Id = LANDING_PAGE_ID,
             BeforeTitleContent = [
 
             ],
             Content = [
-                new HeaderDbEntity(){
+                new HeaderDbEntity()
+                {
                     Id = HEADER_ID
                 }
             ],
             AllPageContents = [
-                new PageContentDbEntity(){
+                new PageContentDbEntity()
+                {
                     Id = 1,
                     PageId = LANDING_PAGE_ID,
                     ContentComponentId = HEADER_ID
                 }
             ]
         },
-        new PageDbEntity(){
+        new PageDbEntity()
+        {
             Slug = "AuditStart",
         },
         new PageDbEntity()
-    {
-        Slug = SECTION_SLUG,
+        {
+            Slug = SECTION_SLUG,
             DisplayTopicTitle = true,
             DisplayHomeButton = false,
             DisplayBackButton = false,
@@ -87,45 +94,54 @@ public class GetPageFromDbQueryTests
     };
 
     private readonly static List<SectionDbEntity> _sections = [
-                new SectionDbEntity(){
+                new SectionDbEntity()
+                {
                     Name = "sSection one",
                     CategoryId = CATEGORY_ID,
                     Order = 0,
                     Recommendations = [
-                        new RecommendationPageDbEntity(){
+                        new RecommendationPageDbEntity()
+                        {
                             DisplayName = "Recommendation one",
                             Maturity = Maturity.High,
-                            Page = new(){
+                            Page = new()
+                            {
                                 Slug = "recommendation-high"
                             }
                         },
-                        new RecommendationPageDbEntity(){
+                        new RecommendationPageDbEntity()
+                        {
                             DisplayName = "Recommendation two",
                             Maturity = Maturity.Medium,
-                            Page = new(){
+                            Page = new()
+                            {
                                 Slug = "recommendation-medium"
                             }
                         }
                     ],
                     Questions = [
-                        new QuestionDbEntity(){
+                        new QuestionDbEntity()
+                        {
                             Order = 0,
                             Slug = "question-one-slug",
                         },
-                        new QuestionDbEntity(){
+                        new QuestionDbEntity()
+                        {
                             Order = 1,
                             Slug = "question-two-slug"
                         }
                     ]
                 },
-            ];
+    ];
 
     private readonly static PageDbEntity _pageWithButton = new()
     {
         Slug = BUTTON_REF_SLUG,
         Content = [
-                new ButtonWithEntryReferenceDbEntity(){
-                    Button = new ButtonDbEntity(){
+                new ButtonWithEntryReferenceDbEntity()
+                {
+                    Button = new ButtonDbEntity()
+                    {
                         Value = "Button value",
                         IsStartButton = true
                     }
@@ -138,10 +154,12 @@ public class GetPageFromDbQueryTests
         Slug = "rich_text_content",
         Content =
         [
-            new TextBodyDbEntity(){
+            new TextBodyDbEntity()
+            {
                 RichTextId = 1
             },
-            new TextBodyDbEntity(){
+            new TextBodyDbEntity()
+            {
                 RichTextId = 2
             },
         ]
@@ -232,7 +250,7 @@ public class GetPageFromDbQueryTests
         _getPageChildrenQuery.TryLoadChildren(Arg.Any<PageDbEntity>(), Arg.Any<CancellationToken>())
                             .Returns(Task.CompletedTask);
 
-        _getPageFromDbQuery = new GetPageFromDbQuery(_cmsDbSubstitute, _logger, _mapperSubstitute, new[] { _getPageChildrenQuery });
+        _getPageFromDbQuery = new GetPageFromDbQuery(_cmsDbSubstitute, _logger, _mapperSubstitute, [_getPageChildrenQuery]);
     }
 
     [Fact]

@@ -18,6 +18,8 @@ public interface ICmsDbContext
 
     public IQueryable<ComponentDropDownDbEntity> ComponentDropDowns { get; }
 
+    public IQueryable<ContentComponentDbEntity> ContentComponents { get; }
+
     public IQueryable<HeaderDbEntity> Headers { get; }
 
     public IQueryable<InsetTextDbEntity> InsetTexts { get; }
@@ -32,8 +34,31 @@ public interface ICmsDbContext
 
     public IQueryable<RecommendationPageDbEntity> RecommendationPages { get; }
 
+    public IQueryable<RecommendationChunkDbEntity> RecommendationChunks { get; }
+
+    public IQueryable<RecommendationIntroDbEntity> RecommendationIntros { get; }
+
+    public IQueryable<RecommendationSectionDbEntity> RecommendationSections { get; }
+
+    public IQueryable<RecommendationChunkContentDbEntity> RecommendationChunkContents { get; }
+
+    public IQueryable<RecommendationChunkAnswerDbEntity> RecommendationChunkAnswers { get; }
+
+    public IQueryable<RecommendationSectionChunkDbEntity> RecommendationSectionChunks { get; }
+
+    public IQueryable<RecommendationSectionAnswerDbEntity> RecommendationSectionAnswers { get; }
+
+    public IQueryable<RecommendationIntroContentDbEntity> RecommendationIntroContents { get; }
+
+    public IQueryable<SubtopicRecommendationDbEntity> SubtopicRecommendations { get; }
+
+    public IQueryable<SubtopicRecommendationIntroDbEntity> SubtopicRecommendationIntros { get; }
+
     public IQueryable<RichTextContentDbEntity> RichTextContents { get; }
+
     public IQueryable<RichTextContentWithSlugDbEntity> RichTextContentWithSlugs { get; }
+
+    public IQueryable<RichTextContentWithSubtopicRecommendationId> RichTextContentWithSubtopicRecommendationIds { get; }
 
     public IQueryable<RichTextDataDbEntity> RichTextDataDbEntity { get; }
 

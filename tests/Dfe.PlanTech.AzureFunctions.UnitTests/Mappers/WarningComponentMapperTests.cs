@@ -1,6 +1,5 @@
 using Dfe.PlanTech.AzureFunctions.Mappings;
 using Dfe.PlanTech.Domain.Caching.Models;
-using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
