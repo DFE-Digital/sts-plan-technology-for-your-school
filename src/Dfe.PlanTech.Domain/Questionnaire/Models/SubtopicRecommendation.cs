@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -11,9 +12,9 @@ public class SubtopicRecommendation : ContentComponent, ISubTopicRecommendation<
 
     public Section Subtopic { get; init; } = null!;
 
-    public RecommendationIntro GetRecommendationByMaturity(string maturity)
-    {
-        return Intros.FirstOrDefault(intro => intro.Maturity == maturity);
-    }
+    public RecommendationIntro? GetRecommendationByMaturity(string maturity)
+    => Intros.FirstOrDefault(intro => intro.Maturity == maturity);
 
+    public RecommendationIntro? GetRecommendationByMaturity(Maturity maturity)
+    => Intros.FirstOrDefault(intro => intro.Maturity == maturity.ToString());
 }

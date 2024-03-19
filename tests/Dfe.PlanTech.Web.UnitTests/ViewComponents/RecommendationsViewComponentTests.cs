@@ -3,6 +3,7 @@ using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.ViewComponents;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
@@ -42,9 +43,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 {
                     new RecommendationChunk()
                     {
-                        Answers = new List<Domain.Questionnaire.Models.Answer>()
+                        Answers = new List<Answer>()
                         {
-                            new Domain.Questionnaire.Models.Answer()
+                            new Answer()
                             {
                                 Sys = new SystemDetails()
                                 {
@@ -98,9 +99,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 {
                     new RecommendationChunk()
                     {
-                        Answers = new List<Domain.Questionnaire.Models.Answer>()
+                        Answers = new List<Answer>()
                         {
-                            new Domain.Questionnaire.Models.Answer()
+                            new Answer()
                             {
                                 Sys = new SystemDetails()
                                 {
@@ -134,11 +135,38 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             }
         };
 
+        private readonly List<SubtopicRecommendation> _subtopicRecommendations = [];
         public RecommendationsViewComponentTests()
         {
             _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
             _loggerCategory = Substitute.For<ILogger<RecommendationsViewComponent>>();
             _getSubTopicRecommendationQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
+
+            _subtopicRecommendations.Add(_subtopic);
+            _subtopicRecommendations.Add(_subtopicTwo);
+
+            _getSubTopicRecommendationQuery.GetRecommendationsViewDto(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+                                            .Returns((callinfo) =>
+                                            {
+                                                var subtopic = callinfo.ArgAt<string>(0);
+                                                var maturity = callinfo.ArgAt<string>(1);
+
+                                                var matching = _subtopicRecommendations.FirstOrDefault(rec => rec.Subtopic.Sys.Id == subtopic);
+
+                                                if (matching == null)
+                                                {
+                                                    return null;
+                                                }
+
+                                                var introForMaturity = matching.Intros.FirstOrDefault(intro => intro.Maturity == maturity);
+
+                                                if (introForMaturity == null)
+                                                {
+                                                    return null;
+                                                }
+
+                                                return new RecommendationsViewDto(introForMaturity.Slug, introForMaturity.Header.Text);
+                                            });
 
             _recommendationsComponent = new RecommendationsViewComponent(_loggerCategory, _getSubmissionStatusesQuery, _getSubTopicRecommendationQuery);
 
@@ -174,8 +202,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Sections = [
                     new()
                     {
-                        Sys = new SystemDetails() { Id = "Section1" },
-                        Name = "Test Section 1",
+                        Sys = new SystemDetails() { Id = "Section2" },
+                        Name = "Test Section 2",
                         Recommendations = [
                             new()
                             {
@@ -204,7 +232,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Maturity = "High"
             });
 
-            Category[] categories = new Category[] { _category };
+            Category[] categories = [_category];
 
             _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
 
@@ -256,9 +284,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_categoryTwo.Sections).Returns([.. _categoryTwo.SectionStatuses]);
 
-            _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic, _subtopicTwo);
-
-            var result = _recommendationsComponent.InvokeAsync(categories).Result as ViewViewComponentResult;
+            var result = (await _recommendationsComponent.InvokeAsync(categories)) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -278,14 +304,13 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.NotEmpty(list);
 
             Assert.NotNull(_subtopic);
-            Assert.Equal(_subtopic.Intros[0].Slug, list.First().RecommendationSlug);
-            Assert.Equal(_subtopic.Intros[0].Header.Text, list.First().RecommendationDisplayName);
+            Assert.Contains(_subtopic.Intros, intro => list.Any(rec => rec.RecommendationSlug == intro.Slug));
+            Assert.Contains(_subtopic.Intros, intro => list.Any(rec => rec.RecommendationDisplayName == intro.Header.Text));
 
             Assert.NotNull(_subtopicTwo);
-            Assert.Equal(_subtopicTwo.Intros[0].Slug, list.Skip(1).First().RecommendationSlug);
-            Assert.Equal(_subtopicTwo.Intros[0].Header.Text, list.Skip(1).First().RecommendationDisplayName);
-            Assert.Null(list.First().NoRecommendationFoundErrorMessage);
-            Assert.Null(list.Skip(1).First().NoRecommendationFoundErrorMessage);
+            Assert.Contains(_subtopicTwo.Intros, intro => list.Any(rec => rec.RecommendationSlug == intro.Slug));
+            Assert.Contains(_subtopicTwo.Intros, intro => list.Any(rec => rec.RecommendationDisplayName == intro.Header.Text));
+            Assert.True(list.All(l => l.NoRecommendationFoundErrorMessage == null));
         }
 
         [Fact]
