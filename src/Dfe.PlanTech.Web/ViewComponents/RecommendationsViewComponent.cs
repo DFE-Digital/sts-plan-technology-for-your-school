@@ -37,7 +37,7 @@ public class RecommendationsViewComponent(
 
         var recommendationsViewComponentViewModel =
             recommendationsAvailable
-                ?  GetRecommendationsViewComponentViewModel(allSectionsOfCombinedCategories,
+                ? GetRecommendationsViewComponentViewModel(allSectionsOfCombinedCategories,
                     allSectionStatusesOfCombinedCategories)
                 : null;
 
@@ -49,18 +49,15 @@ public class RecommendationsViewComponent(
     {
         foreach (var section in sections)
         {
-            var sectionMaturity = sectionStatusesList
-                .Where(sectionStatus => sectionStatus.SectionId == section.Sys.Id && sectionStatus.Completed == 1)
-                .Select(sectionStatus => sectionStatus.Maturity)
-                .FirstOrDefault();
+            var sectionMaturity = sectionStatusesList.Where(sectionStatus => sectionStatus.SectionId == section.Sys.Id && sectionStatus.Completed == 1)
+                                                    .Select(sectionStatus => sectionStatus.Maturity)
+                                                    .FirstOrDefault();
 
             if (string.IsNullOrEmpty(sectionMaturity)) continue;
 
             SubtopicRecommendation? recommendation = null;
 
-
-            recommendation = await getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id);
-
+            recommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id);
 
             if (recommendation == null)
                 _logger.LogError("No Recommendation Found: Section - {sectionName}, Maturity - {sectionMaturity}",

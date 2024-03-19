@@ -14,7 +14,7 @@ public class GetAllAnswersForLatestSubmissionQueryTests
     {
         const string section = "broadband-connection";
         const int establishmentId = 123;
-        
+
         var responses = new List<Response>
         {
             new Response()
@@ -79,8 +79,6 @@ public class GetAllAnswersForLatestSubmissionQueryTests
             }
         };
 
-       
-
         var answers = new List<Answer>
         {
             new Answer()
@@ -101,14 +99,15 @@ public class GetAllAnswersForLatestSubmissionQueryTests
                 AnswerText = "Answer 3",
                 ContentfulRef = "Ref 1"
             }
-            ,    new Answer()
+            ,
+            new Answer()
             {
                 Id = 4,
                 AnswerText = "Answer 4",
                 ContentfulRef = "Ref 1"
             }
         };
-        
+
         var options = new DbContextOptionsBuilder<PlanTechDbContext>().UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
 
         await using var dbContext = new PlanTechDbContext(options);
@@ -117,9 +116,10 @@ public class GetAllAnswersForLatestSubmissionQueryTests
         dbContext.AddRange(answers);
         await dbContext.SaveChangesAsync();
         var query = new GetAllAnswersForLatestSubmissionQuery(dbContext);
-        
+
         var result = await query.GetAllAnswersForLatestSubmission(section, establishmentId);
-                
+
+        Assert.NotNull(result);
         Assert.Equal(2, result.Count);
         Assert.Contains(result, a => a.Id == 3);
         Assert.Contains(result, a => a.Id == 4);

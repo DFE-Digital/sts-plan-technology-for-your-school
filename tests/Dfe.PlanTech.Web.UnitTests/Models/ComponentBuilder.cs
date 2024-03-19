@@ -1,8 +1,8 @@
-﻿using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
+﻿using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Web.Models;
 
 namespace Dfe.PlanTech.Web.UnitTests.Models
 {
@@ -65,50 +65,53 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         };
 
         public List<Section> BuildSections()
-        => new()
-        {
+        =>
+        [
             new Section
             {
                 Name = "Section",
                 Questions = BuildQuestions(),
-                Recommendations =new() {
+                Recommendations = [
                     BuildRecommendationsPage(Maturity.Low),
                     BuildRecommendationsPage(Maturity.Medium),
                     BuildRecommendationsPage(Maturity.High)
-                }
+                ]
             }
+        ];
+
+        public static RecommendationsViewModel BuildRecommendationViewModel()
+        => new()
+        {
+            Intro = BuildRecommendationIntro("intro"),
+            Chunks = [BuildRecommendationChunk("First", "Title one"), BuildRecommendationChunk("Second", "Title two"), BuildRecommendationChunk("Third", "Title three")]
         };
+
+        public static RecommendationIntro BuildRecommendationIntro(string header) => new() { Header = new Header() { Text = header } };
+
+        public static RecommendationChunk BuildRecommendationChunk(string header, string title = "Title") => new() { Header = new Header() { Text = header }, Title = title };
 
         private static List<Question> BuildQuestions()
         {
-            return new()
-            {
+            return
+            [
                 new Question
                 {
                     Text = "Question Text",
                     HelpText = "Help Text",
                     Answers = BuildAnswers(),
                 }
-            };
+            ];
         }
 
         private static List<Answer> BuildAnswers()
         {
-            return new()
-            {
+            return
+            [
                 new Answer
                 {
                     Text = "Answer"
                 }
-            };
-        }
-
-        private static IContentComponent[] BuildContent()
-        {
-            return new IContentComponent[]
-            {
-                BuildButton()
-            };
+            ];
         }
 
         private static RichTextContent BuildRichContent()
@@ -137,7 +140,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             Slug = "testing-page",
             SectionTitle = "Section Title",
             Title = BuildTitle(),
-            Content = new()
+            Content = []
         };
 
         private static Title BuildTitle(string text = "Testing Title")

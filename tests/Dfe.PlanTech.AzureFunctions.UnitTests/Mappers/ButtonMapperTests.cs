@@ -1,5 +1,4 @@
 using Dfe.PlanTech.AzureFunctions.Mappings;
-using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 

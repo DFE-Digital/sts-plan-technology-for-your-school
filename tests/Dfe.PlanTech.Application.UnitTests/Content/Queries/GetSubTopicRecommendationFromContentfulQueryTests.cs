@@ -40,7 +40,7 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
                             Sys = new SystemDetails() { Id = "1" }
                         },
                         new Answer()
-                        { 
+                        {
                             Sys = new SystemDetails() { Id = "2" }
                         },
                         new Answer()
@@ -48,14 +48,14 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
                             Sys = new SystemDetails() { Id = "3" }
                         }
                     },
-                    
+
                     Header = new Header()
                     {
                         Tag = HeaderTag.H1,
                         Size = HeaderSize.Large,
                         Text = "chunk1"
                     }
-                    
+
                 },
                 new RecommendationChunk()
                 {
@@ -66,7 +66,7 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
                             Sys = new SystemDetails() { Id = "4" }
                         },
                         new Answer()
-                        { 
+                        {
                             Sys = new SystemDetails() { Id = "5" }
                         },
                         new Answer()
@@ -74,14 +74,14 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
                             Sys = new SystemDetails() { Id = "6" }
                         }
                     },
-                    
+
                     Header = new Header()
                     {
                         Tag = HeaderTag.H1,
                         Size = HeaderSize.Large,
                         Text = "chunk3"
                     }
-                    
+
                 },
                 new RecommendationChunk()
                 {
@@ -92,7 +92,7 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
                             Sys = new SystemDetails() { Id = "7" }
                         },
                         new Answer()
-                        { 
+                        {
                             Sys = new SystemDetails() { Id = "8" }
                         },
                         new Answer()
@@ -100,7 +100,7 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
                             Sys = new SystemDetails() { Id = "9" }
                         }
                     },
-                    
+
                     Header = new Header()
                     {
                         Tag = HeaderTag.H1,
@@ -110,7 +110,7 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
                 }
             }
         };
-        
+
         _subTopicOne = new()
         {
             Sys = new SystemDetails()
@@ -143,14 +143,14 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
         {
             Subtopic = _subTopicTwo
         };
-        
+
         _getSubTopicRecommendationFromContentfulQuery = new(_repoSubstitute);
     }
 
     [Fact]
     public async Task GetSubTopicRecommendation_Returns_Correct_SubTopicRecommendation_From_SectionOne()
     {
-        _repoSubstitute.GetEntities<SubtopicRecommendation>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns(new List<SubtopicRecommendation?>() { _subtopicRecommendationOne });
+        _repoSubstitute.GetEntities<SubtopicRecommendation?>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns([_subtopicRecommendationOne]);
 
         SubtopicRecommendation? subTopicRecommendation = await _getSubTopicRecommendationFromContentfulQuery.GetSubTopicRecommendation(_subTopicOne.Sys.Id);
 
@@ -161,67 +161,60 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
     [Fact]
     public async Task GetSubTopicRecommendation_Returns_Correct_SubTopicRecommendation_From_SectionTwo()
     {
-        _repoSubstitute.GetEntities<SubtopicRecommendation>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns(new List<SubtopicRecommendation?>() { _subtopicRecommendationTwo });
+        _repoSubstitute.GetEntities<SubtopicRecommendation?>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns([_subtopicRecommendationTwo]);
 
         SubtopicRecommendation? subTopicRecommendation = await _getSubTopicRecommendationFromContentfulQuery.GetSubTopicRecommendation(_subTopicTwo.Sys.Id);
 
         Assert.NotNull(subTopicRecommendation);
         Assert.Equal(_subtopicRecommendationTwo, subTopicRecommendation);
     }
-    
+
     [Fact]
     public async Task GetSubTopicRecommendationIntro_Returns_Intro_When_Exists_In_SubTopicRecommendation_From_SectionOne()
     {
-        _repoSubstitute.GetEntities<SubtopicRecommendation>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns(new List<SubtopicRecommendation?>() { _subtopicRecommendationOne });
+        _repoSubstitute.GetEntities<SubtopicRecommendation?>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns([_subtopicRecommendationOne]);
 
         SubtopicRecommendation? subTopicRecommendation = await _getSubTopicRecommendationFromContentfulQuery.GetSubTopicRecommendation(_subTopicOne.Sys.Id);
-        
-        var intro =  subTopicRecommendation.GetRecommendationByMaturity(Maturity.Medium.ToString());
+
+        var intro = subTopicRecommendation!.GetRecommendationByMaturity(Maturity.Medium.ToString());
 
         Assert.NotNull(intro);
         Assert.Equal(Maturity.Medium.ToString(), intro.Maturity);
     }
-    
-    
+
     [Fact]
     public async Task GetSubTopicRecommendationChunk_When_List_Of_Answers_Passed_To_RecommendationSection_From_SectionOne()
     {
-        _repoSubstitute.GetEntities<SubtopicRecommendation>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns(new List<SubtopicRecommendation?>() { _subtopicRecommendationOne });
+        _repoSubstitute.GetEntities<SubtopicRecommendation?>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns([_subtopicRecommendationOne]);
 
         SubtopicRecommendation? subTopicRecommendation = await _getSubTopicRecommendationFromContentfulQuery.GetSubTopicRecommendation(_subTopicOne.Sys.Id);
 
-        var chunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(new List<string>() { "1", "5", "9" });
-        
+        var chunks = subTopicRecommendation!.Section.GetRecommendationChunksByAnswerIds(new List<string>() { "1", "5", "9" });
+
         Assert.Equal(3, chunks.Count);
     }
-    
-    
-     
+
     [Fact]
     public async Task GetSubTopicRecommendationChunk_When_List_Of_Answers_Passed_To_RecommendationSection_From_SectionOne_No_Duplicate_Chunks_Returned()
     {
-        _repoSubstitute.GetEntities<SubtopicRecommendation>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns(new List<SubtopicRecommendation?>() { _subtopicRecommendationOne });
+        _repoSubstitute.GetEntities<SubtopicRecommendation?>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns([_subtopicRecommendationOne]);
 
         SubtopicRecommendation? subTopicRecommendation = await _getSubTopicRecommendationFromContentfulQuery.GetSubTopicRecommendation(_subTopicOne.Sys.Id);
 
-        var chunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(new List<string>() { "1", "7", "9" });
-        
+        var chunks = subTopicRecommendation!.Section.GetRecommendationChunksByAnswerIds(["1", "7", "9"]);
+
         Assert.Equal(2, chunks.Count);
     }
 
     [Fact]
     public async Task GetSubTopicRecommendationChunks_Returns_Empty_When_List_Of_Answers_Passed_To_RecommendationSection_From_SectionOne_Does_Not_Have_Any_Chunks_Associated()
     {
-        _repoSubstitute.GetEntities<SubtopicRecommendation>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns(new List<SubtopicRecommendation?>() { _subtopicRecommendationOne });
+        _repoSubstitute.GetEntities<SubtopicRecommendation?>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()).Returns([_subtopicRecommendationOne]);
 
         SubtopicRecommendation? subTopicRecommendation = await _getSubTopicRecommendationFromContentfulQuery.GetSubTopicRecommendation(_subTopicOne.Sys.Id);
 
-        var chunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(new List<string>() { "10" });
-        
-        Assert.Equal(0, chunks.Count);
-    }
+        var chunks = subTopicRecommendation!.Section.GetRecommendationChunksByAnswerIds(["10"]);
 
-    
-    
-    
+        Assert.Empty(chunks);
+    }
 }

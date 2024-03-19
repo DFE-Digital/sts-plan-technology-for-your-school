@@ -77,7 +77,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 }
             }
         };
-        
+
         private readonly SubtopicRecommendation? _subtopicTwo = new SubtopicRecommendation()
         {
             Intros = new List<RecommendationIntro>()
@@ -133,7 +133,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 }
             }
         };
-        
+
         public RecommendationsViewComponentTests()
         {
             _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
@@ -217,10 +217,10 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             var model = result.ViewData.Model;
             Assert.NotNull(model);
-            
+
             var unboxed = model as IAsyncEnumerable<RecommendationsViewComponentViewModel>;
             Assert.NotNull(unboxed);
-            
+
             var list = new List<RecommendationsViewComponentViewModel>();
             await foreach (var item in unboxed)
             {
@@ -229,7 +229,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
 
             Assert.NotEmpty(list);
-
+            Assert.NotNull(_subtopic);
             Assert.Equal(_subtopic.Intros[0].Slug, list.First().RecommendationSlug);
             Assert.Equal(_subtopic.Intros[0].Header.Text, list.First().RecommendationDisplayName);
             Assert.Null(list.First().NoRecommendationFoundErrorMessage);
@@ -255,7 +255,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_categoryTwo.Sections).Returns([.. _categoryTwo.SectionStatuses]);
-            
+
             _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic, _subtopicTwo);
 
             var result = _recommendationsComponent.InvokeAsync(categories).Result as ViewViewComponentResult;
@@ -268,17 +268,20 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             var unboxed = model as IAsyncEnumerable<RecommendationsViewComponentViewModel>;
             Assert.NotNull(unboxed);
-            
+
             var list = new List<RecommendationsViewComponentViewModel>();
             await foreach (var item in unboxed)
             {
                 list.Add(item);
             }
-            
+
             Assert.NotEmpty(list);
-            
+
+            Assert.NotNull(_subtopic);
             Assert.Equal(_subtopic.Intros[0].Slug, list.First().RecommendationSlug);
             Assert.Equal(_subtopic.Intros[0].Header.Text, list.First().RecommendationDisplayName);
+
+            Assert.NotNull(_subtopicTwo);
             Assert.Equal(_subtopicTwo.Intros[0].Slug, list.Skip(1).First().RecommendationSlug);
             Assert.Equal(_subtopicTwo.Intros[0].Header.Text, list.Skip(1).First().RecommendationDisplayName);
             Assert.Null(list.First().NoRecommendationFoundErrorMessage);
@@ -310,15 +313,16 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             var unboxed = model as IAsyncEnumerable<RecommendationsViewComponentViewModel>;
             Assert.NotNull(unboxed);
-            
+
             var list = new List<RecommendationsViewComponentViewModel>();
             await foreach (var item in unboxed)
             {
                 list.Add(item);
             }
-            
+
             Assert.NotEmpty(list);
 
+            Assert.NotNull(_subtopic);
             Assert.Equal(_subtopic.Intros[0].Slug, list.First().RecommendationSlug);
             Assert.Equal(_subtopic.Intros[0].Header.Text, list.First().RecommendationDisplayName);
             Assert.Null(list.First().NoRecommendationFoundErrorMessage);
@@ -349,13 +353,13 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             var unboxed = model as IAsyncEnumerable<RecommendationsViewComponentViewModel>;
             Assert.NotNull(unboxed);
-            
+
             var list = new List<RecommendationsViewComponentViewModel>();
             await foreach (var item in unboxed)
             {
                 list.Add(item);
             }
-            
+
             Assert.NotEmpty(list);
 
             Assert.Null(list.First().RecommendationSlug);

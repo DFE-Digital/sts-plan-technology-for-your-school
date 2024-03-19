@@ -13,7 +13,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         }
 
         [Fact]
-        public void Should_render_button_component()
+        public void Should_Render_Button_Component()
         {
             var actual = _componentBuilder.BuildButtonWithLink();
             Assert.NotNull(actual);
@@ -23,7 +23,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         }
 
         [Fact]
-        public void Should_render_dropdown_component()
+        public void Should_Render_Dropdown_Component()
         {
             var actual = _componentBuilder.BuildDropDownComponent();
             Assert.NotNull(actual);
@@ -32,7 +32,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         }
 
         [Fact]
-        public void Should_render_textbody_component()
+        public void Should_Render_TextBody_Component()
         {
             var actual = _componentBuilder.BuildTextBody();
             Assert.NotNull(actual);
@@ -40,7 +40,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         }
 
         [Fact]
-        public void Should_render_category_component()
+        public void Should_Render_Category_Component()
         {
             var actual = _componentBuilder.BuildCategory();
             Assert.NotNull(actual);
@@ -130,6 +130,50 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             var unknownMaturityRecommendation = section.TryGetRecommendationForMaturity(maturity);
 
             Assert.Null(unknownMaturityRecommendation);
+        }
+
+        [Theory]
+        [InlineData("Random test Topic", "random-test-topic")]
+        [InlineData("Y867as ()&ycj Cool Thing", "y867as-ycj-cool-thing")]
+        public void Slugify_Should_Slugify_Strings(string header, string expectedResult)
+        {
+            var recommendationChunk = ComponentBuilder.BuildRecommendationChunk(header);
+
+            Assert.Equal(expectedResult, recommendationChunk.SlugifiedHeader);
+        }
+
+        [Theory]
+        [InlineData("Random test Topic", "random-test-topic")]
+        [InlineData("Y867as ()&ycj Cool Thing", "y867as-ycj-cool-thing")]
+        public void RecommendationIntro_Should_Return_Correct_Header_And_Title(string header, string expectedResult)
+        {
+            var recommendationIntro = ComponentBuilder.BuildRecommendationIntro(header);
+
+            Assert.Equal(header, recommendationIntro.Title);
+            Assert.Equal(expectedResult, recommendationIntro.SlugifiedHeader);
+        }
+
+        [Fact]
+        public void RecommendationViewModel_Should_Return_Accordions_And_All_Content()
+        {
+            var recommendationViewModel = ComponentBuilder.BuildRecommendationViewModel();
+
+            var allContent = recommendationViewModel.AllContent.ToList();
+
+            Assert.Contains(recommendationViewModel.Intro, allContent);
+
+            foreach (var chunk in recommendationViewModel.Chunks)
+            {
+                Assert.Contains(chunk, allContent);
+            }
+
+            var accordions = recommendationViewModel.Accordions.ToList();
+            Assert.Equal(recommendationViewModel.Chunks.Count, accordions.Count);
+
+            foreach (var chunk in recommendationViewModel.Chunks.Select((chunk, index) => new { chunk, index }))
+            {
+                Assert.Contains(accordions, accordion => accordion.Header == chunk.chunk.Header.Text && accordion.Order == chunk.index + 1);
+            }
         }
 
         [Fact]

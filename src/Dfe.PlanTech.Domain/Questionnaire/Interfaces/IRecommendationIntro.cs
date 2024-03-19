@@ -9,7 +9,7 @@ public interface IRecommendationIntro
 
 public interface IRecommendationIntro<THeader, TContentComponent> : IRecommendationIntro
 where THeader : IHeader
-where TContentComponent : IContentComponent
+where TContentComponent : IContentComponentType
 {
     public THeader Header { get; }
 
