@@ -31,11 +31,10 @@ jobs:
       - name: Install and audit dependency signatures
         working-directory: ./.github/semver-release
         run: |
-          npm ci
-          npm audit signatures
+          yarn install --frozen-lockfile
 
       - name: Create Release
         working-directory: ./.github/semver-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run release
+        run: yarn run release
