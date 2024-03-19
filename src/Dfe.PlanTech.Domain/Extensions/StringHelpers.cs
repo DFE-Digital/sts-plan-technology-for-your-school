@@ -4,12 +4,12 @@ namespace Dfe.PlanTech;
 
 public static partial class StringHelpers
 {
-  private const string RemoveNonAlphanumericCharactersRegexPattern = @"[^a-zA-Z0-9\s]";
+    private const string RemoveNonAlphanumericCharactersRegexPattern = @"[^a-zA-Z0-9\s]";
 
-  // Extension method to slugify a string by removing non-alphanumeric characters, replacing spaces with hyphens, and converting to lowercase.
-  public static string Slugify(this string text)
-  => RemoveNonAlphaNumericCharactersPattern().Replace(text, "").Replace(" ", "-").ToLower();
+    // Extension method to slugify a string by removing non-alphanumeric characters, replacing spaces with hyphens, and converting to lowercase.
+    public static string Slugify(this string text)
+    => RemoveNonAlphaNumericCharactersPattern().Replace(text, "").Replace(" ", "-").ToLower();
 
-  [GeneratedRegex(RemoveNonAlphanumericCharactersRegexPattern)]
-  private static partial Regex RemoveNonAlphaNumericCharactersPattern();
+    [GeneratedRegex(RemoveNonAlphanumericCharactersRegexPattern)]
+    private static partial Regex RemoveNonAlphaNumericCharactersPattern();
 }
