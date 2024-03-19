@@ -12,7 +12,7 @@ public class GetCategorySectionsQueryTests
 {
     private readonly ICmsDbContext _db = Substitute.For<ICmsDbContext>();
     private readonly ILogger<GetCategorySectionsQuery> _logger = Substitute.For<ILogger<GetCategorySectionsQuery>>();
-
+    private readonly PageDbEntity _nullPageDbEntity;
     private readonly GetCategorySectionsQuery _getCategorySectionsQuery;
 
     private readonly static PageDbEntity _loadedPage = new()
