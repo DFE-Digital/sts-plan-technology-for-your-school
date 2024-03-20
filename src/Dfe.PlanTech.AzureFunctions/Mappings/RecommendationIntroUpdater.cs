@@ -5,9 +5,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class RecommendationIntroUpdater(ILogger<RecommendationIntroUpdater> logger, CmsDbContext db) :EntityUpdater(logger, db)
+public class RecommendationIntroUpdater(ILogger<RecommendationIntroUpdater> logger, CmsDbContext db) : EntityUpdater(logger, db)
 {
-    
+
     public override MappedEntity UpdateEntityConcrete(MappedEntity entity)
     {
         if (!entity.AlreadyExistsInDatabase)
@@ -19,12 +19,12 @@ public class RecommendationIntroUpdater(ILogger<RecommendationIntroUpdater> logg
         {
             throw new InvalidCastException($"Entity is not the expected type. {entity.ExistingEntity!.GetType()}");
         }
-        
+
         RemoveOldAssociatedIntroContents(existingRecommendationIntro);
 
         return entity;
     }
-    
+
     private void RemoveOldAssociatedIntroContents(RecommendationIntroDbEntity existingRecommendationIntro)
     {
         var contentsToRemove = Db.RecommendationIntroContents
@@ -33,5 +33,5 @@ public class RecommendationIntroUpdater(ILogger<RecommendationIntroUpdater> logg
 
         Db.RecommendationIntroContents.RemoveRange(contentsToRemove);
     }
-    
+
 }

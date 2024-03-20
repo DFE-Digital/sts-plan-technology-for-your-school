@@ -72,7 +72,7 @@ public class QueueReceiver : BaseFunction
                 return;
             }
 
-            UpsertEntity(cmsEvent, mapped);
+            UpsertEntity(mapped);
 
             await DbSaveChanges(cancellationToken);
 
@@ -152,13 +152,15 @@ public class QueueReceiver : BaseFunction
     /// <param name="cmsEvent"></param>
     /// <param name="mapped"></param>
     /// <param name="existing"></param>
-    private void UpsertEntity(CmsEvent cmsEvent, MappedEntity mappedEntity)
+    private void UpsertEntity(MappedEntity mappedEntity)
     {
-        if (cmsEvent == CmsEvent.UNPUBLISH) return;
-
         if (!mappedEntity.AlreadyExistsInDatabase)
         {
             _db.Add(mappedEntity.IncomingEntity);
+        }
+        else
+        {
+            _db.Update(mappedEntity.ExistingEntity!);
         }
     }
 

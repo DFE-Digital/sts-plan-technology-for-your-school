@@ -10,64 +10,64 @@ public class GetSubTopicRecommendationQuery([FromKeyedServices(GetSubtopicRecomm
                                             [FromKeyedServices(GetSubTopicRecommendationFromDbQuery.ServiceKey)] IGetSubTopicRecommendationQuery getFromDbQuery,
                                             ILogger<GetSubTopicRecommendationQuery> logger) : IGetSubTopicRecommendationQuery
 {
-  public const string ServiceKey = "Parent";
+    public const string ServiceKey = "Parent";
 
-  private readonly IGetSubTopicRecommendationQuery _getFromContentfulQuery = getFromContentfulQuery;
-  private readonly IGetSubTopicRecommendationQuery _getFromDbQuery = getFromDbQuery;
-  private readonly ILogger<GetSubTopicRecommendationQuery> _logger = logger;
+    private readonly IGetSubTopicRecommendationQuery _getFromContentfulQuery = getFromContentfulQuery;
+    private readonly IGetSubTopicRecommendationQuery _getFromDbQuery = getFromDbQuery;
+    private readonly ILogger<GetSubTopicRecommendationQuery> _logger = logger;
 
-  public async Task<RecommendationsViewDto?> GetRecommendationsViewDto(string subtopicId, string maturity, CancellationToken cancellationToken = default)
-  {
-    Task<RecommendationsViewDto?> func(IGetSubTopicRecommendationQuery repository) => repository.GetRecommendationsViewDto(subtopicId, maturity, cancellationToken);
-
-    var recommendationsView = await GetFromDbOrContentfulIfNotFound(func, subtopicId);
-
-    if (recommendationsView == null)
+    public async Task<RecommendationsViewDto?> GetRecommendationsViewDto(string subtopicId, string maturity, CancellationToken cancellationToken = default)
     {
-      _logger.LogError("Was unable to find a subtopic recommendation for {SubtopicId} from DB or Contentful", subtopicId);
+        Task<RecommendationsViewDto?> func(IGetSubTopicRecommendationQuery repository) => repository.GetRecommendationsViewDto(subtopicId, maturity, cancellationToken);
+
+        var recommendationsView = await GetFromDbOrContentfulIfNotFound(func, subtopicId);
+
+        if (recommendationsView == null)
+        {
+            _logger.LogError("Was unable to find a subtopic recommendation for {SubtopicId} from DB or Contentful", subtopicId);
+        }
+
+        return recommendationsView;
     }
 
-    return recommendationsView;
-  }
-
-  public async Task<SubtopicRecommendation?> GetSubTopicRecommendation(string subtopicId, CancellationToken cancellationToken)
-  {
-    Task<SubtopicRecommendation?> func(IGetSubTopicRecommendationQuery repository) => repository.GetSubTopicRecommendation(subtopicId, cancellationToken);
-
-    var recommendation = await GetFromDbOrContentfulIfNotFound(func, subtopicId);
-
-    if (recommendation == null)
+    public async Task<SubtopicRecommendation?> GetSubTopicRecommendation(string subtopicId, CancellationToken cancellationToken)
     {
-      _logger.LogError("Was unable to find a subtopic recommendation for {SubtopicId} from DB or Contentful", subtopicId);
+        Task<SubtopicRecommendation?> func(IGetSubTopicRecommendationQuery repository) => repository.GetSubTopicRecommendation(subtopicId, cancellationToken);
+
+        var recommendation = await GetFromDbOrContentfulIfNotFound(func, subtopicId);
+
+        if (recommendation == null)
+        {
+            _logger.LogError("Was unable to find a subtopic recommendation for {SubtopicId} from DB or Contentful", subtopicId);
+        }
+
+        return recommendation;
     }
 
-    return recommendation;
-  }
-
-  private async Task<T?> GetFromDbOrContentfulIfNotFound<T>(Func<IGetSubTopicRecommendationQuery, Task<T?>> getFromInterface, string subtopicId)
-    where T : class
-  {
-    var fromDb = await getFromInterface(_getFromDbQuery);
-
-    if (fromDb != null)
+    private async Task<T?> GetFromDbOrContentfulIfNotFound<T>(Func<IGetSubTopicRecommendationQuery, Task<T?>> getFromInterface, string subtopicId)
+      where T : class
     {
-      LogRetrievalTrace(subtopicId, "database");
-      return fromDb;
+        var fromDb = await getFromInterface(_getFromDbQuery);
+
+        if (fromDb != null)
+        {
+            LogRetrievalTrace(subtopicId, "database");
+            return fromDb;
+        }
+
+        var fromContentful = await getFromInterface(_getFromContentfulQuery);
+
+        if (fromContentful != null)
+        {
+            LogRetrievalTrace(subtopicId, "Contentful");
+            return fromContentful;
+        }
+
+        return default;
     }
 
-    var fromContentful = await getFromInterface(_getFromContentfulQuery);
-
-    if (fromContentful != null)
+    private void LogRetrievalTrace(string subtopicId, string retrievedFrom)
     {
-      LogRetrievalTrace(subtopicId, "Contentful");
-      return fromContentful;
+        _logger.LogTrace("Retrieved subtopic recommendation {SubtopicId} from {RetrievedFrom}", subtopicId, retrievedFrom);
     }
-
-    return default;
-  }
-
-  private void LogRetrievalTrace(string subtopicId, string retrievedFrom)
-  {
-    _logger.LogTrace("Retrieved subtopic recommendation {SubtopicId} from {RetrievedFrom}", subtopicId, retrievedFrom);
-  }
 }

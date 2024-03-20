@@ -8,10 +8,10 @@ namespace Dfe.PlanTech.Infrastructure.Data.EntityTypeConfigurations;
 [ExcludeFromCodeCoverage]
 public class RecommendationIntroEntityTypeConfiguration : IEntityTypeConfiguration<RecommendationIntroDbEntity>
 {
-  public void Configure(EntityTypeBuilder<RecommendationIntroDbEntity> builder)
-  {
-    builder.HasMany(intro => intro.Content)
-            .WithMany(content => content.RecommendationIntro)
-            .UsingEntity<RecommendationIntroContentDbEntity>();
-  }
+    public void Configure(EntityTypeBuilder<RecommendationIntroDbEntity> builder)
+    {
+        builder.HasMany(intro => intro.Content)
+                .WithMany(content => content.RecommendationIntro)
+                .UsingEntity<RecommendationIntroContentDbEntity>();
+    }
 }

@@ -58,7 +58,6 @@ jobs:
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
-        if: env.directory_has_changes == 'true'
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
           cache: false
@@ -68,7 +67,6 @@ jobs:
 
       - name: Run Linter
         uses: wearerequired/lint-action@v2
-        if: env.directory_has_changes == 'true'
         with:
           dotnet_format: true
           dotnet_format_dir: ./src/${{ matrix.workspace }}

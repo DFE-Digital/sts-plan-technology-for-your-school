@@ -25,10 +25,9 @@ jobs:
         with:
           node-version: "lts/*"
 
-      - name: Install and audit dependency signatures
+      - name: Install dependencies
         working-directory: ./.github/semver-release
-        run: |
-          yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile
 
       - name: Create Release
         working-directory: ./.github/semver-release
