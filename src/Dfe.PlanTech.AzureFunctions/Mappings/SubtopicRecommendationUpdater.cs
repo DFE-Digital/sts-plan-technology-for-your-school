@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class SubtopicRecommendationUpdater(ILogger<SubtopicRecommendationUpdater> logger, CmsDbContext db) :EntityUpdater(logger, db)
+public class SubtopicRecommendationUpdater(ILogger<SubtopicRecommendationUpdater> logger, CmsDbContext db) : EntityUpdater(logger, db)
 {
     public override MappedEntity UpdateEntityConcrete(MappedEntity entity)
     {
@@ -18,9 +18,9 @@ public class SubtopicRecommendationUpdater(ILogger<SubtopicRecommendationUpdater
         {
             throw new InvalidCastException($"Entity is not the expected type. {entity.ExistingEntity!.GetType()}");
         }
-        
+
         RemoveOldAssociatedRecommendationIntros(existingSubtopicRecommendation);
-        
+
         return entity;
     }
 
