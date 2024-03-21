@@ -85,6 +85,7 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
                 Chunks = chunks.Select(chunk => new RecommendationChunkDbEntity()
                 {
                     Id = chunk.Id,
+                    Title = chunk.Title,
                     Header = chunk.Header,
                     HeaderId = chunk.HeaderId,
                     Answers = chunk.Answers,
