@@ -20,12 +20,8 @@ public class JsonToEntityMappers(IEnumerable<JsonToDbMapper> mappers, JsonSerial
     }
 
     private JsonToDbMapper GetMapperForPayload(CmsWebHookPayload payload)
-    {
-        var contentType = payload.Sys.ContentType.Sys.Id;
-
-        return _mappers.FirstOrDefault(mapper => mapper.AcceptsContentType(contentType)) ?? throw new KeyNotFoundException($"Could not find mapper for {contentType}");
-    }
+        => _mappers.FirstOrDefault(mapper => mapper.AcceptsContentType(payload.ContentType)) ?? throw new KeyNotFoundException($"Could not find mapper for {payload.ContentType}");
 
     private CmsWebHookPayload SerialiseToPayload(string requestBody)
-      => JsonSerializer.Deserialize<CmsWebHookPayload>(requestBody, _jsonSerialiserOptions) ?? throw new InvalidOperationException($"Could not serialise body to {typeof(CmsWebHookPayload)}. Body was {requestBody}");
+        => JsonSerializer.Deserialize<CmsWebHookPayload>(requestBody, _jsonSerialiserOptions) ?? throw new InvalidOperationException($"Could not serialise body to {typeof(CmsWebHookPayload)}. Body was {requestBody}");
 }

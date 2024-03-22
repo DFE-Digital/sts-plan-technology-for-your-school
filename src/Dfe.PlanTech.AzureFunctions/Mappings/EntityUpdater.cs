@@ -13,8 +13,6 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
 {
     private readonly Type _dontCopyValueAttribute = typeof(DontCopyValueAttribute);
     private readonly ILogger<EntityUpdater> _logger = logger;
-    private MappedEntity? _mappedEntity;
-
     protected readonly CmsDbContext Db = db;
 
     /// <summary>
@@ -32,17 +30,17 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
             ExistingEntity = existing
         };
 
-        _mappedEntity = mappedEntity;
+        mappedEntity.UpdateEntityStatus(cmsEvent);
 
         if (mappedEntity.AlreadyExistsInDatabase)
         {
-            CopyEntityStatus();
             UpdateProperties(incoming, existing!);
         }
 
-        UpdateEntityStatusByEvent(cmsEvent);
-
-        mappedEntity.IsValidComponent(Db, _dontCopyValueAttribute, _logger);
+        if (!mappedEntity.IsValidComponent(Db, _dontCopyValueAttribute, _logger))
+        {
+            return mappedEntity;
+        }
 
         mappedEntity = UpdateEntityConcrete(mappedEntity);
 
@@ -59,73 +57,28 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
         return entity;
     }
 
-    private void CopyEntityStatus()
-    {
-        _mappedEntity!.IncomingEntity.Archived = _mappedEntity.ExistingEntity!.Archived;
-        _mappedEntity!.IncomingEntity.Published = _mappedEntity.ExistingEntity!.Published;
-        _mappedEntity!.IncomingEntity.Deleted = _mappedEntity.ExistingEntity!.Deleted;
-    }
-
     /// <summary>
-    /// Updates the status of an entity based on the provided CMS event and entity information.
+    /// Updates the properties of the existing entity using the values from the incoming entity.
+    /// It only updates the properties if the values have changed, to minimise unnecessary 
+    /// update calls to the database.
     /// </summary>
-    /// <param name="cmsEvent"></param>
-    /// <param name="mapped"></param>
-    /// <param name="existing"></param>
-    /// <exception cref="CmsEventException"></exception>
-    public void UpdateEntityStatusByEvent(CmsEvent cmsEvent)
-    {
-        if (_mappedEntity == null) throw new InvalidDataException($"{nameof(_mappedEntity)} is null");
-
-        switch (cmsEvent)
-        {
-            case CmsEvent.SAVE:
-            case CmsEvent.AUTO_SAVE:
-                break;
-            case CmsEvent.ARCHIVE:
-                _mappedEntity.IncomingEntity.Archived = true;
-                break;
-            case CmsEvent.UNARCHIVE:
-                if (_mappedEntity.ExistingEntity == null)
-                {
-                    throw new CmsEventException(string.Format("Content with Id \"{0}\" has event 'unarchive' despite not existing in the database!", _mappedEntity.IncomingEntity.Id));
-                }
-
-                _mappedEntity.IncomingEntity.Archived = false;
-                break;
-            case CmsEvent.PUBLISH:
-                _mappedEntity.IncomingEntity.Published = true;
-                break;
-            case CmsEvent.UNPUBLISH:
-                if (_mappedEntity.ExistingEntity == null)
-                {
-                    throw new CmsEventException(string.Format("Content with Id \"{0}\" has event 'unpublish' despite not existing in the database!", _mappedEntity.IncomingEntity.Id));
-                }
-                _mappedEntity.ExistingEntity.Published = false;
-                break;
-            case CmsEvent.DELETE:
-                if (_mappedEntity.ExistingEntity == null)
-                {
-                    throw new CmsEventException(string.Format("Content with Id \"{0}\" has event 'delete' despite not existing in the database!", _mappedEntity.IncomingEntity.Id));
-                }
-                _mappedEntity.ExistingEntity.Deleted = true;
-                break;
-        }
-    }
-
+    /// <param name="incoming">The incoming entity with the new values.</param>
+    /// <param name="existing">The existing entity with the current values.</param>
     private void UpdateProperties(ContentComponentDbEntity incoming, ContentComponentDbEntity existing)
     {
         foreach (var property in PropertiesToCopy(incoming))
         {
+            //Get the new and current values from the incoming and existing entities using reflection
             var newValue = property.GetValue(incoming);
             var currentValue = property.GetValue(existing);
 
-            //Don't update existing properties if they haven't changed,
-            //to minimise unnecessary update calls to DB
+            // Don't update the existing property if the values are the same
             if (newValue?.Equals(currentValue) == true)
             {
                 continue;
             }
+
+            // Update the value of the property in the existing entity with the value from the incoming entity
             property.SetValue(existing, property.GetValue(incoming));
         }
     }
@@ -140,9 +93,9 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
     /// <param name="entity">Entity to get copyable properties for</param>
     /// <returns></returns>
     private IEnumerable<PropertyInfo> PropertiesToCopy(ContentComponentDbEntity entity)
-    => entity.GetType()
-            .GetProperties()
-            .Where(property => !HasDontCopyValueAttribute(property));
+        => entity.GetType()
+                .GetProperties()
+                .Where(property => !HasDontCopyValueAttribute(property));
 
     /// <summary>
     /// Does the property have a <see cref="DontCopyValueAttribute"/> property attached to it? 
@@ -150,5 +103,5 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
     /// <param name="property"></param>
     /// <returns></returns>
     private bool HasDontCopyValueAttribute(PropertyInfo property)
-     => property.CustomAttributes.Any(attribute => attribute.AttributeType == _dontCopyValueAttribute);
+        => property.CustomAttributes.Any(attribute => attribute.AttributeType == _dontCopyValueAttribute);
 }
