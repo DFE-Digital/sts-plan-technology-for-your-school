@@ -15,7 +15,7 @@ namespace Dfe.PlanTech.AzureFunctions;
 public class QueueReceiver : BaseFunction
 {
     private readonly CmsDbContext _db;
-    private readonly ContentfulOptions _contentfulOptions = new(true);
+    private readonly ContentfulOptions _contentfulOptions;
     private readonly JsonToEntityMappers _mappers;
 
     public QueueReceiver(ContentfulOptions contentfulOptions, ILoggerFactory loggerFactory, CmsDbContext db, JsonToEntityMappers mappers) : base(loggerFactory.CreateLogger<QueueReceiver>())
@@ -36,7 +36,7 @@ public class QueueReceiver : BaseFunction
     [Function("QueueReceiver")]
     public async Task QueueReceiverDbWriter([ServiceBusTrigger("contentful", IsBatched = true)] ServiceBusReceivedMessage[] messages, ServiceBusMessageActions messageActions, CancellationToken cancellationToken)
     {
-        Logger.LogInformation("Queue Receiver -> Db Writer started. Processing {msgCount} messages", messages.Length);
+        Logger.LogInformation("Queue Receiver -> Db Writer started. Processing {MsgCount} messages", messages.Length);
 
         foreach (ServiceBusReceivedMessage message in messages)
         {
@@ -80,8 +80,8 @@ public class QueueReceiver : BaseFunction
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error processing message ID {message}", message.MessageId);
-            await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace?.TruncateIfOverLength(4000), cancellationToken);
+            Logger.LogError(ex, "Error processing message ID {Message}", message.MessageId);
+            await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace, cancellationToken);
         }
     }
 
@@ -100,13 +100,13 @@ public class QueueReceiver : BaseFunction
     {
         if (cmsEvent == CmsEvent.CREATE)
         {
-            Logger.LogInformation("Dropping received event {cmsEvent}", cmsEvent);
+            Logger.LogInformation("Dropping received event {CmsEvent}", cmsEvent);
             return true;
         }
 
         if ((cmsEvent == CmsEvent.SAVE || cmsEvent == CmsEvent.AUTO_SAVE) && !_contentfulOptions.UsePreview)
         {
-            Logger.LogInformation("Receieved {event} but UsePreview is {usePreview} - dropping message", cmsEvent, _contentfulOptions.UsePreview);
+            Logger.LogInformation("Receieved {Event} but UsePreview is {UsePreview} - dropping message", cmsEvent, _contentfulOptions.UsePreview);
             return true;
         }
 
@@ -126,7 +126,7 @@ public class QueueReceiver : BaseFunction
             throw new CmsEventException(string.Format("Cannot parse header \"{0}\" into a valid CMS event", contentfulEvent));
         }
 
-        Logger.LogInformation("CMS Event: {cmsEvent}", cmsEvent);
+        Logger.LogInformation("CMS Event: {CmsEvent}", cmsEvent);
 
         return cmsEvent;
     }
@@ -141,7 +141,7 @@ public class QueueReceiver : BaseFunction
     {
         string messageBody = Encoding.UTF8.GetString(message.Body);
 
-        Logger.LogInformation("Processing = {messageBody}", messageBody);
+        Logger.LogInformation("Processing = {MessageBody}", messageBody);
 
         return _mappers.ToEntity(messageBody, cmsEvent, cancellationToken);
     }
@@ -179,7 +179,7 @@ public class QueueReceiver : BaseFunction
         }
         else
         {
-            Logger.LogInformation("Updated {rowsChangedInDatabase} rows in the database", rowsChangedInDatabase);
+            Logger.LogInformation("Updated {RowsChangedInDatabase} rows in the database", rowsChangedInDatabase);
         }
     }
 }

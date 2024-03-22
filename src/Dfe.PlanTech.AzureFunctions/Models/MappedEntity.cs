@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Domain;
 using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -9,13 +10,19 @@ namespace Dfe.PlanTech.AzureFunctions.Models;
 
 public class MappedEntity
 {
+    private readonly Type _dontCopyValueAttribute = typeof(DontCopyValueAttribute);
+
     public required ContentComponentDbEntity IncomingEntity { get; init; }
 
     public ContentComponentDbEntity? ExistingEntity { get; init; }
 
+    public required CmsEvent CmsEvent { get; init; }
+
     public bool IsValid { get; private set; }
 
     public bool AlreadyExistsInDatabase => ExistingEntity != null;
+
+    public bool ShouldCopyProperties => AlreadyExistsInDatabase && CmsEvent != CmsEvent.UNPUBLISH && CmsEvent != CmsEvent.DELETE;
 
     /// <summary>
     /// Checks if the incoming entity is a valid component.
@@ -24,10 +31,16 @@ public class MappedEntity
     /// <param name="dontCopyAttribute">The attribute to exclude from the validation.</param>
     /// <param name="logger">The logger instance.</param>
     /// <returns>True if the entity is valid, false otherwise.</returns>
-    public bool IsValidComponent(CmsDbContext db, Type dontCopyAttribute, ILogger logger)
+    public bool IsValidComponent(CmsDbContext db, ILogger logger)
     {
+        if (!ShouldCopyProperties)
+        {
+            IsValid = true;
+            return true;
+        }
+
         // Get a list of null properties from the incoming entity, excluding ones we don't process
-        string? nullProperties = string.Join(", ", AnyRequiredPropertyIsNull(db, dontCopyAttribute));
+        string? nullProperties = string.Join(", ", AnyRequiredPropertyIsNull(db, _dontCopyValueAttribute));
 
         IsValid = string.IsNullOrEmpty(nullProperties);
 
@@ -35,7 +48,7 @@ public class MappedEntity
         if (!IsValid)
         {
             logger.LogInformation(
-                "Content Component with ID {id} is missing the following required properties: {nullProperties}",
+                "Content Component with ID {Id} is missing the following required properties: {NullProperties}",
                 IncomingEntity.Id,
                 nullProperties
             );
@@ -44,18 +57,28 @@ public class MappedEntity
         return IsValid;
     }
 
+    public void UpdateEntity()
+    {
+        UpdateEntityStatus();
+
+        if (ShouldCopyProperties)
+        {
+            UpdateProperties();
+        }
+    }
+
     /// <summary>
     /// Updates the status of the mapped entity based on the provided CMS event, and the existing entity statuses.
     /// </summary>
     /// <param name="cmsEvent">The event type of the payload.</param>
-    public void UpdateEntityStatus(CmsEvent cmsEvent)
+    private void UpdateEntityStatus()
     {
         if (ExistingEntity != null)
         {
             CopyEntityStatus();
         }
 
-        UpdateEntityStatusByEvent(cmsEvent);
+        UpdateEntityStatusByEvent();
     }
 
     /// <summary>
@@ -76,10 +99,9 @@ public class MappedEntity
     /// <param name="mapped"></param>
     /// <param name="existing"></param>
     /// <exception cref="CmsEventException"></exception>
-    private void UpdateEntityStatusByEvent(CmsEvent cmsEvent)
+    private void UpdateEntityStatusByEvent()
     {
-
-        switch (cmsEvent)
+        switch (CmsEvent)
         {
             case CmsEvent.SAVE:
             case CmsEvent.AUTO_SAVE:
@@ -88,10 +110,6 @@ public class MappedEntity
                 IncomingEntity.Archived = true;
                 break;
             case CmsEvent.UNARCHIVE:
-                if (ExistingEntity == null)
-                {
-                    throw new CmsEventException(string.Format("Content with Id \"{0}\" has event 'unarchive' despite not existing in the database!", IncomingEntity.Id));
-                }
                 IncomingEntity.Archived = false;
                 break;
             case CmsEvent.PUBLISH:
@@ -103,6 +121,7 @@ public class MappedEntity
                     throw new CmsEventException(string.Format("Content with Id \"{0}\" has event 'unpublish' despite not existing in the database!", IncomingEntity.Id));
                 }
                 IncomingEntity.Published = false;
+                ExistingEntity.Published = false;
                 break;
             case CmsEvent.DELETE:
                 if (ExistingEntity == null)
@@ -110,6 +129,7 @@ public class MappedEntity
                     throw new CmsEventException(string.Format("Content with Id \"{0}\" has event 'delete' despite not existing in the database!", IncomingEntity.Id));
                 }
                 IncomingEntity.Deleted = true;
+                ExistingEntity.Deleted = false;
                 break;
         }
     }
@@ -121,4 +141,53 @@ public class MappedEntity
                     .Select(prop => prop.PropertyInfo)
                     .Where(prop => !prop!.CustomAttributes.Any(atr => atr.GetType() == dontCopyAttribute))
                     .Where(prop => prop!.GetValue(IncomingEntity) == null);
+
+    /// <summary>
+    /// Updates the properties of the existing entity using the values from the incoming entity.
+    /// It only updates the properties if the values have changed, to minimise unnecessary 
+    /// update calls to the database.
+    /// </summary>
+    /// <param name="incoming">The incoming entity with the new values.</param>
+    /// <param name="existing">The existing entity with the current values.</param>
+    private void UpdateProperties()
+    {
+        foreach (var property in PropertiesToCopy(IncomingEntity))
+        {
+            //Get the new and current values from the incoming and existing entities using reflection
+            var newValue = property.GetValue(IncomingEntity);
+            var currentValue = property.GetValue(ExistingEntity);
+
+            // Don't update the existing property if the values are the same
+            if (newValue?.Equals(currentValue) == true)
+            {
+                continue;
+            }
+
+            // Update the value of the property in the existing entity with the value from the incoming entity
+            property.SetValue(ExistingEntity, property.GetValue(IncomingEntity));
+        }
+    }
+
+    /// <summary>
+    /// Get properties to copy for the selected entity
+    /// </summary>
+    /// <remarks>
+    /// Returns all properties, except properties ending with "Id" (i.e. relationship fields), and properties that have
+    /// a <see cref="DontCopyValueAttribute"/> attribute.
+    /// </remarks>
+    /// <param name="entity">Entity to get copyable properties for</param>
+    /// <returns></returns>
+    private IEnumerable<PropertyInfo> PropertiesToCopy(ContentComponentDbEntity entity)
+        => entity.GetType()
+                .GetProperties()
+                .Where(property => !HasDontCopyValueAttribute(property));
+
+    /// <summary>
+    /// Does the property have a <see cref="DontCopyValueAttribute"/> property attached to it? 
+    /// </summary>
+    /// <param name="property"></param>
+    /// <returns></returns>
+    private bool HasDontCopyValueAttribute(PropertyInfo property)
+        => property.CustomAttributes.Any(attribute => attribute.AttributeType == _dontCopyValueAttribute);
+
 }
