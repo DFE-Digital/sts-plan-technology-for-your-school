@@ -22,7 +22,9 @@ public class MappedEntity
 
     public bool AlreadyExistsInDatabase => ExistingEntity != null;
 
-    public bool ShouldCopyProperties => AlreadyExistsInDatabase && CmsEvent != CmsEvent.UNPUBLISH && CmsEvent != CmsEvent.DELETE;
+    public bool IsRemovalEvent => CmsEvent == CmsEvent.UNPUBLISH || CmsEvent == CmsEvent.DELETE;
+
+    public bool ShouldCopyProperties => AlreadyExistsInDatabase && !IsRemovalEvent;
 
     /// <summary>
     /// Checks if the incoming entity is a valid component.
@@ -33,7 +35,7 @@ public class MappedEntity
     /// <returns>True if the entity is valid, false otherwise.</returns>
     public bool IsValidComponent(CmsDbContext db, ILogger logger)
     {
-        if (!ShouldCopyProperties)
+        if (IsRemovalEvent)
         {
             IsValid = true;
             return true;
