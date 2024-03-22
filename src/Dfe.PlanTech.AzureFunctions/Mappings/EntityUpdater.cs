@@ -28,9 +28,14 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
             CmsEvent = cmsEvent
         };
 
-        mappedEntity.UpdateEntity();
+        mappedEntity.UpdateEntityStatus(cmsEvent);
 
         if (!mappedEntity.IsValidComponent(Db, _logger))
+        {
+            UpdateProperties(incoming, existing!);
+        }
+
+        if (!mappedEntity.IsValidComponent(Db, _dontCopyValueAttribute, _logger))
         {
             return mappedEntity;
         }
@@ -49,4 +54,52 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
     {
         return entity;
     }
+
+    /// <summary>
+    /// Updates the properties of the existing entity using the values from the incoming entity.
+    /// It only updates the properties if the values have changed, to minimise unnecessary 
+    /// update calls to the database.
+    /// </summary>
+    /// <param name="incoming">The incoming entity with the new values.</param>
+    /// <param name="existing">The existing entity with the current values.</param>
+    private void UpdateProperties(ContentComponentDbEntity incoming, ContentComponentDbEntity existing)
+    {
+        foreach (var property in PropertiesToCopy(incoming))
+        {
+            //Get the new and current values from the incoming and existing entities using reflection
+            var newValue = property.GetValue(incoming);
+            var currentValue = property.GetValue(existing);
+
+            // Don't update the existing property if the values are the same
+            if (newValue?.Equals(currentValue) == true)
+            {
+                continue;
+            }
+
+            // Update the value of the property in the existing entity with the value from the incoming entity
+            property.SetValue(existing, property.GetValue(incoming));
+        }
+    }
+
+    /// <summary>
+    /// Get properties to copy for the selected entity
+    /// </summary>
+    /// <remarks>
+    /// Returns all properties, except properties ending with "Id" (i.e. relationship fields), and properties that have
+    /// a <see cref="DontCopyValueAttribute"/> attribute.
+    /// </remarks>
+    /// <param name="entity">Entity to get copyable properties for</param>
+    /// <returns></returns>
+    private IEnumerable<PropertyInfo> PropertiesToCopy(ContentComponentDbEntity entity)
+        => entity.GetType()
+                .GetProperties()
+                .Where(property => !HasDontCopyValueAttribute(property));
+
+    /// <summary>
+    /// Does the property have a <see cref="DontCopyValueAttribute"/> property attached to it? 
+    /// </summary>
+    /// <param name="property"></param>
+    /// <returns></returns>
+    private bool HasDontCopyValueAttribute(PropertyInfo property)
+        => property.CustomAttributes.Any(attribute => attribute.AttributeType == _dontCopyValueAttribute);
 }
