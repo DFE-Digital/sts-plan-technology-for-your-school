@@ -116,9 +116,9 @@ public class GetSubTopicRecommendationQueryTests
         {
             Intros =
             [
-                new(){ Maturity = "Low"},
-                new(){ Maturity = "Medium"},
-                new(){ Maturity = "High"},
+                new() { Maturity = "Low" },
+                new() { Maturity = "Medium" },
+                new() { Maturity = "High" },
             ],
             Section = recommendationSectionOne,
             Subtopic = subtopicOne,
