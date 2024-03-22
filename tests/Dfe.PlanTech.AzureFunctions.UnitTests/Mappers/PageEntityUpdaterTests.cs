@@ -1,5 +1,6 @@
 using Dfe.PlanTech.AzureFunctions.Mappings;
 using Dfe.PlanTech.AzureFunctions.Models;
+using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -73,17 +74,20 @@ public class PageEntityUpdaterTests
         MappedEntity[] shouldErrorEntities = [new MappedEntity()
         {
             IncomingEntity = new ButtonDbEntity(),
-            ExistingEntity = new PageDbEntity()
+            ExistingEntity = new PageDbEntity(),
+            CmsEvent = CmsEvent.SAVE
         },
             new MappedEntity()
             {
                 IncomingEntity = new PageDbEntity(),
-                ExistingEntity = new QuestionDbEntity()
+                ExistingEntity = new QuestionDbEntity(),
+                CmsEvent = CmsEvent.SAVE
             },
             new MappedEntity()
             {
                 IncomingEntity = new SectionDbEntity(),
-                ExistingEntity = new AnswerDbEntity()
+                ExistingEntity = new AnswerDbEntity(),
+                CmsEvent = CmsEvent.SAVE
             }];
 
         foreach (var errorableEntity in shouldErrorEntities)
@@ -111,7 +115,8 @@ public class PageEntityUpdaterTests
             ExistingEntity = new PageDbEntity()
             {
                 AllPageContents = [.. _pageContents]
-            }
+            },
+            CmsEvent = CmsEvent.SAVE
         };
 
         var result = _updater.UpdateEntityConcrete(mappedEntity);
@@ -155,10 +160,11 @@ public class PageEntityUpdaterTests
             ExistingEntity = new PageDbEntity()
             {
                 AllPageContents = [.. _pageContents]
-            }
+            },
+            CmsEvent = CmsEvent.SAVE
         };
 
-        var result = _updater.UpdateEntityConcrete(mappedEntity);
+        _updater.UpdateEntityConcrete(mappedEntity);
 
         Assert.DoesNotContain(removedEntity, _pageContents);
     }
