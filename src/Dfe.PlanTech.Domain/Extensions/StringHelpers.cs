@@ -10,6 +10,8 @@ public static partial class StringHelpers
     public static string Slugify(this string text)
     => RemoveNonAlphaNumericCharactersPattern().Replace(text, "").Replace(" ", "-").ToLower();
 
+    public static string TruncateIfOverLength(this string text, int maxLength) => text.Length < maxLength ? text : text[..maxLength];
+
     [GeneratedRegex(RemoveNonAlphanumericCharactersRegexPattern)]
     private static partial Regex RemoveNonAlphaNumericCharactersPattern();
 }

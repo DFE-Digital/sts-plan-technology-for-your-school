@@ -81,7 +81,7 @@ public class QueueReceiver : BaseFunction
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error processing message ID {message}", message.MessageId);
-            await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace?[..4000], cancellationToken);
+            await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace?.TruncateIfOverLength(4000), cancellationToken);
         }
     }
 
