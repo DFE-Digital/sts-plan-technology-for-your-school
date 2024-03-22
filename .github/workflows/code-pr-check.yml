@@ -21,36 +21,14 @@ env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
 
 jobs:
-  get-src-dir-list:
-    name: Get Directories for Linting
-    runs-on: ubuntu-22.04
-    if: ${{ github.event_name == 'pull_request' }}
-    outputs:
-      directories: ${{ steps.list-dir.outputs.directories }}
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Get Directories
-        id: list-dir
-        uses: ./.github/actions/list-directory
-        with:
-          source: ./src/
-
   lint-code:
     name: Lint & Commit
     runs-on: ubuntu-22.04
     if: ${{ github.event_name == 'pull_request' }}
-    needs: [get-src-dir-list]
-    strategy:
-      max-parallel: 1
-      fail-fast: true
-      matrix:
-        workspace: ${{ fromJson(needs.get-src-dir-list.outputs.directories) }}
     permissions:
       contents: write
       pull-requests: write
+      checks: write
 
     steps:
       - name: Checkout Repository
@@ -69,10 +47,10 @@ jobs:
         uses: wearerequired/lint-action@v2
         with:
           dotnet_format: true
-          dotnet_format_dir: ./src/${{ matrix.workspace }}
+          dotnet_format_dir: ./src
           git_email: "41898282+github-actions[bot]@users.noreply.github.com"
           git_name: "github-actions[bot]"
-          commit_message: "Linted Code in ${{ matrix.workspace }}"
+          commit_message: "Linted Code in source folder"
           auto_fix: true
           commit: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
