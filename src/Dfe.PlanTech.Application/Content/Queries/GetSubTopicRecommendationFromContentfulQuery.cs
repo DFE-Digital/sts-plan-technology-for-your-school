@@ -33,7 +33,7 @@ public class GetSubtopicRecommendationFromContentfulQuery(IContentRepository rep
 
     public async Task<RecommendationsViewDto?> GetRecommendationsViewDto(string subtopicId, string maturity, CancellationToken cancellationToken = default)
     {
-        var options = CreateGetEntityOptions(subtopicId, 2, new ContentQueryEquals() { Field = "fields.intro.fields.maturity", Value = maturity });
+        var options = CreateGetEntityOptions(subtopicId, 2);
         options.Select = ["fields.intros", "sys"];
 
         var subtopicRecommendation = (await _repository.GetEntities<SubtopicRecommendation>(options, cancellationToken)).FirstOrDefault();

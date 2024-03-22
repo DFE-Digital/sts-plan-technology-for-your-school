@@ -5,9 +5,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class RecommendationChunkUpdater(ILogger<RecommendationChunkUpdater> logger, CmsDbContext db) :EntityUpdater(logger, db)
+public class RecommendationChunkUpdater(ILogger<RecommendationChunkUpdater> logger, CmsDbContext db) : EntityUpdater(logger, db)
 {
-    
+
     public override MappedEntity UpdateEntityConcrete(MappedEntity entity)
     {
         if (!entity.AlreadyExistsInDatabase)
@@ -19,13 +19,13 @@ public class RecommendationChunkUpdater(ILogger<RecommendationChunkUpdater> logg
         {
             throw new InvalidCastException($"Entity is not the expected type. {entity.ExistingEntity!.GetType()}");
         }
-        
+
         RemoveOldAssociatedChunkContents(existingRecommendationChunk);
         RemoveOldAssociatedChunkAnswers(existingRecommendationChunk);
 
         return entity;
     }
-    
+
     private void RemoveOldAssociatedChunkContents(RecommendationChunkDbEntity existingRecommendationChunk)
     {
         var contentsToRemove = Db.RecommendationChunkContents
@@ -34,7 +34,7 @@ public class RecommendationChunkUpdater(ILogger<RecommendationChunkUpdater> logg
 
         Db.RecommendationChunkContents.RemoveRange(contentsToRemove);
     }
-    
+
     private void RemoveOldAssociatedChunkAnswers(RecommendationChunkDbEntity existingRecommendationChunk)
     {
         var answersToRemove = Db.RecommendationChunkAnswers
@@ -43,5 +43,5 @@ public class RecommendationChunkUpdater(ILogger<RecommendationChunkUpdater> logg
 
         Db.RecommendationChunkAnswers.RemoveRange(answersToRemove);
     }
-    
+
 }

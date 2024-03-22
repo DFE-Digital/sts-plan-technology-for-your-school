@@ -8,14 +8,14 @@ namespace Dfe.PlanTech.Infrastructure.Data.EntityTypeConfigurations;
 [ExcludeFromCodeCoverage]
 public class RecommendationChunkEntityTypeConfiguration : IEntityTypeConfiguration<RecommendationChunkDbEntity>
 {
-  public void Configure(EntityTypeBuilder<RecommendationChunkDbEntity> builder)
-  {
-    builder.HasMany(chunk => chunk.Answers)
-          .WithMany(content => content.RecommendationChunks)
-          .UsingEntity<RecommendationChunkAnswerDbEntity>();
+    public void Configure(EntityTypeBuilder<RecommendationChunkDbEntity> builder)
+    {
+        builder.HasMany(chunk => chunk.Answers)
+              .WithMany(content => content.RecommendationChunks)
+              .UsingEntity<RecommendationChunkAnswerDbEntity>();
 
-    builder.HasMany(chunk => chunk.Content)
-          .WithMany(content => content.RecommendationChunk)
-          .UsingEntity<RecommendationChunkContentDbEntity>();
-  }
+        builder.HasMany(chunk => chunk.Content)
+              .WithMany(content => content.RecommendationChunk)
+              .UsingEntity<RecommendationChunkContentDbEntity>();
+    }
 }
