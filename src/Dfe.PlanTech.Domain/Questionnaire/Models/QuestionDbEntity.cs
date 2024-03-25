@@ -10,12 +10,15 @@ public class QuestionDbEntity : ContentComponentDbEntity, IQuestion<AnswerDbEnti
 
     public string? HelpText { get; set; }
 
-    public List<AnswerDbEntity> Answers { get; set; } = new();
+    [DontCopyValue]
+    public List<AnswerDbEntity> Answers { get; set; } = [];
 
     public string Slug { get; set; } = null!;
 
-    public List<AnswerDbEntity> PreviousAnswers { get; set; } = new();
+    [DontCopyValue]
+    public List<AnswerDbEntity> PreviousAnswers { get; set; } = [];
 
+    [DontCopyValue]
     public SectionDbEntity? Section { get; set; }
 
     [DontCopyValue]
