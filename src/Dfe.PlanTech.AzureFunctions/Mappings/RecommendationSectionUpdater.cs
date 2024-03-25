@@ -30,8 +30,7 @@ public class RecommendationSectionUpdater(ILogger<RecommendationSectionUpdater> 
     private void RemoveOldAssociatedRecommendationChunks(RecommendationSectionDbEntity existingRecommendationSection)
     {
         var chunksToRemove = Db.RecommendationSectionChunks
-            .Where(content => content.RecommendationSectionId == existingRecommendationSection.Id)
-            .ToList();
+            .Where(content => content.RecommendationSectionId == existingRecommendationSection.Id);
 
         Db.RecommendationSectionChunks.RemoveRange(chunksToRemove);
     }
@@ -39,8 +38,7 @@ public class RecommendationSectionUpdater(ILogger<RecommendationSectionUpdater> 
     private void RemoveOldAssociatedRecommendationAnswers(RecommendationSectionDbEntity existingRecommendationSection)
     {
         var chunksToRemove = Db.RecommendationSectionAnswers
-            .Where(content => content.RecommendationSectionId == existingRecommendationSection.Id)
-            .ToList();
+            .Where(content => content.RecommendationSectionId == existingRecommendationSection.Id);
 
         Db.RecommendationSectionAnswers.RemoveRange(chunksToRemove);
     }

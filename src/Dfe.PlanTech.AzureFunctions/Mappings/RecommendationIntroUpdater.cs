@@ -28,8 +28,7 @@ public class RecommendationIntroUpdater(ILogger<RecommendationIntroUpdater> logg
     private void RemoveOldAssociatedIntroContents(RecommendationIntroDbEntity existingRecommendationIntro)
     {
         var contentsToRemove = Db.RecommendationIntroContents
-            .Where(content => content.RecommendationIntroId == existingRecommendationIntro.Id)
-            .ToList();
+            .Where(content => content.RecommendationIntroId == existingRecommendationIntro.Id);
 
         Db.RecommendationIntroContents.RemoveRange(contentsToRemove);
     }
