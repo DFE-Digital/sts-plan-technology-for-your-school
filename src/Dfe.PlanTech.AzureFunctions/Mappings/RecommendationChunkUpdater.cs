@@ -29,17 +29,16 @@ public class RecommendationChunkUpdater(ILogger<RecommendationChunkUpdater> logg
     private void RemoveOldAssociatedChunkContents(RecommendationChunkDbEntity existingRecommendationChunk)
     {
         var contentsToRemove = Db.RecommendationChunkContents
-            .Where(content => content.RecommendationChunkId == existingRecommendationChunk.Id)
-            .ToList();
+            .Where(content => content.RecommendationChunkId == existingRecommendationChunk.Id);
 
-        Db.RecommendationChunkContents.RemoveRange(contentsToRemove);
+        Db.RecommendationChunkContents.RemoveRange(Db.RecommendationChunkContents
+            .Where(content => content.RecommendationChunkId == existingRecommendationChunk.Id));
     }
 
     private void RemoveOldAssociatedChunkAnswers(RecommendationChunkDbEntity existingRecommendationChunk)
     {
         var answersToRemove = Db.RecommendationChunkAnswers
-            .Where(content => content.RecommendationChunkId == existingRecommendationChunk.Id)
-            .ToList();
+            .Where(content => content.RecommendationChunkId == existingRecommendationChunk.Id);
 
         Db.RecommendationChunkAnswers.RemoveRange(answersToRemove);
     }
