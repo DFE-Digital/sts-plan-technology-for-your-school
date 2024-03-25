@@ -234,7 +234,7 @@ public class GetCategorySectionsQueryTests
         await _db.ReceivedWithAnyArgs(0)
                      .ToListAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
     }
-    
+
     [Fact]
     public async Task Should_Log_No_Matching_Category_Error()
     {

@@ -52,15 +52,15 @@ public class GetSubTopicRecommendationFromDbQueryTests
                     [
                         new AnswerDbEntity()
                         {
-                             Id = "1"
+                            Id = "1"
                         },
                         new AnswerDbEntity()
                         {
-                             Id = "2"
+                            Id = "2"
                         },
                         new AnswerDbEntity()
                         {
-                             Id = "3"
+                            Id = "3"
                         }
                     ],
                     Header = new HeaderDbEntity()
@@ -71,7 +71,8 @@ public class GetSubTopicRecommendationFromDbQueryTests
                         Id = "Header-one"
                     },
                     Content = [
-                        new TextBodyDbEntity(){
+                        new TextBodyDbEntity()
+                        {
                             Id = "Chunk-one"
                         }
                     ]
@@ -101,7 +102,8 @@ public class GetSubTopicRecommendationFromDbQueryTests
                         Id = "Header-two"
                     },
                     Content = [
-                        new TextBodyDbEntity(){
+                        new TextBodyDbEntity()
+                        {
                             Id = "Chunk-two"
                         }
                     ]
@@ -112,11 +114,11 @@ public class GetSubTopicRecommendationFromDbQueryTests
                     [
                         new AnswerDbEntity()
                         {
-                             Id = "7"
+                            Id = "7"
                         },
                         new AnswerDbEntity()
                         {
-                           Id = "8"
+                            Id = "8"
                         },
                         new AnswerDbEntity()
                         {
@@ -131,7 +133,8 @@ public class GetSubTopicRecommendationFromDbQueryTests
                         Id = "Header-three"
                     },
                     Content = [
-                        new TextBodyDbEntity(){
+                        new TextBodyDbEntity()
+                        {
                             Id = "Chunk-three"
                         }
                     ]
@@ -148,9 +151,9 @@ public class GetSubTopicRecommendationFromDbQueryTests
         {
             Intros =
             [
-                new RecommendationIntroDbEntity(){ Maturity = "Low", Id = "Intro-One" },
-                new RecommendationIntroDbEntity(){ Maturity = "Medium", Id = "Intro-Two"},
-                new RecommendationIntroDbEntity(){ Maturity = "High", Id = "Intro-Three"},
+                new RecommendationIntroDbEntity() { Maturity = "Low", Id = "Intro-One" },
+                new RecommendationIntroDbEntity() { Maturity = "Medium", Id = "Intro-Two" },
+                new RecommendationIntroDbEntity() { Maturity = "High", Id = "Intro-Three" },
             ],
             Section = recommendationSectionOne,
             SectionId = recommendationSectionOne.Id,

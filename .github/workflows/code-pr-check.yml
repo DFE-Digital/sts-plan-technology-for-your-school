@@ -21,61 +21,44 @@ env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
 
 jobs:
-  get-src-dir-list:
-    name: Get Directories for Linting
-    runs-on: ubuntu-22.04
-    if: ${{ github.event_name == 'pull_request' }}
-    outputs:
-      directories: ${{ steps.list-dir.outputs.directories }}
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Get Directories
-        id: list-dir
-        uses: ./.github/actions/list-directory
-        with:
-          source: ./src/
-
   lint-code:
     name: Lint & Commit
     runs-on: ubuntu-22.04
     if: ${{ github.event_name == 'pull_request' }}
-    needs: [get-src-dir-list]
-    strategy:
-      max-parallel: 1
-      fail-fast: true
-      matrix:
-        workspace: ${{ fromJson(needs.get-src-dir-list.outputs.directories) }}
+
     permissions:
       contents: write
       pull-requests: write
+      checks: write
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
           cache: false
-        env:
-          DOTNET_INSTALL_DIR: "/usr/share/dotnet"
-          DOTNET_CLI_TELEMETRY_OPTOUT: true
 
-      - name: Run Linter
-        uses: wearerequired/lint-action@v2
-        with:
-          dotnet_format: true
-          dotnet_format_dir: ./src/${{ matrix.workspace }}
-          git_email: "41898282+github-actions[bot]@users.noreply.github.com"
-          git_name: "github-actions[bot]"
-          commit_message: "Linted Code in ${{ matrix.workspace }}"
-          auto_fix: true
-          commit: true
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Lint plan-technology-for-your-school.sln solution
+        run: dotnet format plan-technology-for-your-school.sln
+
+      - name: Commit and push changes if necessary
+        if: 
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          if [[ `git status --porcelain` ]]; then
+            git commit -am "chore: Linted code for plan-technology-for-your-school.sln solution"
+            git push
+          else
+            echo 'No linting changes'
+          fi
 
   build-test-web-app:
     name: Build and run unit tests

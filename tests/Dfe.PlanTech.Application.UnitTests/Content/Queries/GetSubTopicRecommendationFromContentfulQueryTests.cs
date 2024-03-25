@@ -136,9 +136,9 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
         {
             Intros =
             [
-                new RecommendationIntro(){ Maturity = "Low", Header = new Header() { Text = "Low-Maturity-Intro"}},
-                new RecommendationIntro(){ Maturity = "Medium",Header = new Header() { Text = "Medium-Maturity-Intro"}},
-                new RecommendationIntro(){ Maturity = "High",Header = new Header() { Text = "High-Maturity-Intro"}},
+                new RecommendationIntro() { Maturity = "Low", Header = new Header() { Text = "Low-Maturity-Intro" } },
+                new RecommendationIntro() { Maturity = "Medium", Header = new Header() { Text = "Medium-Maturity-Intro" } },
+                new RecommendationIntro() { Maturity = "High", Header = new Header() { Text = "High-Maturity-Intro" } },
             ],
             Section = recommendationSectionOne,
             Subtopic = _subTopicOne,

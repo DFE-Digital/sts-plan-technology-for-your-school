@@ -14,25 +14,25 @@ public class RecommendationChunkUpdaterTests
     private readonly List<RecommendationChunkAnswerDbEntity> _chunkAnswers =
 [
     new RecommendationChunkAnswerDbEntity()
-        {
-            RecommendationChunkId = "1",
-            AnswerId = "E"
-        },
-        new RecommendationChunkAnswerDbEntity()
-        {
-            RecommendationChunkId = "B",
-            AnswerId = "F"
-        },
-        new RecommendationChunkAnswerDbEntity()
-        {
-            RecommendationChunkId = "C",
-            AnswerId = "G"
-        },
-        new RecommendationChunkAnswerDbEntity()
-        {
-            RecommendationChunkId = "D",
-            AnswerId = "H"
-        }
+    {
+        RecommendationChunkId = "1",
+        AnswerId = "E"
+    },
+    new RecommendationChunkAnswerDbEntity()
+    {
+        RecommendationChunkId = "B",
+        AnswerId = "F"
+    },
+    new RecommendationChunkAnswerDbEntity()
+    {
+        RecommendationChunkId = "C",
+        AnswerId = "G"
+    },
+    new RecommendationChunkAnswerDbEntity()
+    {
+        RecommendationChunkId = "D",
+        AnswerId = "H"
+    }
 ];
 
 
@@ -40,8 +40,8 @@ public class RecommendationChunkUpdaterTests
     [
         new RecommendationChunkContentDbEntity()
         {
-            ContentComponentId= "I",
-            RecommendationChunkId= "M"
+            ContentComponentId = "I",
+            RecommendationChunkId = "M"
         },
         new RecommendationChunkContentDbEntity()
         {

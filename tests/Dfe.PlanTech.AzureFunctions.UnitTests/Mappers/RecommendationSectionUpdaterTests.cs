@@ -41,7 +41,7 @@ public class RecommendationSectionUpdaterTests
         new RecommendationSectionChunkDbEntity()
         {
             RecommendationSectionId = "I",
-            RecommendationChunkId= "M"
+            RecommendationChunkId = "M"
         },
         new RecommendationSectionChunkDbEntity()
         {

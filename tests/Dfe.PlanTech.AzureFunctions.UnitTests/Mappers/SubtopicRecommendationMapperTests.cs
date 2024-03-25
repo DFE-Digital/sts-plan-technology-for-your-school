@@ -11,7 +11,7 @@ namespace Dfe.PlanTech.AzureFunctions.UnitTests.Mappers;
 public class SubtopicRecommendationMapperTests : BaseMapperTests
 {
     private readonly DbSet<SubtopicRecommendationIntroDbEntity> _subtopicIntroDbSet = Substitute.For<DbSet<SubtopicRecommendationIntroDbEntity>>();
-    
+
     private static readonly CmsDbContext _db = Substitute.For<CmsDbContext>();
     private static readonly ILogger<SubtopicRecommendationUpdater> _logger = Substitute.For<ILogger<SubtopicRecommendationUpdater>>();
     private static SubtopicRecommendationUpdater CreateMockSubTopicRecommendationUpdater() => new(_logger, _db);
@@ -21,11 +21,11 @@ public class SubtopicRecommendationMapperTests : BaseMapperTests
         var values = new Dictionary<string, object?>
         {
             ["id"] = "ChunkId",
-            ["section"] =  "sectionId",
-            ["subtopic"] =  "subtopicId",
+            ["section"] = "sectionId",
+            ["subtopic"] = "subtopicId",
             ["intros"] = new string[] { "intro1", "intro2", "intro3" },
         };
-        
+
         var _db = Substitute.For<CmsDbContext>();
         var loggerSubstitute = Substitute.For<ILogger<SubtopicRecommendationMapper>>();
         var jsonSerializerOptions = new JsonSerializerOptions();
@@ -38,8 +38,8 @@ public class SubtopicRecommendationMapperTests : BaseMapperTests
         var subtopicRecommendationContents = mapper.PerformAdditionalMapping(values);
 
         Assert.NotNull(subtopicRecommendationContents);
-        
+
         _db.SubtopicRecommendationIntros.Received(3).Attach(Arg.Any<SubtopicRecommendationIntroDbEntity>());
     }
-    
+
 }
