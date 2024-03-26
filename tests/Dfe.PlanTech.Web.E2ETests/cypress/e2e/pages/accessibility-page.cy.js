@@ -3,13 +3,14 @@ describe("Accessibility Page - Unauthenticated", () => {
 
   beforeEach(() => {
     cy.visit(url);
+
     cy.get(
       "footer.govuk-footer ul.govuk-footer__inline-list a.govuk-footer__link"
     )
       .contains("Accessibility")
       .click();
+
     cy.url().should("contain", "/accessibility");
-    cy.injectAxe();
   });
 
   it("Should Have Heading", () => {
@@ -28,6 +29,7 @@ describe("Accessibility Page - Unauthenticated", () => {
   });
 
   it("Passes Accessibility Testing", () => {
+    cy.injectAxe();
     cy.runAxe();
   });
 });

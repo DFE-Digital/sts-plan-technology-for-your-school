@@ -1,15 +1,12 @@
 describe("Cookies Page", () => {
-  const url = "/";
-
   beforeEach(() => {
-    cy.visit(url);
+    cy.visit('/');
     cy.get(
       "footer.govuk-footer ul.govuk-footer__inline-list a.govuk-footer__link"
     )
       .contains("Cookies")
       .click();
     cy.url().should("contain", "/cookies");
-    cy.injectAxe();
   });
 
   it("Should Have Heading", () => {
@@ -49,6 +46,7 @@ describe("Cookies Page", () => {
   });
 
   it("Passes Accessibility Testing", () => {
+    cy.injectAxe();
     cy.runAxe();
   });
 });

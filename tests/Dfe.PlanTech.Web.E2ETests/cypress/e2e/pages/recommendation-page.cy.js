@@ -27,6 +27,7 @@ describe("Recommendation Page", () => {
   });
 
   it("Passes Accessibility Testing", () => {
+    cy.injectAxe();
     cy.runAxe();
   });
 });

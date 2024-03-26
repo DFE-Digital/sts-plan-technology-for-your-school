@@ -15,8 +15,6 @@ describe("Check answers page", () => {
     cy.log(selectedQuestionsWithAnswers);
 
     cy.url().should("contain", "check-answers");
-
-    cy.injectAxe();
   });
 
   it("should show each selected question with answer", () => {
@@ -77,6 +75,7 @@ describe("Check answers page", () => {
   });
 
   it("passes accessibility tests", () => {
+    cy.injectAxe();
     cy.runAxe();
   });
 

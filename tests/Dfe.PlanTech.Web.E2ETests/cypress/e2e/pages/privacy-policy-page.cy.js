@@ -9,7 +9,6 @@ describe("Privacy Policy Page - Unauthenticated", () => {
       .contains("Privacy")
       .click();
     cy.url().should("contain", "/privacy");
-    cy.injectAxe();
   });
 
   it("Should Have Heading", () => {
@@ -28,6 +27,7 @@ describe("Privacy Policy Page - Unauthenticated", () => {
   });
 
   it("Passes Accessibility Testing", () => {
+    cy.injectAxe();
     cy.runAxe();
   });
 });

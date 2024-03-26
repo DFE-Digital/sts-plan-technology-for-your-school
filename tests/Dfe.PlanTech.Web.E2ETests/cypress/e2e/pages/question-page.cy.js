@@ -9,8 +9,6 @@ describe("Question page", () => {
 
     //Navigate to first question
     cy.clickContinueButton();
-
-    cy.injectAxe();
   });
 
   it("should have inline error when trying to submit without answering any questions", () => {
@@ -99,6 +97,7 @@ describe("Question page", () => {
   });
 
   it("passes accessibility tests", () => {
+    cy.injectAxe();
     cy.runAxe();
   });
 });

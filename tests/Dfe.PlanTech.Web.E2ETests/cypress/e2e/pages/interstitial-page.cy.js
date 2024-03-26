@@ -1,15 +1,8 @@
 describe("Interstitial page", () => {
-  let url;
-
   beforeEach(() => {
     cy.loginWithEnv("/self-assessment");
     cy.clickFirstSection();
 
-    cy.url().then((currentUrl) => {
-      url = currentUrl;
-    });
-
-    cy.injectAxe();
   });
 
   it("should have content", () => {
@@ -28,6 +21,7 @@ describe("Interstitial page", () => {
   });
 
   it("passes accessibility tests", () => {
+    cy.injectAxe();
     cy.runAxe();
   });
 });
