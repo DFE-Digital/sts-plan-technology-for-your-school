@@ -1,6 +1,5 @@
 using Dfe.PlanTech.AzureFunctions.Mappings;
 using Dfe.PlanTech.AzureFunctions.Models;
-using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -109,8 +108,7 @@ public class RecommendationChunkUpdaterTests
         var mappedEntity = new MappedEntity
         {
             ExistingEntity = existingSection,
-            IncomingEntity = newSection,
-            CmsEvent = CmsEvent.SAVE
+            IncomingEntity = newSection
         };
 
         var result = updater.UpdateEntityConcrete(mappedEntity);

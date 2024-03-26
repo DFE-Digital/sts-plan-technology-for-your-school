@@ -1,6 +1,5 @@
 using AutoMapper;
 using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Mappings;
 using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Models;

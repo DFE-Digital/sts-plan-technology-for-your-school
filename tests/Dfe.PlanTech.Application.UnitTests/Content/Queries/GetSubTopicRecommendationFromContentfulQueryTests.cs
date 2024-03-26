@@ -250,12 +250,31 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
                                                             .Select(query => query as ContentQueryEquals)
                                                             .Select(query => query!.Value).FirstOrDefault();
 
+                            var maturityFilter = options.Queries!.Where(query => query.Field == "fields.intro.fields.maturity")
+                                                        .Select(query => query as ContentQueryEquals)
+                                                        .Select(query => query!.Value).FirstOrDefault();
+
+                            var test = _subtopicRecommendations.Where(rec => rec.Subtopic.Sys.Id == idFilter)
+                                                            .Select(rec => new SubtopicRecommendation()
+                                                            {
+                                                                Intros = rec.Intros,
+                                                                Sys = rec.Sys
+                                                            }).ToList();
+
+                            var testTwo = _subtopicRecommendations.Where(rec => rec.Subtopic.Sys.Id == idFilter)
+                                                                            .Select(rec => new SubtopicRecommendation()
+                                                                            {
+                                                                                Intros = rec.Intros,
+                                                                                Sys = rec.Sys
+                                                                            }).ToList();
+
                             return _subtopicRecommendations.Where(rec => rec.Subtopic.Sys.Id == idFilter)
                                                             .Select(rec => new SubtopicRecommendation()
                                                             {
                                                                 Intros = rec.Intros,
                                                                 Sys = rec.Sys
-                                                            });
+                                                            })
+                                                            .Where(rec => rec.Intros.Any(intro => intro.Maturity == maturityFilter));
                         });
 
         var maturity = "Low";

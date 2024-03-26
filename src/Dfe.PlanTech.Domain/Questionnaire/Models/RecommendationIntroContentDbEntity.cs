@@ -1,6 +1,6 @@
+using Dfe.PlanTech.Domain.Content.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Dfe.PlanTech.Domain.Content.Models;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 

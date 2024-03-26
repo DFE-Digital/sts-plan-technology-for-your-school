@@ -1,14 +1,4 @@
-﻿using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Web.Models;
-using Dfe.PlanTech.Web.UnitTests.Models;
-using Dfe.PlanTech.Web.ViewComponents;
-using Microsoft.AspNetCore.Mvc.ViewComponents;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Dfe.PlanTech.Web.UnitTests.Models;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
