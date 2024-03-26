@@ -8,11 +8,20 @@ Cypress.Commands.add("login", ({ email, password, url }) => {
         return false
     });
     
-    cy.visit(url);
-    cy.get("input#username").type(email);
-    cy.get("input#password").type(password);
-    cy.get("div.govuk-button-group button.govuk-button").first().click();
-    cy.url().should("contain", url);
+  cy.visit('/');
+  cy.get("a.dfe-header__link.dfe-header__link--service").click();
+
+  cy.origin(
+    Cypress.env('DSi_Url'),
+    { args: { email, password } },
+    ({ email, password }) => {
+        cy.get("input#username").type(email);
+        cy.get("input#password").type(password);
+        cy.get("div.govuk-button-group button.govuk-button").first().click();
+    }
+  )
+  cy.url().should('contain', url);
+
 }); 
 
 /**
@@ -27,13 +36,12 @@ Cypress.Commands.add("loginWithEnv", (url) => {
 
     cy.session(
         args.email,
-        () => {
-            cy.login(args);
-        },
+        () =>  cy.login(args),
         {
             cacheAcrossSpecs: true,
         }
     )
 
     cy.visit(url);
+    cy.url().should('contain', url);
 });
