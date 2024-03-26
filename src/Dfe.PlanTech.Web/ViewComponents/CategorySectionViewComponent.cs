@@ -102,7 +102,7 @@ public class CategorySectionViewComponent(ILogger<CategorySectionViewComponent> 
         }
         catch (Exception e)
         {
-            _logger.LogError("An exception has occurred while trying to retrieve section progress with the following message - {}", e.Message);
+            _logger.LogError("An exception has occurred while trying to retrieve section progress with the following message - {message}", e.Message);
             category.RetrievalError = true;
             return category;
         }
