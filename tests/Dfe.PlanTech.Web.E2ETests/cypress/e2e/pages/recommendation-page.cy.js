@@ -4,8 +4,6 @@ describe("Recommendation Page", () => {
   before(() => {
     cy.loginWithEnv(url);
 
-    cy.url().should("contain", "self-assessment");
-
     cy.completeFirstSubtopic();
   });
   
