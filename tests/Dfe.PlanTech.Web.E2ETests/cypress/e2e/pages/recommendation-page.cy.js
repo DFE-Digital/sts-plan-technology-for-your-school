@@ -16,14 +16,29 @@ describe("Recommendation Page", () => {
     cy.injectAxe();
   });
 
-  it("Should Have a part of header", () => {
+  //Structure elements
+  it("Should have a Part Of header", () => {
     cy.get("span.app-step-nav-header__part-of").should("exist");
   });
 
-  it("Should Have Content", () => {
-    cy.get("p").should("exist");
+  it("Should have Content", () => {
+      cy.get("div.recommendation-piece-content").should("exist");
   });
 
+  it("Should have recommendations sidebar Part Of header", () => {
+      cy.get("h2.app-step-nav-related__heading").should("exist");
+  });
+
+  it("Should have recommendations accordion", () => {
+      cy.get("#step-by-step-navigation").should("exist");
+  });
+
+    it("Should have a Show All Actions chevron and text", () => {
+        cy.get("span.app-step-nav__chevron").should("exist");
+        cy.get("span.app-step-nav__button-text").should("exist");
+    })
+
+  //Accessibility
   it("Passes Accessibility Testing", () => {
     cy.runAxe();
   });
