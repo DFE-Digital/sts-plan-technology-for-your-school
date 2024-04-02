@@ -1,7 +1,7 @@
-using System.Text.Json;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
@@ -19,12 +19,12 @@ public class RecommendationIntroMapper(
         var id = values["id"]?.ToString() ?? throw new KeyNotFoundException("Not found id");
 
         values = MoveValueToNewKey(values, "header", "headerId");
-        
+
         UpdateContentIds(values, id, "content");
 
         return values;
     }
-    
+
     private void UpdateContentIds(Dictionary<string, object?> values, string recommendationIntroId, string currentKey)
     {
         if (values.TryGetValue(currentKey, out object? contents) && contents is object[] inners)
@@ -36,7 +36,7 @@ public class RecommendationIntroMapper(
             values.Remove(currentKey);
         }
     }
-    
+
     private void CreateRecommendationContentEntity(object inner, string recommendationIntroId)
     {
         if (inner is not string contentId)

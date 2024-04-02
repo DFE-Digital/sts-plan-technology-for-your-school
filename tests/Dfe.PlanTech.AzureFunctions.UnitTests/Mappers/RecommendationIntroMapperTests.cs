@@ -1,22 +1,22 @@
-using System.Text.Json;
 using Dfe.PlanTech.AzureFunctions.Mappings;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using System.Text.Json;
 
 namespace Dfe.PlanTech.AzureFunctions.UnitTests.Mappers;
 
 public class RecommendationIntroMapperTests : BaseMapperTests
 {
-        
+
     private readonly DbSet<RecommendationIntroContentDbEntity> _introContentDbSet = Substitute.For<DbSet<RecommendationIntroContentDbEntity>>();
-    
+
     private static readonly CmsDbContext _db = Substitute.For<CmsDbContext>();
     private static readonly ILogger<RecommendationIntroUpdater> _logger = Substitute.For<ILogger<RecommendationIntroUpdater>>();
     private static RecommendationIntroUpdater CreateMockRecommendationIntroUpdater() => new(_logger, _db);
-    
+
     [Fact]
     public void RecommendationIntrosAreMappedCorrectly()
     {
@@ -24,7 +24,7 @@ public class RecommendationIntroMapperTests : BaseMapperTests
         {
             ["id"] = "introId",
             ["slug"] = "test-slug",
-            ["header"] =  "HeaderId",
+            ["header"] = "HeaderId",
             ["content"] = new string[] { "content1", "content2", "content3" },
         };
 
@@ -39,7 +39,7 @@ public class RecommendationIntroMapperTests : BaseMapperTests
         var recommendationIntro = mapper.PerformAdditionalMapping(values);
 
         Assert.NotNull(recommendationIntro);
-        
+
         _db.RecommendationIntroContents.Received(3).Attach(Arg.Any<RecommendationIntroContentDbEntity>());
     }
 }

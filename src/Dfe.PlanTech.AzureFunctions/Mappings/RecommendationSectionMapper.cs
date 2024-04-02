@@ -1,7 +1,7 @@
-using System.Text.Json;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
@@ -18,7 +18,7 @@ public class RecommendationSectionMapper(
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
         var id = values["id"]?.ToString() ?? throw new KeyNotFoundException("Not found id");
-        
+
         UpdateChunkIds(values, id, "chunks");
         UpdateAnswerIds(values, id, "answers");
 
@@ -85,5 +85,5 @@ public class RecommendationSectionMapper(
 
         _db.RecommendationSectionAnswers.Attach(recommendationSectionAnswer);
     }
-    
+
 }

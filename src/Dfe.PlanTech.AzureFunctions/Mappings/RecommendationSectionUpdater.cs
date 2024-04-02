@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class RecommendationSectionUpdater(ILogger<RecommendationSectionUpdater> logger, CmsDbContext db) :EntityUpdater(logger, db)
+public class RecommendationSectionUpdater(ILogger<RecommendationSectionUpdater> logger, CmsDbContext db) : EntityUpdater(logger, db)
 {
     public override MappedEntity UpdateEntityConcrete(MappedEntity entity)
     {
@@ -18,15 +18,15 @@ public class RecommendationSectionUpdater(ILogger<RecommendationSectionUpdater> 
         {
             throw new InvalidCastException($"Entity is not the expected type. {entity.ExistingEntity!.GetType()}");
         }
-        
+
         RemoveOldAssociatedRecommendationChunks(existingRecommendationSection);
         RemoveOldAssociatedRecommendationAnswers(existingRecommendationSection);
 
 
         return entity;
     }
-    
-    
+
+
     private void RemoveOldAssociatedRecommendationChunks(RecommendationSectionDbEntity existingRecommendationSection)
     {
         var chunksToRemove = Db.RecommendationSectionChunks
@@ -35,7 +35,7 @@ public class RecommendationSectionUpdater(ILogger<RecommendationSectionUpdater> 
 
         Db.RecommendationSectionChunks.RemoveRange(chunksToRemove);
     }
-    
+
     private void RemoveOldAssociatedRecommendationAnswers(RecommendationSectionDbEntity existingRecommendationSection)
     {
         var chunksToRemove = Db.RecommendationSectionAnswers
@@ -45,5 +45,5 @@ public class RecommendationSectionUpdater(ILogger<RecommendationSectionUpdater> 
         Db.RecommendationSectionAnswers.RemoveRange(chunksToRemove);
     }
 
-    
+
 }

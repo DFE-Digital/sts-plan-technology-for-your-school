@@ -33,14 +33,14 @@ public class RecommendationIntroUpdaterTests
             ContentComponentId = "D"
         }
     ];
-    
-    
-     [Fact]
+
+
+    [Fact]
     public void UpdateEntityConcrete_EntityExists_RemovesAssociatedIntro()
     {
         var logger = Substitute.For<ILogger<RecommendationIntroUpdater>>();
         var db = Substitute.For<CmsDbContext>();
-        
+
         IQueryable<RecommendationIntroContentDbEntity> queryableIntroContents = _introContents.AsQueryable();
 
         var asyncProviderAnswers = new AsyncQueryProvider<RecommendationIntroContentDbEntity>(queryableIntroContents.Provider);
@@ -51,28 +51,28 @@ public class RecommendationIntroUpdaterTests
         ((IQueryable<RecommendationIntroContentDbEntity>)mockRecommendationIntroContents).ElementType.Returns(queryableIntroContents.ElementType);
         ((IQueryable<RecommendationIntroContentDbEntity>)mockRecommendationIntroContents).GetEnumerator().Returns(queryableIntroContents.GetEnumerator());
         db.RecommendationIntroContents = mockRecommendationIntroContents;
-        
+
         db.RecommendationIntroContents.When(x => x.RemoveRange(Arg.Any<IEnumerable<RecommendationIntroContentDbEntity>>())).Do(callInfo =>
         {
             var entitiesToRemove = (IEnumerable<RecommendationIntroContentDbEntity>)callInfo[0];
             _introContents.RemoveAll(entity => entitiesToRemove.Contains(entity));
         });
-        
-        
+
+
         var updater = new RecommendationIntroUpdater(logger, db);
-        
+
         var existingIntro = new RecommendationIntroDbEntity { Id = "1" };
         var newIntro = new RecommendationIntroDbEntity { Id = "1" };
-        
+
         var mappedEntity = new MappedEntity
         {
             ExistingEntity = existingIntro,
             IncomingEntity = newIntro
         };
-        
+
         var result = updater.UpdateEntityConcrete(mappedEntity);
-        
+
         Assert.Equal(3, _introContents.Count);
     }
-    
+
 }

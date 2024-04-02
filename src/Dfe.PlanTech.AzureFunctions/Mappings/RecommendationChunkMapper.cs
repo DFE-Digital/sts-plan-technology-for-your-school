@@ -1,7 +1,7 @@
-using System.Text.Json;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
@@ -14,13 +14,13 @@ public class RecommendationChunkMapper(EntityRetriever retriever, Recommendation
         var id = values["id"]?.ToString() ?? throw new KeyNotFoundException("Not found id");
 
         values = MoveValueToNewKey(values, "header", "headerId");
-        
+
         UpdateContentIds(values, id, "content");
         UpdateAnswerIds(values, id, "answers");
 
         return values;
     }
-    
+
     private void UpdateContentIds(Dictionary<string, object?> values, string recommendationChunkId, string currentKey)
     {
         if (values.TryGetValue(currentKey, out object? contents) && contents is object[] inners)
@@ -32,7 +32,7 @@ public class RecommendationChunkMapper(EntityRetriever retriever, Recommendation
             values.Remove(currentKey);
         }
     }
-    
+
     private void UpdateAnswerIds(Dictionary<string, object?> values, string recommendationChunkId, string currentKey)
     {
         if (values.TryGetValue(currentKey, out object? contents) && contents is object[] inners)
@@ -78,5 +78,5 @@ public class RecommendationChunkMapper(EntityRetriever retriever, Recommendation
 
         _db.RecommendationChunkContents.Attach(recommendationChunkContent);
     }
-    
+
 }
