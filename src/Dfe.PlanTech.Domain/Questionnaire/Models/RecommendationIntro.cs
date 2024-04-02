@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
@@ -11,6 +12,7 @@ public class RecommendationIntro : ContentComponent, IRecommendationIntro<Header
 
     public string Maturity { get; init; } = null!;
 
+    [NotMapped]
     public List<ContentComponent> Content { get; init; } = [];
 
     public string Title => Header.Text;
