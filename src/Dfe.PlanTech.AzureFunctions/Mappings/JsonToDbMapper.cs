@@ -107,9 +107,9 @@ public abstract class JsonToDbMapper
     public abstract Task<MappedEntity> MapEntity(CmsWebHookPayload payload, CmsEvent cmsEvent, CancellationToken cancellationToken);
 
     protected Dictionary<string, object?> GetEntityValuesDictionary(CmsWebHookPayload payload)
-    => GetEntityValues(payload).Where(kvp => kvp.HasValue)
-                                          .Select(kvp => kvp!.Value)
-                                          .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        => GetEntityValues(payload).Where(kvp => kvp.HasValue)
+                                    .Select(kvp => kvp!.Value)
+                                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
     /// <summary>
     /// Gets all values we care about from the payload
@@ -231,11 +231,4 @@ public abstract class JsonToDbMapper
 
         return values;
     }
-
-    public virtual Task<ContentComponentDbEntity?> RetrieveEntityFromDatabase(ContentComponentDbEntity incomingEntity, CancellationToken cancellationToken)
-    {
-        return EntityRetriever.GetExistingDbEntity(incomingEntity, cancellationToken);
-    }
-
-
 }

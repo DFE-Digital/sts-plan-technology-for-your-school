@@ -1,5 +1,6 @@
 using Dfe.PlanTech.AzureFunctions.Mappings;
 using Dfe.PlanTech.AzureFunctions.Models;
+using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -67,7 +68,8 @@ public class RecommendationIntroUpdaterTests
         var mappedEntity = new MappedEntity
         {
             ExistingEntity = existingIntro,
-            IncomingEntity = newIntro
+            IncomingEntity = newIntro,
+            CmsEvent = CmsEvent.SAVE
         };
 
         var result = updater.UpdateEntityConcrete(mappedEntity);

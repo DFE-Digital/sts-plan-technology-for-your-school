@@ -175,5 +175,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
                 Assert.Contains(accordions, accordion => accordion.Header == chunk.chunk.Header.Text && accordion.Order == chunk.index + 1);
             }
         }
+
+        [Fact]
+        public void Should_render_warning_component()
+        {
+            var text = "test text";
+            var actual = _componentBuilder.BuildWarningComponent(text);
+            Assert.NotNull(actual);
+            Assert.Equal("test text", actual.Text.RichText.Value);
+        }
     }
 }

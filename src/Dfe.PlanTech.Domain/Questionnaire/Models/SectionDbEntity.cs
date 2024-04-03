@@ -10,16 +10,23 @@ public class SectionDbEntity : ContentComponentDbEntity, ISection<QuestionDbEnti
 {
     public string Name { get; set; } = null!;
 
-    public List<QuestionDbEntity> Questions { get; set; } = new();
+    [DontCopyValue]
+    public List<QuestionDbEntity> Questions { get; set; } = [];
 
+    [DontCopyValue]
     public PageDbEntity InterstitialPage { get; set; } = null!;
 
     public string InterstitialPageId { get; set; } = null!;
 
+    [DontCopyValue]
     public CategoryDbEntity? Category { get; set; }
 
     [DontCopyValue]
     public string? CategoryId { get; set; }
 
-    public List<RecommendationPageDbEntity> Recommendations { get; set; } = new();
+    [DontCopyValue]
+    public List<RecommendationPageDbEntity> Recommendations { get; set; } = [];
+
+    [DontCopyValue]
+    public SubtopicRecommendationDbEntity? SubtopicRecommendation { get; set; }
 }

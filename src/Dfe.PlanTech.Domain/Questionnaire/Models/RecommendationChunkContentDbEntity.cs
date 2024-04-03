@@ -1,6 +1,6 @@
-using Dfe.PlanTech.Domain.Content.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Dfe.PlanTech.Domain.Content.Models;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
@@ -17,5 +17,4 @@ public class RecommendationChunkContentDbEntity
     public string? ContentComponentId { get; set; }
 
     public ContentComponentDbEntity? ContentComponent { get; set; }
-
 }

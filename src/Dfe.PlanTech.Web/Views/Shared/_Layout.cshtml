@@ -7,9 +7,9 @@
 @section Head {
     <link rel="stylesheet" as="style" href="~/css/application.css">
 
-    @Html.Raw(GtmConfiguration.Analytics)
-    @Html.Raw(GtmConfiguration.Head)
-    @RenderSection("Head", false)
+        @Html.Raw(GtmConfiguration.Analytics)
+        @Html.Raw(GtmConfiguration.Head)
+        @RenderSection("Head", false)
 }
 
 @{
@@ -25,15 +25,16 @@
 @section Header {
     @Html.Raw(GtmConfiguration.Body)
 
-    <partial name="_CookieBanner"/>
-    <partial name="_Header"/>
+    <partial name="_CookieBanner" />
+    <partial name="_Header" />
 
     @RenderSection("Header", false)
 }
 
-@section BeforeContent {   
-    <script defer>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script> 
-    <partial name="BetaHeader"/>
+@section BeforeContent {
+    <script
+        defer>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
+    <partial name="BetaHeader" />
 
     @RenderSection("BeforeContent", required: false)
 }
@@ -41,7 +42,7 @@
 @RenderBody()
 
 @section Footer {
-    <partial name="_Footer"/>
+    <partial name="_Footer" />
 }
 
 @section BodyEnd {

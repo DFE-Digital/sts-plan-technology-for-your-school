@@ -6,6 +6,8 @@ public class CmsWebHookPayload
 {
     public Dictionary<string, JsonNode> Fields { get; init; } = null!;
     public CmsWebHookSystemDetails Sys { get; init; } = null!;
+
+    public string ContentType => Sys.ContentType.Sys.Id;
 }
 
 public class CmsWebHookSystemDetails

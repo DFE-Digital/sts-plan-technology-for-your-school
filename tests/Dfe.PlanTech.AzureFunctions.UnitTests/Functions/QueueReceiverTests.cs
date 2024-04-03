@@ -215,25 +215,6 @@ public class QueueReceiverTests
     }
 
     [Fact]
-    public async Task QueueRecieverDbWriter_Should_Error_If_NoMatchingFound_And_Unarchive_Event()
-    {
-        _contentComponent.Archived = true;
-
-        ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
-        ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
-
-        var subject = "ContentManagement.Entry.unarchive";
-        var serviceBusMessage = new ServiceBusMessage(bodyJsonStr) { Subject = subject };
-
-        ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
-
-        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
-
-        await serviceBusMessageActionsMock.Received().DeadLetterMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), null, Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
-    }
-
-
-    [Fact]
     public async Task QueueRecieverDbWriter_Should_CompleteSuccessfully_After_Publish()
     {
         _contentComponent.Published = true;

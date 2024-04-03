@@ -1,10 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Infrastructure.Data.EntityTypeConfigurations;
-
 [ExcludeFromCodeCoverage]
 public class PageEntityTypeConfiguration : IEntityTypeConfiguration<PageDbEntity>
 {

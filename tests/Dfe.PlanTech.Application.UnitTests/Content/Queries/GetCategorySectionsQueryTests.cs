@@ -12,7 +12,7 @@ public class GetCategorySectionsQueryTests
 {
     private readonly ICmsDbContext _db = Substitute.For<ICmsDbContext>();
     private readonly ILogger<GetCategorySectionsQuery> _logger = Substitute.For<ILogger<GetCategorySectionsQuery>>();
-
+    private readonly PageDbEntity? _nullPageDbEntity = null;
     private readonly GetCategorySectionsQuery _getCategorySectionsQuery;
 
     private readonly static PageDbEntity _loadedPage = new()
@@ -27,6 +27,19 @@ public class GetCategorySectionsQueryTests
     private readonly static CategoryDbEntity _category = new()
     {
         Id = "category-id",
+        ContentPages = new()
+        {
+
+        },
+        Sections = new()
+        {
+
+        }
+    };
+
+    private readonly static CategoryDbEntity _emptyCategoryId = new()
+    {
+        Id = "",
         ContentPages = new()
         {
 
@@ -144,14 +157,14 @@ public class GetCategorySectionsQueryTests
   };
 
     private readonly List<SectionDbEntity> _sections = new()
-  {
+    {
     new(){
       Category = new(){
 
       },
       CategoryId = "other-category"
-    }
-  };
+      }
+    };
 
     public GetCategorySectionsQueryTests()
     {
@@ -220,5 +233,24 @@ public class GetCategorySectionsQueryTests
 
         await _db.ReceivedWithAnyArgs(0)
                      .ToListAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Should_Log_No_Matching_Category_Error()
+    {
+        _loadedPage.Content.Add(_emptyCategoryId);
+        await _getCategorySectionsQuery.TryLoadChildren(_loadedPage, CancellationToken.None);
+
+        _logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
+        Assert.Empty(_loadedPage.Content[0].Id);
+        Assert.True(_loadedPage.ContentPages.Count == 0);
+    }
+
+    [Fact]
+    public async Task Should_Throw_Null_Reference_Exception()
+    {
+#pragma warning disable CS8604 // Possible null reference argument.
+        await Assert.ThrowsAsync<NullReferenceException>(async () => await _getCategorySectionsQuery.TryLoadChildren(_nullPageDbEntity, CancellationToken.None));
+#pragma warning restore CS8604 // Possible null reference argument.
     }
 }

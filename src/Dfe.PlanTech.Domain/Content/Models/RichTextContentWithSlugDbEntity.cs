@@ -1,6 +1,5 @@
 namespace Dfe.PlanTech.Domain.Content.Models;
 
-
 /// <summary>
 /// Represents a rich text content entity with the corresponding slug for the page that it is loaded on
 /// </summary>
@@ -16,5 +15,4 @@ public class RichTextContentWithSlugDbEntity : RichTextContentDbEntity
     public bool Archived { get; set; }
     public bool Deleted { get; set; }
     public bool Published { get; set; }
-
 }
