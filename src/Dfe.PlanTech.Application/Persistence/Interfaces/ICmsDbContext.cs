@@ -35,7 +35,7 @@ public interface ICmsDbContext
     public IQueryable<RecommendationPageDbEntity> RecommendationPages { get; }
 
     public IQueryable<RecommendationChunkDbEntity> RecommendationChunks { get; }
-    
+
     public IQueryable<RecommendationChunkContentDbEntity> RecommendationChunkContents { get; }
 
     public IQueryable<RecommendationChunkAnswerDbEntity> RecommendationChunkAnswers { get; }
