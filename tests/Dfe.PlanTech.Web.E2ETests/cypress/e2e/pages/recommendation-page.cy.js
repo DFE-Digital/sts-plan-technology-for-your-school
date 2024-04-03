@@ -46,7 +46,7 @@ describe("Recommendation Page", () => {
       cy.get("span.app-step-nav__button-text").should("exist");
   })
 
-    it("Should have a recommendation panel in accordion", () => {
+    it("Should have individual recommendation panel in accordion", () => {
         cy.get("li.app-step-nav__step").should("exist");
     })
 
@@ -64,7 +64,7 @@ describe("Recommendation Page", () => {
             })
     })
 
-    it("Should show/hide all individual recommendations", () => {
+    it("Should show/hide all recommendations", () => {
         cy.get("li.app-step-nav__step").each(() => {
             cy.get("div.app-step-nav__panel").should("have.class", "js-hidden");
             cy.get("span.app-step-nav__chevron").should("have.class", "app-step-nav__chevron--down");
@@ -104,6 +104,22 @@ describe("Recommendation Page", () => {
             cy.wrap($li).find("span.app-step-nav__circle-background").contains(`${index + 1}`)
         })
     })
+
+    //Links
+    it("Should have no broken links", () => {
+        cy.get(".govuk-main-wrapper").within(() => {
+            cy.get("a").each(($link) => {
+                cy.wrap($link).should("have.attr", "href");
+                cy.request({ url: $link.prop("href") });
+            });
+        });
+        cy.get(".app-step-nav-header").within(() => {
+            cy.get("a").each(($link) => {
+                cy.wrap($link).should("have.attr", "href");
+                cy.request({url: $link.prop("href")});
+            });
+        });
+    });
 
   //Accessibility
   it("Passes Accessibility Testing", () => {
