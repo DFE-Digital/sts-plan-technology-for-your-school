@@ -12,7 +12,7 @@ Cypress.Commands.add("login", ({ email, password, url }) => {
   cy.get("input#username").type(email);
   cy.get("input#password").type(password);
     cy.get("div.govuk-button-group button.govuk-button").first().click();
-    cy.wait(1000);
+    cy.wait(4000);
 }); 
 
 /**
