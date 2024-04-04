@@ -38,14 +38,14 @@ We use two external modules to create the majority of the resources required:
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.93.0 |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.88.0 |
 | <a name="provider_null"></a> [null](#provider\_null) | 3.2.2 |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_main_hosting"></a> [main\_hosting](#module\_main\_hosting) | github.com/DFE-Digital/terraform-azurerm-container-apps-hosting | v1.2.0 |
+| <a name="module_main_hosting"></a> [main\_hosting](#module\_main\_hosting) | github.com/uahussain12/terraform-azurerm-container-apps-hosting.git | n/a |
 | <a name="module_waf"></a> [waf](#module\_waf) | github.com/dfe-digital/terraform-azurerm-front-door-app-gateway-waf | v0.3.6 |
 
 ## Resources

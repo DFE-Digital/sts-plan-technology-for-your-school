@@ -7,7 +7,7 @@ resource "azurerm_storage_account" "function_storage" {
   tags                     = local.tags
 
   public_network_access_enabled = true
-  shared_access_key_enabled     = true
+  shared_access_key_enabled     = false
 
   identity {
     type         = "UserAssigned"

@@ -1,5 +1,6 @@
 module "main_hosting" {
-  source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v1.2.0"
+  #source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v1.2.0" TODO: Increment version when change is merged in from fork.
+  source = "github.com/uahussain12/terraform-azurerm-container-apps-hosting.git"
 
   ###########
   # General #
@@ -54,5 +55,12 @@ module "main_hosting" {
   registry_username         = local.registry_username
   registry_password         = local.registry_password
   registry_custom_image_url = local.registry_custom_image_url
+
+  #############################
+  # Storage Account           #
+  #############################
+  container_app_storage_account_shared_access_key_enabled = false
+  mssql_storage_account_shared_access_key_enabled         = false
+  storage_account_public_access_enabled                   = false
 
 }
