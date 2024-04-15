@@ -9,6 +9,8 @@ using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using System.Text;
+using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 
 namespace Dfe.PlanTech.AzureFunctions;
 
@@ -17,12 +19,26 @@ public class QueueReceiver : BaseFunction
     private readonly CmsDbContext _db;
     private readonly ContentfulOptions _contentfulOptions;
     private readonly JsonToEntityMappers _mappers;
+    private readonly ServiceBusClient _serviceBusClient;
+    private readonly IConfiguration _configuration;
+    
+    private const string CustomMessageProperty = "DeliveryAttempts";
 
-    public QueueReceiver(ContentfulOptions contentfulOptions, ILoggerFactory loggerFactory, CmsDbContext db, JsonToEntityMappers mappers) : base(loggerFactory.CreateLogger<QueueReceiver>())
+    private const int _defaultMaxMessageDeliveryAttempts = 4;
+    private const int _defaultMessageDeliveryDelayInSeconds = 10;
+
+    private readonly int _maxMessageDeliveryAttempts;
+    private readonly int _messageDeliveryDelayInSeconds;
+
+    public QueueReceiver(ContentfulOptions contentfulOptions, ILoggerFactory loggerFactory, CmsDbContext db, JsonToEntityMappers mappers, ServiceBusClient serviceBusClient, IConfiguration configuration) : base(loggerFactory.CreateLogger<QueueReceiver>())
     {
         _contentfulOptions = contentfulOptions;
         _db = db;
         _mappers = mappers;
+        _serviceBusClient = serviceBusClient;
+        _configuration = configuration;
+        _maxMessageDeliveryAttempts = int.TryParse(_configuration["MaxMessageDeliveryAttempts"], out var configuredMaxAttempts) ? configuredMaxAttempts : _defaultMaxMessageDeliveryAttempts;
+        _messageDeliveryDelayInSeconds = int.TryParse(_configuration["MessageDeliveryDelayInSeconds"], out var configuredMessageDeliveryDelayInSeconds) ? configuredMessageDeliveryDelayInSeconds : _defaultMessageDeliveryDelayInSeconds;
     }
 
     /// <summary>
@@ -34,7 +50,9 @@ public class QueueReceiver : BaseFunction
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [Function("QueueReceiver")]
-    public async Task QueueReceiverDbWriter([ServiceBusTrigger("contentful", IsBatched = true)] ServiceBusReceivedMessage[] messages, ServiceBusMessageActions messageActions, CancellationToken cancellationToken)
+    public async Task QueueReceiverDbWriter(
+        [ServiceBusTrigger("contentful", IsBatched = true)] ServiceBusReceivedMessage[] messages,
+        ServiceBusMessageActions messageActions, CancellationToken cancellationToken)
     {
         Logger.LogInformation("Queue Receiver -> Db Writer started. Processing {MsgCount} messages", messages.Length);
 
@@ -52,7 +70,8 @@ public class QueueReceiver : BaseFunction
     /// <param name="messageActions">Service bus message actions for completing or dead-lettering</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task ProcessMessage(ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions, CancellationToken cancellationToken)
+    private async Task ProcessMessage(ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions,
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -80,16 +99,63 @@ public class QueueReceiver : BaseFunction
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error processing message ID {Message}", message.MessageId);
-            await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace, cancellationToken);
+            if (ex is JsonException or CmsEventException)
+            {
+                Logger.LogError(ex, "Error processing message ID {Message}", message.MessageId);
+                await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace,
+                    cancellationToken);
+            }
+            
+            var deliveryAttempts = 0;
+
+            if (message.ApplicationProperties.TryGetValue(CustomMessageProperty, out object? attemptObj) &&
+                int.TryParse(attemptObj?.ToString(), out int existingAttempt))
+            {
+                deliveryAttempts = existingAttempt;
+            }
+
+            if (deliveryAttempts >= _maxMessageDeliveryAttempts)
+            {
+                Logger.LogError(ex, "Error processing message ID {Message}", message.MessageId);
+                await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace,
+                    cancellationToken);
+            }
+            else
+            {
+                await RedeliverMessage(message, messageActions, deliveryAttempts, cancellationToken);
+            }
         }
+    }
+
+    private async Task RedeliverMessage(ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions,
+        int deliveryAttempts, CancellationToken cancellationToken)
+    {
+        var resubmittedMessage = new ServiceBusMessage()
+        {
+            ScheduledEnqueueTime = DateTime.UtcNow.AddSeconds(_messageDeliveryDelayInSeconds),
+            Subject = message.Subject,
+            Body = message.Body
+        };
+
+        var nextRetry = ++deliveryAttempts;
+
+        resubmittedMessage.ApplicationProperties.Add(CustomMessageProperty, nextRetry);
+
+        var sender = _serviceBusClient.CreateSender("contentful");
+
+        Logger.LogWarning("Error processing message ID {Message} will retry again, current attempt {Attempt}",
+            message.MessageId, deliveryAttempts);
+
+        await sender.SendMessageAsync(resubmittedMessage, cancellationToken);
+
+        await messageActions.CompleteMessageAsync(message, cancellationToken);
     }
 
     /// <summary>
     /// Checks if the message with the given CmsEvent should be ignored based on certain conditions.
     /// </summary>
     /// <remarks>
-    /// If we recieve a create event, we return true.
+    /// If we receive a create event, we return true.
     /// If we are NOT using preview mode (i.e. we are ignoring drafts), and the event is just a save or autosave, then return true.
     /// 
     /// Else, we return false.
@@ -106,7 +172,8 @@ public class QueueReceiver : BaseFunction
 
         if ((cmsEvent == CmsEvent.SAVE || cmsEvent == CmsEvent.AUTO_SAVE) && !_contentfulOptions.UsePreview)
         {
-            Logger.LogInformation("Receieved {Event} but UsePreview is {UsePreview} - dropping message", cmsEvent, _contentfulOptions.UsePreview);
+            Logger.LogInformation("Received {Event} but UsePreview is {UsePreview} - dropping message", cmsEvent,
+                _contentfulOptions.UsePreview);
             return true;
         }
 
@@ -121,9 +188,11 @@ public class QueueReceiver : BaseFunction
     /// <exception cref="CmsEventException">Exception thrown if we are unable to parse the event to a valid <see cref="CmsEvent"/></exception>
     private CmsEvent GetCmsEvent(string contentfulEvent)
     {
-        if (!Enum.TryParse(contentfulEvent.AsSpan()[(contentfulEvent.LastIndexOf('.') + 1)..], true, out CmsEvent cmsEvent))
+        if (!Enum.TryParse(contentfulEvent.AsSpan()[(contentfulEvent.LastIndexOf('.') + 1)..], true,
+                out CmsEvent cmsEvent))
         {
-            throw new CmsEventException(string.Format("Cannot parse header \"{0}\" into a valid CMS event", contentfulEvent));
+            throw new CmsEventException(string.Format("Cannot parse header \"{0}\" into a valid CMS event",
+                contentfulEvent));
         }
 
         Logger.LogInformation("CMS Event: {CmsEvent}", cmsEvent);
@@ -136,8 +205,8 @@ public class QueueReceiver : BaseFunction
     /// </summary>
     /// <param name="message"></param>
     /// <returns></returns>
-
-    private Task<MappedEntity> MapMessageToEntity(ServiceBusReceivedMessage message, CmsEvent cmsEvent, CancellationToken cancellationToken)
+    private Task<MappedEntity> MapMessageToEntity(ServiceBusReceivedMessage message, CmsEvent cmsEvent,
+        CancellationToken cancellationToken)
     {
         string messageBody = Encoding.UTF8.GetString(message.Body);
 
