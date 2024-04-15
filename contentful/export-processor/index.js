@@ -1,5 +1,5 @@
-import DataMapper from "./data-mapper";
-import ContentTypes from "./content-types/content-types";
+import DataMapper from "#src/data-mapper";
+import ContentTypes from "#src/content-types/content-types";
 
 const exportObj = { DataMapper, ...ContentTypes };
 

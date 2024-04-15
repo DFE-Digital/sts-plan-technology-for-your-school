@@ -1,4 +1,4 @@
-import { Answer } from "./answer.js";
+import { Answer } from "#src/content-types/answer";
 
 export class Question {
   answers;
