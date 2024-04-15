@@ -336,7 +336,7 @@ public class QueueReceiverTests
         var serviceBusMessage = new ServiceBusMessage(bodyJsonStr) { Subject = subject };
 
         ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
-        
+
         await queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
 
         await serviceBusMessageActionsMock.Received()
@@ -354,7 +354,7 @@ public class QueueReceiverTests
 
         var subject = "ContentManagement.Entry.INVALID";
         var serviceBusMessage = new ServiceBusMessage(bodyJsonStr) { Subject = subject };
-        
+
         ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
 
         await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
@@ -403,7 +403,7 @@ public class QueueReceiverTests
         var added = _addedObject as ContentComponentDbEntity;
         Assert.Null(added);
     }
-    
+
     [Fact]
     public async Task QueueReceiverDbWriter_Should_Redeliver_A_Message_If_There_Is_A_Transient_Exception()
     {
@@ -412,7 +412,7 @@ public class QueueReceiverTests
 
         var subject = "ContentManagement.Entry.publish";
         var serviceBusMessage = new ServiceBusMessage(bodyJsonStr) { Subject = subject };
-        
+
         _cmsDbContextMock.SaveChangesAsync().ThrowsAsync(new Exception("Something went wrong"));
 
         var serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
@@ -421,9 +421,9 @@ public class QueueReceiverTests
 
         await serviceBusMessageActionsMock.Received()
             .CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
-        
+
         _serviceBusClientMock.Received(1).CreateSender("contentful");
-        
+
         var added = _addedObject as ContentComponentDbEntity;
         Assert.NotNull(added);
         Assert.True(added.Published);
