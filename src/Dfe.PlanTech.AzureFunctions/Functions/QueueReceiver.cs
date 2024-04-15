@@ -95,15 +95,14 @@ public class QueueReceiver : BaseFunction
 
             await messageActions.CompleteMessageAsync(message, cancellationToken);
         }
+        catch (Exception ex) when (ex is JsonException or CmsEventException)
+        {
+            Logger.LogError(ex, "Error processing message ID {Message}", message.MessageId);
+            await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace,
+                cancellationToken);
+        }
         catch (Exception ex)
         {
-            if (ex is JsonException or CmsEventException)
-            {
-                Logger.LogError(ex, "Error processing message ID {Message}", message.MessageId);
-                await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace,
-                    cancellationToken);
-            }
-
             var deliveryAttempts = 0;
 
             if (message.ApplicationProperties.TryGetValue(CustomMessageProperty, out object? attemptObj) &&
@@ -114,7 +113,7 @@ public class QueueReceiver : BaseFunction
 
             if (deliveryAttempts >= _maxMessageDeliveryAttempts)
             {
-                Logger.LogError(ex, "Error processing message ID {Message}", message.MessageId);
+                Logger.LogError(ex, "Error processing message ID {Message}, The maximum delivery count has been reached", message.MessageId);
                 await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace,
                     cancellationToken);
             }
