@@ -1,61 +1,36 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.CmsDbDataValidator.Tests;
 
-public class QuestionsComparatorclass(CmsDbContext db, ContentfulContent contentfulContent) : BaseComparator(db, contentfulContent, ["Text", "HelpText", "Slug"])
+public class QuestionsComparatorclass(CmsDbContext db, ContentfulContent contentfulContent) : BaseComparator(db, contentfulContent, ["Text", "HelpText", "Slug"], "Question")
 {
-  public override Task ValidateContent() => ValidateQuestions();
-
-  public async Task ValidateQuestions()
+  public override Task ValidateContent()
   {
-    var contentfulQuestions = _contentfulContent.GetEntriesForContentType("question").ToList();
+    ValidateQuestions();
+    return Task.CompletedTask;
+  }
 
-    if (contentfulQuestions == null || contentfulQuestions.Count == 0)
+  public void ValidateQuestions()
+  {
+    foreach (var contentfulQuestion in _contentfulEntities)
     {
-      Console.WriteLine("Questions not found in Contentful export");
-      return;
-    }
-
-    var databaseQuestions = await _db.Questions.Select(question => new QuestionDbEntity()
-    {
-      Id = question.Id,
-      Text = question.Text,
-      HelpText = question.HelpText,
-      Slug = question.Slug,
-      Answers = question.Answers.Select(answer => new AnswerDbEntity()
-      {
-        Id = answer.Id
-      }).ToList()
-    }).ToListAsync();
-
-    if (contentfulQuestions == null || contentfulQuestions.Count == 0)
-    {
-      Console.WriteLine("Questions not found in Database");
-      return;
-    }
-
-    foreach (var contentfulQuestion in contentfulQuestions)
-    {
-      ValidateQuestion(databaseQuestions, contentfulQuestion);
+      ValidateQuestion(_dbEntities.OfType<QuestionDbEntity>().ToArray(), contentfulQuestion);
     }
   }
 
-  private void ValidateQuestion(List<QuestionDbEntity> databaseQuestions, JsonNode contentfulQuestion)
+  private void ValidateQuestion(QuestionDbEntity[] databaseQuestions, JsonNode contentfulQuestion)
   {
-    var databaseQuestion = databaseQuestions.FirstOrDefault(question => question.Id == contentfulQuestion.GetEntryId());
-
+    var databaseQuestion = FindMatchingDbEntity(databaseQuestions, contentfulQuestion);
     if (databaseQuestion == null)
     {
-      Console.WriteLine($"Could not find matching question in DB for {contentfulQuestion}");
       return;
     }
-    string?[] validationResults = ValidateProperties(contentfulQuestion, databaseQuestion!).ToArray();
 
-    LogValidationMessages("Question", validationResults, contentfulQuestion);
+    ValidateProperties(contentfulQuestion, databaseQuestion!);
 
     var contentfulQuestionAnswerIds = contentfulQuestion["answers"]?.AsArray().Select(GetId).Where(id => id != null).ToArray();
 
@@ -91,18 +66,23 @@ public class QuestionsComparatorclass(CmsDbContext db, ContentfulContent content
   }
 
   private static bool ValidateDbAnswerExistsInContentful(AnswerDbEntity answer, string?[] contentfulQuestionAnswerIds)
-=> !contentfulQuestionAnswerIds.Any(answerId => answer.Id == answerId);
+    => !contentfulQuestionAnswerIds.Any(answerId => answer.Id == answerId);
 
   private static bool ValidateContentfulAnswerExistsInDb(QuestionDbEntity? databaseQuestion, string answerId)
-=> !databaseQuestion!.Answers.Exists(answer => answer.Id == answerId);
+    => !databaseQuestion!.Answers.Exists(answer => answer.Id == answerId);
 
-  private static string? ValidateDbAnswerExistsInContentful(QuestionDbEntity? databaseQuestion, JsonNode questionAnswer)
+  protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
   {
-    var answerId = questionAnswer!["sys"]?["id"]?.GetValue<string>() ?? throw new JsonException($"Couldn't find Id in {questionAnswer}");
-
-    var exists = databaseQuestion!.Answers.Exists(answer => answer.Id == answerId);
-
-    return exists ? null : answerId;
+    return _db.Questions.Select(question => new QuestionDbEntity()
+    {
+      Id = question.Id,
+      Text = question.Text,
+      HelpText = question.HelpText,
+      Slug = question.Slug,
+      Answers = question.Answers.Select(answer => new AnswerDbEntity()
+      {
+        Id = answer.Id
+      }).ToList()
+    });
   }
-
 }
