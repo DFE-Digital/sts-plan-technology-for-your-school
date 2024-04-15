@@ -428,4 +428,28 @@ public class QueueReceiverTests
         Assert.NotNull(added);
         Assert.True(added.Published);
     }
+    
+    [Fact]
+    public async Task QueueReceiverDbWriter_Should_DeadLetter_A_Message_If_Max_Message_Delivery_Count_Is_Exhausted()
+    {
+        var serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
+        var serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
+
+        var subject = "ContentManagement.Entry.publish";
+        var serviceBusMessage = new ServiceBusMessage(bodyJsonStr) { Subject = subject };
+        
+        serviceBusMessage.ApplicationProperties.Add("DeliveryAttempts", 4);
+        
+        _cmsDbContextMock.SaveChangesAsync().ThrowsAsync(new Exception("Something went wrong"));
+
+        var serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
+
+        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+
+        await serviceBusMessageActionsMock.Received().DeadLetterMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), null, Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+        
+        var added = _addedObject as ContentComponentDbEntity;
+        Assert.NotNull(added);
+        Assert.True(added.Published);
+    }
 }
