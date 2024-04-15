@@ -21,7 +21,7 @@ public class QueueReceiver : BaseFunction
     private readonly JsonToEntityMappers _mappers;
     private readonly ServiceBusClient _serviceBusClient;
     private readonly IConfiguration _configuration;
-    
+
     private const string CustomMessageProperty = "DeliveryAttempts";
 
     private const int _defaultMaxMessageDeliveryAttempts = 4;
@@ -105,7 +105,7 @@ public class QueueReceiver : BaseFunction
                 await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace,
                     cancellationToken);
             }
-            
+
             var deliveryAttempts = 0;
 
             if (message.ApplicationProperties.TryGetValue(CustomMessageProperty, out object? attemptObj) &&
