@@ -1,6 +1,6 @@
-import { ReplaceNonBreakingHyphen } from "../text-helpers";
+import { CleanText } from "../text-helpers";
 function ValidateTitle(title) {
-  const expectedText = ReplaceNonBreakingHyphen(title.fields.text);
+  const expectedText = CleanText(title.fields.text);
 
   cy.get("h1.govuk-heading-xl").should("exist").and("have.text", expectedText);
 }
