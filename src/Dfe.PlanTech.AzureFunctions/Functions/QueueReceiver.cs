@@ -20,7 +20,6 @@ public class QueueReceiver : BaseFunction
     private readonly ContentfulOptions _contentfulOptions;
     private readonly JsonToEntityMappers _mappers;
     private readonly ServiceBusClient _serviceBusClient;
-    private readonly IConfiguration _configuration;
 
     private const string CustomMessageProperty = "DeliveryAttempts";
 
@@ -36,9 +35,8 @@ public class QueueReceiver : BaseFunction
         _db = db;
         _mappers = mappers;
         _serviceBusClient = serviceBusClient;
-        _configuration = configuration;
-        _maxMessageDeliveryAttempts = int.TryParse(_configuration["MaxMessageDeliveryAttempts"], out var configuredMaxAttempts) ? configuredMaxAttempts : _defaultMaxMessageDeliveryAttempts;
-        _messageDeliveryDelayInSeconds = int.TryParse(_configuration["MessageDeliveryDelayInSeconds"], out var configuredMessageDeliveryDelayInSeconds) ? configuredMessageDeliveryDelayInSeconds : _defaultMessageDeliveryDelayInSeconds;
+        _maxMessageDeliveryAttempts = int.TryParse(configuration["MaxMessageDeliveryAttempts"], out var configuredMaxAttempts) ? configuredMaxAttempts : _defaultMaxMessageDeliveryAttempts;
+        _messageDeliveryDelayInSeconds = int.TryParse(configuration["MessageDeliveryDelayInSeconds"], out var configuredMessageDeliveryDelayInSeconds) ? configuredMessageDeliveryDelayInSeconds : _defaultMessageDeliveryDelayInSeconds;
     }
 
     /// <summary>
