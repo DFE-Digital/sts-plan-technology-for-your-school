@@ -13,6 +13,7 @@ using NSubstitute;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Dfe.PlanTech.AzureFunctions.Utils;
 using NSubstitute.ExceptionExtensions;
 
 namespace Dfe.PlanTech.AzureFunctions.UnitTests;
@@ -29,6 +30,7 @@ public class QueueReceiverTests
     private readonly JsonToEntityMappers _jsonToEntityMappers;
     private readonly ServiceBusClient _serviceBusClientMock;
     private readonly IConfiguration _configurationMock;
+    private readonly IMessageRetryHandler _messageRetryHandlerMock;
 
     private object? _addedObject = null;
 
@@ -43,6 +45,7 @@ public class QueueReceiverTests
         _configurationMock = Substitute.For<IConfiguration>();
         _loggerFactoryMock = Substitute.For<ILoggerFactory>();
         _loggerMock = Substitute.For<ILogger>();
+        _messageRetryHandlerMock = Substitute.For<IMessageRetryHandler>();
 
         _loggerFactoryMock.CreateLogger<Arg.AnyType>().Returns((callinfo) =>
         {
@@ -101,7 +104,7 @@ public class QueueReceiverTests
 
         _jsonToEntityMappers = Substitute.For<JsonToEntityMappers>(new JsonToDbMapper[] { new QuestionMapper(new EntityRetriever(_cmsDbContextMock), new EntityUpdater(Substitute.For<ILogger<EntityUpdater>>(), _cmsDbContextMock), _cmsDbContextMock, Substitute.For<ILogger<QuestionMapper>>(), jsonOptions) }, jsonOptions);
 
-        _queueReceiver = new QueueReceiver(new ContentfulOptions(true), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _serviceBusClientMock, _configurationMock);
+        _queueReceiver = new QueueReceiver(new ContentfulOptions(true), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _messageRetryHandlerMock);
 
         _cmsDbContextMock.Add(Arg.Any<ContentComponentDbEntity>()).Returns(callinfo =>
         {
@@ -305,7 +308,7 @@ public class QueueReceiverTests
     [Fact]
     public async Task QueueReceiverDbWriter_Should_ExitEarly_When_Event_Is_Save_And_UsePreview_Is_False()
     {
-        var queueReceiver = new QueueReceiver(new ContentfulOptions(false), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _serviceBusClientMock, _configurationMock);
+        var queueReceiver = new QueueReceiver(new ContentfulOptions(false), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _messageRetryHandlerMock);
 
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
@@ -327,7 +330,7 @@ public class QueueReceiverTests
     [Fact]
     public async Task QueueReceiverDbWriter_Should_ExitEarly_When_Event_Is_AutoSave_And_UsePreview_Is_False()
     {
-        var queueReceiver = new QueueReceiver(new ContentfulOptions(false), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _serviceBusClientMock, _configurationMock);
+        var queueReceiver = new QueueReceiver(new ContentfulOptions(false), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _messageRetryHandlerMock);
 
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
@@ -417,13 +420,13 @@ public class QueueReceiverTests
 
         var serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
 
-        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+        _messageRetryHandlerMock.RetryRequired(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>()).Returns(true);
 
+        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+        
         await serviceBusMessageActionsMock.Received()
             .CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
-
-        _serviceBusClientMock.Received(1).CreateSender("contentful");
-
+        
         var added = _addedObject as ContentComponentDbEntity;
         Assert.NotNull(added);
         Assert.True(added.Published);

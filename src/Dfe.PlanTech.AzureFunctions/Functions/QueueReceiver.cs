@@ -10,35 +10,18 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Configuration;
+using Dfe.PlanTech.AzureFunctions.Utils;
 
 namespace Dfe.PlanTech.AzureFunctions;
 
-public class QueueReceiver : BaseFunction
+public class QueueReceiver(
+    ContentfulOptions contentfulOptions,
+    ILoggerFactory loggerFactory,
+    CmsDbContext db,
+    JsonToEntityMappers mappers,
+    IMessageRetryHandler messageRetryHandler)
+    : BaseFunction(loggerFactory.CreateLogger<QueueReceiver>())
 {
-    private readonly CmsDbContext _db;
-    private readonly ContentfulOptions _contentfulOptions;
-    private readonly JsonToEntityMappers _mappers;
-    private readonly ServiceBusClient _serviceBusClient;
-
-    private const string CustomMessageProperty = "DeliveryAttempts";
-
-    private const int _defaultMaxMessageDeliveryAttempts = 4;
-    private const int _defaultMessageDeliveryDelayInSeconds = 10;
-
-    private readonly int _maxMessageDeliveryAttempts;
-    private readonly int _messageDeliveryDelayInSeconds;
-
-    public QueueReceiver(ContentfulOptions contentfulOptions, ILoggerFactory loggerFactory, CmsDbContext db, JsonToEntityMappers mappers, ServiceBusClient serviceBusClient, IConfiguration configuration) : base(loggerFactory.CreateLogger<QueueReceiver>())
-    {
-        _contentfulOptions = contentfulOptions;
-        _db = db;
-        _mappers = mappers;
-        _serviceBusClient = serviceBusClient;
-        _maxMessageDeliveryAttempts = int.TryParse(configuration["MaxMessageDeliveryAttempts"], out var configuredMaxAttempts) ? configuredMaxAttempts : _defaultMaxMessageDeliveryAttempts;
-        _messageDeliveryDelayInSeconds = int.TryParse(configuration["MessageDeliveryDelayInSeconds"], out var configuredMessageDeliveryDelayInSeconds) ? configuredMessageDeliveryDelayInSeconds : _defaultMessageDeliveryDelayInSeconds;
-    }
-
     /// <summary>
     /// Azure Function App function that processes messages from a Service Bus queue, converts them
     /// to the appropriate <see cref="ContentComponentDbEntity"/> class, and adds/updates the database where appropriate.
@@ -98,54 +81,25 @@ public class QueueReceiver : BaseFunction
         catch (Exception ex) when (ex is JsonException or CmsEventException)
         {
             Logger.LogError(ex, "Error processing message ID {Message}", message.MessageId);
-            await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace,
-                cancellationToken);
+            await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace, cancellationToken);
         }
         catch (Exception ex)
         {
-            var deliveryAttempts = 0;
-
-            if (message.ApplicationProperties.TryGetValue(CustomMessageProperty, out object? attemptObj) &&
-                int.TryParse(attemptObj?.ToString(), out int existingAttempt))
+            var retryRequired = await messageRetryHandler.RetryRequired(message, cancellationToken);
+            
+            if (retryRequired)
             {
-                deliveryAttempts = existingAttempt;
-            }
-
-            if (deliveryAttempts >= _maxMessageDeliveryAttempts)
-            {
-                Logger.LogError(ex, "Error processing message ID {Message}, The maximum delivery count has been reached", message.MessageId);
-                await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace,
-                    cancellationToken);
+                Logger.LogWarning("Error processing message ID {Message} will retry again", message.MessageId);
+                await messageActions.CompleteMessageAsync(message, cancellationToken);
+                return;
             }
             else
             {
-                await RedeliverMessage(message, messageActions, deliveryAttempts, cancellationToken);
+                Logger.LogError(ex, "Error processing message ID {Message}, The maximum delivery count has been reached", message.MessageId);
+                await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace, cancellationToken);
+                return;
             }
         }
-    }
-
-    private async Task RedeliverMessage(ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions,
-        int deliveryAttempts, CancellationToken cancellationToken)
-    {
-        var resubmittedMessage = new ServiceBusMessage()
-        {
-            ScheduledEnqueueTime = DateTime.UtcNow.AddSeconds(_messageDeliveryDelayInSeconds),
-            Subject = message.Subject,
-            Body = message.Body
-        };
-
-        var nextRetry = ++deliveryAttempts;
-
-        resubmittedMessage.ApplicationProperties.Add(CustomMessageProperty, nextRetry);
-
-        var sender = _serviceBusClient.CreateSender("contentful");
-
-        Logger.LogWarning("Error processing message ID {Message} will retry again, current attempt {Attempt}",
-            message.MessageId, deliveryAttempts);
-
-        await sender.SendMessageAsync(resubmittedMessage, cancellationToken);
-
-        await messageActions.CompleteMessageAsync(message, cancellationToken);
     }
 
     /// <summary>
@@ -167,10 +121,10 @@ public class QueueReceiver : BaseFunction
             return true;
         }
 
-        if ((cmsEvent == CmsEvent.SAVE || cmsEvent == CmsEvent.AUTO_SAVE) && !_contentfulOptions.UsePreview)
+        if ((cmsEvent == CmsEvent.SAVE || cmsEvent == CmsEvent.AUTO_SAVE) && !contentfulOptions.UsePreview)
         {
             Logger.LogInformation("Received {Event} but UsePreview is {UsePreview} - dropping message", cmsEvent,
-                _contentfulOptions.UsePreview);
+                contentfulOptions.UsePreview);
             return true;
         }
 
@@ -209,7 +163,7 @@ public class QueueReceiver : BaseFunction
 
         Logger.LogInformation("Processing = {MessageBody}", messageBody);
 
-        return _mappers.ToEntity(messageBody, cmsEvent, cancellationToken);
+        return mappers.ToEntity(messageBody, cmsEvent, cancellationToken);
     }
 
     /// <summary>
@@ -222,11 +176,11 @@ public class QueueReceiver : BaseFunction
     {
         if (!mappedEntity.AlreadyExistsInDatabase)
         {
-            _db.Add(mappedEntity.IncomingEntity);
+            db.Add(mappedEntity.IncomingEntity);
         }
         else
         {
-            _db.Update(mappedEntity.ExistingEntity!);
+            db.Update(mappedEntity.ExistingEntity!);
         }
     }
 
@@ -237,7 +191,7 @@ public class QueueReceiver : BaseFunction
     /// <returns></returns>
     private async Task DbSaveChanges(CancellationToken cancellationToken)
     {
-        long rowsChangedInDatabase = await _db.SaveChangesAsync(cancellationToken);
+        long rowsChangedInDatabase = await db.SaveChangesAsync(cancellationToken);
 
         if (rowsChangedInDatabase == 0L)
         {
