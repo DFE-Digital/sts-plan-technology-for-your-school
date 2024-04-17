@@ -105,6 +105,14 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
     {
       return null;
     }
+    else if (contentfulProperty == null && databaseValue != null)
+    {
+      return $"{formattedPropertyName} is null in Contentful but is {databaseValue} in the database.";
+    }
+    else if (contentfulProperty != null && databaseValue == null)
+    {
+      return $"{propertyName} is null in DB but is {databaseValue} in the database.";
+    }
 
     var contentfulValue = contentfulProperty!.Deserialize(databaseProperty.PropertyType);
 
@@ -191,22 +199,22 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
       return;
     }
 
-    foreach (var contentfulChildId in contentfulChildrenIds)
-    {
-      var matchingDbEntity = dbChildren.FirstOrDefault(child => child.Id == contentfulChildId);
-      if (matchingDbEntity == null)
-      {
-        Console.WriteLine($"Could not find matching entity for child ID {contentfulChildId} in DB for {contentfulEntity.GetEntryId()}");
-      }
-    }
+    var dbEntityType = typeof(TDbEntity).Name.Replace("DbEntity", "");
 
-    foreach (var dbChild in dbChildren)
+    var contentfulEntityId = contentfulEntity.GetEntryId();
+
+    var missingDbEntities = contentfulChildrenIds.Where(childId => !dbChildren.Any(dbChild => dbChild.Id == childId))
+                                                  .Select(childId => $"Could not find matching entity for child ID {childId} in DB.");
+
+    var extraDbEntities = dbChildren.Where(dbChild => !contentfulChildrenIds.Any(childId => dbChild.Id == childId))
+                                        .Select(dbChild => $"Child ID {dbChild.Id} exists in DB but not in Contentful");
+
+
+    var childErrors = string.Join("\n", missingDbEntities.Concat(extraDbEntities));
+
+    if (!string.IsNullOrEmpty(childErrors))
     {
-      var matchingContentfulReference = contentfulChildrenIds.FirstOrDefault(id => id == dbChild.Id);
-      if (matchingContentfulReference == null)
-      {
-        Console.WriteLine($"Entity ID {dbChild.Id} is a child for {dbChild.Id} but was not found in the Contentful data as a child");
-      }
+      Console.WriteLine($"Child reference errors in {dbEntityType} {contentfulEntityId}: \n{childErrors}");
     }
   }
 
