@@ -24,14 +24,14 @@ public class MessageRetryHandler(
         {
             deliveryAttempts = existingAttempt;
         }
-        
+
         if (deliveryAttempts >= _messageRetryHandlingOptions.MaxMessageDeliveryAttempts)
         {
             return false;
         }
 
         RedeliverMessage(message, deliveryAttempts, cancellationToken);
-        
+
         return true;
     }
 
@@ -47,7 +47,7 @@ public class MessageRetryHandler(
         var nextRetry = ++deliveryAttempts;
 
         resubmittedMessage.ApplicationProperties.Add(CustomMessageProperty, nextRetry);
-        
+
         await _serviceBusSender.SendMessageAsync(resubmittedMessage, cancellationToken);
     }
 }

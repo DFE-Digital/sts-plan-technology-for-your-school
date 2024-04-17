@@ -423,10 +423,10 @@ public class QueueReceiverTests
         _messageRetryHandlerMock.RetryRequired(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>()).Returns(true);
 
         await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
-        
+
         await serviceBusMessageActionsMock.Received()
             .CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
-        
+
         var added = _addedObject as ContentComponentDbEntity;
         Assert.NotNull(added);
         Assert.True(added.Published);

@@ -86,7 +86,7 @@ public class QueueReceiver(
         catch (Exception ex)
         {
             var retryRequired = await messageRetryHandler.RetryRequired(message, cancellationToken);
-            
+
             if (retryRequired)
             {
                 Logger.LogWarning("Error processing message ID {Message} will retry again", message.MessageId);
