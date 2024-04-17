@@ -2,6 +2,7 @@ using System.Text.Json.Nodes;
 using Dfe.PlanTech.CmsDbDataValidator.Tests;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.CmsDbDataValidator.Comparators;
 
@@ -16,20 +17,21 @@ public class PageComparator(CmsDbContext db, ContentfulContent contentfulContent
       _db.Entry(dbEntry).Collection(page => page.BeforeTitleContent).Load();
       comparator.ValidateArrayReferences(contentfulEntry, "beforeTitleContent", dbEntry, (entry) => entry.BeforeTitleContent);
 */
-  public override async Task ValidateContent()
+  public override Task ValidateContent()
   {
-    await ValidatePages(_dbEntities.OfType<PageDbEntity>().ToArray());
+    ValidatePages(_dbEntities.OfType<PageDbEntity>().ToArray());
+    return Task.CompletedTask;
   }
 
-  private async Task ValidatePages(PageDbEntity[] pages)
+  private void ValidatePages(PageDbEntity[] pages)
   {
     foreach (var contentfulPage in _contentfulEntities)
     {
-      await ValidatePage(pages, contentfulPage);
+      ValidatePage(pages, contentfulPage);
     }
   }
 
-  private async Task ValidatePage(PageDbEntity[] pages, JsonNode contentfulPage)
+  private void ValidatePage(PageDbEntity[] pages, JsonNode contentfulPage)
   {
     var matchingDbPage = pages.FirstOrDefault(header => header.Id == contentfulPage.GetEntryId());
 
@@ -42,16 +44,34 @@ public class PageComparator(CmsDbContext db, ContentfulContent contentfulContent
     var titleIdValidationResult = ValidateChild<PageDbEntity>(matchingDbPage, "TitleId", contentfulPage, "title");
     ValidateProperties(contentfulPage, matchingDbPage, titleIdValidationResult);
 
-    await _db.Entry(matchingDbPage).Collection(page => page.Content).LoadAsync();
+    var pageChildren = _db.PageContents.Where(pageContent => pageContent.PageId == matchingDbPage.Id)
+                                      .Select(pageContent =>
+                                      new
+                                      {
+                                        contentId = pageContent.ContentComponentId,
+                                        beforeTitleContentId = pageContent.BeforeContentComponentId
+                                      })
+                                      .ToArray();
+
+    matchingDbPage.Content = pageChildren.Where(child => child.contentId != null)
+                                        .Select(child => new ContentComponentDbEntity()
+                                        {
+                                          Id = child.contentId!
+                                        }).ToList();
+
     ValidateChildren(contentfulPage, "content", matchingDbPage, (page) => page.Content);
 
-    await _db.Entry(matchingDbPage).Collection(page => page.BeforeTitleContent).LoadAsync();
-    ValidateChildren(contentfulPage, "beforeTitleContent", matchingDbPage, (page) => page.BeforeTitleContent);
+    matchingDbPage.BeforeTitleContent = pageChildren.Where(child => child.beforeTitleContentId != null)
+                                    .Select(child => new ContentComponentDbEntity()
+                                    {
+                                      Id = child.beforeTitleContentId!
+                                    }).ToList();
 
+    ValidateChildren(contentfulPage, "beforeTitleContent", matchingDbPage, (page) => page.BeforeTitleContent);
   }
 
   protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
   {
-    return _db.Headers;
+    return _db.Pages.IgnoreAutoIncludes();
   }
 }
