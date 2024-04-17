@@ -1,4 +1,4 @@
-function ValidateButtonWithLink(content) {
+export function ValidateButtonWithLink(content) {
   const button = validateBaseButton(content);
 
   button.should("have.attr", "href").and("include", content.fields.href);
@@ -16,7 +16,7 @@ function validateBaseButton(content) {
   return button;
 }
 
-function ValidateButtonWithEntryReference(content) {
+export function ValidateButtonWithEntryReference(content) {
   const button = validateBaseButton(content);
 
   button.should("have.attr", "href").then((href) => {
@@ -37,8 +37,3 @@ function getClassAssertion(content) {
     ? "have.class"
     : "not.have.class";
 }
-
-export default {
-  ValidateButtonWithLink,
-  ValidateButtonWithEntryReference,
-};
