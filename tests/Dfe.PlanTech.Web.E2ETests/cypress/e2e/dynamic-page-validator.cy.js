@@ -22,7 +22,7 @@ describe("Pages should have content", () => {
       return;
     }
 
-    cy.loginWithEnv(`${selfAssessmentSlug}`);
+    cy.loginWithEnv(selfAssessmentSlug);
     const slug = selfAssessmentSlug.replace("/", "");
     const selfAssessmentPage = FindPageForSlug({
       slug,
@@ -44,7 +44,7 @@ describe("Pages should have content", () => {
     .forEach((page) => {
       it(
         "Should have correct content on non-authorised pages. Testing " +
-          page.fields.internalName,
+        page.fields.internalName,
         () => {
           const slug = `/${page.fields.slug.replace("/", "")}`;
           cy.visit(slug);

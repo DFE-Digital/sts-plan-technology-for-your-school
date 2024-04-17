@@ -1,7 +1,1 @@
-const SelfAssessmentSlug = "/self-assessment";
-
-const slugs = {
-  selfAssessmentSlug: SelfAssessmentSlug,
-};
-
-export default slugs;
+export const selfAssessmentSlug = "/self-assessment";
