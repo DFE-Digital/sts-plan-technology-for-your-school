@@ -35,12 +35,12 @@ public static class RichTextComparator
 
   private static void ValidateChildren(RichTextContentDbEntity dbEntity, JsonArray? children)
   {
-    if (children.Count != dbEntity.Content.Count)
+    if (children?.Count != dbEntity.Content.Count)
     {
-      Console.WriteLine($"Children count mismatch: Contentful '{children.Count}' - Database '{dbEntity.Content.Count}'");
+      Console.WriteLine($"Children count mismatch: Contentful '{children?.Count}' vs Database '{dbEntity.Content.Count}'");
     }
 
-    for (var x = 0; x < children.Count; x++)
+    for (var x = 0; x < children?.Count; x++)
     {
       CompareRichTextContent(dbEntity.Content[x], children[x]!);
     }

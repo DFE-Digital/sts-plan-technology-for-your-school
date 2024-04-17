@@ -5,7 +5,7 @@ namespace Dfe.PlanTech.CmsDbDataValidator;
 
 public static class ContentfulHelpers
 {
-  public static string GetEntryId(this JsonNode jsonNode) => jsonNode["id"]?.GetValue<string>() ?? throw new JsonException($"Couldn't find id for {jsonNode}");
+  public static string GetEntryId(this JsonNode jsonNode) => (jsonNode["sys"]?["id"] ?? jsonNode["id"])?.GetValue<string>() ?? throw new JsonException($"Couldn't find id for {jsonNode}");
 
   public static JsonNode WithoutLocalisation(this JsonNode jsonNode)
   {

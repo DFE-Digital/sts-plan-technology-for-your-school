@@ -59,7 +59,7 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
       return null;
     }
 
-    var dbEntityValue = databaseProperty.GetValue(contentfulEntity)?.ToString();
+    var dbEntityValue = databaseProperty.GetValue(dbEntity)?.ToString();
 
     return CompareStrings(dbEntityPropertyName, contentfulEntity[contentfulPropertyName]?.GetEntryId(), dbEntityValue);
   }
