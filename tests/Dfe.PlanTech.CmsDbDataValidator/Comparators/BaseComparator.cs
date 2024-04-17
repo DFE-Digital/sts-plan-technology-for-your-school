@@ -48,6 +48,22 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
 
   protected abstract IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery();
 
+  protected virtual string? ValidateReferences<TDbEntity>(ContentComponentDbEntity dbEntity, string dbEntityPropertyName, JsonNode contentfulEntity, string contentfulPropertyName)
+    where TDbEntity : ContentComponentDbEntity
+  {
+    var databaseProperty = typeof(TDbEntity).GetProperties().FirstOrDefault(prop => prop.Name == dbEntityPropertyName);
+
+    if (databaseProperty == null)
+    {
+      Console.WriteLine($"{typeof(TDbEntity)} does not have property {dbEntityPropertyName}");
+      return null;
+    }
+
+    var dbEntityValue = databaseProperty.GetValue(contentfulEntity)?.ToString();
+
+    return CompareStrings(dbEntityPropertyName, contentfulEntity[contentfulPropertyName]?.GetEntryId(), dbEntityValue);
+  }
+
   protected virtual bool GetContentfulEntities()
   {
     _contentfulEntities = _contentfulContent.GetEntriesForContentType(LowercaseFirstLetter(_entityType)).ToList();
@@ -130,7 +146,7 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
     }
   }
 
-  protected TDbEntity? FindMatchingDbEntity<TDbEntity>(IEnumerable<TDbEntity> dbEntities, JsonNode contentfulEntity)
+  protected TDbEntity? ValidateChildEntityExistsInDb<TDbEntity>(IEnumerable<TDbEntity> dbEntities, JsonNode contentfulEntity)
     where TDbEntity : ContentComponentDbEntity
   {
     var contentfulEntityId = contentfulEntity.GetEntryId();
@@ -144,7 +160,55 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
     return databaseEntity;
   }
 
-  protected static string? GetId(JsonNode? entry) => entry == null ? null : entry!["sys"]?["id"]?.GetValue<string>() ?? throw new JsonException($"Couldn't find Id in {entry}");
+  /// <summary>
+  /// Validates array references for a given contentful entry and db entry.
+  /// </summary>
+  /// <typeparam name="TDbEntityReferences">The type of the db entity references.</typeparam>
+  /// <param name="contentfulEntity">The contentful entry to validate.</param>
+  /// <param name="arrayKey">The key of the array to validate.</param>
+  /// <param name="dbEntity">The db entry to use for validation.</param>
+  /// <param name="selectReferences">A function to select references from the db entry.</param>
+  protected void ValidateChildren<TDbEntity, TDbEntityReference>(JsonNode contentfulEntity, string arrayKey, TDbEntity dbEntity, Func<TDbEntity, List<TDbEntityReference>> selectReferences)
+      where TDbEntity : ContentComponentDbEntity
+      where TDbEntityReference : ContentComponentDbEntity
+  {
+    var dbChildren = selectReferences(dbEntity);
+
+    // TODO: refactor so that it works with any array and not just sections
+    var contentfulChildrenIds = contentfulEntity[arrayKey]?.AsArray()
+                                                        .Where(child => child != null)
+                                                        .Select(child => child?.GetEntryId())
+                                                        .ToArray();
+
+    if (contentfulChildrenIds == null || contentfulChildrenIds.Length == 0)
+    {
+      //If we have no Contentful children, but we have children in DB, then something's a bit screwy somewhere
+      if (dbChildren != null && dbChildren.Count > 0)
+      {
+        Console.WriteLine($"Contentful entity {contentfulEntity.GetEntryId()} has no children but DB entity has {dbChildren.Count} children");
+      }
+
+      return;
+    }
+
+    foreach (var contentfulChildId in contentfulChildrenIds)
+    {
+      var matchingDbEntity = dbChildren.FirstOrDefault(child => child.Id == contentfulChildId);
+      if (matchingDbEntity == null)
+      {
+        Console.WriteLine($"Could not find matching entity for child ID {contentfulChildId} in DB for {contentfulEntity.GetEntryId()}");
+      }
+    }
+
+    foreach (var dbChild in dbChildren)
+    {
+      var matchingContentfulReference = contentfulChildrenIds.FirstOrDefault(id => id == dbChild.Id);
+      if (matchingContentfulReference == null)
+      {
+        Console.WriteLine($"Entity ID {dbChild.Id} is a child for {dbChild.Id} but was not found in the Contentful data as a child");
+      }
+    }
+  }
 
   private static string LowercaseFirstLetter(string input)
   {

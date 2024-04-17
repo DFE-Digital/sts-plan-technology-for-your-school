@@ -24,7 +24,7 @@ public class ButtonsComparator(CmsDbContext db, ContentfulContent contentfulCont
 
   private void ValidateButton(ButtonDbEntity[] dbButtons, JsonNode contentfulButton)
   {
-    var databaseButton = FindMatchingDbEntity(dbButtons, contentfulButton);
+    var databaseButton = ValidateChildEntityExistsInDb(dbButtons, contentfulButton);
     if (databaseButton == null)
     {
       return;

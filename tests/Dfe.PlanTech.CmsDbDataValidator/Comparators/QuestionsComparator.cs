@@ -24,7 +24,7 @@ public class QuestionsComparatorclass(CmsDbContext db, ContentfulContent content
 
   private void ValidateQuestion(QuestionDbEntity[] databaseQuestions, JsonNode contentfulQuestion)
   {
-    var databaseQuestion = FindMatchingDbEntity(databaseQuestions, contentfulQuestion);
+    var databaseQuestion = ValidateChildEntityExistsInDb(databaseQuestions, contentfulQuestion);
     if (databaseQuestion == null)
     {
       return;
@@ -32,44 +32,8 @@ public class QuestionsComparatorclass(CmsDbContext db, ContentfulContent content
 
     ValidateProperties(contentfulQuestion, databaseQuestion!);
 
-    var contentfulQuestionAnswerIds = contentfulQuestion["answers"]?.AsArray().Select(GetId).Where(id => id != null).ToArray();
-
-    if (contentfulQuestionAnswerIds == null || contentfulQuestionAnswerIds.Length == 0)
-    {
-      Console.WriteLine("No answers found for question");
-      return;
-    }
-
-    CheckForMissingAnswers(contentfulQuestion, databaseQuestion, contentfulQuestionAnswerIds);
-
-    CheckForExtraAnswers(contentfulQuestion, databaseQuestion, contentfulQuestionAnswerIds);
+    ValidateChildren(contentfulQuestion, "answers", databaseQuestion, dbQuestion => dbQuestion.Answers);
   }
-
-  private static void CheckForExtraAnswers(JsonNode contentfulQuestion, QuestionDbEntity databaseQuestion, string?[] contentfulQuestionAnswerIds)
-  {
-    var extraDbAnswers = string.Join("\n", databaseQuestion.Answers.Where(answer => ValidateDbAnswerExistsInContentful(answer, contentfulQuestionAnswerIds)));
-
-    if (!string.IsNullOrEmpty(extraDbAnswers))
-    {
-      Console.WriteLine($"DB has extra answers for question {contentfulQuestion.GetEntryId()}: \n {extraDbAnswers}");
-    }
-  }
-
-  private static void CheckForMissingAnswers(JsonNode contentfulQuestion, QuestionDbEntity databaseQuestion, string?[] contentfulQuestionAnswerIds)
-  {
-    var missingDbAnswers = string.Join("\n", contentfulQuestionAnswerIds.Where(answerId => ValidateContentfulAnswerExistsInDb(databaseQuestion, answerId!)));
-
-    if (!string.IsNullOrEmpty(missingDbAnswers))
-    {
-      Console.WriteLine($"Missing answers for question {contentfulQuestion.GetEntryId()}: \n {missingDbAnswers}");
-    }
-  }
-
-  private static bool ValidateDbAnswerExistsInContentful(AnswerDbEntity answer, string?[] contentfulQuestionAnswerIds)
-    => !contentfulQuestionAnswerIds.Any(answerId => answer.Id == answerId);
-
-  private static bool ValidateContentfulAnswerExistsInDb(QuestionDbEntity? databaseQuestion, string answerId)
-    => !databaseQuestion!.Answers.Exists(answer => answer.Id == answerId);
 
   protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
   {

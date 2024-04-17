@@ -42,7 +42,7 @@ public class ComponentDropdownsComparator(CmsDbContext db, ContentfulContent con
 
   private void ValidateComponentDropDown(ComponentDropDownDbEntity[] componentDropDowns, JsonNode contentfulDropdown)
   {
-    var databaseDropdown = FindMatchingDbEntity(componentDropDowns, contentfulDropdown);
+    var databaseDropdown = ValidateChildEntityExistsInDb(componentDropDowns, contentfulDropdown);
     if (databaseDropdown == null)
     {
       return;
