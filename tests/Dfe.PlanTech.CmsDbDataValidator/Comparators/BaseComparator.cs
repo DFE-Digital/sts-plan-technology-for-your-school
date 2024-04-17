@@ -203,18 +203,23 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
 
     var contentfulEntityId = contentfulEntity.GetEntryId();
 
-    var missingDbEntities = contentfulChildrenIds.Where(childId => !dbChildren.Any(dbChild => dbChild.Id == childId))
-                                                  .Select(childId => $"Could not find matching entity for child ID {childId} in DB.");
+    var missingDbEntities = contentfulChildrenIds.Where(childId => !dbChildren.Any(dbChild => dbChild.Id == childId)).ToArray();
 
     var extraDbEntities = dbChildren.Where(dbChild => !contentfulChildrenIds.Any(childId => dbChild.Id == childId))
-                                        .Select(dbChild => $"Child ID {dbChild.Id} exists in DB but not in Contentful");
+                                    .Select(dbChild => dbChild.Id)
+                                    .ToArray();
 
 
-    var childErrors = string.Join("\n", missingDbEntities.Concat(extraDbEntities));
+    var missingDbEntitiesErrorMessage = missingDbEntities.Length != 0 ? $"  IDs missing in DB but exist in Contentful: \n     {string.Join("\n    ", missingDbEntities)}" : null;
+    var extraDbEntitiesErrorMessage = extraDbEntities.Length != 0 ? $"  IDs in DB but not in Contentful: \n      {string.Join("\n    ", extraDbEntities)}" : null;
+
+    IEnumerable<string?> nonNullErrors = [extraDbEntitiesErrorMessage, extraDbEntitiesErrorMessage];
+
+    var childErrors = string.Join("\n", nonNullErrors.Where(error => error != null));
 
     if (!string.IsNullOrEmpty(childErrors))
     {
-      Console.WriteLine($"Child reference errors in {dbEntityType} {contentfulEntityId}: \n{childErrors}");
+      Console.WriteLine($"Child reference errors in {dbEntityType} {contentfulEntityId} for property {arrayKey}: \n{childErrors}");
     }
   }
 
