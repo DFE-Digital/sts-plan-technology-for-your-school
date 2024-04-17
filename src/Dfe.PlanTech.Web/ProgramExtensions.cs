@@ -133,7 +133,7 @@ public static class ProgramExtensions
 
         services.AddEFSecondLevelCache(options =>
         {
-            options.UseMemoryCacheProvider().ConfigureLogging(true).UseCacheKeyPrefix("EF_");
+            options.UseMemoryCacheProvider().ConfigureLogging(false).UseCacheKeyPrefix("EF_");
             options.CacheAllQueries(CacheExpirationMode.Absolute, TimeSpan.FromMinutes(30));
             options.UseDbCallsIfCachingProviderIsDown(TimeSpan.FromMinutes(1));
         });
