@@ -31,7 +31,7 @@ public class ButtonWithLinksComparator(CmsDbContext db, ContentfulContent conten
       return;
     }
 
-    CompareStrings("ButtonId", contentfulButton["button"]?.GetEntryId(), databaseButton.ButtonId);
+    ValidateChild<ButtonWithLinkDbEntity>(databaseButton, "ButtonId", contentfulButton, "button");
   }
 
   protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()

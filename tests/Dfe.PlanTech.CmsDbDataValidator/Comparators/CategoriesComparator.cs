@@ -35,7 +35,7 @@ public class CategoriesComparator(CmsDbContext db, ContentfulContent contentfulC
 
     ValidateProperties(contentfulCategory, databaseCategory);
 
-    var headerValidationResult = ValidateReferences<CategoryDbEntity>(databaseCategory, "HeaderId", contentfulCategory, "header");
+    var headerValidationResult = ValidateChild<CategoryDbEntity>(databaseCategory, "HeaderId", contentfulCategory, "header");
     if (headerValidationResult != null)
     {
       Console.WriteLine(headerValidationResult);
