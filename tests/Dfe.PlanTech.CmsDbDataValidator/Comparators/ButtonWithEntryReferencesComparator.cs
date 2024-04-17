@@ -24,14 +24,14 @@ public class ButtonWithEntryReferencesComparator(CmsDbContext db, ContentfulCont
 
   private void ValidateButton(ButtonWithEntryReferenceDbEntity[] buttonWithEntryReferences, JsonNode contentfulButton)
   {
-    var databaseButton = FindMatchingDbEntity(buttonWithEntryReferences, contentfulButton);
+    var databaseButton = ValidateChildEntityExistsInDb(buttonWithEntryReferences, contentfulButton);
     if (databaseButton == null)
     {
       return;
     }
 
-    CompareStrings("ButtonId", GetId(contentfulButton["button"])!, databaseButton.ButtonId);
-    CompareStrings("LinkToEntryId", GetId(contentfulButton["linkToEntry"])!, databaseButton.LinkToEntryId);
+    CompareStrings("ButtonId", contentfulButton["button"]?.GetEntryId(), databaseButton.ButtonId);
+    CompareStrings("LinkToEntryId", contentfulButton["linkToEntry"]?.GetEntryId(), databaseButton.LinkToEntryId);
   }
 
   protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
