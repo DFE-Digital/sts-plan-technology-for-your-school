@@ -1,5 +1,5 @@
 import { contentful } from "./contentful";
-import DataMapper from "../../../../contentful/export-processor/data-mapper";
+import { DataMapper } from "export-processor";
 
 const getContentfulData = () => {
   return new DataMapper(contentful);
