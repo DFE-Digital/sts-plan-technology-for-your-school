@@ -13,7 +13,7 @@ public static class DatabaseHelpers
     var sqlServer = ConfigurationSetup.Configuration.GetConnectionString("Database");
 
     ServiceCollection sc = new();
-    sc.AddSingleton<ContentfulOptions>(new ContentfulOptions(false));
+    sc.AddSingleton(new ContentfulOptions(false));
     var serviceProvider = sc.BuildServiceProvider();
     var databaseOptionsBuilder = new DbContextOptionsBuilder<CmsDbContext>()
                               .UseSqlServer(sqlServer)
