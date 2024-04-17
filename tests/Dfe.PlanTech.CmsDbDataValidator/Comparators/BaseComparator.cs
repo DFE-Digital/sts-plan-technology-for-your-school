@@ -48,7 +48,7 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
 
   protected abstract IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery();
 
-  protected virtual string? ValidateReferences<TDbEntity>(ContentComponentDbEntity dbEntity, string dbEntityPropertyName, JsonNode contentfulEntity, string contentfulPropertyName)
+  protected virtual string? ValidateChild<TDbEntity>(ContentComponentDbEntity dbEntity, string dbEntityPropertyName, JsonNode contentfulEntity, string contentfulPropertyName)
     where TDbEntity : ContentComponentDbEntity
   {
     var databaseProperty = typeof(TDbEntity).GetProperties().FirstOrDefault(prop => prop.Name == dbEntityPropertyName);
@@ -209,6 +209,37 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
       }
     }
   }
+
+  public string? ValidateEnumValue<TEnum, TDbEntity>(JsonNode contentfulEntry, string key, TDbEntity dbEntry, TEnum dbValue)
+    where TEnum : struct, Enum
+    where TDbEntity : ContentComponentDbEntity
+  {
+    var enumValue = GetEnumValue<TEnum>(contentfulEntry, key);
+    if (enumValue == null)
+    {
+      return $"Enum {key} in {contentfulEntry.GetEntryId()} was not found";
+    }
+
+    if (!enumValue.Equals(dbValue))
+    {
+      return $"Error: Enum values do not match. Expected {enumValue} but DB has {dbValue}";
+    }
+
+    return null;
+  }
+
+  private static TEnum? GetEnumValue<TEnum>(JsonNode contentfulEntry, string key)
+    where TEnum : struct, Enum
+  {
+    var contentfulValue = contentfulEntry[key]?.GetValue<string>();
+    if (!Enum.TryParse(contentfulValue, out TEnum parsedEnum))
+    {
+      return null;
+    }
+
+    return parsedEnum;
+  }
+
 
   private static string LowercaseFirstLetter(string input)
   {
