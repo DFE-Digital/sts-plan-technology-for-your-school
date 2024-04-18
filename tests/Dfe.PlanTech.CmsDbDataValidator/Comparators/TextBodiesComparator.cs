@@ -40,7 +40,11 @@ public class TextBodyComparator(CmsDbContext db, ContentfulContent contentfulCon
       return;
     }
 
-    RichTextComparator.CompareRichTextContent(matchingDbTextBody.RichText, contentfulTextBody);
+    var errors = RichTextComparator.CompareRichTextContent(matchingDbTextBody.RichText, contentfulTextBody).ToArray();
+
+    if (errors.Length == 0) return;
+
+    Console.WriteLine($"TextBody {contentfulTextBodyId} has validation errors: {string.Join("\n ", errors)}");
   }
 
   protected override IQueryable<TextBodyDbEntity> GetDbEntitiesQuery()
