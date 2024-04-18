@@ -57,7 +57,11 @@ public class ComponentDropdownsComparator(CmsDbContext db, ContentfulContent con
       return;
     }
 
-    RichTextComparator.CompareRichTextContent(databaseDropdown.Content!, content!);
+    var errors = RichTextComparator.CompareRichTextContent(databaseDropdown.Content!, content!).ToArray();
+
+    if (errors.Length == 0) return;
+
+    Console.WriteLine($"TextBody {contentfulDropdown} has validation errors: {string.Join("\n ", errors)}");
   }
 
   protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
