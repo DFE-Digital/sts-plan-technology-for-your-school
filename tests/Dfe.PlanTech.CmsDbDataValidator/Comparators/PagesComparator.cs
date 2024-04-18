@@ -6,17 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.CmsDbDataValidator.Comparators;
 
-public class PageComparator(CmsDbContext db, ContentfulContent contentfulContent) : BaseComparator(db, contentfulContent, ["InternalName", "Slug", "DisplayHomeButton", "DisplayBackButton", "DisplayTopicTitle", "DisplayOrganisationName", "RequiresAuthorisation", "TitleId"], "Page")
+public class PageComparator(CmsDbContext db, ContentfulContent contentfulContent) : BaseComparator(db, contentfulContent, ["InternalName", "Slug", "DisplayHomeButton", "DisplayBackButton", "DisplayTopicTitle", "DisplayOrganisationName", "RequiresAuthorisation"], "Page")
 {
-  /*
-      Assert.Equal(contentfulEntry["title"]?["sys"]?["id"]?.GetValue<string>(), dbEntry.TitleId);
-
-      _db.Entry(dbEntry).Collection(page => page.Content).Load();
-      comparator.ValidateArrayReferences(contentfulEntry, "content", dbEntry, (entry) => entry.Content);
-
-      _db.Entry(dbEntry).Collection(page => page.BeforeTitleContent).Load();
-      comparator.ValidateArrayReferences(contentfulEntry, "beforeTitleContent", dbEntry, (entry) => entry.BeforeTitleContent);
-*/
   public override Task ValidateContent()
   {
     ValidatePages(_dbEntities.OfType<PageDbEntity>().ToArray());
