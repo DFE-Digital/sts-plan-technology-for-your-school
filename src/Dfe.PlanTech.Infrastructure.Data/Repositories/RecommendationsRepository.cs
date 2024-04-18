@@ -46,7 +46,9 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
                                                         Title = chunk.Title,
                                                         Answers = chunk.Answers.Select(answer => new AnswerDbEntity() { Id = answer.Id }).ToList(),
                                                         Id = chunk.Id,
+                                                        Order = chunk.Order,
                                                     })
+                                                    .OrderBy(chunk => chunk.Order)
                                                     .ToListAsync(cancellationToken);
 
         var introContent = await _db.RecommendationIntroContents.Where(introContent => introContent.RecommendationIntro.SubtopicRecommendations.Any(rec => rec.Id == recommendation.Id))
