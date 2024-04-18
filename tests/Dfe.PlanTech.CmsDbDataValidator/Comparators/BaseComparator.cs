@@ -213,7 +213,7 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
     var missingDbEntitiesErrorMessage = missingDbEntities.Length != 0 ? $"  IDs missing in DB but exist in Contentful: \n     {string.Join("\n    ", missingDbEntities)}" : null;
     var extraDbEntitiesErrorMessage = extraDbEntities.Length != 0 ? $"  IDs in DB but not in Contentful: \n      {string.Join("\n    ", extraDbEntities)}" : null;
 
-    IEnumerable<string?> nonNullErrors = [extraDbEntitiesErrorMessage, extraDbEntitiesErrorMessage];
+    IEnumerable<string?> nonNullErrors = [missingDbEntitiesErrorMessage, extraDbEntitiesErrorMessage];
 
     var childErrors = string.Join("\n", nonNullErrors.Where(error => error != null));
 
