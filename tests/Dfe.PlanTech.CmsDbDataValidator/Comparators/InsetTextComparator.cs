@@ -31,12 +31,11 @@ public class InsetTextComparator(CmsDbContext db, ContentfulContent contentfulCo
       return;
     }
 
-
     ValidateProperties(contentfulInsetText, matchingDbInsetText);
   }
 
   protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
   {
-    return _db.Headers;
+    return _db.InsetTexts;
   }
 }
