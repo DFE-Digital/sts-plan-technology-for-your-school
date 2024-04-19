@@ -30,21 +30,36 @@ public class RecommendationSectionMapper(
     {
         if (values.TryGetValue(currentKey, out object? chunks) && chunks is object[] inners)
         {
-            for (var index = 0; index < inners.Length; index++)
+            var orderedChunkIds = inners.Select(inner => CreateRecommendationSectionChunkEntity(inner, recommendationChunkId))
+                                        .Where(inner => inner != null)
+                                        .ToArray();
+
+
+            var existingChunks = _db.RecommendationChunks.Where(chunk => orderedChunkIds.Any(chunkId => chunkId == chunk.Id)).ToList();
+
+            for (var x = 0; x < orderedChunkIds.Length; x++)
             {
-                CreateRecommendationSectionChunkEntity(inners[index], recommendationChunkId);
+                var chunkId = orderedChunkIds[x];
+                var matchingChunk = existingChunks.FirstOrDefault(chunk => chunk.Id == chunkId);
+                if (matchingChunk == null)
+                {
+                    Logger.LogWarning("Could not find matching chunk for {Id}", chunkId);
+                    continue;
+                }
+
+                matchingChunk.Order = x;
             }
 
             values.Remove(currentKey);
         }
     }
 
-    private void CreateRecommendationSectionChunkEntity(object inner, string recommendationSectionId)
+    private string? CreateRecommendationSectionChunkEntity(object inner, string recommendationSectionId)
     {
         if (inner is not string chunkId)
         {
             Logger.LogWarning("Expected string but received {InnerType}", inner.GetType());
-            return;
+            return null;
         }
 
         var recommendationSectionChunk = new RecommendationSectionChunkDbEntity()
@@ -54,6 +69,8 @@ public class RecommendationSectionMapper(
         };
 
         _db.RecommendationSectionChunks.Attach(recommendationSectionChunk);
+
+        return chunkId;
     }
 
     private void UpdateAnswerIds(Dictionary<string, object?> values, string recommendationChunkId, string currentKey)
