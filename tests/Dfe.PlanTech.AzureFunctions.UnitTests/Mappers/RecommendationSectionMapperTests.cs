@@ -11,17 +11,15 @@ namespace Dfe.PlanTech.AzureFunctions.UnitTests.Mappers;
 
 public class RecommendationSectionMapperTests : BaseMapperTests
 {
-
-    private readonly DbSet<RecommendationChunkDbEntity> _recommendationChunksDbSet;
     private readonly DbSet<RecommendationSectionAnswerDbEntity> _sectionAnswerDbSet = Substitute.For<DbSet<RecommendationSectionAnswerDbEntity>>();
     private readonly DbSet<RecommendationSectionChunkDbEntity> _sectionChunkDbSet = Substitute.For<DbSet<RecommendationSectionChunkDbEntity>>();
     private static readonly CmsDbContext _db = Substitute.For<CmsDbContext>();
-    private static readonly ILogger<RecommendationSectionUpdater> _logger = Substitute.For<ILogger<RecommendationSectionUpdater>>();
-    private static RecommendationSectionUpdater CreateMockRecommendationSectionUpdater() => new(_logger, _db);
-
+    private static readonly ILogger<RecommendationSectionMapper> _logger = Substitute.For<ILogger<RecommendationSectionMapper>>();
+    private static RecommendationSectionUpdater CreateMockRecommendationSectionUpdater() => new(Substitute.For<ILogger<RecommendationSectionUpdater>>(), _db);
     private readonly List<RecommendationChunkDbEntity> _chunks = [];
-
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new();
     private readonly string[] _chunkIds = ["chunk1", "chunk2", "chunk3"];
+    private readonly RecommendationSectionMapper _mapper;
 
     public RecommendationSectionMapperTests()
     {
@@ -47,6 +45,15 @@ public class RecommendationSectionMapperTests : BaseMapperTests
         ((IQueryable<RecommendationChunkDbEntity>)mockPageDataSet).GetEnumerator().Returns(queryable.GetEnumerator());
 
         _db.RecommendationChunks = mockPageDataSet;
+
+
+        _db.RecommendationSectionChunks = _sectionChunkDbSet;
+        _db.RecommendationSectionAnswers = _sectionAnswerDbSet;
+
+        _db.RecommendationSectionChunks = _sectionChunkDbSet;
+        _db.RecommendationSectionAnswers = _sectionAnswerDbSet;
+
+        _mapper = new RecommendationSectionMapper(MapperHelpers.CreateMockEntityRetriever(), CreateMockRecommendationSectionUpdater(), _db, _logger, _jsonSerializerOptions);
     }
 
     [Fact]
@@ -59,15 +66,7 @@ public class RecommendationSectionMapperTests : BaseMapperTests
             ["answers"] = new string[] { "answer1", "answer2", "answer3" }
         };
 
-        var loggerSubstitute = Substitute.For<ILogger<RecommendationSectionMapper>>();
-        var jsonSerializerOptions = new JsonSerializerOptions();
-
-        _db.RecommendationSectionChunks = _sectionChunkDbSet;
-        _db.RecommendationSectionAnswers = _sectionAnswerDbSet;
-
-        var mapper = new RecommendationSectionMapper(MapperHelpers.CreateMockEntityRetriever(), CreateMockRecommendationSectionUpdater(), _db, loggerSubstitute, jsonSerializerOptions);
-
-        var recommendationChunk = mapper.PerformAdditionalMapping(values);
+        var recommendationChunk = _mapper.PerformAdditionalMapping(values);
 
         Assert.NotNull(recommendationChunk);
 
@@ -80,5 +79,40 @@ public class RecommendationSectionMapperTests : BaseMapperTests
             Assert.NotNull(matchingChunk);
             Assert.Equal(x, matchingChunk?.Order);
         }
+    }
+
+    [Fact]
+    public void Should_LogWarning_On_Missing_Chunks()
+    {
+        var missingChunkId = "not a real chunk id";
+        string[] chunkIds = [.. _chunkIds, missingChunkId];
+        var values = new Dictionary<string, object?>
+        {
+            ["id"] = "sectionId",
+            ["chunks"] = chunkIds,
+            ["answers"] = new string[] { "answer1", "answer2", "answer3" }
+        };
+
+
+        var recommendationChunk = _mapper.PerformAdditionalMapping(values);
+
+        Assert.NotNull(recommendationChunk);
+
+        var receivedLogWarnings = _logger.ReceivedCalls();
+
+        Assert.Single(receivedLogWarnings);
+
+        var call = receivedLogWarnings.First();
+
+        var arguments = call.GetArguments();
+
+        Assert.NotNull(arguments);
+        var errorMessage = arguments[2]!.ToString();
+
+        Assert.Contains(missingChunkId, errorMessage);
+
+        var logLevel = Enum.Parse<LogLevel>(arguments[0]!.ToString()!);
+
+        Assert.Equal(LogLevel.Warning, logLevel);
     }
 }
