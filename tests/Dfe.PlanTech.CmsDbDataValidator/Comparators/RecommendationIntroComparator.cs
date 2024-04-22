@@ -29,7 +29,7 @@ public class RecommendationIntrosComparator(CmsDbContext db, ContentfulContent c
       return;
     }
 
-    var headerValidationResult = ValidateChild<RecommendationChunkDbEntity>(databaseRecommendationIntro, "HeaderId", contentfulRecommendationIntro, "header");
+    var headerValidationResult = ValidateChild<RecommendationIntroDbEntity>(databaseRecommendationIntro, "HeaderId", contentfulRecommendationIntro, "header");
     ValidateProperties(contentfulRecommendationIntro, databaseRecommendationIntro, headerValidationResult);
     ValidateChildren(contentfulRecommendationIntro, "content", databaseRecommendationIntro, dbRecommendationIntro => dbRecommendationIntro.Content);
   }
