@@ -14,7 +14,9 @@ public class RecommendationIntroDbEntity : ContentComponentDbEntity, IRecommenda
     public string Maturity { get; init; } = null!;
 
 
+    [DontCopyValue]
     public List<ContentComponentDbEntity> Content { get; init; } = [];
 
+    [DontCopyValue]
     public List<SubtopicRecommendationDbEntity> SubtopicRecommendations { get; set; } = [];
 }
