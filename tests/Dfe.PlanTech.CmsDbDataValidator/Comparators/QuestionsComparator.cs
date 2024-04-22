@@ -6,7 +6,7 @@ using Dfe.PlanTech.Infrastructure.Data;
 
 namespace Dfe.PlanTech.CmsDbDataValidator.Tests;
 
-public class QuestionsComparatorclass(CmsDbContext db, ContentfulContent contentfulContent) : BaseComparator(db, contentfulContent, ["Text", "HelpText", "Slug"], "Question")
+public class QuestionsComparator(CmsDbContext db, ContentfulContent contentfulContent) : BaseComparator(db, contentfulContent, ["Text", "HelpText", "Slug"], "Question")
 {
   public override Task ValidateContent()
   {
