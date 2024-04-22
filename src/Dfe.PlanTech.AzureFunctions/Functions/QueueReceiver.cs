@@ -9,22 +9,19 @@ using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using System.Text;
+using System.Text.Json;
+using Dfe.PlanTech.AzureFunctions.Utils;
 
 namespace Dfe.PlanTech.AzureFunctions;
 
-public class QueueReceiver : BaseFunction
+public class QueueReceiver(
+    ContentfulOptions contentfulOptions,
+    ILoggerFactory loggerFactory,
+    CmsDbContext db,
+    JsonToEntityMappers mappers,
+    IMessageRetryHandler messageRetryHandler)
+    : BaseFunction(loggerFactory.CreateLogger<QueueReceiver>())
 {
-    private readonly CmsDbContext _db;
-    private readonly ContentfulOptions _contentfulOptions;
-    private readonly JsonToEntityMappers _mappers;
-
-    public QueueReceiver(ContentfulOptions contentfulOptions, ILoggerFactory loggerFactory, CmsDbContext db, JsonToEntityMappers mappers) : base(loggerFactory.CreateLogger<QueueReceiver>())
-    {
-        _contentfulOptions = contentfulOptions;
-        _db = db;
-        _mappers = mappers;
-    }
-
     /// <summary>
     /// Azure Function App function that processes messages from a Service Bus queue, converts them
     /// to the appropriate <see cref="ContentComponentDbEntity"/> class, and adds/updates the database where appropriate.
@@ -34,7 +31,9 @@ public class QueueReceiver : BaseFunction
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [Function("QueueReceiver")]
-    public async Task QueueReceiverDbWriter([ServiceBusTrigger("contentful", IsBatched = true)] ServiceBusReceivedMessage[] messages, ServiceBusMessageActions messageActions, CancellationToken cancellationToken)
+    public async Task QueueReceiverDbWriter(
+        [ServiceBusTrigger("contentful", IsBatched = true)] ServiceBusReceivedMessage[] messages,
+        ServiceBusMessageActions messageActions, CancellationToken cancellationToken)
     {
         Logger.LogInformation("Queue Receiver -> Db Writer started. Processing {MsgCount} messages", messages.Length);
 
@@ -52,7 +51,8 @@ public class QueueReceiver : BaseFunction
     /// <param name="messageActions">Service bus message actions for completing or dead-lettering</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task ProcessMessage(ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions, CancellationToken cancellationToken)
+    private async Task ProcessMessage(ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions,
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -78,10 +78,27 @@ public class QueueReceiver : BaseFunction
 
             await messageActions.CompleteMessageAsync(message, cancellationToken);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is JsonException or CmsEventException)
         {
             Logger.LogError(ex, "Error processing message ID {Message}", message.MessageId);
             await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            var retryRequired = await messageRetryHandler.RetryRequired(message, cancellationToken);
+
+            if (retryRequired)
+            {
+                Logger.LogWarning("Error processing message ID {Message} will retry again", message.MessageId);
+                await messageActions.CompleteMessageAsync(message, cancellationToken);
+                return;
+            }
+            else
+            {
+                Logger.LogError(ex, "Error processing message ID {Message}, The maximum delivery count has been reached", message.MessageId);
+                await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace, cancellationToken);
+                return;
+            }
         }
     }
 
@@ -89,7 +106,7 @@ public class QueueReceiver : BaseFunction
     /// Checks if the message with the given CmsEvent should be ignored based on certain conditions.
     /// </summary>
     /// <remarks>
-    /// If we recieve a create event, we return true.
+    /// If we receive a create event, we return true.
     /// If we are NOT using preview mode (i.e. we are ignoring drafts), and the event is just a save or autosave, then return true.
     /// 
     /// Else, we return false.
@@ -104,9 +121,10 @@ public class QueueReceiver : BaseFunction
             return true;
         }
 
-        if ((cmsEvent == CmsEvent.SAVE || cmsEvent == CmsEvent.AUTO_SAVE) && !_contentfulOptions.UsePreview)
+        if ((cmsEvent == CmsEvent.SAVE || cmsEvent == CmsEvent.AUTO_SAVE) && !contentfulOptions.UsePreview)
         {
-            Logger.LogInformation("Receieved {Event} but UsePreview is {UsePreview} - dropping message", cmsEvent, _contentfulOptions.UsePreview);
+            Logger.LogInformation("Received {Event} but UsePreview is {UsePreview} - dropping message", cmsEvent,
+                contentfulOptions.UsePreview);
             return true;
         }
 
@@ -121,9 +139,11 @@ public class QueueReceiver : BaseFunction
     /// <exception cref="CmsEventException">Exception thrown if we are unable to parse the event to a valid <see cref="CmsEvent"/></exception>
     private CmsEvent GetCmsEvent(string contentfulEvent)
     {
-        if (!Enum.TryParse(contentfulEvent.AsSpan()[(contentfulEvent.LastIndexOf('.') + 1)..], true, out CmsEvent cmsEvent))
+        if (!Enum.TryParse(contentfulEvent.AsSpan()[(contentfulEvent.LastIndexOf('.') + 1)..], true,
+                out CmsEvent cmsEvent))
         {
-            throw new CmsEventException(string.Format("Cannot parse header \"{0}\" into a valid CMS event", contentfulEvent));
+            throw new CmsEventException(string.Format("Cannot parse header \"{0}\" into a valid CMS event",
+                contentfulEvent));
         }
 
         Logger.LogInformation("CMS Event: {CmsEvent}", cmsEvent);
@@ -136,14 +156,14 @@ public class QueueReceiver : BaseFunction
     /// </summary>
     /// <param name="message"></param>
     /// <returns></returns>
-
-    private Task<MappedEntity> MapMessageToEntity(ServiceBusReceivedMessage message, CmsEvent cmsEvent, CancellationToken cancellationToken)
+    private Task<MappedEntity> MapMessageToEntity(ServiceBusReceivedMessage message, CmsEvent cmsEvent,
+        CancellationToken cancellationToken)
     {
         string messageBody = Encoding.UTF8.GetString(message.Body);
 
         Logger.LogInformation("Processing = {MessageBody}", messageBody);
 
-        return _mappers.ToEntity(messageBody, cmsEvent, cancellationToken);
+        return mappers.ToEntity(messageBody, cmsEvent, cancellationToken);
     }
 
     /// <summary>
@@ -156,11 +176,11 @@ public class QueueReceiver : BaseFunction
     {
         if (!mappedEntity.AlreadyExistsInDatabase)
         {
-            _db.Add(mappedEntity.IncomingEntity);
+            db.Add(mappedEntity.IncomingEntity);
         }
         else
         {
-            _db.Update(mappedEntity.ExistingEntity!);
+            db.Update(mappedEntity.ExistingEntity!);
         }
     }
 
@@ -171,7 +191,7 @@ public class QueueReceiver : BaseFunction
     /// <returns></returns>
     private async Task DbSaveChanges(CancellationToken cancellationToken)
     {
-        long rowsChangedInDatabase = await _db.SaveChangesAsync(cancellationToken);
+        long rowsChangedInDatabase = await db.SaveChangesAsync(cancellationToken);
 
         if (rowsChangedInDatabase == 0L)
         {

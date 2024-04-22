@@ -4,6 +4,10 @@ export class UserJourney {
   section;
   recommendation;
 
+  get pathWithTextOnly() {
+    return this.mapPathToOnlyQuestionAnswerTexts();
+  }
+
   constructor(path, section) {
     this.path = path;
     this.section = section;

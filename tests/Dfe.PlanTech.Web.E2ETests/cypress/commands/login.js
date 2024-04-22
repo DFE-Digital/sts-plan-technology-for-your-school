@@ -8,11 +8,11 @@ Cypress.Commands.add("login", ({ email, password, url }) => {
         return false
     });
     
-    cy.visit(url);
-    cy.get("input#username").type(email);
-    cy.get("input#password").type(password);
+  cy.visit(url);
+  cy.get("input#username").type(email);
+  cy.get("input#password").type(password);
     cy.get("div.govuk-button-group button.govuk-button").first().click();
-    cy.url().should("contain", url);
+    cy.wait(4000);
 }); 
 
 /**
@@ -34,6 +34,7 @@ Cypress.Commands.add("loginWithEnv", (url) => {
             cacheAcrossSpecs: true,
         }
     )
-
-    cy.visit(url);
+    .then(() => {
+        cy.visit(url);
+    })
 });

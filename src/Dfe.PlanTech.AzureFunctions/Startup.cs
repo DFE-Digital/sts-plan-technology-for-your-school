@@ -11,6 +11,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Dfe.PlanTech.AzureFunctions.Config;
+using Dfe.PlanTech.AzureFunctions.Utils;
 
 namespace Dfe.PlanTech.AzureFunctions
 {
@@ -29,9 +31,9 @@ namespace Dfe.PlanTech.AzureFunctions
                 builder.AddServiceBusClient(configuration["AzureWebJobsServiceBus"]);
 
                 builder.AddClient<ServiceBusSender, ServiceBusClientOptions>((_, _, provider) =>
-                  provider.GetService<ServiceBusClient>()!.CreateSender("contentful")
-              )
-              .WithName("contentful");
+                        provider.GetService<ServiceBusClient>()!.CreateSender("contentful")
+                    )
+                    .WithName("contentful");
 
                 builder.UseCredential(new DefaultAzureCredential());
             });
@@ -42,9 +44,17 @@ namespace Dfe.PlanTech.AzureFunctions
                 Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
             });
 
-            services.AddSingleton(new ContentfulOptions(bool.Parse(configuration["Contentful:UsePreview"] ?? bool.FalseString)));
+            services.AddSingleton(
+                new ContentfulOptions(bool.Parse(configuration["ContentfulUsePreview:"] ?? bool.FalseString)));
+
+            services.AddOptions<MessageRetryHandlingOptions>()
+                .Configure<IConfiguration>((settings, configuration) =>
+                {
+                    configuration.GetSection("MessageRetryHandlingOptions").Bind(settings);
+                });
 
             AddMappers(services);
+            AddMessageRetryHandler(services);
         }
 
         /// <summary>
@@ -71,10 +81,16 @@ namespace Dfe.PlanTech.AzureFunctions
             services.AddTransient<EntityUpdater>();
         }
 
+        private static void AddMessageRetryHandler(IServiceCollection services)
+        {
+            services.AddTransient<IMessageRetryHandler, MessageRetryHandler>();
+        }
+
         /// <summary>
         /// Get all <see cref="JsonToDbMapper"/> mappers using reflection 
         /// </summary>
         /// <returns></returns>
-        private static IEnumerable<Type> GetMappers() => Assembly.GetEntryAssembly()!.GetTypes().Where(type => type.IsAssignableTo(typeof(JsonToDbMapper)) && !type.IsAbstract);
+        private static IEnumerable<Type> GetMappers() => Assembly.GetEntryAssembly()!.GetTypes()
+            .Where(type => type.IsAssignableTo(typeof(JsonToDbMapper)) && !type.IsAbstract);
     }
 }
