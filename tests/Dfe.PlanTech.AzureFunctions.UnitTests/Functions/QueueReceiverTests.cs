@@ -5,14 +5,16 @@ using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using NSubstitute.ReceivedExtensions;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Dfe.PlanTech.AzureFunctions.Utils;
+using NSubstitute.ExceptionExtensions;
 
 namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
@@ -26,6 +28,9 @@ public class QueueReceiverTests
     private readonly ILogger _loggerMock;
     private readonly CmsDbContext _cmsDbContextMock;
     private readonly JsonToEntityMappers _jsonToEntityMappers;
+    private readonly ServiceBusClient _serviceBusClientMock;
+    private readonly IConfiguration _configurationMock;
+    private readonly IMessageRetryHandler _messageRetryHandlerMock;
 
     private object? _addedObject = null;
 
@@ -34,11 +39,13 @@ public class QueueReceiverTests
 
     private readonly List<QuestionDbEntity> _existing = [_otherContentComponent];
 
-
     public QueueReceiverTests()
     {
+        _serviceBusClientMock = Substitute.For<ServiceBusClient>();
+        _configurationMock = Substitute.For<IConfiguration>();
         _loggerFactoryMock = Substitute.For<ILoggerFactory>();
         _loggerMock = Substitute.For<ILogger>();
+        _messageRetryHandlerMock = Substitute.For<IMessageRetryHandler>();
 
         _loggerFactoryMock.CreateLogger<Arg.AnyType>().Returns((callinfo) =>
         {
@@ -97,7 +104,7 @@ public class QueueReceiverTests
 
         _jsonToEntityMappers = Substitute.For<JsonToEntityMappers>(new JsonToDbMapper[] { new QuestionMapper(new EntityRetriever(_cmsDbContextMock), new EntityUpdater(Substitute.For<ILogger<EntityUpdater>>(), _cmsDbContextMock), _cmsDbContextMock, Substitute.For<ILogger<QuestionMapper>>(), jsonOptions) }, jsonOptions);
 
-        _queueReceiver = new QueueReceiver(new ContentfulOptions(true), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers);
+        _queueReceiver = new QueueReceiver(new ContentfulOptions(true), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _messageRetryHandlerMock);
 
         _cmsDbContextMock.Add(Arg.Any<ContentComponentDbEntity>()).Returns(callinfo =>
         {
@@ -172,7 +179,7 @@ public class QueueReceiverTests
     }
 
     [Fact]
-    public async Task QueueRecieverDbWriter_Should_CompleteSuccessfully_After_Archive()
+    public async Task QueueReceiverDbWriter_Should_CompleteSuccessfully_After_Archive()
     {
         _contentComponent.Archived = false;
 
@@ -194,7 +201,7 @@ public class QueueReceiverTests
     }
 
     [Fact]
-    public async Task QueueRecieverDbWriter_Should_CompleteSuccessfully_After_Unarchive()
+    public async Task QueueReceiverDbWriter_Should_CompleteSuccessfully_After_Unarchive()
     {
         _existing.Add(_contentComponent);
         _contentComponent.Archived = true;
@@ -215,7 +222,7 @@ public class QueueReceiverTests
     }
 
     [Fact]
-    public async Task QueueRecieverDbWriter_Should_CompleteSuccessfully_After_Publish()
+    public async Task QueueReceiverDbWriter_Should_CompleteSuccessfully_After_Publish()
     {
         _contentComponent.Published = true;
 
@@ -237,7 +244,7 @@ public class QueueReceiverTests
     }
 
     [Fact]
-    public async Task QueueRecieverDbWriter_Should_DeadLetterQueue_After_New_Unpublish()
+    public async Task QueueReceiverDbWriter_Should_DeadLetterQueue_After_New_Unpublish()
     {
         _contentComponent.Published = false;
 
@@ -255,7 +262,7 @@ public class QueueReceiverTests
     }
 
     [Fact]
-    public async Task QueueRecieverDbWriter_Should_CompleteSuccessfully_After_Existing_Unpublish()
+    public async Task QueueReceiverDbWriter_Should_CompleteSuccessfully_After_Existing_Unpublish()
     {
         _existing.Add(_contentComponent);
 
@@ -277,7 +284,7 @@ public class QueueReceiverTests
     }
 
     [Fact]
-    public async Task QueueRecieverDbWriter_Should_CompleteSuccessfully_After_Delete()
+    public async Task QueueReceiverDbWriter_Should_CompleteSuccessfully_After_Delete()
     {
         _contentComponent.Deleted = false;
         _existing.Add(_contentComponent);
@@ -299,9 +306,9 @@ public class QueueReceiverTests
     }
 
     [Fact]
-    public async Task QueueRecieverDbWriter_Should_ExitEarly_When_Event_Is_Save_And_UsePreview_Is_False()
+    public async Task QueueReceiverDbWriter_Should_ExitEarly_When_Event_Is_Save_And_UsePreview_Is_False()
     {
-        var queueReceiver = new QueueReceiver(new ContentfulOptions(false), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers);
+        var queueReceiver = new QueueReceiver(new ContentfulOptions(false), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _messageRetryHandlerMock);
 
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
@@ -321,9 +328,9 @@ public class QueueReceiverTests
 
 
     [Fact]
-    public async Task QueueRecieverDbWriter_Should_ExitEarly_When_Event_Is_AutoSave_And_UsePreview_Is_False()
+    public async Task QueueReceiverDbWriter_Should_ExitEarly_When_Event_Is_AutoSave_And_UsePreview_Is_False()
     {
-        var queueReceiver = new QueueReceiver(new ContentfulOptions(false), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers);
+        var queueReceiver = new QueueReceiver(new ContentfulOptions(false), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _messageRetryHandlerMock);
 
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
@@ -343,7 +350,7 @@ public class QueueReceiverTests
     }
 
     [Fact]
-    public async Task QueueRecieverDbWriter_Should_DeadLetterQueue_If_ActionIsInvalid()
+    public async Task QueueReceiverDbWriter_Should_DeadLetterQueue_If_ActionIsInvalid()
     {
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
@@ -359,7 +366,7 @@ public class QueueReceiverTests
     }
 
     [Fact]
-    public async Task QueueRecieverDbWriter_Should_ExitEarly_When_Component_IsInvalid()
+    public async Task QueueReceiverDbWriter_Should_ExitEarly_When_Component_IsInvalid()
     {
         string invalidBodyJsonStr = "{\"metadata\":{\"tags\":[]},\"sys\":{\"space\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"Space\",\"id\":\"py5afvqdlxgo\"}},\"id\":\"6G1UpN2x7vrtoSZdpg2nW7\",\"type\":\"Entry\",\"createdAt\":\"2024-02-12T11:40:25.426Z\",\"updatedAt\":\"2024-02-12T11:40:38.648Z\",\"environment\":{\"sys\":{\"id\":\"dev\",\"type\":\"Link\",\"linkType\":\"Environment\"}},\"createdBy\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"User\",\"id\":\"4hiJvkyVWdhTt6c4ZoDkMf\"}},\"updatedBy\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"User\",\"id\":\"4hiJvkyVWdhTt6c4ZoDkMf\"}},\"publishedCounter\":0,\"version\":2,\"automationTags\":[],\"contentType\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"ContentType\",\"id\":\"question\"}}},\"fields\":{\"internalName\":{\"en-US\":\"TestInternalName\"},\"slug\":{\"en-US\":\"test-slug\"}}}";
 
@@ -381,7 +388,7 @@ public class QueueReceiverTests
     }
 
     [Fact]
-    public async Task QueueRecieverDbWriter_Should_ExitEarly_When_CmsEvent_Is_Create()
+    public async Task QueueReceiverDbWriter_Should_ExitEarly_When_CmsEvent_Is_Create()
     {
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
@@ -398,5 +405,54 @@ public class QueueReceiverTests
 
         var added = _addedObject as ContentComponentDbEntity;
         Assert.Null(added);
+    }
+
+    [Fact]
+    public async Task QueueReceiverDbWriter_Should_Redeliver_A_Message_If_There_Is_A_Transient_Exception()
+    {
+        var serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
+        var serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
+
+        var subject = "ContentManagement.Entry.publish";
+        var serviceBusMessage = new ServiceBusMessage(bodyJsonStr) { Subject = subject };
+
+        _cmsDbContextMock.SaveChangesAsync().ThrowsAsync(new Exception("Something went wrong"));
+
+        var serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
+
+        _messageRetryHandlerMock.RetryRequired(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>()).Returns(true);
+
+        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+
+        await serviceBusMessageActionsMock.Received()
+            .CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
+
+        var added = _addedObject as ContentComponentDbEntity;
+        Assert.NotNull(added);
+        Assert.True(added.Published);
+    }
+
+    [Fact]
+    public async Task QueueReceiverDbWriter_Should_DeadLetter_A_Message_If_Max_Message_Delivery_Count_Is_Exhausted()
+    {
+        var serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
+        var serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
+
+        var subject = "ContentManagement.Entry.publish";
+        var serviceBusMessage = new ServiceBusMessage(bodyJsonStr) { Subject = subject };
+
+        serviceBusMessage.ApplicationProperties.Add("DeliveryAttempts", 4);
+
+        _cmsDbContextMock.SaveChangesAsync().ThrowsAsync(new Exception("Something went wrong"));
+
+        var serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
+
+        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+
+        await serviceBusMessageActionsMock.Received().DeadLetterMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), null, Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+
+        var added = _addedObject as ContentComponentDbEntity;
+        Assert.NotNull(added);
+        Assert.True(added.Published);
     }
 }
