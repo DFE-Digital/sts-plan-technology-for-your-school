@@ -21,5 +21,6 @@ public class RecommendationChunkDbEntity : ContentComponentDbEntity, IRecommenda
     [NotMapped]
     public List<AnswerDbEntity> Answers { get; init; } = [];
 
+    [DontCopyValue]
     public List<RecommendationSectionDbEntity> RecommendationSections { get; set; } = [];
 }
