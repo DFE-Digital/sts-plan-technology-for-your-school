@@ -32,6 +32,7 @@ public class SubtopicRecommendationsComparator(CmsDbContext db, ContentfulConten
     var sectionValidationResult = ValidateChild<SubtopicRecommendationDbEntity>(databaseSubtopicRecommendation, "SectionId", contentfulSubtopicRecommendation, "section");
     var subtopicValidationResult = ValidateChild<SubtopicRecommendationDbEntity>(databaseSubtopicRecommendation, "SubtopicId", contentfulSubtopicRecommendation, "subtopic");
 
+    ValidateProperties(contentfulSubtopicRecommendation, databaseSubtopicRecommendation, sectionValidationResult, subtopicValidationResult);
     ValidateChildren(contentfulSubtopicRecommendation, "intros", databaseSubtopicRecommendation, dbSubtopicRecommendation => dbSubtopicRecommendation.Intros);
   }
 
