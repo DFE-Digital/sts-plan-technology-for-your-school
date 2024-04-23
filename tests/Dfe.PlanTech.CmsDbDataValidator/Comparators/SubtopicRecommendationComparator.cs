@@ -9,65 +9,65 @@ namespace Dfe.PlanTech.CmsDbDataValidator.Tests;
 
 public class SubtopicRecommendationsComparator(CmsDbContext db, ContentfulContent contentfulContent) : BaseComparator(db, contentfulContent, [], "SubtopicRecommendation")
 {
-  public override Task ValidateContent()
-  {
-    ValidateSubtopicRecommendations();
-    return Task.CompletedTask;
-  }
-
-  public void ValidateSubtopicRecommendations()
-  {
-    foreach (var contentfulSubtopicRecommendation in _contentfulEntities)
+    public override Task ValidateContent()
     {
-      ValidateSubtopicRecommendation(_dbEntities.OfType<SubtopicRecommendationDbEntity>().ToArray(), contentfulSubtopicRecommendation);
-    }
-  }
-
-  private void ValidateSubtopicRecommendation(SubtopicRecommendationDbEntity[] databaseSubtopicRecommendations, JsonNode contentfulSubtopicRecommendation)
-  {
-    var databaseSubtopicRecommendation = TryRetrieveMatchingDbEntity(databaseSubtopicRecommendations, contentfulSubtopicRecommendation);
-    if (databaseSubtopicRecommendation == null)
-    {
-      return;
+        ValidateSubtopicRecommendations();
+        return Task.CompletedTask;
     }
 
-    ValidateProperties(contentfulSubtopicRecommendation, databaseSubtopicRecommendation, GetValidationErrors(databaseSubtopicRecommendation, contentfulSubtopicRecommendation).ToArray());
-  }
-
-
-  protected IEnumerable<DataValidationError> GetValidationErrors(SubtopicRecommendationDbEntity databaseSubtopicRecommendation, JsonNode contentfulSubtopicRecommendation)
-  {
-    var sectionValidationResult = ValidateChild<SubtopicRecommendationDbEntity>(databaseSubtopicRecommendation, "SectionId", contentfulSubtopicRecommendation, "section");
-
-    if (sectionValidationResult != null)
+    public void ValidateSubtopicRecommendations()
     {
-      yield return new DataValidationError("SectionId", sectionValidationResult);
+        foreach (var contentfulSubtopicRecommendation in _contentfulEntities)
+        {
+            ValidateSubtopicRecommendation(_dbEntities.OfType<SubtopicRecommendationDbEntity>().ToArray(), contentfulSubtopicRecommendation);
+        }
     }
 
-    var subtopicValidationResult = ValidateChild<SubtopicRecommendationDbEntity>(databaseSubtopicRecommendation, "SubtopicId", contentfulSubtopicRecommendation, "subtopic");
-
-    if (subtopicValidationResult != null)
+    private void ValidateSubtopicRecommendation(SubtopicRecommendationDbEntity[] databaseSubtopicRecommendations, JsonNode contentfulSubtopicRecommendation)
     {
-      yield return new DataValidationError("SubtopicId", subtopicValidationResult);
+        var databaseSubtopicRecommendation = TryRetrieveMatchingDbEntity(databaseSubtopicRecommendations, contentfulSubtopicRecommendation);
+        if (databaseSubtopicRecommendation == null)
+        {
+            return;
+        }
+
+        ValidateProperties(contentfulSubtopicRecommendation, databaseSubtopicRecommendation, GetValidationErrors(databaseSubtopicRecommendation, contentfulSubtopicRecommendation).ToArray());
     }
 
-    foreach (var child in ValidateChildren(contentfulSubtopicRecommendation, "intros", databaseSubtopicRecommendation, dbRecommendationChunk => dbRecommendationChunk.Intros))
-    {
-      yield return child;
-    }
-  }
 
-  protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
-  {
-    return _db.SubtopicRecommendations.IgnoreQueryFilters().Select(subtopicRecommendation => new SubtopicRecommendationDbEntity()
+    protected IEnumerable<DataValidationError> GetValidationErrors(SubtopicRecommendationDbEntity databaseSubtopicRecommendation, JsonNode contentfulSubtopicRecommendation)
     {
-      Id = subtopicRecommendation.Id,
-      SectionId = subtopicRecommendation.SectionId,
-      SubtopicId = subtopicRecommendation.SubtopicId,
-      Intros = subtopicRecommendation.Intros.Select(intro => new RecommendationIntroDbEntity()
-      {
-        Id = intro.Id
-      }).ToList()
-    });
-  }
+        var sectionValidationResult = ValidateChild<SubtopicRecommendationDbEntity>(databaseSubtopicRecommendation, "SectionId", contentfulSubtopicRecommendation, "section");
+
+        if (sectionValidationResult != null)
+        {
+            yield return new DataValidationError("SectionId", sectionValidationResult);
+        }
+
+        var subtopicValidationResult = ValidateChild<SubtopicRecommendationDbEntity>(databaseSubtopicRecommendation, "SubtopicId", contentfulSubtopicRecommendation, "subtopic");
+
+        if (subtopicValidationResult != null)
+        {
+            yield return new DataValidationError("SubtopicId", subtopicValidationResult);
+        }
+
+        foreach (var child in ValidateChildren(contentfulSubtopicRecommendation, "intros", databaseSubtopicRecommendation, dbRecommendationChunk => dbRecommendationChunk.Intros))
+        {
+            yield return child;
+        }
+    }
+
+    protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
+    {
+        return _db.SubtopicRecommendations.IgnoreQueryFilters().Select(subtopicRecommendation => new SubtopicRecommendationDbEntity()
+        {
+            Id = subtopicRecommendation.Id,
+            SectionId = subtopicRecommendation.SectionId,
+            SubtopicId = subtopicRecommendation.SubtopicId,
+            Intros = subtopicRecommendation.Intros.Select(intro => new RecommendationIntroDbEntity()
+            {
+                Id = intro.Id
+            }).ToList()
+        });
+    }
 }

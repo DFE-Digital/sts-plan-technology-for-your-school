@@ -8,42 +8,42 @@ namespace Dfe.PlanTech.CmsDbDataValidator;
 
 public static class ConfigurationSetup
 {
-  public static readonly IConfiguration Configuration = BuildConfiguration();
+    public static readonly IConfiguration Configuration = BuildConfiguration();
 
-  public static IConfiguration BuildConfiguration()
-  {
-    var builder = new ConfigurationBuilder();
+    public static IConfiguration BuildConfiguration()
+    {
+        var builder = new ConfigurationBuilder();
 
-    builder.SetBasePath(AppContext.BaseDirectory);
+        builder.SetBasePath(AppContext.BaseDirectory);
 
-    return builder.AddAppSettings()
-                  .AddUserSecrets<Program>()
-                  .Build();
-  }
+        return builder.AddAppSettings()
+                      .AddUserSecrets<Program>()
+                      .Build();
+    }
 
-  private static ConfigurationBuilder AddKeyVault(this ConfigurationBuilder builder)
-  {
-    string? keyVaultEndpoint = GetKeyVaultEndPoint(builder);
+    private static ConfigurationBuilder AddKeyVault(this ConfigurationBuilder builder)
+    {
+        string? keyVaultEndpoint = GetKeyVaultEndPoint(builder);
 
-    var azureServiceTokenProvider = new AzureServiceTokenProvider();
-    var keyVaultClient = new KeyVaultClient(
-        new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback));
+        var azureServiceTokenProvider = new AzureServiceTokenProvider();
+        var keyVaultClient = new KeyVaultClient(
+            new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback));
 
-    builder.AddAzureKeyVault(keyVaultEndpoint, keyVaultClient, new DefaultKeyVaultSecretManager());
+        builder.AddAzureKeyVault(keyVaultEndpoint, keyVaultClient, new DefaultKeyVaultSecretManager());
 
-    return builder;
-  }
+        return builder;
+    }
 
-  private static string? GetKeyVaultEndPoint(ConfigurationBuilder builder)
-  {
-    var configuration = builder.Build();
-    var keyVaultEndpoint = configuration.GetConnectionString("KeyVaultEndpoint");
-    return keyVaultEndpoint ?? throw new ArgumentException("Key Vault Endpoint not found in configuration");
-  }
+    private static string? GetKeyVaultEndPoint(ConfigurationBuilder builder)
+    {
+        var configuration = builder.Build();
+        var keyVaultEndpoint = configuration.GetConnectionString("KeyVaultEndpoint");
+        return keyVaultEndpoint ?? throw new ArgumentException("Key Vault Endpoint not found in configuration");
+    }
 
-  public static ConfigurationBuilder AddAppSettings(this ConfigurationBuilder builder)
-  {
-    builder.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-    return builder;
-  }
+    public static ConfigurationBuilder AddAppSettings(this ConfigurationBuilder builder)
+    {
+        builder.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+        return builder;
+    }
 }

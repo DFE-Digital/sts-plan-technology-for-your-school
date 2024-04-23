@@ -8,58 +8,58 @@ namespace Dfe.PlanTech.CmsDbDataValidator.Tests;
 
 public class RecommendationSectionsComparator(CmsDbContext db, ContentfulContent contentfulContent) : BaseComparator(db, contentfulContent, [], "RecommendationSection")
 {
-  public override Task ValidateContent()
-  {
-    ValidateRecommendationSections();
-    return Task.CompletedTask;
-  }
-
-  public void ValidateRecommendationSections()
-  {
-    foreach (var contentfulRecommendationSection in _contentfulEntities)
+    public override Task ValidateContent()
     {
-      ValidateRecommendationSection(_dbEntities.OfType<RecommendationSectionDbEntity>().ToArray(), contentfulRecommendationSection);
-    }
-  }
-
-  private void ValidateRecommendationSection(RecommendationSectionDbEntity[] databaseRecommendationSections, JsonNode contentfulRecommendationSection)
-  {
-    var databaseRecommendationSection = TryRetrieveMatchingDbEntity(databaseRecommendationSections, contentfulRecommendationSection);
-    if (databaseRecommendationSection == null)
-    {
-      return;
+        ValidateRecommendationSections();
+        return Task.CompletedTask;
     }
 
-    ValidateProperties(contentfulRecommendationSection, databaseRecommendationSection, GetValidationErrors(databaseRecommendationSection, contentfulRecommendationSection).ToArray());
-  }
-
-
-  protected IEnumerable<DataValidationError> GetValidationErrors(RecommendationSectionDbEntity databaseRecommendationSection, JsonNode contentfulRecommendationSection)
-  {
-    foreach (var child in ValidateChildren(contentfulRecommendationSection, "answers", databaseRecommendationSection, dbRecommendationChunk => dbRecommendationChunk.Answers))
+    public void ValidateRecommendationSections()
     {
-      yield return child;
+        foreach (var contentfulRecommendationSection in _contentfulEntities)
+        {
+            ValidateRecommendationSection(_dbEntities.OfType<RecommendationSectionDbEntity>().ToArray(), contentfulRecommendationSection);
+        }
     }
 
-    foreach (var child in ValidateChildren(contentfulRecommendationSection, "chunks", databaseRecommendationSection, dbRecommendationChunk => dbRecommendationChunk.Chunks))
+    private void ValidateRecommendationSection(RecommendationSectionDbEntity[] databaseRecommendationSections, JsonNode contentfulRecommendationSection)
     {
-      yield return child;
-    }
-  }
+        var databaseRecommendationSection = TryRetrieveMatchingDbEntity(databaseRecommendationSections, contentfulRecommendationSection);
+        if (databaseRecommendationSection == null)
+        {
+            return;
+        }
 
-  protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
-  {
-    return _db.RecommendationSections.Select(section => new RecommendationSectionDbEntity()
+        ValidateProperties(contentfulRecommendationSection, databaseRecommendationSection, GetValidationErrors(databaseRecommendationSection, contentfulRecommendationSection).ToArray());
+    }
+
+
+    protected IEnumerable<DataValidationError> GetValidationErrors(RecommendationSectionDbEntity databaseRecommendationSection, JsonNode contentfulRecommendationSection)
     {
-      Id = section.Id,
-      Answers = section.Answers.Select(answer => new AnswerDbEntity()
-      {
-        Id = answer.Id
-      }).ToList(),
-      Chunks = section.Chunks.Select(chunk => new RecommendationChunkDbEntity()
-      {
-        Id = chunk.Id
-      }).ToList()
-    });
-  }
+        foreach (var child in ValidateChildren(contentfulRecommendationSection, "answers", databaseRecommendationSection, dbRecommendationChunk => dbRecommendationChunk.Answers))
+        {
+            yield return child;
+        }
+
+        foreach (var child in ValidateChildren(contentfulRecommendationSection, "chunks", databaseRecommendationSection, dbRecommendationChunk => dbRecommendationChunk.Chunks))
+        {
+            yield return child;
+        }
+    }
+
+    protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
+    {
+        return _db.RecommendationSections.Select(section => new RecommendationSectionDbEntity()
+        {
+            Id = section.Id,
+            Answers = section.Answers.Select(answer => new AnswerDbEntity()
+            {
+                Id = answer.Id
+            }).ToList(),
+            Chunks = section.Chunks.Select(chunk => new RecommendationChunkDbEntity()
+            {
+                Id = chunk.Id
+            }).ToList()
+        });
+    }
 }

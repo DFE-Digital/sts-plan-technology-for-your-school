@@ -7,38 +7,38 @@ namespace Dfe.PlanTech.CmsDbDataValidator.Tests;
 
 public class AnswersComparator(CmsDbContext db, ContentfulContent contentfulContent) : BaseComparator(db, contentfulContent, ["Text", "Maturity"], "Answer")
 {
-  public override Task ValidateContent()
-  {
-    ValidateAnswers();
-
-    return Task.CompletedTask;
-  }
-
-  public void ValidateAnswers()
-  {
-    foreach (var contentfulAnswer in _contentfulEntities)
+    public override Task ValidateContent()
     {
-      ValidateAnswer(_dbEntities.OfType<AnswerDbEntity>().ToArray(), contentfulAnswer);
-    }
-  }
+        ValidateAnswers();
 
-  protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
-  {
-    return _db.Answers;
-  }
-
-  private void ValidateAnswer(AnswerDbEntity[] databaseAnswers, JsonNode contentfulAnswer)
-  {
-    var databaseAnswer = TryRetrieveMatchingDbEntity(databaseAnswers, contentfulAnswer);
-    if (databaseAnswer == null)
-    {
-      return;
+        return Task.CompletedTask;
     }
 
-    var nextQuestionMatches = CompareStrings(contentfulAnswer["nextQuestion"]?.GetEntryId(), databaseAnswer.NextQuestionId);
+    public void ValidateAnswers()
+    {
+        foreach (var contentfulAnswer in _contentfulEntities)
+        {
+            ValidateAnswer(_dbEntities.OfType<AnswerDbEntity>().ToArray(), contentfulAnswer);
+        }
+    }
 
-    var nextQustionError = nextQuestionMatches != null ? GenerateDataValidationError("NextQuestionId", nextQuestionMatches) : null;
+    protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
+    {
+        return _db.Answers;
+    }
 
-    ValidateProperties(contentfulAnswer, databaseAnswer, nextQustionError);
-  }
+    private void ValidateAnswer(AnswerDbEntity[] databaseAnswers, JsonNode contentfulAnswer)
+    {
+        var databaseAnswer = TryRetrieveMatchingDbEntity(databaseAnswers, contentfulAnswer);
+        if (databaseAnswer == null)
+        {
+            return;
+        }
+
+        var nextQuestionMatches = CompareStrings(contentfulAnswer["nextQuestion"]?.GetEntryId(), databaseAnswer.NextQuestionId);
+
+        var nextQustionError = nextQuestionMatches != null ? GenerateDataValidationError("NextQuestionId", nextQuestionMatches) : null;
+
+        ValidateProperties(contentfulAnswer, databaseAnswer, nextQustionError);
+    }
 }
