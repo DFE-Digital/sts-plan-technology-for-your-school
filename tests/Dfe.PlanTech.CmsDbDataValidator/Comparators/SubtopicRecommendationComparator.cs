@@ -2,6 +2,7 @@ using System.Text.Json.Nodes;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.CmsDbDataValidator.Tests;
 
@@ -38,7 +39,7 @@ public class SubtopicRecommendationsComparator(CmsDbContext db, ContentfulConten
 
   protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
   {
-    return _db.SubtopicRecommendations.Select(subtopicRecommendation => new SubtopicRecommendationDbEntity()
+    return _db.SubtopicRecommendations.IgnoreQueryFilters().Select(subtopicRecommendation => new SubtopicRecommendationDbEntity()
     {
       Id = subtopicRecommendation.Id,
       SectionId = subtopicRecommendation.SectionId,
