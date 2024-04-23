@@ -53,9 +53,44 @@ public class PageComparator(CmsDbContext db, ContentfulContent contentfulContent
     }
   }
 
-  protected override Task<bool> GetDbEntities()
+  protected override async Task<bool> GetDbEntities()
   {
-    return GetDbEntitiesPaginated(10);
+    var entities = await GetDbEntitiesPaginated(20);
+
+    if (!entities)
+    {
+      return false;
+    }
+
+    var pages = _dbEntities.OfType<PageDbEntity>().ToArray();
+
+
+    var pageChildren = _db.PageContents.Select(pageContent =>
+                                      new PageContentDbEntity
+                                      {
+                                        ContentComponentId = pageContent.ContentComponentId,
+                                        BeforeContentComponentId = pageContent.BeforeContentComponentId,
+                                        PageId = pageContent.PageId
+                                      })
+                                      .ToArray();
+
+    foreach (var page in pages)
+    {
+      page.AllPageContents = pageChildren.Where(pageContent => pageContent.PageId == page.Id).ToList();
+      page.Content = page.AllPageContents.Where(pageContent => pageContent.ContentComponentId != null)
+                                          .Select(pageContent => new ContentComponentDbEntity()
+                                          {
+                                            Id = pageContent.ContentComponentId!,
+                                          }).ToList();
+
+      page.BeforeTitleContent = page.AllPageContents.Where(pageContent => pageContent.BeforeContentComponentId != null)
+                                          .Select(pageContent => new ContentComponentDbEntity()
+                                          {
+                                            Id = pageContent.BeforeContentComponentId!,
+                                          }).ToList();
+    }
+
+    return true;
   }
 
   protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
@@ -69,11 +104,8 @@ public class PageComparator(CmsDbContext db, ContentfulContent contentfulContent
       DisplayHomeButton = page.DisplayHomeButton,
       DisplayOrganisationName = page.DisplayOrganisationName,
       DisplayTopicTitle = page.DisplayTopicTitle,
+      RequiresAuthorisation = page.RequiresAuthorisation,
       TitleId = page.TitleId,
-      Content = page.Content.Select(content => new ContentComponentDbEntity() { Id = content.Id })
-                            .ToList(),
-      BeforeTitleContent = page.BeforeTitleContentPagesJoins.Select(join => new ContentComponentDbEntity() { Id = join.BeforeContentComponentId! })
-                                                            .ToList(),
     });
   }
 }
