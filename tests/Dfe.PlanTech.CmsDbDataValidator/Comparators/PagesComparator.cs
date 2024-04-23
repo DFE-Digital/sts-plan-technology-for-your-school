@@ -42,31 +42,10 @@ public class PageComparator(CmsDbContext db, ContentfulContent contentfulContent
       yield return titleIdValidationResult;
     }
 
-    var pageChildren = _db.PageContents.Where(pageContent => pageContent.PageId == dbPage.Id)
-                                      .Select(pageContent =>
-                                      new
-                                      {
-                                        contentId = pageContent.ContentComponentId,
-                                        beforeTitleContentId = pageContent.BeforeContentComponentId
-                                      })
-                                      .ToArray();
-
-    dbPage.Content = pageChildren.Where(child => child.contentId != null)
-                                        .Select(child => new ContentComponentDbEntity()
-                                        {
-                                          Id = child.contentId!
-                                        }).ToList();
-
     foreach (var child in ValidateChildren(contentfulPage, "content", dbPage, (page) => page.Content))
     {
       yield return child;
     }
-
-    dbPage.BeforeTitleContent = pageChildren.Where(child => child.beforeTitleContentId != null)
-                                    .Select(child => new ContentComponentDbEntity()
-                                    {
-                                      Id = child.beforeTitleContentId!
-                                    }).ToList();
 
     foreach (var child in ValidateChildren(contentfulPage, "beforeTitleContent", dbPage, (page) => page.BeforeTitleContent))
     {
@@ -74,8 +53,27 @@ public class PageComparator(CmsDbContext db, ContentfulContent contentfulContent
     }
   }
 
+  protected override Task<bool> GetDbEntities()
+  {
+    return GetDbEntitiesPaginated(10);
+  }
+
   protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
   {
-    return _db.Pages.IgnoreAutoIncludes();
+    return _db.Pages.Select(page => new PageDbEntity()
+    {
+      Id = page.Id,
+      InternalName = page.InternalName,
+      Slug = page.Slug,
+      DisplayBackButton = page.DisplayBackButton,
+      DisplayHomeButton = page.DisplayHomeButton,
+      DisplayOrganisationName = page.DisplayOrganisationName,
+      DisplayTopicTitle = page.DisplayTopicTitle,
+      TitleId = page.TitleId,
+      Content = page.Content.Select(content => new ContentComponentDbEntity() { Id = content.Id })
+                            .ToList(),
+      BeforeTitleContent = page.BeforeTitleContentPagesJoins.Select(join => new ContentComponentDbEntity() { Id = join.BeforeContentComponentId! })
+                                                            .ToList(),
+    });
   }
 }

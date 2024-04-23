@@ -63,42 +63,9 @@ public class TextBodyComparator(CmsDbContext db, ContentfulContent contentfulCon
   /// Due to the size of TextBody entities, fetching all in one will cause timeout issue.
   /// Paginate through them instead.
   /// </remarks>
-  protected override async Task<bool> GetDbEntities()
+  protected override Task<bool> GetDbEntities()
   {
-    try
-    {
-      var entityCount = await GetDbEntitiesQuery().CountAsync();
-
-      var textBodies = new List<ContentComponentDbEntity>(entityCount);
-
-      int skip = 0;
-      int take = 50;
-      while (true)
-      {
-        var paginatedTextBodies = await GetDbEntitiesQuery().Skip(skip).Take(take).ToListAsync();
-        textBodies.AddRange(paginatedTextBodies);
-
-        skip += take;
-
-        if (skip >= entityCount)
-          break;
-      }
-
-      _dbEntities = textBodies;
-
-      if (_dbEntities == null || _dbEntities.Count == 0)
-      {
-        Console.WriteLine($"{_entityType}s not found in database");
-        return false;
-      }
-
-      return true;
-    }
-    catch (Exception ex)
-    {
-      Console.WriteLine($"Error fetching entities for {_entityType} from DB: {ex.Message}");
-      return false;
-    }
+    return GetDbEntitiesPaginated(50);
   }
 
   protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()

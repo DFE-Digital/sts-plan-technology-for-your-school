@@ -296,6 +296,46 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
     return parsedEnum;
   }
 
+  /// <remarks>
+  /// Due to the size of TextBody entities, fetching all in one will cause timeout issue.
+  /// Paginate through them instead.
+  /// </remarks>
+  protected virtual async Task<bool> GetDbEntitiesPaginated(int take = 50)
+  {
+    try
+    {
+      var entityCount = await GetDbEntitiesQuery().CountAsync();
+
+      var entities = new List<ContentComponentDbEntity>(entityCount);
+
+      int skip = 0;
+      while (true)
+      {
+        var paginatedEntities = await GetDbEntitiesQuery().Skip(skip).Take(take).ToListAsync();
+        entities.AddRange(paginatedEntities);
+
+        skip += take;
+
+        if (skip >= entityCount)
+          break;
+      }
+
+      _dbEntities = entities;
+
+      if (_dbEntities == null || _dbEntities.Count == 0)
+      {
+        Console.WriteLine($"{_entityType}s not found in database");
+        return false;
+      }
+
+      return true;
+    }
+    catch (Exception ex)
+    {
+      Console.WriteLine($"Error fetching entities for {_entityType} from DB: {ex.Message}");
+      return false;
+    }
+  }
 
   private static string LowercaseFirstLetter(string input)
   {
