@@ -50,6 +50,19 @@ public class SectionComparator(CmsDbContext db, ContentfulContent contentfulCont
 
   protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
   {
-    return _db.Sections;
+    return _db.Sections.Select(section => new SectionDbEntity()
+    {
+      Id = section.Id,
+      Name = section.Name,
+      InterstitialPageId = section.InterstitialPageId,
+      Questions = section.Questions.Select(question => new QuestionDbEntity()
+      {
+        Id = question.Id
+      }).ToList(),
+      Recommendations = section.Recommendations.Select(recommendation => new RecommendationPageDbEntity()
+      {
+        Id = recommendation.Id
+      }).ToList()
+    });
   }
 }
