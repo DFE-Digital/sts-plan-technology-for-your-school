@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.AzureFunctions.UnitTests;
@@ -11,6 +12,7 @@ public class AsyncQueryProvider<TEntity> : IAsyncQueryProvider
     {
         _inner = inner;
     }
+
 
     public IQueryable CreateQuery(Expression expression)
     {

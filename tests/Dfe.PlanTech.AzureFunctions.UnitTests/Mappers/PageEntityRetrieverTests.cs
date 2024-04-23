@@ -2,6 +2,7 @@ using Dfe.PlanTech.AzureFunctions.Mappings;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using MockQueryable.NSubstitute;
 using NSubstitute;
 
 namespace Dfe.PlanTech.AzureFunctions.UnitTests.Mappers;
@@ -27,16 +28,9 @@ public class PageEntityRetrieverTests
 
     private void MockPageDbSet()
     {
-        IQueryable<PageDbEntity> queryable = _pages.AsQueryable();
+        var mock = _pages.AsQueryable().BuildMockDbSet();
 
-        var asyncProvider = new AsyncQueryProvider<PageDbEntity>(queryable.Provider);
-
-        var mockPageDataSet = Substitute.For<DbSet<PageDbEntity>, IQueryable<PageDbEntity>>();
-        ((IQueryable<PageDbEntity>)mockPageDataSet).Provider.Returns(asyncProvider);
-        ((IQueryable<PageDbEntity>)mockPageDataSet).Expression.Returns(queryable.Expression);
-        ((IQueryable<PageDbEntity>)mockPageDataSet).ElementType.Returns(queryable.ElementType);
-        ((IQueryable<PageDbEntity>)mockPageDataSet).GetEnumerator().Returns(queryable.GetEnumerator());
-        _db.Pages = mockPageDataSet;
+        _db.Pages = mock;
     }
 
     [Theory]
