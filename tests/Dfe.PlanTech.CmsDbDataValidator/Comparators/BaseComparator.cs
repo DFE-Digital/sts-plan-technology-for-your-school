@@ -37,14 +37,24 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
     return true;
   }
 
-  public async Task ValidateContentAndPrintErrors()
+  public async Task<string> ValidateContentAndPrintErrors()
   {
-    await ValidateContent();
-    Console.WriteLine(EntityTypeValidationErrors.ToString());
-    Console.WriteLine("");
-    Console.WriteLine("-------------");
-    Console.WriteLine("");
+    try
+    {
+      await ValidateContent();
+      string errorMessage = string.Join(Environment.NewLine, [EntityTypeValidationErrors.ToString(), "", "-------------", ""]);
+
+      Console.WriteLine(errorMessage);
+
+      return errorMessage;
+    }
+    catch (Exception ex)
+    {
+      Console.WriteLine($"Error validating {_entityType}: {ex.Message}");
+      return ex.Message;
+    }
   }
+
   public abstract Task ValidateContent();
 
   protected virtual async Task<bool> GetDbEntities()
