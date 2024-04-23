@@ -40,16 +40,67 @@ public class TextBodyComparator(CmsDbContext db, ContentfulContent contentfulCon
       return;
     }
 
-    var errors = RichTextComparator.CompareRichTextContent(matchingDbTextBody.RichText, contentfulTextBody).ToArray();
+    var contentfulRichText = contentfulTextBody["richText"];
+
+    if (contentfulRichText == null)
+    {
+      Console.WriteLine($"TextBody {contentfulTextBodyId} has no rich text");
+      return;
+    }
+
+    var errors = RichTextComparator.CompareRichTextContent(matchingDbTextBody.RichText!, contentfulRichText!).ToArray();
 
     if (errors.Length == 0) return;
 
-    Console.WriteLine($"TextBody {contentfulTextBodyId} has validation errors: {string.Join("\n ", errors)}");
+    Console.WriteLine($"TextBody {contentfulTextBodyId} has validation errors:\n\n{string.Join("\n ", errors)}");
   }
 
-  protected override IQueryable<TextBodyDbEntity> GetDbEntitiesQuery()
+  /// <remarks>
+  /// Due to the size of TextBody entities, fetching all in one will cause timeout issue.
+  /// Paginate through them instead.
+  /// </remarks>
+  protected override async Task<bool> GetDbEntities()
   {
-    return _db.TextBodies.Include(tb => tb.RichText).ThenInclude(rt => rt.Marks)
-                          .Include(tb => tb.RichText).ThenInclude(rt => rt.Data);
+    try
+    {
+      var entityCount = await GetDbEntitiesQuery().CountAsync();
+
+      var textBodies = new List<ContentComponentDbEntity>(entityCount);
+
+      int skip = 0;
+      int take = 50;
+      while (true)
+      {
+        var paginatedTextBodies = await GetDbEntitiesQuery().Skip(skip).Take(take).ToListAsync();
+        textBodies.AddRange(paginatedTextBodies);
+
+        Console.WriteLine($"Retrieved {paginatedTextBodies.Count} {_entityType}s from DB. Bringing total to {textBodies.Count} out of {entityCount}");
+
+        skip += take;
+
+        if (skip >= entityCount)
+          break;
+      }
+
+      _dbEntities = textBodies;
+
+      if (_dbEntities == null || _dbEntities.Count == 0)
+      {
+        Console.WriteLine($"{_entityType}s not found in database");
+        return false;
+      }
+
+      return true;
+    }
+    catch (Exception ex)
+    {
+      Console.WriteLine($"Error fetching entities for {_entityType} from DB: {ex.Message}");
+      return false;
+    }
+  }
+
+  protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
+  {
+    return _db.TextBodies;
   }
 }
