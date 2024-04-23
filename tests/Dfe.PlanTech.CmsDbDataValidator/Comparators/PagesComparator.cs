@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using Dfe.PlanTech.CmsDbDataValidator.Models;
 using Dfe.PlanTech.CmsDbDataValidator.Tests;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
@@ -24,18 +25,24 @@ public class PageComparator(CmsDbContext db, ContentfulContent contentfulContent
 
   private void ValidatePage(PageDbEntity[] pages, JsonNode contentfulPage)
   {
-    var matchingDbPage = pages.FirstOrDefault(header => header.Id == contentfulPage.GetEntryId());
-
+    var matchingDbPage = TryRetrieveMatchingDbEntity(pages, contentfulPage);
     if (matchingDbPage == null)
     {
-      Console.WriteLine($"No matching header found for contentful header with ID: {contentfulPage.GetEntryId()}");
       return;
     }
 
-    var titleIdValidationResult = ValidateChild<PageDbEntity>(matchingDbPage, "TitleId", contentfulPage, "title");
-    ValidateProperties(contentfulPage, matchingDbPage, titleIdValidationResult);
+    ValidateProperties(contentfulPage, matchingDbPage, GetDataValidationErrors(matchingDbPage, contentfulPage).ToArray());
+  }
 
-    var pageChildren = _db.PageContents.Where(pageContent => pageContent.PageId == matchingDbPage.Id)
+  protected IEnumerable<DataValidationError> GetDataValidationErrors(PageDbEntity dbPage, JsonNode contentfulPage)
+  {
+    var titleIdValidationResult = TryGenerateDataValidationError("Title", ValidateChild<PageDbEntity>(dbPage, "TitleId", contentfulPage, "title"));
+    if (titleIdValidationResult != null)
+    {
+      yield return titleIdValidationResult;
+    }
+
+    var pageChildren = _db.PageContents.Where(pageContent => pageContent.PageId == dbPage.Id)
                                       .Select(pageContent =>
                                       new
                                       {
@@ -44,21 +51,27 @@ public class PageComparator(CmsDbContext db, ContentfulContent contentfulContent
                                       })
                                       .ToArray();
 
-    matchingDbPage.Content = pageChildren.Where(child => child.contentId != null)
+    dbPage.Content = pageChildren.Where(child => child.contentId != null)
                                         .Select(child => new ContentComponentDbEntity()
                                         {
                                           Id = child.contentId!
                                         }).ToList();
 
-    ValidateChildren(contentfulPage, "content", matchingDbPage, (page) => page.Content);
+    foreach (var child in ValidateChildren(contentfulPage, "content", dbPage, (page) => page.Content))
+    {
+      yield return child;
+    }
 
-    matchingDbPage.BeforeTitleContent = pageChildren.Where(child => child.beforeTitleContentId != null)
+    dbPage.BeforeTitleContent = pageChildren.Where(child => child.beforeTitleContentId != null)
                                     .Select(child => new ContentComponentDbEntity()
                                     {
                                       Id = child.beforeTitleContentId!
                                     }).ToList();
 
-    ValidateChildren(contentfulPage, "beforeTitleContent", matchingDbPage, (page) => page.BeforeTitleContent);
+    foreach (var child in ValidateChildren(contentfulPage, "beforeTitleContent", dbPage, (page) => page.BeforeTitleContent))
+    {
+      yield return child;
+    }
   }
 
   protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()

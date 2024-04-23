@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using Dfe.PlanTech.CmsDbDataValidator.Models;
 using Dfe.PlanTech.CmsDbDataValidator.Tests;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
@@ -24,35 +25,38 @@ public class TextBodyComparator(CmsDbContext db, ContentfulContent contentfulCon
 
   private void ValidateTextBody(TextBodyDbEntity[] textBodies, JsonNode contentfulTextBody)
   {
-    var contentfulTextBodyId = contentfulTextBody.GetEntryId();
+    var matchingTextBody = TryRetrieveMatchingDbEntity(textBodies, contentfulTextBody);
 
-    if (contentfulTextBodyId == null)
+    if (matchingTextBody == null)
     {
-      Console.WriteLine($"Couldn't find ID for Contentful TextBody {contentfulTextBody}");
       return;
     }
+    ValidateProperties(contentfulTextBody, matchingTextBody, GenerateDataValidationErrors(matchingTextBody, contentfulTextBody).ToArray());
+  }
 
-    var matchingDbTextBody = textBodies.FirstOrDefault(TextBody => TextBody.Id == contentfulTextBodyId);
-
-    if (matchingDbTextBody == null)
-    {
-      Console.WriteLine($"No matching TextBody found for contentful TextBody with ID: {contentfulTextBodyId}");
-      return;
-    }
-
+  protected IEnumerable<DataValidationError> GenerateDataValidationErrors(TextBodyDbEntity dbTextbody, JsonNode contentfulTextBody)
+  {
     var contentfulRichText = contentfulTextBody["richText"];
 
-    if (contentfulRichText == null)
+    if (contentfulRichText == null && dbTextbody.RichText != null)
     {
-      Console.WriteLine($"TextBody {contentfulTextBodyId} has no rich text");
-      return;
+      yield return new DataValidationError("RichText", $"Null in Contentful but exists in DB");
+      yield break;
+    }
+    else if (contentfulRichText != null && dbTextbody.RichText == null)
+    {
+      yield return new DataValidationError("RichText", $"Null in DB but exists in Contentful");
+      yield break;
     }
 
-    var errors = RichTextComparator.CompareRichTextContent(matchingDbTextBody.RichText!, contentfulRichText!).ToArray();
+    var errors = RichTextComparator.CompareRichTextContent(dbTextbody.RichText!, contentfulRichText!).ToArray();
 
-    if (errors.Length == 0) return;
+    if (errors.Length == 0) yield break;
 
-    Console.WriteLine($"TextBody {contentfulTextBodyId} has validation errors:\n\n{string.Join("\n ", errors)}");
+    foreach (var error in errors)
+    {
+      if (error != null) yield return error;
+    }
   }
 
   /// <remarks>
@@ -73,8 +77,6 @@ public class TextBodyComparator(CmsDbContext db, ContentfulContent contentfulCon
       {
         var paginatedTextBodies = await GetDbEntitiesQuery().Skip(skip).Take(take).ToListAsync();
         textBodies.AddRange(paginatedTextBodies);
-
-        Console.WriteLine($"Retrieved {paginatedTextBodies.Count} {_entityType}s from DB. Bringing total to {textBodies.Count} out of {entityCount}");
 
         skip += take;
 

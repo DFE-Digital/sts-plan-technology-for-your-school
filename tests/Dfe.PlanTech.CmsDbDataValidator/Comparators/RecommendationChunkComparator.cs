@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using Dfe.PlanTech.CmsDbDataValidator.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
@@ -23,17 +24,32 @@ public class RecommendationChunksComparatorclass(CmsDbContext db, ContentfulCont
 
   private void ValidateRecommendationChunk(RecommendationChunkDbEntity[] databaseRecommendationChunks, JsonNode contentfulRecommendationChunk)
   {
-    var databaseRecommendationChunk = ValidateChildEntityExistsInDb(databaseRecommendationChunks, contentfulRecommendationChunk);
+    var databaseRecommendationChunk = TryRetrieveMatchingDbEntity(databaseRecommendationChunks, contentfulRecommendationChunk);
     if (databaseRecommendationChunk == null)
     {
       return;
     }
 
-    var headerValidationResult = ValidateChild<RecommendationChunkDbEntity>(databaseRecommendationChunk, "HeaderId", contentfulRecommendationChunk, "header");
-    ValidateProperties(contentfulRecommendationChunk, databaseRecommendationChunk, headerValidationResult);
+    ValidateProperties(contentfulRecommendationChunk, databaseRecommendationChunk, GetValidationErrors(databaseRecommendationChunk, contentfulRecommendationChunk).ToArray());
+  }
 
-    ValidateChildren(contentfulRecommendationChunk, "answers", databaseRecommendationChunk, dbRecommendationChunk => dbRecommendationChunk.Answers);
-    ValidateChildren(contentfulRecommendationChunk, "content", databaseRecommendationChunk, dbRecommendationChunk => dbRecommendationChunk.Content);
+  protected IEnumerable<DataValidationError> GetValidationErrors(RecommendationChunkDbEntity databaseRecommendationChunk, JsonNode contentfulRecommendationChunk)
+  {
+    var headerValidationResult = ValidateChild<RecommendationChunkDbEntity>(databaseRecommendationChunk, "HeaderId", contentfulRecommendationChunk, "header");
+    if (headerValidationResult != null)
+    {
+      yield return new DataValidationError("Header", headerValidationResult);
+    }
+
+    foreach (var child in ValidateChildren(contentfulRecommendationChunk, "answers", databaseRecommendationChunk, dbRecommendationChunk => dbRecommendationChunk.Answers))
+    {
+      yield return child;
+    }
+
+    foreach (var child in ValidateChildren(contentfulRecommendationChunk, "content", databaseRecommendationChunk, dbRecommendationChunk => dbRecommendationChunk.Content))
+    {
+      yield return child;
+    }
   }
 
   protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()

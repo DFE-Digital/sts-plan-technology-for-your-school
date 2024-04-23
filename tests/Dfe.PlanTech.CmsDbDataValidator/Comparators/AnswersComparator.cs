@@ -29,14 +29,16 @@ public class AnswersComparator(CmsDbContext db, ContentfulContent contentfulCont
 
   private void ValidateAnswer(AnswerDbEntity[] databaseAnswers, JsonNode contentfulAnswer)
   {
-    var databaseAnswer = ValidateChildEntityExistsInDb(databaseAnswers, contentfulAnswer);
+    var databaseAnswer = TryRetrieveMatchingDbEntity(databaseAnswers, contentfulAnswer);
     if (databaseAnswer == null)
     {
       return;
     }
 
-    var nextQuestionMatches = CompareStrings("NextQuestionId", contentfulAnswer["nextQuestion"]?.GetEntryId(), databaseAnswer.NextQuestionId);
+    var nextQuestionMatches = CompareStrings(contentfulAnswer["nextQuestion"]?.GetEntryId(), databaseAnswer.NextQuestionId);
 
-    ValidateProperties(contentfulAnswer, databaseAnswer, nextQuestionMatches);
+    var nextQustionError = nextQuestionMatches != null ? GenerateDataValidationError("NextQuestionId", nextQuestionMatches) : null;
+
+    ValidateProperties(contentfulAnswer, databaseAnswer, nextQustionError);
   }
 }

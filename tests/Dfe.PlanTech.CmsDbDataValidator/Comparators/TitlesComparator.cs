@@ -23,19 +23,9 @@ public class TitleComparator(CmsDbContext db, ContentfulContent contentfulConten
 
   private void ValidateTitle(TitleDbEntity[] titles, JsonNode contentfulTitle)
   {
-    var contentfulTitleId = contentfulTitle.GetEntryId();
-
-    if (contentfulTitleId == null)
-    {
-      Console.WriteLine($"Couldn't find ID for Contentful title {contentfulTitle}");
-      return;
-    }
-
-    var matchingDbTitle = titles.FirstOrDefault(title => title.Id == contentfulTitleId);
-
+    var matchingDbTitle = TryRetrieveMatchingDbEntity(titles, contentfulTitle);
     if (matchingDbTitle == null)
     {
-      Console.WriteLine($"No matching title found for contentful title with ID: {contentfulTitleId}");
       return;
     }
 

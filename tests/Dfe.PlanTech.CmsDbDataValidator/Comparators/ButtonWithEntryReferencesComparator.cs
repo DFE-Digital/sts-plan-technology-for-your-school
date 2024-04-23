@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using Dfe.PlanTech.CmsDbDataValidator.Models;
 using Dfe.PlanTech.CmsDbDataValidator.Tests;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
@@ -24,14 +25,16 @@ public class ButtonWithEntryReferencesComparator(CmsDbContext db, ContentfulCont
 
   private void ValidateButton(ButtonWithEntryReferenceDbEntity[] buttonWithEntryReferences, JsonNode contentfulButton)
   {
-    var databaseButton = ValidateChildEntityExistsInDb(buttonWithEntryReferences, contentfulButton);
+    var databaseButton = TryRetrieveMatchingDbEntity(buttonWithEntryReferences, contentfulButton);
     if (databaseButton == null)
     {
       return;
     }
 
-    CompareStrings("ButtonId", contentfulButton["button"]?.GetEntryId(), databaseButton.ButtonId);
-    CompareStrings("LinkToEntryId", contentfulButton["linkToEntry"]?.GetEntryId(), databaseButton.LinkToEntryId);
+    DataValidationError?[] errors = [TryGenerateDataValidationError("Button", CompareStrings(contentfulButton["button"]?.GetEntryId(), databaseButton.ButtonId)),
+                                      TryGenerateDataValidationError("LinkToEntry", CompareStrings(contentfulButton["linkToEntry"]?.GetEntryId(), databaseButton.LinkToEntryId))];
+
+    ValidateProperties(contentfulButton, databaseButton, errors);
   }
 
   protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()

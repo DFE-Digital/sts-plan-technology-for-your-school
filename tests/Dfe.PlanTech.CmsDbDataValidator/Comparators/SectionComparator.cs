@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using Dfe.PlanTech.CmsDbDataValidator.Models;
 using Dfe.PlanTech.CmsDbDataValidator.Tests;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -22,30 +23,37 @@ public class SectionComparator(CmsDbContext db, ContentfulContent contentfulCont
     }
   }
 
-  private void ValidateSection(SectionDbEntity[] Sections, JsonNode contentfulSection)
+  private void ValidateSection(SectionDbEntity[] sections, JsonNode contentfulSection)
   {
-    var contentfulSectionId = contentfulSection.GetEntryId();
-
-    if (contentfulSectionId == null)
-    {
-      Console.WriteLine($"Couldn't find ID for Contentful Section {contentfulSection}");
-      return;
-    }
-
-    var matchingDbSection = Sections.FirstOrDefault(Section => Section.Id == contentfulSectionId);
+    var matchingDbSection = TryRetrieveMatchingDbEntity(sections, contentfulSection);
 
     if (matchingDbSection == null)
     {
-      Console.WriteLine($"No matching Section found for contentful Section with ID: {contentfulSectionId}");
       return;
     }
 
-    var interstitialPageValidationResult = ValidateChild<SectionDbEntity>(matchingDbSection, @"InterstitialPageId", contentfulSection, "interstitialPage");
+    ValidateProperties(contentfulSection, matchingDbSection, GetValidationErrors(matchingDbSection, contentfulSection).ToArray());
+  }
 
-    ValidateProperties(contentfulSection, matchingDbSection, interstitialPageValidationResult);
 
-    ValidateChildren(contentfulSection, "questions", matchingDbSection, section => section.Questions);
-    ValidateChildren(contentfulSection, "recommendations", matchingDbSection, section => section.Recommendations);
+  protected IEnumerable<DataValidationError> GetValidationErrors(SectionDbEntity databaseSection, JsonNode contentfulSection)
+  {
+    var interstitialPageValidationResult = ValidateChild<SectionDbEntity>(databaseSection, "InterstitialPageId", contentfulSection, "interstitialPage");
+
+    if (interstitialPageValidationResult != null)
+    {
+      yield return new DataValidationError("InterstitialPage", interstitialPageValidationResult);
+    }
+
+    foreach (var child in ValidateChildren(contentfulSection, "questions", databaseSection, dbRecommendationChunk => dbRecommendationChunk.Questions))
+    {
+      yield return child;
+    }
+
+    foreach (var child in ValidateChildren(contentfulSection, "recommendations", databaseSection, dbRecommendationChunk => dbRecommendationChunk.Recommendations))
+    {
+      yield return child;
+    }
   }
 
   protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()

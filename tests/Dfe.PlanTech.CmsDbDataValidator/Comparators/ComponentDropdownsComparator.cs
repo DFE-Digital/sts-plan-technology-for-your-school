@@ -1,5 +1,6 @@
 
 using System.Text.Json.Nodes;
+using Dfe.PlanTech.CmsDbDataValidator.Models;
 using Dfe.PlanTech.CmsDbDataValidator.Tests;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
@@ -42,30 +43,38 @@ public class ComponentDropdownsComparator(CmsDbContext db, ContentfulContent con
 
   private void ValidateComponentDropDown(ComponentDropDownDbEntity[] componentDropDowns, JsonNode contentfulDropdown)
   {
-    var databaseDropdown = ValidateChildEntityExistsInDb(componentDropDowns, contentfulDropdown);
+    var databaseDropdown = TryRetrieveMatchingDbEntity(componentDropDowns, contentfulDropdown);
+
     if (databaseDropdown == null)
     {
       return;
     }
 
-
-    var content = contentfulDropdown["content"];
-
-    if (content == null && databaseDropdown.Content != null)
-    {
-      Console.WriteLine($"Content for {databaseDropdown.Id} is not null, but is null in Contentful");
-      return;
-    }
-
-    var errors = RichTextComparator.CompareRichTextContent(databaseDropdown.Content!, content!).ToArray();
-
-    if (errors.Length == 0) return;
-
-    Console.WriteLine($"TextBody {contentfulDropdown} has validation errors: {string.Join("\n ", errors)}");
+    ValidateProperties(contentfulDropdown, databaseDropdown, GetValidationErrors(databaseDropdown, contentfulDropdown).ToArray());
   }
 
   protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
   {
     return _db.ComponentDropDowns;
+  }
+
+  protected IEnumerable<DataValidationError> GetValidationErrors(ComponentDropDownDbEntity databaseDropdown, JsonNode contentfulDropdown)
+  {
+    var content = contentfulDropdown["content"];
+
+    if (content == null && databaseDropdown.Content != null)
+    {
+      yield return GenerateDataValidationError("Content", "Not null in DB but is null in Contentful");
+      yield break;
+    }
+
+    var errors = RichTextComparator.CompareRichTextContent(databaseDropdown.Content!, content!).ToArray();
+
+    if (errors.Length == 0) yield break;
+
+    foreach (var error in errors)
+    {
+      yield return error;
+    }
   }
 }

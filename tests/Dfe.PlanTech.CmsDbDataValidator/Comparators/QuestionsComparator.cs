@@ -24,15 +24,13 @@ public class QuestionsComparator(CmsDbContext db, ContentfulContent contentfulCo
 
   private void ValidateQuestion(QuestionDbEntity[] databaseQuestions, JsonNode contentfulQuestion)
   {
-    var databaseQuestion = ValidateChildEntityExistsInDb(databaseQuestions, contentfulQuestion);
+    var databaseQuestion = TryRetrieveMatchingDbEntity(databaseQuestions, contentfulQuestion);
     if (databaseQuestion == null)
     {
       return;
     }
 
-    ValidateProperties(contentfulQuestion, databaseQuestion!);
-
-    ValidateChildren(contentfulQuestion, "answers", databaseQuestion, dbQuestion => dbQuestion.Answers);
+    ValidateProperties(contentfulQuestion, databaseQuestion!, ValidateChildren(contentfulQuestion, "answers", databaseQuestion, dbQuestion => dbQuestion.Answers).ToArray());
   }
 
   protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
