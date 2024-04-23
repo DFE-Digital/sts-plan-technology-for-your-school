@@ -30,7 +30,7 @@ public class MessageRetryHandler(
             return false;
         }
 
-        RedeliverMessage(message, deliveryAttempts, cancellationToken);
+        await RedeliverMessage(message, deliveryAttempts, cancellationToken);
 
         return true;
     }
