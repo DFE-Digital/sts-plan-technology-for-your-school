@@ -35,15 +35,23 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
 
   protected virtual async Task<bool> GetDbEntities()
   {
-    _dbEntities = await GetDbEntitiesQuery().ToListAsync();
-
-    if (_dbEntities == null || _dbEntities.Count == 0)
+    try
     {
-      Console.WriteLine($"{_entityType}s not found in database");
+      _dbEntities = await GetDbEntitiesQuery().ToListAsync();
+
+      if (_dbEntities == null || _dbEntities.Count == 0)
+      {
+        Console.WriteLine($"{_entityType}s not found in database");
+        return false;
+      }
+
+      return true;
+    }
+    catch (Exception ex)
+    {
+      Console.WriteLine($"Error fetching entities for {_entityType} from DB: {ex.Message}");
       return false;
     }
-
-    return true;
   }
 
   protected abstract IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery();
