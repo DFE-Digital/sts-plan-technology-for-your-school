@@ -6,7 +6,7 @@ using Dfe.PlanTech.Infrastructure.Data;
 
 namespace Dfe.PlanTech.CmsDbDataValidator.Comparators;
 
-public class ButtonWithEntryReferencesComparator(CmsDbContext db, ContentfulContent contentfulContent) : BaseComparator(db, contentfulContent, [], "ButtonWithLink")
+public class ButtonWithEntryReferencesComparator(CmsDbContext db, ContentfulContent contentfulContent) : BaseComparator(db, contentfulContent, [], "ButtonWithEntryReference")
 {
   public override Task ValidateContent()
   {
