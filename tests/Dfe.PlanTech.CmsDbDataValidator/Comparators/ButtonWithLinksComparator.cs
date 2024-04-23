@@ -23,9 +23,9 @@ public class ButtonWithLinksComparator(CmsDbContext db, ContentfulContent conten
     }
   }
 
-  private void ValidateButton(ButtonWithLinkDbEntity[] ButtonWithLinks, JsonNode contentfulButton)
+  private void ValidateButton(ButtonWithLinkDbEntity[] buttonWithLinks, JsonNode contentfulButton)
   {
-    var databaseButton = ValidateChildEntityExistsInDb(ButtonWithLinks, contentfulButton);
+    var databaseButton = ValidateChildEntityExistsInDb(buttonWithLinks, contentfulButton);
     if (databaseButton == null)
     {
       return;
