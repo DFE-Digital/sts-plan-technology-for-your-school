@@ -8,9 +8,10 @@ public static class RichTextComparator
   //TODO: refactor using the BaseComparator class
   public static IEnumerable<string> CompareRichTextContent(RichTextContentDbEntity dbEntity, JsonNode contentfulEntity)
   {
-    if (contentfulEntity?["nodeType"]?.GetValue<string>() != dbEntity.NodeType)
+    var contentfulNodeType = contentfulEntity?["nodeType"]?.GetValue<string>();
+    if (contentfulNodeType != dbEntity.NodeType)
     {
-      yield return $"Node type mismatch: Contentful '{contentfulEntity?["nodeType"]?.GetValue<string>()}' - Database '{dbEntity.NodeType}'";
+      yield return $"Node type mismatch: Contentful '{contentfulNodeType}' - Database '{dbEntity.NodeType}'";
     }
 
     var value = contentfulEntity?["value"]?.GetValue<string>() ?? "";
@@ -20,9 +21,10 @@ public static class RichTextComparator
     }
 
     var data = contentfulEntity?["data"];
-    if (data?["uri"]?.GetValue<string>() != dbEntity.Data?.Uri)
+    var uri = data?["uri"]?.GetValue<string>();
+    if (uri != dbEntity.Data?.Uri)
     {
-      yield return $"URI mismatch: Contentful '{data?["uri"]?.GetValue<string>()}' - Database '{dbEntity.Data?.Uri}'";
+      yield return $"URI mismatch: Contentful '{uri}' - Database '{dbEntity.Data?.Uri}'";
     }
 
     var children = contentfulEntity?["content"]?.AsArray();
@@ -38,17 +40,29 @@ public static class RichTextComparator
 
   private static IEnumerable<string> ValidateChildren(RichTextContentDbEntity dbEntity, JsonArray? children)
   {
-    if (children?.Count != dbEntity.Content.Count)
+    var childrenNullOrEmpty = children == null || children.Count == 0;
+    var dbChildrenNullorEmpty = dbEntity.Content == null || dbEntity.Content.Count == 0;
+
+    if (childrenNullOrEmpty && !dbChildrenNullorEmpty)
     {
-      yield return $"Children count mismatch: Contentful '{children?.Count}' vs Database '{dbEntity.Content.Count}'";
+      yield return $"Contentful entity has no children but DB entity has {dbEntity.Content!.Count} children";
+      yield break;
+    }
+    else if (!childrenNullOrEmpty && dbChildrenNullorEmpty)
+    {
+      yield return $"Contentful entity has {children!.Count} children but DB entity has no children";
+      yield break;
+    }
+    else if (children!.Count != dbEntity.Content!.Count)
+    {
+      yield return $"Children count mismatch: Contentful '{children!.Count}' vs Database '{dbEntity.Content.Count}'";
+      yield break;
     }
 
-    for (var x = 0; x < children?.Count; x++)
+    var errors = children.SelectMany((child, index) => CompareRichTextContent(dbEntity.Content[index], child!));
+    foreach (var error in errors)
     {
-      foreach (var error in CompareRichTextContent(dbEntity.Content[x], children[x]!))
-      {
-        yield return error;
-      }
+      yield return error;
     }
   }
 }
