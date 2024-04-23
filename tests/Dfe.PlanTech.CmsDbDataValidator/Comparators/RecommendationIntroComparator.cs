@@ -41,6 +41,7 @@ public class RecommendationIntrosComparator(CmsDbContext db, ContentfulContent c
       Id = intro.Id,
       Slug = intro.Slug,
       Maturity = intro.Maturity,
+      HeaderId = intro.HeaderId,
       Content = intro.Content.Select(answer => new ContentComponentDbEntity()
       {
         Id = answer.Id
