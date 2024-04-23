@@ -11,8 +11,8 @@ List<string> errors = new(comparatorFactory.Comparators.Count);
 
 foreach (var comparator in comparatorFactory.Comparators)
 {
-  await comparator.InitialiseContent();
-  errors.Add(await comparator.ValidateContentAndPrintErrors());
+    await comparator.InitialiseContent();
+    errors.Add(await comparator.ValidateContentAndPrintErrors());
 }
 
 await File.WriteAllTextAsync("contentful-errors.md", string.Join("", errors));

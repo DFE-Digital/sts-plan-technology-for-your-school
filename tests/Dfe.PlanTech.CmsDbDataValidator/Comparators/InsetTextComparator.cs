@@ -7,34 +7,34 @@ namespace Dfe.PlanTech.CmsDbDataValidator.Comparators;
 
 public class InsetTextComparator(CmsDbContext db, ContentfulContent contentfulContent) : BaseComparator(db, contentfulContent, ["Text"], "InsetText")
 {
-  public override Task ValidateContent()
-  {
-    ValidateInsetTexts(_dbEntities.OfType<InsetTextDbEntity>().ToArray());
-    return Task.CompletedTask;
-  }
-
-  private void ValidateInsetTexts(InsetTextDbEntity[] insetTexts)
-  {
-    foreach (var contentfulInsetText in _contentfulEntities)
+    public override Task ValidateContent()
     {
-      ValidateInsetText(insetTexts, contentfulInsetText);
-    }
-  }
-
-  private void ValidateInsetText(InsetTextDbEntity[] insetTexts, JsonNode contentfulInsetText)
-  {
-    var matchingDbInsetText = TryRetrieveMatchingDbEntity(insetTexts, contentfulInsetText);
-
-    if (matchingDbInsetText == null)
-    {
-      return;
+        ValidateInsetTexts(_dbEntities.OfType<InsetTextDbEntity>().ToArray());
+        return Task.CompletedTask;
     }
 
-    ValidateProperties(contentfulInsetText, matchingDbInsetText);
-  }
+    private void ValidateInsetTexts(InsetTextDbEntity[] insetTexts)
+    {
+        foreach (var contentfulInsetText in _contentfulEntities)
+        {
+            ValidateInsetText(insetTexts, contentfulInsetText);
+        }
+    }
 
-  protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
-  {
-    return _db.InsetTexts;
-  }
+    private void ValidateInsetText(InsetTextDbEntity[] insetTexts, JsonNode contentfulInsetText)
+    {
+        var matchingDbInsetText = TryRetrieveMatchingDbEntity(insetTexts, contentfulInsetText);
+
+        if (matchingDbInsetText == null)
+        {
+            return;
+        }
+
+        ValidateProperties(contentfulInsetText, matchingDbInsetText);
+    }
+
+    protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
+    {
+        return _db.InsetTexts;
+    }
 }

@@ -9,103 +9,103 @@ namespace Dfe.PlanTech.CmsDbDataValidator.Comparators;
 
 public class PageComparator(CmsDbContext db, ContentfulContent contentfulContent) : BaseComparator(db, contentfulContent, ["InternalName", "Slug", "DisplayHomeButton", "DisplayBackButton", "DisplayTopicTitle", "DisplayOrganisationName", "RequiresAuthorisation"], "Page")
 {
-  public override Task ValidateContent()
-  {
-    ValidatePages(_dbEntities.OfType<PageDbEntity>().ToArray());
-    return Task.CompletedTask;
-  }
-
-  private void ValidatePages(PageDbEntity[] pages)
-  {
-    foreach (var contentfulPage in _contentfulEntities)
+    public override Task ValidateContent()
     {
-      ValidatePage(pages, contentfulPage);
-    }
-  }
-
-  private void ValidatePage(PageDbEntity[] pages, JsonNode contentfulPage)
-  {
-    var matchingDbPage = TryRetrieveMatchingDbEntity(pages, contentfulPage);
-    if (matchingDbPage == null)
-    {
-      return;
+        ValidatePages(_dbEntities.OfType<PageDbEntity>().ToArray());
+        return Task.CompletedTask;
     }
 
-    ValidateProperties(contentfulPage, matchingDbPage, GetDataValidationErrors(matchingDbPage, contentfulPage).ToArray());
-  }
-
-  protected IEnumerable<DataValidationError> GetDataValidationErrors(PageDbEntity dbPage, JsonNode contentfulPage)
-  {
-    var titleIdValidationResult = TryGenerateDataValidationError("Title", ValidateChild<PageDbEntity>(dbPage, "TitleId", contentfulPage, "title"));
-    if (titleIdValidationResult != null)
+    private void ValidatePages(PageDbEntity[] pages)
     {
-      yield return titleIdValidationResult;
+        foreach (var contentfulPage in _contentfulEntities)
+        {
+            ValidatePage(pages, contentfulPage);
+        }
     }
 
-    foreach (var child in ValidateChildren(contentfulPage, "content", dbPage, (page) => page.Content))
+    private void ValidatePage(PageDbEntity[] pages, JsonNode contentfulPage)
     {
-      yield return child;
+        var matchingDbPage = TryRetrieveMatchingDbEntity(pages, contentfulPage);
+        if (matchingDbPage == null)
+        {
+            return;
+        }
+
+        ValidateProperties(contentfulPage, matchingDbPage, GetDataValidationErrors(matchingDbPage, contentfulPage).ToArray());
     }
 
-    foreach (var child in ValidateChildren(contentfulPage, "beforeTitleContent", dbPage, (page) => page.BeforeTitleContent))
+    protected IEnumerable<DataValidationError> GetDataValidationErrors(PageDbEntity dbPage, JsonNode contentfulPage)
     {
-      yield return child;
+        var titleIdValidationResult = TryGenerateDataValidationError("Title", ValidateChild<PageDbEntity>(dbPage, "TitleId", contentfulPage, "title"));
+        if (titleIdValidationResult != null)
+        {
+            yield return titleIdValidationResult;
+        }
+
+        foreach (var child in ValidateChildren(contentfulPage, "content", dbPage, (page) => page.Content))
+        {
+            yield return child;
+        }
+
+        foreach (var child in ValidateChildren(contentfulPage, "beforeTitleContent", dbPage, (page) => page.BeforeTitleContent))
+        {
+            yield return child;
+        }
     }
-  }
 
-  protected override async Task<bool> GetDbEntities()
-  {
-    var entities = await GetDbEntitiesPaginated(20);
-
-    if (!entities)
+    protected override async Task<bool> GetDbEntities()
     {
-      return false;
-    }
+        var entities = await GetDbEntitiesPaginated(20);
 
-    var pages = _dbEntities.OfType<PageDbEntity>().ToArray();
+        if (!entities)
+        {
+            return false;
+        }
+
+        var pages = _dbEntities.OfType<PageDbEntity>().ToArray();
 
 
-    var pageChildren = _db.PageContents.Select(pageContent =>
-                                      new PageContentDbEntity
-                                      {
-                                        ContentComponentId = pageContent.ContentComponentId,
-                                        BeforeContentComponentId = pageContent.BeforeContentComponentId,
-                                        PageId = pageContent.PageId
-                                      })
-                                      .ToArray();
-
-    foreach (var page in pages)
-    {
-      page.AllPageContents = pageChildren.Where(pageContent => pageContent.PageId == page.Id).ToList();
-      page.Content = page.AllPageContents.Where(pageContent => pageContent.ContentComponentId != null)
-                                          .Select(pageContent => new ContentComponentDbEntity()
+        var pageChildren = _db.PageContents.Select(pageContent =>
+                                          new PageContentDbEntity
                                           {
-                                            Id = pageContent.ContentComponentId!,
-                                          }).ToList();
+                                              ContentComponentId = pageContent.ContentComponentId,
+                                              BeforeContentComponentId = pageContent.BeforeContentComponentId,
+                                              PageId = pageContent.PageId
+                                          })
+                                          .ToArray();
 
-      page.BeforeTitleContent = page.AllPageContents.Where(pageContent => pageContent.BeforeContentComponentId != null)
-                                          .Select(pageContent => new ContentComponentDbEntity()
-                                          {
-                                            Id = pageContent.BeforeContentComponentId!,
-                                          }).ToList();
+        foreach (var page in pages)
+        {
+            page.AllPageContents = pageChildren.Where(pageContent => pageContent.PageId == page.Id).ToList();
+            page.Content = page.AllPageContents.Where(pageContent => pageContent.ContentComponentId != null)
+                                                .Select(pageContent => new ContentComponentDbEntity()
+                                                {
+                                                    Id = pageContent.ContentComponentId!,
+                                                }).ToList();
+
+            page.BeforeTitleContent = page.AllPageContents.Where(pageContent => pageContent.BeforeContentComponentId != null)
+                                                .Select(pageContent => new ContentComponentDbEntity()
+                                                {
+                                                    Id = pageContent.BeforeContentComponentId!,
+                                                }).ToList();
+        }
+
+        return true;
     }
 
-    return true;
-  }
-
-  protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
-  {
-    return _db.Pages.Select(page => new PageDbEntity()
+    protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
     {
-      Id = page.Id,
-      InternalName = page.InternalName,
-      Slug = page.Slug,
-      DisplayBackButton = page.DisplayBackButton,
-      DisplayHomeButton = page.DisplayHomeButton,
-      DisplayOrganisationName = page.DisplayOrganisationName,
-      DisplayTopicTitle = page.DisplayTopicTitle,
-      RequiresAuthorisation = page.RequiresAuthorisation,
-      TitleId = page.TitleId,
-    });
-  }
+        return _db.Pages.Select(page => new PageDbEntity()
+        {
+            Id = page.Id,
+            InternalName = page.InternalName,
+            Slug = page.Slug,
+            DisplayBackButton = page.DisplayBackButton,
+            DisplayHomeButton = page.DisplayHomeButton,
+            DisplayOrganisationName = page.DisplayOrganisationName,
+            DisplayTopicTitle = page.DisplayTopicTitle,
+            RequiresAuthorisation = page.RequiresAuthorisation,
+            TitleId = page.TitleId,
+        });
+    }
 }

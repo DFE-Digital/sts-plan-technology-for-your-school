@@ -10,35 +10,35 @@ namespace Dfe.PlanTech.CmsDbDataValidator.Comparators;
 
 public class ButtonWithLinksComparator(CmsDbContext db, ContentfulContent contentfulContent) : BaseComparator(db, contentfulContent, ["Href"], "ButtonWithLink")
 {
-  public override Task ValidateContent()
-  {
-    ValidateButtons(_dbEntities.OfType<ButtonWithLinkDbEntity>().ToArray());
-    return Task.CompletedTask;
-  }
-
-  private void ValidateButtons(ButtonWithLinkDbEntity[] buttonWithLinks)
-  {
-    foreach (var contentfulButton in _contentfulEntities)
+    public override Task ValidateContent()
     {
-      ValidateButton(buttonWithLinks, contentfulButton);
-    }
-  }
-
-  private void ValidateButton(ButtonWithLinkDbEntity[] buttonWithLinks, JsonNode contentfulButton)
-  {
-    var databaseButton = TryRetrieveMatchingDbEntity(buttonWithLinks, contentfulButton);
-    if (databaseButton == null)
-    {
-      return;
+        ValidateButtons(_dbEntities.OfType<ButtonWithLinkDbEntity>().ToArray());
+        return Task.CompletedTask;
     }
 
-    DataValidationError?[] errors = [TryGenerateDataValidationError("Button", ValidateChild<ButtonWithLinkDbEntity>(databaseButton, "ButtonId", contentfulButton, "button"))];
+    private void ValidateButtons(ButtonWithLinkDbEntity[] buttonWithLinks)
+    {
+        foreach (var contentfulButton in _contentfulEntities)
+        {
+            ValidateButton(buttonWithLinks, contentfulButton);
+        }
+    }
 
-    ValidateProperties(contentfulButton, databaseButton, errors);
-  }
+    private void ValidateButton(ButtonWithLinkDbEntity[] buttonWithLinks, JsonNode contentfulButton)
+    {
+        var databaseButton = TryRetrieveMatchingDbEntity(buttonWithLinks, contentfulButton);
+        if (databaseButton == null)
+        {
+            return;
+        }
 
-  protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
-  {
-    return _db.ButtonWithLinks;
-  }
+        DataValidationError?[] errors = [TryGenerateDataValidationError("Button", ValidateChild<ButtonWithLinkDbEntity>(databaseButton, "ButtonId", contentfulButton, "button"))];
+
+        ValidateProperties(contentfulButton, databaseButton, errors);
+    }
+
+    protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
+    {
+        return _db.ButtonWithLinks;
+    }
 }

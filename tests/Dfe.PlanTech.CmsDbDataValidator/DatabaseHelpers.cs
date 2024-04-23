@@ -8,17 +8,17 @@ namespace Dfe.PlanTech.CmsDbDataValidator;
 
 public static class DatabaseHelpers
 {
-  public static CmsDbContext CreateDbContext()
-  {
-    var sqlServer = ConfigurationSetup.Configuration.GetConnectionString("Database");
+    public static CmsDbContext CreateDbContext()
+    {
+        var sqlServer = ConfigurationSetup.Configuration.GetConnectionString("Database");
 
-    ServiceCollection sc = new();
-    sc.AddSingleton(new ContentfulOptions(true));
-    var serviceProvider = sc.BuildServiceProvider();
-    var databaseOptionsBuilder = new DbContextOptionsBuilder<CmsDbContext>()
-                              .UseSqlServer(sqlServer)
-                              .UseApplicationServiceProvider(serviceProvider);
+        ServiceCollection sc = new();
+        sc.AddSingleton(new ContentfulOptions(true));
+        var serviceProvider = sc.BuildServiceProvider();
+        var databaseOptionsBuilder = new DbContextOptionsBuilder<CmsDbContext>()
+                                  .UseSqlServer(sqlServer)
+                                  .UseApplicationServiceProvider(serviceProvider);
 
-    return new CmsDbContext(databaseOptionsBuilder.Options);
-  }
+        return new CmsDbContext(databaseOptionsBuilder.Options);
+    }
 }
