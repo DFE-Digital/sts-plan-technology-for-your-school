@@ -23,11 +23,10 @@ public class InsetTextComparator(CmsDbContext db, ContentfulContent contentfulCo
 
   private void ValidateInsetText(InsetTextDbEntity[] insetTexts, JsonNode contentfulInsetText)
   {
-    var matchingDbInsetText = insetTexts.FirstOrDefault(header => header.Id == contentfulInsetText.GetEntryId());
+    var matchingDbInsetText = TryRetrieveMatchingDbEntity(insetTexts, contentfulInsetText);
 
     if (matchingDbInsetText == null)
     {
-      Console.WriteLine($"No matching header found for contentful header with ID: {contentfulInsetText.GetEntryId()}");
       return;
     }
 

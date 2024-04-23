@@ -13,33 +13,23 @@ public class NavigationLinkComparator(CmsDbContext db, ContentfulContent content
     return Task.CompletedTask;
   }
 
-  private void ValidateNavigationLinks(NavigationLinkDbEntity[] NavigationLinks)
+  private void ValidateNavigationLinks(NavigationLinkDbEntity[] navigationLinks)
   {
     foreach (var contentfulNavigationLink in _contentfulEntities)
     {
-      ValidateNavigationLink(NavigationLinks, contentfulNavigationLink);
+      ValidateNavigationLink(navigationLinks, contentfulNavigationLink);
     }
   }
 
-  private void ValidateNavigationLink(NavigationLinkDbEntity[] NavigationLinks, JsonNode contentfulNavigationLink)
+  private void ValidateNavigationLink(NavigationLinkDbEntity[] navigationLinks, JsonNode contentfulNavigationLink)
   {
-    var contentfulNavigationLinkId = contentfulNavigationLink.GetEntryId();
-
-    if (contentfulNavigationLinkId == null)
+    var databaseNavLink = TryRetrieveMatchingDbEntity(navigationLinks, contentfulNavigationLink);
+    if (databaseNavLink == null)
     {
-      Console.WriteLine($"Couldn't find ID for Contentful NavigationLink {contentfulNavigationLink}");
       return;
     }
 
-    var matchingDbNavigationLink = NavigationLinks.FirstOrDefault(NavigationLink => NavigationLink.Id == contentfulNavigationLinkId);
-
-    if (matchingDbNavigationLink == null)
-    {
-      Console.WriteLine($"No matching NavigationLink found for contentful NavigationLink with ID: {contentfulNavigationLinkId}");
-      return;
-    }
-
-    ValidateProperties(contentfulNavigationLink, matchingDbNavigationLink);
+    ValidateProperties(contentfulNavigationLink, databaseNavLink);
   }
 
   protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()

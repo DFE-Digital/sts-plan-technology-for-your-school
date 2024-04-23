@@ -23,24 +23,15 @@ public class WarningComponentComparator(CmsDbContext db, ContentfulContent conte
 
   private void ValidateWarningComponent(WarningComponentDbEntity[] warningComponents, JsonNode contentfulWarningComponent)
   {
-    var contentfulWarningComponentId = contentfulWarningComponent.GetEntryId();
-
-    if (contentfulWarningComponentId == null)
-    {
-      Console.WriteLine($"Couldn't find ID for Contentful warningComponent {contentfulWarningComponent}");
-      return;
-    }
-
-    var matchingDbWarningComponent = warningComponents.FirstOrDefault(warningComponent => warningComponent.Id == contentfulWarningComponentId);
+    var matchingDbWarningComponent = TryRetrieveMatchingDbEntity(warningComponents, contentfulWarningComponent);
 
     if (matchingDbWarningComponent == null)
     {
-      Console.WriteLine($"No matching warningComponent found for contentful warningComponent with ID: {contentfulWarningComponentId}");
       return;
     }
 
     var textValidationResult = ValidateChild<WarningComponentDbEntity>(matchingDbWarningComponent, "TextId", contentfulWarningComponent, "text");
-    ValidateProperties(contentfulWarningComponent, matchingDbWarningComponent, textValidationResult);
+    ValidateProperties(contentfulWarningComponent, matchingDbWarningComponent, TryGenerateDataValidationError("Text", textValidationResult));
   }
 
   protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()

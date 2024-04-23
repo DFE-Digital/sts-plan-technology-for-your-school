@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using Dfe.PlanTech.CmsDbDataValidator.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
@@ -23,14 +24,27 @@ public class RecommendationSectionsComparator(CmsDbContext db, ContentfulContent
 
   private void ValidateRecommendationSection(RecommendationSectionDbEntity[] databaseRecommendationSections, JsonNode contentfulRecommendationSection)
   {
-    var databaseRecommendationSection = ValidateChildEntityExistsInDb(databaseRecommendationSections, contentfulRecommendationSection);
+    var databaseRecommendationSection = TryRetrieveMatchingDbEntity(databaseRecommendationSections, contentfulRecommendationSection);
     if (databaseRecommendationSection == null)
     {
       return;
     }
 
-    ValidateChildren(contentfulRecommendationSection, "answers", databaseRecommendationSection, dbRecommendationSection => dbRecommendationSection.Answers);
-    ValidateChildren(contentfulRecommendationSection, "chunks", databaseRecommendationSection, dbRecommendationSection => dbRecommendationSection.Chunks);
+    ValidateProperties(contentfulRecommendationSection, databaseRecommendationSection, GetValidationErrors(databaseRecommendationSection, contentfulRecommendationSection).ToArray());
+  }
+
+
+  protected IEnumerable<DataValidationError> GetValidationErrors(RecommendationSectionDbEntity databaseRecommendationSection, JsonNode contentfulRecommendationSection)
+  {
+    foreach (var child in ValidateChildren(contentfulRecommendationSection, "answers", databaseRecommendationSection, dbRecommendationChunk => dbRecommendationChunk.Answers))
+    {
+      yield return child;
+    }
+
+    foreach (var child in ValidateChildren(contentfulRecommendationSection, "chunks", databaseRecommendationSection, dbRecommendationChunk => dbRecommendationChunk.Chunks))
+    {
+      yield return child;
+    }
   }
 
   protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()

@@ -23,19 +23,10 @@ public class HeaderComparator(CmsDbContext db, ContentfulContent contentfulConte
 
   private void ValidateHeader(HeaderDbEntity[] headers, JsonNode contentfulHeader)
   {
-    var contentfulHeaderId = contentfulHeader.GetEntryId();
-
-    if (contentfulHeaderId == null)
-    {
-      Console.WriteLine($"Couldn't find ID for Contentful header {contentfulHeader}");
-      return;
-    }
-
-    var matchingDbHeader = headers.FirstOrDefault(header => header.Id == contentfulHeaderId);
+    var matchingDbHeader = TryRetrieveMatchingDbEntity(headers, contentfulHeader);
 
     if (matchingDbHeader == null)
     {
-      Console.WriteLine($"No matching header found for contentful header with ID: {contentfulHeaderId}");
       return;
     }
 

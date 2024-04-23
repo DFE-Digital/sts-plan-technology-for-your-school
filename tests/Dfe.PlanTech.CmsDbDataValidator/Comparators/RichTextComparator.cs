@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using Dfe.PlanTech.CmsDbDataValidator.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 
 namespace Dfe.PlanTech.CmsDbDataValidator.Comparators;
@@ -6,25 +7,26 @@ namespace Dfe.PlanTech.CmsDbDataValidator.Comparators;
 public static class RichTextComparator
 {
   //TODO: refactor using the BaseComparator class
-  public static IEnumerable<string> CompareRichTextContent(RichTextContentDbEntity dbEntity, JsonNode contentfulEntity)
+  public static IEnumerable<DataValidationError> CompareRichTextContent(RichTextContentDbEntity dbEntity, JsonNode contentfulEntity)
   {
     var contentfulNodeType = contentfulEntity?["nodeType"]?.GetValue<string>();
     if (contentfulNodeType != dbEntity.NodeType)
     {
-      yield return $"Node type mismatch: Contentful '{contentfulNodeType}' - Database '{dbEntity.NodeType}'";
+      yield return new DataValidationError("NodeType", $"Contentful '{contentfulNodeType}' - Database '{dbEntity.NodeType}'");
     }
 
     var value = contentfulEntity?["value"]?.GetValue<string>() ?? "";
     if (value != dbEntity.Value)
     {
-      yield return $"Value mismatch: Contentful '{value}' - Database '{dbEntity.Value}'";
+      yield return new DataValidationError("Value", $"Contentful '{value}' - Database '{dbEntity.Value}'");
     }
 
     var data = contentfulEntity?["data"];
     var uri = data?["uri"]?.GetValue<string>();
+
     if (uri != dbEntity.Data?.Uri)
     {
-      yield return $"URI mismatch: Contentful '{uri}' - Database '{dbEntity.Data?.Uri}'";
+      yield return new DataValidationError("Data.Uri", $"Contentful '{uri}' - Database '{dbEntity.Data?.Uri}'");
     }
 
     var children = contentfulEntity?["content"]?.AsArray();
@@ -38,24 +40,24 @@ public static class RichTextComparator
     }
   }
 
-  private static IEnumerable<string> ValidateChildren(RichTextContentDbEntity dbEntity, JsonArray? children)
+  private static IEnumerable<DataValidationError> ValidateChildren(RichTextContentDbEntity dbEntity, JsonArray? children)
   {
     var childrenNullOrEmpty = children == null || children.Count == 0;
     var dbChildrenNullorEmpty = dbEntity.Content == null || dbEntity.Content.Count == 0;
 
     if (childrenNullOrEmpty && !dbChildrenNullorEmpty)
     {
-      yield return $"Contentful entity has no children but DB entity has {dbEntity.Content!.Count} children";
+      yield return new DataValidationError("Content children", $"Contentful has no children - Database {dbEntity.Id} has {dbEntity.Content!.Count} children");
       yield break;
     }
     else if (!childrenNullOrEmpty && dbChildrenNullorEmpty)
     {
-      yield return $"Contentful entity has {children!.Count} children but DB entity has no children";
+      yield return new DataValidationError("Content children", $"Contentful has {children!.Count} children - Database {dbEntity.Id} has no children");
       yield break;
     }
     else if (children!.Count != dbEntity.Content!.Count)
     {
-      yield return $"Children count mismatch: Contentful '{children!.Count}' vs Database '{dbEntity.Content.Count}'";
+      yield return new DataValidationError("Content children", $"Count mismatch: Contentful '{children!.Count}' - Database {dbEntity.Id} has '{dbEntity.Content.Count}'");
       yield break;
     }
 

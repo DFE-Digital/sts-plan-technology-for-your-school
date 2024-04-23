@@ -1,5 +1,7 @@
+using System.CodeDom.Compiler;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Dfe.PlanTech.CmsDbDataValidator.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +18,8 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
   protected List<JsonNode> _contentfulEntities = [];
   protected List<ContentComponentDbEntity> _dbEntities = [];
 
+  public readonly EntityTypeValidationErrors EntityTypeValidationErrors = new() { ContentfulContentType = entityType };
+
   public virtual async Task<bool> InitialiseContent()
   {
     if (!GetContentfulEntities())
@@ -28,9 +32,19 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
       return false;
     }
 
+    EntityTypeValidationErrors.EntityValidationErrors.Capacity = _contentfulEntities.Count;
+
     return true;
   }
 
+  public async Task ValidateContentAndPrintErrors()
+  {
+    await ValidateContent();
+    Console.WriteLine(EntityTypeValidationErrors.ToString());
+    Console.WriteLine("");
+    Console.WriteLine("-------------");
+    Console.WriteLine("");
+  }
   public abstract Task ValidateContent();
 
   protected virtual async Task<bool> GetDbEntities()
@@ -69,7 +83,7 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
 
     var dbEntityValue = databaseProperty.GetValue(dbEntity)?.ToString();
 
-    return CompareStrings(dbEntityPropertyName, contentfulEntity[contentfulPropertyName]?.GetEntryId(), dbEntityValue);
+    return CompareStrings(contentfulEntity[contentfulPropertyName]?.GetEntryId(), dbEntityValue);
   }
 
   protected virtual bool GetContentfulEntities()
@@ -91,10 +105,10 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
     var contentfulValue = contentfulEntity[formattedPropertyName]?.GetValue<string>();
     var databaseValue = databaseEntity.GetType().GetProperty(propertyName)?.GetValue(databaseEntity)?.ToString();
 
-    return CompareStrings(propertyName, contentfulValue, databaseValue);
+    return CompareStrings(contentfulValue, databaseValue);
   }
 
-  protected static string? CompareProperty(JsonNode contentfulEntity, ContentComponentDbEntity databaseEntity, string propertyName, string? contentfulPropertyName = null)
+  protected DataValidationError? CompareProperty(JsonNode contentfulEntity, ContentComponentDbEntity databaseEntity, string propertyName, string? contentfulPropertyName = null)
   {
     var formattedPropertyName = contentfulPropertyName ?? LowercaseFirstLetter(propertyName);
 
@@ -104,7 +118,7 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
 
     if (databaseProperty == null)
     {
-      return $"Could not find property {propertyName} in {databaseEntity.GetType()}";
+      return GenerateDataValidationError(propertyName, "Missing in DB entity");
     }
 
     var databaseValue = databaseProperty!.GetValue(databaseEntity);
@@ -115,43 +129,59 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
     }
     else if (contentfulProperty == null && databaseValue != null)
     {
-      return $"{formattedPropertyName} is null in Contentful but is {databaseValue} in the database.";
+      return GenerateDataValidationError(formattedPropertyName, $"{formattedPropertyName} is null in Contentful but is {databaseValue} in the database.");
     }
     else if (contentfulProperty != null && databaseValue == null)
     {
-      return $"{propertyName} is null in DB but is {databaseValue} in the database.";
+      return GenerateDataValidationError(propertyName, $"{propertyName} is null in DB but is {databaseValue} in the database.");
     }
 
     var contentfulValue = contentfulProperty!.Deserialize(databaseProperty.PropertyType);
 
     if (databaseValue?.GetType() == typeof(string) && contentfulValue?.GetType() == typeof(string))
     {
-      return CompareStrings(propertyName, contentfulValue as string, databaseValue as string);
+      var stringError = CompareStrings(contentfulValue as string, databaseValue as string);
+
+      if (stringError != null)
+      {
+        return GenerateDataValidationError(propertyName, stringError);
+      }
     }
 
     var matching = Equals(contentfulValue, databaseValue);
 
-    return GetValidationMessage(propertyName, contentfulValue, databaseValue, matching);
+    var errorMessage = GetValidationMessage(contentfulValue, databaseValue, matching);
+
+    if (errorMessage != null)
+    {
+      return GenerateDataValidationError(propertyName, errorMessage);
+    }
+
+    return null;
   }
 
-  protected static string? CompareStrings(string propertyName, string? contentfulValue, string? databaseValue)
+  protected static string? CompareStrings(string? contentfulValue, string? databaseValue)
   {
     var matches = string.Equals(contentfulValue, databaseValue);
-    return GetValidationMessage(propertyName, contentfulValue, databaseValue, matches);
+    return GetValidationMessage(contentfulValue, databaseValue, matches);
   }
 
-  private static string? GetValidationMessage<T>(string propertyName, T? contentfulValue, T? databaseValue, bool matches)
-    => matches ? null : $"{propertyName} doesn't match. Expected {contentfulValue} but found {databaseValue}";
+  private static string? GetValidationMessage<T>(T? contentfulValue, T? databaseValue, bool matches)
+    => matches ? null : $"Expected {contentfulValue} but found {databaseValue}";
 
-  protected void ValidateProperties(JsonNode contentfulEntity, ContentComponentDbEntity dbEntity, params string?[]? extraValidations)
+  protected EntityValidationErrors ValidateProperties(JsonNode contentfulEntity, ContentComponentDbEntity dbEntity, params DataValidationError?[]? extraValidations)
   {
     var validationResults = GetValidationResults(contentfulEntity, dbEntity).Concat(extraValidations ?? [])
                                                                             .Where(validationResult => validationResult != null)!;
 
-    LogValidationMessages(validationResults, contentfulEntity);
+    var entityValidationError = GenerateEntityValidationErrors(dbEntity.Id ?? contentfulEntity.GetEntryId()!, validationResults!);
+
+    EntityTypeValidationErrors.AddErrors(entityValidationError);
+
+    return entityValidationError;
   }
 
-  private IEnumerable<string?> GetValidationResults(JsonNode contentfulEntity, ContentComponentDbEntity dbEntity)
+  private IEnumerable<DataValidationError?> GetValidationResults(JsonNode contentfulEntity, ContentComponentDbEntity dbEntity)
   => _propertiesToValidate.Select(prop => CompareProperty(contentfulEntity, dbEntity, prop));
 
   protected void LogValidationMessages(IEnumerable<string?> validationResults, JsonNode contentfulEntity)
@@ -162,15 +192,22 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
     }
   }
 
-  protected TDbEntity? ValidateChildEntityExistsInDb<TDbEntity>(IEnumerable<TDbEntity> dbEntities, JsonNode contentfulEntity)
+  protected TDbEntity? TryRetrieveMatchingDbEntity<TDbEntity>(IEnumerable<TDbEntity> dbEntities, JsonNode contentfulEntity)
     where TDbEntity : ContentComponentDbEntity
   {
     var contentfulEntityId = contentfulEntity.GetEntryId();
+    if (string.IsNullOrEmpty(contentfulEntityId))
+    {
+      Console.WriteLine($"Could not find ID for Contentful Entity {contentfulEntity}");
+      return null;
+    }
+
     var databaseEntity = dbEntities.FirstOrDefault(entity => entity.Id == contentfulEntityId);
 
     if (databaseEntity == null)
     {
-      Console.WriteLine($"Could not find matching {_entityType} in DB for {contentfulEntityId}");
+      EntityTypeValidationErrors.AddErrors(GenerateEntityValidationErrors(contentfulEntityId, GenerateDataValidationError("ENTITY", "Not found in database")));
+      return null;
     }
 
     return databaseEntity;
@@ -184,7 +221,7 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
   /// <param name="arrayKey">The key of the array to validate.</param>
   /// <param name="dbEntity">The db entry to use for validation.</param>
   /// <param name="selectReferences">A function to select references from the db entry.</param>
-  protected void ValidateChildren<TDbEntity, TDbEntityReference>(JsonNode contentfulEntity, string arrayKey, TDbEntity dbEntity, Func<TDbEntity, List<TDbEntityReference>> selectReferences)
+  protected IEnumerable<DataValidationError> ValidateChildren<TDbEntity, TDbEntityReference>(JsonNode contentfulEntity, string arrayKey, TDbEntity dbEntity, Func<TDbEntity, List<TDbEntityReference>> selectReferences)
       where TDbEntity : ContentComponentDbEntity
       where TDbEntityReference : ContentComponentDbEntity
   {
@@ -201,49 +238,47 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
       //If we have no Contentful children, but we have children in DB, then something's a bit screwy somewhere
       if (dbChildren != null && dbChildren.Count > 0)
       {
-        Console.WriteLine($"Contentful entity {contentfulEntity.GetEntryId()} has no children but DB entity has {dbChildren.Count} children");
+        yield return GenerateDataValidationError(arrayKey, $"No children in Contentful by DB entity has {dbChildren.Count} children");
       }
 
-      return;
+      yield break;
     }
 
     var dbEntityType = typeof(TDbEntity).Name.Replace("DbEntity", "");
 
     var contentfulEntityId = contentfulEntity.GetEntryId();
 
-    var missingDbEntities = contentfulChildrenIds.Where(childId => !dbChildren.Any(dbChild => dbChild.Id == childId)).ToArray();
+    var missingDbEntities = contentfulChildrenIds.Where(childId => !dbChildren.Any(dbChild => dbChild.Id == childId))
+                                                .Select(id => GenerateDataValidationError(arrayKey, $"Missing {id} in database"));
 
     var extraDbEntities = dbChildren.Where(dbChild => !contentfulChildrenIds.Any(childId => dbChild.Id == childId))
-                                    .Select(dbChild => dbChild.Id)
-                                    .ToArray();
+                                  .Select(dbChild => GenerateDataValidationError(arrayKey, $"{dbChild.Id} exists in DB but not Contentful"));
 
 
-    var missingDbEntitiesErrorMessage = missingDbEntities.Length != 0 ? $"  IDs missing in DB but exist in Contentful: \n     {string.Join("\n    ", missingDbEntities)}" : null;
-    var extraDbEntitiesErrorMessage = extraDbEntities.Length != 0 ? $"  IDs in DB but not in Contentful: \n      {string.Join("\n    ", extraDbEntities)}" : null;
-
-    IEnumerable<string?> nonNullErrors = [missingDbEntitiesErrorMessage, extraDbEntitiesErrorMessage];
-
-    var childErrors = string.Join("\n", nonNullErrors.Where(error => error != null));
-
-    if (!string.IsNullOrEmpty(childErrors))
+    foreach (var missingDbEntity in missingDbEntities)
     {
-      Console.WriteLine($"Child reference errors in {dbEntityType} {contentfulEntityId} for property {arrayKey}: \n{childErrors}");
+      yield return missingDbEntity;
+    }
+
+    foreach (var extraDbEntity in extraDbEntities)
+    {
+      yield return extraDbEntity;
     }
   }
 
-  public string? ValidateEnumValue<TEnum, TDbEntity>(JsonNode contentfulEntry, string key, TDbEntity dbEntry, TEnum dbValue)
+  public DataValidationError? ValidateEnumValue<TEnum, TDbEntity>(JsonNode contentfulEntry, string key, TDbEntity dbEntry, TEnum dbValue)
     where TEnum : struct, Enum
     where TDbEntity : ContentComponentDbEntity
   {
     var enumValue = GetEnumValue<TEnum>(contentfulEntry, key);
     if (enumValue == null)
     {
-      return $"Enum {key} in {contentfulEntry.GetEntryId()} was not found";
+      return GenerateDataValidationError(key, $"Enum was not found in the Contentful data");
     }
 
     if (!enumValue.Equals(dbValue))
     {
-      return $"Error: Enum values do not match. Expected {enumValue} but DB has {dbValue}";
+      return GenerateDataValidationError(key, $"Expected {enumValue} but DB has {dbValue}");
     }
 
     return null;
@@ -270,4 +305,25 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
     }
     return char.ToLower(input[0]) + input[1..];
   }
+
+  protected virtual DataValidationError GenerateDataValidationError(string field, string message)
+  => new(field, message);
+
+  protected virtual DataValidationError? TryGenerateDataValidationError(string field, string? message)
+  => message == null ? null : new(field, message);
+
+  protected virtual EntityValidationErrors GenerateEntityValidationErrors(string entityId, IEnumerable<DataValidationError> dataValidationErrors)
+  => new()
+  {
+    EntityId = entityId,
+    Errors = dataValidationErrors.ToList()
+  };
+
+  protected virtual EntityValidationErrors GenerateEntityValidationErrors(string entityId, params DataValidationError[] dataValidationErrors)
+  => new()
+  {
+    EntityId = entityId,
+    Errors = [.. dataValidationErrors]
+  };
+
 }

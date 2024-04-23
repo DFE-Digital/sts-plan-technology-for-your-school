@@ -10,5 +10,5 @@ var comparatorFactory = new ComparatorFactory(db, contentfulContent);
 foreach (var comparator in comparatorFactory.Comparators)
 {
   await comparator.InitialiseContent();
-  await comparator.ValidateContent();
+  await comparator.ValidateContentAndPrintErrors();
 }

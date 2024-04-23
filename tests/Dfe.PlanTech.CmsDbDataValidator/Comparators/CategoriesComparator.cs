@@ -1,5 +1,6 @@
 
 using System.Text.Json.Nodes;
+using Dfe.PlanTech.CmsDbDataValidator.Models;
 using Dfe.PlanTech.CmsDbDataValidator.Tests;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -27,21 +28,22 @@ public class CategoriesComparator(CmsDbContext db, ContentfulContent contentfulC
 
   private void ValidateCategory(CategoryDbEntity[] categories, JsonNode contentfulCategory)
   {
-    var databaseCategory = ValidateChildEntityExistsInDb(categories, contentfulCategory);
+    var databaseCategory = TryRetrieveMatchingDbEntity(categories, contentfulCategory);
     if (databaseCategory == null)
     {
       return;
     }
 
-    ValidateProperties(contentfulCategory, databaseCategory);
+    var headerError = TryGenerateDataValidationError("Header", ValidateChild<CategoryDbEntity>(databaseCategory, "HeaderId", contentfulCategory, "header"));
 
-    var headerValidationResult = ValidateChild<CategoryDbEntity>(databaseCategory, "HeaderId", contentfulCategory, "header");
-    if (headerValidationResult != null)
+    var errors = ValidateChildren(contentfulCategory, "sections", databaseCategory, category => category.Sections);
+
+    if (headerError != null)
     {
-      Console.WriteLine(headerValidationResult);
+      errors = errors.Append(headerError);
     }
 
-    ValidateChildren(contentfulCategory, "sections", databaseCategory, category => category.Sections);
+    ValidateProperties(contentfulCategory, databaseCategory, errors.ToArray());
   }
 
   protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
