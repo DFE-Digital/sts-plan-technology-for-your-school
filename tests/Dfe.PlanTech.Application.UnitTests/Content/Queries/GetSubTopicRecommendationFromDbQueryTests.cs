@@ -1,6 +1,5 @@
 using AutoMapper;
 using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Mappings;
 using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -22,7 +21,7 @@ public class GetSubTopicRecommendationFromDbQueryTests
 
     private readonly SubtopicRecommendationDbEntity? _subtopicRecommendationOne;
     private readonly SubtopicRecommendationDbEntity? _subtopicRecommendationTwo;
-
+    private readonly SubtopicRecommendationDbEntity? _subtopicRecommendationThree;
     private readonly IMapper _mapper;
     private readonly ILogger<GetSubTopicRecommendationFromDbQuery> _logger = Substitute.For<ILogger<GetSubTopicRecommendationFromDbQuery>>();
     private readonly List<SubtopicRecommendationDbEntity> _subtopicRecommendations = [];
@@ -174,11 +173,21 @@ public class GetSubTopicRecommendationFromDbQueryTests
             Id = "subtopic-recommendation-two"
         };
 
+        _subtopicRecommendationThree = new()
+        {
+            Subtopic = null!,
+            SubtopicId = "subtopic-id-three",
+            Section = null!,
+            Intros = [],
+            Id = "subtopic-recommendation-three"
+        };
+
 
         _query = new(_recommendationsRepository, _logger, _mapper);
 
         _subtopicRecommendations.Add(_subtopicRecommendationOne);
         _subtopicRecommendations.Add(_subtopicRecommendationTwo);
+        _subtopicRecommendations.Add(_subtopicRecommendationThree);
 
         _recommendationsRepository.GetCompleteRecommendationsForSubtopic(Arg.Any<string>(), Arg.Any<CancellationToken>())
                                   .Returns((callinfo) =>
@@ -219,7 +228,7 @@ public class GetSubTopicRecommendationFromDbQueryTests
     }
 
     [Fact]
-    public async Task LogsError_When_Exception()
+    public async Task LogsError_When_Exception_Retrieving_Recommendations()
     {
         _recommendationsRepository.GetCompleteRecommendationsForSubtopic(Arg.Any<string>(), Arg.Any<CancellationToken>())
                                     .ThrowsAsync((callinfo) => new Exception("Error getting recommendations for subtopic"));
@@ -235,5 +244,38 @@ public class GetSubTopicRecommendationFromDbQueryTests
         var logLevel = arguments[0];
 
         Assert.Equal(LogLevel.Error, logLevel);
+    }
+
+    [Fact]
+    public async Task LogsError_When_Intros_Are_Missing()
+    {
+        var recommendation = await _query.GetSubTopicRecommendation(_subtopicRecommendationTwo!.SubtopicId, CancellationToken.None);
+
+        Assert.Null(recommendation);
+
+        var loggedMessages = _logger.ReceivedCalls().ToArray();
+
+        Assert.Single(loggedMessages);
+
+        var arguments = loggedMessages.First().GetArguments().ToArray();
+
+        var logLevel = arguments[0];
+
+        Assert.Equal(LogLevel.Error, logLevel);
+
+        var message = GetErrors(arguments);
+
+        Assert.Contains("No intros found", message);
+    }
+
+    private static string? GetErrors(object?[] arguments)
+    {
+        var messages = arguments[2];
+
+        var unboxed = messages as IReadOnlyList<KeyValuePair<string, object?>>;
+
+        var errors = unboxed!.FirstOrDefault(val => val.Key == "Errors");
+        var unboxedErrors = errors.Value as string;
+        return unboxedErrors;
     }
 }

@@ -23,10 +23,19 @@ public class GetSubTopicRecommendationFromDbQuery(IRecommendationsRepository rep
 
             if (recommendation == null)
             {
+                _logger.LogError("Unable to find recommendtion for {SubtopicId} in DB", subtopicId);
                 return null;
             }
 
-            return MapRecommendation(recommendation);
+            var errors = ValidateRecommendationResponse(recommendation).ToArray();
+
+            if (errors.Length > 0)
+            {
+                _logger.LogError("Recommendation for {SubtopicId} has several data issues. Returning null so that a retrieval from Contentful can occur. Errors:\n\n{Errors}", subtopicId, string.Join(Environment.NewLine, errors));
+                return null;
+            }
+
+            return MapRecommendation(recommendation!);
         }
         catch (Exception ex)
         {
@@ -41,4 +50,12 @@ public class GetSubTopicRecommendationFromDbQuery(IRecommendationsRepository rep
 
     private SubtopicRecommendation MapRecommendation(SubtopicRecommendationDbEntity dbEntity)
     => _mapperConfiguration.Map<SubtopicRecommendationDbEntity, SubtopicRecommendation>(dbEntity);
+
+    private static IEnumerable<string> ValidateRecommendationResponse(SubtopicRecommendationDbEntity recommendation)
+    {
+        if (recommendation.Intros == null || recommendation.Intros.Count == 0)
+        {
+            yield return "No intros found";
+        }
+    }
 }
