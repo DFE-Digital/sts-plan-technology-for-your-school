@@ -30,7 +30,7 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
 
         mappedEntity.UpdateEntity();
 
-        if (!mappedEntity.IsValidComponent(Db, _logger))
+        if (!mappedEntity.IsValidComponent(Db, _logger) || mappedEntity.IsRemovalEvent)
         {
             return mappedEntity;
         }
