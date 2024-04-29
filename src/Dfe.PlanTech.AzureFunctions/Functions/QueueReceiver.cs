@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Text.Json;
 using Dfe.PlanTech.AzureFunctions.Utils;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.AzureFunctions;
 
@@ -71,9 +72,15 @@ public class QueueReceiver(
                 await messageActions.CompleteMessageAsync(message, cancellationToken);
                 return;
             }
-
-            UpsertEntity(mapped);
-            await DbSaveChanges(cancellationToken);
+            else if (mapped.IsMinimalPayloadEvent)
+            {
+                await ProcessEntityRemovalEvent(db, mapped, cancellationToken);
+            }
+            else
+            {
+                UpsertEntity(mapped);
+                await DbSaveChanges(cancellationToken);
+            }
 
             await messageActions.CompleteMessageAsync(message, cancellationToken);
         }
@@ -99,6 +106,20 @@ public class QueueReceiver(
                 return;
             }
         }
+    }
+
+    private static async Task ProcessEntityRemovalEvent(CmsDbContext db, MappedEntity mapped, CancellationToken cancellationToken)
+    {
+        if (mapped.ExistingEntity == null)
+        {
+            throw new NullReferenceException("ExistingEntity is null for removal event but various validations should have prevented this.");
+        }
+
+        await db.ContentComponents.IgnoreAutoIncludes()
+                                    .IgnoreQueryFilters()
+                                    .Where(contentComponent => contentComponent.Id == mapped.ExistingEntity!.Id)
+                                    .ExecuteUpdateAsync((contentComponent) => contentComponent.SetProperty(cc => cc.Deleted, mapped.ExistingEntity.Deleted)
+                                                                                               .SetProperty(cc => cc.Published, mapped.ExistingEntity.Published), cancellationToken: cancellationToken);
     }
 
     /// <summary>

@@ -22,9 +22,9 @@ public class MappedEntity
 
     public bool AlreadyExistsInDatabase => ExistingEntity != null;
 
-    public bool IsRemovalEvent => CmsEvent == CmsEvent.UNPUBLISH || CmsEvent == CmsEvent.DELETE;
+    public bool IsMinimalPayloadEvent => CmsEvent == CmsEvent.UNPUBLISH || CmsEvent == CmsEvent.DELETE;
 
-    public bool ShouldCopyProperties => AlreadyExistsInDatabase && !IsRemovalEvent;
+    public bool ShouldCopyProperties => AlreadyExistsInDatabase && !IsMinimalPayloadEvent;
 
     /// <summary>
     /// Checks if the incoming entity is a valid component.
@@ -35,7 +35,7 @@ public class MappedEntity
     /// <returns>True if the entity is valid, false otherwise.</returns>
     public bool IsValidComponent(CmsDbContext db, ILogger logger)
     {
-        if (IsRemovalEvent)
+        if (IsMinimalPayloadEvent)
         {
             IsValid = true;
             return true;
@@ -131,7 +131,7 @@ public class MappedEntity
                     throw new CmsEventException(string.Format("Content with Id \"{0}\" has event 'delete' despite not existing in the database!", IncomingEntity.Id));
                 }
                 IncomingEntity.Deleted = true;
-                ExistingEntity.Deleted = false;
+                ExistingEntity.Deleted = true;
                 break;
         }
     }
