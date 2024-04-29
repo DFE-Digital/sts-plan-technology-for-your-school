@@ -70,6 +70,14 @@ public class PageEntityUpdaterTests
                             var pageContentsToRemove = callinfo.ArgAt<IEnumerable<PageContentDbEntity>>(0);
                             _pageContents.RemoveAll(pc => pageContentsToRemove.Contains(pc));
                         });
+
+        _db.PageContents.When(pc => pc.Remove(Arg.Any<PageContentDbEntity>()))
+                .Do((callinfo) =>
+                {
+                    var pageContentsToRemove = callinfo.ArgAt<PageContentDbEntity>(0);
+                    _pageContents.Remove(pageContentsToRemove);
+                });
+
     }
 
     [Fact]
@@ -169,9 +177,46 @@ public class PageEntityUpdaterTests
         _updater.UpdateEntityConcrete(mappedEntity);
 
         Assert.DoesNotContain(removedEntity, existingPage.AllPageContents);
+        Assert.DoesNotContain(removedEntity, _pageContents);
     }
 
+    [Fact]
+    public void Should_Delete_Duplicate_PageContents()
+    {
+        var pageId = "page-id";
 
+        var incomingPage = new PageDbEntity()
+        {
+            AllPageContents = [.. _pageContents],
+            Id = pageId
+        };
+
+        List<PageContentDbEntity> copies = [.. _pageContents];
+        foreach (var copy in copies)
+        {
+            copy.Id *= 10;
+        }
+
+        _pageContents.AddRange(copies);
+
+        var existingPage = new PageDbEntity()
+        {
+            AllPageContents = [.. _pageContents],
+            Id = pageId
+        };
+
+        var mappedEntity = new MappedEntity()
+        {
+            IncomingEntity = incomingPage,
+            ExistingEntity = existingPage,
+            CmsEvent = CmsEvent.SAVE
+        };
+
+        _updater.UpdateEntityConcrete(mappedEntity);
+
+        Assert.Equal(incomingPage.AllPageContents.Count, existingPage.AllPageContents.Count);
+        Assert.Equal(incomingPage.AllPageContents.Count, _pageContents.Count);
+    }
     private static readonly Func<PageContentDbEntity, PageContentDbEntity> InverseOrder
       = pc => new PageContentDbEntity()
       {
