@@ -42,8 +42,6 @@ public class PageEntityUpdater(ILogger<PageEntityUpdater> logger, CmsDbContext d
     /// <param name="existingPage"></param>
     private static void DeleteRemovedPageContents(PageDbEntity incomingPage, PageDbEntity existingPage)
     {
-        var deletedPageContents = existingPage.AllPageContents.Where((existingPageContent) => !HasPageContent(incomingPage, existingPageContent)).ToList();
-
         existingPage.AllPageContents.RemoveAll((existingPageContent) => !HasPageContent(incomingPage, existingPageContent));
     }
 
