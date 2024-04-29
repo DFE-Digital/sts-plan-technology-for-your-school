@@ -19,20 +19,10 @@ public class PageEntityUpdater(ILogger<PageEntityUpdater> logger, CmsDbContext d
             throw new InvalidCastException($"Entities are not expected page types. Received {entity.IncomingEntity.GetType()} and {entity.ExistingEntity!.GetType()}");
         }
 
-        ProcessPageContentChanges(incomingPage, existingPage);
-
-        return entity;
-    }
-
-    /// <summary>
-    /// CRUD page contents for the page
-    /// </summary>
-    /// <param name="incomingPage"></param>
-    /// <param name="existingPage"></param>
-    private static void ProcessPageContentChanges(PageDbEntity incomingPage, PageDbEntity existingPage)
-    {
         AddOrUpdatePageContents(incomingPage, existingPage);
         DeleteRemovedPageContents(incomingPage, existingPage);
+
+        return entity;
     }
 
     /// <summary>
@@ -40,13 +30,22 @@ public class PageEntityUpdater(ILogger<PageEntityUpdater> logger, CmsDbContext d
     /// </summary>
     /// <param name="incomingPage"></param>
     /// <param name="existingPage"></param>
-    private static void DeleteRemovedPageContents(PageDbEntity incomingPage, PageDbEntity existingPage)
+    private void DeleteRemovedPageContents(PageDbEntity incomingPage, PageDbEntity existingPage)
     {
-        existingPage.AllPageContents.RemoveAll((existingPageContent) => !HasPageContent(incomingPage, existingPageContent));
+        foreach (var pageContent in existingPage.AllPageContents)
+        {
+            if (HasPageContent(incomingPage, pageContent))
+            {
+                continue;
+            }
+
+            existingPage.AllPageContents.Remove(pageContent);
+            Db.PageContents.Remove(pageContent);
+        }
     }
 
     private static bool HasPageContent(PageDbEntity page, PageContentDbEntity pageContent)
-     => page.AllPageContents.Any(incomingPageContent => incomingPageContent.Matches(pageContent));
+     => page.AllPageContents.Any(pc => pc.Matches(pageContent));
 
     /// <summary>
     /// For each incoming page content:
@@ -56,7 +55,7 @@ public class PageEntityUpdater(ILogger<PageEntityUpdater> logger, CmsDbContext d
     /// </summary>
     /// <param name="incomingPage"></param>
     /// <param name="existingPage"></param>
-    private static void AddOrUpdatePageContents(PageDbEntity incomingPage, PageDbEntity existingPage)
+    private void AddOrUpdatePageContents(PageDbEntity incomingPage, PageDbEntity existingPage)
     {
         foreach (var pageContent in incomingPage.AllPageContents)
         {
@@ -76,7 +75,7 @@ public class PageEntityUpdater(ILogger<PageEntityUpdater> logger, CmsDbContext d
     /// <param name="existingPage"></param>
     /// <param name="pageContent"></param>
     /// <param name="matchingContents"></param>
-    private static void ProcessPageContent(PageDbEntity existingPage, PageContentDbEntity pageContent, List<PageContentDbEntity> matchingContents)
+    private void ProcessPageContent(PageDbEntity existingPage, PageContentDbEntity pageContent, List<PageContentDbEntity> matchingContents)
     {
         if (matchingContents.Count == 0)
         {
@@ -112,11 +111,15 @@ public class PageEntityUpdater(ILogger<PageEntityUpdater> logger, CmsDbContext d
     /// </remarks>
     /// <param name="existingPage"></param>
     /// <param name="matchingContents"></param>
-    private static void RemoveDuplicates(PageDbEntity existingPage, List<PageContentDbEntity> matchingContents)
+    private void RemoveDuplicates(PageDbEntity existingPage, List<PageContentDbEntity> matchingContents)
     {
         if (matchingContents.Count > 1)
         {
-            existingPage.AllPageContents.RemoveAll((pc) => matchingContents[1..].Contains(pc));
+            foreach (var contentToRemove in matchingContents.Skip(1))
+            {
+                existingPage.AllPageContents.Remove(contentToRemove);
+                Db.PageContents.Remove(contentToRemove);
+            }
         }
     }
 }
