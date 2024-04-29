@@ -47,10 +47,9 @@ public class MappedEntity
         IsValid = string.IsNullOrEmpty(nullProperties);
 
         // Log a message if the entity is not valid.
-        // Log a message if the entity is not valid.
         if (!IsValid)
         {
-            logger.LogInformation(
+            logger.LogWarning(
                 "Content Component with ID {Id} is missing the following required properties: {NullProperties}",
                 IncomingEntity.Id,
                 nullProperties

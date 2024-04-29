@@ -24,25 +24,29 @@ public class PageEntityUpdaterTests
       {
           ContentComponentId = "A",
           Order = 2,
-          PageId = PageId
+          PageId = PageId,
+          Id = 1,
       },
         new PageContentDbEntity()
         {
             ContentComponentId = "B",
             Order = 1,
-            PageId = PageId
+            PageId = PageId,
+            Id = 2
         },
         new PageContentDbEntity()
         {
             BeforeContentComponentId = "D",
             Order = 2,
-            PageId = PageId
+            PageId = PageId,
+            Id = 3
         },
         new PageContentDbEntity()
         {
             BeforeContentComponentId = "E",
             Order = 1,
-            PageId = PageId
+            PageId = PageId,
+            Id = 4
         }
     ];
 
@@ -97,7 +101,7 @@ public class PageEntityUpdaterTests
     }
 
     [Fact]
-    public void Should_AddOrUpddotnetate_NewAndExistingPageComponents()
+    public void Should_AddOrUpdate_NewAndExistingPageComponents()
     {
         var addedEntity = new PageContentDbEntity()
         {
@@ -136,6 +140,38 @@ public class PageEntityUpdaterTests
         Assert.Equivalent(2, eContent!.Order);
     }
 
+    [Fact]
+    public void Should_Delete_Removed_Entities()
+    {
+        var removedEntity = _pageContents.First();
+
+        var pageId = "page-id";
+
+        var existingPage = new PageDbEntity()
+        {
+            AllPageContents = [.. _pageContents],
+            Id = pageId
+        };
+
+        var incomingPage = new PageDbEntity()
+        {
+            AllPageContents = [.. _pageContents.Skip(1)],
+            Id = pageId
+        };
+
+        var mappedEntity = new MappedEntity()
+        {
+            IncomingEntity = incomingPage,
+            ExistingEntity = existingPage,
+            CmsEvent = CmsEvent.SAVE
+        };
+
+        _updater.UpdateEntityConcrete(mappedEntity);
+
+        Assert.DoesNotContain(removedEntity, existingPage.AllPageContents);
+    }
+
+
     private static readonly Func<PageContentDbEntity, PageContentDbEntity> InverseOrder
       = pc => new PageContentDbEntity()
       {
@@ -144,28 +180,4 @@ public class PageEntityUpdaterTests
           PageId = pc.PageId,
           Order = pc.Order == 1 ? 2 : 1
       };
-
-    [Fact]
-    public void Should_Delete_Removed_Entities()
-    {
-        var removedEntity = _pageContents.First();
-
-        var mappedEntity = new MappedEntity()
-        {
-            IncomingEntity = new PageDbEntity()
-            {
-                AllPageContents = [.. _pageContents.Skip(1)],
-                Id = "page-id"
-            },
-            ExistingEntity = new PageDbEntity()
-            {
-                AllPageContents = [.. _pageContents]
-            },
-            CmsEvent = CmsEvent.SAVE
-        };
-
-        _updater.UpdateEntityConcrete(mappedEntity);
-
-        Assert.DoesNotContain(removedEntity, _pageContents);
-    }
 }

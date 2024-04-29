@@ -23,6 +23,7 @@ public class PageEntityRetriever(CmsDbContext db) : EntityRetriever(db)
                                     {
                                         BeforeContentComponentId = pageContent.BeforeContentComponentId,
                                         ContentComponentId = pageContent.ContentComponentId,
+                                        Id = pageContent.Id,
                                         PageId = pageContent.PageId,
                                         Order = pageContent.Order,
                                     }).ToList()
@@ -33,22 +34,6 @@ public class PageEntityRetriever(CmsDbContext db) : EntityRetriever(db)
         {
             return null;
         }
-
-        page.BeforeTitleContent = page.AllPageContents
-            .Where(pageContent => pageContent.BeforeContentComponentId != null)
-            .Select(pageContent => new ContentComponentDbEntity()
-            {
-                Id = pageContent.BeforeContentComponentId!
-            })
-            .ToList();
-
-        page.Content = page.AllPageContents
-            .Where(pageContent => pageContent.ContentComponentId != null)
-            .Select(pageContent => new ContentComponentDbEntity()
-            {
-                Id = pageContent.ContentComponentId!
-            })
-            .ToList();
 
         return page;
     }

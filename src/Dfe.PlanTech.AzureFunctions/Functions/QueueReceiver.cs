@@ -73,7 +73,6 @@ public class QueueReceiver(
             }
 
             UpsertEntity(mapped);
-
             await DbSaveChanges(cancellationToken);
 
             await messageActions.CompleteMessageAsync(message, cancellationToken);
@@ -89,7 +88,7 @@ public class QueueReceiver(
 
             if (retryRequired)
             {
-                Logger.LogWarning("Error processing message ID {Message} will retry again", message.MessageId);
+                Logger.LogWarning(ex, "Error processing message ID {Message}will retry again", message.MessageId);
                 await messageActions.CompleteMessageAsync(message, cancellationToken);
                 return;
             }
