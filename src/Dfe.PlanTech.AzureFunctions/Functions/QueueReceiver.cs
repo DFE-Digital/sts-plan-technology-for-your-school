@@ -116,11 +116,7 @@ public class QueueReceiver(
             throw new NullReferenceException("ExistingEntity is null for removal event but various validations should have prevented this.");
         }
 
-        return db.ContentComponents.IgnoreAutoIncludes()
-                                    .IgnoreQueryFilters()
-                                    .Where(contentComponent => contentComponent.Id == mapped.ExistingEntity!.Id)
-                                    .ExecuteUpdateAsync((contentComponent) => contentComponent.SetProperty(cc => cc.Deleted, mapped.ExistingEntity.Deleted)
-                                                                                               .SetProperty(cc => cc.Published, mapped.ExistingEntity.Published), cancellationToken: cancellationToken);
+        return db.SetComponentPublishedAndDeletedStatuses(mapped.ExistingEntity, mapped.ExistingEntity.Published, mapped.ExistingEntity.Deleted, cancellationToken);
     }
 
     /// <summary>
