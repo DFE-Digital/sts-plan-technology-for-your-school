@@ -43,7 +43,7 @@ public class PageEntityUpdater(ILogger<PageEntityUpdater> logger, CmsDbContext d
     }
 
     private static bool HasPageContent(PageDbEntity page, PageContentDbEntity pageContent)
-     => page.AllPageContents.Any(pc => pc.Matches(pageContent));
+     => page.AllPageContents.Exists(pc => pc.Matches(pageContent));
 
     /// <summary>
     /// For each incoming page content:
