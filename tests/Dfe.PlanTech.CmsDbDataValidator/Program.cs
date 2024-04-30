@@ -1,9 +1,12 @@
 ﻿using Dfe.PlanTech.CmsDbDataValidator;
 
-ConfigurationSetup.BuildConfiguration();
+var configuration = ConfigurationSetup.BuildConfiguration();
 
-var db = DatabaseHelpers.CreateDbContext();
-var contentfulContent = new ContentfulContent("contentful-export.json");
+var db = DatabaseHelpers.CreateDbContext(configuration);
+
+var contentfulContent = new ContentfulContent(configuration);
+
+await contentfulContent.Initialise();
 
 var comparatorFactory = new ComparatorFactory(db, contentfulContent);
 

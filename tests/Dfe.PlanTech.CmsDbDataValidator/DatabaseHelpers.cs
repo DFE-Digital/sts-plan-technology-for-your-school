@@ -8,9 +8,9 @@ namespace Dfe.PlanTech.CmsDbDataValidator;
 
 public static class DatabaseHelpers
 {
-    public static CmsDbContext CreateDbContext()
+    public static CmsDbContext CreateDbContext(IConfiguration configuration)
     {
-        var sqlServer = ConfigurationSetup.Configuration.GetConnectionString("Database");
+        var sqlServer = configuration.GetConnectionString("Database");
 
         ServiceCollection sc = new();
         sc.AddSingleton(new ContentfulOptions(true));
