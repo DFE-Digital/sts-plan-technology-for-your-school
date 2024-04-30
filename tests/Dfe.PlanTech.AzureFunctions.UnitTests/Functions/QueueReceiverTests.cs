@@ -486,4 +486,10 @@ public class QueueReceiverTests
 
         await serviceBusMessageActionsMock.Received().DeadLetterMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), null, Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    public async Task ProcessEntityRemovalEvent_Should_Throw_Exception_If_Entity_Null()
+    {
+        await Assert.ThrowsAsync<NullReferenceException>(() => _queueReceiver.ProcessEntityRemovalEvent(null!, CancellationToken.None));
+    }
 }
