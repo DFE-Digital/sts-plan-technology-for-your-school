@@ -1,22 +1,18 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Microsoft.Extensions.Configuration;
 
 namespace Dfe.PlanTech.CmsDbDataValidator;
 
-public class ContentfulContent
+public class ContentfulContent(IConfiguration configuration)
 {
-    public readonly JsonNode Json;
+    private JsonArray? _entries;
+    private readonly ContentfulExporter _contentfulExporter = new ContentfulExporter(configuration);
+    public JsonArray Entries => _entries ?? throw new InvalidOperationException("Entries have not been loaded yet");
 
-    public ContentfulContent(string filePath)
+    public async Task Initialise()
     {
-        Json = ParseJson(filePath);
-    }
-
-    public JsonNode ParseJson(string filePath)
-    {
-        var fileContent = File.ReadAllText(filePath);
-        var json = JsonNode.Parse(fileContent);
-        return json ?? throw new Exception("Null json");
+        _entries = await _contentfulExporter.GetAllEntriesAsJson();
     }
 
     public IEnumerable<JsonNode> GetEntriesForContentType(string contentType)
@@ -53,12 +49,9 @@ public class ContentfulContent
 
         foreach (var field in fields.AsObject())
         {
-            var withoutLocalisation = field.Value!.WithoutLocalisation();
-            cleanedJsonNode.Add(field.Key, withoutLocalisation);
+            cleanedJsonNode.Add(field.Key, field.Value?.DeepClone());
         }
 
         return cleanedJsonNode;
     }
-
-    private JsonArray Entries => Json["entries"]?.AsArray() ?? throw new JsonException("Couldn't find entries");
 }
