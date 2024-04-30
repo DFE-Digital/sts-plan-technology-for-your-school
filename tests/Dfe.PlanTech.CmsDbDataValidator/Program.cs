@@ -18,4 +18,5 @@ foreach (var comparator in comparatorFactory.Comparators)
     errors.Add(await comparator.ValidateContentAndPrintErrors());
 }
 
-await File.WriteAllTextAsync("contentful-errors.md", string.Join("", errors));
+var contentfulEnvironment = configuration["Contentful:Environment"];
+await File.WriteAllTextAsync($"contentful-errors-{contentfulEnvironment}.md", string.Join("", errors));
