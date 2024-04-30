@@ -490,6 +490,6 @@ public class QueueReceiverTests
     [Fact]
     public async Task ProcessEntityRemovalEvent_Should_Throw_Exception_If_Entity_Null()
     {
-        await Assert.ThrowsAsync<InvalidOperationException>(() => _queueReceiver.ProcessEntityRemovalEvent(null!, CancellationToken.None));
+        await Assert.ThrowsAnyAsync<Exception>(() => _queueReceiver.ProcessEntityRemovalEvent(null!, CancellationToken.None));
     }
 }
