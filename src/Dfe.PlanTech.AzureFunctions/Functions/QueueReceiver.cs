@@ -113,7 +113,7 @@ public class QueueReceiver(
     {
         if (mapped.ExistingEntity == null)
         {
-            throw new NullReferenceException("ExistingEntity is null for removal event but various validations should have prevented this.");
+            throw new InvalidOperationException("ExistingEntity is null for removal event but various validations should have prevented this.");
         }
 
         return db.SetComponentPublishedAndDeletedStatuses(mapped.ExistingEntity, mapped.ExistingEntity.Published, mapped.ExistingEntity.Deleted, cancellationToken);
