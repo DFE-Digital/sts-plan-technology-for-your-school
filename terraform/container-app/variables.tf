@@ -123,8 +123,8 @@ variable "registry_password" {
   type        = string
 }
 
-variable "registry_custom_image_url" {
-  description = "Pass in the address to your image from your custom registry"
+variable "image_tag" {
+  description = "Image tag"
   type        = string
 }
 
