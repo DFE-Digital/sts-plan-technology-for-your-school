@@ -10,6 +10,19 @@
     }
   },
   "extensions": {
-    "serviceBus": {}
+    "serviceBus": {},
+    "http": {
+      "routePrefix": "api",
+      "customHeaders": {
+        "Server": null,
+        "Strict-Transport-Security": "max-age=31536000",
+        "Content-Security-Policy": "default-src 'self'; frame-ancestors 'none';",
+        "X-Frame-Options": "DENY",
+        "Cache-Control": "private",
+        "Content-Type": "application/json", 
+        "X-XSS-Protection": 1,
+        "X-Content-Type-Options": "nosniff"
+      }
+    }
   }
 }
