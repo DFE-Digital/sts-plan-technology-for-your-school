@@ -5,7 +5,6 @@ using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
@@ -15,6 +14,10 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Dfe.PlanTech.AzureFunctions.Utils;
 using NSubstitute.ExceptionExtensions;
+using MockQueryable.NSubstitute;
+using Microsoft.EntityFrameworkCore.Query;
+using System.Linq.Expressions;
+using Dfe.PlanTech.AzureFunctions.Models;
 
 namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
@@ -28,21 +31,18 @@ public class QueueReceiverTests
     private readonly ILogger _loggerMock;
     private readonly CmsDbContext _cmsDbContextMock;
     private readonly JsonToEntityMappers _jsonToEntityMappers;
-    private readonly ServiceBusClient _serviceBusClientMock;
-    private readonly IConfiguration _configurationMock;
     private readonly IMessageRetryHandler _messageRetryHandlerMock;
-
-    private object? _addedObject = null;
 
     private readonly static QuestionDbEntity _contentComponent = new() { Archived = false, Published = true, Deleted = false, Id = _contentId };
     private readonly static QuestionDbEntity _otherContentComponent = new() { Archived = false, Published = true, Deleted = false, Id = "other-content-component" };
 
-    private readonly List<QuestionDbEntity> _existing = [_otherContentComponent];
+    private readonly List<QuestionDbEntity> _questions = [_otherContentComponent];
+    private readonly List<AnswerDbEntity> _answers = [];
+
+    private readonly List<ContentComponentDbEntity> _contentComponents = [];
 
     public QueueReceiverTests()
     {
-        _serviceBusClientMock = Substitute.For<ServiceBusClient>();
-        _configurationMock = Substitute.For<IConfiguration>();
         _loggerFactoryMock = Substitute.For<ILoggerFactory>();
         _loggerMock = Substitute.For<ILogger>();
         _messageRetryHandlerMock = Substitute.For<IMessageRetryHandler>();
@@ -53,17 +53,69 @@ public class QueueReceiverTests
         });
 
         _cmsDbContextMock = Substitute.For<CmsDbContext>();
-        IQueryable<QuestionDbEntity> queryable = _existing.AsQueryable();
         _cmsDbContextMock.SaveChangesAsync().Returns(1);
 
-        var asyncProvider = new AsyncQueryProvider<QuestionDbEntity>(queryable.Provider);
+        var mockQuestionSet = _questions.AsQueryable().BuildMockDbSet();
+        _cmsDbContextMock.Questions = mockQuestionSet;
+        _cmsDbContextMock.Set<QuestionDbEntity>().Returns(mockQuestionSet);
 
-        var mockSet = Substitute.For<DbSet<QuestionDbEntity>, IQueryable<QuestionDbEntity>>();
-        ((IQueryable<QuestionDbEntity>)mockSet).Provider.Returns(asyncProvider);
-        ((IQueryable<QuestionDbEntity>)mockSet).Expression.Returns(queryable.Expression);
-        ((IQueryable<QuestionDbEntity>)mockSet).ElementType.Returns(queryable.ElementType);
-        ((IQueryable<QuestionDbEntity>)mockSet).GetEnumerator().Returns(queryable.GetEnumerator());
+        _cmsDbContextMock.When(db => db.Add(Arg.Any<ContentComponentDbEntity>()))
+                                    .Do((callinfo) =>
+                                    {
+                                        var contentComponent = callinfo.ArgAt<ContentComponentDbEntity>(0);
 
+                                        if (contentComponent is QuestionDbEntity question)
+                                        {
+                                            _questions.Add(question);
+                                        }
+                                        else
+                                        {
+                                            Console.Write("Shouldn't hit this");
+                                        }
+                                    });
+
+
+        var answersDbSet = _answers.AsQueryable().BuildMockDbSet();
+        _cmsDbContextMock.Answers = answersDbSet;
+
+        MockEntityType();
+
+        _jsonToEntityMappers = CreateMappers();
+
+        var sub = Substitute.ForPartsOf<QueueReceiver>(new ContentfulOptions(true), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _messageRetryHandlerMock);
+
+        sub.ProcessEntityRemovalEvent(Arg.Any<MappedEntity>(), Arg.Any<CancellationToken>())
+                        .ReturnsForAnyArgs((callinfo) =>
+                        {
+                            var mappedEntity = callinfo.ArgAt<MappedEntity>(0);
+
+                            var existingEntity = mappedEntity.ExistingEntity as QuestionDbEntity;
+
+                            var matching = _questions.FirstOrDefault(q => q.Id == existingEntity!.Id);
+
+                            matching!.Published = mappedEntity.IncomingEntity.Published;
+                            matching!.Deleted = mappedEntity.IncomingEntity.Deleted;
+
+                            return 1;
+                        });
+
+
+        _queueReceiver = sub;
+        DbSet<ContentComponentDbEntity> contentComponentsMock = MockContentComponents();
+        _cmsDbContextMock.ContentComponents = contentComponentsMock;
+    }
+
+    private DbSet<ContentComponentDbEntity> MockContentComponents()
+    {
+        _contentComponents.Add(_contentComponent);
+        _contentComponents.Add(_otherContentComponent);
+
+        var contentComponentsMock = _contentComponents.AsQueryable().BuildMockDbSet();
+        return contentComponentsMock;
+    }
+
+    private void MockEntityType()
+    {
         var entityTypeMock = Substitute.For<IEntityType>();
         entityTypeMock.ClrType.Returns(typeof(QuestionDbEntity));
 
@@ -81,38 +133,17 @@ public class QueueReceiverTests
         });
 
         entityTypeMock.GetProperties().Returns(questionProperties);
+    }
 
-        _cmsDbContextMock.Set<QuestionDbEntity>().Returns(mockSet);
-
+    private JsonToEntityMappers CreateMappers()
+    {
         JsonSerializerOptions jsonOptions = new()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
         };
 
-        Type questionDbEntityType = typeof(QuestionDbEntity);
-
-        DbSet<AnswerDbEntity> _answerDbSet = Substitute.For<DbSet<AnswerDbEntity>>();
-
-        _cmsDbContextMock.Answers = _answerDbSet;
-
-        _answerDbSet.WhenForAnyArgs(answerDbSet => answerDbSet.Attach(Arg.Any<AnswerDbEntity>()))
-                    .Do(callinfo =>
-                    {
-                        var answer = callinfo.ArgAt<AnswerDbEntity>(0);
-                    });
-
-        _jsonToEntityMappers = Substitute.For<JsonToEntityMappers>(new JsonToDbMapper[] { new QuestionMapper(new EntityRetriever(_cmsDbContextMock), new EntityUpdater(Substitute.For<ILogger<EntityUpdater>>(), _cmsDbContextMock), _cmsDbContextMock, Substitute.For<ILogger<QuestionMapper>>(), jsonOptions) }, jsonOptions);
-
-        _queueReceiver = new QueueReceiver(new ContentfulOptions(true), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _messageRetryHandlerMock);
-
-        _cmsDbContextMock.Add(Arg.Any<ContentComponentDbEntity>()).Returns(callinfo =>
-        {
-            var added = callinfo.ArgAt<ContentComponentDbEntity>(0);
-            _addedObject = added;
-
-            return null!;
-        });
+        return Substitute.For<JsonToEntityMappers>(new JsonToDbMapper[] { new QuestionMapper(new EntityRetriever(_cmsDbContextMock), new EntityUpdater(Substitute.For<ILogger<EntityUpdater>>(), _cmsDbContextMock), _cmsDbContextMock, Substitute.For<ILogger<QuestionMapper>>(), jsonOptions) }, jsonOptions);
     }
 
     [Fact]
@@ -132,12 +163,14 @@ public class QueueReceiverTests
         await _cmsDbContextMock.ReceivedWithAnyArgs(1).SaveChangesAsync(Arg.Any<CancellationToken>());
         _cmsDbContextMock.ReceivedWithAnyArgs(1).Add(Arg.Any<ContentComponentDbEntity>());
 
-        Assert.NotNull(_addedObject);
 
-        var asContentComponentDbEntity = _addedObject as ContentComponentDbEntity;
+        Assert.Equal(2, _questions.Count);
+
+        var addedQuestion = _questions[1];
+
+        var asContentComponentDbEntity = addedQuestion as ContentComponentDbEntity;
 
         Assert.NotNull(asContentComponentDbEntity);
-
         Assert.Equal(_contentId, asContentComponentDbEntity.Id);
     }
 
@@ -162,7 +195,7 @@ public class QueueReceiverTests
     [Fact]
     public async Task QueueReceiverDbWriter_Should_MapExistingDbEntity_To_Message()
     {
-        _existing.Add(_contentComponent);
+        _questions.Add(_contentComponent);
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
 
@@ -195,7 +228,8 @@ public class QueueReceiverTests
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
 
-        var added = _addedObject as ContentComponentDbEntity;
+        Assert.Equal(2, _questions.Count);
+        var added = _questions[1];
         Assert.NotNull(added);
         Assert.True(added.Archived);
     }
@@ -203,7 +237,7 @@ public class QueueReceiverTests
     [Fact]
     public async Task QueueReceiverDbWriter_Should_CompleteSuccessfully_After_Unarchive()
     {
-        _existing.Add(_contentComponent);
+        _questions.Add(_contentComponent);
         _contentComponent.Archived = true;
 
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
@@ -218,7 +252,10 @@ public class QueueReceiverTests
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
 
-        Assert.Null(_addedObject);
+        Assert.Equal(2, _questions.Count);
+        var added = _questions[1];
+        Assert.NotNull(added);
+        Assert.False(added.Archived);
     }
 
     [Fact]
@@ -238,7 +275,8 @@ public class QueueReceiverTests
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
 
-        var added = _addedObject as ContentComponentDbEntity;
+        Assert.Equal(2, _questions.Count);
+        var added = _questions[1];
         Assert.NotNull(added);
         Assert.True(added.Published);
     }
@@ -264,9 +302,9 @@ public class QueueReceiverTests
     [Fact]
     public async Task QueueReceiverDbWriter_Should_CompleteSuccessfully_After_Existing_Unpublish()
     {
-        _existing.Add(_contentComponent);
+        _questions.Add(_contentComponent);
 
-        _contentComponent.Published = false;
+        _contentComponent.Published = true;
 
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
@@ -281,13 +319,18 @@ public class QueueReceiverTests
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
         _cmsDbContextMock.ReceivedWithAnyArgs(0).Add(Arg.Any<ContentComponentDbEntity>());
         await _cmsDbContextMock.ReceivedWithAnyArgs(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+
+        Assert.Equal(2, _questions.Count);
+
+        var question = _questions[1];
+        Assert.False(question.Published);
     }
 
     [Fact]
     public async Task QueueReceiverDbWriter_Should_CompleteSuccessfully_After_Delete()
     {
         _contentComponent.Deleted = false;
-        _existing.Add(_contentComponent);
+        _questions.Add(_contentComponent);
 
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
@@ -302,7 +345,8 @@ public class QueueReceiverTests
         await serviceBusMessageActionsMock.Received()
                                           .CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
 
-        Assert.Null(_addedObject);
+        Assert.Equal(2, _questions.Count);
+        Assert.True(_questions[1].Deleted);
     }
 
     [Fact]
@@ -322,8 +366,7 @@ public class QueueReceiverTests
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
 
-        var added = _addedObject as ContentComponentDbEntity;
-        Assert.Null(added);
+        Assert.Single(_questions);
     }
 
 
@@ -345,8 +388,7 @@ public class QueueReceiverTests
         await serviceBusMessageActionsMock.Received()
                                           .CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
 
-        var added = _addedObject as ContentComponentDbEntity;
-        Assert.Null(added);
+        Assert.Single(_questions);
     }
 
     [Fact]
@@ -383,8 +425,7 @@ public class QueueReceiverTests
         await serviceBusMessageActionsMock.Received()
                                           .CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
 
-        var added = _addedObject as ContentComponentDbEntity;
-        Assert.Null(added);
+        Assert.Single(_questions);
     }
 
     [Fact]
@@ -403,8 +444,7 @@ public class QueueReceiverTests
         await serviceBusMessageActionsMock.Received()
                                           .CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
 
-        var added = _addedObject as ContentComponentDbEntity;
-        Assert.Null(added);
+        Assert.Single(_questions);
     }
 
     [Fact]
@@ -424,12 +464,7 @@ public class QueueReceiverTests
 
         await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
 
-        await serviceBusMessageActionsMock.Received()
-            .CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
-
-        var added = _addedObject as ContentComponentDbEntity;
-        Assert.NotNull(added);
-        Assert.True(added.Published);
+        await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -450,9 +485,11 @@ public class QueueReceiverTests
         await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
 
         await serviceBusMessageActionsMock.Received().DeadLetterMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), null, Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+    }
 
-        var added = _addedObject as ContentComponentDbEntity;
-        Assert.NotNull(added);
-        Assert.True(added.Published);
+    [Fact]
+    public async Task ProcessEntityRemovalEvent_Should_Throw_Exception_If_Entity_Null()
+    {
+        await Assert.ThrowsAnyAsync<Exception>(() => _queueReceiver.ProcessEntityRemovalEvent(null!, CancellationToken.None));
     }
 }

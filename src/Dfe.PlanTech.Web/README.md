@@ -8,6 +8,7 @@ Uses ASP .NET Core MVC.
 
 ## Setup
 
+- Setup your SignIn secrets, using the instructions in the [Dfe.PlanTech.Infrastructure.SignIn](../Dfe.PlanTech.Infrastructure.SignIn/README.md) project
 - Setup your Contentful secrets, using the instructions in the [Dfe.PlanTech.Infrastructure.Contentful](../Dfe.PlanTech.Infrastructure.Contentful/README.md) project
 
 ## Project References

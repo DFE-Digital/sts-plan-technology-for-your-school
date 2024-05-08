@@ -20,17 +20,39 @@ public class PageEntityUpdater(ILogger<PageEntityUpdater> logger, CmsDbContext d
         }
 
         AddOrUpdatePageContents(incomingPage, existingPage);
-        RemoveOldPageContents(incomingPage, existingPage);
+        DeleteRemovedPageContents(incomingPage, existingPage);
 
         return entity;
     }
 
-    private void RemoveOldPageContents(PageDbEntity incomingPage, PageDbEntity existingPage)
+    /// <summary>
+    /// Removes page contents from existing page if they are not in the incoming page update
+    /// </summary>
+    /// <param name="incomingPage"></param>
+    /// <param name="existingPage"></param>
+    private void DeleteRemovedPageContents(PageDbEntity incomingPage, PageDbEntity existingPage)
     {
-        var removedPageContents = existingPage.AllPageContents.Where(pc => !incomingPage.AllPageContents.Exists(apc => apc.Matches(pc)));
-        Db.PageContents.RemoveRange(removedPageContents);
+        var contentsToRemove = existingPage.AllPageContents.Where(pageContent => !HasPageContent(incomingPage, pageContent))
+                                                            .ToArray();
+
+        foreach (var pageContent in contentsToRemove)
+        {
+            existingPage.AllPageContents.Remove(pageContent);
+            Db.PageContents.Remove(pageContent);
+        }
     }
 
+    private static bool HasPageContent(PageDbEntity page, PageContentDbEntity pageContent)
+     => page.AllPageContents.Exists(pc => pc.Matches(pageContent));
+
+    /// <summary>
+    /// For each incoming page content:
+    /// - Add if it doesn't already exist
+    /// - Remove duplicates if any
+    /// - Update order if existing and order has changed
+    /// </summary>
+    /// <param name="incomingPage"></param>
+    /// <param name="existingPage"></param>
     private void AddOrUpdatePageContents(PageDbEntity incomingPage, PageDbEntity existingPage)
     {
         foreach (var pageContent in incomingPage.AllPageContents)
@@ -39,21 +61,62 @@ public class PageEntityUpdater(ILogger<PageEntityUpdater> logger, CmsDbContext d
                                                               .OrderByDescending(pc => pc.Id)
                                                               .ToList();
 
-            if (matchingContents.Count == 0)
-            {
-                existingPage.AllPageContents.Add(pageContent);
-                continue;
-            }
+            ProcessPageContent(existingPage, pageContent, matchingContents);
+        }
+    }
 
-            if (matchingContents.Count > 1)
-            {
-                Db.PageContents.RemoveRange(matchingContents[1..]);
-            }
+    /// <summary>
+    /// - Add page content if missing from existing page
+    /// - Remove duplicates from existing page if found
+    /// - Update order if changed
+    /// </summary>
+    /// <param name="existingPage"></param>
+    /// <param name="pageContent"></param>
+    /// <param name="matchingContents"></param>
+    private void ProcessPageContent(PageDbEntity existingPage, PageContentDbEntity pageContent, List<PageContentDbEntity> matchingContents)
+    {
+        if (matchingContents.Count == 0)
+        {
+            existingPage.AllPageContents.Add(pageContent);
+            return;
+        }
 
-            var remainingMatchingContent = matchingContents[0];
-            if (remainingMatchingContent.Order != pageContent.Order)
+        RemoveDuplicates(existingPage, matchingContents);
+        UpdatePageContentOrder(pageContent, matchingContents);
+    }
+
+    /// <summary>
+    /// Updates the order of the page content if it's different
+    /// </summary>
+    /// <param name="pageContent"></param>
+    /// <param name="matchingContents"></param>
+    private static void UpdatePageContentOrder(PageContentDbEntity pageContent, List<PageContentDbEntity> matchingContents)
+    {
+        var remainingMatchingContent = matchingContents[0];
+
+        //Only change the order if it has actually changed, to prevent unnecessary updates to the DB by EF Core
+        if (remainingMatchingContent.Order != pageContent.Order)
+        {
+            remainingMatchingContent.Order = pageContent.Order;
+        }
+    }
+
+    /// <summary>
+    /// Remove duplicate page content entities
+    /// </summary>
+    /// <remarks>
+    /// Shouldn't be needed anymore, but exists to fix old data issues if they arise.
+    /// </remarks>
+    /// <param name="existingPage"></param>
+    /// <param name="matchingContents"></param>
+    private void RemoveDuplicates(PageDbEntity existingPage, List<PageContentDbEntity> matchingContents)
+    {
+        if (matchingContents.Count > 1)
+        {
+            foreach (var contentToRemove in matchingContents.Skip(1))
             {
-                remainingMatchingContent.Order = pageContent.Order;
+                existingPage.AllPageContents.Remove(contentToRemove);
+                Db.PageContents.Remove(contentToRemove);
             }
         }
     }

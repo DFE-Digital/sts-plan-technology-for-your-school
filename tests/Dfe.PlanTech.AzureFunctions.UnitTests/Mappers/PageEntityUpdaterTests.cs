@@ -24,25 +24,29 @@ public class PageEntityUpdaterTests
       {
           ContentComponentId = "A",
           Order = 2,
-          PageId = PageId
+          PageId = PageId,
+          Id = 1,
       },
         new PageContentDbEntity()
         {
             ContentComponentId = "B",
             Order = 1,
-            PageId = PageId
+            PageId = PageId,
+            Id = 2
         },
         new PageContentDbEntity()
         {
             BeforeContentComponentId = "D",
             Order = 2,
-            PageId = PageId
+            PageId = PageId,
+            Id = 3
         },
         new PageContentDbEntity()
         {
             BeforeContentComponentId = "E",
             Order = 1,
-            PageId = PageId
+            PageId = PageId,
+            Id = 4
         }
     ];
 
@@ -66,6 +70,14 @@ public class PageEntityUpdaterTests
                             var pageContentsToRemove = callinfo.ArgAt<IEnumerable<PageContentDbEntity>>(0);
                             _pageContents.RemoveAll(pc => pageContentsToRemove.Contains(pc));
                         });
+
+        _db.PageContents.When(pc => pc.Remove(Arg.Any<PageContentDbEntity>()))
+                .Do((callinfo) =>
+                {
+                    var pageContentsToRemove = callinfo.ArgAt<PageContentDbEntity>(0);
+                    _pageContents.Remove(pageContentsToRemove);
+                });
+
     }
 
     [Fact]
@@ -97,7 +109,7 @@ public class PageEntityUpdaterTests
     }
 
     [Fact]
-    public void Should_AddOrUpddotnetate_NewAndExistingPageComponents()
+    public void Should_AddOrUpdate_NewAndExistingPageComponents()
     {
         var addedEntity = new PageContentDbEntity()
         {
@@ -136,6 +148,75 @@ public class PageEntityUpdaterTests
         Assert.Equivalent(2, eContent!.Order);
     }
 
+    [Fact]
+    public void Should_Delete_Removed_Entities()
+    {
+        var removedEntity = _pageContents.First();
+
+        var pageId = "page-id";
+
+        var existingPage = new PageDbEntity()
+        {
+            AllPageContents = [.. _pageContents],
+            Id = pageId
+        };
+
+        var incomingPage = new PageDbEntity()
+        {
+            AllPageContents = [.. _pageContents.Skip(1)],
+            Id = pageId
+        };
+
+        var mappedEntity = new MappedEntity()
+        {
+            IncomingEntity = incomingPage,
+            ExistingEntity = existingPage,
+            CmsEvent = CmsEvent.SAVE
+        };
+
+        _updater.UpdateEntityConcrete(mappedEntity);
+
+        Assert.DoesNotContain(removedEntity, existingPage.AllPageContents);
+        Assert.DoesNotContain(removedEntity, _pageContents);
+    }
+
+    [Fact]
+    public void Should_Delete_Duplicate_PageContents()
+    {
+        var pageId = "page-id";
+
+        var incomingPage = new PageDbEntity()
+        {
+            AllPageContents = [.. _pageContents],
+            Id = pageId
+        };
+
+        List<PageContentDbEntity> copies = [.. _pageContents];
+        foreach (var copy in copies)
+        {
+            copy.Id *= 10;
+        }
+
+        _pageContents.AddRange(copies);
+
+        var existingPage = new PageDbEntity()
+        {
+            AllPageContents = [.. _pageContents],
+            Id = pageId
+        };
+
+        var mappedEntity = new MappedEntity()
+        {
+            IncomingEntity = incomingPage,
+            ExistingEntity = existingPage,
+            CmsEvent = CmsEvent.SAVE
+        };
+
+        _updater.UpdateEntityConcrete(mappedEntity);
+
+        Assert.Equal(incomingPage.AllPageContents.Count, existingPage.AllPageContents.Count);
+        Assert.Equal(incomingPage.AllPageContents.Count, _pageContents.Count);
+    }
     private static readonly Func<PageContentDbEntity, PageContentDbEntity> InverseOrder
       = pc => new PageContentDbEntity()
       {
@@ -144,28 +225,4 @@ public class PageEntityUpdaterTests
           PageId = pc.PageId,
           Order = pc.Order == 1 ? 2 : 1
       };
-
-    [Fact]
-    public void Should_Delete_Removed_Entities()
-    {
-        var removedEntity = _pageContents.First();
-
-        var mappedEntity = new MappedEntity()
-        {
-            IncomingEntity = new PageDbEntity()
-            {
-                AllPageContents = [.. _pageContents.Skip(1)],
-                Id = "page-id"
-            },
-            ExistingEntity = new PageDbEntity()
-            {
-                AllPageContents = [.. _pageContents]
-            },
-            CmsEvent = CmsEvent.SAVE
-        };
-
-        _updater.UpdateEntityConcrete(mappedEntity);
-
-        Assert.DoesNotContain(removedEntity, _pageContents);
-    }
 }

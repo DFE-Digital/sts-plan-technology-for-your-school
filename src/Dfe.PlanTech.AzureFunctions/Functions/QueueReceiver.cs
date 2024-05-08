@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Text.Json;
 using Dfe.PlanTech.AzureFunctions.Utils;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.AzureFunctions;
 
@@ -71,8 +72,14 @@ public class QueueReceiver(
                 await messageActions.CompleteMessageAsync(message, cancellationToken);
                 return;
             }
-
-            UpsertEntity(mapped);
+            else if (mapped.IsMinimalPayloadEvent)
+            {
+                await ProcessEntityRemovalEvent(mapped, cancellationToken);
+            }
+            else
+            {
+                UpsertEntity(mapped);
+            }
 
             await DbSaveChanges(cancellationToken);
 
@@ -89,7 +96,7 @@ public class QueueReceiver(
 
             if (retryRequired)
             {
-                Logger.LogWarning("Error processing message ID {Message} will retry again", message.MessageId);
+                Logger.LogWarning(ex, "Error processing message ID {Message}will retry again", message.MessageId);
                 await messageActions.CompleteMessageAsync(message, cancellationToken);
                 return;
             }
@@ -100,6 +107,16 @@ public class QueueReceiver(
                 return;
             }
         }
+    }
+
+    public virtual Task<int> ProcessEntityRemovalEvent(MappedEntity mapped, CancellationToken cancellationToken)
+    {
+        if (mapped.ExistingEntity == null)
+        {
+            throw new InvalidOperationException("ExistingEntity is null for removal event but various validations should have prevented this.");
+        }
+
+        return db.SetComponentPublishedAndDeletedStatuses(mapped.ExistingEntity, mapped.ExistingEntity.Published, mapped.ExistingEntity.Deleted, cancellationToken);
     }
 
     /// <summary>

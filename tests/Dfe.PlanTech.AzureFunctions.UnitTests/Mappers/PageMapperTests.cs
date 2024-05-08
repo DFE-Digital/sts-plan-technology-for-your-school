@@ -17,15 +17,24 @@ public class PageMapperTests : BaseMapperTests
     private readonly CmsDbContext _db = Substitute.For<CmsDbContext>();
     private readonly ILogger<PageMapper> _logger;
     private readonly ILogger<PageEntityUpdater> _entityUpdaterLogger = Substitute.For<ILogger<PageEntityUpdater>>();
-    private readonly DbSet<PageContentDbEntity> _pageContentsDbSet = Substitute.For<DbSet<PageContentDbEntity>>();
+    private readonly DbSet<PageContentDbEntity> _pageContentsDbSet;
     private readonly List<PageContentDbEntity> _attachedPageContents = new(10);
-
+    private readonly List<PageContentDbEntity> _pageContents = [];
     private readonly Faker _faker = new();
 
     public PageMapperTests()
     {
         _logger = Substitute.For<ILogger<PageMapper>>();
         _mapper = new PageMapper(new PageEntityRetriever(_db), new PageEntityUpdater(_entityUpdaterLogger, _db), _logger, JsonOptions);
+
+        var queryablePageContents = _pageContents.AsQueryable();
+        var pageContentsAsyncProvider = new AsyncQueryProvider<PageContentDbEntity>(queryablePageContents.Provider);
+
+        _pageContentsDbSet = Substitute.For<DbSet<PageContentDbEntity>, IQueryable<PageContentDbEntity>>();
+        ((IQueryable<PageContentDbEntity>)_pageContentsDbSet).Provider.Returns(pageContentsAsyncProvider);
+        ((IQueryable<PageContentDbEntity>)_pageContentsDbSet).Expression.Returns(queryablePageContents.Expression);
+        ((IQueryable<PageContentDbEntity>)_pageContentsDbSet).ElementType.Returns(queryablePageContents.ElementType);
+        ((IQueryable<PageContentDbEntity>)_pageContentsDbSet).GetEnumerator().Returns(queryablePageContents.GetEnumerator());
 
         _db.PageContents = _pageContentsDbSet;
 
