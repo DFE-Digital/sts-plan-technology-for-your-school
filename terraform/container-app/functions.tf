@@ -6,8 +6,9 @@ resource "azurerm_storage_account" "function_storage" {
   account_replication_type = "LRS"
   tags                     = local.tags
 
-  public_network_access_enabled = true
-  shared_access_key_enabled     = true
+  public_network_access_enabled = local.storage_account_public_access_enabled
+  shared_access_key_enabled     = local.container_app_storage_account_shared_access_key_enabled
+  allow_nested_items_to_be_public  = local.container_app_blob_storage_public_access_enabled
 
   identity {
     type         = "UserAssigned"
