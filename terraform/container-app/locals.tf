@@ -49,4 +49,12 @@ locals {
   # CDN/Front Door #
   ##################
   cdn_create_custom_domain = var.cdn_create_custom_domain
+
+  ####################
+  # Storage Accounts #
+  ####################
+
+  storage_account_public_access_enabled                   = var.storage_account_public_access_enabled
+  container_app_storage_account_shared_access_key_enabled = var.container_app_storage_account_shared_access_key_enabled
+  container_app_blob_storage_public_access_enabled        = var.container_app_blob_storage_public_access_enabled
 }

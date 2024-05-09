@@ -6,8 +6,9 @@ resource "azurerm_storage_account" "function_storage" {
   account_replication_type = "LRS"
   tags                     = local.tags
 
-  public_network_access_enabled = true
-  shared_access_key_enabled     = true
+  public_network_access_enabled   = local.storage_account_public_access_enabled
+  shared_access_key_enabled       = local.container_app_storage_account_shared_access_key_enabled
+  allow_nested_items_to_be_public = local.container_app_blob_storage_public_access_enabled
 
   identity {
     type         = "UserAssigned"
@@ -32,8 +33,8 @@ resource "azurerm_linux_function_app" "contentful_function" {
 
   service_plan_id = azurerm_service_plan.function_plan.id
 
-  storage_account_access_key = azurerm_storage_account.function_storage.primary_access_key
-  storage_account_name       = azurerm_storage_account.function_storage.name
+  storage_account_name          = azurerm_storage_account.function_storage.name
+  storage_uses_managed_identity = true
 
   key_vault_reference_identity_id = azurerm_user_assigned_identity.user_assigned_identity.id
 
@@ -65,7 +66,11 @@ resource "azurerm_linux_function_app" "contentful_function" {
 
   lifecycle {
     ignore_changes = [
-      app_settings["WEBSITE_RUN_FROM_PACKAGE"]
+      app_settings["WEBSITE_RUN_FROM_PACKAGE"],
+      app_settings["AzureWebJobsStorage__clientId"],
+      app_settings["AzureWebJobsStorage__credential"],
+      app_settings["WEBSITE_RUN_FROM_PACKAGE_BLOB_MI_RESOURCE_ID"],
+
     ]
   }
 
