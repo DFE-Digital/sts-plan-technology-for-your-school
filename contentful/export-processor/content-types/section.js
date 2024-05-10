@@ -1,6 +1,7 @@
 import { Question } from "#src/content-types/question";
 import { UserJourney } from "#src/user-journey/user-journey";
 import SubtopicRecommendation from "#src/content-types/subtopic-recommendation";
+import ErrorLogger from "#src/errors/error-logger";
 
 export class Section {
   recommendation;
@@ -140,7 +141,7 @@ export class Section {
       );
 
       if (!pathForRecommendation) {
-        console.error(`No path found for ${maturity} in ${this.name}`);
+        ErrorLogger.addError({ id: this.id, contentType: "section", message: `No path exists for ${maturity}` });
         continue;
       }
 
@@ -246,13 +247,15 @@ export class Section {
     const question = this.questions.find(
       (question) => question.id == questionId
     );
+
     if (!question) {
-      console.error(`Couldn't find question ${questionId} in ${this.name}`);
+      ErrorLogger.addError({ id: this.id, contentType: "section", message: `Couldn't find question ${questionId} in ${this.name}` });
       return;
     }
-    console.error(
-      `Unable to find a path containing question ${questionId} (${question.text}) in ${this.name}`
-    );
+
+    ErrorLogger.addError({
+      id: this.id, contentType: "section", message: `Question ${questionId} does not have a path`
+    });
 
     return;
   }

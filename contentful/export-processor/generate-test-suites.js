@@ -3,6 +3,9 @@ import "dotenv/config";
 import DataMapper from "#src/data-mapper";
 import TestSuite from "#src/test-suite/test-suite";
 import WriteCsv from "./write-csv.js";
+import ErrorLogger from "#src/errors/error-logger";
+
+const usePreview = process.env.USE_PREVIEW && process.env.USE_PREVIEW == "true";
 
 const options = {
   spaceId: process.env.SPACE_ID,
@@ -14,6 +17,7 @@ const options = {
   skipRoles: true,
   skipWebhooks: true,
   saveFile: false,
+  includeDrafts: usePreview
 };
 
 const exportedData = await contentfulExport(options);
@@ -34,3 +38,4 @@ const testSuites = Object.values(mapped.mappedSections).filter(section => !!sect
 });
 
 WriteCsv(testSuites);
+ErrorLogger.writeErrorsToFile();

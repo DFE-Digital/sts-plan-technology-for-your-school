@@ -1,5 +1,6 @@
 import { Answer } from "#src/content-types/answer";
 import RecommendationChunk from "#src/content-types/recommendation-chunk";
+import ErrorLogger from "#src/errors/error-logger";
 
 export default class RecommendationSection {
   answers;
@@ -7,19 +8,19 @@ export default class RecommendationSection {
   id;
 
   constructor({ fields, sys }) {
-    this.answers = fields.answers?.map((answer) => {
-      return new Answer(answer);
-    }) ?? [];
+    this.id = sys.id;
 
-    if (this.answers.length == 0) {
-      console.log(`No answers for recommendation section ${sys.id}`);
-    }
+    this.answers = fields.answers?.map((answer) => new Answer(answer)) ?? [];
+    this.logErrorIfMissingRelationships("answers");
 
     this.chunks = fields.chunks?.map((chunk) => new RecommendationChunk(chunk)) ?? [];
-    if (this.chunks.length == 0) {
-      console.log(`No chunks for recommendation section ${sys.id}`);
-    }
+    this.logErrorIfMissingRelationships("chunks");
+  }
 
-    this.id = sys.id;
+  logErrorIfMissingRelationships(field) {
+    const matching = this[field];
+    if (!matching || matching.length == 0) {
+      ErrorLogger.addError({ id: this.id, contentType: "recommendationSection", message: `No ${field} found` });
+    }
   }
 }
