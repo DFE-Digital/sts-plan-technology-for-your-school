@@ -23,4 +23,8 @@ export default class RecommendationSection {
       ErrorLogger.addError({ id: this.id, contentType: "recommendationSection", message: `No ${field} found` });
     }
   }
+
+  getChunksForPath(path) {
+    return this.chunks.filter((chunk) => chunk.answers.some((answer) => answer.id == path.answer.id));
+  }
 }

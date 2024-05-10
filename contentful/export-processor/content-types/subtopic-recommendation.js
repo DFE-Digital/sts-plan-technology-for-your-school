@@ -20,4 +20,15 @@ export default class SubtopicRecommendation {
       ErrorLogger.addError({ id: sys.id, contentType: "subtopicRecommendation", message: `No Subtopic found` });
     }
   }
+
+  getContentForMaturityAndPath({ maturity, path }) {
+    const intro = this.intros.find((intro) => intro.maturity == maturity);
+
+    const chunks = this.section.getChunksForPath(path);
+
+    return {
+      intro,
+      chunks
+    }
+  }
 }
