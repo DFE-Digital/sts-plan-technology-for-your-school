@@ -1,8 +1,10 @@
+import SubtopicRecommendation from "#src/content-types/subtopic-recommendation";
+
 export class UserJourney {
   path;
   maturity;
   section;
-  recommendation;
+  recommendationIntro;
 
   get pathWithTextOnly() {
     return this.mapPathToOnlyQuestionAnswerTexts();
@@ -25,22 +27,22 @@ export class UserJourney {
   /**
    * Finds and sets the recommendation property from the recommendations received
    *
-   * @param {Array} recommendations - the list of recommendations to look through
+   * @param {SubtopicRecommendation} recommendation - the list of recommendations to look through
    */
-  setRecommendation(recommendations) {
-    const recommendation = recommendations.filter(
-      (recommendation) => recommendation.maturity == this.maturity
+  setRecommendation(recommendation) {
+    const recommendationIntro = recommendation.intros.filter(
+      (intro) => intro.maturity == this.maturity
     );
 
-    if (recommendation == null || recommendation.length == 0) {
+    if (recommendationIntro == null || recommendationIntro.length == 0) {
       console.error(
-        `could not find recommendation for ${this.maturity} in ${this.section.name}`,
-        recommendations
+        `could not find recommendation intro for ${this.maturity} in ${this.section.name}`,
+        recommendation
       );
       return;
     }
 
-    this.recommendation = recommendation[0];
+    this.recommendationIntro = recommendationIntro;
   }
 
   /**
