@@ -14,22 +14,18 @@ export class Section {
   minimumPathsToNavigateQuestions;
   minimumPathsForRecommendations;
 
-  constructor({ fields, sys }) {
+  /**
+   * 
+   * @param {Object} params
+   * @param {Object} params.fields - The fields of the section
+   * @param {SubtopicRecommendation} recommendation - Subtopic recommendation for the seciton
+   */
+  constructor({ fields, sys }, recommendation) {
     this.interstitialPage = fields.interstitialPage;
     this.questions = fields.questions.map((question) => new Question(question));
     this.id = sys.id;
     this.name = fields.name;
-
-    this.setNextQuestions();
-  }
-
-  /**
-   * 
-   * @param {SubtopicRecommendation} recommendation 
-   */
-  setRecommendationAndInitialisePaths(recommendation) {
     this.recommendation = recommendation;
-
     this.paths = this.getAllPaths(this.questions[0]).map((path) => {
       const userJourney = new UserJourney(path, this);
       userJourney.setRecommendation(recommendation);
@@ -39,6 +35,8 @@ export class Section {
 
     this.getMinimumPathsForQuestions();
     this.getMinimumPathsForRecommendations();
+
+    this.setNextQuestions();
   }
 
   /**
@@ -48,6 +46,7 @@ export class Section {
     const sortedPaths = this.paths
       .slice()
       .sort((a, b) => b.path.length - a.path.length);
+
     this.minimumPathsToNavigateQuestions = this.calculateMinimumPaths(
       sortedPaths,
       this.questions
@@ -277,7 +276,6 @@ export class Section {
           console.error(
             `Error finding question for ${nextQuestionId} in ${this.name} - answer ${answer.text} ${answer.id} in ${question.text} ${question.id}`
           );
-          console.log("");
 
           answer.nextQuestion = null;
           continue;

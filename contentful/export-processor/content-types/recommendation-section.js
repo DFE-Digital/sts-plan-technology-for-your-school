@@ -7,11 +7,19 @@ export default class RecommendationSection {
   id;
 
   constructor({ fields, sys }) {
-    this.answers = fields.answers.map((answer) => {
+    this.answers = fields.answers?.map((answer) => {
       return new Answer(answer);
-    });
+    }) ?? [];
 
-    this.chunks = fields.chunks.map((chunk) => new RecommendationChunk(chunk));
+    if (this.answers.length == 0) {
+      console.log(`No answers for recommendation section ${sys.id}`);
+    }
+
+    this.chunks = fields.chunks?.map((chunk) => new RecommendationChunk(chunk)) ?? [];
+    if (this.chunks.length == 0) {
+      console.log(`No chunks for recommendation section ${sys.id}`);
+    }
+
     this.id = sys.id;
   }
 }

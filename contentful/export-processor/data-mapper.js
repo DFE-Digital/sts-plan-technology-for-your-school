@@ -1,5 +1,6 @@
 import { Section } from "#src/content-types/section";
 import ContentType from "#src/content-types/content-type";
+import SubtopicRecommendation from "#src/content-types/subtopic-recommendation";
 
 /**
  * DataMapper class for mapping and combining data from a file
@@ -114,16 +115,15 @@ export default class DataMapper {
       return;
     }
 
-    for (const [id, section] of sections) {
-      if (
-        !section.fields.recommendations ||
-        section.fields.recommendations.length == 0 ||
-        !section.fields.questions ||
-        section.fields.questions.length == 0
-      )
-        continue;
+    const subtopicRecommendations = Array.from(this.contents["subtopicRecommendation"]);
+    if (!subtopicRecommendations || subtopicRecommendations.length == 0) {
+      throw `No subtopic recommendations found`;
+    }
 
-      yield new Section(section);
+    for (const [id, subtopicRecommendation] of subtopicRecommendations) {
+      const mapped = new SubtopicRecommendation(subtopicRecommendation);
+
+      yield mapped.subtopic;
     }
   }
 
