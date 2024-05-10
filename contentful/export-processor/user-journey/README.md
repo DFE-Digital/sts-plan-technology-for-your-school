@@ -25,4 +25,3 @@ This information is output in the console.
 4. Run the script by running `node test-suit-generator.mjs '{CONTENTFUL_EXPORT_JSON_PATH}'` in the terminal. Where `{CONTENTFUL_EXPORT_JSON_PATH}` is the file path for your exported Contentful data. E.g. `node test-suit-generator.mjs 'contentfulexport.json'`, if your Contentful data is exported as `contentfulexport.json`.
 
 By default, the script will _not_ export all possible user journeys per section. If you wish to do this, simply add another `true` as another argument to the run command on step 4. I.e. `node test-suit-generator.mjs '{CONTENTFUL_EXPORT_JSON_PATH}' true`
-

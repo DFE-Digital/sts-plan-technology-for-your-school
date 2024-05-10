@@ -1,9 +1,9 @@
-import { Recommendation } from "#src/content-types/recommendation";
 import { Question } from "#src/content-types/question";
 import { UserJourney } from "#src/user-journey/user-journey";
+import SubtopicRecommendation from "#src/content-types/subtopic-recommendation";
 
 export class Section {
-  recommendations;
+  recommendation;
   questions;
   name;
   interstitialPage;
@@ -15,19 +15,24 @@ export class Section {
   minimumPathsForRecommendations;
 
   constructor({ fields, sys }) {
-    this.recommendations = fields.recommendations.map((recommendation) => {
-      return new Recommendation(recommendation);
-    });
-
     this.interstitialPage = fields.interstitialPage;
     this.questions = fields.questions.map((question) => new Question(question));
     this.id = sys.id;
     this.name = fields.name;
 
     this.setNextQuestions();
+  }
+
+  /**
+   * 
+   * @param {SubtopicRecommendation} recommendation 
+   */
+  setRecommendationAndInitialisePaths(recommendation) {
+    this.recommendation = recommendation;
+
     this.paths = this.getAllPaths(this.questions[0]).map((path) => {
       const userJourney = new UserJourney(path, this);
-      userJourney.setRecommendation(this.recommendations);
+      userJourney.setRecommendation(recommendation);
 
       return userJourney;
     });
