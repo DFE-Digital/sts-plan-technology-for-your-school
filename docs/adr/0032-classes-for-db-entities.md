@@ -1,6 +1,6 @@
 # 0032 - Classes/Code Structure for DB Entities
 
-* **Status**: proposed
+* **Status**: accepted
 
 ## Context and Problem Statement
 
@@ -50,4 +50,4 @@ How do we model our C# classes for reading/writing CMS models?
 
 ## Decision Outcome
 
-TBD
+We are using 2 classes for each content type; one for Contentful, and one for the database. We use interfaces where possible to ensure that they match as closely as possible, to ensure that mapping and using them interchangably is as easy as possible.
