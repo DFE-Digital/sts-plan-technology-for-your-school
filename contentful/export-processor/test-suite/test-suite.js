@@ -1,5 +1,5 @@
 import TestSuiteRow from "#src/test-suite/test-suite-row";
-import AppendixRow from "#/src/test-suite/appendix-row";
+import AppendixRow from "#src/test-suite/appendix-row";
 
 const ADO_TAG = "Functional";
 
@@ -56,7 +56,7 @@ export default class TestSuiteForSubTopic {
    * @returns 
    */
   createRow(testScenario, testSteps, expectedOutcome, appendix) {
-    return new TestSuiteRow({
+    const row = new TestSuiteRow({
       testReference: `Access_${this.testReferenceIndex++}`,
       adoTag: ADO_TAG,
       subtopic: this.subtopicName,
@@ -64,8 +64,14 @@ export default class TestSuiteForSubTopic {
       preConditions: "User is signed into the DfE Sign in service",
       testSteps: testSteps,
       expectedOutcome: expectedOutcome,
-      appendixRef: appendix.reference
+      appendixRef: appendix?.reference
     });
+
+    if (appendix) {
+      this.appendix.push(appendix);
+    }
+
+    return row;
   }
 
   generateCanNavigateToSubtopic() {
@@ -162,32 +168,59 @@ export default class TestSuiteForSubTopic {
     ...pathForLow.map(pathPart => `${index++} - Choose answer '${pathPart.answer.text}' for question '${pathPart.question.text}'`),
       `4 - Save and continue`, `5 - View ${this.subtopicName} recommendation`].join("\n").replace(",", "");
 
-    const expectedOutcome = `User taken to '${maturity}' recommendation page for ${this.subtopicName}.`;
+    const content = this.subtopic.recommendation.getContentForMaturityAndPath({ maturity, path: pathForLow });
 
-    const appendixRow = new AppendixRow({ reference: `Access_${this.testReferenceIndex}_Appendix`, content: pathForLow });
-    return this.createRow(testScenario, testSteps, expectedOutcome);
+
+    const expectedOutcome = `User taken to '${maturity}' recommendation page with slug '${content.intro.slug}' for ${this.subtopicName}.`;
+
+    const intro = {
+      header: content.intro.header,
+      content: content.intro.content
+    };
+
+    const chunkContents = content.chunks.map(chunk => ({
+      header: chunk.header,
+      title: chunk.title,
+      content: chunk.content
+    }));
+
+    const asCsvContent = `
+    Expected intro:
+  Header: '${intro.header}'
+  Content: '${intro.content}'
+
+  ${chunkContents.map((chunk, index) =>
+      `Accordion section ${index + 2}:
+    Header: '${chunk.header}'
+    Title: '${chunk.title}'
+    Content: '${chunk.content}'
+    `).join("\n")}`;
+
+    const appendixRow = new AppendixRow({ reference: `Access_${this.testReferenceIndex}_Appendix`, content: asCsvContent });
+
+    return this.createRow(testScenario, testSteps, expectedOutcome, appendixRow);
   }
 
   generateChangeAnswersCheckYourAnswers() {
     const testScenario = `User can change answers via the 'Check your answers' page`;
     const testSteps =
       `1 - Navigate to the ${this.subtopicName} subtopic
-2 - Navigate through the interstitial page
-3 - Navigate to the change button on 'Check your answers' page
-4 - Change answer`;
+    2 - Navigate through the interstitial page
+    3 - Navigate to the change button on 'Check your answers' page
+    4 - Change answer`;
 
     const expectedOutcome = `Users answers update to match new answers.`;
     return this.createRow(testScenario, testSteps, expectedOutcome);
   }
 
   generateReturnToSelfAssessment() {
-    const testScenario = `User returns to self-assessment screen during question routing`;
+    const testScenario = `User returns to self - assessment screen during question routing`;
     const testSteps =
       `1 - Navigate to the ${this.subtopicName} subtopic
-2 - Navigate through the interstitial page
-3 - Answer first question, save and continue
-4 - User clicks PTFYS header`;
-    const expectedOutcome = `User returned to self-assessment page. ${this.subtopicName} subtopic shows 'In progress'.`;
+    2 - Navigate through the interstitial page
+    3 - Answer first question, save and continue
+    4 - User clicks PTFYS header`;
+    const expectedOutcome = `User returned to self - assessment page.${this.subtopicName} subtopic shows 'In progress'.`;
     return this.createRow(testScenario, testSteps, expectedOutcome);
   }
 }

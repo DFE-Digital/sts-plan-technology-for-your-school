@@ -1,4 +1,4 @@
-export class AppendixRow {
+export default class AppendixRow {
   reference;
   content;
 

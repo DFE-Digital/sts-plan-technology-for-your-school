@@ -25,6 +25,6 @@ export default class RecommendationSection {
   }
 
   getChunksForPath(path) {
-    return this.chunks.filter((chunk) => chunk.answers.some((answer) => answer.id == path.answer.id));
+    return path.map(pathPart => pathPart.answer.id).flatMap(answerId => this.chunks.filter(chunk => chunk.answers.some(answer => answer.id == answerId)));
   }
 }

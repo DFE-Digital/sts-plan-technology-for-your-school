@@ -10,7 +10,7 @@ export default class RecommendationChunk {
 
   constructor({ fields, sys }) {
     this.title = fields.title;
-    this.header = fields.header;
+    this.header = fields.header.fields.text;
     this.id = sys.id;
     this.content = fields.content;
     this.answers = fields.answers?.map(answer => new Answer(answer)) ?? [];

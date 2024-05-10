@@ -1,8 +1,6 @@
 import fs from "fs";
 
-const filename = "plan-tech-test-suite.csv";
-
-const columns = [
+const mainSheetColumns = [
   { testReference: "Test Reference" },
   { appendixRef: "Appendix Reference" },
   { adoTag: "ADO Tag" },
@@ -14,30 +12,48 @@ const columns = [
   { testApproved: "Test Approved" },
 ];
 
-const columnKeys = [];
-const columnHeaders = [];
+const mainSheetKeys = [];
+const mainSheetHeaders = [];
 
-columns.forEach((columnObj) => {
+mainSheetColumns.forEach((columnObj) => {
   const [key, header] = Object.entries(columnObj)[0];
-  columnKeys.push(key);
-  columnHeaders.push(header);
+  mainSheetKeys.push(key);
+  mainSheetHeaders.push(header);
+});
+
+
+const appendixColumns = [
+  { reference: "Reference" },
+  { content: "Content" },
+]
+const appendixSheetKeys = [];
+const appendixSheetHeaders = [];
+
+appendixColumns.forEach((columnObj) => {
+  const [key, header] = Object.entries(columnObj)[0];
+  appendixSheetKeys.push(key);
+  appendixSheetHeaders.push(header);
 });
 
 export default function WriteCsv(testSuites) {
-  let csv = "";
-  csv += columnHeaders.join(",") + "\n";
+  writeSheet(testSuites.flatMap(suite => suite.testCases), mainSheetHeaders, mainSheetKeys, "plan-tech-test-suite.csv");
+  writeSheet(testSuites.flatMap(suite => suite.appendix), appendixSheetHeaders, appendixSheetKeys, "plan-tech-test-suite-appendix.csv");
+}
 
-  testSuites
-    .flatMap((testSuite) => testSuite.testCases)
+function writeSheet(content, headers, keys, filename) {
+  let csv = "";
+  csv += headers.join(",") + "\n";
+
+  content
     .filter((testCase) => testCase != null)
-    .map((testCase) =>
-      Array.from(
-        columnKeys.map((key) => {
-          return testCase[key] ?? " ";
-        })
-      )
+    .map((testCase) => Array.from(
+      keys.map((key) => {
+        return testCase[key] ?? " ";
+      })
+    )
     )
     .forEach((row) => (csv += '"' + row.join('","') + '"\n'));
 
   fs.writeFileSync(filename, csv);
 }
+
