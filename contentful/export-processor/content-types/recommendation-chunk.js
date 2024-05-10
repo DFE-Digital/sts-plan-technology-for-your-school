@@ -1,4 +1,5 @@
 import { Answer } from "#src/content-types/answer";
+import ErrorLogger from "#src/errors/error-logger";
 
 export default class RecommendationChunk {
   title;
@@ -15,7 +16,7 @@ export default class RecommendationChunk {
     this.answers = fields.answers?.map(answer => new Answer(answer)) ?? [];
 
     if (!this.answers || this.answers.length == 0) {
-      console.log(`No answers for recommendation chunk ${sys.id}`);
+      ErrorLogger.addError({ id: sys.id, contentType: "recommendationChunk", message: `No answers for chunk` });
     }
   }
 }

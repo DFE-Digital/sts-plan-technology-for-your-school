@@ -1,6 +1,7 @@
 import RecommendationIntro from "#src/content-types/recommendation-intro";
 import RecommendationSection from "#src/content-types/recommendation-section";
 import { Section } from "#src/content-types/section";
+import ErrorLogger from "#src/errors/error-logger";
 
 export default class SubtopicRecommendation {
   intros;
@@ -16,7 +17,7 @@ export default class SubtopicRecommendation {
     this.subtopic = fields.subtopic && fields.subtopic.fields && fields.subtopic.sys ? new Section(fields.subtopic, this) : null;
 
     if (!this.subtopic) {
-      console.log(`No subtopic for subtopic recommendation ${sys.id}`);
+      ErrorLogger.addError({ id: sys.id, contentType: "subtopicRecommendation", message: `No Subtopic found` });
     }
   }
 }

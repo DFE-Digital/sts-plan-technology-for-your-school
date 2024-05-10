@@ -1,5 +1,5 @@
 import SubtopicRecommendation from "#src/content-types/subtopic-recommendation";
-
+import ErrorLogger from "#src/errors/error-logger";
 export class UserJourney {
   path;
   maturity;
@@ -24,8 +24,12 @@ export class UserJourney {
     );
 
     if (!this.maturity) {
-      console.log(`Couldn't find maturity for path`, this.path);
+      ErrorLogger.addError({ id: "", contentType: "User journey", message: this.pathToErrorMessage() });
     }
+  }
+
+  pathToErrorMessage() {
+    return this.path.map((pathPart) => `Question "${pathPart.question.text}" - "${pathPart.answer.text}"`).join(" -> ");
   }
 
   /**

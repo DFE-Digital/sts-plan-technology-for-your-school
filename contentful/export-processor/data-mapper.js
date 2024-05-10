@@ -1,6 +1,7 @@
 import { Section } from "#src/content-types/section";
 import ContentType from "#src/content-types/content-type";
 import SubtopicRecommendation from "#src/content-types/subtopic-recommendation";
+import ErrorLogger from "#src/errors/error-logger";
 
 /**
  * DataMapper class for mapping and combining data from a file
@@ -16,6 +17,7 @@ export default class DataMapper {
    * Get the mapped sections
    * @returns {IterableIterator<Section>} Iterator for mapped sections
    */
+
   get mappedSections() {
     if (!this._alreadyMappedSections)
       this._alreadyMappedSections = Array.from(
@@ -183,7 +185,7 @@ export default class DataMapper {
           const matching = this.getMatchingContentForReference(referencedTypesForField, item);
 
           if (!matching) {
-            console.log(`Error finding content for ${referencedTypesForField} ${item?.sys?.id ?? item} in ${entry.sys.contentType.sys.id} ${entry.sys.id}`);
+            logMissingContent(referencedTypesForField, item, entry);
           }
 
           return matching;
@@ -195,7 +197,7 @@ export default class DataMapper {
         );
 
         if (!entry.fields[key]) {
-          console.log(`Error finding content for field ${referencedTypesForField} ${key?.sys?.id ?? key} in ${entry.sys.contentType.sys.id} ${entry.sys.id}`);
+          logMissingContent(referencedTypesForField, key, entry);
         }
       }
     });
@@ -242,3 +244,11 @@ export default class DataMapper {
     return parent.map((child) => children.get(child.sys.id));
   }
 }
+function logMissingContent(referencedTypesForField, item, entry) {
+  ErrorLogger.addError({
+    id: entry.sys.id,
+    contentType: entry.sys.contentType.sys.id,
+    message: `Could not find matching content for ${referencedTypesForField} ${item?.sys?.id ?? item}`
+  });
+}
+
