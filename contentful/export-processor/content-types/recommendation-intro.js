@@ -1,3 +1,5 @@
+import MapContent from "#src/content-types/content-mapper";
+
 export default class RecommendationIntro {
   content;
   header;
@@ -6,7 +8,7 @@ export default class RecommendationIntro {
   slug;
 
   constructor({ fields, sys }) {
-    this.content = fields.content;
+    this.content = MapContent(fields.content);
     this.header = fields.header.fields.text;
     this.id = sys.id;
     this.maturity = fields.maturity;

@@ -11,7 +11,6 @@ export default class RecommendationSection {
     this.id = sys.id;
 
     this.answers = fields.answers?.map((answer) => new Answer(answer)) ?? [];
-    this.logErrorIfMissingRelationships("answers");
 
     this.chunks = fields.chunks?.map((chunk) => new RecommendationChunk(chunk)) ?? [];
     this.logErrorIfMissingRelationships("chunks");

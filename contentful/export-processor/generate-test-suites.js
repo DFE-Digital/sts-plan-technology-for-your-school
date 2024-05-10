@@ -16,8 +16,8 @@ const options = {
   skipEditorInterfaces: true,
   skipRoles: true,
   skipWebhooks: true,
-  saveFile: false,
-  includeDrafts: usePreview
+  saveFile: process.env.SAVE_FILE && process.env.SAVE_FILE == "true",
+  includeDrafts: process.env.USE_PREVIEW && process.env.USE_PREVIEW == "true",
 };
 
 const exportedData = await contentfulExport(options);

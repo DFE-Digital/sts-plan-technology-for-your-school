@@ -21,7 +21,6 @@ mainSheetColumns.forEach((columnObj) => {
   mainSheetHeaders.push(header);
 });
 
-
 const appendixColumns = [
   { reference: "Reference" },
   { content: "Content" },
