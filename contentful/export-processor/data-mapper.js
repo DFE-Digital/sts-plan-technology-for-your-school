@@ -179,20 +179,30 @@ export default class DataMapper {
       if (!referencedTypesForField) return;
 
       if (Array.isArray(value)) {
-        entry.fields[key] = value.map((item) =>
-          this.getMatchingContentForReference(referencedTypesForField, item)
-        );
+        entry.fields[key] = value.map((item) => {
+          const matching = this.getMatchingContentForReference(referencedTypesForField, item);
+
+          if (!matching) {
+            console.log(`Error finding content for ${referencedTypesForField} ${item?.sys?.id ?? item} in ${entry.sys.contentType.sys.id} ${entry.sys.id}`);
+          }
+
+          return matching;
+        }).filter(item => !!item);
       } else {
         entry.fields[key] = this.getMatchingContentForReference(
           referencedTypesForField,
           value
         );
+
+        if (!entry.fields[key]) {
+          console.log(`Error finding content for field ${referencedTypesForField} ${key?.sys?.id ?? key} in ${entry.sys.contentType.sys.id} ${entry.sys.id}`);
+        }
       }
     });
   }
 
   getContentForFieldId(referencedTypesForField, id) {
-    const matchingItem = referencedTypesForField
+    return referencedTypesForField
       .map((type) => {
         const matchingContents = this.contents[type];
         const matchingContent = matchingContents.get(id);
@@ -200,12 +210,6 @@ export default class DataMapper {
         return matchingContent;
       })
       .find((matching) => matching != null);
-
-    if (!matchingItem) {
-      console.error(`Error finding ${id} for ${referencedTypesForField}`);
-    }
-
-    return matchingItem;
   }
 
   getMatchingContentForReference(referencedTypesForField, reference) {
