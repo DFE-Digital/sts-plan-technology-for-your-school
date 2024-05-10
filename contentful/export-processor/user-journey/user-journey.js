@@ -22,6 +22,10 @@ export class UserJourney {
         .filter((maturity) => maturity != null)
         .sort()[0]
     );
+
+    if (!this.maturity) {
+      console.log(`Couldn't find maturity for path`, this.path);
+    }
   }
 
   /**
@@ -30,13 +34,17 @@ export class UserJourney {
    * @param {SubtopicRecommendation} recommendation - the list of recommendations to look through
    */
   setRecommendation(recommendation) {
+    if (!this.maturity) {
+      return;
+    }
+
     const recommendationIntro = recommendation.intros.filter(
       (intro) => intro.maturity == this.maturity
     );
 
     if (recommendationIntro == null || recommendationIntro.length == 0) {
       console.error(
-        `could not find recommendation intro for ${this.maturity} in ${this.section.name}`,
+        `Could not find recommendation intro for ${this.maturity} in ${this.section.name}`,
         recommendation
       );
       return;

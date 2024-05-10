@@ -9,13 +9,14 @@ export default class SubtopicRecommendation {
   id;
 
   constructor({ fields, sys }) {
-    this.intros = fields.intros.map((recommendation) => {
-      return new RecommendationIntro(recommendation);
-    });
-
+    this.intros = fields.intros.map((recommendation) => new RecommendationIntro(recommendation));
     this.section = new RecommendationSection(fields.section);
     this.id = sys.id;
 
-    this.subtopic = new Section(fields.subtopic, this);
+    this.subtopic = fields.subtopic && fields.subtopic.fields && fields.subtopic.sys ? new Section(fields.subtopic, this) : null;
+
+    if (!this.subtopic) {
+      console.log(`No subtopic for subtopic recommendation ${sys.id}`);
+    }
   }
 }

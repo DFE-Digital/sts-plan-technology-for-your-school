@@ -26,6 +26,7 @@ export class Section {
     this.id = sys.id;
     this.name = fields.name;
     this.recommendation = recommendation;
+
     this.paths = this.getAllPaths(this.questions[0]).map((path) => {
       const userJourney = new UserJourney(path, this);
       userJourney.setRecommendation(recommendation);

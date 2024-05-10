@@ -8,7 +8,7 @@ const options = {
   spaceId: process.env.SPACE_ID,
   deliveryToken: process.env.DELIVERY_TOKEN,
   managementToken: process.env.MANAGEMENT_TOKEN,
-  environmentId: "dev",
+  environmentId: process.env.ENVIRONMENT,
   host: "api.contentful.com",
   skipEditorInterfaces: true,
   skipRoles: true,
@@ -22,7 +22,7 @@ const mapped = new DataMapper(exportedData);
 
 let index = 1;
 
-const testSuites = Object.values(mapped.mappedSections).map((section) => {
+const testSuites = Object.values(mapped.mappedSections).filter(section => !!section).map((section) => {
   const testSuite = new TestSuite({
     subtopic: section,
     testReferenceIndex: index,

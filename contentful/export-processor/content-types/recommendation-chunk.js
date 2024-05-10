@@ -12,6 +12,10 @@ export default class RecommendationChunk {
     this.header = fields.header;
     this.id = sys.id;
     this.content = fields.content;
-    this.answers = fields.answers.map(answer => new Answer(answer));
+    this.answers = fields.answers?.map(answer => new Answer(answer)) ?? [];
+
+    if (!this.answers || this.answers.length == 0) {
+      console.log(`No answers for recommendation chunk ${sys.id}`);
+    }
   }
 }
