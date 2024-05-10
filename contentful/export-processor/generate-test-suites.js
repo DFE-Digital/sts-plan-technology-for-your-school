@@ -26,16 +26,18 @@ const mapped = new DataMapper(exportedData);
 
 let index = 1;
 
-const testSuites = Object.values(mapped.mappedSections).filter(section => !!section).map((section) => {
-  const testSuite = new TestSuite({
-    subtopic: section,
-    testReferenceIndex: index,
+const testSuites = Object.values(mapped.mappedSections)
+  .filter(section => !!section)
+  .map((section) => {
+    const testSuite = new TestSuite({
+      subtopic: section,
+      testReferenceIndex: index,
+    });
+
+    index = testSuite.testReferenceIndex;
+
+    return testSuite;
   });
-
-  index = testSuite.testReferenceIndex;
-
-  return testSuite;
-});
 
 WriteCsv(testSuites);
 ErrorLogger.writeErrorsToFile();

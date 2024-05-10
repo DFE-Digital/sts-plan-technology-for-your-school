@@ -146,7 +146,7 @@ export class Section {
       }
 
       minimumPathsForRecommendations[maturity] =
-        pathForRecommendation.path.path;
+        pathForRecommendation.path;
     }
 
     return minimumPathsForRecommendations;
@@ -196,7 +196,7 @@ export class Section {
         ];
 
         const nextQuestion = this.questions.find(
-          (q) => q.id === answer.nextQuestion?.id
+          (q) => q.id === answer.nextQuestion?.sys.id
         );
 
         stack.push({
@@ -220,9 +220,11 @@ export class Section {
       path: path.path,
       questionsAnswered: path.path.map((pathPart) => pathPart.question.id),
     }));
+
     const uniqueQuestions = new Set(
       pathsWithQuestions.map((path) => JSON.stringify(path.questionsAnswered))
     );
+
     const uniquePaths = Array.from(uniqueQuestions).map(JSON.parse);
     return uniquePaths;
   }

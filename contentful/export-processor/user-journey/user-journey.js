@@ -24,6 +24,10 @@ export class UserJourney {
     );
 
     if (!this.maturity) {
+      const test = path
+        .map((questionAnswer) => questionAnswer.answer.maturity)
+        .map(this.maturityRanking);
+
       ErrorLogger.addError({ id: "", contentType: "User journey", message: this.pathToErrorMessage() });
     }
   }
