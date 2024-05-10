@@ -13,8 +13,9 @@ export default class SubtopicRecommendation {
       return new RecommendationIntro(recommendation);
     });
 
-    this.subtopic = new Section(fields.section);
     this.section = new RecommendationSection(fields.section);
     this.id = sys.id;
+
+    this.subtopic = new Section(fields.subtopic, this);
   }
 }
