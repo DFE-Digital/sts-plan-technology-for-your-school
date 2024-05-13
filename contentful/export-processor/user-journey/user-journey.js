@@ -25,10 +25,6 @@ export class UserJourney {
     );
 
     if (!this.maturity) {
-      const test = path
-        .map((questionAnswer) => questionAnswer.answer.maturity)
-        .map(this.maturityRanking);
-
       ErrorLogger.addError({ id: "", contentType: "User journey", message: this.pathToErrorMessage() });
     }
   }
@@ -52,7 +48,7 @@ export class UserJourney {
     );
 
     if (recommendationIntro == null || recommendationIntro.length == 0) {
-      console.error(
+      ErrorLogger.addError(
         `Could not find recommendation intro for ${this.maturity} in ${this.section.name}`,
         recommendation
       );
