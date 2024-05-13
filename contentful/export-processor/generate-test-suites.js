@@ -5,8 +5,6 @@ import TestSuite from "#src/test-suite/test-suite";
 import WriteCsv from "./write-csv.js";
 import ErrorLogger from "#src/errors/error-logger";
 
-const usePreview = process.env.USE_PREVIEW && process.env.USE_PREVIEW == "true";
-
 const options = {
   spaceId: process.env.SPACE_ID,
   deliveryToken: process.env.DELIVERY_TOKEN,
