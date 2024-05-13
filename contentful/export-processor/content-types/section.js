@@ -155,9 +155,6 @@ export class Section {
   /**
    * Calculates the statistics of the paths.
    * Currently just counts the number of paths for each maturity level.
-   *
-   * @param {type} paramName - description of parameter
-   * @return {type} description of return value
    */
   get stats() {
     return this.paths.reduce((count, path) => {
