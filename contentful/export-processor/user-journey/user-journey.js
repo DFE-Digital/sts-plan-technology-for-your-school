@@ -1,5 +1,6 @@
 import SubtopicRecommendation from "#src/content-types/subtopic-recommendation";
 import ErrorLogger from "#src/errors/error-logger";
+
 export class UserJourney {
   path;
   maturity;

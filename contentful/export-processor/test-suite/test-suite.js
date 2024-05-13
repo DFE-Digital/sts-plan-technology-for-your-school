@@ -35,18 +35,6 @@ export default class TestSuiteForSubTopic {
     this.testCases = this.testCaseGenerators.map((generator) => generator()).filter((testCase) => !!testCase);
   }
 
-  /*
-    testReference,
-    appendixRef,
-    adoTag,
-    subTopic,
-    testScenario,
-    preConditions,
-    testSteps,
-    expectedOutcome,
-    testApproved,
-*/
-
   /**
    * 
    * @param {*} testScenario 
