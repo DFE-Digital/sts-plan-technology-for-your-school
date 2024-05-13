@@ -87,3 +87,4 @@ Finally, the data-tools.js file will write a `contentful-errors.md` file contain
 1. Missing data that is referenced
 2. Maturity ratings without a possible user journey in a subtopic
 3. Questions in a sub-topic that have no path to them.
+4. Recommendation chunks with no answers attached to them
