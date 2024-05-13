@@ -24,24 +24,33 @@ These have bespoke classes for them to allow additional functionality, particula
 
 The main one of all of them is the [section](./src/contentful/export-processor/content-types/section.js) class, which contains all logic for things such as calculating possible user journey paths for that section.
 
-## Generate Test Suites
+## Data Tools
 
-[generate-test-suites.js](./src/contentful/export-processor/generate-test-suites.js) is a script that exports data from Contentful and generates test suites for that environment.
+[data-tools.js](/src/contentful/export-processor/data-tools.js) exports data from Contentful, processes it in various ways, and has the ability to save various information. It can:
 
-It uses the DataMapper class to map the content, then creates various "tests" based off the calculated data.
+1. Generate test suites
+2. Generate possible user journey paths
+3. Save errors about possible Contentful content issues
 
 ### Usage
 
 1. Copy the `.env.example` file in the root of the folder and name it `.env`.
-2. Run `npm install` to install dependencies.
-4. Run `npm run generate-test-suites` to generate the test suites.
-5. The script will output three files:
+2. Fill in the various values for the Contentful space, access token etc..
+3. Run `npm install` to install dependencies.
+4. Run `node data-tools` to generate the test suites.
+
+### Generate Test Suites
+
+The data-tools.js file can generate test suites using [generate-test-suites.js](./src/contentful/export-processor/generate-test-suites.js) generates test suites for each sub-topic based on the exported Contentful data.
+
+To generate test suites, make sure `GENERATE_TEST_SUITES` is set to `"true"` in your `.env` file.
+
+#### Created files
 
 - `plan-tech-test-suite.csv` - The actual tests for a user to follow
 - `plan-tech-test-suite-appendix.csv` - Data to verify that the test suites are correct (e.g. specific expected content)
-- `content-errors.md` - Any errors that were found in the Contentful content
 
-### Generates Tests
+#### Generated Tests
 
 For each sub-topic, the following tests should be created:
 
@@ -56,3 +65,25 @@ For each sub-topic, the following tests should be created:
 9. A path for "Low" recommendations
 10. A path for "Medium" recommendations
 11. A path for "High" recommendations
+
+### User Journey Paths
+
+Data-tools.js can also generate and save possible user journeys for each sub-topic using the [write-user-journey-paths.js](./src/contentful/export-processor/write-user-journey-paths.js) file.
+
+To export the journey paths, make sure `EXPORT_USER_JOURNEY_PATHS` is set to `true` in your `.env` file.
+
+By default, it will only export a minimal amount of data:
+
+1. Per subtopic, it will create a `json` file containing:
+  - Total number of possible user journeys through the sub-topic per maturity
+  - One+ user journey path required to navigate through all questions in the sub-topic
+  - One user journey per maturity rating
+2. If `EXPORT_ALL_PATHS` is set to `true` it will save _all_ possible user journeys.
+
+### Errors
+
+Finally, the data-tools.js file will write a `contentful-errors.md` file containing various errors, if any, encountered during the Contentful mapping. This includes:
+
+1. Missing data that is referenced
+2. Maturity ratings without a possible user journey in a subtopic
+3. Questions in a sub-topic that have no path to them.
