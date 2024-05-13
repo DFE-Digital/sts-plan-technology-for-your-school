@@ -9,6 +9,8 @@ class ErrorLogger {
     const error = new ContentError({ id, contentType, message });
 
     this.errors.push(error);
+
+    console.error(`${contentType} error for content ${id}: ${message}`);
   }
 
   writeErrorsToFile(filePath = "content-errors.md") {
