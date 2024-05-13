@@ -3,6 +3,7 @@ import fs from "fs";
 
 class ErrorLogger {
   errors = [];
+  outputDir = "";
 
   addError({ id, contentType, message }) {
     const error = new ContentError({ id, contentType, message });
@@ -18,7 +19,7 @@ class ErrorLogger {
       .join("\n");
 
 
-    fs.writeFileSync(filePath, errors);
+    fs.writeFileSync(this.outputDir + filePath, errors);
   }
 
   errorMessagesForContentType(contentType, errors) {

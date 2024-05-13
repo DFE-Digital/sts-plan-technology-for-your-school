@@ -1,4 +1,5 @@
 import fs from "fs";
+import TestSuite from "#src/test-suite/test-suite";
 
 const mainSheetColumns = [
   { testReference: "Test Reference" },
@@ -34,9 +35,15 @@ appendixColumns.forEach((columnObj) => {
   appendixSheetHeaders.push(header);
 });
 
-export default function WriteCsv(testSuites) {
-  writeSheet(testSuites.flatMap(suite => suite.testCases), mainSheetHeaders, mainSheetKeys, "plan-tech-test-suite.csv");
-  writeSheet(testSuites.flatMap(suite => suite.appendix), appendixSheetHeaders, appendixSheetKeys, "plan-tech-test-suite-appendix.csv");
+/**
+ * 
+ * @param {*} param0 
+ * @param {TestSuite[]} param0.testSuites - test suites to save as CSV
+ * @param {string} param0.outputDir - where to save files to
+ */
+export default function writeTestSuites({ testSuites, outputDir }) {
+  writeSheet(testSuites.flatMap(suite => suite.testCases), mainSheetHeaders, mainSheetKeys, outputDir + "/plan-tech-test-suite.csv");
+  writeSheet(testSuites.flatMap(suite => suite.appendix), appendixSheetHeaders, appendixSheetKeys, outputDir + "/plan-tech-test-suite-appendix.csv");
 }
 
 function writeSheet(content, headers, keys, filename) {
