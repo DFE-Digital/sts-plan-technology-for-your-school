@@ -1,3 +1,4 @@
 contentful*.json
 content-errors*.md
 plan-tech-test-suite*.csv
+output/
