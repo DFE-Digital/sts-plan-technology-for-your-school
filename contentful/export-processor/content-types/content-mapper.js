@@ -46,6 +46,10 @@ function processRichText(richText) {
 }
 
 function* yieldValues(richText) {
+  if (!richText) {
+    return;
+  }
+
   if (richText.value) {
     yield richText.value;
   }
