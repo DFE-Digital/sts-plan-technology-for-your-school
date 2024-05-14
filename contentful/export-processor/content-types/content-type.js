@@ -1,6 +1,7 @@
 class ContentType {
   id;
   fields;
+  referenceFields = {};
 
   constructor({ sys, fields }) {
     this.id = sys.id;
@@ -29,7 +30,13 @@ class ContentType {
       .filter((validation) => validation.linkContentType)
       .map((validation) => validation.linkContentType)[0];
 
-    return linkContentType.length == 0 ? undefined : linkContentType;
+    const linkedContentTypes = linkContentType.length == 0 ? undefined : linkContentType;
+
+    if (linkedContentTypes) {
+      this.referenceFields[field] = linkedContentTypes;
+    }
+
+    return linkedContentTypes;
   }
 }
 

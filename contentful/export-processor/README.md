@@ -39,6 +39,23 @@ The main one of all of them is the [section](./src/contentful/export-processor/c
 3. Run `npm install` to install dependencies.
 4. Run `node data-tools` to generate the test suites.
 
+#### Environment variables
+
+| Name                      | Description                                                                                                                                            |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| MANAGEMENT_TOKEN          | Contentful content management access token. These are personal tokens which can be generated under the `CMA Tokens` section of the Contentful settings |
+| DELIVERY_TOKEN            |                                                                                                                                                        |
+| USE_PREVIEW               |                                                                                                                                                        |
+| SPACE_ID                  |                                                                                                                                                        |
+| ENVIRONMENT               |                                                                                                                                                        |
+| SAVE_FILE                 |                                                                                                                                                        |
+| EXPORT_ALL_PATHS          |                                                                                                                                                        |
+| GENERATE_TEST_SUITES      |                                                                                                                                                        |
+| EXPORT_USER_JOURNEY_PATHS |                                                                                                                                                        |
+| OUTPUT_FILE_DIR           |                                                                                                                                                        |
+| FUNCTION_APP_URL          | Webhook URL where to post content migrations to                                                                                                        |
+
+
 ### Generate Test Suites
 
 The data-tools.js file can generate test suites using [generate-test-suites.js](./src/contentful/export-processor/generate-test-suites.js) generates test suites for each sub-topic based on the exported Contentful data.
@@ -88,3 +105,28 @@ Finally, the data-tools.js file will write a `contentful-errors.md` file contain
 2. Maturity ratings without a possible user journey in a subtopic
 3. Questions in a sub-topic that have no path to them.
 4. Recommendation chunks with no answers attached to them
+
+## Data Migrator
+
+1. Uses Data Mapper class
+2. Uses Contentful API to fetch data from Contentful
+3. Gets content and calculates how many outgoing references it has, and how many incoming references it has
+4. Gets all content with 0 outgoing references
+5. POSTs to webhook
+6. Updates content with references changes
+7. Repeat step 4-6 until all content has been posted
+
+### Usage
+
+1. Setup `.env` (copy `.env.example` and setup fields as necessary)
+2. Run `npm install`
+3. Run `node data-migrator.js`
+
+### Required Environment variables
+
+MANAGEMENT_TOKEN
+DELIVERY_TOKEN
+USE_PREVIEW
+SPACE_ID
+ENVIRONMENT
+FUNCTION_APP_URL
