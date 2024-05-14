@@ -11,9 +11,7 @@ export default function writeUserJourneyPaths({ dataMapper, outputDir, saveAllJo
   const journeys = dataMapper.mappedSections.map(section => dataMapper.convertToMinimalSectionInfo(section, saveAllJourneys));
 
   for (const journey of journeys) {
-    const json = JSON.stringify(journey);
-
-    fs.writeFileSync(`${outputDir}${journey.section.name}.json`, json);
+    fs.writeFileSync(`${outputDir}${journey.section}.json`, JSON.stringify(journey));
   }
 
   const combined = journeys.map(journey => ({
