@@ -1,4 +1,8 @@
+#Generated outputs
 contentful*.json
 content-errors*.md
 plan-tech-test-suite*.csv
 output/
+
+#Env variables
+.env
