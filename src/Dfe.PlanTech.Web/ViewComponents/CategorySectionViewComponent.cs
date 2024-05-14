@@ -1,16 +1,23 @@
 using Dfe.PlanTech.Domain.CategorySection;
+using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.TagHelpers.TaskList;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewComponents;
 
-public class CategorySectionViewComponent(ILogger<CategorySectionViewComponent> logger, IGetSubmissionStatusesQuery query) : ViewComponent
+public class CategorySectionViewComponent(
+    ILogger<CategorySectionViewComponent> logger,
+    IGetSubmissionStatusesQuery query,
+    IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery) : ViewComponent
 {
     private readonly ILogger<CategorySectionViewComponent> _logger = logger;
     private readonly IGetSubmissionStatusesQuery _query = query;
+    private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery = getSubTopicRecommendationQuery;
 
     public async Task<IViewComponentResult> InvokeAsync(Category category)
     {
@@ -21,26 +28,30 @@ public class CategorySectionViewComponent(ILogger<CategorySectionViewComponent> 
 
     private async Task<CategorySectionViewComponentViewModel> GenerateViewModel(Category category)
     {
-        bool sectionsExist = category.Sections?.Count > 0;
+        bool sectionsExist = category.Sections.Count > 0;
 
         if (!sectionsExist)
         {
             _logger.LogError("Found no sections for category {id}", category.Sys.Id);
 
-            return new CategorySectionViewComponentViewModel()
+            return new CategorySectionViewComponentViewModel
             {
                 NoSectionsErrorRedirectUrl = "ServiceUnavailable"
             };
         }
 
         category = await RetrieveSectionStatuses(category);
+        // TODO sort this out, dont use blocking Enumerable
+        var sectionDto = GetCategorySectionViewComponentViewModel(category).ToBlockingEnumerable();
 
-        return new CategorySectionViewComponentViewModel()
+        return new CategorySectionViewComponentViewModel
         {
             CompletedSectionCount = category.Completed,
-            TotalSectionCount = category.Sections?.Count ?? 0,
-            CategorySectionDto = GetCategorySectionViewComponentViewModel(category),
-            ProgressRetrievalErrorMessage = category.RetrievalError ? "Unable to retrieve progress, please refresh your browser." : null
+            TotalSectionCount = category.Sections.Count,
+            CategorySectionDto = sectionDto,
+            ProgressRetrievalErrorMessage = category.RetrievalError
+                ? "Unable to retrieve progress, please refresh your browser."
+                : null
         };
     }
 
@@ -53,13 +64,17 @@ public class CategorySectionViewComponent(ILogger<CategorySectionViewComponent> 
 
     private static void SetCategorySectionDtoTagWithRetrievalError(CategorySectionDto categorySectionDto)
     {
-        categorySectionDto.TagColour = TagColour.Red.ToString();
+        categorySectionDto.TagColour = TagColour.Red;
         categorySectionDto.TagText = "UNABLE TO RETRIEVE STATUS";
     }
 
-    private static void SetCategorySectionDtoTagWithCurrentStatus(Category category, Section categorySection, CategorySectionDto categorySectionDto)
+    private static void SetCategorySectionDtoTagWithCurrentStatus(
+        Category category,
+        Section categorySection,
+        CategorySectionDto categorySectionDto)
     {
-        var sectionStatusCompleted = category.SectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId == categorySection.Sys.Id)?.Completed;
+        var sectionStatusCompleted = category.SectionStatuses
+            .FirstOrDefault(sectionStatus => sectionStatus.SectionId == categorySection.Sys.Id)?.Completed;
 
         if (sectionStatusCompleted != null)
         {
@@ -68,22 +83,28 @@ public class CategorySectionViewComponent(ILogger<CategorySectionViewComponent> 
         }
         else
         {
-            categorySectionDto.TagColour = TagColour.Grey.ToString();
+            categorySectionDto.TagColour = TagColour.Grey;
             categorySectionDto.TagText = "NOT STARTED";
         }
     }
 
-    private IEnumerable<CategorySectionDto> GetCategorySectionViewComponentViewModel(Category category)
+    private async IAsyncEnumerable<CategorySectionDto> GetCategorySectionViewComponentViewModel(Category category)
     {
         foreach (var section in category.Sections)
         {
-            var categorySectionDto = new CategorySectionDto()
+            var sectionStatus = category.SectionStatuses.FirstOrDefault(sectionStatus =>
+                sectionStatus.SectionId == section.Sys.Id && sectionStatus.Completed == 1);
+            var categorySectionDto = new CategorySectionDto
             {
-                Slug = section.InterstitialPage?.Slug,
-                Name = section.Name
+                Slug = section.InterstitialPage.Slug,
+                Name = section.Name,
+                CategorySectionRecommendation = sectionStatus != null
+                    ? await GetRecommendationsViewComponentViewModel(section, sectionStatus)
+                    : null
             };
 
-            if (string.IsNullOrWhiteSpace(categorySectionDto.Slug)) LogErrorWithUserFeedback(section, categorySectionDto);
+            if (string.IsNullOrWhiteSpace(categorySectionDto.Slug))
+                LogErrorWithUserFeedback(section, categorySectionDto);
             else if (category.RetrievalError) SetCategorySectionDtoTagWithRetrievalError(categorySectionDto);
             else SetCategorySectionDtoTagWithCurrentStatus(category, section, categorySectionDto);
 
@@ -102,7 +123,65 @@ public class CategorySectionViewComponent(ILogger<CategorySectionViewComponent> 
         }
         catch (Exception e)
         {
-            _logger.LogError("An exception has occurred while trying to retrieve section progress with the following message - {message}", e.Message);
+            _logger.LogError(
+                "An exception has occurred while trying to retrieve section progress with the following message - {message}",
+                e.Message);
+            category.RetrievalError = true;
+            return category;
+        }
+    }
+
+    private async Task<CategorySectionRecommendationDto?> GetRecommendationsViewComponentViewModel(
+        ISectionComponent section, SectionStatusDto? sectionStatus)
+    {
+        var sectionMaturity = sectionStatus?.Maturity;
+
+        if (string.IsNullOrEmpty(sectionMaturity)) return new CategorySectionRecommendationDto();
+
+
+        var recommendation =
+            await _getSubTopicRecommendationQuery.GetRecommendationsViewDto(section.Sys.Id, sectionMaturity);
+
+        if (recommendation == null)
+        {
+            _logger.LogError("No Recommendation Found: Section - {sectionName}, Maturity - {sectionMaturity}",
+                section.Name, sectionMaturity);
+
+            return new CategorySectionRecommendationDto
+            {
+                NoRecommendationFoundErrorMessage = $"Unable to retrieve {section.Name} recommendation"
+            };
+        }
+
+        if (section.InterstitialPage?.Slug == null)
+        {
+            _logger.LogError("No Slug found for Subtopic with ID: {SectionId}  / name: {SectionName}", section.Sys.Id,
+                section.Name);
+        }
+
+        return new CategorySectionRecommendationDto
+        {
+            RecommendationSlug = recommendation.RecommendationSlug,
+            RecommendationDisplayName = recommendation.DisplayName,
+            SectionSlug = section.InterstitialPage?.Slug ?? ""
+        };
+    }
+
+    public async Task<ICategoryComponent> RetrieveSectionStatuses(ICategoryComponent category)
+    {
+        try
+        {
+            category.SectionStatuses = await _query.GetSectionSubmissionStatuses(category.Sections);
+            category.Completed = category.SectionStatuses.Count(x => x.Completed == 1);
+            category.RetrievalError = false;
+
+            return category;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(
+                "An exception has occurred while trying to retrieve section progress with the following message - {errorMessage}",
+                e.Message);
             category.RetrievalError = true;
             return category;
         }

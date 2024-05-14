@@ -43,5 +43,25 @@ else
                 </task-list-item-name>
             }
         </task-list-item>
+        <task-list-item>
+            @{ var recommendation = categorySectionDtoItem.CategorySectionRecommendation; }
+            <task-list-item-name>
+                @if (recommendation?.RecommendationSlug != null)
+                {
+                    <a class="govuk-link" asp-route="GetRecommendation"
+                       asp-route-sectionSlug="@recommendation.SectionSlug"
+                       asp-route-recommendationSlug="@recommendation.RecommendationSlug">
+                        Recommendation
+                    </a>
+                }
+                else
+                {
+                    <govuk-error-message>@recommendation?.NoRecommendationFoundErrorMessage</govuk-error-message>
+                }
+            </task-list-item-name>
+            <task-list-tag colour=@categorySectionDtoItem.TagColour>
+                @(recommendation?.RecommendationSlug != null ? "Ready" : "Not Available")
+            </task-list-tag>
+        </task-list-item>
     }
 </task-list>

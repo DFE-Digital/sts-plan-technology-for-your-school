@@ -1,5 +1,3 @@
-@using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
-
 @model Dfe.PlanTech.Domain.Content.Models.Page;
 
 @{
@@ -17,24 +15,9 @@
     {
         await Html.RenderPartialAsync("Components/Title", Model.Title);
     }
-
-    var categoriesList = new List<ICategoryComponent>();
-
-    var showRecommendations = false;
-
+    
     foreach (var content in Model.Content)
     {
         await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-
-        if (content is ICategoryComponent category)
-        {
-            showRecommendations = true;
-            categoriesList.Add(category);
-        }
-    }
-
-    if (showRecommendations)
-    {
-        @await Component.InvokeAsync("Recommendations", new { categories = categoriesList.ToArray() })
     }
 }

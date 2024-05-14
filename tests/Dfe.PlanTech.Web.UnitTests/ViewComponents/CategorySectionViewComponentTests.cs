@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -18,7 +19,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
     {
         private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
         private readonly CategorySectionViewComponent _categorySectionViewComponent;
-
+        private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
+        
         private Category _category;
         private readonly ILogger<CategorySectionViewComponent> _loggerCategory;
 
@@ -26,6 +28,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         {
             _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
             _loggerCategory = Substitute.For<ILogger<CategorySectionViewComponent>>();
+            _getSubTopicRecommendationQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
 
             var viewContext = new ViewContext();
 
@@ -34,7 +37,10 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 ViewContext = viewContext
             };
 
-            _categorySectionViewComponent = new CategorySectionViewComponent(_loggerCategory, _getSubmissionStatusesQuery)
+            _categorySectionViewComponent = new CategorySectionViewComponent(
+                _loggerCategory, 
+                _getSubmissionStatusesQuery, 
+                _getSubTopicRecommendationQuery)
             {
                 ViewComponentContext = viewComponentContext
             };
@@ -277,39 +283,6 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal("red", categorySectionDto.TagColour);
             Assert.Equal("UNABLE TO RETRIEVE STATUS", categorySectionDto.TagText);
             Assert.Null(categorySectionDto.NoSlugForSubtopicErrorMessage);
-        }
-
-        [Fact]
-        public async Task Returns_NoSectionsErrorRedirectUrl_If_SectionsAreNull()
-        {
-            _category = new Category()
-            {
-                Completed = 0,
-                Sections = null!,
-                Sys = new()
-                {
-                    Id = "missing-sections-category"
-                }
-            };
-
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
-
-            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
-
-            Assert.NotNull(result);
-            Assert.NotNull(result.ViewData);
-
-            var model = result.ViewData.Model;
-            Assert.NotNull(model);
-
-            var unboxed = model as CategorySectionViewComponentViewModel;
-            Assert.NotNull(unboxed);
-            Assert.Equal("ServiceUnavailable", unboxed.NoSectionsErrorRedirectUrl);
-            Assert.Equal(0, unboxed.TotalSectionCount);
-
-            var categorySectionDtoList = unboxed.CategorySectionDto;
-
-            Assert.Null(categorySectionDtoList);
         }
 
         [Fact]

@@ -11,4 +11,6 @@ public class CategorySectionDto
     public string? TagText { get; set; }
 
     public string? NoSlugForSubtopicErrorMessage { get; set; }
+    
+    public CategorySectionRecommendationDto? CategorySectionRecommendation { get; set;  }
 }
