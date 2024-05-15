@@ -30,8 +30,8 @@ export async function postEntriesToWebhook({ contents }) {
       entries: results.map(result => ({
         ...result,
         entry: {
-          contentType: result.entry.sys.contentType.sys.id,
-          id: result.entry.sys.id,
+          contentType: result.entry.sys?.contentType?.sys?.id,
+          id: result.entry?.sys?.id,
           name: result.entry.fields.internalName?.["en-US"]
         }
       }))
@@ -157,14 +157,14 @@ async function postToWebook(content) {
 
     return {
       success: true,
-      entry: body
+      entry: minifiedContent
     };
   }
   catch (e) {
     console.log('Error posting content ' + content.sys.id + '  ' + e, content, JSON.stringify(content));
     return {
       success: false,
-      entry: body,
+      entry: minifiedContent,
       error: e
     };
   }
