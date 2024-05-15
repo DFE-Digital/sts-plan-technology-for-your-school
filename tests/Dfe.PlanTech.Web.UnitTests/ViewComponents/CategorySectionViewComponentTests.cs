@@ -77,7 +77,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Completed = 1,
             });
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
@@ -122,7 +122,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Completed = 0,
             });
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
@@ -161,7 +161,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         {
             _category.Completed = 0;
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
@@ -214,7 +214,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Completed = 1,
             });
 
-            _ = _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
+            _ = _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
@@ -252,7 +252,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public async Task Returns_ProgressRetrievalError_When_ProgressCanNotBeRetrieved()
         {
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(Arg.Any<IEnumerable<ISectionComponent>>())
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(Arg.Any<string>())
                                         .ThrowsAsync(new Exception("Error occurred fection sections"));
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
@@ -298,7 +298,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 }
             };
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 

@@ -27,8 +27,8 @@ else
             @if (categorySectionDtoItem.Slug != null)
             {
                 <task-list-item-name>
-                     <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@categorySectionDtoItem.Slug"
-                        class="govuk-link">
+                    <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@categorySectionDtoItem.Slug"
+                       class="govuk-link">
                         @categorySectionDtoItem.Name
                     </a>
                 </task-list-item-name>
@@ -45,23 +45,33 @@ else
         </task-list-item>
         <task-list-item>
             @{ var recommendation = categorySectionDtoItem.CategorySectionRecommendation; }
-            <task-list-item-name>
-                @if (recommendation?.RecommendationSlug != null)
+            @{
+                if (recommendation == null)
                 {
-                    <a class="govuk-link" asp-route="GetRecommendation"
-                       asp-route-sectionSlug="@recommendation.SectionSlug"
-                       asp-route-recommendationSlug="@recommendation.RecommendationSlug">
+                    <task-list-item-name>
                         Recommendation
-                    </a>
+                    </task-list-item-name>
                 }
                 else
                 {
-                    <govuk-error-message>@recommendation?.NoRecommendationFoundErrorMessage</govuk-error-message>
+                    @if (recommendation.RecommendationSlug != null)
+                    {
+                        <a class="govuk-link" asp-route="GetRecommendation"
+                           asp-route-sectionSlug="@recommendation.SectionSlug"
+                           asp-route-recommendationSlug="@recommendation.RecommendationSlug">
+                            Recommendation
+                        </a>
+                    }
+                    else
+                    {
+                        <govuk-error-message>@recommendation.NoRecommendationFoundErrorMessage</govuk-error-message>
+                    }
                 }
-            </task-list-item-name>
+            }
             <task-list-tag colour=@categorySectionDtoItem.TagColour>
                 @(recommendation?.RecommendationSlug != null ? "Ready" : "Not Available")
             </task-list-tag>
         </task-list-item>
+
     }
 </task-list>

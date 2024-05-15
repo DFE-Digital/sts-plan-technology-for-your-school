@@ -116,7 +116,7 @@ public class CategorySectionViewComponent(
     {
         try
         {
-            category.SectionStatuses = await _query.GetSectionSubmissionStatuses(category.Sections);
+            category.SectionStatuses = await _query.GetSectionSubmissionStatuses(category.Sys.Id);
             category.Completed = category.SectionStatuses.Count(x => x.Completed == 1);
             category.RetrievalError = false;
             return category;
@@ -171,7 +171,7 @@ public class CategorySectionViewComponent(
     {
         try
         {
-            category.SectionStatuses = await _query.GetSectionSubmissionStatuses(category.Sections);
+            category.SectionStatuses = await _query.GetSectionSubmissionStatuses(category.Sys.Id);
             category.Completed = category.SectionStatuses.Count(x => x.Completed == 1);
             category.RetrievalError = false;
 
