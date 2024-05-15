@@ -7,8 +7,13 @@ import WriteUserJourneyPaths from "#src/write-user-journey-paths";
 import fs from "fs";
 
 const DefaultOutputDirectory = "./output/";
+const getOutputDirWithContentfulEnv = ({ outputDir, contentfulEnvironment }) => `${outputDir}${contentfulEnvironment}/`;
 
 async function processContentfulData(args) {
+  if (!args.outputDir) {
+    args.outputDir = DefaultOutputDirectory;
+  }
+
   if (!args.generateTestSuites && !args.exportUserJourneyPaths) {
     console.error(`No options have been enabled`);
     return;
@@ -18,21 +23,23 @@ async function processContentfulData(args) {
 
   const dataMapper = new DataMapper(contentfulData);
 
-  createFileDirectoryIfNonExistent(args);
+  const combinedOutputDir = getOutputDirWithContentfulEnv({ contentfulEnvironment: process.env.ENVIRONMENT, outputDir: args.outputDir });
+
+  createFileDirectoryIfNonExistent(combinedOutputDir);
 
   if (args.generateTestSuites) {
-    GenerateTestSuites({ dataMapper, outputDir: args.outputDir });
+    GenerateTestSuites({ dataMapper, outputDir: combinedOutputDir });
   }
 
   if (args.exportUserJourneyPaths) {
-    WriteUserJourneyPaths({ dataMapper, outputDir: args.outputDir, saveAllJourneys: args.saveAllJourneys });
+    WriteUserJourneyPaths({ dataMapper, outputDir: combinedOutputDir, saveAllJourneys: args.saveAllJourneys });
   }
 
-  ErrorLogger.outputDir = args.outputDir;
+  ErrorLogger.outputDir = combinedOutputDir;
   ErrorLogger.writeErrorsToFile();
 }
 
-function createFileDirectoryIfNonExistent({ outputDir }) {
+function createFileDirectoryIfNonExistent(outputDir) {
   if (fs.existsSync(outputDir)) {
     return outputDir;
   }
