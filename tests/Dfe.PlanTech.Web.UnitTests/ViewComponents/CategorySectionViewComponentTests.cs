@@ -1,9 +1,11 @@
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
+using Dfe.PlanTech.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.ViewComponents;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -22,13 +24,154 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
         
         private Category _category;
+        private readonly Category _categoryTwo;
         private readonly ILogger<CategorySectionViewComponent> _loggerCategory;
+        
+        private readonly SubtopicRecommendation? _subtopic = new SubtopicRecommendation()
+        {
+            Intros = new List<RecommendationIntro>()
+            {
+                new RecommendationIntro()
+                {
+                    Header = new Header()
+                    {
+                        Text = "I'm a high maturity recommendation for subtopic 1",
+                    },
+                    Slug = "intro-slug",
+                    Maturity = "High",
+                }
+            },
+            Section = new RecommendationSection()
+            {
+                Chunks = new List<RecommendationChunk>()
+                {
+                    new RecommendationChunk()
+                    {
+                        Answers = new List<Answer>()
+                        {
+                            new Answer()
+                            {
+                                Sys = new SystemDetails()
+                                {
+                                    Id = "ref1"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            Subtopic = new Section()
+            {
+                InterstitialPage = new Page()
+                {
+                    Slug = "subtopic-slug"
+                },
+                Sys = new SystemDetails()
+                {
+                    Id = "Section1"
+                },
+                Recommendations = new List<RecommendationPage>()
+                {
+                    new RecommendationPage()
+                    {
+                        Page = new Page()
+                        {
+                            Slug = "subtopic-recommendation-slug"
+                        }
+                    }
+                }
+            }
+        };
+
+        private readonly SubtopicRecommendation? _subtopicTwo = new SubtopicRecommendation()
+        {
+            Intros = new List<RecommendationIntro>()
+            {
+                new RecommendationIntro()
+                {
+                    Header = new Header()
+                    {
+                        Text = "I'm a high maturity recommendation for subtopic 2",
+                    },
+                    Slug = "intro-slug",
+                    Maturity = "High",
+                }
+            },
+            Section = new RecommendationSection()
+            {
+                Chunks = new List<RecommendationChunk>()
+                {
+                    new RecommendationChunk()
+                    {
+                        Answers = new List<Answer>()
+                        {
+                            new Answer()
+                            {
+                                Sys = new SystemDetails()
+                                {
+                                    Id = "ref1"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            Subtopic = new Section()
+            {
+                InterstitialPage = new Page()
+                {
+                    Slug = "subtopic-slug"
+                },
+                Sys = new SystemDetails()
+                {
+                    Id = "Section2"
+                },
+                Recommendations = new List<RecommendationPage>()
+                {
+                    new RecommendationPage()
+                    {
+                        Page = new Page()
+                        {
+                            Slug = "subtopic-recommendation-slug"
+                        }
+                    }
+                }
+            }
+        };
+
+        private readonly List<SubtopicRecommendation> _subtopicRecommendations = [];
 
         public CategorySectionViewComponentTests()
         {
             _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
             _loggerCategory = Substitute.For<ILogger<CategorySectionViewComponent>>();
             _getSubTopicRecommendationQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
+            
+            _subtopicRecommendations.Add(_subtopic);
+            _subtopicRecommendations.Add(_subtopicTwo);
+            
+            _getSubTopicRecommendationQuery.GetRecommendationsViewDto(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns((callinfo) =>
+                {
+                    var subtopic = callinfo.ArgAt<string>(0);
+                    var maturity = callinfo.ArgAt<string>(1);
+
+                    var matching = _subtopicRecommendations.FirstOrDefault(rec => rec.Subtopic.Sys.Id == subtopic);
+
+                    if (matching == null)
+                    {
+                        return null;
+                    }
+
+                    var introForMaturity = matching.Intros.FirstOrDefault(intro => intro.Maturity == maturity);
+
+                    if (introForMaturity == null)
+                    {
+                        return null;
+                    }
+
+                    return new RecommendationsViewDto(introForMaturity.Slug, introForMaturity.Header.Text);
+                });
 
             var viewContext = new ViewContext();
 
@@ -61,10 +204,43 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                         InterstitialPage = new Page()
                         {
                             Slug = "section-1",
-                        }
+                        },
+                        Recommendations = [
+                            new RecommendationPage()
+                            {
+                                InternalName = "High-Maturity-Recommendation-Page-InternalName",
+                                DisplayName = "High-Maturity-Recommendation-Page-DisplayName",
+                                Maturity = Maturity.High,
+                                Page = new Page() { Slug = "High-Maturity-Recommendation-Page-Slug" }
+                            }
+                        ],
                     }
                 }
             }
+            };
+            _categoryTwo = new Category()
+            {
+                Completed = 1,
+                Sections = [
+                    new()
+                    {
+                        Sys = new SystemDetails() { Id = "Section2" },
+                        Name = "Test Section 2",
+                        Recommendations = [
+                            new()
+                            {
+                                InternalName = "High-Maturity-Recommendation-Page-InternalName-Two",
+                                DisplayName = "High-Maturity-Recommendation-Page-DisplayName-Twp",
+                                Maturity = Maturity.High,
+                                Page = new Page() { Slug = "High-Maturity-Recommendation-Page-Slug-Two" }
+                            }
+                        ],
+                        InterstitialPage = new Page
+                        {
+                            Slug = "test-slug"
+                        }
+                    }
+                ]
             };
         }
 
@@ -316,6 +492,147 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var categorySectionDtoList = unboxed.CategorySectionDto;
 
             Assert.Null(categorySectionDtoList);
+        }
+        
+                
+        [Fact]
+        public async Task Returns_RecommendationInfo_If_It_Exists_ForMaturity()
+        {
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
+            {
+                SectionId = "Section1",
+                Completed = 1,
+                Maturity = "High"
+            });
+
+            _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns(_category.SectionStatuses.ToList());
+
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model as CategorySectionViewComponentViewModel;
+            Assert.NotNull(model);
+
+            Assert.NotNull(_subtopic);
+            Assert.NotEmpty(model.CategorySectionDto);
+            var recommendation = model.CategorySectionDto.First().CategorySectionRecommendation;
+            Assert.NotNull(recommendation);
+            Assert.Equal(_subtopic.Intros[0].Slug, recommendation.RecommendationSlug);
+            Assert.Equal(_subtopic.Intros[0].Header.Text,recommendation.RecommendationDisplayName);
+            Assert.Null(recommendation.NoRecommendationFoundErrorMessage);
+        }
+        
+        // TODO
+        [Fact]
+        public async Task Returns_RecommendationInfo_And_Logs_Error_If_Exception_Thrown_By_Get_Category()
+        {
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
+            {
+                SectionId = "Section1",
+                Completed = 1,
+                Maturity = "High"
+            });
+            
+            _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Throws(new Exception("test"));
+
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model as CategorySectionViewComponentViewModel;
+            Assert.NotNull(model);
+
+            Assert.NotNull(_subtopic);
+            Assert.NotEmpty(model.CategorySectionDto);
+            var recommendation = model.CategorySectionDto.First().CategorySectionRecommendation;
+            Assert.NotNull(recommendation);
+            
+            Assert.NotNull(_subtopic);
+            Assert.Equal(_subtopic.Intros[0].Slug, recommendation.RecommendationSlug);
+            Assert.Equal(_subtopic.Intros[0].Header.Text, recommendation.RecommendationDisplayName);
+            Assert.Null(recommendation.NoRecommendationFoundErrorMessage);
+            _loggerCategory.ReceivedWithAnyArgs(1).LogError("An exception has occurred while trying to retrieve section progress with the following message - test");
+        }
+
+        [Fact]
+        public async Task Returns_NullRecommendationInfo_If_No_RecommendationPage_Exists_ForMaturity()
+        {
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
+            {
+                SectionId = "Section1",
+                Completed = 1,
+                Maturity = "Low",
+            });
+            
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns(_category.SectionStatuses.ToList());
+
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model as CategorySectionViewComponentViewModel;
+            Assert.NotNull(model);
+
+            Assert.NotNull(_subtopic);
+            Assert.NotEmpty(model.CategorySectionDto);
+            var recommendation = model.CategorySectionDto.First().CategorySectionRecommendation;
+            Assert.NotNull(recommendation);
+
+            Assert.Null(recommendation.RecommendationSlug);
+            Assert.Null(recommendation.RecommendationDisplayName);
+            Assert.NotNull(recommendation.NoRecommendationFoundErrorMessage);
+        }
+
+        [Fact]
+        public async Task DoesNotReturn_RecommendationInfo_If_Section_IsNot_Completed()
+        {
+            _category.Completed = 0;
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
+            {
+                SectionId = "Section1",
+                Completed = 0,
+                Maturity = null
+            });
+            
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns(_category.SectionStatuses.ToList());
+
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model as CategorySectionViewComponentViewModel;
+            Assert.NotNull(model);
+
+            Assert.NotNull(_subtopic);
+            Assert.NotEmpty(model.CategorySectionDto);
+            var recommendation = model.CategorySectionDto.First().CategorySectionRecommendation;
+            Assert.Null(recommendation);
+        }
+
+        [Fact]
+        public async Task Returns_Null_If_Category_IsNot_Completed()
+        {
+            _category.Completed = 0;
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model as CategorySectionViewComponentViewModel;
+            Assert.NotNull(model);
+
+            Assert.NotNull(_subtopic);
+            Assert.NotEmpty(model.CategorySectionDto);
+            var recommendation = model.CategorySectionDto.First().CategorySectionRecommendation;
+            Assert.Null(recommendation);
         }
     }
 }

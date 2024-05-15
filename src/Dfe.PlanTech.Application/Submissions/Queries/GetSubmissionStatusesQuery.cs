@@ -23,7 +23,7 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
     {
         int establishmentId = _userHelper.GetEstablishmentId().Result;
         
-        return _db.ToListAsync(_db.GetSectionStatusesForCategory(categoryId, establishmentId));
+        return _db.ToListAsync(_db.GetSectionStatuses(categoryId, establishmentId));
     }
 
     public async Task<SectionStatusNew> GetSectionSubmissionStatusAsync(int establishmentId,

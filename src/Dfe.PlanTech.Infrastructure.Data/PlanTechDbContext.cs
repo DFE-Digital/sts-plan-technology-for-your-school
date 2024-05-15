@@ -106,7 +106,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
         });
     }
 
-    public IQueryable<SectionStatusDto> GetSectionStatusesForCategory(string categoryId, int establishmentId) => SectionStatusesSp.FromSqlInterpolated($"{DatabaseConstants.GetSectionStatusesForCategory} {categoryId} , {establishmentId}");
+    public IQueryable<SectionStatusDto> GetSectionStatuses(string categoryId, int establishmentId) => SectionStatusesSp.FromSqlInterpolated($"{DatabaseConstants.GetSectionStatuses} {categoryId} , {establishmentId}");
 
     public void AddUser(User user) => Users.Add(user);
 

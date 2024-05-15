@@ -111,7 +111,7 @@ public class GetSubmissionStatusesQueryTests
 
     public GetSubmissionStatusesQueryTests()
     {
-        Db.GetSectionStatusesForCategory(Arg.Any<string>(), Arg.Any<int>())
+        Db.GetSectionStatuses(Arg.Any<string>(), Arg.Any<int>())
         .Returns((callinfo) =>
         {
             var categoryId = callinfo.ArgAt<string>(0);

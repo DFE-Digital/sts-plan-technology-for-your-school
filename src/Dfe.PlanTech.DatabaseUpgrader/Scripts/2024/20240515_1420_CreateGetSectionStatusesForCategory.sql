@@ -1,4 +1,7 @@
-CREATE   PROCEDURE GetSectionStatusesForCategoryKGTest @categoryId nvarchar(30), @establishmentId int
+-- TODO: Drop this on Dev after testing
+-- TODO: Change this to CREATE OR ALTER PROCEDURE dbo.GetSectionStatuses and rename file
+
+CREATE OR ALTER PROCEDURE dbo.GetSectionStatusesForCategory @categoryId nvarchar(30), @establishmentId int
 AS
 SELECT
     Sub.sectionId,
@@ -19,4 +22,3 @@ WHERE
     CC.Id = @categoryId
 
 GO
-
