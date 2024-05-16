@@ -613,11 +613,13 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.NotNull(_subtopic);
             Assert.NotEmpty(model.CategorySectionDto);
             var recommendation = model.CategorySectionDto.First().CategorySectionRecommendation;
-            Assert.Null(recommendation);
+            Assert.NotNull(recommendation);
+            Assert.Null(recommendation.RecommendationSlug);
+            Assert.Null(recommendation.RecommendationDisplayName);
         }
 
         [Fact]
-        public async Task Returns_Null_If_Category_IsNot_Completed()
+        public async Task Returns_EmptyRecommendation_If_Category_IsNot_Completed()
         {
             _category.Completed = 0;
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
@@ -632,7 +634,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.NotNull(_subtopic);
             Assert.NotEmpty(model.CategorySectionDto);
             var recommendation = model.CategorySectionDto.First().CategorySectionRecommendation;
-            Assert.Null(recommendation);
+            Assert.NotNull(recommendation);
+            Assert.Null(recommendation.RecommendationSlug);
+            Assert.Null(recommendation.RecommendationDisplayName);
         }
     }
 }

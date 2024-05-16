@@ -24,54 +24,10 @@ else
     @foreach (var categorySectionDtoItem in Model.CategorySectionDto)
     {
         <task-list-item>
-            @if (categorySectionDtoItem.Slug != null)
-            {
-                <task-list-item-name>
-                    <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@categorySectionDtoItem.Slug"
-                       class="govuk-link">
-                        @categorySectionDtoItem.Name
-                    </a>
-                </task-list-item-name>
-                <task-list-tag colour=@categorySectionDtoItem.TagColour>
-                    @categorySectionDtoItem.TagText
-                </task-list-tag>
-            }
-            else
-            {
-                <task-list-item-name>
-                    <govuk-error-message>@categorySectionDtoItem.NoSlugForSubtopicErrorMessage</govuk-error-message>
-                </task-list-item-name>
-            }
+            <partial name="Components/Category/Subtopic" model="@categorySectionDtoItem" />
         </task-list-item>
         <task-list-item>
-            @{ var recommendation = categorySectionDtoItem.CategorySectionRecommendation; }
-            @{
-                if (recommendation == null)
-                {
-                    <task-list-item-name>
-                        Recommendation
-                    </task-list-item-name>
-                }
-                else
-                {
-                    @if (recommendation.RecommendationSlug != null)
-                    {
-                        <a class="govuk-link" asp-route="GetRecommendation"
-                           asp-route-sectionSlug="@recommendation.SectionSlug"
-                           asp-route-recommendationSlug="@recommendation.RecommendationSlug">
-                            Recommendation
-                        </a>
-                    }
-                    else
-                    {
-                        <govuk-error-message>@recommendation.NoRecommendationFoundErrorMessage</govuk-error-message>
-                    }
-                }
-            }
-            <task-list-tag colour=@categorySectionDtoItem.TagColour>
-                @(recommendation?.RecommendationSlug != null ? "Ready" : "Not Available")
-            </task-list-tag>
+            <partial name="Components/Category/SubtopicRecommendation" model="@categorySectionDtoItem.CategorySectionRecommendation" />
         </task-list-item>
-
     }
 </task-list>

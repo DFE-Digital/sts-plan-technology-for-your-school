@@ -1,0 +1,20 @@
+@model Dfe.PlanTech.Domain.CategorySection.CategorySectionDto
+
+@if (Model.Slug != null)
+{
+    <task-list-item-name>
+        <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@Model.Slug"
+           class="govuk-link">
+            @Model.Name
+        </a>
+    </task-list-item-name>
+    <task-list-tag colour=@Model.TagColour>
+        @Model.TagText
+    </task-list-tag>
+}
+else
+{
+    <task-list-item-name>
+        <govuk-error-message>@Model.NoSlugForSubtopicErrorMessage</govuk-error-message>
+    </task-list-item-name>
+}

@@ -28,9 +28,7 @@ public class CategoryViewComponent(
 
     private async Task<CategoryViewComponentViewModel> GenerateViewModel(Category category)
     {
-        bool sectionsExist = category.Sections.Count > 0;
-
-        if (!sectionsExist)
+        if (category.Sections.Count == 0)
         {
             _logger.LogError("Found no sections for category {id}", category.Sys.Id);
 
@@ -85,6 +83,14 @@ public class CategoryViewComponent(
             categorySectionDto.TagText = "NOT STARTED";
         }
     }
+    
+    private static void SetCategorySectionRecommendationDtoTag(CategorySectionRecommendationDto categorySectionRecommendationDto)
+    {
+        var recommendationReady = categorySectionRecommendationDto.RecommendationSlug != null;
+
+        categorySectionRecommendationDto.TagColour = recommendationReady ? TagColour.Blue : TagColour.Grey;
+        categorySectionRecommendationDto.TagText = recommendationReady ? "Ready" : "Not Available";
+    }
 
     private async IAsyncEnumerable<CategorySectionDto> GetCategorySectionDto(Category category)
     {
@@ -92,12 +98,14 @@ public class CategoryViewComponent(
         {
             var sectionStatus = category.SectionStatuses.FirstOrDefault(sectionStatus =>
                 sectionStatus.SectionId == section.Sys.Id && sectionStatus.Completed == 1);
-            
+            var recommendation = await GetSectionRecommendation(section, sectionStatus);
+            SetCategorySectionRecommendationDtoTag(recommendation);
+
             var categorySectionDto = new CategorySectionDto
             {
                 Slug = section.InterstitialPage.Slug,
                 Name = section.Name,
-                CategorySectionRecommendation = await GetSectionRecommendation(section, sectionStatus)
+                CategorySectionRecommendation = recommendation
             };
 
             if (string.IsNullOrWhiteSpace(categorySectionDto.Slug))
@@ -128,21 +136,18 @@ public class CategoryViewComponent(
         }
     }
 
-    private async Task<CategorySectionRecommendationDto?> GetSectionRecommendation(
-        ISectionComponent section, SectionStatusDto? sectionStatus)
+    private async Task<CategorySectionRecommendationDto> GetSectionRecommendation(ISectionComponent section, SectionStatusDto? sectionStatus)
     {
         var sectionMaturity = sectionStatus?.Maturity;
 
         if (string.IsNullOrEmpty(sectionMaturity)) return new CategorySectionRecommendationDto();
-
 
         var recommendation =
             await _getSubTopicRecommendationQuery.GetRecommendationsViewDto(section.Sys.Id, sectionMaturity);
 
         if (recommendation == null)
         {
-            _logger.LogError("No Recommendation Found: Section - {sectionName}, Maturity - {sectionMaturity}",
-                section.Name, sectionMaturity);
+            _logger.LogError("No Recommendation Found: Section - {sectionName}, Maturity - {sectionMaturity}", section.Name, sectionMaturity);
 
             return new CategorySectionRecommendationDto
             {
@@ -152,15 +157,14 @@ public class CategoryViewComponent(
 
         if (section.InterstitialPage?.Slug == null)
         {
-            _logger.LogError("No Slug found for Subtopic with ID: {SectionId}  / name: {SectionName}", section.Sys.Id,
-                section.Name);
+            _logger.LogError("No Slug found for Subtopic with ID: {SectionId}  / name: {SectionName}", section.Sys.Id, section.Name);
         }
-
+        
         return new CategorySectionRecommendationDto
         {
             RecommendationSlug = recommendation.RecommendationSlug,
             RecommendationDisplayName = recommendation.DisplayName,
-            SectionSlug = section.InterstitialPage?.Slug ?? ""
+            SectionSlug = section.InterstitialPage?.Slug ?? "",
         };
     }
 

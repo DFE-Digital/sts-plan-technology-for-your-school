@@ -9,5 +9,9 @@ public class CategorySectionRecommendationDto
     public string? NoRecommendationFoundErrorMessage { get; init; }
 
     public string? SectionSlug { get; init; }
+    
+    public string TagColour { get; set; } = null!;
+
+    public string? TagText { get; set; }
 
 }
