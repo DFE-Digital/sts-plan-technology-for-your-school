@@ -5,7 +5,7 @@ CREATE OR ALTER PROCEDURE dbo.GetSectionStatusesForCategory @categoryId nvarchar
 AS
 SELECT
     Sub.sectionId,
-    CAST(Sub.completed as int) as completed,
+    Sub.completed,
     Sub.maturity,
     Sub.dateCreated
 FROM Contentful.Sections CS
