@@ -10,12 +10,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewComponents;
 
-public class CategorySectionViewComponent(
-    ILogger<CategorySectionViewComponent> logger,
+public class CategoryViewComponent(
+    ILogger<CategoryViewComponent> logger,
     IGetSubmissionStatusesQuery query,
     IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery) : ViewComponent
 {
-    private readonly ILogger<CategorySectionViewComponent> _logger = logger;
+    private readonly ILogger<CategoryViewComponent> _logger = logger;
     private readonly IGetSubmissionStatusesQuery _query = query;
     private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery = getSubTopicRecommendationQuery;
 
@@ -26,7 +26,7 @@ public class CategorySectionViewComponent(
         return View(viewModel);
     }
 
-    private async Task<CategorySectionViewComponentViewModel> GenerateViewModel(Category category)
+    private async Task<CategoryViewComponentViewModel> GenerateViewModel(Category category)
     {
         bool sectionsExist = category.Sections.Count > 0;
 
@@ -34,21 +34,19 @@ public class CategorySectionViewComponent(
         {
             _logger.LogError("Found no sections for category {id}", category.Sys.Id);
 
-            return new CategorySectionViewComponentViewModel
+            return new CategoryViewComponentViewModel
             {
                 NoSectionsErrorRedirectUrl = "ServiceUnavailable"
             };
         }
 
         category = await RetrieveSectionStatuses(category);
-        // TODO sort this out, dont use blocking Enumerable
-        var sectionDto = GetCategorySectionViewComponentViewModel(category).ToBlockingEnumerable();
 
-        return new CategorySectionViewComponentViewModel
+        return new CategoryViewComponentViewModel
         {
             CompletedSectionCount = category.Completed,
             TotalSectionCount = category.Sections.Count,
-            CategorySectionDto = sectionDto,
+            CategorySectionDto = await GetCategorySectionDto(category).ToListAsync(),
             ProgressRetrievalErrorMessage = category.RetrievalError
                 ? "Unable to retrieve progress, please refresh your browser."
                 : null
@@ -88,19 +86,18 @@ public class CategorySectionViewComponent(
         }
     }
 
-    private async IAsyncEnumerable<CategorySectionDto> GetCategorySectionViewComponentViewModel(Category category)
+    private async IAsyncEnumerable<CategorySectionDto> GetCategorySectionDto(Category category)
     {
         foreach (var section in category.Sections)
         {
             var sectionStatus = category.SectionStatuses.FirstOrDefault(sectionStatus =>
                 sectionStatus.SectionId == section.Sys.Id && sectionStatus.Completed == 1);
+            
             var categorySectionDto = new CategorySectionDto
             {
                 Slug = section.InterstitialPage.Slug,
                 Name = section.Name,
-                CategorySectionRecommendation = sectionStatus != null
-                    ? await GetRecommendationsViewComponentViewModel(section, sectionStatus)
-                    : null
+                CategorySectionRecommendation = await GetSectionRecommendation(section, sectionStatus)
             };
 
             if (string.IsNullOrWhiteSpace(categorySectionDto.Slug))
@@ -131,7 +128,7 @@ public class CategorySectionViewComponent(
         }
     }
 
-    private async Task<CategorySectionRecommendationDto?> GetRecommendationsViewComponentViewModel(
+    private async Task<CategorySectionRecommendationDto?> GetSectionRecommendation(
         ISectionComponent section, SectionStatusDto? sectionStatus)
     {
         var sectionMaturity = sectionStatus?.Maturity;

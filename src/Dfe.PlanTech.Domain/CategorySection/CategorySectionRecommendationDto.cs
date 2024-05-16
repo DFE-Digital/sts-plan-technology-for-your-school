@@ -1,5 +1,3 @@
-using Dfe.PlanTech.Questionnaire.Models;
-
 namespace Dfe.PlanTech.Domain.CategorySection;
 
 public class CategorySectionRecommendationDto
