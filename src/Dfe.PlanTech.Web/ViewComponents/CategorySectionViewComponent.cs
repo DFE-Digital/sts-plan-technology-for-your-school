@@ -10,12 +10,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewComponents;
 
-public class CategoryViewComponent(
-    ILogger<CategoryViewComponent> logger,
+public class CategorySectionViewComponent(
+    ILogger<CategorySectionViewComponent> logger,
     IGetSubmissionStatusesQuery query,
     IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery) : ViewComponent
 {
-    private readonly ILogger<CategoryViewComponent> _logger = logger;
+    private readonly ILogger<CategorySectionViewComponent> _logger = logger;
     private readonly IGetSubmissionStatusesQuery _query = query;
     private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery = getSubTopicRecommendationQuery;
 
@@ -26,13 +26,13 @@ public class CategoryViewComponent(
         return View(viewModel);
     }
 
-    private async Task<CategoryViewComponentViewModel> GenerateViewModel(Category category)
+    private async Task<CategorySectionViewComponentViewModel> GenerateViewModel(Category category)
     {
         if (category.Sections.Count == 0)
         {
             _logger.LogError("Found no sections for category {id}", category.Sys.Id);
 
-            return new CategoryViewComponentViewModel
+            return new CategorySectionViewComponentViewModel
             {
                 NoSectionsErrorRedirectUrl = "ServiceUnavailable"
             };
@@ -40,7 +40,7 @@ public class CategoryViewComponent(
 
         category = await RetrieveSectionStatuses(category);
 
-        return new CategoryViewComponentViewModel
+        return new CategorySectionViewComponentViewModel
         {
             CompletedSectionCount = category.Completed,
             TotalSectionCount = category.Sections.Count,

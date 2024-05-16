@@ -1,4 +1,4 @@
-@model CategoryViewComponentViewModel
+@model CategorySectionViewComponentViewModel
 
 <h3 class="govuk-heading-s govuk-!-margin-bottom-2">Progress</h3>
 
@@ -24,10 +24,10 @@ else
     @foreach (var categorySectionDtoItem in Model.CategorySectionDto)
     {
         <task-list-item>
-            <partial name="Components/Category/Subtopic" model="@categorySectionDtoItem" />
+            <partial name="Components/CategorySection/Subtopic" model="@categorySectionDtoItem" />
         </task-list-item>
         <task-list-item>
-            <partial name="Components/Category/SubtopicRecommendation" model="@categorySectionDtoItem.CategorySectionRecommendation" />
+            <partial name="Components/CategorySection/SubtopicRecommendation" model="@categorySectionDtoItem.CategorySectionRecommendation" />
         </task-list-item>
     }
 </task-list>

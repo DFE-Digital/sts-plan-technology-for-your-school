@@ -2,7 +2,7 @@ using Dfe.PlanTech.Domain.CategorySection;
 
 namespace Dfe.PlanTech.Web.Models;
 
-public class CategoryViewComponentViewModel
+public class CategorySectionViewComponentViewModel
 {
     public int CompletedSectionCount { get; init; }
 

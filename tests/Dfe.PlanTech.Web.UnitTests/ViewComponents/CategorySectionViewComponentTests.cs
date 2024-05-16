@@ -17,15 +17,15 @@ using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 {
-    public class CategoryViewComponentTests
+    public class CategorySectionViewComponentTests
     {
         private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
-        private readonly CategoryViewComponent _categoryViewComponent;
+        private readonly CategorySectionViewComponent _categorySectionViewComponent;
         private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
         
         private Category _category;
         private readonly Category _categoryTwo;
-        private readonly ILogger<CategoryViewComponent> _loggerCategory;
+        private readonly ILogger<CategorySectionViewComponent> _loggerCategory;
         
         private readonly SubtopicRecommendation? _subtopic = new SubtopicRecommendation()
         {
@@ -141,10 +141,10 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
         private readonly List<SubtopicRecommendation> _subtopicRecommendations = [];
 
-        public CategoryViewComponentTests()
+        public CategorySectionViewComponentTests()
         {
             _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
-            _loggerCategory = Substitute.For<ILogger<CategoryViewComponent>>();
+            _loggerCategory = Substitute.For<ILogger<CategorySectionViewComponent>>();
             _getSubTopicRecommendationQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
             
             _subtopicRecommendations.Add(_subtopic);
@@ -180,7 +180,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 ViewContext = viewContext
             };
 
-            _categoryViewComponent = new CategoryViewComponent(
+            _categorySectionViewComponent = new CategorySectionViewComponent(
                 _loggerCategory, 
                 _getSubmissionStatusesQuery, 
                 _getSubTopicRecommendationQuery)
@@ -255,7 +255,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
 
-            var result = await _categoryViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -263,7 +263,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var model = result.ViewData.Model;
             Assert.NotNull(model);
 
-            var unboxed = model as CategoryViewComponentViewModel;
+            var unboxed = model as CategorySectionViewComponentViewModel;
             Assert.NotNull(unboxed);
 
             Assert.Equal(1, unboxed.CompletedSectionCount);
@@ -300,7 +300,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
 
-            var result = await _categoryViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -308,7 +308,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var model = result.ViewData.Model;
             Assert.NotNull(model);
 
-            var unboxed = model as CategoryViewComponentViewModel;
+            var unboxed = model as CategorySectionViewComponentViewModel;
             Assert.NotNull(unboxed);
 
             Assert.Equal(0, unboxed.CompletedSectionCount);
@@ -339,7 +339,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
 
-            var result = await _categoryViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -347,7 +347,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var model = result.ViewData.Model;
             Assert.NotNull(model);
 
-            var unboxed = model as CategoryViewComponentViewModel;
+            var unboxed = model as CategorySectionViewComponentViewModel;
             Assert.NotNull(unboxed);
 
             Assert.Equal(0, unboxed.CompletedSectionCount);
@@ -392,7 +392,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             _ = _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
 
-            var result = await _categoryViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -400,7 +400,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var model = result.ViewData.Model;
             Assert.NotNull(model);
 
-            var unboxed = model as CategoryViewComponentViewModel;
+            var unboxed = model as CategorySectionViewComponentViewModel;
             Assert.NotNull(unboxed);
 
             Assert.Equal(1, unboxed.CompletedSectionCount);
@@ -431,7 +431,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(Arg.Any<string>())
                                         .ThrowsAsync(new Exception("Error occurred fection sections"));
 
-            var result = await _categoryViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -439,7 +439,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var model = result.ViewData.Model;
             Assert.NotNull(model);
 
-            var unboxed = model as CategoryViewComponentViewModel;
+            var unboxed = model as CategorySectionViewComponentViewModel;
             Assert.NotNull(unboxed);
             Assert.Equal("Unable to retrieve progress, please refresh your browser.", unboxed.ProgressRetrievalErrorMessage);
 
@@ -476,7 +476,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
 
-            var result = await _categoryViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
@@ -484,7 +484,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var model = result.ViewData.Model;
             Assert.NotNull(model);
 
-            var unboxed = model as CategoryViewComponentViewModel;
+            var unboxed = model as CategorySectionViewComponentViewModel;
             Assert.NotNull(unboxed);
             Assert.Equal("ServiceUnavailable", unboxed.NoSectionsErrorRedirectUrl);
             Assert.Equal(0, unboxed.TotalSectionCount);
@@ -508,12 +508,12 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns(_category.SectionStatuses.ToList());
 
-            var result = await _categoryViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
 
-            var model = result.ViewData.Model as CategoryViewComponentViewModel;
+            var model = result.ViewData.Model as CategorySectionViewComponentViewModel;
             Assert.NotNull(model);
 
             Assert.NotNull(_subtopic);
@@ -539,12 +539,12 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Throws(new Exception("test"));
 
-            var result = await _categoryViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
 
-            var model = result.ViewData.Model as CategoryViewComponentViewModel;
+            var model = result.ViewData.Model as CategorySectionViewComponentViewModel;
             Assert.NotNull(model);
 
             Assert.NotNull(_subtopic);
@@ -571,12 +571,12 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns(_category.SectionStatuses.ToList());
 
-            var result = await _categoryViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
 
-            var model = result.ViewData.Model as CategoryViewComponentViewModel;
+            var model = result.ViewData.Model as CategorySectionViewComponentViewModel;
             Assert.NotNull(model);
 
             Assert.NotNull(_subtopic);
@@ -602,12 +602,12 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns(_category.SectionStatuses.ToList());
 
-            var result = await _categoryViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
 
-            var model = result.ViewData.Model as CategoryViewComponentViewModel;
+            var model = result.ViewData.Model as CategorySectionViewComponentViewModel;
             Assert.NotNull(model);
 
             Assert.NotNull(_subtopic);
@@ -623,12 +623,12 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         {
             _category.Completed = 0;
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
-            var result = await _categoryViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
             Assert.NotNull(result.ViewData);
 
-            var model = result.ViewData.Model as CategoryViewComponentViewModel;
+            var model = result.ViewData.Model as CategorySectionViewComponentViewModel;
             Assert.NotNull(model);
 
             Assert.NotNull(_subtopic);
