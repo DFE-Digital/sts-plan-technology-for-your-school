@@ -1,3 +1,5 @@
+import fs from "fs";
+
 const SleepTimeInMs = {
   BetweenGroups: 2000,
   BetweenContent: 50,
@@ -5,6 +7,8 @@ const SleepTimeInMs = {
 }
 
 const MaxRetryCount = 5;
+
+const insertedGroups = [];
 
 export async function postEntriesToWebhook({ contents }) {
   let groupsMigrated = 1;
@@ -19,7 +23,19 @@ export async function postEntriesToWebhook({ contents }) {
 
     console.log(`Found ${withoutReferences.length} entries for migrating`);
 
-    await getContentsAndPostToWebhook(withoutReferences);
+    const results = await getContentsAndPostToWebhook(withoutReferences);
+
+    insertedGroups.push({
+      groupNumber: groupsMigrated,
+      entries: results.map(result => ({
+        ...result,
+        entry: {
+          contentType: result.entry.sys?.contentType?.sys?.id,
+          id: result.entry?.sys?.id,
+          name: result.entry.fields.internalName?.["en-US"]
+        }
+      }))
+    });
 
     insertedItems = [...insertedItems, ...withoutReferences.map(content => content.id)];
 
@@ -33,6 +49,8 @@ export async function postEntriesToWebhook({ contents }) {
 
     await sleep(SleepTimeInMs.BetweenGroups);
   }
+
+  fs.writeFileSync("inserted-groups.json", JSON.stringify(insertedGroups));
 }
 
 
@@ -67,13 +85,17 @@ function sleep(ms) {
  * @param {*} content 
  */
 async function getContentsAndPostToWebhook(content) {
+  const results = [];
   for (let x = 0; x < content.length; x++) {
     const entry = content[x].entry;
 
-    await tryPostContent(entry);
+    const result = await tryPostContent(entry);
+    results.push(result);
 
     sleep(SleepTimeInMs.BetweenContent);
   }
+
+  return results;
 }
 
 /**
@@ -88,8 +110,8 @@ async function tryPostContent(entry) {
   while (true) {
     const result = await postToWebook(entry);
 
-    if (result) {
-      return true;
+    if (result && result.success) {
+      return result;
     }
 
     console.log('Error posting entry');
@@ -97,7 +119,7 @@ async function tryPostContent(entry) {
 
     if (retryCount >= MaxRetryCount) {
       console.log('Reached max retry count');
-      return false;
+      return result;
     }
 
     console.log(`Waiting ${sleepTime / 1000} seconds`);
@@ -108,7 +130,9 @@ async function tryPostContent(entry) {
 }
 
 async function postToWebook(content) {
-  const body = getJsonPayload(content);
+  const minifiedContent = minifyContent(content);
+
+  const body = JSON.stringify(minifiedContent);
 
   try {
     const result = await fetch(process.env.FUNCTION_APP_URL,
@@ -131,11 +155,18 @@ async function postToWebook(content) {
       throw 'error ' + result.status + " " + result.text();
     }
 
-    return true;
+    return {
+      success: true,
+      entry: minifiedContent
+    };
   }
   catch (e) {
     console.log('Error posting content ' + content.sys.id + '  ' + e, content, JSON.stringify(content));
-    return false;
+    return {
+      success: false,
+      entry: minifiedContent,
+      error: e
+    };
   }
 }
 
@@ -144,8 +175,8 @@ async function postToWebook(content) {
  * @param {*} content 
  * @returns 
  */
-function getJsonPayload(content) {
-  const body = {
+function minifyContent(content) {
+  return {
     sys: {
       id: content.sys.id,
       type: content.sys.type,
@@ -153,7 +184,5 @@ function getJsonPayload(content) {
     },
     fields: content.fields
   };
-
-  return JSON.stringify(body);
 }
 
