@@ -54,7 +54,7 @@ public class CategorySectionViewComponent(
     private void LogErrorWithUserFeedback(Section categorySection, CategorySectionDto categorySectionDto)
     {
         categorySectionDto.Slug = null;
-        _logger.LogError("No Slug found for Subtopic with ID: {categorySectionId}", categorySection.Sys.Id);
+        _logger.LogError($"No Slug found for Subtopic with ID: ${categorySection.Sys.Id}/ name: {categorySection.Name}");
         categorySectionDto.NoSlugForSubtopicErrorMessage = string.Format("{0} unavailable", categorySection.Name);
     }
 
@@ -64,18 +64,12 @@ public class CategorySectionViewComponent(
         categorySectionDto.TagText = "UNABLE TO RETRIEVE STATUS";
     }
 
-    private static void SetCategorySectionDtoTagWithCurrentStatus(
-        Category category,
-        Section categorySection,
-        CategorySectionDto categorySectionDto)
+    private static void SetCategorySectionDtoTagWithCurrentStatus(CategorySectionDto categorySectionDto, SectionStatusDto? sectionStatus)
     {
-        var sectionStatusCompleted = category.SectionStatuses
-            .FirstOrDefault(sectionStatus => sectionStatus.SectionId == categorySection.Sys.Id)?.Completed;
-
-        if (sectionStatusCompleted != null)
+        if (sectionStatus != null)
         {
-            categorySectionDto.TagColour = sectionStatusCompleted == 1 ? TagColour.Blue : TagColour.LightBlue;
-            categorySectionDto.TagText = sectionStatusCompleted == 1 ? "COMPLETE" : "IN PROGRESS";
+            categorySectionDto.TagColour = sectionStatus.Completed ? TagColour.Blue : TagColour.LightBlue;
+            categorySectionDto.TagText = sectionStatus.Completed ? "COMPLETE" : "IN PROGRESS";
         }
         else
         {
@@ -83,46 +77,35 @@ public class CategorySectionViewComponent(
             categorySectionDto.TagText = "NOT STARTED";
         }
     }
-    
-    private static void SetCategorySectionRecommendationDtoTag(CategorySectionRecommendationDto categorySectionRecommendationDto)
-    {
-        var recommendationReady = categorySectionRecommendationDto.RecommendationSlug != null;
-
-        categorySectionRecommendationDto.TagColour = recommendationReady ? TagColour.Blue : TagColour.Grey;
-        categorySectionRecommendationDto.TagText = recommendationReady ? "Ready" : "Not Available";
-    }
 
     private async IAsyncEnumerable<CategorySectionDto> GetCategorySectionDto(Category category)
     {
         foreach (var section in category.Sections)
         {
-            var sectionStatus = category.SectionStatuses.FirstOrDefault(sectionStatus =>
-                sectionStatus.SectionId == section.Sys.Id && sectionStatus.Completed == 1);
-            var recommendation = await GetSectionRecommendation(section, sectionStatus);
-            SetCategorySectionRecommendationDtoTag(recommendation);
+            var sectionStatus = category.SectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId == section.Sys.Id);
 
             var categorySectionDto = new CategorySectionDto
             {
                 Slug = section.InterstitialPage.Slug,
                 Name = section.Name,
-                CategorySectionRecommendation = recommendation
+                CategorySectionRecommendation = await GetSectionRecommendationWithTag(section, sectionStatus)
             };
 
             if (string.IsNullOrWhiteSpace(categorySectionDto.Slug))
                 LogErrorWithUserFeedback(section, categorySectionDto);
             else if (category.RetrievalError) SetCategorySectionDtoTagWithRetrievalError(categorySectionDto);
-            else SetCategorySectionDtoTagWithCurrentStatus(category, section, categorySectionDto);
+            else SetCategorySectionDtoTagWithCurrentStatus(categorySectionDto, sectionStatus);
 
             yield return categorySectionDto;
         }
     }
-
+    
     public async Task<Category> RetrieveSectionStatuses(Category category)
     {
         try
         {
             category.SectionStatuses = await _query.GetSectionSubmissionStatuses(category.Sys.Id);
-            category.Completed = category.SectionStatuses.Count(x => x.Completed == 1);
+            category.Completed = category.SectionStatuses.Count(x => x.Completed);
             category.RetrievalError = false;
             return category;
         }
@@ -135,10 +118,23 @@ public class CategorySectionViewComponent(
             return category;
         }
     }
-
-    private async Task<CategorySectionRecommendationDto> GetSectionRecommendation(ISectionComponent section, SectionStatusDto? sectionStatus)
+    
+    private async Task<CategorySectionRecommendationDto> GetSectionRecommendationWithTag(ISectionComponent section, SectionStatusDto? sectionStatus)
     {
-        var sectionMaturity = sectionStatus?.Maturity;
+        var recommendation = await GetCategorySectionRecommendationDto(section, sectionStatus);
+        var recommendationReady = recommendation.RecommendationSlug != null;
+
+        recommendation.TagColour = recommendationReady ? TagColour.Blue : TagColour.Grey;
+        recommendation.TagText = recommendationReady ? "Ready" : "Not Available";
+
+        return recommendation;
+    }
+
+    private async Task<CategorySectionRecommendationDto> GetCategorySectionRecommendationDto(ISectionComponent section, SectionStatusDto? sectionStatus)
+    {
+        if (sectionStatus?.Completed != true) return new CategorySectionRecommendationDto();
+        
+        var sectionMaturity = sectionStatus.Maturity;
 
         if (string.IsNullOrEmpty(sectionMaturity)) return new CategorySectionRecommendationDto();
 
@@ -154,17 +150,12 @@ public class CategorySectionViewComponent(
                 NoRecommendationFoundErrorMessage = $"Unable to retrieve {section.Name} recommendation"
             };
         }
-
-        if (section.InterstitialPage?.Slug == null)
-        {
-            _logger.LogError("No Slug found for Subtopic with ID: {SectionId}  / name: {SectionName}", section.Sys.Id, section.Name);
-        }
         
         return new CategorySectionRecommendationDto
         {
             RecommendationSlug = recommendation.RecommendationSlug,
             RecommendationDisplayName = recommendation.DisplayName,
-            SectionSlug = section.InterstitialPage?.Slug ?? "",
+            SectionSlug = section.InterstitialPage?.Slug
         };
     }
 
@@ -173,7 +164,7 @@ public class CategorySectionViewComponent(
         try
         {
             category.SectionStatuses = await _query.GetSectionSubmissionStatuses(category.Sys.Id);
-            category.Completed = category.SectionStatuses.Count(x => x.Completed == 1);
+            category.Completed = category.SectionStatuses.Count(x => x.Completed);
             category.RetrievalError = false;
 
             return category;

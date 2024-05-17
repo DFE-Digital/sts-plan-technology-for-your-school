@@ -16,10 +16,10 @@ public class GetSubmissionStatusesQueryTests
     private readonly IUser user = Substitute.For<IUser>();
 
     private readonly List<SectionStatusDto> SectionStatuses = [
-        new SectionStatusDto { Completed = 1, SectionId = "1", Maturity = "Low", DateCreated = DateTime.UtcNow },
-        new SectionStatusDto { Completed = 1, SectionId = "2", Maturity = "High", DateCreated = DateTime.UtcNow },
-        new SectionStatusDto { Completed = 0, SectionId = "3", DateCreated = DateTime.UtcNow },
-        new SectionStatusDto { Completed = 0, SectionId = "4", DateCreated = DateTime.UtcNow },
+        new SectionStatusDto { Completed = true, SectionId = "1", Maturity = "Low", DateCreated = DateTime.UtcNow },
+        new SectionStatusDto { Completed = true, SectionId = "2", Maturity = "High", DateCreated = DateTime.UtcNow },
+        new SectionStatusDto { Completed = false, SectionId = "3", DateCreated = DateTime.UtcNow },
+        new SectionStatusDto { Completed = false, SectionId = "4", DateCreated = DateTime.UtcNow },
     ];
 
     private const int establishmentId = 1;

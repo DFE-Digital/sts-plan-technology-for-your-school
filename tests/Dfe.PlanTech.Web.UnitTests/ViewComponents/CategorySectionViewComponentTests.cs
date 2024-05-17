@@ -250,7 +250,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category.SectionStatuses.Add(new SectionStatusDto()
             {
                 SectionId = "Section1",
-                Completed = 1,
+                Completed = true,
             });
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
@@ -295,7 +295,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category.SectionStatuses.Add(new SectionStatusDto()
             {
                 SectionId = "Section1",
-                Completed = 0,
+                Completed = false
             });
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
@@ -387,7 +387,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category.SectionStatuses.Add(new SectionStatusDto()
             {
                 SectionId = "Section1",
-                Completed = 1,
+                Completed = true
             });
 
             _ = _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
@@ -501,7 +501,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
             {
                 SectionId = "Section1",
-                Completed = 1,
+                Completed = true,
                 Maturity = "High"
             });
 
@@ -532,7 +532,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
             {
                 SectionId = "Section1",
-                Completed = 1,
+                Completed = true,
                 Maturity = "High"
             });
             
@@ -565,7 +565,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
             {
                 SectionId = "Section1",
-                Completed = 1,
+                Completed = true,
                 Maturity = "Low",
             });
             
@@ -596,7 +596,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
             {
                 SectionId = "Section1",
-                Completed = 0,
+                Completed = false,
                 Maturity = null
             });
             

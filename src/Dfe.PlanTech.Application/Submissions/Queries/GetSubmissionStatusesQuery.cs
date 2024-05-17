@@ -19,11 +19,11 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
 
     }
     
-    public Task<List<SectionStatusDto>> GetSectionSubmissionStatuses(string categoryId)
+    public async Task<List<SectionStatusDto>> GetSectionSubmissionStatuses(string categoryId)
     {
-        int establishmentId = _userHelper.GetEstablishmentId().Result;
+        int establishmentId = await _userHelper.GetEstablishmentId();
         
-        return _db.ToListAsync(_db.GetSectionStatuses(categoryId, establishmentId));
+        return await _db.ToListAsync(_db.GetSectionStatuses(categoryId, establishmentId));
     }
 
     public async Task<SectionStatusNew> GetSectionSubmissionStatusAsync(int establishmentId,

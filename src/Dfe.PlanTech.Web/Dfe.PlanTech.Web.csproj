@@ -41,10 +41,6 @@
         <None Remove="Views\Recommendations\" />
     </ItemGroup>
 
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="Views\Shared\Components\Recommendations\Default.cshtml" />
-    </ItemGroup>
-
     <Target Name="BuildWebAssets" BeforeTargets="Build" Condition="'$(buildWebAssets)' == 'true'">
         <Exec Command="npm install" WorkingDirectory="../Dfe.PlanTech.Web.Node" />
         <Exec Command="npm run build" WorkingDirectory="../Dfe.PlanTech.Web.Node" />
