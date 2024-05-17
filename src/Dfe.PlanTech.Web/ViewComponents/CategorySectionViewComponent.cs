@@ -4,6 +4,7 @@ using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
+using Dfe.PlanTech.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.TagHelpers.TaskList;
 using Microsoft.AspNetCore.Mvc;
@@ -138,25 +139,32 @@ public class CategorySectionViewComponent(
 
         if (string.IsNullOrEmpty(sectionMaturity)) return new CategorySectionRecommendationDto();
 
-        var recommendation =
-            await _getSubTopicRecommendationQuery.GetRecommendationsViewDto(section.Sys.Id, sectionMaturity);
-
-        if (recommendation == null)
+        try
         {
-            _logger.LogError("No Recommendation Found: Section - {sectionName}, Maturity - {sectionMaturity}", section.Name, sectionMaturity);
-
+            var recommendation = await _getSubTopicRecommendationQuery.GetRecommendationsViewDto(section.Sys.Id, sectionMaturity);
+            if (recommendation == null)
+            {
+                _logger.LogError($"No Recommendation Found: Section - {section.Name}, Maturity - {sectionMaturity}");
+                return new CategorySectionRecommendationDto
+                {
+                    NoRecommendationFoundErrorMessage = $"Unable to retrieve {section.Name} recommendation"
+                };
+            }
+            return new CategorySectionRecommendationDto
+            {
+                RecommendationSlug = recommendation.RecommendationSlug,
+                RecommendationDisplayName = recommendation.DisplayName,
+                SectionSlug = section.InterstitialPage?.Slug
+            };
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"An exception has occurred while trying to retrieve the recommendation for Section {section.Name}, with the message {e.Message}");
             return new CategorySectionRecommendationDto
             {
                 NoRecommendationFoundErrorMessage = $"Unable to retrieve {section.Name} recommendation"
             };
         }
-        
-        return new CategorySectionRecommendationDto
-        {
-            RecommendationSlug = recommendation.RecommendationSlug,
-            RecommendationDisplayName = recommendation.DisplayName,
-            SectionSlug = section.InterstitialPage?.Slug
-        };
     }
 
     public async Task<ICategoryComponent> RetrieveSectionStatuses(ICategoryComponent category)
