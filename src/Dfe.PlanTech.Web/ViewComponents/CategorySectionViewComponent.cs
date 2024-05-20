@@ -4,9 +4,7 @@ using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
-using Dfe.PlanTech.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
-using Dfe.PlanTech.Web.TagHelpers.TaskList;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewComponents;
@@ -52,52 +50,23 @@ public class CategorySectionViewComponent(
         };
     }
 
-    private void LogErrorWithUserFeedback(Section categorySection, CategorySectionDto categorySectionDto)
-    {
-        categorySectionDto.Slug = null;
-        _logger.LogError($"No Slug found for Subtopic with ID: ${categorySection.Sys.Id}/ name: {categorySection.Name}");
-        categorySectionDto.NoSlugForSubtopicErrorMessage = string.Format("{0} unavailable", categorySection.Name);
-    }
-
-    private static void SetCategorySectionDtoTagWithRetrievalError(CategorySectionDto categorySectionDto)
-    {
-        categorySectionDto.TagColour = TagColour.Red;
-        categorySectionDto.TagText = "UNABLE TO RETRIEVE STATUS";
-    }
-
-    private static void SetCategorySectionDtoTagWithCurrentStatus(CategorySectionDto categorySectionDto, SectionStatusDto? sectionStatus)
-    {
-        if (sectionStatus != null)
-        {
-            categorySectionDto.TagColour = sectionStatus.Completed ? TagColour.Blue : TagColour.LightBlue;
-            categorySectionDto.TagText = sectionStatus.Completed ? "COMPLETE" : "IN PROGRESS";
-        }
-        else
-        {
-            categorySectionDto.TagColour = TagColour.Grey;
-            categorySectionDto.TagText = "NOT STARTED";
-        }
-    }
-
     private async IAsyncEnumerable<CategorySectionDto> GetCategorySectionDto(Category category)
     {
         foreach (var section in category.Sections)
         {
             var sectionStatus = category.SectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId == section.Sys.Id);
+            
+            if (string.IsNullOrWhiteSpace(section.InterstitialPage.Slug))
+                _logger.LogError($"No Slug found for Subtopic with ID: ${section.Sys.Id}/ name: {section.Name}");
 
-            var categorySectionDto = new CategorySectionDto
-            {
-                Slug = section.InterstitialPage.Slug,
-                Name = section.Name,
-                CategorySectionRecommendation = await GetSectionRecommendationWithTag(section, sectionStatus)
-            };
-
-            if (string.IsNullOrWhiteSpace(categorySectionDto.Slug))
-                LogErrorWithUserFeedback(section, categorySectionDto);
-            else if (category.RetrievalError) SetCategorySectionDtoTagWithRetrievalError(categorySectionDto);
-            else SetCategorySectionDtoTagWithCurrentStatus(categorySectionDto, sectionStatus);
-
-            yield return categorySectionDto;
+            yield return new CategorySectionDto(
+                slug: section.InterstitialPage.Slug,
+                name: section.Name,
+                retrievalError: category.RetrievalError,
+                started: sectionStatus != null,
+                completed: sectionStatus?.Completed == true,
+                recommendation: await GetCategorySectionRecommendationDto(section, sectionStatus)
+            );
         }
     }
     
@@ -119,32 +88,17 @@ public class CategorySectionViewComponent(
             return category;
         }
     }
-    
-    private async Task<CategorySectionRecommendationDto> GetSectionRecommendationWithTag(ISectionComponent section, SectionStatusDto? sectionStatus)
-    {
-        var recommendation = await GetCategorySectionRecommendationDto(section, sectionStatus);
-        var recommendationReady = recommendation.RecommendationSlug != null;
-
-        recommendation.TagColour = recommendationReady ? TagColour.Blue : TagColour.Grey;
-        recommendation.TagText = recommendationReady ? "Ready" : "Not Available";
-
-        return recommendation;
-    }
 
     private async Task<CategorySectionRecommendationDto> GetCategorySectionRecommendationDto(ISectionComponent section, SectionStatusDto? sectionStatus)
     {
-        if (sectionStatus?.Completed != true) return new CategorySectionRecommendationDto();
-        
-        var sectionMaturity = sectionStatus.Maturity;
-
-        if (string.IsNullOrEmpty(sectionMaturity)) return new CategorySectionRecommendationDto();
+        if (string.IsNullOrEmpty(sectionStatus?.Maturity) || !sectionStatus.Completed) 
+            return new CategorySectionRecommendationDto();
 
         try
         {
-            var recommendation = await _getSubTopicRecommendationQuery.GetRecommendationsViewDto(section.Sys.Id, sectionMaturity);
+            var recommendation = await _getSubTopicRecommendationQuery.GetRecommendationsViewDto(section.Sys.Id, sectionStatus.Maturity);
             if (recommendation == null)
             {
-                _logger.LogError($"No Recommendation Found: Section - {section.Name}, Maturity - {sectionMaturity}");
                 return new CategorySectionRecommendationDto
                 {
                     NoRecommendationFoundErrorMessage = $"Unable to retrieve {section.Name} recommendation"
@@ -164,26 +118,6 @@ public class CategorySectionViewComponent(
             {
                 NoRecommendationFoundErrorMessage = $"Unable to retrieve {section.Name} recommendation"
             };
-        }
-    }
-
-    public async Task<ICategoryComponent> RetrieveSectionStatuses(ICategoryComponent category)
-    {
-        try
-        {
-            category.SectionStatuses = await _query.GetSectionSubmissionStatuses(category.Sys.Id);
-            category.Completed = category.SectionStatuses.Count(x => x.Completed);
-            category.RetrievalError = false;
-
-            return category;
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(
-                "An exception has occurred while trying to retrieve section progress with the following message - {errorMessage}",
-                e.Message);
-            category.RetrievalError = true;
-            return category;
         }
     }
 }

@@ -284,7 +284,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal("Test Section 1", categorySectionDto.Name);
             Assert.Equal("blue", categorySectionDto.TagColour);
             Assert.Equal("COMPLETE", categorySectionDto.TagText);
-            Assert.Null(categorySectionDto.NoSlugForSubtopicErrorMessage);
+            Assert.Null(categorySectionDto.ErrorMessage);
         }
 
         [Fact]
@@ -329,7 +329,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal("Test Section 1", categorySectionDto.Name);
             Assert.Equal("light-blue", categorySectionDto.TagColour);
             Assert.Equal("IN PROGRESS", categorySectionDto.TagText);
-            Assert.Null(categorySectionDto.NoSlugForSubtopicErrorMessage);
+            Assert.Null(categorySectionDto.ErrorMessage);
         }
 
         [Fact]
@@ -368,7 +368,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal("Test Section 1", categorySectionDto.Name);
             Assert.Equal("grey", categorySectionDto.TagColour);
             Assert.Equal("NOT STARTED", categorySectionDto.TagText);
-            Assert.Null(categorySectionDto.NoSlugForSubtopicErrorMessage);
+            Assert.Null(categorySectionDto.ErrorMessage);
         }
 
         [Fact]
@@ -421,8 +421,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal("Test Section 1", categorySectionDto.Name);
             Assert.Null(categorySectionDto.TagColour);
             Assert.Null(categorySectionDto.TagText);
-            Assert.NotNull(categorySectionDto.NoSlugForSubtopicErrorMessage);
-            Assert.Equal("Test Section 1 unavailable", categorySectionDto.NoSlugForSubtopicErrorMessage);
+            Assert.NotNull(categorySectionDto.ErrorMessage);
+            Assert.Equal("Test Section 1 unavailable", categorySectionDto.ErrorMessage);
         }
 
         [Fact]
@@ -458,7 +458,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal("Test Section 1", categorySectionDto.Name);
             Assert.Equal("red", categorySectionDto.TagColour);
             Assert.Equal("UNABLE TO RETRIEVE STATUS", categorySectionDto.TagText);
-            Assert.Null(categorySectionDto.NoSlugForSubtopicErrorMessage);
+            Assert.Null(categorySectionDto.ErrorMessage);
         }
 
         [Fact]
@@ -518,7 +518,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.NotNull(_subtopic);
             Assert.NotEmpty(model.CategorySectionDto);
-            var recommendation = model.CategorySectionDto.First().CategorySectionRecommendation;
+            var recommendation = model.CategorySectionDto.First().Recommendation;
             Assert.NotNull(recommendation);
             Assert.Equal(_subtopic.Intros[0].Slug, recommendation.RecommendationSlug);
             Assert.Equal(_subtopic.Intros[0].Header.Text,recommendation.RecommendationDisplayName);
@@ -549,7 +549,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.NotNull(_subtopic);
             Assert.NotEmpty(model.CategorySectionDto);
-            var recommendation = model.CategorySectionDto.First().CategorySectionRecommendation;
+            var recommendation = model.CategorySectionDto.First().Recommendation;
             Assert.NotNull(recommendation);
             
             Assert.NotNull(_subtopic);
@@ -581,7 +581,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.NotNull(_subtopic);
             Assert.NotEmpty(model.CategorySectionDto);
-            var recommendation = model.CategorySectionDto.First().CategorySectionRecommendation;
+            var recommendation = model.CategorySectionDto.First().Recommendation;
             Assert.NotNull(recommendation);
 
             Assert.Null(recommendation.RecommendationSlug);
@@ -612,7 +612,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.NotNull(_subtopic);
             Assert.NotEmpty(model.CategorySectionDto);
-            var recommendation = model.CategorySectionDto.First().CategorySectionRecommendation;
+            var recommendation = model.CategorySectionDto.First().Recommendation;
             Assert.NotNull(recommendation);
             Assert.Null(recommendation.RecommendationSlug);
             Assert.Null(recommendation.RecommendationDisplayName);
@@ -633,7 +633,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.NotNull(_subtopic);
             Assert.NotEmpty(model.CategorySectionDto);
-            var recommendation = model.CategorySectionDto.First().CategorySectionRecommendation;
+            var recommendation = model.CategorySectionDto.First().Recommendation;
             Assert.NotNull(recommendation);
             Assert.Null(recommendation.RecommendationSlug);
             Assert.Null(recommendation.RecommendationDisplayName);

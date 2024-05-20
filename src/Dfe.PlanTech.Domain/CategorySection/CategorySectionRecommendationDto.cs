@@ -9,9 +9,9 @@ public class CategorySectionRecommendationDto
     public string? NoRecommendationFoundErrorMessage { get; init; }
 
     public string? SectionSlug { get; init; }
+
+    public string TagColour => RecommendationSlug != null ? Constants.TagColour.LightBlue : Constants.TagColour.Grey ;
+
+    public string TagText => RecommendationSlug != null ? "READY" : "NOT AVAILABLE";
     
-    public string TagColour { get; set; } = null!;
-
-    public string? TagText { get; set; }
-
 }
