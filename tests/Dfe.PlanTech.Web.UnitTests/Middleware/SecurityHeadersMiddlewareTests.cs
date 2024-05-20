@@ -25,7 +25,7 @@ public class SecurityHeadersMiddlewareTests
 
         var csp = context.Response.Headers.ContentSecurityPolicy.ToString();
         Assert.Contains("frame-ancestors 'none';", csp);
-        Assert.Contains("default-src 'self';", csp);
+        Assert.Contains("default-src 'self'", csp);
         Assert.Contains("script-src 'nonce-", csp);
     }
 }

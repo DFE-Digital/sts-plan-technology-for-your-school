@@ -61,8 +61,10 @@ public class SecurityHeadersMiddleware
         var cspDirectives = new List<string>
         {
             "frame-ancestors 'none'",
-            "default-src 'self'",
+            "default-src 'self' https://www.clarity.ms https://c.bing.com",
             $"script-src 'nonce-{nonce}' {whitelist}",
+            "img-src 'self' www.googletagmanager.com",
+            "connect-src www.googletagmanager.com"
         };
         var csp = string.Join("; ", cspDirectives);
         context.Response.Headers.ContentSecurityPolicy = csp;
