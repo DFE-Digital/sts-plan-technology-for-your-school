@@ -17,12 +17,12 @@ public class SecurityHeadersMiddlewareTests
         var middleware = new SecurityHeadersMiddleware(new RequestDelegate(next));
 
         await middleware.InvokeAsync(context);
-        
+
         Assert.True(context.Response.Headers.XFrameOptions.Count > 0);
         Assert.Equal("Deny", context.Response.Headers.XFrameOptions);
 
         Assert.True(context.Response.Headers.ContentSecurityPolicy.Count > 0);
-        
+
         var csp = context.Response.Headers.ContentSecurityPolicy.ToString();
         Assert.Contains("frame-ancestors 'none';", csp);
         Assert.Contains("default-src 'self';", csp);

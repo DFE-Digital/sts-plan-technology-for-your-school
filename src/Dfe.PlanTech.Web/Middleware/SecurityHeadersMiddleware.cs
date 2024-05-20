@@ -28,7 +28,7 @@ public class SecurityHeadersMiddleware
     {
         context.Response.Headers.XFrameOptions = "Deny";
     }
-    
+
     private static string GenerateNonce(HttpContext context)
     {
         var nonce = Guid.NewGuid().ToString("N");
