@@ -61,7 +61,7 @@ public class SecurityHeadersMiddleware
         var cspDirectives = new List<string>
         {
             "frame-ancestors 'none'",
-            "default-src 'self' https://www.clarity.ms https://c.bing.com",
+            "default-src 'self' https://www.clarity.ms https://c.bing.com https://a.clarity.ms https://b.clarity.ms https://c.clarity.ms https://d.clarity.ms https://e.clarity.ms https://f.clarity.ms https://g.clarity.ms https://h.clarity.ms https://i.clarity.ms https://j.clarity.ms https://k.clarity.ms https://l.clarity.ms https://m.clarity.ms https://n.clarity.ms https://o.clarity.ms https://p.clarity.ms https://q.clarity.ms https://r.clarity.ms https://s.clarity.ms https://t.clarity.ms https://u.clarity.ms https://v.clarity.ms https://w.clarity.ms https://x.clarity.ms https://y.clarity.ms https://z.clarity.ms",
             $"script-src 'nonce-{nonce}' {whitelist}",
             "img-src 'self' www.googletagmanager.com",
             "connect-src www.googletagmanager.com"
