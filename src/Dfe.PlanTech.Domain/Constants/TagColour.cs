@@ -1,4 +1,4 @@
-namespace Dfe.PlanTech.Web.TagHelpers.TaskList;
+namespace Dfe.PlanTech.Domain.Constants;
 
 public static class TagColour
 {
