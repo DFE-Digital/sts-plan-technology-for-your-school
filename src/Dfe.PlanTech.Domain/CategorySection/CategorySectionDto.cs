@@ -1,3 +1,6 @@
+using Dfe.PlanTech.Domain.Constants;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
+
 namespace Dfe.PlanTech.Domain.CategorySection;
 
 public class CategorySectionDto
@@ -6,10 +9,8 @@ public class CategorySectionDto
 
     public string Name { get; init; }
 
-    public string? TagColour { get; init; }
-
-    public string? TagText { get; init; }
-
+    public Tag Tag { get; init; }
+    
     public string? ErrorMessage { get; init; }
     
     public CategorySectionRecommendationDto? Recommendation { get; init; }
@@ -22,26 +23,15 @@ public class CategorySectionDto
         if (string.IsNullOrWhiteSpace(slug))
         {
             ErrorMessage = $"{Name} unavailable";
+            Tag = new Tag();
         }
         else if (retrievalError)
-        {
-            TagColour = Constants.TagColour.Red;
-            TagText = "UNABLE TO RETRIEVE STATUS";
-        }
+            Tag = new Tag("UNABLE TO RETRIEVE STATUS", TagColour.Red);
         else if (completed)
-        {
-            TagColour = Constants.TagColour.Blue;
-            TagText = "COMPLETE";
-        }
+            Tag = new Tag("COMPLETE", TagColour.Blue);
         else if (started)
-        {
-            TagColour = Constants.TagColour.LightBlue;
-            TagText = "IN PROGRESS";
-        }
+            Tag = new Tag("IN PROGRESS", TagColour.LightBlue );
         else
-        {
-            TagColour = Constants.TagColour.Grey;
-            TagText = "NOT STARTED";
-        }
+            Tag = new Tag("NOT STARTED", TagColour.Grey );
     }
 }

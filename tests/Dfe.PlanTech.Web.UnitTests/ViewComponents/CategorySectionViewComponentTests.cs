@@ -282,8 +282,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Equal("blue", categorySectionDto.TagColour);
-            Assert.Equal("COMPLETE", categorySectionDto.TagText);
+            Assert.Equal("blue", categorySectionDto.Tag.Colour);
+            Assert.Equal("COMPLETE", categorySectionDto.Tag.Text);
             Assert.Null(categorySectionDto.ErrorMessage);
         }
 
@@ -327,8 +327,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Equal("light-blue", categorySectionDto.TagColour);
-            Assert.Equal("IN PROGRESS", categorySectionDto.TagText);
+            Assert.Equal("light-blue", categorySectionDto.Tag.Colour);
+            Assert.Equal("IN PROGRESS", categorySectionDto.Tag.Text);
             Assert.Null(categorySectionDto.ErrorMessage);
         }
 
@@ -366,8 +366,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Equal("grey", categorySectionDto.TagColour);
-            Assert.Equal("NOT STARTED", categorySectionDto.TagText);
+            Assert.Equal("grey", categorySectionDto.Tag.Colour);
+            Assert.Equal("NOT STARTED", categorySectionDto.Tag.Text);
             Assert.Null(categorySectionDto.ErrorMessage);
         }
 
@@ -419,8 +419,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Null(categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Null(categorySectionDto.TagColour);
-            Assert.Null(categorySectionDto.TagText);
+            Assert.Null(categorySectionDto.Tag.Colour);
+            Assert.Null(categorySectionDto.Tag.Text);
             Assert.NotNull(categorySectionDto.ErrorMessage);
             Assert.Equal("Test Section 1 unavailable", categorySectionDto.ErrorMessage);
         }
@@ -456,8 +456,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Equal("red", categorySectionDto.TagColour);
-            Assert.Equal("UNABLE TO RETRIEVE STATUS", categorySectionDto.TagText);
+            Assert.Equal("red", categorySectionDto.Tag.Colour);
+            Assert.Equal("UNABLE TO RETRIEVE STATUS", categorySectionDto.Tag.Text);
             Assert.Null(categorySectionDto.ErrorMessage);
         }
 

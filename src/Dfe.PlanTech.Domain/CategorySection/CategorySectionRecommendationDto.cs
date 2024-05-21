@@ -1,3 +1,6 @@
+using Dfe.PlanTech.Domain.Constants;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
+
 namespace Dfe.PlanTech.Domain.CategorySection;
 
 public class CategorySectionRecommendationDto
@@ -10,8 +13,7 @@ public class CategorySectionRecommendationDto
 
     public string? SectionSlug { get; init; }
 
-    public string TagColour => RecommendationSlug != null ? Constants.TagColour.LightBlue : Constants.TagColour.Grey ;
-
-    public string TagText => RecommendationSlug != null ? "READY" : "NOT AVAILABLE";
-    
+    public Tag Tag => RecommendationSlug != null
+        ? new Tag("READY", TagColour.LightBlue)
+        : new Tag("NOT AVAILABLE", TagColour.Grey);
 }
