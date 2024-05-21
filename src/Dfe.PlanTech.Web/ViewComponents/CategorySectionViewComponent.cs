@@ -55,7 +55,7 @@ public class CategorySectionViewComponent(
         foreach (var section in category.Sections)
         {
             var sectionStatus = category.SectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId == section.Sys.Id);
-            
+
             if (string.IsNullOrWhiteSpace(section.InterstitialPage.Slug))
                 _logger.LogError($"No Slug found for Subtopic with ID: ${section.Sys.Id}/ name: {section.Name}");
 
@@ -69,7 +69,7 @@ public class CategorySectionViewComponent(
             );
         }
     }
-    
+
     public async Task<Category> RetrieveSectionStatuses(Category category)
     {
         try
@@ -91,7 +91,7 @@ public class CategorySectionViewComponent(
 
     private async Task<CategorySectionRecommendationDto> GetCategorySectionRecommendationDto(ISectionComponent section, SectionStatusDto? sectionStatus)
     {
-        if (string.IsNullOrEmpty(sectionStatus?.Maturity) || !sectionStatus.Completed) 
+        if (string.IsNullOrEmpty(sectionStatus?.Maturity) || !sectionStatus.Completed)
             return new CategorySectionRecommendationDto();
 
         try

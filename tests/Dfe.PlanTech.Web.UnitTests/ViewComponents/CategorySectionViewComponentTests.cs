@@ -22,11 +22,11 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
         private readonly CategorySectionViewComponent _categorySectionViewComponent;
         private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
-        
+
         private Category _category;
         private readonly Category _categoryTwo;
         private readonly ILogger<CategorySectionViewComponent> _loggerCategory;
-        
+
         private readonly SubtopicRecommendation? _subtopic = new SubtopicRecommendation()
         {
             Intros = new List<RecommendationIntro>()
@@ -146,10 +146,10 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
             _loggerCategory = Substitute.For<ILogger<CategorySectionViewComponent>>();
             _getSubTopicRecommendationQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
-            
+
             _subtopicRecommendations.Add(_subtopic);
             _subtopicRecommendations.Add(_subtopicTwo);
-            
+
             _getSubTopicRecommendationQuery.GetRecommendationsViewDto(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
                 .Returns((callinfo) =>
                 {
@@ -181,8 +181,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             };
 
             _categorySectionViewComponent = new CategorySectionViewComponent(
-                _loggerCategory, 
-                _getSubmissionStatusesQuery, 
+                _loggerCategory,
+                _getSubmissionStatusesQuery,
                 _getSubTopicRecommendationQuery)
             {
                 ViewComponentContext = viewComponentContext
@@ -493,8 +493,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Null(categorySectionDtoList);
         }
-        
-                
+
+
         [Fact]
         public async Task Returns_RecommendationInfo_If_It_Exists_ForMaturity()
         {
@@ -521,10 +521,10 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var recommendation = model.CategorySectionDto.First().Recommendation;
             Assert.NotNull(recommendation);
             Assert.Equal(_subtopic.Intros[0].Slug, recommendation.RecommendationSlug);
-            Assert.Equal(_subtopic.Intros[0].Header.Text,recommendation.RecommendationDisplayName);
+            Assert.Equal(_subtopic.Intros[0].Header.Text, recommendation.RecommendationDisplayName);
             Assert.Null(recommendation.NoRecommendationFoundErrorMessage);
         }
-        
+
         // TODO
         [Fact]
         public async Task Returns_RecommendationInfo_And_Logs_Error_If_Exception_Thrown_By_Get_Category()
@@ -535,7 +535,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Completed = true,
                 Maturity = "High"
             });
-            
+
             _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Throws(new Exception("test"));
 
@@ -551,7 +551,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.NotEmpty(model.CategorySectionDto);
             var recommendation = model.CategorySectionDto.First().Recommendation;
             Assert.NotNull(recommendation);
-            
+
             Assert.NotNull(_subtopic);
             Assert.Equal(_subtopic.Intros[0].Slug, recommendation.RecommendationSlug);
             Assert.Equal(_subtopic.Intros[0].Header.Text, recommendation.RecommendationDisplayName);
@@ -568,7 +568,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Completed = true,
                 Maturity = "Low",
             });
-            
+
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns(_category.SectionStatuses.ToList());
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
@@ -599,7 +599,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Completed = false,
                 Maturity = null
             });
-            
+
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns(_category.SectionStatuses.ToList());
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;

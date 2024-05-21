@@ -18,11 +18,11 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
         _userHelper = userHelper;
 
     }
-    
+
     public async Task<List<SectionStatusDto>> GetSectionSubmissionStatuses(string categoryId)
     {
         int establishmentId = await _userHelper.GetEstablishmentId();
-        
+
         return await _db.ToListAsync(_db.GetSectionStatuses(categoryId, establishmentId));
     }
 

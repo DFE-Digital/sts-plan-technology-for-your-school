@@ -10,9 +10,9 @@ public class CategorySectionDto
     public string Name { get; init; }
 
     public Tag Tag { get; init; }
-    
+
     public string? ErrorMessage { get; init; }
-    
+
     public CategorySectionRecommendationDto? Recommendation { get; init; }
 
     public CategorySectionDto(string? slug, string name, bool retrievalError, bool started, bool completed, CategorySectionRecommendationDto recommendation)
@@ -30,8 +30,8 @@ public class CategorySectionDto
         else if (completed)
             Tag = new Tag("COMPLETE", TagColour.Blue);
         else if (started)
-            Tag = new Tag("IN PROGRESS", TagColour.LightBlue );
+            Tag = new Tag("IN PROGRESS", TagColour.LightBlue);
         else
-            Tag = new Tag("NOT STARTED", TagColour.Grey );
+            Tag = new Tag("NOT STARTED", TagColour.Grey);
     }
 }
