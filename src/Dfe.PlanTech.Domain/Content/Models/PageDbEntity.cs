@@ -31,9 +31,6 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
     public List<ContentComponentDbEntity> Content { get; set; } = [];
 
     [DontCopyValue]
-    public RecommendationPageDbEntity? RecommendationPage { get; set; }
-
-    [DontCopyValue]
     public SectionDbEntity? Section { get; set; }
 
     /// <summary>

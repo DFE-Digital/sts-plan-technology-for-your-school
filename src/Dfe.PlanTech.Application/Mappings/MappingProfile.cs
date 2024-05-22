@@ -24,7 +24,6 @@ public class CmsMappingProfile : Profile
         .Include<QuestionDbEntity, Question>()
         .Include<RecommendationChunkDbEntity, RecommendationChunk>()
         .Include<RecommendationIntroDbEntity, RecommendationIntro>()
-        .Include<RecommendationPageDbEntity, RecommendationPage>()
         .Include<RecommendationSectionDbEntity, RecommendationSection>()
         .Include<SectionDbEntity, Section>()
         .Include<SubtopicRecommendationDbEntity, SubtopicRecommendation>()
@@ -45,7 +44,6 @@ public class CmsMappingProfile : Profile
         CreateMap<QuestionDbEntity, Question>();
         CreateMap<RecommendationChunkDbEntity, RecommendationChunk>();
         CreateMap<RecommendationIntroDbEntity, RecommendationIntro>();
-        CreateMap<RecommendationPageDbEntity, RecommendationPage>();
         CreateMap<RecommendationSectionDbEntity, RecommendationSection>();
         CreateMap<SectionDbEntity, Section>();
         CreateMap<SubtopicRecommendationDbEntity, SubtopicRecommendation>();

@@ -16,28 +16,21 @@ public interface ISection
 /// <summary>
 /// A subsection of a <see chref="ICategory"/>
 /// </summary>
-public interface ISection<TQuestion, out TPage, TRecommendationPage> : ISection
+public interface ISection<TQuestion, out TPage> : ISection
 where TQuestion : IQuestion
 where TPage : IPage
-where TRecommendationPage : IRecommendationPage
 {
     public List<TQuestion> Questions { get; }
 
     public TPage? InterstitialPage { get; }
-
-    public List<TRecommendationPage> Recommendations { get; }
 }
 
 /// <summary>
 /// Interface for the <see cref="ISection"/> for the Contentful data 
 /// </summary>
-public interface ISectionComponent : ISection<Question, Page, RecommendationPage>, IContentComponent
+public interface ISectionComponent : ISection<Question, Page>, IContentComponent
 {
     public string FirstQuestionId { get; }
-
-    public RecommendationPage? TryGetRecommendationForMaturity(Maturity maturity);
-
-    public RecommendationPage? GetRecommendationForMaturity(string? maturity);
 
     public IEnumerable<QuestionWithAnswer> GetAttachedQuestions(IEnumerable<QuestionWithAnswer> responses);
 }

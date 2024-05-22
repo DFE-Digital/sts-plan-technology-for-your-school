@@ -20,8 +20,6 @@ public class SectionMapper(EntityRetriever retriever, EntityUpdater updater, Cms
             question.Order = order++;
         });
 
-        UpdateReferencesArray(values, "recommendations", _db.RecommendationPages, (id, recommendationPage) => recommendationPage.SectionId = Payload!.Sys.Id);
-
         return values;
     }
 
