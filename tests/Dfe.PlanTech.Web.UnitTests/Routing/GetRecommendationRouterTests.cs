@@ -39,33 +39,6 @@ public class GetRecommendationRouterTests
         {
             Id = "section-id"
         },
-        Recommendations = new()
-        {
-            new()
-            {
-                Page = new Page()
-                {
-                    Slug = "low-recommendation-slug"
-                },
-                Maturity = Maturity.Low,
-                Sys = new SystemDetails()
-                {
-                    Id = "low-id"
-                }
-            },
-            new()
-            {
-                Page = new Page()
-                {
-                    Slug = "high-recommendation-slug"
-                },
-                Maturity = Maturity.High,
-                Sys = new SystemDetails()
-                {
-                    Id = "high-id"
-                }
-            }
-        }
     };
 
     private readonly SubtopicRecommendation? _subtopic = new SubtopicRecommendation()
@@ -107,16 +80,6 @@ public class GetRecommendationRouterTests
             {
                 Id = "subtopic-id"
             },
-            Recommendations = new List<RecommendationPage>()
-            {
-                new RecommendationPage()
-                {
-                    Page = new Page()
-                    {
-                        Slug = "subtopic-recommendation-slug"
-                    }
-                }
-            }
         }
     };
 
@@ -128,9 +91,6 @@ public class GetRecommendationRouterTests
         _getSubTopicRecommendationQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
 
         _controller = new RecommendationsController(new NullLogger<RecommendationsController>());
-
-        _getPageQuery.GetPageBySlug(_section.Recommendations[0].Page.Slug, Arg.Any<CancellationToken>())
-            .Returns(_section.Recommendations[0].Page);
 
         _router = new GetRecommendationRouter(_submissionStatusProcessor, _getAllAnswersForSubmissionQuery, _getSubTopicRecommendationQuery);
     }
