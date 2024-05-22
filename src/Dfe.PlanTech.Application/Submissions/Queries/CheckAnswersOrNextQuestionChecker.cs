@@ -22,7 +22,7 @@ public static class CheckAnswersOrNextQuestionChecker
                                                                                         userJourneyRouter.Section!.Sys.Id,
                                                                                         cancellationToken) ?? throw new InvalidDataException("Missing responses");
 
-            var lastResponseInUserJourney = userJourneyRouter.Section!.GetAttachedQuestions(responses.Responses).Last();
+            var lastResponseInUserJourney = userJourneyRouter.Section!.GetOrderedResponsesForJourney(responses.Responses).Last();
 
             var lastSelectedAnswer = userJourneyRouter.Section!.Questions.First(question => question.Sys.Id == lastResponseInUserJourney.QuestionRef)
                                                                       .Answers.First(answer => answer.Sys.Id == lastResponseInUserJourney.AnswerRef);

@@ -56,11 +56,24 @@ public class QuestionsController : BaseController<QuestionsController>
 
         int establishmentId = await _user.GetEstablishmentId();
 
-        var nextQuestion = await getQuestionQuery.GetNextUnansweredQuestion(establishmentId, section, cancellationToken);
+        try
+        {
+            var nextQuestion =
+                await getQuestionQuery.GetNextUnansweredQuestion(establishmentId, section, cancellationToken);
 
-        if (nextQuestion == null) return this.RedirectToCheckAnswers(sectionSlug);
+            if (nextQuestion == null) return this.RedirectToCheckAnswers(sectionSlug);
 
-        return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = nextQuestion!.Slug });
+            return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = nextQuestion!.Slug });
+        }
+        catch (DatabaseException e)
+        {
+            // Invalidate the current submission and redirect to self-assessment page
+            
+            return RedirectToAction(
+                PagesController.GetPageByRouteAction, 
+                PagesController.ControllerName, 
+                new { route = "self-assessment" });
+        }
     }
 
     [HttpPost("{sectionSlug}/{questionSlug}")]

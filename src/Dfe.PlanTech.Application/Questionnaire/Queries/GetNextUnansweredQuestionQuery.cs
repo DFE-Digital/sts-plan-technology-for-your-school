@@ -22,12 +22,17 @@ public class GetNextUnansweredQuestionQuery : IGetNextUnansweredQuestionQuery
 
         if (answeredQuestions.Responses.Count == 0) throw new DatabaseException($"There are no responses in the database for ongoing submission {answeredQuestions.SubmissionId}, linked to establishment {establishmentId}");
 
-        return GetNextUnansweredQuestion(section, answeredQuestions.Responses);
+        return GetValidatedNextUnansweredQuestion(section, answeredQuestions);
     }
 
-    public static Question? GetNextUnansweredQuestion(Section section, List<QuestionWithAnswer> responses)
+    private static Question? GetValidatedNextUnansweredQuestion(Section section, CheckAnswerDto answeredQuestions)
     {
-        var lastAttachedResponse = section.GetAttachedQuestions(responses).Last();
+        var orderedResponses = section.GetOrderedResponsesForJourney(answeredQuestions.Responses).ToList();
+        
+        if (orderedResponses.Count == 0)
+            throw new DatabaseException($"The responses to the ongoing submission {answeredQuestions.SubmissionId} are out of sync with the topic");
+
+        var lastAttachedResponse = orderedResponses.Last(); 
 
         return section.Questions.Where(question => question.Sys.Id == lastAttachedResponse.QuestionRef)
                               .SelectMany(question => question.Answers)

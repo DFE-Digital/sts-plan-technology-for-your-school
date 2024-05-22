@@ -150,7 +150,7 @@ public class CheckAnswersOrNextQuestionCheckerTests
         processor.GetResponsesQuery.Returns(getResponsesQuery);
 
         var section = Substitute.For<ISectionComponent>();
-        section.GetAttachedQuestions(Arg.Any<IEnumerable<QuestionWithAnswer>>())
+        section.GetOrderedResponsesForJourney(Arg.Any<IEnumerable<QuestionWithAnswer>>())
                 .Returns(new[] {
               CheckAnswersDto.Responses[0],CheckAnswersDto.Responses[1],CheckAnswersDto.Responses[4]
                 });
@@ -186,7 +186,7 @@ public class CheckAnswersOrNextQuestionCheckerTests
         processor.GetResponsesQuery.Returns(getResponsesQuery);
 
         var section = Substitute.For<ISectionComponent>();
-        section.GetAttachedQuestions(Arg.Any<IEnumerable<QuestionWithAnswer>>())
+        section.GetOrderedResponsesForJourney(Arg.Any<IEnumerable<QuestionWithAnswer>>())
                 .Returns(new[] {
               CheckAnswersDto.Responses[0],CheckAnswersDto.Responses[1]
                 });

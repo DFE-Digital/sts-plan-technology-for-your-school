@@ -39,5 +39,5 @@ public interface ISectionComponent : ISection<Question, Page, RecommendationPage
 
     public RecommendationPage? GetRecommendationForMaturity(string? maturity);
 
-    public IEnumerable<QuestionWithAnswer> GetAttachedQuestions(IEnumerable<QuestionWithAnswer> responses);
+    public IEnumerable<QuestionWithAnswer> GetOrderedResponsesForJourney(IEnumerable<QuestionWithAnswer> responses);
 }

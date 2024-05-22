@@ -140,7 +140,7 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     /// <param name="question">Question to check attached status</param>
     /// <returns></returns>
     private bool IsQuestionAttached(IEnumerable<QuestionWithAnswer> responses, Question question)
-    => _router.Section!.GetAttachedQuestions(responses).Any(response => response.QuestionRef == question.Sys.Id);
+    => _router.Section!.GetOrderedResponsesForJourney(responses).Any(response => response.QuestionRef == question.Sys.Id);
 
     /// <summary>
     /// Returns an IActionResult depending on the <see cref="SubmissionStatus"/> in the <see cref="_router"/>
