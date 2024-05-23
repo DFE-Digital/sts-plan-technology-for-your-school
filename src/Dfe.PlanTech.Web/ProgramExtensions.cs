@@ -155,6 +155,7 @@ public static class ProgramExtensions
         services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
         services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
         services.AddTransient<IGetAllAnswersForLatestSubmissionQuery, GetAllAnswersForLatestSubmissionQuery>();
+        services.AddTransient<IResetSubmissionCommand, ResetSubmissionCommand>();
 
         services.AddTransient<GetPageFromDbQuery>();
 

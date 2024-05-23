@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Exceptions;
+using Dfe.PlanTech.Application.Submissions.Commands;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Responses.Interfaces;
@@ -47,6 +48,7 @@ public class QuestionsController : BaseController<QuestionsController>
     [HttpGet("{sectionSlug}/next-question")]
     public async Task<IActionResult> GetNextUnansweredQuestion(string sectionSlug,
                                                                 [FromServices] IGetNextUnansweredQuestionQuery getQuestionQuery,
+                                                                [FromServices] IResetSubmissionCommand resetSubmissionCommand, 
                                                                 CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
@@ -65,10 +67,10 @@ public class QuestionsController : BaseController<QuestionsController>
 
             return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = nextQuestion!.Slug });
         }
-        catch (DatabaseException e)
+        catch (DatabaseException)
         {
             // Invalidate the current submission and redirect to self-assessment page
-            
+            await resetSubmissionCommand.ResetSubmission(section, cancellationToken);
             return RedirectToAction(
                 PagesController.GetPageByRouteAction, 
                 PagesController.ControllerName, 
