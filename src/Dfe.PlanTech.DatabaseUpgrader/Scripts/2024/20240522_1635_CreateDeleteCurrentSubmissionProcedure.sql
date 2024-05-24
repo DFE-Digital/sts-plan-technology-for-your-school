@@ -9,17 +9,14 @@ AS
             From [dbo].submission
             WHERE
                 completed = 0
+            and deleted = 0
             and sectionId = @sectionId
             and sectionName = @sectionName
             and establishmentId = @establishmentId
 
         BEGIN TRAN
-            DELETE R
-            from [dbo].[response] R
-            JOIN [dbo].[submission] S on R.submissionId = S.id
-            WHERE S.id = @SubmissionId
-
-            DELETE S
+            UPDATE S
+            SET Deleted = 1
             FROM [dbo].[submission] S
             WHERE S.id = @SubmissionId
         COMMIT TRAN
