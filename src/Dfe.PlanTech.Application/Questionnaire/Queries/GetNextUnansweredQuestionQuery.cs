@@ -26,8 +26,8 @@ public class GetNextUnansweredQuestionQuery : IGetNextUnansweredQuestionQuery
     }
 
     /// <summary>
-    /// Uses answered questions to find the next. If it is not possible to link responses to questions,
-    /// this indicates that a content change has occured, or another user has edited the response concurrently.
+    /// Uses answered questions to find the next. If it is not possible to order user responses against the current questions,
+    /// this indicates that content has changed or another user finished the submission concurrently.
     /// </summary>
     /// <param name="section"></param>
     /// <param name="answeredQuestions"></param>
