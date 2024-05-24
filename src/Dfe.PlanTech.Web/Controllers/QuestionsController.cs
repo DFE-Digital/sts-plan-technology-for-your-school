@@ -71,6 +71,8 @@ public class QuestionsController : BaseController<QuestionsController>
         {
             // Invalidate the current submission and redirect to self-assessment page
             await resetSubmissionCommand.ResetSubmission(section, cancellationToken);
+            TempData["SubtopicError"] =
+                $"The answers to the section: {section.Name} are out of sync and have not been saved. Please try again.";
             return RedirectToAction(
                 PagesController.GetPageByRouteAction, 
                 PagesController.ControllerName, 
