@@ -1,4 +1,4 @@
-CREATE OR ALTER PROCEDURE ResetSubmissionKGTest
+CREATE OR ALTER PROCEDURE DeleteCurrentSubmission
     @sectionId NVARCHAR(50),
     @sectionName NVARCHAR(50),
     @establishmentId INT

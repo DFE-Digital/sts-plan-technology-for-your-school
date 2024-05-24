@@ -28,8 +28,7 @@ public class Section : ContentComponent, ISectionComponent
     }
 
     /// <summary>
-    /// Puts responses into the correct order for the path the user has taken,
-    /// and verifies the responses are valid for the current submission
+    /// Puts responses into the correct order for the path the user has taken.
     /// </summary>
     /// <returns>Answered questions in correct journey order</returns>
     public IEnumerable<QuestionWithAnswer> GetOrderedResponsesForJourney(IEnumerable<QuestionWithAnswer> responses)

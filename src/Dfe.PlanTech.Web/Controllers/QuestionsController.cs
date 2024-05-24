@@ -48,7 +48,7 @@ public class QuestionsController : BaseController<QuestionsController>
     [HttpGet("{sectionSlug}/next-question")]
     public async Task<IActionResult> GetNextUnansweredQuestion(string sectionSlug,
                                                                 [FromServices] IGetNextUnansweredQuestionQuery getQuestionQuery,
-                                                                [FromServices] IResetSubmissionCommand resetSubmissionCommand, 
+                                                                [FromServices] IDeleteCurrentSubmissionCommand deleteCurrentSubmissionCommand,
                                                                 CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
@@ -69,8 +69,8 @@ public class QuestionsController : BaseController<QuestionsController>
         }
         catch (DatabaseException)
         {
-            // Invalidate the current submission and redirect to self-assessment page
-            await resetSubmissionCommand.ResetSubmission(section, cancellationToken);
+            // Remove the current invalid submission and redirect to self-assessment page
+            await deleteCurrentSubmissionCommand.DeleteCurrentSubmission(section, cancellationToken);
             TempData["SubtopicError"] =
                 $"The answers to the section: {section.Name} are out of sync and have not been saved. Please try again.";
             return RedirectToAction(

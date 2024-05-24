@@ -25,6 +25,14 @@ public class GetNextUnansweredQuestionQuery : IGetNextUnansweredQuestionQuery
         return GetValidatedNextUnansweredQuestion(section, answeredQuestions);
     }
 
+    /// <summary>
+    /// Uses answered questions to find the next. If it is not possible to link responses to questions,
+    /// this indicates that a content change has occured, or another user has edited the response concurrently.
+    /// </summary>
+    /// <param name="section"></param>
+    /// <param name="answeredQuestions"></param>
+    /// <returns></returns>
+    /// <exception cref="DatabaseException"></exception>
     private static Question? GetValidatedNextUnansweredQuestion(Section section, CheckAnswerDto answeredQuestions)
     {
         var orderedResponses = section.GetOrderedResponsesForJourney(answeredQuestions.Responses).ToList();
