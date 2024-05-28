@@ -4,21 +4,21 @@ CREATE OR ALTER PROCEDURE DeleteCurrentSubmission
     @establishmentId INT
 AS
     BEGIN TRY
-        Declare @SubmissionId Int
-        Select @SubmissionId = Id
-            From [dbo].submission
+        DECLARE @submissionId INT
+        SELECT @submissionId = Id
+            FROM [dbo].[submission]
             WHERE
                 completed = 0
-            and deleted = 0
-            and sectionId = @sectionId
-            and sectionName = @sectionName
-            and establishmentId = @establishmentId
+            AND deleted = 0
+            AND sectionId = @sectionId
+            AND sectionName = @sectionName
+            AND establishmentId = @establishmentId
 
         BEGIN TRAN
             UPDATE S
-            SET Deleted = 1
+            SET deleted = 1
             FROM [dbo].[submission] S
-            WHERE S.id = @SubmissionId
+            WHERE S.id = @submissionId
         COMMIT TRAN
     END TRY
     BEGIN CATCH

@@ -1,24 +1,24 @@
 ﻿ALTER PROCEDURE GetSectionStatuses
-    @splitStringVal nvarchar(255),
-    @establishmentId int
+    @splitStringVal NVARCHAR(255),
+    @establishmentId INT
 AS
 
-SELECT value as sectionId
+SELECT value AS sectionId
 INTO #SectionIds
 FROM STRING_SPLIT(@splitStringVal, ',')
 
-Select
+SELECT
     Sub.sectionId,
-    CAST(Sub.completed as int) completed,
+    CAST(Sub.completed AS INT) completed,
     Sub.maturity,
     Sub.dateCreated
 From #SectionIds Ids
 CROSS APPLY (
-    Select top 1 sectionId, completed, maturity, dateCreated
-    From [dbo].submission S
-    Where
+    SELECT TOP 1 sectionId, completed, maturity, dateCreated
+    FROM [dbo].submission S
+    WHERE
         Ids.sectionId = S.sectionId
       AND S.establishmentId = @establishmentId
       AND S.deleted = 0
-    ORDER BY S.dateCreated Desc
+    ORDER BY S.dateCreated DESC
 ) Sub
