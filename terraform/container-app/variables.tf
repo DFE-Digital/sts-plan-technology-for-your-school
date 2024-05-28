@@ -123,8 +123,30 @@ variable "registry_password" {
   type        = string
 }
 
-variable "registry_custom_image_url" {
-  description = "Pass in the address to your image from your custom registry"
+variable "image_tag" {
+  description = "Image tag"
   type        = string
+}
+
+####################
+# Storage Accounts #
+####################
+
+variable "storage_account_public_access_enabled" {
+  description = "Enable public network access"
+  type        = bool
+  default     = false
+}
+
+variable "container_app_storage_account_shared_access_key_enabled" {
+  description = "Enable shared access key"
+  type        = bool
+  default     = false
+}
+
+variable "container_app_blob_storage_public_access_enabled" {
+  description = "Enable app blob storage public access"
+  type        = bool
+  default     = false
 }
 
