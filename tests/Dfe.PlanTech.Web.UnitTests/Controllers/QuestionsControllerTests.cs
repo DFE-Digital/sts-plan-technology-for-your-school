@@ -9,6 +9,7 @@ using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -167,6 +168,23 @@ public class QuestionsControllerTests
 
         Assert.Equal(SectionSlug, sectionSlug);
         Assert.Equal(_validQuestion.Slug, questionSlug);
+    }
+
+    [Fact]
+    public async Task GetNextUnansweredQuestion_Should_Redirect_To_SelfAssessmentPage_When_Database_Exception_Raised()
+    {
+        _getNextUnansweredQuestionQuery
+            .When(x => x.GetNextUnansweredQuestion(Arg.Any<int>(), Arg.Any<Section>()))
+            .Do(_ => throw new DatabaseException("Database exception thrown by the test"));
+
+        _controller.TempData = Substitute.For<ITempDataDictionary>();
+
+        var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand);
+
+        var redirectResult = result as RedirectToActionResult;
+        Assert.NotNull(redirectResult);
+        Assert.Equal(PagesController.ControllerName, redirectResult.ControllerName);
+        Assert.Equal(PagesController.GetPageByRouteAction, redirectResult.ActionName);
     }
 
     [Fact]
