@@ -38,7 +38,7 @@ We use two external modules to create the majority of the resources required:
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.103.1 |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.105.0 |
 
 ## Modules
 
@@ -66,7 +66,6 @@ We use two external modules to create the majority of the resources required:
 | [azurerm_key_vault_secret.vault_secret_contentful_spaceid](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault_secret.vault_secret_database_connectionstring](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
 | [azurerm_linux_function_app.contentful_function](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_function_app) | resource |
-| [azurerm_role_assignment.uami_storage_data_owner_role](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) | resource |
 | [azurerm_service_plan.function_plan](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/service_plan) | resource |
 | [azurerm_servicebus_namespace.service_bus](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/servicebus_namespace) | resource |
 | [azurerm_servicebus_queue.contentful_queue](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/servicebus_queue) | resource |
@@ -91,6 +90,9 @@ We use two external modules to create the majority of the resources required:
 | <a name="input_azure_location"></a> [azure\_location](#input\_azure\_location) | Recourse location | `string` | n/a | yes |
 | <a name="input_cdn_create_custom_domain"></a> [cdn\_create\_custom\_domain](#input\_cdn\_create\_custom\_domain) | A flag to create the A and TXT records for the container app as part of setting up the cdn | `bool` | `false` | no |
 | <a name="input_container_app_blob_storage_public_access_enabled"></a> [container\_app\_blob\_storage\_public\_access\_enabled](#input\_container\_app\_blob\_storage\_public\_access\_enabled) | Enable app blob storage public access | `bool` | `false` | no |
+| <a name="input_container_app_http_concurrency"></a> [container\_app\_http\_concurrency](#input\_container\_app\_http\_concurrency) | Scale up at this number of HTTP requests | `number` | `10` | no |
+| <a name="input_container_app_max_replicas"></a> [container\_app\_max\_replicas](#input\_container\_app\_max\_replicas) | Maximum replicas for the container app | `number` | `2` | no |
+| <a name="input_container_app_min_replicas"></a> [container\_app\_min\_replicas](#input\_container\_app\_min\_replicas) | Minimum replicas for the container app | `number` | `1` | no |
 | <a name="input_container_app_storage_account_shared_access_key_enabled"></a> [container\_app\_storage\_account\_shared\_access\_key\_enabled](#input\_container\_app\_storage\_account\_shared\_access\_key\_enabled) | Enable shared access key | `bool` | `false` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | Environment name, used along with `project_name` as a prefix for all resources | `string` | n/a | yes |
 | <a name="input_image_tag"></a> [image\_tag](#input\_image\_tag) | Image tag | `string` | n/a | yes |

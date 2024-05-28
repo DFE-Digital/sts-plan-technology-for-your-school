@@ -30,6 +30,10 @@ module "main_hosting" {
     identity_ids = [azurerm_user_assigned_identity.user_assigned_identity.id]
   }
 
+  container_max_replicas           = local.container_app_max_replicas
+  container_min_replicas           = local.container_app_min_replicas
+  container_scale_http_concurrency = local.container_app_http_concurrency
+
   #############
   # Azure SQL #
   #############
