@@ -18,7 +18,7 @@ public class DeleteCurrentSubmissionCommand : IDeleteCurrentSubmissionCommand
         _user = user;
     }
 
-    public async Task DeleteCurrentSubmission(Section section, CancellationToken cancellationToken)
+    public async Task DeleteCurrentSubmission(Section section, CancellationToken cancellationToken = default)
     {
         var sectionId = new SqlParameter("@sectionId", section.Sys.Id);
         var sectionName = new SqlParameter("@sectionName", section.Name);
@@ -28,6 +28,6 @@ public class DeleteCurrentSubmissionCommand : IDeleteCurrentSubmissionCommand
                                         @establishmentId={establishmentId},
                                         @sectionId={sectionId},
                                         @sectionName={sectionName}",
-            cancellationToken);
+                                        cancellationToken);
     }
 }
