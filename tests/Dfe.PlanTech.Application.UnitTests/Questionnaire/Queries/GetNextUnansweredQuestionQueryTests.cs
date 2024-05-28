@@ -91,24 +91,24 @@ public class GetNextUnansweredQuestionQueryTests
     [Fact]
     public async Task Should_Throw_DatabaseException_When_Responses_Dont_Align_To_Questions()
     {
-      CheckAnswerDto response = new()
-      {
-        SubmissionId = 1,
-        // skip first question so that ordering responses by question fails
-        Responses = _section.Questions.Select(question => new QuestionWithAnswer()
-          {
-            QuestionRef = question.Sys.Id,
-            AnswerRef = question.Answers[0].Sys.Id
-          }).Skip(1)
-          .ToList()
-      };
-      var getLatestResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
-      getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-        .Returns(response);
+        CheckAnswerDto response = new()
+        {
+            SubmissionId = 1,
+            // skip first question so that ordering responses by question fails
+            Responses = _section.Questions.Select(question => new QuestionWithAnswer()
+            {
+                QuestionRef = question.Sys.Id,
+                AnswerRef = question.Answers[0].Sys.Id
+            }).Skip(1)
+            .ToList()
+        };
+        var getLatestResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
+        getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+          .Returns(response);
 
-      var getNextUnansweredQuestionQuery = new GetNextUnansweredQuestionQuery(getLatestResponsesQuery);
+        var getNextUnansweredQuestionQuery = new GetNextUnansweredQuestionQuery(getLatestResponsesQuery);
 
-      await Assert.ThrowsAsync<DatabaseException>(() => getNextUnansweredQuestionQuery.GetNextUnansweredQuestion(3, _section));
+        await Assert.ThrowsAsync<DatabaseException>(() => getNextUnansweredQuestionQuery.GetNextUnansweredQuestion(3, _section));
     }
 
     [Fact]
