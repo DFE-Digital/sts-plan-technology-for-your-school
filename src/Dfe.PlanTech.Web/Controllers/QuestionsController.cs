@@ -74,8 +74,8 @@ public class QuestionsController : BaseController<QuestionsController>
             TempData["SubtopicError"] =
                 $"The answers to the section: {section.Name} are out of sync and have not been saved. Please try again.";
             return RedirectToAction(
-                PagesController.GetPageByRouteAction, 
-                PagesController.ControllerName, 
+                PagesController.GetPageByRouteAction,
+                PagesController.ControllerName,
                 new { route = "self-assessment" });
         }
     }

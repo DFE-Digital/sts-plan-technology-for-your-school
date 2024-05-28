@@ -36,11 +36,11 @@ public class GetNextUnansweredQuestionQuery : IGetNextUnansweredQuestionQuery
     private static Question? GetValidatedNextUnansweredQuestion(Section section, CheckAnswerDto answeredQuestions)
     {
         var orderedResponses = section.GetOrderedResponsesForJourney(answeredQuestions.Responses).ToList();
-        
+
         if (orderedResponses.Count == 0)
             throw new DatabaseException($"The responses to the ongoing submission {answeredQuestions.SubmissionId} are out of sync with the topic");
 
-        var lastAttachedResponse = orderedResponses.Last(); 
+        var lastAttachedResponse = orderedResponses.Last();
 
         return section.Questions.Where(question => question.Sys.Id == lastAttachedResponse.QuestionRef)
                               .SelectMany(question => question.Answers)
