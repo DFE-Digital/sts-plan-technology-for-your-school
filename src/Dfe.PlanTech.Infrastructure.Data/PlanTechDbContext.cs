@@ -92,7 +92,6 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
         {
             builder.HasKey(submission => submission.Id);
             builder.Property(submission => submission.DateCreated).HasColumnType("datetime").HasDefaultValue();
-            builder.Property(submission => submission.Deleted).HasDefaultValue(false);
         });
 
         modelBuilder.Entity<Response>(builder =>
