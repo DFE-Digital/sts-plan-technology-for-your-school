@@ -1,17 +1,6 @@
 import { defineConfig } from 'cypress';
-import webpackPreprocessor from '@cypress/webpack-preprocessor';
 import { resolve as _resolve } from 'path';
-import { retrieveContentfulData } from './cypress/helpers/retrieve-contentful-data';
-
-const { defaultOptions } = webpackPreprocessor;
-
-
-Object.assign(defaultOptions.webpackOptions, {
-  resolve: {
-    ...defaultOptions.webpackOptions.resolve,
-  },
-});
-
+import { retrieveContentfulData } from "./cypress/helpers/retrieve-contentful-data";
 
 export default defineConfig({
   chromeWebSecurity: false,
@@ -39,8 +28,7 @@ export default defineConfig({
         fetchContentfulData() {
           return retrieveContentfulData();
         }
-      }),
-        on('file:preprocessor', webpackPreprocessor(defaultOptions));
+      });
     },
   },
 });

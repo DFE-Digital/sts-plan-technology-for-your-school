@@ -1,9 +1,11 @@
-import ValidatePage from "../helpers/content-validators/page-validator";
-import { selfAssessmentSlug } from "../helpers/page-slugs";
-import ValidateContent from "../helpers/content-validators/content-validator";
+import ValidatePage from "../helpers/content-validators/page-validator.js";
+import { selfAssessmentSlug } from "../helpers/page-slugs.js";
+import ValidateContent from "../helpers/content-validators/content-validator.js";
+import getContentfulData from "../helpers/retrieve-contentful-data.js";
 
 describe("Pages should have content", () => {
-  const ContentfulData = null;
+  const ContentfulData = getContentfulData();
+
   it("Should render navigation links", () => {
     if (!ContentfulData) {
       return;

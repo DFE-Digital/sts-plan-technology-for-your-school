@@ -1,6 +1,6 @@
-import { parse } from "node-html-parser";
-import TableValidator from "./rich-text-validators/table-validator";
-import { CleanText } from "../text-helpers";
+import { parse } from "node-html-parser.js";
+import TableValidator from "./rich-text-validators/table-validator.js";
+import { CleanText } from "../text-helpers.js";
 
 const tableValidator = new TableValidator();
 
@@ -78,7 +78,7 @@ function validateParagraph(content) {
 }
 
 function buildExpectedHtml(content) {
-  let html = "";
+  let html = ".js";
   for (const child of content.content) {
     if (child.value) {
       html += child.value.replace(/\r\n/g, "\n");
