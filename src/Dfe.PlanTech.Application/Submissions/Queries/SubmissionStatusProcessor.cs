@@ -18,7 +18,8 @@ public class SubmissionStatusProcessor : ISubmissionStatusProcessor
     private ISectionComponent? _sectionComponent;
 
     public IGetLatestResponsesQuery GetResponsesQuery { get; init; }
-    public ISectionComponent Section {
+    public ISectionComponent Section
+    {
         get => _sectionComponent ?? throw new ApplicationException("Section is null but it should not be");
         private set => _sectionComponent = value;
     }
