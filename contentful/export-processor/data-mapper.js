@@ -8,7 +8,7 @@ import ErrorLogger from "./errors/error-logger.js";
  */
 export default class DataMapper {
   // Maps for different content types
-  contents = {};
+  contents = new Map();
 
   contentTypes = new Map();
 
@@ -21,14 +21,14 @@ export default class DataMapper {
   get mappedSections() {
     if (!this._alreadyMappedSections)
       this._alreadyMappedSections = Array.from(
-        this.sectionsToClasses(this.contents["section"])
+        this.sectionsToClasses(this.contents.get("section"))
       );
 
     return this._alreadyMappedSections;
   }
 
   get pages() {
-    return this.contents["page"];
+    return this.contents.get("page");
   }
 
   /**
@@ -49,7 +49,8 @@ export default class DataMapper {
     this.combineEntries();
 
     console.log('contents', this.contents);
-    console.log('nav links', this.contents['navigationLink']);
+    this.contents.set;
+    console.log('nav links', this.contents.get('navigationLinks'));
   }
 
   mapContentTypes(contentTypes) {
@@ -88,11 +89,11 @@ export default class DataMapper {
   }
 
   getContentTypeSet(contentType) {
-    let setForContentType = this.contents[contentType];
+    let setForContentType = this.contents.get(contentType);
 
     if (!setForContentType) {
       setForContentType = new Map();
-      this.contents[contentType] = setForContentType;
+      this.contents.set(contentType, setForContentType);
     }
 
     return setForContentType;
@@ -120,7 +121,7 @@ export default class DataMapper {
       return;
     }
 
-    const subtopicRecommendations = Array.from(this.contents["subtopicRecommendation"]);
+    const subtopicRecommendations = Array.from(this.contents.get("subtopicRecommendation"));
     if (!subtopicRecommendations || subtopicRecommendations.length == 0) {
       throw `No subtopic recommendations found`;
     }
@@ -209,7 +210,7 @@ export default class DataMapper {
   getContentForFieldId(referencedTypesForField, id) {
     return referencedTypesForField
       .map((type) => {
-        const matchingContents = this.contents[type];
+        const matchingContents = this.contents.get(type);
         const matchingContent = matchingContents.get(id);
 
         return matchingContent;
@@ -218,7 +219,6 @@ export default class DataMapper {
   }
 
   getMatchingContentForReference(referencedTypesForField, reference) {
-    console.log(referencedTypesForField, reference);
     const referenceId = reference["sys"]?.["id"];
 
     if (!referenceId) {

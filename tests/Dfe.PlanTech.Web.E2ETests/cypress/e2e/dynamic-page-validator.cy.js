@@ -1,22 +1,25 @@
 import ValidatePage from "../helpers/content-validators/page-validator.js";
 import { selfAssessmentSlug } from "../helpers/page-slugs.js";
 import ValidateContent from "../helpers/content-validators/content-validator.js";
+import DataMapper from "export-processor/data-mapper.js";
 
 describe("Pages should have content", () => {
   let contentfulData;
 
   before(async () => {
-    contentfulData = await cy.task("fetchContentfulData");
+    const contentfulExport = await cy.task("fetchContentfulData");
+    console.log('loaded contentful data', contentfulExport);
+    contentfulData = new DataMapper(contentfulExport);
   });
 
-  it("Should render navigation links", () => {
+  it("Should render navigation links", async () => {
     if (!contentfulData) {
       return;
     }
-
     console.log('contentful data', contentfulData);
 
-    const navigationLinks = contentfulData.contents["navigationLink"];
+    const navigationLinks = contentfulData.contents.get("navigationLink");
+    console.log('nav links', navigationLinks);
     if (!dataLoaded(navigationLinks)) {
       return;
     }
@@ -96,8 +99,7 @@ describe("Pages should have content", () => {
  * @return {boolean} haveContent - whether data has been loaded
  */
 function dataLoaded(contentMap) {
-  const haveContent =
-    contentMap && (contentMap.length > 0 || contentMap.size > 0);
+  const haveContent = contentMap && contentMap.size > 0;
 
   if (!haveContent) {
     console.log("Data has not been loaded");

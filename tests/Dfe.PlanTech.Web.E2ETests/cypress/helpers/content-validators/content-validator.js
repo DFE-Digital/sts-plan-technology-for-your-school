@@ -10,7 +10,7 @@ import ValidateRichTextContent from "./rich-text-content-validator.js";
 import ValidateWarningComponent from "./warning-validator.js";
 
 function ValidateContent(content) {
-  if (!!content.sys || !content.fields) {
+  if (!content.sys || !content.fields) {
     console.log(`Content is missing sys or fields. Skipping`, content);
   }
   switch (content.sys.contentType.sys.id) {
