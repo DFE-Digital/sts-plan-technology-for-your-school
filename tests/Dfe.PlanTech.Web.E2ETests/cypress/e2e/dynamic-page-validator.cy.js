@@ -12,17 +12,14 @@ describe("Pages should have content", () => {
     contentfulData = new DataMapper(contentfulExport);
 
     pages = Array.from(contentfulData.pages.entries());
-    console.log('pages', pages);
   });
 
   it("Should render navigation links", async () => {
     if (!contentfulData) {
       return;
     }
-    console.log('contentful data', contentfulData);
 
     const navigationLinks = Array.from(contentfulData.contents.get("navigationLink").entries());
-    console.log('nav links', navigationLinks);
     if (!dataLoaded(navigationLinks)) {
       return;
     }
@@ -30,7 +27,6 @@ describe("Pages should have content", () => {
     cy.visit("/");
 
     for (const [_, navigationLink] of navigationLinks) {
-      console.log('navigation link', navigationLink);
       ValidateContent(navigationLink);
     }
   });
@@ -56,8 +52,7 @@ describe("Pages should have content", () => {
     ValidatePage(slug, selfAssessmentPage);
   });
 
-  Array.from(contentfulData?.pages ?? [])
-    .map(([_, page]) => page)
+  (pages ?? []).map(([_, page]) => page)
     .filter((page) => !page.fields.requiresAuthorisation)
     .forEach((page) => {
       it(

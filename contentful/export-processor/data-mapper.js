@@ -49,8 +49,6 @@ export default class DataMapper {
     this.combineEntries();
 
     console.log('contents', this.contents);
-    this.contents.set;
-    console.log('nav links', this.contents.get('navigationLinks'));
   }
 
   mapContentTypes(contentTypes) {
@@ -168,7 +166,7 @@ export default class DataMapper {
    * Combine entries for all tracked content types (i.e. answers, pages, questions, recommendations, sections)
    */
   combineEntries() {
-    for (const [contentTypeId, contents] of Object.entries(this.contents)) {
+    for (const [contentTypeId, contents] of this.contents.entries()) {
       const contentType = this.contentTypes.get(contentTypeId);
 
       for (const [id, entry] of contents) {
