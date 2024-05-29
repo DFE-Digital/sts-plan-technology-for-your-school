@@ -32,10 +32,10 @@
 </div>
 
 @section BodyEnd {
-    <script async src="/js/step-by-step-navigation.js"></script>
-    <script defer src="/js/step-by-step-polyfills.js"></script>
+    <script async src="/js/step-by-step-navigation.js" nonce="@Context.Items["nonce"]"></script>
+    <script defer src="/js/step-by-step-polyfills.js" nonce="@Context.Items["nonce"]"></script>
 
-    <script async type="module">
+    <script async type="module" nonce="@Context.Items["nonce"]">
         function waitForGOVUK(callback, interval = 100) {
             if (typeof GOVUK !== 'undefined' && GOVUK.Modules?.AppStepNav !== undefined) {
                 callback();

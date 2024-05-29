@@ -1,7 +1,7 @@
-import TestSuiteRow from "#src/test-suite/test-suite-row";
-import AppendixRow from "#src/test-suite/appendix-row";
+import TestSuiteRow from "./test-suite-row.js";
+import AppendixRow from "./appendix-row.js";
 
-const ADO_TAG = "Functional";
+const ADO_TAG = "Functional.js";
 
 export default class TestSuiteForSubTopic {
   subtopic;

@@ -39,9 +39,9 @@ env:
   TF_VAR_az_sql_azuread_admin_username: ${{ secrets.AZ_SERVICE_PRINCIPAL }}
   TF_VAR_az_sql_admin_password: ${{secrets.AZ_SQL_ADMIN_PASSWORD}}
   TF_VAR_az_sql_azuread_admin_objectid: ${{ secrets.AZ_CLIENT_ID }}
-  TF_VAR_registry_server: "ghcr.io"
+  TF_VAR_registry_server: "ghcr.io/dfe-digital"
+  TF_VAR_image_tag: "latest"
   TF_VAR_registry_username: ${{ github.repository_owner }}
-  TF_VAR_registry_custom_image_url: "ghcr.io/dfe-digital/plan-technology-for-your-school:latest"
   TF_VAR_registry_password: ${{ secrets.GITHUB_TOKEN }}
 
   TF_WORKING_DIRECTORY: terraform/container-app

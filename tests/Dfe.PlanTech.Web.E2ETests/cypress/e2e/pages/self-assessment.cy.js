@@ -1,4 +1,4 @@
-import { selfAssessmentSlug } from "../../helpers/page-slugs";
+import { selfAssessmentSlug } from "../../helpers/page-slugs.js";
 
 describe("Self-assessment page", () => {
   const url = selfAssessmentSlug;

@@ -1,5 +1,5 @@
-import ValidateHeader from "./header-validator";
-import ValidateSection from "./section-validator";
+import ValidateHeader from "./header-validator.js";
+import ValidateSection from "./section-validator.js";
 
 function ValidateCategory({ fields, sys }) {
   const header = fields.header;

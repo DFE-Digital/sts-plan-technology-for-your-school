@@ -1,7 +1,7 @@
-import RecommendationIntro from "#src/content-types/recommendation-intro";
-import RecommendationSection from "#src/content-types/recommendation-section";
-import { Section } from "#src/content-types/section";
-import ErrorLogger from "#src/errors/error-logger";
+import RecommendationIntro from "./recommendation-intro.js";
+import RecommendationSection from "./recommendation-section.js";
+import { Section } from "./section.js";
+import ErrorLogger from "../errors/error-logger.js";
 
 export default class SubtopicRecommendation {
   intros;
@@ -29,6 +29,6 @@ export default class SubtopicRecommendation {
     return {
       intro,
       chunks
-    }
+    };
   }
 }

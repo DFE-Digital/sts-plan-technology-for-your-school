@@ -1,6 +1,5 @@
-import { parse } from "node-html-parser";
-import TableValidator from "./rich-text-validators/table-validator";
-import { CleanText } from "../text-helpers";
+import TableValidator from "./rich-text-validators/table-validator.js";
+import { CleanText } from "../text-helpers.js";
 
 const tableValidator = new TableValidator();
 
@@ -43,8 +42,6 @@ function validateByNodeType(content) {
 function validateParagraph(content) {
   const expectedHtml = buildExpectedHtml(content).trim();
 
-  const parsedElement = parse(expectedHtml);
-
   cy.get("p").then(($paragraphs) => {
     const paragraphHtmls = Array.from(
       Array.from($paragraphs.map((i, el) => Cypress.$(el).html()))
@@ -53,7 +50,7 @@ function validateParagraph(content) {
 
           return {
             original: withoutWhitespaceEscaped,
-            parsed: parse(withoutWhitespaceEscaped),
+            parsed: ""
           };
         })
         .filter((paragraph) => paragraph.original != "")
@@ -78,7 +75,7 @@ function validateParagraph(content) {
 }
 
 function buildExpectedHtml(content) {
-  let html = "";
+  let html = ".js";
   for (const child of content.content) {
     if (child.value) {
       html += child.value.replace(/\r\n/g, "\n");

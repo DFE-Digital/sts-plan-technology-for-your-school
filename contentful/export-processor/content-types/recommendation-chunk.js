@@ -1,6 +1,6 @@
-import { Answer } from "#src/content-types/answer";
-import ErrorLogger from "#src/errors/error-logger";
-import MapContent from "#src/content-types/content-mapper";
+import { Answer } from "./answer.js";
+import ErrorLogger from "../errors/error-logger.js";
+import MapContent from "./content-mapper.js";
 
 export default class RecommendationChunk {
   title;

@@ -1,4 +1,4 @@
-import { CleanText } from "../text-helpers";
+import { CleanText } from "../text-helpers.js";
 function ValidateTitle(title) {
   const expectedText = CleanText(title.fields.text);
 

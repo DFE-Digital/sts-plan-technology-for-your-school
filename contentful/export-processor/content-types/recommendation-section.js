@@ -1,6 +1,6 @@
-import { Answer } from "#src/content-types/answer";
-import RecommendationChunk from "#src/content-types/recommendation-chunk";
-import ErrorLogger from "#src/errors/error-logger";
+import { Answer } from "./answer.js";
+import RecommendationChunk from "./recommendation-chunk.js";
+import ErrorLogger from "../errors/error-logger.js";
 
 export default class RecommendationSection {
   answers;

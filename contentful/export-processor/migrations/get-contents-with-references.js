@@ -1,4 +1,4 @@
-import DataMapper from "#src/data-mapper";
+import DataMapper from "../data-mapper.js";
 
 /**
  * Creates an object with all content entries with their outgoing references
@@ -11,8 +11,8 @@ export const getContentsWithReferences = ({ dataMapper, entries }) => {
 
   getIncomingReferences(contents);
 
-  return addOriginalContentEntries({ contents, entries })
-}
+  return addOriginalContentEntries({ contents, entries });
+};
 
 function getOutgoingReferences(dataMapper) {
   const contents = {};
@@ -82,7 +82,7 @@ function addOriginalContentEntries({ contents, entries }) {
       ...content,
       referencedByIds: Array.from(content.referencedByIds.values()) ?? [],
       entry: matchingEntry
-    }
+    };
   });
 
 }

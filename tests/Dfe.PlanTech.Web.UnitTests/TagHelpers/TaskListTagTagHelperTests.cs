@@ -43,38 +43,7 @@ namespace Dfe.PlanTech.Web.UnitTests.TagHelpers
 
             var htmlString = output.ToHtmlString();
 
-            Assert.Contains($"class=\"govuk-tag govuk-tag--{colour.ToLower()}\"", htmlString);
-        }
-
-        [Fact]
-        public void Should_Float_To_Right()
-        {
-            var colour = "grey";
-
-            var tagHelper = new TaskListTagTagHelper
-            {
-                Colour = colour
-            };
-
-            var context = new TagHelperContext(tagName: "task-list-tag",
-                                                allAttributes: new TagHelperAttributeList(),
-                                                items: new Dictionary<object, object>(),
-                                                uniqueId: "tasklisttag-test");
-
-            var output = new TagHelperOutput("task-list-tag",
-                                            attributes: new TagHelperAttributeList(),
-                                            getChildContentAsync: (useCachedResult, encoder) =>
-                                            {
-                                                var tagHelperContent = new DefaultTagHelperContent();
-                                                tagHelperContent.SetContent("task list tag");
-                                                return Task.FromResult<TagHelperContent>(tagHelperContent);
-                                            });
-
-            tagHelper.Process(context, output);
-
-            var htmlString = output.ToHtmlString();
-
-            Assert.Contains($"style=\"float: right;\"", htmlString);
+            Assert.Contains($"class=\"app-task-list__tag govuk-tag govuk-tag--{colour.ToLower()}\"", htmlString);
         }
 
         [Fact]
@@ -105,7 +74,7 @@ namespace Dfe.PlanTech.Web.UnitTests.TagHelpers
 
             var htmlString = output.ToHtmlString();
 
-            Assert.Contains("class=\"govuk-tag\"", htmlString);
+            Assert.Contains("class=\"app-task-list__tag govuk-tag\"", htmlString);
         }
 
         [Fact]

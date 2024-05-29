@@ -2,16 +2,15 @@ locals {
   ###########
   # General #
   ###########
-  current_user_id           = coalesce(var.msi_id, data.azurerm_client_config.current.object_id)
-  project_name              = var.project_name
-  environment               = var.environment
-  azure_location            = var.azure_location
-  resource_prefix           = "${local.environment}${local.project_name}"
-  resource_group_name       = module.main_hosting.azurerm_resource_group_default.name
-  registry_server           = var.registry_server
-  registry_username         = var.registry_username
-  registry_password         = var.registry_password
-  registry_custom_image_url = var.registry_custom_image_url
+  current_user_id     = coalesce(var.msi_id, data.azurerm_client_config.current.object_id)
+  project_name        = var.project_name
+  environment         = var.environment
+  azure_location      = var.azure_location
+  resource_prefix     = "${local.environment}${local.project_name}"
+  resource_group_name = module.main_hosting.azurerm_resource_group_default.name
+  registry_server     = var.registry_server
+  registry_username   = var.registry_username
+  registry_password   = var.registry_password
 
   tags = {
     "Environment"      = var.az_tag_environment,
@@ -22,9 +21,13 @@ locals {
   #################
   # Container App #
   #################
-  container_app_image_name = "plan-tech-app"
-  kestrel_endpoint         = var.az_app_kestrel_endpoint
-  container_port           = var.az_container_port
+  container_app_image_name       = "plan-tech-app"
+  kestrel_endpoint               = var.az_app_kestrel_endpoint
+  container_port                 = var.az_container_port
+  image_tag                      = var.image_tag
+  container_app_min_replicas     = var.container_app_min_replicas
+  container_app_max_replicas     = var.container_app_max_replicas
+  container_app_http_concurrency = var.container_app_http_concurrency
 
   ####################
   # Managed Identity #
@@ -49,4 +52,12 @@ locals {
   # CDN/Front Door #
   ##################
   cdn_create_custom_domain = var.cdn_create_custom_domain
+
+  ####################
+  # Storage Accounts #
+  ####################
+
+  storage_account_public_access_enabled                   = var.storage_account_public_access_enabled
+  container_app_storage_account_shared_access_key_enabled = var.container_app_storage_account_shared_access_key_enabled
+  container_app_blob_storage_public_access_enabled        = var.container_app_blob_storage_public_access_enabled
 }

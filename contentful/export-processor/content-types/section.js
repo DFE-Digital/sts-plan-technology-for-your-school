@@ -1,7 +1,7 @@
-import { Question } from "#src/content-types/question";
-import { UserJourney } from "#src/user-journey/user-journey";
-import SubtopicRecommendation from "#src/content-types/subtopic-recommendation";
-import ErrorLogger from "#src/errors/error-logger";
+import { Question } from "./question.js";
+import { UserJourney } from "../user-journey/user-journey.js";
+import SubtopicRecommendation from "./subtopic-recommendation.js";
+import ErrorLogger from "../errors/error-logger.js";
 
 export class Section {
   recommendation;

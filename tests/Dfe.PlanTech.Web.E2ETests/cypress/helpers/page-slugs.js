@@ -1,1 +1,1 @@
-export const selfAssessmentSlug = "/self-assessment";
+export const selfAssessmentSlug = "/self-assessment.js";

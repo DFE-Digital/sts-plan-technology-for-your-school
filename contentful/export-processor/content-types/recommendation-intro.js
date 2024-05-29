@@ -1,4 +1,4 @@
-import MapContent from "#src/content-types/content-mapper";
+import MapContent from "./content-mapper.js";
 
 export default class RecommendationIntro {
   content;

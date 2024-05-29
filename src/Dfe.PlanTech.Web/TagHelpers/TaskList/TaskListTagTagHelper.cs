@@ -5,7 +5,8 @@ namespace Dfe.PlanTech.Web.TagHelpers.TaskList;
 
 public class TaskListTagTagHelper : BaseTaskListTagHelper
 {
-    private const string _class = "govuk-tag";
+    private const string _class = "app-task-list__tag";
+    private const string _colourClass = "govuk-tag";
 
     [HtmlAttributeName("colour")]
     public string? Colour { get; set; }
@@ -40,18 +41,10 @@ public class TaskListTagTagHelper : BaseTaskListTagHelper
 
     private void AppendTagColour(StringBuilder stringBuilder)
     {
+        stringBuilder.Append($" {_colourClass}");
         if (TagClassColour != TagColour.Default)
         {
-            stringBuilder.Append(' ');
-            stringBuilder.Append(_class);
-            stringBuilder.Append("--");
-            stringBuilder.Append(TagClassColour);
+            stringBuilder.Append($" {_colourClass}--{TagClassColour}");
         }
-    }
-
-    public override void Process(TagHelperContext context, TagHelperOutput output)
-    {
-        base.Process(context, output);
-        output.Attributes.SetAttribute("style", "float: right;");
     }
 }

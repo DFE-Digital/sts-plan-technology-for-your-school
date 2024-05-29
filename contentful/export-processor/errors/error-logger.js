@@ -1,4 +1,4 @@
-import ContentError from "#src/errors/content-error";
+import ContentError from "./content-error.js";
 import fs from "fs";
 
 class ErrorLogger {
