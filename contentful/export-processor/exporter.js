@@ -1,5 +1,4 @@
 import contentfulExport from "contentful-export";
-
 /**
  * Exports Contentful data.
  *
@@ -7,12 +6,12 @@ import contentfulExport from "contentful-export";
  *
  * @return {object} The exported Contentful data.
  */
-export default function exportContentfulData() {
+export default function exportContentfulData({ spaceId, deliveryToken, managementToken, environment } = {}) {
   const options = {
-    spaceId: process.env.SPACE_ID,
-    deliveryToken: process.env.DELIVERY_TOKEN,
-    managementToken: process.env.MANAGEMENT_TOKEN,
-    environmentId: process.env.ENVIRONMENT,
+    spaceId: spaceId ?? process.env.SPACE_ID,
+    deliveryToken: deliveryToken ?? process.env.DELIVERY_TOKEN,
+    managementToken: managementToken ?? process.env.MANAGEMENT_TOKEN,
+    environmentId: environment ?? process.env.ENVIRONMENT,
     host: "api.contentful.com",
     skipEditorInterfaces: true,
     skipRoles: true,

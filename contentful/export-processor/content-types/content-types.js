@@ -1,12 +1,12 @@
-import { Answer } from "#src/content-types/answer";
-import ContentType from "#src/content-types/content-type";
-import { Question } from "#src/content-types/question";
-import { Recommendation } from "#src/content-types/recommendation";
-import { Section } from "#src/content-types/section";
-import RecommendationChunk from "./recommendation-chunk";
-import RecommendationIntro from "./recommendation-intro";
-import RecommendationSection from "./recommendation-section";
-import SubtopicRecommendation from "./subtopic-recommendation";
+import { Answer } from "./answer.js";
+import ContentType from "./content-type.js";
+import { Question } from "./question.js";
+import { Recommendation } from "./recommendation.js";
+import { Section } from "./section.js";
+import RecommendationChunk from "./recommendation-chunk.js";
+import RecommendationIntro from "./recommendation-intro.js";
+import RecommendationSection from "./recommendation-section.js";
+import SubtopicRecommendation from "./subtopic-recommendation.js";
 
 
 export default { Answer, ContentType, Question, Recommendation, Section, RecommendationChunk, RecommendationIntro, RecommendationSection, SubtopicRecommendation };

@@ -1,5 +1,5 @@
-import ValidateContent from "./content-validator";
-import ValidateTitle from "./title-validator";
+import ValidateContent from "./content-validator.js";
+import ValidateTitle from "./title-validator.js";
 
 function ValidatePage(slug, page) {
   if (!page.fields.requiresAuthorisation) {

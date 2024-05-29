@@ -29,13 +29,13 @@ class ContentType {
     const linkContentType = validations
       .filter((validation) => validation.linkContentType)
       .map((validation) => validation.linkContentType)[0];
-
-    const linkedContentTypes = linkContentType.length == 0 ? undefined : linkContentType;
+      
+    const linkedContentTypes = !linkContentType || linkContentType.length == 0 ? undefined : linkContentType;
 
     if (linkedContentTypes) {
       this.referenceFields[field] = linkedContentTypes;
     }
-
+    
     return linkedContentTypes;
   }
 }

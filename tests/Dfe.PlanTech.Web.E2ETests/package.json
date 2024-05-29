@@ -4,6 +4,7 @@
   "description": "",
   "main": "cypress.config.js",
   "scripts": {
+    "preinstall": "npm install ../../contentful/export-processor -S && npm link ../../contentful/export-processor",
     "test": "cypress run",
     "report:merge": "mochawesome-merge cypress/results/json/*.json > index.json",
     "report:generate": "marge index.json --reportDir public --assetsDir public/assets --reportPageTitle index.html"
@@ -16,7 +17,7 @@
     "@babel/preset-env": "^7.24.5",
     "@cypress/webpack-preprocessor": "^6.0.1",
     "babel-loader": "^9.1.3",
-    "cypress": "^13.9.0",
+    "cypress": "^13.10.0",
     "cypress-axe": "^1.5.0",
     "cypress-multi-reporters": "^1.6.4",
     "mocha": "^10.4.0",
@@ -26,6 +27,7 @@
     "webpack": "^5.91.0"
   },
   "dependencies": {
+    "export-processor": "file:../../contentful/export-processor",
     "node-html-parser": "^6.1.13"
   }
 }

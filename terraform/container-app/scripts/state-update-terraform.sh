@@ -13,7 +13,6 @@ STATE_FILE="$5"
 STATE_ACCOUNT="$6"
 RESOURCE_GROUP_PREFIX="${RESOURCE_GROUP%%-plantech}"
 
-
 terraform import -var-file="$VAR_FILE" module.main_hosting.azurerm_container_app_environment.container_app_env "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP/providers/Microsoft.App/managedEnvironments/${RESOURCE_GROUP}containerapp"
 
 terraform state rm module.main_hosting.azapi_resource.container_app_env
