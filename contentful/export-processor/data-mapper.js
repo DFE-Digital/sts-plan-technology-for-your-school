@@ -1,14 +1,14 @@
-import { Section } from "#src/content-types/section";
-import ContentType from "#src/content-types/content-type";
-import SubtopicRecommendation from "#src/content-types/subtopic-recommendation";
-import ErrorLogger from "#src/errors/error-logger";
+import { Section } from "./content-types/section.js";
+import ContentType from "./content-types/content-type.js";
+import SubtopicRecommendation from "./content-types/subtopic-recommendation.js";
+import ErrorLogger from "./errors/error-logger.js";
 
 /**
  * DataMapper class for mapping and combining data from a file
  */
 export default class DataMapper {
   // Maps for different content types
-  contents = new Map();
+  contents = {};
 
   contentTypes = new Map();
 
@@ -47,6 +47,9 @@ export default class DataMapper {
     this.mapContentTypes(contentTypes);
     this.mapEntries(entries);
     this.combineEntries();
+
+    console.log('contents', this.contents);
+    console.log('nav links', this.contents['navigationLink']);
   }
 
   mapContentTypes(contentTypes) {
@@ -215,6 +218,7 @@ export default class DataMapper {
   }
 
   getMatchingContentForReference(referencedTypesForField, reference) {
+    console.log(referencedTypesForField, reference);
     const referenceId = reference["sys"]?.["id"];
 
     if (!referenceId) {

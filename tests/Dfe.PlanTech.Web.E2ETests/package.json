@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "main": "cypress.config.js",
-  "type": "module",
   "scripts": {
     "preinstall": "npm install ../../contentful/export-processor -S && npm link ../../contentful/export-processor",
     "test": "cypress run",
@@ -28,7 +27,7 @@
     "webpack": "^5.91.0"
   },
   "dependencies": {
-    "export-processor": "file:../../contentful/export-processor",
-    "node-html-parser": "^6.1.13"
+    "node-html-parser": "^6.1.13",
+    "export-processor": "file:../../contentful/export-processor"
   }
 }

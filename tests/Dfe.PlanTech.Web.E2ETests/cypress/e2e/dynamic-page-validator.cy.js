@@ -1,17 +1,22 @@
 import ValidatePage from "../helpers/content-validators/page-validator.js";
 import { selfAssessmentSlug } from "../helpers/page-slugs.js";
 import ValidateContent from "../helpers/content-validators/content-validator.js";
-import getContentfulData from "../helpers/retrieve-contentful-data.js";
 
 describe("Pages should have content", () => {
-  const ContentfulData = getContentfulData();
+  let contentfulData;
+
+  before(async () => {
+    await cy.task("fetchContentfulData");
+  });
 
   it("Should render navigation links", () => {
-    if (!ContentfulData) {
+    if (!contentfulData) {
       return;
     }
 
-    const navigationLinks = ContentfulData.contents["navigationLink"];
+    console.log('contentful data', contentfulData);
+
+    const navigationLinks = contentfulData.contents["navigationLink"];
     if (!dataLoaded(navigationLinks)) {
       return;
     }
@@ -24,7 +29,7 @@ describe("Pages should have content", () => {
   });
 
   it("Should validate self-assessment page", () => {
-    if (!ContentfulData || !dataLoaded(ContentfulData.pages)) {
+    if (!contentfulData || !dataLoaded(contentfulData.pages)) {
       return;
     }
 
@@ -32,7 +37,7 @@ describe("Pages should have content", () => {
     const slug = selfAssessmentSlug.replace("/", "");
     const selfAssessmentPage = FindPageForSlug({
       slug,
-      dataMapper: ContentfulData,
+      dataMapper: contentfulData,
     });
 
     if (!selfAssessmentPage) {
@@ -44,7 +49,7 @@ describe("Pages should have content", () => {
     ValidatePage(slug, selfAssessmentPage);
   });
 
-  Array.from(ContentfulData?.pages ?? [])
+  Array.from(contentfulData?.pages ?? [])
     .map(([_, page]) => page)
     .filter((page) => !page.fields.requiresAuthorisation)
     .forEach((page) => {
@@ -59,14 +64,14 @@ describe("Pages should have content", () => {
       );
     });
 
-  Object.values(ContentfulData?.mappedSections ?? []).forEach((section) => {
+  Object.values(contentfulData?.mappedSections ?? []).forEach((section) => {
     it(`${section.name} should have every question with correct content`, () => {
       cy.loginWithEnv(`${selfAssessmentSlug}`);
 
       validateSections(
         section,
         section.minimumPathsToNavigateQuestions,
-        ContentfulData
+        contentfulData
       );
     });
 
@@ -75,7 +80,7 @@ describe("Pages should have content", () => {
         it(`${section.name} should retrieve correct recommendation for ${maturity} maturity, and all content is valid`, () => {
           cy.loginWithEnv(`${selfAssessmentSlug}`);
 
-          validateSections(section, [path], ContentfulData, () => {
+          validateSections(section, [path], contentfulData, () => {
             validateRecommendationForMaturity(section, maturity);
           });
         });

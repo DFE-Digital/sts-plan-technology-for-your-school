@@ -1,11 +1,17 @@
-import { ExportContentfulData, DataMapper } from "export-processor";
+let dataMapper = null;
 
-const retrieveContentfulData = async () => {
-  const contentfulData = await ExportContentfulData();
+let exportContentfulData = null;
 
-  const dataMapper = new DataMapper(contentfulData);
+const retrieveContentfulData = async ({ contentfulExporter, dataMapper }) => {
+  if (dataMapper) {
+    return dataMapper;
+  }
+
+  const contentfulData = await contentfulExporter();
+
+  dataMapper = new DataMapper(contentfulData);
 
   return dataMapper;
 };
 
-export { retrieveContentfulData };
+module.exports = retrieveContentfulData;

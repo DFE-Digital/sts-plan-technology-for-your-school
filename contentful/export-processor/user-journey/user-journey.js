@@ -1,5 +1,5 @@
-import SubtopicRecommendation from "#src/content-types/subtopic-recommendation";
-import ErrorLogger from "#src/errors/error-logger";
+import SubtopicRecommendation from "../content-types/subtopic-recommendation.js";
+import ErrorLogger from "../errors/error-logger.js";
 
 export class UserJourney {
   path;
@@ -73,11 +73,11 @@ export class UserJourney {
       case "High":
         return 2;
       case 0:
-        return "Low";
+        return "Low.js";
       case 1:
-        return "Medium";
+        return "Medium.js";
       case 2:
-        return "High";
+        return "High.js";
     }
 
     return null;
