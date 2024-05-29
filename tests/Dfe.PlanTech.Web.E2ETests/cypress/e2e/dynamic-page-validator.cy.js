@@ -6,7 +6,7 @@ describe("Pages should have content", () => {
   let contentfulData;
 
   before(async () => {
-    await cy.task("fetchContentfulData");
+    contentfulData = await cy.task("fetchContentfulData");
   });
 
   it("Should render navigation links", () => {
