@@ -1,22 +1,25 @@
 import ValidatePage from "../helpers/content-validators/page-validator.js";
 import { selfAssessmentSlug } from "../helpers/page-slugs.js";
 import ValidateContent from "../helpers/content-validators/content-validator.js";
+import DataMapper from "export-processor/data-mapper.js";
 
 describe("Pages should have content", () => {
   let contentfulData;
+  let pages;
 
   before(async () => {
-    await cy.task("fetchContentfulData");
+    const contentfulExport = await cy.task("fetchContentfulData");
+    contentfulData = new DataMapper(contentfulExport);
+
+    pages = Array.from(contentfulData.pages.entries());
   });
 
-  it("Should render navigation links", () => {
+  it("Should render navigation links", async () => {
     if (!contentfulData) {
       return;
     }
 
-    console.log('contentful data', contentfulData);
-
-    const navigationLinks = contentfulData.contents["navigationLink"];
+    const navigationLinks = Array.from(contentfulData.contents.get("navigationLink").entries());
     if (!dataLoaded(navigationLinks)) {
       return;
     }
@@ -37,7 +40,7 @@ describe("Pages should have content", () => {
     const slug = selfAssessmentSlug.replace("/", "");
     const selfAssessmentPage = FindPageForSlug({
       slug,
-      dataMapper: contentfulData,
+      pages
     });
 
     if (!selfAssessmentPage) {
@@ -49,8 +52,7 @@ describe("Pages should have content", () => {
     ValidatePage(slug, selfAssessmentPage);
   });
 
-  Array.from(contentfulData?.pages ?? [])
-    .map(([_, page]) => page)
+  (pages ?? []).map(([_, page]) => page)
     .filter((page) => !page.fields.requiresAuthorisation)
     .forEach((page) => {
       it(
@@ -96,8 +98,7 @@ describe("Pages should have content", () => {
  * @return {boolean} haveContent - whether data has been loaded
  */
 function dataLoaded(contentMap) {
-  const haveContent =
-    contentMap && (contentMap.length > 0 || contentMap.size > 0);
+  const haveContent = contentMap && ((contentMap.size && contentMap.size > 0) || (contentMap.length && contentMap.length > 0));
 
   if (!haveContent) {
     console.log("Data has not been loaded");
@@ -171,7 +172,7 @@ function validateSections(section, paths, dataMapper, validator) {
 
     const interstitialPage = FindPageForSlug({
       slug: section.interstitialPage.fields.slug,
-      dataMapper,
+      pages,
     });
     ValidatePage(section.interstitialPage.fields.slug, interstitialPage);
 
@@ -250,8 +251,8 @@ function validateAnswers(matchingQuestion) {
   }
 }
 
-function FindPageForSlug({ slug, dataMapper }) {
-  for (const [id, page] of dataMapper.pages) {
+function FindPageForSlug({ slug, pages }) {
+  for (const [id, page] of pages) {
     if (page.fields.slug == slug) {
       return page;
     }

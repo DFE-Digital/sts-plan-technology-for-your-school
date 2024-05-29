@@ -33,15 +33,11 @@ module.exports = defineConfig({
             environment: config.env.CONTENTFUL_ENVIRONMENT,
           });
 
-          console.log('retrieved contentful data', data);
-
-          const dataMapper = new exportProcessor.DataMapper(data);
-
-          console.log('data mapper', dataMapper);
-
-          return dataMapper;
+          return data;
         }
       });
     },
   },
 });
+
+
