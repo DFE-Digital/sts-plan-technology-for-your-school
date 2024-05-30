@@ -48,10 +48,11 @@ export class UserJourney {
     );
 
     if (recommendationIntro == null || recommendationIntro.length == 0) {
-      ErrorLogger.addError(
-        `Could not find recommendation intro for ${this.maturity} in ${this.section.name}`,
-        recommendation
-      );
+      ErrorLogger.addError({
+        id: recommendation.id,
+        contentType: "recommendation",
+        message: `Could not find recommendation intro for ${this.maturity} in ${this.section.name}`,
+      });
       return;
     }
 
@@ -73,11 +74,11 @@ export class UserJourney {
       case "High":
         return 2;
       case 0:
-        return "Low.js";
+        return "Low";
       case 1:
-        return "Medium.js";
+        return "Medium";
       case 2:
-        return "High.js";
+        return "High";
     }
 
     return null;

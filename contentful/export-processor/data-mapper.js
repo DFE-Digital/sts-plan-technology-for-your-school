@@ -47,8 +47,6 @@ export default class DataMapper {
     this.mapContentTypes(contentTypes);
     this.mapEntries(entries);
     this.combineEntries();
-
-    console.log('contents', this.contents);
   }
 
   mapContentTypes(contentTypes) {
