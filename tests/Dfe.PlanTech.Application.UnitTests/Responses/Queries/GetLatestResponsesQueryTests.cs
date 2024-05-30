@@ -122,17 +122,21 @@ public class GetLatestResponsesQueryTests
 
     private IEnumerable<List<Submission>> GenerateSubmissions(Faker faker, Faker<Submission> submissionFaker)
     {
-        foreach (var submissionGroup in GenerateSubmissionsForSections(faker, submissionFaker, _completeSections, true))
+        foreach (var submissionGroup in GenerateSubmissionsForSections(faker, submissionFaker, _completeSections, true, false))
             yield return submissionGroup;
 
-        foreach (var submissionGroup in GenerateSubmissionsForSections(faker, submissionFaker, _incompleteSections, false))
+        foreach (var submissionGroup in GenerateSubmissionsForSections(faker, submissionFaker, _incompleteSections, false, false))
+            yield return submissionGroup;
+
+        foreach (var submissionGroup in GenerateSubmissionsForSections(faker, submissionFaker, _incompleteSections, false, true))
             yield return submissionGroup;
     }
 
     private IEnumerable<List<Submission>> GenerateSubmissionsForSections(Faker faker,
-                                                                                        Faker<Submission> submissionFaker,
-                                                                                        List<Section> sections,
-                                                                                        bool completeSections)
+                                                                         Faker<Submission> submissionFaker,
+                                                                         List<Section> sections,
+                                                                         bool completeSections,
+                                                                         bool deleted)
     {
         foreach (var section in sections)
         {
@@ -141,6 +145,7 @@ public class GetLatestResponsesQueryTests
             {
                 submission.SectionId = section.Sys.Id;
                 submission.SectionName = section.Name;
+                submission.Deleted = deleted;
                 submission.Responses = GenerateResponses(sections, submission, faker).ToList();
 
                 if (!completeSections) continue;
@@ -233,6 +238,20 @@ public class GetLatestResponsesQueryTests
         Assert.Null(latestResponse);
     }
 
+    [Fact]
+    public async Task GetLatestResponses_Should_Not_Return_Deleted_Submission()
+    {
+        var deletedSubmission = GetDeletedSubmissionForIncompleteSection();
+
+        var latestResponse = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(ESTABLISHMENT_ID, deletedSubmission.SectionId);
+        Assert.NotNull(latestResponse);
+
+        var submission = _submissions.FirstOrDefault(submission => submission.Id == latestResponse.SubmissionId);
+        Assert.NotNull(submission);
+
+        Assert.False(submission.Deleted);
+    }
+
     private IEnumerable<Response> GenerateResponses(List<Section> sections,
                                                     Submission submission,
                                                     Faker faker)
@@ -266,6 +285,9 @@ public class GetLatestResponsesQueryTests
 
     private Submission GetIncompleteSubmissionForIncompleteSection()
     => _submissions.First(submission => !submission.Completed && _incompleteSections.Any(section => section.Sys.Id == submission.SectionId));
+
+    private Submission GetDeletedSubmissionForIncompleteSection()
+    => _submissions.First(submission => !submission.Completed && submission.Deleted && _incompleteSections.Any(section => section.Sys.Id == submission.SectionId));
 
     private Response GenerateResponse(Submission submission, Faker faker, Section section, int x)
     {

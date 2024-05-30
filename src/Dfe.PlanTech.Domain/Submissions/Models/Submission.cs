@@ -26,4 +26,6 @@ public class Submission
     public DateTime? DateCompleted { get; set; }
 
     public List<Response> Responses { get; set; } = new();
+
+    public bool Deleted { get; set; }
 }

@@ -27,22 +27,21 @@ public class Section : ContentComponent, ISectionComponent
         return TryGetRecommendationForMaturity(maturityResponse);
     }
 
-    public IEnumerable<QuestionWithAnswer> GetAttachedQuestions(IEnumerable<QuestionWithAnswer> responses)
+    public IEnumerable<QuestionWithAnswer> GetOrderedResponsesForJourney(IEnumerable<QuestionWithAnswer> responses)
     {
-        var questionWithAnswerMap = responses.ToDictionary(questionWithAnswer => questionWithAnswer.QuestionRef,
-                                                                                 questionWithAnswer => questionWithAnswer);
+        var questionWithAnswerMap = responses
+            .ToDictionary(questionWithAnswer => questionWithAnswer.QuestionRef, questionWithAnswer => questionWithAnswer);
 
         Question? node = Questions.FirstOrDefault();
 
         while (node != null)
         {
             if (!questionWithAnswerMap.TryGetValue(node.Sys.Id, out QuestionWithAnswer? questionWithAnswer))
-            {
                 break;
-            }
 
             Answer? answer = GetAnswerForRef(questionWithAnswer);
 
+            // Show the latest Text and Slug, but preserve user answer if there has been a change
             questionWithAnswer = questionWithAnswer with
             {
                 AnswerText = answer?.Text ?? questionWithAnswer.AnswerText,
