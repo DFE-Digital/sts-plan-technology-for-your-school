@@ -14,6 +14,10 @@ async function loadAndSaveContentfulData(config) {
 
     const data = await fetchContentfulExport({ exportContentfulData: exportProcessor.ExportContentfulData, config });
 
+    if (!data) {
+      return;
+    }
+
     console.log("Loaded data. Creating fixtures");
     saveSectionsIfNotExist(data);
   }
@@ -27,6 +31,11 @@ async function fetchContentfulExport({ exportContentfulData, config }) {
     const json = fs.readFileSync(ContentfulDataPath, "utf-8");
 
     return JSON.parse(json);
+  }
+
+  if (!config.env.SPACE_ID || !config.env.MANAGEMENT_TOKEN || !config.env.DELIVERY_TOKEN || !config.env.CONTENTFUL_ENVIRONMENT) {
+    console.log("Cannot fetch Contentful data; missing environment variable(s)");
+    return;
   }
 
   const data = await exportContentfulData({
@@ -44,6 +53,10 @@ async function fetchContentfulExport({ exportContentfulData, config }) {
 }
 
 const readContentfulDataFromJson = () => {
+  if (!fs.existsSync(ContentfulDataPath)) {
+    return;
+  }
+
   const data = fs.readFileSync(ContentfulDataPath, "utf-8");
 
   return JSON.parse(data);
