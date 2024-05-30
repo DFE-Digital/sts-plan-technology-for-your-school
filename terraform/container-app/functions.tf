@@ -1,4 +1,4 @@
-resource "azurerm_storage_account" "function_app_storage" {
+resource "azurerm_storage_account" "contentful_function_storage" {
   name                     = replace("${local.resource_prefix}funcstr", "-", "")
   resource_group_name      = local.resource_group_name
   location                 = local.azure_location
@@ -13,20 +13,21 @@ resource "azurerm_storage_account" "function_app_storage" {
   allow_nested_items_to_be_public = false
 }
 
-resource "azurerm_storage_container" "function_app_str_webjob_host" {
+resource "azurerm_storage_container" "contentful_function_str_webjob_host" {
   name                 = "azure-webjobs-hosts"
-  storage_account_name = azurerm_storage_account.function_app_storage.name
+  storage_account_name = azurerm_storage_account.contentful_function_storage.name
 }
 
-resource "azurerm_storage_container" "function_app_storage_container-" {
+resource "azurerm_storage_container" "contentful_function_storage_container-" {
   name                 = "function-releases"
-  storage_account_name = azurerm_storage_account.function_app_storage.name
+  storage_account_name = azurerm_storage_account.contentful_function_storage.name
 }
-resource "azurerm_storage_container" "function_app_str_webjob_secrets" {
+resource "azurerm_storage_container" "contentful_function_str_webjob_secrets" {
   name                 = "azure-webjobs-secrets"
-  storage_account_name = azurerm_storage_account.function_app_storage.name
+  storage_account_name = azurerm_storage_account.contentful_function_storage.name
 }
-resource "azurerm_service_plan" "function_app_plan" {
+
+resource "azurerm_service_plan" "function_plan" {
   location            = "northeurope"
   name                = "${local.resource_prefix}appserviceplan"
   os_type             = "Linux"
@@ -40,8 +41,26 @@ resource "azurerm_service_plan" "function_app_plan" {
       sku_name
     ]
   }
+
+  depends_on = [null_resource.provision_contentful_function]
 }
-resource "azurerm_linux_function_app" "function_app" {
+
+//Create function app with flex consumption
+resource "null_resource" "provision_contentful_function" {
+  //Always run; there's validation in the script to not run more than necessary
+  triggers = {
+    1 = 1
+  }
+
+  provisioner "local-exec" {
+    # Bootstrap script called with private_ip of each node in the cluster
+    command     = "chmod +x ${path.cwd}/scripts/create-function-app-resources.sh; ${path.cwd}/scripts/create-function-app-resources.sh -g ${local.resource_group_name} -l ${local.azure_location} -a ${local.resource_prefix}appserviceplan -f ${local.resource_prefix}contentfulfunction -s ${replace("${local.resource_prefix}funcstr", "-", "")} -e ${var.az_tag_environment} -p ${var.az_tag_product}"
+    interpreter = ["bash", "-c"]
+  }
+}
+
+
+resource "azurerm_linux_function_app" "contentful_function" {
   builtin_logging_enabled     = false
   client_certificate_mode     = "Required"
   functions_extension_version = "~1"
@@ -49,8 +68,8 @@ resource "azurerm_linux_function_app" "function_app" {
   name                        = "${local.resource_prefix}contentfulfunction"
 
   resource_group_name  = local.resource_group_name
-  service_plan_id      = azurerm_service_plan.function_app_plan.id
-  storage_account_name = azurerm_storage_account.function_app_storage.name
+  service_plan_id      = azurerm_service_plan.function_plan.id
+  storage_account_name = azurerm_storage_account.contentful_function_storage.name
   tags                 = local.tags
 
   key_vault_reference_identity_id = azurerm_user_assigned_identity.user_assigned_identity.id
@@ -84,7 +103,8 @@ resource "azurerm_linux_function_app" "function_app" {
   }
 
   depends_on = [
-    azurerm_service_plan.function_app_plan,
+    azurerm_service_plan.function_plan,
+    null_resource.provision_contentful_function
   ]
 
   lifecycle {
@@ -95,16 +115,15 @@ resource "azurerm_linux_function_app" "function_app" {
       app_settings["WEBSITE_RUN_FROM_PACKAGE_BLOB_MI_RESOURCE_ID"],
     ]
   }
-
 }
 
-resource "azurerm_app_service_custom_hostname_binding" "function_app_host" {
-  app_service_name    = azurerm_service_plan.name
-  hostname            = "${azurerm_linux_function_app.function_app.name}.azurewebsites.net"
+resource "azurerm_app_service_custom_hostname_binding" "contentful_function_host" {
+  app_service_name    = azurerm_service_plan.function_plan.name
+  hostname            = "${azurerm_linux_function_app.contentful_function.name}.azurewebsites.net"
   resource_group_name = local.resource_group_name
 
   depends_on = [
-    azurerm_linux_function_app.function_app,
+    azurerm_linux_function_app.contentful_function,
   ]
 }
 
@@ -113,17 +132,17 @@ data "azurerm_subscription" "subscription" {
 
 
 data "azurerm_function_app_host_keys" "default" {
-  name                = azurerm_linux_function_app.function_app.name
-  resource_group_name = loca.resource_group_name
+  name                = azurerm_linux_function_app.contentful_function.name
+  resource_group_name = local.resource_group_name
 
   depends_on = [
-    azurerm_linux_function_app.function_app
+    azurerm_linux_function_app.contentful_function
   ]
 }
 
 resource "azurerm_application_insights" "functional_insights" {
   name                = "${local.resource_prefix}-function-insights"
-  location            = local.environment
+  location            = local.azure_location
   resource_group_name = local.resource_group_name
   application_type    = "web"
   retention_in_days   = 30
@@ -132,7 +151,7 @@ resource "azurerm_application_insights" "functional_insights" {
 
 resource "azurerm_app_service_connection" "azurekeyvaultconnector" {
   name               = "azurekeyvaultconnection"
-  app_service_id     = azurerm_linux_function_app.function_app.id
+  app_service_id     = azurerm_linux_function_app.contentful_function.id
   target_resource_id = azurerm_key_vault.vault.id
   client_type        = "dotnet"
 
@@ -145,7 +164,7 @@ resource "azurerm_app_service_connection" "azurekeyvaultconnector" {
 
 resource "azurerm_app_service_connection" "azuresqlconnector" {
   name               = "azuresqlconnection"
-  app_service_id     = azurerm_linux_function_app.function_app.id
+  app_service_id     = azurerm_linux_function_app.contentful_function.id
   target_resource_id = "/subscriptions/${data.azurerm_subscription.subscription.subscription_id}/resourceGroups/${local.resource_prefix}/providers/Microsoft.Sql/servers/${local.resource_prefix}/databases/${local.resource_prefix}-sqldb"
   client_type        = "dotnet"
 

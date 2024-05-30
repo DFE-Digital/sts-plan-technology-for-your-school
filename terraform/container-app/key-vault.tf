@@ -106,7 +106,7 @@ resource "azurerm_key_vault_secret" "vault_secret_database_connectionstring" {
 resource "azurerm_key_vault_secret" "functionapp_possibleoutboundipaddresses" {
   key_vault_id = azurerm_key_vault.vault.id
   name         = "functionapp--possibleoutboundipaddresses"
-  value        = join(",", azurerm_linux_function_app.function_app.possible_outbound_ip_address_list)
+  value        = join(",", azurerm_linux_function_app.contentful_function.possible_outbound_ip_address_list)
 
 
   lifecycle {
