@@ -15,9 +15,14 @@ public class SubmissionStatusProcessor : ISubmissionStatusProcessor
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
     private readonly ISubmissionStatusChecker[] _statusCheckers;
+    private ISectionComponent? _sectionComponent;
 
     public IGetLatestResponsesQuery GetResponsesQuery { get; init; }
-    public ISectionComponent? Section { get; private set; }
+    public ISectionComponent Section
+    {
+        get => _sectionComponent ?? throw new ApplicationException("Section is null but it should not be");
+        private set => _sectionComponent = value;
+    }
     public IUser User { get; init; }
     public Question? NextQuestion { get; set; }
     public SectionStatusNew? SectionStatus { get; private set; }

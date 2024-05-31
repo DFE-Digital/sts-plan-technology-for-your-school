@@ -48,7 +48,7 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
 
         if (IsSlugForNextQuestion(questionSlug))
         {
-            var viewModel = controller.GenerateViewModel(sectionSlug, _router.NextQuestion!, _router.Section!, null);
+            var viewModel = controller.GenerateViewModel(sectionSlug, _router.NextQuestion!, _router.Section, null);
             return controller.RenderView(viewModel);
         }
 
@@ -89,7 +89,7 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
 
         var viewModel = controller.GenerateViewModel(sectionSlug,
                                                      question,
-                                                     _router.Section!,
+                                                     _router.Section,
                                                      latestResponseForQuestion.AnswerRef);
 
         return controller.RenderView(viewModel);
@@ -102,7 +102,7 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     /// <returns>Found question</returns>
     /// <exception cref="ContentfulDataUnavailableException">Thrown if no matching question is found</exception>
     private Question GetQuestionForSlug(string questionSlug)
-    => _router.Section!.Questions.FirstOrDefault(q => q.Slug == questionSlug) ?? throw new ContentfulDataUnavailableException($"Could not find question '{questionSlug}'");
+    => _router.Section.Questions.FirstOrDefault(q => q.Slug == questionSlug) ?? throw new ContentfulDataUnavailableException($"Could not find question '{questionSlug}'");
 
     /// <summary>
     /// Retrieves latest responses for the <see cref="Section"/> object in <see cref="_router"/> 
@@ -114,9 +114,9 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     {
         var establishmentId = await _user.GetEstablishmentId();
 
-        var latestResponses = await _getResponseQuery.GetLatestResponses(establishmentId, _router.Section!.Sys.Id, cancellationToken);
+        var latestResponses = await _getResponseQuery.GetLatestResponses(establishmentId, _router.Section.Sys.Id, cancellationToken);
 
-        if (latestResponses == null || latestResponses.Responses.Count == 0) throw new DatabaseException($"Could not find latest responses for '{_router.Section!.Sys.Id}'");
+        if (latestResponses == null || latestResponses.Responses.Count == 0) throw new DatabaseException($"Could not find latest responses for '{_router.Section.Sys.Id}'");
 
         return latestResponses.Responses;
     }
@@ -140,7 +140,7 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     /// <param name="question">Question to check attached status</param>
     /// <returns></returns>
     private bool IsQuestionAttached(IEnumerable<QuestionWithAnswer> responses, Question question)
-    => _router.Section!.GetAttachedQuestions(responses).Any(response => response.QuestionRef == question.Sys.Id);
+    => _router.Section.GetOrderedResponsesForJourney(responses).Any(response => response.QuestionRef == question.Sys.Id);
 
     /// <summary>
     /// Returns an IActionResult depending on the <see cref="SubmissionStatus"/> in the <see cref="_router"/>

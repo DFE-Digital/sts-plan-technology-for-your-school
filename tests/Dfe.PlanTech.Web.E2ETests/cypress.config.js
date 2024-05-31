@@ -15,6 +15,7 @@ Object.assign(webpackOptions.webpackOptions, {
 
 module.exports = defineConfig({
   chromeWebSecurity: false,
+  video: true,
   reporter: "cypress-multi-reporters",
   reporterOptions: {
     "configFile": "reporter-config.json"
@@ -23,7 +24,7 @@ module.exports = defineConfig({
     runMode: 1
   },
   e2e: {
-    setupNodeEvents(on, config) {
+    setupNodeEvents(on, _) {
       on('task', {
         log(message) {
           console.log(message)

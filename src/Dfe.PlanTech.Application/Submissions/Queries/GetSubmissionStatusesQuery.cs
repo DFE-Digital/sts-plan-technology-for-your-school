@@ -31,7 +31,7 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
                                                                          CancellationToken cancellationToken)
     {
         var sectionStatus = _db.GetSubmissions.Where(submission => submission.EstablishmentId == establishmentId &&
-                                                 submission.SectionId == section.Sys.Id);
+                                                 submission.SectionId == section.Sys.Id && !submission.Deleted);
 
         var groupedAndLatest = GetLatestSubmissionStatus(sectionStatus);
 

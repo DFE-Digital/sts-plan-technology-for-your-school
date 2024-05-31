@@ -132,18 +132,18 @@
   }
 }
 
-.app-task-list__tag,
-.app-task-list__task-completed {
-  margin-top: 10px;
-  margin-bottom: 5px;
+@media (max-width: 28.125em) {
+  .app-task-list__tag,
+  .app-task-list__task-completed {
+    margin-top: 10px;
+    margin-bottom: 5px;
+  }
 }
 
 @media (min-width: 28.125em) {
   .app-task-list__tag,
   .app-task-list__task-completed {
     float: right;
-    margin-top: 0;
-    margin-bottom: 0;
   }
 }
 

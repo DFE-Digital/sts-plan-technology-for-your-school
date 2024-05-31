@@ -128,7 +128,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public Task<int> CallStoredProcedureWithReturnInt(string sprocName, IEnumerable<SqlParameter> parms, CancellationToken cancellationToken = default)
      => Database.ExecuteSqlRawAsync(sprocName, parms, cancellationToken: cancellationToken);
 
-    public Task<int> ExecuteRaw(FormattableString sql, CancellationToken cancellationToken = default)
+    public Task<int> ExecuteSqlAsync(FormattableString sql, CancellationToken cancellationToken = default)
     => Database.ExecuteSqlAsync(sql, cancellationToken);
 
     public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default) => queryable.FirstOrDefaultAsync(cancellationToken);

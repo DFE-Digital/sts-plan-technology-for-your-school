@@ -32,7 +32,8 @@
 }
 
 @section BeforeContent {
-    <script
+    <script 
+        nonce="@Context.Items["nonce"]"
         defer>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
     <partial name="BetaHeader" />
 
@@ -46,8 +47,8 @@
 }
 
 @section BodyEnd {
-    <script async src="~/js/app.js"></script>
-    <script defer type="module">
+    <script async src="~/js/app.js" nonce="@Context.Items["nonce"]"></script>
+    <script defer type="module" nonce="@Context.Items["nonce"]">
         import * as govuk from '/js/govuk-frontend.min.js';
         govuk.initAll();
     </script>

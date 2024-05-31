@@ -22,12 +22,23 @@ public class GetNextUnansweredQuestionQuery : IGetNextUnansweredQuestionQuery
 
         if (answeredQuestions.Responses.Count == 0) throw new DatabaseException($"There are no responses in the database for ongoing submission {answeredQuestions.SubmissionId}, linked to establishment {establishmentId}");
 
-        return GetNextUnansweredQuestion(section, answeredQuestions.Responses);
+        return GetValidatedNextUnansweredQuestion(section, answeredQuestions);
     }
 
-    public static Question? GetNextUnansweredQuestion(Section section, List<QuestionWithAnswer> responses)
+    /// <summary>
+    /// Uses answered questions to find the next. If it is not possible to order user responses against the current questions,
+    /// this indicates that content has changed or another user finished the submission concurrently.
+    /// </summary>
+    /// <param name="section"></param>
+    /// <param name="answeredQuestions"></param>
+    /// <returns></returns>
+    /// <exception cref="DatabaseException"></exception>
+    private static Question? GetValidatedNextUnansweredQuestion(Section section, CheckAnswerDto answeredQuestions)
     {
-        var lastAttachedResponse = section.GetAttachedQuestions(responses).Last();
+        var lastAttachedResponse = section.GetOrderedResponsesForJourney(answeredQuestions.Responses).LastOrDefault();
+
+        if (lastAttachedResponse == null)
+            throw new DatabaseException($"The responses to the ongoing submission {answeredQuestions.SubmissionId} are out of sync with the topic");
 
         return section.Questions.Where(question => question.Sys.Id == lastAttachedResponse.QuestionRef)
                               .SelectMany(question => question.Answers)
