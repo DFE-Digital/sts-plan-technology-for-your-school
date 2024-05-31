@@ -58,5 +58,4 @@ module "main_hosting" {
   registry_username = local.registry_username
   registry_password = local.registry_password
   image_tag         = local.image_tag
-
 }
