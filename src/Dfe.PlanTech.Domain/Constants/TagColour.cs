@@ -7,8 +7,9 @@ public static class TagColour
     public readonly static string Grey = "grey";
     public readonly static string LightBlue = "light-blue";
     public readonly static string Red = "red";
+    public readonly static string Green = "green";
 
-    private readonly static string[] _colours = [Blue, Grey, LightBlue, Red];
+    private readonly static string[] _colours = [Blue, Grey, LightBlue, Red, Green];
 
     public static string GetMatchingColour(string? toMatch)
     => string.IsNullOrEmpty(toMatch) ?

@@ -28,7 +28,7 @@ public class CategorySectionDto
         else if (retrievalError)
             Tag = new Tag("UNABLE TO RETRIEVE STATUS", TagColour.Red);
         else if (completed)
-            Tag = new Tag("COMPLETE", TagColour.Blue);
+            Tag = new Tag("COMPLETE", TagColour.Green);
         else if (started)
             Tag = new Tag("IN PROGRESS", TagColour.LightBlue);
         else

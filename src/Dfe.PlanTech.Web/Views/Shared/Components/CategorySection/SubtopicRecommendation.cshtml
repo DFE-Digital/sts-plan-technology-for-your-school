@@ -2,27 +2,28 @@
 
 @if (Model.NoRecommendationFoundErrorMessage == null)
 {
-    @if (Model.RecommendationSlug != null)
-    {
-        <task-list-item-name>
-            <a class="govuk-link" asp-route="GetRecommendation" asp-route-sectionSlug="@Model.SectionSlug" asp-route-recommendationSlug="@Model.RecommendationSlug">
+    <dt class="govuk-summary-list__key govuk-!-font-weight-regular">
+        @if (Model.RecommendationSlug != null)
+        {
+            <a class="govuk-link"
+               asp-route="GetRecommendation" asp-route-sectionSlug="@Model.SectionSlug" asp-route-recommendationSlug="@Model.RecommendationSlug">
                 Recommendation
             </a>
-        </task-list-item-name>
-    }
-    else
-    {
-        <task-list-item-name>
-            Recommendation
-        </task-list-item-name>
-    }
-    <task-list-tag colour=@Model.Tag.Colour>
-        @Model.Tag.Text
-    </task-list-tag>
+        }
+        else
+        {
+            <span>Recommendation</span>
+        }
+    </dt>
+    <dd class="govuk-summary-list__value govuk-!-text-align-right">
+        <task-list-tag colour=@Model.Tag.Colour>
+            @Model.Tag.Text
+        </task-list-tag>
+    </dd>
 }
 else
 {
-    <task-list-item-name>
+    <dt class="govuk-summary-list__key">
         <govuk-error-message>@Model.NoRecommendationFoundErrorMessage</govuk-error-message>
-    </task-list-item-name>
+    </dt>
 }

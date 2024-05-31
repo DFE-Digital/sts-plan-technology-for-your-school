@@ -282,7 +282,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Equal("blue", categorySectionDto.Tag.Colour);
+            Assert.Equal("green", categorySectionDto.Tag.Colour);
             Assert.Equal("COMPLETE", categorySectionDto.Tag.Text);
             Assert.Null(categorySectionDto.ErrorMessage);
         }

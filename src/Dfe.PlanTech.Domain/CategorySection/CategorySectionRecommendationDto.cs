@@ -14,6 +14,6 @@ public class CategorySectionRecommendationDto
     public string? SectionSlug { get; init; }
 
     public Tag Tag => RecommendationSlug != null
-        ? new Tag("READY", TagColour.LightBlue)
+        ? new Tag("VIEW", TagColour.Green)
         : new Tag("NOT AVAILABLE", TagColour.Grey);
 }
