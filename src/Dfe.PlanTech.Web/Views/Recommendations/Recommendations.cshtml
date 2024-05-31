@@ -15,6 +15,11 @@
 <div class="govuk-grid-row" id="top">
     <div class="govuk-grid-column-two-thirds recommendation-content">
         <partial name="RecommendationContent" model="@Model.AllContent" />
+        <hr/>
+        <div>
+            <h2>Share this recommendation</h2>
+            <a href="@Model.ShareRecommendationSlug" target="_blank">Share or download this recommendation in a checklist format</a>
+        </div>
     </div>
 
     <div class="govuk-grid-column-one-third">

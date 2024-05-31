@@ -1,0 +1,12 @@
+@model IEnumerable<Dfe.PlanTech.Domain.Questionnaire.Interfaces.IHeaderWithContent>
+@{
+    ViewData["ParentContainerClass"] = "recommendation-piece-container";
+    ViewData["HeaderClass"] = "recommendation-piece-header";
+    ViewData["ContentClass"] = "recommendation-piece-content";
+}
+
+@foreach (var headerWithContent in Model)
+{
+    <partial name="Components/HeaderWithContent" model="@headerWithContent" />
+    <partial name="RecommendationActions" />
+}

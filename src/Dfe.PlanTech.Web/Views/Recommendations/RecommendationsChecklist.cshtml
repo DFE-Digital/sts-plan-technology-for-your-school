@@ -1,0 +1,25 @@
+@model Dfe.PlanTech.Web.Models.RecommendationsViewModel
+
+<div class="govuk-grid-row" id="top">
+    <div class="govuk-grid-column-two-thirds recommendation-content print">
+        <partial name="RecommendationPrintContent" model="@Model.AllContent" />
+    </div>
+
+    <div class="govuk-grid-column-one-third noprint">
+        <govuk-button-link id="recommendations-print-page">print</govuk-button-link>
+        <govuk-button-link id="recommendations-close-page">close</govuk-button-link>
+    </div>
+</div>
+
+
+<script defer nonce="@Context.Items["nonce"]">
+    document.getElementById("recommendations-print-page").addEventListener("click", printPage);
+    document.getElementById("recommendations-close-page").addEventListener("click", closePage);
+
+    function printPage() {
+        window.print();
+    }
+    function closePage() {
+        window.close();
+    }
+</script>
