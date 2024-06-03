@@ -53,8 +53,21 @@ locals {
   # CDN/Front Door #
   ##################
   cdn_create_custom_domain = var.cdn_create_custom_domain
+  cdn_frontdoor_host_add_response_headers = length(var.cdn_frontdoor_host_add_response_headers) > 0 ? var.cdn_frontdoor_host_add_response_headers : [{
+    "name"  = "Strict-Transport-Security",
+    "value" = "max-age=31536000",
+    },
+    {
+      "name"  = "X-Content-Type-Options",
+      "value" = "nosniff",
+    },
+    {
+      "name"  = "X-XSS-Protection",
+      "value" = "1",
+  }]
 
-  ####################
+
+  ####################x
   # Storage Accounts #
   ####################
 

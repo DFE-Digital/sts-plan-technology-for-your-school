@@ -66,24 +66,9 @@ resource "azurerm_linux_function_app" "contentful_function" {
 
   lifecycle {
     ignore_changes = [
-      app_settings["WEBSITE_RUN_FROM_PACKAGE"],
-      app_settings["AzureWebJobsStorage__clientId"],
-      app_settings["AzureWebJobsStorage__credential"],
-      app_settings["WEBSITE_RUN_FROM_PACKAGE_BLOB_MI_RESOURCE_ID"],
-
+      app_settings,
     ]
   }
-
-}
-
-data "azurerm_function_app_host_keys" "default" {
-  name                = azurerm_linux_function_app.contentful_function.name
-  resource_group_name = local.resource_group_name
-
-  depends_on = [
-    azurerm_linux_function_app.contentful_function
-  ]
-
 }
 
 resource "azurerm_application_insights" "functional_insights" {
@@ -94,7 +79,6 @@ resource "azurerm_application_insights" "functional_insights" {
   retention_in_days   = 30
   tags                = local.tags
 }
-
 
 data "azurerm_subscription" "subscription" {
 }

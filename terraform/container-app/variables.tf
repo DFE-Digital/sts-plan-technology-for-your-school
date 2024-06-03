@@ -129,6 +129,11 @@ variable "cdn_create_custom_domain" {
   default     = false
 }
 
+variable "cdn_frontdoor_host_add_response_headers" {
+  description = "List of response headers to add at the CDN Front Door `[{ \"Name\" = \"Strict-Transport-Security\", \"value\" = \"max-age=31536000\" }]`"
+  type        = list(map(string))
+  default     = []
+}
 
 ###################
 # Github Registry #
