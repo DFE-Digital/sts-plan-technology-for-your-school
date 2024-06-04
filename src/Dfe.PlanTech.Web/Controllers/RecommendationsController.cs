@@ -11,8 +11,6 @@ namespace Dfe.PlanTech.Web.Controllers;
 public class RecommendationsController(ILogger<RecommendationsController> logger)
     : BaseController<RecommendationsController>(logger)
 {
-    public const string GetRecommendationAction = nameof(GetRecommendation);
-
     [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}", Name = "GetRecommendation")]
     public async Task<IActionResult> GetRecommendation(string sectionSlug,
                                                        string recommendationSlug,

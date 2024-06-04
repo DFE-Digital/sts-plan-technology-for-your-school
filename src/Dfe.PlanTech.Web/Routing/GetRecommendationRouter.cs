@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Submissions.Enums;
@@ -40,14 +39,13 @@ public class GetRecommendationRouter(ISubmissionStatusProcessor router,
     }
 
     /// <summary>
-    /// Render the recommendation page (if correct recommendation for section + maturity),
+    /// Fetch the model for the recommendation page/checklist (if correct recommendation for section + maturity),
     /// </summary>
-    /// <param name="controller"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="DatabaseException"></exception>
     /// <exception cref="ContentfulDataUnavailableException"></exception>
-    private async Task<IActionResult> HandleCompleteStatus(RecommendationsController controller, CancellationToken cancellationToken)
+    private async Task<RecommendationsViewModel> GetRecommendationViewModel(CancellationToken cancellationToken)
     {
         if (_router.SectionStatus?.Maturity == null) throw new DatabaseException("Maturity is null, but shouldn't be for a completed section");
 
@@ -65,54 +63,39 @@ public class GetRecommendationRouter(ISubmissionStatusProcessor router,
 
         var shareRecommendationSlug = $"/{_router.Section.Name.Slugify()}/recommendation-checklist/print";
 
-        var viewModel = new RecommendationsViewModel()
+        return new RecommendationsViewModel()
         {
             SectionName = subTopicRecommendation.Subtopic.Name,
             Intro = subTopicIntro,
             Chunks = subTopicChunks,
             ShareRecommendationSlug = shareRecommendationSlug
         };
-
-        return controller.View("~/Views/Recommendations/Recommendations.cshtml", viewModel);
-
     }
 
     /// <summary>
-    /// Render the recommendation page printout (if correct recommendation for section + maturity),
+    /// Render the recommendation page
     /// </summary>
     /// <param name="controller"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    /// <exception cref="DatabaseException"></exception>
-    /// <exception cref="ContentfulDataUnavailableException"></exception>
+    private async Task<IActionResult> HandleCompleteStatus(RecommendationsController controller, CancellationToken cancellationToken)
+    {
+        var viewModel = await GetRecommendationViewModel(cancellationToken);
+
+        return controller.View("~/Views/Recommendations/Recommendations.cshtml", viewModel);
+    }
+
+    /// <summary>
+    /// Render the page for sharing recommendations in a checklist format
+    /// </summary>
+    /// <param name="controller"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     private async Task<IActionResult> HandleChecklist(RecommendationsController controller, CancellationToken cancellationToken)
     {
-        if (_router.SectionStatus?.Maturity == null) throw new DatabaseException("Maturity is null, but shouldn't be for a completed section");
-
-        if (_router.Section == null) throw new DatabaseException("Section is null, but shouldn't be.");
-
-        var usersAnswers =
-            await _getAllAnswersForLatestSubmissionQuery.GetAllAnswersForLatestSubmission(_router.Section.Sys.Id,
-                await _router.User.GetEstablishmentId()) ?? throw new DatabaseException($"Could not find users answers for:  {_router.Section.Name}");
-
-        var subTopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(_router.Section.Sys.Id, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {_router.Section.Name}");
-
-        var subTopicIntro = subTopicRecommendation.GetRecommendationByMaturity(_router.SectionStatus.Maturity) ?? throw new ContentfulDataUnavailableException($"Could not find recommendation intro for maturity:  {_router.SectionStatus?.Maturity}");
-
-        var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(usersAnswers.Select(answer => answer.ContentfulRef));
-
-        var shareRecommendationSlug = $"/{_router.Section.Name.Slugify()}/print";
-
-        var viewModel = new RecommendationsViewModel()
-        {
-            SectionName = subTopicRecommendation.Subtopic.Name,
-            Intro = subTopicIntro,
-            Chunks = subTopicChunks,
-            ShareRecommendationSlug = shareRecommendationSlug
-        };
+        var viewModel = await GetRecommendationViewModel(cancellationToken);
 
         return controller.View("~/Views/Recommendations/RecommendationsChecklist.cshtml", viewModel);
-
     }
 
     /// <summary>
