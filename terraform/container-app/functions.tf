@@ -10,6 +10,16 @@ resource "azurerm_storage_account" "function_storage" {
   shared_access_key_enabled       = local.container_app_storage_account_shared_access_key_enabled
   allow_nested_items_to_be_public = local.container_app_blob_storage_public_access_enabled
 
+  blob_properties {
+    container_delete_retention_policy {
+      days = 7
+    }
+
+    delete_retention_policy {
+      days = 7
+    }
+  }
+
   identity {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.user_assigned_identity.id]
