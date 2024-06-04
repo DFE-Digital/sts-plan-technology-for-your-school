@@ -33,8 +33,10 @@ resource "azurerm_linux_function_app" "contentful_function" {
 
   service_plan_id = azurerm_service_plan.function_plan.id
 
-  storage_account_name          = azurerm_storage_account.function_storage.name
-  storage_uses_managed_identity = true
+  storage_account_name = azurerm_storage_account.function_storage.name
+
+  storage_account_access_key    = local.container_app_storage_account_shared_access_key_enabled ? azurerm_storage_account.function_storage.primary_access_key : null
+  storage_uses_managed_identity = local.container_app_storage_account_shared_access_key_enabled ? null : true
 
   key_vault_reference_identity_id = azurerm_user_assigned_identity.user_assigned_identity.id
 
