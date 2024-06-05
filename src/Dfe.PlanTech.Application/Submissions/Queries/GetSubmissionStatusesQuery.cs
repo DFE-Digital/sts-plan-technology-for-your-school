@@ -52,7 +52,7 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
     /// For each submission, convert to SectionStatus, 
     /// group by Section, 
     /// then return latest for each grouping
-    /// optionally choosing from only complete ones
+    /// optionally choosing from completed submissions first
     /// </summary>
     /// <param name="submissionStatuses"></param>
     /// <param name="completed"></param>
@@ -66,7 +66,9 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
         SectionId = submission.SectionId,
         Status = submission.Completed ? Status.Completed : submission.Responses.Count != 0 ? Status.InProgress : Status.NotStarted,
     })
-    .Where(submission => !completed || submission.Completed)
     .GroupBy(submission => submission.SectionId)
-    .Select(grouping => grouping.OrderByDescending(status => status.DateCreated).First());
+    .Select(grouping => grouping
+        .OrderByDescending(status => completed && status.Completed)
+        .ThenByDescending(status => status.DateCreated)
+        .First());
 }
