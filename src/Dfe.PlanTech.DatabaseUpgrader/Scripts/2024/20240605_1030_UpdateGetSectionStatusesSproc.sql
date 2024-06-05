@@ -26,13 +26,13 @@ CROSS APPLY (
 ) CurrentSubmission
 -- Use maturity from most recent complete submission (if there is one) so that user always sees recommendation
 OUTER APPLY (
-    SELECT TOP 1 sectionId, completed, maturity, dateCreated
+    SELECT TOP 1 maturity
     FROM [dbo].submission S
     WHERE
         Ids.sectionId = S.sectionId
-      AND S.establishmentId = @establishmentId
-      AND S.deleted = 0
-      AND s.completed = 1
+    AND S.establishmentId = @establishmentId
+    AND S.deleted = 0
+    AND s.completed = 1
     ORDER BY
         S.dateCreated DESC
 ) LastCompleteSubmission
