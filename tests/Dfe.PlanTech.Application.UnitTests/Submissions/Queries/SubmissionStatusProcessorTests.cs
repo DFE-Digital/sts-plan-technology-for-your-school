@@ -77,7 +77,7 @@ public class SubmissionStatusProcessorTests
                                                                              _getResponsesQuery,
                                                                              _user);
 
-        _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(Arg.Any<int>(), Arg.Any<Section>(), Arg.Any<CancellationToken>())
+        _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(Arg.Any<int>(), Arg.Any<Section>(), Arg.Any<bool>(),Arg.Any<CancellationToken>())
                                    .Returns(new SectionStatusNew());
 
         await processor.GetJourneyStatusForSection(SectionSlug, default);
@@ -102,7 +102,7 @@ public class SubmissionStatusProcessorTests
                                                                              _getResponsesQuery,
                                                                              _user);
 
-        _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(Arg.Any<int>(), Arg.Any<Section>(), Arg.Any<CancellationToken>())
+        _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(Arg.Any<int>(), Arg.Any<Section>(),Arg.Any<bool>(), Arg.Any<CancellationToken>())
                                    .Returns(new SectionStatusNew());
 
         await Assert.ThrowsAnyAsync<InvalidDataException>(() => processor.GetJourneyStatusForSection(SectionSlug, default));
