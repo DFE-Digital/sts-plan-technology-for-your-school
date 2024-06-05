@@ -16,8 +16,8 @@ public class GetSubmissionStatusesQueryTests
     private readonly IUser user = Substitute.For<IUser>();
 
     private readonly List<SectionStatusDto> SectionStatuses = [
-        new SectionStatusDto { Completed = 1, SectionId = "1", Maturity = "Low", DateCreated = DateTime.UtcNow },
-        new SectionStatusDto { Completed = 1, SectionId = "2", Maturity = "High", DateCreated = DateTime.UtcNow },
+        new SectionStatusDto { Completed = 1, SectionId = "1", LastMaturity = "Low", DateCreated = DateTime.UtcNow },
+        new SectionStatusDto { Completed = 1, SectionId = "2", LastMaturity = "High", DateCreated = DateTime.UtcNow },
         new SectionStatusDto { Completed = 0, SectionId = "3", DateCreated = DateTime.UtcNow },
         new SectionStatusDto { Completed = 0, SectionId = "4", DateCreated = DateTime.UtcNow },
     ];

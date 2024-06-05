@@ -10,7 +10,7 @@ FROM STRING_SPLIT(@splitStringVal, ',')
 SELECT
     CurrentSubmission.sectionId,
     CAST(CurrentSubmission.completed AS INT) completed,
-    LastCompleteSubmission.maturity,
+    LastCompleteSubmission.maturity as lastMaturity,
     CurrentSubmission.dateCreated
 From #SectionIds Ids
 -- The current submission

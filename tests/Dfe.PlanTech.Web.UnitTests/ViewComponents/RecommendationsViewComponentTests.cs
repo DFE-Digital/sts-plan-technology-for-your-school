@@ -229,7 +229,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             {
                 SectionId = "Section1",
                 Completed = 1,
-                Maturity = "High"
+                LastMaturity = "High"
             });
 
             Category[] categories = [_category];
@@ -270,13 +270,13 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             {
                 SectionId = "Section1",
                 Completed = 1,
-                Maturity = "High"
+                LastMaturity = "High"
             });
             _categoryTwo.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
             {
                 SectionId = "Section2",
                 Completed = 1,
-                Maturity = "High"
+                LastMaturity = "High"
             });
 
             Category[] categories = [_category, _categoryTwo];
@@ -320,7 +320,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             {
                 SectionId = "Section1",
                 Completed = 1,
-                Maturity = "High"
+                LastMaturity = "High"
             });
 
             Category[] categories = [_category];
@@ -361,7 +361,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             {
                 SectionId = "Section1",
                 Completed = 1,
-                Maturity = "Low",
+                LastMaturity = "Low",
             });
 
             Category[] categories = new Category[] { _category };
@@ -400,7 +400,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             {
                 SectionId = "Section1",
                 Completed = 0,
-                Maturity = null
+                LastMaturity = null
             });
 
             Category[] categories = [_category];
@@ -423,7 +423,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             {
                 SectionId = "Section1",
                 Completed = 0,
-                Maturity = Maturity.High.ToString(),
+                LastMaturity = Maturity.High.ToString(),
                 DateCreated = DateTime.Now
             });
 

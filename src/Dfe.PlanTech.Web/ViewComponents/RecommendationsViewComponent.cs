@@ -26,7 +26,7 @@ public class RecommendationsViewComponent(
         {
             var categoryElement = await RetrieveSectionStatuses(category);
 
-            if (category.SectionStatuses.Any(sectionStatus => sectionStatus.Maturity != null))
+            if (category.SectionStatuses.Any(sectionStatus => sectionStatus.LastMaturity != null))
             {
                 recommendationsAvailable = true;
             }
@@ -50,7 +50,7 @@ public class RecommendationsViewComponent(
         foreach (var section in sections)
         {
             var sectionMaturity = sectionStatusesList.Where(sectionStatus => sectionStatus.SectionId == section.Sys.Id)
-                                                    .Select(sectionStatus => sectionStatus.Maturity)
+                                                    .Select(sectionStatus => sectionStatus.LastMaturity)
                                                     .FirstOrDefault();
 
             if (string.IsNullOrEmpty(sectionMaturity)) continue;
