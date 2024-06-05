@@ -4,10 +4,14 @@
     <div class="govuk-grid-column-two-thirds recommendation-content print">
         <partial name="RecommendationPrintContent" model="@Model.AllContent" />
     </div>
-
     <div class="govuk-grid-column-one-third noprint">
-        <govuk-button-link id="recommendations-print-page">print</govuk-button-link>
-        <govuk-button-link id="recommendations-close-page">close</govuk-button-link>
+        <govuk-button class="govuk-button--inverse govuk-!-width-one-half" id="recommendations-print-page">
+            <img class="govuk-!-width-full" src="/assets/images/print.png" alt="print"/>
+            Print
+        </govuk-button>
+        <govuk-button class="govuk-button--inverse govuk-!-width-one-half" id="recommendations-close-page">
+            Close
+        </govuk-button>
     </div>
 </div>
 

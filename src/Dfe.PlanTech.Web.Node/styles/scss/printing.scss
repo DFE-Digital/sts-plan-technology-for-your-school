@@ -1,5 +1,13 @@
-@media print
-{
-  .print {display: block};
-  .noprint {display: none;}
+@media print {
+  .noprint {
+    display: none;
+  }
+  .print {
+    width: 100%;
+  }
+}
+
+.button-border {
+  box-shadow: None;
+  border: 1px solid dimgrey;
 }

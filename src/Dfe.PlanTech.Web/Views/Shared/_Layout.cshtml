@@ -26,8 +26,10 @@
     @Html.Raw(GtmConfiguration.Body)
 
     <partial name="_CookieBanner" />
-    <partial name="_Header" />
-
+    @if (ViewData["HideHeader"] != null)
+    {
+        <partial name="_Header" />
+    }
     @RenderSection("Header", false)
 }
 

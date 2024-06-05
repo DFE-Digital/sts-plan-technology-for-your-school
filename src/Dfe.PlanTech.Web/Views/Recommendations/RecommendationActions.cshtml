@@ -1,21 +1,20 @@
-@using System.Text.Json
-
 <div class="govuk-form-group govuk-!-margin-top-5">
     <govuk-checkboxes name="RecommendationActions">
         <govuk-checkboxes-fieldset>
             <govuk-checkboxes-fieldset-legend class="govuk-fieldset__legend--m">
-                Notes
+                <h2 class="govuk-fieldset__heading">
+                    Notes
+                </h2>
             </govuk-checkboxes-fieldset-legend>
             @{
                 foreach (var answer in new List<string> { "Work on this action", "This action is implemented" })
                 {
-                    var checkboxValue = JsonSerializer.Serialize(answer);
-                    <govuk-checkboxes-item value="@checkboxValue">@answer</govuk-checkboxes-item>
+                    <govuk-checkboxes-item disabled="true" value="@answer">@answer</govuk-checkboxes-item>
                 }
             }
         </govuk-checkboxes-fieldset>
     </govuk-checkboxes>
-    <govuk-textarea name="recommendation-actions">
+    <govuk-textarea name="recommendation-actions" disabled="true">
         <govuk-textarea-label class="dfe-u-secondary-text-color">
             What have you done on this action?
         </govuk-textarea-label>
