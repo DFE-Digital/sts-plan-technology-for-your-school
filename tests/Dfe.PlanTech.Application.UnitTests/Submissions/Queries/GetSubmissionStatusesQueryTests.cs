@@ -154,7 +154,7 @@ public class GetSubmissionStatusesQueryTests
     [Fact]
     public async Task GetSectionSubmissionStatusAsync_Returns_Status_InProgress_When_Found_Incomplete_With_Responses()
     {
-        var result = await CreateStrut().GetSectionSubmissionStatusAsync(establishmentId, inprogressSection,false, default);
+        var result = await CreateStrut().GetSectionSubmissionStatusAsync(establishmentId, inprogressSection, false, default);
 
         Assert.NotNull(result);
 
@@ -167,7 +167,7 @@ public class GetSubmissionStatusesQueryTests
     [Fact]
     public async Task GetSectionSubmissionStatusAsync_Returns_Status_NotStarted_When_Found_With_No_Responses()
     {
-        var result = await CreateStrut().GetSectionSubmissionStatusAsync(establishmentId, notstartedSection, false,default);
+        var result = await CreateStrut().GetSectionSubmissionStatusAsync(establishmentId, notstartedSection, false, default);
 
         Assert.NotNull(result);
 
@@ -188,7 +188,7 @@ public class GetSubmissionStatusesQueryTests
             }
         };
 
-        var result = await CreateStrut().GetSectionSubmissionStatusAsync(establishmentId, section, false,default);
+        var result = await CreateStrut().GetSectionSubmissionStatusAsync(establishmentId, section, false, default);
 
         Assert.NotNull(result);
 
