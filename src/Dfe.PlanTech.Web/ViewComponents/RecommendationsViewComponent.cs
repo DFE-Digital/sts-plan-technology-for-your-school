@@ -48,7 +48,7 @@ public class RecommendationsViewComponent(
     {
         foreach (var section in sections)
         {
-            var sectionMaturity = sectionStatusesList.Where(sectionStatus => sectionStatus.SectionId == section.Sys.Id && sectionStatus.Completed == 1)
+            var sectionMaturity = sectionStatusesList.Where(sectionStatus => sectionStatus.SectionId == section.Sys.Id)
                                                     .Select(sectionStatus => sectionStatus.Maturity)
                                                     .FirstOrDefault();
 

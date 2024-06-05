@@ -393,7 +393,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         }
 
         [Fact]
-        public async Task DoesNotReturn_RecommendationInfo_If_Section_IsNot_Completed()
+        public async Task DoesNotReturn_RecommendationInfo_If_Section_IsNot_Started()
         {
             _category.Completed = 0;
             _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
@@ -414,6 +414,47 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             var model = result.ViewData.Model;
             Assert.Null(model);
+        }
+
+        [Fact]
+        public async Task Returns_RecommendationInfo_If_Incomplete_Section_Is_Previously_Completed()
+        {
+            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
+            {
+                SectionId = "Section1",
+                Completed = 0,
+                Maturity = Maturity.High.ToString(),
+                DateCreated = DateTime.Now
+            });
+
+            Category[] categories = [_category];
+
+            _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
+
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses.ToList());
+
+            var result = await _recommendationsComponent.InvokeAsync(categories) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model;
+            Assert.NotNull(model);
+
+            var unboxed = model as IAsyncEnumerable<RecommendationsViewComponentViewModel>;
+            Assert.NotNull(unboxed);
+
+            var list = new List<RecommendationsViewComponentViewModel>();
+            await foreach (var item in unboxed)
+            {
+                list.Add(item);
+            }
+
+            Assert.NotEmpty(list);
+            Assert.NotNull(_subtopic);
+            Assert.Equal(_subtopic.Intros[0].Slug, list.First().RecommendationSlug);
+            Assert.Equal(_subtopic.Intros[0].Header.Text, list.First().RecommendationDisplayName);
+            Assert.Null(list.First().NoRecommendationFoundErrorMessage);
         }
 
         [Fact]
