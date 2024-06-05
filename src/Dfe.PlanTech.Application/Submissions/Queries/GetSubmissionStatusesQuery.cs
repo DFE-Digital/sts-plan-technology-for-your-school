@@ -30,12 +30,13 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
 
     public async Task<SectionStatusNew> GetSectionSubmissionStatusAsync(int establishmentId,
                                                                          ISectionComponent section,
+                                                                         bool completed,
                                                                          CancellationToken cancellationToken)
     {
         var sectionStatus = _db.GetSubmissions.Where(submission => submission.EstablishmentId == establishmentId &&
                                                  submission.SectionId == section.Sys.Id && !submission.Deleted);
 
-        var groupedAndLatest = GetLatestSubmissionStatus(sectionStatus);
+        var groupedAndLatest = GetLatestSubmissionStatus(sectionStatus, completed);
 
         var result = await _db.FirstOrDefaultAsync(groupedAndLatest, cancellationToken);
 
@@ -51,19 +52,21 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
     /// For each submission, convert to SectionStatus, 
     /// group by Section, 
     /// then return latest for each grouping
+    /// optionally choosing from only complete ones
     /// </summary>
     /// <param name="submissionStatuses"></param>
+    /// <param name="completed"></param>
     /// <returns></returns>
-    private static IQueryable<SectionStatusNew> GetLatestSubmissionStatus(IQueryable<Submission> submissionStatuses)
+    private static IQueryable<SectionStatusNew> GetLatestSubmissionStatus(IQueryable<Submission> submissionStatuses, bool completed)
     => submissionStatuses.Select(submission => new SectionStatusNew()
     {
         DateCreated = submission.DateCreated,
         Completed = submission.Completed,
         Maturity = submission.Maturity,
         SectionId = submission.SectionId,
-        Status = submission.Completed ? Status.Completed :
-                                        submission.Responses.Count != 0 ? Status.InProgress : Status.NotStarted,
+        Status = submission.Completed ? Status.Completed : submission.Responses.Count != 0 ? Status.InProgress : Status.NotStarted,
     })
+    .Where(submission => !completed || submission.Completed)
     .GroupBy(submission => submission.SectionId)
     .Select(grouping => grouping.OrderByDescending(status => status.DateCreated).First());
 }

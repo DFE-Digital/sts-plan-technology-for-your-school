@@ -24,12 +24,13 @@ public class RecommendationsViewComponent(
         var recommendationsAvailable = false;
         foreach (var category in categories)
         {
-            if (category.Completed >= 1)
+            var categoryElement = await RetrieveSectionStatuses(category);
+
+            if (category.SectionStatuses.Any(sectionStatus => sectionStatus.Maturity != null))
             {
                 recommendationsAvailable = true;
             }
 
-            var categoryElement = await RetrieveSectionStatuses(category);
             allSectionsOfCombinedCategories.AddRange(categoryElement.Sections);
             allSectionStatusesOfCombinedCategories.AddRange(categoryElement.SectionStatuses);
         }
