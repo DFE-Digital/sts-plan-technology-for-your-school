@@ -97,7 +97,6 @@ resource "azurerm_key_vault_secret" "vault_secret_database_connectionstring" {
 
   lifecycle {
     ignore_changes = [
-      value,
       expiration_date
     ]
   }

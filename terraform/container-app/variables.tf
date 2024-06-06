@@ -62,6 +62,12 @@ variable "az_sql_sku" {
   default     = "Basic"
 }
 
+variable "az_sql_max_pool_size" {
+  description = "Maximum number of possible connections per SQL connection string usage"
+  type        = number
+  default     = 100
+}
+
 ############
 # KeyVault #
 ############
