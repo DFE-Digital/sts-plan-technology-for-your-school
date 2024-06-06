@@ -37,12 +37,13 @@ locals {
   #############
   # Azure SQL #
   #############
-  az_sql_connection_string      = "Server=tcp:${local.resource_prefix}.database.windows.net,1433;Initial Catalog=${local.resource_prefix}-sqldb;Authentication=Active Directory Default; Persist Security Info=False;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+  az_sql_connection_string      = "Server=tcp:${local.resource_prefix}.database.windows.net,1433;Initial Catalog=${local.resource_prefix}-sqldb;Authentication=Active Directory Default; Persist Security Info=False;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Max Pool Size=${local.az_sql_max_pool_size};"
   az_sql_azuread_admin_username = var.az_sql_azuread_admin_username
   az_sql_admin_password         = var.az_sql_admin_password
   az_sql_azuread_admin_objectid = var.az_sql_azuread_admin_objectid
   az_use_azure_ad_auth_only     = var.az_tag_environment != "Dev"
   az_sql_sku                    = var.az_sql_sku
+  az_sql_max_pool_size          = var.az_sql_max_pool_size
 
   ##################
   # Azure KeyVault #

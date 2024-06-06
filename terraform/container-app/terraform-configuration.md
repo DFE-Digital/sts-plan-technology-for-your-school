@@ -82,6 +82,7 @@ We use two external modules to create the majority of the resources required:
 | <a name="input_az_sql_admin_password"></a> [az\_sql\_admin\_password](#input\_az\_sql\_admin\_password) | Password for the admin listed in the 'az\_sql\_azuread\_admin\_username' variable | `string` | n/a | yes |
 | <a name="input_az_sql_azuread_admin_objectid"></a> [az\_sql\_azuread\_admin\_objectid](#input\_az\_sql\_azuread\_admin\_objectid) | Object ID for the admin listed in the 'az\_sql\_azuread\_admin\_username' variable | `string` | n/a | yes |
 | <a name="input_az_sql_azuread_admin_username"></a> [az\_sql\_azuread\_admin\_username](#input\_az\_sql\_azuread\_admin\_username) | Username/email/service principal name/etc of the Azure AD account to use as admin for the SQL Server | `string` | n/a | yes |
+| <a name="input_az_sql_max_pool_size"></a> [az\_sql\_max\_pool\_size](#input\_az\_sql\_max\_pool\_size) | Maximum number of possible connections per SQL connection string usage | `number` | `100` | no |
 | <a name="input_az_sql_sku"></a> [az\_sql\_sku](#input\_az\_sql\_sku) | What SKU/plan to use for the SQL DB | `string` | `"Basic"` | no |
 | <a name="input_az_tag_environment"></a> [az\_tag\_environment](#input\_az\_tag\_environment) | Environment tag to be applied to all resources | `string` | n/a | yes |
 | <a name="input_az_tag_product"></a> [az\_tag\_product](#input\_az\_tag\_product) | Product tag to be applied to all resources | `string` | n/a | yes |
