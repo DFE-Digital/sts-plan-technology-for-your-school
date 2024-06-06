@@ -46,6 +46,11 @@ public class SecurityHeadersMiddleware
         {
             // js enabled script from GovUK page template helper
             "sha256-wmo5EWLjw+Yuj9jZzGNNeSsUOBQmBvE1pvSPVNQzJ34=",
+            // GTM script
+            "sha256-gzsHnnK1EawAVVit3yASTTRq8VhtWS0NCJ66Uf7kuNo=", //dev
+            "sha256-2Nhol3TKqV6DYFKe+wJwhRm4f6MVsvNfmBszPjRwjHU=", //test
+            "sha256-xQhyoHKSpPfmZdpqSAVuF++Vi0cYVZJAmz095APtCeU=", //preprod
+            "sha256-rShgM5VeUrqNsjEGFqGi145wZyD8LcsuZl+34RXh+5I=" //prod
         };
         return string.Join(" ", allowedScriptHashes.Select(hash => $"'{hash}'"));
     }
@@ -64,7 +69,8 @@ public class SecurityHeadersMiddleware
             "default-src 'self' https://www.clarity.ms https://c.bing.com https://a.clarity.ms https://b.clarity.ms https://c.clarity.ms https://d.clarity.ms https://e.clarity.ms https://f.clarity.ms https://g.clarity.ms https://h.clarity.ms https://i.clarity.ms https://j.clarity.ms https://k.clarity.ms https://l.clarity.ms https://m.clarity.ms https://n.clarity.ms https://o.clarity.ms https://p.clarity.ms https://q.clarity.ms https://r.clarity.ms https://s.clarity.ms https://t.clarity.ms https://u.clarity.ms https://v.clarity.ms https://w.clarity.ms https://x.clarity.ms https://y.clarity.ms https://z.clarity.ms",
             $"script-src 'nonce-{nonce}' {whitelist}",
             "img-src 'self' www.googletagmanager.com",
-            "connect-src www.googletagmanager.com"
+            "connect-src www.googletagmanager.com",
+            "frame-src www.googletagmanager.com"
         };
         var csp = string.Join("; ", cspDirectives);
         context.Response.Headers.ContentSecurityPolicy = csp;
