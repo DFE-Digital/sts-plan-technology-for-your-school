@@ -47,14 +47,25 @@ public class SubmissionStatusProcessor : ISubmissionStatusProcessor
         User = user;
     }
 
+    public async Task GetJourneyStatusForSection(string sectionSlug, CancellationToken cancellationToken)
+    {
+        await GetJourneyStatus(sectionSlug, false, cancellationToken);
+    }
+
+    public async Task GetJourneyStatusForSectionRecommendation(string sectionSlug, CancellationToken cancellationToken)
+    {
+        await GetJourneyStatus(sectionSlug, true, cancellationToken);
+    }
+
     /// <summary>
-    /// Get's the current status for the current user's establishment and the given section
+    /// Get's the current status or most recently completed status for the current user's establishment and the given section
     /// </summary>
     /// <param name="sectionSlug"></param>
+    /// <param name="complete"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="ContentfulDataUnavailableException"></exception>
-    public async Task GetJourneyStatusForSection(string sectionSlug, CancellationToken cancellationToken)
+    private async Task GetJourneyStatus(string sectionSlug, bool complete, CancellationToken cancellationToken)
     {
         var establishmentId = await User.GetEstablishmentId();
 
@@ -63,6 +74,7 @@ public class SubmissionStatusProcessor : ISubmissionStatusProcessor
 
         SectionStatus = await _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(establishmentId,
                                                                                           Section,
+                                                                                          complete,
                                                                                           cancellationToken);
 
         var matchingStatusChecker = _statusCheckers.FirstOrDefault(statusChecker => statusChecker.IsMatchingSubmissionStatus(this)) ??

@@ -21,4 +21,5 @@ public interface ISubmissionStatusProcessor
     public SectionStatusNew? SectionStatus { get; }
 
     Task GetJourneyStatusForSection(string sectionSlug, CancellationToken cancellationToken);
+    Task GetJourneyStatusForSectionRecommendation(string sectionSlug, CancellationToken cancellationToken);
 }
