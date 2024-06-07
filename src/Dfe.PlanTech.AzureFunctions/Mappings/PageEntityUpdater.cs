@@ -22,6 +22,9 @@ public class PageEntityUpdater(ILogger<PageEntityUpdater> logger, CmsDbContext d
         AddOrUpdatePageContents(incomingPage, existingPage);
         DeleteRemovedPageContents(incomingPage, existingPage);
 
+        existingPage.BeforeTitleContent = existingPage.AllPageContents.Where(pc => pc.BeforeContentComponentId != null).Select(pc => new ContentComponentDbEntity() { Id = pc.BeforeContentComponentId!}).ToList();
+        existingPage.Content = existingPage.AllPageContents.Where(pc => pc.ContentComponentId != null).Select(pc => new ContentComponentDbEntity() { Id = pc.ContentComponentId!}).ToList();
+
         return entity;
     }
 
@@ -40,9 +43,6 @@ public class PageEntityUpdater(ILogger<PageEntityUpdater> logger, CmsDbContext d
             existingPage.AllPageContents.Remove(pageContent);
             Db.PageContents.Remove(pageContent);
         }
-
-        existingPage.BeforeTitleContent.RemoveAll(pc => contentsToRemove.Any(content => content.BeforeContentComponentId != null && content.BeforeContentComponentId == pc.Id));
-        existingPage.Content.RemoveAll(pc => contentsToRemove.Any(content => content.ContentComponentId != null && content.ContentComponentId == pc.Id));
     }
 
     private static bool HasPageContent(PageDbEntity page, PageContentDbEntity pageContent)
