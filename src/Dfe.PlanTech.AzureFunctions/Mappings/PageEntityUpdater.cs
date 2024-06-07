@@ -41,8 +41,6 @@ public class PageEntityUpdater(ILogger<PageEntityUpdater> logger, CmsDbContext d
             Db.PageContents.Remove(pageContent);
         }
 
-        var beforeContents = contentsToRemove.Where(pc => pc.BeforeContentComponentId != null);
-
         existingPage.BeforeTitleContent.RemoveAll(pc => contentsToRemove.Any(content => content.BeforeContentComponentId != null && content.BeforeContentComponentId == pc.Id));
         existingPage.Content.RemoveAll(pc => contentsToRemove.Any(content => content.ContentComponentId != null && content.ContentComponentId == pc.Id));
     }
