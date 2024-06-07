@@ -167,4 +167,10 @@ public static class ProgramExtensions
         services.AddTransient<GtmConfiguration>();
         return services;
     }
+
+    public static IServiceCollection AddCspConfiguration(this IServiceCollection services)
+    {
+        services.AddTransient<CspConfiguration>();
+        return services;
+    }
 }
