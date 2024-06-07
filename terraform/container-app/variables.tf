@@ -33,6 +33,7 @@ variable "msi_id" {
   type        = string
   description = "The Managed Service Identity ID. If this value isn't null (the default), 'data.azurerm_client_config.current.object_id' will be set to this value."
   default     = null
+  sensitive   = true
 }
 
 #############
@@ -46,12 +47,25 @@ variable "az_sql_azuread_admin_username" {
 variable "az_sql_azuread_admin_objectid" {
   description = "Object ID for the admin listed in the 'az_sql_azuread_admin_username' variable"
   type        = string
+  sensitive   = true
 }
 
 variable "az_sql_admin_password" {
   description = "Password for the admin listed in the 'az_sql_azuread_admin_username' variable"
   type        = string
   sensitive   = true
+}
+
+variable "az_sql_sku" {
+  description = "What SKU/plan to use for the SQL DB"
+  type        = string
+  default     = "Basic"
+}
+
+variable "az_sql_max_pool_size" {
+  description = "Maximum number of possible connections per SQL connection string usage"
+  type        = number
+  default     = 100
 }
 
 ############
@@ -93,6 +107,24 @@ variable "az_container_port" {
   default     = 8080
 }
 
+variable "container_app_min_replicas" {
+  description = "Minimum replicas for the container app"
+  type        = number
+  default     = 1
+}
+
+variable "container_app_max_replicas" {
+  description = "Maximum replicas for the container app"
+  type        = number
+  default     = 2
+}
+
+variable "container_app_http_concurrency" {
+  description = "Scale up at this number of HTTP requests"
+  type        = number
+  default     = 10
+}
+
 
 ##################
 # CDN/Front Door #
@@ -103,6 +135,11 @@ variable "cdn_create_custom_domain" {
   default     = false
 }
 
+variable "cdn_frontdoor_host_add_response_headers" {
+  description = "List of response headers to add at the CDN Front Door `[{ \"Name\" = \"Strict-Transport-Security\", \"value\" = \"max-age=31536000\" }]`"
+  type        = list(map(string))
+  default     = []
+}
 
 ###################
 # Github Registry #
@@ -116,15 +153,39 @@ variable "registry_server" {
 variable "registry_username" {
   description = "Container registry username"
   type        = string
+  sensitive   = true
 }
 
 variable "registry_password" {
   description = "Container registry password"
   type        = string
+  sensitive   = true
 }
 
-variable "registry_custom_image_url" {
-  description = "Pass in the address to your image from your custom registry"
+variable "image_tag" {
+  description = "Image tag"
   type        = string
+}
+
+####################
+# Storage Accounts #
+####################
+
+variable "storage_account_public_access_enabled" {
+  description = "Enable public network access"
+  type        = bool
+  default     = false
+}
+
+variable "container_app_storage_account_shared_access_key_enabled" {
+  description = "Enable shared access key"
+  type        = bool
+  default     = false
+}
+
+variable "container_app_blob_storage_public_access_enabled" {
+  description = "Enable app blob storage public access"
+  type        = bool
+  default     = false
 }
 

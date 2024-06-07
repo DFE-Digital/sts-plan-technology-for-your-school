@@ -1,5 +1,7 @@
 import { Section } from "#src/content-types/section";
 import ContentType from "#src/content-types/content-type";
+import SubtopicRecommendation from "#src/content-types/subtopic-recommendation";
+import ErrorLogger from "#src/errors/error-logger";
 
 /**
  * DataMapper class for mapping and combining data from a file
@@ -15,6 +17,7 @@ export default class DataMapper {
    * Get the mapped sections
    * @returns {IterableIterator<Section>} Iterator for mapped sections
    */
+
   get mappedSections() {
     if (!this._alreadyMappedSections)
       this._alreadyMappedSections = Array.from(
@@ -114,16 +117,15 @@ export default class DataMapper {
       return;
     }
 
-    for (const [id, section] of sections) {
-      if (
-        !section.fields.recommendations ||
-        section.fields.recommendations.length == 0 ||
-        !section.fields.questions ||
-        section.fields.questions.length == 0
-      )
-        continue;
+    const subtopicRecommendations = Array.from(this.contents["subtopicRecommendation"]);
+    if (!subtopicRecommendations || subtopicRecommendations.length == 0) {
+      throw `No subtopic recommendations found`;
+    }
 
-      yield new Section(section);
+    for (const [id, subtopicRecommendation] of subtopicRecommendations) {
+      const mapped = new SubtopicRecommendation(subtopicRecommendation);
+
+      yield mapped.subtopic;
     }
   }
 
@@ -179,20 +181,30 @@ export default class DataMapper {
       if (!referencedTypesForField) return;
 
       if (Array.isArray(value)) {
-        entry.fields[key] = value.map((item) =>
-          this.getMatchingContentForReference(referencedTypesForField, item)
-        );
+        entry.fields[key] = value.map((item) => {
+          const matching = this.getMatchingContentForReference(referencedTypesForField, item);
+
+          if (!matching) {
+            logMissingContent(referencedTypesForField, item, entry);
+          }
+
+          return matching;
+        }).filter(item => !!item);
       } else {
         entry.fields[key] = this.getMatchingContentForReference(
           referencedTypesForField,
           value
         );
+
+        if (!entry.fields[key]) {
+          logMissingContent(referencedTypesForField, key, entry);
+        }
       }
     });
   }
 
   getContentForFieldId(referencedTypesForField, id) {
-    const matchingItem = referencedTypesForField
+    return referencedTypesForField
       .map((type) => {
         const matchingContents = this.contents[type];
         const matchingContent = matchingContents.get(id);
@@ -200,12 +212,6 @@ export default class DataMapper {
         return matchingContent;
       })
       .find((matching) => matching != null);
-
-    if (!matchingItem) {
-      console.error(`Error finding ${id} for ${referencedTypesForField}`);
-    }
-
-    return matchingItem;
   }
 
   getMatchingContentForReference(referencedTypesForField, reference) {
@@ -238,3 +244,11 @@ export default class DataMapper {
     return parent.map((child) => children.get(child.sys.id));
   }
 }
+function logMissingContent(referencedTypesForField, item, entry) {
+  ErrorLogger.addError({
+    id: entry.sys.id,
+    contentType: entry.sys.contentType.sys.id,
+    message: `Could not find matching content for ${referencedTypesForField} ${item?.sys?.id ?? item}`
+  });
+}
+

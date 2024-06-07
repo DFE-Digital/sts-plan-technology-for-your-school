@@ -1,5 +1,5 @@
 import TestSuiteRow from "#src/test-suite/test-suite-row";
-//import Appendix from "#/src/test-suite/appendix";
+import AppendixRow from "#src/test-suite/appendix-row";
 
 const ADO_TAG = "Functional";
 
@@ -24,7 +24,7 @@ export default class TestSuiteForSubTopic {
   ];
 
   testCases = [];
-
+  appendix = [];
   subtopicName;
 
   constructor({ subtopic, testReferenceIndex }) {
@@ -32,22 +32,19 @@ export default class TestSuiteForSubTopic {
     this.subtopicName = this.subtopic.name.trim();
     this.testReferenceIndex = testReferenceIndex;
 
-    this.testCases = this.testCaseGenerators.map((generator) => generator());
+    this.testCases = this.testCaseGenerators.map((generator) => generator()).filter((testCase) => !!testCase);
   }
 
-  /*
-    testReference,
-    appendixRef,
-    adoTag,
-    subTopic,
-    testScenario,
-    preConditions,
-    testSteps,
-    expectedOutcome,
-    testApproved,
-*/
-  createRow(testScenario, testSteps, expectedOutcome) {
-    return new TestSuiteRow({
+  /**
+   * 
+   * @param {*} testScenario 
+   * @param {*} testSteps 
+   * @param {*} expectedOutcome 
+   * @param {AppendixRow | undefined} appendix 
+   * @returns 
+   */
+  createRow(testScenario, testSteps, expectedOutcome, appendix) {
+    const row = new TestSuiteRow({
       testReference: `Access_${this.testReferenceIndex++}`,
       adoTag: ADO_TAG,
       subtopic: this.subtopicName,
@@ -55,7 +52,14 @@ export default class TestSuiteForSubTopic {
       preConditions: "User is signed into the DfE Sign in service",
       testSteps: testSteps,
       expectedOutcome: expectedOutcome,
+      appendixRef: appendix?.reference
     });
+
+    if (appendix) {
+      this.appendix.push(appendix);
+    }
+
+    return row;
   }
 
   generateCanNavigateToSubtopic() {
@@ -71,6 +75,7 @@ export default class TestSuiteForSubTopic {
     const expectedOutcome = `Answers match. Can save and continue.`;
     return this.createRow(testScenario, testSteps, expectedOutcome);
   }
+
   generateAttemptsSaveWithoutAnswer() {
     const testScenario = `User attempts to save and continue without selecting an answer`;
     const testSteps = `1 - Navigate to ${this.subtopicName} subtopic
@@ -126,42 +131,84 @@ export default class TestSuiteForSubTopic {
   }
 
   generateReceivesLowScoringLogic() {
-    //TODO: use paths
-    const testScenario = `User receives low scoring logic`;
-    const testSteps = `1 - Navigate to the ${this.subtopicName} subtopic
-                        2 - Navigate through the interstitial page
-                        3 - STEPS GO HERE
-                        4 - Save and continue
-                        5 - View ${this.subtopicName} recommendation`;
-    const expectedOutcome = `User taken to 'RECOMMENDATION PAGE SLUG' recommendation page.`;
-    return this.createRow(testScenario, testSteps, expectedOutcome);
+    return this.generateTestForMaturity("Low");
   }
 
   generateReceivesHighScoringLogic() {
-    //TODO
+    return this.generateTestForMaturity("High");
   }
 
   generateReceivesMidScoringLogic() {
-    //TODO
+    return this.generateTestForMaturity("Medium");
+  }
+
+  generateTestForMaturity(maturity) {
+    const pathForLow = this.subtopic.minimumPathsForRecommendations[maturity];
+    if (!pathForLow) {
+      console.error(`No '${maturity}' maturity journey for ${this.subtopicName}`);
+      return;
+    }
+
+    const testScenario = `User receives recommendation for ${maturity} maturity`;
+    let index = 3;
+
+    const testSteps = [`1 - Navigate to the ${this.subtopicName} subtopic`, `2 - Navigate through the interstitial page`,
+    ...pathForLow.map(pathPart => `${index++} - Choose answer '${pathPart.answer.text}' for question '${pathPart.question.text}'`),
+      `4 - Save and continue`, `5 - View ${this.subtopicName} recommendation`].join("\n").replace(",", "");
+
+    const content = this.subtopic.recommendation.getContentForMaturityAndPath({ maturity, path: pathForLow });
+
+
+    const expectedOutcome = `User taken to '${maturity}' recommendation page with slug '${content.intro.slug}' for ${this.subtopicName}.`;
+
+    const intro = {
+      header: content.intro.header,
+      content: content.intro.content
+    };
+
+    const chunkContents = content.chunks.map(chunk => ({
+      header: chunk.header,
+      title: chunk.title,
+      content: chunk.content
+    }));
+
+    const asCsvContent = `
+    Expected intro:
+  Header: '${intro.header}'
+  Content: '${intro.content}'
+
+  ${chunkContents.map((chunk, index) =>
+      `Accordion section ${index + 2}:
+    Header: '${chunk.header}'
+    Title: '${chunk.title}'
+    Content: '${chunk.content}'
+    `).join("\n")}`;
+
+    const appendixRow = new AppendixRow({ reference: `Access_${this.testReferenceIndex}_Appendix`, content: asCsvContent });
+
+    return this.createRow(testScenario, testSteps, expectedOutcome, appendixRow);
   }
 
   generateChangeAnswersCheckYourAnswers() {
     const testScenario = `User can change answers via the 'Check your answers' page`;
-    const testSteps = `1 - Navigate to the ${this.subtopicName} subtopic
-                        2 - Navigate through the interstitial page
-                        3 - Navigate to the change button on 'Check your answers' page
-                        4 - Change answer`;
+    const testSteps =
+      `1 - Navigate to the ${this.subtopicName} subtopic
+    2 - Navigate through the interstitial page
+    3 - Navigate to the change button on 'Check your answers' page
+    4 - Change answer`;
+
     const expectedOutcome = `Users answers update to match new answers.`;
     return this.createRow(testScenario, testSteps, expectedOutcome);
   }
 
   generateReturnToSelfAssessment() {
-    const testScenario = `User returns to self-assessment screen during question routing`;
-    const testSteps = `1 - Navigate to the ${this.subtopicName} subtopic
-                        2 - Navigate through the interstitial page
-                        3 - Answer first question, save and continue
-                        4 - User clicks PTFYS header`;
-    const expectedOutcome = `User returned to self-assessment page. ${this.subtopicName} subtopic shows 'In progress'.`;
+    const testScenario = `User returns to self - assessment screen during question routing`;
+    const testSteps =
+      `1 - Navigate to the ${this.subtopicName} subtopic
+    2 - Navigate through the interstitial page
+    3 - Answer first question, save and continue
+    4 - User clicks PTFYS header`;
+    const expectedOutcome = `User returned to self - assessment page.${this.subtopicName} subtopic shows 'In progress'.`;
     return this.createRow(testScenario, testSteps, expectedOutcome);
   }
 }

@@ -1,9 +1,10 @@
-import { Recommendation } from "#src/content-types/recommendation";
 import { Question } from "#src/content-types/question";
 import { UserJourney } from "#src/user-journey/user-journey";
+import SubtopicRecommendation from "#src/content-types/subtopic-recommendation";
+import ErrorLogger from "#src/errors/error-logger";
 
 export class Section {
-  recommendations;
+  recommendation;
   questions;
   name;
   interstitialPage;
@@ -14,26 +15,30 @@ export class Section {
   minimumPathsToNavigateQuestions;
   minimumPathsForRecommendations;
 
-  constructor({ fields, sys }) {
-    this.recommendations = fields.recommendations.map((recommendation) => {
-      return new Recommendation(recommendation);
-    });
-
+  /**
+   * 
+   * @param {Object} params
+   * @param {Object} params.fields - The fields of the section
+   * @param {SubtopicRecommendation} recommendation - Subtopic recommendation for the seciton
+   */
+  constructor({ fields, sys }, recommendation) {
     this.interstitialPage = fields.interstitialPage;
     this.questions = fields.questions.map((question) => new Question(question));
     this.id = sys.id;
     this.name = fields.name;
+    this.recommendation = recommendation;
 
-    this.setNextQuestions();
     this.paths = this.getAllPaths(this.questions[0]).map((path) => {
       const userJourney = new UserJourney(path, this);
-      userJourney.setRecommendation(this.recommendations);
+      userJourney.setRecommendation(recommendation);
 
       return userJourney;
     });
 
     this.getMinimumPathsForQuestions();
     this.getMinimumPathsForRecommendations();
+
+    this.setNextQuestions();
   }
 
   /**
@@ -43,6 +48,7 @@ export class Section {
     const sortedPaths = this.paths
       .slice()
       .sort((a, b) => b.path.length - a.path.length);
+
     this.minimumPathsToNavigateQuestions = this.calculateMinimumPaths(
       sortedPaths,
       this.questions
@@ -135,12 +141,12 @@ export class Section {
       );
 
       if (!pathForRecommendation) {
-        console.error(`No path found for ${maturity} in ${this.name}`);
+        ErrorLogger.addError({ id: this.id, contentType: "section", message: `No path exists for ${maturity}` });
         continue;
       }
 
       minimumPathsForRecommendations[maturity] =
-        pathForRecommendation.path.path;
+        pathForRecommendation.path;
     }
 
     return minimumPathsForRecommendations;
@@ -149,9 +155,6 @@ export class Section {
   /**
    * Calculates the statistics of the paths.
    * Currently just counts the number of paths for each maturity level.
-   *
-   * @param {type} paramName - description of parameter
-   * @return {type} description of return value
    */
   get stats() {
     return this.paths.reduce((count, path) => {
@@ -190,7 +193,7 @@ export class Section {
         ];
 
         const nextQuestion = this.questions.find(
-          (q) => q.id === answer.nextQuestion?.id
+          (q) => q.id === answer.nextQuestion?.sys.id
         );
 
         stack.push({
@@ -214,9 +217,11 @@ export class Section {
       path: path.path,
       questionsAnswered: path.path.map((pathPart) => pathPart.question.id),
     }));
+
     const uniqueQuestions = new Set(
       pathsWithQuestions.map((path) => JSON.stringify(path.questionsAnswered))
     );
+
     const uniquePaths = Array.from(uniqueQuestions).map(JSON.parse);
     return uniquePaths;
   }
@@ -241,13 +246,15 @@ export class Section {
     const question = this.questions.find(
       (question) => question.id == questionId
     );
+
     if (!question) {
-      console.error(`Couldn't find question ${questionId} in ${this.name}`);
+      ErrorLogger.addError({ id: this.id, contentType: "section", message: `Couldn't find question ${questionId} in ${this.name}` });
       return;
     }
-    console.error(
-      `Unable to find a path containing question ${questionId} (${question.text}) in ${this.name}`
-    );
+
+    ErrorLogger.addError({
+      id: this.id, contentType: "section", message: `Question ${questionId} does not have a path`
+    });
 
     return;
   }
@@ -272,7 +279,6 @@ export class Section {
           console.error(
             `Error finding question for ${nextQuestionId} in ${this.name} - answer ${answer.text} ${answer.id} in ${question.text} ${question.id}`
           );
-          console.log("");
 
           answer.nextQuestion = null;
           continue;

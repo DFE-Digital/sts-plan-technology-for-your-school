@@ -1,36 +1,27 @@
-import contentfulExport from "contentful-export";
 import "dotenv/config";
-import DataMapper from "#src/data-mapper";
 import TestSuite from "#src/test-suite/test-suite";
-import WriteCsv from "./write-csv.js";
+import writeTestSuites from "./test-suite/write-csvs.js";
 
-const options = {
-  spaceId: process.env.SPACE_ID,
-  deliveryToken: process.env.DELIVERY_TOKEN,
-  managementToken: process.env.MANAGEMENT_TOKEN,
-  environmentId: "dev",
-  host: "api.contentful.com",
-  skipEditorInterfaces: true,
-  skipRoles: true,
-  skipWebhooks: true,
-  saveFile: false,
-};
+/**
+ * @param {object} args
+ * @param {DataMapper} args.dataMapper - created and initialised DataMapper
+ * @param {string} args.outputDir - directory to write journey paths to
+ */
+export default function generateTestSuites({ dataMapper, outputDir }) {
+  let index = 1;
 
-const exportedData = await contentfulExport(options);
+  const testSuites = Object.values(dataMapper.mappedSections)
+    .filter(section => !!section)
+    .map((section) => {
+      const testSuite = new TestSuite({
+        subtopic: section,
+        testReferenceIndex: index,
+      });
 
-const mapped = new DataMapper(exportedData);
+      index = testSuite.testReferenceIndex;
 
-let index = 1;
+      return testSuite;
+    });
 
-const testSuites = Object.values(mapped.mappedSections).map((section) => {
-  const testSuite = new TestSuite({
-    subtopic: section,
-    testReferenceIndex: index,
-  });
-
-  index = testSuite.testReferenceIndex;
-
-  return testSuite;
-});
-
-WriteCsv(testSuites);
+  writeTestSuites({ testSuites, outputDir });
+}

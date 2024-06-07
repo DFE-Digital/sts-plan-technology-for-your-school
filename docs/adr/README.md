@@ -46,3 +46,4 @@ General information about architectural decision records is available at <https:
 | [0033 - Test data generation](./0033-test-data-generation.md)                                               | Accepted |
 | [0034 - Entity mapping](./0034-entity-mapping.md)                                                           | Accepted |
 | [0035 - Caching](./0035-caching.md)                                                                         | Accepted |
+| [0036 - DB Unit Tests](./0036-db-unit-tests.md)                                                             | Proposed |
