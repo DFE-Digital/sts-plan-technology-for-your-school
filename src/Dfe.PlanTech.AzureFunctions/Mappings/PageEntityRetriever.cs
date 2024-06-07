@@ -27,10 +27,12 @@ public class PageEntityRetriever(CmsDbContext db) : EntityRetriever(db)
                                         PageId = pageContent.PageId,
                                         Order = pageContent.Order,
                                     }).ToList(),
-                                    BeforeTitleContent = page.BeforeTitleContent.Select(c => new ContentComponentDbEntity(){
+                                    BeforeTitleContent = page.BeforeTitleContent.Select(c => new ContentComponentDbEntity()
+                                    {
                                         Id = c.Id
                                     }).ToList(),
-                                    Content = page.Content.Select(c => new ContentComponentDbEntity(){
+                                    Content = page.Content.Select(c => new ContentComponentDbEntity()
+                                    {
                                         Id = c.Id
                                     }).ToList(),
                                 })
