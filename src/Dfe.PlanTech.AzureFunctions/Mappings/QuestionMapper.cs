@@ -3,6 +3,7 @@ using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -12,7 +13,7 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 public class QuestionMapper(EntityRetriever retriever, EntityUpdater updater, CmsDbContext db, ILogger<JsonToDbMapper<QuestionDbEntity>> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<QuestionDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
     private readonly CmsDbContext _db = db;
-    private readonly List<string> _incomingAnswerIds = [];
+    private readonly List<AnswerDbEntity> _incomingAnswers = [];
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
@@ -25,32 +26,53 @@ public class QuestionMapper(EntityRetriever retriever, EntityUpdater updater, Cm
     {
         int order = 0;
 
-        UpdateReferencesArray(values, "answers", _db.Answers, (id, answer) =>
+        foreach (var answer in GetReferences<AnswerDbEntity>(values, "answers"))
         {
-            answer.ParentQuestionId = Payload!.Sys.Id;
             answer.Order = order++;
-
-            _incomingAnswerIds.Add(answer.Id);
-        });
+            _incomingAnswers.Add(answer);
+        }
     }
 
     public override async Task<MappedEntity> MapEntity(CmsWebHookPayload payload, CmsEvent cmsEvent, CancellationToken cancellationToken)
     {
-        var mappedEntity = await base.MapEntity(payload, cmsEvent, cancellationToken);
+        var incomingEntity = ToEntity(payload);
+
+        var existingEntity = await _db.Questions.Where(question => question.Id == incomingEntity.Id).Include(q => q.Answers).FirstAsync(cancellationToken: cancellationToken);
+
+        var mappedEntity = _entityUpdater.UpdateEntity(incomingEntity, existingEntity, cmsEvent);
 
         if (!mappedEntity.AlreadyExistsInDatabase)
         {
             return mappedEntity;
         }
 
-        return RemoveQuestionFromRemovedAnswers(mappedEntity);
+        var withoutOldQuestions = RemoveQuestionFromRemovedAnswers(mappedEntity);
+        AddOrUpdateQuestions(existingEntity);
+
+        return mappedEntity;
+    }
+
+    private void AddOrUpdateQuestions(QuestionDbEntity existingEntity)
+    {
+        foreach (var incomingAnswer in _incomingAnswers)
+        {
+            var matchingAnswer = existingEntity.Answers.FirstOrDefault(answer => answer.Id == incomingAnswer.Id);
+            if (matchingAnswer == null)
+            {
+                incomingAnswer.ParentQuestionId = existingEntity.Id;
+            }
+            else
+            {
+                matchingAnswer.Order = incomingAnswer.Order;
+            }
+        }
     }
 
     protected MappedEntity RemoveQuestionFromRemovedAnswers(MappedEntity mappedEntity)
     {
         var (incoming, existing) = mappedEntity.GetTypedEntities<QuestionDbEntity>();
 
-        var answersToRemove = existing.Answers.Where(existingAnswer => !_incomingAnswerIds.Exists(incomingAnswer => incomingAnswer == existingAnswer.Id))
+        var answersToRemove = existing.Answers.Where(existingAnswer => !_incomingAnswers.Exists(incomingAnswer => incomingAnswer.Id == existingAnswer.Id))
                                                 .ToArray();
 
         foreach (var answerToRemove in answersToRemove)
