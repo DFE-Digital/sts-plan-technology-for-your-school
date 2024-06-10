@@ -1,106 +1,52 @@
 using System.Text.Json;
+using Dfe.PlanTech.AzureFunctions.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
 public class RecommendationSectionMapper(
     EntityRetriever retriever,
-    RecommendationSectionUpdater updater,
+    EntityUpdater updater,
     CmsDbContext db,
     ILogger<RecommendationSectionMapper> logger,
     JsonSerializerOptions jsonSerialiserOptions)
     : JsonToDbMapper<RecommendationSectionDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
     private readonly CmsDbContext _db = db;
+    private readonly List<AnswerDbEntity> _incomingAnswers = [];
+    private readonly List<RecommendationChunkDbEntity> _incomingContent = [];
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
-        var id = values["id"]?.ToString() ?? throw new KeyNotFoundException("Not found id");
-
-        UpdateChunkIds(values, id, "chunks");
-        UpdateAnswerIds(values, id, "answers");
+        _incomingAnswers.AddRange(_entityUpdater.GetAndOrderReferencedEntities<AnswerDbEntity>(values, "answers"));
+        _incomingContent.AddRange(_entityUpdater.GetAndOrderReferencedEntities<RecommendationChunkDbEntity>(values, "chunks"));
 
         return values;
     }
 
-
-    private void UpdateChunkIds(Dictionary<string, object?> values, string recommendationChunkId, string currentKey)
+    public override async Task PostUpdateEntityCallback(MappedEntity mappedEntity)
     {
-        if (values.TryGetValue(currentKey, out object? chunks) && chunks is object[] inners)
+        var (incoming, existing) = mappedEntity.GetTypedEntities<RecommendationSectionDbEntity>();
+
+        if (existing != null)
         {
-            var orderedChunkIds = inners.Select(inner => CreateRecommendationSectionChunkEntity(inner, recommendationChunkId))
-                                        .Where(inner => inner != null)
-                                        .ToArray();
+            existing.Answers.AddRange(await _db.RecommendationSectionAnswers
+                                                .Where(recSecAnswer => recSecAnswer.RecommendationSectionId == incoming.Id)
+                                                .Select(recSecAnswer => recSecAnswer.Answer)
+                                                .Select(answer => answer!)
+                                                .ToListAsync());
 
-
-            var existingChunks = _db.RecommendationChunks.Where(chunk => orderedChunkIds.Any(chunkId => chunkId == chunk.Id)).ToList();
-
-            for (var x = 0; x < orderedChunkIds.Length; x++)
-            {
-                var chunkId = orderedChunkIds[x];
-                var matchingChunk = existingChunks.FirstOrDefault(chunk => chunk.Id == chunkId);
-                if (matchingChunk == null)
-                {
-                    Logger.LogWarning("Could not find matching chunk for {Id}", chunkId);
-                    continue;
-                }
-
-                matchingChunk.Order = x;
-            }
-
-            values.Remove(currentKey);
-        }
-    }
-
-    private string? CreateRecommendationSectionChunkEntity(object inner, string recommendationSectionId)
-    {
-        if (inner is not string chunkId)
-        {
-            Logger.LogWarning("Expected string but received {InnerType}", inner.GetType());
-            return null;
+            existing.Chunks.AddRange(await _db.RecommendationSectionChunks
+                                                .Where(recSecChunk => recSecChunk.RecommendationSectionId == incoming.Id)
+                                                .Select(recSecChunk => recSecChunk.RecommendationChunk)
+                                                .Select(chunk => chunk!)
+                                                .ToListAsync());
         }
 
-        var recommendationSectionChunk = new RecommendationSectionChunkDbEntity()
-        {
-            RecommendationSectionId = recommendationSectionId,
-            RecommendationChunkId = chunkId
-        };
-
-        _db.RecommendationSectionChunks.Attach(recommendationSectionChunk);
-
-        return chunkId;
+        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recSection) => recSection.Answers, _incomingAnswers, _db.Answers, false);
+        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recSection) => recSection.Chunks, _incomingContent, _db.RecommendationChunks, true);
     }
-
-    private void UpdateAnswerIds(Dictionary<string, object?> values, string recommendationChunkId, string currentKey)
-    {
-        if (values.TryGetValue(currentKey, out object? answers) && answers is object[] inners)
-        {
-            for (var index = 0; index < inners.Length; index++)
-            {
-                CreateRecommendationSectionAnswerEntity(inners[index], recommendationChunkId);
-            }
-
-            values.Remove(currentKey);
-        }
-    }
-
-    private void CreateRecommendationSectionAnswerEntity(object inner, string recommendationChunkId)
-    {
-        if (inner is not string answerId)
-        {
-            Logger.LogWarning("Expected string but received {InnerType}", inner.GetType());
-            return;
-        }
-
-        var recommendationSectionAnswer = new RecommendationSectionAnswerDbEntity()
-        {
-            RecommendationSectionId = recommendationChunkId,
-            AnswerId = answerId
-        };
-
-        _db.RecommendationSectionAnswers.Attach(recommendationSectionAnswer);
-    }
-
 }

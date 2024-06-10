@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "Dfe_PlanTech_AzureFunctions": {
+    "Dfe.PlanTech.AzureFunctions": {
       "commandName": "Project",
       "commandLineArgs": "--port 7215",
       "launchBrowser": false

@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Dfe.PlanTech.AzureFunctions\Dfe_PlanTech_AzureFunctions.csproj" />
+    <ProjectReference Include="..\..\src\Dfe.PlanTech.AzureFunctions\Dfe.PlanTech.AzureFunctions.csproj" />
   </ItemGroup>
 
 </Project>
