@@ -25,6 +25,8 @@ public class SectionMapper(EntityRetriever retriever, EntityUpdater updater, Cms
             _incomingQuestions.Add(question);
         }
 
+        values.Remove("recommendations");
+        
         return values;
     }
 
@@ -50,7 +52,6 @@ public class SectionMapper(EntityRetriever retriever, EntityUpdater updater, Cms
             Logger.LogError("Section is not a section. Is type " + mappedEntity.ExistingEntity?.GetType());
             return mappedEntity;
         }
-
 
         await AddOrUpdateQuestions(existingSection);
 
