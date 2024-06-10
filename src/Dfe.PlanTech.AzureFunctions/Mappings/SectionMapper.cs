@@ -33,9 +33,8 @@ public class SectionMapper(EntityRetriever retriever, EntityUpdater updater, Cms
     {
         var incomingEntity = ToEntity(payload);
 
-        var existingEntity = await _db.Sections.Where(section => section.Id == incomingEntity.Id)
-                                                .Include(q => q.Questions)
-                                                .FirstAsync(cancellationToken: cancellationToken);
+        var existingEntity = await _db.Sections.Include(q => q.Questions)
+                                                .FirstOrDefaultAsync(section => section.Id == incomingEntity.Id, cancellationToken: cancellationToken);
 
         var mappedEntity = _entityUpdater.UpdateEntity(incomingEntity, existingEntity, cmsEvent);
 
@@ -54,19 +53,27 @@ public class SectionMapper(EntityRetriever retriever, EntityUpdater updater, Cms
         }
 
 
-        AddOrUpdateQuestions(existingSection);
+        await AddOrUpdateQuestions(existingSection);
 
         return mappedEntity;
     }
 
-    private void AddOrUpdateQuestions(SectionDbEntity existingEntity)
+    private async Task AddOrUpdateQuestions(SectionDbEntity existingEntity)
     {
         foreach (var incomingQuestion in _incomingQuestions)
         {
             var matchingQuestion = existingEntity.Questions.FirstOrDefault(question => question.Id == incomingQuestion.Id);
             if (matchingQuestion == null)
             {
-                incomingQuestion.SectionId = existingEntity.Id;
+                var dbQuestion = await _db.Questions.FirstOrDefaultAsync(question => question.Id == incomingQuestion.Id);
+                if (dbQuestion == null)
+                {
+                    Logger.LogError($"Section {existingEntity.Id} is trying to add question {incomingQuestion.Id} but this is not found in the DB");
+                    continue;
+                }
+
+                existingEntity.Questions.Add(dbQuestion);
+                dbQuestion.SectionId = existingEntity.Id;
             }
             else
             {

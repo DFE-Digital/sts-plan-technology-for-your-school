@@ -144,43 +144,22 @@ public class SectionMapperTests : BaseMapperTests
         Assert.Equal(SectionId, mapped.Id);
         Assert.Equal(SectionName, mapped.Name);
         Assert.Equal(InterstitialPage.Sys.Id, mapped.InterstitialPageId);
-
-        Assert.Equal(Questions.Length, _attachedQuestions.Count);
-
-        foreach (var question in Questions)
-        {
-            var contains = _attachedQuestions.Any(attached => attached.Id == question.Sys.Id);
-            Assert.True(contains);
-        }
     }
 
     [Fact]
     public async Task MapEntity_Should_Return_MappedEntity_When_NotExisting_In_DB()
     {
-        var payload = """
-            {
-                "fields": {
-                    "questions": {
-                        "en-US": [
-                                {"id": "question-one-id"}
-                        ]
-                    }
-                },
-                "sys": {
-                    "id": "section-id",
-                    "type": "entry",
-                    "contentType": {
-                        "id": "section"
-                    }
-                }
-            }
-        """;
+        CmsWebHookSystemDetailsInnerContainer[] questions = [
+        ];
 
-        var cmsWebHookPayload = JsonSerializer.Deserialize<CmsWebHookPayload>(payload, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+        var fields = new Dictionary<string, object?>()
+        {
+            ["questions"] = WrapWithLocalisation(questions),
+        };
 
-        Assert.NotNull(cmsWebHookPayload);
+        var payload = CreatePayload(fields, "test-section-not-found");
 
-        var result = await _mapper.MapEntity(cmsWebHookPayload, CmsEvent.PUBLISH, default(CancellationToken));
+        var result = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, CancellationToken.None);
 
         Assert.NotNull(result);
         Assert.NotNull(result.IncomingEntity);

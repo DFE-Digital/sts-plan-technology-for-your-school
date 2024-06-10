@@ -37,7 +37,8 @@ public class QuestionMapper(EntityRetriever retriever, EntityUpdater updater, Cm
     {
         var incomingEntity = ToEntity(payload);
 
-        var existingEntity = await _db.Questions.Where(question => question.Id == incomingEntity.Id).Include(q => q.Answers).FirstAsync(cancellationToken: cancellationToken);
+        var existingEntity = await _db.Questions.Include(q => q.Answers)
+                                                .FirstOrDefaultAsync(question => question.Id == incomingEntity.Id, cancellationToken: cancellationToken);
 
         var mappedEntity = _entityUpdater.UpdateEntity(incomingEntity, existingEntity, cmsEvent);
 
@@ -47,19 +48,27 @@ public class QuestionMapper(EntityRetriever retriever, EntityUpdater updater, Cm
         }
 
         var withoutOldQuestions = RemoveQuestionFromRemovedAnswers(mappedEntity);
-        AddOrUpdateQuestions(existingEntity);
+        await AddOrUpdateQuestions(existingEntity);
 
         return mappedEntity;
     }
 
-    private void AddOrUpdateQuestions(QuestionDbEntity existingEntity)
+    private async Task AddOrUpdateQuestions(QuestionDbEntity existingEntity)
     {
         foreach (var incomingAnswer in _incomingAnswers)
         {
             var matchingAnswer = existingEntity.Answers.FirstOrDefault(answer => answer.Id == incomingAnswer.Id);
             if (matchingAnswer == null)
             {
-                incomingAnswer.ParentQuestionId = existingEntity.Id;
+                var dbAnswer = await _db.Answers.FirstOrDefaultAsync(answer => answer.Id == incomingAnswer.Id);
+                if (dbAnswer == null)
+                {
+                    Logger.LogError($"Question {existingEntity.Id} is trying to add answer {incomingAnswer.Id} but this is not found in the DB");
+                    continue;
+                }
+
+                existingEntity.Answers.Add(dbAnswer);
+                dbAnswer.ParentQuestionId = existingEntity.Id;
             }
             else
             {
