@@ -107,9 +107,11 @@ public class QuestionsController : BaseController<QuestionsController>
         return RedirectToAction(nameof(GetNextUnansweredQuestion), new { sectionSlug });
     }
 
+    [NonAction]
     public IActionResult RenderView(QuestionViewModel viewModel) => View("Question", viewModel);
 
-    public async Task<QuestionViewModel> GenerateViewModel(string sectionSlug, string questionSlug, CancellationToken cancellationToken)
+    [NonAction]
+    private async Task<QuestionViewModel> GenerateViewModel(string sectionSlug, string questionSlug, CancellationToken cancellationToken)
     {
         var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
                         throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
@@ -127,6 +129,7 @@ public class QuestionsController : BaseController<QuestionsController>
         return GenerateViewModel(sectionSlug, question, section, latestResponseForQuestion?.AnswerRef);
     }
 
+    [NonAction]
     public QuestionViewModel GenerateViewModel(string sectionSlug, Question question, ISectionComponent section, string? latestAnswerContentfulId)
     {
         ViewData["Title"] = question.Text;
