@@ -70,12 +70,13 @@ namespace Dfe.PlanTech.AzureFunctions
             services.AddScoped<RichTextContentMapper>();
             services.AddScoped<JsonToEntityMappers>();
 
-            services.AddTransient<PageEntityUpdater>();
             services.AddTransient<PageEntityRetriever>();
+            services.AddTransient<PageEntityUpdater>();
             services.AddTransient<RecommendationChunkUpdater>();
-            services.AddTransient<RecommendationSectionUpdater>();
             services.AddTransient<RecommendationIntroUpdater>();
+            services.AddTransient<RecommendationSectionUpdater>();
             services.AddTransient<SubtopicRecommendationUpdater>();
+
             services.AddTransient<EntityRetriever>();
             services.AddTransient<EntityUpdater>();
         }

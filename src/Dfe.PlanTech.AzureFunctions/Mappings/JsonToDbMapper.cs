@@ -16,7 +16,6 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 public abstract class JsonToDbMapper<TEntity>(EntityRetriever entityRetriever, EntityUpdater entityUpdater, ILogger<JsonToDbMapper<TEntity>> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper(entityRetriever, typeof(TEntity), logger, jsonSerialiserOptions)
 where TEntity : ContentComponentDbEntity, new()
 {
-    protected readonly TEntity MappedEntity = new();
     protected CmsWebHookPayload? Payload;
     protected EntityUpdater _entityUpdater = entityUpdater;
 
