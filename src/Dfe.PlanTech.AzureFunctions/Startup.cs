@@ -44,7 +44,7 @@ namespace Dfe.PlanTech.AzureFunctions
                 Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
             });
 
-            services.AddSingleton(new ContentfulOptions(bool.Parse(configuration["ContentfulUsePreview:"] ?? bool.FalseString)));
+            services.AddSingleton(new ContentfulOptions(bool.Parse(configuration["Contentful:UsePreview"] ?? bool.FalseString)));
 
             services.AddOptions<MessageRetryHandlingOptions>()
                 .Configure<IConfiguration>((settings, configuration) =>
