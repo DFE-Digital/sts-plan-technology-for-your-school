@@ -191,7 +191,8 @@ public class QuestionMapperTests : BaseMapperTests
     }
 
     [Fact]
-    public async Task Should_Log_Error_If_Answer_Not_Found(){
+    public async Task Should_Log_Error_If_Answer_Not_Found()
+    {
         CmsWebHookSystemDetailsInnerContainer[] answers = [
             new CmsWebHookSystemDetailsInnerContainer() { Sys = new() { Id = "not-existing-id" } },
         ];
