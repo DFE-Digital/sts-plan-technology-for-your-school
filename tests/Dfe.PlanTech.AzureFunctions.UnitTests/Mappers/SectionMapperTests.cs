@@ -75,7 +75,7 @@ public class SectionMapperTests : BaseMapperTests
 
     public SectionMapperTests()
     {
-       _testSection = new()
+        _testSection = new()
         {
             Id = TestSectionId,
             Questions = _testQuestions
