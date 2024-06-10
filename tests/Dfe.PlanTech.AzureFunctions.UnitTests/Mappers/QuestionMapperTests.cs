@@ -18,9 +18,9 @@ public class QuestionMapperTests : BaseMapperTests
     private const string QuestionHelpText = "Question help text";
     private const string QuestionSlug = "/question-slug";
     private readonly CmsWebHookSystemDetailsInnerContainer[] Answers = [
-    new CmsWebHookSystemDetailsInnerContainer() {Sys = new() { Id = "Answer One Id" } },
-    new CmsWebHookSystemDetailsInnerContainer() {Sys = new() { Id = "Answer Two Id" } },
-    new CmsWebHookSystemDetailsInnerContainer() {Sys = new() { Id = "Answer Three Id" } },
+    new CmsWebHookSystemDetailsInnerContainer() { Sys = new() { Id = "Answer One Id" } },
+        new CmsWebHookSystemDetailsInnerContainer() { Sys = new() { Id = "Answer Two Id" } },
+        new CmsWebHookSystemDetailsInnerContainer() { Sys = new() { Id = "Answer Three Id" } },
     ];
 
     private const string QuestionId = "Question Id";
@@ -31,24 +31,27 @@ public class QuestionMapperTests : BaseMapperTests
     private readonly ILogger<JsonToDbMapper<QuestionDbEntity>> _logger;
 
     private readonly static List<AnswerDbEntity> _testAnswers = [
-                    new AnswerDbEntity(){
-                Id="remove-me-one",
-                ParentQuestionId=TestQuestionId
-            },
-            new AnswerDbEntity(){
-                Id="remove-me-two",
-                ParentQuestionId=TestQuestionId
-            },
-            new AnswerDbEntity(){
-                Id="keep-me-id",
-                ParentQuestionId=TestQuestionId,
-            }
+                    new AnswerDbEntity()
+                    {
+                        Id = "remove-me-one",
+                        ParentQuestionId = TestQuestionId
+                    },
+        new AnswerDbEntity()
+        {
+            Id = "remove-me-two",
+            ParentQuestionId = TestQuestionId
+        },
+        new AnswerDbEntity()
+        {
+            Id = "keep-me-id",
+            ParentQuestionId = TestQuestionId,
+        }
     ];
 
     private readonly static QuestionDbEntity _testQuestion = new()
     {
         Id = TestQuestionId,
-        Answers =_testAnswers
+        Answers = _testAnswers
     };
 
     private readonly List<QuestionDbEntity> _questions = [_testQuestion];
@@ -77,7 +80,8 @@ public class QuestionMapperTests : BaseMapperTests
         {
             var type = callinfo.ArgAt<Type>(0);
 
-            if(type == questionType){
+            if (type == questionType)
+            {
                 return entityTypeMock;
             }
 
@@ -135,7 +139,8 @@ public class QuestionMapperTests : BaseMapperTests
     }
 
     [Fact]
-    public async Task MapEntity_Should_Return_MappedEntity_When_NotExisting_In_DB() {
+    public async Task MapEntity_Should_Return_MappedEntity_When_NotExisting_In_DB()
+    {
         var payload = """
             {
                 "fields": {
@@ -167,9 +172,10 @@ public class QuestionMapperTests : BaseMapperTests
     }
 
     [Fact]
-    public async Task MapEntity_Should_Update_Answer_ParentQuestionIds(){
-        CmsWebHookSystemDetailsInnerContainer[]  answers = [
-            new CmsWebHookSystemDetailsInnerContainer() {Sys = new() { Id = AnswerIdToKeep } },
+    public async Task MapEntity_Should_Update_Answer_ParentQuestionIds()
+    {
+        CmsWebHookSystemDetailsInnerContainer[] answers = [
+            new CmsWebHookSystemDetailsInnerContainer() { Sys = new() { Id = AnswerIdToKeep } },
         ];
 
 
@@ -187,7 +193,7 @@ public class QuestionMapperTests : BaseMapperTests
         Assert.NotNull(result.ExistingEntity);
 
         var existingQuestionEntity = result.ExistingEntity as QuestionDbEntity;
-        
+
         Assert.NotNull(existingQuestionEntity);
 
         Assert.Single(existingQuestionEntity.Answers);

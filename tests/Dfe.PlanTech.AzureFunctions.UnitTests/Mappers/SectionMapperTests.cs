@@ -18,24 +18,27 @@ public class SectionMapperTests : BaseMapperTests
     private readonly string QuestionIdToKeep = "keep-me-id";
     private readonly static string TestSectionId = "section-id-one";
     private readonly static List<QuestionDbEntity> _testQuestions = [
-                    new QuestionDbEntity(){
-                Id="remove-me-one",
-                SectionId=TestSectionId
-            },
-            new QuestionDbEntity(){
-                Id="remove-me-two",
-                SectionId=TestSectionId
-            },
-            new QuestionDbEntity(){
-                Id="keep-me-id",
-                SectionId=TestSectionId
-            }
+                    new QuestionDbEntity()
+                    {
+                        Id = "remove-me-one",
+                        SectionId = TestSectionId
+                    },
+        new QuestionDbEntity()
+        {
+            Id = "remove-me-two",
+            SectionId = TestSectionId
+        },
+        new QuestionDbEntity()
+        {
+            Id = "keep-me-id",
+            SectionId = TestSectionId
+        }
     ];
 
     private readonly static SectionDbEntity _testSection = new()
     {
         Id = TestSectionId,
-        Questions =_testQuestions
+        Questions = _testQuestions
     };
 
     private readonly List<SectionDbEntity> _sections = [_testSection];
@@ -65,9 +68,9 @@ public class SectionMapperTests : BaseMapperTests
     private readonly List<QuestionDbEntity> _attachedQuestions = new(4);
 
     private readonly List<PageDbEntity> _pages = [new()
-        {
-            Id = "Interstitial page id",
-        }];
+    {
+        Id = "Interstitial page id",
+    }];
 
     private readonly DbSet<PageDbEntity> _pagesDbSet;
 
@@ -151,8 +154,9 @@ public class SectionMapperTests : BaseMapperTests
         }
     }
 
-        [Fact]
-    public async Task MapEntity_Should_Return_MappedEntity_When_NotExisting_In_DB() {
+    [Fact]
+    public async Task MapEntity_Should_Return_MappedEntity_When_NotExisting_In_DB()
+    {
         var payload = """
             {
                 "fields": {
@@ -184,9 +188,10 @@ public class SectionMapperTests : BaseMapperTests
     }
 
     [Fact]
-    public async Task MapEntity_Should_Update_Question_SectionIds(){
+    public async Task MapEntity_Should_Update_Question_SectionIds()
+    {
         CmsWebHookSystemDetailsInnerContainer[] questions = [
-            new CmsWebHookSystemDetailsInnerContainer() {Sys = new() { Id = QuestionIdToKeep } },
+            new CmsWebHookSystemDetailsInnerContainer() { Sys = new() { Id = QuestionIdToKeep } },
         ];
 
         var fields = new Dictionary<string, object?>()
@@ -203,7 +208,7 @@ public class SectionMapperTests : BaseMapperTests
         Assert.NotNull(result.ExistingEntity);
 
         var existingSectionEntity = result.ExistingEntity as SectionDbEntity;
-        
+
         Assert.NotNull(existingSectionEntity);
 
         Assert.Single(existingSectionEntity.Questions);

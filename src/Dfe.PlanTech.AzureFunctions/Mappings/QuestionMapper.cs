@@ -13,7 +13,7 @@ public class QuestionMapper(EntityRetriever retriever, EntityUpdater updater, Cm
 {
     private readonly CmsDbContext _db = db;
     private readonly List<string> _incomingAnswerIds = [];
-    
+
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
         UpdateAnswersParentQuestionIds(values);
