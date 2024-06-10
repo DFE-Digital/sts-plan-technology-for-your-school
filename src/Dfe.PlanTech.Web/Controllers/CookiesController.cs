@@ -1,11 +1,13 @@
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
+[LogInvalidModelState]
 [Route("/cookies")]
 public class CookiesController : BaseController<CookiesController>
 {

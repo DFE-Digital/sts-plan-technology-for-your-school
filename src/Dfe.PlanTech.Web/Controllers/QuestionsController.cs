@@ -5,6 +5,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Responses.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
@@ -12,7 +13,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
+[LogInvalidModelState]
 [Authorize]
+[Route("/")]
 public class QuestionsController : BaseController<QuestionsController>
 {
     public const string Controller = "Questions";
