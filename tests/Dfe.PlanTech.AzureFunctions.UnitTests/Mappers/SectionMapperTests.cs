@@ -196,4 +196,24 @@ public class SectionMapperTests : BaseMapperTests
 
         Assert.All(_testQuestions.Where(answer => answer.Id != QuestionIdToKeep), (question) => Assert.Null(question.SectionId));
     }
+
+    [Fact]
+    public async Task Should_Log_Error_If_Question_Not_Found()
+    {
+        CmsWebHookSystemDetailsInnerContainer[] questions = [
+            new CmsWebHookSystemDetailsInnerContainer() { Sys = new() { Id = "not-existing-id" } },
+        ];
+
+
+        var fields = new Dictionary<string, object?>()
+        {
+            ["questions"] = WrapWithLocalisation(questions),
+        };
+
+        var payload = CreatePayload(fields, TestSectionId);
+
+        var result = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default(CancellationToken));
+
+        _logger.ReceivedWithAnyArgs(1);
+    }
 }
