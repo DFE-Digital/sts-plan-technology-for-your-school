@@ -45,7 +45,6 @@ public class SectionMapper(EntityRetriever retriever, EntityUpdater updater, Cms
 
         RemoveSectionFromRemovedQuestions(mappedEntity);
 
-
         if (mappedEntity.ExistingEntity is not SectionDbEntity existingSection)
         {
             Logger.LogError("Section is not a section. Is type " + mappedEntity.ExistingEntity?.GetType());
