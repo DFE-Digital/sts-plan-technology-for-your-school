@@ -72,10 +72,6 @@ namespace Dfe.PlanTech.AzureFunctions
 
             services.AddTransient<PageEntityRetriever>();
             services.AddTransient<PageEntityUpdater>();
-            services.AddTransient<RecommendationChunkUpdater>();
-            services.AddTransient<RecommendationIntroUpdater>();
-            services.AddTransient<RecommendationSectionUpdater>();
-            services.AddTransient<SubtopicRecommendationUpdater>();
 
             services.AddTransient<EntityRetriever>();
             services.AddTransient<EntityUpdater>();

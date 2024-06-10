@@ -69,12 +69,22 @@ public class MappedEntity
         }
     }
 
-    public (TEntity incoming, TEntity existing) GetTypedEntities<TEntity>()
+    public (TEntity incoming, TEntity? existing) GetTypedEntities<TEntity>()
         where TEntity : ContentComponentDbEntity
     {
-        if (IncomingEntity is not TEntity incoming || ExistingEntity is not TEntity existing)
+        if (IncomingEntity is not TEntity incoming)
         {
             throw new InvalidCastException($"Entities are not expected type. Received {IncomingEntity.GetType()} and {ExistingEntity!.GetType()} but expected {typeof(TEntity)}");
+        }
+
+        if (ExistingEntity == null)
+        {
+            return (incoming, null);
+        }
+
+        if (ExistingEntity is not TEntity existing)
+        {
+            throw new InvalidCastException($"Entities are not expected type. Received  {IncomingEntity.GetType()} and  {ExistingEntity!.GetType()} but expected  {typeof(TEntity)}");
         }
 
         return (incoming, existing);

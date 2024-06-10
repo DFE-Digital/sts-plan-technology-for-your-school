@@ -1,60 +1,45 @@
 using System.Text.Json;
+using Dfe.PlanTech.AzureFunctions.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
 public class SubtopicRecommendationMapper(
     EntityRetriever retriever,
-    SubtopicRecommendationUpdater updater,
+    EntityUpdater updater,
     CmsDbContext db,
     ILogger<SubtopicRecommendationMapper> logger,
     JsonSerializerOptions jsonSerialiserOptions)
     : JsonToDbMapper<SubtopicRecommendationDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
     private readonly CmsDbContext _db = db;
+    private readonly List<RecommendationIntroDbEntity> _incomingIntros = [];
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
-        var id = values["id"]?.ToString() ?? throw new KeyNotFoundException("Not found id");
-
         values = MoveValueToNewKey(values, "section", "sectionId");
-
         values = MoveValueToNewKey(values, "subtopic", "subtopicId");
 
-        UpdateContentIds(values, id, "intros");
+        _incomingIntros.AddRange(_entityUpdater.GetAndOrderReferencedEntities<RecommendationIntroDbEntity>(values, "intros"));
 
         return values;
     }
 
-    private void UpdateContentIds(Dictionary<string, object?> values, string subtopicRecommendationId, string currentKey)
+    public override async Task PostUpdateEntityCallback(MappedEntity mappedEntity)
     {
-        if (values.TryGetValue(currentKey, out object? intros) && intros is object[] inners)
-        {
-            for (var index = 0; index < inners.Length; index++)
-            {
-                CreateSubtopicRecommendationIntroEntity(inners[index], subtopicRecommendationId);
-            }
-            values.Remove(currentKey);
-        }
-    }
+        var (incoming, existing) = mappedEntity.GetTypedEntities<SubtopicRecommendationDbEntity>();
 
-
-    private void CreateSubtopicRecommendationIntroEntity(object inner, string subtopicRecommendationId)
-    {
-        if (inner is not string recommendationIntroId)
+        if (existing != null)
         {
-            Logger.LogWarning("Expected string but received {InnerType}", inner.GetType());
-            return;
+            existing.RecommendationIntro = await _db.SubtopicRecommendationIntros.Where(subRecIntro => subRecIntro.SubtopicRecommendationId == incoming.Id)
+                                                                        .Select(subRecIntro => subRecIntro.RecommendationIntro)
+                                                                        .Select(intro => intro!)
+                                                                        .ToListAsync();
         }
 
-        var subtopicRecommendationIntro = new SubtopicRecommendationIntroDbEntity()
-        {
-            SubtopicRecommendationId = subtopicRecommendationId,
-            RecommendationIntroId = recommendationIntroId
-        };
-
-        _db.SubtopicRecommendationIntros.Attach(subtopicRecommendationIntro);
+        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (subtopicRec) => subtopicRec.Intros, _incomingIntros, _db.RecommendationIntros, false);
     }
 }
