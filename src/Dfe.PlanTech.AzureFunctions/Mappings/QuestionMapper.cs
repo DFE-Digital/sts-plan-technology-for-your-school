@@ -61,7 +61,8 @@ public class QuestionMapper(EntityRetriever retriever, EntityUpdater updater, Cm
             if (matchingAnswer == null)
             {
                 var dbAnswer = await _db.Answers.FirstOrDefaultAsync(answer => answer.Id == incomingAnswer.Id);
-                if(dbAnswer == null){
+                if (dbAnswer == null)
+                {
                     Logger.LogError($"Question {existingEntity.Id} is trying to add answer {incomingAnswer.Id} but this is not found in the DB");
                     continue;
                 }

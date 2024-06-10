@@ -66,7 +66,8 @@ public class SectionMapper(EntityRetriever retriever, EntityUpdater updater, Cms
             if (matchingQuestion == null)
             {
                 var dbQuestion = await _db.Questions.FirstOrDefaultAsync(question => question.Id == incomingQuestion.Id);
-                if(dbQuestion == null){
+                if (dbQuestion == null)
+                {
                     Logger.LogError($"Section {existingEntity.Id} is trying to add question {incomingQuestion.Id} but this is not found in the DB");
                     continue;
                 }
