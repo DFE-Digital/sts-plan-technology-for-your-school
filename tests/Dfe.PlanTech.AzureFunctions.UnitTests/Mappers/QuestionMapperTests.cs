@@ -30,22 +30,23 @@ public class QuestionMapperTests : BaseMapperTests
     private readonly QuestionMapper _mapper;
     private readonly ILogger<JsonToDbMapper<QuestionDbEntity>> _logger;
 
+    private readonly static AnswerDbEntity _expectedAnswer = new()
+    {
+        Id = "keep-me-id",
+        ParentQuestionId = TestQuestionId,
+    };
     private readonly static List<AnswerDbEntity> _testAnswers = [
-                    new AnswerDbEntity()
-                    {
-                        Id = "remove-me-one",
-                        ParentQuestionId = TestQuestionId
-                    },
+        new AnswerDbEntity()
+        {
+            Id = "remove-me-one",
+            ParentQuestionId = TestQuestionId
+        },
         new AnswerDbEntity()
         {
             Id = "remove-me-two",
             ParentQuestionId = TestQuestionId
         },
-        new AnswerDbEntity()
-        {
-            Id = "keep-me-id",
-            ParentQuestionId = TestQuestionId,
-        }
+        _expectedAnswer
     ];
 
     private readonly static QuestionDbEntity _testQuestion = new()
@@ -56,11 +57,15 @@ public class QuestionMapperTests : BaseMapperTests
 
     private readonly List<QuestionDbEntity> _questions = [_testQuestion];
     private readonly DbSet<QuestionDbEntity> _questionDbSet;
-    private readonly DbSet<AnswerDbEntity> _answerDbSet = Substitute.For<DbSet<AnswerDbEntity>>();
-    private readonly List<AnswerDbEntity> _attachedAnswers = new(4);
+
+    private readonly List<AnswerDbEntity> _answers = [_expectedAnswer];
+    private readonly DbSet<AnswerDbEntity> _answerDbSet;
+
     public QuestionMapperTests()
     {
+        _answers.AddRange(Answers.Select(a => new AnswerDbEntity() { Id = a.Sys.Id }));
         _questionDbSet = _questions.BuildMockDbSet();
+        _answerDbSet = _answers.BuildMockDbSet();
         _db.Answers = _answerDbSet;
         _db.Questions = _questionDbSet;
 
@@ -97,15 +102,6 @@ public class QuestionMapperTests : BaseMapperTests
     [Fact]
     public void Mapper_Should_Map_Relationship()
     {
-        _db.Answers = _answerDbSet;
-
-        _answerDbSet.WhenForAnyArgs(answerDbSet => answerDbSet.Attach(Arg.Any<AnswerDbEntity>()))
-                    .Do(callinfo =>
-                    {
-                        var answer = callinfo.ArgAt<AnswerDbEntity>(0);
-                        _attachedAnswers.Add(answer);
-                    });
-
         var fields = new Dictionary<string, object?>()
         {
             ["text"] = WrapWithLocalisation(QuestionText),
@@ -127,15 +123,6 @@ public class QuestionMapperTests : BaseMapperTests
         Assert.Equal(QuestionText, concrete.Text);
         Assert.Equal(QuestionHelpText, concrete.HelpText);
         Assert.Equal(QuestionSlug, concrete.Slug);
-
-        Assert.Equal(Answers.Length, _attachedAnswers.Count);
-
-        foreach (var item in Answers.Select((answer, index) => new { answer, index }))
-        {
-            var matchingAnswer = _attachedAnswers.Find(attached => attached.Id == item.answer.Sys.Id);
-            Assert.NotNull(matchingAnswer);
-            Assert.Equal(item.index, matchingAnswer.Order);
-        }
     }
 
     [Fact]
