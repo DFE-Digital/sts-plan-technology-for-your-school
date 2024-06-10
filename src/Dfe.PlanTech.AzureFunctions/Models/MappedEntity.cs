@@ -69,6 +69,18 @@ public class MappedEntity
         }
     }
 
+    public (TEntity incoming, TEntity existing) GetTypedEntities<TEntity>()
+        where TEntity : ContentComponentDbEntity
+    {
+        if (IncomingEntity is not TEntity incoming || ExistingEntity is not TEntity existing)
+        {
+            throw new InvalidCastException($"Entities are not expected type. Received {IncomingEntity.GetType()} and {ExistingEntity!.GetType()} but expected {typeof(TEntity)}");
+        }
+
+        return (incoming, existing);
+    }
+
+
     /// <summary>
     /// Updates the status of the mapped entity based on the provided CMS event, and the existing entity statuses.
     /// </summary>
