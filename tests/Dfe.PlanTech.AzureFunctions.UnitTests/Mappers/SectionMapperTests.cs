@@ -15,41 +15,41 @@ namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
 public class SectionMapperTests : BaseMapperTests
 {
-    private readonly string QuestionIdToKeep = "keep-me-id";
+    private readonly static string QuestionIdToKeep = "keep-me-id";
     private readonly static string TestSectionId = "section-id-one";
-    private readonly static List<QuestionDbEntity> _testQuestions = [
-                    new QuestionDbEntity()
-                    {
-                        Id = "remove-me-one",
-                        SectionId = TestSectionId
-                    },
+
+    private readonly static QuestionDbEntity _questionToKeep = new()
+    {
+        Id = QuestionIdToKeep,
+        SectionId = TestSectionId
+    };
+
+    private readonly List<QuestionDbEntity> _testQuestions = [
+        new QuestionDbEntity()
+        {
+            Id = "remove-me-one",
+            SectionId = TestSectionId
+        },
         new QuestionDbEntity()
         {
             Id = "remove-me-two",
             SectionId = TestSectionId
         },
-        new QuestionDbEntity()
-        {
-            Id = "keep-me-id",
-            SectionId = TestSectionId
-        }
+        _questionToKeep
     ];
 
-    private readonly static SectionDbEntity _testSection = new()
-    {
-        Id = TestSectionId,
-        Questions = _testQuestions
-    };
+    private readonly SectionDbEntity _testSection;
 
-    private readonly List<SectionDbEntity> _sections = [_testSection];
+    private readonly List<SectionDbEntity> _sections = [];
     private readonly DbSet<SectionDbEntity> _sectionDbSet;
 
     private const string SectionName = "Section name";
     private readonly CmsWebHookSystemDetailsInnerContainer[] Questions = new[]{
-    new CmsWebHookSystemDetailsInnerContainer() {Sys = new() { Id = "Question One Id" } },
-    new CmsWebHookSystemDetailsInnerContainer() {Sys = new() { Id = "Question Two Id" } },
-    new CmsWebHookSystemDetailsInnerContainer() {Sys = new() { Id = "Question Three Id" } },
+        new CmsWebHookSystemDetailsInnerContainer() {Sys = new() { Id = "Question One Id" } },
+        new CmsWebHookSystemDetailsInnerContainer() {Sys = new() { Id = "Question Two Id" } },
+        new CmsWebHookSystemDetailsInnerContainer() {Sys = new() { Id = "Question Three Id" } },
     };
+
     private readonly CmsWebHookSystemDetailsInnerContainer InterstitialPage = new()
     {
         Sys = new()
@@ -65,7 +65,6 @@ public class SectionMapperTests : BaseMapperTests
     private readonly ILogger<SectionMapper> _logger;
 
     private readonly DbSet<QuestionDbEntity> _questionsDbSet;
-    private readonly List<QuestionDbEntity> _attachedQuestions = new(4);
 
     private readonly List<PageDbEntity> _pages = [new()
     {
@@ -76,6 +75,14 @@ public class SectionMapperTests : BaseMapperTests
 
     public SectionMapperTests()
     {
+       _testSection = new()
+        {
+            Id = TestSectionId,
+            Questions = _testQuestions
+        };
+
+        _sections.Add(_testSection);
+
         _questionsDbSet = _testQuestions.BuildMockDbSet();
         _sectionDbSet = _sections.BuildMockDbSet();
         _pagesDbSet = _pages.BuildMockDbSet();
@@ -86,13 +93,6 @@ public class SectionMapperTests : BaseMapperTests
 
         _db.Set<SectionDbEntity>().Returns(_sectionDbSet);
         _db.Set<QuestionDbEntity>().Returns(_questionsDbSet);
-
-        _questionsDbSet.WhenForAnyArgs(questionDbSet => questionDbSet.Attach(Arg.Any<QuestionDbEntity>()))
-                    .Do(callinfo =>
-                    {
-                        var question = callinfo.ArgAt<QuestionDbEntity>(0);
-                        _attachedQuestions.Add(question);
-                    });
 
         MockDbModel();
 
@@ -180,7 +180,7 @@ public class SectionMapperTests : BaseMapperTests
 
         var payload = CreatePayload(fields, TestSectionId);
 
-        var result = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default(CancellationToken));
+        var result = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, CancellationToken.None);
 
         Assert.NotNull(result);
         Assert.NotNull(result.IncomingEntity);
@@ -203,7 +203,6 @@ public class SectionMapperTests : BaseMapperTests
         CmsWebHookSystemDetailsInnerContainer[] questions = [
             new CmsWebHookSystemDetailsInnerContainer() { Sys = new() { Id = "not-existing-id" } },
         ];
-
 
         var fields = new Dictionary<string, object?>()
         {
