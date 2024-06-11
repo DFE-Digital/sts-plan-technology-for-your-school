@@ -10,8 +10,8 @@ public sealed class LogInvalidModelState : ActionFilterAttribute
         var logger = svc.GetService<ILogger<LogInvalidModelState>>();
         if (!context.ModelState.IsValid)
         {
-            var routeName = context.ActionDescriptor.AttributeRouteInfo?.Name;
-            logger?.LogError("Not able to validate model state for route: {routeName}", routeName);
+            var displayName = context.ActionDescriptor.DisplayName;
+            logger?.LogError("Not able to validate model state for controller method: {displayName}", displayName);
         }
     }
 }
