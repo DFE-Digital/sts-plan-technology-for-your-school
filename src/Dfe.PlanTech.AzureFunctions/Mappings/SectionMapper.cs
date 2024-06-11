@@ -26,16 +26,17 @@ public class SectionMapper(EntityRetriever retriever, EntityUpdater updater, Cms
         }
 
         values.Remove("recommendations");
-        
+
         return values;
     }
-
 
     public override async Task<MappedEntity> MapEntity(CmsWebHookPayload payload, CmsEvent cmsEvent, CancellationToken cancellationToken)
     {
         var incomingEntity = ToEntity(payload);
 
         var existingEntity = await _db.Sections.Include(q => q.Questions)
+                                                .IgnoreQueryFilters()
+                                                .IgnoreAutoIncludes()
                                                 .FirstOrDefaultAsync(section => section.Id == incomingEntity.Id, cancellationToken: cancellationToken);
 
         var mappedEntity = _entityUpdater.UpdateEntity(incomingEntity, existingEntity, cmsEvent);
