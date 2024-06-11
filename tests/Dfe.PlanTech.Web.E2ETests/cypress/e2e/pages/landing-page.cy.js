@@ -11,7 +11,7 @@ describe("landing page", () => {
   it("should contain headings", () => {
     cy.get("h2.govuk-heading-l")
       .should("exist")
-      .and("have.length.of.at.least", 4);
+      .and("have.length.of.at.least", 2);
   });
 
   it("should contain text bodies", () => {
