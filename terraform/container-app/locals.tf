@@ -50,6 +50,11 @@ locals {
   ##################
   kv_name = "${local.environment}${local.project_name}-kv"
 
+  kv_secrets_csp_connectsrc = "${local.csp_google_tag_manager_domain} region1.google-analytics.com ${local.csp_clarity_domains}"
+  kv_secrets_csp_defaultsrc = local.csp_clarity_domains
+  kv_secrets_csp_framesrc   = "${local.csp_google_tag_manager_domain} ${local.csp_clarity_domains}"
+  kv_secrets_csp_imgsrc     = "${local.csp_google_tag_manager_domain} ${local.csp_clarity_domains}"
+
   ##################
   # CDN/Front Door #
   ##################
@@ -75,4 +80,11 @@ locals {
   storage_account_public_access_enabled                   = var.storage_account_public_access_enabled
   container_app_storage_account_shared_access_key_enabled = var.container_app_storage_account_shared_access_key_enabled
   container_app_blob_storage_public_access_enabled        = var.container_app_blob_storage_public_access_enabled
+
+  ###########################
+  # Content Security Policy #
+  ###########################
+
+  csp_clarity_domains           = "https://www.clarity.ms https://c.bing.com https://a.clarity.ms https://b.clarity.ms https://c.clarity.ms https://d.clarity.ms https://e.clarity.ms https://f.clarity.ms https://g.clarity.ms https://h.clarity.ms https://i.clarity.ms https://j.clarity.ms https://k.clarity.ms https://l.clarity.ms https://m.clarity.ms https://n.clarity.ms https://o.clarity.ms https://p.clarity.ms https://q.clarity.ms https://r.clarity.ms https://s.clarity.ms https://t.clarity.ms https://u.clarity.ms https://v.clarity.ms https://w.clarity.ms https://x.clarity.ms https://y.clarity.ms https://z.clarity.ms"
+  csp_google_tag_manager_domain = "www.googletagmanager.com"
 }

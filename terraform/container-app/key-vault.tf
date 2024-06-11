@@ -20,6 +20,10 @@ resource "azurerm_key_vault" "vault" {
   }
 }
 
+###################
+# Access Policies #
+###################
+
 resource "azurerm_key_vault_access_policy" "vault_access_policy_tf" {
   key_vault_id = azurerm_key_vault.vault.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
@@ -37,6 +41,14 @@ resource "azurerm_key_vault_access_policy" "vault_access_policy_mi" {
   secret_permissions = ["List", "Get"]
   key_permissions    = ["List", "Get", "WrapKey", "UnwrapKey"]
 }
+
+###########
+# Secrets #
+###########
+
+######################
+# Contentful secrets #
+######################
 
 resource "azurerm_key_vault_secret" "vault_secret_contentful_deliveryapikey" {
   key_vault_id = azurerm_key_vault.vault.id
@@ -90,6 +102,10 @@ resource "azurerm_key_vault_secret" "vault_secret_contentful_environment" {
   }
 }
 
+####################
+# Database secrets #
+####################
+
 resource "azurerm_key_vault_secret" "vault_secret_database_connectionstring" {
   key_vault_id = azurerm_key_vault.vault.id
   name         = "connectionstrings--database"
@@ -101,6 +117,66 @@ resource "azurerm_key_vault_secret" "vault_secret_database_connectionstring" {
     ]
   }
 }
+
+###################################
+# Content Security Policy secrets #
+###################################
+
+resource "azurerm_key_vault_secret" "csp_connect_src" {
+  name         = "CSP--ConnectSrc"
+  key_vault_id = azurerm_key_vault.vault.id
+  value        = local.kv_secrets_csp_connectsrc
+
+  lifecycle {
+    ignore_changes = [
+      value,
+      expiration_date
+    ]
+  }
+}
+
+resource "azurerm_key_vault_secret" "csp_default_src" {
+  name         = "CSP--DefaultSrc"
+  key_vault_id = azurerm_key_vault.vault.id
+  value        = local.kv_secrets_csp_defaultsrc
+
+  lifecycle {
+    ignore_changes = [
+      value,
+      expiration_date
+    ]
+  }
+}
+
+resource "azurerm_key_vault_secret" "csp_frame_src" {
+  name         = "CSP--FrameSrc"
+  key_vault_id = azurerm_key_vault.vault.id
+  value        = local.kv_secrets_csp_framesrc
+
+  lifecycle {
+    ignore_changes = [
+      value,
+      expiration_date
+    ]
+  }
+}
+
+resource "azurerm_key_vault_secret" "csp_img_src" {
+  name         = "CSP--ImgSrc"
+  key_vault_id = azurerm_key_vault.vault.id
+  value        = local.kv_secrets_csp_imgsrc
+
+  lifecycle {
+    ignore_changes = [
+      value,
+      expiration_date
+    ]
+  }
+}
+
+########
+# Keys #
+########
 
 resource "azurerm_key_vault_key" "data_protection_key" {
   name         = "dataprotection"
@@ -116,3 +192,4 @@ resource "azurerm_key_vault_key" "data_protection_key" {
     ignore_changes = all
   }
 }
+
