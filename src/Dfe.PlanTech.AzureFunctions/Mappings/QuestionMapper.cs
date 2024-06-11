@@ -38,6 +38,8 @@ public class QuestionMapper(EntityRetriever retriever, EntityUpdater updater, Cm
         var incomingEntity = ToEntity(payload);
 
         var existingEntity = await _db.Questions.Include(q => q.Answers)
+                                                .IgnoreQueryFilters()
+                                                .IgnoreAutoIncludes()
                                                 .FirstOrDefaultAsync(question => question.Id == incomingEntity.Id, cancellationToken: cancellationToken);
 
         var mappedEntity = _entityUpdater.UpdateEntity(incomingEntity, existingEntity, cmsEvent);
@@ -48,7 +50,7 @@ public class QuestionMapper(EntityRetriever retriever, EntityUpdater updater, Cm
         }
 
         var withoutOldQuestions = RemoveQuestionFromRemovedAnswers(mappedEntity);
-        await AddOrUpdateQuestions(existingEntity);
+        await AddOrUpdateQuestions(existingEntity!);
 
         return mappedEntity;
     }
