@@ -103,7 +103,7 @@ jobs:
 
   generate-subtopic-visualisations:
     needs: [set-env, deploy-to-dev-and-test]
-    name: Run the visualisation workflow again staging content.
+    name: Run the visualisation workflow against staging content.
     if: ${{ needs.set-env.outputs.branch == 'main' }}
     strategy:
       max-parallel: 1
