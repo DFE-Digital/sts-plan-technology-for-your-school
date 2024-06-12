@@ -41,7 +41,7 @@ public class QuestionMapperTests : BaseMapperTests
             Id = "remove-me-one",
             ParentQuestionId = TestQuestionId
         },
-        new AnswerDbEntity()git
+        new AnswerDbEntity()
         {
             Id = "remove-me-two",
             ParentQuestionId = TestQuestionId
