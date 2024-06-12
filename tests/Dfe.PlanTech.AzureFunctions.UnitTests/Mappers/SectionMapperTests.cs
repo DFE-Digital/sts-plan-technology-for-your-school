@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Dfe.PlanTech.AzureFunctions.Mappings;
 using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Models;
@@ -28,7 +27,7 @@ public class SectionMapperTests : BaseMapperTests
         new QuestionDbEntity()
         {
             Id = "remove-me-one",
-            SectionId = TestSectionId
+            SectionId = TestSectionId,
         },
         new QuestionDbEntity()
         {
@@ -78,7 +77,8 @@ public class SectionMapperTests : BaseMapperTests
         _testSection = new()
         {
             Id = TestSectionId,
-            Questions = _testQuestions
+            Questions = _testQuestions,
+            InterstitialPageId = "Interstitial page id"
         };
 
         _sections.Add(_testSection);
@@ -203,16 +203,19 @@ public class SectionMapperTests : BaseMapperTests
         CmsWebHookSystemDetailsInnerContainer[] questions = [
             new CmsWebHookSystemDetailsInnerContainer() { Sys = new() { Id = "not-existing-id" } },
         ];
+        var interstitialPage = new CmsWebHookSystemDetailsInnerContainer()
+        { Sys = new CmsWebHookSystemDetailsInner() { Id = "Interstitial page Id" } };
 
         var fields = new Dictionary<string, object?>()
         {
+            ["interstitialPage"] = WrapWithLocalisation(interstitialPage),
             ["questions"] = WrapWithLocalisation(questions),
         };
 
         var payload = CreatePayload(fields, TestSectionId);
 
-        var result = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default(CancellationToken));
+        await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default);
 
-        _logger.ReceivedWithAnyArgs(1);
+        Assert.Single(_logger.ReceivedCalls());
     }
 }

@@ -207,6 +207,6 @@ public class QuestionMapperTests : BaseMapperTests
 
         var result = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default(CancellationToken));
 
-        _logger.ReceivedWithAnyArgs(1);
+        Assert.Single(_logger.ReceivedCalls());
     }
 }
