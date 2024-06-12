@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.SignIns.Interfaces;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.SignIns.Enums;
 using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Users.Exceptions;
@@ -386,5 +387,52 @@ public class DfeOpenIdConnectEventsTests
 
         await Assert.ThrowsAnyAsync<KeyNotFoundException>(() =>
             OnUserInformationReceivedEvent.OnUserInformationReceived(context));
+    }
+
+    [Fact]
+    public void GetOriginUrl_Should_Return_XForwardedHost_If_Found()
+    {
+        var host = "www.should-return-this.com";
+
+        var httpContext = Substitute.For<HttpContext>();
+        var context = new RedirectContext(httpContext, new AuthenticationScheme("", "", typeof(DummyAuthHandler)), new OpenIdConnectOptions(), new AuthenticationProperties() { });
+
+        var request = Substitute.For<HttpRequest>();
+        var headers = new HeaderDictionary
+        {
+            { "X-Forwarded-Host", host }
+        };
+
+        request.Headers.Returns(headers);
+        context.Request.Returns(request);
+        var originUrl = DfeOpenIdConnectEvents.GetOriginUrl(context, new DfeSignInConfiguration());
+
+        Assert.Contains(host, originUrl);
+    }
+
+    [Fact]
+    public void GetOriginUrl_Should_Return_FrontDoorURL_If_Header_Not_Found()
+    {
+        var host = "www.should-return-this.com";
+
+        var httpContext = Substitute.For<HttpContext>();
+        var context = new RedirectContext(httpContext, new AuthenticationScheme("", "", typeof(DummyAuthHandler)), new OpenIdConnectOptions(), new AuthenticationProperties() { });
+
+        var request = Substitute.For<HttpRequest>();
+        var headers = new HeaderDictionary
+        {
+        };
+
+        request.Headers.Returns(headers);
+        context.Request.Returns(request);
+
+        var config = new DfeSignInConfiguration()
+        {
+            FrontDoorUrl = host
+        };
+
+        var originUrl = DfeOpenIdConnectEvents.GetOriginUrl(context, config);
+
+        Assert.Contains(host, originUrl);
     }
 }
