@@ -64,12 +64,13 @@ public static class DfeOpenIdConnectEvents
     /// <param name="config">The configuration for OpenID Connect sign-ins.</param>
     /// <param name="callbackPath">The path of the callback URL.</param>
     public static string CreateCallbackUrl(RedirectContext context, IDfeSignInConfiguration config, string callbackPath)
-     { 
-        var originUrl = GetOriginUrl(context, config); 
+    {
+        var originUrl = GetOriginUrl(context, config);
 
         //Our config uses URls like "/auth/cb" for the redirect callback slug, signout slug, etc.
         //So we should ensure that the URL does not end with a forward slash when returning
-        if(originUrl.EndsWith('/') && callbackPath.StartsWith('/')){
+        if (originUrl.EndsWith('/') && callbackPath.StartsWith('/'))
+        {
             originUrl = originUrl[..^1];
         }
 

@@ -409,7 +409,7 @@ public class DfeOpenIdConnectEventsTests
         request.Headers.Returns(headers);
         context.Request.Returns(request);
 
-           var config = new DfeSignInConfiguration()
+        var config = new DfeSignInConfiguration()
         {
             FrontDoorUrl = configUrl
         };
@@ -488,7 +488,7 @@ public class DfeOpenIdConnectEventsTests
         {
             { "X-Forwarded-Host", host }
         };
-        
+
         request.Headers.Returns(headers);
         context.Request.Returns(request);
 
@@ -504,13 +504,14 @@ public class DfeOpenIdConnectEventsTests
     }
 
     [Theory]
-    [InlineData("www.plantech.com","/auth/cb")]
-    [InlineData("www.plantech.com/","/auth/cb")]
-    [InlineData("www.plantech.com/","auth/cb")]
-    [InlineData("plantech.education.gov.uk/","/auth/cb")]
-    [InlineData("plantech.education.gov.uk","/auth/cb")]
-    [InlineData("plantech.education.gov.uk/","auth/cb")]
-    public void CreateCallbackUrl_Should_Remove_Double_Slashes_For_ForwardedHost_Headers(string host, string callback){
+    [InlineData("www.plantech.com", "/auth/cb")]
+    [InlineData("www.plantech.com/", "/auth/cb")]
+    [InlineData("www.plantech.com/", "auth/cb")]
+    [InlineData("plantech.education.gov.uk/", "/auth/cb")]
+    [InlineData("plantech.education.gov.uk", "/auth/cb")]
+    [InlineData("plantech.education.gov.uk/", "auth/cb")]
+    public void CreateCallbackUrl_Should_Remove_Double_Slashes_For_ForwardedHost_Headers(string host, string callback)
+    {
         var configUrl = "www.shouldnt-return-this.com";
 
         var httpContext = Substitute.For<HttpContext>();
@@ -521,7 +522,7 @@ public class DfeOpenIdConnectEventsTests
         {
             { "X-Forwarded-Host", host }
         };
-        
+
         request.Headers.Returns(headers);
         context.Request.Returns(request);
 
@@ -545,13 +546,14 @@ public class DfeOpenIdConnectEventsTests
 
 
     [Theory]
-    [InlineData("www.plantech.com","/auth/cb")]
-    [InlineData("www.plantech.com/","/auth/cb")]
-    [InlineData("www.plantech.com/","auth/cb")]
-    [InlineData("plantech.education.gov.uk/","/auth/cb")]
-    [InlineData("plantech.education.gov.uk","/auth/cb")]
-    [InlineData("plantech.education.gov.uk/","auth/cb")]
-    public void CreateCallbackUrl_Should_Remove_Double_Slashes_For_FrontDoorUrl(string host, string callback){
+    [InlineData("www.plantech.com", "/auth/cb")]
+    [InlineData("www.plantech.com/", "/auth/cb")]
+    [InlineData("www.plantech.com/", "auth/cb")]
+    [InlineData("plantech.education.gov.uk/", "/auth/cb")]
+    [InlineData("plantech.education.gov.uk", "/auth/cb")]
+    [InlineData("plantech.education.gov.uk/", "auth/cb")]
+    public void CreateCallbackUrl_Should_Remove_Double_Slashes_For_FrontDoorUrl(string host, string callback)
+    {
         var httpContext = Substitute.For<HttpContext>();
         var context = new RedirectContext(httpContext, new AuthenticationScheme("", "", typeof(DummyAuthHandler)), new OpenIdConnectOptions(), new AuthenticationProperties() { });
 
@@ -559,7 +561,7 @@ public class DfeOpenIdConnectEventsTests
         var headers = new HeaderDictionary
         {
         };
-        
+
         request.Headers.Returns(headers);
         context.Request.Returns(request);
 
@@ -572,7 +574,7 @@ public class DfeOpenIdConnectEventsTests
 
         Assert.Contains(host, originUrl);
         Assert.Contains(callback, originUrl);
-        
+
         Assert.DoesNotContain("//", originUrl);
 
         var actualExpectedResult = (host + callback).Replace("//", "/");
