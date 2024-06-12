@@ -1,11 +1,18 @@
+using System.Text.RegularExpressions;
 using Dfe.PlanTech.Domain.SignIns.Models;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Dfe.PlanTech.Infrastructure.SignIns;
 
-public static class DfeOpenIdConnectEvents
+public static partial class DfeOpenIdConnectEvents
 {
+    [GeneratedRegex(SchemeMatchRegexPattern)]
+    private static partial Regex SchemeMatchRegexAttribute();
+
+    public const string SchemeMatchRegexPattern = @"^(https?:\/\/)";
+    public readonly static Regex SchemeMatchRegex = SchemeMatchRegexAttribute();
+
     private const string ForwardHostHeader = "X-Forwarded-Host";
 
     /// <summary>
@@ -73,8 +80,13 @@ public static class DfeOpenIdConnectEvents
         {
             originUrl = originUrl[..^1];
         }
+        else if (!originUrl.EndsWith('/') && !callbackPath.StartsWith('/'))
+        {
+            originUrl += '/';
+        }
 
-        if(!originUrl.StartsWith("https://")){
+        if (!SchemeMatchRegex.Match(originUrl).Success)
+        {
             originUrl = $"https://{originUrl}";
         }
 

@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Application.SignIns.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.SignIns.Enums;
 using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Users.Exceptions;
@@ -13,11 +12,18 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using NSubstitute;
 using System.Security.Claims;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace Dfe.PlanTech.Infrastructure.SignIns.UnitTests;
 
-public class DfeOpenIdConnectEventsTests
+public partial class DfeOpenIdConnectEventsTests
 {
+    [GeneratedRegex(SchemeMatchRegexPattern)]
+    private static partial Regex SchemeMatchRegexAttribute();
+
+    public const string SchemeMatchRegexPattern = @"^(https?:\/\/)";
+    public readonly static Regex SchemeMatchRegex = SchemeMatchRegexAttribute();
+
     [Fact]
     public async Task OnTokenValidated_Should_TryAddRoles_OnTokenValidated_When_DiscoverRolesWithPublicApi_Is_True()
     {
@@ -247,7 +253,7 @@ public class DfeOpenIdConnectEventsTests
 
         await DfeOpenIdConnectEvents.OnRedirectToIdentityProvider(context);
 
-        var expectedUrl = config.FrontDoorUrl + config.CallbackUrl;
+        var expectedUrl = "https://" + config.FrontDoorUrl + config.CallbackUrl;
 
         Assert.Equal(expectedUrl, openIdConnectMessage.RedirectUri);
     }
@@ -278,11 +284,10 @@ public class DfeOpenIdConnectEventsTests
 
         await DfeOpenIdConnectEvents.OnRedirectToIdentityProviderForSignOut(context);
 
-        var expectedUrl = config.FrontDoorUrl + config.SignoutRedirectUrl;
+        var expectedUrl = "https://" + config.FrontDoorUrl + config.SignoutRedirectUrl;
 
         Assert.Equal(expectedUrl, openIdConnectMessage.PostLogoutRedirectUri);
     }
-
 
     [Fact]
     public async Task The_Correct_Role_Does_Not_Exist()
@@ -413,7 +418,8 @@ public class DfeOpenIdConnectEventsTests
         {
             FrontDoorUrl = configUrl
         };
-        var originUrl = DfeOpenIdConnectEvents.GetOriginUrl(context, new DfeSignInConfiguration());
+
+        var originUrl = DfeOpenIdConnectEvents.GetOriginUrl(context, config);
 
         Assert.Contains(host, originUrl);
     }
@@ -504,13 +510,19 @@ public class DfeOpenIdConnectEventsTests
     }
 
     [Theory]
+    [InlineData("www.plantech.com", "auth/cb")]
     [InlineData("www.plantech.com", "/auth/cb")]
     [InlineData("www.plantech.com/", "/auth/cb")]
     [InlineData("www.plantech.com/", "auth/cb")]
     [InlineData("plantech.education.gov.uk/", "/auth/cb")]
     [InlineData("plantech.education.gov.uk", "/auth/cb")]
     [InlineData("plantech.education.gov.uk/", "auth/cb")]
-    public void CreateCallbackUrl_Should_Remove_Double_Slashes_For_ForwardedHost_Headers(string host, string callback)
+    [InlineData("https://plantech.education.gov.uk/", "auth/cb")]
+    [InlineData("https://plantech.education.gov.uk/", "/auth/cb")]
+    [InlineData("http://plantech.education.gov.uk", "auth/cb")]
+    [InlineData("https://plantech.education.gov.uk", "/auth/cb")]
+    [InlineData("https://plantech.education.gov.uk", "auth/cb")]
+    public void CreateCallbackUrl_Should_Return_Correct_Url_For_ForwardedHost_Headers(string host, string callback)
     {
         var configUrl = "www.shouldnt-return-this.com";
 
@@ -533,26 +545,23 @@ public class DfeOpenIdConnectEventsTests
 
         var originUrl = DfeOpenIdConnectEvents.CreateCallbackUrl(context, config, callback);
 
-        Assert.Contains(host, originUrl);
-        Assert.Contains(callback, originUrl);
-
-        Assert.DoesNotContain("//", originUrl);
-        Assert.DoesNotContain(configUrl, originUrl);
-
-        var actualExpectedResult = (host + callback).Replace("//", "/");
-
-        Assert.Contains(actualExpectedResult, originUrl);
+        ValidateOriginUrlResult(originUrl, host, callback);
     }
 
-
     [Theory]
+    [InlineData("www.plantech.com", "auth/cb")]
     [InlineData("www.plantech.com", "/auth/cb")]
     [InlineData("www.plantech.com/", "/auth/cb")]
     [InlineData("www.plantech.com/", "auth/cb")]
     [InlineData("plantech.education.gov.uk/", "/auth/cb")]
     [InlineData("plantech.education.gov.uk", "/auth/cb")]
     [InlineData("plantech.education.gov.uk/", "auth/cb")]
-    public void CreateCallbackUrl_Should_Remove_Double_Slashes_For_FrontDoorUrl(string host, string callback)
+    [InlineData("https://plantech.education.gov.uk/", "auth/cb")]
+    [InlineData("https://plantech.education.gov.uk/", "/auth/cb")]
+    [InlineData("http://plantech.education.gov.uk", "auth/cb")]
+    [InlineData("https://plantech.education.gov.uk", "/auth/cb")]
+    [InlineData("https://plantech.education.gov.uk", "auth/cb")]
+    public void CreateCallbackUrl_Should_Return_Correct_Url_For_FrontdoorUrl(string host, string callback)
     {
         var httpContext = Substitute.For<HttpContext>();
         var context = new RedirectContext(httpContext, new AuthenticationScheme("", "", typeof(DummyAuthHandler)), new OpenIdConnectOptions(), new AuthenticationProperties() { });
@@ -572,13 +581,42 @@ public class DfeOpenIdConnectEventsTests
 
         var originUrl = DfeOpenIdConnectEvents.CreateCallbackUrl(context, config, callback);
 
-        Assert.Contains(host, originUrl);
-        Assert.Contains(callback, originUrl);
-
-        Assert.DoesNotContain("//", originUrl);
-
-        var actualExpectedResult = (host + callback).Replace("//", "/");
-
-        Assert.Contains(actualExpectedResult, originUrl);
+        ValidateOriginUrlResult(originUrl, host, callback);
     }
+
+    private static void ValidateOriginUrlResult(string originUrl, string host, string callbackUrl)
+    {
+        if (!Uri.TryCreate(originUrl, UriKind.RelativeOrAbsolute, out Uri? uri))
+        {
+            Assert.Fail(CreateFailureMessage(originUrl, host, callbackUrl));
+        }
+
+        Assert.NotNull(uri);
+        Assert.InRange(uri.Scheme, Uri.UriSchemeHttp, Uri.UriSchemeHttps);
+
+        string expectedPath = GetExpectedPath(callbackUrl);
+        Assert.Equal(expectedPath, uri.AbsolutePath);
+
+        string expectedHost = GetExpectedHost(host);
+        Assert.Equal(expectedHost, uri.Host);
+
+        Assert.False(uri.AbsolutePath.StartsWith("//"), CreateFailureMessage(originUrl, expectedPath, expectedHost));
+    }
+
+    private static string GetExpectedPath(string callbackUrl)
+    {
+        return !callbackUrl.StartsWith('/') ? '/' + callbackUrl : callbackUrl;
+    }
+
+    private static string GetExpectedHost(string host)
+    {
+        //Remove scheme from the host
+        var expectedHost = SchemeMatchRegex.Replace(host, match => "");
+
+        //Remove trailing / if present
+        return expectedHost.EndsWith('/') ? expectedHost[..^1] : expectedHost;
+    }
+
+    private static string CreateFailureMessage(string originUrl, string host, string callbackUrl)
+    => $"Result not a valid URI - \"{originUrl}\" from host \"{host}\" and callback url \"{callbackUrl}\".";
 }
