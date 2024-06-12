@@ -498,11 +498,11 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public async Task Returns_RecommendationInfo_If_It_Exists_ForMaturity()
         {
-            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
+            _category.SectionStatuses.Add(new SectionStatusDto()
             {
                 SectionId = "Section1",
                 Completed = true,
-                Maturity = "High"
+                LastMaturity = "High"
             });
 
             _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
@@ -529,11 +529,11 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public async Task Returns_RecommendationInfo_And_Logs_Error_If_Exception_Thrown_By_Get_Category()
         {
-            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
+            _category.SectionStatuses.Add(new SectionStatusDto()
             {
                 SectionId = "Section1",
                 Completed = true,
-                Maturity = "High"
+                LastMaturity = "High"
             });
 
             _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
@@ -562,11 +562,11 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public async Task Returns_NullRecommendationInfo_If_No_RecommendationPage_Exists_ForMaturity()
         {
-            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
+            _category.SectionStatuses.Add(new SectionStatusDto()
             {
                 SectionId = "Section1",
                 Completed = true,
-                Maturity = "Low",
+                LastMaturity = "Low",
             });
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns(_category.SectionStatuses.ToList());
@@ -593,11 +593,11 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         public async Task DoesNotReturn_RecommendationInfo_If_Section_IsNot_Completed()
         {
             _category.Completed = 0;
-            _category.SectionStatuses.Add(new Domain.Submissions.Models.SectionStatusDto()
+            _category.SectionStatuses.Add(new SectionStatusDto()
             {
                 SectionId = "Section1",
                 Completed = false,
-                Maturity = null
+                LastMaturity = null
             });
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns(_category.SectionStatuses.ToList());
@@ -637,6 +637,37 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.NotNull(recommendation);
             Assert.Null(recommendation.RecommendationSlug);
             Assert.Null(recommendation.RecommendationDisplayName);
+        }
+
+        [Fact]
+        public async Task Returns_RecommendationInfo_If_Incomplete_Section_Is_Previously_Completed()
+        {
+            _category.SectionStatuses.Add(new SectionStatusDto()
+            {
+                SectionId = "Section1",
+                Completed = false,
+                LastMaturity = Maturity.High.ToString(),
+                DateCreated = DateTime.Now
+            });
+
+            _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns(_category.SectionStatuses.ToList());
+
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model as CategorySectionViewComponentViewModel;
+            Assert.NotNull(model);
+
+            Assert.NotNull(_subtopic);
+            Assert.NotEmpty(model.CategorySectionDto);
+            var recommendation = model.CategorySectionDto.First().Recommendation;
+            Assert.NotNull(recommendation);
+            Assert.Equal(_subtopic.Intros[0].Slug, recommendation.RecommendationSlug);
+            Assert.Equal(_subtopic.Intros[0].Header.Text, recommendation.RecommendationDisplayName);
+            Assert.Null(recommendation.NoRecommendationFoundErrorMessage);
         }
     }
 }

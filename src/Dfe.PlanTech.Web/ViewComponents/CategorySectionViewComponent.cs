@@ -91,12 +91,12 @@ public class CategorySectionViewComponent(
 
     private async Task<CategorySectionRecommendationDto> GetCategorySectionRecommendationDto(ISectionComponent section, SectionStatusDto? sectionStatus)
     {
-        if (string.IsNullOrEmpty(sectionStatus?.Maturity) || !sectionStatus.Completed)
+        if (string.IsNullOrEmpty(sectionStatus?.LastMaturity))
             return new CategorySectionRecommendationDto();
 
         try
         {
-            var recommendation = await _getSubTopicRecommendationQuery.GetRecommendationsViewDto(section.Sys.Id, sectionStatus.Maturity);
+            var recommendation = await _getSubTopicRecommendationQuery.GetRecommendationsViewDto(section.Sys.Id, sectionStatus.LastMaturity);
             if (recommendation == null)
             {
                 return new CategorySectionRecommendationDto
