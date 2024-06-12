@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
-[LogInvalidModelState]
 [Authorize]
 [Route("/")]
 public class QuestionsController : BaseController<QuestionsController>
@@ -35,6 +34,7 @@ public class QuestionsController : BaseController<QuestionsController>
         _user = user;
     }
 
+    [LogInvalidModelState]
     [HttpGet("{sectionSlug}/{questionSlug}")]
     public async Task<IActionResult> GetQuestionBySlug(string sectionSlug,
                                                         string questionSlug,
@@ -48,6 +48,7 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
 
+    [LogInvalidModelState]
     [HttpGet("{sectionSlug}/next-question")]
     public async Task<IActionResult> GetNextUnansweredQuestion(string sectionSlug,
                                                                 [FromServices] IGetNextUnansweredQuestionQuery getQuestionQuery,

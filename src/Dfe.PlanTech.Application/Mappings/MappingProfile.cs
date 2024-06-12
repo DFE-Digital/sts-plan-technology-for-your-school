@@ -11,7 +11,6 @@ public class CmsMappingProfile : Profile
 {
     public CmsMappingProfile()
     {
-        CreateMap<PageDbEntity, Page>();
 
         CreateMap<ContentComponentDbEntity, ContentComponent>()
         .Include<AnswerDbEntity, Answer>()
@@ -21,6 +20,7 @@ public class CmsMappingProfile : Profile
         .Include<CategoryDbEntity, Category>()
         .Include<HeaderDbEntity, Header>()
         .Include<InsetTextDbEntity, InsetText>()
+        .Include<PageDbEntity, Page>()
         .Include<QuestionDbEntity, Question>()
         .Include<RecommendationChunkDbEntity, RecommendationChunk>()
         .Include<RecommendationIntroDbEntity, RecommendationIntro>()
@@ -42,6 +42,7 @@ public class CmsMappingProfile : Profile
         CreateMap<CategoryDbEntity, Category>();
         CreateMap<HeaderDbEntity, Header>();
         CreateMap<InsetTextDbEntity, InsetText>();
+        CreateMap<PageDbEntity, Page>();
         CreateMap<QuestionDbEntity, Question>();
         CreateMap<RecommendationChunkDbEntity, RecommendationChunk>();
         CreateMap<RecommendationIntroDbEntity, RecommendationIntro>();
