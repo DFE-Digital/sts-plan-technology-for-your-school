@@ -17,9 +17,7 @@ public static class DfeOpenIdConnectEvents
     {
         var config = context.HttpContext.RequestServices.GetRequiredService<IDfeSignInConfiguration>();
 
-        var originUrl = GetOriginUrl(context, config);
-
-        context.ProtocolMessage.RedirectUri = $"{originUrl}{config.CallbackUrl}";
+        context.ProtocolMessage.RedirectUri = CreateCallbackUrl(context, config, config.CallbackUrl);
 
         return Task.FromResult(0);
     }
@@ -35,9 +33,7 @@ public static class DfeOpenIdConnectEvents
         {
             var config = context.HttpContext.RequestServices.GetRequiredService<IDfeSignInConfiguration>();
 
-            var originUrl = GetOriginUrl(context, config);
-
-            context.ProtocolMessage.PostLogoutRedirectUri = $"{originUrl}{config.SignoutRedirectUrl}";
+            context.ProtocolMessage.PostLogoutRedirectUri = CreateCallbackUrl(context, config, config.SignoutRedirectUrl);
         }
 
         return Task.FromResult(0);
@@ -51,12 +47,19 @@ public static class DfeOpenIdConnectEvents
                                                             .Select(header => header.Value.FirstOrDefault())
                                                             .FirstOrDefault();
 
-        var originUrl = forwardHostHeader ?? config.FrontDoorUrl;
+        return forwardHostHeader ?? config.FrontDoorUrl;
+    }
 
-        if(originUrl.Last() != '/'){
-            originUrl += '/';
+    public static string CreateCallbackUrl(RedirectContext context, IDfeSignInConfiguration config, string callbackPath)
+    {
+        var originUrl = GetOriginUrl(context, config);
+
+        //Our config uses URls like "/auth/cb" for the redirect callback slug, signout slug, etc.
+        //So we should ensure that the URL does not end with a forward slash when returning
+        if(originUrl.EndsWith('/') && callbackPath.StartsWith('/')){
+            originUrl = originUrl[..^1];
         }
 
-        return config.FrontDoorUrl;
+        return $"{originUrl}{callbackPath}";
     }
 }

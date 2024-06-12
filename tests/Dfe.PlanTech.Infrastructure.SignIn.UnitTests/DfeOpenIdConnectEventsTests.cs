@@ -389,10 +389,13 @@ public class DfeOpenIdConnectEventsTests
             OnUserInformationReceivedEvent.OnUserInformationReceived(context));
     }
 
-    [Fact]
-    public void GetOriginUrl_Should_Return_XForwardedHost_If_Found()
+    [Theory]
+    [InlineData("www.should-return-this.com")]
+    [InlineData("www.and-return-this.co.uk")]
+    [InlineData("this-should-also-work.gov.uk")]
+    public void GetOriginUrl_Should_Return_XForwardedHost_If_Found(string host)
     {
-        var host = "www.should-return-this.com";
+        var configUrl = "www.shouldnt-return-this.com";
 
         var httpContext = Substitute.For<HttpContext>();
         var context = new RedirectContext(httpContext, new AuthenticationScheme("", "", typeof(DummyAuthHandler)), new OpenIdConnectOptions(), new AuthenticationProperties() { });
@@ -405,16 +408,23 @@ public class DfeOpenIdConnectEventsTests
 
         request.Headers.Returns(headers);
         context.Request.Returns(request);
+
+           var config = new DfeSignInConfiguration()
+        {
+            FrontDoorUrl = configUrl
+        };
         var originUrl = DfeOpenIdConnectEvents.GetOriginUrl(context, new DfeSignInConfiguration());
 
         Assert.Contains(host, originUrl);
     }
 
-    [Fact]
-    public void GetOriginUrl_Should_Return_FrontDoorURL_If_Header_Not_Found()
-    {
-        var host = "www.should-return-this.com";
 
+    [Theory]
+    [InlineData("www.should-return-this.com")]
+    [InlineData("www.and-return-this.co.uk")]
+    [InlineData("this-should-also-work.gov.uk")]
+    public void GetOriginUrl_Should_Return_FrontDoorURL_If_Header_Not_Found(string host)
+    {
         var httpContext = Substitute.For<HttpContext>();
         var context = new RedirectContext(httpContext, new AuthenticationScheme("", "", typeof(DummyAuthHandler)), new OpenIdConnectOptions(), new AuthenticationProperties() { });
 
@@ -434,5 +444,139 @@ public class DfeOpenIdConnectEventsTests
         var originUrl = DfeOpenIdConnectEvents.GetOriginUrl(context, config);
 
         Assert.Contains(host, originUrl);
+    }
+
+
+    [Theory]
+    [InlineData("www.should-return-this.com")]
+    [InlineData("www.should-return-this.com/")]
+    public void GetOriginUrl_Should_Return_Append_ForwardSlash_To_FrontDoorUrl_If_Missing(string host)
+    {
+        var httpContext = Substitute.For<HttpContext>();
+        var context = new RedirectContext(httpContext, new AuthenticationScheme("", "", typeof(DummyAuthHandler)), new OpenIdConnectOptions(), new AuthenticationProperties() { });
+
+        var request = Substitute.For<HttpRequest>();
+        var headers = new HeaderDictionary
+        {
+        };
+
+        request.Headers.Returns(headers);
+        context.Request.Returns(request);
+
+        var config = new DfeSignInConfiguration()
+        {
+            FrontDoorUrl = host
+        };
+
+        var originUrl = DfeOpenIdConnectEvents.GetOriginUrl(context, config);
+
+        Assert.Equal(host, originUrl);
+    }
+
+    [Theory]
+    [InlineData("www.should-return-this.com")]
+    [InlineData("www.should-return-this.com/")]
+    public void GetOriginUrl_Should_Return_Append_ForwardSlash_To_ForwardedHostHeader_If_Missing(string host)
+    {
+        var configUrl = "www.shouldnt-return-this.com";
+
+        var httpContext = Substitute.For<HttpContext>();
+        var context = new RedirectContext(httpContext, new AuthenticationScheme("", "", typeof(DummyAuthHandler)), new OpenIdConnectOptions(), new AuthenticationProperties() { });
+
+        var request = Substitute.For<HttpRequest>();
+        var headers = new HeaderDictionary
+        {
+            { "X-Forwarded-Host", host }
+        };
+        
+        request.Headers.Returns(headers);
+        context.Request.Returns(request);
+
+        var config = new DfeSignInConfiguration()
+        {
+            FrontDoorUrl = configUrl
+        };
+
+        var originUrl = DfeOpenIdConnectEvents.GetOriginUrl(context, config);
+
+        Assert.Equal(host, originUrl);
+        Assert.DoesNotContain(configUrl, originUrl);
+    }
+
+    [Theory]
+    [InlineData("www.plantech.com","/auth/cb")]
+    [InlineData("www.plantech.com/","/auth/cb")]
+    [InlineData("www.plantech.com/","auth/cb")]
+    [InlineData("plantech.education.gov.uk/","/auth/cb")]
+    [InlineData("plantech.education.gov.uk","/auth/cb")]
+    [InlineData("plantech.education.gov.uk/","auth/cb")]
+    public void CreateCallbackUrl_Should_Remove_Double_Slashes_For_ForwardedHost_Headers(string host, string callback){
+        var configUrl = "www.shouldnt-return-this.com";
+
+        var httpContext = Substitute.For<HttpContext>();
+        var context = new RedirectContext(httpContext, new AuthenticationScheme("", "", typeof(DummyAuthHandler)), new OpenIdConnectOptions(), new AuthenticationProperties() { });
+
+        var request = Substitute.For<HttpRequest>();
+        var headers = new HeaderDictionary
+        {
+            { "X-Forwarded-Host", host }
+        };
+        
+        request.Headers.Returns(headers);
+        context.Request.Returns(request);
+
+        var config = new DfeSignInConfiguration()
+        {
+            FrontDoorUrl = configUrl
+        };
+
+        var originUrl = DfeOpenIdConnectEvents.CreateCallbackUrl(context, config, callback);
+
+        Assert.Contains(host, originUrl);
+        Assert.Contains(callback, originUrl);
+
+        Assert.DoesNotContain("//", originUrl);
+        Assert.DoesNotContain(configUrl, originUrl);
+
+        var actualExpectedResult = (host + callback).Replace("//", "/");
+
+        Assert.Contains(actualExpectedResult, originUrl);
+    }
+
+
+    [Theory]
+    [InlineData("www.plantech.com","/auth/cb")]
+    [InlineData("www.plantech.com/","/auth/cb")]
+    [InlineData("www.plantech.com/","auth/cb")]
+    [InlineData("plantech.education.gov.uk/","/auth/cb")]
+    [InlineData("plantech.education.gov.uk","/auth/cb")]
+    [InlineData("plantech.education.gov.uk/","auth/cb")]
+    public void CreateCallbackUrl_Should_Remove_Double_Slashes_For_FrontDoorUrl(string host, string callback){
+        var httpContext = Substitute.For<HttpContext>();
+        var context = new RedirectContext(httpContext, new AuthenticationScheme("", "", typeof(DummyAuthHandler)), new OpenIdConnectOptions(), new AuthenticationProperties() { });
+
+        var request = Substitute.For<HttpRequest>();
+        var headers = new HeaderDictionary
+        {
+        };
+        
+        request.Headers.Returns(headers);
+        context.Request.Returns(request);
+
+        var config = new DfeSignInConfiguration()
+        {
+            FrontDoorUrl = host
+        };
+
+        var originUrl = DfeOpenIdConnectEvents.CreateCallbackUrl(context, config, callback);
+
+        Assert.Contains(host, originUrl);
+        Assert.Contains(callback, originUrl);
+        
+        Assert.DoesNotContain("//", originUrl);
+
+        var actualExpectedResult = (host + callback).Replace("//", "/");
+
+        Assert.Contains(actualExpectedResult, originUrl);
     }
 }
