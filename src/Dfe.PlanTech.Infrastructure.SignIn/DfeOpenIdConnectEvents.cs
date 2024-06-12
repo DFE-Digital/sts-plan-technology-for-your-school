@@ -74,6 +74,10 @@ public static class DfeOpenIdConnectEvents
             originUrl = originUrl[..^1];
         }
 
-        return $"{originUrl}{callbackPath}";
+        if(!originUrl.StartsWith("https://")){
+            originUrl = $"https://{originUrl}";
+        }
+
+        return originUrl + callbackPath;
     }
 }
