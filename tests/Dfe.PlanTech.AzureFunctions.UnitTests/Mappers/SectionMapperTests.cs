@@ -204,7 +204,7 @@ public class SectionMapperTests : BaseMapperTests
             new CmsWebHookSystemDetailsInnerContainer() { Sys = new() { Id = "not-existing-id" } },
         ];
         var interstitialPage = new CmsWebHookSystemDetailsInnerContainer()
-            { Sys = new CmsWebHookSystemDetailsInner() { Id = "Interstitial page Id" } };
+        { Sys = new CmsWebHookSystemDetailsInner() { Id = "Interstitial page Id" } };
 
         var fields = new Dictionary<string, object?>()
         {
