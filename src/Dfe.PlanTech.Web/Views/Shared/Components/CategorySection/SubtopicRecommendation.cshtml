@@ -1,29 +1,24 @@
+@using Dfe.PlanTech.Domain.Constants
 @model Dfe.PlanTech.Domain.CategorySection.CategorySectionRecommendationDto
 
-@if (Model.NoRecommendationFoundErrorMessage == null)
-{
-    <dt class="govuk-summary-list__key govuk-!-font-weight-regular">
-        @if (Model.RecommendationSlug != null)
-        {
-            <a class="govuk-link"
-               asp-route="GetRecommendation" asp-route-sectionSlug="@Model.SectionSlug" asp-route-recommendationSlug="@Model.RecommendationSlug">
-                Recommendation
-            </a>
-        }
-        else
-        {
-            <span>Recommendation</span>
-        }
-    </dt>
-    <dd class="govuk-summary-list__value govuk-!-text-align-right">
-        <task-list-tag colour=@Model.Tag.Colour>
-            @Model.Tag.Text
-        </task-list-tag>
-    </dd>
-}
-else
-{
-    <dt class="govuk-summary-list__key">
+
+<dd class="govuk-summary-list__value govuk-!-text-align-right">
+    @if (Model.NoRecommendationFoundErrorMessage != null)
+    {
         <govuk-error-message>@Model.NoRecommendationFoundErrorMessage</govuk-error-message>
-    </dt>
-}
+    }
+    else if (Model.RecommendationSlug != null)
+    {
+        <govuk-button-link
+            class="go"
+            asp-route="GetRecommendation"
+            asp-route-sectionSlug="@Model.SectionSlug"
+            asp-route-recommendationSlug="@Model.RecommendationSlug">
+            View Recommendation
+        </govuk-button-link>
+        if (Model.RecommendationSlug.Contains("broadband"))
+        {
+            <task-list-tag colour="@TagColour.Yellow">New</task-list-tag>
+        }
+    }
+</dd>

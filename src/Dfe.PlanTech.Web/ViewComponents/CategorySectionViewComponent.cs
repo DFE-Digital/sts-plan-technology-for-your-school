@@ -63,8 +63,7 @@ public class CategorySectionViewComponent(
                 slug: section.InterstitialPage.Slug,
                 name: section.Name,
                 retrievalError: category.RetrievalError,
-                started: sectionStatus != null,
-                completed: sectionStatus?.Completed == true,
+                sectionStatus: sectionStatus,
                 recommendation: await GetCategorySectionRecommendationDto(section, sectionStatus)
             );
         }
