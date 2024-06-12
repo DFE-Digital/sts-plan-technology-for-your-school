@@ -1,11 +1,14 @@
 using Dfe.PlanTech.Domain.SignIns.Models;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Primitives;
 
 namespace Dfe.PlanTech.Infrastructure.SignIns;
 
 public static class DfeOpenIdConnectEvents
 {
+    private const string ForwardHostHeader = "X-Forwarded-Host";
+
     /// <summary>
     /// Re-writes the login callback URI
     /// </summary>
@@ -15,9 +18,25 @@ public static class DfeOpenIdConnectEvents
     {
         var config = context.HttpContext.RequestServices.GetRequiredService<IDfeSignInConfiguration>();
 
-        context.ProtocolMessage.RedirectUri = $"{config.FrontDoorUrl}{config.CallbackUrl}";
+        var originUrl = GetOriginUrl(context, config);
+
+        context.ProtocolMessage.RedirectUri = $"{originUrl}{config.CallbackUrl}";
 
         return Task.FromResult(0);
+    }
+
+    private static string GetOriginUrl(RedirectContext context, IDfeSignInConfiguration config)
+    {
+        var forwardHostHeader = context.HttpContext.Request.Headers
+                                                            .Where(header => string.Equals(ForwardHostHeader, header.Key, StringComparison.InvariantCultureIgnoreCase))
+                                                            .Select(header => header.Value.FirstOrDefault())
+                                                            .FirstOrDefault();
+
+        if(forwardHostHeader != null){
+            return $"https://{forwardHostHeader}/";
+        }
+
+        return config.FrontDoorUrl;
     }
 
     /// <summary>
@@ -27,11 +46,13 @@ public static class DfeOpenIdConnectEvents
     /// <returns></returns>
     public static Task OnRedirectToIdentityProviderForSignOut(RedirectContext context)
     {
-        var config = context.HttpContext.RequestServices.GetRequiredService<IDfeSignInConfiguration>();
-
         if (context.ProtocolMessage != null)
         {
-            context.ProtocolMessage.PostLogoutRedirectUri = $"{config.FrontDoorUrl}{config.SignoutRedirectUrl}";
+            var config = context.HttpContext.RequestServices.GetRequiredService<IDfeSignInConfiguration>();
+
+            var originUrl = GetOriginUrl(context, config);
+
+            context.ProtocolMessage.PostLogoutRedirectUri = $"{originUrl}{config.SignoutRedirectUrl}";
         }
 
         return Task.FromResult(0);
