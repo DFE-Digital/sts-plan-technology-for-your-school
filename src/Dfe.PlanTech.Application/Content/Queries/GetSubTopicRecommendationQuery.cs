@@ -30,7 +30,7 @@ public class GetSubTopicRecommendationQuery([FromKeyedServices(GetSubtopicRecomm
         return recommendationsView;
     }
 
-    public async Task<SubtopicRecommendation?> GetSubTopicRecommendation(string subtopicId, CancellationToken cancellationToken)
+    public async Task<SubtopicRecommendation?> GetSubTopicRecommendation(string subtopicId, CancellationToken cancellationToken = default)
     {
         Task<SubtopicRecommendation?> func(IGetSubTopicRecommendationQuery repository) => repository.GetSubTopicRecommendation(subtopicId, cancellationToken);
 

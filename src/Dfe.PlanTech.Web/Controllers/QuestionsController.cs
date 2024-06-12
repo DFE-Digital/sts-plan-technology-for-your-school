@@ -5,6 +5,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Responses.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Dfe.PlanTech.Web.Controllers;
 
 [Authorize]
+[Route("/")]
 public class QuestionsController : BaseController<QuestionsController>
 {
     public const string Controller = "Questions";
@@ -32,6 +34,7 @@ public class QuestionsController : BaseController<QuestionsController>
         _user = user;
     }
 
+    [LogInvalidModelState]
     [HttpGet("{sectionSlug}/{questionSlug}")]
     public async Task<IActionResult> GetQuestionBySlug(string sectionSlug,
                                                         string questionSlug,
@@ -45,6 +48,7 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
 
+    [LogInvalidModelState]
     [HttpGet("{sectionSlug}/next-question")]
     public async Task<IActionResult> GetNextUnansweredQuestion(string sectionSlug,
                                                                 [FromServices] IGetNextUnansweredQuestionQuery getQuestionQuery,
@@ -104,9 +108,11 @@ public class QuestionsController : BaseController<QuestionsController>
         return RedirectToAction(nameof(GetNextUnansweredQuestion), new { sectionSlug });
     }
 
+    [NonAction]
     public IActionResult RenderView(QuestionViewModel viewModel) => View("Question", viewModel);
 
-    public async Task<QuestionViewModel> GenerateViewModel(string sectionSlug, string questionSlug, CancellationToken cancellationToken)
+    [NonAction]
+    private async Task<QuestionViewModel> GenerateViewModel(string sectionSlug, string questionSlug, CancellationToken cancellationToken)
     {
         var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
                         throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
@@ -124,6 +130,7 @@ public class QuestionsController : BaseController<QuestionsController>
         return GenerateViewModel(sectionSlug, question, section, latestResponseForQuestion?.AnswerRef);
     }
 
+    [NonAction]
     public QuestionViewModel GenerateViewModel(string sectionSlug, Question question, ISectionComponent section, string? latestAnswerContentfulId)
     {
         ViewData["Title"] = question.Text;
