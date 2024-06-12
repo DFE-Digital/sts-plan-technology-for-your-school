@@ -1,80 +1,23 @@
 @model Dfe.PlanTech.Web.Models.CookiesViewModel
 
 @section BeforeContent {
-    @{
-        await Html.RenderPartialAsync("BackButton");
-    }
+    <partial name="BackButton" />
 }
+
+<partial name="CookiesPreferencesSetBanner" model="@Model"/>
 
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-        @{
-            bool userPreferenceSet = TempData["UserPreferenceRecorded"] as bool? ?? false;
-            if (userPreferenceSet)
+        <partial name="Components/PageComponentFactory" model="@Model.Title"/>
+
+        @if (Model.Content != null)
+        {
+            foreach (var content in Model.Content)
             {
-                <div class="govuk-notification-banner govuk-notification-banner--success" role="alert"
-                    aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
-                    <div class="govuk-notification-banner__header">
-                        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
-                            Success
-                        </h2>
-                    </div>
-                    <div class="govuk-notification-banner__content">
-                        <p class="govuk-notification-banner__heading">
-                            You’ve set your cookie preferences. <a class="govuk-notification-banner__link"
-                                href="javascript:void(0)" onclick="window.history.go(-2)">Go back to the page you were looking
-                                at</a>.
-                        </p>
-                    </div>
-                </div>
+                <partial name="Components/PageComponentFactory" model="content"/>
             }
         }
 
-        @{
-            await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Title);
-        }
-
-
-        @{
-            if (Model.Content != null)
-            {
-                foreach (var content in Model.Content)
-                {
-                    await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-                }
-            }
-        }
-
-        <h2 class="govuk-heading-l">Change your cookie settings</h2>
-        <form asp-controller="Cookies" asp-action="CookiePreference" method="post" novalidate>
-            <div class="govuk-form-group">
-            </div>
-            <div class="govuk-form-group">
-                <fieldset class="govuk-fieldset">
-                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
-                        Do you want to accept analytics cookies?
-                    </legend>
-                    <div class="govuk-radios" data-module="govuk-radios">
-                        <div class="govuk-radios__item">
-                            <input class="govuk-radios__input" id="analytics-cookies-yes" name="userPreference"
-                                type="radio" value="true" checked>
-                            <label class="govuk-label govuk-radios__label" for="analytics-cookies-yes">
-                                Yes
-                            </label>
-                        </div>
-                        <div class="govuk-radios__item">
-                            <input class="govuk-radios__input" id="analytics-cookies-no" name="userPreference"
-                                type="radio" value="false">
-                            <label class="govuk-label govuk-radios__label" for="analytics-cookies-no">
-                                No
-                            </label>
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
-            <button type="submit" class="govuk-button" data-module="govuk-button">
-                Save cookie settings
-            </button>
-        </form>
+        <partial name="CookiePreferencesForm" model="@Model.Cookie"/>
     </div>
 </div>

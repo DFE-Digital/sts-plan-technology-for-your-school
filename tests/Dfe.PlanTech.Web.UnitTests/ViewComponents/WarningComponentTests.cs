@@ -37,7 +37,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public void WarningComponent_Sets_Null()
         {
-            var testWarning = componentBuilder.BuildWarningComponent(nullText);
+            var testWarning = componentBuilder.BuildWarningComponent(nullText!);
             Assert.Null(testWarning.Text.RichText.Value);
         }
     }

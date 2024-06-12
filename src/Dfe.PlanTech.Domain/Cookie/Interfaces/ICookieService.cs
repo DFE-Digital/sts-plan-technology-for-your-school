@@ -2,11 +2,9 @@
 
 public interface ICookieService
 {
-    public DfeCookie GetCookie();
+    public DfeCookie Cookie { get; }
 
-    public void SetPreference(bool userPreference);
+    public void SetCookieAcceptance(bool userAcceptsCookies);
 
     public void SetVisibility(bool visibility);
-
-    public void RejectCookies();
 }
