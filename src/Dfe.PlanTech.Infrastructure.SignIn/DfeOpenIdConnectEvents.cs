@@ -1,7 +1,6 @@
 using Dfe.PlanTech.Domain.SignIns.Models;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Primitives;
 
 namespace Dfe.PlanTech.Infrastructure.SignIns;
 
@@ -25,20 +24,6 @@ public static class DfeOpenIdConnectEvents
         return Task.FromResult(0);
     }
 
-    private static string GetOriginUrl(RedirectContext context, IDfeSignInConfiguration config)
-    {
-        var forwardHostHeader = context.HttpContext.Request.Headers
-                                                            .Where(header => string.Equals(ForwardHostHeader, header.Key, StringComparison.InvariantCultureIgnoreCase))
-                                                            .Select(header => header.Value.FirstOrDefault())
-                                                            .FirstOrDefault();
-
-        if(forwardHostHeader != null){
-            return $"https://{forwardHostHeader}/";
-        }
-
-        return config.FrontDoorUrl;
-    }
-
     /// <summary>
     /// Re-writes the signout redirect URI
     /// </summary>
@@ -56,5 +41,20 @@ public static class DfeOpenIdConnectEvents
         }
 
         return Task.FromResult(0);
+    }
+
+    
+    public static string GetOriginUrl(RedirectContext context, IDfeSignInConfiguration config)
+    {
+        var forwardHostHeader = context.HttpContext.Request.Headers
+                                                            .Where(header => string.Equals(ForwardHostHeader, header.Key, StringComparison.InvariantCultureIgnoreCase))
+                                                            .Select(header => header.Value.FirstOrDefault())
+                                                            .FirstOrDefault();
+
+        if(forwardHostHeader != null){
+            return $"https://{forwardHostHeader}/";
+        }
+
+        return config.FrontDoorUrl;
     }
 }
