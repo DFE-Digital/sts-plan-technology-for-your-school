@@ -19,8 +19,9 @@
 @section Header {
     @Html.Raw(GtmConfiguration.Body)
 
-    <partial name="_CookieBanner"/>
-    <partial name="_Header"/>
+    <partial name="CookiesBanner/_CookieBanner" />
+    <partial name="_Header" />
+
     @RenderSection("Header", false)
 }
 
