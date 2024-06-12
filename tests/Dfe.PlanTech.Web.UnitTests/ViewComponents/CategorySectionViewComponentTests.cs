@@ -251,6 +251,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             {
                 SectionId = "Section1",
                 Completed = true,
+                DateCreated = new DateTime(2015, 10, 15),
             });
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
@@ -282,8 +283,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Equal("green", categorySectionDto.Tag.Colour);
-            Assert.Equal("COMPLETE", categorySectionDto.Tag.Text);
+            Assert.Equal("grey", categorySectionDto.Tag.Colour);
+            Assert.Equal("COMPLETE 15/10/2015", categorySectionDto.Tag.Text);
             Assert.Null(categorySectionDto.ErrorMessage);
         }
 
@@ -295,7 +296,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category.SectionStatuses.Add(new SectionStatusDto()
             {
                 SectionId = "Section1",
-                Completed = false
+                Completed = false,
+                DateCreated = new DateTime(2000, 01, 25)
             });
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
@@ -327,8 +329,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Equal("light-blue", categorySectionDto.Tag.Colour);
-            Assert.Equal("IN PROGRESS", categorySectionDto.Tag.Text);
+            Assert.Equal("grey", categorySectionDto.Tag.Colour);
+            Assert.Equal("IN PROGRESS 25/01/2000", categorySectionDto.Tag.Text);
             Assert.Null(categorySectionDto.ErrorMessage);
         }
 

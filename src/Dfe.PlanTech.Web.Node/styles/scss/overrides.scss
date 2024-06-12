@@ -49,6 +49,11 @@ strong.govuk-tag {
   vertical-align: middle;
 }
 
+// The self assessment list has a 4th much smaller column, so cannot have the table layout as fixed
+.dfe-self-assessment-list {
+  table-layout: auto;
+}
+
 //Hide GTM iframe
 iframe {
   display: none;
