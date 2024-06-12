@@ -390,11 +390,12 @@ public class DfeOpenIdConnectEventsTests
     }
 
     [Fact]
-    public void GetOriginUrl_Should_Return_XForwardedHost_If_Found(){
+    public void GetOriginUrl_Should_Return_XForwardedHost_If_Found()
+    {
         var host = "www.should-return-this.com";
 
         var httpContext = Substitute.For<HttpContext>();
-        var context = new RedirectContext(httpContext, new AuthenticationScheme("", "", typeof(DummyAuthHandler)), new OpenIdConnectOptions(), new AuthenticationProperties(){} );
+        var context = new RedirectContext(httpContext, new AuthenticationScheme("", "", typeof(DummyAuthHandler)), new OpenIdConnectOptions(), new AuthenticationProperties() { });
 
         var request = Substitute.For<HttpRequest>();
         var headers = new HeaderDictionary
@@ -410,11 +411,12 @@ public class DfeOpenIdConnectEventsTests
     }
 
     [Fact]
-    public void GetOriginUrl_Should_Return_FrontDoorURL_If_Header_Not_Found(){
+    public void GetOriginUrl_Should_Return_FrontDoorURL_If_Header_Not_Found()
+    {
         var host = "www.should-return-this.com";
 
         var httpContext = Substitute.For<HttpContext>();
-        var context = new RedirectContext(httpContext, new AuthenticationScheme("", "", typeof(DummyAuthHandler)), new OpenIdConnectOptions(), new AuthenticationProperties(){} );
+        var context = new RedirectContext(httpContext, new AuthenticationScheme("", "", typeof(DummyAuthHandler)), new OpenIdConnectOptions(), new AuthenticationProperties() { });
 
         var request = Substitute.For<HttpRequest>();
         var headers = new HeaderDictionary

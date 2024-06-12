@@ -43,7 +43,7 @@ public static class DfeOpenIdConnectEvents
         return Task.FromResult(0);
     }
 
-    
+
     public static string GetOriginUrl(RedirectContext context, IDfeSignInConfiguration config)
     {
         var forwardHostHeader = context.HttpContext.Request.Headers
@@ -51,7 +51,8 @@ public static class DfeOpenIdConnectEvents
                                                             .Select(header => header.Value.FirstOrDefault())
                                                             .FirstOrDefault();
 
-        if(forwardHostHeader != null){
+        if (forwardHostHeader != null)
+        {
             return $"https://{forwardHostHeader}/";
         }
 
