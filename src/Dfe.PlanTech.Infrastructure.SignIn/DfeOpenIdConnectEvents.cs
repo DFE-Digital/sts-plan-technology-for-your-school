@@ -51,9 +51,10 @@ public static class DfeOpenIdConnectEvents
                                                             .Select(header => header.Value.FirstOrDefault())
                                                             .FirstOrDefault();
 
-        if (forwardHostHeader != null)
-        {
-            return $"https://{forwardHostHeader}/";
+        var originUrl = forwardHostHeader ?? config.FrontDoorUrl;
+
+        if(originUrl.Last() != '/'){
+            originUrl += '/';
         }
 
         return config.FrontDoorUrl;
