@@ -525,7 +525,6 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Null(recommendation.NoRecommendationFoundErrorMessage);
         }
 
-        // TODO
         [Fact]
         public async Task Returns_RecommendationInfo_And_Logs_Error_If_Exception_Thrown_By_Get_Category()
         {
@@ -590,7 +589,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         }
 
         [Fact]
-        public async Task DoesNotReturn_RecommendationInfo_If_Section_IsNot_Completed()
+        public async Task DoesNotReturn_RecommendationInfo_If_Section_Has_Never_Been_Completed()
         {
             _category.Completed = 0;
             _category.SectionStatuses.Add(new SectionStatusDto()
@@ -602,27 +601,6 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns(_category.SectionStatuses.ToList());
 
-            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
-
-            Assert.NotNull(result);
-            Assert.NotNull(result.ViewData);
-
-            var model = result.ViewData.Model as CategorySectionViewComponentViewModel;
-            Assert.NotNull(model);
-
-            Assert.NotNull(_subtopic);
-            Assert.NotEmpty(model.CategorySectionDto);
-            var recommendation = model.CategorySectionDto.First().Recommendation;
-            Assert.NotNull(recommendation);
-            Assert.Null(recommendation.RecommendationSlug);
-            Assert.Null(recommendation.RecommendationDisplayName);
-        }
-
-        [Fact]
-        public async Task Returns_EmptyRecommendation_If_Category_IsNot_Completed()
-        {
-            _category.Completed = 0;
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
             Assert.NotNull(result);
