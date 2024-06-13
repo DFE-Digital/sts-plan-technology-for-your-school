@@ -5,19 +5,12 @@ using System.Text.Json;
 
 namespace Dfe.PlanTech.Application.Cookie.Service;
 
-public class CookieService : ICookieService
+public class CookieService(IHttpContextAccessor context, ICookiesCleaner cookiesCleaner) : ICookieService
 {
     public const string Cookie_Key = "user_cookies_preferences";
 
-    private readonly IHttpContextAccessor _context;
     private DfeCookie? _dfeCookie;
-
     public DfeCookie Cookie => _dfeCookie ?? GetCookie();
-
-    public CookieService(IHttpContextAccessor context)
-    {
-        _context = context;
-    }
 
     public void SetVisibility(bool visibility)
     {
@@ -27,11 +20,16 @@ public class CookieService : ICookieService
     public void SetCookieAcceptance(bool userAcceptsCookies)
     {
         CreateCookie(Cookie_Key, userAcceptsCookies: userAcceptsCookies);
+
+        if (!userAcceptsCookies)
+        {
+            cookiesCleaner.RemoveNonEssentialCookies(context.HttpContext);
+        }
     }
 
     public DfeCookie GetCookie()
     {
-        var cookie = _context.HttpContext.Request.Cookies[Cookie_Key];
+        var cookie = context.HttpContext.Request.Cookies[Cookie_Key];
         if (cookie is null)
         {
             return new DfeCookie();
@@ -43,12 +41,12 @@ public class CookieService : ICookieService
 
     private void DeleteCookie()
     {
-        _context.HttpContext.Response.Cookies.Delete(Cookie_Key);
+        context.HttpContext.Response.Cookies.Delete(Cookie_Key);
     }
 
     private void CreateCookie(string key, bool? userAcceptsCookies = null, bool? visibility = null)
     {
-        CookieOptions cookieOptions = new CookieOptions
+        CookieOptions cookieOptions = new()
         {
             Secure = true,
             HttpOnly = true,
@@ -64,7 +62,7 @@ public class CookieService : ICookieService
         };
 
         var serializedCookie = JsonSerializer.Serialize(cookie);
-        _context.HttpContext.Response.Cookies.Append(key, serializedCookie, cookieOptions);
+        context.HttpContext.Response.Cookies.Append(key, serializedCookie, cookieOptions);
         _dfeCookie = cookie;
     }
 }

@@ -1,5 +1,7 @@
 @using Dfe.PlanTech.Domain.Cookie;
 
+@model Dfe.PlanTech.Web.Models.CookiesViewModel
+
 @{
     bool userPreferenceSet = TempData[CookieConstants.UserPreferenceRecordedKey] as bool? ?? false;
 }
@@ -18,8 +20,7 @@
                 You’ve set your cookie preferences.
                 
                 <a class="govuk-notification-banner__link"
-                    href="javascript:void(0)"
-                    onclick="window.history.go(-2)">Go back to the page you were looking at</a>.
+                    href="@Model.ReferrerUrl">Go back to the page you were looking at</a>.
             </p>
         </div>
     </div>
