@@ -20,11 +20,14 @@ public class CookiesController(ILogger<CookiesController> logger, ICookieService
     {
         var cookiesPageContent = await getPageQuery.GetPageBySlug(CookiesSlug, cancellationToken);
 
+        var referrerUrl = HttpContext.Request.Headers.Referer.ToString();
+
         CookiesViewModel cookiesViewModel = new()
         {
             Title = cookiesPageContent?.Title ?? new Title() { Text = "Cookies" },
             Content = cookiesPageContent?.Content ?? [],
             Cookie = _cookieService.Cookie,
+            ReferrerUrl = referrerUrl ?? "",
         };
 
         return View("Cookies", cookiesViewModel);

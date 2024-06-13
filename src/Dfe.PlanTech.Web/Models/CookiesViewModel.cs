@@ -10,4 +10,6 @@ public class CookiesViewModel
     public List<ContentComponent> Content { get; init; } = null!;
 
     public DfeCookie Cookie { get; init; } = new DfeCookie();
+
+    public string ReferrerUrl { get; init; } = null!;
 }

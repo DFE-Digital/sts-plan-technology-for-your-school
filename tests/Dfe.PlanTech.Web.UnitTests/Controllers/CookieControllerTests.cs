@@ -1,20 +1,15 @@
 ﻿using AutoMapper;
-using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
+using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Primitives;
-using Microsoft.Net.Http.Headers;
 using NSubstitute;
 using Xunit;
 
@@ -22,9 +17,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 {
     public class CookieControllerTests
     {
-        private readonly ICmsDbContext _db = Substitute.For<ICmsDbContext>();
-        private readonly IMapper _mapper = Substitute.For<IMapper>();
-
         private readonly Page[] _pages =
         [
             new Page()
@@ -89,6 +81,26 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             //Assert
             Assert.IsType<RedirectResult>(result);
             Assert.Equal(url, result.Url);
+        }
+
+        [Theory]
+        [InlineData("https://www.google.com")]
+        [InlineData("https://www.plantech.education.gov.uk/accessibility")]
+        public async Task ReferrerUrl_Should_Be_Retrieved_From_Header(string referrerUrl)
+        {
+            IGetPageQuery getPageQuery = SetupPageQueryMock();
+
+            CookiesController cookiesController = CreateStrut();
+            cookiesController.HttpContext.Request.Headers.Referer = referrerUrl;
+
+            var result = await cookiesController.GetCookiesPage(getPageQuery, CancellationToken.None);
+            Assert.IsType<ViewResult>(result);
+
+            var model = (result as ViewResult)!.Model as CookiesViewModel;
+
+            Assert.NotNull(model);
+
+            Assert.Equal(referrerUrl, model.ReferrerUrl);
         }
 
         [Fact]
