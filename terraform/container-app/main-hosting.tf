@@ -1,5 +1,5 @@
 module "main_hosting" {
-  source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v1.2.0"
+  source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v1.6.4"
 
   ###########
   # General #
@@ -12,10 +12,9 @@ module "main_hosting" {
   #################
   # Container App #
   #################
-  enable_container_registry           = true
-  use_external_container_registry_url = true
-  image_name                          = local.container_app_image_name
-  container_port                      = local.container_port
+  enable_container_registry = true
+  image_name                = local.container_app_image_name
+  container_port            = local.container_port
   container_secret_environment_variables = {
     "AZURE_CLIENT_ID" = azurerm_user_assigned_identity.user_assigned_identity.client_id,
     "KeyVaultName"    = local.kv_name
@@ -31,6 +30,10 @@ module "main_hosting" {
     identity_ids = [azurerm_user_assigned_identity.user_assigned_identity.id]
   }
 
+  container_max_replicas           = local.container_app_max_replicas
+  container_min_replicas           = local.container_app_min_replicas
+  container_scale_http_concurrency = local.container_app_http_concurrency
+
   #############
   # Azure SQL #
   #############
@@ -41,6 +44,8 @@ module "main_hosting" {
   mssql_azuread_admin_username       = local.az_sql_azuread_admin_username
   mssql_azuread_admin_object_id      = local.az_sql_azuread_admin_objectid
   mssql_azuread_auth_only            = local.az_use_azure_ad_auth_only
+  mssql_managed_identity_assign_role = false
+  mssql_sku_name                     = local.az_sql_sku
 
   ##############
   # Networking #
@@ -50,9 +55,8 @@ module "main_hosting" {
   #############################
   # Github Container Registry #
   #############################
-  registry_server           = local.registry_server
-  registry_username         = local.registry_username
-  registry_password         = local.registry_password
-  registry_custom_image_url = local.registry_custom_image_url
-
+  registry_server   = local.registry_server
+  registry_username = local.registry_username
+  registry_password = local.registry_password
+  image_tag         = local.image_tag
 }

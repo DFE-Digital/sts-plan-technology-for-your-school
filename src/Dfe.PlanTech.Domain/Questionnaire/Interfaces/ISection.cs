@@ -32,5 +32,10 @@ public interface ISectionComponent : ISection<Question, Page>, IContentComponent
 {
     public string FirstQuestionId { get; }
 
-    public IEnumerable<QuestionWithAnswer> GetAttachedQuestions(IEnumerable<QuestionWithAnswer> responses);
+
+    /// <summary>
+    /// Puts responses into the correct order for the path the user has taken.
+    /// </summary>
+    /// <returns>Answered questions in correct journey order</returns>
+    public IEnumerable<QuestionWithAnswer> GetOrderedResponsesForJourney(IEnumerable<QuestionWithAnswer> responses);
 }

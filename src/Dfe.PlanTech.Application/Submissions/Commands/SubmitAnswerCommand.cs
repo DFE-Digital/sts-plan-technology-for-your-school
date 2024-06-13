@@ -72,7 +72,7 @@ public class SubmitAnswerCommand : ISubmitAnswerCommand
             Direction = ParameterDirection.Output
         };
 
-        await _db.ExecuteRaw($@"EXEC SubmitAnswer
+        await _db.ExecuteSqlAsync($@"EXEC SubmitAnswer
                                             @establishmentId={establishmentId},
                                             @userId={userId},
                                             @sectionId={sectionId},

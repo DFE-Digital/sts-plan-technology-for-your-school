@@ -7,9 +7,12 @@ using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using Dfe.PlanTech.Web.Helpers;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
+[LogInvalidModelState]
+[Route("/")]
 public class PagesController : BaseController<PagesController>
 {
     public const string ControllerName = "Pages";
@@ -20,7 +23,7 @@ public class PagesController : BaseController<PagesController>
     }
 
     [Authorize(Policy = PageModelAuthorisationPolicy.POLICY_NAME)]
-    [HttpGet("/{route?}")]
+    [HttpGet("{route?}")]
     public IActionResult GetByRoute([ModelBinder(typeof(PageModelBinder))] Page page, [FromServices] IUser user)
     {
         var viewModel = new PageViewModel(page, this, user, logger);

@@ -16,8 +16,8 @@ public class GetSubmissionStatusesQueryTests
     private readonly IUser user = Substitute.For<IUser>();
 
     private readonly List<SectionStatusDto> SectionStatuses = [
-            new SectionStatusDto { Completed = 1, SectionId = "1", Maturity = "Low", DateCreated = DateTime.UtcNow },
-        new SectionStatusDto { Completed = 1, SectionId = "2", Maturity = "High", DateCreated = DateTime.UtcNow },
+        new SectionStatusDto { Completed = 1, SectionId = "1", LastMaturity = "Low", DateCreated = DateTime.UtcNow },
+        new SectionStatusDto { Completed = 1, SectionId = "2", LastMaturity = "High", DateCreated = DateTime.UtcNow },
         new SectionStatusDto { Completed = 0, SectionId = "3", DateCreated = DateTime.UtcNow },
         new SectionStatusDto { Completed = 0, SectionId = "4", DateCreated = DateTime.UtcNow },
     ];
@@ -141,7 +141,7 @@ public class GetSubmissionStatusesQueryTests
     [Fact]
     public async Task GetSectionSubmissionStatusAsync_Returns_Status_Completed_When_Found_With_Responses()
     {
-        var result = await CreateStrut().GetSectionSubmissionStatusAsync(establishmentId, completeSection, default);
+        var result = await CreateStrut().GetSectionSubmissionStatusAsync(establishmentId, completeSection, false, default);
 
         Assert.NotNull(result);
 
@@ -154,7 +154,7 @@ public class GetSubmissionStatusesQueryTests
     [Fact]
     public async Task GetSectionSubmissionStatusAsync_Returns_Status_InProgress_When_Found_Incomplete_With_Responses()
     {
-        var result = await CreateStrut().GetSectionSubmissionStatusAsync(establishmentId, inprogressSection, default);
+        var result = await CreateStrut().GetSectionSubmissionStatusAsync(establishmentId, inprogressSection, false, default);
 
         Assert.NotNull(result);
 
@@ -167,7 +167,7 @@ public class GetSubmissionStatusesQueryTests
     [Fact]
     public async Task GetSectionSubmissionStatusAsync_Returns_Status_NotStarted_When_Found_With_No_Responses()
     {
-        var result = await CreateStrut().GetSectionSubmissionStatusAsync(establishmentId, notstartedSection, default);
+        var result = await CreateStrut().GetSectionSubmissionStatusAsync(establishmentId, notstartedSection, false, default);
 
         Assert.NotNull(result);
 
@@ -188,7 +188,7 @@ public class GetSubmissionStatusesQueryTests
             }
         };
 
-        var result = await CreateStrut().GetSectionSubmissionStatusAsync(establishmentId, section, default);
+        var result = await CreateStrut().GetSectionSubmissionStatusAsync(establishmentId, section, false, default);
 
         Assert.NotNull(result);
 

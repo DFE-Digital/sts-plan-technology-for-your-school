@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 
@@ -20,6 +21,7 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
     public bool RequiresAuthorisation { get; set; } = true;
 
     [DontCopyValue]
+    [NotMapped]
     public List<ContentComponentDbEntity> BeforeTitleContent { get; set; } = [];
 
     [DontCopyValue]
@@ -28,6 +30,7 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
     public string? TitleId { get; set; }
 
     [DontCopyValue]
+    [NotMapped]
     public List<ContentComponentDbEntity> Content { get; set; } = [];
 
     [DontCopyValue]

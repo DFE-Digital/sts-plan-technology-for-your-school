@@ -49,7 +49,7 @@ public class CheckAnswersRouter : ICheckAnswersRouter
     private async Task<IActionResult> ProcessCheckAnswers(string sectionSlug, string? errorMessage, CheckAnswersController controller, CancellationToken cancellationToken)
     {
         var establishmentId = await _user.GetEstablishmentId();
-        var checkAnswerDto = await _processCheckAnswerDtoCommand.GetCheckAnswerDtoForSection(establishmentId, _router.Section!, cancellationToken);
+        var checkAnswerDto = await _processCheckAnswerDtoCommand.GetCheckAnswerDtoForSection(establishmentId, _router.Section, cancellationToken);
 
         if (checkAnswerDto == null || checkAnswerDto.Responses == null) throw new DatabaseException("Could not retrieve the answered question list");
 
@@ -59,7 +59,7 @@ public class CheckAnswersRouter : ICheckAnswersRouter
         var model = new CheckAnswersViewModel()
         {
             Title = checkAnswerPageContent!.Title ?? new Title() { Text = PageTitle },
-            SectionName = _router.Section!.Name,
+            SectionName = _router.Section.Name,
             CheckAnswerDto = checkAnswerDto,
             Content = checkAnswerPageContent.Content,
             SectionSlug = sectionSlug,
@@ -73,7 +73,7 @@ public class CheckAnswersRouter : ICheckAnswersRouter
 
     private IActionResult ProcessQuestionStatus(string sectionSlug, Controller controller)
     {
-        var nextQuestionSlug = _router.NextQuestion?.Slug ?? _router.Section!.Questions.Select(question => question.Slug).First();
+        var nextQuestionSlug = _router.NextQuestion?.Slug ?? _router.Section.Questions.Select(question => question.Slug).First();
 
         return QuestionsController.RedirectToQuestionBySlug(sectionSlug, nextQuestionSlug, controller);
     }
