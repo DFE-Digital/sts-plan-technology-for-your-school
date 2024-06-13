@@ -9,7 +9,14 @@
     }
     else if (Model.RecommendationSlug != null)
     {
-        <task-list-tag colour="@TagColour.Yellow">New</task-list-tag>
+        if (TempData.ContainsKey("SectionSlug"))
+        {
+            var sectionSlug = TempData["SectionSlug"] as string;
+            @if (!string.IsNullOrEmpty(sectionSlug) && sectionSlug == Model.SectionSlug)
+            {
+                <task-list-tag colour="@TagColour.Yellow">New</task-list-tag>
+            }
+        }
         <govuk-button-link
             class="go"
             asp-route="GetRecommendation"
