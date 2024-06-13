@@ -283,7 +283,7 @@ public class GetRecommendationRouterTests
         _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
 
         await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() =>
-            _router.ValidateRoute(_section.InterstitialPage.Slug, _section.Recommendations[0].Page.Slug, _controller,
+            _router.ValidateRoute(_section.InterstitialPage.Slug, "any-recommendation-slug", _controller,
                 default));
     }
 
@@ -316,7 +316,7 @@ public class GetRecommendationRouterTests
 
         _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
 
-        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, _section.Recommendations[0].Page.Slug,
+        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, "any-recommendation-slug",
             _controller, default);
 
         var viewResult = result as ViewResult;
