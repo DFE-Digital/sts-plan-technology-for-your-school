@@ -38,6 +38,7 @@ div.govuk-width-container {
 strong.govuk-tag {
   text-transform: lowercase;
   max-width: fit-content;
+  vertical-align: middle;
 
   &:first-letter {
     text-transform: uppercase;
@@ -47,11 +48,10 @@ strong.govuk-tag {
 .govuk-summary-list__key,
 .govuk-summary-list__value {
   vertical-align: middle;
-}
 
-// The self assessment list has a 4th much smaller column, so cannot have the table layout as fixed
-.dfe-self-assessment-list {
-  table-layout: auto;
+  > .govuk-button {
+    vertical-align: middle;
+  }
 }
 
 //Hide GTM iframe

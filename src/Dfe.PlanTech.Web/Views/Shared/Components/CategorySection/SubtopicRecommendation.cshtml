@@ -2,15 +2,16 @@
 @model Dfe.PlanTech.Domain.CategorySection.CategorySectionRecommendationDto
 
 
-<dd class="govuk-summary-list__value govuk-!-text-align-right govuk-!-padding-right-0">
+<dd class="govuk-summary-list__value govuk-!-text-align-right">
     @if (Model.NoRecommendationFoundErrorMessage != null)
     {
         <govuk-error-message>@Model.NoRecommendationFoundErrorMessage</govuk-error-message>
     }
     else if (Model.RecommendationSlug != null)
     {
+        <task-list-tag colour="@TagColour.Yellow">New</task-list-tag>
         <govuk-button-link
-            class="go govuk-!-margin-bottom-0"
+            class="go"
             asp-route="GetRecommendation"
             asp-route-sectionSlug="@Model.SectionSlug"
             asp-route-recommendationSlug="@Model.RecommendationSlug">
@@ -18,10 +19,4 @@
         </govuk-button-link>
     }
 </dd>
-@if (Model.RecommendationSlug?.Contains("broadband") ?? false)
-{
-    <dd class="govuk-summary-list__value govuk-!-text-align-right">
-        <task-list-tag colour="@TagColour.Yellow">New</task-list-tag>
-    </dd>
-}
 
