@@ -45,6 +45,12 @@ strong.govuk-tag {
   }
 }
 
+.dfe-self-assessment-list {
+  > .govuk-summary-list__row {
+    height: 4rem;
+  }
+}
+
 .govuk-summary-list__key,
 .govuk-summary-list__value {
   vertical-align: middle;
