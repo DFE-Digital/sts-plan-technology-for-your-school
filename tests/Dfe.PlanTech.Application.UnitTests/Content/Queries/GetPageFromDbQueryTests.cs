@@ -99,26 +99,6 @@ public class GetPageFromDbQueryTests
                     Name = "sSection one",
                     CategoryId = CATEGORY_ID,
                     Order = 0,
-                    Recommendations = [
-                        new RecommendationPageDbEntity()
-                        {
-                            DisplayName = "Recommendation one",
-                            Maturity = Maturity.High,
-                            Page = new()
-                            {
-                                Slug = "recommendation-high"
-                            }
-                        },
-                        new RecommendationPageDbEntity()
-                        {
-                            DisplayName = "Recommendation two",
-                            Maturity = Maturity.Medium,
-                            Page = new()
-                            {
-                                Slug = "recommendation-medium"
-                            }
-                        }
-                    ],
                     Questions = [
                         new QuestionDbEntity()
                         {
@@ -205,13 +185,6 @@ public class GetPageFromDbQueryTests
                                                 {
                                                     Id = section.Id
                                                 },
-                                                Recommendations = section.Recommendations.Select(recommendation => new RecommendationPage()
-                                                {
-                                                    Sys = new()
-                                                    {
-                                                        Id = recommendation.Id
-                                                    }
-                                                }).ToList(),
                                                 Questions = section.Questions.Select(question => new Question()
                                                 {
                                                     Sys = new()
