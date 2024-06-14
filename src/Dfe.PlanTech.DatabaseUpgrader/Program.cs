@@ -8,8 +8,10 @@ internal class Program
 {
     private static readonly Logger _logger = new Logger();
 
-    private static int Main(string[] args)
+    private static void Main(string[] args)
     {
+        var success = false;
+
         Parser.Default.ParseArguments<Options>(args)
           .WithParsed((options) =>
           {
