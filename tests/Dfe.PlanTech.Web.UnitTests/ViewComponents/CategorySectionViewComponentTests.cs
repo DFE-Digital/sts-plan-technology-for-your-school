@@ -69,16 +69,6 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Sys = new SystemDetails()
                 {
                     Id = "Section1"
-                },
-                Recommendations = new List<RecommendationPage>()
-                {
-                    new RecommendationPage()
-                    {
-                        Page = new Page()
-                        {
-                            Slug = "subtopic-recommendation-slug"
-                        }
-                    }
                 }
             }
         };
@@ -125,16 +115,6 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Sys = new SystemDetails()
                 {
                     Id = "Section2"
-                },
-                Recommendations = new List<RecommendationPage>()
-                {
-                    new RecommendationPage()
-                    {
-                        Page = new Page()
-                        {
-                            Slug = "subtopic-recommendation-slug"
-                        }
-                    }
                 }
             }
         };
@@ -205,15 +185,6 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                         {
                             Slug = "section-1",
                         },
-                        Recommendations = [
-                            new RecommendationPage()
-                            {
-                                InternalName = "High-Maturity-Recommendation-Page-InternalName",
-                                DisplayName = "High-Maturity-Recommendation-Page-DisplayName",
-                                Maturity = Maturity.High,
-                                Page = new Page() { Slug = "High-Maturity-Recommendation-Page-Slug" }
-                            }
-                        ],
                     }
                 }
             }
@@ -226,15 +197,6 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                     {
                         Sys = new SystemDetails() { Id = "Section2" },
                         Name = "Test Section 2",
-                        Recommendations = [
-                            new()
-                            {
-                                InternalName = "High-Maturity-Recommendation-Page-InternalName-Two",
-                                DisplayName = "High-Maturity-Recommendation-Page-DisplayName-Twp",
-                                Maturity = Maturity.High,
-                                Page = new Page() { Slug = "High-Maturity-Recommendation-Page-Slug-Two" }
-                            }
-                        ],
                         InterstitialPage = new Page
                         {
                             Slug = "test-slug"

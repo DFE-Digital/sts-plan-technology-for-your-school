@@ -69,16 +69,6 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
                                 Text = question.Text,
                                 Slug = question.Slug,
                             }).ToList(),
-        Recommendations = section.Recommendations
-                                .Select(recommendation => new RecommendationPageDbEntity()
-                                {
-                                    Maturity = recommendation.Maturity,
-                                    Page = new PageDbEntity()
-                                    {
-                                        Slug = recommendation.Page.Slug
-                                    },
-                                    Id = recommendation.Id
-                                }).ToList()
     };
 
     private static Expression<Func<SectionDbEntity, bool>> SlugMatchesInterstitialPage(string sectionSlug)
