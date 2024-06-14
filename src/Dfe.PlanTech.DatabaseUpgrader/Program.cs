@@ -6,14 +6,10 @@ using CommandLine;
 /// </summary>
 internal class Program
 {
-    private const int ErrorResult = -1;
-    private const int SuccessResult = 0;
     private static readonly Logger _logger = new Logger();
 
     private static int Main(string[] args)
     {
-        bool success = false;
-
         Parser.Default.ParseArguments<Options>(args)
           .WithParsed((options) =>
           {
@@ -25,7 +21,10 @@ internal class Program
               success = HandleParseError(errors);
           });
 
-        return success ? SuccessResult : ErrorResult;
+        if (!success)
+        {
+            throw new Exception("Errors occurred migrating database");
+        }
     }
 
     /// <summary>
