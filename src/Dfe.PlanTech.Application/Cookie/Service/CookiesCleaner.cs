@@ -43,7 +43,7 @@ public class CookiesCleaner(CookiesCleanerOptions opts) : ICookiesCleaner
       => new()
       {
           Expires = DateTime.Now.AddSeconds(-1),
-          HttpOnly = false,
+          HttpOnly = true,
           Secure = true
       };
 
