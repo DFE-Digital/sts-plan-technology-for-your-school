@@ -16,17 +16,6 @@ public class Section : ContentComponent, ISectionComponent
 
     public Page InterstitialPage { get; init; } = null!;
 
-    public List<RecommendationPage> Recommendations { get; init; } = new();
-
-    public RecommendationPage? TryGetRecommendationForMaturity(Maturity maturity) => Recommendations.Find(recommendation => recommendation.Maturity == maturity);
-
-    public RecommendationPage? GetRecommendationForMaturity(string? maturity)
-    {
-        if (string.IsNullOrEmpty(maturity) || !Enum.TryParse(maturity, out Maturity maturityResponse)) return null;
-
-        return TryGetRecommendationForMaturity(maturityResponse);
-    }
-
     public IEnumerable<QuestionWithAnswer> GetOrderedResponsesForJourney(IEnumerable<QuestionWithAnswer> responses)
     {
         var questionWithAnswerMap = responses
