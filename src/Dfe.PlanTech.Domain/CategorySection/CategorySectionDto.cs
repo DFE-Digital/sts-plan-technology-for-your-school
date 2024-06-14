@@ -44,6 +44,6 @@ public class CategorySectionDto
         if (date == null)
             return null;
         var localTime = date.Value.ToLocalTime();
-        return localTime.Date == DateTime.Today.Date ? $"{localTime:hh:mm tt}" : localTime.ToShortDateString();
+        return localTime.Date == DateTime.Today.Date ? $"{localTime:hh:mm tt}" : $"{localTime:dd/MM/yyyy}";
     }
 }
