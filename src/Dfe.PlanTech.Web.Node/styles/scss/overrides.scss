@@ -37,9 +37,26 @@ div.govuk-width-container {
 
 strong.govuk-tag {
   text-transform: lowercase;
+  max-width: fit-content;
+  vertical-align: middle;
 
   &:first-letter {
     text-transform: uppercase;
+  }
+}
+
+.dfe-self-assessment-list {
+  > .govuk-summary-list__row {
+    height: 4rem;
+  }
+}
+
+.govuk-summary-list__key,
+.govuk-summary-list__value {
+  vertical-align: middle;
+
+  > .govuk-button {
+    vertical-align: middle;
   }
 }
 
