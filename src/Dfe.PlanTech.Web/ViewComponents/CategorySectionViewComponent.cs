@@ -57,7 +57,7 @@ public class CategorySectionViewComponent(
             var sectionStatus = category.SectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId == section.Sys.Id);
 
             if (string.IsNullOrWhiteSpace(section.InterstitialPage.Slug))
-                _logger.LogError($"No Slug found for Subtopic with ID: ${section.Sys.Id}/ name: {section.Name}");
+                _logger.LogError("No Slug found for Subtopic with ID: {sectionId}/ name: {sectionName}", section.Sys.Id, section.Name);
 
             yield return new CategorySectionDto(
                 slug: section.InterstitialPage.Slug,
@@ -112,7 +112,7 @@ public class CategorySectionViewComponent(
         }
         catch (Exception e)
         {
-            _logger.LogError($"An exception has occurred while trying to retrieve the recommendation for Section {section.Name}, with the message {e.Message}");
+            _logger.LogError("An exception has occurred while trying to retrieve the recommendation for Section {sectionName}, with the message {errMessage}", section.Name, e.Message);
             return new CategorySectionRecommendationDto
             {
                 NoRecommendationFoundErrorMessage = $"Unable to retrieve {section.Name} recommendation"
