@@ -45,9 +45,11 @@ strong.govuk-tag {
   }
 }
 
-.dfe-self-assessment-list {
-  > .govuk-summary-list__row {
-    height: 4rem;
+@media (min-width: 40.0625em) {
+  .dfe-self-assessment-list {
+    > .govuk-summary-list__row {
+      height: 4rem;
+    }
   }
 }
 

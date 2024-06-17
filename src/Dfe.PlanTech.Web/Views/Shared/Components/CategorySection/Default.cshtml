@@ -20,12 +20,4 @@ else
         class="govuk-visually-hidden">Error:</span>@Model.ProgressRetrievalErrorMessage</p>
 }
 
-<dl class="govuk-summary-list dfe-self-assessment-list">
-    @foreach (var categorySectionDtoItem in Model.CategorySectionDto)
-    {
-        <div class="govuk-summary-list__row">
-            <partial name="Components/CategorySection/Subtopic" model="@categorySectionDtoItem"/>
-            <partial name="Components/CategorySection/SubtopicRecommendation" model="@categorySectionDtoItem.Recommendation"/>
-        </div>
-    }
-</dl>
+<partial name="Components/CategorySection/Subtopics" model="@Model"/>
