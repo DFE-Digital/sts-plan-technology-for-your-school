@@ -8,7 +8,7 @@ public class SectionStatusDto
 
     public int Completed { get; set; }
 
-    public string? Maturity { get; set; }
+    public string? LastMaturity { get; set; }
 
     public DateTime DateCreated { get; set; }
 }

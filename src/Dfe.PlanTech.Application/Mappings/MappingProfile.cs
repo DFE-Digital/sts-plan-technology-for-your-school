@@ -11,7 +11,6 @@ public class CmsMappingProfile : Profile
 {
     public CmsMappingProfile()
     {
-        CreateMap<PageDbEntity, Page>();
 
         CreateMap<ContentComponentDbEntity, ContentComponent>()
         .Include<AnswerDbEntity, Answer>()
@@ -21,10 +20,10 @@ public class CmsMappingProfile : Profile
         .Include<CategoryDbEntity, Category>()
         .Include<HeaderDbEntity, Header>()
         .Include<InsetTextDbEntity, InsetText>()
+        .Include<PageDbEntity, Page>()
         .Include<QuestionDbEntity, Question>()
         .Include<RecommendationChunkDbEntity, RecommendationChunk>()
         .Include<RecommendationIntroDbEntity, RecommendationIntro>()
-        .Include<RecommendationPageDbEntity, RecommendationPage>()
         .Include<RecommendationSectionDbEntity, RecommendationSection>()
         .Include<SectionDbEntity, Section>()
         .Include<SubtopicRecommendationDbEntity, SubtopicRecommendation>()
@@ -42,10 +41,10 @@ public class CmsMappingProfile : Profile
         CreateMap<CategoryDbEntity, Category>();
         CreateMap<HeaderDbEntity, Header>();
         CreateMap<InsetTextDbEntity, InsetText>();
+        CreateMap<PageDbEntity, Page>();
         CreateMap<QuestionDbEntity, Question>();
         CreateMap<RecommendationChunkDbEntity, RecommendationChunk>();
         CreateMap<RecommendationIntroDbEntity, RecommendationIntro>();
-        CreateMap<RecommendationPageDbEntity, RecommendationPage>();
         CreateMap<RecommendationSectionDbEntity, RecommendationSection>();
         CreateMap<SectionDbEntity, Section>();
         CreateMap<SubtopicRecommendationDbEntity, SubtopicRecommendation>();

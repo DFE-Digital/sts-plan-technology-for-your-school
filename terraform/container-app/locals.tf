@@ -37,27 +37,54 @@ locals {
   #############
   # Azure SQL #
   #############
-  az_sql_connection_string      = "Server=tcp:${local.resource_prefix}.database.windows.net,1433;Initial Catalog=${local.resource_prefix}-sqldb;Authentication=Active Directory Default; Persist Security Info=False;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+  az_sql_connection_string      = "Server=tcp:${local.resource_prefix}.database.windows.net,1433;Initial Catalog=${local.resource_prefix}-sqldb;Authentication=Active Directory Default; Persist Security Info=False;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Max Pool Size=${local.az_sql_max_pool_size};"
   az_sql_azuread_admin_username = var.az_sql_azuread_admin_username
   az_sql_admin_password         = var.az_sql_admin_password
   az_sql_azuread_admin_objectid = var.az_sql_azuread_admin_objectid
   az_use_azure_ad_auth_only     = var.az_tag_environment != "Dev"
+  az_sql_sku                    = var.az_sql_sku
+  az_sql_max_pool_size          = var.az_sql_max_pool_size
 
   ##################
   # Azure KeyVault #
   ##################
   kv_name = "${local.environment}${local.project_name}-kv"
 
+  kv_secrets_csp_connectsrc = "${local.csp_google_tag_manager_domain} region1.google-analytics.com ${local.csp_clarity_domains}"
+  kv_secrets_csp_defaultsrc = local.csp_clarity_domains
+  kv_secrets_csp_framesrc   = "${local.csp_google_tag_manager_domain} ${local.csp_clarity_domains}"
+  kv_secrets_csp_imgsrc     = "${local.csp_google_tag_manager_domain} ${local.csp_clarity_domains}"
+
   ##################
   # CDN/Front Door #
   ##################
   cdn_create_custom_domain = var.cdn_create_custom_domain
+  cdn_frontdoor_host_add_response_headers = length(var.cdn_frontdoor_host_add_response_headers) > 0 ? var.cdn_frontdoor_host_add_response_headers : [{
+    "name"  = "Strict-Transport-Security",
+    "value" = "max-age=31536000",
+    },
+    {
+      "name"  = "X-Content-Type-Options",
+      "value" = "nosniff",
+    },
+    {
+      "name"  = "X-XSS-Protection",
+      "value" = "1",
+  }]
 
-  ####################
+
+  ####################x
   # Storage Accounts #
   ####################
 
   storage_account_public_access_enabled                   = var.storage_account_public_access_enabled
   container_app_storage_account_shared_access_key_enabled = var.container_app_storage_account_shared_access_key_enabled
   container_app_blob_storage_public_access_enabled        = var.container_app_blob_storage_public_access_enabled
+
+  ###########################
+  # Content Security Policy #
+  ###########################
+
+  csp_clarity_domains           = "https://www.clarity.ms https://c.bing.com https://a.clarity.ms https://b.clarity.ms https://c.clarity.ms https://d.clarity.ms https://e.clarity.ms https://f.clarity.ms https://g.clarity.ms https://h.clarity.ms https://i.clarity.ms https://j.clarity.ms https://k.clarity.ms https://l.clarity.ms https://m.clarity.ms https://n.clarity.ms https://o.clarity.ms https://p.clarity.ms https://q.clarity.ms https://r.clarity.ms https://s.clarity.ms https://t.clarity.ms https://u.clarity.ms https://v.clarity.ms https://w.clarity.ms https://x.clarity.ms https://y.clarity.ms https://z.clarity.ms"
+  csp_google_tag_manager_domain = "www.googletagmanager.com"
 }

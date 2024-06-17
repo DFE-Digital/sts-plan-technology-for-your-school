@@ -35,5 +35,5 @@ public interface IPlanTechDbContext
 
     Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default);
 
-    Task<int> ExecuteRaw(FormattableString sql, CancellationToken cancellationToken = default);
+    Task<int> ExecuteSqlAsync(FormattableString sql, CancellationToken cancellationToken = default);
 }

@@ -49,11 +49,6 @@ public class SectionComparator(CmsDbContext db, ContentfulContent contentfulCont
         {
             yield return child;
         }
-
-        foreach (var child in ValidateChildren(contentfulSection, "recommendations", databaseSection, dbRecommendationChunk => dbRecommendationChunk.Recommendations))
-        {
-            yield return child;
-        }
     }
 
     protected override IQueryable<ContentComponentDbEntity> GetDbEntitiesQuery()
@@ -67,10 +62,6 @@ public class SectionComparator(CmsDbContext db, ContentfulContent contentfulCont
             {
                 Id = question.Id
             }).ToList(),
-            Recommendations = section.Recommendations.Select(recommendation => new RecommendationPageDbEntity()
-            {
-                Id = recommendation.Id
-            }).ToList()
         });
     }
 }

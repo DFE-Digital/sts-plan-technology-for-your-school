@@ -16,7 +16,6 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 public abstract class JsonToDbMapper<TEntity>(EntityRetriever entityRetriever, EntityUpdater entityUpdater, ILogger<JsonToDbMapper<TEntity>> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper(entityRetriever, typeof(TEntity), logger, jsonSerialiserOptions)
 where TEntity : ContentComponentDbEntity, new()
 {
-    protected readonly TEntity MappedEntity = new();
     protected CmsWebHookPayload? Payload;
     protected EntityUpdater _entityUpdater = entityUpdater;
 
@@ -47,6 +46,30 @@ where TEntity : ContentComponentDbEntity, new()
     }
 
     public abstract Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values);
+
+    protected IEnumerable<TReferencedEntity> GetReferences<TReferencedEntity>(Dictionary<string, object?> values, string key)
+        where TReferencedEntity : ContentComponentDbEntity, new()
+    {
+        if (values.TryGetValue(key, out object? referencesArray) && referencesArray is object[] inners)
+        {
+            foreach (var inner in inners)
+            {
+                if (inner is not string id)
+                {
+                    Logger.LogWarning("Expected string but received {innerType}", inner.GetType());
+                    continue;
+                }
+
+                yield return new TReferencedEntity() { Id = id };
+            }
+
+            values.Remove(key);
+        }
+        else
+        {
+            Logger.LogError("Expected {key} to be references array but received {type}", key, referencesArray?.GetType());
+        }
+    }
 
     protected void UpdateReferencesArray<TRelatedEntity>(Dictionary<string, object?> values, string key, DbSet<TRelatedEntity> dbSet, Action<string, TRelatedEntity> updateEntity)
         where TRelatedEntity : ContentComponentDbEntity, new()

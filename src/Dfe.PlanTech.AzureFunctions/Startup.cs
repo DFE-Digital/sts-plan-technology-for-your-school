@@ -44,8 +44,7 @@ namespace Dfe.PlanTech.AzureFunctions
                 Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
             });
 
-            services.AddSingleton(
-                new ContentfulOptions(bool.Parse(configuration["ContentfulUsePreview:"] ?? bool.FalseString)));
+            services.AddSingleton(new ContentfulOptions(bool.Parse(configuration["Contentful:UsePreview"] ?? bool.FalseString)));
 
             services.AddOptions<MessageRetryHandlingOptions>()
                 .Configure<IConfiguration>((settings, configuration) =>
@@ -71,12 +70,13 @@ namespace Dfe.PlanTech.AzureFunctions
             services.AddScoped<RichTextContentMapper>();
             services.AddScoped<JsonToEntityMappers>();
 
-            services.AddTransient<PageEntityUpdater>();
             services.AddTransient<PageEntityRetriever>();
+            services.AddTransient<PageEntityUpdater>();
             services.AddTransient<RecommendationChunkUpdater>();
-            services.AddTransient<RecommendationSectionUpdater>();
             services.AddTransient<RecommendationIntroUpdater>();
+            services.AddTransient<RecommendationSectionUpdater>();
             services.AddTransient<SubtopicRecommendationUpdater>();
+
             services.AddTransient<EntityRetriever>();
             services.AddTransient<EntityUpdater>();
         }

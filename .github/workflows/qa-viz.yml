@@ -7,7 +7,8 @@ on:
       environment:
         description: Environment to run the visualisation for
         required: true
-        options: ['Dev', 'Tst', 'Staging']
+        type: choice
+        options: ['Dev', 'Tst', 'Staging', 'Production']
   workflow_call:
     inputs:
       environment:

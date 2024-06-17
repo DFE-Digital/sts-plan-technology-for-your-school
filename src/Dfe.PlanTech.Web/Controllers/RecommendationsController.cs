@@ -1,10 +1,13 @@
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
+[LogInvalidModelState]
 [Authorize]
+[Route("/")]
 public class RecommendationsController(ILogger<RecommendationsController> logger)
     : BaseController<RecommendationsController>(logger)
 {

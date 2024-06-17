@@ -15,7 +15,7 @@ public class GetAllAnswersForLatestSubmissionQuery(IPlanTechDbContext db) : IGet
     public async Task<List<Answer>?> GetAllAnswersForLatestSubmission(string sectionId, int establishmentId)
     {
         var latestSubmissionIdQuery = db.GetSubmissions
-            .Where(s => s.SectionId == sectionId && s.EstablishmentId == establishmentId && s.Completed)
+            .Where(s => s.SectionId == sectionId && s.EstablishmentId == establishmentId && s.Completed && !s.Deleted)
             .OrderByDescending(s => s.DateCreated)
             .Select(s => s.Id);
 

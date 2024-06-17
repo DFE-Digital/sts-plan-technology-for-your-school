@@ -61,8 +61,9 @@ public class GetLatestResponsesQuery : IGetLatestResponsesQuery
 
     private static Expression<Func<Submission, bool>> IsMatchingIncompleteSubmission(int establishmentId, string sectionId)
     => submission => !submission.Completed &&
-                        submission.EstablishmentId == establishmentId &&
-                        submission.SectionId == sectionId;
+                     !submission.Deleted &&
+                     submission.EstablishmentId == establishmentId &&
+                     submission.SectionId == sectionId;
 
     private static Expression<Func<Domain.Responses.Models.Response, QuestionWithAnswer>> ToQuestionWithAnswer()
     => response => new QuestionWithAnswer()

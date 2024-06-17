@@ -42,3 +42,8 @@ strong.govuk-tag {
     text-transform: uppercase;
   }
 }
+
+//Hide GTM iframe
+iframe {
+  display: none;
+}

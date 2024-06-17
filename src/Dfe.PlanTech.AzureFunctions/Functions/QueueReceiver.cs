@@ -11,7 +11,6 @@ using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Text.Json;
 using Dfe.PlanTech.AzureFunctions.Utils;
-using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.AzureFunctions;
 

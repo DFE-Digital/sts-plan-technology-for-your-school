@@ -74,64 +74,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             Assert.Equal("Inset Text", actual.Text);
         }
 
-        [Fact]
-        public void Should_Render_RecommendationPage()
-        {
-            var maturity = Maturity.Low;
-            var recommendationPage = _componentBuilder.BuildRecommendationsPage(maturity);
-
-            Assert.NotNull(recommendationPage);
-            Assert.NotNull(recommendationPage.Page);
-            Assert.NotNull(recommendationPage.InternalName);
-            Assert.NotNull(recommendationPage.DisplayName);
-            Assert.Equal(maturity, recommendationPage.Maturity);
-        }
-
-        [Fact]
-        public void Section_Should_Return_Correct_Maturity()
-        {
-            var maturity = Maturity.Low;
-            var section = _componentBuilder.BuildSections().First();
-
-            var lowMaturityRecommendation = section.TryGetRecommendationForMaturity(maturity);
-
-            Assert.NotNull(lowMaturityRecommendation);
-            Assert.Equal(maturity, lowMaturityRecommendation.Maturity);
-        }
-
-        [Fact]
-        public void Section_Should_Return_Correct_Maturity_When_Maturity_Is_A_String()
-        {
-            var maturity = "Low";
-            var section = _componentBuilder.BuildSections().First();
-
-            var lowMaturityRecommendation = section.GetRecommendationForMaturity(maturity);
-
-            Assert.NotNull(lowMaturityRecommendation);
-            Assert.Equal(Maturity.Low, lowMaturityRecommendation.Maturity);
-        }
-
-        [Fact]
-        public void Section_Should_Return_Null_When_Maturity_Is_A_String_And_Is_Null()
-        {
-            string? maturity = null;
-            var section = _componentBuilder.BuildSections().First();
-            var recommendation = section.GetRecommendationForMaturity(maturity);
-
-            Assert.Null(recommendation);
-        }
-
-        [Fact]
-        public void Section_Should_Return_Null_If_Maturity_Not_Found()
-        {
-            var maturity = Maturity.Unknown;
-            var section = _componentBuilder.BuildSections().First();
-
-            var unknownMaturityRecommendation = section.TryGetRecommendationForMaturity(maturity);
-
-            Assert.Null(unknownMaturityRecommendation);
-        }
-
         [Theory]
         [InlineData("Random test Topic", "random-test-topic")]
         [InlineData("Y867as ()&ycj Cool Thing", "y867as-ycj-cool-thing")]

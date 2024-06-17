@@ -1,11 +1,14 @@
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
+[LogInvalidModelState]
 [Authorize]
+[Route("/")]
 public class CheckAnswersController : BaseController<CheckAnswersController>
 {
     public const string ControllerName = "CheckAnswers";
@@ -13,8 +16,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     public const string CheckAnswersPageSlug = "check-answers";
     public const string CheckAnswersViewName = "CheckAnswers";
 
-    public const string InlineRecommendationUnavailableErrorMessage =
-        "Unable to save. Please try again. If this problem continues you can";
+    public const string InlineRecommendationUnavailableErrorMessage = "Unable to save. Please try again. If this problem continues you can";
 
     public CheckAnswersController(ILogger<CheckAnswersController> logger) : base(logger)
     {

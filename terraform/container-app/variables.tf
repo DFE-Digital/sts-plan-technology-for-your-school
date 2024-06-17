@@ -33,6 +33,7 @@ variable "msi_id" {
   type        = string
   description = "The Managed Service Identity ID. If this value isn't null (the default), 'data.azurerm_client_config.current.object_id' will be set to this value."
   default     = null
+  sensitive   = true
 }
 
 #############
@@ -46,12 +47,25 @@ variable "az_sql_azuread_admin_username" {
 variable "az_sql_azuread_admin_objectid" {
   description = "Object ID for the admin listed in the 'az_sql_azuread_admin_username' variable"
   type        = string
+  sensitive   = true
 }
 
 variable "az_sql_admin_password" {
   description = "Password for the admin listed in the 'az_sql_azuread_admin_username' variable"
   type        = string
   sensitive   = true
+}
+
+variable "az_sql_sku" {
+  description = "What SKU/plan to use for the SQL DB"
+  type        = string
+  default     = "Basic"
+}
+
+variable "az_sql_max_pool_size" {
+  description = "Maximum number of possible connections per SQL connection string usage"
+  type        = number
+  default     = 100
 }
 
 ############
@@ -121,6 +135,11 @@ variable "cdn_create_custom_domain" {
   default     = false
 }
 
+variable "cdn_frontdoor_host_add_response_headers" {
+  description = "List of response headers to add at the CDN Front Door `[{ \"Name\" = \"Strict-Transport-Security\", \"value\" = \"max-age=31536000\" }]`"
+  type        = list(map(string))
+  default     = []
+}
 
 ###################
 # Github Registry #
@@ -134,11 +153,13 @@ variable "registry_server" {
 variable "registry_username" {
   description = "Container registry username"
   type        = string
+  sensitive   = true
 }
 
 variable "registry_password" {
   description = "Container registry password"
   type        = string
+  sensitive   = true
 }
 
 variable "image_tag" {

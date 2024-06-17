@@ -21,7 +21,7 @@ public class PageContentDbEntity
     /// <summary>
     /// What order the component should be in in its respective section (e.g. before/after)
     /// </summary>
-    public int Order { get; set; }
+    public int? Order { get; set; }
 
     public bool Matches(PageContentDbEntity other)
     {

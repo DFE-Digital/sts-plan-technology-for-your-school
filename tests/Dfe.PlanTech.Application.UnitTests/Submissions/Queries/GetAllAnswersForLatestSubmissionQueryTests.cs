@@ -56,6 +56,16 @@ public class GetAllAnswersForLatestSubmissionQueryTests
                 Maturity = "medium",
                 DateCreated = DateTime.UtcNow,
                 DateLastUpdated = null
+            },
+            new Response()
+            {
+                AnswerId = 5,
+                QuestionId = 1,
+                UserId = 2,
+                SubmissionId = 3,
+                Maturity = "medium",
+                DateCreated = DateTime.UtcNow,
+                DateLastUpdated = null
             }
         };
 
@@ -67,7 +77,17 @@ public class GetAllAnswersForLatestSubmissionQueryTests
                 SectionName = "Bob",
                 EstablishmentId = establishmentId,
                 Completed = true,
-                DateCreated = DateTime.UtcNow,
+                DateCreated = DateTime.UtcNow.AddHours(-1),
+                Deleted = false
+            },
+            new Submission()
+            {
+                SectionId = section,
+                SectionName = "Bob",
+                EstablishmentId = establishmentId,
+                Completed = true,
+                DateCreated = DateTime.UtcNow.AddHours(-1),
+                Deleted = false
             },
             new Submission()
             {
@@ -76,6 +96,7 @@ public class GetAllAnswersForLatestSubmissionQueryTests
                 EstablishmentId = establishmentId,
                 Completed = true,
                 DateCreated = DateTime.UtcNow,
+                Deleted = true
             }
         };
 
@@ -98,12 +119,17 @@ public class GetAllAnswersForLatestSubmissionQueryTests
                 Id = 3,
                 AnswerText = "Answer 3",
                 ContentfulRef = "Ref 1"
-            }
-            ,
+            },
             new Answer()
             {
                 Id = 4,
                 AnswerText = "Answer 4",
+                ContentfulRef = "Ref 1"
+            },
+            new Answer()
+            {
+                Id = 5,
+                AnswerText = "Answer 5",
                 ContentfulRef = "Ref 1"
             }
         };

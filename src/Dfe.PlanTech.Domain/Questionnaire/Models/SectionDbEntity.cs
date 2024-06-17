@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 /// <summary>
 /// Class for the <see cref="Section"/> table in the database 
 /// </summary>
-public class SectionDbEntity : ContentComponentDbEntity, ISection<QuestionDbEntity, PageDbEntity, RecommendationPageDbEntity>
+public class SectionDbEntity : ContentComponentDbEntity, ISection<QuestionDbEntity, PageDbEntity>
 {
     public string Name { get; set; } = null!;
 
@@ -23,9 +23,6 @@ public class SectionDbEntity : ContentComponentDbEntity, ISection<QuestionDbEnti
 
     [DontCopyValue]
     public string? CategoryId { get; set; }
-
-    [DontCopyValue]
-    public List<RecommendationPageDbEntity> Recommendations { get; set; } = [];
 
     [DontCopyValue]
     public SubtopicRecommendationDbEntity? SubtopicRecommendation { get; set; }

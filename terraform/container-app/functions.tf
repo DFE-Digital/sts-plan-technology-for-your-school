@@ -10,6 +10,16 @@ resource "azurerm_storage_account" "function_storage" {
   shared_access_key_enabled       = local.container_app_storage_account_shared_access_key_enabled
   allow_nested_items_to_be_public = local.container_app_blob_storage_public_access_enabled
 
+  blob_properties {
+    container_delete_retention_policy {
+      days = 7
+    }
+
+    delete_retention_policy {
+      days = 7
+    }
+  }
+
   identity {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.user_assigned_identity.id]
@@ -33,8 +43,10 @@ resource "azurerm_linux_function_app" "contentful_function" {
 
   service_plan_id = azurerm_service_plan.function_plan.id
 
-  storage_account_name          = azurerm_storage_account.function_storage.name
-  storage_uses_managed_identity = true
+  storage_account_name = azurerm_storage_account.function_storage.name
+
+  storage_account_access_key    = local.container_app_storage_account_shared_access_key_enabled ? azurerm_storage_account.function_storage.primary_access_key : null
+  storage_uses_managed_identity = local.container_app_storage_account_shared_access_key_enabled ? null : true
 
   key_vault_reference_identity_id = azurerm_user_assigned_identity.user_assigned_identity.id
 
@@ -66,24 +78,9 @@ resource "azurerm_linux_function_app" "contentful_function" {
 
   lifecycle {
     ignore_changes = [
-      app_settings["WEBSITE_RUN_FROM_PACKAGE"],
-      app_settings["AzureWebJobsStorage__clientId"],
-      app_settings["AzureWebJobsStorage__credential"],
-      app_settings["WEBSITE_RUN_FROM_PACKAGE_BLOB_MI_RESOURCE_ID"],
-
+      app_settings,
     ]
   }
-
-}
-
-data "azurerm_function_app_host_keys" "default" {
-  name                = azurerm_linux_function_app.contentful_function.name
-  resource_group_name = local.resource_group_name
-
-  depends_on = [
-    azurerm_linux_function_app.contentful_function
-  ]
-
 }
 
 resource "azurerm_application_insights" "functional_insights" {
@@ -94,7 +91,6 @@ resource "azurerm_application_insights" "functional_insights" {
   retention_in_days   = 30
   tags                = local.tags
 }
-
 
 data "azurerm_subscription" "subscription" {
 }

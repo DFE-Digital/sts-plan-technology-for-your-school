@@ -69,5 +69,7 @@ module "waf" {
   cdn_waf_custom_block_response_status_code = 405
   cdn_waf_custom_block_response_body        = base64encode("<h1>Service unavailable</h1>")
 
+  cdn_add_response_headers = local.cdn_frontdoor_host_add_response_headers
+
   tags = local.tags
 }

@@ -21,7 +21,9 @@ _Note: Will look into automating the Contentful export for ease_
 - [x] InsetText
 - [x] NavigationLink
 - [x] Question
-- [x] RecommendationPage
+- [ ] RecommendationIntro
+- [ ] RecommendationChunk
+- [ ] RecommendationSection
 - [x] Section *
 - [x] TextBody *
 - [x] Titles

@@ -73,28 +73,6 @@ public class GetCategorySectionsQueryTests
             Order = 1
             }
           },
-          Recommendations = new(){
-            new(){
-              InternalName = "internalname-should-be-null",
-              DisplayName = "Recommendation-one",
-              Maturity = Maturity.High,
-              Page = new(){
-                Slug = "/recommendation-one-slug",
-                Id = "recommendation-page-one"
-              },
-              Id = "recommendation-one"
-            },
-             new(){
-              InternalName = "internalname-should-be-null",
-              DisplayName = "Recommendation-two",
-              Maturity = Maturity.Medium,
-              Page = new(){
-                Slug = "/recommendation-two-slug",
-                Id = "recommendation-page-two"
-              },
-              Id = "recommendation-two"
-            }
-          },
           InterstitialPage = new(){
             Id = "interstitial-page-one",
             Slug = "/page-one",
@@ -122,28 +100,6 @@ public class GetCategorySectionsQueryTests
             HelpText = "helptext-should-be-null",
             Text = "text-should-be-null",
             Order = 1
-            }
-          },
-          Recommendations = new(){
-            new(){
-              InternalName = "internalname-should-be-null",
-              DisplayName = "Recommendation-three",
-              Maturity = Maturity.High,
-              Page = new(){
-                Slug = "/recommendation-three-slug",
-                Id = "recommendation-page-three"
-              },
-              Id = "recommendation-three"
-            },
-             new(){
-              InternalName = "internalname-should-be-null",
-              DisplayName = "Recommendation-four",
-              Maturity = Maturity.Medium,
-              Page = new(){
-                Slug = "/recommendation-four-slug",
-                Id = "recommendation-page-four"
-              },
-              Id = "recommendation-four"
             }
           },
           InterstitialPage = new(){
@@ -212,16 +168,6 @@ public class GetCategorySectionsQueryTests
                 Assert.Equal(question.Slug, matchingQuestion.Slug);
                 Assert.Null(matchingQuestion.Text);
                 Assert.Null(matchingQuestion.HelpText);
-            }
-
-            foreach (var recommendation in section.Recommendations)
-            {
-                var matchingRecommendation = matching.Recommendations.Find(r => r.Id == recommendation.Id);
-                Assert.NotNull(matchingRecommendation);
-                Assert.Equal(recommendation.DisplayName, matchingRecommendation.DisplayName);
-                Assert.Equal(recommendation.Maturity, matchingRecommendation.Maturity);
-                Assert.NotNull(matchingRecommendation.DisplayName);
-                Assert.Null(matchingRecommendation.InternalName);
             }
         }
     }

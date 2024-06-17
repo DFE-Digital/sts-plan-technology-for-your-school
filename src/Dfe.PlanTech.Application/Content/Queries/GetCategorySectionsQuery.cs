@@ -84,7 +84,6 @@ public class GetCategorySectionsQuery : IGetPageChildrenQuery
     private static bool AllSectionsValid(IEnumerable<SectionDbEntity> sections)
         => !sections.Any(cat => cat.InterstitialPage == null);
 
-
     /// <summary>
     /// Quer to get <see cref="SectionDbEntity">s for the given page, but with only necessary information we require
     /// </summary>
@@ -103,16 +102,6 @@ public class GetCategorySectionsQuery : IGetPageChildrenQuery
                     {
                         Slug = question.Slug,
                         Id = question.Id,
-                    }).ToList(),
-                    Recommendations = section.Recommendations.Select(recommendation => new RecommendationPageDbEntity()
-                    {
-                        DisplayName = recommendation.DisplayName,
-                        Maturity = recommendation.Maturity,
-                        Page = new PageDbEntity()
-                        {
-                            Slug = recommendation.Page.Slug
-                        },
-                        Id = recommendation.Id
                     }).ToList(),
                     InterstitialPage = new PageDbEntity()
                     {

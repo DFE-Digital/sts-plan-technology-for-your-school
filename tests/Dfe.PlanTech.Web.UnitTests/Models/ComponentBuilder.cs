@@ -50,15 +50,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             LinkToEntry = BuildButton()
         };
 
-        public RecommendationPage BuildRecommendationsPage(Maturity maturity = Maturity.Unknown)
-        => new()
-        {
-            Page = BuildPage(),
-            DisplayName = $"Testing Recommendation - {maturity}",
-            InternalName = $"testing-recommendation-{maturity}",
-            Maturity = maturity,
-        };
-
         public InsetText BuildInsetText() => new()
         {
             Text = "Inset Text"
@@ -71,11 +62,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             {
                 Name = "Section",
                 Questions = BuildQuestions(),
-                Recommendations = [
-                    BuildRecommendationsPage(Maturity.Low),
-                    BuildRecommendationsPage(Maturity.Medium),
-                    BuildRecommendationsPage(Maturity.High)
-                ]
             }
         ];
 

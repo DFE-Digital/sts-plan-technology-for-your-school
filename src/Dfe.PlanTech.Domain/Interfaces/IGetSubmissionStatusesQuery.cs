@@ -9,6 +9,7 @@ public interface IGetSubmissionStatusesQuery
 
     Task<SectionStatusNew> GetSectionSubmissionStatusAsync(int establishmentId,
                                                            ISectionComponent section,
+                                                           bool completed,
                                                            CancellationToken cancellationToken);
 }
 

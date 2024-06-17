@@ -155,6 +155,7 @@ public static class ProgramExtensions
         services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
         services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
         services.AddTransient<IGetAllAnswersForLatestSubmissionQuery, GetAllAnswersForLatestSubmissionQuery>();
+        services.AddTransient<IDeleteCurrentSubmissionCommand, DeleteCurrentSubmissionCommand>();
 
         services.AddTransient<GetPageFromDbQuery>();
 
@@ -164,6 +165,12 @@ public static class ProgramExtensions
     public static IServiceCollection AddGoogleTagManager(this IServiceCollection services)
     {
         services.AddTransient<GtmConfiguration>();
+        return services;
+    }
+
+    public static IServiceCollection AddCspConfiguration(this IServiceCollection services)
+    {
+        services.AddTransient<CspConfiguration>();
         return services;
     }
 }

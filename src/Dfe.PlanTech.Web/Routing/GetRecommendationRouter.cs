@@ -23,7 +23,7 @@ public class GetRecommendationRouter(ISubmissionStatusProcessor router,
         if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
         if (string.IsNullOrEmpty(recommendationSlug)) throw new ArgumentNullException(nameof(recommendationSlug));
 
-        await _router.GetJourneyStatusForSection(sectionSlug, cancellationToken);
+        await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken);
         return _router.Status switch
         {
             SubmissionStatus.Completed => await HandleCompleteStatus(controller, cancellationToken),

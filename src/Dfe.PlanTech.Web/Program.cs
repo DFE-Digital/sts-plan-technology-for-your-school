@@ -28,6 +28,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<ITelemetryInitializer, CustomRequestDimensionsTelemetryInitializer>();
 
 builder.Services.AddGoogleTagManager();
+builder.Services.AddCspConfiguration();
 // Add services to the container.
 
 builder.Services.AddControllersWithViews();

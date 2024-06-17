@@ -29,7 +29,7 @@ public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand
         ArgumentNullException.ThrowIfNull(checkAnswerDto);
         ArgumentNullException.ThrowIfNull(section);
 
-        var attachedQuestions = section.GetAttachedQuestions(checkAnswerDto.Responses).ToList();
+        var attachedQuestions = section.GetOrderedResponsesForJourney(checkAnswerDto.Responses).ToList();
 
         return new CheckAnswerDto()
         {

@@ -77,7 +77,7 @@ public class SubmitAnswerCommandTests
     {
         var result = "";
         FormattableString? formattableString = null;
-        _db.ExecuteRaw(Arg.Any<FormattableString>(), Arg.Any<CancellationToken>())
+        _db.ExecuteSqlAsync(Arg.Any<FormattableString>(), Arg.Any<CancellationToken>())
             .Returns((callInfo) =>
             {
                 formattableString = callInfo.ArgAt<FormattableString>(0);

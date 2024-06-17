@@ -16,33 +16,21 @@ public class Section : ContentComponent, ISectionComponent
 
     public Page InterstitialPage { get; init; } = null!;
 
-    public List<RecommendationPage> Recommendations { get; init; } = new();
-
-    public RecommendationPage? TryGetRecommendationForMaturity(Maturity maturity) => Recommendations.Find(recommendation => recommendation.Maturity == maturity);
-
-    public RecommendationPage? GetRecommendationForMaturity(string? maturity)
+    public IEnumerable<QuestionWithAnswer> GetOrderedResponsesForJourney(IEnumerable<QuestionWithAnswer> responses)
     {
-        if (string.IsNullOrEmpty(maturity) || !Enum.TryParse(maturity, out Maturity maturityResponse)) return null;
-
-        return TryGetRecommendationForMaturity(maturityResponse);
-    }
-
-    public IEnumerable<QuestionWithAnswer> GetAttachedQuestions(IEnumerable<QuestionWithAnswer> responses)
-    {
-        var questionWithAnswerMap = responses.ToDictionary(questionWithAnswer => questionWithAnswer.QuestionRef,
-                                                                                 questionWithAnswer => questionWithAnswer);
+        var questionWithAnswerMap = responses
+            .ToDictionary(questionWithAnswer => questionWithAnswer.QuestionRef, questionWithAnswer => questionWithAnswer);
 
         Question? node = Questions.FirstOrDefault();
 
         while (node != null)
         {
             if (!questionWithAnswerMap.TryGetValue(node.Sys.Id, out QuestionWithAnswer? questionWithAnswer))
-            {
                 break;
-            }
 
             Answer? answer = GetAnswerForRef(questionWithAnswer);
 
+            // Show the latest Text and Slug, but preserve user answer if there has been a change
             questionWithAnswer = questionWithAnswer with
             {
                 AnswerText = answer?.Text ?? questionWithAnswer.AnswerText,
