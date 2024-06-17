@@ -5,13 +5,13 @@
         <partial name="RecommendationPrintContent" model="@Model.AllContent" />
     </div>
     <div class="govuk-grid-column-one-third noprint">
-        <govuk-button class="govuk-button--inverse govuk-!-width-one-half" id="recommendations-print-page">
-            <img class="govuk-!-width-full" src="/assets/images/print.png" alt="print"/>
+        <div id="recommendations-print-page" class="govuk-button govuk-button--inverse button-border print-button">
+            <img class="print-img" src="/assets/images/print.png" alt="Print"/><br>
             Print
-        </govuk-button>
-        <govuk-button class="govuk-button--inverse govuk-!-width-one-half" id="recommendations-close-page">
+        </div>
+        <div id="recommendations-close-page" class="govuk-button govuk-button--inverse button-border">
             Close
-        </govuk-button>
+        </div>
     </div>
 </div>
 

@@ -61,14 +61,11 @@ public class GetRecommendationRouter(ISubmissionStatusProcessor router,
 
         var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(usersAnswers.Select(answer => answer.ContentfulRef));
 
-        var shareRecommendationSlug = $"/{_router.Section.Name.Slugify()}/recommendation-checklist/print";
-
         return new RecommendationsViewModel()
         {
             SectionName = subTopicRecommendation.Subtopic.Name,
             Intro = subTopicIntro,
             Chunks = subTopicChunks,
-            ShareRecommendationSlug = shareRecommendationSlug
         };
     }
 

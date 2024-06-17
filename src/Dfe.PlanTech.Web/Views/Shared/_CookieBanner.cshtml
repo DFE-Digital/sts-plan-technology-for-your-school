@@ -7,7 +7,7 @@
 @if (!cookie.HasApproved && !cookie.IsRejected)
 {
     <form method="post">
-      <div class="govuk-cookie-banner " data-nosnippet role="region" aria-label="Cookies on Plan technology for your school">
+      <div class="govuk-cookie-banner noprint " data-nosnippet role="region" aria-label="Cookies on Plan technology for your school">
         <div class="govuk-cookie-banner__message govuk-width-container">
           <div class="govuk-grid-row">
             <div class="govuk-grid-column-two-thirds">
@@ -34,7 +34,7 @@
 else if ((cookie.HasApproved || cookie.IsRejected) && cookie.IsVisible)
 {
     <form method="post" asp-controller="Cookies" asp-action="HideBanner">
-        <div class="govuk-cookie-banner " data-nosnippet role="region" aria-label="Cookies on Plan technology for your school">
+        <div class="govuk-cookie-banner noprint " data-nosnippet role="region" aria-label="Cookies on Plan technology for your school">
             <div class="govuk-cookie-banner__message govuk-width-container">
                 <div class="govuk-grid-row">
                     <div class="govuk-grid-column-two-thirds">

@@ -1,3 +1,7 @@
+.onlyprint {
+  display: none;
+}
+
 @media print {
   .noprint {
     display: none;
@@ -5,9 +9,22 @@
   .print {
     width: 100%;
   }
+  .onlyprint {
+    display: block;
+  }
 }
 
 .button-border {
   box-shadow: None;
   border: 1px solid dimgrey;
+  margin: 20px;
+  width: 120px;
+  padding: 10px;
+  height: auto;
+  display: block;
+
+  > img {
+    height: 60px;
+    padding-bottom: 10px;
+  }
 }

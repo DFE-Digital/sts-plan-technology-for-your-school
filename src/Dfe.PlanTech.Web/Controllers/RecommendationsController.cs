@@ -27,7 +27,7 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
           cancellationToken);
     }
 
-    [HttpGet("{sectionSlug}/recommendation-checklist/{recommendationSlug}", Name = "GetRecommendationChecklist")]
+    [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}/print", Name = "GetRecommendationChecklist")]
     public async Task<IActionResult> GetRecommendationChecklist(string sectionSlug,
                                                                 string recommendationSlug,
                                                                 [FromServices] IGetRecommendationRouter getRecommendationValidator,
