@@ -1,14 +1,18 @@
 @model Dfe.PlanTech.Web.Models.RecommendationsViewModel
 
+@{
+    Layout = "_PrintLayout";
+}
+
 <div class="govuk-grid-row" id="top">
     <div class="govuk-grid-column-two-thirds recommendation-content print">
-        <div class="dfe-header__logo print-header onlyprint">
+        <div class="dfe-header__logo print-header">
             <img src="/assets/images/dfe-logo-alt.png" class="dfe-logo govuk-!-padding-bottom-2" alt="DfE Logo">
             <p class="govuk-body">Plan technology for your school</p>
         </div>
-        <hr class="onlyprint"/>
-        <p class="onlyprint govuk-!-margin-top-4" id="printedDateTime">Date and time this document was printed: @($"{DateTime.Now:ddd MMM yyyy HH:mm:ss zzz}")</p>
-        <hr class="onlyprint"/>
+        <hr/>
+        <p class="govuk-!-margin-top-4" id="printedDateTime">Date and time this document was printed: @($"{DateTime.Now:ddd MMM yyyy HH:mm:ss zzz}")</p>
+        <hr/>
         <partial name="RecommendationPrintContent" model="@Model.AllContent"/>
     </div>
     <div class="govuk-grid-column-one-third noprint">
@@ -26,10 +30,8 @@
 <script defer nonce="@Context.Items["nonce"]">
     document.getElementById("recommendations-print-page").addEventListener("click", printPage);
     document.getElementById("recommendations-close-page").addEventListener("click", closePage);
-    let printedDateTime = document.getElementById("printedDateTime");
 
     function printPage() {
-        printedDateTime.innerText = `Date and time this document was printed: ${new Date().toString()}`;
         window.print();
     }
     function closePage() {

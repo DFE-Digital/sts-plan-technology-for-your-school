@@ -30,7 +30,9 @@ public class GetRecommendationRouter(ISubmissionStatusProcessor router,
         await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken);
         return _router.Status switch
         {
-            SubmissionStatus.Completed => checklist ? await HandleChecklist(controller, cancellationToken) : await HandleCompleteStatus(controller, cancellationToken),
+            SubmissionStatus.Completed => checklist ?
+                await HandleChecklist(controller, recommendationSlug, cancellationToken) :
+                await HandleCompleteStatus(controller, recommendationSlug, cancellationToken),
             SubmissionStatus.CheckAnswers => controller.RedirectToCheckAnswers(sectionSlug),
             SubmissionStatus.NextQuestion => HandleQuestionStatus(sectionSlug, controller),
             SubmissionStatus.NotStarted => PageRedirecter.RedirectToSelfAssessment(controller),
@@ -41,11 +43,12 @@ public class GetRecommendationRouter(ISubmissionStatusProcessor router,
     /// <summary>
     /// Fetch the model for the recommendation page/checklist (if correct recommendation for section + maturity),
     /// </summary>
+    /// <param name="recommendationSlug"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="DatabaseException"></exception>
     /// <exception cref="ContentfulDataUnavailableException"></exception>
-    private async Task<RecommendationsViewModel> GetRecommendationViewModel(CancellationToken cancellationToken)
+    private async Task<RecommendationsViewModel> GetRecommendationViewModel(string recommendationSlug, CancellationToken cancellationToken)
     {
         if (_router.SectionStatus?.Maturity == null) throw new DatabaseException("Maturity is null, but shouldn't be for a completed section");
 
@@ -66,6 +69,7 @@ public class GetRecommendationRouter(ISubmissionStatusProcessor router,
             SectionName = subTopicRecommendation.Subtopic.Name,
             Intro = subTopicIntro,
             Chunks = subTopicChunks,
+            Slug = recommendationSlug
         };
     }
 
@@ -73,11 +77,12 @@ public class GetRecommendationRouter(ISubmissionStatusProcessor router,
     /// Render the recommendation page
     /// </summary>
     /// <param name="controller"></param>
+    /// <param name="recommendationSlug"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task<IActionResult> HandleCompleteStatus(RecommendationsController controller, CancellationToken cancellationToken)
+    private async Task<IActionResult> HandleCompleteStatus(RecommendationsController controller, string recommendationSlug, CancellationToken cancellationToken)
     {
-        var viewModel = await GetRecommendationViewModel(cancellationToken);
+        var viewModel = await GetRecommendationViewModel(recommendationSlug, cancellationToken);
 
         return controller.View("~/Views/Recommendations/Recommendations.cshtml", viewModel);
     }
@@ -86,11 +91,12 @@ public class GetRecommendationRouter(ISubmissionStatusProcessor router,
     /// Render the page for sharing recommendations in a checklist format
     /// </summary>
     /// <param name="controller"></param>
+    /// <param name="recommendationSlug"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task<IActionResult> HandleChecklist(RecommendationsController controller, CancellationToken cancellationToken)
+    private async Task<IActionResult> HandleChecklist(RecommendationsController controller, string recommendationSlug, CancellationToken cancellationToken)
     {
-        var viewModel = await GetRecommendationViewModel(cancellationToken);
+        var viewModel = await GetRecommendationViewModel(recommendationSlug, cancellationToken);
 
         return controller.View("~/Views/Recommendations/RecommendationsChecklist.cshtml", viewModel);
     }

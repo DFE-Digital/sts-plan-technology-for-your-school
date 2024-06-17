@@ -1,16 +1,9 @@
-.onlyprint {
-  display: none;
-}
-
 @media print {
   .noprint {
     display: none;
   }
   .print {
     width: 100%;
-  }
-  .onlyprint {
-    display: block;
   }
 }
 

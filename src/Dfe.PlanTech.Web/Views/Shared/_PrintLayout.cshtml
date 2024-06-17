@@ -18,9 +18,6 @@
 
 @section Header {
     @Html.Raw(GtmConfiguration.Body)
-
-    <partial name="_CookieBanner"/>
-    <partial name="_Header"/>
     @RenderSection("Header", false)
 }
 
@@ -32,12 +29,7 @@
 
 @RenderBody()
 
-@section Footer {
-    <partial name="_Footer"/>
-}
-
 @section BodyEnd {
     <partial name="_BodyEnd"/>
     @RenderSection("BodyEnd", required: false)
 }
-
