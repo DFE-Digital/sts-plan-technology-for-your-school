@@ -1,10 +1,13 @@
-DELETE
-FROM Contentful.ContentComponents
-WHERE Id in (
-    Select Id From Contentful.RecommendationPages)
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_SCHEMA = 'Contentful' AND TABLE_NAME = 'RecommendationPages')
 
-TRUNCATE TABLE Contentful.RecommendationPages
+BEGIN
+    DELETE
+    FROM Contentful.ContentComponents
+    WHERE Id in (
+        Select Id From Contentful.RecommendationPages)
 
-DROP TABLE Contentful.RecommendationPages
+    TRUNCATE TABLE Contentful.RecommendationPages
 
-GO
+    DROP TABLE Contentful.RecommendationPages
+END
