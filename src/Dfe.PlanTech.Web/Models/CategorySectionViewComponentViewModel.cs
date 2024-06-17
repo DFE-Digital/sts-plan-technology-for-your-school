@@ -8,7 +8,7 @@ public class CategorySectionViewComponentViewModel
 
     public int TotalSectionCount { get; init; }
 
-    public IEnumerable<CategorySectionDto> CategorySectionDto { get; init; } = null!;
+    public IList<CategorySectionDto> CategorySectionDto { get; init; } = null!;
 
     public string? NoSectionsErrorRedirectUrl { get; set; }
 
