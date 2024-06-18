@@ -37,8 +37,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.Infrastructure
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.CmsDbDataValidator", "tests\Dfe.PlanTech.CmsDbDataValidator\Dfe.PlanTech.CmsDbDataValidator.csproj", "{66E92A5E-5C8A-4245-A55F-087FE2D96EEF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.AzureFunctions.E2ETests", "tests\Dfe.PlanTech.AzureFunctions.E2ETests\Dfe.PlanTech.AzureFunctions.E2ETests.csproj", "{79177AD9-1D52-4338-A987-C88AF66A347C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,10 +103,6 @@ Global
 		{66E92A5E-5C8A-4245-A55F-087FE2D96EEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66E92A5E-5C8A-4245-A55F-087FE2D96EEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{66E92A5E-5C8A-4245-A55F-087FE2D96EEF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{79177AD9-1D52-4338-A987-C88AF66A347C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{79177AD9-1D52-4338-A987-C88AF66A347C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{79177AD9-1D52-4338-A987-C88AF66A347C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{79177AD9-1D52-4338-A987-C88AF66A347C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -129,7 +123,6 @@ Global
 		{2F75269D-834B-4E0A-BAD2-7ECAD359C56D} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
 		{B82ED911-FFCD-4EFF-BD9E-405394811F13} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
 		{66E92A5E-5C8A-4245-A55F-087FE2D96EEF} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
-		{79177AD9-1D52-4338-A987-C88AF66A347C} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2661FAF0-D2EA-4265-846E-E6AB213C854C}

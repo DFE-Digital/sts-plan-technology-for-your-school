@@ -23,6 +23,7 @@ public class SubtopicRecommendationMapper(
         values = MoveValueToNewKey(values, "section", "sectionId");
         values = MoveValueToNewKey(values, "subtopic", "subtopicId");
 
+        _incomingIntros.Clear();
         _incomingIntros.AddRange(_entityUpdater.GetAndOrderReferencedEntities<RecommendationIntroDbEntity>(values, "intros"));
 
         return values;

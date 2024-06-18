@@ -17,9 +17,10 @@ public class RecommendationChunkMapper(EntityRetriever retriever, EntityUpdater 
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
-        var id = values["id"]?.ToString() ?? throw new KeyNotFoundException("Not found id");
-
         values = MoveValueToNewKey(values, "header", "headerId");
+
+        _incomingAnswers.Clear();
+        _incomingContent.Clear();
 
         _incomingAnswers.AddRange(_entityUpdater.GetAndOrderReferencedEntities<AnswerDbEntity>(values, "answers"));
         _incomingContent.AddRange(_entityUpdater.GetAndOrderReferencedEntities<ContentComponentDbEntity>(values, "content"));

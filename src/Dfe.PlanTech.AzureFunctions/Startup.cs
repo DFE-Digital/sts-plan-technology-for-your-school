@@ -64,11 +64,11 @@ namespace Dfe.PlanTech.AzureFunctions
         {
             foreach (var mapper in GetMappers())
             {
-                services.AddScoped(typeof(JsonToDbMapper), mapper);
+                services.AddTransient(typeof(JsonToDbMapper), mapper);
             }
 
-            services.AddScoped<RichTextContentMapper>();
-            services.AddScoped<JsonToEntityMappers>();
+            services.AddTransient<RichTextContentMapper>();
+            services.AddTransient<JsonToEntityMappers>();
 
             services.AddTransient<PageEntityRetriever>();
             services.AddTransient<PageEntityUpdater>();

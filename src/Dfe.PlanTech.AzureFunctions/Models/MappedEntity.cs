@@ -99,21 +99,20 @@ public class MappedEntity
     {
         if (ExistingEntity != null)
         {
-            CopyEntityStatus();
+            CopyEntityStatus(ExistingEntity, IncomingEntity);
         }
 
         UpdateEntityStatusByEvent();
     }
 
     /// <summary>
-    /// Copies the status values from an existing entity to an incoming entity, to ensure we only
-    /// change statuses we need to.
+    /// Copies the status values one entity to another, to ensure that they match when updated.
     ///</summary>
-    private void CopyEntityStatus()
+    private static void CopyEntityStatus(ContentComponentDbEntity source, ContentComponentDbEntity target)
     {
-        IncomingEntity.Archived = ExistingEntity!.Archived;
-        IncomingEntity.Published = ExistingEntity!.Published;
-        IncomingEntity.Deleted = ExistingEntity!.Deleted;
+        target.Archived = source.Archived;
+        target.Published = source.Published;
+        target.Deleted = source.Deleted;
     }
 
     /// <summary>
@@ -145,7 +144,6 @@ public class MappedEntity
                     throw new CmsEventException(string.Format("Content with Id \"{0}\" has event 'unpublish' despite not existing in the database!", IncomingEntity.Id));
                 }
                 IncomingEntity.Published = false;
-                ExistingEntity.Published = false;
                 break;
             case CmsEvent.DELETE:
                 if (ExistingEntity == null)
@@ -153,7 +151,6 @@ public class MappedEntity
                     throw new CmsEventException(string.Format("Content with Id \"{0}\" has event 'delete' despite not existing in the database!", IncomingEntity.Id));
                 }
                 IncomingEntity.Deleted = true;
-                ExistingEntity.Deleted = true;
                 break;
         }
     }

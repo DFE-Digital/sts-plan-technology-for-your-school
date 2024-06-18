@@ -146,11 +146,18 @@ public abstract class JsonToDbMapper
         {
             Logger.LogError("No value for {field}", field);
             yield return null;
+            yield break;
         }
 
-        var fieldChildren = field.Value!.AsObject();
+        var fieldChildren = GetValueAsObject(field);
 
-        if (fieldChildren.Count > 1)
+        if (fieldChildren == null)
+        {
+            yield return null;
+            yield break;
+        }
+
+        if (fieldChildren!.Count > 1)
         {
             Logger.LogError("Expected only one language - received {count}", fieldChildren.Count);
             yield return null;
@@ -161,6 +168,20 @@ public abstract class JsonToDbMapper
             var value = GetValue(child.Value!);
 
             yield return new KeyValuePair<string, object?>(field.Key, value);
+        }
+
+    }
+
+    private JsonObject? GetValueAsObject(KeyValuePair<string, JsonNode> field)
+    {
+        try
+        {
+            return field.Value!.AsObject();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Errorwhen serialising field \"{FieldName}\":as object.\nValue was: {FieldValue}", field.Key, field.Value);
+            return null;
         }
     }
 

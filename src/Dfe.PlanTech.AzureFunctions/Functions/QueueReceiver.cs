@@ -66,21 +66,20 @@ public class QueueReceiver(
 
             MappedEntity mapped = await MapMessageToEntity(message, cmsEvent, cancellationToken);
 
-            if (!mapped.IsValid)
+            if (mapped.IsMinimalPayloadEvent)
             {
-                await messageActions.CompleteMessageAsync(message, cancellationToken);
-                return;
-            }
-            else if (mapped.IsMinimalPayloadEvent)
-            {
+                Logger.LogInformation("Processing minimal payload event {CmsEvent} for entity with ID {Id}", mapped.CmsEvent, mapped.IncomingEntity.Id);
                 await ProcessEntityRemovalEvent(mapped, cancellationToken);
+            }
+            else if (!mapped.IsValid)
+            {
+                Logger.LogWarning("Entity {MappedEntityType} is invalid", mapped.IncomingEntity?.GetType());
             }
             else
             {
                 UpsertEntity(mapped);
+                await DbSaveChanges(cancellationToken);
             }
-
-            await DbSaveChanges(cancellationToken);
 
             await messageActions.CompleteMessageAsync(message, cancellationToken);
         }
@@ -115,7 +114,7 @@ public class QueueReceiver(
             throw new InvalidOperationException("ExistingEntity is null for removal event but various validations should have prevented this.");
         }
 
-        return db.SetComponentPublishedAndDeletedStatuses(mapped.ExistingEntity, mapped.ExistingEntity.Published, mapped.ExistingEntity.Deleted, cancellationToken);
+        return db.SetComponentPublishedAndDeletedStatuses(mapped.ExistingEntity, mapped.IncomingEntity.Published, mapped.IncomingEntity.Deleted, cancellationToken);
     }
 
     /// <summary>

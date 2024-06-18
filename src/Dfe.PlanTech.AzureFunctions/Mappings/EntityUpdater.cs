@@ -1,10 +1,8 @@
-using System.Linq.Expressions;
 using Dfe.PlanTech.AzureFunctions.Models;
 using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
@@ -31,7 +29,6 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
         };
 
         mappedEntity.UpdateEntity();
-
         await preUpdateEntityCallback(mappedEntity);
 
         if (!mappedEntity.IsValidComponent(Db, _logger) || mappedEntity.IsMinimalPayloadEvent)
@@ -111,7 +108,7 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
 
         foreach (var incomingReferencedEntity in incomingReferencedEntities)
         {
-            var existingReferencedEntity = existingReferencedEntities.FirstOrDefault(existingReference => existingReference.Id == incomingReferencedEntity.Id);
+            var existingReferencedEntity = existingReferencedEntities.Find(existingReference => existingReference.Id == incomingReferencedEntity.Id);
             if (existingReferencedEntity == null)
             {
                 await AddNewReferencedEntity(entity, existingReferencedEntities, referencedEntityDbSet, incomingReferencedEntity);
@@ -145,12 +142,12 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
     protected virtual void RemoveRemovedReferencedEntities<TReferencedEntity>(List<TReferencedEntity> existingReferencedEntities, List<TReferencedEntity> incomingReferencedEntities)
         where TReferencedEntity : ContentComponentDbEntity
     {
-        var answersToRemove = existingReferencedEntities.Where(existingReference => !incomingReferencedEntities.Exists(incomingReference => incomingReference.Id == existingReference.Id))
-                                                        .ToArray();
+        var referencesToRemove = existingReferencedEntities.Where(existingReference => !incomingReferencedEntities.Exists(incomingReference => incomingReference.Id == existingReference.Id))
+                                                            .ToArray();
 
-        foreach (var answerToRemove in answersToRemove)
+        foreach (var referenceToRemove in referencesToRemove)
         {
-            existingReferencedEntities.Remove(answerToRemove);
+            existingReferencedEntities.Remove(referenceToRemove);
         }
     }
 }

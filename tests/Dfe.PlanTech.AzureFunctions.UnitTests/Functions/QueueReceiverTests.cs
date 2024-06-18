@@ -15,9 +15,7 @@ using System.Text.Json.Serialization;
 using Dfe.PlanTech.AzureFunctions.Utils;
 using NSubstitute.ExceptionExtensions;
 using MockQueryable.NSubstitute;
-using Microsoft.EntityFrameworkCore.Query;
-using System.Linq.Expressions;
-using Dfe.PlanTech.AzureFunctions.Models;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 
@@ -53,6 +51,7 @@ public class QueueReceiverTests
         });
 
         _cmsDbContextMock = Substitute.For<CmsDbContext>();
+
         _cmsDbContextMock.SaveChangesAsync().Returns(1);
 
         var mockQuestionSet = _questions.AsQueryable().BuildMockDbSet();
@@ -81,26 +80,20 @@ public class QueueReceiverTests
         MockEntityType();
 
         _jsonToEntityMappers = CreateMappers();
+        _cmsDbContextMock.SetComponentPublishedAndDeletedStatuses(Arg.Any<ContentComponentDbEntity>(), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
+            .Returns((callinfo) =>
+            {
+                var contentComponent = callinfo.ArgAt<ContentComponentDbEntity>(0);
+                var published = callinfo.ArgAt<bool>(1);
+                var deleted = callinfo.ArgAt<bool>(2);
 
-        var sub = Substitute.ForPartsOf<QueueReceiver>(new ContentfulOptions(true), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _messageRetryHandlerMock);
+                contentComponent.Published = published;
+                contentComponent.Deleted = deleted;
 
-        sub.ProcessEntityRemovalEvent(Arg.Any<MappedEntity>(), Arg.Any<CancellationToken>())
-                        .ReturnsForAnyArgs((callinfo) =>
-                        {
-                            var mappedEntity = callinfo.ArgAt<MappedEntity>(0);
+                return Task.FromResult(1);
+            });
 
-                            var existingEntity = mappedEntity.ExistingEntity as QuestionDbEntity;
-
-                            var matching = _questions.FirstOrDefault(q => q.Id == existingEntity!.Id);
-
-                            matching!.Published = mappedEntity.IncomingEntity.Published;
-                            matching!.Deleted = mappedEntity.IncomingEntity.Deleted;
-
-                            return 1;
-                        });
-
-
-        _queueReceiver = sub;
+        _queueReceiver = new(new ContentfulOptions(true), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _messageRetryHandlerMock);
         DbSet<ContentComponentDbEntity> contentComponentsMock = MockContentComponents();
         _cmsDbContextMock.ContentComponents = contentComponentsMock;
     }
@@ -318,8 +311,9 @@ public class QueueReceiverTests
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
         _cmsDbContextMock.ReceivedWithAnyArgs(0).Add(Arg.Any<ContentComponentDbEntity>());
-        await _cmsDbContextMock.ReceivedWithAnyArgs(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        await _cmsDbContextMock.ReceivedWithAnyArgs(0).SaveChangesAsync(Arg.Any<CancellationToken>());
 
+        await _cmsDbContextMock.ReceivedWithAnyArgs(1).SetComponentPublishedAndDeletedStatuses(Arg.Any<QuestionDbEntity>(), false, false, Arg.Any<CancellationToken>());
         Assert.Equal(2, _questions.Count);
 
         var question = _questions[1];
