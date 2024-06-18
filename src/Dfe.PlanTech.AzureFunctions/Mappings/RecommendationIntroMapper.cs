@@ -23,6 +23,8 @@ public class RecommendationIntroMapper(
     {
         values = MoveValueToNewKey(values, "header", "headerId");
 
+        _incomingContent.Clear();
+
         _incomingContent.AddRange(_entityUpdater.GetAndOrderReferencedEntities<ContentComponentDbEntity>(values, "content"));
 
         return values;

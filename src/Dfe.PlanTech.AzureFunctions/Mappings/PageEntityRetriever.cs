@@ -27,6 +27,9 @@ public class PageEntityRetriever(CmsDbContext db) : EntityRetriever(db)
                                         PageId = pageContent.PageId,
                                         Order = pageContent.Order,
                                     }).ToList(),
+                                    Published = page.Published,
+                                    Archived = page.Archived,
+                                    Deleted = page.Deleted
                                 })
                                 .FirstOrDefaultAsync(page => page.Id == entity.Id, cancellationToken);
 

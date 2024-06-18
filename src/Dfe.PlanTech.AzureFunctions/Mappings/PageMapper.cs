@@ -17,7 +17,10 @@ public class PageMapper(PageEntityRetriever retriever, PageEntityUpdater updater
     public override PageDbEntity ToEntity(CmsWebHookPayload payload)
     {
         var mappedPage = base.ToEntity(payload);
-        mappedPage.AllPageContents = _pageContents;
+        foreach (var content in PageContents)
+        {
+            mappedPage.AllPageContents.Add(content);
+        }
 
         return mappedPage;
     }
@@ -34,6 +37,8 @@ public class PageMapper(PageEntityRetriever retriever, PageEntityUpdater updater
 
         values = MoveValueToNewKey(values, "title", "titleId");
 
+        _pageContents.Clear();
+
         UpdateContentIds(values, id, BeforeTitleContentKey);
         UpdateContentIds(values, id, ContentKey);
 
@@ -48,7 +53,7 @@ public class PageMapper(PageEntityRetriever retriever, PageEntityUpdater updater
         {
             for (var index = 0; index < inners.Length; index++)
             {
-                CreatePageContentEntity(inners[index], index, pageId, isBeforeTitleContent);
+                CreatePageContentEntity(inners[index], index, isBeforeTitleContent);
             }
 
             values.Remove(currentKey);
@@ -62,7 +67,7 @@ public class PageMapper(PageEntityRetriever retriever, PageEntityUpdater updater
     /// <param name="order">Order of the content for the page</param>
     /// <param name="pageId"></param>
     /// <param name="isBeforeTitleContent"></param>
-    private void CreatePageContentEntity(object inner, int order, string pageId, bool isBeforeTitleContent)
+    private void CreatePageContentEntity(object inner, int order, bool isBeforeTitleContent)
     {
         if (inner is not string contentId)
         {
@@ -72,18 +77,10 @@ public class PageMapper(PageEntityRetriever retriever, PageEntityUpdater updater
 
         var pageContent = new PageContentDbEntity()
         {
-            PageId = pageId,
-            Order = order
+            Order = order,
+            BeforeContentComponentId = isBeforeTitleContent ? contentId : null,
+            ContentComponentId = !isBeforeTitleContent ? contentId : null,
         };
-
-        if (isBeforeTitleContent)
-        {
-            pageContent.BeforeContentComponentId = contentId;
-        }
-        else
-        {
-            pageContent.ContentComponentId = contentId;
-        }
 
         _pageContents.Add(pageContent);
     }

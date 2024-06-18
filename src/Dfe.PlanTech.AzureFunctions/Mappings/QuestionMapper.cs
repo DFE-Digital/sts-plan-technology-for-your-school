@@ -16,6 +16,7 @@ public class QuestionMapper(EntityRetriever retriever, EntityUpdater updater, Cm
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
+        _incomingAnswers.Clear();
         _incomingAnswers.AddRange(_entityUpdater.GetAndOrderReferencedEntities<AnswerDbEntity>(values, "answers"));
 
         return values;
@@ -31,6 +32,8 @@ public class QuestionMapper(EntityRetriever retriever, EntityUpdater updater, Cm
                                         .Where(answer => answer.ParentQuestionId == incoming.Id)
                                         .Select(answer => answer)
                                         .ToListAsync();
+
+            Logger.LogInformation("Retrieved answers for existing question: \"{Answers}\"", string.Join(",", existing.Answers.Select(answer => answer.Id)));
         }
 
         await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (question) => question.Answers, _incomingAnswers, _db.Answers, true);

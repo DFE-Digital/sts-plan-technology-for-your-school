@@ -202,8 +202,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
         modelBuilder.Entity<ContentComponentDbEntity>().HasQueryFilter(ShouldShowEntity());
     }
 
-    public async Task<int> SetComponentPublishedAndDeletedStatuses(ContentComponentDbEntity contentComponent, bool published, bool deleted, CancellationToken cancellationToken = default)
-        => await Database.ExecuteSqlAsync($"UPDATE [Contentful].[ContentComponents] SET Published = {published}, Deleted = {deleted} WHERE [Id] = {contentComponent.Id}", cancellationToken: cancellationToken);
+    public virtual Task<int> SetComponentPublishedAndDeletedStatuses(ContentComponentDbEntity contentComponent, bool published, bool deleted, CancellationToken cancellationToken = default)
+        => Database.ExecuteSqlAsync($"UPDATE [Contentful].[ContentComponents] SET Published = {published}, Deleted = {deleted} WHERE [Id] = {contentComponent.Id}", cancellationToken: cancellationToken);
 
     /// <summary>
     /// Should the given entity be displayed? I.e. is it not archived, not deleted, and either published or use preview mode is enabled

@@ -16,6 +16,7 @@ public class CategoryMapper(EntityRetriever retriever, EntityUpdater updater, Cm
     {
         values = MoveValueToNewKey(values, "header", "headerId");
 
+        _incomingSections.Clear();
         _incomingSections.AddRange(_entityUpdater.GetAndOrderReferencedEntities<SectionDbEntity>(values, "sections"));
 
         return values;

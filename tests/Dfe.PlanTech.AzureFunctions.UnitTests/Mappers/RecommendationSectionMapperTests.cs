@@ -1,28 +1,49 @@
 using System.Text.Json;
 using Dfe.PlanTech.AzureFunctions.Mappings;
+using Dfe.PlanTech.Domain.Caching.Enums;
+using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using MockQueryable.NSubstitute;
 using NSubstitute;
-using NSubstitute.Extensions;
 
 namespace Dfe.PlanTech.AzureFunctions.UnitTests.Mappers;
 
 public class RecommendationSectionMapperTests : BaseMapperTests
 {
-    private readonly DbSet<RecommendationSectionAnswerDbEntity> _sectionAnswerDbSet = Substitute.For<DbSet<RecommendationSectionAnswerDbEntity>>();
-    private readonly DbSet<RecommendationSectionChunkDbEntity> _sectionChunkDbSet = Substitute.For<DbSet<RecommendationSectionChunkDbEntity>>();
-    private static readonly CmsDbContext _db = Substitute.For<CmsDbContext>();
-    private static readonly ILogger<RecommendationSectionMapper> _logger = Substitute.For<ILogger<RecommendationSectionMapper>>();
-    private static RecommendationSectionUpdater CreateMockRecommendationSectionUpdater() => new(Substitute.For<ILogger<RecommendationSectionUpdater>>(), _db);
-    private readonly List<RecommendationChunkDbEntity> _chunks = [];
-    private readonly JsonSerializerOptions _jsonSerializerOptions = new();
+    private const string ExistingSectionId = "TestingSection";
     private readonly string[] _chunkIds = ["chunk1", "chunk2", "chunk3"];
+    private readonly string[] _answerIds = ["answer1", "answer2", "answer3"];
+
+    private readonly List<AnswerDbEntity> _answers = [];
+    private readonly List<RecommendationChunkDbEntity> _chunks = [];
+    private readonly List<RecommendationSectionAnswerDbEntity> _recommendationSectionAnswers = [];
+    private readonly List<RecommendationSectionChunkDbEntity> _recommendationSectionChunks = [];
+    private readonly List<RecommendationSectionDbEntity> _recommendationSections = [];
+
+    private readonly DbSet<AnswerDbEntity> _answersDbSet;
+    private readonly DbSet<RecommendationChunkDbEntity> _recommendationChunkDbSet;
+    private readonly DbSet<RecommendationSectionAnswerDbEntity> _sectionAnswerDbSet;
+    private readonly DbSet<RecommendationSectionChunkDbEntity> _sectionChunkDbSet;
+    private readonly DbSet<RecommendationSectionDbEntity> _sectionsDbSet;
+
+    private static readonly CmsDbContext _db = Substitute.For<CmsDbContext>();
+    private static readonly ILogger<RecommendationSectionMapper> _recSecMapperLogger = Substitute.For<ILogger<RecommendationSectionMapper>>();
+    private readonly ILogger<EntityUpdater> _entityUpdaterLogger;
+    private static EntityUpdater CreateMockRecommendationSectionUpdater(ILogger<EntityUpdater> logger) => new(logger, _db);
     private readonly RecommendationSectionMapper _mapper;
+
+    private readonly RecommendationSectionDbEntity ExitingRecommendationSectionDbEntity = new()
+    {
+        Id = ExistingSectionId,
+    };
 
     public RecommendationSectionMapperTests()
     {
+        _entityUpdaterLogger = Substitute.For<ILogger<EntityUpdater>>();
+
         foreach (var id in _chunkIds)
         {
             var chunk = new RecommendationChunkDbEntity()
@@ -33,86 +54,169 @@ public class RecommendationSectionMapperTests : BaseMapperTests
 
             _chunks.Add(chunk);
         }
+        _chunks.Add(new RecommendationChunkDbEntity() { Id = "chunk4" });
 
-        IQueryable<RecommendationChunkDbEntity> queryable = _chunks.AsQueryable();
+        _recommendationChunkDbSet = _chunks.BuildMockDbSet();
+        _db.RecommendationChunks = _recommendationChunkDbSet;
 
-        var asyncProvider = new AsyncQueryProvider<RecommendationChunkDbEntity>(queryable.Provider);
+        for (int x = 0; x < _answerIds.Length; x++)
+        {
+            string id = _answerIds[x];
+            var answer = new AnswerDbEntity()
+            {
+                Id = id,
+                Order = x
+            };
 
-        var mockPageDataSet = Substitute.For<DbSet<RecommendationChunkDbEntity>, IQueryable<RecommendationChunkDbEntity>>();
-        ((IQueryable<RecommendationChunkDbEntity>)mockPageDataSet).Provider.Returns(asyncProvider);
-        ((IQueryable<RecommendationChunkDbEntity>)mockPageDataSet).Expression.Returns(queryable.Expression);
-        ((IQueryable<RecommendationChunkDbEntity>)mockPageDataSet).ElementType.Returns(queryable.ElementType);
-        ((IQueryable<RecommendationChunkDbEntity>)mockPageDataSet).GetEnumerator().Returns(queryable.GetEnumerator());
+            _answers.Add(answer);
+        }
+        _answers.Add(new AnswerDbEntity() { Id = "answer4" });
 
-        _db.RecommendationChunks = mockPageDataSet;
+        _answersDbSet = _answers.BuildMockDbSet();
+        _db.Answers = _answersDbSet;
 
-
-        _db.RecommendationSectionChunks = _sectionChunkDbSet;
+        _sectionAnswerDbSet = _recommendationSectionAnswers.BuildMockDbSet();
         _db.RecommendationSectionAnswers = _sectionAnswerDbSet;
 
+        _sectionChunkDbSet = _recommendationSectionChunks.BuildMockDbSet();
         _db.RecommendationSectionChunks = _sectionChunkDbSet;
-        _db.RecommendationSectionAnswers = _sectionAnswerDbSet;
 
-        _mapper = new RecommendationSectionMapper(MapperHelpers.CreateMockEntityRetriever(), CreateMockRecommendationSectionUpdater(), _db, _logger, _jsonSerializerOptions);
+        _recommendationSections.Add(ExitingRecommendationSectionDbEntity);
+        _sectionsDbSet = _recommendationSections.BuildMockDbSet();
+        _db.RecommendationSections = _sectionsDbSet;
+
+        _db.Set<AnswerDbEntity>().Returns(_answersDbSet);
+        _db.Set<RecommendationChunkDbEntity>().Returns(_recommendationChunkDbSet);
+        _db.Set<RecommendationSectionAnswerDbEntity>().Returns(_sectionAnswerDbSet);
+        _db.Set<RecommendationSectionChunkDbEntity>().Returns(_sectionChunkDbSet);
+        _db.Set<RecommendationSectionDbEntity>().Returns(_sectionsDbSet);
+
+        MockEntityEntry(_db, typeof(RecommendationSectionDbEntity));
+        _mapper = new RecommendationSectionMapper(MapperHelpers.CreateMockEntityRetriever(_db), CreateMockRecommendationSectionUpdater(_entityUpdaterLogger), _db, _recSecMapperLogger, JsonOptions);
     }
 
     [Fact]
-    public void RecommendationSectionsAreMappedCorrectly()
+    public async Task Should_Create_New_Recommendation_Section_With_Existing_Data()
     {
-        var values = new Dictionary<string, object?>
+        var payload = CreateRecommendationSectionPayload("new-section-id", _answerIds, _chunkIds);
+
+        var recommendationSection = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default);
+
+        Assert.NotNull(recommendationSection);
+
+        var (incoming, existing) = recommendationSection.GetTypedEntities<RecommendationSectionDbEntity>();
+
+        Assert.NotNull(incoming);
+        Assert.Null(existing);
+
+        Assert.Equal(_answerIds.Length, incoming.Answers.Count);
+
+        foreach (var answerId in _answerIds)
         {
-            ["id"] = "sectionId",
-            ["chunks"] = _chunkIds,
-            ["answers"] = new string[] { "answer1", "answer2", "answer3" }
-        };
+            var matching = incoming.Answers.FirstOrDefault(answer => answer.Id == answerId);
+            Assert.NotNull(matching);
+        }
 
-        var recommendationChunk = _mapper.PerformAdditionalMapping(values);
-
-        Assert.NotNull(recommendationChunk);
-
-        _db.RecommendationSectionAnswers.Received(3).Attach(Arg.Any<RecommendationSectionAnswerDbEntity>());
-        _db.RecommendationSectionChunks.Received(3).Attach(Arg.Any<RecommendationSectionChunkDbEntity>());
-
-        for (var x = 0; x < _chunkIds.Length; x++)
+        Assert.Equal(_chunkIds.Length, incoming.Chunks.Count);
+        foreach (var chunkId in _chunkIds)
         {
-            var matchingChunk = _chunks.FirstOrDefault(c => c.Id == _chunkIds[x]);
-            Assert.NotNull(matchingChunk);
-            Assert.Equal(x, matchingChunk?.Order);
+            var matching = incoming.Chunks.FirstOrDefault(answer => answer.Id == chunkId);
+            Assert.NotNull(matching);
         }
     }
 
     [Fact]
-    public void Should_LogWarning_On_Missing_Chunks()
+    public async Task Should_Update_Existing_RecommendationSection()
     {
-        var missingChunkId = "not a real chunk id";
-        string[] chunkIds = [.. _chunkIds, missingChunkId];
-        var values = new Dictionary<string, object?>
+        string[] answers = [.. _answerIds[1..], "answer4"];
+        string[] chunks = [.. _chunkIds[..2], "chunk4"];
+        var payload = CreateRecommendationSectionPayload(ExitingRecommendationSectionDbEntity.Id, answers, chunks);
+
+        var recommendationSection = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default);
+
+        Assert.NotNull(recommendationSection);
+
+        var (incoming, existing) = recommendationSection.GetTypedEntities<RecommendationSectionDbEntity>();
+
+        Assert.NotNull(incoming);
+        Assert.NotNull(existing);
+
+        Assert.Equal(answers.Length, existing.Answers.Count);
+
+        foreach (var answerId in answers)
         {
-            ["id"] = "sectionId",
-            ["chunks"] = chunkIds,
-            ["answers"] = new string[] { "answer1", "answer2", "answer3" }
+            var matching = existing.Answers.FirstOrDefault(answer => answer.Id == answerId);
+            Assert.NotNull(matching);
+        }
+
+        Assert.Equal(chunks.Length, existing.Chunks.Count);
+        foreach (var chunkId in chunks)
+        {
+            var matching = existing.Chunks.FirstOrDefault(answer => answer.Id == chunkId);
+            Assert.NotNull(matching);
+        }
+    }
+
+    [Theory]
+    [InlineData("Not-An-Existing-RecSec")]
+    [InlineData(ExistingSectionId)]
+    public async Task Should_LogWarning_On_Missing_References(string recSecId)
+    {
+        string[] notFoundAnswers = ["not-existing-answer", "also-not-existing"];
+        string[] notFoundChunks = ["not-found-chunk"];
+        var payload = CreateRecommendationSectionPayload(recSecId, ["answer1", .. notFoundAnswers], ["chunk3", .. notFoundChunks]);
+
+        var recommendationSection = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default);
+
+        var (incoming, existing) = recommendationSection.GetTypedEntities<RecommendationSectionDbEntity>();
+
+        Assert.NotNull(incoming);
+
+        var recSecToCheck = (recSecId == ExistingSectionId ? existing : incoming)!;
+
+        if (recSecId == ExistingSectionId)
+        {
+            Assert.NotNull(existing);
+        }
+        else
+        {
+            Assert.Null(existing);
+        }
+
+        Assert.Single(recSecToCheck.Answers);
+        Assert.Single(recSecToCheck.Chunks);
+
+        string[] notFoundReferenceIds = [.. notFoundAnswers, .. notFoundChunks];
+        FindLogMessagesContainingStrings(_entityUpdaterLogger, notFoundReferenceIds);
+    }
+
+    private CmsWebHookPayload CreateRecommendationSectionPayload(string sectionId, string[] answerIds, string[] chunkIds)
+    {
+        CmsWebHookSystemDetailsInnerContainer[] answers =
+            answerIds.Select(answerId => new CmsWebHookSystemDetailsInnerContainer()
+            {
+                Sys = new CmsWebHookSystemDetailsInner()
+                {
+                    Id = answerId
+                }
+            }).ToArray();
+
+        CmsWebHookSystemDetailsInnerContainer[] chunks =
+            chunkIds.Select(chunkId => new CmsWebHookSystemDetailsInnerContainer()
+            {
+                Sys = new CmsWebHookSystemDetailsInner()
+                {
+                    Id = chunkId
+                }
+            }).ToArray();
+
+        var fields = new Dictionary<string, object?>()
+        {
+            ["answers"] = WrapWithLocalisation(answers),
+            ["chunks"] = WrapWithLocalisation(chunks),
         };
 
-
-        var recommendationChunk = _mapper.PerformAdditionalMapping(values);
-
-        Assert.NotNull(recommendationChunk);
-
-        var receivedLogWarnings = _logger.ReceivedCalls();
-
-        Assert.Single(receivedLogWarnings);
-
-        var call = receivedLogWarnings.First();
-
-        var arguments = call.GetArguments();
-
-        Assert.NotNull(arguments);
-        var errorMessage = arguments[2]!.ToString();
-
-        Assert.Contains(missingChunkId, errorMessage);
-
-        var logLevel = Enum.Parse<LogLevel>(arguments[0]!.ToString()!);
-
-        Assert.Equal(LogLevel.Warning, logLevel);
+        var payload = CreatePayload(fields, sectionId);
+        return payload;
     }
 }

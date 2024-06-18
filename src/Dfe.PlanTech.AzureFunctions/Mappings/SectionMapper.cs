@@ -17,6 +17,8 @@ public class SectionMapper(EntityRetriever retriever, EntityUpdater updater, Cms
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
         values = MoveValueToNewKey(values, "interstitialPage", "interstitialPageId");
+
+        _incomingQuestions.Clear();
         _incomingQuestions.AddRange(_entityUpdater.GetAndOrderReferencedEntities<QuestionDbEntity>(values, "questions"));
 
         return values;

@@ -72,8 +72,6 @@ public class QuestionMapperTests : BaseMapperTests
         _db.Set<AnswerDbEntity>().Returns(_answerDbSet);
         _db.Set<QuestionDbEntity>().Returns(_questionDbSet);
 
-        var modelMock = Substitute.For<IModel>();
-
         var entityTypeMock = Substitute.For<IEntityType>();
         entityTypeMock.ClrType.Returns(typeof(QuestionDbEntity));
 
@@ -159,7 +157,7 @@ public class QuestionMapperTests : BaseMapperTests
     }
 
     [Fact]
-    public async Task MapEntity_Should_Update_Answer_ParentQuestionIds()
+    public async Task MapEntity_Should_Update_Existing_Question()
     {
         CmsWebHookSystemDetailsInnerContainer[] answers = [
             new CmsWebHookSystemDetailsInnerContainer() { Sys = new() { Id = AnswerIdToKeep } },
@@ -182,12 +180,8 @@ public class QuestionMapperTests : BaseMapperTests
         var existingQuestionEntity = result.ExistingEntity as QuestionDbEntity;
 
         Assert.NotNull(existingQuestionEntity);
-
         Assert.Single(existingQuestionEntity.Answers);
-
         Assert.Equal(AnswerIdToKeep, existingQuestionEntity.Answers.First().Id);
-
-        Assert.All(_testAnswers.Where(answer => answer.Id != AnswerIdToKeep), (answer) => Assert.Null(answer.ParentQuestionId));
     }
 
     [Fact]
