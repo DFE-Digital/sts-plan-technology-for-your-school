@@ -5,7 +5,6 @@
 
 @{
   var cookie = cookieService.Cookie;
-  var userPreferencesSet = cookie.UserAcceptsCookies;
 }
 
 @if(!cookie.IsVisible)
@@ -13,16 +12,16 @@
   return;
 }
 
-<form method="post">
-  <div class="govuk-cookie-banner " data-nosnippet role="region" aria-label="Cookies on Plan technology for your school">
-    <div class="govuk-cookie-banner__message govuk-width-container">
-      @if(!cookie.UserPreferencesSet){
-        <partial name="CookiesBanner/_CookieBanner_PreferencesNotSet" model=@cookie/>
-      }
-      else
-      {
-        <partial name="CookiesBanner/_CookieBanner_PreferencesSet" model=@cookie/>
-      }
-    </div>
-  </div>
-</form>
+<section class="govuk-cookie-banner" data-nosnippet aria-label="Cookies on Plan technology for your school">
+  <form method="post">
+      <div class="govuk-cookie-banner__message govuk-width-container">
+        @if(!cookieService.Cookie.UserPreferencesSet){
+          <partial name="CookiesBanner/_CookieBanner_PreferencesNotSet" model=@cookie/>
+        }
+        else
+        {
+          <partial name="CookiesBanner/_CookieBanner_PreferencesSet" model=@cookie/>
+        }
+      </div>
+  </form>
+</section>
