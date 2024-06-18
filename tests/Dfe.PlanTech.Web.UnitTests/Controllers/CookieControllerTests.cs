@@ -158,7 +158,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             cookiesController.TempData = tempDataSubstitute;
 
-            var result = Assert.Throws<ArgumentException>(() => cookiesController.SetCookiePreference(userPreference));
+            var result = Assert.Throws<ArgumentException>(() => cookiesController.SetCookiePreference(userPreference!));
             Assert.Contains("Can't convert preference", result.Message);
         }
 
