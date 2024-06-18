@@ -11,7 +11,7 @@
             <p class="govuk-body">Plan technology for your school</p>
         </div>
         <hr/>
-        <p class="govuk-!-margin-top-4" id="printedDateTime">Date and time this document was printed: @($"{DateTime.Now:ddd MMM yyyy HH:mm:ss zzz}")</p>
+        <p class="govuk-!-margin-top-4" id="printed-date-time">Date and time this document was printed: @($"{DateTime.Now:ddd MMM yyyy HH:mm:ss zzz}")</p>
         <hr/>
         <partial name="RecommendationPrintContent" model="@Model.AllContent"/>
     </div>
