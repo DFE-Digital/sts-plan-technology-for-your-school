@@ -3,7 +3,6 @@
 @model IEnumerable<Dfe.PlanTech.Domain.Questionnaire.Interfaces.IHeaderWithContent>
 
 @{
-    var counter = 0;
     foreach (var headerWithContent in Model)
     {
         if (headerWithContent is RecommendationIntro)
@@ -14,7 +13,7 @@
         }
         else
         {
-            <h3>@($"{++counter}. {headerWithContent.Header.Text}")</h3>
+            <partial name="Components/HeaderWithContent" model="@headerWithContent"/>
             <div class="recommendation-piece-content">
                 @foreach (var content in headerWithContent.Content)
                 {

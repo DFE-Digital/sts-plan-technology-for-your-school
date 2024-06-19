@@ -302,14 +302,11 @@ public class GetRecommendationRouterTests
                 default));
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task Should_Show_RecommendationPage_or_Checklist_When_Status_Is_Recommendation_And_All_Valid(bool checklist)
+    private async Task<IActionResult> Setup_Valid_Recommendation(bool checklist)
     {
         _submissionStatusProcessor.When(processor =>
                 processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
-            .Do((callinfo) =>
+            .Do(_ =>
             {
                 _submissionStatusProcessor.Status = SubmissionStatus.Completed;
                 _submissionStatusProcessor.Section.Returns(_section);
@@ -322,7 +319,7 @@ public class GetRecommendationRouterTests
         _getAllAnswersForSubmissionQuery.GetAllAnswersForLatestSubmission(Arg.Any<string>(), Arg.Any<int>()).Returns(
             new List<Answer>()
             {
-                new Answer()
+                new ()
                 {
                     Id = 1,
                     AnswerText = "Answer 1",
@@ -330,17 +327,36 @@ public class GetRecommendationRouterTests
                 }
             });
 
-
         _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
-
-        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, "any-recommendation-slug", checklist,
+        return await _router.ValidateRoute(_section.InterstitialPage.Slug, "any-recommendation-slug", checklist,
             _controller, default);
+    }
+
+    [Fact]
+    public async Task Should_Show_RecommendationPage_When_Status_Is_Recommendation_And_All_Valid()
+    {
+        var result = await Setup_Valid_Recommendation(checklist: false);
 
         var viewResult = result as ViewResult;
 
         Assert.NotNull(viewResult);
 
         var model = viewResult.Model as RecommendationsViewModel;
+
+        Assert.NotNull(model);
+        Assert.Equal(_subtopic!.Intros[0], model.Intro);
+    }
+
+    [Fact]
+    public async Task Should_Show_RecommendationChecklistPage_When_Status_Is_Recommendation_And_All_Valid()
+    {
+        var result = await Setup_Valid_Recommendation(checklist: true);
+
+        var viewResult = result as ViewResult;
+
+        Assert.NotNull(viewResult);
+
+        var model = viewResult.Model as RecommendationsChecklistViewModel;
 
         Assert.NotNull(model);
         Assert.Equal(_subtopic!.Intros[0], model.Intro);
