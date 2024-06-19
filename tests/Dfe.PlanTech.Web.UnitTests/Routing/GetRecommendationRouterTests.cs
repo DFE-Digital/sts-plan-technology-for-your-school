@@ -302,7 +302,7 @@ public class GetRecommendationRouterTests
                 default));
     }
 
-    private async Task<IActionResult> Setup_Valid_Recommendation(bool checklist)
+    private void Setup_Valid_Recommendation()
     {
         _submissionStatusProcessor.When(processor =>
                 processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
@@ -328,14 +328,13 @@ public class GetRecommendationRouterTests
             });
 
         _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
-        return await _router.ValidateRoute(_section.InterstitialPage.Slug, "any-recommendation-slug", checklist,
-            _controller, default);
     }
 
     [Fact]
     public async Task Should_Show_RecommendationPage_When_Status_Is_Recommendation_And_All_Valid()
     {
-        var result = await Setup_Valid_Recommendation(checklist: false);
+        Setup_Valid_Recommendation();
+        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, "any-recommendation-slug", false, _controller, default);
 
         var viewResult = result as ViewResult;
 
@@ -350,7 +349,8 @@ public class GetRecommendationRouterTests
     [Fact]
     public async Task Should_Show_RecommendationChecklistPage_When_Status_Is_Recommendation_And_All_Valid()
     {
-        var result = await Setup_Valid_Recommendation(checklist: true);
+        Setup_Valid_Recommendation();
+        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, "any-recommendation-slug", true, _controller, default);
 
         var viewResult = result as ViewResult;
 

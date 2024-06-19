@@ -1,5 +1,5 @@
 <div class="govuk-form-group govuk-!-margin-top-5">
-    <govuk-checkboxes name="RecommendationActions">
+    <govuk-checkboxes name="recommendation-actions-checkboxes-@ViewData["RecommendationsActionsHeader"]">
         <govuk-checkboxes-fieldset>
             <govuk-checkboxes-fieldset-legend class="govuk-fieldset__legend--m">
                 <h2 class="govuk-fieldset__heading">
@@ -14,7 +14,7 @@
             }
         </govuk-checkboxes-fieldset>
     </govuk-checkboxes>
-    <govuk-textarea name="recommendation-actions" disabled="true">
+    <govuk-textarea name="recommendation-actions-textarea-@ViewData["RecommendationsActionsHeader"]" disabled="true">
         <govuk-textarea-label class="dfe-u-secondary-text-color">
             What have you done on this action?
         </govuk-textarea-label>

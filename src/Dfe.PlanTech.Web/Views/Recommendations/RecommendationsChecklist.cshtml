@@ -10,9 +10,9 @@
             <img src="/assets/images/dfe-logo-alt.png" class="dfe-logo govuk-!-padding-bottom-2" alt="DfE Logo">
             <p class="govuk-body">Plan technology for your school</p>
         </div>
-        <hr/>
-        <p class="govuk-!-margin-top-4" id="printed-date-time">Date and time this document was printed: @($"{DateTime.Now:ddd MMM yyyy HH:mm:ss zzz}")</p>
-        <hr/>
+        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"/>
+        <p class="govuk-!-margin-top-4 govuk-body" id="printed-date-time">Date and time this document was printed: @($"{DateTime.Now:ddd MMM yyyy HH:mm:ss zzz}")</p>
+        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"/>
         <partial name="RecommendationPrintContent" model="@Model.AllContent"/>
     </div>
     <div class="govuk-grid-column-one-third noprint">

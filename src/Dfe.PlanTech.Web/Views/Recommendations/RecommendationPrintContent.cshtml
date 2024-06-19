@@ -19,7 +19,8 @@
                 {
                     await Html.RenderPartialAsync("Components/PageComponentFactory", content);
                 }
-                <partial name="RecommendationActions"/>
+                @{ ViewData["RecommendationsActionsHeader"] = headerWithContent.SlugifiedHeader; }
+                <partial name="RecommendationActions" />
             </div>
         }
     }
