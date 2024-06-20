@@ -3,35 +3,35 @@ using Dfe.PlanTech.AzureFunctions.E2ETests.Generators;
 using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Dfe.Plantech.AzureFunctions.E2ETests.EntityTests;
+namespace Dfe.PlanTech.AzureFunctions.E2ETests.EntityTests;
 
 [Collection("ContentComponent")]
 public class InsetTextTests : EntityTests<InsetText, InsetTextDbEntity, InsetTextGenerator>
 {
-  protected override InsetTextGenerator CreateEntityGenerator() => new();
+    protected override InsetTextGenerator CreateEntityGenerator() => new();
 
-  protected override void ClearDatabase()
-  {
-    var dbInsetTexts = GetDbEntitiesQuery().ToList();
+    protected override void ClearDatabase()
+    {
+        var dbInsetTexts = GetDbEntitiesQuery().ToList();
 
-    Db.InsetTexts.RemoveRange(dbInsetTexts);
+        Db.InsetTexts.RemoveRange(dbInsetTexts);
 
-    Db.SaveChanges();
-  }
+        Db.SaveChanges();
+    }
 
-  protected override Dictionary<string, object?> CreateEntityValuesDictionary(InsetText entity)
-   => new()
-   {
-     ["text"] = entity.Text,
-   };
+    protected override Dictionary<string, object?> CreateEntityValuesDictionary(InsetText entity)
+     => new()
+     {
+         ["text"] = entity.Text,
+     };
 
-  protected override IQueryable<InsetTextDbEntity> GetDbEntitiesQuery() => Db.InsetTexts.IgnoreQueryFilters().IgnoreAutoIncludes();
+    protected override IQueryable<InsetTextDbEntity> GetDbEntitiesQuery() => Db.InsetTexts.IgnoreQueryFilters().IgnoreAutoIncludes();
 
-  protected override void ValidateDbMatches(InsetText entity, InsetTextDbEntity? dbEntity, bool published = true, bool archived = false, bool deleted = false)
-  {
-    Assert.NotNull(dbEntity);
-    Assert.Equal(entity.Text, entity.Text);
+    protected override void ValidateDbMatches(InsetText entity, InsetTextDbEntity? dbEntity, bool published = true, bool archived = false, bool deleted = false)
+    {
+        Assert.NotNull(dbEntity);
+        Assert.Equal(entity.Text, dbEntity.Text);
 
-    ValidateEntityState(dbEntity, published, archived, deleted);
-  }
+        ValidateEntityState(dbEntity, published, archived, deleted);
+    }
 }
