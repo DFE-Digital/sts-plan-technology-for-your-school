@@ -11,11 +11,11 @@ public class RecommendationsChecklistViewModel
     public RecommendationIntro Intro { get; init; } = null!;
 
     public List<RecommendationChunk> Chunks { get; init; } = null!;
-    
+
     public IEnumerable<IHeaderWithContent> AllContent => GetAllContent();
 
     private static RecommendationChunk ConvertToNumberedChunk(RecommendationChunk content, int index)
-    => new ()
+    => new()
     {
         Header = new Header
         {
