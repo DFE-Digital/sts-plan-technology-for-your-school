@@ -7,10 +7,14 @@
   }
 }
 
-.button-border {
+.print-header {
+  float: none
+}
+
+.print-buttons__button {
   box-shadow: None;
   border: 1px solid grey;
-  margin: 20px;
+  margin: 10px;
   width: 120px;
   padding: 10px;
   height: auto;
@@ -22,6 +26,13 @@
   }
 }
 
-.print-header {
-  float: none
+.print-buttons__row {
+  flex-basis: 100%;
 }
+
+.print-buttons__container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+

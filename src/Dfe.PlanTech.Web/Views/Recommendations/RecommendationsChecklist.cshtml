@@ -15,12 +15,13 @@
         <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"/>
         <partial name="RecommendationPrintContent" model="@Model.AllContent"/>
     </div>
-    <div class="govuk-grid-column-one-third noprint">
-        <div id="recommendations-print-page" class="govuk-button govuk-button--inverse button-border print-button">
+    <div class="govuk-grid-column-one-third print-buttons__container noprint">
+        <div id="recommendations-print-page" class="govuk-button govuk-button--inverse print-buttons__button">
             <img class="print-img" src="/assets/images/print.png" alt="Print"/><br>
             Print
         </div>
-        <div id="recommendations-close-page" class="govuk-button govuk-button--inverse button-border">
+        <div class="print-buttons__row"></div>
+        <div id="recommendations-close-page" class="govuk-button govuk-button--inverse print-buttons__button">
             Close
         </div>
     </div>
