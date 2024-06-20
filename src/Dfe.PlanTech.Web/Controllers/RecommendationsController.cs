@@ -11,8 +11,6 @@ namespace Dfe.PlanTech.Web.Controllers;
 public class RecommendationsController(ILogger<RecommendationsController> logger)
     : BaseController<RecommendationsController>(logger)
 {
-    public const string GetRecommendationAction = nameof(GetRecommendation);
-
     [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}", Name = "GetRecommendation")]
     public async Task<IActionResult> GetRecommendation(string sectionSlug,
                                                        string recommendationSlug,
@@ -24,7 +22,25 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
 
         return await getRecommendationValidator.ValidateRoute(sectionSlug,
           recommendationSlug,
+          false,
           this,
           cancellationToken);
     }
+
+    [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}/print", Name = "GetRecommendationChecklist")]
+    public async Task<IActionResult> GetRecommendationChecklist(string sectionSlug,
+                                                                string recommendationSlug,
+                                                                [FromServices] IGetRecommendationRouter getRecommendationValidator,
+                                                                CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
+        if (string.IsNullOrEmpty(recommendationSlug)) throw new ArgumentNullException(nameof(recommendationSlug));
+
+        return await getRecommendationValidator.ValidateRoute(sectionSlug,
+            recommendationSlug,
+            true,
+            this,
+            cancellationToken);
+    }
 }
+
