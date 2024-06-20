@@ -13,14 +13,18 @@
         }
         else
         {
-            <partial name="Components/HeaderWithContent" model="@headerWithContent"/>
-            <div class="recommendation-piece-content">
+            <div class="recommendation-action-header">
+                @{
+                    await Html.RenderPartialAsync("Components/Header", headerWithContent.Header);
+                }
+            </div>
+            <div class="recommendation-action-content">
                 @foreach (var content in headerWithContent.Content)
                 {
                     await Html.RenderPartialAsync("Components/PageComponentFactory", content);
                 }
                 @{ ViewData["RecommendationsActionsHeader"] = headerWithContent.SlugifiedHeader; }
-                <partial name="RecommendationActions" />
+                <partial name="RecommendationActions"/>
             </div>
         }
     }

@@ -19,7 +19,7 @@ public class RecommendationsChecklistViewModel
     {
         Header = new Header
         {
-            Text = $"{index + 1}: {content.Header.Text}",
+            Text = $"{index + 1}. {content.Header.Text}",
             Tag = HeaderTag.H3,
             Size = HeaderSize.Medium
         },
