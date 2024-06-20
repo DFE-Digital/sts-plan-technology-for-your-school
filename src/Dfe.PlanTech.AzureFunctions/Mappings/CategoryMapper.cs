@@ -27,10 +27,9 @@ public class CategoryMapper(EntityRetriever retriever, EntityUpdater updater, Cm
 
         if (existing != null)
         {
-            existing.Sections = await _db.Sections
-                                            .Where(section => section.CategoryId == incoming.Id)
-                                            .Select(section => section)
-                                            .ToListAsync();
+            existing.Sections = await _db.Sections.Where(section => section.CategoryId == incoming.Id)
+                                                .Select(section => section)
+                                                .ToListAsync();
         }
 
         await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (category) => category.Sections, _incomingSections, _db.Sections, true);

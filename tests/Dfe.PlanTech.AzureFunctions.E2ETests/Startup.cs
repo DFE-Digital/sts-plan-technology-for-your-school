@@ -13,72 +13,72 @@ namespace Dfe.PlanTech.AzureFunctions.E2ETests;
 
 public static class Startup
 {
-  public static IServiceProvider CreateServiceProvider(IConfiguration? configuration = null)
-  {
-    configuration ??= CreateConfiguration();
-
-    var services = new ServiceCollection();
-
-    services.AddDbContext<CmsDbContext>(opts =>
+    public static IServiceProvider CreateServiceProvider(IConfiguration? configuration = null)
     {
-      opts.UseSqlServer(configuration.GetConnectionString("Database"));
-      opts.EnableSensitiveDataLogging(true);
-    });
+        configuration ??= CreateConfiguration();
 
-    services.AddLogging(opts =>
-    {
-      opts.AddConsole();
-      opts.SetMinimumLevel(LogLevel.Warning);
-    });
+        var services = new ServiceCollection();
 
-    services.AddSingleton(new JsonSerializerOptions()
-    {
-      PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-      Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
-      PropertyNameCaseInsensitive = true,
-    });
-
-    services.AddSingleton(new ContentfulOptions(true));
-
-    services.AddOptions<MessageRetryHandlingOptions>()
-        .Configure<IConfiguration>((settings, configuration) =>
+        services.AddDbContext<CmsDbContext>(opts =>
         {
-          configuration.GetSection("MessageRetryHandlingOptions").Bind(settings);
+            opts.UseSqlServer(configuration.GetConnectionString("Database"));
+            opts.EnableSensitiveDataLogging(true);
         });
 
-    AddMappers(services);
-    return services.BuildServiceProvider();
-  }
+        services.AddLogging(opts =>
+        {
+            opts.AddConsole();
+            opts.SetMinimumLevel(LogLevel.Warning);
+        });
 
-  private static void AddMappers(IServiceCollection services)
-  {
-    foreach (var mapper in GetMappers())
-    {
-      services.AddScoped(typeof(JsonToDbMapper), mapper);
+        services.AddSingleton(new JsonSerializerOptions()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+            PropertyNameCaseInsensitive = true,
+        });
+
+        services.AddSingleton(new ContentfulOptions(true));
+
+        services.AddOptions<MessageRetryHandlingOptions>()
+            .Configure<IConfiguration>((settings, configuration) =>
+            {
+                configuration.GetSection("MessageRetryHandlingOptions").Bind(settings);
+            });
+
+        AddMappers(services);
+        return services.BuildServiceProvider();
     }
 
-    services.AddScoped<RichTextContentMapper>();
-    services.AddScoped<JsonToEntityMappers>();
+    private static void AddMappers(IServiceCollection services)
+    {
+        foreach (var mapper in GetMappers())
+        {
+            services.AddScoped(typeof(JsonToDbMapper), mapper);
+        }
 
-    services.AddTransient<PageEntityRetriever>();
-    services.AddTransient<PageEntityUpdater>();
+        services.AddScoped<RichTextContentMapper>();
+        services.AddScoped<JsonToEntityMappers>();
 
-    services.AddTransient<EntityRetriever>();
-    services.AddTransient<EntityUpdater>();
-  }
+        services.AddTransient<PageEntityRetriever>();
+        services.AddTransient<PageEntityUpdater>();
 
-  private static IEnumerable<Type> GetMappers()
-   => AppDomain.CurrentDomain.GetAssemblies()
-                              .SelectMany(assembley => assembley.GetTypes())
-                              .Where(type => type.IsAssignableTo(typeof(JsonToDbMapper)) && !type.IsAbstract);
+        services.AddTransient<EntityRetriever>();
+        services.AddTransient<EntityUpdater>();
+    }
 
-  public static IConfiguration CreateConfiguration()
-  {
-    var configurationBuilder = new ConfigurationBuilder();
-    configurationBuilder.AddUserSecrets<ForLoadingUserSecrets>();
+    private static IEnumerable<Type> GetMappers()
+     => AppDomain.CurrentDomain.GetAssemblies()
+                                .SelectMany(assembley => assembley.GetTypes())
+                                .Where(type => type.IsAssignableTo(typeof(JsonToDbMapper)) && !type.IsAbstract);
 
-    return configurationBuilder.Build();
-  }
+    public static IConfiguration CreateConfiguration()
+    {
+        var configurationBuilder = new ConfigurationBuilder();
+        configurationBuilder.AddUserSecrets<ForLoadingUserSecrets>();
+
+        return configurationBuilder.Build();
+    }
 }
 
 public class ForLoadingUserSecrets
