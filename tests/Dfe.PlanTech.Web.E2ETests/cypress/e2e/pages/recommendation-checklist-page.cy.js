@@ -30,7 +30,8 @@ describe("Recommendation Checklist Page", () => {
   });
 
   it("Should have Content", () => {
-      cy.get("div.recommendation-piece-content").should("exist");
+      cy.get("div.recommendation-action-header").should("exist");
+      cy.get("div.recommendation-action-content").should("exist");
   });
 
   it("Should have a banner showing printout time", () => {

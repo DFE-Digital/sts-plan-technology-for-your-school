@@ -56,9 +56,13 @@ public class GetRecommendationRouterTests
             {
                 new RecommendationChunk()
                 {
+                    Header = new ()
+                    {
+                        Text = "test-header"
+                    },
                     Answers = new List<Domain.Questionnaire.Models.Answer>()
                     {
-                        new Domain.Questionnaire.Models.Answer()
+                        new ()
                         {
                             Sys = new SystemDetails()
                             {
@@ -360,5 +364,12 @@ public class GetRecommendationRouterTests
 
         Assert.NotNull(model);
         Assert.Equal(_subtopic!.Intros[0], model.Intro);
+
+        var content = model.AllContent.ToList();
+        var intro = content[0];
+        var firstChunk = content[1];
+
+        Assert.Equal(_subtopic.Intros[0], intro);
+        Assert.Equal("1. test-header", firstChunk.Header.Text);
     }
 }
