@@ -1,6 +1,6 @@
 @media print {
   .noprint {
-    display: none;
+    display: none !important;
   }
   .print {
     width: 100%;
