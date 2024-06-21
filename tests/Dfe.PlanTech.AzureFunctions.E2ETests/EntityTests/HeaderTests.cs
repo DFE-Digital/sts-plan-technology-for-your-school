@@ -27,7 +27,7 @@ public class HeaderTests : EntityTests<Header, HeaderDbEntity, HeaderGenerator>
          ["size"] = entity.Size
      };
 
-    protected override IQueryable<HeaderDbEntity> GetDbEntitiesQuery() => Db.Headers.IgnoreQueryFilters().IgnoreAutoIncludes();
+    protected override IQueryable<HeaderDbEntity> GetDbEntitiesQuery() => Db.Headers.IgnoreQueryFilters().IgnoreAutoIncludes().AsNoTracking();
 
     protected override void ValidateDbMatches(Header entity, HeaderDbEntity? dbEntity, bool published = true, bool archived = false, bool deleted = false)
     {

@@ -25,7 +25,7 @@ public class InsetTextTests : EntityTests<InsetText, InsetTextDbEntity, InsetTex
          ["text"] = entity.Text,
      };
 
-    protected override IQueryable<InsetTextDbEntity> GetDbEntitiesQuery() => Db.InsetTexts.IgnoreQueryFilters().IgnoreAutoIncludes();
+    protected override IQueryable<InsetTextDbEntity> GetDbEntitiesQuery() => Db.InsetTexts.IgnoreQueryFilters().IgnoreAutoIncludes().AsNoTracking();
 
     protected override void ValidateDbMatches(InsetText entity, InsetTextDbEntity? dbEntity, bool published = true, bool archived = false, bool deleted = false)
     {
