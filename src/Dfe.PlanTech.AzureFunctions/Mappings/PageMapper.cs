@@ -39,13 +39,13 @@ public class PageMapper(PageEntityRetriever retriever, PageEntityUpdater updater
 
         _pageContents.Clear();
 
-        UpdateContentIds(values, id, BeforeTitleContentKey);
-        UpdateContentIds(values, id, ContentKey);
+        UpdateContentIds(values, BeforeTitleContentKey);
+        UpdateContentIds(values, ContentKey);
 
         return values;
     }
 
-    private void UpdateContentIds(Dictionary<string, object?> values, string pageId, string currentKey)
+    private void UpdateContentIds(Dictionary<string, object?> values, string currentKey)
     {
         bool isBeforeTitleContent = currentKey == BeforeTitleContentKey;
 
@@ -65,7 +65,6 @@ public class PageMapper(PageEntityRetriever retriever, PageEntityUpdater updater
     /// </summary>
     /// <param name="inner">The child content ID.</param>
     /// <param name="order">Order of the content for the page</param>
-    /// <param name="pageId"></param>
     /// <param name="isBeforeTitleContent"></param>
     private void CreatePageContentEntity(object inner, int order, bool isBeforeTitleContent)
     {
