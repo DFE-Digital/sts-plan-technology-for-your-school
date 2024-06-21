@@ -28,7 +28,7 @@ public static class Startup
         services.AddLogging(opts =>
         {
             opts.AddConsole();
-            opts.SetMinimumLevel(LogLevel.Warning);
+            opts.SetMinimumLevel(LogLevel.Information);
         });
 
         services.AddSingleton(new JsonSerializerOptions()

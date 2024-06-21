@@ -26,7 +26,7 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
     public EntityTests(int listSize = 50)
     {
         CreatedEntities = new(listSize);
-        var serviceProvider = PlanTech.AzureFunctions.E2ETests.Startup.CreateServiceProvider();
+        var serviceProvider = Startup.CreateServiceProvider();
 
         Db = serviceProvider.GetRequiredService<CmsDbContext>();
         Db.ChangeTracker.Clear();
@@ -304,7 +304,10 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
     }
 
     protected virtual Task<TDbEntity?> GetDbEntityById(TEntity entity) => GetDbEntityById(entity.Sys.Id);
-    protected virtual Task<TDbEntity?> GetDbEntityById(string id) => GetDbEntitiesQuery().AsNoTracking().FirstOrDefaultAsync(dbEntity => dbEntity.Id == id);
+
+    protected virtual Task<TDbEntity?> GetDbEntityById(string id) => GetDbEntitiesQuery()
+                                                                                .AsNoTracking()
+                                                                                .FirstOrDefaultAsync(dbEntity => dbEntity.Id == id);
 
     protected virtual void ValidateEntityState(TDbEntity dbEntity, bool published, bool archived, bool deleted)
     {
@@ -317,6 +320,7 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
     protected abstract TEntityGenerator CreateEntityGenerator();
     protected abstract Dictionary<string, object?> CreateEntityValuesDictionary(TEntity entity);
     protected abstract void ValidateDbMatches(TEntity entity, TDbEntity? dbEntity, bool published = true, bool archived = false, bool deleted = false);
+
     protected abstract IQueryable<TDbEntity> GetDbEntitiesQuery();
 
     private static ServiceBusMessageActions CreateServiceBusMessageActionsSubstitute()
