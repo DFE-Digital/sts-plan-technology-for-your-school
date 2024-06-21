@@ -19,6 +19,16 @@ public class QuestionGenerator : BaseGenerator<Question>
         RuleFor(question => question.Answers, faker => answers.Count > 0 ? AnswerGeneratorHelper.GetEntities(faker, 2, 7) : []);
     }
 
+    public List<Question> GenerateQuestionsAndSaveToDb(CmsDbContext db, int count)
+    {
+        var questions = Generate(count);
+        var questionDbEntities = MapToDbEntities(questions);
+        db.Questions.AddRange(questionDbEntities);
+        db.SaveChanges();
+
+        return questions;
+    }
+
     public static IEnumerable<QuestionDbEntity> MapToDbEntities(IEnumerable<Question> questions)
     => questions.Select(question => new QuestionDbEntity()
     {
@@ -31,4 +41,15 @@ public class QuestionGenerator : BaseGenerator<Question>
         Archived = false,
         Deleted = false,
     });
+
+    public static QuestionGenerator CreateInstance(CmsDbContext db)
+    {
+        var answerGenerator = new AnswerGenerator();
+        var answers = answerGenerator.Generate(2000);
+
+        db.Answers.AddRange(AnswerGenerator.MapToDbEntities(answers));
+        db.SaveChanges();
+
+        return new QuestionGenerator(answers);
+    }
 }
