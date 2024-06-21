@@ -11,11 +11,12 @@ public class TextBodyMapper(EntityRetriever retriever, EntityUpdater updater, Ri
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
-        var richText = (values["richText"] ?? throw new KeyNotFoundException($"No rich text value found")) as JsonNode;
+        if (values.TryGetValue("richText", out object richTextValue) && richTextValue is JsonNode richText)
+        {
+            var deserialised = richText.Deserialize<RichTextContent>(JsonOptions) ?? throw new InvalidOperationException($"Could not map to {typeof(RichTextContent)}");
 
-        var deserialised = richText.Deserialize<RichTextContent>(JsonOptions) ?? throw new InvalidOperationException($"Could not map to {typeof(RichTextContent)}");
-
-        values["richText"] = JsonNode.Parse(JsonSerializer.Serialize(_richTextMapper.MapToDbEntity(deserialised), JsonOptions));
+            values["richText"] = JsonNode.Parse(JsonSerializer.Serialize(_richTextMapper.MapToDbEntity(deserialised), JsonOptions));
+        }
 
         return values;
     }
