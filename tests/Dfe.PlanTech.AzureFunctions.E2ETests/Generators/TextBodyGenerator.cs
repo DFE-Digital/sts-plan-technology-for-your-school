@@ -15,6 +15,7 @@ public class TextBodyGenerator : BaseGenerator<TextBody>
     public static IEnumerable<TextBodyDbEntity> MapToDbEntities(IEnumerable<TextBody> textBodies)
     => textBodies.Select(tb => new TextBodyDbEntity()
     {
+        Id = tb.Sys.Id,
         RichText = RichTextGenerator.MapToDbEntity(tb.RichText),
     });
 }
