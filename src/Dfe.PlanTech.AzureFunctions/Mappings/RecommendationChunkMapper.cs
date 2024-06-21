@@ -12,18 +12,15 @@ public class RecommendationChunkMapper(EntityRetriever retriever, EntityUpdater 
 {
     private readonly CmsDbContext _db = db;
 
-    private readonly List<AnswerDbEntity> _incomingAnswers = [];
-    private readonly List<ContentComponentDbEntity> _incomingContent = [];
+    private List<AnswerDbEntity> _incomingAnswers = [];
+    private List<ContentComponentDbEntity> _incomingContent = [];
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
         values = MoveValueToNewKey(values, "header", "headerId");
 
-        _incomingAnswers.Clear();
-        _incomingContent.Clear();
-
-        _incomingAnswers.AddRange(_entityUpdater.GetAndOrderReferencedEntities<AnswerDbEntity>(values, "answers"));
-        _incomingContent.AddRange(_entityUpdater.GetAndOrderReferencedEntities<ContentComponentDbEntity>(values, "content"));
+        _incomingAnswers = _entityUpdater.GetAndOrderReferencedEntities<AnswerDbEntity>(values, "answers").ToList();
+        _incomingContent = _entityUpdater.GetAndOrderReferencedEntities<ContentComponentDbEntity>(values, "content").ToList();
 
         return values;
     }
@@ -34,17 +31,15 @@ public class RecommendationChunkMapper(EntityRetriever retriever, EntityUpdater 
 
         if (existing != null)
         {
-            existing.Answers.AddRange(await _db.RecommendationChunkAnswers
-                                                .Where(recChunkAnswer => recChunkAnswer.AnswerId == incoming.Id)
-                                                .Select(recChunkAnswer => recChunkAnswer.Answer)
-                                                .Select(content => content!)
-                                                .ToListAsync());
+            if (existing.Answers == null || existing.Answers.Count == 0)
+            {
+                await _db.Entry(existing).Collection(recChunk => recChunk.Answers).LoadAsync();
+            }
 
-            existing.Content.AddRange(await _db.RecommendationChunkContents
-                                                .Where(recChunkContent => recChunkContent.RecommendationChunkId == incoming.Id)
-                                                .Select(recChunkContent => recChunkContent.ContentComponent)
-                                                .Select(content => content!)
-                                                .ToListAsync());
+            if (existing.Content == null || existing.Content.Count == 0)
+            {
+                await _db.Entry(existing).Collection(recChunk => recChunk.Content).LoadAsync();
+            }
         }
 
         await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recChunk) => recChunk.Answers, _incomingAnswers, _db.Answers, true);
