@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Infrastructure.Data;
 
 namespace Dfe.PlanTech.AzureFunctions.E2ETests.Generators;
 
@@ -34,6 +35,15 @@ public class PageGenerator : BaseGenerator<Page>
         RuleFor(page => page.Title, faker => TitleHelper.GetEntity(faker));
     }
 
+    public List<Page> GeneratePagesAndSaveToDb(CmsDbContext db, int count)
+    {
+        var pages = Generate(count);
+        var pageDbEntities = MapToDbEntity(pages);
+        db.Pages.AddRange(pageDbEntities);
+        db.SaveChanges();
+        return pages;
+    }
+
     public static IEnumerable<PageDbEntity> MapToDbEntity(IEnumerable<Page> pages)
     => pages.Select(page => new PageDbEntity()
     {
@@ -48,4 +58,23 @@ public class PageGenerator : BaseGenerator<Page>
         TitleId = page.Title?.Sys.Id,
         Published = true,
     });
+
+    public static PageGenerator CreateInstance(CmsDbContext db)
+    {
+        var titleGenerator = new TitleGenerator();
+
+        var titles = titleGenerator.Generate(2000);
+
+        var titleDbEntities = titles.Select(title => new TitleDbEntity()
+        {
+            Id = title.Sys.Id,
+            Published = true,
+            Text = title.Text,
+        });
+
+        db.Titles.AddRange(titleDbEntities);
+        db.SaveChanges();
+
+        return new PageGenerator(titles);
+    }
 }

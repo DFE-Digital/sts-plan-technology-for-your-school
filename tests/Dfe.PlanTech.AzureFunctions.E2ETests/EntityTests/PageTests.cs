@@ -1,6 +1,7 @@
 
 using Dfe.PlanTech.AzureFunctions.E2ETests.Generators;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.AzureFunctions.E2ETests.EntityTests;
@@ -8,24 +9,7 @@ namespace Dfe.PlanTech.AzureFunctions.E2ETests.EntityTests;
 [Collection("ContentComponent")]
 public class PageTests() : EntityTests<Page, PageDbEntity, PageGenerator>
 {
-    protected override PageGenerator CreateEntityGenerator()
-    {
-        var titleGenerator = new TitleGenerator();
-
-        var titles = titleGenerator.Generate(1000);
-
-        var titleDbEntities = titles.Select(title => new TitleDbEntity()
-        {
-            Id = title.Sys.Id,
-            Published = true,
-            Text = title.Text,
-        });
-
-        Db.Titles.AddRange(titleDbEntities);
-        Db.SaveChanges();
-
-        return new PageGenerator(titles);
-    }
+    protected override PageGenerator CreateEntityGenerator() => PageGenerator.CreateInstance(Db);
 
     protected override void ClearDatabase()
     {
@@ -44,18 +28,18 @@ public class PageTests() : EntityTests<Page, PageDbEntity, PageGenerator>
     }
 
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(Page entity)
-     => new()
-     {
-         ["beforeTitleContent"] = entity.BeforeTitleContent.Select(content => new { Sys = new { content.Sys.Id } }),
-         ["content"] = entity.Content.Select(content => new { Sys = new { content.Sys.Id } }),
-         ["displayBackButton"] = entity.DisplayBackButton,
-         ["displayHomeButton"] = entity.DisplayHomeButton,
-         ["displayOrganisationName"] = entity.DisplayOrganisationName,
-         ["displayTopicTitle"] = entity.DisplayTopicTitle,
-         ["internalName"] = entity.InternalName,
-         ["slug"] = entity.Slug,
-         ["title"] = entity.Title != null ? new { Sys = new { entity.Title?.Sys.Id } } : null
-     };
+        => new()
+        {
+            ["beforeTitleContent"] = entity.BeforeTitleContent.Select(content => new { Sys = new { content.Sys.Id } }),
+            ["content"] = entity.Content.Select(content => new { Sys = new { content.Sys.Id } }),
+            ["displayBackButton"] = entity.DisplayBackButton,
+            ["displayHomeButton"] = entity.DisplayHomeButton,
+            ["displayOrganisationName"] = entity.DisplayOrganisationName,
+            ["displayTopicTitle"] = entity.DisplayTopicTitle,
+            ["internalName"] = entity.InternalName,
+            ["slug"] = entity.Slug,
+            ["title"] = entity.Title != null ? new { Sys = new { entity.Title?.Sys.Id } } : null
+        };
 
     protected override IQueryable<PageDbEntity> GetDbEntitiesQuery() => Db.Pages.IgnoreAutoIncludes().IgnoreQueryFilters();
 

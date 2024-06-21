@@ -31,14 +31,14 @@ where TEntity : ContentComponent
             return [];
         }
 
-        int amountOfEntitiesToPick = GetEntityCountToPick(faker, min, max);
+        var amountOfEntitiesToPick = Math.Min(_remainingEntities.Count, Math.Max(0, GetEntityCountToPick(faker, min, max)));
 
-        var startIndex = faker.Random.Int(0, GetSliceLength(amountOfEntitiesToPick));
+        var sliceLength = GetSliceLength(amountOfEntitiesToPick);
+
+        var startIndex = faker.Random.Int(0, sliceLength);
 
         return GetEntitiesAndRemoveFromList(amountOfEntitiesToPick, startIndex);
     }
-
-    private static string NoEntitiesLeftMessage => $"No entities of type {typeof(TEntity)} remaining to retrieve";
 
     private List<TEntity> GetEntitiesAndRemoveFromList(int amountOfEntitiesToPick, int startIndex)
     {
@@ -51,5 +51,5 @@ where TEntity : ContentComponent
 
     private static int GetEntityCountToPick(Faker faker, int min, int max) => faker.Random.Int(min, max);
 
-    private int GetSliceLength(int amountToPick) => _remainingEntities.Count - amountToPick - 1;
+    private int GetSliceLength(int amountToPick) => Math.Min(_remainingEntities.Count - 1, Math.Max(0, _remainingEntities.Count - amountToPick - 1));
 }

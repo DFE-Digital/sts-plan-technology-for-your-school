@@ -8,16 +8,7 @@ namespace Dfe.PlanTech.AzureFunctions.E2ETests.EntityTests;
 [Collection("ContentComponent")]
 public class QuestionTests() : EntityTests<Question, QuestionDbEntity, QuestionGenerator>
 {
-    protected override QuestionGenerator CreateEntityGenerator()
-    {
-        var answerGenerator = new AnswerGenerator();
-        var answers = answerGenerator.Generate(2000);
-
-        Db.Answers.AddRange(AnswerGenerator.MapToDbEntities(answers));
-        Db.SaveChanges();
-
-        return new QuestionGenerator(answers);
-    }
+    protected override QuestionGenerator CreateEntityGenerator() => QuestionGenerator.CreateInstance(Db);
 
     protected override void ClearDatabase()
     {
@@ -43,20 +34,18 @@ public class QuestionTests() : EntityTests<Question, QuestionDbEntity, QuestionG
     {
         Db.ChangeTracker.Clear();
 
-        var answers = Db.Answers.IgnoreAutoIncludes().IgnoreQueryFilters();
-
         var questions = Db.Questions.IgnoreAutoIncludes()
-                         .IgnoreQueryFilters()
-                         .Select(question => new QuestionDbEntity()
-                         {
-                             Id = question.Id,
-                             Text = question.Text,
-                             HelpText = question.HelpText,
-                             Published = question.Published,
-                             Archived = question.Archived,
-                             Deleted = question.Deleted,
-                             Answers = answers.Where(answer => answer.NextQuestionId == question.Id).ToList()
-                         });
+                                    .IgnoreQueryFilters()
+                                    .Select(question => new QuestionDbEntity()
+                                    {
+                                        Id = question.Id,
+                                        Text = question.Text,
+                                        HelpText = question.HelpText,
+                                        Published = question.Published,
+                                        Archived = question.Archived,
+                                        Deleted = question.Deleted,
+                                        Answers = question.Answers
+                                    });
 
         return questions;
     }
