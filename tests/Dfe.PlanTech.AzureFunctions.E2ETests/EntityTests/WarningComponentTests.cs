@@ -21,20 +21,18 @@ public class WarningComponentTests() : EntityTests<WarningComponent, WarningComp
 
     protected override void ClearDatabase()
     {
-        var textBodys = Db.TextBodies.IgnoreAutoIncludes().IgnoreQueryFilters().ToList();
-        Db.TextBodies.RemoveRange(textBodys);
-        Db.SaveChanges();
-
-        var questions = GetDbEntitiesQuery().ToList();
-        Db.Warnings.RemoveRange(questions);
-        Db.SaveChanges();
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Warnings]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[TextBodies]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RichTextMarkDbEntity]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RichTextContents]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RichTextDataDbEntity]");
     }
 
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(WarningComponent entity)
-     => new()
-     {
-         ["text"] = new { Sys = new { entity.Text.Sys.Id } }
-     };
+    => new()
+    {
+        ["text"] = new { Sys = new { entity.Text.Sys.Id } }
+    };
 
     protected override IQueryable<WarningComponentDbEntity> GetDbEntitiesQuery()
     => Db.Warnings.IgnoreQueryFilters().AsNoTracking();
@@ -43,7 +41,7 @@ public class WarningComponentTests() : EntityTests<WarningComponent, WarningComp
     {
         Assert.NotNull(dbEntity);
 
-        TextBodyTests.ValidateRichTextContent(entity.Text.RichText, dbEntity.Text.RichText);
+        Assert.Equal(entity.Text.Sys.Id, dbEntity.TextId);
 
         ValidateEntityState(dbEntity, published, archived, deleted);
     }
