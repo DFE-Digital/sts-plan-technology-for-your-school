@@ -19,7 +19,7 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
     /// <param name="existing"></param>
     /// <param name="cmsEvent"></param>
     /// <returns></returns>
-    public async Task<MappedEntity> UpdateEntity(ContentComponentDbEntity incoming, ContentComponentDbEntity? existing, CmsEvent cmsEvent, Func<MappedEntity, Task> preUpdateEntityCallback)
+    public async Task<MappedEntity> UpdateEntity(ContentComponentDbEntity incoming, ContentComponentDbEntity? existing, CmsEvent cmsEvent, Func<MappedEntity, Task> postUpdateEntityCallback)
     {
         var mappedEntity = new MappedEntity()
         {
@@ -29,7 +29,7 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
         };
 
         mappedEntity.UpdateEntity();
-        await preUpdateEntityCallback(mappedEntity);
+        await postUpdateEntityCallback(mappedEntity);
 
         if (!mappedEntity.IsValidComponent(Db, _logger) || mappedEntity.IsMinimalPayloadEvent)
         {
