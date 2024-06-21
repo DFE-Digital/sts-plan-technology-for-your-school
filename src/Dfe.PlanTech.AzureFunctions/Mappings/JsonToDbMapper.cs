@@ -54,43 +54,6 @@ where TEntity : ContentComponentDbEntity, new()
     {
         return values;
     }
-
-    protected void UpdateReferencesArray<TRelatedEntity>(Dictionary<string, object?> values, string key, DbSet<TRelatedEntity> dbSet, Action<string, TRelatedEntity> updateEntity)
-        where TRelatedEntity : ContentComponentDbEntity, new()
-    {
-        if (values.TryGetValue(key, out object? referencesArray) && referencesArray is object[] inners)
-        {
-            foreach (var inner in inners)
-            {
-                UpdateRelatedEntity(inner, dbSet, updateEntity);
-            }
-
-            values.Remove(key);
-        }
-        else
-        {
-            Logger.LogError("Expected {key} to be references array but received {type}", key, referencesArray?.GetType());
-        }
-    }
-
-    protected void UpdateRelatedEntity<TRelatedEntity>(object inner, DbSet<TRelatedEntity> dbSet, Action<string, TRelatedEntity> updateEntity)
-        where TRelatedEntity : ContentComponentDbEntity, new()
-    {
-        if (inner is not string id)
-        {
-            Logger.LogWarning("Expected string but received {innerType}", inner.GetType());
-            return;
-        }
-
-        var relatedEntity = new TRelatedEntity()
-        {
-            Id = id
-        };
-
-        dbSet.Attach(relatedEntity);
-
-        updateEntity(id, relatedEntity);
-    }
 }
 
 public abstract class JsonToDbMapper
