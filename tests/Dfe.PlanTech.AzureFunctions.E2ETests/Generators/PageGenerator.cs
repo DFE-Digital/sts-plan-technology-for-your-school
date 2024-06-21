@@ -61,19 +61,7 @@ public class PageGenerator : BaseGenerator<Page>
 
     public static PageGenerator CreateInstance(CmsDbContext db)
     {
-        var titleGenerator = new TitleGenerator();
-
-        var titles = titleGenerator.Generate(2000);
-
-        var titleDbEntities = titles.Select(title => new TitleDbEntity()
-        {
-            Id = title.Sys.Id,
-            Published = true,
-            Text = title.Text,
-        });
-
-        db.Titles.AddRange(titleDbEntities);
-        db.SaveChanges();
+        var titles = TitleGenerator.GenerateTitles(db, 2000);
 
         return new PageGenerator(titles);
     }
