@@ -143,7 +143,7 @@ public abstract class JsonToDbMapper
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Errorwhen serialising field \"{FieldName}\":as object.\nValue was: {FieldValue}", field.Key, field.Value);
+            Logger.LogError(ex, "Error when serialising field \"{FieldName}\":as object.\nValue was: {FieldValue}", field.Key, field.Value);
             return null;
         }
     }
