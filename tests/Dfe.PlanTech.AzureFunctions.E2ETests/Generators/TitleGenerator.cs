@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Infrastructure.Data;
 
 namespace Dfe.PlanTech.AzureFunctions.E2ETests.Generators;
 
@@ -16,4 +17,23 @@ public class TitleGenerator : BaseGenerator<Title>
          Text = title.Text,
          Published = true
      });
+
+    public static List<Title> GenerateTitles(CmsDbContext db, int count = 2000)
+    {
+        var titleGenerator = new TitleGenerator();
+
+        var titles = titleGenerator.Generate(count);
+
+        var titleDbEntities = titles.Select(title => new TitleDbEntity()
+        {
+            Id = title.Sys.Id,
+            Published = true,
+            Text = title.Text,
+        });
+
+        db.Titles.AddRange(titleDbEntities);
+        db.SaveChanges();
+
+        return titles;
+    }
 }

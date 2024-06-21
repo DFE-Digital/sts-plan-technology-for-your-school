@@ -9,8 +9,15 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions.E2ETests.Utilities;
 
+
 public static class EntityToPayload
 {
+    public static object ToEntityId(this ContentComponent contentComponent)
+    => new { Sys = new { contentComponent.Sys.Id } };
+
+    public static IEnumerable<object> ToEntityIds(this IEnumerable<ContentComponent> contentComponents)
+    => contentComponents.Select(ToEntityId);
+
     private static readonly JsonSerializerOptions jsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
