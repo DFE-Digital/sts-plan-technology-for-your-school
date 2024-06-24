@@ -34,6 +34,8 @@ public class RecommendationIntroMapper(
 
         if (existing != null && existing.Content != null && existing.Content.Count == 0)
         {
+            //There is no need for assignment as EF Core will automatically assigned the retrieved relationships to the existing entity,
+            //as the existing entity is being tracked by EF Core's ChangeTracker, and EF Core is aware of the relationship.
             await _db.RecommendationIntroContents.IgnoreQueryFilters().Where(recChunkIntro => recChunkIntro.RecommendationIntroId == existing.Id).Include(recIntro => recIntro.ContentComponent).ToListAsync();
         }
 

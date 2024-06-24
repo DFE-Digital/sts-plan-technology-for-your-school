@@ -31,6 +31,8 @@ public class RecommendationChunkMapper(EntityRetriever retriever, EntityUpdater 
 
         if (existing != null)
         {
+            //There is no need for assignment as EF Core will automatically assigned the retrieved relationships to the existing entity,
+            //as the existing entity is being tracked by EF Core's ChangeTracker, and EF Core is aware of the relationship.
             if (existing.Answers == null || existing.Answers.Count == 0)
             {
                 await _db.RecommendationChunkAnswers.IgnoreQueryFilters().Where(recChunkAnswer => recChunkAnswer.RecommendationChunkId == existing.Id).Include(rca => rca.Answer).ToListAsync();

@@ -33,6 +33,8 @@ public class RecommendationSectionMapper(
 
         if (existing != null)
         {
+            //There is no need for assignment as EF Core will automatically assigned the retrieved relationships to the existing entity,
+            //as the existing entity is being tracked by EF Core's ChangeTracker, and EF Core is aware of the relationship.
             await _db.RecommendationSectionAnswers.IgnoreQueryFilters().Where(recSecAnswer => recSecAnswer.RecommendationSectionId == existing.Id).Include(recSecAnswer => recSecAnswer.Answer).ToListAsync();
             await _db.RecommendationSectionChunks.IgnoreQueryFilters().Where(recSecChunk => recSecChunk.RecommendationSectionId == existing.Id).Include(recSecChunk => recSecChunk.RecommendationChunk).ToListAsync();
         }
