@@ -12,14 +12,13 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 public class SectionMapper(EntityRetriever retriever, EntityUpdater updater, CmsDbContext db, ILogger<SectionMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<SectionDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
     private readonly CmsDbContext _db = db;
-    private readonly List<QuestionDbEntity> _incomingQuestions = [];
+    private List<QuestionDbEntity> _incomingQuestions = [];
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
         values = MoveValueToNewKey(values, "interstitialPage", "interstitialPageId");
 
-        _incomingQuestions.Clear();
-        _incomingQuestions.AddRange(_entityUpdater.GetAndOrderReferencedEntities<QuestionDbEntity>(values, "questions"));
+        _incomingQuestions = _entityUpdater.GetAndOrderReferencedEntities<QuestionDbEntity>(values, "questions").ToList();
 
         return values;
     }
