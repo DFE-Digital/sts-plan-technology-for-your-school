@@ -39,6 +39,8 @@ public class RecommendationIntroGenerator : BaseGenerator<RecommendationIntro>
     {
         Id = recommendationIntro.Sys.Id,
         HeaderId = recommendationIntro.Header.Sys.Id,
+        Maturity = recommendationIntro.Maturity,
+        Slug = recommendationIntro.Slug,
         Published = true,
         Archived = false,
         Deleted = false,

@@ -19,7 +19,7 @@ public class ButtonWithEntryReferenceTests : EntityTests<ButtonWithEntryReferenc
     var pageGenerator = new PageGenerator([]);
 
     var pages = pageGenerator.Generate(100);
-    var pageDbEntities = PageGenerator.MapToDbEntity(pages);
+    var pageDbEntities = PageGenerator.MapToDbEntities(pages);
     Db.Pages.AddRange(pageDbEntities);
     Db.SaveChanges();
 
@@ -28,13 +28,9 @@ public class ButtonWithEntryReferenceTests : EntityTests<ButtonWithEntryReferenc
 
   protected override void ClearDatabase()
   {
-    var buttons = Db.Buttons.IgnoreAutoIncludes().IgnoreQueryFilters().ToList();
-    Db.Buttons.RemoveRange(buttons);
-
-    var dbButtonWithEntryReferences = GetDbEntitiesQuery().ToList();
-    Db.ButtonWithEntryReferences.RemoveRange(dbButtonWithEntryReferences);
-
-    Db.SaveChanges();
+    Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ButtonWithEntryReferences]");
+    Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Buttons]");
+    Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
   }
 
   protected override Dictionary<string, object?> CreateEntityValuesDictionary(ButtonWithEntryReference entity)

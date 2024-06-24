@@ -38,14 +38,17 @@ public class PageGenerator : BaseGenerator<Page>
     public List<Page> GeneratePagesAndSaveToDb(CmsDbContext db, int count)
     {
         var pages = Generate(count);
-        var pageDbEntities = MapToDbEntity(pages);
+        var pageDbEntities = MapToDbEntities(pages);
         db.Pages.AddRange(pageDbEntities);
         db.SaveChanges();
         return pages;
     }
 
-    public static IEnumerable<PageDbEntity> MapToDbEntity(IEnumerable<Page> pages)
-    => pages.Select(page => new PageDbEntity()
+    public static IEnumerable<PageDbEntity> MapToDbEntities(IEnumerable<Page> pages)
+    => pages.Select(MapToDbEntitiy);
+
+    public static PageDbEntity MapToDbEntitiy(Page page)
+    => new()
     {
         Id = page.Sys.Id,
         Slug = page.Slug,
@@ -57,7 +60,7 @@ public class PageGenerator : BaseGenerator<Page>
         RequiresAuthorisation = page.RequiresAuthorisation,
         TitleId = page.Title?.Sys.Id,
         Published = true,
-    });
+    };
 
     public static PageGenerator CreateInstance(CmsDbContext db)
     {
