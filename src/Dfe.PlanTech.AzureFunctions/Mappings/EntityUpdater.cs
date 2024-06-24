@@ -86,7 +86,12 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
         values.Remove(key);
     }
 
-    public virtual async Task UpdateReferences<TEntity, TReferencedEntity>(TEntity incomingEntity, TEntity? existingEntity, Func<TEntity, List<TReferencedEntity>> getReferencedEntities, List<TReferencedEntity> incomingReferencedEntities, DbSet<TReferencedEntity> referencedEntityDbSet, bool updateOrder = false)
+    public virtual async Task UpdateReferences<TEntity, TReferencedEntity>(TEntity incomingEntity,
+                                                                            TEntity? existingEntity,
+                                                                            Func<TEntity, List<TReferencedEntity>> getReferencedEntities,
+                                                                            List<TReferencedEntity> incomingReferencedEntities,
+                                                                            DbSet<TReferencedEntity> referencedEntityDbSet,
+                                                                            bool updateOrder = false)
               where TEntity : ContentComponentDbEntity
           where TReferencedEntity : ContentComponentDbEntity
     {
