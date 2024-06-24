@@ -10,14 +10,13 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 public class CategoryMapper(EntityRetriever retriever, EntityUpdater updater, CmsDbContext db, ILogger<CategoryMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<CategoryDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
     private readonly CmsDbContext _db = db;
-    private readonly List<SectionDbEntity> _incomingSections = [];
+    private List<SectionDbEntity> _incomingSections = [];
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
         values = MoveValueToNewKey(values, "header", "headerId");
 
-        _incomingSections.Clear();
-        _incomingSections.AddRange(_entityUpdater.GetAndOrderReferencedEntities<SectionDbEntity>(values, "sections"));
+        _incomingSections = _entityUpdater.GetAndOrderReferencedEntities<SectionDbEntity>(values, "sections").ToList();
 
         return values;
     }
