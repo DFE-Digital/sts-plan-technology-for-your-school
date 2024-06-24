@@ -12,9 +12,8 @@ public class TitleTests() : EntityTests<Title, TitleDbEntity, TitleGenerator>
 
     protected override void ClearDatabase()
     {
-        var titles = GetDbEntitiesQuery().ToList();
-        Db.Titles.RemoveRange(titles);
-        Db.SaveChanges();
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Titles]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
     }
 
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(Title entity)

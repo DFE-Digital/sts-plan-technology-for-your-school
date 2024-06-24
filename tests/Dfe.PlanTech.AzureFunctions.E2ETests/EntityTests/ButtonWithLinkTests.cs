@@ -21,13 +21,9 @@ public class ButtonWithLinkTests : EntityTests<ButtonWithLink, ButtonWithLinkDbE
 
     protected override void ClearDatabase()
     {
-        var buttons = Db.Buttons.IgnoreAutoIncludes().IgnoreQueryFilters().ToList();
-        Db.Buttons.RemoveRange(buttons);
-
-        var dbButtonWithLinks = GetDbEntitiesQuery().ToList();
-        Db.ButtonWithLinks.RemoveRange(dbButtonWithLinks);
-
-        Db.SaveChanges();
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ButtonWithLinks]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Buttons]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
     }
 
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(ButtonWithLink entity)

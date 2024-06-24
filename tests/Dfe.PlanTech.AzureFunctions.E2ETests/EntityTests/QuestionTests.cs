@@ -12,13 +12,9 @@ public class QuestionTests() : EntityTests<Question, QuestionDbEntity, QuestionG
 
     protected override void ClearDatabase()
     {
-        var answers = Db.Answers.IgnoreAutoIncludes().IgnoreQueryFilters().ToList();
-        Db.Answers.RemoveRange(answers);
-        Db.SaveChanges();
-
-        var questions = GetDbEntitiesQuery().ToList();
-        Db.Questions.RemoveRange(questions);
-        Db.SaveChanges();
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Answers]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Questions]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
     }
 
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(Question entity)

@@ -12,11 +12,8 @@ public class InsetTextTests : EntityTests<InsetText, InsetTextDbEntity, InsetTex
 
     protected override void ClearDatabase()
     {
-        var dbInsetTexts = GetDbEntitiesQuery().ToList();
-
-        Db.InsetTexts.RemoveRange(dbInsetTexts);
-
-        Db.SaveChanges();
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[InsetTexts]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
     }
 
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(InsetText entity)

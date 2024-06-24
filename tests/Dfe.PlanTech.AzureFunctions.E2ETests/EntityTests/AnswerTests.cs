@@ -12,11 +12,8 @@ public class AnswerTests : EntityTests<Answer, AnswerDbEntity, AnswerGenerator>
 
     protected override void ClearDatabase()
     {
-        var dbAnswers = GetDbEntitiesQuery().ToList();
-
-        Db.Answers.RemoveRange(dbAnswers);
-
-        Db.SaveChanges();
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Answers]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
     }
 
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(Answer entity)

@@ -43,9 +43,9 @@ public class RecommendationSectionTests() : EntityTests<RecommendationSection, R
 
         Assert.Equal(entity.Answers.Count, dbEntity.Answers.Count);
 
-        foreach (var content in entity.Answers)
+        foreach (var answer in entity.Answers)
         {
-            var matching = dbEntity.Answers.FirstOrDefault(dbContent => content.Sys.Id == dbContent.Id);
+            var matching = dbEntity.Answers.FirstOrDefault(dbAnswer => answer.Sys.Id == dbAnswer.Id);
             Assert.NotNull(matching);
         }
 

@@ -9,31 +9,12 @@ public class CategoryTests : EntityTests<Category, CategoryDbEntity, CategoryGen
 {
     protected override void ClearDatabase()
     {
-        var pageContents = Db.PageContents.IgnoreAutoIncludes().IgnoreQueryFilters().ToList();
-        Db.PageContents.RemoveRange(pageContents);
-        Db.SaveChanges();
-
-        var questions = Db.Questions.IgnoreAutoIncludes().IgnoreQueryFilters().ToList();
-        Db.Questions.RemoveRange(questions);
-        Db.SaveChanges();
-
-        var sections = Db.Sections.IgnoreAutoIncludes().IgnoreQueryFilters().ToList();
-        Db.Sections.RemoveRange(sections);
-        Db.SaveChanges();
-
-        var categories = Db.Categories.IgnoreAutoIncludes().IgnoreQueryFilters().ToList();
-        Db.Categories.RemoveRange(categories);
-        Db.SaveChanges();
-
-        var headers = Db.Headers.IgnoreAutoIncludes().IgnoreQueryFilters().ToList();
-        Db.Headers.RemoveRange(headers);
-        Db.SaveChanges();
-
-        var pages = Db.Pages.IgnoreQueryFilters().IgnoreAutoIncludes().ToList();
-        Db.Pages.RemoveRange(pages);
-        Db.SaveChanges();
-
-        Db.ChangeTracker.Clear();
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[PageContents]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Questions]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Sections]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Categories]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Headers]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
     }
 
     protected override CategoryGenerator CreateEntityGenerator()

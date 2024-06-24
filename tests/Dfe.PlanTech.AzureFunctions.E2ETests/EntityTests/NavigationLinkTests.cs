@@ -12,11 +12,8 @@ public class NavigationLinkTests : EntityTests<NavigationLink, NavigationLinkDbE
 
     protected override void ClearDatabase()
     {
-        var dbNavigationLinks = GetDbEntitiesQuery().ToList();
-
-        Db.NavigationLink.RemoveRange(dbNavigationLinks);
-
-        Db.SaveChanges();
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[NavigationLink]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
     }
 
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(NavigationLink entity)
