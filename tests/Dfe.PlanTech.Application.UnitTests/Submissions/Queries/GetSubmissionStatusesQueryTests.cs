@@ -16,10 +16,10 @@ public class GetSubmissionStatusesQueryTests
     private readonly IUser user = Substitute.For<IUser>();
 
     private readonly List<SectionStatusDto> SectionStatuses = [
-        new SectionStatusDto { Completed = 1, SectionId = "1", LastMaturity = "Low", DateCreated = DateTime.UtcNow },
-        new SectionStatusDto { Completed = 1, SectionId = "2", LastMaturity = "High", DateCreated = DateTime.UtcNow },
-        new SectionStatusDto { Completed = 0, SectionId = "3", DateCreated = DateTime.UtcNow },
-        new SectionStatusDto { Completed = 0, SectionId = "4", DateCreated = DateTime.UtcNow },
+        new SectionStatusDto { Completed = true, SectionId = "1", LastMaturity = "Low", DateCreated = DateTime.UtcNow },
+        new SectionStatusDto { Completed = true, SectionId = "2", LastMaturity = "High", DateCreated = DateTime.UtcNow },
+        new SectionStatusDto { Completed = false, SectionId = "3", DateCreated = DateTime.UtcNow },
+        new SectionStatusDto { Completed = false, SectionId = "4", DateCreated = DateTime.UtcNow },
     ];
 
     private const int establishmentId = 1;
@@ -87,6 +87,25 @@ public class GetSubmissionStatusesQueryTests
             }
         };
 
+    private readonly Category[] categories = new Category[]
+    {
+        new(){
+            Sys = new SystemDetails() { Id = "A" },
+            Sections = new List<Section>()
+            {
+                completeSection,
+                notstartedSection
+            }
+        },
+        new(){
+            Sys = new SystemDetails() { Id = "B" },
+            Sections = new List<Section>()
+            {
+                inprogressSection,
+            }
+        }
+    };
+
 
     private GetSubmissionStatusesQuery CreateStrut() => new GetSubmissionStatusesQuery(Db, user);
 
@@ -95,9 +114,10 @@ public class GetSubmissionStatusesQueryTests
         Db.GetSectionStatuses(Arg.Any<string>(), Arg.Any<int>())
         .Returns((callinfo) =>
         {
-            var sectionIds = callinfo.ArgAt<string>(0).Split(",");
-
-            return SectionStatuses.Where(sectionStatus => sectionIds.Any(id => id == sectionStatus.SectionId)).AsQueryable();
+            var categoryId = callinfo.ArgAt<string>(0);
+            var category = categories.FirstOrDefault(category => category.Sys.Id == categoryId);
+            Assert.NotNull(category);
+            return SectionStatuses.Where(sectionStatus => category.Sections.Select(section => section.Sys.Id).Any(id => id == sectionStatus.SectionId)).AsQueryable();
         });
 
 
@@ -124,11 +144,11 @@ public class GetSubmissionStatusesQueryTests
     [Fact]
     public async Task GetSectionSubmissionStatuses_ReturnsListOfStatuses()
     {
-        var sections = new Section[2] { new() { Sys = new SystemDetails { Id = "1" } }, new() { Sys = new SystemDetails { Id = "3" } } };
+        var category = categories[0];
+        var sections = category.Sections;
+        var result = await CreateStrut().GetSectionSubmissionStatuses(category.Sys.Id);
 
-        var result = await CreateStrut().GetSectionSubmissionStatuses(sections);
-
-        Assert.Equal(result.Count, sections.Length);
+        Assert.Equal(result.Count, sections.Count());
 
         foreach (var section in sections)
         {

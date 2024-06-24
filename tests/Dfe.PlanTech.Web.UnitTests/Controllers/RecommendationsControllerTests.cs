@@ -45,7 +45,18 @@ public class RecommendationsControllerTests
 
         await _recommendationsController.GetRecommendation(sectionSlug, recommendationSlug, _recommendationsRouter, default);
 
-        await _recommendationsRouter.Received().ValidateRoute(sectionSlug, recommendationSlug, _recommendationsController, Arg.Any<CancellationToken>());
+        await _recommendationsRouter.Received().ValidateRoute(sectionSlug, recommendationSlug, false, _recommendationsController, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task RecommendationsPagePageChecklist_Should_Call_RecommendationsRouter_When_Args_Valid()
+    {
+        string sectionSlug = "section-slug";
+        string recommendationSlug = "recommendation-slug";
+
+        await _recommendationsController.GetRecommendationChecklist(sectionSlug, recommendationSlug, _recommendationsRouter, default);
+
+        await _recommendationsRouter.Received().ValidateRoute(sectionSlug, recommendationSlug, true, _recommendationsController, Arg.Any<CancellationToken>());
     }
 
 }

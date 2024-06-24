@@ -14,7 +14,15 @@
 
 <div class="govuk-grid-row" id="top">
     <div class="govuk-grid-column-two-thirds recommendation-content">
-        <partial name="RecommendationContent" model="@Model.AllContent" />
+        <div class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+            <partial name="RecommendationContent" model="@Model.AllContent"/>
+        </div>
+        <div>
+            <h2 class="govuk-heading-m">Share this recommendation</h2>
+            <p class="govuk-body">
+                <a class="govuk-link govuk-!-font-weight-bold" href="@Model.Slug/print" target="_blank">Share or download this recommendation in a checklist format</a>
+            </p>
+        </div>
     </div>
 
     <div class="govuk-grid-column-one-third">

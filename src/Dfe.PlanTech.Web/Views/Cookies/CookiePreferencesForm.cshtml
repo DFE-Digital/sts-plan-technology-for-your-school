@@ -1,0 +1,40 @@
+@model Dfe.PlanTech.Domain.Cookie.DfeCookie;
+
+<h2 class="govuk-heading-l">Change your cookie settings</h2>
+
+@{
+    var trueChecked = Model.UseCookies;
+    var falseChecked = !trueChecked;
+}
+
+<form asp-controller="cookies" asp-action="SetCookiePreference" asp-route-isCookiesPage="true" method="post" novalidate>
+    <div class="govuk-form-group">
+        <fieldset class="govuk-fieldset">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+                Do you want to accept analytics cookies?
+            </legend>
+
+            <div class="govuk-radios" data-module="govuk-radios">
+                <div class="govuk-radios__item">
+                    <input class="govuk-radios__input" id="analytics-cookies-yes" name="userPreference" 
+                            type="radio" value="true" checked="@trueChecked">
+                    <label class="govuk-label govuk-radios__label" for="analytics-cookies-yes">
+                        Yes
+                    </label>
+                </div>
+
+                <div class="govuk-radios__item">
+                    <input class="govuk-radios__input" id="analytics-cookies-no" name="userPreference" 
+                            type="radio" value="false" checked="@falseChecked">
+                    <label class="govuk-label govuk-radios__label" for="analytics-cookies-no">
+                        No
+                    </label>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    
+    <button type="submit" class="govuk-button" data-module="govuk-button">
+        Save cookie settings
+    </button>
+</form>

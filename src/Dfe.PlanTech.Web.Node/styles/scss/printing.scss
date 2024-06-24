@@ -1,0 +1,38 @@
+@media print {
+  .noprint {
+    display: none !important;
+  }
+  .print {
+    width: 100%;
+  }
+}
+
+.print-header {
+  float: none
+}
+
+.print-buttons__button {
+  box-shadow: None;
+  border: 1px solid grey;
+  margin: 10px;
+  width: 120px;
+  padding: 10px;
+  height: auto;
+  display: block;
+
+  > img {
+    height: 60px;
+    padding-bottom: 10px;
+  }
+}
+
+.print-buttons__row {
+  flex-basis: 100%;
+}
+
+.print-buttons__container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+

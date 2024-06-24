@@ -1,15 +1,9 @@
-﻿@inject GovUk.Frontend.AspNetCore.PageTemplateHelper PageTemplateHelper
-@inject Dfe.PlanTech.Web.Helpers.GtmConfiguration GtmConfiguration
+﻿@inject GtmConfiguration GtmConfiguration
 @using Dfe.PlanTech.Web.Helpers;
 
-@using System.Globalization;
-
 @section Head {
-    <link rel="stylesheet" as="style" href="~/css/application.css">
-
-        @Html.Raw(GtmConfiguration.Analytics)
-        <script nonce="@Context.Items["nonce"]">@Html.Raw(GtmConfiguration.Head)</script>
-        @RenderSection("Head", false)
+    <partial name="_Head"/>
+    @RenderSection("Head", false)
 }
 
 @{
@@ -25,33 +19,24 @@
 @section Header {
     @Html.Raw(GtmConfiguration.Body)
 
-    <partial name="_CookieBanner" />
+    <partial name="CookiesBanner/_CookieBanner" />
     <partial name="_Header" />
 
     @RenderSection("Header", false)
 }
 
 @section BeforeContent {
-    <script 
-        nonce="@Context.Items["nonce"]"
-        defer>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
-    <partial name="BetaHeader" />
-
+    <partial name="_BeforeContent"/>
     @RenderSection("BeforeContent", required: false)
 }
 
 @RenderBody()
 
 @section Footer {
-    <partial name="_Footer" />
+    <partial name="_Footer"/>
 }
 
 @section BodyEnd {
-    <script async src="~/js/app.js" nonce="@Context.Items["nonce"]"></script>
-    <script defer type="module" nonce="@Context.Items["nonce"]">
-        import * as govuk from '/js/govuk-frontend.min.js';
-        govuk.initAll();
-    </script>
-
+    <partial name="_BodyEnd"/>
     @RenderSection("BodyEnd", required: false)
 }

@@ -1,8 +1,11 @@
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
+using Dfe.PlanTech.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.ViewComponents;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -18,14 +21,137 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
     {
         private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
         private readonly CategorySectionViewComponent _categorySectionViewComponent;
+        private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
 
         private Category _category;
+        private readonly Category _categoryTwo;
         private readonly ILogger<CategorySectionViewComponent> _loggerCategory;
+
+        private readonly SubtopicRecommendation? _subtopic = new SubtopicRecommendation()
+        {
+            Intros = new List<RecommendationIntro>()
+            {
+                new RecommendationIntro()
+                {
+                    Header = new Header()
+                    {
+                        Text = "I'm a high maturity recommendation for subtopic 1",
+                    },
+                    Slug = "intro-slug",
+                    Maturity = "High",
+                }
+            },
+            Section = new RecommendationSection()
+            {
+                Chunks = new List<RecommendationChunk>()
+                {
+                    new RecommendationChunk()
+                    {
+                        Answers = new List<Answer>()
+                        {
+                            new Answer()
+                            {
+                                Sys = new SystemDetails()
+                                {
+                                    Id = "ref1"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            Subtopic = new Section()
+            {
+                InterstitialPage = new Page()
+                {
+                    Slug = "subtopic-slug"
+                },
+                Sys = new SystemDetails()
+                {
+                    Id = "Section1"
+                }
+            }
+        };
+
+        private readonly SubtopicRecommendation? _subtopicTwo = new SubtopicRecommendation()
+        {
+            Intros = new List<RecommendationIntro>()
+            {
+                new RecommendationIntro()
+                {
+                    Header = new Header()
+                    {
+                        Text = "I'm a high maturity recommendation for subtopic 2",
+                    },
+                    Slug = "intro-slug",
+                    Maturity = "High",
+                }
+            },
+            Section = new RecommendationSection()
+            {
+                Chunks = new List<RecommendationChunk>()
+                {
+                    new RecommendationChunk()
+                    {
+                        Answers = new List<Answer>()
+                        {
+                            new Answer()
+                            {
+                                Sys = new SystemDetails()
+                                {
+                                    Id = "ref1"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            Subtopic = new Section()
+            {
+                InterstitialPage = new Page()
+                {
+                    Slug = "subtopic-slug"
+                },
+                Sys = new SystemDetails()
+                {
+                    Id = "Section2"
+                }
+            }
+        };
+
+        private readonly List<SubtopicRecommendation> _subtopicRecommendations = [];
 
         public CategorySectionViewComponentTests()
         {
             _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
             _loggerCategory = Substitute.For<ILogger<CategorySectionViewComponent>>();
+            _getSubTopicRecommendationQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
+
+            _subtopicRecommendations.Add(_subtopic);
+            _subtopicRecommendations.Add(_subtopicTwo);
+
+            _getSubTopicRecommendationQuery.GetRecommendationsViewDto(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns((callinfo) =>
+                {
+                    var subtopic = callinfo.ArgAt<string>(0);
+                    var maturity = callinfo.ArgAt<string>(1);
+
+                    var matching = _subtopicRecommendations.FirstOrDefault(rec => rec.Subtopic.Sys.Id == subtopic);
+
+                    if (matching == null)
+                    {
+                        return null;
+                    }
+
+                    var introForMaturity = matching.Intros.FirstOrDefault(intro => intro.Maturity == maturity);
+
+                    if (introForMaturity == null)
+                    {
+                        return null;
+                    }
+
+                    return new RecommendationsViewDto(introForMaturity.Slug, introForMaturity.Header.Text);
+                });
 
             var viewContext = new ViewContext();
 
@@ -34,7 +160,10 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 ViewContext = viewContext
             };
 
-            _categorySectionViewComponent = new CategorySectionViewComponent(_loggerCategory, _getSubmissionStatusesQuery)
+            _categorySectionViewComponent = new CategorySectionViewComponent(
+                _loggerCategory,
+                _getSubmissionStatusesQuery,
+                _getSubTopicRecommendationQuery)
             {
                 ViewComponentContext = viewComponentContext
             };
@@ -55,10 +184,25 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                         InterstitialPage = new Page()
                         {
                             Slug = "section-1",
-                        }
+                        },
                     }
                 }
             }
+            };
+            _categoryTwo = new Category()
+            {
+                Completed = 1,
+                Sections = [
+                    new()
+                    {
+                        Sys = new SystemDetails() { Id = "Section2" },
+                        Name = "Test Section 2",
+                        InterstitialPage = new Page
+                        {
+                            Slug = "test-slug"
+                        }
+                    }
+                ]
             };
         }
 
@@ -68,10 +212,11 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category.SectionStatuses.Add(new SectionStatusDto()
             {
                 SectionId = "Section1",
-                Completed = 1,
+                Completed = true,
+                DateCreated = new DateTime(2015, 10, 15),
             });
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
@@ -100,9 +245,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Equal("blue", categorySectionDto.TagColour);
-            Assert.Equal("COMPLETE", categorySectionDto.TagText);
-            Assert.Null(categorySectionDto.NoSlugForSubtopicErrorMessage);
+            Assert.Equal("grey", categorySectionDto.Tag.Colour);
+            Assert.Equal("COMPLETE 15/10/2015", categorySectionDto.Tag.Text);
+            Assert.Null(categorySectionDto.ErrorMessage);
         }
 
         [Fact]
@@ -113,10 +258,11 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category.SectionStatuses.Add(new SectionStatusDto()
             {
                 SectionId = "Section1",
-                Completed = 0,
+                Completed = false,
+                DateCreated = new DateTime(2000, 01, 25)
             });
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
@@ -145,9 +291,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Equal("light-blue", categorySectionDto.TagColour);
-            Assert.Equal("IN PROGRESS", categorySectionDto.TagText);
-            Assert.Null(categorySectionDto.NoSlugForSubtopicErrorMessage);
+            Assert.Equal("grey", categorySectionDto.Tag.Colour);
+            Assert.Equal("IN PROGRESS 25/01/2000", categorySectionDto.Tag.Text);
+            Assert.Null(categorySectionDto.ErrorMessage);
         }
 
         [Fact]
@@ -155,7 +301,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         {
             _category.Completed = 0;
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
@@ -184,9 +330,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Equal("grey", categorySectionDto.TagColour);
-            Assert.Equal("NOT STARTED", categorySectionDto.TagText);
-            Assert.Null(categorySectionDto.NoSlugForSubtopicErrorMessage);
+            Assert.Equal("grey", categorySectionDto.Tag.Colour);
+            Assert.Equal("NOT STARTED", categorySectionDto.Tag.Text);
+            Assert.Null(categorySectionDto.ErrorMessage);
         }
 
         [Fact]
@@ -205,10 +351,10 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category.SectionStatuses.Add(new SectionStatusDto()
             {
                 SectionId = "Section1",
-                Completed = 1,
+                Completed = true
             });
 
-            _ = _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
+            _ = _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
@@ -237,16 +383,16 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Null(categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Null(categorySectionDto.TagColour);
-            Assert.Null(categorySectionDto.TagText);
-            Assert.NotNull(categorySectionDto.NoSlugForSubtopicErrorMessage);
-            Assert.Equal("Test Section 1 unavailable", categorySectionDto.NoSlugForSubtopicErrorMessage);
+            Assert.Null(categorySectionDto.Tag.Colour);
+            Assert.Null(categorySectionDto.Tag.Text);
+            Assert.NotNull(categorySectionDto.ErrorMessage);
+            Assert.Equal("Test Section 1 unavailable", categorySectionDto.ErrorMessage);
         }
 
         [Fact]
         public async Task Returns_ProgressRetrievalError_When_ProgressCanNotBeRetrieved()
         {
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(Arg.Any<IEnumerable<ISectionComponent>>())
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(Arg.Any<string>())
                                         .ThrowsAsync(new Exception("Error occurred fection sections"));
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
@@ -274,42 +420,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Equal("red", categorySectionDto.TagColour);
-            Assert.Equal("UNABLE TO RETRIEVE STATUS", categorySectionDto.TagText);
-            Assert.Null(categorySectionDto.NoSlugForSubtopicErrorMessage);
-        }
-
-        [Fact]
-        public async Task Returns_NoSectionsErrorRedirectUrl_If_SectionsAreNull()
-        {
-            _category = new Category()
-            {
-                Completed = 0,
-                Sections = null!,
-                Sys = new()
-                {
-                    Id = "missing-sections-category"
-                }
-            };
-
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
-
-            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
-
-            Assert.NotNull(result);
-            Assert.NotNull(result.ViewData);
-
-            var model = result.ViewData.Model;
-            Assert.NotNull(model);
-
-            var unboxed = model as CategorySectionViewComponentViewModel;
-            Assert.NotNull(unboxed);
-            Assert.Equal("ServiceUnavailable", unboxed.NoSectionsErrorRedirectUrl);
-            Assert.Equal(0, unboxed.TotalSectionCount);
-
-            var categorySectionDtoList = unboxed.CategorySectionDto;
-
-            Assert.Null(categorySectionDtoList);
+            Assert.Equal("red", categorySectionDto.Tag.Colour);
+            Assert.Equal("UNABLE TO RETRIEVE STATUS", categorySectionDto.Tag.Text);
+            Assert.Null(categorySectionDto.ErrorMessage);
         }
 
         [Fact]
@@ -325,7 +438,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 }
             };
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
@@ -343,6 +456,160 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var categorySectionDtoList = unboxed.CategorySectionDto;
 
             Assert.Null(categorySectionDtoList);
+        }
+
+
+        [Fact]
+        public async Task Returns_RecommendationInfo_If_It_Exists_ForMaturity()
+        {
+            _category.SectionStatuses.Add(new SectionStatusDto()
+            {
+                SectionId = "Section1",
+                Completed = true,
+                LastMaturity = "High"
+            });
+
+            _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns(_category.SectionStatuses.ToList());
+
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model as CategorySectionViewComponentViewModel;
+            Assert.NotNull(model);
+
+            Assert.NotNull(_subtopic);
+            Assert.NotEmpty(model.CategorySectionDto);
+            var recommendation = model.CategorySectionDto.First().Recommendation;
+            Assert.NotNull(recommendation);
+            Assert.Equal(_subtopic.Intros[0].Slug, recommendation.RecommendationSlug);
+            Assert.Equal(_subtopic.Intros[0].Header.Text, recommendation.RecommendationDisplayName);
+            Assert.Null(recommendation.NoRecommendationFoundErrorMessage);
+        }
+
+        [Fact]
+        public async Task Returns_RecommendationInfo_And_Logs_Error_If_Exception_Thrown_By_Get_Category()
+        {
+            _category.SectionStatuses.Add(new SectionStatusDto()
+            {
+                SectionId = "Section1",
+                Completed = true,
+                LastMaturity = "High"
+            });
+
+            _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Throws(new Exception("test"));
+
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model as CategorySectionViewComponentViewModel;
+            Assert.NotNull(model);
+
+            Assert.NotNull(_subtopic);
+            Assert.NotEmpty(model.CategorySectionDto);
+            var recommendation = model.CategorySectionDto.First().Recommendation;
+            Assert.NotNull(recommendation);
+
+            Assert.NotNull(_subtopic);
+            Assert.Equal(_subtopic.Intros[0].Slug, recommendation.RecommendationSlug);
+            Assert.Equal(_subtopic.Intros[0].Header.Text, recommendation.RecommendationDisplayName);
+            Assert.Null(recommendation.NoRecommendationFoundErrorMessage);
+            _loggerCategory.ReceivedWithAnyArgs(1).LogError("An exception has occurred while trying to retrieve section progress with the following message - test");
+        }
+
+        [Fact]
+        public async Task Returns_NullRecommendationInfo_If_No_RecommendationPage_Exists_ForMaturity()
+        {
+            _category.SectionStatuses.Add(new SectionStatusDto()
+            {
+                SectionId = "Section1",
+                Completed = true,
+                LastMaturity = "Low",
+            });
+
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns(_category.SectionStatuses.ToList());
+
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model as CategorySectionViewComponentViewModel;
+            Assert.NotNull(model);
+
+            Assert.NotNull(_subtopic);
+            Assert.NotEmpty(model.CategorySectionDto);
+            var recommendation = model.CategorySectionDto.First().Recommendation;
+            Assert.NotNull(recommendation);
+
+            Assert.Null(recommendation.RecommendationSlug);
+            Assert.Null(recommendation.RecommendationDisplayName);
+            Assert.NotNull(recommendation.NoRecommendationFoundErrorMessage);
+        }
+
+        [Fact]
+        public async Task DoesNotReturn_RecommendationInfo_If_Section_Has_Never_Been_Completed()
+        {
+            _category.Completed = 0;
+            _category.SectionStatuses.Add(new SectionStatusDto()
+            {
+                SectionId = "Section1",
+                Completed = false,
+                LastMaturity = null
+            });
+
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns(_category.SectionStatuses.ToList());
+
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model as CategorySectionViewComponentViewModel;
+            Assert.NotNull(model);
+
+            Assert.NotNull(_subtopic);
+            Assert.NotEmpty(model.CategorySectionDto);
+            var recommendation = model.CategorySectionDto.First().Recommendation;
+            Assert.NotNull(recommendation);
+            Assert.Null(recommendation.RecommendationSlug);
+            Assert.Null(recommendation.RecommendationDisplayName);
+        }
+
+        [Fact]
+        public async Task Returns_RecommendationInfo_If_Incomplete_Section_Is_Previously_Completed()
+        {
+            _category.SectionStatuses.Add(new SectionStatusDto()
+            {
+                SectionId = "Section1",
+                Completed = false,
+                LastMaturity = Maturity.High.ToString(),
+                DateCreated = DateTime.Now
+            });
+
+            _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns(_category.SectionStatuses.ToList());
+
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model as CategorySectionViewComponentViewModel;
+            Assert.NotNull(model);
+
+            Assert.NotNull(_subtopic);
+            Assert.NotEmpty(model.CategorySectionDto);
+            var recommendation = model.CategorySectionDto.First().Recommendation;
+            Assert.NotNull(recommendation);
+            Assert.Equal(_subtopic.Intros[0].Slug, recommendation.RecommendationSlug);
+            Assert.Equal(_subtopic.Intros[0].Header.Text, recommendation.RecommendationDisplayName);
+            Assert.Null(recommendation.NoRecommendationFoundErrorMessage);
         }
     }
 }

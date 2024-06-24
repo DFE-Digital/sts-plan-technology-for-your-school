@@ -14,11 +14,13 @@ public interface IGetRecommendationRouter
     /// </summary>
     /// <param name="sectionSlug"></param>
     /// <param name="recommendationSlug"></param>
+    /// <param name="checklist"></param>
     /// <param name="controller"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     public Task<IActionResult> ValidateRoute(string sectionSlug,
                                              string recommendationSlug,
+                                             bool checklist,
                                              RecommendationsController controller,
                                              CancellationToken cancellationToken);
 }

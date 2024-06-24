@@ -98,11 +98,8 @@ describe("Check answers page", () => {
   it("submits answers and shows notification", () => {
     cy.submitAnswers();
 
-    cy.url().should("contain", "self-assessment");
-    cy.get("div.govuk-notification-banner__header").should("exist");
-
-    cy.get(".govuk-notification-banner__content a")
-      .should("have.attr", "href")
-      .and("include", "#recommendations-section");
+    cy.get(".govuk-tag--yellow")
+      .should("exist")
+      .and("contain", "New");
   });
 });

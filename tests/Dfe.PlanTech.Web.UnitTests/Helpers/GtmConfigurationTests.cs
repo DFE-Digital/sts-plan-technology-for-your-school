@@ -39,53 +39,21 @@ public class GtmConfigurationTests
     [Fact]
     public void Should_Return_BodyAndHead_When_Cookies_Accepted()
     {
-        CookieService.GetCookie().Returns((_) => new DfeCookie()
-        {
-            HasApproved = true
-        });
+        var cookie = CreateCookie(true);
+        CookieService.Cookie.Returns(cookie);
 
         var gtmConfiguration = new GtmConfiguration(CookieService, Configuration);
 
         Assert.Equal(GTM_BODY_VALUE, gtmConfiguration.Body);
         Assert.Equal(GTM_HEAD_VALUE, gtmConfiguration.Head);
+        Assert.Equal(GTM_ANALYTICS_VALUE, gtmConfiguration.Analytics);
     }
 
     [Fact]
     public void Should_Return_Empty_When_Cookies_Not_Accepted()
     {
-        CookieService.GetCookie().Returns((_) => new DfeCookie()
-        {
-            HasApproved = false
-        });
-
-        var gtmConfiguration = new GtmConfiguration(CookieService, Configuration);
-
-        Assert.Empty(gtmConfiguration.Body);
-        Assert.Empty(gtmConfiguration.Head);
-    }
-
-    [Fact]
-    public void Should_Return_Analytics_Regardless_Of_Cookies_Accepted()
-    {
-        CookieService.GetCookie().Returns((_) => new DfeCookie()
-        {
-            HasApproved = true
-        });
-
-        var gtmConfiguration = new GtmConfiguration(CookieService, Configuration);
-
-        Assert.Equal(GTM_BODY_VALUE, gtmConfiguration.Body);
-        Assert.Equal(GTM_HEAD_VALUE, gtmConfiguration.Head);
-        Assert.Equal(GTM_ANALYTICS_VALUE, gtmConfiguration.Analytics);
-    }
-
-    [Fact]
-    public void Should_Return_Analytics_Regardless_Of_Cookies_Declined()
-    {
-        CookieService.GetCookie().Returns((_) => new DfeCookie()
-        {
-            HasApproved = false
-        });
+        var cookie = CreateCookie(false);
+        CookieService.Cookie.Returns(cookie);
 
         var gtmConfiguration = new GtmConfiguration(CookieService, Configuration);
 
@@ -93,4 +61,19 @@ public class GtmConfigurationTests
         Assert.Empty(gtmConfiguration.Head);
         Assert.Equal(GTM_ANALYTICS_VALUE, gtmConfiguration.Analytics);
     }
+
+    [Fact]
+    public void Should_Return_Empty_When_Cookie_Preferences_Not_Set()
+    {
+        var cookie = CreateCookie(null);
+        CookieService.Cookie.Returns(cookie);
+
+        var gtmConfiguration = new GtmConfiguration(CookieService, Configuration);
+
+        Assert.Empty(gtmConfiguration.Body);
+        Assert.Empty(gtmConfiguration.Head);
+        Assert.Equal(GTM_ANALYTICS_VALUE, gtmConfiguration.Analytics);
+    }
+
+    private static DfeCookie CreateCookie(bool? userAcceptsCookie) => new() { UserAcceptsCookies = userAcceptsCookie };
 }

@@ -16,13 +16,13 @@ describe("Self-assessment page", () => {
   });
 
   it("should contain sections", () => {
-    cy.get("ul.app-task-list__items > li")
+    cy.get("div.govuk-summary-list__row > dt")
       .should("exist")
       .and("have.length.greaterThan", 1);
   });
 
   it("each section should link to a page", () => {
-    cy.get("ul.app-task-list__items > li a").each((link) => {
+    cy.get("div.govuk-summary-list__row > dt a").each((link) => {
       cy.wrap(link).should("have.attr", "href").and("not.be.null");
     });
   });

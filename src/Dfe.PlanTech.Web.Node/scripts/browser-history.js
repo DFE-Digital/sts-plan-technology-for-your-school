@@ -1,7 +1,7 @@
 const STORAGE_KEY = "BrowserHistory";
 export const DEFAULT_ROUTE = "/self-assessment";
 export const BACK_BUTTON_ID = "back-button-link";
-
+export const NOTIFICATION_BANNER_GO_BACK_LINK_ID = "notification-go-back-link";
 /**
  * Tracks a users browser history, stores it in local storage, and amends the back button link (if existing on page)
  */
@@ -10,7 +10,7 @@ export class BrowserHistory {
 
     get lastUrl() {
         if (this.history.length > 0) {
-            if (this.getLastRef() == window.location.href){
+            if (this.getLastRef() == window.location.href) {
                 return this.history[this.history.length - 2];
             }
             return this.history[this.history.length - 1];
@@ -23,7 +23,8 @@ export class BrowserHistory {
         this.history = this.getHistory();
 
         this.ifNavigatingBackwardsRemoveUrl();
-        this.amendBackButton();
+        this.amendLinkHref(BACK_BUTTON_ID);
+        this.amendLinkHref(NOTIFICATION_BANNER_GO_BACK_LINK_ID);
         this.tryAddUrl();
     }
 
@@ -35,7 +36,7 @@ export class BrowserHistory {
         if (window.location.href == lastHref) {
             return;
         }
-        
+
         this.history.push(window.location.href);
         this.saveHistory();
     }
@@ -97,8 +98,8 @@ export class BrowserHistory {
     /**
      * Gets the back button link from the page, if it exists amend HREF to be last url in history
      */
-    amendBackButton() {
-        const backButtonLink = document.getElementById(BACK_BUTTON_ID);
+    amendLinkHref(id) {
+        const backButtonLink = document.getElementById(id);
 
         if (!backButtonLink) {
             return;

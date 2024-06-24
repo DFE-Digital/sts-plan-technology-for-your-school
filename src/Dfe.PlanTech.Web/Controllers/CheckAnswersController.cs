@@ -51,7 +51,7 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
             return this.RedirectToCheckAnswers(sectionSlug);
         }
 
-        TempData["SectionName"] = sectionName;
+        TempData["SectionSlug"] = sectionSlug;
 
         return this.RedirectToSelfAssessment();
     }

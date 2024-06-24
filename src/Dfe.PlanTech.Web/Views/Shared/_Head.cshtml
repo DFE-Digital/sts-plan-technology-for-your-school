@@ -1,0 +1,7 @@
+@using Dfe.PlanTech.Web.Helpers
+@inject GtmConfiguration GtmConfiguration
+
+<link rel="stylesheet" as="style" href="~/css/application.css">
+
+@Html.Raw(GtmConfiguration.Analytics)
+<script nonce="@Context.Items["nonce"]">@Html.Raw(GtmConfiguration.Head)</script>

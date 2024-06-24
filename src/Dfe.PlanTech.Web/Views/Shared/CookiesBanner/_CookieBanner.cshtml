@@ -1,0 +1,27 @@
+﻿@using Microsoft.AspNetCore.Http.Features;
+@using Dfe.PlanTech.Domain.Cookie;
+
+@inject Dfe.PlanTech.Domain.Cookie.Interfaces.ICookieService cookieService
+
+@{
+  var cookie = cookieService.Cookie;
+}
+
+@if(!cookie.IsVisible)
+{
+  return;
+}
+
+<section class="govuk-cookie-banner" data-nosnippet aria-label="Cookies on Plan technology for your school">
+  <form method="post">
+      <div class="govuk-cookie-banner__message govuk-width-container">
+        @if(!cookieService.Cookie.UserPreferencesSet){
+          <partial name="CookiesBanner/_CookieBanner_PreferencesNotSet" model=@cookie/>
+        }
+        else
+        {
+          <partial name="CookiesBanner/_CookieBanner_PreferencesSet" model=@cookie/>
+        }
+      </div>
+  </form>
+</section>

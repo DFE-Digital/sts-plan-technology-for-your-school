@@ -1,0 +1,12 @@
+@model Dfe.PlanTech.Domain.Cookie.CookieAcceptOption;
+
+@{
+  var optionText = Model.ToString();
+  var value = optionText.ToLower();
+  var buttonName = $"{value}-cookies";
+  var userPreference = Model == Dfe.PlanTech.Domain.Cookie.CookieAcceptOption.Accept;
+}
+
+<button value="@value"type="submit" name="@buttonName" class="govuk-button" data-module="govuk-button" asp-controller="Cookies" asp-action="SetCookiePreference" asp-route-userPreference="@userPreference">
+      @optionText additional cookies
+</button>

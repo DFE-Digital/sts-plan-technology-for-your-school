@@ -9,28 +9,8 @@
     {
         await Html.RenderPartialAsync("HomeButton", Model);
     }
-    }
-    @{
-    if (Model.Page.Slug == "self-assessment" && TempData.ContainsKey("SectionName"))
-    {
-        var sectionName = TempData["SectionName"] as string;
-        <div class="govuk-notification-banner govuk-notification-banner--success" role="alert"
-            aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
-            <div class="govuk-notification-banner__header">
-                <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
-                    Success
-                </h2>
-            </div>
-            @if (!string.IsNullOrEmpty(sectionName))
-            {
-                <div class="govuk-notification-banner__content">
-                    <h3 class="govuk-notification-banner__heading">
-                        You have one new <a href="#recommendations-section">recommendation for @sectionName</a>
-                    </h3>
-                </div>
-            }
-        </div>
-    }
+}
+@{
     if (Model.Page.Slug == "self-assessment" && TempData.ContainsKey("SubtopicError"))
     {
         var error = TempData["SubtopicError"] as string;

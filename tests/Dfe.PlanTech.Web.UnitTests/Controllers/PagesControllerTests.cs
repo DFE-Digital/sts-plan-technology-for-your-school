@@ -46,8 +46,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public void Should_ReturnLandingPage_When_IndexRouteLoaded()
         {
-            var cookie = new DfeCookie { HasApproved = true };
-            cookiesSubstitute.GetCookie().Returns(cookie);
+            var cookie = new DfeCookie { UserAcceptsCookies = true };
+            cookiesSubstitute.Cookie.Returns(cookie);
 
             var establishment = new EstablishmentDto()
             {
@@ -89,8 +89,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public void Should_SetOrganisationName_When_DisplayOrganisationNameIsTrue()
         {
-            var cookie = new DfeCookie { HasApproved = true };
-            cookiesSubstitute.GetCookie().Returns(cookie);
+            var cookie = new DfeCookie { UserAcceptsCookies = true };
+            cookiesSubstitute.Cookie.Returns(cookie);
 
             var establishment = new EstablishmentDto()
             {
@@ -132,8 +132,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public void Should_Not_OrganisationName_When_DisplayOrganisationName_Is_False()
         {
-            var cookie = new DfeCookie { HasApproved = true };
-            cookiesSubstitute.GetCookie().Returns(cookie);
+            var cookie = new DfeCookie { UserAcceptsCookies = true };
+            cookiesSubstitute.Cookie.Returns(cookie);
 
             var establishment = new EstablishmentDto()
             {

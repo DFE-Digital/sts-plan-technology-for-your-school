@@ -19,13 +19,11 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
 
     }
 
-    public Task<List<SectionStatusDto>> GetSectionSubmissionStatuses(IEnumerable<ISectionComponent> sections)
+    public async Task<List<SectionStatusDto>> GetSectionSubmissionStatuses(string categoryId)
     {
-        int establishmentId = _userHelper.GetEstablishmentId().Result;
+        int establishmentId = await _userHelper.GetEstablishmentId();
 
-        string sectionStringify = string.Join(',', sections.Select(x => x.Sys.Id));
-
-        return _db.ToListAsync(_db.GetSectionStatuses(sectionStringify, establishmentId));
+        return await _db.ToListAsync(_db.GetSectionStatuses(categoryId, establishmentId));
     }
 
     public async Task<SectionStatusNew> GetSectionSubmissionStatusAsync(int establishmentId,

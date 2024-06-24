@@ -1,0 +1,31 @@
+@using Dfe.PlanTech.Domain.Questionnaire.Models
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model IEnumerable<Dfe.PlanTech.Domain.Questionnaire.Interfaces.IHeaderWithContent>
+
+@{
+    foreach (var headerWithContent in Model)
+    {
+        if (headerWithContent is RecommendationIntro)
+        {
+            <partial name="Components/HeaderWithContent" model="@headerWithContent"/>
+            <h2 class="govuk-heading-xl govuk-!-margin-top-6">Actions</h2>
+            <p>The following is a list of actions generated from the questions we have asked and the responses given.</p>
+        }
+        else
+        {
+            <div class="recommendation-action-header">
+                @{
+                    await Html.RenderPartialAsync("Components/Header", headerWithContent.Header);
+                }
+            </div>
+            <div class="recommendation-action-content">
+                @foreach (var content in headerWithContent.Content)
+                {
+                    await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+                }
+                @{ ViewData["RecommendationsActionsHeader"] = headerWithContent.SlugifiedHeader; }
+                <partial name="RecommendationActions"/>
+            </div>
+        }
+    }
+}
