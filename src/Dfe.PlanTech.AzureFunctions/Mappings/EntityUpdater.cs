@@ -95,17 +95,22 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
               where TEntity : ContentComponentDbEntity
           where TReferencedEntity : ContentComponentDbEntity
     {
-        if (existingEntity == null)
+        if (existingEntity != null)
         {
-            await AddOrUpdateReferencedEntities(incomingEntity, getReferencedEntities(incomingEntity), incomingReferencedEntities, referencedEntityDbSet, updateOrder);
-            return;
+            RemoveRemovedReferencedEntities(existingReferencedEntities: getReferencedEntities(existingEntity), incomingReferencedEntities: incomingReferencedEntities);
         }
 
-        RemoveRemovedReferencedEntities(existingReferencedEntities: getReferencedEntities(existingEntity), incomingReferencedEntities: incomingReferencedEntities);
-        await AddOrUpdateReferencedEntities(entity: existingEntity, existingReferencedEntities: getReferencedEntities(existingEntity), incomingReferencedEntities: incomingReferencedEntities, referencedEntityDbSet: referencedEntityDbSet, updateOrder: updateOrder);
+        var parentEntity = existingEntity ?? incomingEntity;
+        var referenceEntityCollection = getReferencedEntities(existingEntity ?? incomingEntity);
+
+        await AddOrUpdateReferencedEntities(parentEntity, referenceEntityCollection, incomingReferencedEntities, referencedEntityDbSet, updateOrder);
     }
 
-    protected virtual async Task AddOrUpdateReferencedEntities<TEntity, TReferencedEntity>(TEntity entity, List<TReferencedEntity> existingReferencedEntities, List<TReferencedEntity> incomingReferencedEntities, DbSet<TReferencedEntity> referencedEntityDbSet, bool updateOrder = false)
+    protected virtual async Task AddOrUpdateReferencedEntities<TEntity, TReferencedEntity>(TEntity entity,
+                                                                                           List<TReferencedEntity> destinationReferenceEntityCollection,
+                                                                                           List<TReferencedEntity> incomingReferencedEntities,
+                                                                                           DbSet<TReferencedEntity> referencedEntityDbSet,
+                                                                                           bool updateOrder = false)
           where TEntity : ContentComponentDbEntity
           where TReferencedEntity : ContentComponentDbEntity
     {
@@ -113,14 +118,10 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
 
         foreach (var incomingReferencedEntity in incomingReferencedEntities)
         {
-            var existingReferencedEntity = existingReferencedEntities.Find(existingReference => existingReference.Id == incomingReferencedEntity.Id);
-            if (existingReferencedEntity == null)
-            {
-                await AddNewReferencedEntity(entity, existingReferencedEntities, referencedEntityDbSet, incomingReferencedEntity);
-                existingReferencedEntity = incomingReferencedEntity;
-            }
+            var existingReferencedEntity = destinationReferenceEntityCollection.Find(existingReference => existingReference.Id == incomingReferencedEntity.Id) ??
+                                           await AddNewReferencedEntity(entity, incomingReferencedEntity, destinationReferenceEntityCollection, referencedEntityDbSet);
 
-            if (updateOrder)
+            if (updateOrder && existingReferencedEntity != null)
             {
                 existingReferencedEntity.Order = order;
             }
@@ -130,18 +131,19 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
 
     }
 
-    protected virtual async Task AddNewReferencedEntity<TEntity, TReferencedEntity>(TEntity existingEntity, List<TReferencedEntity> existingReferencedEntities, DbSet<TReferencedEntity> referencedEntityDbSet, TReferencedEntity incomingReferencedEntity)
+    protected virtual async Task<TReferencedEntity?> AddNewReferencedEntity<TEntity, TReferencedEntity>(TEntity entity, TReferencedEntity referencedEntity, List<TReferencedEntity> referencedEntitiesCollection, DbSet<TReferencedEntity> referencedEntityDbSet)
         where TEntity : ContentComponentDbEntity
         where TReferencedEntity : ContentComponentDbEntity
     {
-        var dbReferencedEntity = await referencedEntityDbSet.FirstOrDefaultAsync(referencedEntity => referencedEntity.Id == incomingReferencedEntity.Id);
+        var dbReferencedEntity = await referencedEntityDbSet.FirstOrDefaultAsync(referencedEntity => referencedEntity.Id == referencedEntity.Id);
         if (dbReferencedEntity == null)
         {
-            _logger.LogError("{ParentEntityType} {ParentId} is trying to add {ChildReferenceType} {ChildReferenceId} but this is not found in the DB", typeof(TEntity).Name, existingEntity.Id, typeof(TReferencedEntity).Name, incomingReferencedEntity.Id);
-            return;
+            _logger.LogError("{ParentEntityType} {ParentId} is trying to add {ChildReferenceType} {ChildReferenceId} but this is not found in the DB", typeof(TEntity).Name, entity.Id, typeof(TReferencedEntity).Name, referencedEntity.Id);
+            return null;
         }
 
-        existingReferencedEntities.Add(dbReferencedEntity);
+        referencedEntitiesCollection.Add(dbReferencedEntity);
+        return dbReferencedEntity;
     }
 
     protected virtual void RemoveRemovedReferencedEntities<TReferencedEntity>(List<TReferencedEntity> existingReferencedEntities, List<TReferencedEntity> incomingReferencedEntities)
