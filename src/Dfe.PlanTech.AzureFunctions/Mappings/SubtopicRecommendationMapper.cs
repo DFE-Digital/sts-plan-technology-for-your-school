@@ -16,15 +16,14 @@ public class SubtopicRecommendationMapper(
     : JsonToDbMapper<SubtopicRecommendationDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
     private readonly CmsDbContext _db = db;
-    private readonly List<RecommendationIntroDbEntity> _incomingIntros = [];
+    private List<RecommendationIntroDbEntity> _incomingIntros = [];
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
         values = MoveValueToNewKey(values, "section", "sectionId");
         values = MoveValueToNewKey(values, "subtopic", "subtopicId");
 
-        _incomingIntros.Clear();
-        _incomingIntros.AddRange(_entityUpdater.GetAndOrderReferencedEntities<RecommendationIntroDbEntity>(values, "intros"));
+        _incomingIntros = _entityUpdater.GetAndOrderReferencedEntities<RecommendationIntroDbEntity>(values, "intros").ToList();
 
         return values;
     }
@@ -35,10 +34,7 @@ public class SubtopicRecommendationMapper(
 
         if (existing != null)
         {
-            existing.RecommendationIntro = await _db.SubtopicRecommendationIntros.Where(subRecIntro => subRecIntro.SubtopicRecommendationId == incoming.Id)
-                                                                        .Select(subRecIntro => subRecIntro.RecommendationIntro)
-                                                                        .Select(intro => intro!)
-                                                                        .ToListAsync();
+            await _db.SubtopicRecommendationIntros.IgnoreQueryFilters().Where(subRecIntro => subRecIntro.SubtopicRecommendation.Id == existing.Id).Include(subRecIntro => subRecIntro.RecommendationIntro).ToListAsync();
         }
 
         await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (subtopicRec) => subtopicRec.Intros, _incomingIntros, _db.RecommendationIntros, false);

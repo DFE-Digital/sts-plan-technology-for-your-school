@@ -16,16 +16,16 @@ public class RecommendationSectionMapper(
     : JsonToDbMapper<RecommendationSectionDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
     private readonly CmsDbContext _db = db;
-    private readonly List<AnswerDbEntity> _incomingAnswers = [];
-    private readonly List<RecommendationChunkDbEntity> _incomingContent = [];
+    private List<AnswerDbEntity> _incomingAnswers = [];
+    private List<RecommendationChunkDbEntity> _incomingContent = [];
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
         _incomingAnswers.Clear();
         _incomingContent.Clear();
 
-        _incomingAnswers.AddRange(_entityUpdater.GetAndOrderReferencedEntities<AnswerDbEntity>(values, "answers"));
-        _incomingContent.AddRange(_entityUpdater.GetAndOrderReferencedEntities<RecommendationChunkDbEntity>(values, "chunks"));
+        _incomingAnswers = _entityUpdater.GetAndOrderReferencedEntities<AnswerDbEntity>(values, "answers").ToList();
+        _incomingContent = _entityUpdater.GetAndOrderReferencedEntities<RecommendationChunkDbEntity>(values, "chunks").ToList();
 
         return values;
     }
@@ -36,17 +36,8 @@ public class RecommendationSectionMapper(
 
         if (existing != null)
         {
-            existing.Answers.AddRange(await _db.RecommendationSectionAnswers
-                                                .Where(recSecAnswer => recSecAnswer.RecommendationSectionId == incoming.Id)
-                                                .Select(recSecAnswer => recSecAnswer.Answer)
-                                                .Select(answer => answer!)
-                                                .ToListAsync());
-
-            existing.Chunks.AddRange(await _db.RecommendationSectionChunks
-                                                .Where(recSecChunk => recSecChunk.RecommendationSectionId == incoming.Id)
-                                                .Select(recSecChunk => recSecChunk.RecommendationChunk)
-                                                .Select(chunk => chunk!)
-                                                .ToListAsync());
+            await _db.RecommendationSectionAnswers.IgnoreQueryFilters().Where(recSecAnswer => recSecAnswer.RecommendationSectionId == existing.Id).Include(recSecAnswer => recSecAnswer.Answer).ToListAsync();
+            await _db.RecommendationSectionChunks.IgnoreQueryFilters().Where(recSecChunk => recSecChunk.RecommendationSectionId == existing.Id).Include(recSecChunk => recSecChunk.RecommendationChunk).ToListAsync();
         }
 
         await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recSection) => recSection.Answers, _incomingAnswers, _db.Answers, false);

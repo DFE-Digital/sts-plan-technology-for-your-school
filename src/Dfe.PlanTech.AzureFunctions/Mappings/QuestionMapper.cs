@@ -1,6 +1,4 @@
 using Dfe.PlanTech.AzureFunctions.Models;
-using Dfe.PlanTech.Domain.Caching.Enums;
-using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -12,12 +10,11 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 public class QuestionMapper(EntityRetriever retriever, EntityUpdater updater, CmsDbContext db, ILogger<JsonToDbMapper<QuestionDbEntity>> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<QuestionDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
     private readonly CmsDbContext _db = db;
-    private readonly List<AnswerDbEntity> _incomingAnswers = [];
+    private List<AnswerDbEntity> _incomingAnswers = [];
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
-        _incomingAnswers.Clear();
-        _incomingAnswers.AddRange(_entityUpdater.GetAndOrderReferencedEntities<AnswerDbEntity>(values, "answers"));
+        _incomingAnswers = _entityUpdater.GetAndOrderReferencedEntities<AnswerDbEntity>(values, "answers").ToList();
 
         return values;
     }
@@ -33,7 +30,7 @@ public class QuestionMapper(EntityRetriever retriever, EntityUpdater updater, Cm
                                         .Select(answer => answer)
                                         .ToListAsync();
 
-            Logger.LogInformation("Retrieved answers for existing question: \"{Answers}\"", string.Join(",", existing.Answers.Select(answer => answer.Id)));
+            Logger.LogTrace("Retrieved answers for existing question ID \"{QuestionId}\": \"{Answers}\"", existing.Id, string.Join(",", existing.Answers.Select(answer => answer.Id)));
         }
 
         await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (question) => question.Answers, _incomingAnswers, _db.Answers, true);

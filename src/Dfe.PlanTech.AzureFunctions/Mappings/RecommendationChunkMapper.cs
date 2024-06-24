@@ -33,12 +33,12 @@ public class RecommendationChunkMapper(EntityRetriever retriever, EntityUpdater 
         {
             if (existing.Answers == null || existing.Answers.Count == 0)
             {
-                await _db.Entry(existing).Collection(recChunk => recChunk.Answers).LoadAsync();
+                await _db.RecommendationChunkAnswers.IgnoreQueryFilters().Where(recChunkAnswer => recChunkAnswer.RecommendationChunkId == existing.Id).Include(rca => rca.Answer).ToListAsync();
             }
 
             if (existing.Content == null || existing.Content.Count == 0)
             {
-                await _db.Entry(existing).Collection(recChunk => recChunk.Content).LoadAsync();
+                await _db.RecommendationChunkContents.IgnoreQueryFilters().Where(recChunkContent => recChunkContent.RecommendationChunkId == existing.Id).Include(rca => rca.ContentComponent).ToListAsync();
             }
         }
 
