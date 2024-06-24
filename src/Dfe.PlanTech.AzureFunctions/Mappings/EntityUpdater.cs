@@ -68,7 +68,7 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
     {
         if (!values.TryGetValue(key, out object? referencesArray) || referencesArray is not object[] inners)
         {
-            _logger.LogError("Expected {Key} to be references array but received {Type}", key, referencesArray?.GetType());
+            _logger.LogWarning("Expected {Key} to be references array but received {Type}", key, referencesArray?.GetType());
             yield break;
         }
 
