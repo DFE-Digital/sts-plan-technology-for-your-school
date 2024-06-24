@@ -20,7 +20,7 @@ public class SectionTests() : EntityTests<Section, SectionDbEntity, SectionGener
         var pageGenerator = new PageGenerator([]);
         var pages = pageGenerator.Generate(100);
 
-        var pageDbEntities = PageGenerator.MapToDbEntity(pages);
+        var pageDbEntities = PageGenerator.MapToDbEntities(pages);
         Db.Pages.AddRange(pageDbEntities);
         Db.SaveChanges();
 
@@ -29,17 +29,11 @@ public class SectionTests() : EntityTests<Section, SectionDbEntity, SectionGener
 
     protected override void ClearDatabase()
     {
-        var questions = Db.Questions.IgnoreQueryFilters().IgnoreAutoIncludes().ToList();
-        Db.Questions.RemoveRange(questions);
-        Db.SaveChanges();
-
-        var sections = Db.Sections.IgnoreQueryFilters().IgnoreAutoIncludes().ToList();
-        Db.Sections.RemoveRange(sections);
-        Db.SaveChanges();
-
-        var pages = Db.Pages.IgnoreQueryFilters().IgnoreAutoIncludes().ToList();
-        Db.Pages.RemoveRange(pages);
-        Db.SaveChanges();
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Questions]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Sections]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[PageContents]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Pages]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
     }
 
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(Section entity)
@@ -53,18 +47,21 @@ public class SectionTests() : EntityTests<Section, SectionDbEntity, SectionGener
          },
      };
 
-    protected override IQueryable<SectionDbEntity> GetDbEntitiesQuery() => Db.Sections.IgnoreQueryFilters().IgnoreAutoIncludes().Select(section => new SectionDbEntity()
-    {
-        Id = section.Id,
-        Name = section.Name,
-        Published = section.Published,
-        Archived = section.Archived,
-        Deleted = section.Deleted,
-        Questions = section.Questions.Select(question => new QuestionDbEntity()
-        {
-            Id = question.Id
-        }).ToList()
-    });
+    protected override IQueryable<SectionDbEntity> GetDbEntitiesQuery()
+     => Db.Sections.IgnoreQueryFilters()
+                    .IgnoreAutoIncludes()
+                    .Select(section => new SectionDbEntity()
+                    {
+                        Id = section.Id,
+                        Name = section.Name,
+                        Published = section.Published,
+                        Archived = section.Archived,
+                        Deleted = section.Deleted,
+                        Questions = section.Questions.Select(question => new QuestionDbEntity()
+                        {
+                            Id = question.Id
+                        }).ToList()
+                    });
 
     protected override void ValidateDbMatches(Section entity, SectionDbEntity? dbEntity, bool published = true, bool archived = false, bool deleted = false)
     {

@@ -12,11 +12,8 @@ public class ButtonTests : EntityTests<Button, ButtonDbEntity, ButtonGenerator>
 
     protected override void ClearDatabase()
     {
-        var dbButtons = GetDbEntitiesQuery().ToList();
-
-        Db.Buttons.RemoveRange(dbButtons);
-
-        Db.SaveChanges();
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Buttons]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
     }
 
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(Button entity)

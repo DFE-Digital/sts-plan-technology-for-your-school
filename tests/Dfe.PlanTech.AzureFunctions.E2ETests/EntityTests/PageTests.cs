@@ -13,18 +13,10 @@ public class PageTests() : EntityTests<Page, PageDbEntity, PageGenerator>
 
     protected override void ClearDatabase()
     {
-        var contentComponents = Db.ContentComponents.IgnoreAutoIncludes().IgnoreQueryFilters().ToList();
-        Db.ContentComponents.RemoveRange(contentComponents);
-
-        var pageContents = Db.PageContents.IgnoreAutoIncludes().IgnoreQueryFilters().ToList();
-        Db.PageContents.RemoveRange(pageContents);
-
-        var titles = Db.Titles.IgnoreAutoIncludes().IgnoreQueryFilters().ToList();
-        Db.Titles.RemoveRange(titles);
-
-        var pages = GetDbEntitiesQuery().ToList();
-        Db.Pages.RemoveRange(pages);
-        Db.SaveChanges();
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[PageContents]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Pages]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Titles]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
     }
 
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(Page entity)

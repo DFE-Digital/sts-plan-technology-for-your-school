@@ -12,9 +12,11 @@ public class TextBodyTests() : EntityTests<TextBody, TextBodyDbEntity, TextBodyG
 
     protected override void ClearDatabase()
     {
-        var titles = GetDbEntitiesQuery().ToList();
-        Db.TextBodies.RemoveRange(titles);
-        Db.SaveChanges();
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[TextBodies]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RichTextMarkDbEntity]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RichTextContents]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RichTextDataDbEntity]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
     }
 
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(TextBody entity)

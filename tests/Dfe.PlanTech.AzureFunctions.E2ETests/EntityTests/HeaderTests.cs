@@ -12,11 +12,8 @@ public class HeaderTests : EntityTests<Header, HeaderDbEntity, HeaderGenerator>
 
     protected override void ClearDatabase()
     {
-        var dbHeaders = GetDbEntitiesQuery().ToList();
-
-        Db.Headers.RemoveRange(dbHeaders);
-
-        Db.SaveChanges();
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Headers]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
     }
 
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(Header entity)
