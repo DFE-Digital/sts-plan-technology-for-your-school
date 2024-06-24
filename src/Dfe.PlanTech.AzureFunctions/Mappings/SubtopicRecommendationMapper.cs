@@ -34,6 +34,8 @@ public class SubtopicRecommendationMapper(
 
         if (existing != null)
         {
+            //There is no need for assignment as EF Core will automatically assigned the retrieved relationships to the existing entity,
+            //as the existing entity is being tracked by EF Core's ChangeTracker, and EF Core is aware of the relationship.
             await _db.SubtopicRecommendationIntros.IgnoreQueryFilters().Where(subRecIntro => subRecIntro.SubtopicRecommendation.Id == existing.Id).Include(subRecIntro => subRecIntro.RecommendationIntro).ToListAsync();
         }
 
