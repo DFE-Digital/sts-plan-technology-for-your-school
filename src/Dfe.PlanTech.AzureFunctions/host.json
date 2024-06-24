@@ -10,6 +10,7 @@
     }
   },
   "extensions": {
+    "serviceBus": {},
     "http": {
       "routePrefix": "api",
       "customHeaders": {
