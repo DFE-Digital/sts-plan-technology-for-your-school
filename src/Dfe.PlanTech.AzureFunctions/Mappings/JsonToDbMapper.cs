@@ -213,7 +213,7 @@ public abstract class JsonToDbMapper
     {
         if (!values.TryGetValue(currentKey, out object? value))
         {
-            Logger.LogWarning("COuld not find key {currentKey}", currentKey);
+            Logger.LogWarning("Could not find key {currentKey}", currentKey);
             return values;
         }
 
