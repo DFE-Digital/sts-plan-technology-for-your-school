@@ -119,7 +119,7 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
         foreach (var incomingReferencedEntity in incomingReferencedEntities)
         {
             var existingReferencedEntity = destinationReferenceEntityCollection.Find(existingReference => existingReference.Id == incomingReferencedEntity.Id) ??
-                                           await AddNewReferencedEntity(entity, incomingReferencedEntity, destinationReferenceEntityCollection, referencedEntityDbSet);
+                                        await AddNewReferencedEntity(entity, incomingReferencedEntity, destinationReferenceEntityCollection, referencedEntityDbSet);
 
             if (updateOrder && existingReferencedEntity != null)
             {
@@ -135,7 +135,7 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
         where TEntity : ContentComponentDbEntity
         where TReferencedEntity : ContentComponentDbEntity
     {
-        var dbReferencedEntity = await referencedEntityDbSet.FirstOrDefaultAsync(referencedEntity => referencedEntity.Id == referencedEntity.Id);
+        var dbReferencedEntity = await referencedEntityDbSet.FirstOrDefaultAsync(dbReferenceEntity => dbReferenceEntity.Id == referencedEntity.Id);
         if (dbReferencedEntity == null)
         {
             _logger.LogError("{ParentEntityType} {ParentId} is trying to add {ChildReferenceType} {ChildReferenceId} but this is not found in the DB", typeof(TEntity).Name, entity.Id, typeof(TReferencedEntity).Name, referencedEntity.Id);
