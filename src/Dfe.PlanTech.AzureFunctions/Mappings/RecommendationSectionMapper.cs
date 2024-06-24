@@ -21,9 +21,6 @@ public class RecommendationSectionMapper(
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
-        _incomingAnswers.Clear();
-        _incomingContent.Clear();
-
         _incomingAnswers = _entityUpdater.GetAndOrderReferencedEntities<AnswerDbEntity>(values, "answers").ToList();
         _incomingContent = _entityUpdater.GetAndOrderReferencedEntities<RecommendationChunkDbEntity>(values, "chunks").ToList();
 
