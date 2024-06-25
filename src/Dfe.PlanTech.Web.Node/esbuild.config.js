@@ -62,7 +62,7 @@ await esbuild.build({
 
 //Copy assets
 //DFE
-const dfeDir = "./node_modules/dfe-frontend-alpha/packages/assets";
+const dfeDir = "./node_modules/dfe-frontend/packages/assets";
 readdirSync(dfeDir).forEach((file) => {
   if (file.indexOf(".png") == -1) {
     return;

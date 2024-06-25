@@ -12,7 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@govuk-prototype-kit/step-by-step": "^2.2.2",
-    "dfe-frontend-alpha": "^1.0.1",
+    "dfe-frontend": "^2.0.1",
     "esbuild": "0.18.17",
     "esbuild-sass-plugin": "^2.10.0",
     "fs": "^0.0.1-security",

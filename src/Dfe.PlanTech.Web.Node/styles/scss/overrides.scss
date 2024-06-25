@@ -1,4 +1,4 @@
-@use "../../node_modules/dfe-frontend-alpha/packages/dfefrontend.scss";
+@use "../../node_modules/dfe-frontend/packages/dfefrontend.scss";
 
 * {
   font-family: BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu,
@@ -60,6 +60,10 @@ strong.govuk-tag {
   > .govuk-button {
     vertical-align: middle;
   }
+}
+
+.dfe-header {
+  border-bottom: 10px solid #347ca9
 }
 
 //Hide GTM iframe
