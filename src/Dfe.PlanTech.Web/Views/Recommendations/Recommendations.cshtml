@@ -4,28 +4,20 @@
     <link rel="stylesheet" as="style" href="~/css/step-by-step.css">
 }
 
+@section BeforeContent
+{
+    <div class="govuk-breadcrumbs">
+        <ol class="govuk-breadcrumbs__list">
+            <li class="govuk-breadcrumbs__list-item">
+                <a class="govuk-breadcrumbs__link" href="/self-assessment">Technology self-assessment</a>
+            </li>
+            <li class="govuk-breadcrumbs__list-item">
+                <a class="govuk-breadcrumbs__link" href="@Model.Slug">@Model.Intro.Title</a>
+            </li>
+        </ol>
+    </div>
+}
+
 <div class="recommendation-content">
     <partial name="RecommendationContent" model="@Model"/>
 </div>
-
-@section BodyEnd {
-    <script async src="/js/step-by-step-navigation.js" nonce="@Context.Items["nonce"]"></script>
-    <script defer src="/js/step-by-step-polyfills.js" nonce="@Context.Items["nonce"]"></script>
-
-    <script async type="module" nonce="@Context.Items["nonce"]">
-        function waitForGOVUK(callback, interval = 100) {
-            if (typeof GOVUK !== 'undefined' && GOVUK.Modules?.AppStepNav !== undefined) {
-                callback();
-            } else {
-                setTimeout(function() {
-                    waitForGOVUK(callback);
-                }, interval);
-            }
-        }
-
-        waitForGOVUK(function() {
-            const $element = document.querySelector('#step-by-step-navigation');
-            new GOVUK.Modules.AppStepNav($element).init();
-        });
-    </script>
-}
