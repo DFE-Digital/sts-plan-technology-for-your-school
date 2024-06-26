@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Dfe.PlanTech.AzureFunctions.Mappings;
 using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Models;
@@ -35,6 +34,8 @@ public class RecommendationSectionMapperTests : BaseMapperTests
     private static EntityUpdater CreateMockRecommendationSectionUpdater(ILogger<EntityUpdater> logger) => new(logger, _db);
     private readonly RecommendationSectionMapper _mapper;
 
+    private readonly int InitialOrder = 999;
+
     private readonly RecommendationSectionDbEntity ExitingRecommendationSectionDbEntity = new()
     {
         Id = ExistingSectionId,
@@ -49,7 +50,7 @@ public class RecommendationSectionMapperTests : BaseMapperTests
             var chunk = new RecommendationChunkDbEntity()
             {
                 Id = id,
-                Order = 99999
+                Order = InitialOrder
             };
 
             _chunks.Add(chunk);
@@ -65,12 +66,12 @@ public class RecommendationSectionMapperTests : BaseMapperTests
             var answer = new AnswerDbEntity()
             {
                 Id = id,
-                Order = x
+                Order = InitialOrder
             };
 
             _answers.Add(answer);
         }
-        _answers.Add(new AnswerDbEntity() { Id = "answer4" });
+        _answers.Add(new AnswerDbEntity() { Id = "answer4", Order = InitialOrder });
 
         _answersDbSet = _answers.BuildMockDbSet();
         _db.Answers = _answersDbSet;
@@ -109,20 +110,8 @@ public class RecommendationSectionMapperTests : BaseMapperTests
         Assert.NotNull(incoming);
         Assert.Null(existing);
 
-        Assert.Equal(_answerIds.Length, incoming.Answers.Count);
-
-        foreach (var answerId in _answerIds)
-        {
-            var matching = incoming.Answers.FirstOrDefault(answer => answer.Id == answerId);
-            Assert.NotNull(matching);
-        }
-
-        Assert.Equal(_chunkIds.Length, incoming.Chunks.Count);
-        foreach (var chunkId in _chunkIds)
-        {
-            var matching = incoming.Chunks.FirstOrDefault(answer => answer.Id == chunkId);
-            Assert.NotNull(matching);
-        }
+        ValidateReferencedContent(_answerIds, incoming.Answers, true, InitialOrder);
+        ValidateReferencedContent(_chunkIds, incoming.Chunks, true);
     }
 
     [Fact]
@@ -130,6 +119,7 @@ public class RecommendationSectionMapperTests : BaseMapperTests
     {
         string[] answers = [.. _answerIds[1..], "answer4"];
         string[] chunks = [.. _chunkIds[..2], "chunk4"];
+
         var payload = CreateRecommendationSectionPayload(ExitingRecommendationSectionDbEntity.Id, answers, chunks);
 
         var recommendationSection = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default);
@@ -141,20 +131,8 @@ public class RecommendationSectionMapperTests : BaseMapperTests
         Assert.NotNull(incoming);
         Assert.NotNull(existing);
 
-        Assert.Equal(answers.Length, existing.Answers.Count);
-
-        foreach (var answerId in answers)
-        {
-            var matching = existing.Answers.FirstOrDefault(answer => answer.Id == answerId);
-            Assert.NotNull(matching);
-        }
-
-        Assert.Equal(chunks.Length, existing.Chunks.Count);
-        foreach (var chunkId in chunks)
-        {
-            var matching = existing.Chunks.FirstOrDefault(answer => answer.Id == chunkId);
-            Assert.NotNull(matching);
-        }
+        ValidateReferencedContent(answers, existing.Answers, true, InitialOrder);
+        ValidateReferencedContent(chunks, existing.Chunks, true);
     }
 
     [Theory]

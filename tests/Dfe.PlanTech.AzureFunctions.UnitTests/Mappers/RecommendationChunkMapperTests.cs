@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Dfe.PlanTech.AzureFunctions.Mappings;
 using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Models;
@@ -36,6 +35,8 @@ public class RecommendationChunkMapperTests : BaseMapperTests
     private static EntityUpdater CreateMockRecommendationChunkUpdater(ILogger<EntityUpdater> logger) => new(logger, _db);
     private readonly RecommendationChunkMapper _mapper;
 
+    private readonly int InitialOrder = 999;
+
     private readonly RecommendationChunkDbEntity ExistingRecommendationChunk = new()
     {
         Id = ExistingChunkId,
@@ -52,7 +53,7 @@ public class RecommendationChunkMapperTests : BaseMapperTests
             var content = new ContentComponentDbEntity()
             {
                 Id = contentId,
-                Order = x
+                Order = InitialOrder,
             };
 
             _contentComponents.Add(content);
@@ -84,7 +85,7 @@ public class RecommendationChunkMapperTests : BaseMapperTests
             var answer = new AnswerDbEntity()
             {
                 Id = id,
-                Order = x
+                Order = InitialOrder
             };
 
             _answers.Add(answer);
@@ -131,18 +132,8 @@ public class RecommendationChunkMapperTests : BaseMapperTests
 
         Assert.Equal(_answerIds.Length, incoming.Answers.Count);
 
-        foreach (var answerId in _answerIds)
-        {
-            var matching = incoming.Answers.FirstOrDefault(answer => answer.Id == answerId);
-            Assert.NotNull(matching);
-        }
-
-        Assert.Equal(_contentIds.Length, incoming.Content.Count);
-        foreach (var contentId in _contentIds)
-        {
-            var matching = incoming.Content.FirstOrDefault(answer => answer.Id == contentId);
-            Assert.NotNull(matching);
-        }
+        ValidateReferencedContent(_answerIds, incoming.Answers, true, InitialOrder);
+        ValidateReferencedContent(_contentIds, incoming.Content, true);
     }
 
     [Fact]
@@ -161,20 +152,8 @@ public class RecommendationChunkMapperTests : BaseMapperTests
         Assert.NotNull(incoming);
         Assert.NotNull(existing);
 
-        Assert.Equal(answers.Length, existing.Answers.Count);
-
-        foreach (var answerId in answers)
-        {
-            var matching = existing.Answers.FirstOrDefault(answer => answer.Id == answerId);
-            Assert.NotNull(matching);
-        }
-
-        Assert.Equal(contents.Length, existing.Content.Count);
-        foreach (var contentId in contents)
-        {
-            var matching = existing.Content.FirstOrDefault(answer => answer.Id == contentId);
-            Assert.NotNull(matching);
-        }
+        ValidateReferencedContent(answers, existing.Answers, true, InitialOrder);
+        ValidateReferencedContent(contents, existing.Content, true);
     }
 
     [Theory]
@@ -208,6 +187,34 @@ public class RecommendationChunkMapperTests : BaseMapperTests
 
         string[] notFoundReferenceIds = [.. notFoundAnswers, .. notFoundContent];
         FindLogMessagesContainingStrings(_entityUpdaterLogger, notFoundReferenceIds);
+    }
+
+    private void ValidateAnswers(string[] answerIds, RecommendationChunkDbEntity recommendationChunk)
+    {
+        Assert.Equal(answerIds.Length, recommendationChunk.Answers.Count);
+
+        for (int x = 0; x < answerIds.Length; x++)
+        {
+            var answerId = answerIds[x];
+            var matching = recommendationChunk.Answers.FirstOrDefault(answer => answer.Id == answerId);
+            Assert.NotNull(matching);
+
+            //The order should NOT have changed
+            Assert.Equal(InitialOrder, matching.Order);
+        }
+    }
+
+    private static void ValidateContent(string[] contentIds, RecommendationChunkDbEntity existing)
+    {
+        Assert.Equal(contentIds.Length, existing.Content.Count);
+
+        for (int x = 0; x < contentIds.Length; x++)
+        {
+            var contentId = contentIds[x];
+            var matching = existing.Content.FirstOrDefault(answer => answer.Id == contentId);
+            Assert.NotNull(matching);
+            Assert.Equal(x, matching.Order);
+        }
     }
 
     private CmsWebHookPayload CreateRecommendationChunkPayload(string chunkId, string[] answerIds, string[] contentIds)
