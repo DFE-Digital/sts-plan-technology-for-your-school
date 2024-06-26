@@ -5,28 +5,55 @@ using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
-using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
+using NSubstitute.Core;
 using Xunit;
-using Answer = Dfe.PlanTech.Domain.Answers.Models.Answer;
 
 namespace Dfe.PlanTech.Web.UnitTests.Routing;
 
 public class GetRecommendationRouterTests
 {
-    private readonly IGetPageQuery _getPageQuery;
     private readonly ISubmissionStatusProcessor _submissionStatusProcessor;
 
     private readonly RecommendationsController _controller;
     private readonly GetRecommendationRouter _router;
 
-    private readonly IGetAllAnswersForLatestSubmissionQuery _getAllAnswersForSubmissionQuery;
+    private readonly IGetLatestResponsesQuery _getLatestResponsesQuery;
     private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
+
+    private static readonly Answer AnswerOne = new()
+    {
+        Sys = new()
+        {
+            Id = "Answer-1"
+        },
+        Text = "Answer-1-Text"
+    };
+
+    private static readonly Answer AnswerTwo = new()
+    {
+        Sys = new()
+        {
+            Id = "Answer-2"
+        },
+        Text = "Answer-2-Text"
+    };
+
+    private static readonly Question Question = new()
+    {
+        Sys = new()
+        {
+            Id = "Question-1"
+        },
+        Text = "Question-Text",
+        Slug = "Question-1-Slug",
+        Answers = [AnswerOne, AnswerTwo]
+    };
 
     private readonly Section _section = new()
     {
@@ -38,40 +65,32 @@ public class GetRecommendationRouterTests
         {
             Id = "section-id"
         },
+        Questions = [Question]
     };
 
-    private readonly SubtopicRecommendation? _subtopic = new SubtopicRecommendation()
+    private readonly SubtopicRecommendation? _subtopic = new()
     {
-        Intros = new List<RecommendationIntro>()
-        {
-            new RecommendationIntro()
+        Intros =
+        [
+            new()
             {
                 Slug = "intro-slug",
                 Maturity = "High",
             }
-        },
+        ],
         Section = new RecommendationSection()
         {
-            Chunks = new List<RecommendationChunk>()
-            {
-                new RecommendationChunk()
+            Chunks =
+            [
+                new()
                 {
-                    Header = new ()
+                    Header = new()
                     {
                         Text = "test-header"
                     },
-                    Answers = new List<Domain.Questionnaire.Models.Answer>()
-                    {
-                        new ()
-                        {
-                            Sys = new SystemDetails()
-                            {
-                                Id = "ref1"
-                            }
-                        }
-                    }
+                    Answers = [AnswerOne]
                 }
-            }
+            ]
         },
         Subtopic = new Section()
         {
@@ -88,14 +107,13 @@ public class GetRecommendationRouterTests
 
     public GetRecommendationRouterTests()
     {
-        _getPageQuery = Substitute.For<IGetPageQuery>();
         _submissionStatusProcessor = Substitute.For<ISubmissionStatusProcessor>();
-        _getAllAnswersForSubmissionQuery = Substitute.For<IGetAllAnswersForLatestSubmissionQuery>();
+        _getLatestResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
         _getSubTopicRecommendationQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
 
         _controller = new RecommendationsController(new NullLogger<RecommendationsController>());
 
-        _router = new GetRecommendationRouter(_submissionStatusProcessor, _getAllAnswersForSubmissionQuery, _getSubTopicRecommendationQuery);
+        _router = new GetRecommendationRouter(_submissionStatusProcessor, _getLatestResponsesQuery, _getSubTopicRecommendationQuery);
     }
 
     [Theory]
@@ -126,9 +144,8 @@ public class GetRecommendationRouterTests
     [InlineData(true)]
     public async Task Should_Redirect_To_CheckAnswersPage_When_Status_CheckAnswers(bool checklist)
     {
-        _submissionStatusProcessor.When(processor =>
-                processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
-            .Do((callinfo) => { _submissionStatusProcessor.Status = SubmissionStatus.CheckAnswers; });
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+                                  .Do((callinfo) => { _submissionStatusProcessor.Status = SubmissionStatus.CheckAnswers; });
 
         var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, "recommendation-slug", checklist, _controller,
             default);
@@ -243,8 +260,7 @@ public class GetRecommendationRouterTests
     [InlineData(true)]
     public async Task Should_Throw_Exception_When_Recommendation_Not_In_Section(bool checklist)
     {
-        _submissionStatusProcessor.When(processor =>
-                processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
             .Do((callinfo) =>
             {
                 _submissionStatusProcessor.Status = SubmissionStatus.Completed;
@@ -255,16 +271,8 @@ public class GetRecommendationRouterTests
                 });
             });
 
-        _getAllAnswersForSubmissionQuery.GetAllAnswersForLatestSubmission(Arg.Any<string>(), Arg.Any<int>()).Returns(
-            new List<Answer>()
-            {
-                new Answer()
-                {
-                    Id = 1,
-                    AnswerText = "Answer 1",
-                    ContentfulRef = "ref1"
-                }
-            });
+        _getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
+                                .Returns(MockValidLatestResponse);
 
         await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() =>
             _router.ValidateRoute(_section.InterstitialPage.Slug, "other-recommendation-slug", checklist, _controller, default));
@@ -287,51 +295,14 @@ public class GetRecommendationRouterTests
                 });
             });
 
-        _getAllAnswersForSubmissionQuery.GetAllAnswersForLatestSubmission(Arg.Any<string>(), Arg.Any<int>()).Returns(
-            new List<Answer>()
-            {
-                new Answer()
-                {
-                    Id = 1,
-                    AnswerText = "Answer 1",
-                    ContentfulRef = "ref1"
-                }
-            });
-
+        _getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
+                                .Returns(MockValidLatestResponse);
 
         _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
 
         await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() =>
             _router.ValidateRoute(_section.InterstitialPage.Slug, "any-recommendation-slug", checklist, _controller,
                 default));
-    }
-
-    private void Setup_Valid_Recommendation()
-    {
-        _submissionStatusProcessor.When(processor =>
-                processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
-            .Do(_ =>
-            {
-                _submissionStatusProcessor.Status = SubmissionStatus.Completed;
-                _submissionStatusProcessor.Section.Returns(_section);
-                _submissionStatusProcessor.SectionStatus.Returns(new SectionStatusNew()
-                {
-                    Maturity = "High"
-                });
-            });
-
-        _getAllAnswersForSubmissionQuery.GetAllAnswersForLatestSubmission(Arg.Any<string>(), Arg.Any<int>()).Returns(
-            new List<Answer>()
-            {
-                new ()
-                {
-                    Id = 1,
-                    AnswerText = "Answer 1",
-                    ContentfulRef = "ref1"
-                }
-            });
-
-        _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
     }
 
     [Fact]
@@ -364,6 +335,7 @@ public class GetRecommendationRouterTests
 
         Assert.NotNull(model);
         Assert.Equal(_subtopic!.Intros[0], model.Intro);
+        Assert.Contains(AnswerOne, model.Chunks.SelectMany(chunk => chunk.Answers));
 
         var content = model.AllContent.ToList();
         var intro = content[0];
@@ -371,5 +343,46 @@ public class GetRecommendationRouterTests
 
         Assert.Equal(_subtopic.Intros[0], intro);
         Assert.Equal("1. test-header", firstChunk.Header.Text);
+    }
+
+
+    private void Setup_Valid_Recommendation()
+    {
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+            .Do(_ =>
+            {
+                _submissionStatusProcessor.Status = SubmissionStatus.Completed;
+                _submissionStatusProcessor.Section.Returns(_section);
+                _submissionStatusProcessor.SectionStatus.Returns(new SectionStatusNew()
+                {
+                    Maturity = "High"
+                });
+            });
+
+        _getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
+                                .Returns(MockValidLatestResponse);
+
+        _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
+    }
+
+    private static SubmissionResponsesDto MockValidLatestResponse(CallInfo callinfo)
+    {
+        var establishmentId = callinfo.ArgAt<int>(0);
+        var subtopicId = callinfo.ArgAt<string>(1);
+
+        return new SubmissionResponsesDto()
+        {
+            SubmissionId = 1234,
+            Responses = [
+                new QuestionWithAnswer()
+                {
+                    AnswerText = AnswerOne.Text,
+                    AnswerRef = AnswerOne.Sys.Id,
+                    QuestionRef = Question.Sys.Id,
+                    QuestionSlug = Question.Slug,
+                    QuestionText = Question.Text
+                },
+            ]
+        };
     }
 }

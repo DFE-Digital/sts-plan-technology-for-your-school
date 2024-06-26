@@ -1,7 +1,6 @@
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Queries;
-using Dfe.PlanTech.Domain.Responses.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Exceptions;
@@ -17,17 +16,17 @@ public class CheckAnswersRouter : ICheckAnswersRouter
     private const string PageTitle = "Check Answers";
 
     private readonly IGetPageQuery _getPageQuery;
-    private readonly IProcessCheckAnswerDtoCommand _processCheckAnswerDtoCommand;
+    private readonly IProcessSubmissionResponsesCommand _processSubmissionResponsesCommand;
     private readonly IUser _user;
     private readonly ISubmissionStatusProcessor _router;
 
     public CheckAnswersRouter(IGetPageQuery getPageQuery,
-                              IProcessCheckAnswerDtoCommand processCheckAnswerDtoCommand,
+                              IProcessSubmissionResponsesCommand processSubmissionResponsesCommand,
                               IUser user,
                               ISubmissionStatusProcessor router)
     {
         _getPageQuery = getPageQuery;
-        _processCheckAnswerDtoCommand = processCheckAnswerDtoCommand;
+        _processSubmissionResponsesCommand = processSubmissionResponsesCommand;
         _user = user;
         _router = router;
     }
@@ -49,9 +48,9 @@ public class CheckAnswersRouter : ICheckAnswersRouter
     private async Task<IActionResult> ProcessCheckAnswers(string sectionSlug, string? errorMessage, CheckAnswersController controller, CancellationToken cancellationToken)
     {
         var establishmentId = await _user.GetEstablishmentId();
-        var checkAnswerDto = await _processCheckAnswerDtoCommand.GetCheckAnswerDtoForSection(establishmentId, _router.Section, cancellationToken);
+        var submissionResponsesDto = await _processSubmissionResponsesCommand.GetSubmissionResponsesDtoForSection(establishmentId, _router.Section, cancellationToken);
 
-        if (checkAnswerDto == null || checkAnswerDto.Responses == null) throw new DatabaseException("Could not retrieve the answered question list");
+        if (submissionResponsesDto == null || submissionResponsesDto.Responses == null) throw new DatabaseException("Could not retrieve the answered question list");
 
         var checkAnswerPageContent = await _getPageQuery.GetPageBySlug(CheckAnswersController.CheckAnswersPageSlug, cancellationToken) ??
                                     throw new PageNotFoundException($"Could not find page for {CheckAnswersController.CheckAnswersPageSlug}");
@@ -60,10 +59,10 @@ public class CheckAnswersRouter : ICheckAnswersRouter
         {
             Title = checkAnswerPageContent!.Title ?? new Title() { Text = PageTitle },
             SectionName = _router.Section.Name,
-            CheckAnswerDto = checkAnswerDto,
+            SubmissionResponses = submissionResponsesDto,
             Content = checkAnswerPageContent.Content,
             SectionSlug = sectionSlug,
-            SubmissionId = checkAnswerDto.SubmissionId,
+            SubmissionId = submissionResponsesDto.SubmissionId,
             Slug = checkAnswerPageContent.Slug,
             ErrorMessage = errorMessage
         };

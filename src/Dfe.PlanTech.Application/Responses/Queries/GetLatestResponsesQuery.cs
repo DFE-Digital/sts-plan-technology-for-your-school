@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Domain.Responses.Interfaces;
+using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using System.Linq.Expressions;
 
@@ -21,19 +21,19 @@ public class GetLatestResponsesQuery(IPlanTechDbContext db) : IGetLatestResponse
         return await _db.FirstOrDefaultAsync(responseListByDate, cancellationToken);
     }
 
-    public async Task<ResponsesForSubmissionDto?> GetLatestResponses(int establishmentId, string sectionId, bool completedSubmission = false, CancellationToken cancellationToken = default)
+    public async Task<SubmissionResponsesDto?> GetLatestResponses(int establishmentId, string sectionId, bool completedSubmission, CancellationToken cancellationToken = default)
     {
-        var latestCheckAnswerDto = await _db.FirstOrDefaultAsync(GetLatestResponsesBySectionIdQueryable(establishmentId, sectionId, completedSubmission), cancellationToken);
+        var latestSubmissionResponses = await _db.FirstOrDefaultAsync(GetLatestResponsesBySectionIdQueryable(establishmentId, sectionId, completedSubmission), cancellationToken);
 
-        bool haveSubmission = latestCheckAnswerDto != null &&
-                                    latestCheckAnswerDto.SubmissionId > 0 &&
-                                    latestCheckAnswerDto.Responses != null;
-        return haveSubmission ? latestCheckAnswerDto : null;
+        return HaveSubmission(latestSubmissionResponses) ? latestSubmissionResponses : null;
     }
 
-    private IQueryable<ResponsesForSubmissionDto> GetLatestResponsesBySectionIdQueryable(int establishmentId, string sectionId, bool completedSubmission)
+    private static bool HaveSubmission(SubmissionResponsesDto? latestSubmissionResponses)
+    => latestSubmissionResponses != null && latestSubmissionResponses.HaveAnyResponses;
+
+    private IQueryable<SubmissionResponsesDto> GetLatestResponsesBySectionIdQueryable(int establishmentId, string sectionId, bool completedSubmission)
     => GetCurrentSubmission(establishmentId, sectionId, completedSubmission)
-            .Select(submission => new ResponsesForSubmissionDto()
+            .Select(submission => new SubmissionResponsesDto()
             {
                 SubmissionId = submission.Id,
                 Responses = submission.Responses.Select(response => new QuestionWithAnswer
@@ -60,7 +60,7 @@ public class GetLatestResponsesQuery(IPlanTechDbContext db) : IGetLatestResponse
                      submission.EstablishmentId == establishmentId &&
                      submission.SectionId == sectionId;
 
-    private static Expression<Func<Domain.Responses.Models.Response, QuestionWithAnswer>> ToQuestionWithAnswer()
+    private static Expression<Func<Response, QuestionWithAnswer>> ToQuestionWithAnswer()
     => response => new QuestionWithAnswer()
     {
         QuestionRef = response.Question.ContentfulRef,

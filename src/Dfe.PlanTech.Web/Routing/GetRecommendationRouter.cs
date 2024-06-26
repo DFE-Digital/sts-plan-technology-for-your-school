@@ -1,10 +1,8 @@
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Domain.Responses.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
-using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;

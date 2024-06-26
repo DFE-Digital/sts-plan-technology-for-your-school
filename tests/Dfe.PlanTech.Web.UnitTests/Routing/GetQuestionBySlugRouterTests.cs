@@ -2,9 +2,9 @@ using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Domain.Responses.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
+using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
@@ -29,7 +29,7 @@ public class GetQuestionBySlugRouterTests
 
     private readonly Section _section;
 
-    private readonly ResponsesForSubmissionDto _responses;
+    private readonly SubmissionResponsesDto _responses;
 
     public GetQuestionBySlugRouterTests()
     {
@@ -172,7 +172,7 @@ public class GetQuestionBySlugRouterTests
         var secondQuestion = _section.Questions[1];
         var firstQuestion = _section.Questions[0];
 
-        _getResponseQuery.GetLatestResponses(Arg.Any<int>(), _section.Sys.Id, Arg.Any<CancellationToken>())
+        _getResponseQuery.GetLatestResponses(Arg.Any<int>(), _section.Sys.Id, false, Arg.Any<CancellationToken>())
                          .Returns(_responses);
 
         _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
@@ -209,7 +209,7 @@ public class GetQuestionBySlugRouterTests
 
         var responseForQuestion = _responses.Responses.First(resp => resp.QuestionRef == firstQuestion.Sys.Id);
 
-        _getResponseQuery.GetLatestResponses(Arg.Any<int>(), _section.Sys.Id, Arg.Any<CancellationToken>())
+        _getResponseQuery.GetLatestResponses(Arg.Any<int>(), _section.Sys.Id, false, Arg.Any<CancellationToken>())
                          .Returns(_responses);
 
         _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
@@ -275,7 +275,7 @@ public class GetQuestionBySlugRouterTests
         var secondQuestion = _section.Questions[1];
         var thirdQuestion = _section.Questions[2];
 
-        _getResponseQuery.GetLatestResponses(Arg.Any<int>(), _section.Sys.Id, Arg.Any<CancellationToken>())
+        _getResponseQuery.GetLatestResponses(Arg.Any<int>(), _section.Sys.Id, false, Arg.Any<CancellationToken>())
                          .Returns(_responses);
 
         _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
@@ -310,7 +310,7 @@ public class GetQuestionBySlugRouterTests
                                         _submissionStatusProcessor.Section.Returns(_section);
                                     });
 
-        _getResponseQuery.GetLatestResponses(Arg.Any<int>(), _section.Sys.Id, Arg.Any<CancellationToken>())
+        _getResponseQuery.GetLatestResponses(Arg.Any<int>(), _section.Sys.Id, false, Arg.Any<CancellationToken>())
                           .Returns(_responses);
 
 
@@ -337,7 +337,7 @@ public class GetQuestionBySlugRouterTests
 
         var responseForQuestion = _responses.Responses.First(resp => resp.QuestionRef == firstQuestion.Sys.Id);
 
-        _getResponseQuery.GetLatestResponses(Arg.Any<int>(), _section.Sys.Id, Arg.Any<CancellationToken>())
+        _getResponseQuery.GetLatestResponses(Arg.Any<int>(), _section.Sys.Id, false, Arg.Any<CancellationToken>())
                          .Returns(_responses);
 
         _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))

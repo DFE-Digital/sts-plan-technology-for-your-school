@@ -1,9 +1,6 @@
 ﻿using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Domain.Answers.Models;
 using Dfe.PlanTech.Domain.Establishments.Models;
-using Dfe.PlanTech.Domain.Questions.Models;
-using Dfe.PlanTech.Domain.Responses.Models;
 using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Models;
@@ -23,9 +20,9 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
 
     public DbSet<SignIn> SignIn { get; set; } = null!;
 
-    public DbSet<Question> Questions { get; set; } = null!;
+    public DbSet<ResponseQuestion> Questions { get; set; } = null!;
 
-    public DbSet<Answer> Answers { get; set; } = null!;
+    public DbSet<ResponseAnswer> Answers { get; set; } = null!;
 
     public DbSet<Submission> Submissions { get; set; } = null!;
 
@@ -69,7 +66,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
         });
 
         // Setup Question Table
-        modelBuilder.Entity<Question>(builder =>
+        modelBuilder.Entity<ResponseQuestion>(builder =>
         {
             builder.HasKey(question => question.Id);
             builder.Property(question => question.Id).ValueGeneratedOnAdd();
@@ -79,7 +76,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
         });
 
         // Setup Answer Table
-        modelBuilder.Entity<Answer>(builder =>
+        modelBuilder.Entity<ResponseAnswer>(builder =>
         {
             builder.HasKey(answer => answer.Id);
             builder.Property(answer => answer.Id).ValueGeneratedOnAdd();
@@ -117,7 +114,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
 
     public IQueryable<Submission> GetSubmissions => Submissions;
 
-    public IQueryable<Answer> GetAnswers => Answers;
+    public IQueryable<ResponseAnswer> GetAnswers => Answers;
 
     public Task<int> SaveChangesAsync() => base.SaveChangesAsync();
 
