@@ -1,42 +1,41 @@
 @model Dfe.PlanTech.Web.Models.RecommendationsViewModel
+
 @section Header {
     <link rel="stylesheet" as="style" href="~/css/step-by-step.css">
 }
 
-@section BeforeContent {
-     <div class="app-step-nav-header">
-        <span class="app-step-nav-header__part-of">Part of</span>
-        <a class="app-step-nav-header__title" href="/self-assessment#recommendations-section">
-            @Model.SectionName
-        </a>
-    </div>
-}
-
-<div class="govuk-grid-row" id="top">
-    <div class="govuk-grid-column-two-thirds recommendation-content">
-        <div class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
-            <partial name="RecommendationContent" model="@Model.AllContent"/>
+<div class="recommendation-content">
+    @foreach (var headerWithContent in Model.AllContent)
+    {
+        <div class="recommendation-piece-container" id="@headerWithContent.SlugifiedHeader">
+            <div class="recommendation-piece-header">
+                @{
+                    await Html.RenderPartialAsync("Components/Header", headerWithContent.Header);
+                }
+            </div>
+            <div class="govuk-grid-row" id="top">
+                <div class="govuk-grid-column-one-third">
+                    <partial name="Components/VerticalNavigation/Default" model="@Model.Chunks"/>
+                </div>
+                <div class="govuk-grid-column-two-thirds">
+                    <div class="govuk-section-break govuk-!-margin-top-0 govuk-section-break--m govuk-section-break--visible">
+                        <div class="recommendation-piece-content">
+                            @foreach (var content in headerWithContent.Content)
+                            {
+                                await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+                            }
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="govuk-heading-m">Share this recommendation</h2>
+                        <p class="govuk-body">
+                            <a class="govuk-link govuk-!-font-weight-bold" href="@Model.Slug/print" target="_blank">Share or download this recommendation in a checklist format</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div>
-            <h2 class="govuk-heading-m">Share this recommendation</h2>
-            <p class="govuk-body">
-                <a class="govuk-link govuk-!-font-weight-bold" href="@Model.Slug/print" target="_blank">Share or download this recommendation in a checklist format</a>
-            </p>
-        </div>
-    </div>
-
-    <div class="govuk-grid-column-one-third">
-        <div class="app-step-nav-related app-step-nav-related--singular">
-            <h2 class="app-step-nav-related__heading">
-                <span class="app-step-nav-related__pretitle">Part of</span>
-                <a href="#top">
-                    @Model.SectionName Recommendations
-                </a>
-            </h2>
-        </div>
-
-        <partial name="Components/Accordion/AccordionParent" model="@Model.Accordions"/>
-    </div>
+    }
 </div>
 
 @section BodyEnd {
