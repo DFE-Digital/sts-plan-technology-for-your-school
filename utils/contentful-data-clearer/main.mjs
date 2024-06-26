@@ -17,7 +17,6 @@ const client = contentful.createClient(
   }
 );
 
-console.log(envOptions);
 const contentTypesToDelete = process.env.CONTENT_TYPES_TO_DELETE?.split(",");
 
 await deleteContentfulContent({ client, envOptions, contentTypesToDelete });
