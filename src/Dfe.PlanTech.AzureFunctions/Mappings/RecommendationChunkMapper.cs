@@ -44,7 +44,7 @@ public class RecommendationChunkMapper(EntityRetriever retriever, EntityUpdater 
             }
         }
 
-        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recChunk) => recChunk.Answers, _incomingAnswers, _db.Answers, true);
+        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recChunk) => recChunk.Answers, _incomingAnswers, _db.Answers, false);
         await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recChunk) => recChunk.Content, _incomingContent, _db.ContentComponents, true);
     }
 }
