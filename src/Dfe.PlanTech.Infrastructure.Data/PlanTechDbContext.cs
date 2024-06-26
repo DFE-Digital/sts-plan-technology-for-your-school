@@ -68,6 +68,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
         // Setup Question Table
         modelBuilder.Entity<ResponseQuestion>(builder =>
         {
+            builder.ToTable("question");
             builder.HasKey(question => question.Id);
             builder.Property(question => question.Id).ValueGeneratedOnAdd();
             builder.Property(question => question.QuestionText).HasMaxLength(4000); // NVARCHAR Max Length
@@ -78,6 +79,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
         // Setup Answer Table
         modelBuilder.Entity<ResponseAnswer>(builder =>
         {
+            builder.ToTable("answer");
             builder.HasKey(answer => answer.Id);
             builder.Property(answer => answer.Id).ValueGeneratedOnAdd();
             builder.Property(answer => answer.AnswerText).HasMaxLength(4000); // NVARCHAR Max Length
