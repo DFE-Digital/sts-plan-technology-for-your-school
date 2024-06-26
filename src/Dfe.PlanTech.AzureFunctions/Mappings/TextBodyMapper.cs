@@ -11,7 +11,7 @@ public class TextBodyMapper(EntityRetriever retriever, EntityUpdater updater, Ri
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
-        if (values.TryGetValue("richText", out object richTextValue) && richTextValue is JsonNode richText)
+        if (values.TryGetValue("richText", out object? richTextValue) && richTextValue is JsonNode richText)
         {
             var deserialised = richText.Deserialize<RichTextContent>(JsonOptions) ?? throw new InvalidOperationException($"Could not map to {typeof(RichTextContent)}");
 

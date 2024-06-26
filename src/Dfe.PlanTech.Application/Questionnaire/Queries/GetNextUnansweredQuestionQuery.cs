@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Domain.Responses.Interfaces;
+using Dfe.PlanTech.Domain.Submissions.Interfaces;
 
 namespace Dfe.PlanTech.Application.Questionnaire.Queries;
 
@@ -33,7 +33,7 @@ public class GetNextUnansweredQuestionQuery : IGetNextUnansweredQuestionQuery
     /// <param name="answeredQuestions"></param>
     /// <returns></returns>
     /// <exception cref="DatabaseException"></exception>
-    private static Question? GetValidatedNextUnansweredQuestion(Section section, ResponsesForSubmissionDto answeredQuestions)
+    private static Question? GetValidatedNextUnansweredQuestion(Section section, SubmissionResponsesDto answeredQuestions)
     {
         var lastAttachedResponse = section.GetOrderedResponsesForJourney(answeredQuestions.Responses).LastOrDefault();
 

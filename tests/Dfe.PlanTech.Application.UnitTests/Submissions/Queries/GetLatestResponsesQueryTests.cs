@@ -3,13 +3,10 @@ using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Responses.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Domain.Responses.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using NSubstitute;
-using Answer = Dfe.PlanTech.Domain.Answers.Models.Answer;
-using Question = Dfe.PlanTech.Domain.Questions.Models.Question;
 
-namespace Dfe.PlanTech.Application.UnitTests.Responses.Queries;
+namespace Dfe.PlanTech.Application.UnitTests.Submissions.Queries;
 
 public class GetLatestResponsesQueryTests
 {
@@ -107,10 +104,10 @@ public class GetLatestResponsesQueryTests
                                         return Task.FromResult(queryable.FirstOrDefault());
                                     });
 
-        _planTechDbContextSubstitute.FirstOrDefaultAsync(Arg.Any<IQueryable<ResponsesForSubmissionDto>>(), Arg.Any<CancellationToken>())
+        _planTechDbContextSubstitute.FirstOrDefaultAsync(Arg.Any<IQueryable<SubmissionResponsesDto>>(), Arg.Any<CancellationToken>())
         .Returns((callInfo) =>
         {
-            var queryable = callInfo.ArgAt<IQueryable<ResponsesForSubmissionDto>>(0);
+            var queryable = callInfo.ArgAt<IQueryable<SubmissionResponsesDto>>(0);
 
             return Task.FromResult(queryable.FirstOrDefault());
         });
@@ -212,7 +209,7 @@ public class GetLatestResponsesQueryTests
                                                                             .Select(responses => responses.OrderByDescending(response => response.DateCreated).First())
                                                                             .ToArray();
 
-        var latestResponse = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(ESTABLISHMENT_ID, incompleteSubmission.SectionId);
+        var latestResponse = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(ESTABLISHMENT_ID, incompleteSubmission.SectionId, false);
 
         Assert.NotNull(latestResponse);
         Assert.NotNull(latestResponse.Responses);
@@ -233,7 +230,7 @@ public class GetLatestResponsesQueryTests
     {
         var completeSubmission = GetCompletedSubmissionForCompletedSection();
 
-        var latestResponse = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(ESTABLISHMENT_ID, completeSubmission.SectionId);
+        var latestResponse = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(ESTABLISHMENT_ID, completeSubmission.SectionId, false);
 
         Assert.Null(latestResponse);
     }
@@ -243,7 +240,7 @@ public class GetLatestResponsesQueryTests
     {
         var deletedSubmission = GetDeletedSubmissionForIncompleteSection();
 
-        var latestResponse = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(ESTABLISHMENT_ID, deletedSubmission.SectionId);
+        var latestResponse = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(ESTABLISHMENT_ID, deletedSubmission.SectionId, false);
         Assert.NotNull(latestResponse);
 
         var submission = _submissions.FirstOrDefault(submission => submission.Id == latestResponse.SubmissionId);
@@ -301,13 +298,13 @@ public class GetLatestResponsesQueryTests
             UserId = USER_ID,
             SubmissionId = submission.Id,
             Submission = submission,
-            Question = new Question()
+            Question = new ResponseQuestion()
             {
                 QuestionText = question.Text,
                 ContentfulRef = question.Sys.Id,
                 Id = questionId++,
             },
-            Answer = new Answer()
+            Answer = new ResponseAnswer()
             {
                 AnswerText = answer.Text,
                 ContentfulRef = answer.Sys.Id,

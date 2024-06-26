@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Submissions.Models;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 

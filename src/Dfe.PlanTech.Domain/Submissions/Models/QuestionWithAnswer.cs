@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Dfe.PlanTech.Domain.Questionnaire.Models;
+namespace Dfe.PlanTech.Domain.Submissions.Models;
 
 public record QuestionWithAnswer
 {

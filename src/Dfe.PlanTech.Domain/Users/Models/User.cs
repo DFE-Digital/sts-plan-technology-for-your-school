@@ -1,5 +1,5 @@
-﻿using Dfe.PlanTech.Domain.Responses.Models;
-using Dfe.PlanTech.Domain.SignIns.Models;
+﻿using Dfe.PlanTech.Domain.SignIns.Models;
+using Dfe.PlanTech.Domain.Submissions.Models;
 
 namespace Dfe.PlanTech.Domain.Users.Models;
 

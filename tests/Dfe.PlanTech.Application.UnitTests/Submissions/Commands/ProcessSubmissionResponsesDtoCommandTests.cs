@@ -1,12 +1,13 @@
 using Dfe.PlanTech.Application.Responses.Commands;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Domain.Responses.Interfaces;
+using Dfe.PlanTech.Domain.Submissions.Interfaces;
+using Dfe.PlanTech.Domain.Submissions.Models;
 using NSubstitute;
 
-namespace Dfe.PlanTech.Application.UnitTests.Responses.Commands;
+namespace Dfe.PlanTech.Application.UnitTests.Submissions.Commands;
 
-public class ProcessCheckAnswerDtoCommandTests
+public class ProcessSubmissionResponsesDtoCommandTests
 {
   [Fact]
   public async Task Should_Remove_Detached_Questions()
@@ -15,10 +16,10 @@ public class ProcessCheckAnswerDtoCommandTests
     var answerIds = new[] { "AnswerRef1", "AnswerRef2", "AnswerRef3" };
     var questionSlugs = new[] { "question-1", "question-2", "question-3" };
 
-    ResponsesForSubmissionDto response = new()
+    SubmissionResponsesDto response = new()
     {
       SubmissionId = 1,
-      Responses = new List<QuestionWithAnswer>(){
+      Responses = [
         new(){
           QuestionRef = questionIds[0],
           AnswerRef = answerIds[0],
@@ -40,7 +41,7 @@ public class ProcessCheckAnswerDtoCommandTests
           QuestionText = "Question 3 text",
           DateCreated = DateTime.Now
         },
-      }
+      ]
     };
 
     List<Question> questions = new() {new()
@@ -105,35 +106,34 @@ public class ProcessCheckAnswerDtoCommandTests
     };
 
     var getLatestResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
-    getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+    getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
                          .Returns((callinfo) => response);
 
-    var processCheckAnswerDtoCommand = new ProcessCheckAnswerDtoCommand(getLatestResponsesQuery);
+    var processSubmissionResponsesDtoCommand = new ProcessSubmissionResponsesDto(getLatestResponsesQuery);
 
+    var submissionResponsesDto = await processSubmissionResponsesDtoCommand.GetSubmissionResponsesDtoForSection(3, section);
 
-    var checkAnswerDto = await processCheckAnswerDtoCommand.GetCheckAnswerDtoForSection(3, section);
+    Assert.NotNull(submissionResponsesDto);
 
-    Assert.NotNull(checkAnswerDto);
-
-    Assert.Equal(checkAnswerDto.SubmissionId, response.SubmissionId);
-    Assert.Equal(2, checkAnswerDto.Responses.Count);
+    Assert.Equal(submissionResponsesDto.SubmissionId, response.SubmissionId);
+    Assert.Equal(2, submissionResponsesDto.Responses.Count);
   }
 
   [Fact]
   public async Task Should_Return_Null_When_No_Responses()
   {
-    ResponsesForSubmissionDto? response = null;
+    SubmissionResponsesDto? response = null;
 
     var getLatestResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
-    getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+    getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), false, Arg.Any<CancellationToken>())
                         .Returns(Task.FromResult(response));
 
-    var processCheckAnswerDtoCommand = new ProcessCheckAnswerDtoCommand(getLatestResponsesQuery);
+    var processSubmissionResponsesDtoCommand = new ProcessSubmissionResponsesDto(getLatestResponsesQuery);
 
     var section = new Section() { Sys = new SystemDetails() { Id = "ABCD" } };
 
-    var checkAnswerDto = await processCheckAnswerDtoCommand.GetCheckAnswerDtoForSection(3, section);
+    var submissionResponsesDto = await processSubmissionResponsesDtoCommand.GetSubmissionResponsesDtoForSection(3, section);
 
-    Assert.Null(checkAnswerDto);
+    Assert.Null(submissionResponsesDto);
   }
 }

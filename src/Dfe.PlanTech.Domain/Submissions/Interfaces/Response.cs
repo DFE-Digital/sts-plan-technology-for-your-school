@@ -1,9 +1,6 @@
-﻿using Dfe.PlanTech.Domain.Answers.Models;
-using Dfe.PlanTech.Domain.Questions.Models;
-using Dfe.PlanTech.Domain.Submissions.Models;
-using Dfe.PlanTech.Domain.Users.Models;
+﻿using Dfe.PlanTech.Domain.Users.Models;
 
-namespace Dfe.PlanTech.Domain.Responses.Models;
+namespace Dfe.PlanTech.Domain.Submissions.Models;
 
 public class Response
 {
@@ -19,11 +16,11 @@ public class Response
 
     public int QuestionId { get; set; }
 
-    public Question Question { get; set; } = null!;
+    public ResponseQuestion Question { get; set; } = null!;
 
     public int AnswerId { get; set; }
 
-    public Answer Answer { get; set; } = null!;
+    public ResponseAnswer Answer { get; set; } = null!;
 
     public string Maturity { get; set; } = null!;
 
