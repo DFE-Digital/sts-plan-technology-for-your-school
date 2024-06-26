@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Domain.Caching.Models;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
@@ -7,10 +8,40 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
-namespace Dfe.PlanTech.AzureFunctions;
+namespace Dfe.PlanTech.AzureFunctions.UnitTests.Mappers;
 
 public abstract class BaseMapperTests
 {
+    /// <summary>
+    /// Validates that all reference IDs exist in the references, and validates order matches if required.
+    /// </summary>
+    /// <typeparam name="TReferencedContentComponent"></typeparam>
+    /// <param name="referenceIds"></param>
+    /// <param name="references"></param>
+    /// <param name="validateOrder"></param>
+    /// <param name="expectedOrder">
+    /// By default, the order of the referenced content is expected to match the order of the reference IDs.
+    /// If this field is not null order will be validated against this instead
+    /// </param>
+    protected static void ValidateReferencedContent<TReferencedContentComponent>(string[] referenceIds, List<TReferencedContentComponent>? references, bool validateOrder, int? expectedOrder = null)
+    where TReferencedContentComponent : ContentComponentDbEntity
+    {
+        Assert.NotNull(references);
+        Assert.Equal(referenceIds.Length, references.Count);
+
+        for (int x = 0; x < referenceIds.Length; x++)
+        {
+            var referenceId = referenceIds[x];
+            var matching = references.FirstOrDefault(answer => answer.Id == referenceId);
+            Assert.NotNull(matching);
+
+            if (validateOrder)
+            {
+                Assert.Equal(expectedOrder ?? x, matching.Order);
+            }
+        }
+    }
+
     protected readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
