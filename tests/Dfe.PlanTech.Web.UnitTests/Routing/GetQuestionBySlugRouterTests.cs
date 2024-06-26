@@ -29,7 +29,7 @@ public class GetQuestionBySlugRouterTests
 
     private readonly Section _section;
 
-    private readonly CheckAnswerDto _responses;
+    private readonly ResponsesForSubmissionDto _responses;
 
     public GetQuestionBySlugRouterTests()
     {

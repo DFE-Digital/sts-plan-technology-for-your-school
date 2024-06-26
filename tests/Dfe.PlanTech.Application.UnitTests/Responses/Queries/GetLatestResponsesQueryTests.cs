@@ -107,10 +107,10 @@ public class GetLatestResponsesQueryTests
                                         return Task.FromResult(queryable.FirstOrDefault());
                                     });
 
-        _planTechDbContextSubstitute.FirstOrDefaultAsync(Arg.Any<IQueryable<CheckAnswerDto>>(), Arg.Any<CancellationToken>())
+        _planTechDbContextSubstitute.FirstOrDefaultAsync(Arg.Any<IQueryable<ResponsesForSubmissionDto>>(), Arg.Any<CancellationToken>())
         .Returns((callInfo) =>
         {
-            var queryable = callInfo.ArgAt<IQueryable<CheckAnswerDto>>(0);
+            var queryable = callInfo.ArgAt<IQueryable<ResponsesForSubmissionDto>>(0);
 
             return Task.FromResult(queryable.FirstOrDefault());
         });

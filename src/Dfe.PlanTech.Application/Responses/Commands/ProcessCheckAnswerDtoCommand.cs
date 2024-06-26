@@ -13,9 +13,9 @@ public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand
         _getLatestResponseListForSubmissionQuery = getLatestResponseListForSubmissionQuery;
     }
 
-    public async Task<CheckAnswerDto?> GetCheckAnswerDtoForSection(int establishmentId, ISectionComponent section, CancellationToken cancellationToken = default)
+    public async Task<ResponsesForSubmissionDto?> GetCheckAnswerDtoForSection(int establishmentId, ISectionComponent section, CancellationToken cancellationToken = default)
     {
-        var checkAnswerDto = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(establishmentId, section.Sys.Id, cancellationToken);
+        var checkAnswerDto = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(establishmentId, section.Sys.Id, false, cancellationToken);
         if (checkAnswerDto?.Responses == null || checkAnswerDto.Responses.Count == 0)
         {
             return null;
@@ -24,14 +24,14 @@ public class ProcessCheckAnswerDtoCommand : IProcessCheckAnswerDtoCommand
         return RemoveDetachedQuestions(checkAnswerDto, section);
     }
 
-    private static CheckAnswerDto RemoveDetachedQuestions(CheckAnswerDto checkAnswerDto, ISectionComponent section)
+    private static ResponsesForSubmissionDto RemoveDetachedQuestions(ResponsesForSubmissionDto checkAnswerDto, ISectionComponent section)
     {
         ArgumentNullException.ThrowIfNull(checkAnswerDto);
         ArgumentNullException.ThrowIfNull(section);
 
         var attachedQuestions = section.GetOrderedResponsesForJourney(checkAnswerDto.Responses).ToList();
 
-        return new CheckAnswerDto()
+        return new ResponsesForSubmissionDto()
         {
             SubmissionId = checkAnswerDto.SubmissionId,
             Responses = attachedQuestions

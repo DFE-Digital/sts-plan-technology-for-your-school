@@ -114,7 +114,7 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     {
         var establishmentId = await _user.GetEstablishmentId();
 
-        var latestResponses = await _getResponseQuery.GetLatestResponses(establishmentId, _router.Section.Sys.Id, cancellationToken);
+        var latestResponses = await _getResponseQuery.GetLatestResponses(establishmentId, _router.Section.Sys.Id, false, cancellationToken);
 
         if (latestResponses == null || latestResponses.Responses.Count == 0) throw new DatabaseException($"Could not find latest responses for '{_router.Section.Sys.Id}'");
 

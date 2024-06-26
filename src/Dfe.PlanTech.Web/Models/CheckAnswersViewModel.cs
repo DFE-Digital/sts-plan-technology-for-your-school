@@ -13,7 +13,7 @@ public class CheckAnswersViewModel
     public string SectionName { get; init; } = null!;
 
     [Required]
-    public CheckAnswerDto CheckAnswerDto { get; init; } = null!;
+    public ResponsesForSubmissionDto CheckAnswerDto { get; init; } = null!;
 
     [Required]
     public List<ContentComponent> Content { get; init; } = null!;
