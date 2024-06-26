@@ -58,7 +58,7 @@ async function deleteContentFromContentful({ client, envOptions, query }) {
   }
 }
 
-async function unpublishAndDeleteEntry({ entry, client }) {
+async function unpublishAndDeleteEntry({ entry, client, envOptions }) {
   if (entry.sys.publishedVersion) {
     await client.entry.unpublish({
       ...envOptions,
