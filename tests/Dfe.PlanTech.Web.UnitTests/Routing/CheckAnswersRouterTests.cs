@@ -46,11 +46,13 @@ public class CheckAnswersRouterTests
     private readonly SubmissionResponsesDto _checkAnswersDto = new()
     {
         Responses = [
-            new (){
+            new()
+            {
                 QuestionRef = "q1",
                 AnswerRef = "a1"
             },
-            new (){
+            new()
+            {
                 QuestionRef = "q2",
                 AnswerRef = "q2-a1"
             }
