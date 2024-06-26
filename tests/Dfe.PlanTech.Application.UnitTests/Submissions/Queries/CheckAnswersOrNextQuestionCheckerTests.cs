@@ -13,9 +13,9 @@ namespace Dfe.PlanTech.Application.UnitTests.Submissions.Queries;
 
 public class CheckAnswersOrNextQuestionCheckerTests
 {
-    public readonly ISubmissionStatusChecker StatusChecker = CheckAnswersOrNextQuestionChecker.CheckAnswersOrNextQuestion;
+  public readonly ISubmissionStatusChecker StatusChecker = CheckAnswersOrNextQuestionChecker.CheckAnswersOrNextQuestion;
 
-    public static readonly List<Question> Questions = new() {
+  public static readonly List<Question> Questions = new() {
   new(){
     Sys = new SystemDetails(){ Id = "Question-One" },
     Answers = new()
@@ -38,7 +38,7 @@ public class CheckAnswersOrNextQuestionCheckerTests
   },
   };
 
-    public readonly List<Answer> Answers = new(){
+  public readonly List<Answer> Answers = new(){
           new(){
             Sys = new SystemDetails(){
               Id = "Answer-One"
@@ -63,9 +63,9 @@ public class CheckAnswersOrNextQuestionCheckerTests
         };
 
 
-    public CheckAnswerDto CheckAnswersDto = new()
-    {
-        Responses = new List<QuestionWithAnswer>(){
+  public ResponsesForSubmissionDto CheckAnswersDto = new()
+  {
+    Responses = new List<QuestionWithAnswer>(){
         new QuestionWithAnswer(){
           QuestionRef = "Question-One",
           AnswerRef = "Answer-One"
@@ -88,123 +88,123 @@ public class CheckAnswersOrNextQuestionCheckerTests
         },
 
       }
-    };
+  };
 
-    public CheckAnswersOrNextQuestionCheckerTests()
+  public CheckAnswersOrNextQuestionCheckerTests()
+  {
+    foreach (var question in Questions)
     {
-        foreach (var question in Questions)
-        {
-            question.Answers.AddRange(Answers);
-        }
+      question.Answers.AddRange(Answers);
     }
+  }
 
-    [Fact]
-    public void Should_Match_InProgress_Status()
-    {
-        var processor = Substitute.For<ISubmissionStatusProcessor>();
-        processor.Section.Returns(new Section() { });
-        processor.SectionStatus.Returns(new SectionStatusNew() { Status = Status.InProgress });
+  [Fact]
+  public void Should_Match_InProgress_Status()
+  {
+    var processor = Substitute.For<ISubmissionStatusProcessor>();
+    processor.Section.Returns(new Section() { });
+    processor.SectionStatus.Returns(new SectionStatusNew() { Status = Status.InProgress });
 
-        var matches = StatusChecker.IsMatchingSubmissionStatus(processor);
+    var matches = StatusChecker.IsMatchingSubmissionStatus(processor);
 
-        Assert.True(matches);
-    }
+    Assert.True(matches);
+  }
 
-    [Fact]
-    public void Should_Not_Match_NotStarted_Status()
-    {
-        var processor = Substitute.For<ISubmissionStatusProcessor>();
-        processor.Section.Returns(new Section() { });
-        processor.SectionStatus.Returns(new SectionStatusNew() { Status = Status.NotStarted });
+  [Fact]
+  public void Should_Not_Match_NotStarted_Status()
+  {
+    var processor = Substitute.For<ISubmissionStatusProcessor>();
+    processor.Section.Returns(new Section() { });
+    processor.SectionStatus.Returns(new SectionStatusNew() { Status = Status.NotStarted });
 
-        var matches = StatusChecker.IsMatchingSubmissionStatus(processor);
+    var matches = StatusChecker.IsMatchingSubmissionStatus(processor);
 
-        Assert.False(matches);
-    }
+    Assert.False(matches);
+  }
 
-    [Fact]
-    public void Should_Not_Match_Completed_Status()
-    {
-        var processor = Substitute.For<ISubmissionStatusProcessor>();
-        processor.Section.Returns(new Section() { });
-        processor.SectionStatus.Returns(new SectionStatusNew() { Status = Status.Completed });
+  [Fact]
+  public void Should_Not_Match_Completed_Status()
+  {
+    var processor = Substitute.For<ISubmissionStatusProcessor>();
+    processor.Section.Returns(new Section() { });
+    processor.SectionStatus.Returns(new SectionStatusNew() { Status = Status.Completed });
 
-        var matches = StatusChecker.IsMatchingSubmissionStatus(processor);
+    var matches = StatusChecker.IsMatchingSubmissionStatus(processor);
 
-        Assert.False(matches);
-    }
+    Assert.False(matches);
+  }
 
-    [Fact]
-    public async Task Should_SetStatus_To_CheckAnswers_When_No_NextQuestion()
-    {
-        var processor = Substitute.For<ISubmissionStatusProcessor>();
+  [Fact]
+  public async Task Should_SetStatus_To_CheckAnswers_When_No_NextQuestion()
+  {
+    var processor = Substitute.For<ISubmissionStatusProcessor>();
 
-        var user = Substitute.For<IUser>();
-        user.GetEstablishmentId().Returns(1);
-        processor.User.Returns(user);
+    var user = Substitute.For<IUser>();
+    user.GetEstablishmentId().Returns(1);
+    processor.User.Returns(user);
 
-        var getResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
-        getResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-                    .Returns(CheckAnswersDto);
+    var getResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
+    getResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(CheckAnswersDto);
 
-        processor.GetResponsesQuery.Returns(getResponsesQuery);
+    processor.GetResponsesQuery.Returns(getResponsesQuery);
 
-        var section = Substitute.For<ISectionComponent>();
-        section.GetOrderedResponsesForJourney(Arg.Any<IEnumerable<QuestionWithAnswer>>())
-                .Returns(new[] {
+    var section = Substitute.For<ISectionComponent>();
+    section.GetOrderedResponsesForJourney(Arg.Any<IEnumerable<QuestionWithAnswer>>())
+            .Returns(new[] {
               CheckAnswersDto.Responses[0],CheckAnswersDto.Responses[1],CheckAnswersDto.Responses[4]
-                });
+            });
 
-        section.Sys.Returns(new SystemDetails()
-        {
-            Id = "section-id"
-        });
-
-        section.Questions.Returns(Questions);
-
-        processor.Section.Returns(section);
-        processor.SectionStatus.Returns(new SectionStatusNew() { Status = Status.InProgress });
-
-        await StatusChecker.ProcessSubmission(processor, default);
-
-        Assert.Equal(SubmissionStatus.CheckAnswers, processor.Status);
-    }
-
-    [Fact]
-    public async Task Should_SetStatus_To_CheckAnswers_When_NextQuestion()
+    section.Sys.Returns(new SystemDetails()
     {
-        var processor = Substitute.For<ISubmissionStatusProcessor>();
+      Id = "section-id"
+    });
 
-        var user = Substitute.For<IUser>();
-        user.GetEstablishmentId().Returns(1);
-        processor.User.Returns(user);
+    section.Questions.Returns(Questions);
 
-        var getResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
-        getResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-                         .Returns(CheckAnswersDto);
+    processor.Section.Returns(section);
+    processor.SectionStatus.Returns(new SectionStatusNew() { Status = Status.InProgress });
 
-        processor.GetResponsesQuery.Returns(getResponsesQuery);
+    await StatusChecker.ProcessSubmission(processor, default);
 
-        var section = Substitute.For<ISectionComponent>();
-        section.GetOrderedResponsesForJourney(Arg.Any<IEnumerable<QuestionWithAnswer>>())
-                .Returns(new[] {
+    Assert.Equal(SubmissionStatus.CheckAnswers, processor.Status);
+  }
+
+  [Fact]
+  public async Task Should_SetStatus_To_CheckAnswers_When_NextQuestion()
+  {
+    var processor = Substitute.For<ISubmissionStatusProcessor>();
+
+    var user = Substitute.For<IUser>();
+    user.GetEstablishmentId().Returns(1);
+    processor.User.Returns(user);
+
+    var getResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
+    getResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+                     .Returns(CheckAnswersDto);
+
+    processor.GetResponsesQuery.Returns(getResponsesQuery);
+
+    var section = Substitute.For<ISectionComponent>();
+    section.GetOrderedResponsesForJourney(Arg.Any<IEnumerable<QuestionWithAnswer>>())
+            .Returns(new[] {
               CheckAnswersDto.Responses[0],CheckAnswersDto.Responses[1]
-                });
+            });
 
-        section.Sys.Returns(new SystemDetails()
-        {
-            Id = "section-id"
-        });
+    section.Sys.Returns(new SystemDetails()
+    {
+      Id = "section-id"
+    });
 
-        section.Questions.Returns(Questions);
+    section.Questions.Returns(Questions);
 
-        processor.Section.Returns(section);
-        processor.SectionStatus.Returns(new SectionStatusNew() { Status = Status.InProgress });
+    processor.Section.Returns(section);
+    processor.SectionStatus.Returns(new SectionStatusNew() { Status = Status.InProgress });
 
-        await StatusChecker.ProcessSubmission(processor, default);
+    await StatusChecker.ProcessSubmission(processor, default);
 
-        Assert.Equal(SubmissionStatus.NextQuestion, processor.Status);
-        Assert.Equal(Questions[3], processor.NextQuestion);
-    }
+    Assert.Equal(SubmissionStatus.NextQuestion, processor.Status);
+    Assert.Equal(Questions[3], processor.NextQuestion);
+  }
 
 }

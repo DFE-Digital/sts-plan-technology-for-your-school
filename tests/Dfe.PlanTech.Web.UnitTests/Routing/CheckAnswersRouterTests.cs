@@ -43,7 +43,7 @@ public class CheckAnswersRouterTests
         Name = "Section name"
     };
 
-    private readonly CheckAnswerDto _checkAnswersDto = new()
+    private readonly ResponsesForSubmissionDto _checkAnswersDto = new()
     {
         Responses = new List<QuestionWithAnswer>()
                           {

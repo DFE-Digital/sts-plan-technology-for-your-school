@@ -16,7 +16,7 @@ public class GetNextUnansweredQuestionQuery : IGetNextUnansweredQuestionQuery
 
     public async Task<Question?> GetNextUnansweredQuestion(int establishmentId, Section section, CancellationToken cancellationToken = default)
     {
-        var answeredQuestions = await _getResponseQuery.GetLatestResponses(establishmentId, section.Sys.Id, cancellationToken);
+        var answeredQuestions = await _getResponseQuery.GetLatestResponses(establishmentId, section.Sys.Id, false, cancellationToken);
 
         if (answeredQuestions == null) return section.Questions.FirstOrDefault();
 
@@ -33,7 +33,7 @@ public class GetNextUnansweredQuestionQuery : IGetNextUnansweredQuestionQuery
     /// <param name="answeredQuestions"></param>
     /// <returns></returns>
     /// <exception cref="DatabaseException"></exception>
-    private static Question? GetValidatedNextUnansweredQuestion(Section section, CheckAnswerDto answeredQuestions)
+    private static Question? GetValidatedNextUnansweredQuestion(Section section, ResponsesForSubmissionDto answeredQuestions)
     {
         var lastAttachedResponse = section.GetOrderedResponsesForJourney(answeredQuestions.Responses).LastOrDefault();
 

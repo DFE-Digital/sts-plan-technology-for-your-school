@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Responses.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
@@ -11,11 +12,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace Dfe.PlanTech.Web.Routing;
 
 public class GetRecommendationRouter(ISubmissionStatusProcessor router,
-                                    IGetAllAnswersForLatestSubmissionQuery getAllAnswersForLatestSubmissionQuery,
+                                    IGetLatestResponsesQuery getLatestResponsesQuery,
                                     IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery) : IGetRecommendationRouter
 {
     private readonly ISubmissionStatusProcessor _router = router;
-    private readonly IGetAllAnswersForLatestSubmissionQuery _getAllAnswersForLatestSubmissionQuery = getAllAnswersForLatestSubmissionQuery;
+    private readonly IGetLatestResponsesQuery _getLatestResponsesQuery = getLatestResponsesQuery;
     private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery = getSubTopicRecommendationQuery;
 
     public async Task<IActionResult> ValidateRoute(
@@ -47,15 +48,14 @@ public class GetRecommendationRouter(ISubmissionStatusProcessor router,
 
         if (_router.Section == null) throw new DatabaseException("Section is null, but shouldn't be.");
 
-        var usersAnswers =
-            await _getAllAnswersForLatestSubmissionQuery.GetAllAnswersForLatestSubmission(_router.Section.Sys.Id,
-                await _router.User.GetEstablishmentId()) ?? throw new DatabaseException($"Could not find users answers for:  {_router.Section.Name}");
+        var submissionResponses = await _getLatestResponsesQuery.GetLatestResponses(await _router.User.GetEstablishmentId(), _router.Section.Sys.Id, true, cancellationToken) ?? throw new DatabaseException($"Could not find users answers for:  {_router.Section.Name}");
+        var onlyLatestResponses = _router.Section.GetOrderedResponsesForJourney(submissionResponses.Responses);
 
         var subTopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(_router.Section.Sys.Id, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {_router.Section.Name}");
 
         var subTopicIntro = subTopicRecommendation.GetRecommendationByMaturity(_router.SectionStatus.Maturity) ?? throw new ContentfulDataUnavailableException($"Could not find recommendation intro for maturity:  {_router.SectionStatus?.Maturity}");
 
-        var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(usersAnswers.Select(answer => answer.ContentfulRef));
+        var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(onlyLatestResponses.Select(answer => answer.AnswerRef));
 
         return (subTopicRecommendation, subTopicIntro, subTopicChunks);
     }

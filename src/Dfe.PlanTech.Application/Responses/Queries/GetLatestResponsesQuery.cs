@@ -6,18 +6,13 @@ using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Application.Responses.Queries;
 
-public class GetLatestResponsesQuery : IGetLatestResponsesQuery
+public class GetLatestResponsesQuery(IPlanTechDbContext db) : IGetLatestResponsesQuery
 {
-    private readonly IPlanTechDbContext _db;
-
-    public GetLatestResponsesQuery(IPlanTechDbContext db)
-    {
-        _db = db;
-    }
+    private readonly IPlanTechDbContext _db = db;
 
     public async Task<QuestionWithAnswer?> GetLatestResponseForQuestion(int establishmentId, string sectionId, string questionId, CancellationToken cancellationToken = default)
     {
-        var responseListByDate = GetCurrentSubmission(establishmentId, sectionId)
+        var responseListByDate = GetCurrentSubmission(establishmentId, sectionId, false)
                                         .SelectMany(submission => submission.Responses)
                                         .Where(response => response.Question.ContentfulRef == questionId)
                                         .OrderByDescending(response => response.DateCreated)
@@ -26,9 +21,9 @@ public class GetLatestResponsesQuery : IGetLatestResponsesQuery
         return await _db.FirstOrDefaultAsync(responseListByDate, cancellationToken);
     }
 
-    public async Task<CheckAnswerDto?> GetLatestResponses(int establishmentId, string sectionId, CancellationToken cancellationToken = default)
+    public async Task<ResponsesForSubmissionDto?> GetLatestResponses(int establishmentId, string sectionId, bool completedSubmission = false, CancellationToken cancellationToken = default)
     {
-        var latestCheckAnswerDto = await _db.FirstOrDefaultAsync(GetLatestResponsesBySectionIdQueryable(establishmentId, sectionId), cancellationToken);
+        var latestCheckAnswerDto = await _db.FirstOrDefaultAsync(GetLatestResponsesBySectionIdQueryable(establishmentId, sectionId, completedSubmission), cancellationToken);
 
         bool haveSubmission = latestCheckAnswerDto != null &&
                                     latestCheckAnswerDto.SubmissionId > 0 &&
@@ -36,9 +31,9 @@ public class GetLatestResponsesQuery : IGetLatestResponsesQuery
         return haveSubmission ? latestCheckAnswerDto : null;
     }
 
-    private IQueryable<CheckAnswerDto> GetLatestResponsesBySectionIdQueryable(int establishmentId, string sectionId)
-    => GetCurrentSubmission(establishmentId, sectionId)
-            .Select(submission => new CheckAnswerDto()
+    private IQueryable<ResponsesForSubmissionDto> GetLatestResponsesBySectionIdQueryable(int establishmentId, string sectionId, bool completedSubmission)
+    => GetCurrentSubmission(establishmentId, sectionId, completedSubmission)
+            .Select(submission => new ResponsesForSubmissionDto()
             {
                 SubmissionId = submission.Id,
                 Responses = submission.Responses.Select(response => new QuestionWithAnswer
@@ -54,13 +49,13 @@ public class GetLatestResponsesQuery : IGetLatestResponsesQuery
                 .ToList()
             });
 
-    private IQueryable<Submission> GetCurrentSubmission(int establishmentId, string sectionId)
+    private IQueryable<Submission> GetCurrentSubmission(int establishmentId, string sectionId, bool completedSubmission)
     => _db.GetSubmissions
-            .Where(IsMatchingIncompleteSubmission(establishmentId, sectionId))
+            .Where(IsMatchingIncompleteSubmission(establishmentId, sectionId, completedSubmission))
             .OrderByDescending(submission => submission.DateCreated);
 
-    private static Expression<Func<Submission, bool>> IsMatchingIncompleteSubmission(int establishmentId, string sectionId)
-    => submission => !submission.Completed &&
+    private static Expression<Func<Submission, bool>> IsMatchingIncompleteSubmission(int establishmentId, string sectionId, bool completedSubmission)
+    => submission => (submission.Completed == completedSubmission) &&
                      !submission.Deleted &&
                      submission.EstablishmentId == establishmentId &&
                      submission.SectionId == sectionId;
