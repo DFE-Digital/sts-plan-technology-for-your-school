@@ -26,25 +26,55 @@ public class GetRecommendationRouterTests
     private readonly IGetLatestResponsesQuery _getLatestResponsesQuery;
     private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
 
-    private static readonly Answer AnswerOne = new()
+    private static Answer AnswerOne = new()
     {
         Sys = new()
         {
             Id = "Answer-1"
         },
-        Text = "Answer-1-Text"
+        Text = "Answer-1-Text",
+        NextQuestion = QuestionTwo,
     };
 
-    private static readonly Answer AnswerTwo = new()
+    private static Answer AnswerTwo = new()
     {
         Sys = new()
         {
             Id = "Answer-2"
         },
-        Text = "Answer-2-Text"
+        Text = "Answer-2-Text",
+        NextQuestion = QuestionTwo,
     };
 
-    private static readonly Question Question = new()
+    private static Answer AnswerThree = new()
+    {
+        Sys = new()
+        {
+            Id = "Answer-3"
+        },
+        Text = "Answer-3-Text",
+        NextQuestion = QuestionFour,
+    };
+
+    private static Answer AnswerFour = new()
+    {
+        Sys = new()
+        {
+            Id = "Answer-4"
+        },
+        Text = "Answer-4-Text",
+    };
+
+    private static Answer AnswerFive = new()
+    {
+        Sys = new()
+        {
+            Id = "Answer-5"
+        },
+        Text = "Answer-5-Text",
+    };
+
+    private static readonly Question QuestionOne = new()
     {
         Sys = new()
         {
@@ -52,10 +82,43 @@ public class GetRecommendationRouterTests
         },
         Text = "Question-Text",
         Slug = "Question-1-Slug",
-        Answers = [AnswerOne, AnswerTwo]
+        Answers = []
     };
 
-    private readonly Section _section = new()
+    private static readonly Question QuestionTwo = new()
+    {
+        Sys = new()
+        {
+            Id = "Question-2"
+        },
+        Text = "Question-2-Text",
+        Slug = "Question-2-Slug",
+        Answers = []
+    };
+
+    private static readonly Question QuestionThree = new()
+    {
+        Sys = new()
+        {
+            Id = "Question-3"
+        },
+        Text = "Question-3-Text",
+        Slug = "Question-3-Slug",
+        Answers = []
+    };
+
+    private static readonly Question QuestionFour = new()
+    {
+        Sys = new()
+        {
+            Id = "Question-4"
+        },
+        Text = "Question-4-Text",
+        Slug = "Question-4-Slug",
+        Answers = []
+    };
+
+    private static readonly Section _section = new()
     {
         InterstitialPage = new Page()
         {
@@ -65,10 +128,10 @@ public class GetRecommendationRouterTests
         {
             Id = "section-id"
         },
-        Questions = [Question]
+        Questions = [QuestionOne, QuestionTwo, QuestionThree, QuestionFour]
     };
 
-    private readonly SubtopicRecommendation? _subtopic = new()
+    private readonly SubtopicRecommendation? _subtopicRecommendation = new()
     {
         Intros =
         [
@@ -86,33 +149,101 @@ public class GetRecommendationRouterTests
                 {
                     Header = new()
                     {
-                        Text = "test-header"
+                        Text = "test-header-1"
                     },
                     Answers = [AnswerOne]
+                },
+                new()
+                {
+                    Header = new()
+                    {
+                        Text = "test-header-2"
+                    },
+                    Answers = [AnswerTwo]
+                },
+                new()
+                {
+                    Header = new()
+                    {
+                        Text = "test-header-3"
+                    },
+                    Answers = [AnswerThree]
+                },
+                new()
+                {
+                    Header = new()
+                    {
+                        Text = "test-header-4"
+                    },
+                    Answers = [AnswerFour]
+                },
+                new()
+                {
+                    Header = new()
+                    {
+                        Text = "test-header-5"
+                    },
+                    Answers = [AnswerFive]
                 }
             ]
         },
-        Subtopic = new Section()
-        {
-            InterstitialPage = new Page()
-            {
-                Slug = "subtopic-slug"
-            },
-            Sys = new SystemDetails()
-            {
-                Id = "subtopic-id"
-            },
-        }
+        Subtopic = _section
     };
 
     public GetRecommendationRouterTests()
     {
+        //The NextQuestions were AWOL on answers so... recreating
+        AnswerOne = new Answer()
+        {
+            Sys = AnswerOne.Sys,
+            Text = AnswerOne.Text,
+            NextQuestion = QuestionTwo
+        };
+
+        AnswerTwo = new Answer()
+        {
+            Sys = AnswerTwo.Sys,
+            Text = AnswerTwo.Text,
+            NextQuestion = QuestionTwo
+        };
+
+        AnswerThree = new Answer()
+        {
+            Sys = AnswerThree.Sys,
+            Text = AnswerThree.Text,
+            NextQuestion = QuestionFour
+        };
+
+        AnswerFour = new Answer()
+        {
+            Sys = AnswerFour.Sys,
+            Text = AnswerFour.Text,
+        };
+
+        AnswerFive = new Answer()
+        {
+            Sys = AnswerThree.Sys,
+            Text = AnswerThree.Text,
+        };
+
+
+        QuestionOne.Answers.Add(AnswerOne);
+        QuestionOne.Answers.Add(AnswerTwo);
+        QuestionTwo.Answers.Add(AnswerThree);
+        QuestionThree.Answers.Add(AnswerFour);
+        QuestionFour.Answers.Add(AnswerFive);
+
+        _subtopicRecommendation.Section.Chunks[0].Answers.Add(AnswerOne);
+        _subtopicRecommendation.Section.Chunks[1].Answers.Add(AnswerTwo);
+        _subtopicRecommendation.Section.Chunks[2].Answers.Add(AnswerThree);
+        _subtopicRecommendation.Section.Chunks[3].Answers.Add(AnswerFour);
+        _subtopicRecommendation.Section.Chunks[4].Answers.Add(AnswerFive);
+
         _submissionStatusProcessor = Substitute.For<ISubmissionStatusProcessor>();
         _getLatestResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
         _getSubTopicRecommendationQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
 
         _controller = new RecommendationsController(new NullLogger<RecommendationsController>());
-
         _router = new GetRecommendationRouter(_submissionStatusProcessor, _getLatestResponsesQuery, _getSubTopicRecommendationQuery);
     }
 
@@ -272,7 +403,7 @@ public class GetRecommendationRouterTests
             });
 
         _getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
-                                .Returns(MockValidLatestResponse);
+                                .Returns((callinfo) => MockValidLatestResponse(callinfo));
 
         await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() =>
             _router.ValidateRoute(_section.InterstitialPage.Slug, "other-recommendation-slug", checklist, _controller, default));
@@ -296,9 +427,9 @@ public class GetRecommendationRouterTests
             });
 
         _getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
-                                .Returns(MockValidLatestResponse);
+                                .Returns((callinfo) => MockValidLatestResponse(callinfo));
 
-        _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
+        _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopicRecommendation);
 
         await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() =>
             _router.ValidateRoute(_section.InterstitialPage.Slug, "any-recommendation-slug", checklist, _controller,
@@ -318,13 +449,51 @@ public class GetRecommendationRouterTests
         var model = viewResult.Model as RecommendationsViewModel;
 
         Assert.NotNull(model);
-        Assert.Equal(_subtopic!.Intros[0], model.Intro);
+        Assert.Equal(_subtopicRecommendation!.Intros[0], model.Intro);
     }
 
     [Fact]
-    public async Task Should_Show_RecommendationChecklistPage_When_Status_Is_Recommendation_And_All_Valid()
+    public async Task Should_Return_Only_Last_Recommendation_Journey()
     {
-        Setup_Valid_Recommendation();
+        List<QuestionWithAnswer> responses = [
+            new QuestionWithAnswer()
+            {
+                AnswerText = AnswerOne.Text,
+                AnswerRef = AnswerOne.Sys.Id,
+                QuestionRef = QuestionOne.Sys.Id,
+                QuestionSlug = QuestionOne.Slug,
+                QuestionText = QuestionOne.Text
+            },
+            new QuestionWithAnswer()
+            {
+                AnswerText = AnswerThree.Text,
+                AnswerRef = AnswerThree.Sys.Id,
+                QuestionRef = QuestionTwo.Sys.Id,
+                QuestionSlug = QuestionTwo.Slug,
+                QuestionText = QuestionTwo.Text
+            },
+            new QuestionWithAnswer()
+            {
+                AnswerText = AnswerFour.Text,
+                AnswerRef = AnswerFour.Sys.Id,
+                QuestionRef = QuestionThree.Sys.Id,
+                QuestionSlug = QuestionThree.Slug,
+                QuestionText = QuestionThree.Text
+            },
+            new QuestionWithAnswer()
+            {
+                AnswerText = AnswerFive.Text,
+                AnswerRef = AnswerFive.Sys.Id,
+                QuestionRef = QuestionFour.Sys.Id,
+                QuestionSlug = QuestionFour.Slug,
+                QuestionText = QuestionFour.Text
+            },
+        ];
+
+        //Expected route = Q1 - A1 -> Q2 + A3 -> Q4 + A5
+
+        Setup_Valid_Recommendation(responses);
+
         var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, "any-recommendation-slug", true, _controller, default);
 
         var viewResult = result as ViewResult;
@@ -334,19 +503,16 @@ public class GetRecommendationRouterTests
         var model = viewResult.Model as RecommendationsChecklistViewModel;
 
         Assert.NotNull(model);
-        Assert.Equal(_subtopic!.Intros[0], model.Intro);
+        Assert.Equal(_subtopicRecommendation!.Intros[0], model.Intro);
+
         Assert.Contains(AnswerOne, model.Chunks.SelectMany(chunk => chunk.Answers));
+        Assert.Contains(AnswerThree, model.Chunks.SelectMany(chunk => chunk.Answers));
+        Assert.Contains(AnswerFive, model.Chunks.SelectMany(chunk => chunk.Answers));
 
-        var content = model.AllContent.ToList();
-        var intro = content[0];
-        var firstChunk = content[1];
-
-        Assert.Equal(_subtopic.Intros[0], intro);
-        Assert.Equal("1. test-header", firstChunk.Header.Text);
+        Assert.Equal(3, model.Chunks.Count);
     }
 
-
-    private void Setup_Valid_Recommendation()
+    private void Setup_Valid_Recommendation(List<QuestionWithAnswer>? responses = null)
     {
         _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
             .Do(_ =>
@@ -360,12 +526,12 @@ public class GetRecommendationRouterTests
             });
 
         _getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
-                                .Returns(MockValidLatestResponse);
+                                .Returns((callinfo) => MockValidLatestResponse(callinfo, responses));
 
-        _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
+        _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopicRecommendation);
     }
 
-    private static SubmissionResponsesDto MockValidLatestResponse(CallInfo callinfo)
+    private static SubmissionResponsesDto MockValidLatestResponse(CallInfo callinfo, List<QuestionWithAnswer>? responses = null)
     {
         var establishmentId = callinfo.ArgAt<int>(0);
         var subtopicId = callinfo.ArgAt<string>(1);
@@ -373,14 +539,14 @@ public class GetRecommendationRouterTests
         return new SubmissionResponsesDto()
         {
             SubmissionId = 1234,
-            Responses = [
+            Responses = responses ?? [
                 new QuestionWithAnswer()
                 {
                     AnswerText = AnswerOne.Text,
                     AnswerRef = AnswerOne.Sys.Id,
-                    QuestionRef = Question.Sys.Id,
-                    QuestionSlug = Question.Slug,
-                    QuestionText = Question.Text
+                    QuestionRef = QuestionOne.Sys.Id,
+                    QuestionSlug = QuestionOne.Slug,
+                    QuestionText = QuestionOne.Text
                 },
             ]
         };
