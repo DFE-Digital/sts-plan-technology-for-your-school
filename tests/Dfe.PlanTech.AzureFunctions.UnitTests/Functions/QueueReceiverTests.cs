@@ -352,7 +352,8 @@ public class QueueReceiverTests
         _contentComponent.Published = true;
         _questions.Add(_contentComponent);
         _entityRetrieverMock
-            .When(mock => mock.GetExistingDbEntity(Arg.Any<ContentComponentDbEntity>(), default)
+            .When(mock => mock
+                .GetExistingDbEntity(Arg.Is<ContentComponentDbEntity>(entity => entity.Id == _contentId), default)
                 .Returns(_contentComponent));
         var queueReceiver = new QueueReceiver(new ContentfulOptions(false), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _messageRetryHandlerMock);
 
@@ -376,7 +377,8 @@ public class QueueReceiverTests
     public async Task QueueReceiverDbWriter_Should_Save_When_Event_Is_Save_And_Entity_Is_Unpublished_And_UsePreview_Is_False(string subject)
     {
         _entityRetrieverMock
-            .When(mock => mock.GetExistingDbEntity(Arg.Any<ContentComponentDbEntity>(), default)
+            .When(mock => mock
+                .GetExistingDbEntity(Arg.Is<ContentComponentDbEntity>(entity => entity.Id == _otherContentComponent.Id), default)
                 .Returns(_otherContentComponent));
         var queueReceiver = new QueueReceiver(new ContentfulOptions(false), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _messageRetryHandlerMock);
 
