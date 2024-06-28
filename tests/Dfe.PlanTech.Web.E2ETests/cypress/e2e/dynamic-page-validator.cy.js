@@ -166,7 +166,7 @@ function validateRecommendationForMaturity(section, maturity) {
 function validateSections(section, paths, dataMapper, validator) {
   cy.visit(`/${selfAssessmentSlug}`);
 
-  for (const path of paths) {
+    for (const path of paths) {
     //Navigate through interstitial page
       cy.get("div.govuk-summary-list__row > dt a").contains(section.name).click();
 
@@ -181,7 +181,7 @@ function validateSections(section, paths, dataMapper, validator) {
 
     cy.get("a.govuk-button.govuk-link").contains("Continue").click();
 
-    navigateAndValidateQuestionPages(path, section);
+   navigateAndValidateQuestionPages(path, section);
 
     validateCheckAnswersPage(path, section);
 
@@ -194,30 +194,33 @@ function validateSections(section, paths, dataMapper, validator) {
 }
 
 function validateCheckAnswersPage(path, section) {
-  for (const question in path) {
-    cy.get("div.govuk-summary-list__row dt.govuk-summary-list__key.spacer")
-      .contains(question.question.text.trim())
-      .siblings("dd.govuk-summary-list__value.spacer")
-      .contains(question.answer.text);
 
+    for (let i = 0; i < path.length; i++) {
+        cy.task("log", path[i].question.text)
+        cy.get("div.govuk-summary-list__row dt.govuk-summary-list__key.spacer")
+      .contains(path[i].question.text.trim())
+      .siblings("dd.govuk-summary-list__value.spacer")
+      .contains(path[i].answer.text);
     cy.url().should(
       "include",
       `${section.interstitialPage.fields.slug}/check-answers`
     );
-  }
+    }
 
   cy.get("button.govuk-button").contains("Save and continue").click();
 }
 
 function navigateAndValidateQuestionPages(path, section) {
-    for (const question in path) {
+
+
+    for (let i = 0; i < path.length; i++) {
     const matchingQuestion = section.questions.find(
-      (q) => q.text === question.question.text
+        (q) => q.text === path[i].question.text
     );
     
     if (!matchingQuestion) {
       throw new Error(
-        `Couldn't find matching question for ${question.question.text}`
+        `Couldn't find matching question for ${path[i].question.text}`
       );
     }
     
@@ -227,7 +230,7 @@ function navigateAndValidateQuestionPages(path, section) {
     );
 
     //Contains question
-    cy.get("h1.govuk-fieldset__heading").contains(question.question.text.trim());
+    cy.get("h1.govuk-fieldset__heading").contains(path[i].question.text.trim());
 
     //Contains question help text
     if (matchingQuestion.helpText) {
@@ -240,7 +243,7 @@ function navigateAndValidateQuestionPages(path, section) {
     cy.get(
       "div.govuk-radios div.govuk-radios__item label.govuk-radios__label.govuk-label"
     )
-      .contains(question.answer.text)
+      .contains(path[i].answer.text)
       .click();
 
     cy.get("button.govuk-button").contains("Save and continue").click();
