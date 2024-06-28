@@ -168,7 +168,7 @@ function validateSections(section, paths, dataMapper, validator) {
 
   for (const path of paths) {
     //Navigate through interstitial page
-    cy.get("ul.app-task-list__items > li a").contains(section.name).click();
+      cy.get("div.govuk-summary-list__row > dt a").contains(section.name).click();
 
     cy.url().should("include", section.interstitialPage.fields.slug);
 
@@ -198,7 +198,7 @@ function validateCheckAnswersPage(path, section) {
     cy.get("div.govuk-summary-list__row dt.govuk-summary-list__key.spacer")
       .contains(question.question.text.trim())
       .siblings("dd.govuk-summary-list__value.spacer")
-      .contains(question.answer);
+      .contains(question.answer.text);
 
     cy.url().should(
       "include",
@@ -233,14 +233,14 @@ function navigateAndValidateQuestionPages(path, section) {
     if (matchingQuestion.helpText) {
       cy.get("div.govuk-hint").contains(matchingQuestion.helpText);
     }
-    //Contains all answerees
+    //Contains all answers
     validateAnswers(matchingQuestion);
 
     //Select answer for path and continue
     cy.get(
       "div.govuk-radios div.govuk-radios__item label.govuk-radios__label.govuk-label"
     )
-      .contains(question.answer)
+      .contains(question.answer.text)
       .click();
 
     cy.get("button.govuk-button").contains("Save and continue").click();
