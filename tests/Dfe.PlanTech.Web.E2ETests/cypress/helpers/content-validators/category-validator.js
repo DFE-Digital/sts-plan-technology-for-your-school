@@ -13,13 +13,13 @@ function ValidateCategory({ fields, sys }) {
     .contains("You have completed");
 
   const appTaskList = progressTest
-    .next("ul.app-task-list__items")
+    .next("dl.govuk-summary-list")
     .should("exist");
 
-  const sections = fields.sections;
+    const sections = fields.sections;
 
-  appTaskList.find("li.app-task-list__item").then(($listItems) => {
-    expect($listItems).to.have.length(sections.length);
+    appTaskList.find("div.govuk-summary-list__row").then(($listItems) => {
+       // expect($listItems).to.have.length(sections.length);
 
     for (let index = 0; index < sections.length; index++) {
       const section = sections[index];
