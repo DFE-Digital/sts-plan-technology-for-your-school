@@ -194,7 +194,7 @@ function validateSections(section, paths, dataMapper, validator) {
 }
 
 function validateCheckAnswersPage(path, section) {
-  for (const question of path) {
+  for (const question in path) {
     cy.get("div.govuk-summary-list__row dt.govuk-summary-list__key.spacer")
       .contains(question.question.text.trim())
       .siblings("dd.govuk-summary-list__value.spacer")
@@ -210,17 +210,17 @@ function validateCheckAnswersPage(path, section) {
 }
 
 function navigateAndValidateQuestionPages(path, section) {
-  for (const question of path) {
+    for (const question in path) {
     const matchingQuestion = section.questions.find(
       (q) => q.text === question.question.text
     );
-
+    
     if (!matchingQuestion) {
       throw new Error(
         `Couldn't find matching question for ${question.question.text}`
       );
     }
-
+    
     cy.url().should(
       "include",
       `/${section.interstitialPage.fields.slug}/${matchingQuestion.slug}`
