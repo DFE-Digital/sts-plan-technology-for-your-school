@@ -30,7 +30,7 @@ We use two external modules to create the majority of the resources required:
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.0 |
 | <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) | >= 1.6.0 |
-| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 3.82.0 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | = 3.110.0 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | >= 3.2.1 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.5.1 |
 
@@ -51,31 +51,31 @@ We use two external modules to create the majority of the resources required:
 
 | Name | Type |
 |------|------|
-| [azurerm_app_service_connection.azurekeyvaultconnector](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/app_service_connection) | resource |
-| [azurerm_app_service_connection.azuresqlconnector](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/app_service_connection) | resource |
-| [azurerm_application_insights.functional_insights](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/application_insights) | resource |
-| [azurerm_key_vault.vault](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault) | resource |
-| [azurerm_key_vault_access_policy.vault_access_policy_mi](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_access_policy) | resource |
-| [azurerm_key_vault_access_policy.vault_access_policy_tf](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_access_policy) | resource |
-| [azurerm_key_vault_key.data_protection_key](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_key) | resource |
-| [azurerm_key_vault_secret.csp_connect_src](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
-| [azurerm_key_vault_secret.csp_default_src](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
-| [azurerm_key_vault_secret.csp_frame_src](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
-| [azurerm_key_vault_secret.csp_img_src](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
-| [azurerm_key_vault_secret.vault_secret_contentful_deliveryapikey](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
-| [azurerm_key_vault_secret.vault_secret_contentful_environment](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
-| [azurerm_key_vault_secret.vault_secret_contentful_previewapikey](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
-| [azurerm_key_vault_secret.vault_secret_contentful_spaceid](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
-| [azurerm_key_vault_secret.vault_secret_database_connectionstring](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
-| [azurerm_linux_function_app.contentful_function](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_function_app) | resource |
-| [azurerm_service_plan.function_plan](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/service_plan) | resource |
-| [azurerm_servicebus_namespace.service_bus](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/servicebus_namespace) | resource |
-| [azurerm_servicebus_queue.contentful_queue](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/servicebus_queue) | resource |
-| [azurerm_servicebus_queue_authorization_rule.azurefunction](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/servicebus_queue_authorization_rule) | resource |
-| [azurerm_storage_account.function_storage](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_account) | resource |
-| [azurerm_user_assigned_identity.user_assigned_identity](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/user_assigned_identity) | resource |
-| [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) | data source |
-| [azurerm_subscription.subscription](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subscription) | data source |
+| [azurerm_app_service_connection.azurekeyvaultconnector](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/app_service_connection) | resource |
+| [azurerm_app_service_connection.azuresqlconnector](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/app_service_connection) | resource |
+| [azurerm_application_insights.functional_insights](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/application_insights) | resource |
+| [azurerm_key_vault.vault](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/key_vault) | resource |
+| [azurerm_key_vault_access_policy.vault_access_policy_mi](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/key_vault_access_policy) | resource |
+| [azurerm_key_vault_access_policy.vault_access_policy_tf](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/key_vault_access_policy) | resource |
+| [azurerm_key_vault_key.data_protection_key](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/key_vault_key) | resource |
+| [azurerm_key_vault_secret.csp_connect_src](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.csp_default_src](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.csp_frame_src](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.csp_img_src](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.vault_secret_contentful_deliveryapikey](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.vault_secret_contentful_environment](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.vault_secret_contentful_previewapikey](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.vault_secret_contentful_spaceid](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.vault_secret_database_connectionstring](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/key_vault_secret) | resource |
+| [azurerm_linux_function_app.contentful_function](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/linux_function_app) | resource |
+| [azurerm_service_plan.function_plan](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/service_plan) | resource |
+| [azurerm_servicebus_namespace.service_bus](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/servicebus_namespace) | resource |
+| [azurerm_servicebus_queue.contentful_queue](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/servicebus_queue) | resource |
+| [azurerm_servicebus_queue_authorization_rule.azurefunction](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/servicebus_queue_authorization_rule) | resource |
+| [azurerm_storage_account.function_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/storage_account) | resource |
+| [azurerm_user_assigned_identity.user_assigned_identity](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/resources/user_assigned_identity) | resource |
+| [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/data-sources/client_config) | data source |
+| [azurerm_subscription.subscription](https://registry.terraform.io/providers/hashicorp/azurerm/3.110.0/docs/data-sources/subscription) | data source |
 
 ## Inputs
 
