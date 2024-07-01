@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
@@ -9,6 +11,7 @@ public class AnswerDbEntity : ContentComponentDbEntity, IAnswer<QuestionDbEntity
 
     public string? NextQuestionId { get; set; }
 
+    [DontCopyValue]
     public QuestionDbEntity? NextQuestion { get; set; }
 
     public string Maturity { get; set; } = null!;
@@ -16,8 +19,12 @@ public class AnswerDbEntity : ContentComponentDbEntity, IAnswer<QuestionDbEntity
     [DontCopyValue]
     public string? ParentQuestionId { get; set; }
 
+    [DontCopyValue]
     public QuestionDbEntity? ParentQuestion { get; set; }
 
+    [DontCopyValue]
     public List<RecommendationChunkDbEntity> RecommendationChunks { get; set; } = [];
+
+    [DontCopyValue]
     public List<RecommendationSectionDbEntity> RecommendationSections { get; set; } = [];
 }

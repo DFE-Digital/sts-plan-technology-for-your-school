@@ -32,11 +32,11 @@ Uses ASP .NET Core MVC.
 
 ### NodeJS Packages Used
 
-| Name                                                                   | Purpose                                            |
-| ---------------------------------------------------------------------- | -------------------------------------------------- |
-| [Gulp](https://gulpjs.com/)                                            | Compiling/minifying/combining/etc. SCSS + JS files |
-| [govuk-frontend](https://www.npmjs.com/package/govuk-frontend)         | Gov.UK SCSS                                        |
-| [dfe-frontend-alpha](https://www.npmjs.com/package/dfe-frontend-alpha) | DFE SCSS overrides                                 |
-| [gulp-csso](https://www.npmjs.com/package/gulp-csso)                   | CSS minification                                   |
-| [gulp-sass](https://www.npmjs.com/package/gulp-sass)                   | SASS compiling                                     |
-| [gulp-sourcemaps](https://www.npmjs.com/package/gulp-sourcemaps)       | Sourcemaps creation                                |
+| Name                                                             | Purpose                                            |
+|------------------------------------------------------------------|----------------------------------------------------|
+| [Gulp](https://gulpjs.com/)                                      | Compiling/minifying/combining/etc. SCSS + JS files |
+| [govuk-frontend](https://www.npmjs.com/package/govuk-frontend)   | Gov.UK SCSS                                        |
+| [dfe-frontend](https://www.npmjs.com/package/dfe-frontend)       | DFE SCSS overrides                                 |
+| [gulp-csso](https://www.npmjs.com/package/gulp-csso)             | CSS minification                                   |
+| [gulp-sass](https://www.npmjs.com/package/gulp-sass)             | SASS compiling                                     |
+| [gulp-sourcemaps](https://www.npmjs.com/package/gulp-sourcemaps) | Sourcemaps creation                                |

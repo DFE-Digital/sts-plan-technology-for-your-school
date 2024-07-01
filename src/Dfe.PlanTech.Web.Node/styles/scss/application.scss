@@ -1,5 +1,5 @@
 @use "../../node_modules/govuk-frontend/dist/govuk/all.scss";
-@use "../../node_modules/dfe-frontend-alpha/packages/dfefrontend.scss";
+@use "../../node_modules/dfe-frontend/packages/dfefrontend.scss";
 
 @import "app-task-list";
 @import "aside";
@@ -8,3 +8,4 @@
 @import "govuk-header";
 @import "hero-banner";
 @import "overrides";
+@import "printing";

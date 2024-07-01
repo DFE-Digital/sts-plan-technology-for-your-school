@@ -20,28 +20,4 @@ else
         class="govuk-visually-hidden">Error:</span>@Model.ProgressRetrievalErrorMessage</p>
 }
 
-<task-list>
-    @foreach (var categorySectionDtoItem in Model.CategorySectionDto)
-    {
-        <task-list-item>
-            @if (categorySectionDtoItem.Slug != null)
-            {
-                <task-list-item-name>
-                     <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@categorySectionDtoItem.Slug"
-                        class="govuk-link">
-                        @categorySectionDtoItem.Name
-                    </a>
-                </task-list-item-name>
-                <task-list-tag colour=@categorySectionDtoItem.TagColour>
-                    @categorySectionDtoItem.TagText
-                </task-list-tag>
-            }
-            else
-            {
-                <task-list-item-name>
-                    <govuk-error-message>@categorySectionDtoItem.NoSlugForSubtopicErrorMessage</govuk-error-message>
-                </task-list-item-name>
-            }
-        </task-list-item>
-    }
-</task-list>
+<partial name="Components/CategorySection/Subtopics" model="@Model"/>

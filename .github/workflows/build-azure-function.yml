@@ -32,11 +32,11 @@ jobs:
 
       - name: Install Dependencies
         shell: bash
-        run: dotnet restore ./src/Dfe.PlanTech.AzureFunctions/Dfe_PlanTech_AzureFunctions.csproj
+        run: dotnet restore ./src/Dfe.PlanTech.AzureFunctions/Dfe.PlanTech.AzureFunctions.csproj
 
       - name: Build Azure Function App
         shell: bash
-        run: dotnet publish ./src/Dfe.PlanTech.AzureFunctions/Dfe_PlanTech_AzureFunctions.csproj --configuration Release --no-restore --output ./build
+        run: dotnet publish ./src/Dfe.PlanTech.AzureFunctions/Dfe.PlanTech.AzureFunctions.csproj --configuration Release --no-restore --output ./build
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4

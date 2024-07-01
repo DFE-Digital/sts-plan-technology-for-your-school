@@ -1,8 +1,6 @@
 using Dfe.PlanTech.Application.Exceptions;
-using Dfe.PlanTech.Application.Submissions.Commands;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Domain.Responses.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
@@ -13,7 +11,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
-[LogInvalidModelState]
 [Authorize]
 [Route("/")]
 public class QuestionsController : BaseController<QuestionsController>
@@ -35,6 +32,7 @@ public class QuestionsController : BaseController<QuestionsController>
         _user = user;
     }
 
+    [LogInvalidModelState]
     [HttpGet("{sectionSlug}/{questionSlug}")]
     public async Task<IActionResult> GetQuestionBySlug(string sectionSlug,
                                                         string questionSlug,
@@ -48,6 +46,7 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
 
+    [LogInvalidModelState]
     [HttpGet("{sectionSlug}/next-question")]
     public async Task<IActionResult> GetNextUnansweredQuestion(string sectionSlug,
                                                                 [FromServices] IGetNextUnansweredQuestionQuery getQuestionQuery,

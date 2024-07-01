@@ -57,30 +57,30 @@ public class QueueReceiver(
         try
         {
             CmsEvent cmsEvent = GetCmsEvent(message.Subject);
-
-            if (ShouldIgnoreMessage(cmsEvent))
-            {
-                await messageActions.CompleteMessageAsync(message, cancellationToken);
-                return;
-            }
-
             MappedEntity mapped = await MapMessageToEntity(message, cmsEvent, cancellationToken);
 
-            if (!mapped.IsValid)
+            var isPublished = mapped.ExistingEntity?.Published ?? false;
+
+            if (ShouldIgnoreMessage(cmsEvent, isPublished))
             {
                 await messageActions.CompleteMessageAsync(message, cancellationToken);
                 return;
             }
-            else if (mapped.IsMinimalPayloadEvent)
+
+            if (mapped.IsMinimalPayloadEvent)
             {
+                Logger.LogInformation("Processing minimal payload event {CmsEvent} for entity with ID {Id}", mapped.CmsEvent, mapped.IncomingEntity.Id);
                 await ProcessEntityRemovalEvent(mapped, cancellationToken);
+            }
+            else if (!mapped.IsValid)
+            {
+                Logger.LogWarning("Entity {MappedEntityType} is invalid", mapped.IncomingEntity?.GetType());
             }
             else
             {
                 UpsertEntity(mapped);
+                await DbSaveChanges(cancellationToken);
             }
-
-            await DbSaveChanges(cancellationToken);
 
             await messageActions.CompleteMessageAsync(message, cancellationToken);
         }
@@ -115,7 +115,7 @@ public class QueueReceiver(
             throw new InvalidOperationException("ExistingEntity is null for removal event but various validations should have prevented this.");
         }
 
-        return db.SetComponentPublishedAndDeletedStatuses(mapped.ExistingEntity, mapped.ExistingEntity.Published, mapped.ExistingEntity.Deleted, cancellationToken);
+        return db.SetComponentPublishedAndDeletedStatuses(mapped.ExistingEntity, mapped.IncomingEntity.Published, mapped.IncomingEntity.Deleted, cancellationToken);
     }
 
     /// <summary>
@@ -128,8 +128,9 @@ public class QueueReceiver(
     /// Else, we return false.
     /// </remarks>
     /// <param name="cmsEvent"></param>
+    /// <param name="isPublished"></param>
     /// <returns></returns>
-    private bool ShouldIgnoreMessage(CmsEvent cmsEvent)
+    private bool ShouldIgnoreMessage(CmsEvent cmsEvent, bool isPublished)
     {
         if (cmsEvent == CmsEvent.CREATE)
         {
@@ -137,7 +138,7 @@ public class QueueReceiver(
             return true;
         }
 
-        if ((cmsEvent == CmsEvent.SAVE || cmsEvent == CmsEvent.AUTO_SAVE) && !contentfulOptions.UsePreview)
+        if ((cmsEvent == CmsEvent.SAVE || cmsEvent == CmsEvent.AUTO_SAVE) && isPublished && !contentfulOptions.UsePreview)
         {
             Logger.LogInformation("Received {Event} but UsePreview is {UsePreview} - dropping message", cmsEvent,
                 contentfulOptions.UsePreview);

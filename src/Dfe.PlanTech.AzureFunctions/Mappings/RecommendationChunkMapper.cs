@@ -1,82 +1,50 @@
 using System.Text.Json;
+using Dfe.PlanTech.AzureFunctions.Models;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
-public class RecommendationChunkMapper(EntityRetriever retriever, RecommendationChunkUpdater updater, CmsDbContext db, ILogger<RecommendationChunkMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<RecommendationChunkDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
+public class RecommendationChunkMapper(EntityRetriever retriever, EntityUpdater updater, CmsDbContext db, ILogger<RecommendationChunkMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<RecommendationChunkDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
     private readonly CmsDbContext _db = db;
 
+    private List<AnswerDbEntity> _incomingAnswers = [];
+    private List<ContentComponentDbEntity> _incomingContent = [];
+
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
-        var id = values["id"]?.ToString() ?? throw new KeyNotFoundException("Not found id");
-
         values = MoveValueToNewKey(values, "header", "headerId");
 
-        UpdateContentIds(values, id, "content");
-        UpdateAnswerIds(values, id, "answers");
+        _incomingAnswers = _entityUpdater.GetAndOrderReferencedEntities<AnswerDbEntity>(values, "answers").ToList();
+        _incomingContent = _entityUpdater.GetAndOrderReferencedEntities<ContentComponentDbEntity>(values, "content").ToList();
 
         return values;
     }
 
-    private void UpdateContentIds(Dictionary<string, object?> values, string recommendationChunkId, string currentKey)
+    public override async Task PostUpdateEntityCallback(MappedEntity mappedEntity)
     {
-        if (values.TryGetValue(currentKey, out object? contents) && contents is object[] inners)
+        var (incoming, existing) = mappedEntity.GetTypedEntities<RecommendationChunkDbEntity>();
+
+        if (existing != null)
         {
-            for (var index = 0; index < inners.Length; index++)
+            //There is no need for assignment as EF Core will automatically assigned the retrieved relationships to the existing entity,
+            //as the existing entity is being tracked by EF Core's ChangeTracker, and EF Core is aware of the relationship.
+            if (existing.Answers == null || existing.Answers.Count == 0)
             {
-                CreateRecommendationContentEntity(inners[index], recommendationChunkId);
+                await _db.RecommendationChunkAnswers.IgnoreQueryFilters().Where(recChunkAnswer => recChunkAnswer.RecommendationChunkId == existing.Id).Include(rca => rca.Answer).ToListAsync();
             }
-            values.Remove(currentKey);
-        }
-    }
 
-    private void UpdateAnswerIds(Dictionary<string, object?> values, string recommendationChunkId, string currentKey)
-    {
-        if (values.TryGetValue(currentKey, out object? contents) && contents is object[] inners)
-        {
-            for (var index = 0; index < inners.Length; index++)
+            if (existing.Content == null || existing.Content.Count == 0)
             {
-                CreateRecommendationAnswerEntity(inners[index], recommendationChunkId);
+                await _db.RecommendationChunkContents.IgnoreQueryFilters().Where(recChunkContent => recChunkContent.RecommendationChunkId == existing.Id).Include(rca => rca.ContentComponent).ToListAsync();
             }
-            values.Remove(currentKey);
-        }
-    }
-
-    private void CreateRecommendationAnswerEntity(object inner, string recommendationChunkId)
-    {
-        if (inner is not string answerId)
-        {
-            Logger.LogWarning("Expected string but received {InnerType}", inner.GetType());
-            return;
         }
 
-        var recommendationChunkAnswer = new RecommendationChunkAnswerDbEntity()
-        {
-            RecommendationChunkId = recommendationChunkId,
-            AnswerId = answerId
-        };
-
-        _db.RecommendationChunkAnswers.Attach(recommendationChunkAnswer);
+        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recChunk) => recChunk.Answers, _incomingAnswers, _db.Answers, false);
+        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recChunk) => recChunk.Content, _incomingContent, _db.ContentComponents, true);
     }
-
-    private void CreateRecommendationContentEntity(object inner, string recommendationChunkId)
-    {
-        if (inner is not string contentId)
-        {
-            Logger.LogWarning("Expected string but received {InnerType}", inner.GetType());
-            return;
-        }
-
-        var recommendationChunkContent = new RecommendationChunkContentDbEntity()
-        {
-            RecommendationChunkId = recommendationChunkId,
-            ContentComponentId = contentId
-        };
-
-        _db.RecommendationChunkContents.Attach(recommendationChunkContent);
-    }
-
 }

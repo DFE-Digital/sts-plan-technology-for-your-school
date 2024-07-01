@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Dfe.PlanTech.AzureFunctions.Mappings;
 using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Models;
@@ -11,7 +10,7 @@ using Microsoft.Extensions.Logging;
 using MockQueryable.NSubstitute;
 using NSubstitute;
 
-namespace Dfe.PlanTech.AzureFunctions.UnitTests;
+namespace Dfe.PlanTech.AzureFunctions.UnitTests.Mappers;
 
 public class SectionMapperTests : BaseMapperTests
 {
@@ -28,7 +27,7 @@ public class SectionMapperTests : BaseMapperTests
         new QuestionDbEntity()
         {
             Id = "remove-me-one",
-            SectionId = TestSectionId
+            SectionId = TestSectionId,
         },
         new QuestionDbEntity()
         {
@@ -44,11 +43,11 @@ public class SectionMapperTests : BaseMapperTests
     private readonly DbSet<SectionDbEntity> _sectionDbSet;
 
     private const string SectionName = "Section name";
-    private readonly CmsWebHookSystemDetailsInnerContainer[] Questions = new[]{
-        new CmsWebHookSystemDetailsInnerContainer() {Sys = new() { Id = "Question One Id" } },
-        new CmsWebHookSystemDetailsInnerContainer() {Sys = new() { Id = "Question Two Id" } },
-        new CmsWebHookSystemDetailsInnerContainer() {Sys = new() { Id = "Question Three Id" } },
-    };
+    private readonly CmsWebHookSystemDetailsInnerContainer[] Questions = [
+        new CmsWebHookSystemDetailsInnerContainer() { Sys = new() { Id = "Question One Id" } },
+        new CmsWebHookSystemDetailsInnerContainer() { Sys = new() { Id = "Question Two Id" } },
+        new CmsWebHookSystemDetailsInnerContainer() { Sys = new() { Id = "Question Three Id" } },
+    ];
 
     private readonly CmsWebHookSystemDetailsInnerContainer InterstitialPage = new()
     {
@@ -63,7 +62,7 @@ public class SectionMapperTests : BaseMapperTests
     private readonly CmsDbContext _db = Substitute.For<CmsDbContext>();
     private readonly SectionMapper _mapper;
     private readonly ILogger<SectionMapper> _logger;
-
+    private readonly ILogger<EntityUpdater> _entityUpdaterLogger;
     private readonly DbSet<QuestionDbEntity> _questionsDbSet;
 
     private readonly List<PageDbEntity> _pages = [new()
@@ -78,7 +77,8 @@ public class SectionMapperTests : BaseMapperTests
         _testSection = new()
         {
             Id = TestSectionId,
-            Questions = _testQuestions
+            Questions = _testQuestions,
+            InterstitialPageId = "Interstitial page id"
         };
 
         _sections.Add(_testSection);
@@ -97,7 +97,8 @@ public class SectionMapperTests : BaseMapperTests
         MockDbModel();
 
         _logger = Substitute.For<ILogger<SectionMapper>>();
-        _mapper = new SectionMapper(MapperHelpers.CreateMockEntityRetriever(_db), MapperHelpers.CreateMockEntityUpdater(_db), _db, _logger, JsonOptions);
+        _entityUpdaterLogger = Substitute.For<ILogger<EntityUpdater>>();
+        _mapper = new SectionMapper(MapperHelpers.CreateMockEntityRetriever(_db), MapperHelpers.CreateMockEntityUpdater(_db, _entityUpdaterLogger), _db, _logger, JsonOptions);
     }
 
     private void MockDbModel()
@@ -167,7 +168,7 @@ public class SectionMapperTests : BaseMapperTests
     }
 
     [Fact]
-    public async Task MapEntity_Should_Update_Question_SectionIds()
+    public async Task Should_Update_Existing_Entity()
     {
         CmsWebHookSystemDetailsInnerContainer[] questions = [
             new CmsWebHookSystemDetailsInnerContainer() { Sys = new() { Id = QuestionIdToKeep } },
@@ -193,26 +194,29 @@ public class SectionMapperTests : BaseMapperTests
         Assert.Single(existingSectionEntity.Questions);
 
         Assert.Equal(QuestionIdToKeep, existingSectionEntity.Questions.First().Id);
-
-        Assert.All(_testQuestions.Where(answer => answer.Id != QuestionIdToKeep), (question) => Assert.Null(question.SectionId));
     }
 
     [Fact]
     public async Task Should_Log_Error_If_Question_Not_Found()
     {
+        var missingId = "not-existing-id";
         CmsWebHookSystemDetailsInnerContainer[] questions = [
-            new CmsWebHookSystemDetailsInnerContainer() { Sys = new() { Id = "not-existing-id" } },
+            new CmsWebHookSystemDetailsInnerContainer() { Sys = new() { Id = missingId } },
         ];
+
+        var interstitialPage = new CmsWebHookSystemDetailsInnerContainer()
+        { Sys = new CmsWebHookSystemDetailsInner() { Id = "Interstitial page Id" } };
 
         var fields = new Dictionary<string, object?>()
         {
+            ["interstitialPage"] = WrapWithLocalisation(interstitialPage),
             ["questions"] = WrapWithLocalisation(questions),
         };
 
         var payload = CreatePayload(fields, TestSectionId);
 
-        var result = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default(CancellationToken));
+        await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default);
 
-        _logger.ReceivedWithAnyArgs(1);
+        Assert.Single(_entityUpdaterLogger.ReceivedCalls());
     }
 }

@@ -17,6 +17,8 @@ public class RecommendationsViewModel
 
     public IEnumerable<IAccordion> Accordions => Chunks.Select(ConvertToAccordion);
 
+    public string Slug { get; init; } = null!;
+
     private static Accordion ConvertToAccordion(IHeaderWithContent content, int index)
     => new()
     {

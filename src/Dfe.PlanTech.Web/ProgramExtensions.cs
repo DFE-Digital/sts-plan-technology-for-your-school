@@ -16,11 +16,11 @@ using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Domain.Content.Queries;
+using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
-using Dfe.PlanTech.Domain.Responses.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
@@ -139,9 +139,9 @@ public static class ProgramExtensions
         });
 
         services.AddDbContext<IPlanTechDbContext, PlanTechDbContext>(databaseOptionsAction);
+        ConfigureCookies(services, configuration);
 
         services.AddTransient<ICalculateMaturityCommand, CalculateMaturityCommand>();
-        services.AddTransient<ICookieService, CookieService>();
         services.AddTransient<ICreateEstablishmentCommand, CreateEstablishmentCommand>();
         services.AddTransient<ICreateUserCommand, CreateUserCommand>();
         services.AddTransient<IGetEstablishmentIdQuery, GetEstablishmentIdQuery>();
@@ -151,15 +151,25 @@ public static class ProgramExtensions
         services.AddTransient<IGetSectionQuery, GetSectionQuery>();
         services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
         services.AddTransient<IGetUserIdQuery, GetUserIdQuery>();
-        services.AddTransient<IProcessCheckAnswerDtoCommand, ProcessCheckAnswerDtoCommand>();
+        services.AddTransient<IProcessSubmissionResponsesCommand, ProcessSubmissionResponsesDto>();
         services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
         services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
-        services.AddTransient<IGetAllAnswersForLatestSubmissionQuery, GetAllAnswersForLatestSubmissionQuery>();
         services.AddTransient<IDeleteCurrentSubmissionCommand, DeleteCurrentSubmissionCommand>();
 
         services.AddTransient<GetPageFromDbQuery>();
 
         return services;
+    }
+
+    private static void ConfigureCookies(IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddScoped<ICookieService, CookieService>();
+        services.AddTransient<ICookiesCleaner, CookiesCleaner>((services) =>
+        {
+            var options = configuration.GetSection("Cookies").Get<CookiesCleanerOptions>();
+
+            return new CookiesCleaner(options ?? new CookiesCleanerOptions() { EssentialCookies = [] });
+        });
     }
 
     public static IServiceCollection AddGoogleTagManager(this IServiceCollection services)

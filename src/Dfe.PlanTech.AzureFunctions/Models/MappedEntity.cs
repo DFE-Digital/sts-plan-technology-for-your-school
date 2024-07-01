@@ -69,12 +69,22 @@ public class MappedEntity
         }
     }
 
-    public (TEntity incoming, TEntity existing) GetTypedEntities<TEntity>()
+    public (TEntity incoming, TEntity? existing) GetTypedEntities<TEntity>()
         where TEntity : ContentComponentDbEntity
     {
-        if (IncomingEntity is not TEntity incoming || ExistingEntity is not TEntity existing)
+        if (IncomingEntity is not TEntity incoming)
         {
             throw new InvalidCastException($"Entities are not expected type. Received {IncomingEntity.GetType()} and {ExistingEntity!.GetType()} but expected {typeof(TEntity)}");
+        }
+
+        if (ExistingEntity == null)
+        {
+            return (incoming, null);
+        }
+
+        if (ExistingEntity is not TEntity existing)
+        {
+            throw new InvalidCastException($"Entities are not expected type. Received  {IncomingEntity.GetType()} and  {ExistingEntity!.GetType()} but expected  {typeof(TEntity)}");
         }
 
         return (incoming, existing);
@@ -89,21 +99,20 @@ public class MappedEntity
     {
         if (ExistingEntity != null)
         {
-            CopyEntityStatus();
+            CopyEntityStatus(ExistingEntity, IncomingEntity);
         }
 
         UpdateEntityStatusByEvent();
     }
 
     /// <summary>
-    /// Copies the status values from an existing entity to an incoming entity, to ensure we only
-    /// change statuses we need to.
+    /// Copies the status values one entity to another, to ensure that they match when updated.
     ///</summary>
-    private void CopyEntityStatus()
+    private static void CopyEntityStatus(ContentComponentDbEntity source, ContentComponentDbEntity target)
     {
-        IncomingEntity.Archived = ExistingEntity!.Archived;
-        IncomingEntity.Published = ExistingEntity!.Published;
-        IncomingEntity.Deleted = ExistingEntity!.Deleted;
+        target.Archived = source.Archived;
+        target.Published = source.Published;
+        target.Deleted = source.Deleted;
     }
 
     /// <summary>
@@ -135,7 +144,6 @@ public class MappedEntity
                     throw new CmsEventException(string.Format("Content with Id \"{0}\" has event 'unpublish' despite not existing in the database!", IncomingEntity.Id));
                 }
                 IncomingEntity.Published = false;
-                ExistingEntity.Published = false;
                 break;
             case CmsEvent.DELETE:
                 if (ExistingEntity == null)
@@ -143,7 +151,6 @@ public class MappedEntity
                     throw new CmsEventException(string.Format("Content with Id \"{0}\" has event 'delete' despite not existing in the database!", IncomingEntity.Id));
                 }
                 IncomingEntity.Deleted = true;
-                ExistingEntity.Deleted = true;
                 break;
         }
     }

@@ -19,6 +19,7 @@ public static class CheckAnswersOrNextQuestionChecker
         {
             var responses = await userJourneyRouter.GetResponsesQuery.GetLatestResponses(await userJourneyRouter.User.GetEstablishmentId(),
                                                                                         userJourneyRouter.Section.Sys.Id,
+                                                                                        false,
                                                                                         cancellationToken) ?? throw new InvalidDataException("Missing responses");
 
             var lastResponseInUserJourney = userJourneyRouter.Section.GetOrderedResponsesForJourney(responses.Responses).Last();

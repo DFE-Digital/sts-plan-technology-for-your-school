@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.Submissions.Models;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
@@ -15,17 +15,6 @@ public class Section : ContentComponent, ISectionComponent
     public string FirstQuestionId => Questions.Select(question => question.Sys.Id).FirstOrDefault() ?? "";
 
     public Page InterstitialPage { get; init; } = null!;
-
-    public List<RecommendationPage> Recommendations { get; init; } = new();
-
-    public RecommendationPage? TryGetRecommendationForMaturity(Maturity maturity) => Recommendations.Find(recommendation => recommendation.Maturity == maturity);
-
-    public RecommendationPage? GetRecommendationForMaturity(string? maturity)
-    {
-        if (string.IsNullOrEmpty(maturity) || !Enum.TryParse(maturity, out Maturity maturityResponse)) return null;
-
-        return TryGetRecommendationForMaturity(maturityResponse);
-    }
 
     public IEnumerable<QuestionWithAnswer> GetOrderedResponsesForJourney(IEnumerable<QuestionWithAnswer> responses)
     {

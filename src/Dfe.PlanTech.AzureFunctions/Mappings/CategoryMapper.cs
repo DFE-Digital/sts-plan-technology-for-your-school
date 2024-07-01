@@ -1,5 +1,7 @@
+using Dfe.PlanTech.AzureFunctions.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
@@ -8,18 +10,28 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 public class CategoryMapper(EntityRetriever retriever, EntityUpdater updater, CmsDbContext db, ILogger<CategoryMapper> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<CategoryDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
     private readonly CmsDbContext _db = db;
+    private List<SectionDbEntity> _incomingSections = [];
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
-        int order = 0;
         values = MoveValueToNewKey(values, "header", "headerId");
 
-        UpdateReferencesArray(values, "sections", _db.Sections, (id, section) =>
-        {
-            section.CategoryId = Payload!.Sys.Id;
-            section.Order = order++;
-        });
+        _incomingSections = _entityUpdater.GetAndOrderReferencedEntities<SectionDbEntity>(values, "sections").ToList();
 
         return values;
+    }
+
+    public override async Task PostUpdateEntityCallback(MappedEntity mappedEntity)
+    {
+        var (incoming, existing) = mappedEntity.GetTypedEntities<CategoryDbEntity>();
+
+        if (existing != null)
+        {
+            existing.Sections = await _db.Sections.Where(section => section.CategoryId == incoming.Id)
+                                                .Select(section => section)
+                                                .ToListAsync();
+        }
+
+        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (category) => category.Sections, _incomingSections, _db.Sections, true);
     }
 }

@@ -1,19 +1,15 @@
 ﻿using AutoMapper;
-using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Queries;
+using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
+using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Primitives;
-using Microsoft.Net.Http.Headers;
 using NSubstitute;
 using Xunit;
 
@@ -21,19 +17,15 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 {
     public class CookieControllerTests
     {
-        private readonly ICmsDbContext _db = Substitute.For<ICmsDbContext>();
-        private readonly IMapper _mapper = Substitute.For<IMapper>();
-        private readonly GetPageFromDbQuery _getPageFromDbQuery;
-
-        private readonly Page[] _pages = new Page[]
-        {
+        private readonly Page[] _pages =
+        [
             new Page()
             {
                 Slug = "cookies",
                 Title = new Title() { Text = "Cookies" },
-                Content = new List<ContentComponent> { new Header() { Tag = Domain.Content.Enums.HeaderTag.H1, Text = "Analytical Cookies" }}
+                Content = [new Header() { Tag = Domain.Content.Enums.HeaderTag.H1, Text = "Analytical Cookies" }]
             },
-        };
+        ];
 
         public static CookiesController CreateStrut()
         {
@@ -44,11 +36,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 ControllerContext = ControllerHelpers.SubstituteControllerContext()
             };
-        }
-
-        public CookieControllerTests()
-        {
-            _getPageFromDbQuery = Substitute.For<GetPageFromDbQuery>(_db, new NullLogger<GetPageFromDbQuery>(), _mapper, Array.Empty<IGetPageChildrenQuery>());
         }
 
         [Theory]
@@ -75,9 +62,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Theory]
-        [InlineData("https://localhost:8080/self-assessment")]
-        [InlineData("https://www.dfe.gov.uk/self-assessment")]
-        public void Accept_Redirects_BackToPlaceOfOrigin(string url)
+        [InlineData("https://localhost:8080/self-assessment", "true")]
+        [InlineData("https://www.dfe.gov.uk/self-assessment", "false")]
+        public void SetCookiePreference_Redirects_BackToPlaceOfOrigin(string url, string userAcceptsCookie)
         {
             //Arrange
             var strut = CreateStrut();
@@ -89,7 +76,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             };
 
             //Act
-            var result = strut.Accept() as RedirectResult;
+            var result = strut.SetCookiePreference(userAcceptsCookie) as RedirectResult;
 
             //Assert
             Assert.IsType<RedirectResult>(result);
@@ -97,42 +84,24 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Theory]
-        [InlineData("https://localhost:8080/self-assessment")]
-        [InlineData("https://www.dfe.gov.uk/self-assessment")]
-        public void Reject_Redirects_BackToPlaceOfOrigin(string url)
+        [InlineData("https://www.google.com")]
+        [InlineData("https://www.plantech.education.gov.uk/accessibility")]
+        public async Task ReferrerUrl_Should_Be_Retrieved_From_Header(string referrerUrl)
         {
-            //Arrange
-            var strut = CreateStrut();
-            var httpContext = new DefaultHttpContext();
-            httpContext.Request.Headers.Referer = url;
-            strut.ControllerContext = new ControllerContext
-            {
-                HttpContext = httpContext
-            };
+            IGetPageQuery getPageQuery = SetupPageQueryMock();
 
-            //Act
-            var result = strut.Reject() as RedirectResult;
+            CookiesController cookiesController = CreateStrut();
+            cookiesController.HttpContext.Request.Headers.Referer = referrerUrl;
 
-            //Assert
-            Assert.IsType<RedirectResult>(result);
-            Assert.Equal(url, result.Url);
+            var result = await cookiesController.GetCookiesPage(getPageQuery, CancellationToken.None);
+            Assert.IsType<ViewResult>(result);
+
+            var model = (result as ViewResult)!.Model as CookiesViewModel;
+
+            Assert.NotNull(model);
+
+            Assert.Equal(referrerUrl, model.ReferrerUrl);
         }
-
-        private static IRequestCookieCollection SubstituteRequestCookieCollection(string key, string value)
-        {
-            var requestFeature = new HttpRequestFeature();
-            var featureCollection = new FeatureCollection();
-
-            requestFeature.Headers = new HeaderDictionary();
-            requestFeature.Headers.Append(HeaderNames.Cookie, new StringValues(key + "=" + value));
-
-            featureCollection.Set<IHttpRequestFeature>(requestFeature);
-
-            var cookiesFeature = new RequestCookiesFeature(featureCollection);
-
-            return cookiesFeature.Cookies;
-        }
-
 
         [Fact]
         public async Task CookiesPageDisplays()
@@ -152,45 +121,44 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Theory]
         [InlineData("true")]
         [InlineData("false")]
-        public void settingCookiePreferenceBasedOnInputRedirectsToCookiePage(string userPreference)
+        public void CookiePreferences_Redirects_ToCookiePage(string userPreference)
         {
             CookiesController cookiesController = CreateStrut();
 
             var tempDataSubstitute = Substitute.For<ITempDataDictionary>();
-            var cookiesSubstitute = Substitute.For<ICookieService>();
-
-            cookiesSubstitute.SetPreference(Arg.Any<bool>());
 
             cookiesController.TempData = tempDataSubstitute;
 
-            var result = cookiesController.CookiePreference(userPreference);
+            var result = cookiesController.SetCookiePreference(userPreference, true);
 
-            tempDataSubstitute.Received(1)["UserPreferenceRecorded"] = true;
+            tempDataSubstitute.Received(1)[CookieConstants.UserPreferenceRecordedKey] = true;
 
             Assert.IsType<RedirectToActionResult>(result);
 
-            var res = result as RedirectToActionResult;
-
-            if (res != null)
+            if (result is RedirectToActionResult res)
             {
                 Assert.Equal("GetByRoute", res.ActionName);
                 Assert.Equal("Pages", res.ControllerName);
             }
         }
 
-        [Fact]
-        public void settingCookiePreferenceBasedOnInputAsNullThrowsException()
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        [InlineData("1234")]
+        [InlineData("bad-thing")]
+        public void Invalid_Preference_Throws_Exception(string? userPreference)
         {
             CookiesController cookiesController = CreateStrut();
 
             var tempDataSubstitute = Substitute.For<ITempDataDictionary>();
             var cookiesSubstitute = Substitute.For<ICookieService>();
 
-            cookiesSubstitute.SetPreference(Arg.Any<bool>());
+            cookiesSubstitute.SetCookieAcceptance(true);
 
             cookiesController.TempData = tempDataSubstitute;
 
-            var result = Assert.Throws<ArgumentException>(() => cookiesController.CookiePreference(string.Empty));
+            var result = Assert.Throws<ArgumentException>(() => cookiesController.SetCookiePreference(userPreference!));
             Assert.Contains("Can't convert preference", result.Message);
         }
 

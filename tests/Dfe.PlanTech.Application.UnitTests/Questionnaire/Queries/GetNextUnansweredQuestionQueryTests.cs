@@ -2,7 +2,8 @@ using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Domain.Responses.Interfaces;
+using Dfe.PlanTech.Domain.Submissions.Interfaces;
+using Dfe.PlanTech.Domain.Submissions.Models;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Questionnaire.Queries;
@@ -15,13 +16,14 @@ public class GetNextUnansweredQuestionQueryTests
         {
             Id = "TestSection"
         },
-        Questions = new(){ new()
-    {
-      Text = "First question",
-      Sys = new SystemDetails(){
-        Id = "FQ"
-      },
-      Answers = new(){
+        Questions = [new()
+        {
+            Text = "First question",
+            Sys = new SystemDetails()
+            {
+                Id = "FQ"
+            },
+            Answers = new(){
         new(){
           Sys = new SystemDetails(){
             Id = "FA"
@@ -29,43 +31,52 @@ public class GetNextUnansweredQuestionQueryTests
           Text = "First Answer"
         }
       }
-    }, new(){
-          Text = "Second question",
-          Sys = new SystemDetails(){
-            Id = "SQ",
-          },
-          Answers = new(){
-            new(){
-              Sys = new SystemDetails(){
-                Id = "FA"
-              },
-              Text = "First Answer"
-            }
-          }
         },
-        new(){
-          Text = "Third Question",
-          Sys = new SystemDetails(){
-            Id = "TQ"
-          },
-          Answers = new(){
-            new(){
-              Sys = new SystemDetails(){
-                Id = "FA"
-              },
-              Text = "First Answer"
+            new()
+            {
+                Text = "Second question",
+                Sys = new SystemDetails()
+                {
+                    Id = "SQ",
+                },
+                Answers = [
+              new()
+              {
+                  Sys = new SystemDetails()
+                  {
+                      Id = "FA"
+                  },
+                  Text = "First Answer"
+              }
+            ]
+            },
+            new()
+            {
+                Text = "Third Question",
+                Sys = new SystemDetails()
+                {
+                    Id = "TQ"
+                },
+                Answers = [
+              new()
+              {
+                  Sys = new SystemDetails()
+                  {
+                      Id = "FA"
+                  },
+                  Text = "First Answer"
+              }
+            ]
             }
-          }
-        }
-      }
+        ]
     };
 
     [Fact]
     public async Task Should_Return_FirstQuestion_When_No_Responses()
     {
-        CheckAnswerDto? response = null;
+        SubmissionResponsesDto? response = null;
         var getLatestResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
-        getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+        getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), false, Arg.Any<CancellationToken>())
         .Returns(Task.FromResult(response));
 
         var getNextUnansweredQuestionQuery = new GetNextUnansweredQuestionQuery(getLatestResponsesQuery);
@@ -78,9 +89,9 @@ public class GetNextUnansweredQuestionQueryTests
     [Fact]
     public async Task Should_Throw_DatabaseException_When_No_Responses_In_OngoingSubmission()
     {
-        CheckAnswerDto? response = new() { Responses = new(), SubmissionId = 1 };
+        SubmissionResponsesDto? response = new() { Responses = new(), SubmissionId = 1 };
         var getLatestResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
-        getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+        getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), false, Arg.Any<CancellationToken>())
         .Returns(Task.FromResult(response ?? null));
 
         var getNextUnansweredQuestionQuery = new GetNextUnansweredQuestionQuery(getLatestResponsesQuery);
@@ -91,7 +102,7 @@ public class GetNextUnansweredQuestionQueryTests
     [Fact]
     public async Task Should_Throw_DatabaseException_When_Responses_Dont_Align_To_Questions()
     {
-        CheckAnswerDto response = new()
+        SubmissionResponsesDto response = new()
         {
             SubmissionId = 1,
             // skip first question so that ordering responses by question fails
@@ -103,7 +114,7 @@ public class GetNextUnansweredQuestionQueryTests
             .ToList()
         };
         var getLatestResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
-        getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+        getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), false, Arg.Any<CancellationToken>())
           .Returns(response);
 
         var getNextUnansweredQuestionQuery = new GetNextUnansweredQuestionQuery(getLatestResponsesQuery);
@@ -124,7 +135,7 @@ public class GetNextUnansweredQuestionQueryTests
             };
         }
 
-        CheckAnswerDto response = new()
+        SubmissionResponsesDto response = new()
         {
             SubmissionId = 1,
             Responses = _section.Questions.Select(question => new QuestionWithAnswer()
@@ -136,7 +147,7 @@ public class GetNextUnansweredQuestionQueryTests
         };
 
         var getLatestResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
-        getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+        getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), false, Arg.Any<CancellationToken>())
         .Returns((callinfo) => response);
 
         var getNextUnansweredQuestionQuery = new GetNextUnansweredQuestionQuery(getLatestResponsesQuery);

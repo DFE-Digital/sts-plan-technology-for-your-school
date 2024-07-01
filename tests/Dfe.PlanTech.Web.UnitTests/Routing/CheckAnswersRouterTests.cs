@@ -3,9 +3,9 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Domain.Responses.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
+using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
@@ -20,7 +20,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing;
 public class CheckAnswersRouterTests
 {
     private readonly IGetPageQuery _getPageQuery = Substitute.For<IGetPageQuery>();
-    private readonly IProcessCheckAnswerDtoCommand _checkAnswerCommand = Substitute.For<IProcessCheckAnswerDtoCommand>();
+    private readonly IProcessSubmissionResponsesCommand _checkAnswerCommand = Substitute.For<IProcessSubmissionResponsesCommand>();
     private readonly IUser _user = Substitute.For<IUser>();
     private readonly ISubmissionStatusProcessor _submissionStatusProcessor = Substitute.For<ISubmissionStatusProcessor>();
 
@@ -43,19 +43,20 @@ public class CheckAnswersRouterTests
         Name = "Section name"
     };
 
-    private readonly CheckAnswerDto _checkAnswersDto = new()
+    private readonly SubmissionResponsesDto _checkAnswersDto = new()
     {
-        Responses = new List<QuestionWithAnswer>()
-                          {
-                            new (){
-                              QuestionRef = "q1",
-                              AnswerRef = "a1"
-                            },
-                            new (){
-                              QuestionRef = "q2",
-                              AnswerRef = "q2-a1"
-                            }
-                          }
+        Responses = [
+            new()
+            {
+                QuestionRef = "q1",
+                AnswerRef = "a1"
+            },
+            new()
+            {
+                QuestionRef = "q2",
+                AnswerRef = "q2-a1"
+            }
+        ]
     };
 
     private readonly List<ContentComponent> _checkAnswersPageContent = new(){
@@ -65,7 +66,7 @@ public class CheckAnswersRouterTests
     public CheckAnswersRouterTests()
     {
         _user.GetEstablishmentId().Returns(establishmentId);
-        _checkAnswerCommand.GetCheckAnswerDtoForSection(establishmentId, Arg.Any<Section>(), Arg.Any<CancellationToken>())
+        _checkAnswerCommand.GetSubmissionResponsesDtoForSection(establishmentId, Arg.Any<Section>(), Arg.Any<CancellationToken>())
                             .Returns((callinfo) =>
                             {
                                 var sectionArg = callinfo.ArgAt<ISection>(1);
@@ -177,7 +178,7 @@ public class CheckAnswersRouterTests
 
         Assert.Equal(_section.Name, model.SectionName);
         Assert.Equal(sectionSlug, model.SectionSlug);
-        Assert.Equal(_checkAnswersDto, model.CheckAnswerDto);
+        Assert.Equal(_checkAnswersDto, model.SubmissionResponses);
         Assert.Equal(_checkAnswersDto.SubmissionId, model.SubmissionId);
         Assert.Equal(_checkAnswersPageContent, model.Content);
     }

@@ -1,4 +1,4 @@
-@use "../../node_modules/dfe-frontend-alpha/packages/dfefrontend.scss";
+@use "../../node_modules/dfe-frontend/packages/dfefrontend.scss";
 
 * {
   font-family: BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu,
@@ -37,10 +37,33 @@ div.govuk-width-container {
 
 strong.govuk-tag {
   text-transform: lowercase;
+  max-width: fit-content;
+  vertical-align: middle;
 
   &:first-letter {
     text-transform: uppercase;
   }
+}
+
+@media (min-width: 40.0625em) {
+  .dfe-self-assessment-list {
+    > .govuk-summary-list__row {
+      height: 4rem;
+    }
+  }
+}
+
+.govuk-summary-list__key,
+.govuk-summary-list__value {
+  vertical-align: middle;
+
+  > .govuk-button {
+    vertical-align: middle;
+  }
+}
+
+.dfe-header {
+  border-bottom: 10px solid #347ca9
 }
 
 //Hide GTM iframe

@@ -1,0 +1,35 @@
+@using Dfe.PlanTech.Web.TagHelpers.TaskList
+@using GovUk.Frontend.AspNetCore.TagHelpers
+@using AnchorTagHelper = Microsoft.AspNetCore.Mvc.TagHelpers.AnchorTagHelper
+@model CategorySectionViewComponentViewModel
+
+<dl class="govuk-summary-list dfe-self-assessment-list">
+    @foreach (var categorySectionDtoItem in Model.CategorySectionDto)
+    {
+        <div class="govuk-summary-list__row">
+            @if (categorySectionDtoItem.Slug != null)
+            {
+                <dt class="govuk-summary-list__key govuk-!-font-weight-regular">
+                    <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@categorySectionDtoItem.Slug"
+                       class="govuk-link">
+                        @categorySectionDtoItem.Name
+                    </a>
+                </dt>
+                <dd class="govuk-summary-list__value govuk-!-text-align-left">
+                    <task-list-tag colour=@categorySectionDtoItem.Tag.Colour>
+                        @categorySectionDtoItem.Tag.Text
+                    </task-list-tag>
+                </dd>
+            }
+            else
+            {
+                <dt class="govuk-summary-list__key">
+                    <govuk-error-message>@categorySectionDtoItem.ErrorMessage</govuk-error-message>
+                </dt>
+            }
+            <dd class="govuk-summary-list__value govuk-!-text-align-right">
+                <partial name="Components/CategorySection/SubtopicRecommendation" model="@categorySectionDtoItem.Recommendation"/>
+            </dd>
+        </div>
+    }
+</dl>

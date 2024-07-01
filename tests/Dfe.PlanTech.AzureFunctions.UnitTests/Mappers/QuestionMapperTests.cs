@@ -8,9 +8,8 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
 using MockQueryable.NSubstitute;
 using NSubstitute;
-using System.Text.Json;
 
-namespace Dfe.PlanTech.AzureFunctions.UnitTests;
+namespace Dfe.PlanTech.AzureFunctions.UnitTests.Mappers;
 
 public class QuestionMapperTests : BaseMapperTests
 {
@@ -34,6 +33,7 @@ public class QuestionMapperTests : BaseMapperTests
     {
         Id = "keep-me-id",
         ParentQuestionId = TestQuestionId,
+        Order = 999
     };
     private readonly static List<AnswerDbEntity> _testAnswers = [
         new AnswerDbEntity()
@@ -71,8 +71,6 @@ public class QuestionMapperTests : BaseMapperTests
 
         _db.Set<AnswerDbEntity>().Returns(_answerDbSet);
         _db.Set<QuestionDbEntity>().Returns(_questionDbSet);
-
-        var modelMock = Substitute.For<IModel>();
 
         var entityTypeMock = Substitute.For<IEntityType>();
         entityTypeMock.ClrType.Returns(typeof(QuestionDbEntity));
@@ -128,38 +126,30 @@ public class QuestionMapperTests : BaseMapperTests
     [Fact]
     public async Task MapEntity_Should_Return_MappedEntity_When_NotExisting_In_DB()
     {
-        var payload = """
-            {
-                "fields": {
-                    "answers": {
-                        "en-US": [
-                                {"id": "answer-one-id"}
-                        ]
-                    }
-                },
-                "sys": {
-                    "id": "question-id",
-                    "type": "entry",
-                    "contentType": {
-                        "id": "question"
-                    }
-                }
-            }
-        """;
+        var fields = new Dictionary<string, object?>()
+        {
+            ["text"] = WrapWithLocalisation(QuestionText),
+            ["helpText"] = WrapWithLocalisation(QuestionHelpText),
+            ["slug"] = WrapWithLocalisation(QuestionSlug),
+            ["answers"] = WrapWithLocalisation(Answers),
+        };
 
-        var cmsWebHookPayload = JsonSerializer.Deserialize<CmsWebHookPayload>(payload, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+        var payload = CreatePayload(fields, "doesnt-exist-in-db");
 
-        Assert.NotNull(cmsWebHookPayload);
-
-        var result = await _mapper.MapEntity(cmsWebHookPayload, CmsEvent.PUBLISH, default(CancellationToken));
+        var result = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default);
 
         Assert.NotNull(result);
-        Assert.NotNull(result.IncomingEntity);
-        Assert.Null(result.ExistingEntity);
+
+        var (incoming, existing) = result.GetTypedEntities<QuestionDbEntity>();
+
+        Assert.NotNull(incoming);
+        Assert.Null(existing);
+
+        ValidateReferencedContent(Answers.Select(answer => answer.Sys.Id).ToArray(), incoming.Answers, true);
     }
 
     [Fact]
-    public async Task MapEntity_Should_Update_Answer_ParentQuestionIds()
+    public async Task MapEntity_Should_Update_Existing_Question()
     {
         CmsWebHookSystemDetailsInnerContainer[] answers = [
             new CmsWebHookSystemDetailsInnerContainer() { Sys = new() { Id = AnswerIdToKeep } },
@@ -173,7 +163,7 @@ public class QuestionMapperTests : BaseMapperTests
 
         var payload = CreatePayload(fields, TestQuestionId);
 
-        var result = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default(CancellationToken));
+        var result = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default);
 
         Assert.NotNull(result);
         Assert.NotNull(result.IncomingEntity);
@@ -182,12 +172,11 @@ public class QuestionMapperTests : BaseMapperTests
         var existingQuestionEntity = result.ExistingEntity as QuestionDbEntity;
 
         Assert.NotNull(existingQuestionEntity);
-
         Assert.Single(existingQuestionEntity.Answers);
 
-        Assert.Equal(AnswerIdToKeep, existingQuestionEntity.Answers.First().Id);
-
-        Assert.All(_testAnswers.Where(answer => answer.Id != AnswerIdToKeep), (answer) => Assert.Null(answer.ParentQuestionId));
+        var firstAnswer = existingQuestionEntity.Answers.First();
+        Assert.Equal(AnswerIdToKeep, firstAnswer.Id);
+        Assert.Equal(0, firstAnswer.Order);
     }
 
     [Fact]
@@ -204,9 +193,8 @@ public class QuestionMapperTests : BaseMapperTests
         };
 
         var payload = CreatePayload(fields, TestQuestionId);
+        _ = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default);
 
-        var result = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default(CancellationToken));
-
-        _logger.ReceivedWithAnyArgs(1);
+        Assert.Single(_logger.ReceivedCalls());
     }
 }

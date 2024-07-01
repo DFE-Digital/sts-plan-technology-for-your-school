@@ -1,0 +1,34 @@
+﻿@inject GtmConfiguration GtmConfiguration
+@using Dfe.PlanTech.Web.Helpers;
+
+@section Head {
+    <partial name="_Head"/>
+    @RenderSection("Head", false)
+}
+
+@{
+    Layout = "_GovUkPageTemplate";
+
+    if (ViewData["Title"] == null)
+    {
+        var routeData = Context.GetRouteData();
+        ViewData["Title"] = routeData.GetTitleForPage();
+    }
+}
+
+@section Header {
+    @Html.Raw(GtmConfiguration.Body)
+    @RenderSection("Header", false)
+}
+
+@section BeforeContent {
+    <partial name="_BeforeContent"/>
+    @RenderSection("BeforeContent", required: false)
+}
+
+@RenderBody()
+
+@section BodyEnd {
+    <partial name="_BodyEnd"/>
+    @RenderSection("BodyEnd", required: false)
+}

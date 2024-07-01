@@ -36,76 +36,23 @@ where TEntity : ContentComponentDbEntity, new()
         return serialised;
     }
 
+    public virtual Task PostUpdateEntityCallback(MappedEntity mappedEntity)
+    {
+        return Task.CompletedTask;
+    }
+
     public override async Task<MappedEntity> MapEntity(CmsWebHookPayload payload, CmsEvent cmsEvent, CancellationToken cancellationToken)
     {
         var incomingEntity = ToEntity(payload);
 
         var existingEntity = await EntityRetriever.GetExistingDbEntity(incomingEntity, cancellationToken);
 
-        return _entityUpdater.UpdateEntity(incomingEntity, existingEntity, cmsEvent);
+        return await _entityUpdater.UpdateEntity(incomingEntity, existingEntity, cmsEvent, PostUpdateEntityCallback);
     }
 
-    public abstract Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values);
-
-    protected IEnumerable<TReferencedEntity> GetReferences<TReferencedEntity>(Dictionary<string, object?> values, string key)
-        where TReferencedEntity : ContentComponentDbEntity, new()
+    public virtual Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
-        if (values.TryGetValue(key, out object? referencesArray) && referencesArray is object[] inners)
-        {
-            foreach (var inner in inners)
-            {
-                if (inner is not string id)
-                {
-                    Logger.LogWarning("Expected string but received {innerType}", inner.GetType());
-                    continue;
-                }
-
-                yield return new TReferencedEntity() { Id = id };
-            }
-
-            values.Remove(key);
-        }
-        else
-        {
-            Logger.LogError("Expected {key} to be references array but received {type}", key, referencesArray?.GetType());
-        }
-    }
-
-    protected void UpdateReferencesArray<TRelatedEntity>(Dictionary<string, object?> values, string key, DbSet<TRelatedEntity> dbSet, Action<string, TRelatedEntity> updateEntity)
-        where TRelatedEntity : ContentComponentDbEntity, new()
-    {
-        if (values.TryGetValue(key, out object? referencesArray) && referencesArray is object[] inners)
-        {
-            foreach (var inner in inners)
-            {
-                UpdateRelatedEntity(inner, dbSet, updateEntity);
-            }
-
-            values.Remove(key);
-        }
-        else
-        {
-            Logger.LogError("Expected {key} to be references array but received {type}", key, referencesArray?.GetType());
-        }
-    }
-
-    protected void UpdateRelatedEntity<TRelatedEntity>(object inner, DbSet<TRelatedEntity> dbSet, Action<string, TRelatedEntity> updateEntity)
-        where TRelatedEntity : ContentComponentDbEntity, new()
-    {
-        if (inner is not string id)
-        {
-            Logger.LogWarning("Expected string but received {innerType}", inner.GetType());
-            return;
-        }
-
-        var relatedEntity = new TRelatedEntity()
-        {
-            Id = id
-        };
-
-        dbSet.Attach(relatedEntity);
-
-        updateEntity(id, relatedEntity);
+        return values;
     }
 }
 
@@ -162,11 +109,18 @@ public abstract class JsonToDbMapper
         {
             Logger.LogError("No value for {field}", field);
             yield return null;
+            yield break;
         }
 
-        var fieldChildren = field.Value!.AsObject();
+        var fieldChildren = GetValueAsObject(field);
 
-        if (fieldChildren.Count > 1)
+        if (fieldChildren == null)
+        {
+            yield return null;
+            yield break;
+        }
+
+        if (fieldChildren!.Count > 1)
         {
             Logger.LogError("Expected only one language - received {count}", fieldChildren.Count);
             yield return null;
@@ -177,6 +131,20 @@ public abstract class JsonToDbMapper
             var value = GetValue(child.Value!);
 
             yield return new KeyValuePair<string, object?>(field.Key, value);
+        }
+
+    }
+
+    private JsonObject? GetValueAsObject(KeyValuePair<string, JsonNode> field)
+    {
+        try
+        {
+            return field.Value!.AsObject();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error when serialising field \"{FieldName}\":as object.\nValue was: {FieldValue}", field.Key, field.Value);
+            return null;
         }
     }
 
@@ -245,7 +213,7 @@ public abstract class JsonToDbMapper
     {
         if (!values.TryGetValue(currentKey, out object? value))
         {
-            Logger.LogWarning("COuld not find key {currentKey}", currentKey);
+            Logger.LogWarning("Could not find key {currentKey}", currentKey);
             return values;
         }
 

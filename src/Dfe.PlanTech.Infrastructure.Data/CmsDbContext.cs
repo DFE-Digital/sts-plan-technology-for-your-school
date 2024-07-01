@@ -43,9 +43,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
 
     #region RECOMMENDATIONS
-    //Old
-    public DbSet<RecommendationPageDbEntity> RecommendationPages { get; set; }
-
     //New
     public DbSet<RecommendationChunkAnswerDbEntity> RecommendationChunkAnswers { get; set; }
     public DbSet<RecommendationChunkContentDbEntity> RecommendationChunkContents { get; set; }
@@ -97,7 +94,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<RecommendationChunkDbEntity> ICmsDbContext.RecommendationChunks => RecommendationChunks;
     IQueryable<RecommendationIntroContentDbEntity> ICmsDbContext.RecommendationIntroContents => RecommendationIntroContents;
     IQueryable<RecommendationIntroDbEntity> ICmsDbContext.RecommendationIntros => RecommendationIntros;
-    IQueryable<RecommendationPageDbEntity> ICmsDbContext.RecommendationPages => RecommendationPages;
     IQueryable<RecommendationSectionAnswerDbEntity> ICmsDbContext.RecommendationSectionAnswers => RecommendationSectionAnswers;
     IQueryable<RecommendationSectionChunkDbEntity> ICmsDbContext.RecommendationSectionChunks => RecommendationSectionChunks;
     IQueryable<RecommendationSectionDbEntity> ICmsDbContext.RecommendationSections => RecommendationSections;
@@ -191,13 +187,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         modelBuilder.Entity<QuestionDbEntity>().ToTable("Questions", Schema);
 
-        modelBuilder.Entity<RecommendationPageDbEntity>(entity =>
-        {
-            entity.HasOne(recommendation => recommendation.Page)
-                .WithOne(page => page.RecommendationPage)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
-
         modelBuilder.Entity<RichTextContentWithSlugDbEntity>(entity => { entity.ToView("RichTextContentsBySlug"); });
         modelBuilder.Entity<RichTextContentWithSubtopicRecommendationId>(entity => { entity.ToView("RichTextContentsBySubtopicRecommendationId"); });
 
@@ -213,8 +202,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
         modelBuilder.Entity<ContentComponentDbEntity>().HasQueryFilter(ShouldShowEntity());
     }
 
-    public async Task<int> SetComponentPublishedAndDeletedStatuses(ContentComponentDbEntity contentComponent, bool published, bool deleted, CancellationToken cancellationToken = default)
-        => await Database.ExecuteSqlAsync($"UPDATE [Contentful].[ContentComponents] SET Published = {published}, Deleted = {deleted} WHERE [Id] = {contentComponent.Id}", cancellationToken: cancellationToken);
+    public virtual Task<int> SetComponentPublishedAndDeletedStatuses(ContentComponentDbEntity contentComponent, bool published, bool deleted, CancellationToken cancellationToken = default)
+        => Database.ExecuteSqlAsync($"UPDATE [Contentful].[ContentComponents] SET Published = {published}, Deleted = {deleted} WHERE [Id] = {contentComponent.Id}", cancellationToken: cancellationToken);
 
     /// <summary>
     /// Should the given entity be displayed? I.e. is it not archived, not deleted, and either published or use preview mode is enabled

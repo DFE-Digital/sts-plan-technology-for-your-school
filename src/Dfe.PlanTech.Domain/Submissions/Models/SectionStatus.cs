@@ -6,7 +6,7 @@ public class SectionStatusDto
 {
     public string SectionId { get; set; } = null!;
 
-    public int Completed { get; set; }
+    public bool Completed { get; set; }
 
     public string? LastMaturity { get; set; }
 

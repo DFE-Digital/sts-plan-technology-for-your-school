@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Queries;
+using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
@@ -9,28 +10,46 @@ namespace Dfe.PlanTech.Web.Controllers;
 
 [LogInvalidModelState]
 [Route("/cookies")]
-public class CookiesController : BaseController<CookiesController>
+public class CookiesController(ILogger<CookiesController> logger, ICookieService cookieService) : BaseController<CookiesController>(logger)
 {
     private const string CookiesSlug = "cookies";
-    private readonly ICookieService _cookieService;
+    private readonly ICookieService _cookieService = cookieService;
 
-    public CookiesController(ILogger<CookiesController> logger, ICookieService cookieService) : base(logger)
+    [HttpGet]
+    public async Task<IActionResult> GetCookiesPage([FromServices] IGetPageQuery getPageQuery, CancellationToken cancellationToken)
     {
-        _cookieService = cookieService;
+        var cookiesPageContent = await getPageQuery.GetPageBySlug(CookiesSlug, cancellationToken);
+
+        var referrerUrl = HttpContext.Request.Headers.Referer.ToString();
+
+        CookiesViewModel cookiesViewModel = new()
+        {
+            Title = cookiesPageContent?.Title ?? new Title() { Text = "Cookies" },
+            Content = cookiesPageContent?.Content ?? [],
+            Cookie = _cookieService.Cookie,
+            ReferrerUrl = referrerUrl ?? "",
+        };
+
+        return View("Cookies", cookiesViewModel);
     }
 
-    [HttpPost("accept")]
-    public IActionResult Accept()
+    [HttpPost]
+    public IActionResult SetCookiePreference(string userPreference, bool isCookiesPage = false)
     {
-        _cookieService.SetPreference(true);
-        return RedirectToPlaceOfOrigin();
-    }
+        if (!bool.TryParse(userPreference, out bool userAcceptsCookies))
+        {
+            throw new ArgumentException("Can't convert preference", userPreference);
+        }
+        _cookieService.SetCookieAcceptance(userAcceptsCookies);
 
-    [HttpPost("reject")]
-    public IActionResult Reject()
-    {
-        _cookieService.RejectCookies();
-        return RedirectToPlaceOfOrigin();
+        if (!isCookiesPage)
+        {
+            return RedirectToPlaceOfOrigin();
+        }
+
+        TempData[CookieConstants.UserPreferenceRecordedKey] = true;
+
+        return RedirectToAction("GetByRoute", "Pages", new { route = CookiesSlug });
     }
 
     [HttpPost("hidebanner")]
@@ -45,40 +64,5 @@ public class CookiesController : BaseController<CookiesController>
         var returnUrl = Request.Headers.Referer.ToString();
 
         return Redirect(returnUrl);
-    }
-
-    public async Task<IActionResult> GetCookiesPage([FromServices] IGetPageQuery getPageQuery, CancellationToken cancellationToken)
-    {
-        var cookiesPageContent = await getPageQuery.GetPageBySlug(CookiesSlug, cancellationToken);
-
-        CookiesViewModel cookiesViewModel = new()
-        {
-            Title = cookiesPageContent?.Title ?? new Title() { Text = "Cookies" },
-            Content = cookiesPageContent?.Content ?? new List<ContentComponent>(0)
-        };
-
-        return View("Cookies", cookiesViewModel);
-    }
-
-    [HttpPost]
-    public IActionResult CookiePreference(string userPreference)
-    {
-        if (bool.TryParse(userPreference, out bool preference))
-        {
-            if (preference)
-            {
-                _cookieService.SetPreference(preference);
-            }
-            else
-            {
-                _cookieService.RejectCookies();
-            }
-            TempData["UserPreferenceRecorded"] = true;
-            return RedirectToAction("GetByRoute", "Pages", new { route = "cookies" });
-        }
-        else
-        {
-            throw new ArgumentException("Can't convert preference", nameof(userPreference));
-        }
     }
 }

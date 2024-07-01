@@ -1,0 +1,19 @@
+@model Dfe.PlanTech.Domain.Cookie.DfeCookie;
+
+@{
+  var cookieStatus = Model.UseCookies ? "accepted" : "rejected";
+}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+      <div class="govuk-cookie-banner__content">
+        <p class="govuk-body">You’ve @cookieStatus additional cookies. You can <a class="govuk-link" href="/cookies">change your cookie settings</a> at any time.</p>
+      </div>
+  </div>
+</div>
+
+<div class="govuk-button-group">
+  <button value="hide-cookies" type="submit" name="hide-cookies" class="govuk-button" data-module="govuk-button" asp-controller="Cookies" asp-action="HideBanner">
+      Hide cookie message
+  </button>
+</div>

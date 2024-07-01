@@ -5,62 +5,64 @@ using System.Text.Json;
 
 namespace Dfe.PlanTech.Application.Cookie.Service;
 
-public class CookieService : ICookieService
+public class CookieService(IHttpContextAccessor context, ICookiesCleaner cookiesCleaner) : ICookieService
 {
-    private readonly IHttpContextAccessor _context;
-    private const string Cookie_Key = "cookies_preferences_set";
+    public const string Cookie_Key = "user_cookies_preferences";
 
-    public CookieService(IHttpContextAccessor context)
-    {
-        _context = context;
-    }
+    private DfeCookie? _dfeCookie;
+    public DfeCookie Cookie => _dfeCookie ?? GetCookie();
 
     public void SetVisibility(bool visibility)
     {
-        var currentCookie = GetCookie();
-        DeleteCookie();
-        CreateCookie(Cookie_Key, currentCookie.HasApproved, visibility, currentCookie.IsRejected);
+        CreateCookie(Cookie_Key, visibility: visibility);
     }
 
-    public void RejectCookies()
+    public void SetCookieAcceptance(bool userAcceptsCookies)
     {
-        DeleteCookie();
-        CreateCookie(Cookie_Key, false, true, true);
-    }
+        CreateCookie(Cookie_Key, userAcceptsCookies: userAcceptsCookies);
 
-    public void SetPreference(bool userPreference)
-    {
-        CreateCookie(Cookie_Key, userPreference);
+        if (!userAcceptsCookies)
+        {
+            cookiesCleaner.RemoveNonEssentialCookies(context.HttpContext);
+        }
     }
 
     public DfeCookie GetCookie()
     {
-        var cookie = _context.HttpContext.Request.Cookies[Cookie_Key];
+        var cookie = context.HttpContext.Request.Cookies[Cookie_Key];
         if (cookie is null)
         {
             return new DfeCookie();
         }
-        else
-        {
-            var dfeCookie = JsonSerializer.Deserialize<DfeCookie>(cookie);
-            return dfeCookie is null ? new DfeCookie() : dfeCookie;
-        }
+
+        var dfeCookie = JsonSerializer.Deserialize<DfeCookie>(cookie);
+        return dfeCookie;
     }
 
     private void DeleteCookie()
     {
-        _context.HttpContext.Response.Cookies.Delete(Cookie_Key);
+        context.HttpContext.Response.Cookies.Delete(Cookie_Key);
     }
 
-    private void CreateCookie(string key, bool value, bool visibility = true, bool rejected = false)
+    private void CreateCookie(string key, bool? userAcceptsCookies = null, bool? visibility = null)
     {
-        CookieOptions cookieOptions = new CookieOptions();
-        cookieOptions.Secure = true;
-        cookieOptions.HttpOnly = true;
-        cookieOptions.Expires = new DateTimeOffset(DateTime.Now.AddYears(1));
+        CookieOptions cookieOptions = new()
+        {
+            Secure = true,
+            HttpOnly = true,
+            Expires = new DateTimeOffset(DateTime.Now.AddYears(1))
+        };
 
-        var cookie = new DfeCookie { IsVisible = visibility, HasApproved = value, IsRejected = rejected };
+        DeleteCookie();
+
+        var cookie = Cookie with
+        {
+            UserAcceptsCookies = userAcceptsCookies ?? Cookie.UserAcceptsCookies,
+            IsVisible = visibility ?? Cookie.IsVisible
+        };
+
         var serializedCookie = JsonSerializer.Serialize(cookie);
-        _context.HttpContext.Response.Cookies.Append(key, serializedCookie, cookieOptions);
+        context.HttpContext.Response.Cookies.Append(key, serializedCookie, cookieOptions);
+        _dfeCookie = cookie;
     }
 }

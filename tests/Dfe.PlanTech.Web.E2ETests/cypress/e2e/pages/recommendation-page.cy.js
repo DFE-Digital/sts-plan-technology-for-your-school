@@ -46,9 +46,15 @@ describe("Recommendation Page", () => {
       cy.get("span.app-step-nav__button-text").should("exist");
   })
 
-    it("Should have individual recommendation panel in accordion", () => {
-        cy.get("li.app-step-nav__step").should("exist");
-    })
+  it("Should have individual recommendation panel in accordion", () => {
+      cy.get("li.app-step-nav__step").should("exist");
+  })
+
+  it("Should have a link to print open the page in another tab in a checklist format", () => {
+      cy.get("a.govuk-link")
+          .contains("Share or download this recommendation in a checklist format")
+          .should("have.attr", "target", "_blank")
+  })
 
     //Concertina display
     it("Should change text and chevron direction of Show/Hide All on click", () => {

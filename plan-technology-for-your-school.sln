@@ -29,7 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.PlanTech.Infrastructure
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.UnitTests.Shared", "tests\Dfe.PlanTech.UnitTests.Shared\Dfe.PlanTech.UnitTests.Shared.csproj", "{5D0C8F71-DD08-43AE-8791-A488DBDE2DF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe_PlanTech_AzureFunctions", "src\Dfe.PlanTech.AzureFunctions\Dfe_PlanTech_AzureFunctions.csproj", "{71808DB3-6B0A-42C1-8B3A-26A8C2D24AAD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.AzureFunctions", "src\Dfe.PlanTech.AzureFunctions\Dfe.PlanTech.AzureFunctions.csproj", "{71808DB3-6B0A-42C1-8B3A-26A8C2D24AAD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.AzureFunctions.UnitTests", "tests\Dfe.PlanTech.AzureFunctions.UnitTests\Dfe.PlanTech.AzureFunctions.UnitTests.csproj", "{2F75269D-834B-4E0A-BAD2-7ECAD359C56D}"
 EndProject

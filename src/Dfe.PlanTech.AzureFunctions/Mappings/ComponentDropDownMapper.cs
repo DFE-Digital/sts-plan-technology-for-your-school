@@ -6,8 +6,5 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
 public class ComponentDropDownMapper(EntityRetriever retriever, EntityUpdater updater, ILogger<JsonToDbMapper<ComponentDropDownDbEntity>> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper<ComponentDropDownDbEntity>(retriever, updater, logger, jsonSerialiserOptions)
 {
-    public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
-    {
-        return values;
-    }
+
 }

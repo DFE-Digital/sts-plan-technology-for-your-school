@@ -1,5 +1,4 @@
-﻿using Dfe.PlanTech.Domain.Answers.Models;
-using Dfe.PlanTech.Domain.Establishments.Models;
+﻿using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Models;
@@ -17,7 +16,7 @@ public interface IPlanTechDbContext
     // Submission Table
     public IQueryable<Submission> GetSubmissions { get; }
 
-    public IQueryable<Answer> GetAnswers { get; }
+    public IQueryable<ResponseAnswer> GetAnswers { get; }
 
     public void AddEstablishment(Establishment establishment);
 
@@ -25,7 +24,7 @@ public interface IPlanTechDbContext
 
     Task<int> CallStoredProcedureWithReturnInt(string sprocName, IEnumerable<SqlParameter> parms, CancellationToken cancellationToken = default);
 
-    IQueryable<SectionStatusDto> GetSectionStatuses(string sectionIds, int establishmentId);
+    IQueryable<SectionStatusDto> GetSectionStatuses(string categoryId, int establishmentId);
 
     Task<User?> GetUserBy(Expression<Func<User, bool>> predicate);
 
