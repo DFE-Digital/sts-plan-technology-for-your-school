@@ -82,7 +82,7 @@ describe("Pages should have content", () => {
           cy.loginWithEnv(`${selfAssessmentSlug}`);
 
           const matchingSection = dataMapper.mappedSections.find(s => s.id == section.id);
-
+                    
           validateSections(matchingSection, section.minimumPathsForRecommendations[maturity], dataMapper, () => {
             validateRecommendationForMaturity(matchingSection, maturity);
           });
@@ -117,12 +117,12 @@ function dataLoaded(contentMap) {
  * @throws {Error} if matching recommendation is not found
  */
 function validateRecommendationForMaturity(section, maturity) {
-  //Validate recommendation banner
-  cy.get(
+    //Validate recommendation banner
+    cy.get(
     "div.govuk-notification-banner.govuk-notification-banner--success h3.govuk-notification-banner__heading"
   ).contains(`You have one new recommendation for ${section.name}`);
-
-  const matchingRecommendation = section.recommendations.find(
+ 
+  const matchingRecommendation = section.recommendation.intros.find(
     (recommendation) => recommendation.maturity == maturity
   );
 
@@ -133,25 +133,25 @@ function validateRecommendationForMaturity(section, maturity) {
     );
 
   const expectedPath =
-    `/${section.name.trim()}/recommendation/${matchingRecommendation.page.fields.slug.trim()}`
+    `/${section.name.trim()}/recommendation/${matchingRecommendation.slug.trim()}`
       .toLowerCase()
       .replace(/ /g, "-");
 
   cy.get(
     "ul.app-task-list__items li.app-task-list__item span.app-task-list__task-name a.govuk-link"
   )
-    .contains(matchingRecommendation.displayName.trim())
+    .contains(section.name.trim())
     .should("have.attr", "href")
     .and("include", expectedPath);
 
   cy.get(
     "ul.app-task-list__items li.app-task-list__item span.app-task-list__task-name a.govuk-link"
   )
-    .contains(matchingRecommendation.displayName.trim())
+    .contains(section.name.trim())
     .click();
 
   ValidatePage(
-    matchingRecommendation.page.fields.slug,
+    matchingRecommendation.slug,
     matchingRecommendation.page
   );
 }
