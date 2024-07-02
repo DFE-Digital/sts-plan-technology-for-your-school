@@ -23,7 +23,7 @@ public class CategorySectionDto
         Recommendation = recommendation;
         var started = sectionStatus != null;
         var completed = sectionStatus?.Completed == true;
-        var lastEdited = LastEditedDate(sectionStatus?.DateCreated);
+        var lastEdited = LastEditedDate(sectionStatus?.DateUpdated);
         if (string.IsNullOrWhiteSpace(slug))
         {
             ErrorMessage = $"{Name} unavailable";
@@ -43,7 +43,8 @@ public class CategorySectionDto
     {
         if (date == null)
             return null;
-        var localTime = date.Value.ToLocalTime();
+        var britishTimeZone = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
+        var localTime = TimeZoneInfo.ConvertTimeFromUtc(date.Value, britishTimeZone);
         return localTime.Date == DateTime.Today.Date ? $"{localTime:hh:mm tt}" : $"{localTime:dd/MM/yyyy}";
     }
 }
