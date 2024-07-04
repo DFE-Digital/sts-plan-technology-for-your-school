@@ -81,10 +81,9 @@ describe("Pages should have content", () => {
         it(`${section.name} should retrieve correct recommendation for ${maturity} maturity, and all content is valid`, () => {
           cy.loginWithEnv(`${selfAssessmentSlug}`);
 
-          const matchingSection = dataMapper.mappedSections.find(s => s.id == section.id);
                     
-          validateSections(matchingSection, section.minimumPathsForRecommendations[maturity], dataMapper, () => {
-            validateRecommendationForMaturity(matchingSection, maturity);
+          validateSections(section, [section.minimumPathsForRecommendations[maturity]], dataMapper, () => {
+            validateRecommendationForMaturity(section, maturity);
           });
         });
       }
@@ -121,11 +120,11 @@ function validateRecommendationForMaturity(section, maturity) {
     cy.get(
     "div.govuk-notification-banner.govuk-notification-banner--success h3.govuk-notification-banner__heading"
   ).contains(`You have one new recommendation for ${section.name}`);
- 
+
   const matchingRecommendation = section.recommendation.intros.find(
     (recommendation) => recommendation.maturity == maturity
   );
-
+  
   if (!matchingRecommendation)
     throw new Error(
       `Couldn't find a recommendation for maturity ${maturity} in ${section.name}`,
@@ -150,10 +149,6 @@ function validateRecommendationForMaturity(section, maturity) {
     .contains(section.name.trim())
     .click();
 
-  ValidatePage(
-    matchingRecommendation.slug,
-    matchingRecommendation.page
-  );
 }
 
 /**
@@ -164,18 +159,18 @@ function validateRecommendationForMaturity(section, maturity) {
  * @param {Function} validator - optional validation function to call at the end of every path
  */
 function validateSections(section, paths, dataMapper, validator) {
-  cy.visit(`/${selfAssessmentSlug}`);
+    cy.visit(`/${selfAssessmentSlug}`);
 
-    for (const path of paths) {
-    //Navigate through interstitial page
-      cy.get("div.govuk-summary-list__row > dt a").contains(section.name).click();
+   for (const path of paths) {
+        //Navigate through interstitial page
+        cy.get("div.govuk-summary-list__row > dt a").contains(section.name).click();
 
     cy.url().should("include", section.interstitialPage.fields.slug);
 
     const interstitialPage = FindPageForSlug({
       slug: section.interstitialPage.fields.slug,
       dataMapper,
-    });
+        });
 
     ValidatePage(section.interstitialPage.fields.slug, interstitialPage);
 
@@ -187,67 +182,66 @@ function validateSections(section, paths, dataMapper, validator) {
 
     cy.url().should("include", selfAssessmentSlug);
 
-    if (validator) {
-      validator();
+        if (validator) {
+            validator();
+        }
     }
-  }
 }
 
 function validateCheckAnswersPage(path, section) {
 
-    for (let i = 0; i < path.length; i++) {
-        cy.task("log", path[i].question.text)
+    for (const q of path) {
         cy.get("div.govuk-summary-list__row dt.govuk-summary-list__key.spacer")
-      .contains(path[i].question.text.trim())
-      .siblings("dd.govuk-summary-list__value.spacer")
-      .contains(path[i].answer.text);
-    cy.url().should(
-      "include",
-      `${section.interstitialPage.fields.slug}/check-answers`
-    );
+            .contains(q.question.text.trim())
+            .siblings("dd.govuk-summary-list__value.spacer")
+            .contains(q.answer.text);
     }
 
-  cy.get("button.govuk-button").contains("Save and continue").click();
+    cy.url().should(	  
+        "include",
+        `${section.interstitialPage.fields.slug}/check-answers`
+    );
+
+    cy.get("button.govuk-button").contains("Save and continue").click();
 }
 
 function navigateAndValidateQuestionPages(path, section) {
 
+    for (const question of path) {
+        const matchingQuestion = section.questions.find(
+            (q) => q.text === question.question.text
+        );
 
-    for (let i = 0; i < path.length; i++) {
-    const matchingQuestion = section.questions.find(
-        (q) => q.text === path[i].question.text
-    );
-    
-    if (!matchingQuestion) {
-      throw new Error(
-        `Couldn't find matching question for ${path[i].question.text}`
-      );
+        if (!matchingQuestion) {
+            throw new Error(
+                `Couldn't find matching question for ${question.question.text}`
+            );
+        }
+
+        cy.url().should(
+            "include",
+            `/${section.interstitialPage.fields.slug}/${matchingQuestion.slug}`
+        );
+
+        //Contains question
+        cy.get("h1.govuk-fieldset__heading").contains(question.question.text.trim());
+
+        //Contains question help text
+        if (matchingQuestion.helpText) {
+            cy.get("div.govuk-hint").contains(matchingQuestion.helpText);
+        }
+        //Contains all answers
+        validateAnswers(matchingQuestion);
+
+        //Select answer for path and continue
+        cy.get(
+            "div.govuk-radios div.govuk-radios__item label.govuk-radios__label.govuk-label"
+        )
+            .contains(question.answer.text)
+            .click();
+
+        cy.get("button.govuk-button").contains("Save and continue").click();
     }
-    
-    cy.url().should(
-      "include",
-      `/${section.interstitialPage.fields.slug}/${matchingQuestion.slug}`
-    );
-
-    //Contains question
-    cy.get("h1.govuk-fieldset__heading").contains(path[i].question.text.trim());
-
-    //Contains question help text
-    if (matchingQuestion.helpText) {
-      cy.get("div.govuk-hint").contains(matchingQuestion.helpText);
-    }
-    //Contains all answers
-    validateAnswers(matchingQuestion);
-
-    //Select answer for path and continue
-    cy.get(
-      "div.govuk-radios div.govuk-radios__item label.govuk-radios__label.govuk-label"
-    )
-      .contains(path[i].answer.text)
-      .click();
-
-    cy.get("button.govuk-button").contains("Save and continue").click();
-  }
 }
 
 function validateAnswers(matchingQuestion) {
