@@ -38,13 +38,13 @@ public class CategorySectionDto
             Tag = new Tag();
         }
         else if (retrievalError)
-            Tag = new Tag("UNABLE TO RETRIEVE STATUS", TagColour.Red);
+            Tag = new Tag("unable to retrieve status", TagColour.Red);
         else if (completed)
-            Tag = new Tag($"COMPLETE {lastEdited}", TagColour.Grey);
+            Tag = new Tag($"last completed {lastEdited}", TagColour.Grey);
         else if (started)
-            Tag = new Tag($"IN PROGRESS {lastEdited}", TagColour.Grey);
+            Tag = new Tag($"in progress {lastEdited}", TagColour.Grey);
         else
-            Tag = new Tag("NOT STARTED", TagColour.Grey);
+            Tag = new Tag("not started", TagColour.Grey);
     }
 
     private string? LastEditedDate(DateTime? date, ISystemTime systemTime)
@@ -53,6 +53,6 @@ public class CategorySectionDto
             return null;
         var britishTimeZone = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
         var localTime = TimeZoneInfo.ConvertTimeFromUtc(date.Value, britishTimeZone);
-        return localTime.Date == systemTime.Today.Date ? $"{localTime:hh:mm tt}" : $"{localTime:dd/MM/yyyy}";
+        return localTime.Date == systemTime.Today.Date ? $"{localTime:hh:mm tt}" : $"{localTime:dd MMM yyyy}";
     }
 }

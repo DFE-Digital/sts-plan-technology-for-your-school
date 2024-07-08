@@ -36,13 +36,9 @@ div.govuk-width-container {
 }
 
 strong.govuk-tag {
-  text-transform: lowercase;
+  text-transform: capitalize;
   max-width: fit-content;
   vertical-align: middle;
-
-  &:first-letter {
-    text-transform: uppercase;
-  }
 }
 
 @media (min-width: 40.0625em) {

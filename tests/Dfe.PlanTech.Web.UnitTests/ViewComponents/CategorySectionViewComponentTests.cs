@@ -210,8 +210,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         }
 
         [Theory]
-        [InlineData("2015/10/15", "COMPLETE 15/10/2015")]
-        [InlineData("2015/10/16 12:13:00", "COMPLETE 01:13 PM")] // British summer time GMT + 1
+        [InlineData("2015/10/15", "last completed 15 Oct 2015")]
+        [InlineData("2015/10/16 12:13:00", "last completed 01:13 PM")] // British summer time GMT + 1
         public async Task Returns_CategorySectionInfo_If_Slug_Exists_And_SectionIsCompleted(string utcTime, string expectedBadge)
         {
             _systemTime.Today.Returns(_ => new DateTime(2015, 10, 16));
@@ -257,8 +257,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         }
 
         [Theory]
-        [InlineData("2015/03/15", "IN PROGRESS 15/03/2015")]
-        [InlineData("2015/03/16 10:13:00", "IN PROGRESS 10:13 AM")] // GMT
+        [InlineData("2015/03/15", "in progress 15 Mar 2015")]
+        [InlineData("2015/03/16 10:13:00", "in progress 10:13 AM")] // GMT
         public async Task Returns_CategorySelectionInfo_If_Slug_Exists_And_SectionIsNotCompleted(string utcTime, string expectedBadge)
         {
             _systemTime.Today.Returns(_ => new DateTime(2015, 3, 16));
@@ -340,7 +340,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
             Assert.Equal("grey", categorySectionDto.Tag.Colour);
-            Assert.Equal("NOT STARTED", categorySectionDto.Tag.Text);
+            Assert.Equal("not started", categorySectionDto.Tag.Text);
             Assert.Null(categorySectionDto.ErrorMessage);
         }
 
@@ -430,7 +430,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
             Assert.Equal("red", categorySectionDto.Tag.Colour);
-            Assert.Equal("UNABLE TO RETRIEVE STATUS", categorySectionDto.Tag.Text);
+            Assert.Equal("unable to retrieve status", categorySectionDto.Tag.Text);
             Assert.Null(categorySectionDto.ErrorMessage);
         }
 
