@@ -115,16 +115,14 @@ function dataLoaded(contentMap) {
  * @param {string} maturity - the maturity level to validate
  * @throws {Error} if matching recommendation is not found
  */
+
 function validateRecommendationForMaturity(section, maturity) {
-    //Validate recommendation banner
-    cy.get(
-    "div.govuk-notification-banner.govuk-notification-banner--success h3.govuk-notification-banner__heading"
-  ).contains(`You have one new recommendation for ${section.name}`);
+    const submissionTimeText = getSubmissionTimeText(new Date());
 
   const matchingRecommendation = section.recommendation.intros.find(
     (recommendation) => recommendation.maturity == maturity
-  );
-  
+    );
+
   if (!matchingRecommendation)
     throw new Error(
       `Couldn't find a recommendation for maturity ${maturity} in ${section.name}`,
@@ -136,19 +134,27 @@ function validateRecommendationForMaturity(section, maturity) {
       .toLowerCase()
       .replace(/ /g, "-");
 
-  cy.get(
-    "ul.app-task-list__items li.app-task-list__item span.app-task-list__task-name a.govuk-link"
-  )
-    .contains(section.name.trim())
-    .should("have.attr", "href")
-    .and("include", expectedPath);
+    cy.get("a.govuk-link")
+        .contains(section.name.trim())
+        .should("have.attr", "href").and("include", `${section.name.trim().toLowerCase().replace(/ /g, "-")}`);
 
-  cy.get(
-    "ul.app-task-list__items li.app-task-list__item span.app-task-list__task-name a.govuk-link"
-  )
-    .contains(section.name.trim())
-    .click();
+    cy.get("a.govuk-link")
+        .contains(section.name.trim())
+        .parent()
+        .next()
+        .within(() => {
+            cy.get("strong.app-task-list__tag").should("include.text", `${submissionTimeText}`)
+        })
 
+    cy.get("a.govuk-link")
+        .contains(section.name.trim())
+        .parent().next().next()
+        .within(() => {
+            cy.get("strong.app-task-list__tag").should("include.text", "New").and("have.class", "govuk-tag--yellow");
+            cy.get("a.govuk-button").contains("View Recommendation")
+                .should("have.attr", "href")
+                .and("include", expectedPath);
+        })
 }
 
 /**
@@ -176,7 +182,7 @@ function validateSections(section, paths, dataMapper, validator) {
 
     cy.get("a.govuk-button.govuk-link").contains("Continue").click();
 
-   navigateAndValidateQuestionPages(path, section);
+    navigateAndValidateQuestionPages(path, section);
 
     validateCheckAnswersPage(path, section);
 
@@ -260,4 +266,10 @@ function FindPageForSlug({ slug, dataMapper }) {
   }
 
   return null;
+}
+
+function getSubmissionTimeText(time) {
+    const hours = time.getHours() < 12 ? time.getHours() : Number(time.getHours()) - 12;
+
+    return `last completed ${hours.toString().length === 1 ? `${hours}` : hours}:${time.getMinutes()}${time.getHours() < 12 ? "am" : "pm"}`
 }
