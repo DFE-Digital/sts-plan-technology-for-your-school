@@ -53,6 +53,6 @@ public class CategorySectionDto
             return null;
         var britishTimeZone = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
         var localTime = TimeZoneInfo.ConvertTimeFromUtc(date.Value, britishTimeZone);
-        return localTime.Date == systemTime.Today.Date ? $"{localTime:hh:mm tt}" : $"{localTime:dd MMM yyyy}";
+        return localTime.Date == systemTime.Today.Date ? $"{localTime:h:mm tt}" : $"{localTime:d MMM yyyy}";
     }
 }
