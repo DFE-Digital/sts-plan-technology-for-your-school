@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Dfe.PlanTech.Web.Authorisation;
 
-public class ApiKeyAuthorisationFilter([FromServices] CacheRefreshConfiguration cacheRefreshConfiguration): IAuthorizationFilter
+public class ApiKeyAuthorisationFilter([FromServices] CacheRefreshConfiguration cacheRefreshConfiguration) : IAuthorizationFilter
 {
     private const string ApiKeyName = "X-WEBSITE-CACHE-CLEAR-API-KEY";
 
