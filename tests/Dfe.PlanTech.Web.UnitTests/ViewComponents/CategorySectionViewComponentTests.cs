@@ -211,7 +211,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
         [Theory]
         [InlineData("2015/10/15", "last completed 15 Oct 2015")]
-        [InlineData("2015/10/16 12:13:00", "last completed 1:13 PM")] // British summer time GMT + 1
+        [InlineData("2015/10/16 12:13:00", "last completed 1:13pm")] // British summer time GMT + 1
         public async Task Returns_CategorySectionInfo_If_Slug_Exists_And_SectionIsCompleted(string utcTime, string expectedBadge)
         {
             _systemTime.Today.Returns(_ => new DateTime(2015, 10, 16));
@@ -258,7 +258,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
         [Theory]
         [InlineData("2015/03/05", "in progress 5 Mar 2015")]
-        [InlineData("2015/03/06 10:13:00", "in progress 10:13 AM")] // GMT
+        [InlineData("2015/03/06 10:13:00", "in progress 10:13am")] // GMT
         public async Task Returns_CategorySelectionInfo_If_Slug_Exists_And_SectionIsNotCompleted(string utcTime, string expectedBadge)
         {
             _systemTime.Today.Returns(_ => new DateTime(2015, 3, 6));
