@@ -20,7 +20,8 @@ public class QueueReceiver(
     ILoggerFactory loggerFactory,
     CmsDbContext db,
     JsonToEntityMappers mappers,
-    IMessageRetryHandler messageRetryHandler)
+    IMessageRetryHandler messageRetryHandler,
+    IHttpHandler httpHandler)
     : BaseFunction(loggerFactory.CreateLogger<QueueReceiver>())
 {
     /// <summary>
@@ -113,11 +114,10 @@ public class QueueReceiver(
     /// </summary>
     private async Task RequestCacheClear()
     {
-        var httpClient = new HttpClient();
         var request = new HttpRequestMessage(HttpMethod.Post, cacheRefreshConfiguration.Endpoint);
         request.Headers.Add("X-WEBSITE-CACHE-CLEAR-API-KEY", cacheRefreshConfiguration.ApiKey);
 
-        await httpClient.SendAsync(request);
+        await httpHandler.SendAsync(request);
     }
 
     public virtual Task<int> ProcessEntityRemovalEvent(MappedEntity mapped, CancellationToken cancellationToken)
