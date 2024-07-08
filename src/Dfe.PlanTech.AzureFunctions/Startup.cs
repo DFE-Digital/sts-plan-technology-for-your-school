@@ -45,6 +45,7 @@ namespace Dfe.PlanTech.AzureFunctions
             });
 
             services.AddSingleton(new ContentfulOptions(bool.Parse(configuration["Contentful:UsePreview"] ?? bool.FalseString)));
+            services.AddSingleton(new CacheRefreshConfiguration(configuration["WEBSITE_CACHE_CLEAR_ENDPOINT"], configuration["WEBSITE_CACHE_CLEAR_APIKEY"]));
 
             services.AddOptions<MessageRetryHandlingOptions>()
                 .Configure<IConfiguration>((settings, configuration) =>

@@ -81,6 +81,7 @@ builder.Services.AddAuthorizationBuilder()
                 {
                     policy.Requirements.Add(new PageAuthorisationRequirement());
                 });
+builder.Services.AddSingleton<ApiKeyAuthorisationFilter>();
 
 builder.Services.AddContentfulServices(builder.Configuration);
 

@@ -16,6 +16,7 @@ namespace Dfe.PlanTech.AzureFunctions;
 
 public class QueueReceiver(
     ContentfulOptions contentfulOptions,
+    CacheRefreshConfiguration cacheRefreshConfiguration,
     ILoggerFactory loggerFactory,
     CmsDbContext db,
     JsonToEntityMappers mappers,
@@ -45,7 +46,8 @@ public class QueueReceiver(
 
     /// <summary>
     /// Processes a message from the Service Bus, updating the corresponding database entities,
-    /// and completing or dead-lettering the message. 
+    /// and completing or dead-lettering the message.
+    /// Then makes a request to the web app to clear the database cache.
     /// </summary>
     /// <param name="message">Service bus message to process</param>
     /// <param name="messageActions">Service bus message actions for completing or dead-lettering</param>
@@ -83,6 +85,7 @@ public class QueueReceiver(
             }
 
             await messageActions.CompleteMessageAsync(message, cancellationToken);
+            await RequestCacheClear();
         }
         catch (Exception ex) when (ex is JsonException or CmsEventException)
         {
@@ -99,13 +102,22 @@ public class QueueReceiver(
                 await messageActions.CompleteMessageAsync(message, cancellationToken);
                 return;
             }
-            else
-            {
-                Logger.LogError(ex, "Error processing message ID {Message}, The maximum delivery count has been reached", message.MessageId);
-                await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace, cancellationToken);
-                return;
-            }
+
+            Logger.LogError(ex, "Error processing message ID {Message}, The maximum delivery count has been reached", message.MessageId);
+            await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace, cancellationToken);
         }
+    }
+
+    /// <summary>
+    /// Makes a call to the plan tech web app that invalidates the database cache.
+    /// </summary>
+    private async Task RequestCacheClear()
+    {
+        var httpClient = new HttpClient();
+        var request = new HttpRequestMessage(HttpMethod.Post, cacheRefreshConfiguration.Endpoint);
+        request.Headers.Add("X-WEBSITE-CACHE-CLEAR-API-KEY", cacheRefreshConfiguration.ApiKey);
+
+        await httpClient.SendAsync(request);
     }
 
     public virtual Task<int> ProcessEntityRemovalEvent(MappedEntity mapped, CancellationToken cancellationToken)
