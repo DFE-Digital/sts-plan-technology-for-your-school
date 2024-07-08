@@ -47,7 +47,7 @@ public class CategorySectionDto
             Tag = new Tag("not started", TagColour.Grey);
     }
 
-    private string? LastEditedDate(DateTime? date, ISystemTime systemTime)
+    private static string? LastEditedDate(DateTime? date, ISystemTime systemTime)
     {
         if (date == null)
             return null;
