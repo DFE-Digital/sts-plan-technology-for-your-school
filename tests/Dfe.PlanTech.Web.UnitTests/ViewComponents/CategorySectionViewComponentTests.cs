@@ -22,6 +22,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
         private readonly CategorySectionViewComponent _categorySectionViewComponent;
         private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
+        private readonly ISystemTime _systemTime;
 
         private Category _category;
         private readonly Category _categoryTwo;
@@ -126,6 +127,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
             _loggerCategory = Substitute.For<ILogger<CategorySectionViewComponent>>();
             _getSubTopicRecommendationQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
+            _systemTime = Substitute.For<ISystemTime>();
 
             _subtopicRecommendations.Add(_subtopic);
             _subtopicRecommendations.Add(_subtopicTwo);
@@ -163,7 +165,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _categorySectionViewComponent = new CategorySectionViewComponent(
                 _loggerCategory,
                 _getSubmissionStatusesQuery,
-                _getSubTopicRecommendationQuery)
+                _getSubTopicRecommendationQuery,
+                _systemTime)
             {
                 ViewComponentContext = viewComponentContext
             };
@@ -206,14 +209,17 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             };
         }
 
-        [Fact]
-        public async Task Returns_CategorySectionInfo_If_Slug_Exists_And_SectionIsCompleted()
+        [Theory]
+        [InlineData("2015/10/15", "last completed 15 Oct 2015")]
+        [InlineData("2015/10/16 12:13:00", "last completed 1:13pm")] // British summer time GMT + 1
+        public async Task Returns_CategorySectionInfo_If_Slug_Exists_And_SectionIsCompleted(string utcTime, string expectedBadge)
         {
+            _systemTime.Today.Returns(_ => new DateTime(2015, 10, 16));
             _category.SectionStatuses.Add(new SectionStatusDto()
             {
                 SectionId = "Section1",
                 Completed = true,
-                DateCreated = new DateTime(2015, 10, 15),
+                DateUpdated = DateTime.Parse(utcTime),
             });
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
@@ -246,20 +252,23 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
             Assert.Equal("grey", categorySectionDto.Tag.Colour);
-            Assert.Equal("COMPLETE 15/10/2015", categorySectionDto.Tag.Text);
+            Assert.Equal(expectedBadge, categorySectionDto.Tag.Text);
             Assert.Null(categorySectionDto.ErrorMessage);
         }
 
-        [Fact]
-        public async Task Returns_CategorySelectionInfo_If_Slug_Exists_And_SectionIsNotCompleted()
+        [Theory]
+        [InlineData("2015/03/05", "in progress 5 Mar 2015")]
+        [InlineData("2015/03/06 10:13:00", "in progress 10:13am")] // GMT
+        public async Task Returns_CategorySelectionInfo_If_Slug_Exists_And_SectionIsNotCompleted(string utcTime, string expectedBadge)
         {
+            _systemTime.Today.Returns(_ => new DateTime(2015, 3, 6));
             _category.Completed = 0;
 
             _category.SectionStatuses.Add(new SectionStatusDto()
             {
                 SectionId = "Section1",
                 Completed = false,
-                DateCreated = new DateTime(2000, 01, 25)
+                DateUpdated = DateTime.Parse(utcTime)
             });
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
@@ -292,7 +301,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
             Assert.Equal("grey", categorySectionDto.Tag.Colour);
-            Assert.Equal("IN PROGRESS 25/01/2000", categorySectionDto.Tag.Text);
+            Assert.Equal(expectedBadge, categorySectionDto.Tag.Text);
             Assert.Null(categorySectionDto.ErrorMessage);
         }
 
@@ -331,7 +340,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
             Assert.Equal("grey", categorySectionDto.Tag.Colour);
-            Assert.Equal("NOT STARTED", categorySectionDto.Tag.Text);
+            Assert.Equal("not started", categorySectionDto.Tag.Text);
             Assert.Null(categorySectionDto.ErrorMessage);
         }
 
@@ -421,7 +430,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
             Assert.Equal("red", categorySectionDto.Tag.Colour);
-            Assert.Equal("UNABLE TO RETRIEVE STATUS", categorySectionDto.Tag.Text);
+            Assert.Equal("unable to retrieve status", categorySectionDto.Tag.Text);
             Assert.Null(categorySectionDto.ErrorMessage);
         }
 
