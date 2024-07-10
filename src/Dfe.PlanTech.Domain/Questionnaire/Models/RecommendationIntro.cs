@@ -15,7 +15,5 @@ public class RecommendationIntro : ContentComponent, IRecommendationIntro<Header
     [NotMapped]
     public List<ContentComponent> Content { get; init; } = [];
 
-    public string Title => Header.Text;
-
     public string SlugifiedHeader => Header.Text.Slugify();
 }

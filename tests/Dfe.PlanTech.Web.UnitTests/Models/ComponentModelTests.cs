@@ -91,7 +91,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         {
             var recommendationIntro = ComponentBuilder.BuildRecommendationIntro(header);
 
-            Assert.Equal(header, recommendationIntro.Title);
+            Assert.Equal(header, recommendationIntro.Header.Text);
             Assert.Equal(expectedResult, recommendationIntro.SlugifiedHeader);
         }
 

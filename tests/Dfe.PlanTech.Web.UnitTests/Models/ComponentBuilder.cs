@@ -74,7 +74,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
 
         public static RecommendationIntro BuildRecommendationIntro(string header) => new() { Header = new Header() { Text = header } };
 
-        public static RecommendationChunk BuildRecommendationChunk(string header, string title = "Title") => new() { Header = new Header() { Text = header }, Title = title };
+        public static RecommendationChunk BuildRecommendationChunk(string header, string title = "Title") => new() { Header = new Header() { Text = header } };
 
         private static List<Question> BuildQuestions()
         {
