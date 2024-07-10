@@ -8,7 +8,7 @@
                 await Html.RenderPartialAsync("Components/Header", headerWithContent.Header);
             }
         </div>
-        <div class="govuk-grid-row" id="top">
+        <div class="govuk-grid-row">
             <div class="govuk-grid-column-one-third">
                 @{ ViewData["VerticalNavigationSection"] = headerWithContent.SlugifiedHeader; }
                 <partial name="Components/VerticalNavigation/Default" model="@Model.Chunks"/>
