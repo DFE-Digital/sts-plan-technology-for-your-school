@@ -1,6 +1,10 @@
-import { getSubmissionTimeText } from "../dpv-helpers/time-helpers";
+import { CleanText } from "../../../helpers/text-helpers";
+import { getSlowTestSubmissionTimeText, getSubmissionTimeText } from "../dpv-helpers/time-helpers";
+
 
 export const selfAssessmentPageNewRecommendation = (section, maturity) => {
+    const submissionTimeText = getSubmissionTimeText(new Date());
+    const slowSubmissionTimeText = getSlowTestSubmissionTimeText(new Date());
 
     const matchingRecommendation = section.recommendation.intros.find(
         (recommendation) => recommendation.maturity == maturity
@@ -17,8 +21,6 @@ export const selfAssessmentPageNewRecommendation = (section, maturity) => {
             .toLowerCase()
             .replace(/ /g, "-");
 
-    const submissionTimeText = getSubmissionTimeText(new Date());
-
     cy.get("a.govuk-link")
         .contains(section.name.trim())
         .should("have.attr", "href").and("include", `${section.name.trim().toLowerCase().replace(/ /g, "-")}`);
@@ -28,7 +30,10 @@ export const selfAssessmentPageNewRecommendation = (section, maturity) => {
         .parent()
         .next()
         .within(() => {
-            cy.get("strong.app-task-list__tag").should("include.text", `${submissionTimeText}`)
+            cy.get("strong.app-task-list__tag").invoke("text")
+                .then((text) => {
+                    cy.wrap(CleanText(text)).should("be.oneOf", [submissionTimeText, slowSubmissionTimeText]);
+                });
         })
 
     cy.get("a.govuk-link")
