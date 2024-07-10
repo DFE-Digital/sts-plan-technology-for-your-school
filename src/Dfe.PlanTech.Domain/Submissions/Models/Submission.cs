@@ -1,5 +1,4 @@
 ﻿using Dfe.PlanTech.Domain.Establishments.Models;
-using Dfe.PlanTech.Domain.Responses.Models;
 
 namespace Dfe.PlanTech.Domain.Submissions.Models;
 

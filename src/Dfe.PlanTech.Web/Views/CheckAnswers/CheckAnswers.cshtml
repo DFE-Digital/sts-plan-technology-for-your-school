@@ -13,7 +13,7 @@
             await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Title);
         }
         <dl class="govuk-summary-list govuk-!-margin-bottom-9">
-            @foreach (var questionWithAnswer in Model.CheckAnswerDto.Responses)
+            @foreach (var questionWithAnswer in Model.SubmissionResponses.Responses)
             {
                 var anchorLabel = $"your answer for {questionWithAnswer.QuestionText}";
 

@@ -2,7 +2,6 @@ using Dfe.PlanTech.Application.Submissions.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Domain.Responses.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
@@ -16,26 +15,26 @@ public class CheckAnswersOrNextQuestionCheckerTests
     public readonly ISubmissionStatusChecker StatusChecker = CheckAnswersOrNextQuestionChecker.CheckAnswersOrNextQuestion;
 
     public static readonly List<Question> Questions = new() {
-  new(){
-    Sys = new SystemDetails(){ Id = "Question-One" },
-    Answers = new()
-  },
-   new(){
-    Sys = new SystemDetails(){ Id = "Question-Two" },
-    Answers = new()
-  },
-   new(){
-    Sys = new SystemDetails(){ Id = "Question-Three" },
-    Answers = new()
-  },
-   new(){
-    Sys = new SystemDetails(){ Id = "Question-Four" },
-    Answers = new()
-  },
-  new(){
-    Sys = new SystemDetails(){ Id = "Question-Five" },
-    Answers = new()
-  },
+    new(){
+      Sys = new SystemDetails(){ Id = "Question-One" },
+      Answers = new()
+    },
+    new(){
+      Sys = new SystemDetails(){ Id = "Question-Two" },
+      Answers = new()
+    },
+    new(){
+      Sys = new SystemDetails(){ Id = "Question-Three" },
+      Answers = new()
+    },
+    new(){
+      Sys = new SystemDetails(){ Id = "Question-Four" },
+      Answers = new()
+    },
+    new(){
+      Sys = new SystemDetails(){ Id = "Question-Five" },
+      Answers = new()
+    },
   };
 
     public readonly List<Answer> Answers = new(){
@@ -63,31 +62,35 @@ public class CheckAnswersOrNextQuestionCheckerTests
         };
 
 
-    public CheckAnswerDto CheckAnswersDto = new()
+    public SubmissionResponsesDto ResponsesForSubmissionDto = new()
     {
-        Responses = new List<QuestionWithAnswer>(){
-        new QuestionWithAnswer(){
-          QuestionRef = "Question-One",
-          AnswerRef = "Answer-One"
-        },
-        new QuestionWithAnswer(){
-          QuestionRef = "Question-Two",
-          AnswerRef = "Answer-Two"
-        },
-        new QuestionWithAnswer(){
-          QuestionRef = "Question-Three",
-          AnswerRef = "Answer-Three"
-        },
-        new QuestionWithAnswer(){
-          QuestionRef = "Question-Four",
-          AnswerRef = "Answer-Four"
-        },
-        new QuestionWithAnswer(){
-          QuestionRef = "Question-Five",
-          AnswerRef = "Answer-Four"
-        },
-
-      }
+        Responses = [
+          new QuestionWithAnswer()
+          {
+              QuestionRef = "Question-One",
+              AnswerRef = "Answer-One"
+          },
+            new QuestionWithAnswer()
+            {
+                QuestionRef = "Question-Two",
+                AnswerRef = "Answer-Two"
+            },
+            new QuestionWithAnswer()
+            {
+                QuestionRef = "Question-Three",
+                AnswerRef = "Answer-Three"
+            },
+            new QuestionWithAnswer()
+            {
+                QuestionRef = "Question-Four",
+                AnswerRef = "Answer-Four"
+            },
+            new QuestionWithAnswer()
+            {
+                QuestionRef = "Question-Five",
+                AnswerRef = "Answer-Four"
+            },
+        ]
     };
 
     public CheckAnswersOrNextQuestionCheckerTests()
@@ -144,15 +147,14 @@ public class CheckAnswersOrNextQuestionCheckerTests
         processor.User.Returns(user);
 
         var getResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
-        getResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-                    .Returns(CheckAnswersDto);
+        getResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(ResponsesForSubmissionDto);
 
         processor.GetResponsesQuery.Returns(getResponsesQuery);
 
         var section = Substitute.For<ISectionComponent>();
         section.GetOrderedResponsesForJourney(Arg.Any<IEnumerable<QuestionWithAnswer>>())
                 .Returns(new[] {
-              CheckAnswersDto.Responses[0],CheckAnswersDto.Responses[1],CheckAnswersDto.Responses[4]
+              ResponsesForSubmissionDto.Responses[0],ResponsesForSubmissionDto.Responses[1],ResponsesForSubmissionDto.Responses[4]
                 });
 
         section.Sys.Returns(new SystemDetails()
@@ -180,16 +182,13 @@ public class CheckAnswersOrNextQuestionCheckerTests
         processor.User.Returns(user);
 
         var getResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
-        getResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-                         .Returns(CheckAnswersDto);
+        getResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(ResponsesForSubmissionDto);
 
         processor.GetResponsesQuery.Returns(getResponsesQuery);
 
         var section = Substitute.For<ISectionComponent>();
         section.GetOrderedResponsesForJourney(Arg.Any<IEnumerable<QuestionWithAnswer>>())
-                .Returns(new[] {
-              CheckAnswersDto.Responses[0],CheckAnswersDto.Responses[1]
-                });
+                .Returns([ResponsesForSubmissionDto.Responses[0], ResponsesForSubmissionDto.Responses[1]]);
 
         section.Sys.Returns(new SystemDetails()
         {

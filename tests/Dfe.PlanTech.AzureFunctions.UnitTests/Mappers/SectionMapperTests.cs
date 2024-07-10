@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 using MockQueryable.NSubstitute;
 using NSubstitute;
 
-namespace Dfe.PlanTech.AzureFunctions.UnitTests;
+namespace Dfe.PlanTech.AzureFunctions.UnitTests.Mappers;
 
 public class SectionMapperTests : BaseMapperTests
 {

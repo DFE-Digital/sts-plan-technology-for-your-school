@@ -3,7 +3,7 @@ using Dfe.PlanTech.Domain.Caching.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
-namespace Dfe.PlanTech.AzureFunctions.UnitTests;
+namespace Dfe.PlanTech.AzureFunctions.UnitTests.Mappers;
 
 public class ButtonWithEntryReferenceMapperTests : BaseMapperTests
 {

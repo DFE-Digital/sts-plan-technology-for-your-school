@@ -2,7 +2,7 @@ using Dfe.PlanTech.AzureFunctions.Mappings;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
-namespace Dfe.PlanTech.AzureFunctions.UnitTests;
+namespace Dfe.PlanTech.AzureFunctions.UnitTests.Mappers;
 
 public class NavigationLinkMapperTests : BaseMapperTests
 {

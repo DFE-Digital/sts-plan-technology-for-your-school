@@ -1,6 +1,6 @@
 ﻿using Dfe.PlanTech.Domain.Questionnaire.Models;
 
-namespace Dfe.PlanTech.Domain.Responses.Models;
+namespace Dfe.PlanTech.Domain.Submissions.Models;
 
 public class RecordResponseDto
 {

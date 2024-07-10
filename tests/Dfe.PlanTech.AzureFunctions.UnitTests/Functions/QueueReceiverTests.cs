@@ -28,6 +28,7 @@ public class QueueReceiverTests
     private readonly ILoggerFactory _loggerFactoryMock;
     private readonly ILogger _loggerMock;
     private readonly CmsDbContext _cmsDbContextMock;
+    private readonly EntityRetriever _entityRetrieverMock;
     private readonly JsonToEntityMappers _jsonToEntityMappers;
     private readonly IMessageRetryHandler _messageRetryHandlerMock;
 
@@ -51,6 +52,7 @@ public class QueueReceiverTests
         });
 
         _cmsDbContextMock = Substitute.For<CmsDbContext>();
+        _entityRetrieverMock = Substitute.For<EntityRetriever>(_cmsDbContextMock);
 
         _cmsDbContextMock.SaveChangesAsync().Returns(1);
 
@@ -72,7 +74,6 @@ public class QueueReceiverTests
                                             Console.Write("Shouldn't hit this");
                                         }
                                     });
-
 
         var answersDbSet = _answers.AsQueryable().BuildMockDbSet();
         _cmsDbContextMock.Answers = answersDbSet;
@@ -343,15 +344,22 @@ public class QueueReceiverTests
         Assert.True(_questions[1].Deleted);
     }
 
-    [Fact]
-    public async Task QueueReceiverDbWriter_Should_ExitEarly_When_Event_Is_Save_And_UsePreview_Is_False()
+    [Theory]
+    [InlineData("ContentManagement.Entry.save")]
+    [InlineData("ContentManagement.Entry.auto_save")]
+    public async Task QueueReceiverDbWriter_Should_ExitEarly_When_Event_Is_Save_And_Entity_Is_Published_And_UsePreview_Is_False(string subject)
     {
+        _contentComponent.Published = true;
+        _questions.Add(_contentComponent);
+        _entityRetrieverMock
+            .When(mock => mock
+                .GetExistingDbEntity(Arg.Is<ContentComponentDbEntity>(entity => entity.Id == _contentId), default)
+                .Returns(_contentComponent));
         var queueReceiver = new QueueReceiver(new ContentfulOptions(false), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _messageRetryHandlerMock);
 
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
 
-        var subject = "ContentManagement.Entry.save";
         var serviceBusMessage = new ServiceBusMessage(bodyJsonStr) { Subject = subject };
 
         ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
@@ -360,29 +368,32 @@ public class QueueReceiverTests
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
 
-        Assert.Single(_questions);
+        await _cmsDbContextMock.Received(0).SaveChangesAsync();
     }
 
-
-    [Fact]
-    public async Task QueueReceiverDbWriter_Should_ExitEarly_When_Event_Is_AutoSave_And_UsePreview_Is_False()
+    [Theory]
+    [InlineData("ContentManagement.Entry.save")]
+    [InlineData("ContentManagement.Entry.auto_save")]
+    public async Task QueueReceiverDbWriter_Should_Save_When_Event_Is_Save_And_Entity_Is_Unpublished_And_UsePreview_Is_False(string subject)
     {
+        _entityRetrieverMock
+            .When(mock => mock
+                .GetExistingDbEntity(Arg.Is<ContentComponentDbEntity>(entity => entity.Id == _otherContentComponent.Id), default)
+                .Returns(_otherContentComponent));
         var queueReceiver = new QueueReceiver(new ContentfulOptions(false), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _messageRetryHandlerMock);
 
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
 
-        var subject = "ContentManagement.Entry.auto_save";
         var serviceBusMessage = new ServiceBusMessage(bodyJsonStr) { Subject = subject };
 
         ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
 
         await queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
 
-        await serviceBusMessageActionsMock.Received()
-                                          .CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
+        await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
 
-        Assert.Single(_questions);
+        await _cmsDbContextMock.Received(1).SaveChangesAsync();
     }
 
     [Fact]

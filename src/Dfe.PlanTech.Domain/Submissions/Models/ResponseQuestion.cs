@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Dfe.PlanTech.Domain.Questions.Models;
+namespace Dfe.PlanTech.Domain.Submissions.Models;
 
-public class Question
+public class ResponseQuestion
 {
     [Required]
     public int Id { get; init; }

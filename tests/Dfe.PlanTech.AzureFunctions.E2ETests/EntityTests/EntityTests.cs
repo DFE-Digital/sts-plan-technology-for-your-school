@@ -242,6 +242,115 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
         ClearDatabase();
     }
 
+    [Fact]
+    public async Task Should_Allow_Save_When_NotExisting_In_Db()
+    {
+        var entities = EntityGenerator.Generate(20);
+
+        CreatedEntities.AddRange(entities);
+
+        var cmsEvent = CmsEvent.SAVE;
+
+        foreach (var entity in entities)
+        {
+            var message = CreateServiceBusMessage(entity, cmsEvent);
+            await QueueReceiver.QueueReceiverDbWriter([message], MessageActions, default);
+
+            var dbEntity = await GetDbEntityById(entity.Sys.Id);
+            ValidateDbMatches(entity, dbEntity, published: false);
+        }
+
+        Db.ChangeTracker.Clear();
+
+        await ValidateAllEntitiesMatch(entities, false, false, false);
+        ClearDatabase();
+    }
+
+    [Fact]
+    public async Task Should_Allow_AutoSave_When_NotExisting_In_Db()
+    {
+        var entities = EntityGenerator.Generate(20);
+
+        CreatedEntities.AddRange(entities);
+
+        var cmsEvent = CmsEvent.AUTO_SAVE;
+
+        foreach (var entity in entities)
+        {
+            var message = CreateServiceBusMessage(entity, cmsEvent);
+            await QueueReceiver.QueueReceiverDbWriter([message], MessageActions, default);
+
+            Db.ChangeTracker.Clear();
+
+            var dbEntity = await GetDbEntityById(entity.Sys.Id);
+            ValidateDbMatches(entity, dbEntity, published: false);
+        }
+
+        Db.ChangeTracker.Clear();
+
+        await ValidateAllEntitiesMatch(entities, false, false, false);
+        ClearDatabase();
+    }
+
+    [Fact]
+    public async Task Should_Allow_Save_When_Exists_But_Not_Published()
+    {
+        await CreateAndPublishEntities();
+
+        var updatedEntities = EntityGenerator.CopyWithDifferentValues(CreatedEntities).ToList();
+
+        foreach (var entity in updatedEntities)
+        {
+            Db.ChangeTracker.Clear();
+
+            //Unpublish entity first
+            await UpdateEntityStatus(entity.Original, CmsEvent.UNPUBLISH);
+
+            Db.ChangeTracker.Clear();
+
+            //Update with SAVE event
+            var message = CreateServiceBusMessage(entity.Updated, CmsEvent.SAVE);
+            await QueueReceiver.QueueReceiverDbWriter([message], MessageActions, default);
+
+            //Assert changed
+            var dbEntity = await GetDbEntityById(entity.Original.Sys.Id);
+            ValidateDbMatches(entity.Updated, dbEntity, published: false);
+        }
+
+        await ValidateAllEntitiesMatch(updatedEntities.Select(entity => entity.Updated), false, false, false);
+        ClearDatabase();
+    }
+
+    [Fact]
+    public async Task Should_Allow_AutoSave_When_Exists_But_Not_Published()
+    {
+        await CreateAndPublishEntities();
+
+        var updatedEntities = EntityGenerator.CopyWithDifferentValues(CreatedEntities).ToList();
+
+        foreach (var entity in updatedEntities)
+        {
+            Db.ChangeTracker.Clear();
+
+            //Unpublish entity first
+            await UpdateEntityStatus(entity.Original, CmsEvent.UNPUBLISH);
+
+            Db.ChangeTracker.Clear();
+
+            //Update with SAVE event
+            var message = CreateServiceBusMessage(entity.Updated, CmsEvent.AUTO_SAVE);
+            await QueueReceiver.QueueReceiverDbWriter([message], MessageActions, default);
+
+            //Assert changed
+            var dbEntity = await GetDbEntityById(entity.Original.Sys.Id);
+            ValidateDbMatches(entity.Updated, dbEntity, published: false);
+        }
+
+        await ValidateAllEntitiesMatch(updatedEntities.Select(entity => entity.Updated), false, false, false);
+        ClearDatabase();
+    }
+
+
     private async Task UpdateEntityStatus(TEntity entity, CmsEvent cmsEvent)
     {
         var message = CreateBlankMessage(entity, cmsEvent);
@@ -274,6 +383,8 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
         {
             var message = CreateServiceBusMessage(entity, cmsEvent);
             await QueueReceiver.QueueReceiverDbWriter([message], MessageActions, default);
+
+            Db.ChangeTracker.Clear();
 
             var dbEntity = await GetDbEntityById(entity.Sys.Id);
             ValidateDbMatches(entity, dbEntity, published: true);

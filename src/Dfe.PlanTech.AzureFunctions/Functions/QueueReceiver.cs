@@ -57,14 +57,15 @@ public class QueueReceiver(
         try
         {
             CmsEvent cmsEvent = GetCmsEvent(message.Subject);
+            MappedEntity mapped = await MapMessageToEntity(message, cmsEvent, cancellationToken);
 
-            if (ShouldIgnoreMessage(cmsEvent))
+            var isPublished = mapped.ExistingEntity?.Published ?? false;
+
+            if (ShouldIgnoreMessage(cmsEvent, isPublished))
             {
                 await messageActions.CompleteMessageAsync(message, cancellationToken);
                 return;
             }
-
-            MappedEntity mapped = await MapMessageToEntity(message, cmsEvent, cancellationToken);
 
             if (mapped.IsMinimalPayloadEvent)
             {
@@ -127,8 +128,9 @@ public class QueueReceiver(
     /// Else, we return false.
     /// </remarks>
     /// <param name="cmsEvent"></param>
+    /// <param name="isPublished"></param>
     /// <returns></returns>
-    private bool ShouldIgnoreMessage(CmsEvent cmsEvent)
+    private bool ShouldIgnoreMessage(CmsEvent cmsEvent, bool isPublished)
     {
         if (cmsEvent == CmsEvent.CREATE)
         {
@@ -136,7 +138,7 @@ public class QueueReceiver(
             return true;
         }
 
-        if ((cmsEvent == CmsEvent.SAVE || cmsEvent == CmsEvent.AUTO_SAVE) && !contentfulOptions.UsePreview)
+        if ((cmsEvent == CmsEvent.SAVE || cmsEvent == CmsEvent.AUTO_SAVE) && isPublished && !contentfulOptions.UsePreview)
         {
             Logger.LogInformation("Received {Event} but UsePreview is {UsePreview} - dropping message", cmsEvent,
                 contentfulOptions.UsePreview);
