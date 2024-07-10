@@ -14,7 +14,7 @@ public partial class HeadingRenderer : BaseRichTextContentPartRender
 
     public override StringBuilder AddHtml(RichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
-        var tag = GetHeaderTag().Replace(content.NodeType,"$1$2");
+        var tag = GetHeaderTag().Replace(content.NodeType, "$1$2");
 
         stringBuilder.Append($"<{tag}>");
         rendererCollection.RenderChildren(content, stringBuilder);
