@@ -7,7 +7,8 @@ const ReplaceWhiteSpace = (string) =>
     .replace(/\s/g, " ")
     .replace(" ", " ")
     .replace(" ", " ")
-    .replace(" ", " ");
+    .replace(" ", " ")
+    .replace("  ", " ");
 
 const CleanText = (text) =>
   ReplaceNonBreakingHyphen(ReplaceWhiteSpace(text)).trim();
