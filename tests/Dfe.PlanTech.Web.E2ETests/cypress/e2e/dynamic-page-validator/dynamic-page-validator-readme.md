@@ -2,13 +2,10 @@
 
 ## Instructions
 
-1. Extract Contentful content using CLI
-2. Rename file to `contentful.js`, and make the JSON an object called Contentful. E.g. `const contentful = { ... JSON}`;
-3. Export that object
-4. Place the `contentful.js` in `helpers` folder in the parent folder. E.g. `Dfe.PlanTech.Web.E2ETests\cypress\helpers\contentful.js`
-5. Remove the `skip` command on line 14.
-
-_Note: Will look into automating the Contentful export for ease_
+1. Create `fixtures` folder in `Dfe.PlanTech.Web.E2ETests\cypress` if one does not exist.
+2. Delete any old version of `contentful-data.json` that may exist in `\fixtures` to ensure that the content tested against is up-to-date.
+3. Before running Cypress, run `npm install` from `\Dfe.PlanTech.Web.E2ETests` to install the Contentful export processor.
+4. Run Cypress as normal (using `npx cypress open --config "baseUrl=URL"` where URL is that listed in your `cypress.env.json` file) and select the dynamic page validator.
 
 ### Components content validated
 
@@ -21,8 +18,8 @@ _Note: Will look into automating the Contentful export for ease_
 - [x] InsetText
 - [x] NavigationLink
 - [x] Question
-- [ ] RecommendationIntro
-- [ ] RecommendationChunk
+- [ ] RecommendationIntro 
+- [ ] RecommendationChunk *
 - [ ] RecommendationSection
 - [x] Section *
 - [x] TextBody *
@@ -31,23 +28,29 @@ _Note: Will look into automating the Contentful export for ease_
 
 * Not fully complete. See below for notes.
 
-| Content Type | Status Notes                                                                                                                        |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Section      | Haven't added functionality to test current section status                                                                          |
-| TextBody     | Haven't added validations for all element types (e.g. hyperlinks, strong, italics, etc.), haven't validated classes for most things |
+| Content Type        | Status Notes                                                                                                                        |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Section             | Not currently testing for 'Not started' and 'In progress' section statuses                                                          |
+| TextBody            | Haven't added validations for all element types (e.g. hyperlinks, strong, italics, etc.), haven't validated classes for most things |
+| RecommendationChunk | WIP to create paths to ensure all RecommendationChunks are presented for test as chunks are no longer determined by	 maturity	    |
 
 ### Page routing validated
 
 - [x] Sub-topic routing
 - [x] Recommendation routing
+- [ ] Amending answers from the Check Answers page
+- [ ] Returning to an In Progress assessment
 
 ### Other validated
 
 - [x] Page authentication
+- [ ] Recommendations printing
+- [ ] 
 
 ### Other to do
 
 - [x] Do not fail if one error; run entire tests for issues.
+- [ ] Complete/reset journey if failing during question/answer validation (leaving section on 'In progress' fails the url check in the next routed test on that section)
 - [x] Split tests up; not just one `it` function
 - [ ] Complete documentation:
    - [ ] Merge with documentation in `contentful-helpers`
@@ -55,8 +58,6 @@ _Note: Will look into automating the Contentful export for ease_
 - [ ] Clear section status before each run
 
 #### Integrate with CI/CD Pipeline
-
-_Note: Out of scope of the current user story for this work_
 
 - [ ] Export Contentful content automatically
 - [ ] Run E2E test based off the exported data as part of our CI/CD workflow
