@@ -18,7 +18,7 @@ public class ApiKeyAuthorisationFilter([FromServices] CacheRefreshConfiguration 
         }
 
         var validApiKey = cacheRefreshConfiguration.ApiKey;
-        if (validApiKey.IsNullOrEmpty() || !validApiKey.Equals(providedApiKey))
+        if (validApiKey is null || !validApiKey.Equals(providedApiKey))
         {
             context.Result = new UnauthorizedResult();
         }

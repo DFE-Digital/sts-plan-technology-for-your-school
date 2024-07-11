@@ -4,6 +4,6 @@ public class HttpHandler : IHttpHandler
 {
     private readonly HttpClient _httpClient = new();
 
-    public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage requestMessage) =>
-        await _httpClient.SendAsync(requestMessage);
+    public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request) =>
+        await _httpClient.SendAsync(request);
 }
