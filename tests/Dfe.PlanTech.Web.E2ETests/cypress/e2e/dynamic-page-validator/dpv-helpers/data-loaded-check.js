@@ -6,7 +6,7 @@
  */
 
 export const dataLoaded = (contentMap) => {
-    const haveContent = contentMap && ((contentMap.size && contentMap.size > 0) || (contentMap.length && contentMap.length > 0));
+    const haveContent = contentMap?.size > 0 || contentMap?.length > 0;
 
     if (!haveContent) {
         console.log("Data has not been loaded");

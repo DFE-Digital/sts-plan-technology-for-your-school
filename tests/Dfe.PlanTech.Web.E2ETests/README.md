@@ -13,7 +13,7 @@ Created using [Cypress](https://cypress.io)
 3. Install the necessary packages by running `npm install` from `Dfe.PlanTech.Web.E2ETests`.
 4. Run Cypress by running `npx cypress open --config "baseUrl=URL"` where URL is the same as in the variables mentioned below.
 
-Further setup is required to use the Dynamic Page Validator - see the dedicated README.
+Further setup is required to use the Dynamic Page Validator - see the dedicated [README](./cypress/e2e/dynamic-page-validator/dynamic-page-validator-readme.md).
 
 
 ### Variables

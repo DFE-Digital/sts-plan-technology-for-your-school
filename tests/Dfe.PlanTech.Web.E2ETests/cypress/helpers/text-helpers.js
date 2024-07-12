@@ -1,14 +1,10 @@
 const ReplaceNonBreakingHyphen = (text) => text.replace("&#8209;", "‑");
 
 const ReplaceWhiteSpace = (string) =>
-  string
-    .replace(/\s/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/\s/g, " ")
-    .replace(" ", " ")
-    .replace(" ", " ")
-    .replace(" ", " ")
-    .replace("  ", " ");
+    string
+        .replace(/&nbsp;/g, " ")
+        .replace(/(\s|\u00A0|\u202f|\u0020|\u2007)+/g, " ");
+
 
 const CleanText = (text) =>
   ReplaceNonBreakingHyphen(ReplaceWhiteSpace(text)).trim();

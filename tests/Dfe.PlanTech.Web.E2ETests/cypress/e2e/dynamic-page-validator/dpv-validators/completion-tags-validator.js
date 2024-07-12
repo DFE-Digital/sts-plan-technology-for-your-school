@@ -1,10 +1,11 @@
 import { CleanText } from "../../../helpers/text-helpers";
-import { getSlowTestSubmissionTimeText, getSubmissionTimeText } from "../dpv-helpers/time-helpers";
+import { getSubmissionTimeText } from "../dpv-helpers/time-helpers";
 
 
 export const selfAssessmentPageNewRecommendation = (section, maturity) => {
-    const submissionTimeText = getSubmissionTimeText(new Date());
-    const slowSubmissionTimeText = getSlowTestSubmissionTimeText(new Date());
+    const time = new Date();
+    const timePlusOneMinute = new Date(time).setMinutes(time.getMinutes() + 1);
+    const lateTime = new Date(timePlusOneMinute);
 
     const matchingRecommendation = section.recommendation.intros.find(
         (recommendation) => recommendation.maturity == maturity
@@ -32,7 +33,7 @@ export const selfAssessmentPageNewRecommendation = (section, maturity) => {
         .within(() => {
             cy.get("strong.app-task-list__tag").invoke("text")
                 .then((text) => {
-                    cy.wrap(CleanText(text)).should("be.oneOf", [submissionTimeText, slowSubmissionTimeText]);
+                    cy.wrap(CleanText(text)).should("be.oneOf", [ getSubmissionTimeText(time), getSubmissionTimeText(lateTime) ]);
                 });
         })
 

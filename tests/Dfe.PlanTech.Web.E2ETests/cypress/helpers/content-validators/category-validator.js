@@ -19,7 +19,7 @@ function ValidateCategory({ fields, sys }) {
     const sections = fields.sections;
 
     appTaskList.find("div.govuk-summary-list__row").then(($listItems) => {
-       // expect($listItems).to.have.length(sections.length);
+       expect($listItems).to.have.length(sections.length);
 
     for (let index = 0; index < sections.length; index++) {
       const section = sections[index];
