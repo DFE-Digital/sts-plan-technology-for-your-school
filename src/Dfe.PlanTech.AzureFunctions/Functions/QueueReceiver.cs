@@ -114,8 +114,13 @@ public class QueueReceiver(
     /// </summary>
     private async Task RequestCacheClear()
     {
+        if (cacheRefreshConfiguration.ApiKeyName is null)
+        {
+            Logger.LogError("No Api Key name has been configured but is required for clearing the website cache");
+            return;
+        }
         var request = new HttpRequestMessage(HttpMethod.Post, cacheRefreshConfiguration.Endpoint);
-        request.Headers.Add("X-WEBSITE-CACHE-CLEAR-API-KEY", cacheRefreshConfiguration.ApiKey);
+        request.Headers.Add(cacheRefreshConfiguration.ApiKeyName, cacheRefreshConfiguration.ApiKeyValue);
 
         await httpHandler.SendAsync(request);
     }
