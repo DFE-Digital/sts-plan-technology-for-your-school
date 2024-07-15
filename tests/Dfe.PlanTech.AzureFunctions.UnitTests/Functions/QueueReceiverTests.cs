@@ -24,7 +24,7 @@ public class QueueReceiverTests
 {
     private const string bodyJsonStr = "{\"metadata\":{\"tags\":[]},\"fields\":{\"internalName\":{\"en-US\":\"TestingQuestion\"},\"text\":{\"en-US\":\"TestingQuestion\"},\"helpText\":{\"en-US\":\"HelpText\"},\"answers\":{\"en-US\":[{\"sys\":{\"type\":\"Link\",\"linkType\":\"Entry\",\"id\":\"4QscetbCYG4MUsGdoDU0C3\"}}]},\"slug\":{\"en-US\":\"testing-slug\"}},\"sys\":{\"type\":\"Entry\",\"id\":\"2VSR0emw0SPy8dlR9XlgfF\",\"space\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"Space\",\"id\":\"py5afvqdlxgo\"}},\"environment\":{\"sys\":{\"id\":\"dev\",\"type\":\"Link\",\"linkType\":\"Environment\"}},\"contentType\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"ContentType\",\"id\":\"question\"}},\"createdBy\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"User\",\"id\":\"5yhMQOCN9P2vGpfjyZKiey\"}},\"updatedBy\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"User\",\"id\":\"4hiJvkyVWdhTt6c4ZoDkMf\"}},\"revision\":13,\"createdAt\":\"2023-12-04T14:36:46.614Z\",\"updatedAt\":\"2023-12-15T16:16:45.034Z\"}}";
     private const string _contentId = "2VSR0emw0SPy8dlR9XlgfF";
-    private const string _refresh_api_key_header = "X-WEBSITE-CACHE-CLEAR-API-KEY";
+    private const string _refresh_api_key_name = "X-WEBSITE-CACHE-CLEAR-API-KEY";
     private const string _refresh_api_key_value = "mock-refresh-api-key";
     private const string _refresh_endpoint = "mock-refresh-endpoint";
     private readonly QueueReceiver _queueReceiver;
@@ -101,7 +101,7 @@ public class QueueReceiverTests
                 return Task.FromResult(1);
             });
 
-        _cacheRefreshConfiguration = new CacheRefreshConfiguration(_refresh_endpoint, _refresh_api_key_value);
+        _cacheRefreshConfiguration = new CacheRefreshConfiguration(_refresh_endpoint, _refresh_api_key_name, _refresh_api_key_value);
         _queueReceiver = new(new ContentfulOptions(true), _cacheRefreshConfiguration, _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _messageRetryHandlerMock, _httpHandler);
         DbSet<ContentComponentDbEntity> contentComponentsMock = MockContentComponents();
         _cmsDbContextMock.ContentComponents = contentComponentsMock;
@@ -408,7 +408,7 @@ public class QueueReceiverTests
         await _httpHandler.SendAsync(Arg.Is<HttpRequestMessage>(
             request => request.RequestUri != null
                        && request.RequestUri.ToString() == _refresh_endpoint
-                       && request.Headers.TryGetValues(_refresh_api_key_header, out headerValues)
+                       && request.Headers.TryGetValues(_refresh_api_key_name, out headerValues)
                        && headerValues.Contains(_refresh_api_key_value)));
     }
 

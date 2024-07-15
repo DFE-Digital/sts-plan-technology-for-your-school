@@ -11,14 +11,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Authorisation;
 
 public class ApiKeyAuthorisationFilterTests
 {
-    private const string ApiKeyName = "X-WEBSITE-CACHE-CLEAR-API-KEY";
     private const string RefreshEndpoint = "mock-refresh-endpoint";
-    private const string RefreshApiKey = "mock-refresh-api-key";
+    private const string RefreshApiKeyName = "X-WEBSITE-CACHE-CLEAR-API-KEY";
+    private const string RefreshApiKeyValue = "mock-refresh-api-key";
     private readonly ApiKeyAuthorisationFilter _authorisationFilter;
 
     public ApiKeyAuthorisationFilterTests()
     {
-        var cacheRefreshConfiguration = new CacheRefreshConfiguration(RefreshEndpoint, RefreshApiKey);
+        var cacheRefreshConfiguration = new CacheRefreshConfiguration(RefreshEndpoint, RefreshApiKeyName, RefreshApiKeyValue);
         _authorisationFilter = new ApiKeyAuthorisationFilter(cacheRefreshConfiguration);
     }
 
@@ -40,7 +40,7 @@ public class ApiKeyAuthorisationFilterTests
     public void ShouldReturn_Unauthorised_Result_If_Invalid_ApiKey()
     {
         var httpContext = new DefaultHttpContext();
-        httpContext.Request.Headers.Append(ApiKeyName, "invalid-api-key");
+        httpContext.Request.Headers.Append(RefreshApiKeyName, "invalid-api-key");
         var actionContext = new ActionContext
         {
             HttpContext = httpContext,
@@ -56,7 +56,7 @@ public class ApiKeyAuthorisationFilterTests
     public void Should_Continue_Authorised_If_Valid_ApiKey()
     {
         var httpContext = new DefaultHttpContext();
-        httpContext.Request.Headers.Append(ApiKeyName, RefreshApiKey);
+        httpContext.Request.Headers.Append(RefreshApiKeyName, RefreshApiKeyValue);
         var actionContext = new ActionContext
         {
             HttpContext = httpContext,

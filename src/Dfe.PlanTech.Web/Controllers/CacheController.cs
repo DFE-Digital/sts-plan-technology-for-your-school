@@ -11,7 +11,7 @@ public class CacheController : BaseController<CacheController>
     {
     }
 
-    [HttpPost("clear-cache")]
+    [HttpPost("clear")]
     [ValidateApiKey]
     public bool ClearCache([FromServices] IEFCacheServiceProvider cacheServiceProvider)
     {
@@ -23,7 +23,7 @@ public class CacheController : BaseController<CacheController>
         }
         catch (Exception e)
         {
-            logger.LogError("An error occured while trying to clear the database cache: {message}", e.Message);
+            logger.LogError(e, "An error occured while trying to clear the database cache: {message}", e.Message);
             return false;
         }
     }
