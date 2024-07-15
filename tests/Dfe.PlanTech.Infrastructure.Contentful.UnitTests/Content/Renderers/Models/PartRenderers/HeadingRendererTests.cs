@@ -68,4 +68,39 @@ public class HeadingRendererTests
 
         Assert.Equal(expected, html);
     }
+
+    [Theory]
+    [InlineData("heading-1", "<h1>test</h1>")]
+    [InlineData("heading-2", "<h2>test</h2>")]
+    [InlineData("heading-3", "<h3>test</h3>")]
+    [InlineData("heading-4", "<h4>test</h4>")]
+    [InlineData("heading-5", "<h5>test</h5>")]
+    [InlineData("heading-6", "<h6>test</h6>")]
+    public void Should_Generate_Correct_Header_Tags_With_Text_Rendering_Within(string nodeType, string expected)
+    {
+        var headingRenderer = new HeadingRenderer();
+        var textRenderer = new TextRenderer(new TextRendererOptions(new NullLogger<TextRendererOptions>(), []));
+
+        var rendererCollection = new RichTextRenderer(
+            new NullLogger<IRichTextRenderer>(),
+            new List<BaseRichTextContentPartRender> { headingRenderer, textRenderer }
+        );
+
+        var content = new RichTextContent()
+        {
+            NodeType = nodeType,
+            Content = [
+                new RichTextContent()
+                {
+                    NodeType = "text",
+                    Value = "test"
+                }
+            ]
+        };
+
+        var result = headingRenderer.AddHtml(content, rendererCollection, new StringBuilder());
+        var html = result.ToString();
+
+        Assert.Equal(expected, html);
+    }
 }
