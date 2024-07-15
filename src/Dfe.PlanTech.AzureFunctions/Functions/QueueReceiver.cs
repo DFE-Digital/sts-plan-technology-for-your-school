@@ -10,18 +10,18 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Text.Json;
+using Dfe.PlanTech.AzureFunctions.Services;
 using Dfe.PlanTech.AzureFunctions.Utils;
 
 namespace Dfe.PlanTech.AzureFunctions;
 
 public class QueueReceiver(
     ContentfulOptions contentfulOptions,
-    CacheRefreshConfiguration cacheRefreshConfiguration,
     ILoggerFactory loggerFactory,
     CmsDbContext db,
     JsonToEntityMappers mappers,
     IMessageRetryHandler messageRetryHandler,
-    IHttpHandler httpHandler)
+    ICacheHandler cacheHandler)
     : BaseFunction(loggerFactory.CreateLogger<QueueReceiver>())
 {
     /// <summary>
@@ -86,7 +86,7 @@ public class QueueReceiver(
             }
 
             await messageActions.CompleteMessageAsync(message, cancellationToken);
-            await RequestCacheClear();
+            await cacheHandler.RequestCacheClear();
         }
         catch (Exception ex) when (ex is JsonException or CmsEventException)
         {
@@ -107,22 +107,6 @@ public class QueueReceiver(
             Logger.LogError(ex, "Error processing message ID {Message}, The maximum delivery count has been reached", message.MessageId);
             await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace, cancellationToken);
         }
-    }
-
-    /// <summary>
-    /// Makes a call to the plan tech web app that invalidates the database cache.
-    /// </summary>
-    private async Task RequestCacheClear()
-    {
-        if (cacheRefreshConfiguration.ApiKeyName is null)
-        {
-            Logger.LogError("No Api Key name has been configured but is required for clearing the website cache");
-            return;
-        }
-        var request = new HttpRequestMessage(HttpMethod.Post, cacheRefreshConfiguration.Endpoint);
-        request.Headers.Add(cacheRefreshConfiguration.ApiKeyName, cacheRefreshConfiguration.ApiKeyValue);
-
-        await httpHandler.SendAsync(request);
     }
 
     public virtual Task<int> ProcessEntityRemovalEvent(MappedEntity mapped, CancellationToken cancellationToken)

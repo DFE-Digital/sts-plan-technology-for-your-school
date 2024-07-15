@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Dfe.PlanTech.AzureFunctions.Config;
+using Dfe.PlanTech.AzureFunctions.Services;
 using Dfe.PlanTech.AzureFunctions.Utils;
 
 namespace Dfe.PlanTech.AzureFunctions
@@ -49,7 +50,8 @@ namespace Dfe.PlanTech.AzureFunctions
                 configuration["WEBSITE_CACHE_CLEAR_ENDPOINT"],
                 configuration["WEBSITE_CACHE_CLEAR_APIKEY_NAME"],
                 configuration["WEBSITE_CACHE_CLEAR_APIKEY_VALUE"]));
-            services.AddTransient<IHttpHandler, HttpHandler>();
+            services.AddHttpClient<CacheHandler>();
+            services.AddTransient<ICacheHandler, CacheHandler>();
 
             services.AddOptions<MessageRetryHandlingOptions>()
                 .Configure<IConfiguration>((settings, configuration) =>

@@ -12,6 +12,7 @@ using NSubstitute;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Dfe.PlanTech.AzureFunctions.Services;
 using Dfe.PlanTech.AzureFunctions.Utils;
 using NSubstitute.ExceptionExtensions;
 using MockQueryable.NSubstitute;
@@ -24,9 +25,7 @@ public class QueueReceiverTests
 {
     private const string bodyJsonStr = "{\"metadata\":{\"tags\":[]},\"fields\":{\"internalName\":{\"en-US\":\"TestingQuestion\"},\"text\":{\"en-US\":\"TestingQuestion\"},\"helpText\":{\"en-US\":\"HelpText\"},\"answers\":{\"en-US\":[{\"sys\":{\"type\":\"Link\",\"linkType\":\"Entry\",\"id\":\"4QscetbCYG4MUsGdoDU0C3\"}}]},\"slug\":{\"en-US\":\"testing-slug\"}},\"sys\":{\"type\":\"Entry\",\"id\":\"2VSR0emw0SPy8dlR9XlgfF\",\"space\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"Space\",\"id\":\"py5afvqdlxgo\"}},\"environment\":{\"sys\":{\"id\":\"dev\",\"type\":\"Link\",\"linkType\":\"Environment\"}},\"contentType\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"ContentType\",\"id\":\"question\"}},\"createdBy\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"User\",\"id\":\"5yhMQOCN9P2vGpfjyZKiey\"}},\"updatedBy\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"User\",\"id\":\"4hiJvkyVWdhTt6c4ZoDkMf\"}},\"revision\":13,\"createdAt\":\"2023-12-04T14:36:46.614Z\",\"updatedAt\":\"2023-12-15T16:16:45.034Z\"}}";
     private const string _contentId = "2VSR0emw0SPy8dlR9XlgfF";
-    private const string _refresh_api_key_name = "X-WEBSITE-CACHE-CLEAR-API-KEY";
-    private const string _refresh_api_key_value = "mock-refresh-api-key";
-    private const string _refresh_endpoint = "mock-refresh-endpoint";
+
     private readonly QueueReceiver _queueReceiver;
 
     private readonly ILoggerFactory _loggerFactoryMock;
@@ -35,8 +34,8 @@ public class QueueReceiverTests
     private readonly EntityRetriever _entityRetrieverMock;
     private readonly JsonToEntityMappers _jsonToEntityMappers;
     private readonly IMessageRetryHandler _messageRetryHandlerMock;
-    private readonly IHttpHandler _httpHandler;
-    private readonly CacheRefreshConfiguration _cacheRefreshConfiguration;
+    private readonly ICacheHandler _cacheHandler;
+
 
     private readonly static QuestionDbEntity _contentComponent = new() { Archived = false, Published = true, Deleted = false, Id = _contentId };
     private readonly static QuestionDbEntity _otherContentComponent = new() { Archived = false, Published = true, Deleted = false, Id = "other-content-component" };
@@ -51,7 +50,7 @@ public class QueueReceiverTests
         _loggerFactoryMock = Substitute.For<ILoggerFactory>();
         _loggerMock = Substitute.For<ILogger>();
         _messageRetryHandlerMock = Substitute.For<IMessageRetryHandler>();
-        _httpHandler = Substitute.For<IHttpHandler>();
+        _cacheHandler = Substitute.For<ICacheHandler>();
 
         _loggerFactoryMock.CreateLogger<Arg.AnyType>().Returns((callinfo) =>
         {
@@ -101,8 +100,7 @@ public class QueueReceiverTests
                 return Task.FromResult(1);
             });
 
-        _cacheRefreshConfiguration = new CacheRefreshConfiguration(_refresh_endpoint, _refresh_api_key_name, _refresh_api_key_value);
-        _queueReceiver = new(new ContentfulOptions(true), _cacheRefreshConfiguration, _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _messageRetryHandlerMock, _httpHandler);
+        _queueReceiver = new(new ContentfulOptions(true), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _messageRetryHandlerMock, _cacheHandler);
         DbSet<ContentComponentDbEntity> contentComponentsMock = MockContentComponents();
         _cmsDbContextMock.ContentComponents = contentComponentsMock;
 
@@ -364,7 +362,7 @@ public class QueueReceiverTests
             .When(mock => mock
                 .GetExistingDbEntity(Arg.Is<ContentComponentDbEntity>(entity => entity.Id == _contentId), default)
                 .Returns(_contentComponent));
-        var queueReceiver = new QueueReceiver(new ContentfulOptions(false), _cacheRefreshConfiguration, _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _messageRetryHandlerMock, _httpHandler);
+        var queueReceiver = new QueueReceiver(new ContentfulOptions(false), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _messageRetryHandlerMock, _cacheHandler);
 
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
@@ -378,7 +376,7 @@ public class QueueReceiverTests
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
 
         await _cmsDbContextMock.Received(0).SaveChangesAsync();
-        Assert.Empty(_httpHandler.ReceivedCalls());
+        await _cacheHandler.Received(0).RequestCacheClear();
     }
 
     [Theory]
@@ -390,7 +388,7 @@ public class QueueReceiverTests
             .When(mock => mock
                 .GetExistingDbEntity(Arg.Is<ContentComponentDbEntity>(entity => entity.Id == _otherContentComponent.Id), default)
                 .Returns(_otherContentComponent));
-        var queueReceiver = new QueueReceiver(new ContentfulOptions(false), _cacheRefreshConfiguration, _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _messageRetryHandlerMock, _httpHandler);
+        var queueReceiver = new QueueReceiver(new ContentfulOptions(false), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _messageRetryHandlerMock, _cacheHandler);
 
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
         ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
@@ -404,12 +402,7 @@ public class QueueReceiverTests
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
 
         await _cmsDbContextMock.Received(1).SaveChangesAsync();
-        IEnumerable<string>? headerValues;
-        await _httpHandler.Received(1).SendAsync(Arg.Is<HttpRequestMessage>(
-            request => request.RequestUri != null
-                       && request.RequestUri.ToString() == _refresh_endpoint
-                       && request.Headers.TryGetValues(_refresh_api_key_name, out headerValues)
-                       && headerValues.Contains(_refresh_api_key_value)));
+        await _cacheHandler.Received(1).RequestCacheClear();
     }
 
     [Fact]
