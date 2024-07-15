@@ -405,7 +405,7 @@ public class QueueReceiverTests
 
         await _cmsDbContextMock.Received(1).SaveChangesAsync();
         IEnumerable<string>? headerValues;
-        await _httpHandler.SendAsync(Arg.Is<HttpRequestMessage>(
+        await _httpHandler.Received(1).SendAsync(Arg.Is<HttpRequestMessage>(
             request => request.RequestUri != null
                        && request.RequestUri.ToString() == _refresh_endpoint
                        && request.Headers.TryGetValues(_refresh_api_key_name, out headerValues)
