@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.AzureFunctions.Services;
 public class CacheHandler(
     HttpClient httpClient,
     CacheRefreshConfiguration cacheRefreshConfiguration,
-    ILogger<CacheHandler> logger): ICacheHandler
+    ILogger<CacheHandler> logger) : ICacheHandler
 {
     /// <summary>
     /// Makes a call to the plan tech web app that invalidates the database cache.
