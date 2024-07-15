@@ -6,8 +6,6 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
 public class RecommendationChunkDbEntity : ContentComponentDbEntity, IRecommendationChunk<AnswerDbEntity, ContentComponentDbEntity, HeaderDbEntity>
 {
-    public string Title { get; init; } = null!;
-
     public string HeaderId { get; set; } = null!;
 
     public HeaderDbEntity Header { get; init; } = null!;

@@ -91,12 +91,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         {
             var recommendationIntro = ComponentBuilder.BuildRecommendationIntro(header);
 
-            Assert.Equal(header, recommendationIntro.Title);
+            Assert.Equal(header, recommendationIntro.Header.Text);
             Assert.Equal(expectedResult, recommendationIntro.SlugifiedHeader);
         }
 
         [Fact]
-        public void RecommendationViewModel_Should_Return_Accordions_And_All_Content()
+        public void RecommendationViewModel_Should_Return_All_Content()
         {
             var recommendationViewModel = ComponentBuilder.BuildRecommendationViewModel();
 
@@ -107,14 +107,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             foreach (var chunk in recommendationViewModel.Chunks)
             {
                 Assert.Contains(chunk, allContent);
-            }
-
-            var accordions = recommendationViewModel.Accordions.ToList();
-            Assert.Equal(recommendationViewModel.Chunks.Count, accordions.Count);
-
-            foreach (var chunk in recommendationViewModel.Chunks.Select((chunk, index) => new { chunk, index }))
-            {
-                Assert.Contains(accordions, accordion => accordion.Header == chunk.chunk.Header.Text && accordion.Order == chunk.index + 1);
             }
         }
 

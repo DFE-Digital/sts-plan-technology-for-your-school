@@ -1,11 +1,34 @@
-@model IEnumerable<Dfe.PlanTech.Domain.Questionnaire.Interfaces.IHeaderWithContent>
-@{
-  ViewData["ParentContainerClass"] = "recommendation-piece-container";
-  ViewData["HeaderClass"] = "recommendation-piece-header";
-  ViewData["ContentClass"] = "recommendation-piece-content";
-}
+@model Dfe.PlanTech.Web.Models.RecommendationsViewModel
 
-@foreach (var headerWithContent in Model)
+@foreach (var headerWithContent in Model.AllContent)
 {
-  <partial name="Components/HeaderWithContent" model="@headerWithContent" />
+    <div class="recommendation-piece-container" id="@headerWithContent.SlugifiedHeader">
+        <div class="recommendation-piece-header">
+            @{
+                await Html.RenderPartialAsync("Components/Header", headerWithContent.Header);
+            }
+        </div>
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-one-third">
+                @{ ViewData["VerticalNavigationSection"] = headerWithContent.SlugifiedHeader; }
+                <partial name="Components/VerticalNavigation/Default" model="@Model.Chunks"/>
+            </div>
+            <div class="govuk-grid-column-two-thirds">
+                <div class="govuk-section-break govuk-!-margin-top-0 govuk-section-break--m govuk-section-break--visible">
+                    <div class="recommendation-piece-content">
+                        @foreach (var content in headerWithContent.Content)
+                        {
+                            await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+                        }
+                    </div>
+                </div>
+                <div>
+                    <h2 class="govuk-heading-m">Share this recommendation</h2>
+                    <p class="govuk-body">
+                        <a class="govuk-link govuk-!-font-weight-bold" href="@Model.Slug/print" target="_blank">Share or download this recommendation in a checklist format</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
 }

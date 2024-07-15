@@ -57,7 +57,6 @@ public class RecommendationChunksComparatorclass(CmsDbContext db, ContentfulCont
         return _db.RecommendationChunks.Select(chunk => new RecommendationChunkDbEntity()
         {
             Id = chunk.Id,
-            Title = chunk.Title,
             HeaderId = chunk.HeaderId,
             Answers = chunk.Answers.Select(answer => new AnswerDbEntity()
             {

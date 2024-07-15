@@ -5,8 +5,6 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
 public class RecommendationChunk : ContentComponent, IRecommendationChunk<Answer, ContentComponent, Header>, IHeaderWithContent
 {
-    public string Title { get; init; } = null!;
-
     public Header Header { get; init; } = null!;
 
     public List<ContentComponent> Content { get; init; } = [];

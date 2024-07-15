@@ -23,7 +23,6 @@ public class RecommendationsChecklistViewModel
             Tag = HeaderTag.H3,
             Size = HeaderSize.Medium
         },
-        Title = content.Title,
         Content = content.Content,
     };
 

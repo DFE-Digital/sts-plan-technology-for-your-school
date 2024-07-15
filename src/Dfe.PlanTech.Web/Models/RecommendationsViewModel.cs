@@ -1,5 +1,3 @@
-using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 
@@ -15,18 +13,7 @@ public class RecommendationsViewModel
 
     public IEnumerable<IHeaderWithContent> AllContent => GetAllContent();
 
-    public IEnumerable<IAccordion> Accordions => Chunks.Select(ConvertToAccordion);
-
     public string Slug { get; init; } = null!;
-
-    private static Accordion ConvertToAccordion(IHeaderWithContent content, int index)
-    => new()
-    {
-        Header = content.Header.Text,
-        Order = index + 1,
-        Slug = content.SlugifiedHeader,
-        Title = content.Title,
-    };
 
     private IEnumerable<IHeaderWithContent> GetAllContent()
     {
