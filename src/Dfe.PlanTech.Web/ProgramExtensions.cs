@@ -83,6 +83,11 @@ public static class ProgramExtensions
 
         services.AddTransient<GetPageFromContentfulQuery>();
         services.AddSingleton(new ContentfulOptions(configuration.GetValue<bool>("Contentful:UsePreview")));
+        services.AddSingleton(new CacheRefreshConfiguration(
+            configuration["CacheClear:Endpoint"],
+            configuration["CacheClear:ApiKeyName"],
+            configuration["CacheClear:ApiKeyValue"]
+            ));
 
         services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubtopicRecommendationFromContentfulQuery>(GetSubtopicRecommendationFromContentfulQuery.ServiceKey);
         services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationFromDbQuery>(GetSubTopicRecommendationFromDbQuery.ServiceKey);

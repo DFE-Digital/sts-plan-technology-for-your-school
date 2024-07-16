@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Dfe.PlanTech.AzureFunctions.Config;
+using Dfe.PlanTech.AzureFunctions.Services;
 using Dfe.PlanTech.AzureFunctions.Utils;
 
 namespace Dfe.PlanTech.AzureFunctions
@@ -45,6 +46,16 @@ namespace Dfe.PlanTech.AzureFunctions
             });
 
             services.AddSingleton(new ContentfulOptions(bool.Parse(configuration["Contentful:UsePreview"] ?? bool.FalseString)));
+            services.AddSingleton(new CacheRefreshConfiguration(
+                configuration["WEBSITE_CACHE_CLEAR_ENDPOINT"],
+                configuration["WEBSITE_CACHE_CLEAR_APIKEY_NAME"],
+                configuration["WEBSITE_CACHE_CLEAR_APIKEY_VALUE"]));
+            services.AddHttpClient<CacheHandler>()
+                .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler()
+                {
+                    PooledConnectionLifetime = TimeSpan.FromMinutes(5)
+                });
+            services.AddTransient<ICacheHandler, CacheHandler>();
 
             services.AddOptions<MessageRetryHandlingOptions>()
                 .Configure<IConfiguration>((settings, configuration) =>
