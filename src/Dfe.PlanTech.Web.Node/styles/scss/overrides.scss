@@ -36,9 +36,12 @@ div.govuk-width-container {
 }
 
 strong.govuk-tag {
-  text-transform: capitalize;
   max-width: fit-content;
   vertical-align: middle;
+
+  &:first-letter {
+    text-transform: uppercase;
+  }
 }
 
 @media (min-width: 40.0625em) {
@@ -60,6 +63,12 @@ strong.govuk-tag {
 
 .dfe-header {
   border-bottom: 10px solid #347ca9
+}
+
+.share-html-img {
+  width: 100px;
+  float: left;
+  padding-right: 10px;
 }
 
 //Hide GTM iframe
