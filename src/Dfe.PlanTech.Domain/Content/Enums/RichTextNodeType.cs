@@ -14,4 +14,5 @@ public enum RichTextNodeType
     TableRow,
     TableHeaderCell,
     TableCell,
+    Heading
 }

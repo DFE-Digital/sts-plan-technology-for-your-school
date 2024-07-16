@@ -11,6 +11,8 @@ public class SectionStatusDto
     public string? LastMaturity { get; set; }
 
     public DateTime DateCreated { get; set; }
+
+    public DateTime DateUpdated { get; set; }
 }
 
 public record SectionStatusNew
