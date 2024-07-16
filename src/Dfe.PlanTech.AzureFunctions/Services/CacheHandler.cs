@@ -11,7 +11,7 @@ public class CacheHandler(
     /// <summary>
     /// Makes a call to the plan tech web app that invalidates the database cache.
     /// </summary>
-    public async Task RequestCacheClear()
+    public async Task RequestCacheClear(CancellationToken cancellationToken)
     {
         if (cacheRefreshConfiguration.ApiKeyName is null)
         {
@@ -22,6 +22,6 @@ public class CacheHandler(
         var request = new HttpRequestMessage(HttpMethod.Post, cacheRefreshConfiguration.Endpoint);
         request.Headers.Add(cacheRefreshConfiguration.ApiKeyName, cacheRefreshConfiguration.ApiKeyValue);
 
-        await httpClient.SendAsync(request);
+        await httpClient.SendAsync(request, cancellationToken);
     }
 }

@@ -86,7 +86,7 @@ public class QueueReceiver(
             }
 
             await messageActions.CompleteMessageAsync(message, cancellationToken);
-            await cacheHandler.RequestCacheClear();
+            await cacheHandler.RequestCacheClear(cancellationToken);
         }
         catch (Exception ex) when (ex is JsonException or CmsEventException)
         {

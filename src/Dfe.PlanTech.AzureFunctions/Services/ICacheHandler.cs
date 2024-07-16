@@ -2,5 +2,5 @@ namespace Dfe.PlanTech.AzureFunctions.Services;
 
 public interface ICacheHandler
 {
-    Task RequestCacheClear();
+    Task RequestCacheClear(CancellationToken cancellationToken);
 }

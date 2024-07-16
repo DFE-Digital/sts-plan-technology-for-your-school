@@ -50,9 +50,13 @@ namespace Dfe.PlanTech.AzureFunctions
                 configuration["WEBSITE_CACHE_CLEAR_ENDPOINT"],
                 configuration["WEBSITE_CACHE_CLEAR_APIKEY_NAME"],
                 configuration["WEBSITE_CACHE_CLEAR_APIKEY_VALUE"]));
-            services.AddHttpClient<CacheHandler>();
+            services.AddHttpClient<CacheHandler>()
+                .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler()
+                {
+                    PooledConnectionLifetime = TimeSpan.FromMinutes(5)
+                });
             services.AddTransient<ICacheHandler, CacheHandler>();
-
+            
             services.AddOptions<MessageRetryHandlingOptions>()
                 .Configure<IConfiguration>((settings, configuration) =>
                 {

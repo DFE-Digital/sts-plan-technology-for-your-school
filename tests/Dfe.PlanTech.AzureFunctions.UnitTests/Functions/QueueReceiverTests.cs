@@ -376,7 +376,7 @@ public class QueueReceiverTests
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
 
         await _cmsDbContextMock.Received(0).SaveChangesAsync();
-        await _cacheHandler.Received(0).RequestCacheClear();
+        await _cacheHandler.Received(0).RequestCacheClear(Arg.Any<CancellationToken>());
     }
 
     [Theory]
@@ -402,7 +402,7 @@ public class QueueReceiverTests
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
 
         await _cmsDbContextMock.Received(1).SaveChangesAsync();
-        await _cacheHandler.Received(1).RequestCacheClear();
+        await _cacheHandler.Received(1).RequestCacheClear(Arg.Any<CancellationToken>());
     }
 
     [Fact]

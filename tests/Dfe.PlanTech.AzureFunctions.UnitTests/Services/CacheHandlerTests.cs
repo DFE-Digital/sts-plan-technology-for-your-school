@@ -30,7 +30,7 @@ public class CacheHandlerTests
     [Fact]
     public async Task CacheHandler_Should_Make_Request_With_CorrectHeaders()
     {
-        await _cacheHandler.RequestCacheClear();
+        await _cacheHandler.RequestCacheClear(default);
         Assert.Single(_httpMessageHandler.Requests);
         var request = _httpMessageHandler.Requests.First();
         Assert.NotNull(request.RequestUri);
