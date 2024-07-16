@@ -56,7 +56,7 @@ namespace Dfe.PlanTech.AzureFunctions
                     PooledConnectionLifetime = TimeSpan.FromMinutes(5)
                 });
             services.AddTransient<ICacheHandler, CacheHandler>();
-            
+
             services.AddOptions<MessageRetryHandlingOptions>()
                 .Configure<IConfiguration>((settings, configuration) =>
                 {
