@@ -6,11 +6,11 @@
         @foreach (var chunk in Model)
         {
             var classes = chunk.SlugifiedHeader == ViewData["VerticalNavigationSection"]?.ToString()
-                ? "dfe-vertical-nav__section-item--active govuk-!-font-weight-bold"
+                ? "dfe-vertical-nav__link--selected govuk-!-font-weight-bold"
                 : "";
 
-            <li class="dfe-vertical-nav__section-item @classes">
-                <a class="dfe-vertical-nav__link govuk-link" href="#@chunk.SlugifiedHeader">@chunk.Header.Text</a>
+            <li class="dfe-vertical-nav__section-item">
+                <a class="dfe-vertical-nav__link @classes" href="#@chunk.SlugifiedHeader">@chunk.Header.Text</a>
             </li>
         }
     </ul>
