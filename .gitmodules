@@ -1,0 +1,3 @@
+[submodule "contentandsupport"]
+	path = contentandsupport
+	url = https://github.com/DFE-Digital/sts-content-support
