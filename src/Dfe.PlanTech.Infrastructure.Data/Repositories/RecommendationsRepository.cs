@@ -79,7 +79,9 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
                 Header = intro.Header,
                 HeaderId = intro.HeaderId,
                 Maturity = intro.Maturity,
-                Content = introContent.Where(content => content.intro == intro.Id).Select(content => content.content!).ToList()
+                Content = [.. introContent.Where(content => content.intro == intro.Id)
+                                      .Select(content => content.content!)
+                                      .OrderBy(content => content.Order)]
             }).ToList(),
             Section = new RecommendationSectionDbEntity()
             {
@@ -89,7 +91,9 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
                     Header = chunk.Header,
                     HeaderId = chunk.HeaderId,
                     Answers = chunk.Answers,
-                    Content = chunkContent.Where(content => content.chunk == chunk.Id).Select(content => content.content!).ToList()
+                    Content = [.. chunkContent.Where(content => content.chunk == chunk.Id)
+                                              .Select(content => content.content!)
+                                              .OrderBy(content => content.Order)]
                 }).ToList(),
                 Answers = recommendation.Section.Answers,
                 Id = recommendation.Section.Id,
