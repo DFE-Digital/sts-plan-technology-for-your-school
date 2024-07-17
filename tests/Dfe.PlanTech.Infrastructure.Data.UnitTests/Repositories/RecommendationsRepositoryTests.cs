@@ -120,17 +120,17 @@ public class RecommendationsRepositoryTests
                             Id = "Chunk-one-content-one",
                             Order = 0,
                         },
-                        new TextBodyDbEntity()
-                        {
-                            Id = "Chunk-one-content-two",
-                            Order = 1,
-                        },
-                        new TextBodyDbEntity()
-                        {
-                            Id = "Chunk-one-content-three",
-                            Order = 2,
-                        },
-                    ]
+                      new TextBodyDbEntity()
+                      {
+                          Id = "Chunk-one-content-two",
+                          Order = 1,
+                      },
+                      new TextBodyDbEntity()
+                      {
+                          Id = "Chunk-one-content-three",
+                          Order = 2,
+                      },
+                  ]
               },
                   new RecommendationChunkDbEntity()
                   {
@@ -163,16 +163,16 @@ public class RecommendationsRepositoryTests
                             Id = "Chunk-two-content-two",
                             Order = 1,
                         },
-                         new TextBodyDbEntity()
-                        {
-                            Id = "Chunk-two-content-thre",
-                            Order = 2,
-                        },
-                        new TextBodyDbEntity()
-                        {
-                            Id = "Chunk-two-content-one",
-                            Order = 0,
-                        }
+                          new TextBodyDbEntity()
+                          {
+                              Id = "Chunk-two-content-thre",
+                              Order = 2,
+                          },
+                          new TextBodyDbEntity()
+                          {
+                              Id = "Chunk-two-content-one",
+                              Order = 0,
+                          }
                     ]
                   },
                   new RecommendationChunkDbEntity()
@@ -206,16 +206,16 @@ public class RecommendationsRepositoryTests
                             Id = "Chunk-three-content-three",
                             Order = 2,
                         },
-                         new TextBodyDbEntity()
-                        {
-                            Id = "Chunk-three-content-two",
-                            Order = 1,
-                        },
-                        new TextBodyDbEntity()
-                        {
-                            Id = "Chunk-three-content-one",
-                            Order = 0,
-                        }
+                          new TextBodyDbEntity()
+                          {
+                              Id = "Chunk-three-content-two",
+                              Order = 1,
+                          },
+                          new TextBodyDbEntity()
+                          {
+                              Id = "Chunk-three-content-one",
+                              Order = 0,
+                          }
                     ]
                   }
               ],
@@ -228,72 +228,78 @@ public class RecommendationsRepositoryTests
         {
             Intros =
             [
-              new RecommendationIntroDbEntity() {
-                Maturity = "Low",
-                Id = "Intro-One-Low",
-                Slug = "Low-Maturity",
-                Header = new HeaderDbEntity() { Text = "Low maturity header", Id = "Intro-header-one" },
-                Content = [
+              new RecommendationIntroDbEntity()
+              {
+                  Maturity = "Low",
+                  Id = "Intro-One-Low",
+                  Slug = "Low-Maturity",
+                  Header = new HeaderDbEntity() { Text = "Low maturity header", Id = "Intro-header-one" },
+                  Content = [
                     new TextBodyDbEntity()
                     {
                         Id = "Intro-one-content-three",
                         Order = 2,
                     },
-                        new TextBodyDbEntity()
-                    {
-                        Id = "Intro-one-content-two",
-                        Order = 1,
-                    },
-                    new TextBodyDbEntity()
-                    {
-                        Id = "Intro-one-content-one",
-                        Order = 0,
-                    }
-                ] },
-              new RecommendationIntroDbEntity() {
-                Maturity = "Medium",
-                Id = "Intro-Two-Medium",
-                Slug = "Medium-Maturity",
-                Header = new HeaderDbEntity() { Text = "Medium maturity header", Id = "Intro-header-two" },
-                Content = [
+                      new TextBodyDbEntity()
+                      {
+                          Id = "Intro-one-content-two",
+                          Order = 1,
+                      },
+                      new TextBodyDbEntity()
+                      {
+                          Id = "Intro-one-content-one",
+                          Order = 0,
+                      }
+                ]
+              },
+                new RecommendationIntroDbEntity()
+                {
+                    Maturity = "Medium",
+                    Id = "Intro-Two-Medium",
+                    Slug = "Medium-Maturity",
+                    Header = new HeaderDbEntity() { Text = "Medium maturity header", Id = "Intro-header-two" },
+                    Content = [
                     new TextBodyDbEntity()
                     {
                         Id = "Intro-two-content-two",
                         Order = 1,
                     },
-                    new TextBodyDbEntity()
-                    {
-                        Id = "Intro-two-content-three",
-                        Order = 2,
-                    },
-                    new TextBodyDbEntity()
-                    {
-                        Id = "Intro-two-content-one",
-                        Order = 0,
-                    }
-                ] },
-              new RecommendationIntroDbEntity() {
-                Maturity = "High",
-                Id = "Intro-Three-High",
-                Slug = "High-Maturity",
-                Header = new HeaderDbEntity() { Text = "High maturity header", Id = "Intro-header-three" },
-                Content = [
+                        new TextBodyDbEntity()
+                        {
+                            Id = "Intro-two-content-three",
+                            Order = 2,
+                        },
+                        new TextBodyDbEntity()
+                        {
+                            Id = "Intro-two-content-one",
+                            Order = 0,
+                        }
+                ]
+                },
+                new RecommendationIntroDbEntity()
+                {
+                    Maturity = "High",
+                    Id = "Intro-Three-High",
+                    Slug = "High-Maturity",
+                    Header = new HeaderDbEntity() { Text = "High maturity header", Id = "Intro-header-three" },
+                    Content = [
                     new TextBodyDbEntity()
                     {
                         Id = "Intro-three-content-three",
                         Order = 2,
                     },
-                    new TextBodyDbEntity()
-                    {
-                        Id = "Intro-three-content-one",
-                        Order = 0,
-                    },
-                    new TextBodyDbEntity()
-                    {
-                        Id = "Intro-three-content-two",
-                        Order = 1,
-                    },
-                ]  },
+                        new TextBodyDbEntity()
+                        {
+                            Id = "Intro-three-content-one",
+                            Order = 0,
+                        },
+                        new TextBodyDbEntity()
+                        {
+                            Id = "Intro-three-content-two",
+                            Order = 1,
+                        },
+                    ]
+                },
             ],
             Section = recommendationSectionOne,
             SectionId = recommendationSectionOne.Id,
