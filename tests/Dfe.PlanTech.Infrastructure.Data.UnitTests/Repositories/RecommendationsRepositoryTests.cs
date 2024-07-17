@@ -26,6 +26,9 @@ public class RecommendationsRepositoryTests
     private readonly List<RecommendationIntroDbEntity> _intros = [];
     private readonly List<SectionDbEntity> _sections = [];
     private readonly List<SubtopicRecommendationDbEntity> _subtopicRecommendations = [];
+    private readonly List<RecommendationIntroContentDbEntity> _introContent = [];
+    private readonly List<RecommendationChunkContentDbEntity> _chunkContent = [];
+    private readonly List<RichTextContentWithSubtopicRecommendationId> _richTexts = [];
 
     public RecommendationsRepositoryTests()
     {
@@ -54,17 +57,13 @@ public class RecommendationsRepositoryTests
         var chunksMockSet = _chunks.BuildMock();
         _db.RecommendationChunks.Returns(chunksMockSet);
 
-        List<RecommendationIntroContentDbEntity> introContent = [];
-        var introContentMock = introContent.BuildMock();
+        var introContentMock = _introContent.BuildMock();
         _db.RecommendationIntroContents.Returns(introContentMock);
 
-        List<RecommendationChunkContentDbEntity> chunkContent = [];
-        var chunkContentMock = chunkContent.BuildMock();
+        var chunkContentMock = _chunkContent.BuildMock();
         _db.RecommendationChunkContents.Returns(chunkContentMock);
 
-
-        List<RichTextContentWithSubtopicRecommendationId> richTexts = [];
-        var richTextsMock = richTexts.BuildMock();
+        var richTextsMock = _richTexts.BuildMock();
         _db.RichTextContentWithSubtopicRecommendationIds.Returns(richTextsMock);
 
         _repository = new RecommendationsRepository(_db);
@@ -118,8 +117,19 @@ public class RecommendationsRepositoryTests
                   Content = [
                         new TextBodyDbEntity()
                         {
-                            Id = "Chunk-one"
-                        }
+                            Id = "Chunk-one-content-one",
+                            Order = 0,
+                        },
+                        new TextBodyDbEntity()
+                        {
+                            Id = "Chunk-one-content-two",
+                            Order = 1,
+                        },
+                        new TextBodyDbEntity()
+                        {
+                            Id = "Chunk-one-content-three",
+                            Order = 2,
+                        },
                     ]
               },
                   new RecommendationChunkDbEntity()
@@ -150,7 +160,18 @@ public class RecommendationsRepositoryTests
                       Content = [
                         new TextBodyDbEntity()
                         {
-                            Id = "Chunk-two"
+                            Id = "Chunk-two-content-two",
+                            Order = 1,
+                        },
+                         new TextBodyDbEntity()
+                        {
+                            Id = "Chunk-two-content-thre",
+                            Order = 2,
+                        },
+                        new TextBodyDbEntity()
+                        {
+                            Id = "Chunk-two-content-one",
+                            Order = 0,
                         }
                     ]
                   },
@@ -182,7 +203,18 @@ public class RecommendationsRepositoryTests
                       Content = [
                         new TextBodyDbEntity()
                         {
-                            Id = "Chunk-three"
+                            Id = "Chunk-three-content-three",
+                            Order = 2,
+                        },
+                         new TextBodyDbEntity()
+                        {
+                            Id = "Chunk-three-content-two",
+                            Order = 1,
+                        },
+                        new TextBodyDbEntity()
+                        {
+                            Id = "Chunk-three-content-one",
+                            Order = 0,
                         }
                     ]
                   }
@@ -196,9 +228,72 @@ public class RecommendationsRepositoryTests
         {
             Intros =
             [
-              new RecommendationIntroDbEntity() { Maturity = "Low", Id = "Intro-One-Low", Slug = "Low-Maturity", Header = new HeaderDbEntity() { Text = "Low maturity header", Id = "Intro-header-one" } },
-                new RecommendationIntroDbEntity() { Maturity = "Medium", Id = "Intro-Two-Medium", Slug = "Medium-Maturity", Header = new HeaderDbEntity() { Text = "Medium maturity header", Id = "Intro-header-two" } },
-                new RecommendationIntroDbEntity() { Maturity = "High", Id = "Intro-Three-High", Slug = "High-Maturity", Header = new HeaderDbEntity() { Text = "High maturity header", Id = "Intro-header-three" } },
+              new RecommendationIntroDbEntity() {
+                Maturity = "Low",
+                Id = "Intro-One-Low",
+                Slug = "Low-Maturity",
+                Header = new HeaderDbEntity() { Text = "Low maturity header", Id = "Intro-header-one" },
+                Content = [
+                    new TextBodyDbEntity()
+                    {
+                        Id = "Intro-one-content-three",
+                        Order = 2,
+                    },
+                        new TextBodyDbEntity()
+                    {
+                        Id = "Intro-one-content-two",
+                        Order = 1,
+                    },
+                    new TextBodyDbEntity()
+                    {
+                        Id = "Intro-one-content-one",
+                        Order = 0,
+                    }
+                ] },
+              new RecommendationIntroDbEntity() {
+                Maturity = "Medium",
+                Id = "Intro-Two-Medium",
+                Slug = "Medium-Maturity",
+                Header = new HeaderDbEntity() { Text = "Medium maturity header", Id = "Intro-header-two" },
+                Content = [
+                    new TextBodyDbEntity()
+                    {
+                        Id = "Intro-two-content-two",
+                        Order = 1,
+                    },
+                    new TextBodyDbEntity()
+                    {
+                        Id = "Intro-two-content-three",
+                        Order = 2,
+                    },
+                    new TextBodyDbEntity()
+                    {
+                        Id = "Intro-two-content-one",
+                        Order = 0,
+                    }
+                ] },
+              new RecommendationIntroDbEntity() {
+                Maturity = "High",
+                Id = "Intro-Three-High",
+                Slug = "High-Maturity",
+                Header = new HeaderDbEntity() { Text = "High maturity header", Id = "Intro-header-three" },
+                Content = [
+                    new TextBodyDbEntity()
+                    {
+                        Id = "Intro-three-content-three",
+                        Order = 2,
+                    },
+                    new TextBodyDbEntity()
+                    {
+                        Id = "Intro-three-content-one",
+                        Order = 0,
+                    },
+                    new TextBodyDbEntity()
+                    {
+                        Id = "Intro-three-content-two",
+                        Order = 1,
+                    },
+                ]  },
             ],
             Section = recommendationSectionOne,
             SectionId = recommendationSectionOne.Id,
@@ -246,6 +341,52 @@ public class RecommendationsRepositoryTests
 
         Assert.NotNull(recommendation);
         Assert.Equal(_subtopicRecommendation.Id, recommendation.Id);
+
+        //Validate content ordering
+
+        //Intro content
+        for (var x = 0; x < recommendation.Intros.Count; x++)
+        {
+            var intro = recommendation.Intros[x];
+            var matchingIntro = _intros.Find(c => c.Id == intro.Id);
+
+            Assert.NotNull(matchingIntro);
+
+            for (var y = 0; y < intro.Content.Count; y++)
+            {
+                var content = intro.Content[y];
+                var matchingContent = _introContent.Find(ic => ic.ContentComponentId == content.Id);
+
+                Assert.NotNull(matchingContent);
+                Assert.NotNull(matchingContent.ContentComponent);
+
+                Assert.Equal(matchingContent.ContentComponent!.Order, y);
+            }
+        }
+
+        //Chunks
+        for (var x = 0; x < recommendation.RecommendationChunk.Count; x++)
+        {
+            var chunk = recommendation.RecommendationChunk[x];
+            var matchingChunk = _chunks.Find(c => c.Id == chunk.Id);
+
+            Assert.NotNull(matchingChunk);
+
+            //Chunk ordering
+            Assert.Equal(matchingChunk.Order, x);
+
+            //Chunk content
+            for (var y = 0; y < chunk.Content.Count; y++)
+            {
+                var content = chunk.Content[y];
+                var matchingContent = _chunkContent.Find(ic => ic.ContentComponentId == content.Id);
+
+                Assert.NotNull(matchingContent);
+                Assert.NotNull(matchingContent.ContentComponent);
+
+                Assert.Equal(matchingContent.ContentComponent!.Order, y);
+            }
+        }
     }
 
     [Fact]
