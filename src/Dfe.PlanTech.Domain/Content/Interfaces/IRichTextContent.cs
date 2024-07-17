@@ -27,12 +27,12 @@ public partial interface IRichTextContent
     });
 
     public bool MatchesNodeType(string? enumName)
-    => string.Equals(enumName, RemoveHyphensRegEx().Replace(NodeType, ""), StringComparison.OrdinalIgnoreCase);
+    => string.Equals(enumName, RemoveHyphensAndNumbersRegEx().Replace(NodeType, ""), StringComparison.OrdinalIgnoreCase);
 
     public string? GetNameForNodeType(RichTextNodeType value) => Enum.GetName(value);
 
-    [GeneratedRegex("-")]
-    private static partial Regex RemoveHyphensRegEx();
+    [GeneratedRegex("-|\\d")]
+    private static partial Regex RemoveHyphensAndNumbersRegEx();
 }
 
 public interface IRichTextContent<TMark, TContentType, TData> : IRichTextContent

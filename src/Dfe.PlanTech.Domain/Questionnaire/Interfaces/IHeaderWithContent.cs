@@ -4,8 +4,6 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 public interface IHeaderWithContent
 {
-    public string Title { get; }
-
     public string SlugifiedHeader { get; }
 
     public Header Header { get; }

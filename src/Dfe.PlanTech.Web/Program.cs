@@ -1,6 +1,8 @@
 using Azure.Identity;
 using Dfe.PlanTech.Application.Helpers;
 using Dfe.PlanTech.Application.Submissions.Queries;
+using Dfe.PlanTech.Domain.Helpers;
+using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.SignIns;
@@ -81,8 +83,10 @@ builder.Services.AddAuthorizationBuilder()
                 {
                     policy.Requirements.Add(new PageAuthorisationRequirement());
                 });
+builder.Services.AddSingleton<ApiKeyAuthorisationFilter>();
 
 builder.Services.AddContentfulServices(builder.Configuration);
+builder.Services.AddSingleton<ISystemTime, SystemTime>();
 
 var app = builder.Build();
 

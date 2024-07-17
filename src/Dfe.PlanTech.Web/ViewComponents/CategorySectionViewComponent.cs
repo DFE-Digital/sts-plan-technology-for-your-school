@@ -12,7 +12,8 @@ namespace Dfe.PlanTech.Web.ViewComponents;
 public class CategorySectionViewComponent(
     ILogger<CategorySectionViewComponent> logger,
     IGetSubmissionStatusesQuery query,
-    IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery) : ViewComponent
+    IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery,
+    [FromServices] ISystemTime systemTime) : ViewComponent
 {
     private readonly ILogger<CategorySectionViewComponent> _logger = logger;
     private readonly IGetSubmissionStatusesQuery _query = query;
@@ -64,7 +65,8 @@ public class CategorySectionViewComponent(
                 name: section.Name,
                 retrievalError: category.RetrievalError,
                 sectionStatus: sectionStatus,
-                recommendation: await GetCategorySectionRecommendationDto(section, sectionStatus)
+                recommendation: await GetCategorySectionRecommendationDto(section, sectionStatus),
+                systemTime
             );
         }
     }

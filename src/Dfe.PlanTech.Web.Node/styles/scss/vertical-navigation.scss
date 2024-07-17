@@ -1,0 +1,22 @@
+.dfe-vertical-nav__section-item {
+  list-style-type: none;
+  font-size: 1rem;
+  border-left: 4px solid #b1b4b6;
+  padding: 7px 30px 8px 10px;
+}
+
+.dfe-vertical-nav__section-item--active {
+  border-left: 4px solid #1d70b8;
+  background-color: #f3f2f1;
+}
+
+.dfe-vertical-nav__link:not(:hover) {
+    text-decoration: none;
+  }
+
+.dfe-vertical-nav__theme {
+  border-top: 1px solid #1d70b8;
+  padding-top: 5px;
+  margin-top: 10px;
+  margin-left: 0;
+}

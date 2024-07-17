@@ -10,6 +10,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Text.Json;
+using Dfe.PlanTech.AzureFunctions.Services;
 using Dfe.PlanTech.AzureFunctions.Utils;
 
 namespace Dfe.PlanTech.AzureFunctions;
@@ -19,7 +20,8 @@ public class QueueReceiver(
     ILoggerFactory loggerFactory,
     CmsDbContext db,
     JsonToEntityMappers mappers,
-    IMessageRetryHandler messageRetryHandler)
+    IMessageRetryHandler messageRetryHandler,
+    ICacheHandler cacheHandler)
     : BaseFunction(loggerFactory.CreateLogger<QueueReceiver>())
 {
     /// <summary>
@@ -45,7 +47,8 @@ public class QueueReceiver(
 
     /// <summary>
     /// Processes a message from the Service Bus, updating the corresponding database entities,
-    /// and completing or dead-lettering the message. 
+    /// and completing or dead-lettering the message.
+    /// Then makes a request to the web app to clear the database cache.
     /// </summary>
     /// <param name="message">Service bus message to process</param>
     /// <param name="messageActions">Service bus message actions for completing or dead-lettering</param>
@@ -83,6 +86,7 @@ public class QueueReceiver(
             }
 
             await messageActions.CompleteMessageAsync(message, cancellationToken);
+            await cacheHandler.RequestCacheClear(cancellationToken);
         }
         catch (Exception ex) when (ex is JsonException or CmsEventException)
         {
@@ -99,12 +103,9 @@ public class QueueReceiver(
                 await messageActions.CompleteMessageAsync(message, cancellationToken);
                 return;
             }
-            else
-            {
-                Logger.LogError(ex, "Error processing message ID {Message}, The maximum delivery count has been reached", message.MessageId);
-                await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace, cancellationToken);
-                return;
-            }
+
+            Logger.LogError(ex, "Error processing message ID {Message}, The maximum delivery count has been reached", message.MessageId);
+            await messageActions.DeadLetterMessageAsync(message, null, ex.Message, ex.StackTrace, cancellationToken);
         }
     }
 
