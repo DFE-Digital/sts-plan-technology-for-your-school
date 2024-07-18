@@ -1,4 +1,5 @@
 using Azure.Identity;
+using Dfe.ContentSupport.Web.Controllers;
 using Dfe.PlanTech.Application.Helpers;
 using Dfe.PlanTech.Application.Submissions.Queries;
 using Dfe.PlanTech.Domain.Helpers;
@@ -65,6 +66,8 @@ builder.Services.AddScoped<ComponentViewsFactory>();
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddSingleton<IAuthorizationHandler, PageModelAuthorisationPolicy>();
 builder.Services.AddSingleton<IExceptionHandlerMiddleware, ServiceExceptionHandlerMiddleWare>();
+
+builder.Services.AddTransient<HomeController,HomeController>();
 
 builder.Services.AddTransient<ISubmissionStatusProcessor, SubmissionStatusProcessor>();
 builder.Services.AddTransient<IGetRecommendationRouter, GetRecommendationRouter>();
