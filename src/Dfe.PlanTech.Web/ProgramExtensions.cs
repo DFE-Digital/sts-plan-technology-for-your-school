@@ -32,6 +32,8 @@ using EFCoreSecondLevelCacheInterceptor;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Serialization;
 using System.Diagnostics.CodeAnalysis;
+using Dfe.ContentSupport.Web.Controllers;
+using Dfe.ContentSupport.Web.Extensions;
 
 namespace Dfe.PlanTech.Web;
 
@@ -187,5 +189,11 @@ public static class ProgramExtensions
     {
         services.AddTransient<CspConfiguration>();
         return services;
+    }
+    
+    public static void InitContentAndSupport(this WebApplicationBuilder builder)
+    {
+        builder.InitDependencyInjection();
+        builder.Services.AddTransient<HomeController,HomeController>();
     }
 }
