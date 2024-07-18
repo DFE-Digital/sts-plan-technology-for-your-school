@@ -1,6 +1,5 @@
 import { Answer } from "./answer.js";
 import ErrorLogger from "../errors/error-logger.js";
-import MapContent from "./content-mapper.js";
 
 export default class RecommendationChunk {
   title;
@@ -13,7 +12,7 @@ export default class RecommendationChunk {
     this.title = fields.title;
     this.header = fields.header.fields.text;
     this.id = sys.id;
-    this.content = MapContent(fields.content);
+    this.content = fields.content;
     this.answers = fields.answers?.map(answer => new Answer(answer)) ?? [];
 
     if (!this.answers || this.answers.length == 0) {

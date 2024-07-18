@@ -8,10 +8,10 @@ export default class RecommendationIntro {
   slug;
 
   constructor({ fields, sys }) {
-    this.content = MapContent(fields.content);
-    this.header = fields.header.fields.text;
-    this.id = sys.id;
-    this.maturity = fields.maturity;
-    this.slug = fields.slug;
+      this.content = fields.content;
+      this.header = fields.header.fields.text;
+      this.id = sys.id;
+      this.maturity = fields.maturity;
+      this.slug = fields.slug;
   }
 }

@@ -34,7 +34,7 @@ export const validateSections = (section, paths, dataMapper, validator) => {
 
         // Call recommendations validation function(s) if applicable
         if (validator) {
-            validator();
+            validator(path);
         }
     }
 }

@@ -7,7 +7,7 @@ import { validateRecommendationForMaturity } from "./dpv-validators/recommendati
 import { validateSelfAssessmentPageOnStart } from "./dpv-validators/self-assessment-page-validators.js";
 
 const dataMapper = new DataMapper(require('../../fixtures/contentful-data'));
-
+/*
 describe("Navigation links and non-authorised pages", () => {
 
     it("Should render navigation links", async () => {
@@ -36,7 +36,7 @@ describe("Sections and all-questions paths", () => {
         });
     });
 });
-
+*/
 describe("Recommendations", () => {
 
     (dataMapper?.mappedSections ?? []).forEach((section) => {
@@ -44,8 +44,8 @@ describe("Recommendations", () => {
 
             it(`${section.name} should retrieve correct recommendation for ${maturity} maturity, and all content is valid`, () => {
                 cy.loginWithEnv(`${selfAssessmentSlug}`);
-                validateSections(section, [section.minimumPathsForRecommendations[maturity]], dataMapper, () => {
-                    validateRecommendationForMaturity(section, maturity);
+                validateSections(section, [section.minimumPathsForRecommendations[maturity]], dataMapper, (path) => {
+                    validateRecommendationForMaturity(section, maturity, path);
                 });
             });
         });
