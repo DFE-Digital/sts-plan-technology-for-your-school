@@ -7,7 +7,7 @@ import { validateRecommendationForMaturity } from "./dpv-validators/recommendati
 import { validateSelfAssessmentPageOnStart } from "./dpv-validators/self-assessment-page-validators.js";
 
 const dataMapper = new DataMapper(require('../../fixtures/contentful-data'));
-/*
+
 describe("Navigation links and non-authorised pages", () => {
 
     it("Should render navigation links", async () => {
@@ -36,7 +36,7 @@ describe("Sections and all-questions paths", () => {
         });
     });
 });
-*/
+
 describe("Recommendations", () => {
 
     (dataMapper?.mappedSections ?? []).forEach((section) => {
