@@ -12,11 +12,13 @@
   display: block;
   padding: 7px 30px 8px 10px;
   border-left: 4px solid #b1b4b6;
+  text-decoration: none;
 }
 
 .dfe-vertical-nav__link--selected {
   border-left: 4px solid var(--govuk-link-color);
   background-color: #f3f2f1;
+  font-weight: bold;
 }
 
 .dfe-vertical-nav__link,
@@ -25,18 +27,12 @@
     color: var(--govuk-link-color);
   }
 
-  &:focus {
+  &:active, &:hover {
     background-color: #fd0;
-  }
-
-  &:active, &:focus {
     color: var(--govuk-black);
     border-left: 4px solid var(--govuk-black);
+    font-weight: normal;
   }
-}
-
-.dfe-vertical-nav__link:not(:hover) {
-  text-decoration: none;
 }
 
 .dfe-vertical-nav__theme {

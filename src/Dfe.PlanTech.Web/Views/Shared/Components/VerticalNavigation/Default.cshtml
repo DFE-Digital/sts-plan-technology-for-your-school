@@ -6,7 +6,7 @@
         @foreach (var chunk in Model)
         {
             var classes = chunk.SlugifiedHeader == ViewData["VerticalNavigationSection"]?.ToString()
-                ? "dfe-vertical-nav__link--selected govuk-!-font-weight-bold"
+                ? "dfe-vertical-nav__link--selected"
                 : "";
 
             <li class="dfe-vertical-nav__section-item">
