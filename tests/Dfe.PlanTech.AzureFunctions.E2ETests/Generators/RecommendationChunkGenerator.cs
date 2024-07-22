@@ -17,7 +17,6 @@ public class RecommendationChunkGenerator : BaseGenerator<RecommendationChunk>
         ContentComponentGeneratorHelper = new(contents);
         HeaderGeneratorHelper = new(headers);
 
-        RuleFor(recommendationChunk => recommendationChunk.Title, faker => faker.Lorem.Sentence(faker.Random.Int(1, 5)));
         RuleFor(recommendationChunk => recommendationChunk.Answers, faker => answers.Count > 0 ? AnswerGeneratorHelper.GetEntities(faker, 2, 5) : []);
         RuleFor(recommendationChunk => recommendationChunk.Content, faker => contents.Count > 0 ? ContentComponentGeneratorHelper.GetEntities(faker, 2, 5) : []);
         RuleFor(recommendationChunk => recommendationChunk.Header, faker => headers.Count > 0 ? HeaderGeneratorHelper.GetEntity(faker) : null!);
@@ -39,7 +38,6 @@ public class RecommendationChunkGenerator : BaseGenerator<RecommendationChunk>
         Id = recommendationChunk.Sys.Id,
         Answers = recommendationChunk.Answers.Select(answer => new AnswerDbEntity() { Id = answer.Sys.Id }).ToList(),
         HeaderId = recommendationChunk.Header.Sys.Id,
-        Title = recommendationChunk.Title,
         Published = true,
         Archived = false,
         Deleted = false,

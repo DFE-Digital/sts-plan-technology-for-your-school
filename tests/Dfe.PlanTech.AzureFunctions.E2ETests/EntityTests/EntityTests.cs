@@ -1,8 +1,8 @@
 using Azure.Messaging.ServiceBus;
-using Dfe.PlanTech.AzureFunctions;
 using Dfe.PlanTech.AzureFunctions.E2ETests.Generators;
 using Dfe.PlanTech.AzureFunctions.E2ETests.Utilities;
 using Dfe.PlanTech.AzureFunctions.Mappings;
+using Dfe.PlanTech.AzureFunctions.Services;
 using Dfe.PlanTech.AzureFunctions.Utils;
 using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -36,6 +36,7 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
         Mappers = serviceProvider.GetRequiredService<JsonToEntityMappers>();
         MessageActions = CreateServiceBusMessageActionsSubstitute();
         MessageRetryHandler = serviceProvider.GetService<IMessageRetryHandler>() ?? EntityTests<TEntity, TDbEntity, TEntityGenerator>.CreateMessageRetryHandlerSub();
+        CacheHandler = Substitute.For<ICacheHandler>();
         QueueReceiver = CreateQueueReceiver();
 
         ClearDatabase();
@@ -52,6 +53,7 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
     protected readonly List<TEntity> CreatedEntities;
     protected readonly ServiceBusMessageActions MessageActions;
     protected readonly TEntityGenerator EntityGenerator;
+    protected readonly ICacheHandler CacheHandler;
 
     [Fact]
     public async Task Should_Publish_Entities()
@@ -396,7 +398,7 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
     }
 
     protected QueueReceiver CreateQueueReceiver(bool usePreviewContent = false)
-    => new(new ContentfulOptions(usePreviewContent), LoggerFactory, Db, Mappers, MessageRetryHandler);
+    => new(new ContentfulOptions(usePreviewContent), LoggerFactory, Db, Mappers, MessageRetryHandler, CacheHandler);
 
     protected ServiceBusReceivedMessage CreateBlankMessage(TEntity entity, CmsEvent cmsEvent)
     {
