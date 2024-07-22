@@ -23,9 +23,7 @@
 
 .dfe-vertical-nav__link,
 .dfe-vertical-nav__link--selected {
-  &:visited {
-    color: var(--govuk-link-color);
-  }
+  color: var(--govuk-link-color);
 
   &:active, &:hover {
     background-color: #fd0;
