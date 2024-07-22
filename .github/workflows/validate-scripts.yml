@@ -75,7 +75,3 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           postfixes: |
             sql
-          directories: |
-            ./src/Dfe.PlanTech.DatabaseUpgrader/Scripts
-            ./src/Dfe.PlanTech.DatabaseUpgrader/EnvironmentSpecificScripts
-            ./.github/scripts
