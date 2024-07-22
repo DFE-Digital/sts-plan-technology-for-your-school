@@ -91,11 +91,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: true
-          
-      - name: Git Submodule Update
-        run: |
-          git pull --recurse-submodules
-          git submodule update --remote --recursive
 
       - name: Azure CLI Login
         uses: ./.github/actions/azure-login
