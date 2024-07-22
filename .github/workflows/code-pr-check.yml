@@ -64,7 +64,6 @@ jobs:
             git push
           else
             echo 'No linting changes'
-          fi
 
   build-test-web-app:
     name: Build and run unit tests
