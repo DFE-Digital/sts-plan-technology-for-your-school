@@ -52,28 +52,27 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
                                                     .ToListAsync(cancellationToken);
 
         var introContent = await _db.RecommendationIntroContents.Where(introContent => introContent.RecommendationIntro.SubtopicRecommendations.Any(rec => rec.Id == recommendation.Id))
-                                                                .Select(introContent => new
+                                                                .Select(introContent => new RecommendationIntroContentDbEntity()
                                                                 {
-                                                                    intro = introContent.RecommendationIntroId,
-                                                                    content = introContent.ContentComponent,
-                                                                    rowId = introContent.Id
+                                                                    RecommendationIntroId = introContent.RecommendationIntroId,
+                                                                    ContentComponent = introContent.ContentComponent,
+                                                                    ContentComponentId = introContent.ContentComponentId,
+                                                                    Id = introContent.Id
                                                                 })
                                                                 .ToListAsync(cancellationToken);
 
         var chunkContent = await _db.RecommendationChunkContents.Where(chunkContent => chunkContent.RecommendationChunk.RecommendationSections.Any(section => section.Id == recommendation.SectionId))
-                                                                .Select(chunkContent => new
+                                                                .Select(chunkContent => new RecommendationChunkContentDbEntity()
                                                                 {
-                                                                    chunk = chunkContent.RecommendationChunkId,
-                                                                    content = chunkContent.ContentComponent,
-                                                                    rowId = chunkContent.Id
+                                                                    RecommendationChunkId = chunkContent.RecommendationChunkId,
+                                                                    ContentComponent = chunkContent.ContentComponent,
+                                                                    ContentComponentId = chunkContent.ContentComponentId,
+                                                                    Id = chunkContent.Id
                                                                 })
                                                                 .ToListAsync(cancellationToken);
 
-        //Log errored contents
-        var erroredIntros = introContent.Where(intro => intro.content == null).ToArray();
-        var erroredContent = chunkContent.Where(chunk => chunk.content == null).ToArray();
-        logger.LogError("RecommendationIntroContent missing ContentComponentId: {ErroredIntroContentsRowIds}", erroredIntros.Select(intro => intro.rowId));
-        logger.LogError("RecommendationChunkContent missing ContentComponentId: {ErroredChunkContentsRowIds}", erroredContent.Select(chunk => chunk.rowId));
+        LogInvalidJoinRows(introContent);
+        LogInvalidJoinRows(chunkContent);
 
         await _db.RichTextContentWithSubtopicRecommendationIds
           .Where(rt => rt.SubtopicRecommendationId == recommendation.Id)
@@ -88,10 +87,9 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
                 Header = intro.Header,
                 HeaderId = intro.HeaderId,
                 Maturity = intro.Maturity,
-                Content = [.. introContent.Where(content => content.intro == intro.Id)
-                                      .Select(content => content.content!)
-                                      .Where(content => content != null)
-                                      .OrderBy(content => content.Order)]
+                Content = [.. introContent.Where(content => content.RecommendationIntroId == intro.Id && content.ContentComponent != null)
+                                            .Select(content => content.ContentComponent)
+                                            .OrderBy(content => content?.Order)]
             }).ToList(),
             Section = new RecommendationSectionDbEntity()
             {
@@ -101,10 +99,9 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
                     Header = chunk.Header,
                     HeaderId = chunk.HeaderId,
                     Answers = chunk.Answers,
-                    Content = [.. chunkContent.Where(content => content.chunk == chunk.Id)
-                                              .Select(content => content.content!)
-                                              .Where(content => content != null)
-                                              .OrderBy(content => content.Order)]
+                    Content = [.. chunkContent.Where(content => content.RecommendationChunkId == chunk.Id && content.ContentComponent != null)
+                                            .Select(content => content.ContentComponent)
+                                            .OrderBy(content => content?.Order)]
                 }).ToList(),
                 Answers = recommendation.Section.Answers,
                 Id = recommendation.Section.Id,
@@ -120,8 +117,21 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
                                   .Select(intro => intro != null ? new RecommendationsViewDto(intro.Slug, intro.Header.Text) : null)
                                   .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
-    private void LogErroredRelationshipRows(IEnumerable<RecommendationChunkContentDbEntity> chunkContent,
-                                            IEnumerable<RecommendationIntroContentDbEntity> introContent)
+    /// <summary>
+    /// Check for invalid join rows, and log any errored rows.
+    /// </summary>
+    /// <typeparam name="TContentComponentJoin"></typeparam>
+    /// <param name="contentJoins"></param>
+    private void LogInvalidJoinRows<TContentComponentJoin>(List<TContentComponentJoin> contentJoins)
+    where TContentComponentJoin : class, IHasContentComponent
     {
+        var invalidJoins = contentJoins.Where(join => join.ContentComponent == null).ToArray();
+
+        if (invalidJoins.Length == 0)
+        {
+            return;
+        }
+
+        logger.LogError("{ContentJoinType} has {InvalidRowsCount} rows missing ContentComponentId: {ErroredRowIds}", typeof(TContentComponentJoin).Name, invalidJoins.Length, invalidJoins.Select(join => join.Id));
     }
 }
