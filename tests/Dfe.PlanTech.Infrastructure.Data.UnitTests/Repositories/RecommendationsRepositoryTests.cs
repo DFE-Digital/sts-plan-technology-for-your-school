@@ -5,6 +5,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data.Repositories;
+using Microsoft.Extensions.Logging.Abstractions;
 using MockQueryable.NSubstitute;
 using NSubstitute;
 
@@ -66,7 +67,7 @@ public class RecommendationsRepositoryTests
         var richTextsMock = _richTexts.BuildMock();
         _db.RichTextContentWithSubtopicRecommendationIds.Returns(richTextsMock);
 
-        _repository = new RecommendationsRepository(_db);
+        _repository = new RecommendationsRepository(_db, new NullLogger<IRecommendationsRepository>());
     }
 
     private SubtopicRecommendationDbEntity CreateSubtopicRecommendationDbEntity()

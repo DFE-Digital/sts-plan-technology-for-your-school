@@ -4,10 +4,11 @@ using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Questionnaire.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Repositories;
 
-public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepository
+public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendationsRepository> logger) : IRecommendationsRepository
 {
     private readonly ICmsDbContext _db = db;
 
@@ -54,7 +55,8 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
                                                                 .Select(introContent => new
                                                                 {
                                                                     intro = introContent.RecommendationIntroId,
-                                                                    content = introContent.ContentComponent
+                                                                    content = introContent.ContentComponent,
+                                                                    rowId = introContent.Id
                                                                 })
                                                                 .ToListAsync(cancellationToken);
 
@@ -62,13 +64,20 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
                                                                 .Select(chunkContent => new
                                                                 {
                                                                     chunk = chunkContent.RecommendationChunkId,
-                                                                    content = chunkContent.ContentComponent
+                                                                    content = chunkContent.ContentComponent,
+                                                                    rowId = chunkContent.Id
                                                                 })
                                                                 .ToListAsync(cancellationToken);
 
+        //Log errored contents
+        var erroredIntros = introContent.Where(intro => intro.content == null).ToArray();
+        var erroredContent = chunkContent.Where(chunk => chunk.content == null).ToArray();
+        logger.LogError("RecommendationIntroContent missing ContentComponentId: {ErroredIntroContentsRowIds}", erroredIntros.Select(intro => intro.rowId));
+        logger.LogError("RecommendationChunkContent missing ContentComponentId: {ErroredChunkContentsRowIds}", erroredContent.Select(chunk => chunk.rowId));
+
         await _db.RichTextContentWithSubtopicRecommendationIds
-                  .Where(rt => rt.SubtopicRecommendationId == recommendation.Id)
-                  .ToListAsync(cancellationToken);
+          .Where(rt => rt.SubtopicRecommendationId == recommendation.Id)
+          .ToListAsync(cancellationToken);
 
         return new SubtopicRecommendationDbEntity()
         {
@@ -81,6 +90,7 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
                 Maturity = intro.Maturity,
                 Content = [.. introContent.Where(content => content.intro == intro.Id)
                                       .Select(content => content.content!)
+                                      .Where(content => content != null)
                                       .OrderBy(content => content.Order)]
             }).ToList(),
             Section = new RecommendationSectionDbEntity()
@@ -93,6 +103,7 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
                     Answers = chunk.Answers,
                     Content = [.. chunkContent.Where(content => content.chunk == chunk.Id)
                                               .Select(content => content.content!)
+                                              .Where(content => content != null)
                                               .OrderBy(content => content.Order)]
                 }).ToList(),
                 Answers = recommendation.Section.Answers,
@@ -108,4 +119,9 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
                                   .Select(subtopicRecommendation => subtopicRecommendation.Intros.FirstOrDefault(intro => intro.Maturity == maturity))
                                   .Select(intro => intro != null ? new RecommendationsViewDto(intro.Slug, intro.Header.Text) : null)
                                   .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+    private void LogErroredRelationshipRows(IEnumerable<RecommendationChunkContentDbEntity> chunkContent,
+                                            IEnumerable<RecommendationIntroContentDbEntity> introContent)
+    {
+    }
 }
