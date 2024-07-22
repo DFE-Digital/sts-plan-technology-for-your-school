@@ -58,7 +58,7 @@ if (!builder.Environment.IsDevelopment())
     }
 }
 
-builder.InitContentAndSupport();
+builder.InitCsDependencyInjection();
 
 builder.Services.AddCaching();
 builder.Services.AddCQRSServices();
