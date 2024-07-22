@@ -38,6 +38,11 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.ref }}
 
+      - name: Git Submodule Update
+        run: |
+            git pull --recurse-submodules
+            git submodule update --remote --recursive
+
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
