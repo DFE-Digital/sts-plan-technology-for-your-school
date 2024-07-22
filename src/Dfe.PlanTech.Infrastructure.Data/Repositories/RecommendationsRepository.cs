@@ -51,7 +51,8 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
                                                     .OrderBy(chunk => chunk.Order)
                                                     .ToListAsync(cancellationToken);
 
-        var introContent = await _db.RecommendationIntroContents.Where(introContent => introContent.RecommendationIntro.SubtopicRecommendations.Any(rec => rec.Id == recommendation.Id))
+        var introContent = await _db.RecommendationIntroContents.Where(introContent => introContent.RecommendationIntro != null &&
+                                                                                       introContent.RecommendationIntro.SubtopicRecommendations.Any(rec => rec.Id == recommendation.Id))
                                                                 .Select(introContent => new RecommendationIntroContentDbEntity()
                                                                 {
                                                                     RecommendationIntroId = introContent.RecommendationIntroId,
@@ -61,7 +62,8 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
                                                                 })
                                                                 .ToListAsync(cancellationToken);
 
-        var chunkContent = await _db.RecommendationChunkContents.Where(chunkContent => chunkContent.RecommendationChunk.RecommendationSections.Any(section => section.Id == recommendation.SectionId))
+        var chunkContent = await _db.RecommendationChunkContents.Where(chunkContent => chunkContent.RecommendationChunk != null &&
+                                                                                       chunkContent.RecommendationChunk.RecommendationSections.Any(section => section.Id == recommendation.SectionId))
                                                                 .Select(chunkContent => new RecommendationChunkContentDbEntity()
                                                                 {
                                                                     RecommendationChunkId = chunkContent.RecommendationChunkId,
