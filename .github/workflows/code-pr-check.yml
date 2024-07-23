@@ -60,7 +60,7 @@ jobs:
 
           if [[ `git status --porcelain` ]]; then 
             git add src/*
-            git add test/*
+            git add tests/*
             git commit -m "chore: Linted code for plan-technology-for-your-school.sln solution"
             git push
           else
