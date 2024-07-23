@@ -47,7 +47,11 @@ if (!builder.Environment.IsDevelopment())
 
     builder.Services.AddDbContext<DataProtectionDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Database")));
     builder.Services.AddDataProtection()
-                        .PersistKeysToDbContext<DataProtectionDbContext>()
+                                            .PersistKeysToDbContext<DataProtectionDbContext>()
+                        
+                        
+                        
+                        
                         .ProtectKeysWithAzureKeyVault(new Uri(keyVaultUri + "keys/dataprotection"), azureCredentials);
 
     //Add overrides json for overwriting KV values for testing
@@ -57,7 +61,7 @@ if (!builder.Environment.IsDevelopment())
     }
 }
 
-builder.InitCsDependencyInjection();
+            builder.InitCsDependencyInjection();
 
 builder.Services.AddCaching();
 builder.Services.AddCQRSServices();
