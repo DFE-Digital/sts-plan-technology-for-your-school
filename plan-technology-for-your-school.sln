@@ -37,8 +37,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.PlanTech.Infrastructure
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.PlanTech.CmsDbDataValidator", "tests\Dfe.PlanTech.CmsDbDataValidator\Dfe.PlanTech.CmsDbDataValidator.csproj", "{66E92A5E-5C8A-4245-A55F-087FE2D96EEF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.ContentSupport.Web", "contentandsupport\src\Dfe.ContentSupport.Web\Dfe.ContentSupport.Web.csproj", "{60DAAF72-2587-4FDC-A579-F7589126DD44}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,10 +103,6 @@ Global
 		{66E92A5E-5C8A-4245-A55F-087FE2D96EEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66E92A5E-5C8A-4245-A55F-087FE2D96EEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{66E92A5E-5C8A-4245-A55F-087FE2D96EEF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{60DAAF72-2587-4FDC-A579-F7589126DD44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{60DAAF72-2587-4FDC-A579-F7589126DD44}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{60DAAF72-2587-4FDC-A579-F7589126DD44}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{60DAAF72-2587-4FDC-A579-F7589126DD44}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
