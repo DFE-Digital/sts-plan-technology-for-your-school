@@ -38,7 +38,7 @@ public class PagesController : BaseController<PagesController>
 
     [HttpGet(UrlConstants.ServiceUnavailable, Name = UrlConstants.ServiceUnavailable)]
     public IActionResult ServiceUnavailable([FromServices] IConfiguration configuration)
-     =>  View(new ServiceUnavailableViewModel
+     => View(new ServiceUnavailableViewModel
      {
          RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
          ContactUsEmail = configuration["ContactUs:Email"]
