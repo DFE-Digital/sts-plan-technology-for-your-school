@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using System.Security.Claims;
+using Microsoft.Extensions.Configuration;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Controllers
@@ -23,6 +24,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private const string SELF_ASSESSMENT_SLUG = "self-assessment";
         readonly ICookieService cookiesSubstitute = Substitute.For<ICookieService>();
         readonly IUser userSubstitute = Substitute.For<IUser>();
+        private readonly IConfiguration _configuration = Substitute.For<IConfiguration>();
 
         private readonly PagesController _controller;
         private readonly ControllerContext _controllerContext;
@@ -205,7 +207,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             _controller.ControllerContext = controllerContext;
 
-            var result = _controller.ServiceUnavailable();
+            var result = _controller.ServiceUnavailable(_configuration);
 
             var viewResult = result as ViewResult;
 

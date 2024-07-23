@@ -37,6 +37,10 @@ public class PagesController : BaseController<PagesController>
     => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 
     [HttpGet(UrlConstants.ServiceUnavailable, Name = UrlConstants.ServiceUnavailable)]
-    public IActionResult ServiceUnavailable()
-    => View(new ServiceUnavailableViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    public IActionResult ServiceUnavailable([FromServices] IConfiguration configuration)
+     =>  View(new ServiceUnavailableViewModel
+     {
+         RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+         ContactUsEmail = configuration["ContactUs:Email"]
+     });
 }
