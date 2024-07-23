@@ -57,6 +57,7 @@ if (!builder.Environment.IsDevelopment())
     }
 }
 
+
 builder.InitCsDependencyInjection();
 
 builder.Services.AddCaching();
