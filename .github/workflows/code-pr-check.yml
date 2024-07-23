@@ -39,11 +39,6 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           submodules: true
 
-      - name: Git Submodule Update
-        run: |
-            git pull --recurse-submodules
-            git submodule update --remote --recursive
-
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -52,6 +47,11 @@ jobs:
 
       - name: Lint plan-technology-for-your-school.sln solution
         run: dotnet format plan-technology-for-your-school.sln
+
+      - name: Git Submodule Update
+        run: |
+            git pull --recurse-submodules
+            git submodule update --remote --recursive
 
       - name: Commit and push changes if necessary
         if: 
