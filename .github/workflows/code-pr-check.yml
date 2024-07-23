@@ -54,13 +54,14 @@ jobs:
         run: dotnet format plan-technology-for-your-school.sln
 
       - name: Commit and push changes if necessary
-        if: 
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
-          if [[ `git status --porcelain` ]]; then
-            git commit -am "chore: Linted code for plan-technology-for-your-school.sln solution"
+          if [[ `git status --porcelain` ]]; then 
+            git add src/*
+            git add test/*
+            git commit -m "chore: Linted code for plan-technology-for-your-school.sln solution"
             git push
           else
             echo 'No linting changes'
