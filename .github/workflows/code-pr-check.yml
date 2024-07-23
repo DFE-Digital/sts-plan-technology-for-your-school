@@ -58,7 +58,7 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
-          if [[ `git status --porcelain` ]]; then 
+          if [[ `git status --porcelain --ignore-submodules=all` ]]; then 
             git add src/*
             git add tests/*
             git commit -m "chore: Linted code for plan-technology-for-your-school.sln solution"
