@@ -15,9 +15,8 @@ export const validateRecommendationForMaturity = (section, maturity, path) => {
         (recommendation) => recommendation.maturity == maturity
     );
 
-    // Get chunks for path and remove duplicates
-    const unfilteredChunks = section.recommendation.section.getChunksForPath(path)
-    const chunks = unfilteredChunks.filter((chunk, index) => unfilteredChunks.indexOf(chunk) === index);
+    // Get chunks for path
+    const chunks = section.recommendation.section.getChunksForPath(path)
 
     const recommendationUrl = `${section.interstitialPage.fields.slug}/recommendation` 
 

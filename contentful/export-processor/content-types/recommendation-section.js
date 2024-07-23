@@ -24,6 +24,22 @@ export default class RecommendationSection {
   }
 
   getChunksForPath(path) {
-    return path.map(pathPart => pathPart.answer.id).flatMap(answerId => this.chunks.filter(chunk => chunk.answers.some(answer => answer.id == answerId)));
+      const answerIds = path.map(pathPart => pathPart.answer.id);
+
+      const filteredChunks = this.chunks.filter(chunk =>
+          chunk.answers.some(answer => answerIds.includes(answer.id))
+      );
+
+      const uniqueChunks = [];
+      const seen = new Set();
+
+      for (const chunk of filteredChunks) {
+          const chunkStr = JSON.stringify(chunk);
+          if (!seen.has(chunkStr)) {
+              seen.add(chunkStr);
+              uniqueChunks.push(chunk);
+          }
+      }
+      return uniqueChunks;
   }
 }
