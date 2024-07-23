@@ -1,5 +1,3 @@
-import MapContent from "./content-mapper.js";
-
 export default class RecommendationIntro {
   content;
   header;
