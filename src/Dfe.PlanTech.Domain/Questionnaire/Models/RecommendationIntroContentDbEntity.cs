@@ -4,7 +4,7 @@ using Dfe.PlanTech.Domain.Content.Models;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-public class RecommendationIntroContentDbEntity
+public class RecommendationIntroContentDbEntity : IHasContentComponent
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

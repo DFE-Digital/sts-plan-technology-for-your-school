@@ -25,7 +25,6 @@ public class RecommendationChunkTests() : EntityTests<RecommendationChunk, Recom
      => new()
      {
          ["header"] = entity.Header.ToEntityId(),
-         ["title"] = entity.Title,
          ["answers"] = entity.Answers.ToEntityIds(),
          ["content"] = entity.Content.ToEntityIds(),
      };
@@ -44,7 +43,6 @@ public class RecommendationChunkTests() : EntityTests<RecommendationChunk, Recom
         Assert.NotNull(dbEntity);
 
         Assert.Equal(entity.Header.Sys.Id, dbEntity.HeaderId);
-        Assert.Equal(entity.Title, dbEntity.Title);
         Assert.Equal(entity.Answers.Count, dbEntity.Answers.Count);
 
         foreach (var answer in entity.Answers)
