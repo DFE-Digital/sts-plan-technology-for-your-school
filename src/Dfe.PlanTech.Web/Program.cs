@@ -1,4 +1,5 @@
 using Azure.Identity;
+using Dfe.ContentSupport.Web.Extensions;
 using Dfe.PlanTech.Application.Helpers;
 using Dfe.PlanTech.Application.Submissions.Queries;
 using Dfe.PlanTech.Domain.Helpers;
@@ -46,8 +47,8 @@ if (!builder.Environment.IsDevelopment())
 
     builder.Services.AddDbContext<DataProtectionDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Database")));
     builder.Services.AddDataProtection()
-                        .PersistKeysToDbContext<DataProtectionDbContext>()
-                        .ProtectKeysWithAzureKeyVault(new Uri(keyVaultUri + "keys/dataprotection"), azureCredentials);
+        .PersistKeysToDbContext<DataProtectionDbContext>()
+        .ProtectKeysWithAzureKeyVault(new Uri(keyVaultUri + "keys/dataprotection"), azureCredentials);
 
     //Add overrides json for overwriting KV values for testing
     if (builder.Environment.IsStaging())
@@ -56,6 +57,8 @@ if (!builder.Environment.IsDevelopment())
     }
 }
 
+
+builder.InitCsDependencyInjection();
 
 builder.Services.AddCaching();
 builder.Services.AddCQRSServices();
