@@ -3,7 +3,7 @@ import { FindPageForSlug, selfAssessmentSlug } from "../../../helpers/page-slugs
 import { dataLoaded } from "../dpv-helpers/data-loaded-check.js";
 
 export const validateSelfAssessmentPageOnStart = (dataMapper) => {
-    if (!dataMapper || !dataLoaded(dataMapper.pages)) {
+    if (!dataLoaded(dataMapper.pages)) {
         return;
     }
 

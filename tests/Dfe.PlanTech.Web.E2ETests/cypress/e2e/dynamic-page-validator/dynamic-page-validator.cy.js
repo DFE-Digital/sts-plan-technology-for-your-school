@@ -19,7 +19,7 @@ describe("Navigation links and non-authorised pages", () => {
 });
 
 describe("Self assessment page", () => {
-
+    
     it("Should validate self-assessment page", () => {
         validateSelfAssessmentPageOnStart(dataMapper);        
     });
