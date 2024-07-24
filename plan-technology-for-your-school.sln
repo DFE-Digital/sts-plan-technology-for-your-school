@@ -37,10 +37,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.PlanTech.Infrastructure
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.PlanTech.CmsDbDataValidator", "tests\Dfe.PlanTech.CmsDbDataValidator\Dfe.PlanTech.CmsDbDataValidator.csproj", "{66E92A5E-5C8A-4245-A55F-087FE2D96EEF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.ContentSupport.Web", "contentandsupport\src\Dfe.ContentSupport.Web\Dfe.ContentSupport.Web.csproj", "{902F3AA9-FF2C-4D89-98F2-74467B043BA0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.ContentSupport.Web.Tests", "contentandsupport\tests\Dfe.ContentSupport.Web.Tests\Dfe.ContentSupport.Web.Tests.csproj", "{3638920D-A73C-4F6D-A9CE-ADDACB76C541}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -107,14 +103,6 @@ Global
 		{66E92A5E-5C8A-4245-A55F-087FE2D96EEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66E92A5E-5C8A-4245-A55F-087FE2D96EEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{66E92A5E-5C8A-4245-A55F-087FE2D96EEF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{902F3AA9-FF2C-4D89-98F2-74467B043BA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{902F3AA9-FF2C-4D89-98F2-74467B043BA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{902F3AA9-FF2C-4D89-98F2-74467B043BA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{902F3AA9-FF2C-4D89-98F2-74467B043BA0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3638920D-A73C-4F6D-A9CE-ADDACB76C541}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3638920D-A73C-4F6D-A9CE-ADDACB76C541}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3638920D-A73C-4F6D-A9CE-ADDACB76C541}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3638920D-A73C-4F6D-A9CE-ADDACB76C541}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -135,7 +123,6 @@ Global
 		{2F75269D-834B-4E0A-BAD2-7ECAD359C56D} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
 		{B82ED911-FFCD-4EFF-BD9E-405394811F13} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
 		{66E92A5E-5C8A-4245-A55F-087FE2D96EEF} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
-		{3638920D-A73C-4F6D-A9CE-ADDACB76C541} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2661FAF0-D2EA-4265-846E-E6AB213C854C}
