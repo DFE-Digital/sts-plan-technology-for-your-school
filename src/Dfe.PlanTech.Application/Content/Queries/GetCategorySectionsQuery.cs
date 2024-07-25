@@ -8,9 +8,6 @@ namespace Dfe.PlanTech.Application.Content.Queries;
 
 public class GetCategorySectionsQuery(ICmsDbContext db, ILogger<GetCategorySectionsQuery> logger) : IGetPageChildrenQuery
 {
-    private readonly ICmsDbContext _db = db;
-    private readonly ILogger<GetCategorySectionsQuery> _logger = logger;
-
     /// <summary>
     /// If there are any "Category" components in the Page.Content, then load the required Section information for each one.
     /// </summary>
@@ -25,13 +22,13 @@ public class GetCategorySectionsQuery(ICmsDbContext db, ILogger<GetCategorySecti
 
             if (!pageHasCategories) return;
 
-            var sections = await _db.ToListAsync(SectionsForPageQueryable(page), cancellationToken);
+            var sections = await db.ToListAsync(SectionsForPageQueryable(page), cancellationToken);
 
             CopySectionsToPage(page, sections);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching categories for {page}", page.Id);
+            logger.LogError(ex, "Error fetching categories for {page}", page.Id);
             throw new InvalidOperationException($"An error occurred while fetching the categories for the page with ID: {page.Id}", ex);
         }
     }
@@ -52,9 +49,10 @@ public class GetCategorySectionsQuery(ICmsDbContext db, ILogger<GetCategorySecti
 
             if (matching == null)
             {
-                _logger.LogError("Could not find matching category {categoryId} in {pageSlug}", cat.Key, page.Slug);
+                logger.LogError("Could not find matching category {categoryId} in {pageSlug}", cat.Key, page.Slug);
                 continue;
             }
+
             bool sectionsValid = AllSectionsValid(sections);
 
             if (!sectionsValid)
@@ -84,7 +82,7 @@ public class GetCategorySectionsQuery(ICmsDbContext db, ILogger<GetCategorySecti
     /// <param name="page"></param>
     /// <returns></returns>
     private IQueryable<SectionDbEntity> SectionsForPageQueryable(PageDbEntity page)
-    => _db.Sections.Where(section => section.Category != null && section.Category.ContentPages.Any(categoryPage => categoryPage.Slug == page.Slug))
+    => db.Sections.Where(section => section.Category != null && section.Category.ContentPages.Any(categoryPage => categoryPage.Slug == page.Slug))
                 .Where(section => section.Order != null)
                 .OrderBy(section => section.Order)
                 .Select(section => new SectionDbEntity()
