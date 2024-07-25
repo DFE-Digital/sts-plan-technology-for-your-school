@@ -25,7 +25,7 @@ internal class Program
 
         if (!success)
         {
-            throw new Exception("Errors occurred migrating database");
+            throw new InvalidOperationException("Errors occurred migrating database");
         }
     }
 

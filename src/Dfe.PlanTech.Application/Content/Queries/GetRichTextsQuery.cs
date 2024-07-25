@@ -35,8 +35,7 @@ public class GetRichTextsForPageQuery(ICmsDbContext db, ILogger<GetRichTextsForP
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching rich text content from Database for {pageId}", page.Id);
-            throw;
+            throw new InvalidOperationException("Error fetching RichTextContent from Database for " + page.Id, ex);
         }
     }
 

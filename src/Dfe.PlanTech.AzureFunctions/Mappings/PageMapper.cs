@@ -33,7 +33,10 @@ public class PageMapper(PageEntityRetriever retriever, PageEntityUpdater updater
     /// <exception cref="KeyNotFoundException"></exception>
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
-        var id = values["id"]?.ToString() ?? throw new KeyNotFoundException("Not found id");
+        if (!values.TryGetValue("id", out object? idObj) || idObj == null)
+            throw new KeyNotFoundException("Not found id");
+
+        var id = idObj.ToString() ?? throw new KeyNotFoundException("Not found id");
 
         values = MoveValueToNewKey(values, "title", "titleId");
 

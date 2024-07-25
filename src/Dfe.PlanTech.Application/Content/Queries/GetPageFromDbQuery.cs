@@ -40,7 +40,7 @@ public class GetPageFromDbQuery : IGetPageQuery
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error fetching {page} from database", slug);
-            return null;
+            throw new InvalidOperationException("Error while fetching page", ex);
         }
     }
 
@@ -78,7 +78,7 @@ public class GetPageFromDbQuery : IGetPageQuery
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error fetching {page} from database", slug);
-            throw;
+            throw new InvalidOperationException("Error while fetching page from database", ex);
         }
     }
 
@@ -94,7 +94,7 @@ public class GetPageFromDbQuery : IGetPageQuery
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading children from database for {page}", page!.Id);
-            throw;
+            throw new InvalidOperationException("Error while loading page children", ex);
         }
     }
 
@@ -120,5 +120,4 @@ public class GetPageFromDbQuery : IGetPageQuery
 
         return true;
     }
-
 }

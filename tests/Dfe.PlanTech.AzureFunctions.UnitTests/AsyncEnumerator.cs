@@ -23,6 +23,7 @@ public class AsyncEnumerator<T> : IAsyncEnumerator<T>
 
     public ValueTask DisposeAsync()
     {
+        GC.SuppressFinalize(this);
         return ValueTask.CompletedTask;
     }
 }

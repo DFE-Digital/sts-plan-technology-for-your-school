@@ -1,9 +1,9 @@
-﻿@inject GtmConfiguration GtmConfiguration
+@inject GtmConfiguration GtmConfiguration
 @using Dfe.PlanTech.Web.Helpers;
 
 @section Head {
     <partial name="_Head"/>
-    @RenderSection("Head", false)
+    @RenderSection("Head", required: false)
 }
 
 @{
@@ -22,21 +22,18 @@
     <partial name="CookiesBanner/_CookieBanner" />
     <partial name="_Header" />
 
-    @RenderSection("Header", false)
+    @RenderSection("Header", required: false)
 }
+
+@RenderBody()
 
 @section BeforeContent {
     <partial name="_BeforeContent"/>
     @RenderSection("BeforeContent", required: false)
 }
 
-@RenderBody()
-
 @section Footer {
     <partial name="_Footer"/>
 }
 
-@section BodyEnd {
-    <partial name="_BodyEnd"/>
-    @RenderSection("BodyEnd", required: false)
-}
+@await RenderSectionAsync("BodyEnd")

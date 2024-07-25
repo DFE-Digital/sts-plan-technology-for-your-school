@@ -96,8 +96,15 @@ public static class QueryBuilders
     {
         var fieldInfo = queryBuilder.GetType().GetField(QueryBuilderStringValuesFieldName, BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new MissingFieldException($"Couldn't find field {QueryBuilderStringValuesFieldName}");
 
-        var value = fieldInfo.GetValue(queryBuilder) ?? throw new ArgumentNullException($"{QueryBuilderStringValuesFieldName} is null in QueryBuilder");
+        var value = fieldInfo.GetValue(queryBuilder);
 
-        return value is List<KeyValuePair<string, string>> list ? list : throw new InvalidCastException($"Expected {value} to be {typeof(List<KeyValuePair<string, string>>)} but is actually {value!.GetType()}");
+        if (value == null) throw new ArgumentNullException(nameof(value), $"{QueryBuilderStringValuesFieldName} is null in QueryBuilder");
+
+        if (value is not List<KeyValuePair<string, string>> list)
+        {
+            throw new InvalidCastException($"Expected {value.GetType()} to be {typeof(List<KeyValuePair<string, string>>)} but is actually {value.GetType()}");
+        }
+
+        return list;
     }
 }

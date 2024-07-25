@@ -6,16 +6,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
-public class GetCategorySectionsQuery : IGetPageChildrenQuery
+public class GetCategorySectionsQuery(ICmsDbContext db, ILogger<GetCategorySectionsQuery> logger) : IGetPageChildrenQuery
 {
-    private readonly ICmsDbContext _db;
-    private readonly ILogger<GetCategorySectionsQuery> _logger;
-
-    public GetCategorySectionsQuery(ICmsDbContext db, ILogger<GetCategorySectionsQuery> logger)
-    {
-        _db = db;
-        _logger = logger;
-    }
+    private readonly ICmsDbContext _db = db;
+    private readonly ILogger<GetCategorySectionsQuery> _logger = logger;
 
     /// <summary>
     /// If there are any "Category" components in the Page.Content, then load the required Section information for each one.
@@ -38,7 +32,7 @@ public class GetCategorySectionsQuery : IGetPageChildrenQuery
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error fetching categories for {page}", page.Id);
-            throw;
+            throw new InvalidOperationException($"An error occurred while fetching the categories for the page with ID: {page.Id}", ex);
         }
     }
 

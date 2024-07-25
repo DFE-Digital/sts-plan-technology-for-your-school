@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Enums;
@@ -56,17 +56,21 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
     /// <param name="completed"></param>
     /// <returns></returns>
     private static IQueryable<SectionStatusNew> GetLatestSubmissionStatus(IQueryable<Submission> submissionStatuses, bool completed)
-    => submissionStatuses.Select(submission => new SectionStatusNew()
-    {
-        DateCreated = submission.DateCreated,
-        Completed = submission.Completed,
-        Maturity = submission.Maturity,
-        SectionId = submission.SectionId,
-        Status = submission.Completed ? Status.Completed : submission.Responses.Count != 0 ? Status.InProgress : Status.NotStarted,
-    })
-    .GroupBy(submission => submission.SectionId)
-    .Select(grouping => grouping
-        .OrderByDescending(status => completed && status.Completed)
-        .ThenByDescending(status => status.DateCreated)
-        .First());
+        => submissionStatuses.Select(submission => new SectionStatusNew()
+        {
+            DateCreated = submission.DateCreated,
+            Completed = submission.Completed,
+            Maturity = submission.Maturity,
+            SectionId = submission.SectionId,
+            Status = GetSubmissionStatus(submission),
+        })
+        .GroupBy(submission => submission.SectionId)
+        .Select(grouping => grouping
+            .OrderByDescending(status => completed && status.Completed)
+            .ThenByDescending(status => status.DateCreated)
+            .First());
+
+    private static Status GetSubmissionStatus(Submission submission) =>
+        submission.Completed ? Status.Completed :
+        (submission.Responses?.Count ?? 0) > 0 ? Status.InProgress : Status.NotStarted;
 }

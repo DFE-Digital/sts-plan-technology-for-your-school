@@ -42,13 +42,14 @@ public class SecurityHeadersMiddleware
     /// Returns space separated hashes of any scripts that cannot be inlined, but are allowed
     /// </summary>
     /// <param name="context"></param>
-    private static string GetAllowedScriptHashes(HttpContext context)
+    private static string GetAllowedScriptHashes()
     {
         var allowedScriptHashes = new List<string>
         {
             // js enabled script from GovUK page template helper
             "sha256-wmo5EWLjw+Yuj9jZzGNNeSsUOBQmBvE1pvSPVNQzJ34=",
         };
+
         return string.Join(" ", allowedScriptHashes.Select(hash => $"'{hash}'"));
     }
 
@@ -59,7 +60,7 @@ public class SecurityHeadersMiddleware
     private static void AddContentSecurityPolicy(HttpContext context)
     {
         var nonce = GenerateNonce(context);
-        var whitelist = GetAllowedScriptHashes(context);
+        var whitelist = GetAllowedScriptHashes();
         var config = context.RequestServices.GetRequiredService<CspConfiguration>();
         var cspDirectives = new List<string>
         {
