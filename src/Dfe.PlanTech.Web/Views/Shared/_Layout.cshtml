@@ -3,7 +3,7 @@
 
 @section Head {
     <partial name="_Head"/>
-    @RenderSection("Head", required: false)
+    @await RenderSectionAsync("Head", required: false)
 }
 
 @{
@@ -22,18 +22,21 @@
     <partial name="CookiesBanner/_CookieBanner" />
     <partial name="_Header" />
 
-    @RenderSection("Header", required: false)
+    @await RenderSectionAsync("Header", required: false)
 }
-
-@RenderBody()
 
 @section BeforeContent {
     <partial name="_BeforeContent"/>
-    @RenderSection("BeforeContent", required: false)
+    @await RenderSectionAsync("BeforeContent", required: false)
 }
+
+@RenderBody()
 
 @section Footer {
     <partial name="_Footer"/>
 }
 
-@await RenderSectionAsync("BodyEnd")
+@section BodyEnd {
+    <partial name="_BodyEnd"/>
+    @await RenderSectionAsync("BodyEnd", required: false)
+}
