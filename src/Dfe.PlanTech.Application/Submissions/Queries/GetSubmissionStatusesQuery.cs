@@ -62,15 +62,9 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
             Completed = submission.Completed,
             Maturity = submission.Maturity,
             SectionId = submission.SectionId,
-            Status = GetSubmissionStatus(submission),
+            Status = submission.Completed ? Status.Completed : submission.Responses.Count != 0 ? Status.InProgress : Status.NotStarted,
         })
+        .Where(submission => !completed || submission.Completed)
         .GroupBy(submission => submission.SectionId)
-        .Select(grouping => grouping
-            .OrderByDescending(status => completed && status.Completed)
-            .ThenByDescending(status => status.DateCreated)
-            .First());
-
-    private static Status GetSubmissionStatus(Submission submission) => submission.Completed ? Status.Completed : GetSubmissionStatus(submission.Responses);
-
-    private static Status GetSubmissionStatus(List<Response>? responses) => (responses?.Count ?? 0) > 0 ? Status.InProgress : Status.NotStarted;
+        .Select(grouping => grouping.OrderByDescending(status => status.DateCreated).First());
 }
