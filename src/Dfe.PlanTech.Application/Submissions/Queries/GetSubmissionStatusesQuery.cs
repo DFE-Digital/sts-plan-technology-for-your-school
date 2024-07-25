@@ -47,16 +47,17 @@ public class GetSubmissionStatusesQuery(IPlanTechDbContext db, IUser userHelper)
     /// <param name="completed"></param>
     /// <returns></returns>
     private static IQueryable<SectionStatusNew> GetLatestSubmissionStatus(IQueryable<Submission> submissionStatuses, bool completed)
-    => submissionStatuses
-        .Where(submission => completed == submission.Completed)
-        .Select(submission => new SectionStatusNew()
-        {
-            DateCreated = submission.DateCreated,
-            Completed = submission.Completed,
-            Maturity = submission.Maturity,
-            SectionId = submission.SectionId,
-            Status = submission.Completed ? Status.Completed : submission.Responses.Count != 0 ? Status.InProgress : Status.NotStarted,
-        })
-        .GroupBy(submission => submission.SectionId)
-        .Select(grouping => grouping.OrderByDescending(status => status.DateCreated).First());
+    => submissionStatuses.Select(submission => new SectionStatusNew()
+    {
+        DateCreated = submission.DateCreated,
+        Completed = submission.Completed,
+        Maturity = submission.Maturity,
+        SectionId = submission.SectionId,
+        Status = submission.Completed ? Status.Completed : submission.Responses.Count != 0 ? Status.InProgress : Status.NotStarted,
+    })
+    .GroupBy(submission => submission.SectionId)
+    .Select(grouping => grouping
+        .OrderByDescending(status => completed && status.Completed)
+        .ThenByDescending(status => status.DateCreated)
+        .First());
 }
