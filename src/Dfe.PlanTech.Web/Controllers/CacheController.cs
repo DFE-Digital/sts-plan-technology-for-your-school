@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Dfe.PlanTech.Web.Controllers;
 
 [Route("cache")]
+[LogInvalidModelState]
 public class CacheController(ILogger<CacheController> logger) : BaseController<CacheController>(logger)
 {
     [HttpPost("clear")]

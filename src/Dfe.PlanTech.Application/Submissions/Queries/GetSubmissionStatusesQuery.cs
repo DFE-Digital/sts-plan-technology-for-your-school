@@ -70,7 +70,7 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
             .ThenByDescending(status => status.DateCreated)
             .First());
 
-    private static Status GetSubmissionStatus(Submission submission) =>
-        submission.Completed ? Status.Completed :
-        (submission.Responses?.Count ?? 0) > 0 ? Status.InProgress : Status.NotStarted;
+    private static Status GetSubmissionStatus(Submission submission) => submission.Completed ? Status.Completed : GetSubmissionStatus(submission.Responses);
+
+    private static Status GetSubmissionStatus(List<Response>? responses) => (responses?.Count ?? 0) > 0 ? Status.InProgress : Status.NotStarted;
 }
