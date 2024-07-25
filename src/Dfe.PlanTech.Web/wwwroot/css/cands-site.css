@@ -1,0 +1,86 @@
+﻿img {
+    max-width: 100%;
+}
+
+video {
+    max-width: 100%;
+}
+
+.attachment {
+    position: relative;
+}
+
+.attachment:after {
+    content: '';
+    display: block;
+    clear: both;
+}
+
+.attachment .attachment-title {
+    font-weight: 400;
+    font-size: 1.6875rem;
+    line-height: 1.1111111111;
+    margin: 0 0 15px;
+}
+
+.attachment .attachment-title .attachment-link {
+    line-height: 1.29;
+}
+
+.attachment .attachment-details {
+    padding-left: 134px;
+}
+
+.attachment .attachment-thumbnail {
+    position: relative;
+    float: left;
+    margin-right: 25px;
+    margin-bottom: 15px;
+    padding: 5px;
+    display: block;
+    max-width: 280px;
+    width: 140px;
+    height: auto;
+    border: #e6e6e6;
+    outline: 5px solid #e6e6e6;
+    background: #ffffff;
+    box-shadow: 0 2px 2px #999999;
+    fill: #d8d8d8;
+    stroke: #d8d8d8;
+}
+
+.attachment .attachment-metadata {
+    font-weight: 400;
+    font-size: 1.1875rem;
+    line-height: 1.25;
+    margin: 0 0 15px;
+    color: #505a5f;
+}
+
+.attachment .attachment-metadata:last-of-type {
+    margin-bottom: 0;
+}
+
+.attachment .attachment-metadata .attachment-attribute {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    text-decoration: none;
+    cursor: help;
+}
+
+.attachment-thumbnail {
+    display: block;
+    width: auto;
+    max-width: 99px;
+    height: auto;
+    border: rgba(11, 12, 12, 0.1);
+    outline: 5px solid rgba(11, 12, 12, 0.1);
+    background: #fff;
+    box-shadow: 0 2px 2px rgba(11, 12, 12, 0.4);
+    fill: #b1b4b6;
+    stroke: #b1b4b6;
+}
+
+.dfe-page-header {
+    background-color: #ebf2f6;
+}
