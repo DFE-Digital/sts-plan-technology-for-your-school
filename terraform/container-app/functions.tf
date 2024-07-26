@@ -64,7 +64,9 @@ resource "azapi_resource" "contentful_function" {
             type  = "blobContainer",
             value = "${azurerm_storage_account.function_storage.primary_blob_endpoint}function-releases"
             authentication = {
-              type = "SystemAssignedIdentity"
+              type                               = "StorageAccountConnectionString"
+              storageAccountConnectionStringName = "AzureWebJobsStorage"
+              userAssignedIdentityResourceId     = "azurerm_user_assigned_identity.user_assigned_identity.id"
             }
           }
         },
@@ -82,6 +84,10 @@ resource "azapi_resource" "contentful_function" {
       siteConfig = {
         appSettings = [
           {
+            name  = "keyVaultReferenceIdentity",
+            value = azurerm_user_assigned_identity.user_assigned_identity.id
+          },
+          {
             name  = "AzureWebJobsStorage__accountName",
             value = azurerm_storage_account.function_storage.name
           },
@@ -97,40 +103,9 @@ resource "azapi_resource" "contentful_function" {
             name  = "AzureWebJobsServiceBus",
             value = azurerm_servicebus_namespace.service_bus.default_primary_connection_string
           },
-          {
-            name  = "WEBSITE_ENABLE_SYNC_UPDATE_SITE",
-            value = true
-          },
-          {
-            name  = "WEBSITE_MOUNT_ENABLED",
-            value = 1
-          },
-          {
-            name  = "AZURE_CLIENT_ID",
-            value = azurerm_user_assigned_identity.user_assigned_identity.client_id
-          },
-          {
-            name  = "AZURE_KEYVAULT_CLIENTID",
-            value = azurerm_user_assigned_identity.user_assigned_identity.client_id
-          },
-          {
-            name  = "AZURE_KEYVAULT_RESOURCEENDPOINT",
-            value = azurerm_key_vault.vault.vault_uri
-          },
-          {
-            name  = "AZURE_KEYVAULT_SCOPE",
-            value = "https://vault.azure.net/.default"
-          },
-          {
-            name  = "KeyVaultReferenceIdentity",
-            value = azurerm_user_assigned_identity.user_assigned_identity.id
-          },
-          {
-            name  = "WEBSITE_RUN_FROM_PACKAGE",
-            value = ""
-          }
         ]
       }
+
     }
   })
   depends_on = [azurerm_service_plan.function_plan, azurerm_user_assigned_identity.user_assigned_identity, azurerm_servicebus_namespace.service_bus, azurerm_storage_account.function_storage]
