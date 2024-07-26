@@ -113,7 +113,7 @@ locals {
   function_appsetting_sql_connection_string = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=${azurerm_key_vault_secret.vault_secret_database_connectionstring.name})"
 
   function_appsetting_cacheclear_apikey_name  = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=CacheClear--ApiKeyName)"
-  function_appsetting_cacheclear_apikey_value = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=CacheClear--ApiKeyValu)"
+  function_appsetting_cacheclear_apikey_value = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=CacheClear--ApiKeyValue)"
   function_appsetting_cacheclear_endpoint     = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=CacheClear--Endpoint)"
 
 }
