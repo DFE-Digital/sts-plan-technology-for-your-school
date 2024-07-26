@@ -1,5 +1,5 @@
 import fs from "fs";
-import TestSuite from "#src/test-suite/test-suite";
+import TestSuite from "./test-suite.js";
 
 const mainSheetColumns = [
   { testReference: "Test Reference" },
@@ -25,7 +25,7 @@ mainSheetColumns.forEach((columnObj) => {
 const appendixColumns = [
   { reference: "Reference" },
   { content: "Content" },
-]
+];
 const appendixSheetKeys = [];
 const appendixSheetHeaders = [];
 

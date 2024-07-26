@@ -1,9 +1,9 @@
 import "dotenv/config";
-import DataMapper from "#src/data-mapper";
-import ExportContentfulData from "./exporter.js";
-import GenerateTestSuites from "./generate-test-suites.js";
-import ErrorLogger from "#src/errors/error-logger";
-import WriteUserJourneyPaths from "#src/write-user-journey-paths";
+import DataMapper from "./data-mapper.js";
+import ExportContentfulData from "./exporter.js.js";
+import GenerateTestSuites from "./generate-test-suites.js.js";
+import ErrorLogger from "./errors/error-logger.js";
+import WriteUserJourneyPaths from "./write-user-journey-paths.js";
 import fs from "fs";
 
 const DefaultOutputDirectory = "./output/";
@@ -59,6 +59,6 @@ const options = {
   exportUserJourneyPaths: process.env.EXPORT_USER_JOURNEY_PATHS === 'true',
   outputDir: process.env.OUTPUT_FILE_DIR ?? DefaultOutputDirectory,
   saveAllJourneys: process.env.EXPORT_ALL_PATHS === "true" || process.env.EXPORT_ALL_PATHS === true
-}
+};
 
 await processContentfulData(options);

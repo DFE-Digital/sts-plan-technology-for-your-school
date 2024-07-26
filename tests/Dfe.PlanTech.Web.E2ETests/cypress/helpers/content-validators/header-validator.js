@@ -13,7 +13,7 @@ function ValidateHeader(content) {
 }
 
 function GetExpectedClass(size) {
-  const sizeLetters = size == "extra large" ? "xl" : size.substring(0, 1);
+  const sizeLetters = size == "extralarge" ? "xl" : size.substring(0, 1);
 
   const expectedClass = "govuk-heading-" + sizeLetters;
   return expectedClass;
