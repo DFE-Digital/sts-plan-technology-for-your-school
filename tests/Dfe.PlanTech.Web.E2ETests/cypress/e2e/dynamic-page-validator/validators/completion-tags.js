@@ -1,24 +1,12 @@
-import { CleanText } from "../../../helpers/text-helpers";
-import { getSubmissionTimeText } from "../dpv-helpers/time-helpers";
+import { CleanText, getSubmissionTimeText } from "../helpers/index.js";
 
-
-export const selfAssessmentPageNewRecommendation = (section, maturity) => {
+export const validateCompletionTags = (section, introPage) => {
     const time = new Date();
     const timePlusOneMinute = new Date(time).setMinutes(time.getMinutes() + 1);
     const lateTime = new Date(timePlusOneMinute);
 
-    const matchingRecommendation = section.recommendation.intros.find(
-        (recommendation) => recommendation.maturity == maturity
-    );
-
-    if (!matchingRecommendation)
-        throw new Error(
-            `Couldn't find a recommendation for maturity ${maturity} in ${section.name}`,
-            section
-        );
-
     const expectedPath =
-        `/${section.name.trim()}/recommendation/${matchingRecommendation.slug.trim()}`
+        `/${section.name.trim()}/recommendation/${introPage.slug.trim()}`
             .toLowerCase()
             .replace(/ /g, "-");
 

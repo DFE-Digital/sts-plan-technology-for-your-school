@@ -1,9 +1,7 @@
-import ValidatePage from "../../../helpers/content-validators/page-validator.js";
-import { FindPageForSlug, selfAssessmentSlug } from "../../../helpers/page-slugs.js";
-import { dataLoaded } from "../dpv-helpers/data-loaded-check.js";
+import { FindPageForSlug, ValidatePage, dataLoaded, selfAssessmentSlug } from "../helpers/index.js";
 
-export const validateSelfAssessmentPageOnStart = (dataMapper) => {
-    if (!dataLoaded(dataMapper.pages)) {
+export const validateSelfAssessmentPage = (dataMapper) => {
+    if (!dataLoaded(dataMapper)) {
         return;
     }
 

@@ -1,7 +1,5 @@
-import ValidatePage from "../../../helpers/content-validators/page-validator.js";
-import { selfAssessmentSlug, FindPageForSlug } from "../../../helpers/page-slugs.js";
-import { validateCheckAnswersPage } from "./check-answers-validator.js";
-import { navigateAndValidateQuestionPages } from "./questions-validator.js";
+import { FindPageForSlug, selfAssessmentSlug, ValidatePage } from "../helpers/index.js";
+import { navigateAndValidateQuestionPages, validateCheckAnswersPage } from "./index.js";
 
 /**
  * Validates sections using the given paths

@@ -1,4 +1,4 @@
-const fs = require("fs");
+const { existsSync, readFileSync, writeFileSync } = require("fs");
 
 const ContentfulDataPath = "./cypress/fixtures/contentful-data.json";
 
@@ -21,11 +21,17 @@ async function loadAndSaveContentfulData(config) {
 }
 
 async function fetchContentfulExport({ exportContentfulData, config }) {
-  if (fs.existsSync(ContentfulDataPath)) {
+  if (existsSync(ContentfulDataPath)) {
     console.log(`Contentful export file at ${ContentfulDataPath} already exists - using it`);
-    const json = fs.readFileSync(ContentfulDataPath, "utf-8");
+      const contents = readFileSync(ContentfulDataPath, "utf-8");
 
-    return JSON.parse(json);
+      const json = JSON.parse(contents);
+
+      const jsonValid = json.entries?.length > 0 && json.contentTypes?.length > 0;
+
+      if (jsonValid) {
+          return json;
+      }
   }
 
   if (!config.env.SPACE_ID || !config.env.MANAGEMENT_TOKEN || !config.env.DELIVERY_TOKEN || !config.env.CONTENTFUL_ENVIRONMENT) {
@@ -42,18 +48,18 @@ async function fetchContentfulExport({ exportContentfulData, config }) {
 
   /**As the data is passed to/from the dev server + browser, it has to be serialisable.
 *    So we save the Contentful entries as JSON instead for read + usage by the test file later. */
-  fs.writeFileSync(ContentfulDataPath, JSON.stringify(data));
+  writeFileSync(ContentfulDataPath, JSON.stringify(data));
 
   console.log("Saved Contentful data as " + ContentfulDataPath);
   return data;
 }
 
 const readContentfulDataFromJson = () => {
-  if (!fs.existsSync(ContentfulDataPath)) {
+  if (!existsSync(ContentfulDataPath)) {
     return;
   }
 
-  const data = fs.readFileSync(ContentfulDataPath, "utf-8");
+  const data = readFileSync(ContentfulDataPath, "utf-8");
 
   return JSON.parse(data);
 };

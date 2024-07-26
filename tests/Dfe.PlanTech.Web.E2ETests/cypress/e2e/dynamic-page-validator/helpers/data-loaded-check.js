@@ -5,8 +5,8 @@
  * @return {boolean} haveContent - whether data has been loaded
  */
 
-export const dataLoaded = (contentMap) => {
-    const haveContent = contentMap?.size > 0 || contentMap?.length > 0;
+export const dataLoaded = ({ contents }) => {
+    const haveContent = contents?.size > 0 || contents?.length > 0;
 
     if (!haveContent) {
         console.log("Data has not been loaded");

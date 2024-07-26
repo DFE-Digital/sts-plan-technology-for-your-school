@@ -9,48 +9,46 @@ import ValidateNavigationLink from "./nav-link-validator.js";
 import ValidateRichTextContent from "./rich-text-content-validator.js";
 import ValidateWarningComponent from "./warning-validator.js";
 
-function ValidateContent(content) {
-  if (!content.sys || !content.fields) {
-    console.log(`Content is missing sys or fields. Skipping`, content);
-  }
-  switch (content.sys.contentType.sys.id) {
-    case "header": {
-      ValidateHeader(content);
-      break;
+export const ValidateContent = (content) => {
+    if (!content.sys || !content.fields) {
+        console.log(`Content is missing sys or fields. Skipping`, content);
     }
-    case "buttonWithLink": {
-      ValidateButtonWithLink(content);
-      break;
+    switch (content.sys.contentType.sys.id) {
+        case "header": {
+            ValidateHeader(content);
+            break;
+        }
+        case "buttonWithLink": {
+            ValidateButtonWithLink(content);
+            break;
+        }
+        case "textBody": {
+            ValidateRichTextContent(content.fields.richText);
+            break;
+        }
+        case "category": {
+            ValidateCategory(content);
+            break;
+        }
+        case "warningComponent": {
+            ValidateWarningComponent(content);
+            break;
+        }
+        case "buttonWithEntryReference": {
+            ValidateButtonWithEntryReference(content);
+            break;
+        }
+        case "insetText": {
+            ValidateInsetTextContent(content);
+            break;
+        }
+        case "navigationLink": {
+            ValidateNavigationLink(content);
+            break;
+        }
+        default: {
+            console.log(content.sys.contentType.sys.id, content);
+            break;
+        }
     }
-    case "textBody": {
-      ValidateRichTextContent(content.fields.richText);
-      break;
-    }
-    case "category": {
-      ValidateCategory(content);
-      break;
-    }
-    case "warningComponent": {
-      ValidateWarningComponent(content);
-      break;
-    }
-    case "buttonWithEntryReference": {
-      ValidateButtonWithEntryReference(content);
-      break;
-    }
-    case "insetText": {
-      ValidateInsetTextContent(content);
-      break;
-    }
-    case "navigationLink": {
-      ValidateNavigationLink(content);
-      break;
-    }
-    default: {
-      console.log(content.sys.contentType.sys.id, content);
-      break;
-    }
-  }
-}
-
-export default ValidateContent;
+};

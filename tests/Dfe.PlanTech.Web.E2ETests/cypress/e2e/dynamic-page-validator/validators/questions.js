@@ -1,5 +1,5 @@
-import { CleanText } from "../../../helpers/text-helpers.js";
-import { validateAnswers } from "./answer-validator.js";
+import { CleanText } from "../helpers/index.js";
+import { validateAnswers } from "./index.js";
 
 export const navigateAndValidateQuestionPages = (path, section) => {
 

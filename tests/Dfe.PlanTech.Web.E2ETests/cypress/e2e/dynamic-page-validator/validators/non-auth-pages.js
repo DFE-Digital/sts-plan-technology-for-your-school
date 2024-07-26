@@ -1,4 +1,4 @@
-import ValidatePage from "../../../helpers/content-validators/page-validator.js";
+import { ValidatePage } from "../helpers/index.js";
 
 export const validateNonAuthorisedPages = (dataMapper) => {
     Array.from(dataMapper?.pages ?? [])

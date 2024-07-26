@@ -1,6 +1,6 @@
-import ValidateContent from "../../../helpers/content-validators/content-validator.js";
+import { ValidateContent } from "../helpers/index.js";
 
-export const ValidateRecommendationIntro = (introPage, recommendationUrl) => {
+export const validateRecommendationIntro = (introPage, recommendationUrl) => {
     const { slug, header, content } = introPage;
     
     cy.url().should("include", `${recommendationUrl}/${slug}`);
@@ -10,7 +10,7 @@ export const ValidateRecommendationIntro = (introPage, recommendationUrl) => {
     if (content) {
         for (const component of content) {
             if (!component) {
-                console.log(`content is missing in page.`, introPage);
+                console.log(`Content is missing in exported data.`, introPage);
                 continue;
             }
             ValidateContent(component)

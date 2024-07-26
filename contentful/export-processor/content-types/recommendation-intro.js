@@ -7,7 +7,7 @@ export default class RecommendationIntro {
 
   constructor({ fields, sys }) {
       this.content = fields.content;
-      this.header = fields.header.fields.text;
+      this.header = fields.header?.fields.text;
       this.id = sys.id;
       this.maturity = fields.maturity;
       this.slug = fields.slug;

@@ -1,8 +1,7 @@
-import ValidateContent from "../../../helpers/content-validators/content-validator";
-import { CleanText } from "../../../helpers/text-helpers";
-import { slugifyChunks } from "../dpv-helpers/slugify-chunks";
+import { CleanText, ValidateContent, slugifyChunks } from "../helpers/index.js";
 
-export const ValidateRecommendationChunks = (chunks) => {
+
+export const validateRecommendationChunks = (chunks) => {
 
     cy.get("h2.dfe-vertical-nav__theme").contains("List of actions").should("exist");
 

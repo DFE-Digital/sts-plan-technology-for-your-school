@@ -1,7 +1,7 @@
-import ValidateContent from "./content-validator.js";
+import { ValidateContent } from "./content-validator.js";
 import ValidateTitle from "./title-validator.js";
 
-function ValidatePage(slug, page) {
+export const ValidatePage = (slug, page) => {
   if (!page.fields.requiresAuthorisation) {
     ShouldMatchUrl(slug);
   }
@@ -13,7 +13,7 @@ function ValidatePage(slug, page) {
   if (page.fields.beforeTitleContent) {
     for (const content of page.fields.beforeTitleContent) {
       if (!content) {
-        console.log(`Before title content is missing in page.`, page);
+        console.log(`Before title content is missing in exported page data.`, page);
         continue;
       }
       ValidateContent(content);
@@ -23,7 +23,7 @@ function ValidatePage(slug, page) {
   if (page.fields.content) {
     for (const content of page.fields.content) {
       if (!content) {
-        console.log(`Content is missing in page.`, page);
+        console.log(`Content is missing in exported page data.`, page);
         continue;
       }
       ValidateContent(content);

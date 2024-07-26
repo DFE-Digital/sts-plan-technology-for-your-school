@@ -1,10 +1,7 @@
-import { selfAssessmentSlug } from "../../helpers/page-slugs.js";
 import DataMapper from "export-processor/data-mapper.js";
-import { validateSections } from "./dpv-validators/section-validator.js";
-import { validateNonAuthorisedPages } from "./dpv-validators/non-auth-pages-validator.js";
-import { validateNavigationLinks } from "./dpv-validators/nav-links-validator.js";
-import { validateRecommendationForMaturity } from "./dpv-validators/recommendations-validator.js";
-import { validateSelfAssessmentPageOnStart } from "./dpv-validators/self-assessment-page-validators.js";
+import { selfAssessmentSlug } from "./helpers/index.js";
+import { validateNavigationLinks, validateNonAuthorisedPages, validateRecommendationForMaturity, validateSections, validateSelfAssessmentPage } from "./validators/index.js";
+
 
 const dataMapper = new DataMapper(require('../../fixtures/contentful-data'));
 
@@ -21,7 +18,7 @@ describe("Navigation links and non-authorised pages", () => {
 describe("Self assessment page", () => {
     
     it("Should validate self-assessment page", () => {
-        validateSelfAssessmentPageOnStart(dataMapper);        
+        validateSelfAssessmentPage(dataMapper);        
     });
 
 });
