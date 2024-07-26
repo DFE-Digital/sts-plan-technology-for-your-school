@@ -68,11 +68,9 @@ resource "azapi_resource" "contentful_function" {
             authentication = {
               type                               = "StorageAccountConnectionString"
               storageAccountConnectionStringName = "AzureWebJobsStorage"
-              userAssignedIdentityResourceId     = azurerm_user_assigned_identity.user_assigned_identity.id
             }
           }
         },
-        /* Make these variables */
         scaleAndConcurrency = {
           maximumInstanceCount = local.function.scaling.max_instance_count,
           instanceMemoryMB     = local.function.scaling.memory
@@ -82,7 +80,6 @@ resource "azapi_resource" "contentful_function" {
           version = local.function.runtime.version
         }
       },
-
       siteConfig = {
         appSettings = [
           /* Connections */
@@ -123,11 +120,13 @@ resource "azapi_resource" "contentful_function" {
             name  = "WEBSITE_CACHE_CLEAR_ENDPOINT"
             value = local.function.app_settings.cacheclear.endpoint
           }
-        ]
+        ],
+        http20enabled = true
+        minTlsVersion = "1.3"
       }
+      httpsOnly = true
     }
   })
-  depends_on = [azurerm_service_plan.function_plan, azurerm_user_assigned_identity.user_assigned_identity, azurerm_servicebus_namespace.service_bus, azurerm_storage_account.function_storage]
 
   lifecycle {
     ignore_changes = [
