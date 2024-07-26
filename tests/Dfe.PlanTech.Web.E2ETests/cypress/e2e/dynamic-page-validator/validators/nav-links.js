@@ -5,6 +5,8 @@ export const validateNavigationLinks = (dataMapper) => {
         return;
     }
 
+    cy.visit("/");
+
     for (const navigationLink of dataMapper.contents.get("navigationLink").values()) {
         ValidateContent(navigationLink);
     }
