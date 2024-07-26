@@ -52,6 +52,8 @@ resource "azapi_resource" "contentful_function" {
     identity_ids = [azurerm_user_assigned_identity.user_assigned_identity.id]
   }
 
+  tags = local.tags
+
   body = jsonencode({
     kind = "functionapp,linux",
 
@@ -83,6 +85,7 @@ resource "azapi_resource" "contentful_function" {
 
       siteConfig = {
         appSettings = [
+          /* Connections */
           {
             name  = "keyVaultReferenceIdentity",
             value = azurerm_user_assigned_identity.user_assigned_identity.id
@@ -103,6 +106,23 @@ resource "azapi_resource" "contentful_function" {
             name  = "AzureWebJobsServiceBus",
             value = azurerm_servicebus_namespace.service_bus.default_primary_connection_string
           },
+          {
+            name  = "AzureWebJobsStorage"
+            value = azurerm_storage_account.function_storage.default_primary_connection_string
+          },
+          /* Cache clearing */
+          {
+            name  = "WEBSITE_CACHE_CLEAR_APIKEY_NAME"
+            value = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=CacheClear--ApiKeyName)"
+          },
+          {
+            name  = "WEBSITE_CACHE_CLEAR_APIKEY_VALUE"
+            value = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=CacheClear--ApiKeyValue)"
+          }
+          , {
+            name  = "WEBSITE_CACHE_CLEAR_ENDPOINT"
+            value = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=CacheClear--Endpoint)"
+          }
         ]
       }
 
