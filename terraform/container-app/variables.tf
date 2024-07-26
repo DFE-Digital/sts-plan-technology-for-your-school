@@ -189,3 +189,45 @@ variable "container_app_blob_storage_public_access_enabled" {
   default     = false
 }
 
+################
+# Function App #
+################
+
+variable "function_runtime" {
+  description = "Azure Function runtime settings; language, verison, etc."
+
+  type = object({
+    name    = string
+    version = string
+  })
+
+  default = {
+    name    = "dotnet-isolated"
+    version = "8.0"
+  }
+}
+
+variable "function_scaling" {
+  description = "Azure Function scaling settings; max instance count + RAM"
+
+  type = object({
+    max_instance_count = number
+    memory             = number
+  })
+
+  default = {
+    max_instance_count = 40
+    memory             = 2048
+  }
+
+  validation {
+    condition     = var.function_scaling.memory == 2048 || var.function_scaling.memory == 4096
+    error_message = "Memory must be 2048 or 4096"
+  }
+
+  validation {
+    condition     = var.function_scaling.max_instance_count >= 40
+    error_message = "Max instance count must be at least 40"
+  }
+
+}

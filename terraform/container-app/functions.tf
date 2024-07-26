@@ -30,7 +30,7 @@ resource "azurerm_storage_account" "function_storage" {
 resource "azurerm_service_plan" "function_plan" {
   name                = "${local.resource_prefix}appserviceplan"
   resource_group_name = local.resource_group_name
-  location            = "northeurope"
+  location            = local.function.location
   os_type             = "Linux"
   sku_name            = "FC1"
   tags                = local.tags
@@ -43,8 +43,8 @@ data "azurerm_resource_group" "resource_group" {
 resource "azapi_resource" "contentful_function" {
   type                      = "Microsoft.Web/sites@2023-12-01"
   schema_validation_enabled = false
-  location                  = "northeurope"
-  name                      = "${local.resource_prefix}contentfulfunction"
+  location                  = local.function.location
+  name                      = local.function.name
   parent_id                 = data.azurerm_resource_group.resource_group.id
 
   identity {
@@ -68,18 +68,18 @@ resource "azapi_resource" "contentful_function" {
             authentication = {
               type                               = "StorageAccountConnectionString"
               storageAccountConnectionStringName = "AzureWebJobsStorage"
-              userAssignedIdentityResourceId     = "azurerm_user_assigned_identity.user_assigned_identity.id"
+              userAssignedIdentityResourceId     = azurerm_user_assigned_identity.user_assigned_identity.id
             }
           }
         },
         /* Make these variables */
         scaleAndConcurrency = {
-          maximumInstanceCount = 40,
-          instanceMemoryMB     = 2048
+          maximumInstanceCount = local.function.scaling.max_instance_count,
+          instanceMemoryMB     = local.function.scaling.memory
         },
         runtime = {
-          name    = "dotnet-isolated",
-          version = "8.0"
+          name    = local.function.runtime.name,
+          version = local.function.runtime.version
         }
       },
 
@@ -91,16 +91,12 @@ resource "azapi_resource" "contentful_function" {
             value = azurerm_user_assigned_identity.user_assigned_identity.id
           },
           {
-            name  = "AzureWebJobsStorage__accountName",
-            value = azurerm_storage_account.function_storage.name
-          },
-          {
             name  = "APPLICATIONINSIGHTS_CONNECTION_STRING",
             value = azurerm_application_insights.functional_insights.connection_string
           },
           {
             name  = "AZURE_SQL_CONNECTIONSTRING",
-            value = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=${azurerm_key_vault_secret.vault_secret_database_connectionstring.name})"
+            value = local.function.app_settings.sql_connection_string
           },
           {
             name  = "AzureWebJobsServiceBus",
@@ -108,27 +104,37 @@ resource "azapi_resource" "contentful_function" {
           },
           {
             name  = "AzureWebJobsStorage"
-            value = azurerm_storage_account.function_storage.default_primary_connection_string
+            value = azurerm_storage_account.function_storage.primary_blob_connection_string
+          },
+          {
+            name  = "AzureWebJobsStorage__accountName",
+            value = azurerm_storage_account.function_storage.name
           },
           /* Cache clearing */
           {
             name  = "WEBSITE_CACHE_CLEAR_APIKEY_NAME"
-            value = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=CacheClear--ApiKeyName)"
+            value = local.function.app_settings.cacheclear.apikey_name
           },
           {
             name  = "WEBSITE_CACHE_CLEAR_APIKEY_VALUE"
-            value = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=CacheClear--ApiKeyValue)"
-          }
-          , {
+            value = local.function.app_settings.cacheclear.apikey_value
+          },
+          {
             name  = "WEBSITE_CACHE_CLEAR_ENDPOINT"
-            value = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=CacheClear--Endpoint)"
+            value = local.function.app_settings.cacheclear.endpoint
           }
         ]
       }
-
     }
   })
   depends_on = [azurerm_service_plan.function_plan, azurerm_user_assigned_identity.user_assigned_identity, azurerm_servicebus_namespace.service_bus, azurerm_storage_account.function_storage]
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
+
 }
 
 
@@ -139,31 +145,4 @@ resource "azurerm_application_insights" "functional_insights" {
   application_type    = "web"
   retention_in_days   = 30
   tags                = local.tags
-}
-
-data "azurerm_subscription" "subscription" {
-}
-
-resource "azurerm_app_service_connection" "azurekeyvaultconnector" {
-  name               = "azurekeyvaultconnection"
-  app_service_id     = azapi_resource.contentful_function.id
-  target_resource_id = azurerm_key_vault.vault.id
-  client_type        = "dotnet"
-  authentication {
-    type            = "userAssignedIdentity"
-    client_id       = azurerm_user_assigned_identity.user_assigned_identity.client_id
-    subscription_id = data.azurerm_subscription.subscription.subscription_id
-  }
-}
-
-resource "azurerm_app_service_connection" "azuresqlconnector" {
-  name               = "azuresqlconnection"
-  app_service_id     = azapi_resource.contentful_function.id
-  target_resource_id = "/subscriptions/${data.azurerm_subscription.subscription.subscription_id}/resourceGroups/${local.resource_prefix}/providers/Microsoft.Sql/servers/${local.resource_prefix}/databases/${local.resource_prefix}-sqldb"
-  client_type        = "dotnet"
-  authentication {
-    type            = "userAssignedIdentity"
-    client_id       = azurerm_user_assigned_identity.user_assigned_identity.client_id
-    subscription_id = data.azurerm_subscription.subscription.subscription_id
-  }
 }
