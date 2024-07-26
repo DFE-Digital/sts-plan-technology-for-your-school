@@ -62,7 +62,7 @@ resource "azapi_resource" "contentful_function" {
         deployment = {
           storage = {
             type  = "blobContainer",
-            value = "${azurerm_storage_account.function_storage.primary_blob_endpoint}deploymentpackage"
+            value = "${azurerm_storage_account.function_storage.primary_blob_endpoint}function-releases"
             authentication = {
               type = "SystemAssignedIdentity"
             }
