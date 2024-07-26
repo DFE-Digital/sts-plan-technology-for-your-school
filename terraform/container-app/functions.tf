@@ -31,7 +31,7 @@ resource "azurerm_service_plan" "function_plan" {
   resource_group_name = local.resource_group_name
   location            = local.azure_location
   os_type             = "Linux"
-  sku_name            = "Y1"
+  sku_name            = "FC1"
   tags                = local.tags
 }
 
