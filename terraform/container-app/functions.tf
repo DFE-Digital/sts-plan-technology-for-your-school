@@ -130,12 +130,10 @@ resource "azapi_resource" "contentful_function" {
 
   lifecycle {
     ignore_changes = [
-      tags
+      tags,
     ]
   }
-
 }
-
 
 resource "azurerm_application_insights" "functional_insights" {
   name                = "${local.resource_prefix}-function-insights"
@@ -144,4 +142,20 @@ resource "azurerm_application_insights" "functional_insights" {
   application_type    = "web"
   retention_in_days   = 30
   tags                = local.tags
+}
+
+/* 
+* To fix an issue where the Key Vault connection fails on initial TF apply,
+* and the only solution is to set via CLI
+*/
+resource "null_resource" "function_set_keyVaultReferenceIdentity" {
+  triggers = {
+    identity = azurerm_user_assigned_identity.user_assigned_identity.id
+  }
+
+  provisioner "local-exec" {
+    command = "az rest --method PATCH --uri \"${azapi_resource.contentful_function.id}?api-version=2023-12-01\" --body \"{'properties':{'keyVaultReferenceIdentity':'${azurerm_user_assigned_identity.user_assigned_identity.id}'}}\""
+  }
+
+  depends_on = [azapi_resource.contentful_function, azurerm_user_assigned_identity.user_assigned_identity]
 }
