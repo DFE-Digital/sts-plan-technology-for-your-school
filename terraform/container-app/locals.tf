@@ -110,11 +110,11 @@ locals {
 
     vnet = {
       name          = "${local.resource_prefix}-function-vn"
-      address_space = var.function_vnet_address_space
+      address_space = "10.0.0.0/14"
 
       subnet = {
         name             = "${local.resource_prefix}-functioninfra"
-        address_prefixes = [cidrsubnet(var.function_vnet_address_space, 0, 0)]
+        address_prefixes = ["10.0.0.0/24"]
       }
     }
   }

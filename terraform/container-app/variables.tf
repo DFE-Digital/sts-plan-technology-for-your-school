@@ -230,9 +230,3 @@ variable "function_scaling" {
     error_message = "Max instance count must be at least 40 and less than 1000"
   }
 }
-
-variable "function_vnet_address_space" {
-  description = "CIDR address space for the Function App VNET"
-  type        = string
-  default     = "10.0.0.0/14" //10.0.0.0 - 10.3.255.255
-}

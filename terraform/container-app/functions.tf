@@ -41,10 +41,10 @@ resource "azurerm_virtual_network" "function_vnet" {
 }
 
 resource "azurerm_subnet" "function_infra_subnet" {
-  name                 = local.function.subnet.name
+  name                 = local.function.vnet.subnet.name
   virtual_network_name = local.function.vnet.name
   resource_group_name  = local.resource_group_name
-  address_prefixes     = [local.function.vnet.address_prefixes]
+  address_prefixes     = local.function.vnet.subnet.address_prefixes
 
   service_endpoints = ["Microsoft.KeyVault", "Microsoft.Storage"]
 
