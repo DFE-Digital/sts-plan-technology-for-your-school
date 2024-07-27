@@ -10,6 +10,8 @@ on:
       - ".github/workflows/matrix-deploy-azure-function.yml"
       - ".github/workflows/build-azure-function.yml"
       - ".github/workflows/deploy-azure-function.yml"
+  pull_request:
+    branches: ["main", "development"]
 
 jobs:
   set-env:
