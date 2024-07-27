@@ -32,26 +32,19 @@ resource "azurerm_storage_account" "function_storage" {
   }
 }
 
-locals {
-  function_vnet_name            = "${local.resource_prefix}-function-vn"
-  function_subnet_name          = "${local.resource_prefix}-functioninfra"
-  virtual_network_address_space = "10.0.0.0/14" //Add to module vars/locals
-  //10.0.0.0 - 10.3.255.255
-}
-
 resource "azurerm_virtual_network" "function_vnet" {
-  name                = local.function_vnet_name
-  address_space       = [local.virtual_network_address_space]
+  name                = local.function.vnet.name
+  address_space       = [local.function.vnet.address_space]
   location            = local.function.location
   resource_group_name = local.resource_group_name
   tags                = local.tags
 }
 
 resource "azurerm_subnet" "function_infra_subnet" {
-  name                 = local.function_subnet_name
-  virtual_network_name = local.function_vnet_name
+  name                 = local.function.subnet.name
+  virtual_network_name = local.function.vnet.name
   resource_group_name  = local.resource_group_name
-  address_prefixes     = ["10.0.0.0/24"] //Add to module locals
+  address_prefixes     = [local.function.vnet.address_prefixes]
 
   service_endpoints = ["Microsoft.KeyVault", "Microsoft.Storage"]
 
