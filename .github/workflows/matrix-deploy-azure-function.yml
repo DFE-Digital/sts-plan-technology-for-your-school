@@ -10,9 +10,7 @@ on:
       - ".github/workflows/matrix-deploy-azure-function.yml"
       - ".github/workflows/build-azure-function.yml"
       - ".github/workflows/deploy-azure-function.yml"
-  pull_request:
-    branches: ["main", "development"]
-
+  
 jobs:
   set-env:
     runs-on: ubuntu-22.04
@@ -43,9 +41,9 @@ jobs:
     name: Deploy Azure Function
     strategy:
       fail-fast: true
-      max-parallel: 1
+      max-parallel: 2
       matrix:
-        target: [Dev]
+        target: [Dev, Tst]
     uses: ./.github/workflows/deploy-azure-function.yml
     with:
       environment: ${{ matrix.target }}
