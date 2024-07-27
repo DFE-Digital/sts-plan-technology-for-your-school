@@ -24,8 +24,48 @@ resource "azurerm_storage_account" "function_storage" {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.user_assigned_identity.id]
   }
+
+  network_rules {
+    bypass                     = ["Logging", "Metrics"]
+    default_action             = "Deny"
+    virtual_network_subnet_ids = [azurerm_subnet.function_infra_subnet.id]
+  }
 }
 
+locals {
+  function_vnet_name            = "${local.resource_prefix}-function-vn"
+  function_subnet_name          = "${local.resource_prefix}-functioninfra"
+  virtual_network_address_space = "10.0.0.0/14" //Add to module vars/locals
+  //10.0.0.0 - 10.3.255.255
+}
+
+resource "azurerm_virtual_network" "function_vnet" {
+  name                = local.function_vnet_name
+  address_space       = [local.virtual_network_address_space]
+  location            = local.function.location
+  resource_group_name = local.resource_group_name
+  tags                = local.tags
+}
+
+resource "azurerm_subnet" "function_infra_subnet" {
+  name                 = local.function_subnet_name
+  virtual_network_name = local.function_vnet_name
+  resource_group_name  = local.resource_group_name
+  address_prefixes     = ["10.0.0.0/24"] //Add to module locals
+
+  service_endpoints = ["Microsoft.KeyVault", "Microsoft.Storage"]
+
+  delegation {
+    name = "AFADelegationService"
+
+    service_delegation {
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/join/action"
+      ]
+      name = "Microsoft.App/environments"
+    }
+  }
+}
 
 resource "azurerm_service_plan" "function_plan" {
   name                = "${local.resource_prefix}appserviceplan"
@@ -60,6 +100,9 @@ resource "azapi_resource" "contentful_function" {
     properties = {
       serverFarmId = azurerm_service_plan.function_plan.id,
 
+      httpsOnly              = true,
+      virtualNetworkSubnetId = azurerm_subnet.function_infra_subnet.id,
+      vnetImagePullEnabled   = true,
       functionAppConfig = {
         deployment = {
           storage = {
@@ -124,7 +167,6 @@ resource "azapi_resource" "contentful_function" {
         http20enabled = true
         minTlsVersion = "1.3"
       }
-      httpsOnly = true
     }
   })
 
