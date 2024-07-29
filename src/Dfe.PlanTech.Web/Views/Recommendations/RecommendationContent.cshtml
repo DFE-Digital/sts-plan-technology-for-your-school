@@ -1,4 +1,6 @@
 @model Dfe.PlanTech.Web.Models.RecommendationsViewModel
+@using Dfe.PlanTech.Domain.Questionnaire.Models;
+
 
 @foreach (var headerWithContent in Model.AllContent)
 {
@@ -22,16 +24,13 @@
                         }
                     </div>
                 </div>
-                @foreach (var chunk in @Model.Chunks)
+                @if (headerWithContent is RecommendationChunk chunk)
                 {
-                    @if (chunk.CSUrl != null)
-                    {
-                        <div class="govuk-!-margin-bottom-3">
-                            <a class="govuk-link govuk-!-font-weight-bold" href=@chunk.CSUrl target="_blank">
-                                @chunk.CSLinkText
-                            </a>
-                        </div>
-                    }
+                    <div class="govuk-!-margin-bottom-3">
+                        <a class="govuk-link govuk-!-font-weight-bold" href=@chunk.CSUrl target="_blank">
+                            @chunk.CSLinkText
+                        </a>
+                    </div>
                 }
                 <div>
                     <h2 class="govuk-heading-m">Share this recommendation</h2>
