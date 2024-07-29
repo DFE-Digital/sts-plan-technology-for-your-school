@@ -141,7 +141,16 @@ public class RecommendationChunkMapperTests : BaseMapperTests
     {
         string[] answers = [.. _answerIds[1..]];
         string[] contents = [.. _contentIds[2..]];
-        var payload = CreateRecommendationChunkPayload(ExistingRecommendationChunk.Id, answers, contents);
+        string testUrl = "http://testurl.com";
+        string linkText = "test link";
+
+        var payload = CreateRecommendationChunkPayload(
+            ExistingRecommendationChunk.Id,
+            answers,
+            contents,
+            testUrl,
+            linkText
+        );
 
         var RecommendationChunk = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default);
 
@@ -151,6 +160,8 @@ public class RecommendationChunkMapperTests : BaseMapperTests
 
         Assert.NotNull(incoming);
         Assert.NotNull(existing);
+        Assert.Equal(testUrl, incoming.CSUrl);
+        Assert.Equal(linkText, incoming.CSLinkText);
 
         ValidateReferencedContent(answers, existing.Answers, true, InitialOrder);
         ValidateReferencedContent(contents, existing.Content, true);
@@ -163,7 +174,13 @@ public class RecommendationChunkMapperTests : BaseMapperTests
     {
         string[] notFoundAnswers = ["not-existing-answer", "also-not-existing"];
         string[] notFoundContent = ["not-found-content"];
-        var payload = CreateRecommendationChunkPayload(recSecId, ["answer1", .. notFoundAnswers], ["content3", .. notFoundContent]);
+        var payload = CreateRecommendationChunkPayload(
+            recSecId,
+            ["answer1", .. notFoundAnswers],
+            ["content3", .. notFoundContent],
+            null,
+            null
+        );
 
         var RecommendationChunk = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default);
 
@@ -217,7 +234,13 @@ public class RecommendationChunkMapperTests : BaseMapperTests
         }
     }
 
-    private CmsWebHookPayload CreateRecommendationChunkPayload(string chunkId, string[] answerIds, string[] contentIds)
+    private CmsWebHookPayload CreateRecommendationChunkPayload(
+        string chunkId,
+        string[] answerIds,
+        string[] contentIds,
+        string? csUrl,
+        string? csLinkText
+    )
     {
         CmsWebHookSystemDetailsInnerContainer[] answers =
             answerIds.Select(answerId => new CmsWebHookSystemDetailsInnerContainer()
@@ -241,6 +264,8 @@ public class RecommendationChunkMapperTests : BaseMapperTests
         {
             ["answers"] = WrapWithLocalisation(answers),
             ["content"] = WrapWithLocalisation(contents),
+            ["csUrl"] = WrapWithLocalisation(csUrl),
+            ["csLinkText"] = WrapWithLocalisation(csLinkText)
         };
 
         var payload = CreatePayload(fields, chunkId);
