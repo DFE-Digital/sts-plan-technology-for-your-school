@@ -48,6 +48,7 @@ public class SecurityHeadersMiddleware
         {
             // js enabled script from GovUK page template helper
             "sha256-wmo5EWLjw+Yuj9jZzGNNeSsUOBQmBvE1pvSPVNQzJ34=",
+            "sha256-GUQ5ad8JK5KmEWmROf3LZd9ge94daqNvd8xy9YS1iDw=" //C&S govUK
         };
         return string.Join(" ", allowedScriptHashes.Select(hash => $"'{hash}'"));
     }
