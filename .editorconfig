@@ -39,3 +39,7 @@ dotnet_style_prefer_compound_assignment = true
 dotnet_style_prefer_is_null_check_over_reference_equality_method = true
 dotnet_style_prefer_simplified_boolean_expressions = true
 dotnet_style_prefer_simplified_interpolation = true
+
+## Set warnings to errors to be auto-fixed by dotnet format
+# Using directive is unnecessary
+dotnet_diagnostic.IDE0005.severity = error
