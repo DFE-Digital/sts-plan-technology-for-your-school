@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Web.SeedTestData.ContentGenerators;
 using Microsoft.EntityFrameworkCore;
@@ -11,10 +10,8 @@ public class SeedData(CmsDbContext db)
     /// The order of this list matters, it includes all content generator classes
     /// and any content which includes content from another generator must be further down the list
     /// </summary>
-    private readonly List<ContentGenerator> _contentGenerators =
+    private readonly List<IContentGenerator> _contentGenerators =
     [
-        new WifiSubtopic(db),
-        new ConnectivityCategory(db),
         new SelfAssessmentPage(db)
     ];
 
