@@ -12,4 +12,6 @@ where THeader : IHeader
     public List<TContentComponent> Content { get; }
 
     public List<TAnswer> Answers { get; }
+
+    public string? CSUrl { get; }
 }
