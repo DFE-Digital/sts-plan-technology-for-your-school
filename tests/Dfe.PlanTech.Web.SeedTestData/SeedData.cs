@@ -7,8 +7,7 @@ namespace Dfe.PlanTech.Web.SeedTestData;
 public class SeedData(CmsDbContext db)
 {
     /// <summary>
-    /// The order of this list matters, it includes all content generator classes
-    /// and any content which includes content from another generator must be further down the list
+    /// List of all standalone mock content generators for the seeded database
     /// </summary>
     private readonly List<IContentGenerator> _contentGenerators =
     [
@@ -17,7 +16,7 @@ public class SeedData(CmsDbContext db)
 
     public void CreateData()
     {
-        //CreateBaseData();
+        CreateBaseData();
         foreach (var generator in _contentGenerators)
         {
             generator.CreateData();
@@ -26,11 +25,12 @@ public class SeedData(CmsDbContext db)
     }
 
     /// <summary>
-    /// Creates the basic data like establishment, user, homepage,
+    /// Creates the basic data like establishment, user,
     /// that plan tech requires to operate.
     /// </summary>
     private void CreateBaseData()
     {
+        // Match establishment and user ID that our test account
         db.Database.ExecuteSql($@"SET IDENTITY_INSERT [dbo].[user] ON
 Insert into [dbo].[user] (id, dfeSignInRef) Select 53, 'sign-in-ref'
 SET IDENTITY_INSERT [dbo].[user] OFF");

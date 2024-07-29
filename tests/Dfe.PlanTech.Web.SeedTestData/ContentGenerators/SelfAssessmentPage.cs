@@ -25,15 +25,20 @@ public class SelfAssessmentPage(CmsDbContext db) : IContentGenerator
                         Id = "wifi-header-id",
                         Text = "Wifi",
                         Tag = HeaderTag.H3,
-                        Size = HeaderSize.Medium
+                        Size = HeaderSize.Medium,
+                        Published = true
                     }
                 ],
                 Title = new TitleDbEntity()
                 {
                     Id = "wifi-title-id",
                     Text = "Wifi topic",
-                }
-            }
+                    Published = true
+                },
+                Published = true,
+            },
+            Order = 0,
+            Published = true
         };
         var connectivityCategory = new CategoryDbEntity()
         {
@@ -44,7 +49,8 @@ public class SelfAssessmentPage(CmsDbContext db) : IContentGenerator
                 Id = "connectivity-header-id",
                 Text = "Connectivity",
                 Tag = HeaderTag.H2,
-                Size = HeaderSize.Large
+                Size = HeaderSize.Large,
+                Published = true
             },
             Published = true,
             Sections = [wifiSubtopic]
@@ -62,7 +68,8 @@ public class SelfAssessmentPage(CmsDbContext db) : IContentGenerator
                     Id = "self-assessment-header-id",
                     Text = "Self Assessment",
                     Tag = HeaderTag.H1,
-                    Size = HeaderSize.ExtraLarge
+                    Size = HeaderSize.ExtraLarge,
+                    Published = true
                 },
                 connectivityCategory
             ],
@@ -70,6 +77,7 @@ public class SelfAssessmentPage(CmsDbContext db) : IContentGenerator
             {
                 Id = "self-assessment-title-id",
                 Text = "Technology self-assessment",
+                Published = true
             },
             DisplayOrganisationName = true,
             Published = true
