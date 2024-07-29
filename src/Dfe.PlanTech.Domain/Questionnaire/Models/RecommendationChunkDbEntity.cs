@@ -21,4 +21,6 @@ public class RecommendationChunkDbEntity : ContentComponentDbEntity, IRecommenda
 
     [DontCopyValue]
     public List<RecommendationSectionDbEntity> RecommendationSections { get; set; } = [];
+
+    public string? CSUrl { get; set; }
 }

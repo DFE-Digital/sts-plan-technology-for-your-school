@@ -22,6 +22,17 @@
                         }
                     </div>
                 </div>
+                @foreach (var chunk in @Model.Chunks)
+                {
+                    @if (chunk.CSUrl != null)
+                    {
+                        <div>
+                            <a href=@chunk.CSUrl>
+                                CS LINK HERE
+                            </a>
+                        </div>
+                    }
+                }
                 <div>
                     <h2 class="govuk-heading-m">Share this recommendation</h2>
                     <p class="govuk-body">
