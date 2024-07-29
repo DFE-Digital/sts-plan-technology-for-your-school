@@ -14,4 +14,6 @@ where THeader : IHeader
     public List<TAnswer> Answers { get; }
 
     public string? CSUrl { get; }
+
+    public string? CSLinkText { get; }
 }

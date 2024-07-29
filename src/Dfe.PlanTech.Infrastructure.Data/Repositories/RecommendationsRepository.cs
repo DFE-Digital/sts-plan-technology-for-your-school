@@ -48,6 +48,7 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
                                                         Id = chunk.Id,
                                                         Order = chunk.Order,
                                                         CSUrl = chunk.CSUrl,
+                                                        CSLinkText = chunk.CSLinkText
                                                     })
                                                     .OrderBy(chunk => chunk.Order)
                                                     .ToListAsync(cancellationToken);
@@ -105,7 +106,8 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
                     Content = [.. chunkContent.Where(content => content.RecommendationChunkId == chunk.Id && content.ContentComponent != null)
                                             .Select(content => content.ContentComponent)
                                             .OrderBy(content => content?.Order)],
-                    CSUrl = chunk.CSUrl
+                    CSUrl = chunk.CSUrl,
+                    CSLinkText = chunk.CSLinkText,
                 }).ToList(),
                 Answers = recommendation.Section.Answers,
                 Id = recommendation.Section.Id,

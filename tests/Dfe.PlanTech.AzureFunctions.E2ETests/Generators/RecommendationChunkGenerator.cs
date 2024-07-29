@@ -20,6 +20,8 @@ public class RecommendationChunkGenerator : BaseGenerator<RecommendationChunk>
         RuleFor(recommendationChunk => recommendationChunk.Answers, faker => answers.Count > 0 ? AnswerGeneratorHelper.GetEntities(faker, 2, 5) : []);
         RuleFor(recommendationChunk => recommendationChunk.Content, faker => contents.Count > 0 ? ContentComponentGeneratorHelper.GetEntities(faker, 2, 5) : []);
         RuleFor(recommendationChunk => recommendationChunk.Header, faker => headers.Count > 0 ? HeaderGeneratorHelper.GetEntity(faker) : null!);
+        RuleFor(recommendationChunk => recommendationChunk.CSUrl, faker => faker.Internet.Url().OrNull());
+        RuleFor(recommendationChunk => recommendationChunk.CSLinkText, faker => faker.Lorem.Sentence().OrNull());
     }
 
     public List<RecommendationChunk> GenerateRecommendationChunksAndSaveToDb(CmsDbContext db, int count)
@@ -38,6 +40,8 @@ public class RecommendationChunkGenerator : BaseGenerator<RecommendationChunk>
         Id = recommendationChunk.Sys.Id,
         Answers = recommendationChunk.Answers.Select(answer => new AnswerDbEntity() { Id = answer.Sys.Id }).ToList(),
         HeaderId = recommendationChunk.Header.Sys.Id,
+        CSUrl = recommendationChunk.CSUrl,
+        CSLinkText = recommendationChunk.CSLinkText,
         Published = true,
         Archived = false,
         Deleted = false,
