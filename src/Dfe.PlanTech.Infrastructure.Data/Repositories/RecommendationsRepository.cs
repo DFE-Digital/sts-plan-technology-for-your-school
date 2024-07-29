@@ -47,6 +47,7 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
                                                         Answers = chunk.Answers.Select(answer => new AnswerDbEntity() { Id = answer.Id }).ToList(),
                                                         Id = chunk.Id,
                                                         Order = chunk.Order,
+                                                        CSUrl = chunk.CSUrl,
                                                     })
                                                     .OrderBy(chunk => chunk.Order)
                                                     .ToListAsync(cancellationToken);
@@ -103,7 +104,8 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
                     Answers = chunk.Answers,
                     Content = [.. chunkContent.Where(content => content.RecommendationChunkId == chunk.Id && content.ContentComponent != null)
                                             .Select(content => content.ContentComponent)
-                                            .OrderBy(content => content?.Order)]
+                                            .OrderBy(content => content?.Order)],
+                    CSUrl = chunk.CSUrl
                 }).ToList(),
                 Answers = recommendation.Section.Answers,
                 Id = recommendation.Section.Id,

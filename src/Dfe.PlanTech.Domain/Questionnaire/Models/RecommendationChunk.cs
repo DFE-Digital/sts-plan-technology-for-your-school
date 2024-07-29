@@ -12,4 +12,6 @@ public class RecommendationChunk : ContentComponent, IRecommendationChunk<Answer
     public List<Answer> Answers { get; init; } = [];
 
     public string SlugifiedHeader => Header.Text.Slugify();
+
+    public string? CSUrl { get; init; }
 }
