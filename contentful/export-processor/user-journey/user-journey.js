@@ -1,5 +1,5 @@
-import SubtopicRecommendation from "#src/content-types/subtopic-recommendation";
-import ErrorLogger from "#src/errors/error-logger";
+import SubtopicRecommendation from "../content-types/subtopic-recommendation.js";
+import ErrorLogger from "../errors/error-logger.js";
 
 export class UserJourney {
   path;
@@ -48,10 +48,11 @@ export class UserJourney {
     );
 
     if (recommendationIntro == null || recommendationIntro.length == 0) {
-      ErrorLogger.addError(
-        `Could not find recommendation intro for ${this.maturity} in ${this.section.name}`,
-        recommendation
-      );
+      ErrorLogger.addError({
+        id: recommendation.id,
+        contentType: "recommendation",
+        message: `Could not find recommendation intro for ${this.maturity} in ${this.section.name}`,
+      });
       return;
     }
 

@@ -1,0 +1,11 @@
+export { validateAnswers } from "./answer.js";
+export { validateCheckAnswersPage } from "./check-answers.js";
+export { validateCompletionTags } from "./completion-tags.js";
+export { validateNavigationLinks } from "./nav-links.js";
+export { validateNonAuthorisedPages } from "./non-auth-pages.js";
+export { navigateAndValidateQuestionPages } from "./questions.js";
+export { validateRecommendationChunks } from "./recommendation-chunks.js";
+export { validateRecommendationIntro } from "./recommendation-intro.js";
+export { validateRecommendationForMaturity } from "./recommendations.js";
+export { validateSelfAssessmentPage } from "./self-assessment-page.js";
+export { validateSections } from "./section.js";

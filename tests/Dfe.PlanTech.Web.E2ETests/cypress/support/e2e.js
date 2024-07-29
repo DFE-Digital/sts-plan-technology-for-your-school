@@ -1,2 +1,2 @@
-import "./commands";
+import "./commands.js";
 import 'cypress-axe';

@@ -1,4 +1,4 @@
-import AppendixRow from "#src/test-suite/appendix-row";
+import AppendixRow from "./appendix-row.js";
 
 export default class Appendix {
   rows = [];
