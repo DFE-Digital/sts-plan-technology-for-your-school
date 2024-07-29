@@ -1,37 +1,46 @@
-using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
+using Dfe.PlanTech.Web.SeedTestData.ContentGenerators;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Web.SeedTestData;
 
-public class SeedData
+public class SeedData(CmsDbContext db)
 {
-    private static CmsDbContext _db;
-
-    public SeedData(CmsDbContext dbContext)
-    {
-        _db = dbContext;
-    }
+    /// <summary>
+    /// The order of this list matters, it includes all content generator classes
+    /// and any content which includes content from another generator must be further down the list
+    /// </summary>
+    private readonly List<ContentGenerator> _contentGenerators =
+    [
+        new WifiSubtopic(db),
+        new ConnectivityCategory(db),
+        new SelfAssessmentPage(db)
+    ];
 
     public void CreateData()
     {
-        _db.Pages.Add(new PageDbEntity()
+        //CreateBaseData();
+        foreach (var generator in _contentGenerators)
         {
-            Id = "self-assessment-id",
-            InternalName = "self-assessment-internal-name",
-            Slug = "self-assessment",
-            Content = [
-                new HeaderDbEntity()
-                {
-                    Id = "self-assessment-header-id",
-                    Text = "Self Assessment",
-                    Tag = HeaderTag.H1,
-                    Size = HeaderSize.Large
-                }
-            ]
-        });
+            generator.CreateData();
+            db.SaveChanges();
+        }
+    }
 
-        _db.SaveChanges();
+    /// <summary>
+    /// Creates the basic data like establishment, user, homepage,
+    /// that plan tech requires to operate.
+    /// </summary>
+    private void CreateBaseData()
+    {
+        db.Database.ExecuteSql($@"SET IDENTITY_INSERT [dbo].[user] ON
+Insert into [dbo].[user] (id, dfeSignInRef) Select 53, 'sign-in-ref'
+SET IDENTITY_INSERT [dbo].[user] OFF");
+
+        db.Database.ExecuteSql($@"SET IDENTITY_INSERT [dbo].[establishment] ON
+Insert into [dbo].[establishment] (id, establishmentRef, establishmentType, orgName) 
+Select 16, '00000002', 'Test School', 'Test Establishment'
+SET IDENTITY_INSERT [dbo].[establishment] OFF");
     }
 }
