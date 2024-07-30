@@ -1,7 +1,7 @@
 import "dotenv/config";
 import DataMapper from "./data-mapper.js";
-import ExportContentfulData from "./exporter.js.js";
-import GenerateTestSuites from "./generate-test-suites.js.js";
+import ExportContentfulData from "./exporter.js";
+import GenerateTestSuites from "./generate-test-suites.js";
 import ErrorLogger from "./errors/error-logger.js";
 import WriteUserJourneyPaths from "./write-user-journey-paths.js";
 import fs from "fs";
