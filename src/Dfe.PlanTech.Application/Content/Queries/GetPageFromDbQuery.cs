@@ -66,10 +66,7 @@ public class GetPageFromDbQuery : IGetPageQuery
         {
             var page = await _db.GetPageBySlug(slug, cancellationToken);
 
-            if (page == null)
-            {
-                return null;
-            }
+            if (page == null) return null;
 
             page.OrderContents();
 
