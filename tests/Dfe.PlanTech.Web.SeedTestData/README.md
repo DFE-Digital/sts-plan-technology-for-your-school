@@ -1,6 +1,6 @@
 # Seeding Test Data
 
-This project contains the code to seed an empty plan tech database with realistic mock content. 
+This project contains the code to seed an empty plan tech database with mock content. 
 
 The database can then be used with the plan tech web app to run more complex and detailed end to end tests with cypress that rely on content being consistent.
 
@@ -16,9 +16,9 @@ for a detailed guide on setting a mock database manually that this project can u
 ## How to use
 
 To use this project to get a seeded database for testing you need to:
-- setup a test database
-- run the database upgrader against it to initialise it with the PlanTech schema
-- run this project to populate the database with test data.
+1. setup a test database
+2. run the database upgrader against it to initialise it with the PlanTech schema
+3. run this project to populate the database with test data.
 
 There is a bash script to do this, or you can run each step manually
 
@@ -59,3 +59,14 @@ If having issues with the bash scripts or wanting more control over each step yo
 1. Follow the steps in the [Azure E2E Tests setup](tests/Dfe.PlanTech.AzureFunctions.E2ETests/README.md) to create a database and run the database upgrader against it
 2. Setup dotnet secrets for this project with the same connection string the Azure E2E test setup would require
 3. Run this project to populate the database
+
+
+### Using Plan Tech With Seeded Test Database
+
+After running the above to create a database with mock content, you can try it against plan tech by editing your dotnet secrets for `src/Dfe.PlanTech.Web`
+and changing your connection string to match the one set above.
+
+So using the above name and password for example:
+```
+Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=Pa5ssw0rd@G0esH3r3;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;Max Pool Size=1000;Database=plantech-mock-db
+```

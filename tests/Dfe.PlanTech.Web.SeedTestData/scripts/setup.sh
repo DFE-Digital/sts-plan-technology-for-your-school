@@ -13,3 +13,7 @@ dotnet user-secrets set "ConnectionStrings:Database" "Server=tcp:localhost,1433;
 cd ../../src/Dfe.PlanTech.DatabaseUpgrader || exit
 
 dotnet run --connectionstring "Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=$password;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;Max Pool Size=1000;Database=plantech-mock-db"
+
+cd ../../tests/Dfe.PlanTech.Web.SeedTestData || exit
+
+dotnet run

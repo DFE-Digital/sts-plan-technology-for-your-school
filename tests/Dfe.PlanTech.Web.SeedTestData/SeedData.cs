@@ -30,14 +30,14 @@ public class SeedData(CmsDbContext db)
     /// </summary>
     private void CreateBaseData()
     {
-        // Match establishment and user ID that our test account
+        // Match establishment and user ID of test account
         db.Database.ExecuteSql($@"SET IDENTITY_INSERT [dbo].[user] ON
 Insert into [dbo].[user] (id, dfeSignInRef) Select 53, 'sign-in-ref'
 SET IDENTITY_INSERT [dbo].[user] OFF");
 
         db.Database.ExecuteSql($@"SET IDENTITY_INSERT [dbo].[establishment] ON
 Insert into [dbo].[establishment] (id, establishmentRef, establishmentType, orgName) 
-Select 16, '00000002', 'Test School', 'Test Establishment'
+Select 16, 'Test Ref', 'Test School', 'Test Establishment'
 SET IDENTITY_INSERT [dbo].[establishment] OFF");
     }
 }

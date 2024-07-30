@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Web.SeedTestData.ContentGenerators;
 
 public class SelfAssessmentPage(CmsDbContext db) : IContentGenerator
 {
-    private SectionDbEntity GetWifiSubtopic()
+    private static SectionDbEntity GetWifiSubtopic()
     {
         var q2 = new QuestionDbEntity
         {
@@ -106,7 +106,7 @@ public class SelfAssessmentPage(CmsDbContext db) : IContentGenerator
         };
     }
 
-    private CategoryDbEntity GetConnectivityCategory()
+    private static CategoryDbEntity GetConnectivityCategory()
     {
         var wifiSubtopic = GetWifiSubtopic();
         return new CategoryDbEntity
