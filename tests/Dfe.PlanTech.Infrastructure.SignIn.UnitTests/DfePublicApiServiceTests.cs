@@ -1,8 +1,8 @@
+using System.Diagnostics;
 using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Users.Exceptions;
 using Dfe.PlanTech.Infrastructure.SignIn.Services;
 using NSubstitute;
-using System.Diagnostics;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;

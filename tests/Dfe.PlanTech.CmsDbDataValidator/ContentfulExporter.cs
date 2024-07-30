@@ -40,13 +40,15 @@ public class ContentfulExporter
             var serialised = JsonSerializer.Deserialize<JsonNode>(entriesChunk) ?? throw new JsonException("Could not serialise entries");
             var itemCount = serialised["total"]?.GetValue<int>() ?? 0;
 
-            if (itemCount == 0) break;
+            if (itemCount == 0)
+                break;
 
             var items = serialised["items"]?.AsArray() ?? throw new JsonException("Could not serialise items");
 
             foreach (var item in items)
             {
-                if (item == null) continue;
+                if (item == null)
+                    continue;
 
                 contentfulEntries.Add(item.DeepClone());
             }

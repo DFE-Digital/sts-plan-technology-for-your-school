@@ -39,8 +39,10 @@ public class QuestionsController : BaseController<QuestionsController>
                                                         [FromServices] IGetQuestionBySlugRouter router,
                                                         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
-        if (string.IsNullOrEmpty(questionSlug)) throw new ArgumentNullException(nameof(questionSlug));
+        if (string.IsNullOrEmpty(sectionSlug))
+            throw new ArgumentNullException(nameof(sectionSlug));
+        if (string.IsNullOrEmpty(questionSlug))
+            throw new ArgumentNullException(nameof(questionSlug));
 
         return await router.ValidateRoute(sectionSlug, questionSlug, this, cancellationToken);
     }
@@ -53,7 +55,8 @@ public class QuestionsController : BaseController<QuestionsController>
                                                                 [FromServices] IDeleteCurrentSubmissionCommand deleteCurrentSubmissionCommand,
                                                                 CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
+        if (string.IsNullOrEmpty(sectionSlug))
+            throw new ArgumentNullException(nameof(sectionSlug));
 
         var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
                         throw new ContentfulDataUnavailableException($"Could not find section with slug {sectionSlug}");
@@ -65,7 +68,8 @@ public class QuestionsController : BaseController<QuestionsController>
             var nextQuestion =
                 await getQuestionQuery.GetNextUnansweredQuestion(establishmentId, section, cancellationToken);
 
-            if (nextQuestion == null) return this.RedirectToCheckAnswers(sectionSlug);
+            if (nextQuestion == null)
+                return this.RedirectToCheckAnswers(sectionSlug);
 
             return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = nextQuestion!.Slug });
         }

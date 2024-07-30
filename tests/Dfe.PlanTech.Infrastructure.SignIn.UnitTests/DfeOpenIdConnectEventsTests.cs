@@ -1,3 +1,6 @@
+using System.Security.Claims;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using Dfe.PlanTech.Application.SignIns.Interfaces;
 using Dfe.PlanTech.Domain.SignIns.Enums;
 using Dfe.PlanTech.Domain.SignIns.Models;
@@ -10,9 +13,6 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using NSubstitute;
-using System.Security.Claims;
-using System.Text.Json;
-using System.Text.RegularExpressions;
 
 namespace Dfe.PlanTech.Infrastructure.SignIns.UnitTests;
 

@@ -1,5 +1,4 @@
 using Contentful.Core;
-using Contentful.Core.Configuration;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
@@ -39,7 +38,8 @@ public class ContentfulRepository : IContentRepository
 
     public async Task<TEntity?> GetEntityById<TEntity>(string id, int include = 2, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
+        if (string.IsNullOrEmpty(id))
+            throw new ArgumentNullException(nameof(id));
 
         //There exists a "GetEntry" option for the Contentful client, however the "Include"
         //option doesn't seem to have any effect there - it only seems to return the main parent entry

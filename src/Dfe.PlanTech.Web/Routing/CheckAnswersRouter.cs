@@ -33,7 +33,8 @@ public class CheckAnswersRouter : ICheckAnswersRouter
 
     public async Task<IActionResult> ValidateRoute(string sectionSlug, string? errorMessage, CheckAnswersController controller, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
+        if (string.IsNullOrEmpty(sectionSlug))
+            throw new ArgumentNullException(nameof(sectionSlug));
 
         await _router.GetJourneyStatusForSection(sectionSlug, cancellationToken);
 
@@ -50,7 +51,8 @@ public class CheckAnswersRouter : ICheckAnswersRouter
         var establishmentId = await _user.GetEstablishmentId();
         var submissionResponsesDto = await _processSubmissionResponsesCommand.GetSubmissionResponsesDtoForSection(establishmentId, _router.Section, cancellationToken);
 
-        if (submissionResponsesDto == null || submissionResponsesDto.Responses == null) throw new DatabaseException("Could not retrieve the answered question list");
+        if (submissionResponsesDto == null || submissionResponsesDto.Responses == null)
+            throw new DatabaseException("Could not retrieve the answered question list");
 
         var checkAnswerPageContent = await _getPageQuery.GetPageBySlug(CheckAnswersController.CheckAnswersPageSlug, cancellationToken) ??
                                     throw new PageNotFoundException($"Could not find page for {CheckAnswersController.CheckAnswersPageSlug}");

@@ -1,5 +1,10 @@
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.AzureFunctions.Mappings;
+using Dfe.PlanTech.AzureFunctions.Services;
+using Dfe.PlanTech.AzureFunctions.Utils;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -8,15 +13,9 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using Dfe.PlanTech.AzureFunctions.Services;
-using Dfe.PlanTech.AzureFunctions.Utils;
-using NSubstitute.ExceptionExtensions;
 using MockQueryable.NSubstitute;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using NSubstitute.ReceivedExtensions;
 
 namespace Dfe.PlanTech.AzureFunctions.UnitTests;

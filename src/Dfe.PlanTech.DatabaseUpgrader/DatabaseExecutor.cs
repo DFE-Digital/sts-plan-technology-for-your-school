@@ -77,7 +77,8 @@ public class DatabaseExecutor
     {
         var result = upgrader.PerformUpgrade();
 
-        if (result.Successful) return true;
+        if (result.Successful)
+            return true;
 
         _logger.DisplayErrors("The database migration was not successful.", result.Error.Message, result.Error.StackTrace);
         return false;

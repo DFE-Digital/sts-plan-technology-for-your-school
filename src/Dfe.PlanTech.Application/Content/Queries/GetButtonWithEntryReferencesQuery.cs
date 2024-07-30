@@ -29,7 +29,8 @@ public class GetButtonWithEntryReferencesQuery : IGetPageChildrenQuery
         {
             var buttons = page.Content.Exists(content => content is ButtonWithEntryReferenceDbEntity);
 
-            if (!buttons) return;
+            if (!buttons)
+                return;
 
             var buttonQuery = ButtonWithEntryReferencesQueryable(page);
 

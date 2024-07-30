@@ -1,9 +1,9 @@
+using System.Security.Claims;
 using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Controllers

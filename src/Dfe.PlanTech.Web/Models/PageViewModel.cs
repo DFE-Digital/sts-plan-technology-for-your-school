@@ -18,7 +18,8 @@ public class PageViewModel
 
     public void TryLoadOrganisationName(HttpContext httpContext, IUser user, ILogger logger)
     {
-        if (!Page.DisplayOrganisationName) return;
+        if (!Page.DisplayOrganisationName)
+            return;
 
         if (httpContext.User.Identity?.IsAuthenticated == false)
         {

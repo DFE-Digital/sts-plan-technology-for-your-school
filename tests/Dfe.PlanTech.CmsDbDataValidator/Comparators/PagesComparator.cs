@@ -3,7 +3,6 @@ using Dfe.PlanTech.CmsDbDataValidator.Models;
 using Dfe.PlanTech.CmsDbDataValidator.Tests;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.CmsDbDataValidator.Comparators;
 

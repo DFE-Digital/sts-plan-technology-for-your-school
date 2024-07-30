@@ -17,8 +17,10 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
                                                        [FromServices] IGetRecommendationRouter getRecommendationValidator,
                                                        CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
-        if (string.IsNullOrEmpty(recommendationSlug)) throw new ArgumentNullException(nameof(recommendationSlug));
+        if (string.IsNullOrEmpty(sectionSlug))
+            throw new ArgumentNullException(nameof(sectionSlug));
+        if (string.IsNullOrEmpty(recommendationSlug))
+            throw new ArgumentNullException(nameof(recommendationSlug));
 
         return await getRecommendationValidator.ValidateRoute(sectionSlug,
           recommendationSlug,
@@ -33,8 +35,10 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
                                                                 [FromServices] IGetRecommendationRouter getRecommendationValidator,
                                                                 CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
-        if (string.IsNullOrEmpty(recommendationSlug)) throw new ArgumentNullException(nameof(recommendationSlug));
+        if (string.IsNullOrEmpty(sectionSlug))
+            throw new ArgumentNullException(nameof(sectionSlug));
+        if (string.IsNullOrEmpty(recommendationSlug))
+            throw new ArgumentNullException(nameof(recommendationSlug));
 
         return await getRecommendationValidator.ValidateRoute(sectionSlug,
             recommendationSlug,

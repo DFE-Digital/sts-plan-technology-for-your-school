@@ -20,7 +20,8 @@ public class GetCategorySectionsQuery(ICmsDbContext db, ILogger<GetCategorySecti
         {
             var pageHasCategories = page.Content.Exists(content => content is CategoryDbEntity);
 
-            if (!pageHasCategories) return;
+            if (!pageHasCategories)
+                return;
 
             var sections = await db.ToListAsync(SectionsForPageQueryable(page), cancellationToken);
 
