@@ -1,6 +1,5 @@
-using Microsoft.EntityFrameworkCore.Query;
-using Microsoft.EntityFrameworkCore.Query.Internal;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 

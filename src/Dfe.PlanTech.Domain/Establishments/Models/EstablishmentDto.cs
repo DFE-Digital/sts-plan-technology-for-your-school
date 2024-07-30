@@ -1,5 +1,5 @@
-using Dfe.PlanTech.Domain.Establishments.Exceptions;
 using System.Text.Json.Serialization;
+using Dfe.PlanTech.Domain.Establishments.Exceptions;
 
 namespace Dfe.PlanTech.Domain.Establishments.Models;
 

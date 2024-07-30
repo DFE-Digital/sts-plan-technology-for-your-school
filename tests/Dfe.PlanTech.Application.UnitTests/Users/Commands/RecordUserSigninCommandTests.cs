@@ -1,11 +1,11 @@
-﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
+﻿using System.Linq.Expressions;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Commands;
 using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Domain.Users.Models;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
-using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
 {

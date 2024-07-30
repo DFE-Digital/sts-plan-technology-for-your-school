@@ -1,7 +1,7 @@
+using System.Text;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Helpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
-using System.Text;
 
 namespace Dfe.PlanTech.Web.TagHelpers;
 

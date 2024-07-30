@@ -1,9 +1,9 @@
+using System.Net;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.Domain.Caching.Exceptions;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using System.Net;
 
 namespace Dfe.PlanTech.AzureFunctions.UnitTests;
 

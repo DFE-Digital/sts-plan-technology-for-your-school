@@ -70,7 +70,8 @@ public class ComponentDropdownsComparator(CmsDbContext db, ContentfulContent con
 
         var errors = RichTextComparator.CompareRichTextContent(databaseDropdown.Content!, content!).ToArray();
 
-        if (errors.Length == 0) yield break;
+        if (errors.Length == 0)
+            yield break;
 
         foreach (var error in errors)
         {

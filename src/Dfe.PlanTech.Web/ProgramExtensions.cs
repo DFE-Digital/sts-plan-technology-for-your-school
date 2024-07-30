@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Content.Queries;
@@ -31,7 +32,6 @@ using Dfe.PlanTech.Web.Helpers;
 using EFCoreSecondLevelCacheInterceptor;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Serialization;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Web;
 

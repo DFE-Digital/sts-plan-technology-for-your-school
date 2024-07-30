@@ -1,7 +1,7 @@
+using System.Text;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.Extensions.Logging;
-using System.Text;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 

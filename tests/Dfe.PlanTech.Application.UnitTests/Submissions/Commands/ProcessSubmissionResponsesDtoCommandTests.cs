@@ -2,7 +2,6 @@ using Dfe.PlanTech.Application.Responses.Commands;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
-using Dfe.PlanTech.Domain.Submissions.Models;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Submissions.Commands;

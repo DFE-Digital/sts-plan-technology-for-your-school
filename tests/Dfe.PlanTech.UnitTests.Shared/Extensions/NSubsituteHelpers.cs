@@ -1,6 +1,6 @@
-using NSubstitute;
 using System.Linq.Expressions;
 using System.Reflection;
+using NSubstitute;
 using Xunit;
 
 namespace Dfe.PlanTech;
@@ -16,7 +16,8 @@ public static class NSubstituteExtensions
 
         Assert.Equal(timesCalled, methodCalls.Length);
 
-        if (expectedArguments == null) return;
+        if (expectedArguments == null)
+            return;
 
         foreach (var methodCall in methodCalls)
         {
