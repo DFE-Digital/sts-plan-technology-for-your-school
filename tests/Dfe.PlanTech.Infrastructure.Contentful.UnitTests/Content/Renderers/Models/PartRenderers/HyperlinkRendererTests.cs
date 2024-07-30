@@ -55,7 +55,7 @@ public class HyperlinkRendererTests
     public void Should_CreateLink_When_PassedValidData()
     {
         var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
-        var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), new[] { renderer });
+        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
 
         const string linkText = "Click Here";
         const string url = "https://www.test-url.com";
@@ -82,7 +82,7 @@ public class HyperlinkRendererTests
     public void Should_NotAddLink_When_MissingURI()
     {
         var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
-        var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), new[] { renderer });
+        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
 
         const string linkText = "Click Here";
 
@@ -105,7 +105,7 @@ public class HyperlinkRendererTests
         const string testClasses = "testing-classes";
 
         var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions() { Classes = testClasses });
-        var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), new[] { renderer });
+        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
 
         const string linkText = "Click Here";
         const string url = "https://www.test-url.com";

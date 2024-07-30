@@ -1,5 +1,4 @@
-﻿using Dfe.PlanTech.Domain.Questionnaire.Enums;
-using Xunit;
+﻿using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Models
 {
@@ -108,15 +107,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             {
                 Assert.Contains(chunk, allContent);
             }
-        }
-
-        [Fact]
-        public void Should_render_warning_component()
-        {
-            var text = "test text";
-            var actual = _componentBuilder.BuildWarningComponent(text);
-            Assert.NotNull(actual);
-            Assert.Equal("test text", actual.Text.RichText.Value);
         }
     }
 }

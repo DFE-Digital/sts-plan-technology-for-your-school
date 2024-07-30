@@ -36,7 +36,7 @@ public class RichTextRendererTests
             new HyperlinkRenderer(new HyperlinkRendererOptions())
         };
 
-        _renderer = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), partRenderers);
+        _renderer = new RichTextRenderer(new NullLogger<RichTextRenderer>(), partRenderers);
     }
 
     [Fact]

@@ -44,9 +44,9 @@ public class MessageRetryHandler(
             Body = message.Body
         };
 
-        var nextRetry = ++deliveryAttempts;
+        ++deliveryAttempts;
 
-        resubmittedMessage.ApplicationProperties.Add(CustomMessageProperty, nextRetry);
+        resubmittedMessage.ApplicationProperties.Add(CustomMessageProperty, deliveryAttempts);
 
         await _serviceBusSender.SendMessageAsync(resubmittedMessage, cancellationToken);
     }

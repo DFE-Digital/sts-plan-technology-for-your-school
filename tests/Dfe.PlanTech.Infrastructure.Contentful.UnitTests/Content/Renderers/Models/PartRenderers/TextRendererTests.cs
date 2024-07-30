@@ -59,7 +59,7 @@ public class TextRendererTests
         };
 
         var renderer = new TextRenderer(new TextRendererOptions(new NullLogger<TextRendererOptions>(), new List<MarkOption>() { boldMarkOption }));
-        var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), new[] { renderer });
+        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
 
         const string value = "Paragraph text";
 
@@ -96,7 +96,7 @@ public class TextRendererTests
         };
 
         var renderer = new TextRenderer(new TextRendererOptions(new NullLogger<TextRendererOptions>(), new List<MarkOption>() { boldMarkOption }));
-        var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), new[] { renderer });
+        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
 
         const string value = "Paragraph text";
 
@@ -134,7 +134,7 @@ public class TextRendererTests
         };
 
         var renderer = new TextRenderer(new TextRendererOptions(new NullLogger<TextRendererOptions>(), new List<MarkOption>() { boldMarkOption }));
-        var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), new[] { renderer });
+        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
 
         const string value = "Paragraph text";
 

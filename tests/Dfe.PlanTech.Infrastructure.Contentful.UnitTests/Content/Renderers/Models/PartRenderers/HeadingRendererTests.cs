@@ -56,7 +56,7 @@ public class HeadingRendererTests
     public void Should_Generate_Correct_Header_Tags(string nodeType, string expected)
     {
         var renderer = new HeadingRenderer();
-        var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), new[] { renderer });
+        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
         var content = new RichTextContent()
         {
             NodeType = nodeType,
@@ -82,7 +82,7 @@ public class HeadingRendererTests
         var textRenderer = new TextRenderer(new TextRendererOptions(new NullLogger<TextRendererOptions>(), []));
 
         var rendererCollection = new RichTextRenderer(
-            new NullLogger<IRichTextRenderer>(),
+            new NullLogger<RichTextRenderer>(),
             new List<BaseRichTextContentPartRender> { headingRenderer, textRenderer }
         );
 

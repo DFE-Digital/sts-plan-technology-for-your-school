@@ -23,7 +23,7 @@ public class PagesController : BaseController<PagesController>
     }
 
     [Authorize(Policy = PageModelAuthorisationPolicy.POLICY_NAME)]
-    [HttpGet("{route?}")]
+    [HttpGet("{route?}", Name = "GetPage")]
     public IActionResult GetByRoute([ModelBinder(typeof(PageModelBinder))] Page page, [FromServices] IUser user)
     {
         var viewModel = new PageViewModel(page, this, user, logger);

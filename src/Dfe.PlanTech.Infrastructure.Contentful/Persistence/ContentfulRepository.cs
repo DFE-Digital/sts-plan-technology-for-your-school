@@ -19,7 +19,7 @@ public class ContentfulRepository : IContentRepository
     public ContentfulRepository(ILoggerFactory loggerFactory, IContentfulClient client)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
-        _client.ContentTypeResolver = new EntityResolver(loggerFactory.CreateLogger<IContentTypeResolver>());
+        _client.ContentTypeResolver = new EntityResolver(loggerFactory.CreateLogger<EntityResolver>());
     }
 
     public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IGetEntitiesOptions? options, CancellationToken cancellationToken = default)

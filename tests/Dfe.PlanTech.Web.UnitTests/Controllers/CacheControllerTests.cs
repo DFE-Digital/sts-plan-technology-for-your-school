@@ -1,5 +1,6 @@
 ﻿using Dfe.PlanTech.Web.Controllers;
 using EFCoreSecondLevelCacheInterceptor;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -20,7 +21,13 @@ public class CacheControllerTests
     [Fact]
     public void ClearCache_Should_Return_True_On_Success()
     {
-        Assert.True(_cacheController.ClearCache(_cacheServiceProvider));
+        var clearCacheResult = _cacheController.ClearCache(_cacheServiceProvider);
+        Assert.NotNull(clearCacheResult);
+
+        var result = clearCacheResult as ObjectResult;
+        Assert.NotNull(result);
+        Assert.Equal(200, result.StatusCode);
+
         _cacheServiceProvider.Received(1).ClearAllCachedEntries();
     }
 
@@ -30,6 +37,12 @@ public class CacheControllerTests
         _cacheServiceProvider
             .When(call => call.ClearAllCachedEntries())
             .Do(_ => throw new Exception("unexpected error"));
-        Assert.False(_cacheController.ClearCache(_cacheServiceProvider));
+
+        var clearCacheResult = _cacheController.ClearCache(_cacheServiceProvider);
+        Assert.NotNull(clearCacheResult);
+
+        var result = clearCacheResult as ObjectResult;
+        Assert.NotNull(result);
+        Assert.Equal(500, result.StatusCode);
     }
 }

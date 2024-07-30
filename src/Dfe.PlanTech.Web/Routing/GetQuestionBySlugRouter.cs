@@ -172,5 +172,6 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     /// </summary>
     /// <param name="questionSlug"></param>
     /// <returns></returns>
-    private bool IsSlugForNextQuestion(string questionSlug) => _router.NextQuestion != null && _router.NextQuestion!.Slug == questionSlug;
+    private bool IsSlugForNextQuestion(string questionSlug)
+    => _router.NextQuestion != null && _router.NextQuestion!.Slug == questionSlug;
 }

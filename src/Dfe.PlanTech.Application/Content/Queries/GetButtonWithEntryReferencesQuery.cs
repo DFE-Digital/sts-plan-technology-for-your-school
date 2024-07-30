@@ -38,7 +38,7 @@ public class GetButtonWithEntryReferencesQuery : IGetPageChildrenQuery
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading button references for {page}", page.Id);
-            throw;
+            throw new InvalidOperationException("An unexpected error occurred while loading button references.", ex);
         }
     }
 

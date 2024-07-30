@@ -12,9 +12,9 @@ public class RichTextContent : ContentComponent, IRichTextContent<RichTextMark, 
 
     public string NodeType { get; set; } = "";
 
-    public List<RichTextMark> Marks { get; set; } = new();
+    public List<RichTextMark> Marks { get; set; } = [];
 
-    public List<RichTextContent> Content { get; set; } = new();
+    public List<RichTextContent> Content { get; set; } = [];
 
     public RichTextData? Data { get; set; }
 }
