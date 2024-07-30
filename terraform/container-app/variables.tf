@@ -189,6 +189,12 @@ variable "container_app_blob_storage_public_access_enabled" {
   default     = false
 }
 
+variable "storage_account_expiration_period" {
+  description = "The SAS expiration period in format of DD.HH:MM:SS"
+  type        = string
+  default     = "00.01:00:00"
+}
+
 ################
 # Function App #
 ################
