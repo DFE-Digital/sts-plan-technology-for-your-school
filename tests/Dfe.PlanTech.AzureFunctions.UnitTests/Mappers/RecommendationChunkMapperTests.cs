@@ -119,7 +119,7 @@ public class RecommendationChunkMapperTests : BaseMapperTests
     [Fact]
     public async Task Should_Create_New_Recommendation_Chunk_With_Existing_Data()
     {
-        var payload = CreateRecommendationChunkPayload("new-chunk-id", _answerIds, _contentIds);
+        var payload = CreateRecommendationChunkPayload("new-chunk-id", _answerIds, _contentIds, null, null);
 
         var RecommendationChunk = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default);
 
