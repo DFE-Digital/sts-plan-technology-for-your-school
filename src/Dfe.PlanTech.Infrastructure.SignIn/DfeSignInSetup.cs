@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Application.SignIns.Interfaces;
 using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Infrastructure.SignIn.Services;
@@ -11,7 +12,6 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Infrastructure.SignIns;
 

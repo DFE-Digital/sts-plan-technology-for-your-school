@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Helper;
 using Dfe.PlanTech.Domain.Establishments.Models;
@@ -5,7 +6,6 @@ using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Domain.Users.Models;
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
-using System.Security.Claims;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Helpers;

@@ -35,7 +35,8 @@ public class RichTextContentMapper
     where TInData : class, IRichTextData
     where TOutData : class, IRichTextData, new()
     {
-        if (data == null) return null;
+        if (data == null)
+            return null;
 
         var outData = new TOutData()
         {

@@ -1,5 +1,5 @@
-﻿using Dfe.PlanTech.DatabaseUpgrader;
-using CommandLine;
+﻿using CommandLine;
+using Dfe.PlanTech.DatabaseUpgrader;
 
 /// <summary>
 /// PlanTech Database Upgrader.

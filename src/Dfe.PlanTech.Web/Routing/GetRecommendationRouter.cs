@@ -24,8 +24,10 @@ public class GetRecommendationRouter(ISubmissionStatusProcessor router,
         RecommendationsController controller,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
-        if (string.IsNullOrEmpty(recommendationSlug)) throw new ArgumentNullException(nameof(recommendationSlug));
+        if (string.IsNullOrEmpty(sectionSlug))
+            throw new ArgumentNullException(nameof(sectionSlug));
+        if (string.IsNullOrEmpty(recommendationSlug))
+            throw new ArgumentNullException(nameof(recommendationSlug));
 
         await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken);
         return _router.Status switch
@@ -42,9 +44,11 @@ public class GetRecommendationRouter(ISubmissionStatusProcessor router,
 
     private async Task<(SubtopicRecommendation, RecommendationIntro, List<RecommendationChunk>)> GetSubtopicRecommendation(CancellationToken cancellationToken)
     {
-        if (_router.SectionStatus?.Maturity == null) throw new DatabaseException("Maturity is null, but shouldn't be for a completed section");
+        if (_router.SectionStatus?.Maturity == null)
+            throw new DatabaseException("Maturity is null, but shouldn't be for a completed section");
 
-        if (_router.Section == null) throw new DatabaseException("Section is null, but shouldn't be.");
+        if (_router.Section == null)
+            throw new DatabaseException("Section is null, but shouldn't be.");
 
         var submissionResponses = await _getLatestResponsesQuery.GetLatestResponses(await _router.User.GetEstablishmentId(), _router.Section.Sys.Id, true, cancellationToken) ?? throw new DatabaseException($"Could not find users answers for:  {_router.Section.Name}");
         var onlyLatestResponses = _router.Section.GetOrderedResponsesForJourney(submissionResponses.Responses);

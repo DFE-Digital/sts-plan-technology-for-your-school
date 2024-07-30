@@ -28,7 +28,8 @@ public static class RouteDataExtensions
                                         .Select(routePart => routePart.Value!.ToString())
                                         .FirstOrDefault();
 
-        if (string.IsNullOrEmpty(sectionSlug)) return DefaultPageTitle;
+        if (string.IsNullOrEmpty(sectionSlug))
+            return DefaultPageTitle;
 
         //Replace hyphens with spaces, then convert to Title Case (i.e. capitalise words)
         sectionSlug = sectionSlug.Replace("-", " ");

@@ -16,7 +16,8 @@ public class CustomRequestDimensionsTelemetryInitializer : ITelemetryInitializer
 
     public void Initialize(ITelemetry telemetry)
     {
-        if (telemetry is not RequestTelemetry requestTelemetry) return;
+        if (telemetry is not RequestTelemetry requestTelemetry)
+            return;
         var requestId = GetRequestId();
         requestTelemetry.Properties["RequestId"] = requestId;
     }

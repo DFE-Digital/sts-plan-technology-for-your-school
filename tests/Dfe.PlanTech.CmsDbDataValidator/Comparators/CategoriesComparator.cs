@@ -1,11 +1,9 @@
 
 using System.Text.Json.Nodes;
-using Dfe.PlanTech.CmsDbDataValidator.Models;
 using Dfe.PlanTech.CmsDbDataValidator.Tests;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.CmsDbDataValidator.Comparators;
 
