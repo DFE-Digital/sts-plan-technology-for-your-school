@@ -1,12 +1,12 @@
 # Seeding Test Data
 
-This project contains the code to seed an empty plan tech database with mock content. 
+This project contains the code to seed an empty plan tech database with mock content.
 
 The database can then be used with the plan tech web app to run more complex and detailed end to end tests with cypress that rely on content being consistent.
 
 ## Overview
 
-The standard E2E tests that run against each environment are kept quite generic so that if content is changed, questions reordered, or topics added/removed, they continue to pass. 
+The standard E2E tests that run against each environment are kept quite generic so that if content is changed, questions reordered, or topics added/removed, they continue to pass.
 
 The purpose of this project, seeding with realistic mock content, is to support writing more complex and detailed end to end tests that rely on content being consistent.
 
@@ -26,9 +26,9 @@ There is a bash script to do this, or you can run each step manually
 
 #### Macbooks
 
-If you're running this locally on a macbook with an M1 chip, the setup script won't work as `sqlcmd` is not available on Arm64 chips. 
+If you're running this locally on a macbook with an M1 chip, the setup script won't work as `sqlcmd` is not available on Arm64 chips.
 
-Instead you can install `sql-cli` to your machine with 
+Instead you can install `sql-cli` to your machine with
 ```bash
 npm install -g sql-cli
 ```
@@ -70,3 +70,6 @@ So using the above name and password for example:
 ```
 Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=Pa5ssw0rd@G0esH3r3;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;Max Pool Size=1000;Database=plantech-mock-db
 ```
+
+Any required content that has not been mocked, (e.g. at the moment, the index page) will fallback to Contentful to find it,
+so Plan tech continues to operate off dev content unless it has been replaced with a fixed test alternative.

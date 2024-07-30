@@ -3,6 +3,11 @@ password=$2
 
 docker run --cap-add SYS_PTRACE -e 'ACCEPT_EULA=1' -e "MSSQL_SA_PASSWORD=$password" -p 1433:1433 --name $name -d mcr.microsoft.com/azure-sql-edge
 
+echo "Waiting for server to start"
+until docker logs $name 2>&1 | grep -q "SQL Server is now ready for client connections"; do
+  sleep 1
+done
+
 mssql -u sa \
       -p $password \
       -q "CREATE DATABASE [plantech-mock-db]"
