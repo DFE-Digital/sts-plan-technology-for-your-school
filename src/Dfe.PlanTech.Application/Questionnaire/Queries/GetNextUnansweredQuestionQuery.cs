@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Application.Exceptions;
-using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 
@@ -18,9 +17,11 @@ public class GetNextUnansweredQuestionQuery : IGetNextUnansweredQuestionQuery
     {
         var answeredQuestions = await _getResponseQuery.GetLatestResponses(establishmentId, section.Sys.Id, false, cancellationToken);
 
-        if (answeredQuestions == null) return section.Questions.FirstOrDefault();
+        if (answeredQuestions == null)
+            return section.Questions.FirstOrDefault();
 
-        if (answeredQuestions.Responses.Count == 0) throw new DatabaseException($"There are no responses in the database for ongoing submission {answeredQuestions.SubmissionId}, linked to establishment {establishmentId}");
+        if (answeredQuestions.Responses.Count == 0)
+            throw new DatabaseException($"There are no responses in the database for ongoing submission {answeredQuestions.SubmissionId}, linked to establishment {establishmentId}");
 
         return GetValidatedNextUnansweredQuestion(section, answeredQuestions);
     }

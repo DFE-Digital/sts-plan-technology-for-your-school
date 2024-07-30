@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
@@ -9,10 +10,9 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using System.Security.Claims;
-using Microsoft.Extensions.Configuration;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Controllers

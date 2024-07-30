@@ -1,8 +1,8 @@
+using System.Reflection;
 using Contentful.Core.Search;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Persistence.Queries;
-using System.Reflection;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 
@@ -18,7 +18,8 @@ public static class QueryBuilders
     /// <returns></returns>
     public static QueryBuilder<T> ByContentType<T>(string contentTypeId)
     {
-        if (string.IsNullOrEmpty(contentTypeId)) throw new ArgumentNullException(nameof(contentTypeId));
+        if (string.IsNullOrEmpty(contentTypeId))
+            throw new ArgumentNullException(nameof(contentTypeId));
 
         var queryBuilder = new QueryBuilder<T>();
         queryBuilder.ContentTypeIs(contentTypeId);
@@ -83,7 +84,8 @@ public static class QueryBuilders
 
     public static QueryBuilder<T> WithSelect<T>(this QueryBuilder<T> queryBuilder, IGetEntitiesOptions options)
     {
-        if (options.Select == null) return queryBuilder;
+        if (options.Select == null)
+            return queryBuilder;
 
         var queryStringValues = queryBuilder.QueryStringValues();
 

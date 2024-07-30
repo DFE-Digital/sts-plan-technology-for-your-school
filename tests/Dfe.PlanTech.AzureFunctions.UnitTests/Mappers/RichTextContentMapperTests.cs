@@ -116,15 +116,18 @@ public class RichTextContentMapperTests : BaseMapperTests
         var marksMatch = expected.Marks.Zip(actual.Marks, (expectedMark, actualMark) => MarkMatches(expectedMark, actualMark))
                                        .All(matches => matches);
 
-        if (!marksMatch) return false;
+        if (!marksMatch)
+            return false;
 
         var dataMatches = DataMatches(expected.Data, actual.Data);
 
-        if (!dataMatches) return false;
+        if (!dataMatches)
+            return false;
 
         var valuesMatch = expected.NodeType == actual.NodeType && expected.Value == actual.Value;
 
-        if (!valuesMatch) return false;
+        if (!valuesMatch)
+            return false;
 
         var childrenMatch = expected.Content.Count == actual.Content.Count &&
                               expected.Content.All(content => actual.Content.Any(actualContent => ContentMatches<TContentIn, TDataIn, TMarkIn, TContentOut, TDataOut, TMarkOut>(content, actualContent)));
@@ -139,11 +142,13 @@ public class RichTextContentMapperTests : BaseMapperTests
 
     public static bool DataMatches(IRichTextData? expected, IRichTextData? actual)
     {
-        if (expected == null && actual == null) return true;
+        if (expected == null && actual == null)
+            return true;
 
         var nullabilityMatches = (expected == null) == (actual == null);
 
-        if (!nullabilityMatches) return nullabilityMatches;
+        if (!nullabilityMatches)
+            return nullabilityMatches;
 
         return expected!.Uri == actual!.Uri;
     }

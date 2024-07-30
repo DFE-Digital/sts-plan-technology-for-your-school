@@ -1,8 +1,8 @@
+using System.Security.Claims;
+using System.Text.Json;
 using Dfe.PlanTech.Domain.SignIns.Enums;
 using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Infrastructure.SignIns.Extensions;
-using System.Security.Claims;
-using System.Text.Json;
 
 namespace Dfe.PlanTech.Infrastructure.SignIns.UnitTests;
 

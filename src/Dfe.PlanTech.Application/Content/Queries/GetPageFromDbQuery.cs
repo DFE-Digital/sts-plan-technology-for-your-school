@@ -33,7 +33,8 @@ public class GetPageFromDbQuery : IGetPageQuery
         {
             var page = await RetrievePageFromDatabase(slug, cancellationToken);
 
-            if (page == null) return null;
+            if (page == null)
+                return null;
 
             return _mapperConfiguration.Map<PageDbEntity, Page>(page);
         }

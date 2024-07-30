@@ -1,7 +1,7 @@
-﻿using Dfe.PlanTech.Domain.Cookie;
+﻿using System.Text.Json;
+using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Microsoft.AspNetCore.Http;
-using System.Text.Json;
 
 namespace Dfe.PlanTech.Application.Cookie.Service;
 

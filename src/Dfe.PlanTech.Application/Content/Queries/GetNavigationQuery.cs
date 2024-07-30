@@ -25,7 +25,8 @@ public class GetNavigationQuery : ContentRetriever, IGetNavigationQuery
     {
         var navigationLinks = await GetFromDatabase();
 
-        if (navigationLinks.Count > 0) return navigationLinks;
+        if (navigationLinks.Count > 0)
+            return navigationLinks;
 
         return await GetFromContentful(cancellationToken);
     }

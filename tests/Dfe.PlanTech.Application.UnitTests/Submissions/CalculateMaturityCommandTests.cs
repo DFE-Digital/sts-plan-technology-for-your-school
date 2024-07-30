@@ -1,9 +1,9 @@
-﻿using Dfe.PlanTech.Application.Constants;
+﻿using System.Data.SqlTypes;
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Submissions.Commands;
 using Microsoft.Data.SqlClient;
 using NSubstitute;
-using System.Data.SqlTypes;
 
 namespace Dfe.PlanTech.Application.UnitTests.Submissions;
 public class CalculateMaturityCommandTests
