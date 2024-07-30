@@ -3,16 +3,10 @@ using Dfe.PlanTech.Domain.Content.Queries;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
-public class GetPageQuery : IGetPageQuery
+public class GetPageQuery(GetPageFromContentfulQuery getPageFromContentfulQuery, GetPageFromDbQuery getPageFromDbQuery) : IGetPageQuery
 {
-    private readonly IGetPageQuery _getPageFromDbQuery;
-    private readonly IGetPageQuery _getPageFromContentfulQuery;
-
-    public GetPageQuery(GetPageFromContentfulQuery getPageFromContentfulQuery, GetPageFromDbQuery getPageFromDbQuery)
-    {
-        _getPageFromDbQuery = getPageFromDbQuery;
-        _getPageFromContentfulQuery = getPageFromContentfulQuery;
-    }
+    private readonly GetPageFromDbQuery _getPageFromDbQuery = getPageFromDbQuery;
+    private readonly GetPageFromContentfulQuery _getPageFromContentfulQuery = getPageFromContentfulQuery;
 
     /// <summary>
     /// Fetches page from <see chref="IContentRepository"/> by slug

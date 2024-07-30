@@ -1,4 +1,3 @@
-
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -22,7 +21,6 @@ public class WarningComponentDbEntity : ContentComponentDbEntity, IWarningCompon
     public long RichTextId => Text.RichTextId;
 }
 
-public class RichTextContentWithPageSlug
+public interface IRichTextContentWithPageSlug : IHasRichText
 {
-
 }

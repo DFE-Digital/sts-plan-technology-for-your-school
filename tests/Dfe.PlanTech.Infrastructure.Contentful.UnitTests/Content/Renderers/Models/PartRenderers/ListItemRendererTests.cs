@@ -49,7 +49,7 @@ public class ListItemRendererTests
     public void Should_CreateListItem_When_PassedValidData()
     {
         var renderer = new ListItemRenderer();
-        var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), new[] { renderer });
+        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
 
         const string listItemValue = "List item one";
 

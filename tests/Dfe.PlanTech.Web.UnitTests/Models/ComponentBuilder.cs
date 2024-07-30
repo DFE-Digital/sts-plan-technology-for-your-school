@@ -135,7 +135,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             Text = text
         };
 
-        public WarningComponent BuildWarningComponent(string text)
+        public static WarningComponent BuildWarningComponent(string text)
         {
             return new WarningComponent
             {

@@ -114,7 +114,7 @@ public class TableRendererTests
         var renderers = new List<IRichTextContentPartRenderer>
             { tableRenderer, tableRowRenderer, tableHeaderCellRenderer, tableCellRenderer };
 
-        var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(),
+        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(),
             renderers);
 
         StringBuilder output = tableRenderer.AddHtml(content, rendererCollection, new StringBuilder());

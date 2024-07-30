@@ -132,4 +132,4 @@ app.MapControllerRoute(
     name: "default"
 );
 
-app.Run();
+await app.RunAsync();

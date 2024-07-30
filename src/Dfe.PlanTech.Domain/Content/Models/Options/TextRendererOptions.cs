@@ -15,7 +15,7 @@ public class TextRendererOptions
 
     public MarkOption? GetMatchingOptionForMark(RichTextMark mark)
     {
-        var matchingOption = _markOptions.FirstOrDefault(option => option.Mark == mark.Type);
+        var matchingOption = _markOptions.Find(option => option.Mark == mark.Type);
 
         if (matchingOption == null)
         {

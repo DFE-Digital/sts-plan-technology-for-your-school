@@ -14,12 +14,12 @@ public class SubmissionStatusProcessor : ISubmissionStatusProcessor
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
     private readonly ISubmissionStatusChecker[] _statusCheckers;
-    private ISectionComponent? _sectionComponent;
+    private ISectionComponent? _sectionComponent = null; // Initialize the field with null
 
     public IGetLatestResponsesQuery GetResponsesQuery { get; init; }
     public ISectionComponent Section
     {
-        get => _sectionComponent ?? throw new ApplicationException("Section is null but it should not be");
+        get => _sectionComponent ?? throw new ContentfulDataUnavailableException("Section is null but it should not be");
         private set => _sectionComponent = value;
     }
     public IUser User { get; init; }
@@ -68,15 +68,14 @@ public class SubmissionStatusProcessor : ISubmissionStatusProcessor
     {
         var establishmentId = await User.GetEstablishmentId();
 
-        Section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
-                        throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
+        Section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
 
         SectionStatus = await _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(establishmentId,
                                                                                           Section,
                                                                                           complete,
                                                                                           cancellationToken);
 
-        var matchingStatusChecker = _statusCheckers.FirstOrDefault(statusChecker => statusChecker.IsMatchingSubmissionStatus(this)) ??
+        var matchingStatusChecker = Array.Find(_statusCheckers, statusChecker => statusChecker.IsMatchingSubmissionStatus(this)) ??
                                     throw new InvalidDataException($"Could not find appropriate status checker for section status {SectionStatus}");
 
         await matchingStatusChecker.ProcessSubmission(this, cancellationToken);

@@ -1,8 +1,8 @@
 import "dotenv/config";
-import DataMapper from "#src/data-mapper";
+import DataMapper from "./data-mapper.js";
 import ExportContentfulData from "./exporter.js";
-import { getContentsWithReferences } from "#src/migrations/get-contents-with-references";
-import { postEntriesToWebhook } from "#src/migrations/post-content-to-webhook";
+import { getContentsWithReferences } from "./migrations/get-contents-with-references.js";
+import { postEntriesToWebhook } from "./migrations/post-content-to-webhook.js";
 
 const contentfulData = await ExportContentfulData();
 

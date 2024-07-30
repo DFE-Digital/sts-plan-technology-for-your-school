@@ -9,7 +9,7 @@ namespace Dfe.PlanTech.Web.Controllers;
 [LogInvalidModelState]
 [Authorize]
 [Route("/")]
-public class CheckAnswersController : BaseController<CheckAnswersController>
+public class CheckAnswersController(ILogger<CheckAnswersController> logger) : BaseController<CheckAnswersController>(logger)
 {
     public const string ControllerName = "CheckAnswers";
     public const string CheckAnswersAction = nameof(CheckAnswersPage);
@@ -17,10 +17,6 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
     public const string CheckAnswersViewName = "CheckAnswers";
 
     public const string InlineRecommendationUnavailableErrorMessage = "Unable to save. Please try again. If this problem continues you can";
-
-    public CheckAnswersController(ILogger<CheckAnswersController> logger) : base(logger)
-    {
-    }
 
     [HttpGet("{sectionSlug}/check-answers")]
     public async Task<IActionResult> CheckAnswersPage(string sectionSlug,
@@ -52,7 +48,6 @@ public class CheckAnswersController : BaseController<CheckAnswersController>
         }
 
         TempData["SectionSlug"] = sectionSlug;
-
         return this.RedirectToSelfAssessment();
     }
 }

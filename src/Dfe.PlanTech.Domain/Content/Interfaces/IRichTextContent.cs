@@ -20,11 +20,12 @@ public partial interface IRichTextContent
     public string NodeType { get; set; }
 
     public RichTextNodeType MappedNodeType
-    => Enum.GetValues<RichTextNodeType>().FirstOrDefault(value =>
-    {
-        string? enumName = GetNameForNodeType(value);
-        return MatchesNodeType(enumName);
-    });
+    => Array.Find(Enum.GetValues<RichTextNodeType>(),
+        value =>
+        {
+            string? enumName = GetNameForNodeType(value);
+            return MatchesNodeType(enumName);
+        });
 
     public bool MatchesNodeType(string? enumName)
     => string.Equals(enumName, RemoveHyphensAndNumbersRegEx().Replace(NodeType, ""), StringComparison.OrdinalIgnoreCase);
@@ -35,10 +36,11 @@ public partial interface IRichTextContent
     private static partial Regex RemoveHyphensAndNumbersRegEx();
 }
 
+
 public interface IRichTextContent<TMark, TContentType, TData> : IRichTextContent
-where TMark : IRichTextMark, new()
-where TContentType : IRichTextContent<TMark, TContentType, TData>, new()
-where TData : IRichTextData, new()
+    where TMark : IRichTextMark, new()
+    where TContentType : IRichTextContent<TMark, TContentType, TData>, new()
+    where TData : IRichTextData, new()
 {
     /// <summary>
     /// Collection of marks (e.g. underline, bold, etc.)

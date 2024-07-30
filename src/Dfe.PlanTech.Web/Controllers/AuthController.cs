@@ -15,5 +15,5 @@ public class AuthController : Controller
 
     [Authorize]
     [HttpGet("sign-out")]
-    public new IActionResult SignOut() => new SignOutResult(new[] { OpenIdConnectDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme });
+    public new IActionResult SignOut() => new SignOutResult([OpenIdConnectDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme]);
 }

@@ -82,9 +82,9 @@ public class CategorySectionViewComponent(
         }
         catch (Exception e)
         {
-            _logger.LogError(
-                "An exception has occurred while trying to retrieve section progress with the following message - {message}",
-                e.Message);
+            _logger.LogError(e,
+                             "An exception has occurred while trying to retrieve section progress with the following message - {message}",
+                             e.Message);
             category.RetrievalError = true;
             return category;
         }
@@ -114,7 +114,10 @@ public class CategorySectionViewComponent(
         }
         catch (Exception e)
         {
-            _logger.LogError("An exception has occurred while trying to retrieve the recommendation for Section {sectionName}, with the message {errMessage}", section.Name, e.Message);
+            _logger.LogError(e,
+                             "An exception has occurred while trying to retrieve the recommendation for Section {sectionName}, with the message {errMessage}",
+                             section.Name,
+                             e.Message);
             return new CategorySectionRecommendationDto
             {
                 NoRecommendationFoundErrorMessage = $"Unable to retrieve {section.Name} recommendation"

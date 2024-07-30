@@ -23,7 +23,7 @@ public class PagesController : BaseController<PagesController>
     }
 
     [Authorize(Policy = PageModelAuthorisationPolicy.POLICY_NAME)]
-    [HttpGet("{route?}")]
+    [HttpGet("{route?}", Name = "GetPage")]
     public IActionResult GetByRoute([ModelBinder(typeof(PageModelBinder))] Page page, [FromServices] IUser user)
     {
         var viewModel = new PageViewModel(page, this, user, logger);
@@ -37,6 +37,10 @@ public class PagesController : BaseController<PagesController>
     => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 
     [HttpGet(UrlConstants.ServiceUnavailable, Name = UrlConstants.ServiceUnavailable)]
-    public IActionResult ServiceUnavailable()
-    => View(new ServiceUnavailableViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    public IActionResult ServiceUnavailable([FromServices] IConfiguration configuration)
+     => View(new ServiceUnavailableViewModel
+     {
+         RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+         ContactUsEmail = configuration["ContactUs:Email"]
+     });
 }

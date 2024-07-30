@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Enums;
@@ -7,23 +7,14 @@ using Dfe.PlanTech.Domain.Users.Interfaces;
 
 namespace Dfe.PlanTech.Application.Submissions.Queries;
 
-public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
+public class GetSubmissionStatusesQuery(IPlanTechDbContext db, IUser userHelper) : IGetSubmissionStatusesQuery
 {
-    private readonly IPlanTechDbContext _db;
-    private readonly IUser _userHelper;
-
-    public GetSubmissionStatusesQuery(IPlanTechDbContext db, IUser userHelper)
-    {
-        _db = db;
-        _userHelper = userHelper;
-
-    }
 
     public async Task<List<SectionStatusDto>> GetSectionSubmissionStatuses(string categoryId)
     {
-        int establishmentId = await _userHelper.GetEstablishmentId();
+        int establishmentId = await userHelper.GetEstablishmentId();
 
-        return await _db.ToListAsync(_db.GetSectionStatuses(categoryId, establishmentId));
+        return await db.ToListAsync(db.GetSectionStatuses(categoryId, establishmentId));
     }
 
     public async Task<SectionStatusNew> GetSectionSubmissionStatusAsync(int establishmentId,
@@ -31,12 +22,12 @@ public class GetSubmissionStatusesQuery : IGetSubmissionStatusesQuery
                                                                          bool completed,
                                                                          CancellationToken cancellationToken)
     {
-        var sectionStatus = _db.GetSubmissions.Where(submission => submission.EstablishmentId == establishmentId &&
+        var sectionStatus = db.GetSubmissions.Where(submission => submission.EstablishmentId == establishmentId &&
                                                  submission.SectionId == section.Sys.Id && !submission.Deleted);
 
         var groupedAndLatest = GetLatestSubmissionStatus(sectionStatus, completed);
 
-        var result = await _db.FirstOrDefaultAsync(groupedAndLatest, cancellationToken);
+        var result = await db.FirstOrDefaultAsync(groupedAndLatest, cancellationToken);
 
         return result ?? new SectionStatusNew()
         {

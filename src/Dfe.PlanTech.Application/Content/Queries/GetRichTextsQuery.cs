@@ -10,7 +10,6 @@ namespace Dfe.PlanTech.Application.Content.Queries;
 public class GetRichTextsForPageQuery(ICmsDbContext db, ILogger<GetRichTextsForPageQuery> logger, ContentfulOptions contentfulOptions) : IGetPageChildrenQuery
 {
     private readonly ICmsDbContext _db = db;
-    private readonly ILogger<GetRichTextsForPageQuery> _logger = logger;
     private readonly ContentfulOptions _contentfulOptions = contentfulOptions;
 
     /// <summary>
@@ -35,8 +34,8 @@ public class GetRichTextsForPageQuery(ICmsDbContext db, ILogger<GetRichTextsForP
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching rich text content from Database for {pageId}", page.Id);
-            throw;
+            logger.LogError(ex, "Error fetching RichTextContent from Database for {PageId}", page.Id);
+            throw new InvalidOperationException("Error fetching RichTextContent from Database for " + page.Id, ex);
         }
     }
 
