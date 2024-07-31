@@ -22,6 +22,10 @@ The design for the ticket is based on:
 - Minor change three
 - ...
 
+## Non-functional changes (e.g. documentation)
+
+- Docs change one
+
 # Release requirements
 
 What steps are required for release, if any? E.g. Key Vault secrets, Terraform changes, etc.
