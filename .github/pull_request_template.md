@@ -37,6 +37,7 @@ Release requirement one description
 # Checklist
 
 - [ ] Title uses [Angular commit convention](https://www.conventionalcommits.org/en/v1.0.0-beta.4/)
+- [ ] PR targets development branch
 - [ ] Unit tests have been added/updated
 - [ ] E2E tests have been added/updated
 - [ ] GitHub workflows/actions have been updated
