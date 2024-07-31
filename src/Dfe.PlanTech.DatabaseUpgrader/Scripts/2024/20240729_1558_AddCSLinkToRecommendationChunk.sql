@@ -1,4 +1,4 @@
-IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS 
                WHERE TABLE_NAME = 'RecommendationChunks' 
                AND TABLE_SCHEMA = 'Contentful' 
                AND COLUMN_NAME = 'CSLinkText')
@@ -7,7 +7,7 @@ BEGIN
         ADD [CSLinkText] NVARCHAR(256);
 END;
 
-IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS 
                WHERE TABLE_NAME = 'RecommendationChunks' 
                AND TABLE_SCHEMA = 'Contentful' 
                AND COLUMN_NAME = 'CSUrl')
