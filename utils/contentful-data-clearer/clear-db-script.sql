@@ -1,33 +1,31 @@
-DELETE FROM [Contentful].[Answers]
-DELETE FROM [Contentful].[Buttons]
-DELETE FROM [Contentful].[ButtonWithEntryReferences]
-DELETE FROM [Contentful].[ButtonWithLinks]
-DELETE FROM [Contentful].[Categories]
-DELETE FROM [Contentful].[Checkboxes]
-DELETE FROM [Contentful].[CheckboxOptions]
-DELETE FROM [Contentful].[ComponentDropDowns]
-DELETE FROM [Contentful].[ContentComponents]
-DELETE FROM [Contentful].[Headers]
-DELETE FROM [Contentful].[InsetTexts]
-DELETE FROM [Contentful].[NavigationLink]
-DELETE FROM [Contentful].[Pages]
-DELETE FROM [Contentful].[PageContents]
-DELETE FROM [Contentful].[Questions]
-DELETE FROM [Contentful].[RecommendationChunkAnswers]
-DELETE FROM [Contentful].[RecommendationChunkContents]
-DELETE FROM [Contentful].[RecommendationChunks]
-DELETE FROM [Contentful].[RecommendationIntroContents]
-DELETE FROM [Contentful].[RecommendationIntros]
-DELETE FROM [Contentful].[RecommendationSectionAnswers]
-DELETE FROM [Contentful].[RecommendationSectionChunks]
-DELETE FROM [Contentful].[RecommendationSections]
-DELETE FROM [Contentful].[RichTextContents]
-DELETE FROM [Contentful].[RichTextDataDbEntity]
-DELETE FROM [Contentful].[RichTextMarkDbEntity]
-DELETE FROM [Contentful].[Sections]
-DELETE FROM [Contentful].[SubtopicRecommendationIntros]
-DELETE FROM [Contentful].[SubtopicRecommendations]
-DELETE FROM [Contentful].[Textareas]
-DELETE FROM [Contentful].[TextBodies]
-DELETE FROM [Contentful].[Titles]
-DELETE FROM [Contentful].[Warnings]
+DECLARE @Table NVARCHAR(100);
+DECLARE @Schema NVARCHAR(100) = 'Contentful';
+
+DECLARE @ConstraintsOff NVARCHAR(MAX) = ''
+DECLARE @DeleteFromTables NVARCHAR(MAX) = ''
+Declare @ConstraintsOn NVARCHAR(MAX) = ''
+
+DECLARE Cur CURSOR FOR (
+    SELECT SCHEMA_NAME(schema_id) + '.' + [name]
+    FROM sys.tables
+    WHERE
+        SCHEMA_NAME(schema_id) = @Schema
+    )
+OPEN Cur
+FETCH NEXT FROM Cur INTO @Table
+WHILE @@FETCH_STATUS = 0
+    BEGIN
+        SET @ConstraintsOff = @ConstraintsOff + '
+ALTER TABLE ' + @Table + ' NOCHECK CONSTRAINT ALL'
+        SET @ConstraintsOn = @ConstraintsOn + '
+ALTER TABLE ' + @Table + ' CHECK CONSTRAINT ALL'
+        SET @DeleteFromTables = @DeleteFromTables + '
+DELETE FROM ' + @Table
+        FETCH NEXT FROM Cur INTO @Table
+    END
+CLOSE Cur
+DEALLOCATE Cur
+
+Exec sp_executesql @ConstraintsOff
+Exec sp_executesql @DeleteFromTables
+Exec sp_executesql @ConstraintsOn
