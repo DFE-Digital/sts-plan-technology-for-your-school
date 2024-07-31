@@ -4,26 +4,29 @@ Addresses ticket [#TICKET-NUMBER](www.ticket-link.com)
 
 High level overview of changes; one or two sentences.
 
-## Changes
+The design for the ticket is based on:
+![This design from XXXXXX](screenshot-of-design.png)
 
-### Major
+# Changes
+
+## Major
 
 - Major change one
 - Major change two
 - ...
 
-### Minor
+## Minor
 
 - Minor change one
 - Minor change two
 - Minor change three
 - ...
 
-## Release requirements
+# Release requirements
 
 What steps are required for release, if any? E.g. Key Vault secrets, Terraform changes, etc.
 
-### Release requirement one title
+## Release requirement one title
 
 Release requirement one description
 
@@ -31,11 +34,12 @@ Release requirement one description
 - Step two
 - ...
 
-## Checklist
+# Checklist
 
 - [ ] Title uses [Angular commit convention](https://www.conventionalcommits.org/en/v1.0.0-beta.4/)
 - [ ] Unit tests have been added/updated
 - [ ] E2E tests have been added/updated
+- [ ] GitHub workflows/actions have been updated
 - [ ] Terraform has been updated
 - [ ] Documentation has been updated
 - [ ] Key Vault secrets have been added to dev
