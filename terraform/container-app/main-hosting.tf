@@ -50,7 +50,7 @@ module "main_hosting" {
   ##############
   # Networking #
   ##############
-  container_apps_infra_subnet_service_endpoints = ["Microsoft.KeyVault"]
+  container_apps_infra_subnet_service_endpoints = ["Microsoft.KeyVault", "Microsoft.Storage"]
 
   #############################
   # Github Container Registry #

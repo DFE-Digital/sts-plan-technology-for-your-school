@@ -24,61 +24,148 @@ resource "azurerm_storage_account" "function_storage" {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.user_assigned_identity.id]
   }
+
+  network_rules {
+    bypass                     = ["Logging", "Metrics"]
+    default_action             = "Deny"
+    virtual_network_subnet_ids = [azurerm_subnet.function_infra_subnet.id]
+  }
+}
+
+resource "azurerm_virtual_network" "function_vnet" {
+  name                = local.function.vnet.name
+  address_space       = [local.function.vnet.address_space]
+  location            = local.function.location
+  resource_group_name = local.resource_group_name
+  tags                = local.tags
+}
+
+resource "azurerm_subnet" "function_infra_subnet" {
+  name                 = local.function.vnet.subnet.name
+  virtual_network_name = local.function.vnet.name
+  resource_group_name  = local.resource_group_name
+  address_prefixes     = local.function.vnet.subnet.address_prefixes
+
+  service_endpoints = ["Microsoft.KeyVault", "Microsoft.Storage"]
+
+  delegation {
+    name = "AFADelegationService"
+
+    service_delegation {
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/join/action"
+      ]
+      name = "Microsoft.App/environments"
+    }
+  }
 }
 
 resource "azurerm_service_plan" "function_plan" {
   name                = "${local.resource_prefix}appserviceplan"
   resource_group_name = local.resource_group_name
-  location            = local.azure_location
+  location            = local.function.location
   os_type             = "Linux"
-  sku_name            = "Y1"
+  sku_name            = "FC1"
   tags                = local.tags
 }
 
-resource "azurerm_linux_function_app" "contentful_function" {
-  name                = "${local.resource_prefix}contentfulfunction"
-  resource_group_name = local.resource_group_name
-  location            = local.azure_location
-  tags                = local.tags
+data "azurerm_resource_group" "resource_group" {
+  name = local.resource_group_name
+}
 
-  service_plan_id = azurerm_service_plan.function_plan.id
-
-  storage_account_name = azurerm_storage_account.function_storage.name
-
-  storage_account_access_key    = local.container_app_storage_account_shared_access_key_enabled ? azurerm_storage_account.function_storage.primary_access_key : null
-  storage_uses_managed_identity = local.container_app_storage_account_shared_access_key_enabled ? null : true
-
-  key_vault_reference_identity_id = azurerm_user_assigned_identity.user_assigned_identity.id
-
-  site_config {
-    application_insights_key = azurerm_application_insights.functional_insights.instrumentation_key
-    application_stack {
-      dotnet_version              = "8.0"
-      use_dotnet_isolated_runtime = true
-    }
-  }
+resource "azapi_resource" "contentful_function" {
+  type                      = "Microsoft.Web/sites@2023-12-01"
+  schema_validation_enabled = false
+  location                  = local.function.location
+  name                      = local.function.name
+  parent_id                 = data.azurerm_resource_group.resource_group.id
 
   identity {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.user_assigned_identity.id]
   }
 
-  app_settings = {
-    AZURE_SQL_CONNECTIONSTRING      = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=${azurerm_key_vault_secret.vault_secret_database_connectionstring.name})"
-    AzureWebJobsServiceBus          = azurerm_servicebus_namespace.service_bus.default_primary_connection_string
-    WEBSITE_ENABLE_SYNC_UPDATE_SITE = true
-    WEBSITE_MOUNT_ENABLED           = 1
-    AZURE_CLIENT_ID                 = azurerm_user_assigned_identity.user_assigned_identity.client_id
-    AZURE_KEYVAULT_CLIENTID         = azurerm_user_assigned_identity.user_assigned_identity.client_id
-    AZURE_KEYVAULT_RESOURCEENDPOINT = azurerm_key_vault.vault.vault_uri
-    AZURE_KEYVAULT_SCOPE            = "https://vault.azure.net/.default"
-    KeyVaultReferenceIdentity       = azurerm_user_assigned_identity.user_assigned_identity.id
-    WEBSITE_RUN_FROM_PACKAGE        = ""
-  }
+  tags = local.tags
+
+  body = jsonencode({
+    kind = "functionapp,linux",
+
+    properties = {
+      serverFarmId = azurerm_service_plan.function_plan.id,
+
+      httpsOnly              = true,
+      virtualNetworkSubnetId = azurerm_subnet.function_infra_subnet.id,
+      vnetImagePullEnabled   = true,
+      functionAppConfig = {
+        deployment = {
+          storage = {
+            type  = "blobContainer",
+            value = "${azurerm_storage_account.function_storage.primary_blob_endpoint}function-releases"
+            authentication = {
+              type                               = "StorageAccountConnectionString"
+              storageAccountConnectionStringName = "AzureWebJobsStorage"
+            }
+          }
+        },
+        scaleAndConcurrency = {
+          maximumInstanceCount = local.function.scaling.max_instance_count,
+          instanceMemoryMB     = local.function.scaling.memory
+        },
+        runtime = {
+          name    = local.function.runtime.name,
+          version = local.function.runtime.version
+        }
+      },
+      siteConfig = {
+        appSettings = [
+          /* Connections */
+          {
+            name  = "keyVaultReferenceIdentity",
+            value = azurerm_user_assigned_identity.user_assigned_identity.id
+          },
+          {
+            name  = "APPLICATIONINSIGHTS_CONNECTION_STRING",
+            value = azurerm_application_insights.functional_insights.connection_string
+          },
+          {
+            name  = "AZURE_SQL_CONNECTIONSTRING",
+            value = local.function.app_settings.sql_connection_string
+          },
+          {
+            name  = "AzureWebJobsServiceBus",
+            value = azurerm_servicebus_namespace.service_bus.default_primary_connection_string
+          },
+          {
+            name  = "AzureWebJobsStorage"
+            value = azurerm_storage_account.function_storage.primary_blob_connection_string
+          },
+          {
+            name  = "AzureWebJobsStorage__accountName",
+            value = azurerm_storage_account.function_storage.name
+          },
+          /* Cache clearing */
+          {
+            name  = "WEBSITE_CACHE_CLEAR_APIKEY_NAME"
+            value = local.function.app_settings.cacheclear.apikey_name
+          },
+          {
+            name  = "WEBSITE_CACHE_CLEAR_APIKEY_VALUE"
+            value = local.function.app_settings.cacheclear.apikey_value
+          },
+          {
+            name  = "WEBSITE_CACHE_CLEAR_ENDPOINT"
+            value = local.function.app_settings.cacheclear.endpoint
+          }
+        ],
+        http20enabled = true
+        minTlsVersion = "1.3"
+      }
+    }
+  })
 
   lifecycle {
     ignore_changes = [
-      app_settings,
+      tags,
     ]
   }
 }
@@ -92,29 +179,18 @@ resource "azurerm_application_insights" "functional_insights" {
   tags                = local.tags
 }
 
-data "azurerm_subscription" "subscription" {
-}
-
-resource "azurerm_app_service_connection" "azurekeyvaultconnector" {
-  name               = "azurekeyvaultconnection"
-  app_service_id     = azurerm_linux_function_app.contentful_function.id
-  target_resource_id = azurerm_key_vault.vault.id
-  client_type        = "dotnet"
-  authentication {
-    type            = "userAssignedIdentity"
-    client_id       = azurerm_user_assigned_identity.user_assigned_identity.client_id
-    subscription_id = data.azurerm_subscription.subscription.subscription_id
+/* 
+* To fix an issue where the Key Vault connection fails on initial TF apply,
+* and the only solution is to set via CLI
+*/
+resource "null_resource" "function_set_keyVaultReferenceIdentity" {
+  triggers = {
+    identity = azurerm_user_assigned_identity.user_assigned_identity.id
   }
-}
 
-resource "azurerm_app_service_connection" "azuresqlconnector" {
-  name               = "azuresqlconnection"
-  app_service_id     = azurerm_linux_function_app.contentful_function.id
-  target_resource_id = "/subscriptions/${data.azurerm_subscription.subscription.subscription_id}/resourceGroups/${local.resource_prefix}/providers/Microsoft.Sql/servers/${local.resource_prefix}/databases/${local.resource_prefix}-sqldb"
-  client_type        = "dotnet"
-  authentication {
-    type            = "userAssignedIdentity"
-    client_id       = azurerm_user_assigned_identity.user_assigned_identity.client_id
-    subscription_id = data.azurerm_subscription.subscription.subscription_id
+  provisioner "local-exec" {
+    command = "az rest --method PATCH --uri \"${azapi_resource.contentful_function.id}?api-version=2023-12-01\" --body \"{'properties':{'keyVaultReferenceIdentity':'${azurerm_user_assigned_identity.user_assigned_identity.id}'}}\""
   }
+
+  depends_on = [azapi_resource.contentful_function, azurerm_user_assigned_identity.user_assigned_identity]
 }
