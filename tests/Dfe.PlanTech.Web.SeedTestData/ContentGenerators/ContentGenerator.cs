@@ -15,7 +15,7 @@ public abstract class ContentGenerator
     /// Helper method to create a ContentComponentDbEntity with Published = true
     /// and a randomly generated Id
     /// </summary>
-    protected static T CreateComponent<T>(T entity) where T: ContentComponentDbEntity
+    protected static T CreateComponent<T>(T entity) where T : ContentComponentDbEntity
     {
         entity.Id = GenerateId();
         entity.Published = true;
