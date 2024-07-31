@@ -34,6 +34,10 @@ Release requirement one description
 - Step two
 - ...
 
+# Additional notes
+
+Any additional notes, comments, etc. that might be required here.
+
 # Checklist
 
 - [ ] Title uses [Angular commit convention](https://www.conventionalcommits.org/en/v1.0.0-beta.4/)
