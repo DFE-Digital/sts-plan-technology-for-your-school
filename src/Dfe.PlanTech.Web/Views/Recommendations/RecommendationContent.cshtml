@@ -26,7 +26,7 @@
                     @if (headerWithContent is RecommendationChunk chunk && !string.IsNullOrEmpty(chunk.CSUrl) && !string.IsNullOrEmpty(chunk.CSLinkText))
                     {
                         <div class="govuk-!-margin-top-3 govuk-!-margin-bottom-9">
-                            <a class="govuk-link govuk-!-font-weight-bold" href=@chunk.CSUrl target="_blank">
+                            <a class="govuk-body govuk-link govuk-!-font-weight-bold" href=@chunk.CSUrl target="_blank">
                                 @chunk.CSLinkText
                             </a>
                         </div>
