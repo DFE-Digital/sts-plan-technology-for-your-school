@@ -107,13 +107,21 @@ locals {
         endpoint     = local.function_appsetting_cacheclear_endpoint
       }
     }
+
+    vnet = {
+      name          = "${local.resource_prefix}-function-vn"
+      address_space = "10.0.0.0/14"
+
+      subnet = {
+        name             = "${local.resource_prefix}-functioninfra"
+        address_prefixes = ["10.0.0.0/24"]
+      }
+    }
   }
 
   # Settings
-  function_appsetting_sql_connection_string = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=${azurerm_key_vault_secret.vault_secret_database_connectionstring.name})"
-
+  function_appsetting_sql_connection_string   = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=${azurerm_key_vault_secret.vault_secret_database_connectionstring.name})"
   function_appsetting_cacheclear_apikey_name  = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=CacheClear--ApiKeyName)"
   function_appsetting_cacheclear_apikey_value = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=CacheClear--ApiKeyValue)"
   function_appsetting_cacheclear_endpoint     = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=CacheClear--Endpoint)"
-
 }

@@ -24,8 +24,41 @@ resource "azurerm_storage_account" "function_storage" {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.user_assigned_identity.id]
   }
+
+  network_rules {
+    bypass                     = ["Logging", "Metrics"]
+    default_action             = "Deny"
+    virtual_network_subnet_ids = [azurerm_subnet.function_infra_subnet.id]
+  }
 }
 
+resource "azurerm_virtual_network" "function_vnet" {
+  name                = local.function.vnet.name
+  address_space       = [local.function.vnet.address_space]
+  location            = local.function.location
+  resource_group_name = local.resource_group_name
+  tags                = local.tags
+}
+
+resource "azurerm_subnet" "function_infra_subnet" {
+  name                 = local.function.vnet.subnet.name
+  virtual_network_name = local.function.vnet.name
+  resource_group_name  = local.resource_group_name
+  address_prefixes     = local.function.vnet.subnet.address_prefixes
+
+  service_endpoints = ["Microsoft.KeyVault", "Microsoft.Storage"]
+
+  delegation {
+    name = "AFADelegationService"
+
+    service_delegation {
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/join/action"
+      ]
+      name = "Microsoft.App/environments"
+    }
+  }
+}
 
 resource "azurerm_service_plan" "function_plan" {
   name                = "${local.resource_prefix}appserviceplan"
@@ -60,6 +93,9 @@ resource "azapi_resource" "contentful_function" {
     properties = {
       serverFarmId = azurerm_service_plan.function_plan.id,
 
+      httpsOnly              = true,
+      virtualNetworkSubnetId = azurerm_subnet.function_infra_subnet.id,
+      vnetImagePullEnabled   = true,
       functionAppConfig = {
         deployment = {
           storage = {
@@ -124,7 +160,6 @@ resource "azapi_resource" "contentful_function" {
         http20enabled = true
         minTlsVersion = "1.3"
       }
-      httpsOnly = true
     }
   })
 
