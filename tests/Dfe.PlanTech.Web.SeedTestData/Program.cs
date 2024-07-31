@@ -1,3 +1,4 @@
+using System.Reflection;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -10,10 +11,12 @@ namespace Dfe.PlanTech.Web.SeedTestData;
 
 public static class Program
 {
-    private static ServiceProvider CreateServiceProvider(IConfiguration? configuration = null)
+    private static ServiceProvider CreateServiceProvider()
     {
-        configuration ??= CreateConfiguration();
+        var configurationBuilder = new ConfigurationBuilder();
+        configurationBuilder.AddUserSecrets(Assembly.GetExecutingAssembly());
 
+        var configuration = configurationBuilder.Build();
         var services = new ServiceCollection();
 
         services.AddDbContext<CmsDbContext>(opts =>
@@ -35,23 +38,10 @@ public static class Program
         return services.BuildServiceProvider();
     }
 
-    private static IConfiguration CreateConfiguration()
-    {
-        var configurationBuilder = new ConfigurationBuilder();
-        configurationBuilder.AddUserSecrets<ForLoadingUserSecrets>();
-
-        return configurationBuilder.Build();
-    }
-
     public static void Main()
     {
         var provider = CreateServiceProvider();
         var seeder = provider.GetRequiredService<SeedData>();
         seeder.CreateData();
     }
-}
-
-public class ForLoadingUserSecrets
-{
-
 }
