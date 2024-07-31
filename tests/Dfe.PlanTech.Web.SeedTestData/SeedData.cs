@@ -9,7 +9,7 @@ public class SeedData(CmsDbContext db)
     /// <summary>
     /// List of all standalone mock content generators for the seeded database
     /// </summary>
-    private readonly List<IContentGenerator> _contentGenerators =
+    private readonly List<ContentGenerator> _contentGenerators =
     [
         new SelfAssessmentPage(db)
     ];
@@ -25,19 +25,17 @@ public class SeedData(CmsDbContext db)
     }
 
     /// <summary>
-    /// Creates the basic data like establishment, user,
+    /// Creates the basic data like establishments, users,
     /// that plan tech requires to operate.
     /// </summary>
     private void CreateBaseData()
     {
-        // Match establishment and user ID of test account
-        db.Database.ExecuteSql($@"SET IDENTITY_INSERT [dbo].[user] ON
-Insert into [dbo].[user] (id, dfeSignInRef) Select 53, 'sign-in-ref'
-SET IDENTITY_INSERT [dbo].[user] OFF");
+        // Add 100 dummy users & establishments to align with test account logins
+        db.Database.ExecuteSql(@$"With Range(n) AS (Select 1 union all select n+1 from Range where n < 100)
+Insert into [dbo].[user] (dfeSignInRef) Select CONCAT('sign-in-ref-', n) From Range");
 
-        db.Database.ExecuteSql($@"SET IDENTITY_INSERT [dbo].[establishment] ON
-Insert into [dbo].[establishment] (id, establishmentRef, establishmentType, orgName) 
-Select 16, 'Test Ref', 'Test School', 'Test Establishment'
-SET IDENTITY_INSERT [dbo].[establishment] OFF");
+        db.Database.ExecuteSql($@"With Range(n) AS (Select 1 union all select n+1 from Range where n < 100)
+Insert into [dbo].[establishment] (establishmentRef, establishmentType, orgName)
+Select CONCAT('Test Ref ', n), 'Test School', CONCAT('Test Establishment ', n) from Range");
     }
 }

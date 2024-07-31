@@ -6,155 +6,115 @@ using Dfe.PlanTech.Infrastructure.Data;
 
 namespace Dfe.PlanTech.Web.SeedTestData.ContentGenerators;
 
-public class SelfAssessmentPage(CmsDbContext db) : IContentGenerator
+public class SelfAssessmentPage(CmsDbContext db) : ContentGenerator
 {
     private static SectionDbEntity GetWifiSubtopic()
     {
-        var q2 = new QuestionDbEntity
+        var q2 = CreateComponent(new QuestionDbEntity()
         {
-            Id = "wifi-q2",
-            Published = true,
             Slug = "wifi-q2",
             Text = "Do you have someone responsible for reviewing the broadband?",
             Order = 1,
             Answers =
             [
-                new AnswerDbEntity
+                CreateComponent(new AnswerDbEntity()
                 {
                     Text = "Yes",
                     Maturity = "High",
-                    Published = true,
-                    Id = "wifi-q2-a1"
-                },
-                new AnswerDbEntity
+                }),
+                CreateComponent(new AnswerDbEntity()
                 {
                     Text = "No",
                     Maturity = "Low",
-                    Published = true,
-                    Id = "wifi-q2-a2"
-                }
+                }),
             ]
-        };
-        var q1 = new QuestionDbEntity
+        });
+        var q1 = CreateComponent(new QuestionDbEntity
         {
-            Id = "wifi-q1",
-            Published = true,
             Slug = "wifi-q1",
             Text = "What type of broadband do you have?",
             Order = 0,
             Answers =
             [
-                new AnswerDbEntity
+                CreateComponent(new AnswerDbEntity()
                 {
                     Text = "Fibre",
                     Maturity = "High",
-                    NextQuestion = q2,
-                    Published = true,
-                    Id = "wifi-q1-a1"
-                },
-                new AnswerDbEntity
+                    NextQuestion = q2
+                }),
+                CreateComponent(new AnswerDbEntity()
                 {
                     Text = "Mobile",
                     Maturity = "Medium",
-                    NextQuestion = q2,
-                    Published = true,
-                    Id = "wifi-q1-a2"
-                }
+                    NextQuestion = q2
+                }),
             ]
-        };
-        var interstitialHeader = new HeaderDbEntity
-        {
-            Id = "wifi-header-id",
-            Text = "Wifi",
-            Tag = HeaderTag.H3,
-            Size = HeaderSize.Medium,
-            Published = true
-        };
-        var interstitialContinueButton = new ButtonWithEntryReferenceDbEntity
-        {
-            Id = "wifi-button-reference-id",
-            Button = new ButtonDbEntity
-            {
-                Id = "wifi-continue-button",
-                Published = true,
-                Value = "Continue"
-            },
-            LinkToEntry = q1,
-            Published = true
-        };
-        return new SectionDbEntity
+        });
+
+        return CreateComponent(new SectionDbEntity
         {
             Name = "Wifi",
-            Id = "wifi-section-id",
-            InterstitialPage = new PageDbEntity
+            InterstitialPage = CreateComponent(new PageDbEntity
             {
-                Id = "wifi-interstitial-id",
                 InternalName = "wifi-interstitial-name",
                 Slug = "wifi",
-                Content = [interstitialHeader, interstitialContinueButton],
-                Title = new TitleDbEntity
-                {
-                    Id = "wifi-title-id",
-                    Text = "Wifi topic",
-                    Published = true
-                },
-                Published = true,
-            },
+                Content =
+                [
+                    CreateComponent(new HeaderDbEntity
+                    {
+                        Text = "Wifi",
+                        Tag = HeaderTag.H3,
+                        Size = HeaderSize.Medium,
+                    }),
+                    CreateComponent(new ButtonWithEntryReferenceDbEntity
+                    {
+                        Button = CreateComponent(new ButtonDbEntity { Value = "Continue" }),
+                        LinkToEntry = q1,
+                    })
+                ],
+                Title = CreateComponent(new TitleDbEntity { Text = "Wifi topic" }),
+            }),
             Order = 0,
-            Published = true,
             Questions = [q1, q2]
-        };
+        });
     }
 
     private static CategoryDbEntity GetConnectivityCategory()
     {
         var wifiSubtopic = GetWifiSubtopic();
-        return new CategoryDbEntity
+        return CreateComponent(new CategoryDbEntity
         {
             InternalName = "Connectivity",
-            Id = "connectivity-category-id",
-            Header = new HeaderDbEntity
+            Header = CreateComponent(new HeaderDbEntity
             {
-                Id = "connectivity-header-id",
                 Text = "Connectivity",
                 Tag = HeaderTag.H2,
                 Size = HeaderSize.Large,
-                Published = true
-            },
-            Published = true,
+            }),
             Sections = [wifiSubtopic]
-        };
+        });
     }
 
-    public void CreateData()
+    public override void CreateData()
     {
         var connectivityCategory = GetConnectivityCategory();
 
-        db.Pages.Add(new PageDbEntity
+        db.Pages.Add(CreateComponent(new PageDbEntity
         {
-            Id = "self-assessment-id",
             InternalName = "self-assessment-internal-name",
             Slug = "self-assessment",
             Content =
             [
-                new HeaderDbEntity
+                CreateComponent(new HeaderDbEntity
                 {
-                    Id = "self-assessment-header-id",
                     Text = "Self Assessment",
                     Tag = HeaderTag.H1,
                     Size = HeaderSize.ExtraLarge,
-                    Published = true
-                },
+                }),
                 connectivityCategory
             ],
-            Title = new TitleDbEntity
-            {
-                Id = "self-assessment-title-id",
-                Text = "Technology self-assessment",
-                Published = true
-            },
+            Title = CreateComponent(new TitleDbEntity { Text = "Technology self-assessment" }),
             DisplayOrganisationName = true,
-            Published = true
-        });
+        }));
     }
 }
