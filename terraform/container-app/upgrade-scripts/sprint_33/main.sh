@@ -38,7 +38,7 @@ while getopts "g:t:h" opt; do
   esac
 done
 
-# Validate calues exist
+# Validate required arguments exist
 if [[
   -z "$RESOURCE_GROUP_NAME" ||
   -z "$TFVAR_PATH"
@@ -46,4 +46,10 @@ if [[
   usage
 fi
 
-bash $(dirname "$0")/import_keyvault_secrets.sh
+export PARENT_DIR=$( cd $(dirname $0)"/../"; pwd -P )
+
+export RESOURCE_GROUP_NAME
+export TFVAR_PATH
+export PARENT_DIR
+
+bash "$(dirname "$0")/import_keyvault_secrets.sh"
