@@ -19,6 +19,8 @@ public interface ICmsDbContext
     public IQueryable<ComponentDropDownDbEntity> ComponentDropDowns { get; }
 
     public IQueryable<ContentComponentDbEntity> ContentComponents { get; }
+    
+    public IQueryable<CSLinkDbEntity> CSLinks { get; }
 
     public IQueryable<HeaderDbEntity> Headers { get; }
 

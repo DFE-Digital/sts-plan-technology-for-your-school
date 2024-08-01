@@ -29,6 +29,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public DbSet<ContentComponentDbEntity> ContentComponents { get; set; }
 
+    public DbSet<CSLinkDbEntity> CSLinks { get; set; }
+
     public DbSet<HeaderDbEntity> Headers { get; set; }
 
     public DbSet<InsetTextDbEntity> InsetTexts { get; set; }
@@ -82,6 +84,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<CategoryDbEntity> ICmsDbContext.Categories => Categories;
     IQueryable<ComponentDropDownDbEntity> ICmsDbContext.ComponentDropDowns => ComponentDropDowns;
     IQueryable<ContentComponentDbEntity> ICmsDbContext.ContentComponents => ContentComponents;
+    IQueryable<CSLinkDbEntity> ICmsDbContext.CSLinks => CSLinks;
 
     IQueryable<HeaderDbEntity> ICmsDbContext.Headers => Headers;
     IQueryable<InsetTextDbEntity> ICmsDbContext.InsetTexts => InsetTexts;

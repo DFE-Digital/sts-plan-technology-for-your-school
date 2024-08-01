@@ -1,10 +1,13 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-public class RecommendationChunkDbEntity : ContentComponentDbEntity, IRecommendationChunk<AnswerDbEntity, ContentComponentDbEntity, HeaderDbEntity>
+public class RecommendationChunkDbEntity
+    : ContentComponentDbEntity,
+        IRecommendationChunk<AnswerDbEntity, ContentComponentDbEntity, HeaderDbEntity>
 {
     public string HeaderId { get; set; } = null!;
 
@@ -21,8 +24,5 @@ public class RecommendationChunkDbEntity : ContentComponentDbEntity, IRecommenda
 
     [DontCopyValue]
     public List<RecommendationSectionDbEntity> RecommendationSections { get; set; } = [];
-
-    public string? CSUrl { get; set; }
-
-    public string? CSLinkText { get; set; }
+    public CSLink? CSLink { get; set; }
 }

@@ -23,11 +23,11 @@
                             await Html.RenderPartialAsync("Components/PageComponentFactory", content);
                         }
                     </div>
-                    @if (headerWithContent is RecommendationChunk chunk && !string.IsNullOrEmpty(chunk.CSUrl) && !string.IsNullOrEmpty(chunk.CSLinkText))
+                    @if (headerWithContent is RecommendationChunk chunk && chunk.CSLink != null && !string.IsNullOrEmpty(chunk.CSLink.Url) && !string.IsNullOrEmpty(chunk.CSLink.LinkText))
                     {
                         <div class="govuk-!-margin-top-3 govuk-!-margin-bottom-9">
-                            <a class="govuk-body govuk-link govuk-!-font-weight-bold" href=@chunk.CSUrl target="_blank">
-                                @chunk.CSLinkText
+                            <a class="govuk-body govuk-link govuk-!-font-weight-bold" href=@chunk.CSLink.Url target="_blank">
+                                @chunk.CSLink.LinkText
                             </a>
                         </div>
                     }

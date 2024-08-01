@@ -1,4 +1,6 @@
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
@@ -12,8 +14,4 @@ where THeader : IHeader
     public List<TContentComponent> Content { get; }
 
     public List<TAnswer> Answers { get; }
-
-    public string? CSUrl { get; }
-
-    public string? CSLinkText { get; }
 }

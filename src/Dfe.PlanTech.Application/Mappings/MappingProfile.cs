@@ -18,6 +18,7 @@ public class CmsMappingProfile : Profile
         .Include<ButtonWithEntryReferenceDbEntity, ButtonWithEntryReference>()
         .Include<ButtonWithLinkDbEntity, ButtonWithLink>()
         .Include<CategoryDbEntity, Category>()
+        .Include<CSLinkDbEntity, CSLink>()
         .Include<HeaderDbEntity, Header>()
         .Include<InsetTextDbEntity, InsetText>()
         .Include<PageDbEntity, Page>()
@@ -39,6 +40,7 @@ public class CmsMappingProfile : Profile
         CreateMap<ButtonWithEntryReferenceDbEntity, ButtonWithEntryReference>();
         CreateMap<ButtonWithLinkDbEntity, ButtonWithLink>();
         CreateMap<CategoryDbEntity, Category>();
+        CreateMap<CSLinkDbEntity, CSLink>();
         CreateMap<HeaderDbEntity, Header>();
         CreateMap<InsetTextDbEntity, InsetText>();
         CreateMap<PageDbEntity, Page>();
