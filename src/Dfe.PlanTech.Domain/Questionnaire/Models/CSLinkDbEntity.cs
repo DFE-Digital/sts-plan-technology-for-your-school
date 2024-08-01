@@ -5,7 +5,7 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
 public class CSLinkDbEntity : ContentComponentDbEntity, ICSLink
 {
-    public string Url { get; set; }
+    public string Url { get; set; } = null!;
 
-    public string LinkText { get; set; }
+    public string LinkText { get; set; } = null!;
 }
