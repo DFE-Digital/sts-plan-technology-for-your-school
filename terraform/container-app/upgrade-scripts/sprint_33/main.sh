@@ -52,4 +52,3 @@ export TFVAR_PATH
 export PARENT_DIR
 
 bash "$(dirname "$0")/import_keyvault_secrets.sh"
-
