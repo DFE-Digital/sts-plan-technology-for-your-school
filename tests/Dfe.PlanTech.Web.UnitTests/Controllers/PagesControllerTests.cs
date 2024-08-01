@@ -211,9 +211,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var viewResult = result as ViewResult;
 
-            var model = viewResult!.Model;
-
-            Assert.IsNotType<ServiceUnavailableViewModel>(model);
+            var model = viewResult!.Model; Assert.IsNotType<ServiceUnavailableViewModel>(model);
         }
     }
 }
