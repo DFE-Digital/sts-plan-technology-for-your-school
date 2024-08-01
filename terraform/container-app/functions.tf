@@ -36,34 +36,6 @@ resource "azurerm_storage_account" "function_storage" {
   }
 }
 
-resource "azurerm_virtual_network" "function_vnet" {
-  name                = local.function.vnet.name
-  address_space       = [local.function.vnet.address_space]
-  location            = local.function.location
-  resource_group_name = local.resource_group_name
-  tags                = local.tags
-}
-
-resource "azurerm_subnet" "function_infra_subnet" {
-  name                 = local.function.vnet.subnet.name
-  virtual_network_name = local.function.vnet.name
-  resource_group_name  = local.resource_group_name
-  address_prefixes     = local.function.vnet.subnet.address_prefixes
-
-  service_endpoints = ["Microsoft.KeyVault", "Microsoft.Storage"]
-
-  delegation {
-    name = "AFADelegationService"
-
-    service_delegation {
-      actions = [
-        "Microsoft.Network/virtualNetworks/subnets/join/action"
-      ]
-      name = "Microsoft.App/environments"
-    }
-  }
-}
-
 resource "azurerm_service_plan" "function_plan" {
   name                = "${local.resource_prefix}appserviceplan"
   resource_group_name = local.resource_group_name
