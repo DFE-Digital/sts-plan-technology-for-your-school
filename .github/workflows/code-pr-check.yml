@@ -58,7 +58,7 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
-          if [[ `git status --porcelain` ]]; then 
+          if [[ `git status --porcelain` ]]; then
             git add src/*
             git add tests/*
             git commit -m "chore: Linted code for plan-technology-for-your-school.sln solution"
@@ -78,7 +78,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: true
-          
+
       - name: Cache SonarCloud packages
         uses: actions/cache@v4
         with:
@@ -107,7 +107,7 @@ jobs:
           /d:sonar.host.url="https://sonarcloud.io" \
           /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml \
           /d:sonar.exclusions=**/contentandsupport/** \
-          /d:sonar.coverage.exclusions=**/Program.cs,**/gulpfile.js,**/wwwroot/**,**/contentandsupport/** \
+          /d:sonar.coverage.exclusions=**/Program.cs,**/gulpfile.js,**/wwwroot/**,**/contentandsupport/**,**/Dfe.PlanTech.Web.SeedTestData/** \
           /d:sonar.issue.ignore.multicriteria=e1 \
           /d:sonar.issue.ignore.multicriteria.e1.ruleKey=csharpsquid:S6602 \
           /d:sonar.issue.ignore.multicriteria.e1.resourceKey=src/**/*.cs

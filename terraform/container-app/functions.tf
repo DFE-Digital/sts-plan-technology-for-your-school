@@ -20,6 +20,10 @@ resource "azurerm_storage_account" "function_storage" {
     }
   }
 
+  sas_policy {
+    expiration_period = local.storage_account_expiration_period
+  }
+
   identity {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.user_assigned_identity.id]
