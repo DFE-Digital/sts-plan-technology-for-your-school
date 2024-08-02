@@ -1,5 +1,6 @@
 :root {
   --govuk-link-color: #1d70b8;
+  --govuk-dark-link-color: #003A69;
   --govuk-black: #0b0c0c;
 }
 
@@ -9,6 +10,7 @@
 }
 
 .dfe-vertical-nav__link {
+  color: var(--govuk-link-color);
   display: block;
   padding: 7px 30px 8px 10px;
   border-left: 4px solid #b1b4b6;
@@ -16,6 +18,7 @@
 }
 
 .dfe-vertical-nav__link--selected {
+  color: var(--govuk-dark-link-color);
   border-left: 4px solid var(--govuk-link-color);
   background-color: #f3f2f1;
   font-weight: bold;
@@ -23,13 +26,10 @@
 
 .dfe-vertical-nav__link,
 .dfe-vertical-nav__link--selected {
-  color: var(--govuk-link-color);
-
   &:active, &:hover {
     background-color: #fd0;
     color: var(--govuk-black);
     border-left: 4px solid var(--govuk-black);
-    font-weight: normal;
   }
 }
 
