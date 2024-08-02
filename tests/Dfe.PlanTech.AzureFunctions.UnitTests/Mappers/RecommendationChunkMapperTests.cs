@@ -146,7 +146,11 @@ public class RecommendationChunkMapperTests : BaseMapperTests
         var csLink = new CSLink
         {
             Url = testUrl,
-            LinkText = linkText
+            LinkText = linkText,
+            Sys = new SystemDetails
+            {
+                Id = "csLink-id"
+            }
         };
 
         var payload = CreateRecommendationChunkPayload(
@@ -266,9 +270,18 @@ public class RecommendationChunkMapperTests : BaseMapperTests
         var fields = new Dictionary<string, object?>()
         {
             ["answers"] = WrapWithLocalisation(answers),
-            ["content"] = WrapWithLocalisation(contents),
-            ["csLink"] = WrapWithLocalisation(csLink)
+            ["content"] = WrapWithLocalisation(contents)
         };
+
+        if (csLink != null)
+        {
+            var csLinkFields = new Dictionary<string, object?>
+                {
+                    ["url"] = WrapWithLocalisation(csLink.Url),
+                    ["linkText"] = WrapWithLocalisation(csLink.LinkText)
+                };
+            fields["csLink"] = CreatePayload(csLinkFields, csLink.Sys.Id);
+        }
 
         var payload = CreatePayload(fields, chunkId);
         return payload;
