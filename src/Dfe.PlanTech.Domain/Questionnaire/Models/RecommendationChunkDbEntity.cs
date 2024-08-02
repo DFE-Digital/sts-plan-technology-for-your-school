@@ -23,6 +23,8 @@ public class RecommendationChunkDbEntity
 
     [DontCopyValue]
     public List<RecommendationSectionDbEntity> RecommendationSections { get; set; } = [];
+    
+    public string CSLinkId { get; set; } = null!;
 
     public CSLinkDbEntity? CSLink { get; init; }
 }
