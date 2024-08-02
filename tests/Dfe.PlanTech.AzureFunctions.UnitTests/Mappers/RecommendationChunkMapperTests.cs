@@ -276,10 +276,10 @@ public class RecommendationChunkMapperTests : BaseMapperTests
         if (csLink != null)
         {
             var csLinkFields = new Dictionary<string, object?>
-                {
-                    ["url"] = WrapWithLocalisation(csLink.Url),
-                    ["linkText"] = WrapWithLocalisation(csLink.LinkText)
-                };
+            {
+                ["url"] = WrapWithLocalisation(csLink.Url),
+                ["linkText"] = WrapWithLocalisation(csLink.LinkText)
+            };
             fields["csLink"] = CreatePayload(csLinkFields, csLink.Sys.Id);
         }
 
