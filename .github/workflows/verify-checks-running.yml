@@ -1,0 +1,16 @@
+name: Verify Checks Running
+
+on:
+  push:
+    branches: ["main", "development"]
+  pull_request:
+    branches: ["main", "development"]
+
+jobs:
+  verify-checks-running:
+    name: Verify Checks Running
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Echo to console
+        run: echo "checks are running"
