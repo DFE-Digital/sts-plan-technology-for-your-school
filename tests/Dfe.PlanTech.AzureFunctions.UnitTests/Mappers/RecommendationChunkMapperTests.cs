@@ -141,23 +141,13 @@ public class RecommendationChunkMapperTests : BaseMapperTests
     {
         string[] answers = [.. _answerIds[1..]];
         string[] contents = [.. _contentIds[2..]];
-        string testUrl = "http://testurl.com";
-        string linkText = "test link";
-        var csLink = new CSLink
-        {
-            Url = testUrl,
-            LinkText = linkText,
-            Sys = new SystemDetails
-            {
-                Id = "csLink-id"
-            }
-        };
+        string csLinkId = "csLink-id";
 
         var payload = CreateRecommendationChunkPayload(
             ExistingRecommendationChunk.Id,
             answers,
             contents,
-            csLink
+            csLinkId
         );
 
         var RecommendationChunk = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default);
@@ -168,8 +158,7 @@ public class RecommendationChunkMapperTests : BaseMapperTests
 
         Assert.NotNull(incoming);
         Assert.NotNull(existing);
-        Assert.Equal(testUrl, incoming.CSLink.Url);
-        Assert.Equal(linkText, incoming.CSLink.LinkText);
+        Assert.Equal(csLinkId, incoming.CSLinkId);
 
         ValidateReferencedContent(answers, existing.Answers, true, InitialOrder);
         ValidateReferencedContent(contents, existing.Content, true);
@@ -245,7 +234,7 @@ public class RecommendationChunkMapperTests : BaseMapperTests
         string chunkId,
         string[] answerIds,
         string[] contentIds,
-        CSLink? csLink
+        string csLinkId
     )
     {
 
@@ -270,17 +259,19 @@ public class RecommendationChunkMapperTests : BaseMapperTests
         var fields = new Dictionary<string, object?>()
         {
             ["answers"] = WrapWithLocalisation(answers),
-            ["content"] = WrapWithLocalisation(contents)
+            ["content"] = WrapWithLocalisation(contents),
         };
 
-        if (csLink != null)
+        if (csLinkId != null)
         {
-            var csLinkFields = new Dictionary<string, object?>
+            var link = new CmsWebHookSystemDetailsInnerContainer()
             {
-                ["url"] = WrapWithLocalisation(csLink.Url),
-                ["linkText"] = WrapWithLocalisation(csLink.LinkText)
+                Sys = new CmsWebHookSystemDetailsInner()
+                {
+                    Id = csLinkId
+                }
             };
-            fields["csLink"] = CreatePayload(csLinkFields, csLink.Sys.Id);
+            fields["csLinkId"] = WrapWithLocalisation(link);
         }
 
         var payload = CreatePayload(fields, chunkId);
