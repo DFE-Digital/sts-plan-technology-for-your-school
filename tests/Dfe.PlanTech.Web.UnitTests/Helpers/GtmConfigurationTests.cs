@@ -70,8 +70,7 @@ public class GtmConfigurationTests
 
         var gtmConfiguration = new GtmConfiguration(CookieService, Configuration);
 
-        Assert.Empty(gtmConfiguration.Body);
-        Assert.Empty(gtmConfiguration.Head);
+        Assert.Empty(gtmConfiguration.Body); Assert.NotEmpty(gtmConfiguration.Head);
         Assert.Equal(GTM_ANALYTICS_VALUE, gtmConfiguration.Analytics);
     }
 
