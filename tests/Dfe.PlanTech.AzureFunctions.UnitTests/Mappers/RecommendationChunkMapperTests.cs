@@ -234,7 +234,7 @@ public class RecommendationChunkMapperTests : BaseMapperTests
         string chunkId,
         string[] answerIds,
         string[] contentIds,
-        string csLinkId
+        string? csLinkId
     )
     {
 
