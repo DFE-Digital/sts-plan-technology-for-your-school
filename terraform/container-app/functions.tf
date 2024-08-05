@@ -69,9 +69,13 @@ resource "azapi_resource" "contentful_function" {
     properties = {
       serverFarmId = azurerm_service_plan.function_plan.id,
 
-      httpsOnly              = true,
-      virtualNetworkSubnetId = azurerm_subnet.function_infra_subnet.id,
-      vnetImagePullEnabled   = true,
+      keyVaultReferenceIdentity = azurerm_user_assigned_identity.user_assigned_identity.id,
+
+      virtualNetworkSubnetId  = azurerm_subnet.function_infra_subnet.id,
+      vnetContentShareEnabled = true,
+      vnetImagePullEnabled    = true,
+      vnetRouteAllEnabled     = true,
+
       functionAppConfig = {
         deployment = {
           storage = {
