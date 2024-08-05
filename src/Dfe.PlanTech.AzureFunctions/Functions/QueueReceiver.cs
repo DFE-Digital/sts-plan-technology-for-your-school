@@ -12,6 +12,7 @@ using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.AzureFunctions;
 
@@ -24,6 +25,16 @@ public class QueueReceiver(
     ICacheHandler cacheHandler)
     : BaseFunction(loggerFactory.CreateLogger<QueueReceiver>())
 {
+    public QueueReceiver(IOptions<ContentfulOptions> contentfulOptions,
+    ILoggerFactory loggerFactory,
+    CmsDbContext db,
+    JsonToEntityMappers mappers,
+    IMessageRetryHandler messageRetryHandler,
+    ICacheHandler cacheHandler) : this(contentfulOptions.Value, loggerFactory, db, mappers, messageRetryHandler, cacheHandler)
+    {
+
+    }
+
     /// <summary>
     /// Azure Function App function that processes messages from a Service Bus queue, converts them
     /// to the appropriate <see cref="ContentComponentDbEntity"/> class, and adds/updates the database where appropriate.
