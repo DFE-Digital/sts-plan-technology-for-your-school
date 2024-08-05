@@ -76,6 +76,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         [Theory]
         [InlineData("Random test Topic", "random-test-topic")]
         [InlineData("Y867as ()&ycj Cool Thing", "y867as-ycj-cool-thing")]
+        [InlineData("Save a back-up...", "save-a-back-up")]
         public void Slugify_Should_Slugify_Strings(string header, string expectedResult)
         {
             var recommendationChunk = ComponentBuilder.BuildRecommendationChunk(header);
