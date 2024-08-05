@@ -1,9 +1,11 @@
 @model Dfe.PlanTech.Web.Models.RecommendationsViewModel
+@using Dfe.PlanTech.Domain.Questionnaire.Models;
+
 
 @foreach (var headerWithContent in Model.AllContent)
 {
     <div class="recommendation-piece-container" id="@headerWithContent.SlugifiedHeader">
-        <div class="recommendation-piece-header">
+    <div class="recommendation-piece-header">
             @{
                 await Html.RenderPartialAsync("Components/Header", headerWithContent.Header);
             }
@@ -21,7 +23,16 @@
                             await Html.RenderPartialAsync("Components/PageComponentFactory", content);
                         }
                     </div>
+                    @if (headerWithContent is RecommendationChunk chunk && chunk.CSLink != null)
+                    {
+                        <div class="govuk-!-margin-top-3 govuk-!-margin-bottom-9">
+                            <a class="govuk-body govuk-link govuk-!-font-weight-bold" href=@chunk.CSLink.Url target="_blank">
+                                @chunk.CSLink.LinkText
+                            </a>
+                        </div>
+                    }
                 </div>
+
                 <div>
                     <h2 class="govuk-heading-m">Share this recommendation</h2>
                     <p class="govuk-body">
