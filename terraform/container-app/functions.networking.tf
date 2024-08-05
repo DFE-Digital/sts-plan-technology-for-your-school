@@ -46,6 +46,13 @@ resource "azurerm_private_dns_zone" "files_storage" {
   tags                = local.tags
 }
 
+resource "azurerm_private_dns_zone" "keyvault" {
+  name                = local.function.vnet.dns.keyvault.name
+  resource_group_name = local.resource_group_name
+  tags                = local.tags
+}
+
+
 resource "azurerm_private_endpoint" "blob_storage" {
   custom_network_interface_name = local.function.vnet.endpoints.blob.nic_name
   location                      = local.function.location
@@ -65,6 +72,13 @@ resource "azurerm_private_endpoint" "blob_storage" {
     private_connection_resource_id = azurerm_storage_account.function_storage.id
     subresource_names              = ["blob"]
   }
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "blob_storage" {
+  name                  = "function_vn"
+  resource_group_name   = local.resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.blob_storage.name
+  virtual_network_id    = azurerm_virtual_network.function_vnet.id
 }
 
 resource "azurerm_private_endpoint" "files_storage" {
@@ -87,3 +101,39 @@ resource "azurerm_private_endpoint" "files_storage" {
     subresource_names              = ["file"]
   }
 }
+
+resource "azurerm_private_dns_zone_virtual_network_link" "files_storage" {
+  name                  = "function_vn"
+  resource_group_name   = local.resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.files_storage.name
+  virtual_network_id    = azurerm_virtual_network.function_vnet.id
+}
+
+resource "azurerm_private_endpoint" "keyvault" {
+  custom_network_interface_name = local.function.vnet.endpoints.keyvault.nic_name
+  location                      = local.function.location
+  name                          = local.function.vnet.endpoints.keyvault.name
+  resource_group_name           = local.resource_group_name
+  subnet_id                     = azurerm_subnet.function_storage.id
+  tags                          = local.tags
+
+  private_dns_zone_group {
+    name                 = "default"
+    private_dns_zone_ids = [azurerm_private_dns_zone.keyvault.id]
+  }
+
+  private_service_connection {
+    is_manual_connection           = false
+    name                           = local.function.vnet.endpoints.blob.name
+    private_connection_resource_id = azurerm_storage_account.function_storage.id
+    subresource_names              = ["blob"]
+  }
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "keyvault" {
+  name                  = "function_vn"
+  resource_group_name   = local.resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.keyvault.name
+  virtual_network_id    = azurerm_virtual_network.function_vnet.id
+}
+

@@ -42,6 +42,11 @@ jobs:
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
           az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
+      - name: Set storage account name var
+        shell: bash
+        run: echo "STORAGE_ACCOUNT=$(echo ${{ env.AZURE_STORAGEACCOUNT_NAME }} | sed -e "s/-//g")" >> $GITHUB_ENV
+          
+
       - name: Get workflow IP address
         id: whats-my-ip
         uses: ./.github/actions/whats-my-ip-address
@@ -51,8 +56,9 @@ jobs:
         # The Azure Storage Account's name contains no hyphens, unlike almost all of our other resources
         # Therefore remove hyphens from the string before using it as the account name
         run: |
+          az storage account update --name $STORAGE_ACCOUNT --resource-group ${{ env.AZURE_RESOURCEGROUP_NAME }} --public-network-access Enabled &> /dev/null
           az storage account network-rule add --resource-group ${{ env.AZURE_RESOURCEGROUP_NAME }} \
-                                              --account-name $(echo ${{ env.AZURE_STORAGEACCOUNT_NAME }} | sed -e "s/-//g") \
+                                              --account-name $STORAGE_ACCOUNT \
                                               --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
       - name: Deploy Azure Function App
@@ -66,5 +72,6 @@ jobs:
         if: always()
         run: |
           az storage account network-rule remove --resource-group ${{ env.AZURE_RESOURCEGROUP_NAME }} \
-                                                 --account-name $(echo ${{ env.AZURE_STORAGEACCOUNT_NAME }} | sed -e "s/-//g") \
+                                                 --account-name $STORAGE_ACCOUNT \
                                                  --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+          az storage account update --name $STORAGE_ACCOUNT --resource-group ${{ env.AZURE_RESOURCEGROUP_NAME }} --public-network-access Disabled &> /dev/null
