@@ -9,6 +9,7 @@ using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -25,6 +26,7 @@ public class QuestionsControllerTests
     private readonly IGetQuestionBySlugRouter _getQuestionBySlugRouter;
     private readonly IUser _user;
     private readonly QuestionsController _controller;
+    private readonly IConfiguration _configuration;
 
     private const string QuestionSlug = "question-slug";
     private const string SectionSlug = "section-slug";
@@ -59,6 +61,7 @@ public class QuestionsControllerTests
         _validSection.Questions.Add(_validQuestion);
 
         _logger = Substitute.For<ILogger<QuestionsController>>();
+        _configuration = Substitute.For<IConfiguration>();
 
         _getSectionQuery = Substitute.For<IGetSectionQuery>();
         _getSectionQuery.GetSectionBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
@@ -127,19 +130,19 @@ public class QuestionsControllerTests
     [Fact]
     public async Task GetNextUnansweredQuestion_Should_Error_When_SectionSlug_Null()
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetNextUnansweredQuestion(null!, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetNextUnansweredQuestion(null!, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand, _configuration));
     }
 
     [Fact]
     public async Task GetNextUnansweredQuestion_Should_Error_When_SectionSlug_NotFound()
     {
-        await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() => _controller.GetNextUnansweredQuestion("Not a real section", _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand));
+        await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() => _controller.GetNextUnansweredQuestion("Not a real section", _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand, _configuration));
     }
 
     [Fact]
     public async Task GetNextUnansweredQuestion_Should_Redirect_To_CheckAnswersPage_When_No_Question_Returned()
     {
-        var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand);
+        var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand, _configuration);
 
         var redirectResult = result as RedirectToActionResult;
         Assert.NotNull(redirectResult);
@@ -153,7 +156,7 @@ public class QuestionsControllerTests
         _getNextUnansweredQuestionQuery.GetNextUnansweredQuestion(EstablishmentId, _validSection, Arg.Any<CancellationToken>())
                                         .Returns((callinfo) => _validQuestion);
 
-        var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand);
+        var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand, _configuration);
 
         var redirectResult = result as RedirectToActionResult;
         Assert.NotNull(redirectResult);
@@ -178,7 +181,7 @@ public class QuestionsControllerTests
 
         _controller.TempData = Substitute.For<ITempDataDictionary>();
 
-        var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand);
+        var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand, _configuration);
 
         var redirectResult = result as RedirectToActionResult;
         Assert.NotNull(redirectResult);
