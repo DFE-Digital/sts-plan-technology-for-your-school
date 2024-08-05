@@ -20,6 +20,8 @@ public interface ICmsDbContext
 
     public IQueryable<ContentComponentDbEntity> ContentComponents { get; }
 
+    public IQueryable<CSLinkDbEntity> CSLinks { get; }
+
     public IQueryable<HeaderDbEntity> Headers { get; }
 
     public IQueryable<InsetTextDbEntity> InsetTexts { get; }

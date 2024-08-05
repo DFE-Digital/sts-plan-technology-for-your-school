@@ -18,6 +18,7 @@ public class RecommendationChunkMapper(EntityRetriever retriever, EntityUpdater 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
         values = MoveValueToNewKey(values, "header", "headerId");
+        values = MoveValueToNewKey(values, "csLink", "csLinkId");
 
         _incomingAnswers = _entityUpdater.GetAndOrderReferencedEntities<AnswerDbEntity>(values, "answers").ToList();
         _incomingContent = _entityUpdater.GetAndOrderReferencedEntities<ContentComponentDbEntity>(values, "content").ToList();

@@ -4,7 +4,9 @@ using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-public class RecommendationChunkDbEntity : ContentComponentDbEntity, IRecommendationChunk<AnswerDbEntity, ContentComponentDbEntity, HeaderDbEntity>
+public class RecommendationChunkDbEntity
+    : ContentComponentDbEntity,
+        IRecommendationChunk<AnswerDbEntity, ContentComponentDbEntity, HeaderDbEntity>
 {
     public string HeaderId { get; set; } = null!;
 
@@ -21,4 +23,8 @@ public class RecommendationChunkDbEntity : ContentComponentDbEntity, IRecommenda
 
     [DontCopyValue]
     public List<RecommendationSectionDbEntity> RecommendationSections { get; set; } = [];
+
+    public string? CSLinkId { get; set; }
+
+    public CSLinkDbEntity? CSLink { get; init; }
 }
