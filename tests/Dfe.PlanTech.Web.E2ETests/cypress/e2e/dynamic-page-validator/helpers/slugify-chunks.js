@@ -1,5 +1,5 @@
 export const slugifyChunks = (text) => {
-    const removeNonAlphanumericCharactersRegexPattern = /[^a-zA-Z0-9\s]/g
+    const removeNonAlphanumericExceptHyphensRegexPattern = /[^a-zA-Z0-9\s-]/g
 
-    return text.replace(removeNonAlphanumericCharactersRegexPattern, "").trim().replace(/ /g, "-").toLowerCase();
+    return text.replace(removeNonAlphanumericExceptHyphensRegexPattern, "").trim().replace(/ /g, "-").toLowerCase();
 }
