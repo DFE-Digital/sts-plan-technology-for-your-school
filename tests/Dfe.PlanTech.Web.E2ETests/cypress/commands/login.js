@@ -11,8 +11,7 @@ Cypress.Commands.add("login", ({ email, password, url }) => {
   cy.visit(url);
   cy.get("input#username").type(email);
   cy.get("div.govuk-button-group button.govuk-button").first().click();
-  cy.wait(4000);
-  cy.get("input#password").type(password);
+  cy.get("input#password", { timeout: 4000 }).type(password);
     cy.get("div.govuk-button-group button.govuk-button").first().click();
     cy.wait(4000);
 }); 
