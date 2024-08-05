@@ -138,6 +138,10 @@ locals {
         files = {
           name = "privatelink.file.core.windows.net"
         }
+
+        keyvault = {
+          name = "privatelink.vaultcore.azure.net"
+        }
       }
 
       endpoints = {
@@ -149,6 +153,11 @@ locals {
         files = {
           nic_name = "${local.resource_prefix}-files-storage-nic"
           name     = "${local.resource_prefix}-files-storage"
+        }
+
+        keyvault = {
+          nic_name = "${local.resource_prefix}-keyvault-nic"
+          name     = "${local.resource_prefix}-keyvault"
         }
       }
     }
