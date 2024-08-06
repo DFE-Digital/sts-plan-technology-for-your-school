@@ -20,11 +20,11 @@ namespace Dfe.PlanTech.AzureFunctions
     [ExcludeFromCodeCoverage]
     public static class Startup
     {
-        public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+        public static void ConfigureServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<CmsDbContext>(options =>
             {
-                options.UseSqlServer(configuration["AZURE_SQL_CONNECTIONSTRING"]);
+                options.UseSqlServer(configuration["ConnectionStrings:Database"]);
             });
 
             services.AddAzureClients(builder =>
@@ -45,26 +45,47 @@ namespace Dfe.PlanTech.AzureFunctions
                 Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
             });
 
-            services.AddSingleton(new ContentfulOptions(bool.Parse(configuration["Contentful:UsePreview"] ?? bool.FalseString)));
-            services.AddSingleton(new CacheRefreshConfiguration(
-                configuration["WEBSITE_CACHE_CLEAR_ENDPOINT"],
-                configuration["WEBSITE_CACHE_CLEAR_APIKEY_NAME"],
-                configuration["WEBSITE_CACHE_CLEAR_APIKEY_VALUE"]));
+            ConfigureCaching(services);
+            ConfigureContentful(services);
+            ConfigureRetryHandling(services);
+
+            AddMappers(services);
+            AddMessageRetryHandler(services);
+        }
+
+        private static void ConfigureRetryHandling(IServiceCollection services)
+        {
+            services.AddOptions<MessageRetryHandlingOptions>()
+                    .Configure<IConfiguration>((settings, configuration) =>
+                    {
+                        configuration.GetSection("MessageRetryHandlingOptions").Bind(settings);
+                    });
+        }
+
+        private static void ConfigureContentful(IServiceCollection services)
+        {
+            services.AddOptions<ContentfulOptions>()
+                    .Configure<IConfiguration>((settings, configuration) =>
+                    {
+                        configuration.GetSection("Contentful").Bind(settings);
+                    });
+        }
+
+        private static void ConfigureCaching(IServiceCollection services)
+        {
+            services.AddOptions<CacheRefreshConfiguration>()
+                    .Configure<IConfiguration>((settings, configuration) =>
+                    {
+                        configuration.GetSection("CacheClear").Bind(settings);
+                    });
+
             services.AddHttpClient<CacheHandler>()
                 .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler()
                 {
                     PooledConnectionLifetime = TimeSpan.FromMinutes(5)
                 });
+
             services.AddTransient<ICacheHandler, CacheHandler>();
-
-            services.AddOptions<MessageRetryHandlingOptions>()
-                .Configure<IConfiguration>((settings, configuration) =>
-                {
-                    configuration.GetSection("MessageRetryHandlingOptions").Bind(settings);
-                });
-
-            AddMappers(services);
-            AddMessageRetryHandler(services);
         }
 
         /// <summary>

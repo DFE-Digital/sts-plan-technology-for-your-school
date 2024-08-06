@@ -7,6 +7,7 @@ using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
@@ -122,7 +123,9 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
     {
-        _contentfulOptions = this.GetService<ContentfulOptions>();
+        _contentfulOptions = this.GetService<ContentfulOptions>() ??
+                                this.GetService<IOptions<ContentfulOptions>>()?.Value ??
+                                throw new Exception($"Couldn't find required service {typeof(CmsDbContext).Name}");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
