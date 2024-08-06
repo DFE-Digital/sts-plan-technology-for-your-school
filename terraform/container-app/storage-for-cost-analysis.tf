@@ -27,7 +27,7 @@ resource "azurerm_storage_account" "costing_storage" {
   }
 
   sas_policy {
-    expiration_period = local.storage_account_sas_expiration_period
+    expiration_period = local.storage_account_expiration_period
   }
 }
 
