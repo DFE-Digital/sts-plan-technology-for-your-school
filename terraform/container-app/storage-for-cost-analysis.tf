@@ -25,6 +25,10 @@ resource "azurerm_storage_account" "costing_storage" {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.user_assigned_identity.id]
   }
+
+  sas_policy {
+    expiration_period = local.storage_account_sas_expiration_period
+  }
 }
 
 resource azurerm_storage_container "blobforcost" {
