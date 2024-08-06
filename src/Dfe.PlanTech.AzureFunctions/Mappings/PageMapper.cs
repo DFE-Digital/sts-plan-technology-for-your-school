@@ -1,7 +1,7 @@
+using System.Text.Json;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.Extensions.Logging;
-using System.Text.Json;
 
 namespace Dfe.PlanTech.AzureFunctions.Mappings;
 
@@ -33,7 +33,8 @@ public class PageMapper(PageEntityRetriever retriever, PageEntityUpdater updater
     /// <exception cref="KeyNotFoundException"></exception>
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
-        var id = values["id"]?.ToString() ?? throw new KeyNotFoundException("Not found id");
+        if (!values.TryGetValue("id", out object? idObj) || idObj == null)
+            throw new KeyNotFoundException("Not found id");
 
         values = MoveValueToNewKey(values, "title", "titleId");
 

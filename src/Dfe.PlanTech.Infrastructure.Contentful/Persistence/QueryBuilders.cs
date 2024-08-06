@@ -1,8 +1,8 @@
+using System.Reflection;
 using Contentful.Core.Search;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Persistence.Queries;
-using System.Reflection;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 
@@ -18,7 +18,8 @@ public static class QueryBuilders
     /// <returns></returns>
     public static QueryBuilder<T> ByContentType<T>(string contentTypeId)
     {
-        if (string.IsNullOrEmpty(contentTypeId)) throw new ArgumentNullException(nameof(contentTypeId));
+        if (string.IsNullOrEmpty(contentTypeId))
+            throw new ArgumentNullException(nameof(contentTypeId));
 
         var queryBuilder = new QueryBuilder<T>();
         queryBuilder.ContentTypeIs(contentTypeId);
@@ -83,7 +84,8 @@ public static class QueryBuilders
 
     public static QueryBuilder<T> WithSelect<T>(this QueryBuilder<T> queryBuilder, IGetEntitiesOptions options)
     {
-        if (options.Select == null) return queryBuilder;
+        if (options.Select == null)
+            return queryBuilder;
 
         var queryStringValues = queryBuilder.QueryStringValues();
 
@@ -96,8 +98,13 @@ public static class QueryBuilders
     {
         var fieldInfo = queryBuilder.GetType().GetField(QueryBuilderStringValuesFieldName, BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new MissingFieldException($"Couldn't find field {QueryBuilderStringValuesFieldName}");
 
-        var value = fieldInfo.GetValue(queryBuilder) ?? throw new ArgumentNullException($"{QueryBuilderStringValuesFieldName} is null in QueryBuilder");
+        var value = fieldInfo.GetValue(queryBuilder) ?? throw new InvalidDataException($"{QueryBuilderStringValuesFieldName} is null in QueryBuilder");
 
-        return value is List<KeyValuePair<string, string>> list ? list : throw new InvalidCastException($"Expected {value} to be {typeof(List<KeyValuePair<string, string>>)} but is actually {value!.GetType()}");
+        if (value is not List<KeyValuePair<string, string>> list)
+        {
+            throw new InvalidCastException($"Expected {value.GetType()} to be {typeof(List<KeyValuePair<string, string>>)} but is actually {value.GetType()}");
+        }
+
+        return list;
     }
 }

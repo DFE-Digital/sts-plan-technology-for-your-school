@@ -22,7 +22,8 @@ public class ContentfulContent(IConfiguration configuration)
     {
         var saveExport = bool.TryParse(_configuration["Contentful:SaveExport"], out bool shouldSaveExport) && shouldSaveExport;
 
-        if (!saveExport) return;
+        if (!saveExport)
+            return;
 
         var contentfulEnvironment = _configuration["Contentful:Environment"];
         await File.WriteAllTextAsync($"contentful-export-{contentfulEnvironment}.json", JsonSerializer.Serialize(_entries));

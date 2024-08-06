@@ -15,13 +15,13 @@ public class LogInvalidModelStateTests
     [Fact]
     public void Should_Call_Logger_When_Invalid_Model_State()
     {
-        var logger = Substitute.For<ILogger<LogInvalidModelState>>();
+        var logger = Substitute.For<ILogger<LogInvalidModelStateAttribute>>();
         var filters = new List<IFilterMetadata>();
         var actionArguments = new Dictionary<string, object?>();
         var controller = Substitute.For<Controller>();
 
         var context = Substitute.For<HttpContext>();
-        context.RequestServices.GetService(typeof(ILogger<LogInvalidModelState>)).Returns(logger);
+        context.RequestServices.GetService(typeof(ILogger<LogInvalidModelStateAttribute>)).Returns(logger);
 
         var actionContext = new ActionContext
         {
@@ -33,7 +33,7 @@ public class LogInvalidModelStateTests
         var actionExecutingContext = new ActionExecutingContext(actionContext, filters, actionArguments, controller);
         actionExecutingContext.ModelState.AddModelError("Property", "Is Missing");
 
-        var filter = new LogInvalidModelState();
+        var filter = new LogInvalidModelStateAttribute();
         filter.OnActionExecuting(actionExecutingContext);
 
         Assert.Single(logger.ReceivedCalls());

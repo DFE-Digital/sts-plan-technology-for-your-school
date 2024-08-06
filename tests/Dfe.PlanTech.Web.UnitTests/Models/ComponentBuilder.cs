@@ -1,6 +1,5 @@
 ﻿using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
-using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
 
@@ -135,7 +134,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             Text = text
         };
 
-        public WarningComponent BuildWarningComponent(string text)
+        public static WarningComponent BuildWarningComponent(string text)
         {
             return new WarningComponent
             {

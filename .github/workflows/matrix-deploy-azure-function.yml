@@ -10,7 +10,7 @@ on:
       - ".github/workflows/matrix-deploy-azure-function.yml"
       - ".github/workflows/build-azure-function.yml"
       - ".github/workflows/deploy-azure-function.yml"
-
+  
 jobs:
   set-env:
     runs-on: ubuntu-22.04

@@ -1,5 +1,5 @@
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using System.ComponentModel.DataAnnotations;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Web.Models;
 

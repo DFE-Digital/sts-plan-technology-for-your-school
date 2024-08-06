@@ -189,9 +189,50 @@ variable "container_app_blob_storage_public_access_enabled" {
   default     = false
 }
 
-variable "storage_account_sas_expiration_period" {
+variable "storage_account_expiration_period" {
   description = "The SAS expiration period in format of DD.HH:MM:SS"
   type        = string
-  default     = "02.00:00:00"
+  default     = "00.01:00:00"
 }
 
+################
+# Function App #
+################
+
+variable "function_runtime" {
+  description = "Azure Function runtime settings; language, verison, etc."
+
+  type = object({
+    name    = string
+    version = string
+  })
+
+  default = {
+    name    = "dotnet-isolated"
+    version = "8.0"
+  }
+}
+
+variable "function_scaling" {
+  description = "Azure Function scaling settings; max instance count + RAM"
+
+  type = object({
+    max_instance_count = number
+    memory             = number
+  })
+
+  default = {
+    max_instance_count = 40
+    memory             = 2048
+  }
+
+  validation {
+    condition     = var.function_scaling.memory == 2048 || var.function_scaling.memory == 4096
+    error_message = "Memory must be 2048 or 4096"
+  }
+
+  validation {
+    condition     = var.function_scaling.max_instance_count >= 40 && var.function_scaling.max_instance_count <= 1000
+    error_message = "Max instance count must be at least 40 and less than 1000"
+  }
+}

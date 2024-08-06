@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Dfe.PlanTech.Application.SignIns.Interfaces;
 using Dfe.PlanTech.Domain.SignIns.Enums;
 using Dfe.PlanTech.Domain.SignIns.Models;
@@ -7,7 +8,6 @@ using Dfe.PlanTech.Domain.Users.Models;
 using Dfe.PlanTech.Infrastructure.SignIns.Extensions;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
-using System.Security.Claims;
 
 namespace Dfe.PlanTech.Infrastructure.SignIns.ConnectEvents;
 
@@ -61,7 +61,8 @@ public static class OnUserInformationReceivedEvent
     {
         var principal = context.Principal;
 
-        if (principal == null) return;
+        if (principal == null)
+            return;
 
         ClaimsIdentity claimsIdentity = new(new[]{
             new Claim(ClaimConstants.DB_USER_ID, signin.UserId.ToString()),

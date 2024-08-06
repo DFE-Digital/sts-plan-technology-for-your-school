@@ -1,8 +1,8 @@
+using System.Text;
+using System.Text.RegularExpressions;
 using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 

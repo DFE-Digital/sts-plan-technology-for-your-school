@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
@@ -5,8 +7,6 @@ using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
@@ -28,6 +28,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
     public DbSet<ComponentDropDownDbEntity> ComponentDropDowns { get; set; }
 
     public DbSet<ContentComponentDbEntity> ContentComponents { get; set; }
+
+    public DbSet<CSLinkDbEntity> CSLinks { get; set; }
 
     public DbSet<HeaderDbEntity> Headers { get; set; }
 
@@ -82,6 +84,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<CategoryDbEntity> ICmsDbContext.Categories => Categories;
     IQueryable<ComponentDropDownDbEntity> ICmsDbContext.ComponentDropDowns => ComponentDropDowns;
     IQueryable<ContentComponentDbEntity> ICmsDbContext.ContentComponents => ContentComponents;
+    IQueryable<CSLinkDbEntity> ICmsDbContext.CSLinks => CSLinks;
 
     IQueryable<HeaderDbEntity> ICmsDbContext.Headers => Headers;
     IQueryable<InsetTextDbEntity> ICmsDbContext.InsetTexts => InsetTexts;

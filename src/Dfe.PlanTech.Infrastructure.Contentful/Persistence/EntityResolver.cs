@@ -9,20 +9,15 @@ namespace Dfe.PlanTech.Infrastructure.Contentful;
 /// For mapping fields/properties of type <see chref="IContentComponent"/> to their concrete type,
 /// when serialising the returned API response from Contentful
 /// </summary>
-public class EntityResolver : IContentTypeResolver
+public class EntityResolver(ILogger<EntityResolver> logger) : IContentTypeResolver
 {
     public Dictionary<string, Type> Types => _types;
 
-    private readonly ILogger<IContentTypeResolver> _logger;
+    private readonly ILogger<EntityResolver> _logger = logger;
 
     private readonly Dictionary<string, Type> _types = typeof(IContentComponent).Assembly.GetTypes()
                                                                         .Where(type => type.IsAssignableTo(typeof(IContentComponent)))
                                                                         .ToDictionary(type => type.Name.ToLower());
-
-    public EntityResolver(ILogger<IContentTypeResolver> logger)
-    {
-        _logger = logger;
-    }
 
     /// <summary>
     /// Returns matching type for ID, or <see chref="MissingComponent"/> if none found.

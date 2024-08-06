@@ -1,8 +1,8 @@
-﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
+﻿using System.Linq.Expressions;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Queries;
 using Dfe.PlanTech.Domain.Users.Models;
 using NSubstitute;
-using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Application.UnitTests.Users.Queries
 {

@@ -1,11 +1,11 @@
+using System.Data;
+using System.Security.Authentication;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Microsoft.Data.SqlClient;
-using System.Data;
-using System.Security.Authentication;
 
 namespace Dfe.PlanTech.Application.Submissions.Commands;
 
@@ -25,7 +25,8 @@ public class SubmitAnswerCommand : ISubmitAnswerCommand
     //Which will then either redirect to the "GetQuestionBySlug" route or "Check Answers" route
     public async Task<int> SubmitAnswer(SubmitAnswerDto submitAnswerDto, CancellationToken cancellationToken = default)
     {
-        if (submitAnswerDto?.ChosenAnswer == null) throw new InvalidDataException($"{nameof(submitAnswerDto.ChosenAnswer)} is null");
+        if (submitAnswerDto?.ChosenAnswer == null)
+            throw new InvalidDataException($"{nameof(submitAnswerDto.ChosenAnswer)} is null");
 
         int userId = await _user.GetCurrentUserId() ?? throw new AuthenticationException("User is not authenticated");
         int establishmentId = await _user.GetEstablishmentId();

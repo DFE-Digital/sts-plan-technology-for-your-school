@@ -1,9 +1,9 @@
-﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
+﻿using System.Text.Json;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.SignIns.Enums;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Microsoft.AspNetCore.Http;
-using System.Text.Json;
 
 namespace Dfe.PlanTech.Application.Users.Helper;
 
@@ -30,7 +30,8 @@ public class UserHelper : IUser
     public async Task<int?> GetCurrentUserId()
     {
         var dbUserId = GetDbIdFromClaim(ClaimConstants.DB_USER_ID);
-        if (dbUserId != null) return dbUserId;
+        if (dbUserId != null)
+            return dbUserId;
 
         var userId = _httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(x => x.Type.Contains("nameidentifier"))?.Value;
 
@@ -43,7 +44,8 @@ public class UserHelper : IUser
     public async Task<int> GetEstablishmentId()
     {
         var dbEstablishmentId = GetDbIdFromClaim(ClaimConstants.DB_ESTABLISHMENT_ID);
-        if (dbEstablishmentId != null) return dbEstablishmentId.Value;
+        if (dbEstablishmentId != null)
+            return dbEstablishmentId.Value;
 
         var establishmentDto = GetOrganisationData();
 
@@ -67,7 +69,8 @@ public class UserHelper : IUser
                     throw new KeyNotFoundException($"Could not find {ORG_CLAIM_TYPE} claim type");
 
         var establishment = JsonSerializer.Deserialize<EstablishmentDto>(orgDetails);
-        if (establishment == null || !establishment.IsValid) throw new InvalidDataException("Establishment was not expected format");
+        if (establishment == null || !establishment.IsValid)
+            throw new InvalidDataException("Establishment was not expected format");
 
         return establishment;
     }

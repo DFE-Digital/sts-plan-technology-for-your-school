@@ -29,7 +29,8 @@ public class GetButtonWithEntryReferencesQuery : IGetPageChildrenQuery
         {
             var buttons = page.Content.Exists(content => content is ButtonWithEntryReferenceDbEntity);
 
-            if (!buttons) return;
+            if (!buttons)
+                return;
 
             var buttonQuery = ButtonWithEntryReferencesQueryable(page);
 
@@ -38,7 +39,7 @@ public class GetButtonWithEntryReferencesQuery : IGetPageChildrenQuery
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading button references for {page}", page.Id);
-            throw;
+            throw new InvalidOperationException("An unexpected error occurred while loading button references.", ex);
         }
     }
 

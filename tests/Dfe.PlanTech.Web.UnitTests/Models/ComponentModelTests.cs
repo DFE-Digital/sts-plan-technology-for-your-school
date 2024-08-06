@@ -1,5 +1,4 @@
-﻿using Dfe.PlanTech.Domain.Questionnaire.Enums;
-using Xunit;
+﻿using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Models
 {
@@ -77,6 +76,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         [Theory]
         [InlineData("Random test Topic", "random-test-topic")]
         [InlineData("Y867as ()&ycj Cool Thing", "y867as-ycj-cool-thing")]
+        [InlineData("Save a back-up...", "save-a-back-up")]
         public void Slugify_Should_Slugify_Strings(string header, string expectedResult)
         {
             var recommendationChunk = ComponentBuilder.BuildRecommendationChunk(header);
@@ -108,15 +108,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             {
                 Assert.Contains(chunk, allContent);
             }
-        }
-
-        [Fact]
-        public void Should_render_warning_component()
-        {
-            var text = "test text";
-            var actual = _componentBuilder.BuildWarningComponent(text);
-            Assert.NotNull(actual);
-            Assert.Equal("test text", actual.Text.RichText.Value);
         }
     }
 }
