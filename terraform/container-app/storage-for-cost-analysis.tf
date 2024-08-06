@@ -31,7 +31,7 @@ resource "azurerm_storage_account" "costing_storage" {
   }
 }
 
-resource azurerm_storage_container "blobforcost" {
+resource "azurerm_storage_container" "blobforcost" {
   name                  = "blobforcost"
   storage_account_name  = azurerm_storage_account.costing_storage.name
   container_access_type = "private"
