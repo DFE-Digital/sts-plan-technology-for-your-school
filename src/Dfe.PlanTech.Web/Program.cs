@@ -1,5 +1,4 @@
 using Azure.Identity;
-using Dfe.ContentSupport.Web.Extensions;
 using Dfe.PlanTech.Application.Helpers;
 using Dfe.PlanTech.Application.Submissions.Queries;
 using Dfe.PlanTech.Domain.Helpers;
