@@ -26,7 +26,7 @@ resource "azurerm_private_endpoint" "keyvault" {
   location                      = local.azure_location
   name                          = local.kv_networking.endpoint.name
   resource_group_name           = local.resource_group_name
-  subnet_id                     = module.main_hosting.networking.subnet_id
+  subnet_id                     = azurerm_subnet.keyvault.id
   tags                          = local.tags
 
   private_dns_zone_group {
