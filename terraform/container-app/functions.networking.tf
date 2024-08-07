@@ -130,10 +130,34 @@ resource "azurerm_private_endpoint" "keyvault" {
   }
 }
 
-resource "azurerm_private_dns_zone_virtual_network_link" "keyvault" {
+resource "azurerm_private_dns_zone_virtual_network_link" "keyvault_to_functionvnet" {
   name                  = "function_vn"
   resource_group_name   = local.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.keyvault.name
   virtual_network_id    = azurerm_virtual_network.function_vnet.id
 }
 
+resource "azurerm_private_dns_zone_virtual_network_link" "keyvault_to_defaultvnet" {
+  name                  = "default_vn"
+  resource_group_name   = local.resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.keyvault.name
+  virtual_network_id    = module.main_hosting.networking.vnet_id
+}
+
+resource "azurerm_virtual_network_peering" "function_to_main" {
+  name                      = "${local.resource_prefix}-defaultvn-peer"
+  resource_group_name       = local.resource_group_name
+  virtual_network_name      = azurerm_virtual_network.function_vnet.name
+  remote_virtual_network_id = module.main_hosting.networking.vnet_id
+
+  allow_forwarded_traffic = true
+}
+
+resource "azurerm_virtual_network_peering" "main_to_function" {
+  name                      = "${local.resource_prefix}-functionvn-peer"
+  resource_group_name       = local.resource_group_name
+  virtual_network_name      = "${local.resource_prefix}default"
+  remote_virtual_network_id = azurerm_virtual_network.function_vnet.id
+
+  allow_forwarded_traffic = true
+}
