@@ -8,7 +8,7 @@ public interface IComponentDropDown
     /// <summary>
     /// The title to display.
     /// </summary>
-    public string Title { get; }
+    public string? Title { get; }
 }
 
 public interface IComponentDropDown<out TContent> : IComponentDropDown
@@ -18,5 +18,5 @@ where TContent : IRichTextContent
     /// <summary>
     /// The Content to display.
     /// </summary>
-    public TContent Content { get; }
+    public TContent? Content { get; }
 }

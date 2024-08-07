@@ -14,7 +14,7 @@ public class Section : ContentComponent, ISectionComponent
 
     public string FirstQuestionId => Questions.Select(question => question.Sys.Id).FirstOrDefault() ?? "";
 
-    public Page InterstitialPage { get; init; } = null!;
+    public Page? InterstitialPage { get; init; }
 
     public IEnumerable<QuestionWithAnswer> GetOrderedResponsesForJourney(IEnumerable<QuestionWithAnswer> responses)
     {

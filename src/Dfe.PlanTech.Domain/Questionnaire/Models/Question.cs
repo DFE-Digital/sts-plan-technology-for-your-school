@@ -8,7 +8,7 @@ public class Question : ContentComponent, IQuestion<Answer>
     /// <summary>
     /// Actual question text
     /// </summary>
-    public string Text { get; init; } = null!;
+    public string? Text { get; init; }
 
     /// <summary>
     /// Optional help text
@@ -17,5 +17,5 @@ public class Question : ContentComponent, IQuestion<Answer>
 
     public List<Answer> Answers { get; init; } = new();
 
-    public string Slug { get; set; } = null!;
+    public string? Slug { get; set; }
 }

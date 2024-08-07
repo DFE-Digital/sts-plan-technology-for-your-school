@@ -4,7 +4,7 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 public interface IRecommendationIntro
 {
-    public string Maturity { get; }
+    public string? Maturity { get; }
 }
 
 public interface IRecommendationIntro<THeader, TContentComponent> : IRecommendationIntro

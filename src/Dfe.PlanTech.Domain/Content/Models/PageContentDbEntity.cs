@@ -9,7 +9,7 @@ public class PageContentDbEntity
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
 
-    public string PageId { get; set; } = null!;
+    public string? PageId { get; set; }
     public PageDbEntity Page { get; set; } = null!;
 
     public string? ContentComponentId { get; set; }

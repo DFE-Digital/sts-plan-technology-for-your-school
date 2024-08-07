@@ -6,11 +6,11 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
 public class RecommendationIntro : ContentComponent, IRecommendationIntro<Header, ContentComponent>, IHeaderWithContent
 {
-    public string Slug { get; init; } = null!;
+    public string? Slug { get; init; }
 
     public Header Header { get; init; } = null!;
 
-    public string Maturity { get; init; } = null!;
+    public string? Maturity { get; init; }
 
     [NotMapped]
     public List<ContentComponent> Content { get; init; } = [];

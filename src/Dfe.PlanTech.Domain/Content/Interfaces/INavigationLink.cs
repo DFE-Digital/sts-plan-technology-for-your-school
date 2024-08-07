@@ -11,12 +11,12 @@ public interface INavigationLink
     /// <summary>
     /// Display text (i.e. <a>{DisplayText}</a>)
     /// </summary>
-    public string DisplayText { get; set; }
+    public string? DisplayText { get; set; }
 
     /// <summary>
     /// Href value (i.e. <a href="{Href}"></a>)
     /// </summary>
-    public string Href { get; set; }
+    public string? Href { get; set; }
 
     /// <summary>
     /// Should this link open in a new tab?

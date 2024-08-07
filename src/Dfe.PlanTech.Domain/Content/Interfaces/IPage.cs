@@ -4,9 +4,9 @@ namespace Dfe.PlanTech.Domain.Content.Interfaces;
 
 public interface IPage
 {
-    public string InternalName { get; }
+    public string? InternalName { get; }
 
-    public string Slug { get; }
+    public string? Slug { get; }
 
     public bool DisplayBackButton { get; }
 

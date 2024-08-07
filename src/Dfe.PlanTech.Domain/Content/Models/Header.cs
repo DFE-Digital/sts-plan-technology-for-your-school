@@ -11,7 +11,7 @@ public class Header : ContentComponent, IHeader
 {
     public string Text { get; init; } = null!;
 
-    public HeaderTag Tag { get; init; }
+    public HeaderTag? Tag { get; init; }
 
-    public HeaderSize Size { get; init; }
+    public HeaderSize? Size { get; init; }
 }

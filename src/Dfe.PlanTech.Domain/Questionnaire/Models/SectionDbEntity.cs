@@ -4,7 +4,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
 /// <summary>
-/// Class for the <see cref="Section"/> table in the database 
+/// Class for the <see cref="Section"/> table in the database
 /// </summary>
 public class SectionDbEntity : ContentComponentDbEntity, ISection<QuestionDbEntity, PageDbEntity>
 {
@@ -14,9 +14,9 @@ public class SectionDbEntity : ContentComponentDbEntity, ISection<QuestionDbEnti
     public List<QuestionDbEntity> Questions { get; set; } = [];
 
     [DontCopyValue]
-    public PageDbEntity InterstitialPage { get; set; } = null!;
+    public PageDbEntity? InterstitialPage { get; set; }
 
-    public string InterstitialPageId { get; set; } = null!;
+    public string? InterstitialPageId { get; set; }
 
     [DontCopyValue]
     public CategoryDbEntity? Category { get; set; }
