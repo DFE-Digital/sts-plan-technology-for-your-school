@@ -52,7 +52,6 @@ resource "azurerm_private_dns_zone" "keyvault" {
   tags                = local.tags
 }
 
-
 resource "azurerm_private_endpoint" "blob_storage" {
   custom_network_interface_name = local.function.vnet.endpoints.blob.nic_name
   location                      = local.function.location
@@ -124,9 +123,9 @@ resource "azurerm_private_endpoint" "keyvault" {
 
   private_service_connection {
     is_manual_connection           = false
-    name                           = local.function.vnet.endpoints.blob.name
-    private_connection_resource_id = azurerm_storage_account.function_storage.id
-    subresource_names              = ["blob"]
+    name                           = local.function.vnet.endpoints.vault.name
+    private_connection_resource_id = azurerm_key_vault.vault.id
+    subresource_names              = ["vault"]
   }
 }
 
