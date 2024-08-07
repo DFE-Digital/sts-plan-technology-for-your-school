@@ -72,7 +72,9 @@ We use two external modules to create the majority of the resources required:
 | [azurerm_servicebus_namespace.service_bus](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/servicebus_namespace) | resource |
 | [azurerm_servicebus_queue.contentful_queue](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/servicebus_queue) | resource |
 | [azurerm_servicebus_queue_authorization_rule.azurefunction](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/servicebus_queue_authorization_rule) | resource |
+| [azurerm_storage_account.costing_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/storage_account) | resource |
 | [azurerm_storage_account.function_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/storage_account) | resource |
+| [azurerm_storage_container.blobforcost](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/storage_container) | resource |
 | [azurerm_subnet.function_infra_subnet](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/subnet) | resource |
 | [azurerm_user_assigned_identity.user_assigned_identity](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/user_assigned_identity) | resource |
 | [azurerm_virtual_network.function_vnet](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/virtual_network) | resource |
