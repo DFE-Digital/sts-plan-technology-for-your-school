@@ -6,7 +6,6 @@ using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
@@ -121,11 +120,11 @@ public class CmsDbContext : DbContext, ICmsDbContext
         _contentfulOptions = new ContentfulOptions(false);
     }
 
-    public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
+    public CmsDbContext(DbContextOptions<CmsDbContext> options,
+                        ContentfulOptions? contentfulOptions = null,
+                        IOptions<ContentfulOptions>? contentfulOptionsOptions = null) : base(options)
     {
-        _contentfulOptions = this.GetService<ContentfulOptions>() ??
-                                this.GetService<IOptions<ContentfulOptions>>()?.Value ??
-                                throw new Exception($"Couldn't find required service {typeof(CmsDbContext).Name}");
+        _contentfulOptions = contentfulOptionsOptions?.Value ?? contentfulOptions ?? throw new Exception($"Couldn't find required service {typeof(CmsDbContext).Name}");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
