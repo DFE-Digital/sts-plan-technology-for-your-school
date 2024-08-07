@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.AzureFunctions
 {
@@ -69,6 +70,8 @@ namespace Dfe.PlanTech.AzureFunctions
                     {
                         configuration.GetSection("Contentful").Bind(settings);
                     });
+
+            services.AddTransient(services => services.GetRequiredService<IOptions<ContentfulOptions>>().Value);
         }
 
         private static void ConfigureCaching(IServiceCollection services)
