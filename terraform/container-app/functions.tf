@@ -100,16 +100,8 @@ resource "azapi_resource" "contentful_function" {
         appSettings = [
           /* Connections */
           {
-            name  = "keyVaultReferenceIdentity",
-            value = azurerm_user_assigned_identity.user_assigned_identity.id
-          },
-          {
             name  = "APPLICATIONINSIGHTS_CONNECTION_STRING",
             value = azurerm_application_insights.functional_insights.connection_string
-          },
-          {
-            name  = "AZURE_SQL_CONNECTIONSTRING",
-            value = local.function.app_settings.sql_connection_string
           },
           {
             name  = "AzureWebJobsServiceBus",
@@ -123,19 +115,6 @@ resource "azapi_resource" "contentful_function" {
             name  = "AzureWebJobsStorage__accountName",
             value = azurerm_storage_account.function_storage.name
           },
-          /* Cache clearing */
-          {
-            name  = "WEBSITE_CACHE_CLEAR_APIKEY_NAME"
-            value = local.function.app_settings.cacheclear.apikey_name
-          },
-          {
-            name  = "WEBSITE_CACHE_CLEAR_APIKEY_VALUE"
-            value = local.function.app_settings.cacheclear.apikey_value
-          },
-          {
-            name  = "WEBSITE_CACHE_CLEAR_ENDPOINT"
-            value = local.function.app_settings.cacheclear.endpoint
-          }
         ],
         http20enabled = true
         minTlsVersion = "1.3"
@@ -157,20 +136,4 @@ resource "azurerm_application_insights" "functional_insights" {
   application_type    = "web"
   retention_in_days   = 30
   tags                = local.tags
-}
-
-/* 
-* To fix an issue where the Key Vault connection fails on initial TF apply,
-* and the only solution is to set via CLI
-*/
-resource "null_resource" "function_set_keyVaultReferenceIdentity" {
-  triggers = {
-    identity = azurerm_user_assigned_identity.user_assigned_identity.id
-  }
-
-  provisioner "local-exec" {
-    command = "az rest --method PATCH --uri \"${azapi_resource.contentful_function.id}?api-version=2023-12-01\" --body \"{'properties':{'keyVaultReferenceIdentity':'${azurerm_user_assigned_identity.user_assigned_identity.id}'}}\""
-  }
-
-  depends_on = [azapi_resource.contentful_function, azurerm_user_assigned_identity.user_assigned_identity]
 }
