@@ -21,8 +21,6 @@ ALTER TABLE Contentful.[Answers] ALTER COLUMN [Maturity] NVARCHAR(MAX) NULL;
 ALTER TABLE Contentful.[RecommendationIntros] ALTER COLUMN [Maturity] NVARCHAR(40) NULL;
 ALTER TABLE Contentful.[RecommendationIntros] ALTER COLUMN [Slug] NVARCHAR(MAX) NULL;
 ALTER TABLE Contentful.[PageContents] ALTER COLUMN [PageId] NVARCHAR(30) NULL;
-ALTER TABLE Contentful.[Textareas] ALTER COLUMN [Label] NVARCHAR(256) NULL;
-ALTER TABLE Contentful.[Textareas] ALTER COLUMN [Readonly] BIT NULL;
 ALTER TABLE Contentful.[Buttons] ALTER COLUMN [Value] NVARCHAR(MAX) NULL;
 ALTER TABLE Contentful.[Buttons] ALTER COLUMN [IsStartButton] BIT NULL;
 ALTER TABLE Contentful.[Headers] ALTER COLUMN [Text] NVARCHAR(MAX) NULL;

@@ -275,7 +275,7 @@ public abstract class BaseComparator(CmsDbContext db, ContentfulContent contentf
         }
     }
 
-    public DataValidationError? ValidateEnumValue<TEnum, TDbEntity>(JsonNode contentfulEntry, string key, TDbEntity dbEntry, TEnum dbValue)
+    public DataValidationError? ValidateEnumValue<TEnum, TDbEntity>(JsonNode contentfulEntry, string key, TDbEntity? dbEntry, TEnum? dbValue)
       where TEnum : struct, Enum
       where TDbEntity : ContentComponentDbEntity
     {
