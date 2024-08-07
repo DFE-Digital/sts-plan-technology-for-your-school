@@ -122,9 +122,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
     {
-        var contentfulOptions = this.GetService<ContentfulOptions>() ?? throw new MissingServiceException($"Could not find service {nameof(ContentfulOptions)}");
-
-        _contentfulOptions = contentfulOptions;
+        _contentfulOptions = this.GetService<ContentfulOptions>() ?? throw new MissingServiceException($"Could not find service {nameof(ContentfulOptions)}");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
