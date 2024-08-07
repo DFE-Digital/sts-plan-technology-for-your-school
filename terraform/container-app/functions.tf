@@ -115,6 +115,10 @@ resource "azapi_resource" "contentful_function" {
             name  = "AzureWebJobsStorage__accountName",
             value = azurerm_storage_account.function_storage.name
           },
+          {
+            name  = "Key_Vault_Name",
+            value = azurerm_key_vault.vault.name
+          },
         ],
         http20enabled = true
         minTlsVersion = "1.3"
