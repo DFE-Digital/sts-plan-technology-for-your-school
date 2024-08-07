@@ -124,7 +124,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
                         ContentfulOptions? contentfulOptions = null,
                         IOptions<ContentfulOptions>? contentfulOptionsOptions = null) : base(options)
     {
-        _contentfulOptions = contentfulOptionsOptions?.Value ?? contentfulOptions ?? throw new Exception($"Couldn't find required service {typeof(CmsDbContext).Name}");
+        _contentfulOptions = contentfulOptionsOptions?.Value ?? contentfulOptions ?? throw new ArgumentNullException(nameof(contentfulOptions));
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
