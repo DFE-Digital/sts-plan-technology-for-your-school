@@ -116,7 +116,7 @@ resource "azapi_resource" "contentful_function" {
             value = azurerm_storage_account.function_storage.name
           },
           {
-            name  = "Key_Vault_Name",
+            name  = "Azure_KeyVault_Name",
             value = azurerm_key_vault.vault.name
           },
         ],
