@@ -63,5 +63,5 @@ module "main_hosting" {
   ###########
   # Storage #
   ###########
-  storage_account_sas_expiration_period = "00.01:00:00"
+  storage_account_sas_expiration_period = local.storage_account_expiration_period
 }

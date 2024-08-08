@@ -40,7 +40,6 @@ We use two external modules to create the majority of the resources required:
 |------|---------|
 | <a name="provider_azapi"></a> [azapi](#provider\_azapi) | 1.14.0 |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.113.0 |
-| <a name="provider_null"></a> [null](#provider\_null) | 3.2.2 |
 
 ## Modules
 
@@ -68,6 +67,16 @@ We use two external modules to create the majority of the resources required:
 | [azurerm_key_vault_secret.vault_secret_contentful_previewapikey](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault_secret.vault_secret_contentful_spaceid](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault_secret.vault_secret_database_connectionstring](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/key_vault_secret) | resource |
+| [azurerm_private_dns_zone.blob_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone) | resource |
+| [azurerm_private_dns_zone.files_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone) | resource |
+| [azurerm_private_dns_zone.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone) | resource |
+| [azurerm_private_dns_zone_virtual_network_link.blob_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone_virtual_network_link) | resource |
+| [azurerm_private_dns_zone_virtual_network_link.files_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone_virtual_network_link) | resource |
+| [azurerm_private_dns_zone_virtual_network_link.keyvault_to_defaultvnet](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone_virtual_network_link) | resource |
+| [azurerm_private_dns_zone_virtual_network_link.keyvault_to_functionvnet](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone_virtual_network_link) | resource |
+| [azurerm_private_endpoint.blob_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_endpoint) | resource |
+| [azurerm_private_endpoint.files_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_endpoint) | resource |
+| [azurerm_private_endpoint.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_endpoint) | resource |
 | [azurerm_service_plan.function_plan](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/service_plan) | resource |
 | [azurerm_servicebus_namespace.service_bus](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/servicebus_namespace) | resource |
 | [azurerm_servicebus_queue.contentful_queue](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/servicebus_queue) | resource |
@@ -76,11 +85,16 @@ We use two external modules to create the majority of the resources required:
 | [azurerm_storage_account.function_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/storage_account) | resource |
 | [azurerm_storage_container.blobforcost](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/storage_container) | resource |
 | [azurerm_subnet.function_infra_subnet](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/subnet) | resource |
+| [azurerm_subnet.function_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/subnet) | resource |
+| [azurerm_subnet.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/subnet) | resource |
+| [azurerm_subnet_route_table_association.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/subnet_route_table_association) | resource |
 | [azurerm_user_assigned_identity.user_assigned_identity](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/user_assigned_identity) | resource |
 | [azurerm_virtual_network.function_vnet](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/virtual_network) | resource |
-| [null_resource.function_set_keyVaultReferenceIdentity](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
+| [azurerm_virtual_network_peering.function_to_main](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/virtual_network_peering) | resource |
+| [azurerm_virtual_network_peering.main_to_function](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/virtual_network_peering) | resource |
 | [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/data-sources/client_config) | data source |
 | [azurerm_resource_group.resource_group](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/data-sources/resource_group) | data source |
+| [azurerm_route_table.default](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/data-sources/route_table) | data source |
 
 ## Inputs
 
