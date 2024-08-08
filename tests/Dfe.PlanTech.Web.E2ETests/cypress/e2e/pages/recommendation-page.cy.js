@@ -1,4 +1,4 @@
-describe("Recommendation Page", () => {
+describe("Recommendation Page without CSLinks", () => {
   const url = "/self-assessment";
 
   before(() => {
@@ -64,3 +64,83 @@ describe("Recommendation Page", () => {
     cy.runAxe();
   });
 });
+
+
+describe("Recommendation Page with CSLinks", () => {
+  const url = "/self-assessment";
+
+  before(() => {
+      cy.loginWithEnv(url);
+
+      cy.completeSecondSubtopic();
+  });
+
+  beforeEach(() => {
+      cy.loginWithEnv(url);
+      cy.navigateToSecondRecommendationPage();
+
+      cy.url().should("contain", "recommendation");
+
+      cy.injectAxe();
+  });
+
+  it("Should have DfE header", () => {
+      cy.get("header.dfe-header").should("exist");
+  });
+
+  it("Should have Gov.uk footer", () => {
+      cy.get("footer.govuk-footer").should("exist");
+  });
+
+  it("Should have Content", () => {
+      cy.get("div.recommendation-piece-content").should("exist");
+  });
+
+  it("Should have vertical navigation bar", () => {
+      cy.get("nav.dfe-vertical-nav").should("exist");
+  });
+
+  it("Should have sections in navigation bar", () => {
+      cy.get("li.dfe-vertical-nav__section-item").should("exist");
+  });
+
+  it("Should have a link to print open the page in another tab in a checklist format", () => {
+      cy.get("a.govuk-link")
+          .contains(
+              "Share or download this recommendation in a checklist format"
+          )
+          .should("have.attr", "target", "_blank");
+  });
+
+  //Links
+  it("Should have no broken links", () => {
+      cy.get(".govuk-main-wrapper").within(() => {
+          cy.get("a").each(($link) => {
+              cy.wrap($link).should("have.attr", "href");
+              cy.request({ url: $link.prop("href") });
+          });
+      });
+      cy.get(".recommendation-content").within(() => {
+          cy.get("a").each(($link) => {
+              cy.wrap($link).should("have.attr", "href");
+              cy.request({ url: $link.prop("href") });
+          });
+      });
+  });
+
+  // CSLink
+  it("Should render CSLink which opens in a new tab", () => {
+    cy.get("li.dfe-vertical-nav__section-item").eq(2).click();
+    
+    cy.get("a.govuk-body")
+    .contains("(opens in new tab)")
+    .should("have.attr", "target", "_blank")
+    .should("have.attr", "href");
+  });
+
+  //Accessibility
+  it("Passes Accessibility Testing", () => {
+      cy.runAxe();
+  });
+});
+
