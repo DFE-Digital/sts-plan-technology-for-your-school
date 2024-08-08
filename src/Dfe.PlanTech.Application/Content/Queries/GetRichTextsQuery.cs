@@ -13,7 +13,7 @@ public class GetRichTextsForPageQuery(ICmsDbContext db, ILogger<GetRichTextsForP
     private readonly ContentfulOptions _contentfulOptions = contentfulOptions;
 
     /// <summary>
-    /// Load RichTextContents for the given page from database 
+    /// Load RichTextContents for the given page from database
     /// </summary>
     /// <param name="page"></param>
     /// <param name="cancellationToken"></param>
@@ -42,6 +42,6 @@ public class GetRichTextsForPageQuery(ICmsDbContext db, ILogger<GetRichTextsForP
 
     private Expression<Func<RichTextContentWithSlugDbEntity, bool>> PageMatchesSlugAndPublishedOrIsPreview(PageDbEntity page)
     {
-        return content => content.Slug == page.Slug && (!_contentfulOptions.UsePreview || content.Published);
+        return content => content.Slug == page.Slug && (_contentfulOptions.UsePreview || content.Published);
     }
 }
