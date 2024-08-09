@@ -11,7 +11,11 @@ using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MockQueryable.NSubstitute;
 using NSubstitute;
@@ -51,6 +55,7 @@ public class QueueReceiverTests
         _messageRetryHandlerMock = Substitute.For<IMessageRetryHandler>();
         _cacheHandler = Substitute.For<ICacheHandler>();
 
+
         _loggerFactoryMock.CreateLogger<Arg.AnyType>().Returns((callinfo) =>
         {
             return _loggerMock;
@@ -59,8 +64,9 @@ public class QueueReceiverTests
         _cmsDbContextMock = Substitute.For<CmsDbContext>();
         _entityRetrieverMock = Substitute.For<EntityRetriever>(_cmsDbContextMock);
 
-        _cmsDbContextMock.SaveChangesAsync().Returns(1);
+        MockEntityChangeTracking();
 
+        _cmsDbContextMock.SaveChangesAsync().Returns(1);
         var mockQuestionSet = _questions.AsQueryable().BuildMockDbSet();
         _cmsDbContextMock.Questions = mockQuestionSet;
         _cmsDbContextMock.Set<QuestionDbEntity>().Returns(mockQuestionSet);
@@ -103,6 +109,20 @@ public class QueueReceiverTests
         DbSet<ContentComponentDbEntity> contentComponentsMock = MockContentComponents();
         _cmsDbContextMock.ContentComponents = contentComponentsMock;
 
+    }
+
+    private void MockEntityChangeTracking()
+    {
+        var dbContextOptionsBuilder = new DbContextOptionsBuilder<CmsDbContext>();
+        dbContextOptionsBuilder.UseSqlServer("NotARealSqlServer");
+
+        var services = new ServiceCollection();
+
+        services.AddSingleton(new ContentfulOptions());
+        dbContextOptionsBuilder.UseApplicationServiceProvider(services.BuildServiceProvider());
+        var actualDbContext = new CmsDbContext(dbContextOptionsBuilder.Options);
+        var changeTrackerMock = Substitute.For<ChangeTracker>(actualDbContext, Substitute.For<IStateManager>(), Substitute.For<IChangeDetector>(), Substitute.For<IRuntimeModel>(), Substitute.For<IEntityEntryGraphIterator>());
+        _cmsDbContextMock.ChangeTracker.Returns(changeTrackerMock);
     }
 
     private DbSet<ContentComponentDbEntity> MockContentComponents()
