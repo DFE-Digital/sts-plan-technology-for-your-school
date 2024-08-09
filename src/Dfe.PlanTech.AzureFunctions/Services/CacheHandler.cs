@@ -30,7 +30,13 @@ public class CacheHandler(
 
         var request = new HttpRequestMessage(HttpMethod.Post, cacheRefreshConfiguration.Endpoint);
         request.Headers.Add(cacheRefreshConfiguration.ApiKeyName, cacheRefreshConfiguration.ApiKeyValue);
-
-        await httpClient.SendAsync(request, cancellationToken);
+        try
+        {
+            await httpClient.SendAsync(request, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error requesting a cache clear after content update");
+        }
     }
 }
