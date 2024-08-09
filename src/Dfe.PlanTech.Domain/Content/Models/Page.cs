@@ -4,9 +4,9 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 
 public class Page : ContentComponent, IPageContent
 {
-    public string InternalName { get; init; } = null!;
+    public string? InternalName { get; init; }
 
-    public string Slug { get; init; } = null!;
+    public string? Slug { get; init; }
 
     public bool DisplayBackButton { get; init; }
 

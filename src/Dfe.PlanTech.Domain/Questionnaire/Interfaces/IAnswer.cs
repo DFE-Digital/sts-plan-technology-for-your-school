@@ -2,9 +2,9 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 public interface IAnswer
 {
-    public string Text { get; }
+    public string? Text { get; }
 
-    public string Maturity { get; }
+    public string? Maturity { get; }
 }
 
 

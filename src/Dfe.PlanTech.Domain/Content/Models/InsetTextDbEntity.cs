@@ -8,5 +8,5 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 /// <inheritdoc/>
 public class InsetTextDbEntity : ContentComponentDbEntity, IInsetText
 {
-    public string Text { get; init; } = null!;
+    public string? Text { get; init; }
 }

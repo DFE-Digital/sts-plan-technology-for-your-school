@@ -5,14 +5,14 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
 public class AnswerDbEntity : ContentComponentDbEntity, IAnswer<QuestionDbEntity>
 {
-    public string Text { get; set; } = null!;
+    public string? Text { get; set; }
 
     public string? NextQuestionId { get; set; }
 
     [DontCopyValue]
     public QuestionDbEntity? NextQuestion { get; set; }
 
-    public string Maturity { get; set; } = null!;
+    public string? Maturity { get; set; }
 
     [DontCopyValue]
     public string? ParentQuestionId { get; set; }

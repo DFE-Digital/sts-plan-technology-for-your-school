@@ -10,5 +10,5 @@ public interface ITextBody
 public interface ITextBody<out TContent> : ITextBody
 where TContent : IRichTextContent
 {
-    public TContent RichText { get; }
+    public TContent? RichText { get; }
 }

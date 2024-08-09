@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 /// <inheritdoc/>
 public class ComponentDropDown : ContentComponent, IComponentDropDown<RichTextContent>
 {
-    public string Title { get; set; } = null!;
+    public string? Title { get; set; }
 
-    public RichTextContent Content { get; set; } = null!;
+    public RichTextContent? Content { get; set; }
 }

@@ -8,7 +8,7 @@ public interface IButtonWithLink
     /// <summary>
     /// HREF for the button - the URL where it should link to
     /// </summary>
-    public string Href { get; }
+    public string? Href { get; }
 }
 
 public interface IButtonWithLink<out TButton> : IButtonWithLink

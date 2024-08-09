@@ -6,9 +6,9 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 
 public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEntity, TitleDbEntity>, IHasSlug
 {
-    public string InternalName { get; set; } = null!;
+    public string? InternalName { get; set; }
 
-    public string Slug { get; set; } = null!;
+    public string? Slug { get; set; }
 
     public bool DisplayBackButton { get; set; }
 
@@ -37,7 +37,7 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
     public SectionDbEntity? Section { get; set; }
 
     /// <summary>
-    /// Combined joins for <see cref="Content"/> and <see cref="BeforeTitleContent"/> 
+    /// Combined joins for <see cref="Content"/> and <see cref="BeforeTitleContent"/>
     /// </summary>
     [DontCopyValue]
     public List<PageContentDbEntity> AllPageContents { get; set; } = [];

@@ -10,7 +10,7 @@ public class CategoryDbEntity : ContentComponentDbEntity, ICategory<HeaderDbEnti
     [DontCopyValue]
     public HeaderDbEntity Header { get; set; } = null!;
 
-    public string InternalName { get; set; } = null!;
+    public string? InternalName { get; set; }
 
     [DontCopyValue]
     public List<SectionDbEntity> Sections { get; set; } = [];
