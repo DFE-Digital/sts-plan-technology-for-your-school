@@ -1,5 +1,5 @@
 [submodule "contentandsupport"]
 	path = contentandsupport
 	url = https://github.com/DFE-Digital/sts-content-support
-	branch = Development
+	branch = main
 	ignore = all
