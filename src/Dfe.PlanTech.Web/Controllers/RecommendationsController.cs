@@ -1,8 +1,5 @@
-using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Persistence.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
-using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -35,16 +32,19 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
 
     [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}/preview/{maturity?}", Name = "GetRecommendationPreview")]
     public async Task<IActionResult> GetRecommendationPreview(string sectionSlug,
-                                                       string recommendationSlug,
-                                                       string? maturity,
-                                                       [FromServices] ContentfulOptions contentfulOptions,
-                                                       [FromServices] IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery,
-                                                       [FromServices] IGetSectionQuery getSectionQuery,
-                                                       CancellationToken cancellationToken)
+                                                              string recommendationSlug,
+                                                              string? maturity,
+                                                              [FromServices] ContentfulOptions contentfulOptions,
+                                                              [FromServices] IGetRecommendationRouter getRecommendationRouter,
+                                                              CancellationToken cancellationToken)
     {
         if (!contentfulOptions.UsePreview)
         {
-            return new RedirectToActionResult("GetRecommendation", "Recommendations", new { sectionSlug, recommendationSlug });
+            return new RedirectToActionResult("GetRecommendation", "Recommendations", new
+            {
+                sectionSlug,
+                recommendationSlug
+            });
         }
 
         if (string.IsNullOrEmpty(sectionSlug))
@@ -52,32 +52,7 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
         if (string.IsNullOrEmpty(recommendationSlug))
             throw new ArgumentNullException(nameof(recommendationSlug));
 
-        var subtopic = await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken);
-
-        if (subtopic == null)
-        {
-            return new NotFoundResult();
-        }
-
-        var recommendation = await getSubTopicRecommendationQuery.GetSubTopicRecommendation(subtopic.Sys.Id, cancellationToken);
-
-        if (recommendation == null)
-        {
-            logger.LogError("Couldn't find recommendation for section slug {SectionSlug}", sectionSlug);
-            return new NotFoundResult();
-        }
-
-        var intro = recommendation.Intros.FirstOrDefault(intro => intro.Maturity == maturity) ?? recommendation.Intros.First();
-
-        var viewModel = new RecommendationsViewModel()
-        {
-            SectionName = subtopic.Name,
-            Intro = intro,
-            Chunks = recommendation.Section.Chunks,
-            Slug = recommendationSlug,
-        };
-
-        return View("~/Views/Recommendations/Recommendations.cshtml", viewModel);
+        return await getRecommendationRouter.GetRecommendationPreview(sectionSlug, recommendationSlug, maturity, this, cancellationToken);
     }
 
     [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}/print", Name = "GetRecommendationChecklist")]

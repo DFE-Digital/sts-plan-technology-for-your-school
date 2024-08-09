@@ -30,6 +30,7 @@ public class GetRecommendationRouter(ISubmissionStatusProcessor router,
             throw new ArgumentNullException(nameof(recommendationSlug));
 
         await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken);
+
         return _router.Status switch
         {
             SubmissionStatus.Completed => checklist ?
@@ -40,6 +41,27 @@ public class GetRecommendationRouter(ISubmissionStatusProcessor router,
             SubmissionStatus.NotStarted => PageRedirecter.RedirectToSelfAssessment(controller),
             _ => throw new InvalidOperationException($"Invalid journey status - {_router.Status}"),
         };
+    }
+
+    public async Task<IActionResult> GetRecommendationPreview(string sectionSlug,
+                                                              string recommendationSlug,
+                                                              string? maturity,
+                                                              RecommendationsController controller,
+                                                              CancellationToken cancellationToken)
+    {
+        await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken);
+        var recommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(_router.Section.Sys.Id, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {_router.Section.Name}");
+        var intro = recommendation.Intros.FirstOrDefault(intro => intro.Maturity == maturity) ?? recommendation.Intros.First();
+
+        var viewModel = new RecommendationsViewModel()
+        {
+            SectionName = _router.Section.Name,
+            Intro = intro,
+            Chunks = recommendation.Section.Chunks,
+            Slug = recommendationSlug,
+        };
+
+        return controller.View("~/Views/Recommendations/Recommendations.cshtml", viewModel);
     }
 
     private async Task<(SubtopicRecommendation, RecommendationIntro, List<RecommendationChunk>)> GetSubtopicRecommendation(CancellationToken cancellationToken)
