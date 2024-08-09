@@ -10,8 +10,6 @@ public class GetSubTopicRecommendationQuery([FromKeyedServices(GetSubtopicRecomm
                                             [FromKeyedServices(GetSubTopicRecommendationFromDbQuery.ServiceKey)] IGetSubTopicRecommendationQuery getFromDbQuery,
                                             ILogger<GetSubTopicRecommendationQuery> logger) : IGetSubTopicRecommendationQuery
 {
-    public const string ServiceKey = "Parent";
-
     private readonly IGetSubTopicRecommendationQuery _getFromContentfulQuery = getFromContentfulQuery;
     private readonly IGetSubTopicRecommendationQuery _getFromDbQuery = getFromDbQuery;
     private readonly ILogger<GetSubTopicRecommendationQuery> _logger = logger;

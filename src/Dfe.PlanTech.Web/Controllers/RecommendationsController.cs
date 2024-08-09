@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
@@ -27,6 +28,31 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
           false,
           this,
           cancellationToken);
+    }
+
+    [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}/preview/{maturity?}", Name = "GetRecommendationPreview")]
+    public async Task<IActionResult> GetRecommendationPreview(string sectionSlug,
+                                                              string recommendationSlug,
+                                                              string? maturity,
+                                                              [FromServices] ContentfulOptions contentfulOptions,
+                                                              [FromServices] IGetRecommendationRouter getRecommendationRouter,
+                                                              CancellationToken cancellationToken)
+    {
+        if (!contentfulOptions.UsePreview)
+        {
+            return new RedirectToActionResult("GetRecommendation", "Recommendations", new
+            {
+                sectionSlug,
+                recommendationSlug
+            });
+        }
+
+        if (string.IsNullOrEmpty(sectionSlug))
+            throw new ArgumentNullException(nameof(sectionSlug));
+        if (string.IsNullOrEmpty(recommendationSlug))
+            throw new ArgumentNullException(nameof(recommendationSlug));
+
+        return await getRecommendationRouter.GetRecommendationPreview(sectionSlug, recommendationSlug, maturity, this, cancellationToken);
     }
 
     [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}/print", Name = "GetRecommendationChecklist")]
