@@ -2,9 +2,24 @@ const navigateToRecommendationPage = () => {
     cy.get('a[href*="/recommendation/"]').first().click();
 };
 
+const navigateToSecondRecommendationPage = () => {
+  cy.get('a[href*="/recommendation/"]').eq(1).click();
+};
+
 const completeFirstSubtopic = () => {
   let selectedQuestionsWithAnswers = [];
     cy.clickFirstSection();
+    cy.clickContinueButton();
+
+  return cy
+    .navigateToCheckAnswersPage(selectedQuestionsWithAnswers)
+    .then((res) => cy.wrap(res))
+    .then(() => cy.submitAnswers());
+}
+
+const completeSecondSubtopic = () => {
+  let selectedQuestionsWithAnswers = [];
+    cy.clickSecondSection();
     cy.clickContinueButton();
 
   return cy
@@ -45,7 +60,12 @@ Cypress.Commands.add(
   "navigateToRecommendationPage",
   navigateToRecommendationPage
 );
+Cypress.Commands.add(
+  "navigateToSecondRecommendationPage",
+  navigateToSecondRecommendationPage
+);
 Cypress.Commands.add("completeFirstSubtopic", completeFirstSubtopic);
+Cypress.Commands.add("completeSecondSubtopic", completeSecondSubtopic);
 Cypress.Commands.add("navigateToCheckAnswersPage", navigateToCheckAnswersPage);
 Cypress.Commands.add("navigateThroughQuestions", navigateThroughQuestions);
 Cypress.Commands.add("submitAnswers", submitAnswers);
