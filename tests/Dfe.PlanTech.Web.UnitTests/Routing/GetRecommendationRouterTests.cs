@@ -137,8 +137,18 @@ public class GetRecommendationRouterTests
         [
             new()
             {
-                Slug = "intro-slug",
+                Slug = "high-slug",
                 Maturity = "High",
+            },
+            new()
+            {
+                Slug = "medium-slug",
+                Maturity = "Medium",
+            },
+            new()
+            {
+                Slug = "low-slug",
+                Maturity = "Low",
             }
         ],
         Section = new RecommendationSection()
@@ -512,6 +522,66 @@ public class GetRecommendationRouterTests
         Assert.Equal(3, model.Chunks.Count);
     }
 
+    [Fact]
+    public async Task GetPreview_Should_Return_Preview()
+    {
+        Setup_Valid_Recommendation();
+
+        var result = await _router.GetRecommendationPreview(_section.InterstitialPage.Slug, "recommendation-slug", null, _controller, default);
+        var viewResult = result as ViewResult;
+
+        Assert.NotNull(viewResult);
+
+        var model = viewResult.Model as RecommendationsViewModel;
+
+        Assert.NotNull(model);
+        //If no maturity given it should use first intro
+        Assert.Equal(_subtopicRecommendation!.Intros[0], model.Intro);
+        Assert.Equal(_subtopicRecommendation.Section.Chunks.Count, model.Chunks.Count);
+    }
+
+    [Theory]
+    [InlineData("Low")]
+    [InlineData("Medium")]
+    [InlineData("High")]
+    public async Task GetPreview_Should_Return_MatchingIntroForMaturity(string maturity)
+    {
+        Setup_Valid_Recommendation();
+
+        var result = await _router.GetRecommendationPreview(_section.InterstitialPage.Slug, "recommendation-slug", maturity, _controller, default);
+        var viewResult = result as ViewResult;
+
+        Assert.NotNull(viewResult);
+
+        var model = viewResult.Model as RecommendationsViewModel;
+
+        Assert.NotNull(model);
+
+        var expectedIntro = _subtopicRecommendation!.Intros.FirstOrDefault(intro => intro.Maturity == maturity);
+        Assert.Equal(expectedIntro, model.Intro);
+        Assert.Equal(_subtopicRecommendation.Section.Chunks.Count, model.Chunks.Count);
+    }
+
+    [Theory]
+    [InlineData("not a real maturity")]
+    [InlineData("also not real")]
+    [InlineData("")]
+    public async Task GetPreview_Should_Return_FirstIntro_If_Invalid_Maturity(string maturity)
+    {
+        Setup_Valid_Recommendation();
+
+        var result = await _router.GetRecommendationPreview(_section.InterstitialPage.Slug, "recommendation-slug", maturity, _controller, default);
+        var viewResult = result as ViewResult;
+
+        Assert.NotNull(viewResult);
+
+        var model = viewResult.Model as RecommendationsViewModel;
+
+        Assert.NotNull(model);
+        Assert.Equal(_subtopicRecommendation!.Intros[0], model.Intro);
+        Assert.Equal(_subtopicRecommendation.Section.Chunks.Count, model.Chunks.Count);
+    }
+
     private void Setup_Valid_Recommendation(List<QuestionWithAnswer>? responses = null)
     {
         _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
@@ -533,9 +603,6 @@ public class GetRecommendationRouterTests
 
     private static SubmissionResponsesDto MockValidLatestResponse(CallInfo callinfo, List<QuestionWithAnswer>? responses = null)
     {
-        var establishmentId = callinfo.ArgAt<int>(0);
-        var subtopicId = callinfo.ArgAt<string>(1);
-
         return new SubmissionResponsesDto()
         {
             SubmissionId = 1234,
