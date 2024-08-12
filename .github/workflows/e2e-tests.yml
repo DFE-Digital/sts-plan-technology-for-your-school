@@ -8,6 +8,8 @@ on:
       - "src/**"
       - "tests/Dfe.PlanTech.Web.E2ETests/**"
       - ".github/workflows/e2e-tests.yml"
+      - "contentandsupport/**"
+      - ".gitmodules"
 
 concurrency:
   group: "${{ github.workflow }}"
