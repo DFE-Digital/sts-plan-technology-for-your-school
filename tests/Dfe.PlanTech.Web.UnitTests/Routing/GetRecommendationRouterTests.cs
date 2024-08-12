@@ -527,7 +527,7 @@ public class GetRecommendationRouterTests
     {
         Setup_Valid_Recommendation();
 
-        var result = await _router.GetRecommendationPreview(_section.InterstitialPage.Slug, "recommendation-slug", null, _controller, default);
+        var result = await _router.GetRecommendationPreview(_section.InterstitialPage.Slug, null, _controller, default);
         var viewResult = result as ViewResult;
 
         Assert.NotNull(viewResult);
@@ -548,7 +548,7 @@ public class GetRecommendationRouterTests
     {
         Setup_Valid_Recommendation();
 
-        var result = await _router.GetRecommendationPreview(_section.InterstitialPage.Slug, "recommendation-slug", maturity, _controller, default);
+        var result = await _router.GetRecommendationPreview(_section.InterstitialPage.Slug, maturity, _controller, default);
         var viewResult = result as ViewResult;
 
         Assert.NotNull(viewResult);
@@ -570,7 +570,7 @@ public class GetRecommendationRouterTests
     {
         Setup_Valid_Recommendation();
 
-        var result = await _router.GetRecommendationPreview(_section.InterstitialPage.Slug, "recommendation-slug", maturity, _controller, default);
+        var result = await _router.GetRecommendationPreview(_section.InterstitialPage.Slug, maturity, _controller, default);
         var viewResult = result as ViewResult;
 
         Assert.NotNull(viewResult);

@@ -30,9 +30,8 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
           cancellationToken);
     }
 
-    [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}/preview/{maturity?}", Name = "GetRecommendationPreview")]
+    [HttpGet("{sectionSlug}/recommendation/preview/{maturity?}", Name = "GetRecommendationPreview")]
     public async Task<IActionResult> GetRecommendationPreview(string sectionSlug,
-                                                              string recommendationSlug,
                                                               string? maturity,
                                                               [FromServices] ContentfulOptions contentfulOptions,
                                                               [FromServices] IGetRecommendationRouter getRecommendationRouter,
@@ -40,19 +39,13 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
     {
         if (!contentfulOptions.UsePreview)
         {
-            return new RedirectToActionResult("GetRecommendation", "Recommendations", new
-            {
-                sectionSlug,
-                recommendationSlug
-            });
+            return new RedirectResult("/self-assessment");
         }
 
         if (string.IsNullOrEmpty(sectionSlug))
             throw new ArgumentNullException(nameof(sectionSlug));
-        if (string.IsNullOrEmpty(recommendationSlug))
-            throw new ArgumentNullException(nameof(recommendationSlug));
 
-        return await getRecommendationRouter.GetRecommendationPreview(sectionSlug, recommendationSlug, maturity, this, cancellationToken);
+        return await getRecommendationRouter.GetRecommendationPreview(sectionSlug, maturity, this, cancellationToken);
     }
 
     [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}/print", Name = "GetRecommendationChecklist")]

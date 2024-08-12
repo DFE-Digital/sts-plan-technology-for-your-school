@@ -29,13 +29,11 @@ public interface IGetRecommendationRouter
     /// Gets a preview of a recommendation. Includes all recommendation chunks; no filtering off user's journey
     /// </summary>
     /// <param name="sectionSlug"></param>
-    /// <param name="recommendationSlug"></param>
     /// <param name="maturity">What intro to return for the user. If null, returns first found.</param>
     /// <param name="controller"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     public Task<IActionResult> GetRecommendationPreview(string sectionSlug,
-                                                        string recommendationSlug,
                                                         string? maturity,
                                                         RecommendationsController controller,
                                                         CancellationToken cancellationToken);

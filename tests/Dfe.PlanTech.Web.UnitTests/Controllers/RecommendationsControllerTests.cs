@@ -57,35 +57,30 @@ public class RecommendationsControllerTests
     public async Task RecommendationsPage_Preview_Should_Call_RecommendationsRouter_When_Args_Valid(string? maturity)
     {
         string sectionSlug = "section-slug";
-        string recommendationSlug = "recommendation-slug";
 
-        await _recommendationsController.GetRecommendationPreview(sectionSlug, recommendationSlug, maturity, new ContentfulOptions(true), _recommendationsRouter, default);
+        await _recommendationsController.GetRecommendationPreview(sectionSlug, maturity, new ContentfulOptions(true), _recommendationsRouter, default);
 
-        await _recommendationsRouter.Received().GetRecommendationPreview(sectionSlug, recommendationSlug, maturity, _recommendationsController, Arg.Any<CancellationToken>());
+        await _recommendationsRouter.Received().GetRecommendationPreview(sectionSlug, maturity, _recommendationsController, Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task RecommendationsPage_Preview_Should_Return_Redirect_When_UsePreview_Is_False()
     {
         string sectionSlug = "section-slug";
-        string recommendationSlug = "recommendation-slug";
 
-        var result = await _recommendationsController.GetRecommendationPreview(sectionSlug, recommendationSlug, null, new ContentfulOptions(false), _recommendationsRouter, default);
+        var result = await _recommendationsController.GetRecommendationPreview(sectionSlug, null, new ContentfulOptions(false), _recommendationsRouter, default);
 
-        var redirectResult = result as RedirectToActionResult;
+        var redirectResult = result as RedirectResult;
         Assert.NotNull(redirectResult);
-        Assert.Equal(nameof(_recommendationsController.GetRecommendation), redirectResult.ActionName);
-        Assert.Equal("Recommendations", redirectResult.ControllerName);
+        Assert.Equal("/self-assessment", redirectResult.Url);
     }
 
     [Theory]
-    [InlineData("section valid", null)]
-    [InlineData("section valid", "")]
-    [InlineData("", "recommendation valid")]
-    [InlineData(null, "recommendation valid")]
-    public async Task RecommendationsPage_Preview_Should_ThrowException_When_Args_Invalid(string? sectionSlug, string? recommendationSlug)
+    [InlineData("")]
+    [InlineData(null)]
+    public async Task RecommendationsPage_Preview_Should_ThrowException_When_Args_Invalid(string? sectionSlug)
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _recommendationsController.GetRecommendationPreview(sectionSlug!, recommendationSlug!, null, new ContentfulOptions(true), _recommendationsRouter, default));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _recommendationsController.GetRecommendationPreview(sectionSlug!, null, new ContentfulOptions(true), _recommendationsRouter, default));
     }
 
     [Fact]

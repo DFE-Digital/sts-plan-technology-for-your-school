@@ -44,7 +44,6 @@ public class GetRecommendationRouter(ISubmissionStatusProcessor router,
     }
 
     public async Task<IActionResult> GetRecommendationPreview(string sectionSlug,
-                                                              string recommendationSlug,
                                                               string? maturity,
                                                               RecommendationsController controller,
                                                               CancellationToken cancellationToken)
@@ -58,7 +57,7 @@ public class GetRecommendationRouter(ISubmissionStatusProcessor router,
             SectionName = _router.Section.Name,
             Intro = intro,
             Chunks = recommendation.Section.Chunks,
-            Slug = recommendationSlug,
+            Slug = "preview",
         };
 
         return controller.View("~/Views/Recommendations/Recommendations.cshtml", viewModel);
