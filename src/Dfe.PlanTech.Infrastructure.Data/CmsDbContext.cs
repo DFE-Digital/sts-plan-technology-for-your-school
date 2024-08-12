@@ -3,11 +3,11 @@ using System.Linq.Expressions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
+using Dfe.PlanTech.Domain.Exceptions;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
@@ -86,7 +86,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<ComponentDropDownDbEntity> ICmsDbContext.ComponentDropDowns => ComponentDropDowns;
     IQueryable<ContentComponentDbEntity> ICmsDbContext.ContentComponents => ContentComponents;
     IQueryable<CSLinkDbEntity> ICmsDbContext.CSLinks => CSLinks;
-
     IQueryable<HeaderDbEntity> ICmsDbContext.Headers => Headers;
     IQueryable<InsetTextDbEntity> ICmsDbContext.InsetTexts => InsetTexts;
     IQueryable<NavigationLinkDbEntity> ICmsDbContext.NavigationLink => NavigationLink;
@@ -123,9 +122,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
     {
-        _contentfulOptions = this.GetService<ContentfulOptions>() ??
-                                this.GetService<IOptions<ContentfulOptions>>()?.Value ??
-                                throw new Exception($"Couldn't find required service {typeof(CmsDbContext).Name}");
+        _contentfulOptions = this.GetService<ContentfulOptions>() ?? throw new MissingServiceException($"Could not find service {nameof(ContentfulOptions)}");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -18,45 +18,45 @@ public class GetRichTextsQueryTests
     {
         Id = "Page-id",
         Content = new()
-        {
-
-        }
     };
 
-    private readonly static List<RichTextContentDbEntity> _richTextContents = new(){
-    new()
+    private readonly static List<RichTextContentWithSlugDbEntity> _richTextContentsWithSlug = new()
     {
-      Data = new()
-      {
-        Uri = "uri"
-      },
-      Marks = new(){
-        new(){
-          Type = "Bold",
+        new()
+        {
+            Data = new()
+            {
+                Uri = "uri"
+            },
+            Marks = new()
+            {
+                new()
+                {
+                    Type = "Bold",
+                }
+            },
+            Content = new(),
+            Value = "rich-text",
+            Id = 1,
+        },
+        new()
+        {
+            Data = new()
+            {
+                Uri = "uri"
+            },
+            Marks =
+            [
+                new()
+                {
+                    Type = "Bold",
+                }
+            ],
+            Content = [],
+            Value = "rich-text",
+            Id = 2
         }
-      },
-      Content = new()
-      {
-
-      },
-      Value = "rich-text",
-      Id = 1,
-          },new()
-    {
-      Data = new()
-      {
-        Uri = "uri"
-      },
-      Marks = [
-        new(){
-          Type = "Bold",
-        }
-      ],
-      Content = [],
-      Value = "rich-text",
-      Id = 2
-          }
-  };
+    };
 
     private readonly List<RichTextContentDbEntity> _returnedRichTextContents = new();
 
@@ -68,7 +68,7 @@ public class GetRichTextsQueryTests
 
         _getRichTextsQuery = new GetRichTextsForPageQuery(_db, _logger, _contentfulOptions);
 
-        _db.RichTextContents.Returns(_richTextContents.AsQueryable());
+        _db.RichTextContentWithSlugs.Returns(_richTextContentsWithSlug.AsQueryable());
 
         _db.ToListAsync(Arg.Any<IQueryable<RichTextContentDbEntity>>(), Arg.Any<CancellationToken>())
             .Returns(callinfo =>
@@ -84,13 +84,13 @@ public class GetRichTextsQueryTests
     {
         _loadedPage.Content.Add(new TextBodyDbEntity()
         {
-            RichText = _richTextContents.First()
+            RichText = _richTextContentsWithSlug.First()
         });
 
         await _getRichTextsQuery.TryLoadChildren(_loadedPage, CancellationToken.None);
 
         await _db.ReceivedWithAnyArgs(1)
-                     .ToListAsync(Arg.Any<IQueryable<RichTextContentWithSlugDbEntity>>(), Arg.Any<CancellationToken>());
+            .ToListAsync(Arg.Any<IQueryable<RichTextContentWithSlugDbEntity>>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -99,6 +99,27 @@ public class GetRichTextsQueryTests
         await _getRichTextsQuery.TryLoadChildren(_loadedPage, CancellationToken.None);
 
         await _db.ReceivedWithAnyArgs(0)
-                     .ToListAsync(Arg.Any<IQueryable<RichTextContentWithSlugDbEntity>>(), Arg.Any<CancellationToken>());
+            .ToListAsync(Arg.Any<IQueryable<RichTextContentWithSlugDbEntity>>(), Arg.Any<CancellationToken>());
+    }
+
+    [Theory]
+    [InlineData(true, 2)]
+    [InlineData(false, 0)]
+    public async Task Should_Only_Retrieve_Draft_RichTextContents_When_UsePreviewEnabled(bool usePreview, int expectedContentCount)
+    {
+        var richTextQuery = new GetRichTextsForPageQuery(_db, _logger, new ContentfulOptions(usePreview));
+
+        _loadedPage.Content.Add(new TextBodyDbEntity()
+        {
+            RichText = _richTextContentsWithSlug.First(),
+            Published = false
+        });
+
+        await richTextQuery.TryLoadChildren(_loadedPage, CancellationToken.None);
+
+        await _db.Received(1)
+            .ToListAsync(Arg.Is<IQueryable<RichTextContentWithSlugDbEntity>>(
+                arg => arg.Count() == expectedContentCount
+                ), Arg.Any<CancellationToken>());
     }
 }
