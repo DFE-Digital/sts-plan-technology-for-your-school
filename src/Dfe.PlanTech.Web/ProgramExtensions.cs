@@ -31,6 +31,7 @@ using Dfe.PlanTech.Infrastructure.Data.Repositories;
 using Dfe.PlanTech.Web.Helpers;
 using EFCoreSecondLevelCacheInterceptor;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
 
 namespace Dfe.PlanTech.Web;
@@ -82,17 +83,21 @@ public static class ProgramExtensions
         });
 
         services.AddTransient<GetPageFromContentfulQuery>();
-        services.AddSingleton(new ContentfulOptions(configuration.GetValue<bool>("Contentful:UsePreview")));
-        services.AddSingleton(new CacheRefreshConfiguration(
-            configuration["CacheClear:Endpoint"],
-            configuration["CacheClear:ApiKeyName"],
-            configuration["CacheClear:ApiKeyValue"]
-            ));
+
+        services.AddOptions<ContentfulOptions>()
+                .Configure<IConfiguration>((settings, configuration) => configuration.GetSection("Contentful").Bind(settings));
+
+        services.AddOptions<CacheRefreshConfiguration>()
+                .Configure<IConfiguration>((settings, configuration) => configuration.GetSection("CacheClear").Bind(settings));
+
+        services.AddTransient((services) => services.GetRequiredService<IOptions<ContentfulOptions>>().Value);
+        services.AddTransient((services) => services.GetRequiredService<IOptions<CacheRefreshConfiguration>>().Value);
 
         services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubtopicRecommendationFromContentfulQuery>(GetSubtopicRecommendationFromContentfulQuery.ServiceKey);
         services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationFromDbQuery>(GetSubTopicRecommendationFromDbQuery.ServiceKey);
         services.AddTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationQuery>();
         services.AddTransient<IRecommendationsRepository, RecommendationsRepository>();
+
         return services;
     }
 

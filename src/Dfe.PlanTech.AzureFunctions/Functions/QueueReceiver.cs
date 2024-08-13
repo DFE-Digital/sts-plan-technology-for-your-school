@@ -59,6 +59,8 @@ public class QueueReceiver(
     {
         try
         {
+            db.ChangeTracker.Clear();
+
             CmsEvent cmsEvent = GetCmsEvent(message.Subject);
             MappedEntity mapped = await MapMessageToEntity(message, cmsEvent, cancellationToken);
 
