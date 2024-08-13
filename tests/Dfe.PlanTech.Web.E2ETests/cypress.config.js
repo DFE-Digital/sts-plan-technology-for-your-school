@@ -2,6 +2,7 @@ const { defineConfig } = require('cypress');
 const { loadAndSave, readFromJson } = require("./cypress/contentful-data-loader");
 
 module.exports = defineConfig({
+    numTestsKeptInMemory: 5,
     chromeWebSecurity: false,
     video: true,
     reporter: "cypress-multi-reporters",
