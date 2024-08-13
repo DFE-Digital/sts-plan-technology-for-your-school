@@ -62,3 +62,5 @@ but we could make every field that can have a default, have a default and the ot
     - The defaults will render incomplete content "valid" when it isn't. This risk is small because Contentful doesn't allow publishing content with missing mandatory fields. So only UsePreview environments have a risk of showing blank content.
 
 ## Decision Outcome
+
+Option 3. It's lowest risk and involvement whilst effectively resolving the problem. The suggested implementation will be to modify the way the Azure function maps a json object into database entities and add defaults at this stage, to minimise the changes required.
