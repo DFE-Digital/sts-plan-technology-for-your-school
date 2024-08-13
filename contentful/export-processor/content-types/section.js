@@ -38,7 +38,7 @@ export class Section {
       this.getMinimumPathsForRecommendations();
       this.getPathsForAllAnswers();
       this.setNextQuestions();
-
+      this.checkAllChunksTested();
   }
 
   /**
@@ -168,12 +168,6 @@ export class Section {
             })
         })
 
-        // Log ids of answers used in minimum paths to navigate questions
-        const allQuestionPaths = this.minimumPathsToNavigateQuestions[0]
-        allQuestionPaths.forEach((question) => {
-            answersUsed.push(question.answer.id)
-        })
-
         // Log ids of answers used in minimum paths for recommendations
         const allRecommendationPaths = this.minimumPathsForRecommendations;
         for (const maturity in allRecommendationPaths) {
@@ -251,6 +245,24 @@ export class Section {
         });
     }
 
+    checkAllChunksTested() {
+        const sectionChunks = this.recommendation.section.chunks;
+        const testedChunks = [];
+
+        Object.values(this.minimumPathsForRecommendations).forEach((path) => {
+            testedChunks.push(this.recommendation.section.getChunksForPath(path));
+        })
+
+        this.pathsForAllPossibleAnswers.forEach((userJourney) => {
+            const { path } = userJourney;
+            testedChunks.push(this.recommendation.section.getChunksForPath(path));
+        })
+
+        const uniqueTestedChunks = new Set(testedChunks.flat())
+
+        console.log(`Recommendation chunks in ${this.name}: ${sectionChunks.length}`)
+        console.log(`Recommendation chunks to be tested in ${this.name}: ${uniqueTestedChunks.size}`)
+    }
    
 
   /**
