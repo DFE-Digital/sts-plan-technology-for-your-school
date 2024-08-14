@@ -4,10 +4,11 @@ using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Questionnaire.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Repositories;
 
-public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepository
+public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendationsRepository> logger) : IRecommendationsRepository
 {
     private readonly ICmsDbContext _db = db;
 
@@ -46,29 +47,39 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
                                                         Answers = chunk.Answers.Select(answer => new AnswerDbEntity() { Id = answer.Id }).ToList(),
                                                         Id = chunk.Id,
                                                         Order = chunk.Order,
+                                                        CSLink = chunk.CSLink
                                                     })
                                                     .OrderBy(chunk => chunk.Order)
                                                     .ToListAsync(cancellationToken);
 
-        var introContent = await _db.RecommendationIntroContents.Where(introContent => introContent.RecommendationIntro.SubtopicRecommendations.Any(rec => rec.Id == recommendation.Id))
-                                                                .Select(introContent => new
+        var introContent = await _db.RecommendationIntroContents.Where(introContent => introContent.RecommendationIntro != null &&
+                                                                                       introContent.RecommendationIntro.SubtopicRecommendations.Any(rec => rec.Id == recommendation.Id))
+                                                                .Select(introContent => new RecommendationIntroContentDbEntity()
                                                                 {
-                                                                    intro = introContent.RecommendationIntroId,
-                                                                    content = introContent.ContentComponent
+                                                                    RecommendationIntroId = introContent.RecommendationIntroId,
+                                                                    ContentComponent = introContent.ContentComponent,
+                                                                    ContentComponentId = introContent.ContentComponentId,
+                                                                    Id = introContent.Id
                                                                 })
                                                                 .ToListAsync(cancellationToken);
 
-        var chunkContent = await _db.RecommendationChunkContents.Where(chunkContent => chunkContent.RecommendationChunk.RecommendationSections.Any(section => section.Id == recommendation.SectionId))
-                                                                .Select(chunkContent => new
+        var chunkContent = await _db.RecommendationChunkContents.Where(chunkContent => chunkContent.RecommendationChunk != null &&
+                                                                                       chunkContent.RecommendationChunk.RecommendationSections.Any(section => section.Id == recommendation.SectionId))
+                                                                .Select(chunkContent => new RecommendationChunkContentDbEntity()
                                                                 {
-                                                                    chunk = chunkContent.RecommendationChunkId,
-                                                                    content = chunkContent.ContentComponent
+                                                                    RecommendationChunkId = chunkContent.RecommendationChunkId,
+                                                                    ContentComponent = chunkContent.ContentComponent,
+                                                                    ContentComponentId = chunkContent.ContentComponentId,
+                                                                    Id = chunkContent.Id
                                                                 })
                                                                 .ToListAsync(cancellationToken);
+
+        LogInvalidJoinRows(introContent);
+        LogInvalidJoinRows(chunkContent);
 
         await _db.RichTextContentWithSubtopicRecommendationIds
-                  .Where(rt => rt.SubtopicRecommendationId == recommendation.Id)
-                  .ToListAsync(cancellationToken);
+          .Where(rt => rt.SubtopicRecommendationId == recommendation.Id)
+          .ToListAsync(cancellationToken);
 
         return new SubtopicRecommendationDbEntity()
         {
@@ -79,9 +90,9 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
                 Header = intro.Header,
                 HeaderId = intro.HeaderId,
                 Maturity = intro.Maturity,
-                Content = [.. introContent.Where(content => content.intro == intro.Id)
-                                      .Select(content => content.content!)
-                                      .OrderBy(content => content.Order)]
+                Content = [.. introContent.Where(content => content.RecommendationIntroId == intro.Id && content.ContentComponent != null)
+                                            .Select(content => content.ContentComponent)
+                                            .OrderBy(content => content?.Order)]
             }).ToList(),
             Section = new RecommendationSectionDbEntity()
             {
@@ -91,9 +102,10 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
                     Header = chunk.Header,
                     HeaderId = chunk.HeaderId,
                     Answers = chunk.Answers,
-                    Content = [.. chunkContent.Where(content => content.chunk == chunk.Id)
-                                              .Select(content => content.content!)
-                                              .OrderBy(content => content.Order)]
+                    Content = [.. chunkContent.Where(content => content.RecommendationChunkId == chunk.Id && content.ContentComponent != null)
+                                            .Select(content => content.ContentComponent)
+                                            .OrderBy(content => content?.Order)],
+                    CSLink = chunk.CSLink
                 }).ToList(),
                 Answers = recommendation.Section.Answers,
                 Id = recommendation.Section.Id,
@@ -108,4 +120,22 @@ public class RecommendationsRepository(ICmsDbContext db) : IRecommendationsRepos
                                   .Select(subtopicRecommendation => subtopicRecommendation.Intros.FirstOrDefault(intro => intro.Maturity == maturity))
                                   .Select(intro => intro != null ? new RecommendationsViewDto(intro.Slug, intro.Header.Text) : null)
                                   .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+    /// <summary>
+    /// Check for invalid join rows, and log any errored rows.
+    /// </summary>
+    /// <typeparam name="TContentComponentJoin"></typeparam>
+    /// <param name="contentJoins"></param>
+    private void LogInvalidJoinRows<TContentComponentJoin>(List<TContentComponentJoin> contentJoins)
+    where TContentComponentJoin : class, IHasContentComponent
+    {
+        var invalidJoins = contentJoins.Where(join => join.ContentComponent == null).ToArray();
+
+        if (invalidJoins.Length == 0)
+        {
+            return;
+        }
+
+        logger.LogError("{ContentJoinType} has {InvalidRowsCount} rows missing ContentComponentId: {ErroredRowIds}", typeof(TContentComponentJoin).Name, invalidJoins.Length, invalidJoins.Select(join => join.Id));
+    }
 }

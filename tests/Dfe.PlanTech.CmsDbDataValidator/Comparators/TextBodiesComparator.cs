@@ -3,7 +3,6 @@ using Dfe.PlanTech.CmsDbDataValidator.Models;
 using Dfe.PlanTech.CmsDbDataValidator.Tests;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.CmsDbDataValidator.Comparators;
 
@@ -51,11 +50,13 @@ public class TextBodyComparator(CmsDbContext db, ContentfulContent contentfulCon
 
         var errors = RichTextComparator.CompareRichTextContent(dbTextbody.RichText!, contentfulRichText!).ToArray();
 
-        if (errors.Length == 0) yield break;
+        if (errors.Length == 0)
+            yield break;
 
         foreach (var error in errors)
         {
-            if (error != null) yield return error;
+            if (error != null)
+                yield return error;
         }
     }
 

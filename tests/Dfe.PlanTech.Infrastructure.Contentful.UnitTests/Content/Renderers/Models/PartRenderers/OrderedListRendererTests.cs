@@ -1,9 +1,8 @@
-using Dfe.PlanTech.Domain.Content.Interfaces;
+using System.Text;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 using Microsoft.Extensions.Logging.Abstractions;
-using System.Text;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
 
@@ -49,7 +48,7 @@ public class OrderedListRendererTests
     public void Should_CreateOrderedList_When_PassedValidData()
     {
         var renderer = new OrderedListRenderer();
-        var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(), new[] { renderer });
+        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
 
         const string listItemValue = "List item one";
 

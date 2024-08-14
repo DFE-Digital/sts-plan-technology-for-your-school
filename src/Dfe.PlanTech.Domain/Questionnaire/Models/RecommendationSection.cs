@@ -7,7 +7,6 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 public class RecommendationSection : ContentComponent, IRecommendationSection<Answer, ContentComponent, Header, RecommendationChunk>
 {
     [NotMapped]
-
     public List<Answer> Answers { get; init; } = [];
 
     [NotMapped]
@@ -16,7 +15,7 @@ public class RecommendationSection : ContentComponent, IRecommendationSection<An
     public List<RecommendationChunk> GetRecommendationChunksByAnswerIds(IEnumerable<string> answerIds)
     {
         return Chunks
-            .Where(chunk => chunk.Answers.Any(chunkAnswer => answerIds.Contains(chunkAnswer.Sys.Id)))
+            .Where(chunk => chunk.Answers.Exists(chunkAnswer => answerIds.Contains(chunkAnswer.Sys.Id)))
             .Distinct()
             .ToList();
     }

@@ -5,6 +5,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data.Repositories;
+using Microsoft.Extensions.Logging;
 using MockQueryable.NSubstitute;
 using NSubstitute;
 
@@ -12,10 +13,10 @@ namespace Dfe.PlanTech.Infrastructure.Data.UnitTests;
 
 public class RecommendationsRepositoryTests
 {
+    private const string RecChunkOneId = "recommendation-chunk-one";
+    private const string RecIntroOneId = "Intro-One-Low";
 #pragma warning disable CA1859 // Use concrete type
     private readonly IRecommendationsRepository _repository;
-#pragma warning disable CA1859 // Use concrete type
-
     private readonly ICmsDbContext _db = Substitute.For<ICmsDbContext>();
 
     private readonly SubtopicRecommendationDbEntity _subtopicRecommendation;
@@ -30,18 +31,48 @@ public class RecommendationsRepositoryTests
     private readonly List<RecommendationChunkContentDbEntity> _chunkContent = [];
     private readonly List<RichTextContentWithSubtopicRecommendationId> _richTexts = [];
 
+    private readonly ILogger<IRecommendationsRepository> _logger = Substitute.For<ILogger<IRecommendationsRepository>>();
+
+    private readonly List<string> LoggedMessages = [];
+
     public RecommendationsRepositoryTests()
     {
         _subtopicRecommendation = CreateSubtopicRecommendationDbEntity();
         _subtopicRecommendations.Add(_subtopicRecommendation);
-
-        _answers.AddRange([.. _subtopicRecommendation.Section.Answers, .. _subtopicRecommendation.Section.Chunks.SelectMany(chunk => chunk.Answers)]);
-        _chunks.AddRange(_subtopicRecommendation.Section.Chunks);
-        _intros.AddRange(_subtopicRecommendation.Section.RecommendationIntro);
         _sections.Add(_subtopicRecommendation.Subtopic);
 
-        var testing = new List<SubtopicRecommendationDbEntity>() { new() { Id = "One" } };
-        var queryable = testing.AsQueryable();
+        foreach (var intro in _subtopicRecommendation.Intros)
+        {
+            intro.SubtopicRecommendations.Add(_subtopicRecommendation);
+        }
+        _intros.AddRange(_subtopicRecommendation.Intros);
+        _introContent.AddRange(_subtopicRecommendation.Intros.SelectMany((intro, introIndex) => intro.Content
+                                                                                             .Select((content, contentIndex) => new RecommendationIntroContentDbEntity()
+                                                                                             {
+                                                                                                 Id = introIndex + contentIndex,
+                                                                                                 RecommendationIntro = intro,
+                                                                                                 RecommendationIntroId = intro.Id,
+                                                                                                 ContentComponent = content,
+                                                                                                 ContentComponentId = content.Id
+                                                                                             })));
+
+        foreach (var chunk in _subtopicRecommendation.Section.Chunks)
+        {
+            chunk.RecommendationSections.Add(_subtopicRecommendation.Section);
+        }
+        _chunks.AddRange(_subtopicRecommendation.Section.Chunks);
+        _chunkContent.AddRange(_subtopicRecommendation.Section.Chunks.SelectMany((chunk, chunkIndex) => chunk.Content
+                                                                                                             .Select((content, contentIndex) => new RecommendationChunkContentDbEntity()
+                                                                                                             {
+                                                                                                                 Id = chunkIndex + contentIndex,
+                                                                                                                 RecommendationChunk = chunk,
+                                                                                                                 RecommendationChunkId = chunk.Id,
+                                                                                                                 ContentComponent = content,
+                                                                                                                 ContentComponentId = content.Id
+                                                                                                             })));
+
+
+        _answers.AddRange([.. _subtopicRecommendation.Section.Answers, .. _subtopicRecommendation.Section.Chunks.SelectMany(chunk => chunk.Answers)]);
 
         var mockContext = Substitute.For<ICmsDbContext>();
 
@@ -66,10 +97,10 @@ public class RecommendationsRepositoryTests
         var richTextsMock = _richTexts.BuildMock();
         _db.RichTextContentWithSubtopicRecommendationIds.Returns(richTextsMock);
 
-        _repository = new RecommendationsRepository(_db);
+        _repository = new RecommendationsRepository(_db, _logger);
     }
 
-    private SubtopicRecommendationDbEntity CreateSubtopicRecommendationDbEntity()
+    private static SubtopicRecommendationDbEntity CreateSubtopicRecommendationDbEntity()
     {
         var recommendationSectionOne = new RecommendationSectionDbEntity()
         {
@@ -91,7 +122,7 @@ public class RecommendationsRepositoryTests
               [
               new RecommendationChunkDbEntity()
               {
-                  Id = "recommendation-chunk-one",
+                  Id = RecChunkOneId,
                   Answers =
                     [
                         new AnswerDbEntity()
@@ -231,7 +262,7 @@ public class RecommendationsRepositoryTests
               new RecommendationIntroDbEntity()
               {
                   Maturity = "Low",
-                  Id = "Intro-One-Low",
+                  Id = RecIntroOneId,
                   Slug = "Low-Maturity",
                   Header = new HeaderDbEntity() { Text = "Low maturity header", Id = "Intro-header-one" },
                   Content = [
@@ -345,10 +376,89 @@ public class RecommendationsRepositoryTests
     {
         var recommendation = await _repository.GetCompleteRecommendationsForSubtopic(_subtopicRecommendation.Subtopic.Id, CancellationToken.None);
 
+        Validate_GetCompleteRecommendationsForSubtopic_Success(recommendation);
+    }
+
+    [Fact]
+    public async Task GetCompleteRecommendationsForSubtopic_Should_Return_Null_When_NotFound()
+    {
+        var recommendation = await _repository.GetCompleteRecommendationsForSubtopic("Not a real subtopic", CancellationToken.None);
+
+        Assert.Null(recommendation);
+    }
+
+    [Fact]
+    public async Task GetCompleteRecommendationsForSubtopic_Should_Log_InvalidContentRows()
+    {
+        var recChunk = _subtopicRecommendation.Section.Chunks.FirstOrDefault(chunk => chunk.Id == RecChunkOneId);
+        Assert.NotNull(recChunk);
+
+        int[] invalidChunkRowIds = [12345, 123456];
+        foreach (var id in invalidChunkRowIds)
+        {
+            _chunkContent.Add(new()
+            {
+                Id = id,
+                RecommendationChunkId = RecChunkOneId,
+                RecommendationChunk = recChunk
+            });
+        }
+
+        var recIntro = _subtopicRecommendation.Intros.FirstOrDefault(intro => intro.Id == RecIntroOneId);
+        Assert.NotNull(recIntro);
+        int[] invalidIntroIds = [99999, 342, 1823];
+        foreach (var id in invalidIntroIds)
+        {
+            _introContent.Add(new()
+            {
+                Id = id,
+                RecommendationIntro = recIntro,
+                RecommendationIntroId = recIntro.Id
+            });
+        }
+
+        var recommendation = await _repository.GetCompleteRecommendationsForSubtopic(_subtopicRecommendation.Subtopic.Id, CancellationToken.None);
+
+        Validate_GetCompleteRecommendationsForSubtopic_Success(recommendation);
+
+        var logMessages = _logger.ReceivedCalls().ToArray();
+        Assert.Equal(2, logMessages.Length);
+
+        var containsIntroMessage = false;
+        var containsChunkMessage = false;
+        foreach (var message in logMessages)
+        {
+            var arguments = message.GetArguments();
+            var loggedMessage = arguments[2]?.ToString();
+            Assert.NotNull(loggedMessage);
+
+            var idsToCheckFor = loggedMessage.Contains("Chunk") ? invalidChunkRowIds : invalidIntroIds;
+
+            if (loggedMessage.Contains("Chunk"))
+            {
+                containsChunkMessage = true;
+            }
+            else
+            {
+                containsIntroMessage = true;
+            }
+
+            foreach (var id in idsToCheckFor)
+            {
+                Assert.Contains(id.ToString(), loggedMessage);
+            }
+        }
+
+        Assert.True(containsIntroMessage);
+        Assert.True(containsChunkMessage);
+    }
+
+    private void Validate_GetCompleteRecommendationsForSubtopic_Success(SubtopicRecommendationDbEntity? recommendation)
+    {
         Assert.NotNull(recommendation);
         Assert.Equal(_subtopicRecommendation.Id, recommendation.Id);
 
-        //Validate content ordering
+        Assert.Equal(_subtopicRecommendation.Intros.Count, recommendation.Intros.Count);
 
         //Intro content
         for (var x = 0; x < recommendation.Intros.Count; x++)
@@ -370,6 +480,7 @@ public class RecommendationsRepositoryTests
             }
         }
 
+        Assert.Equal(_subtopicRecommendation.Section.Chunks.Count, recommendation.Section.Chunks.Count);
         //Chunks
         for (var x = 0; x < recommendation.RecommendationChunk.Count; x++)
         {
@@ -395,11 +506,4 @@ public class RecommendationsRepositoryTests
         }
     }
 
-    [Fact]
-    public async Task GetCompleteRecommendationsForSubtopic_Should_Return_Null_When_NotFound()
-    {
-        var recommendation = await _repository.GetCompleteRecommendationsForSubtopic("Not a real subtopic", CancellationToken.None);
-
-        Assert.Null(recommendation);
-    }
 }

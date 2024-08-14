@@ -40,7 +40,8 @@ public class Logger
 
         foreach (var message in messages)
         {
-            if (string.IsNullOrEmpty(message)) continue;
+            if (string.IsNullOrEmpty(message))
+                continue;
 
             Console.WriteLine(message);
         }

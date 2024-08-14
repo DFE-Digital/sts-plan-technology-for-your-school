@@ -1,7 +1,7 @@
+using System.Reflection;
 using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
 using Newtonsoft.Json.Serialization;
 using NSubstitute;
-using System.Reflection;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Serializers
 {

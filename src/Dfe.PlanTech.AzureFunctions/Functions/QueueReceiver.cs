@@ -1,6 +1,10 @@
+using System.Text;
+using System.Text.Json;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.AzureFunctions.Mappings;
 using Dfe.PlanTech.AzureFunctions.Models;
+using Dfe.PlanTech.AzureFunctions.Services;
+using Dfe.PlanTech.AzureFunctions.Utils;
 using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -8,10 +12,6 @@ using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using System.Text;
-using System.Text.Json;
-using Dfe.PlanTech.AzureFunctions.Services;
-using Dfe.PlanTech.AzureFunctions.Utils;
 
 namespace Dfe.PlanTech.AzureFunctions;
 
@@ -59,6 +59,8 @@ public class QueueReceiver(
     {
         try
         {
+            db.ChangeTracker.Clear();
+
             CmsEvent cmsEvent = GetCmsEvent(message.Subject);
             MappedEntity mapped = await MapMessageToEntity(message, cmsEvent, cancellationToken);
 

@@ -39,8 +39,10 @@ public class QuestionsController : BaseController<QuestionsController>
                                                         [FromServices] IGetQuestionBySlugRouter router,
                                                         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
-        if (string.IsNullOrEmpty(questionSlug)) throw new ArgumentNullException(nameof(questionSlug));
+        if (string.IsNullOrEmpty(sectionSlug))
+            throw new ArgumentNullException(nameof(sectionSlug));
+        if (string.IsNullOrEmpty(questionSlug))
+            throw new ArgumentNullException(nameof(questionSlug));
 
         return await router.ValidateRoute(sectionSlug, questionSlug, this, cancellationToken);
     }
@@ -51,9 +53,11 @@ public class QuestionsController : BaseController<QuestionsController>
     public async Task<IActionResult> GetNextUnansweredQuestion(string sectionSlug,
                                                                 [FromServices] IGetNextUnansweredQuestionQuery getQuestionQuery,
                                                                 [FromServices] IDeleteCurrentSubmissionCommand deleteCurrentSubmissionCommand,
+                                                                [FromServices] IConfiguration configuration,
                                                                 CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
+        if (string.IsNullOrEmpty(sectionSlug))
+            throw new ArgumentNullException(nameof(sectionSlug));
 
         var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
                         throw new ContentfulDataUnavailableException($"Could not find section with slug {sectionSlug}");
@@ -65,7 +69,8 @@ public class QuestionsController : BaseController<QuestionsController>
             var nextQuestion =
                 await getQuestionQuery.GetNextUnansweredQuestion(establishmentId, section, cancellationToken);
 
-            if (nextQuestion == null) return this.RedirectToCheckAnswers(sectionSlug);
+            if (nextQuestion == null)
+                return this.RedirectToCheckAnswers(sectionSlug);
 
             return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = nextQuestion!.Slug });
         }
@@ -73,7 +78,7 @@ public class QuestionsController : BaseController<QuestionsController>
         {
             // Remove the current invalid submission and redirect to self-assessment page
             await deleteCurrentSubmissionCommand.DeleteCurrentSubmission(section, cancellationToken);
-            TempData["SubtopicError"] = "Sorry, there has been a problem with the service and your answers have not been saved. Please try again.";
+            TempData["SubtopicError"] = configuration["ErrorMessages:ConcurrentUsersOrContentChange"];
             return RedirectToAction(
                 PagesController.GetPageByRouteAction,
                 PagesController.ControllerName,
@@ -82,7 +87,12 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
     [HttpPost("{sectionSlug}/{questionSlug}")]
-    public async Task<IActionResult> SubmitAnswer(string sectionSlug, string questionSlug, SubmitAnswerDto submitAnswerDto, [FromServices] ISubmitAnswerCommand submitAnswerCommand, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> SubmitAnswer(
+        string sectionSlug,
+        string questionSlug,
+        SubmitAnswerDto submitAnswerDto,
+        [FromServices] ISubmitAnswerCommand submitAnswerCommand,
+        CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
         {
@@ -97,7 +107,7 @@ public class QuestionsController : BaseController<QuestionsController>
         }
         catch (Exception e)
         {
-            logger.LogError("An error has occurred while submitting an answer with the following message: {message} ", e.Message);
+            logger.LogError(e, "An error has occurred while submitting an answer with the following message: {Message} ", e.Message);
             var viewModel = await GenerateViewModel(sectionSlug, questionSlug, cancellationToken);
             viewModel.ErrorMessages = new[] { "Save failed. Please try again later." };
             return RenderView(viewModel);

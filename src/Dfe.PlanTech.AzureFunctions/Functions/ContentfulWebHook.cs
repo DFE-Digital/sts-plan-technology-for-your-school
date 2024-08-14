@@ -22,7 +22,7 @@ namespace Dfe.PlanTech.AzureFunctions
             Logger.LogInformation("Received webhook POST.");
 
             var stream = new StreamReader(req.Body);
-            var body = stream.ReadToEnd();
+            var body = await stream.ReadToEndAsync(); // Await ReadToEndAsync instead
             var cmsEvent = req.Headers.GetValues("X-Contentful-Topic").FirstOrDefault();
 
             if (string.IsNullOrEmpty(body))

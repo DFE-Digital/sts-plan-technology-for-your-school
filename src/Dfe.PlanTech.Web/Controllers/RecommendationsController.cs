@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
@@ -17,8 +18,10 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
                                                        [FromServices] IGetRecommendationRouter getRecommendationValidator,
                                                        CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
-        if (string.IsNullOrEmpty(recommendationSlug)) throw new ArgumentNullException(nameof(recommendationSlug));
+        if (string.IsNullOrEmpty(sectionSlug))
+            throw new ArgumentNullException(nameof(sectionSlug));
+        if (string.IsNullOrEmpty(recommendationSlug))
+            throw new ArgumentNullException(nameof(recommendationSlug));
 
         return await getRecommendationValidator.ValidateRoute(sectionSlug,
           recommendationSlug,
@@ -27,14 +30,34 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
           cancellationToken);
     }
 
+    [HttpGet("{sectionSlug}/recommendation/preview/{maturity?}", Name = "GetRecommendationPreview")]
+    public async Task<IActionResult> GetRecommendationPreview(string sectionSlug,
+                                                              string? maturity,
+                                                              [FromServices] ContentfulOptions contentfulOptions,
+                                                              [FromServices] IGetRecommendationRouter getRecommendationRouter,
+                                                              CancellationToken cancellationToken)
+    {
+        if (!contentfulOptions.UsePreview)
+        {
+            return new RedirectResult("/self-assessment");
+        }
+
+        if (string.IsNullOrEmpty(sectionSlug))
+            throw new ArgumentNullException(nameof(sectionSlug));
+
+        return await getRecommendationRouter.GetRecommendationPreview(sectionSlug, maturity, this, cancellationToken);
+    }
+
     [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}/print", Name = "GetRecommendationChecklist")]
     public async Task<IActionResult> GetRecommendationChecklist(string sectionSlug,
                                                                 string recommendationSlug,
                                                                 [FromServices] IGetRecommendationRouter getRecommendationValidator,
                                                                 CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
-        if (string.IsNullOrEmpty(recommendationSlug)) throw new ArgumentNullException(nameof(recommendationSlug));
+        if (string.IsNullOrEmpty(sectionSlug))
+            throw new ArgumentNullException(nameof(sectionSlug));
+        if (string.IsNullOrEmpty(recommendationSlug))
+            throw new ArgumentNullException(nameof(recommendationSlug));
 
         return await getRecommendationValidator.ValidateRoute(sectionSlug,
             recommendationSlug,

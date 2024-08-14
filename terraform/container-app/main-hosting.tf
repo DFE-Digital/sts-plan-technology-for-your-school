@@ -1,5 +1,5 @@
 module "main_hosting" {
-  source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v1.6.4"
+  source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v1.10.3"
 
   ###########
   # General #
@@ -50,7 +50,7 @@ module "main_hosting" {
   ##############
   # Networking #
   ##############
-  container_apps_infra_subnet_service_endpoints = ["Microsoft.KeyVault"]
+  container_apps_infra_subnet_service_endpoints = ["Microsoft.KeyVault", "Microsoft.Storage"]
 
   #############################
   # Github Container Registry #

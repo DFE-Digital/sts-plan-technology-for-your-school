@@ -39,8 +39,8 @@ public class GetSubTopicRecommendationFromDbQuery(IRecommendationsRepository rep
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving recommendation for {Subtopic} from DB", subtopicId);
-            throw;
+            _logger.LogError(ex, "Error retrieving recommendation for {SubTopic} from DB", subtopicId);
+            throw new InvalidOperationException($"There was an error retrieving the recommendation for Subtopic Id: {subtopicId}. See inner exception.", ex);
         }
     }
 

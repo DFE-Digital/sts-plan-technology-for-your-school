@@ -1,4 +1,5 @@
 
+using System.Diagnostics.CodeAnalysis;
 using Contentful.Core;
 using Contentful.Core.Configuration;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
@@ -12,7 +13,6 @@ using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 

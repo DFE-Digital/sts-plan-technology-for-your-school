@@ -145,7 +145,8 @@ public class GetLatestResponsesQueryTests
                 submission.Deleted = deleted;
                 submission.Responses = GenerateResponses(sections, submission, faker).ToList();
 
-                if (!completeSections) continue;
+                if (!completeSections)
+                    continue;
 
                 submission.Completed = true;
                 submission.DateCompleted = faker.Date.Future(1, submission.DateCreated);

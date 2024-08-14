@@ -1,5 +1,5 @@
-﻿using Dfe.PlanTech.DatabaseUpgrader;
-using CommandLine;
+﻿using CommandLine;
+using Dfe.PlanTech.DatabaseUpgrader;
 
 /// <summary>
 /// PlanTech Database Upgrader.
@@ -25,7 +25,7 @@ internal class Program
 
         if (!success)
         {
-            throw new Exception("Errors occurred migrating database");
+            throw new InvalidOperationException("Errors occurred migrating database");
         }
     }
 

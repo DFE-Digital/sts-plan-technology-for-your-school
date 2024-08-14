@@ -1,9 +1,9 @@
+using System.Text;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 using Microsoft.Extensions.Logging.Abstractions;
-using System.Text;
 using TableCellRenderer =
     Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers.TableCellRenderer;
 using TableRenderer = Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers.TableRenderer;
@@ -114,7 +114,7 @@ public class TableRendererTests
         var renderers = new List<IRichTextContentPartRenderer>
             { tableRenderer, tableRowRenderer, tableHeaderCellRenderer, tableCellRenderer };
 
-        var rendererCollection = new RichTextRenderer(new NullLogger<IRichTextRenderer>(),
+        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(),
             renderers);
 
         StringBuilder output = tableRenderer.AddHtml(content, rendererCollection, new StringBuilder());

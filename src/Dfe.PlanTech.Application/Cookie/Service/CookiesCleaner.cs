@@ -53,5 +53,6 @@ public class CookiesCleaner(CookiesCleanerOptions opts) : ICookiesCleaner
     /// <param name="context"></param>
     /// <returns></returns>
     private IEnumerable<string> GetNonEssentialCookies(HttpContext context)
-      => context.Request.Cookies.Where(c => !opts.EssentialCookies.Any(e => c.Key.StartsWith(e))).Select(cookie => cookie.Key);
+      => context.Request.Cookies.Where(cookie => !Array.Exists(opts.EssentialCookies, essentialCookie => cookie.Key.StartsWith(essentialCookie)))
+                                .Select(cookie => cookie.Key);
 }

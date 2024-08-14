@@ -119,7 +119,7 @@ public class RecommendationChunkMapperTests : BaseMapperTests
     [Fact]
     public async Task Should_Create_New_Recommendation_Chunk_With_Existing_Data()
     {
-        var payload = CreateRecommendationChunkPayload("new-chunk-id", _answerIds, _contentIds);
+        var payload = CreateRecommendationChunkPayload("new-chunk-id", _answerIds, _contentIds, null);
 
         var RecommendationChunk = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default);
 
@@ -141,7 +141,14 @@ public class RecommendationChunkMapperTests : BaseMapperTests
     {
         string[] answers = [.. _answerIds[1..]];
         string[] contents = [.. _contentIds[2..]];
-        var payload = CreateRecommendationChunkPayload(ExistingRecommendationChunk.Id, answers, contents);
+        string csLinkId = "csLink-id";
+
+        var payload = CreateRecommendationChunkPayload(
+            ExistingRecommendationChunk.Id,
+            answers,
+            contents,
+            csLinkId
+        );
 
         var RecommendationChunk = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default);
 
@@ -151,6 +158,7 @@ public class RecommendationChunkMapperTests : BaseMapperTests
 
         Assert.NotNull(incoming);
         Assert.NotNull(existing);
+        Assert.Equal(csLinkId, incoming.CSLinkId);
 
         ValidateReferencedContent(answers, existing.Answers, true, InitialOrder);
         ValidateReferencedContent(contents, existing.Content, true);
@@ -163,7 +171,12 @@ public class RecommendationChunkMapperTests : BaseMapperTests
     {
         string[] notFoundAnswers = ["not-existing-answer", "also-not-existing"];
         string[] notFoundContent = ["not-found-content"];
-        var payload = CreateRecommendationChunkPayload(recSecId, ["answer1", .. notFoundAnswers], ["content3", .. notFoundContent]);
+        var payload = CreateRecommendationChunkPayload(
+            recSecId,
+            ["answer1", .. notFoundAnswers],
+            ["content3", .. notFoundContent],
+            null
+        );
 
         var RecommendationChunk = await _mapper.MapEntity(payload, CmsEvent.PUBLISH, default);
 
@@ -217,8 +230,14 @@ public class RecommendationChunkMapperTests : BaseMapperTests
         }
     }
 
-    private CmsWebHookPayload CreateRecommendationChunkPayload(string chunkId, string[] answerIds, string[] contentIds)
+    private CmsWebHookPayload CreateRecommendationChunkPayload(
+        string chunkId,
+        string[] answerIds,
+        string[] contentIds,
+        string? csLinkId
+    )
     {
+
         CmsWebHookSystemDetailsInnerContainer[] answers =
             answerIds.Select(answerId => new CmsWebHookSystemDetailsInnerContainer()
             {
@@ -242,6 +261,18 @@ public class RecommendationChunkMapperTests : BaseMapperTests
             ["answers"] = WrapWithLocalisation(answers),
             ["content"] = WrapWithLocalisation(contents),
         };
+
+        if (csLinkId != null)
+        {
+            var link = new CmsWebHookSystemDetailsInnerContainer()
+            {
+                Sys = new CmsWebHookSystemDetailsInner()
+                {
+                    Id = csLinkId
+                }
+            };
+            fields["csLinkId"] = WrapWithLocalisation(link);
+        }
 
         var payload = CreatePayload(fields, chunkId);
         return payload;

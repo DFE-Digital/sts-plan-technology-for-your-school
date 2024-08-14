@@ -27,15 +27,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.PlanTech.Infrastructure
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.PlanTech.Infrastructure.Data", "src\Dfe.PlanTech.Infrastructure.Data\Dfe.PlanTech.Infrastructure.Data.csproj", "{98347BCE-5A8C-4B60-9661-D26CE35844E5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.UnitTests.Shared", "tests\Dfe.PlanTech.UnitTests.Shared\Dfe.PlanTech.UnitTests.Shared.csproj", "{5D0C8F71-DD08-43AE-8791-A488DBDE2DF7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.PlanTech.UnitTests.Shared", "tests\Dfe.PlanTech.UnitTests.Shared\Dfe.PlanTech.UnitTests.Shared.csproj", "{5D0C8F71-DD08-43AE-8791-A488DBDE2DF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.AzureFunctions", "src\Dfe.PlanTech.AzureFunctions\Dfe.PlanTech.AzureFunctions.csproj", "{71808DB3-6B0A-42C1-8B3A-26A8C2D24AAD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.PlanTech.AzureFunctions", "src\Dfe.PlanTech.AzureFunctions\Dfe.PlanTech.AzureFunctions.csproj", "{71808DB3-6B0A-42C1-8B3A-26A8C2D24AAD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.AzureFunctions.UnitTests", "tests\Dfe.PlanTech.AzureFunctions.UnitTests\Dfe.PlanTech.AzureFunctions.UnitTests.csproj", "{2F75269D-834B-4E0A-BAD2-7ECAD359C56D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.PlanTech.AzureFunctions.UnitTests", "tests\Dfe.PlanTech.AzureFunctions.UnitTests\Dfe.PlanTech.AzureFunctions.UnitTests.csproj", "{2F75269D-834B-4E0A-BAD2-7ECAD359C56D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.Infrastructure.Data.UnitTests", "tests\Dfe.PlanTech.Infrastructure.Data.UnitTests\Dfe.PlanTech.Infrastructure.Data.UnitTests.csproj", "{B82ED911-FFCD-4EFF-BD9E-405394811F13}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.PlanTech.Infrastructure.Data.UnitTests", "tests\Dfe.PlanTech.Infrastructure.Data.UnitTests\Dfe.PlanTech.Infrastructure.Data.UnitTests.csproj", "{B82ED911-FFCD-4EFF-BD9E-405394811F13}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.CmsDbDataValidator", "tests\Dfe.PlanTech.CmsDbDataValidator\Dfe.PlanTech.CmsDbDataValidator.csproj", "{66E92A5E-5C8A-4245-A55F-087FE2D96EEF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.PlanTech.CmsDbDataValidator", "tests\Dfe.PlanTech.CmsDbDataValidator\Dfe.PlanTech.CmsDbDataValidator.csproj", "{66E92A5E-5C8A-4245-A55F-087FE2D96EEF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.ContentSupport.Web", "contentandsupport\src\Dfe.ContentSupport.Web\Dfe.ContentSupport.Web.csproj", "{902F3AA9-FF2C-4D89-98F2-74467B043BA0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.Web.SeedTestData", "tests\Dfe.PlanTech.Web.SeedTestData\Dfe.PlanTech.Web.SeedTestData.csproj", "{0E05B7CD-6CDC-41EE-89BB-AE415A359085}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -103,6 +107,14 @@ Global
 		{66E92A5E-5C8A-4245-A55F-087FE2D96EEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66E92A5E-5C8A-4245-A55F-087FE2D96EEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{66E92A5E-5C8A-4245-A55F-087FE2D96EEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E05B7CD-6CDC-41EE-89BB-AE415A359085}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E05B7CD-6CDC-41EE-89BB-AE415A359085}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E05B7CD-6CDC-41EE-89BB-AE415A359085}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E05B7CD-6CDC-41EE-89BB-AE415A359085}.Release|Any CPU.Build.0 = Release|Any CPU
+		{902F3AA9-FF2C-4D89-98F2-74467B043BA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{902F3AA9-FF2C-4D89-98F2-74467B043BA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{902F3AA9-FF2C-4D89-98F2-74467B043BA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{902F3AA9-FF2C-4D89-98F2-74467B043BA0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -123,6 +135,7 @@ Global
 		{2F75269D-834B-4E0A-BAD2-7ECAD359C56D} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
 		{B82ED911-FFCD-4EFF-BD9E-405394811F13} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
 		{66E92A5E-5C8A-4245-A55F-087FE2D96EEF} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
+		{0E05B7CD-6CDC-41EE-89BB-AE415A359085} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2661FAF0-D2EA-4265-846E-E6AB213C854C}

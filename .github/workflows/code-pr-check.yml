@@ -37,6 +37,12 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.ref }}
+          submodules: true
+
+      - name: Git Submodule Update
+        run: |
+            git pull --recurse-submodules
+            git submodule update --remote --recursive
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
@@ -48,13 +54,14 @@ jobs:
         run: dotnet format plan-technology-for-your-school.sln
 
       - name: Commit and push changes if necessary
-        if: 
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
           if [[ `git status --porcelain` ]]; then
-            git commit -am "chore: Linted code for plan-technology-for-your-school.sln solution"
+            git add src/*
+            git add tests/*
+            git commit -m "chore: Linted code for plan-technology-for-your-school.sln solution"
             git push
           else
             echo 'No linting changes'
@@ -69,6 +76,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v4
@@ -97,7 +106,8 @@ jobs:
           /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
           /d:sonar.host.url="https://sonarcloud.io" \
           /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml \
-          /d:sonar.coverage.exclusions=**/Program.cs,**/gulpfile.js,**/wwwroot/** \
+          /d:sonar.exclusions=**/contentandsupport/** \
+          /d:sonar.coverage.exclusions=**/Program.cs,**/gulpfile.js,**/wwwroot/**,**/contentandsupport/**,**/Dfe.PlanTech.Web.SeedTestData/** \
           /d:sonar.issue.ignore.multicriteria=e1 \
           /d:sonar.issue.ignore.multicriteria.e1.ruleKey=csharpsquid:S6602 \
           /d:sonar.issue.ignore.multicriteria.e1.resourceKey=src/**/*.cs

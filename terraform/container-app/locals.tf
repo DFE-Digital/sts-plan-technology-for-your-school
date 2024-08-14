@@ -80,6 +80,7 @@ locals {
   storage_account_public_access_enabled                   = var.storage_account_public_access_enabled
   container_app_storage_account_shared_access_key_enabled = var.container_app_storage_account_shared_access_key_enabled
   container_app_blob_storage_public_access_enabled        = var.container_app_blob_storage_public_access_enabled
+  storage_account_expiration_period                       = var.storage_account_expiration_period
 
   ###########################
   # Content Security Policy #
@@ -87,4 +88,41 @@ locals {
 
   csp_clarity_domains           = "https://www.clarity.ms https://c.bing.com https://a.clarity.ms https://b.clarity.ms https://c.clarity.ms https://d.clarity.ms https://e.clarity.ms https://f.clarity.ms https://g.clarity.ms https://h.clarity.ms https://i.clarity.ms https://j.clarity.ms https://k.clarity.ms https://l.clarity.ms https://m.clarity.ms https://n.clarity.ms https://o.clarity.ms https://p.clarity.ms https://q.clarity.ms https://r.clarity.ms https://s.clarity.ms https://t.clarity.ms https://u.clarity.ms https://v.clarity.ms https://w.clarity.ms https://x.clarity.ms https://y.clarity.ms https://z.clarity.ms"
   csp_google_tag_manager_domain = "www.googletagmanager.com"
+
+  ################
+  # Function App #
+  ################
+
+  function = {
+    name     = "${local.resource_prefix}contentfulfunction",
+    location = "northeurope",
+
+    runtime = var.function_runtime,
+    scaling = var.function_scaling,
+
+    app_settings = {
+      sql_connection_string = local.function_appsetting_sql_connection_string
+      cacheclear = {
+        apikey_name  = local.function_appsetting_cacheclear_apikey_name,
+        apikey_value = local.function_appsetting_cacheclear_apikey_value,
+        endpoint     = local.function_appsetting_cacheclear_endpoint
+      }
+    }
+
+    vnet = {
+      name          = "${local.resource_prefix}-function-vn"
+      address_space = "10.0.0.0/14"
+
+      subnet = {
+        name             = "${local.resource_prefix}-functioninfra"
+        address_prefixes = ["10.0.0.0/24"]
+      }
+    }
+  }
+
+  # Settings
+  function_appsetting_sql_connection_string   = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=${azurerm_key_vault_secret.vault_secret_database_connectionstring.name})"
+  function_appsetting_cacheclear_apikey_name  = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=CacheClear--ApiKeyName)"
+  function_appsetting_cacheclear_apikey_value = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=CacheClear--ApiKeyValue)"
+  function_appsetting_cacheclear_endpoint     = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=CacheClear--Endpoint)"
 }

@@ -41,8 +41,10 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     /// <exception cref="ArgumentNullException"></exception>
     public async Task<IActionResult> ValidateRoute(string sectionSlug, string questionSlug, QuestionsController controller, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(sectionSlug)) throw new ArgumentNullException(nameof(sectionSlug));
-        if (string.IsNullOrEmpty(questionSlug)) throw new ArgumentNullException(nameof(questionSlug));
+        if (string.IsNullOrEmpty(sectionSlug))
+            throw new ArgumentNullException(nameof(sectionSlug));
+        if (string.IsNullOrEmpty(questionSlug))
+            throw new ArgumentNullException(nameof(questionSlug));
 
         await _router.GetJourneyStatusForSection(sectionSlug, cancellationToken);
 
@@ -52,7 +54,8 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
             return controller.RenderView(viewModel);
         }
 
-        if (SectionIsAtStart) return PageRedirecter.RedirectToInterstitialPage(controller, sectionSlug);
+        if (SectionIsAtStart)
+            return PageRedirecter.RedirectToInterstitialPage(controller, sectionSlug);
 
         return await ProcessOtherStatuses(sectionSlug, questionSlug, controller, cancellationToken);
     }
@@ -83,7 +86,8 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
 
         var isAttachedQuestion = IsQuestionAttached(responses, question);
 
-        if (!isAttachedQuestion) return HandleNotAttachedQuestion(sectionSlug, controller);
+        if (!isAttachedQuestion)
+            return HandleNotAttachedQuestion(sectionSlug, controller);
 
         var latestResponseForQuestion = GetLatestResponseForQuestion(responses, question);
 
@@ -116,7 +120,8 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
 
         var latestResponses = await _getResponseQuery.GetLatestResponses(establishmentId, _router.Section.Sys.Id, false, cancellationToken);
 
-        if (latestResponses == null || latestResponses.Responses.Count == 0) throw new DatabaseException($"Could not find latest responses for '{_router.Section.Sys.Id}'");
+        if (latestResponses == null || latestResponses.Responses.Count == 0)
+            throw new DatabaseException($"Could not find latest responses for '{_router.Section.Sys.Id}'");
 
         return latestResponses.Responses;
     }
@@ -172,5 +177,6 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     /// </summary>
     /// <param name="questionSlug"></param>
     /// <returns></returns>
-    private bool IsSlugForNextQuestion(string questionSlug) => _router.NextQuestion != null && _router.NextQuestion!.Slug == questionSlug;
+    private bool IsSlugForNextQuestion(string questionSlug)
+    => _router.NextQuestion != null && _router.NextQuestion!.Slug == questionSlug;
 }

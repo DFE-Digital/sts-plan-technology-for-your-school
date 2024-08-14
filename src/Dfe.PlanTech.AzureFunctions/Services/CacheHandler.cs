@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.AzureFunctions.Services;
 
@@ -8,6 +9,14 @@ public class CacheHandler(
     CacheRefreshConfiguration cacheRefreshConfiguration,
     ILogger<CacheHandler> logger) : ICacheHandler
 {
+
+    public CacheHandler(HttpClient httpClient,
+    IOptions<CacheRefreshConfiguration> cacheRefreshConfigurationOptions,
+    ILogger<CacheHandler> logger) : this(httpClient, cacheRefreshConfigurationOptions.Value, logger)
+    {
+
+    }
+
     /// <summary>
     /// Makes a call to the plan tech web app that invalidates the database cache.
     /// </summary>
@@ -21,7 +30,13 @@ public class CacheHandler(
 
         var request = new HttpRequestMessage(HttpMethod.Post, cacheRefreshConfiguration.Endpoint);
         request.Headers.Add(cacheRefreshConfiguration.ApiKeyName, cacheRefreshConfiguration.ApiKeyValue);
-
-        await httpClient.SendAsync(request, cancellationToken);
+        try
+        {
+            await httpClient.SendAsync(request, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error requesting a cache clear after content update");
+        }
     }
 }

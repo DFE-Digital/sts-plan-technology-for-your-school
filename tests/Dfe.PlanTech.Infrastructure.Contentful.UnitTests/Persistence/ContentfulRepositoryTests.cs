@@ -1,3 +1,4 @@
+using System.Web;
 using Contentful.Core;
 using Contentful.Core.Models;
 using Contentful.Core.Search;
@@ -5,7 +6,6 @@ using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
-using System.Web;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
 {
@@ -59,7 +59,8 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
                 string id = string.Empty;
                 string etag = string.Empty;
                 var matching = _substituteData.FirstOrDefault(test => test.Id == id);
-                if (matching == null) return Task.FromResult(new ContentfulResult<TestClass>());
+                if (matching == null)
+                    return Task.FromResult(new ContentfulResult<TestClass>());
 
                 return Task.FromResult(new ContentfulResult<TestClass>(etag, matching));
             });

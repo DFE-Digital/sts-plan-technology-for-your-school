@@ -36,14 +36,29 @@ _Note: These instructions require Docker, but that is not required to run the te
 
 #### Setup a database
 
-1. Create an [Azure SQL Edge server] by running the following command in your terminal: `docker run --cap-add SYS_PTRACE -e 'ACCEPT_EULA=1' -e "MSSQL_SA_PASSWORD=Pa5ssw0rd@G0esH3r3" -p 1433:1433 --name azuresqledge -d mcr.microsoft.com/azure-sql-edge`.
-
+1. Create an [Azure SQL Edge server] by running the following command in your terminal: 
+```bash
+docker run --cap-add SYS_PTRACE -e 'ACCEPT_EULA=1' -e "MSSQL_SA_PASSWORD=Pa5ssw0rd@G0esH3r3" -p 1433:1433 --name azuresqledge -d mcr.microsoft.com/azure-sql-edge`.
+```
 Notes: 
 - Feel free to change the password, port, name, etc. in the command
 - The password used needs to conform to Microsoft's password standards otherwise it will not work
 
-2. Create the connection string for the server. With the above settings the connection string would be `Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=Pa5ssw0rd@G0esH3r3;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;Max Pool Size=1000;`
-3. Initialise the database with our schema by running the [Dfe.PlanTech.DatabaseUpgrader](../../src/Dfe.PlanTech.DatabaseUpgrader/) project against it. View that project's README (linked) for more information on how to do this.
+2. Connect to the server and create a new database by either:
+   - running the following command (not supported on Arm64 chips):
+       ```bash
+       docker exec -it azuresqledge /opt/mssql-tools/bin/sqlcmd \
+          -S localhost -U SA -P "Pa5ssw0rd@G0esH3r3" \
+          -Q 'CREATE DATABASE [plantech-mock-db]'
+       ```
+   - Or connecting to the server with any preferred cli/tool (e.g. sql-cli or Azure Data Studio) and creating it with that.
+
+Notes:
+   - Name for the database can be changed to anything you like
+   - To connect to the server with the connection string before the database has been created, just remove the database parameter
+   
+3. Create the connection string for the testing database. With the above settings the connection string would be `Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=Pa5ssw0rd@G0esH3r3;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;Max Pool Size=1000;Database=plantech-mock-db`
+4. Initialise the database with our schema by running the [Dfe.PlanTech.DatabaseUpgrader](../../src/Dfe.PlanTech.DatabaseUpgrader/) project against it. View that project's README (linked) for more information on how to do this.
 
 #### Configure environment variables
 

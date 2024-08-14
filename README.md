@@ -4,7 +4,7 @@ Web application to help schools plan a technology roadmap
 
 [![Code PR Check](https://github.com/DFE-Digital/plan-technology-for-your-school/actions/workflows/code-pr-check.yml/badge.svg)](https://github.com/DFE-Digital/plan-technology-for-your-school/actions/workflows/code-pr-check.yml)
 [![Terraform PR Check](https://github.com/DFE-Digital/plan-technology-for-your-school/actions/workflows/terraform-pr-check.yml/badge.svg?branch=main)](https://github.com/DFE-Digital/plan-technology-for-your-school/actions/workflows/terraform-pr-check.yml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DFE-Digital_school-account&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=DFE-Digital_plan-technology-for-your-school)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DFE-Digital_plan-technology-for-your-school&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=DFE-Digital_plan-technology-for-your-school)
 
 ## Requirements
 
