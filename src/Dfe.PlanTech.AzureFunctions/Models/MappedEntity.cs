@@ -41,18 +41,15 @@ public class MappedEntity
             return true;
         }
 
-        // Get a list of null properties from the incoming entity, excluding ones we don't process
-        string? nullProperties = string.Join(", ", AnyRequiredPropertyIsNull(db, _dontCopyValueAttribute));
-
-        IsValid = string.IsNullOrEmpty(nullProperties);
+        // Set missing required properties on the incoming entity to a default value, excluding ones we don't process
+        IsValid = SetDefaultsOnRequiredProperties(db, _dontCopyValueAttribute);
 
         // Log a message if the entity is not valid.
         if (!IsValid)
         {
             logger.LogWarning(
-                "Content Component with ID {Id} is missing the following required properties: {NullProperties}",
-                IncomingEntity.Id,
-                nullProperties
+                "Content Component with ID {Id} has required properties that could not be set to a default value",
+                IncomingEntity.Id
             );
         }
 
@@ -155,21 +152,56 @@ public class MappedEntity
         }
     }
 
-    private IEnumerable<PropertyInfo?> AnyRequiredPropertyIsNull(CmsDbContext db, Type dontCopyAttribute)
-        => db.Model.FindEntityType(IncomingEntity.GetType())!
-                    .GetProperties()
-                    .Where(prop => !prop.IsNullable)
-                    .Select(prop => prop.PropertyInfo)
-                    .Where(prop => !prop!.CustomAttributes.Any(atr => atr.GetType() == dontCopyAttribute))
-                    .Where(prop => prop!.GetValue(IncomingEntity) == null);
+    /// <summary>
+    /// Provides a default value for a given type.
+    /// Integers are defaulted to 1 as the usage is for Header Tags and Sizes
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
+    private static object? GetDefaultValue(Type type)
+    {
+        if (type == typeof(string))
+            return "";
+        if (type == typeof(int))
+            return 1;
+        if (type == typeof(bool))
+            return false;
+
+        return null;
+    }
+
+    /// <summary>
+    /// Set a default value for any required but null property on the incoming entity
+    /// This is to allow saving the entity before it is complete, to avoid losing relationships between entities
+    /// </summary>
+    /// <param name="db"></param>
+    /// <param name="dontCopyAttribute"></param>
+    /// <returns>Whether all required properties were successfully updated</returns>
+    private bool SetDefaultsOnRequiredProperties(CmsDbContext db, Type dontCopyAttribute)
+    {
+        var missingRequiredProperties = db.Model.FindEntityType(IncomingEntity.GetType())!
+            .GetProperties()
+            .Where(prop => !prop.IsNullable)
+            .Select(prop => prop.PropertyInfo)
+            .Where(prop => prop != null && prop.CustomAttributes.All(atr => atr.GetType() != dontCopyAttribute))
+            .Where(prop => prop!.GetValue(IncomingEntity) == null);
+
+        foreach (var prop in missingRequiredProperties)
+        {
+            var defaultValue = GetDefaultValue(prop!.PropertyType);
+            if (defaultValue is null)
+                return false;
+            prop.SetValue(IncomingEntity, defaultValue);
+        }
+
+        return true;
+    }
 
     /// <summary>
     /// Updates the properties of the existing entity using the values from the incoming entity.
-    /// It only updates the properties if the values have changed, to minimise unnecessary 
+    /// It only updates the properties if the values have changed, to minimise unnecessary
     /// update calls to the database.
     /// </summary>
-    /// <param name="incoming">The incoming entity with the new values.</param>
-    /// <param name="existing">The existing entity with the current values.</param>
     private void UpdateProperties()
     {
         foreach (var property in PropertiesToCopy(IncomingEntity))
@@ -204,7 +236,7 @@ public class MappedEntity
                 .Where(property => !HasDontCopyValueAttribute(property));
 
     /// <summary>
-    /// Does the property have a <see cref="DontCopyValueAttribute"/> property attached to it? 
+    /// Does the property have a <see cref="DontCopyValueAttribute"/> property attached to it?
     /// </summary>
     /// <param name="property"></param>
     /// <returns></returns>
