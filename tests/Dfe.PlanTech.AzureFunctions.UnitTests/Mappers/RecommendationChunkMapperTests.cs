@@ -183,14 +183,14 @@ public class RecommendationChunkMapperTests : BaseMapperTests
         var (incoming, existing) = RecommendationChunk.GetTypedEntities<RecommendationChunkDbEntity>();
 
         // Assert.NotNull(incoming);
-     Assert.Null(incoming);
+        Assert.Null(incoming);
 
         var recSecToCheck = (recSecId == ExistingChunkId ? existing : incoming)!;
 
         if (recSecId == ExistingChunkId)
         {
             // Assert.NotNull(existing);
-                         Assert.Null(existing);
+            Assert.Null(existing);
         }
         else
         {
