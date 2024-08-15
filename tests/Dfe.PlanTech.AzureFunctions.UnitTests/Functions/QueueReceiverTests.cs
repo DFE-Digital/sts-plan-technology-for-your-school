@@ -441,27 +441,6 @@ public class QueueReceiverTests
     }
 
     [Fact]
-    public async Task QueueReceiverDbWriter_Should_ExitEarly_When_Component_IsInvalid()
-    {
-        string invalidBodyJsonStr = "{\"metadata\":{\"tags\":[]},\"sys\":{\"space\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"Space\",\"id\":\"py5afvqdlxgo\"}},\"id\":\"6G1UpN2x7vrtoSZdpg2nW7\",\"type\":\"Entry\",\"createdAt\":\"2024-02-12T11:40:25.426Z\",\"updatedAt\":\"2024-02-12T11:40:38.648Z\",\"environment\":{\"sys\":{\"id\":\"dev\",\"type\":\"Link\",\"linkType\":\"Environment\"}},\"createdBy\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"User\",\"id\":\"4hiJvkyVWdhTt6c4ZoDkMf\"}},\"updatedBy\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"User\",\"id\":\"4hiJvkyVWdhTt6c4ZoDkMf\"}},\"publishedCounter\":0,\"version\":2,\"automationTags\":[],\"contentType\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"ContentType\",\"id\":\"question\"}}},\"fields\":{\"internalName\":{\"en-US\":\"TestInternalName\"},\"slug\":{\"en-US\":\"test-slug\"}}}";
-
-        ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
-        ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
-
-        var subject = "ContentManagement.Entry.auto_save";
-        var serviceBusMessage = new ServiceBusMessage(invalidBodyJsonStr) { Subject = subject };
-
-        ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
-
-        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
-
-        await serviceBusMessageActionsMock.Received()
-                                          .CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
-
-        Assert.Single(_questions);
-    }
-
-    [Fact]
     public async Task QueueReceiverDbWriter_Should_ExitEarly_When_CmsEvent_Is_Create()
     {
         ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
@@ -524,5 +503,25 @@ public class QueueReceiverTests
     public async Task ProcessEntityRemovalEvent_Should_Throw_Exception_If_Entity_Null()
     {
         await Assert.ThrowsAnyAsync<Exception>(() => _queueReceiver.ProcessEntityRemovalEvent(null!, CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task QueueReceiverDbWriter_Should_Save_With_Defaults_When_Required_Content_Missing()
+    {
+        string bodyWithMissingFields = "{\"metadata\":{\"tags\":[]},\"fields\":{},\"sys\":{\"type\":\"Entry\",\"id\":\"2VSR0emw0SPy8dlR9XlgfF\",\"space\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"Space\",\"id\":\"py5afvqdlxgo\"}},\"environment\":{\"sys\":{\"id\":\"dev\",\"type\":\"Link\",\"linkType\":\"Environment\"}},\"contentType\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"ContentType\",\"id\":\"question\"}},\"createdBy\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"User\",\"id\":\"5yhMQOCN9P2vGpfjyZKiey\"}},\"updatedBy\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"User\",\"id\":\"4hiJvkyVWdhTt6c4ZoDkMf\"}},\"revision\":13,\"createdAt\":\"2023-12-04T14:36:46.614Z\",\"updatedAt\":\"2023-12-15T16:16:45.034Z\"}}";
+
+        ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
+        ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
+
+        var subject = "ContentManagement.Entry.save";
+        var serviceBusMessage = new ServiceBusMessage(bodyWithMissingFields) { Subject = subject };
+
+        ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
+
+        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+
+        await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>());
+        await _cmsDbContextMock.ReceivedWithAnyArgs(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        _cmsDbContextMock.ReceivedWithAnyArgs(1).Add(Arg.Any<ContentComponentDbEntity>());
     }
 }
