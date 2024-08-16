@@ -60,7 +60,6 @@ public class PageModelAuthorisationPolicyTests
         Assert.True(_authContext.HasSucceeded);
     }
 
-
     [Fact]
     public async Task Should_Set_HttpContext_Item_For_Page()
     {
@@ -120,7 +119,7 @@ public class PageModelAuthorisationPolicyTests
     {
         _authContext = new AuthorizationHandlerContext(new[] { new PageAuthorisationRequirement() }, new ClaimsPrincipal(), null);
         await _policy.HandleAsync(_authContext);
-        _logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
+        _logger.ReceivedWithAnyArgs(1).Log(LogLevel.Error, Arg.Any<EventId>(), Arg.Any<Exception>(), Arg.Any<string>(), Arg.Any<object[]>());
     }
 
     [Fact]
@@ -138,5 +137,4 @@ public class PageModelAuthorisationPolicyTests
         Assert.True(_httpContext.Request.RouteValues.ContainsKey(PageModelAuthorisationPolicy.ROUTE_NAME));
         Assert.Equal("/", _httpContext.Request.RouteValues[PageModelAuthorisationPolicy.ROUTE_NAME]);
     }
-
 }
