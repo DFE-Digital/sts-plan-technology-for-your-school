@@ -38,7 +38,7 @@ We use two external modules to create the majority of the resources required:
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azapi"></a> [azapi](#provider\_azapi) | 1.14.0 |
+| <a name="provider_azapi"></a> [azapi](#provider\_azapi) | 1.15.0 |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.113.0 |
 
 ## Modules
@@ -68,13 +68,17 @@ We use two external modules to create the majority of the resources required:
 | [azurerm_key_vault_secret.vault_secret_contentful_spaceid](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault_secret.vault_secret_database_connectionstring](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/key_vault_secret) | resource |
 | [azurerm_private_dns_zone.blob_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone) | resource |
+| [azurerm_private_dns_zone.database](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone) | resource |
 | [azurerm_private_dns_zone.files_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone) | resource |
 | [azurerm_private_dns_zone.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone) | resource |
 | [azurerm_private_dns_zone_virtual_network_link.blob_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone_virtual_network_link) | resource |
+| [azurerm_private_dns_zone_virtual_network_link.database_default](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone_virtual_network_link) | resource |
+| [azurerm_private_dns_zone_virtual_network_link.database_function](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone_virtual_network_link) | resource |
 | [azurerm_private_dns_zone_virtual_network_link.files_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone_virtual_network_link) | resource |
 | [azurerm_private_dns_zone_virtual_network_link.keyvault_to_defaultvnet](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone_virtual_network_link) | resource |
 | [azurerm_private_dns_zone_virtual_network_link.keyvault_to_functionvnet](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone_virtual_network_link) | resource |
 | [azurerm_private_endpoint.blob_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_endpoint) | resource |
+| [azurerm_private_endpoint.database](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_endpoint) | resource |
 | [azurerm_private_endpoint.files_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_endpoint) | resource |
 | [azurerm_private_endpoint.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_endpoint) | resource |
 | [azurerm_service_plan.function_plan](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/service_plan) | resource |
@@ -95,6 +99,7 @@ We use two external modules to create the majority of the resources required:
 | [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/data-sources/client_config) | data source |
 | [azurerm_resource_group.resource_group](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/data-sources/resource_group) | data source |
 | [azurerm_route_table.default](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/data-sources/route_table) | data source |
+| [azurerm_sql_server.database](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/data-sources/sql_server) | data source |
 
 ## Inputs
 
