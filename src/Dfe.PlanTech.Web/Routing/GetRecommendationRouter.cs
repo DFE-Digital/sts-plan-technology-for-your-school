@@ -50,7 +50,11 @@ public class GetRecommendationRouter(ISubmissionStatusProcessor router,
     {
         await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken);
         var recommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(_router.Section.Sys.Id, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {_router.Section.Name}");
-        var intro = recommendation.Intros.FirstOrDefault(intro => string.Equals(intro.Maturity, maturity, StringComparison.InvariantCultureIgnoreCase)) ?? recommendation.Intros.First();
+        
+        var intro = recommendation.Intros.Count > 0 && 
+                    string.Equals(recommendation.Intros[0].Maturity, maturity, StringComparison.InvariantCultureIgnoreCase) ? 
+                    recommendation.Intros[0] : 
+                    recommendation.Intros[0];
 
         var viewModel = new RecommendationsViewModel()
         {
