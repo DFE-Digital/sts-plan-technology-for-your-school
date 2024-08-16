@@ -89,7 +89,7 @@ public class GetNavigationQueryTests
 
         var result = await navQuery.GetNavigationLinks();
 
-        _logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
+        _logger.ReceivedWithAnyArgs(1).Log(LogLevel.Error, default, "An error occurred while retrieving navigation links.", default, default!);
         Assert.Equal(_contentfulLinks, result);
     }
 
@@ -116,7 +116,7 @@ public class GetNavigationQueryTests
 
         var result = await navQuery.GetNavigationLinks();
 
-        _logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
+        _logger.ReceivedWithAnyArgs(1).Log(LogLevel.Error, default, "An error occurred while retrieving navigation links.", default, default!);
         Assert.Empty(result);
     }
 
