@@ -18,7 +18,7 @@ where TEntity : ContentComponentDbEntity, new()
     protected CmsWebHookPayload? Payload;
     protected EntityUpdater _entityUpdater;
 
-    protected JsonToDbMapper(EntityRetriever entityRetriever, EntityUpdater entityUpdater, ILogger<JsonToDbMapper<TEntity>> logger, JsonSerializerOptions jsonSerialiserOptions) 
+    protected JsonToDbMapper(EntityRetriever entityRetriever, EntityUpdater entityUpdater, ILogger<JsonToDbMapper<TEntity>> logger, JsonSerializerOptions jsonSerialiserOptions)
         : base(entityRetriever, typeof(TEntity), logger, jsonSerialiserOptions)
     {
         _entityUpdater = entityUpdater;

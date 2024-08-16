@@ -97,7 +97,7 @@ public static class QueryBuilders
     public static List<KeyValuePair<string, string>> QueryStringValues<T>(this QueryBuilder<T> queryBuilder)
     {
         var fieldInfo = queryBuilder.GetType().GetField(QueryBuilderStringValuesFieldName, BindingFlags.NonPublic | BindingFlags.Instance);
-        
+
         if (fieldInfo == null)
         {
             throw new MissingFieldException($"Couldn't find field {QueryBuilderStringValuesFieldName}");

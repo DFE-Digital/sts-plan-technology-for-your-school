@@ -44,7 +44,7 @@ public class GetNavigationQueryTests
             return queryable.ToList();
         });
 
-        GetNavigationQuery navQuery = new GetNavigationQuery(_db, _logger, _contentRepository);
+        GetNavigationQuery navQuery = new(_db, _logger, _contentRepository);
 
         var result = await navQuery.GetNavigationLinks();
 
@@ -65,7 +65,7 @@ public class GetNavigationQueryTests
             return queryable.ToList();
         });
 
-        GetNavigationQuery navQuery = new GetNavigationQuery(_db, _logger, _contentRepository);
+        GetNavigationQuery navQuery = new(_db, _logger, _contentRepository);
 
         var result = await navQuery.GetNavigationLinks();
 
@@ -85,11 +85,12 @@ public class GetNavigationQueryTests
             throw new Exception("Error occurred");
         });
 
-        GetNavigationQuery navQuery = new GetNavigationQuery(_db, _logger, _contentRepository);
+        GetNavigationQuery navQuery = new(_db, _logger, _contentRepository);
 
         var result = await navQuery.GetNavigationLinks();
 
-        _logger.ReceivedWithAnyArgs(1).Log(LogLevel.Error, default, "An error occurred while retrieving navigation links.", default, default!);
+        _logger.ReceivedMessages(GetNavigationQuery.ExceptionMessageDatabase, LogLevel.Error, 1);
+
         Assert.Equal(_contentfulLinks, result);
     }
 
@@ -112,11 +113,13 @@ public class GetNavigationQueryTests
         });
 
 
-        GetNavigationQuery navQuery = new GetNavigationQuery(_db, _logger, _contentRepository);
+        GetNavigationQuery navQuery = new(_db, _logger, _contentRepository);
 
         var result = await navQuery.GetNavigationLinks();
 
-        _logger.ReceivedWithAnyArgs(1).Log(LogLevel.Error, default, "An error occurred while retrieving navigation links.", default, default!);
+        var receivedCalls = _logger.ReceivedCalls();
+
+        _logger.ReceivedMessages(GetNavigationQuery.ExceptionMessageContentful, LogLevel.Error, 1);
         Assert.Empty(result);
     }
 

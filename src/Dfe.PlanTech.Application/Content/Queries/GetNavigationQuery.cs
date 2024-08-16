@@ -12,6 +12,10 @@ namespace Dfe.PlanTech.Application.Content.Queries;
 /// </summary>
 public class GetNavigationQuery : ContentRetriever, IGetNavigationQuery
 {
+    public const string ExceptionMessageContentful = "Error getting navigation links from Contentful";
+
+    public const string ExceptionMessageDatabase = "Error getting navigation links from database";
+
     private readonly ICmsDbContext _db;
     private readonly ILogger<GetNavigationQuery> _logger;
 
@@ -41,7 +45,7 @@ public class GetNavigationQuery : ContentRetriever, IGetNavigationQuery
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting navigation links from database");
+            _logger.LogError(ex, ExceptionMessageDatabase);
             return new();
         }
     }
@@ -55,8 +59,8 @@ public class GetNavigationQuery : ContentRetriever, IGetNavigationQuery
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting navigation links from Contentful");
-            return Array.Empty<NavigationLink>();
+            _logger.LogError(ex, ExceptionMessageContentful);
+            return [];
         }
     }
 }

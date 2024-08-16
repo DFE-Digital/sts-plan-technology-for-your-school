@@ -61,7 +61,7 @@ public class PageModelBinderTests
 
         await pageModelBinder.BindModelAsync(modelBinderContext);
 
-        logger.ReceivedWithAnyArgs(1).Log(LogLevel.Error, default, default, default, LogMessageTemplate, default!);
+        logger.ReceivedMessages(LogMessageTemplate, LogLevel.Error, 1);
         Assert.False(modelBinderContext.Result.IsModelSet);
     }
 
@@ -82,7 +82,7 @@ public class PageModelBinderTests
 
         await pageModelBinder.BindModelAsync(modelBinderContext);
 
-        logger.ReceivedWithAnyArgs(1).Log(LogLevel.Error, default, default, default, LogMessageTemplate, default!);
+        logger.ReceivedMessages(LogMessageTemplate, LogLevel.Error, 1);
 
         Assert.False(modelBinderContext.Result.IsModelSet);
     }

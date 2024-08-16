@@ -9,7 +9,7 @@ namespace Dfe.PlanTech.Web.Controllers;
 [LogInvalidModelState]
 [Authorize]
 [Route("/")]
-public class CheckAnswersController(ILogger<CheckAnswersController> logger) : BaseController<CheckAnswersController>(logger)
+public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswersLogger) : BaseController<CheckAnswersController>(checkAnswersLogger)
 {
     public const string ControllerName = "CheckAnswers";
     public const string CheckAnswersAction = nameof(CheckAnswersPage);

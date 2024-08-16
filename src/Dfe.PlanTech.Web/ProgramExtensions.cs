@@ -176,7 +176,7 @@ public static class ProgramExtensions
         {
             var options = configuration.GetSection("Cookies").Get<CookiesCleanerOptions>();
 
-            return new CookiesCleaner(options ?? new CookiesCleanerOptions() { EssentialCookies = new List<string>() });
+            return new CookiesCleaner(options ?? new CookiesCleanerOptions() { EssentialCookies = [] });
         });
     }
 

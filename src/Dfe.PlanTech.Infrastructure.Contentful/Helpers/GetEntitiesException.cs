@@ -9,7 +9,7 @@ public class GetEntitiesException : Exception
     {
     }
 
-    protected GetEntitiesException(SerializationInfo info, StreamingContext context) : base(info, context)
+    protected GetEntitiesException(SerializationInfo info, StreamingContext context) : base()
     {
     }
 }
