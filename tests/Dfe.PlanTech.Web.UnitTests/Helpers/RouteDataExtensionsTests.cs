@@ -2,6 +2,7 @@ using Dfe.PlanTech.Web.Helpers;
 using Microsoft.AspNetCore.Routing;
 using Xunit;
 
+namespace Dfe.PlanTech.Web.UnitTests.Helpers;
 public class RouteDataExtensionsTests
 {
     [Fact]
