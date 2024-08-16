@@ -45,6 +45,12 @@ locals {
   az_sql_sku                    = var.az_sql_sku
   az_sql_max_pool_size          = var.az_sql_max_pool_size
 
+  az_sql_vnet = {
+    dns_zone_name = "privatelink.database.windows.net"
+    nic_name      = "${local.resource_prefix}-db-nic"
+    endpoint_name = "${local.resource_prefix}-db"
+  }
+
   ##################
   # Azure KeyVault #
   ##################

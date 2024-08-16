@@ -22,6 +22,8 @@ resource "azurerm_subnet" "function_infra_subnet" {
       name = "Microsoft.App/environments"
     }
   }
+
+  service_endpoints = ["Microsoft.Storage", "Microsoft.KeyVault"]
 }
 
 resource "azurerm_subnet" "function_storage" {
