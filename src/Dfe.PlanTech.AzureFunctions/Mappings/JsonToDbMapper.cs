@@ -28,6 +28,11 @@ where TEntity : ContentComponentDbEntity, new()
     {
         Payload = payload;
 
+        if (payload == null)
+        {
+            throw new ArgumentNullException(nameof(payload));
+        }
+
         var values = GetEntityValuesDictionary(payload);
 
         if (!payload.Sys.Type.Equals("DeletedEntry"))
