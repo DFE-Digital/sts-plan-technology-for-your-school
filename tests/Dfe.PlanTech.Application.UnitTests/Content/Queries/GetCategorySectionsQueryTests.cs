@@ -188,8 +188,8 @@ public class GetCategorySectionsQueryTests
 
         const string errorMessage = "No matching category found.";
         _logger.ReceivedWithAnyArgs(1).Log(LogLevel.Error, Arg.Any<EventId>(), Arg.Any<Exception>(), errorMessage, Arg.Any<object[]>());
-        Assert.Empty(_loadedPage.Content[0].Id);
-        Assert.True(_loadedPage.ContentPages.Count == 0);
+        Assert.Equal("", _loadedPage.Content[0].Id);
+        Assert.Equal(0, _loadedPage.ContentPages.Count);
     }
 
     [Fact]
