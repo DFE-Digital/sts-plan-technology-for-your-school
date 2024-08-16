@@ -114,8 +114,7 @@ public class QueueReceiverTests
         services.AddSingleton(new ContentfulOptions());
         dbContextOptionsBuilder.UseApplicationServiceProvider(services.BuildServiceProvider());
         var actualDbContext = new CmsDbContext(dbContextOptionsBuilder.Options);
-        var changeTrackerMock = Substitute.For<ChangeTracker>(actualDbContext);
-        _cmsDbContextMock.ChangeTracker.Returns(changeTrackerMock);
+        _cmsDbContextMock.ChangeTracker.Returns(actualDbContext.ChangeTracker);
     }
 
     private DbSet<ContentComponentDbEntity> MockContentComponents()
