@@ -6,14 +6,14 @@
 
 <h1 class="text-danger">Sorry, there is a problem with this service</h1>
 <p class="text-danger">You’ll need to try again later.</p>
-@if (!(Model?.ContactUsEmail).IsNullOrEmpty())
+@if (!string.IsNullOrEmpty(Model?.ContactUsEmail))
 {
     <p class="text-danger">
         You can also contact our support team at
         <a href="mailto:@Model.ContactUsEmail" class="govuk-link" target="_blank" rel="noopener">@Model.ContactUsEmail</a>
     </p>
 }
-@if (Model?.ShowRequestId ?? false)
+@if (Model?.ShowRequestId == true)
 {
     <p>
         <strong>Request ID:</strong> <code>@Model?.RequestId</code>
