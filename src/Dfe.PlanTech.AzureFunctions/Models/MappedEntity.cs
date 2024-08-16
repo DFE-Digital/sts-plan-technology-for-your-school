@@ -46,12 +46,7 @@ public class MappedEntity
 
         // Log a message if the entity is not valid.
         if (!IsValid)
-        {
-            logger.LogWarning(
-                "Content Component with ID {Id} has required properties that could not be set to a default value",
-                IncomingEntity.Id
-            );
-        }
+            logger.LogWarning("Content Component with ID {Id} has required properties that could not be set to a default value", IncomingEntity.Id);
 
         return IsValid;
     }

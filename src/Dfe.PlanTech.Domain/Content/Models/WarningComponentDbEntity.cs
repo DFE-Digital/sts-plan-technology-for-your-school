@@ -18,7 +18,7 @@ public class WarningComponentDbEntity : ContentComponentDbEntity, IWarningCompon
 
     [NotMapped]
     [DontCopyValue]
-    public long RichTextId => Text.RichTextId;
+    public long? RichTextId => Text.RichTextId;
 }
 
 public interface IRichTextContentWithPageSlug : IHasRichText

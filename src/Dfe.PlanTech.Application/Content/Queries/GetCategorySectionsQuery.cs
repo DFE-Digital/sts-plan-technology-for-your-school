@@ -84,7 +84,7 @@ public class GetCategorySectionsQuery(ICmsDbContext db, ILogger<GetCategorySecti
     /// <returns></returns>
     private IQueryable<SectionDbEntity> SectionsForPageQueryable(PageDbEntity page)
     => db.Sections.Where(section => section.Category != null && section.Category.ContentPages.Any(categoryPage => categoryPage.Slug == page.Slug))
-                .Where(section => section.Order != null)
+                .Where(section => section.Order != null && section.InterstitialPage != null)
                 .OrderBy(section => section.Order)
                 .Select(section => new SectionDbEntity()
                 {
@@ -98,8 +98,8 @@ public class GetCategorySectionsQuery(ICmsDbContext db, ILogger<GetCategorySecti
                     }).ToList(),
                     InterstitialPage = new PageDbEntity()
                     {
-                        Slug = section.InterstitialPage.Slug,
-                        Id = section.InterstitialPage.Id
+                        Slug = section.InterstitialPage!.Slug,
+                        Id = section.InterstitialPage!.Id
                     }
                 });
 }
