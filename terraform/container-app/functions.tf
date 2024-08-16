@@ -30,9 +30,8 @@ resource "azurerm_storage_account" "function_storage" {
   }
 
   network_rules {
-    bypass                     = ["Logging", "Metrics"]
-    default_action             = "Deny"
-    virtual_network_subnet_ids = [azurerm_subnet.function_infra_subnet.id]
+    bypass         = ["Logging", "Metrics"]
+    default_action = "Deny"
   }
 }
 
