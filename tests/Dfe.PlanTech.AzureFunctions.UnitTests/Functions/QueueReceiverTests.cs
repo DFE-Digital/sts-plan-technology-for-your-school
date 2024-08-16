@@ -11,10 +11,6 @@ using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MockQueryable.NSubstitute;
@@ -39,14 +35,13 @@ public class QueueReceiverTests
     private readonly IMessageRetryHandler _messageRetryHandlerMock;
     private readonly ICacheHandler _cacheHandler;
 
-
     private readonly static QuestionDbEntity _contentComponent = new() { Archived = false, Published = true, Deleted = false, Id = _contentId };
     private readonly static QuestionDbEntity _otherContentComponent = new() { Archived = false, Published = true, Deleted = false, Id = "other-content-component" };
 
-    private readonly List<QuestionDbEntity> _questions = [_otherContentComponent];
-    private readonly List<AnswerDbEntity> _answers = [];
+    private readonly List<QuestionDbEntity> _questions = new() { _otherContentComponent };
+    private readonly List<AnswerDbEntity> _answers = new();
 
-    private readonly List<ContentComponentDbEntity> _contentComponents = [];
+    private readonly List<ContentComponentDbEntity> _contentComponents = new();
 
     public QueueReceiverTests()
     {
@@ -54,7 +49,6 @@ public class QueueReceiverTests
         _loggerMock = Substitute.For<ILogger>();
         _messageRetryHandlerMock = Substitute.For<IMessageRetryHandler>();
         _cacheHandler = Substitute.For<ICacheHandler>();
-
 
         _loggerFactoryMock.CreateLogger<Arg.AnyType>().Returns((callinfo) =>
         {
@@ -72,19 +66,19 @@ public class QueueReceiverTests
         _cmsDbContextMock.Set<QuestionDbEntity>().Returns(mockQuestionSet);
 
         _cmsDbContextMock.When(db => db.Add(Arg.Any<ContentComponentDbEntity>()))
-                                    .Do((callinfo) =>
-                                    {
-                                        var contentComponent = callinfo.ArgAt<ContentComponentDbEntity>(0);
+            .Do((callinfo) =>
+            {
+                var contentComponent = callinfo.ArgAt<ContentComponentDbEntity>(0);
 
-                                        if (contentComponent is QuestionDbEntity question)
-                                        {
-                                            _questions.Add(question);
-                                        }
-                                        else
-                                        {
-                                            Console.Write("Shouldn't hit this");
-                                        }
-                                    });
+                if (contentComponent is QuestionDbEntity question)
+                {
+                    _questions.Add(question);
+                }
+                else
+                {
+                    Console.Write("Shouldn't hit this");
+                }
+            });
 
         var answersDbSet = _answers.AsQueryable().BuildMockDbSet();
         _cmsDbContextMock.Answers = answersDbSet;
@@ -108,7 +102,6 @@ public class QueueReceiverTests
         _queueReceiver = new(new ContentfulOptions(true), _loggerFactoryMock, _cmsDbContextMock, _jsonToEntityMappers, _messageRetryHandlerMock, _cacheHandler);
         DbSet<ContentComponentDbEntity> contentComponentsMock = MockContentComponents();
         _cmsDbContextMock.ContentComponents = contentComponentsMock;
-
     }
 
     private void MockEntityChangeTracking()
@@ -121,7 +114,7 @@ public class QueueReceiverTests
         services.AddSingleton(new ContentfulOptions());
         dbContextOptionsBuilder.UseApplicationServiceProvider(services.BuildServiceProvider());
         var actualDbContext = new CmsDbContext(dbContextOptionsBuilder.Options);
-        var changeTrackerMock = Substitute.For<ChangeTracker>(actualDbContext, Substitute.For<IStateManager>(), Substitute.For<IChangeDetector>(), Substitute.For<IRuntimeModel>(), Substitute.For<IEntityEntryGraphIterator>());
+        var changeTrackerMock = Substitute.For<ChangeTracker>(actualDbContext);
         _cmsDbContextMock.ChangeTracker.Returns(changeTrackerMock);
     }
 
@@ -141,7 +134,7 @@ public class QueueReceiverTests
 
         _cmsDbContextMock.Model.FindEntityType(typeof(QuestionDbEntity)).Returns(entityTypeMock);
 
-        HashSet<string> nonNullablePropertyNames = ["Text", "Slug", "Answers"];
+        HashSet<string> nonNullablePropertyNames = new() { "Text", "Slug", "Answers" };
 
         IEnumerable<IProperty>? questionProperties = typeof(QuestionDbEntity).GetProperties().Select(property =>
         {
@@ -177,12 +170,11 @@ public class QueueReceiverTests
 
         ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
 
-        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+        await _queueReceiver.QueueReceiverDbWriter(new[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock, CancellationToken.None);
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>());
         await _cmsDbContextMock.ReceivedWithAnyArgs(1).SaveChangesAsync(Arg.Any<CancellationToken>());
         _cmsDbContextMock.ReceivedWithAnyArgs(1).Add(Arg.Any<ContentComponentDbEntity>());
-
 
         Assert.Equal(2, _questions.Count);
 
@@ -207,7 +199,7 @@ public class QueueReceiverTests
 
         ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
 
-        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+        await _queueReceiver.QueueReceiverDbWriter(new[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock, CancellationToken.None);
 
         await serviceBusMessageActionsMock.Received().DeadLetterMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), null, Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
@@ -224,7 +216,7 @@ public class QueueReceiverTests
 
         ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
 
-        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+        await _queueReceiver.QueueReceiverDbWriter(new[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock, CancellationToken.None);
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
         _cmsDbContextMock.ReceivedWithAnyArgs(0).Add(Arg.Any<ContentComponentDbEntity>());
@@ -244,7 +236,7 @@ public class QueueReceiverTests
 
         ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
 
-        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+        await _queueReceiver.QueueReceiverDbWriter(new[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock, CancellationToken.None);
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
 
@@ -268,7 +260,7 @@ public class QueueReceiverTests
 
         ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
 
-        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+        await _queueReceiver.QueueReceiverDbWriter(new[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock, CancellationToken.None);
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
 
@@ -291,7 +283,7 @@ public class QueueReceiverTests
 
         ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
 
-        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+        await _queueReceiver.QueueReceiverDbWriter(new[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock, CancellationToken.None);
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
 
@@ -314,7 +306,7 @@ public class QueueReceiverTests
 
         ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
 
-        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+        await _queueReceiver.QueueReceiverDbWriter(new[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock, CancellationToken.None);
 
         await serviceBusMessageActionsMock.Received().DeadLetterMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), null, Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
@@ -334,7 +326,7 @@ public class QueueReceiverTests
 
         ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
 
-        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+        await _queueReceiver.QueueReceiverDbWriter(new[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock, CancellationToken.None);
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
         _cmsDbContextMock.ReceivedWithAnyArgs(0).Add(Arg.Any<ContentComponentDbEntity>());
@@ -361,7 +353,7 @@ public class QueueReceiverTests
 
         ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
 
-        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+        await _queueReceiver.QueueReceiverDbWriter(new[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock, CancellationToken.None);
 
         await serviceBusMessageActionsMock.Received()
                                           .CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
@@ -390,7 +382,7 @@ public class QueueReceiverTests
 
         ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
 
-        await queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+        await queueReceiver.QueueReceiverDbWriter(new[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock, CancellationToken.None);
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
 
@@ -416,7 +408,7 @@ public class QueueReceiverTests
 
         ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
 
-        await queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+        await queueReceiver.QueueReceiverDbWriter(new[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock, CancellationToken.None);
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
 
@@ -435,7 +427,7 @@ public class QueueReceiverTests
 
         ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
 
-        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+        await _queueReceiver.QueueReceiverDbWriter(new[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock, CancellationToken.None);
 
         await serviceBusMessageActionsMock.Received().DeadLetterMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), null, Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
@@ -453,7 +445,7 @@ public class QueueReceiverTests
 
         ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
 
-        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+        await _queueReceiver.QueueReceiverDbWriter(new[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock, CancellationToken.None);
 
         await serviceBusMessageActionsMock.Received()
                                           .CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
@@ -472,7 +464,7 @@ public class QueueReceiverTests
 
         ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
 
-        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+        await _queueReceiver.QueueReceiverDbWriter(new[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock, CancellationToken.None);
 
         await serviceBusMessageActionsMock.Received()
                                           .CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
@@ -495,7 +487,7 @@ public class QueueReceiverTests
 
         _messageRetryHandlerMock.RetryRequired(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>()).Returns(true);
 
-        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+        await _queueReceiver.QueueReceiverDbWriter(new[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock, CancellationToken.None);
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
     }
@@ -515,7 +507,7 @@ public class QueueReceiverTests
 
         var serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
 
-        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+        await _queueReceiver.QueueReceiverDbWriter(new[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock, CancellationToken.None);
 
         await serviceBusMessageActionsMock.Received().DeadLetterMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), null, Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
