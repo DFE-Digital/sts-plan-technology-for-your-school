@@ -113,7 +113,7 @@ public abstract class JsonToDbMapper
     {
         if (field.Value == null)
         {
-            Logger.LogError("No value for {field}", field);
+            Logger.LogError("No value for {field}", field.Key);
             yield return null;
             yield break;
         }
