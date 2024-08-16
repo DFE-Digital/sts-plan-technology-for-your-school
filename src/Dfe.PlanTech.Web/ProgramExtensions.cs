@@ -124,8 +124,6 @@ public static class ProgramExtensions
 
     public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
-        IServiceProvider serviceProvider = services.BuildServiceProvider();
-
         void databaseOptionsAction(DbContextOptionsBuilder options) => options.UseSqlServer(configuration.GetConnectionString("Database"));
 
         services.AddDbContextPool<ICmsDbContext, CmsDbContext>((serviceProvider, optionsBuilder) =>
@@ -178,7 +176,7 @@ public static class ProgramExtensions
         {
             var options = configuration.GetSection("Cookies").Get<CookiesCleanerOptions>();
 
-            return new CookiesCleaner(options ?? new CookiesCleanerOptions() { EssentialCookies = [] });
+            return new CookiesCleaner(options ?? new CookiesCleanerOptions() { EssentialCookies = new List<string>() });
         });
     }
 
