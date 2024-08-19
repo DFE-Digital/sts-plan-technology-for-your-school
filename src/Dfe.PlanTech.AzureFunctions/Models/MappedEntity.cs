@@ -149,7 +149,7 @@ public class MappedEntity
 
     /// <summary>
     /// Provides a default value for a given type.
-    /// Integers are defaulted to 1 as the usage is for Header Tags and Sizes
+    /// Ints and Bools default to 0 and false without intervention
     /// </summary>
     /// <param name="type"></param>
     /// <returns></returns>
@@ -157,10 +157,6 @@ public class MappedEntity
     {
         if (type == typeof(string))
             return "";
-        if (type == typeof(int))
-            return 1;
-        if (type == typeof(bool))
-            return false;
 
         return null;
     }
