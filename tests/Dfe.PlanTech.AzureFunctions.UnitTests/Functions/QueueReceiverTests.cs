@@ -440,6 +440,23 @@ public class QueueReceiverTests
         await serviceBusMessageActionsMock.Received().DeadLetterMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), null, Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
+    [Theory]
+    [InlineData("ContentManagement.Entry.unpublish")]
+    [InlineData("ContentManagement.Entry.delete")]
+    public async Task QueueReceiverDbWriter_Should_DeadLetterQueue_If_Delete_Or_Unpublish_Missing_Entity(string subject)
+    {
+        ServiceBusReceivedMessage serviceBusReceivedMessageMock = Substitute.For<ServiceBusReceivedMessage>();
+        ServiceBusMessageActions serviceBusMessageActionsMock = Substitute.For<ServiceBusMessageActions>();
+
+        var serviceBusMessage = new ServiceBusMessage(bodyJsonStr) { Subject = subject };
+
+        ServiceBusReceivedMessage serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(serviceBusReceivedMessageMock.LockToken)));
+
+        await _queueReceiver.QueueReceiverDbWriter([serviceBusReceivedMessage], serviceBusMessageActionsMock, CancellationToken.None);
+
+        await serviceBusMessageActionsMock.Received().DeadLetterMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), null, Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+    }
+
     [Fact]
     public async Task QueueReceiverDbWriter_Should_ExitEarly_When_CmsEvent_Is_Create()
     {
