@@ -37,23 +37,18 @@ public class MappedEntityTests
         _cmsDbContextMock = Substitute.For<CmsDbContext>();
         _logger = Substitute.For<ILogger>();
 
-        var mockType = Substitute.For<IEntityType>();
-        var invalidMockType = Substitute.For<IEntityType>();
-        mockType.ClrType.Returns(typeof(MockDbEntity));
-        invalidMockType.ClrType.Returns(typeof(InvalidMockDbEntity));
-
-        _cmsDbContextMock.Model.FindEntityType(typeof(MockDbEntity)).Returns(mockType);
-        _cmsDbContextMock.Model.FindEntityType(typeof(InvalidMockDbEntity)).Returns(invalidMockType);
-
-        HashSet<string> nonNullablePropertyNames = ["String", "Int", "Bool", "Answer"];
-
-        mockType.GetProperties().Returns(MockProperties(nonNullablePropertyNames, typeof(MockDbEntity)));
-        invalidMockType.GetProperties().Returns(MockProperties(nonNullablePropertyNames, typeof(InvalidMockDbEntity)));
+        SetNonNullableProperties(["String", "Int", "Bool"], typeof(MockDbEntity));
+        SetNonNullableProperties(["Answer"], typeof(InvalidMockDbEntity));
     }
 
-    private static IEnumerable<IProperty> MockProperties(HashSet<string> nonNullableProperties, Type entityType)
+    private void SetNonNullableProperties(HashSet<string> nonNullableProperties, Type entityType)
     {
-        return entityType.GetProperties().Select(property =>
+        var mockType = Substitute.For<IEntityType>();
+        mockType.ClrType.Returns(entityType);
+
+        _cmsDbContextMock.Model.FindEntityType(entityType).Returns(mockType);
+
+        var mockProperties = entityType.GetProperties().Select(property =>
         {
             var propertySub = Substitute.For<IProperty>();
             propertySub.PropertyInfo.Returns(property);
@@ -61,6 +56,8 @@ public class MappedEntityTests
 
             return propertySub;
         });
+
+        mockType.GetProperties().Returns(mockProperties);
     }
 
     [Fact]
