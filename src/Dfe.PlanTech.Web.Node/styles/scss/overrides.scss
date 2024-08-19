@@ -83,3 +83,13 @@ iframe {
 button.govuk-button--secondary {
     background-color: white;
 }
+
+.govuk-button--white {
+    @extend .govuk-button--secondary;
+    &:not(:hover, :active){
+        background-color: white;
+    }
+    &:hover{
+        color: #0b0c0c;
+    }
+}

@@ -17,4 +17,6 @@ public class QuestionViewModel
     public string SectionSlug { get; init; } = null!;
 
     public string SectionId { get; init; } = null!;
+
+    public string ShareUrl { get; init; } = null!;
 }

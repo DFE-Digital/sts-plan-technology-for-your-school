@@ -7,6 +7,7 @@ using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
@@ -37,6 +38,7 @@ public class QuestionsController : BaseController<QuestionsController>
     public async Task<IActionResult> GetQuestionBySlug(string sectionSlug,
                                                         string questionSlug,
                                                         [FromServices] IGetQuestionBySlugRouter router,
+                                                        [FromServices] IConfiguration configuration,
                                                         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(sectionSlug))
@@ -44,7 +46,14 @@ public class QuestionsController : BaseController<QuestionsController>
         if (string.IsNullOrEmpty(questionSlug))
             throw new ArgumentNullException(nameof(questionSlug));
 
-        return await router.ValidateRoute(sectionSlug, questionSlug, this, cancellationToken);
+        try
+        {
+            return await router.ValidateRoute(sectionSlug, questionSlug, this, cancellationToken);
+        }
+        catch (ContentfulDataUnavailableException)
+        {
+            return RedirectToSelfAssessmentWithError(configuration["ErrorMessages:InvalidQuestionLink"]);
+        }
     }
 
 
@@ -77,11 +86,7 @@ public class QuestionsController : BaseController<QuestionsController>
         {
             // Remove the current invalid submission and redirect to self-assessment page
             await deleteCurrentSubmissionCommand.DeleteCurrentSubmission(section, cancellationToken);
-            TempData["SubtopicError"] = configuration["ErrorMessages:ConcurrentUsersOrContentChange"];
-            return RedirectToAction(
-                PagesController.GetPageByRouteAction,
-                PagesController.ControllerName,
-                new { route = "self-assessment" });
+            return RedirectToSelfAssessmentWithError(configuration["ErrorMessages:ConcurrentUsersOrContentChange"]);
         }
     }
 
@@ -116,7 +121,7 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
     [NonAction]
-    public IActionResult RenderView(QuestionViewModel viewModel) => View("Question", viewModel);
+    public IActionResult RenderView(QuestionViewModel viewModel) => View("QuestionPage", viewModel);
 
     [NonAction]
     private async Task<QuestionViewModel> GenerateViewModel(string sectionSlug, string questionSlug, CancellationToken cancellationToken)
@@ -148,8 +153,18 @@ public class QuestionsController : BaseController<QuestionsController>
             AnswerRef = latestAnswerContentfulId,
             SectionName = section.Name,
             SectionSlug = sectionSlug,
-            SectionId = section.Sys.Id
+            SectionId = section.Sys.Id,
+            ShareUrl = HttpContext.Request.GetEncodedUrl()
         };
+    }
+
+    private RedirectToActionResult RedirectToSelfAssessmentWithError(string? errorMessage)
+    {
+        TempData["SelfAssessmentErrorPanelMessage"] = errorMessage;
+        return RedirectToAction(
+            PagesController.GetPageByRouteAction,
+            PagesController.ControllerName,
+            new { route = "self-assessment" });
     }
 
     public static IActionResult RedirectToQuestionBySlug(string sectionSlug, string questionSlug, Controller controller)

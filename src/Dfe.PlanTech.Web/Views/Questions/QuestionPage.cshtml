@@ -1,0 +1,16 @@
+@model Dfe.PlanTech.Web.Models.QuestionViewModel
+
+@section BeforeContent {
+    @{
+        await Html.RenderPartialAsync("BackButton");
+    }
+}
+
+<div class="govuk-grid-row" id="top">
+    <div class="govuk-grid-column-two-thirds">
+        <partial name="Question" model="@Model"/>
+    </div>
+    <div class="govuk-grid-column-one-third">
+        <partial name="ShareLink" model="@Model.ShareUrl"/>
+    </div>
+</div>
