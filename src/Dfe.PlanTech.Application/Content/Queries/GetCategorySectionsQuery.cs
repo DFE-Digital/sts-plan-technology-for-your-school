@@ -29,7 +29,7 @@ public class GetCategorySectionsQuery(ICmsDbContext db, ILogger<GetCategorySecti
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error fetching categories for {page}", page.Id);
+            logger.LogError(ex, "Error fetching categories for {Page}", page.Id);
             throw new InvalidOperationException($"An error occurred while fetching the categories for the page with ID: {page.Id}", ex);
         }
     }
@@ -50,7 +50,7 @@ public class GetCategorySectionsQuery(ICmsDbContext db, ILogger<GetCategorySecti
 
             if (matching == null)
             {
-                logger.LogError("Could not find matching category {categoryId} in {pageSlug}", cat.Key, page.Slug);
+                logger.LogError("Could not find matching category {CategoryId} in {PageSlug}", cat.Key, page.Slug);
                 continue;
             }
 
