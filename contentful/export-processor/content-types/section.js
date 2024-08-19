@@ -158,25 +158,18 @@ export class Section {
 
     getPathsForAllAnswers() {
         const allAnswerPaths = []
-        const allAnswers = []
-        const answersUsed = []
 
         // Log ids of all answers in section
-        this.questions.forEach((question) => {
-            question.answers.forEach((answer) => {
-                allAnswers.push(answer.id)
-            })
-        })
+        const allAnswers = this.questions.flatMap(question => question.answers.map(answer => answer.id));
 
         // Log ids of answers used in minimum paths for recommendations
         const allRecommendationPaths = this.minimumPathsForRecommendations;
-        for (const maturity in allRecommendationPaths) {
-            allRecommendationPaths[maturity].forEach((question) => {
-                if (!answersUsed.includes(question.answer.id)) {
-                    answersUsed.push(question.answer.id)
-                }
-            })
-        }
+        const answersUsed = Object.values(allRecommendationPaths).flat().reduce((previous, current) => {
+            if (previous.indexOf(current.answer.id) == -1) {
+                previous.push(current.answer.id);
+            }
+            return previous;
+        }, []);
 
         // Create paths until all answers are used
         while (answersUsed.length !== allAnswers.length) {
@@ -246,24 +239,27 @@ export class Section {
     }
 
     checkAllChunksTested() {
-        const sectionChunks = this.recommendation.section.chunks;
-        const testedChunks = [];
+        const sectionChunks = this.recommendation.section.chunks.map(chunk => chunk.id);
 
-        Object.values(this.minimumPathsForRecommendations).forEach((path) => {
-            testedChunks.push(this.recommendation.section.getChunksForPath(path));
-        })
-
-        this.pathsForAllPossibleAnswers.forEach((userJourney) => {
-            const { path } = userJourney;
-            testedChunks.push(this.recommendation.section.getChunksForPath(path));
-        })
-
-        const uniqueTestedChunks = new Set(testedChunks.flat())
-
-        console.log(`Recommendation chunks in ${this.name}: ${sectionChunks.length}`)
-        console.log(`Recommendation chunks to be tested in ${this.name}: ${uniqueTestedChunks.size}`)
+        const uniqueTestedChunks = [...Object.values(this.minimumPathsForRecommendations), ...this.pathsForAllPossibleAnswers.map(userJourney => userJourney.path)]
+            .map(path => this.recommendation.section.getChunksForPath(path))
+            .flat()
+            .reduce((uniqueChunks, current) => {
+                if (!uniqueChunks.includes(current.id)) {
+                    uniqueChunks.push(current.id);
+                }
+                return uniqueChunks;
+            }, [])
+        
+        if (sectionChunks.length !== uniqueTestedChunks.length) {
+            sectionChunks.filter(chunkId => !uniqueTestedChunks.includes(chunkId)).forEach(missingChunk => {
+                console.error(
+                    `Recommendation chunk ${missingChunk} in ${this.name} not included in any test paths.`
+                );
+            })
+        }
     }
-   
+    
 
   /**
    * Calculates the statistics of the paths.
