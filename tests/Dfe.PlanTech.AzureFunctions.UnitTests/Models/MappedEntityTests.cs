@@ -9,7 +9,7 @@ using NSubstitute;
 
 namespace Dfe.PlanTech.AzureFunctions.UnitTests.Models;
 
-public class MockDbEntity: ContentComponentDbEntity
+public class MockDbEntity : ContentComponentDbEntity
 {
     public string String { get; init; } = null!;
 
@@ -22,7 +22,7 @@ public class MockDbEntity: ContentComponentDbEntity
 /// Content references are nullable or have DontCopyValue so this scenario *should* never happen.
 /// But in the event an entity has a null property that cannot be defaulted, it should be deemed invalid
 /// </summary>
-public class InvalidMockDbEntity: ContentComponentDbEntity
+public class InvalidMockDbEntity : ContentComponentDbEntity
 {
     public Answer Answer { get; init; } = null!;
 }
