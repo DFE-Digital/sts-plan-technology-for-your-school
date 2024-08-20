@@ -59,4 +59,9 @@ module "main_hosting" {
   registry_username = local.registry_username
   registry_password = local.registry_password
   image_tag         = local.image_tag
+
+  ###########
+  # Storage #
+  ###########
+  storage_account_sas_expiration_period = local.storage_account_expiration_period
 }
