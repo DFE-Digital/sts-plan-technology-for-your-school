@@ -10,7 +10,7 @@ public class WarningComponentDbEntity : ContentComponentDbEntity, IWarningCompon
 
     [NotMapped]
     [DontCopyValue]
-    public RichTextContentDbEntity RichText
+    public RichTextContentDbEntity? RichText
     {
         get => Text.RichText;
         set => Text.RichText = value;
