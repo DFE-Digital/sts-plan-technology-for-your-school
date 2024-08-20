@@ -23,7 +23,7 @@ const selectFirstRadioButton = () => {
             .invoke("text")
             .then((answer) => (questionWithAnswer.answer = answer.trim()));
 
-          cy.wrap(item).find("input", { force: true }).should("exist");
+          cy.wrap(item).find("input", {force: true}).should("exist");
 
           cy.wrap(item).find("label").click();
         });
@@ -34,5 +34,14 @@ const selectFirstRadioButton = () => {
 const saveAndContinue = () =>
   cy.get("form button.govuk-button").contains("Save and continue").click();
 
+const assertCopiedToClipboard = (text) => {
+  cy.window().then(win => {
+    win.navigator.clipboard.readText().then(text => {
+      expect(value).to.eq(text)
+    })
+  })
+}
+
 Cypress.Commands.add("selectFirstRadioButton", selectFirstRadioButton);
 Cypress.Commands.add("saveAndContinue", saveAndContinue);
+Cypress.Commands.add("assertCopiedToClipboard", assertCopiedToClipboard)

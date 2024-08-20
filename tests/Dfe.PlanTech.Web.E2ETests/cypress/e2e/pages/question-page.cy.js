@@ -59,6 +59,27 @@ describe("Question page", () => {
       });
   });
 
+  it("should have a panel that provides a copyable link for sharing the question", () => {
+    cy.get("div.dfe-section-card")
+      .should("exist")
+      .within(($card) => {
+        cy.get("label").should("exist");
+        cy.url().then($url => {
+          cy.get("input[name=questionLink]")
+            .should("exist")
+            .invoke("val")
+            .should("equal", $url)
+            .should("have.attr", "readonly")
+          cy.get("button")
+            .should("exist")
+            .click()
+            .then(() => {
+              cy.assertCopiedToClipboard($url)
+            })
+        })
+      })
+  });
+
   it("should have submit button", () => {
     cy.get("form button.govuk-button").should("exist");
   });
@@ -69,7 +90,7 @@ describe("Question page", () => {
 
       cy.saveAndContinue();
 
-      cy.location("pathname", { timeout: 60000 }).should(
+      cy.location("pathname", {timeout: 60000}).should(
         "not.include",
         firstUrl
       );
@@ -89,7 +110,7 @@ describe("Question page", () => {
       cy.saveAndContinue();
 
       //Ensure path changes
-      cy.location("pathname", { timeout: 60000 }).should("not.equal", firstUrl);
+      cy.location("pathname", {timeout: 60000}).should("not.equal", firstUrl);
 
       cy.get("a.govuk-back-link")
         .should("exist")
