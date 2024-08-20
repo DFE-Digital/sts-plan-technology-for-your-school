@@ -26,12 +26,18 @@ function generateTerraformImports(inputString, varFile) {
 
 // Replace with _all_ of the failures from the TF apply. Ensure first line formatting matches as shown.
 const inputString = `
-│ Error: A resource with the ID "/subscriptions/AZURE_RESOURCE_ID" already exists - to be managed via Terraform this resource needs to be imported into the State. Please see the resource documentation for "azurerm_private_endpoint" for more information.
+│ Error: A resource with the ID "/subscriptions/abc/resourceGroups/xyz/providers/Microsoft.ServiceName/resourceType/resourcename" already exists - to be managed via Terraform this resource needs to be imported into the State. Please see the resource documentation for "azurerm_private_endpoint" for more information.
 │
 │   with azurerm_private_endpoint.database,
 │   on database.networking.tf line 7, in resource "azurerm_private_endpoint" "database":
 │    7: resource "azurerm_private_endpoint" "database" {
-│`;
+│
+│ Error: A resource with the ID "/subscriptions/abc/resourceGroups/xyz/providers/Microsoft.ServiceName/resourceType/resourcename" already exists - to be managed via Terraform this resource needs to be imported into the State. Please see the resource documentation for "azurerm_private_endpoint" for more information.
+│   with azurerm_private_endpoint.another_database,
+│   on another_database.networking.tf line 7, in resource "azurerm_private_endpoint" "another_database":
+│    7: resource "azurerm_private_endpoint" "another_database" {
+`;
+
 
 const varFile = '../terraform-stg.tfvars'; //replace with appropriate TF vars file
 const result = generateTerraformImports(inputString, varFile);
