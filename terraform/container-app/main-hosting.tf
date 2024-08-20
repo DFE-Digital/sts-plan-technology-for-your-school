@@ -46,6 +46,7 @@ module "main_hosting" {
   mssql_azuread_auth_only            = local.az_use_azure_ad_auth_only
   mssql_managed_identity_assign_role = false
   mssql_sku_name                     = local.az_sql_sku
+  mssql_max_size_gb                  = local.az_sql_max_size_gb
 
   ##############
   # Networking #
