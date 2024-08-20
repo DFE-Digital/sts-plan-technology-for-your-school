@@ -63,18 +63,29 @@ describe("Question page", () => {
     cy.get("div.dfe-section-card")
       .should("exist")
       .within(($card) => {
+        cy.get("h1").should("exist");
         cy.get("label").should("exist");
         cy.url().then($url => {
+          // check share link matches that of the current page
           cy.get("input[name=questionLink]")
             .should("exist")
+            .should("have.attr", "readonly")
+
+          cy.get("input[name=questionLink]")
             .invoke("val")
             .should("equal", $url)
-            .should("have.attr", "readonly")
+
+          // check that copy to clipboard button works
           cy.get("button")
             .should("exist")
             .click()
             .then(() => {
               cy.assertCopiedToClipboard($url)
+
+              // and replaces the link and button with a success message
+              cy.get("p").should("exist")
+              cy.get("label").should("not.exist")
+              cy.get("button").should("not.exist")
             })
         })
       })

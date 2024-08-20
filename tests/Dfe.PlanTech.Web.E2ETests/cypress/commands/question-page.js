@@ -36,7 +36,7 @@ const saveAndContinue = () =>
 
 const assertCopiedToClipboard = (text) => {
   cy.window().then(win => {
-    win.navigator.clipboard.readText().then(text => {
+    win.navigator.clipboard.readText().then(value => {
       expect(value).to.eq(text)
     })
   })

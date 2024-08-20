@@ -1,11 +1,13 @@
 @using GovUk.Frontend.AspNetCore.TagHelpers
 
 <div class="dfe-section-card">
-    <govuk-input id="question-link" name="questionLink" type="url" value="@Model" input-readonly="true">
-        <govuk-input-label class="govuk-heading-m">Share a link to this question</govuk-input-label>
-        <govuk-input-hint>You can do this by coping the following link</govuk-input-hint>
-    </govuk-input>
-    <govuk-button id="question-link-copy-button" class="govuk-button--white">Copy link to clipboard</govuk-button>
+    <h1 class="govuk-heading-m">Share this question</h1>
+    <div id="link-sharing-container">
+        <govuk-input id="question-link" name="questionLink" type="url" value="@Model" input-readonly="true">
+            <govuk-input-label>Copy the link to share this question with team members who can help</govuk-input-label>
+        </govuk-input>
+        <govuk-button id="question-link-copy-button" class="govuk-button--white">Copy link to clipboard</govuk-button>
+    </div>
 </div>
 
 
@@ -14,5 +16,9 @@
 
     function copyLink() {
         navigator.clipboard.writeText("@Model");
-    }
+
+        let copied = document.createElement("p");
+        copied.textContent = "You have copied the link to your clipboard";
+        document.getElementById("link-sharing-container").replaceWith(copied)
+     }
 </script>
