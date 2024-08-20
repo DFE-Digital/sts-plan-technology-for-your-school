@@ -7,6 +7,7 @@ using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Configuration;
@@ -86,18 +87,19 @@ public class QuestionsControllerTests
         _user.GetEstablishmentId().Returns(EstablishmentId);
 
         _controller = new QuestionsController(_logger, _getSectionQuery, _getResponseQuery, _user);
+        _controller.ControllerContext.HttpContext = new DefaultHttpContext();
     }
 
     [Fact]
     public async Task GetQuestionBySlug_Should_Error_When_Missing_SectionId()
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionBySlug(null!, "question-slug", _getQuestionBySlugRouter));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionBySlug(null!, "question-slug", _getQuestionBySlugRouter, _configuration));
     }
 
     [Fact]
     public async Task GetQuestionBySlug_Should_Error_When_Missing_QuestionId()
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionBySlug("section-slug", null!, _getQuestionBySlugRouter));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionBySlug("section-slug", null!, _getQuestionBySlugRouter, _configuration));
     }
 
     [Fact]
@@ -120,7 +122,7 @@ public class QuestionsControllerTests
         string section = "section";
         string question = "question";
 
-        await _controller.GetQuestionBySlug(section, question, _getQuestionBySlugRouter);
+        await _controller.GetQuestionBySlug(section, question, _getQuestionBySlugRouter, _configuration);
 
         Assert.Equal(section, sectionSlug);
         Assert.Equal(question, questionSlug);
@@ -190,6 +192,23 @@ public class QuestionsControllerTests
     }
 
     [Fact]
+    public async Task GetQuestionBySlug_Should_Redirect_To_SelfAssessmentPage_When_Contentful_Data_Exception_Raised()
+    {
+        _getQuestionBySlugRouter
+            .When(x => x.ValidateRoute(Arg.Any<string>(), Arg.Any<string>(), _controller, default))
+            .Do(_ => throw new ContentfulDataUnavailableException("Data exception thrown by the test"));
+
+        _controller.TempData = Substitute.For<ITempDataDictionary>();
+
+        var result = await _controller.GetQuestionBySlug(SectionSlug, "fake-question-slug", _getQuestionBySlugRouter, _configuration);
+
+        var redirectResult = result as RedirectToActionResult;
+        Assert.NotNull(redirectResult);
+        Assert.Equal(PagesController.ControllerName, redirectResult.ControllerName);
+        Assert.Equal(PagesController.GetPageByRouteAction, redirectResult.ActionName);
+    }
+
+    [Fact]
     public async Task SubmitAnswer_Should_Return_To_Question_When_Invalid_ModelState()
     {
         var errorMessages = new[] {
@@ -209,7 +228,7 @@ public class QuestionsControllerTests
         var result = await _controller.SubmitAnswer(sectionSlug, questionSlug, submitAnswerDto, submitAnswerCommand, cancellationToken);
 
         var viewResult = Assert.IsType<ViewResult>(result);
-        Assert.Equal("Question", viewResult.ViewName);
+        Assert.Equal("QuestionPage", viewResult.ViewName);
 
         var viewModel = Assert.IsType<QuestionViewModel>(viewResult.Model);
 
@@ -241,7 +260,7 @@ public class QuestionsControllerTests
         var result = await _controller.SubmitAnswer(sectionSlug, questionSlug, submitAnswerDto, submitAnswerCommand, cancellationToken);
 
         var viewResult = Assert.IsType<ViewResult>(result);
-        Assert.Equal("Question", viewResult.ViewName);
+        Assert.Equal("QuestionPage", viewResult.ViewName);
 
         var viewModel = Assert.IsType<QuestionViewModel>(viewResult.Model);
 

@@ -9,6 +9,7 @@ using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
@@ -21,19 +22,25 @@ public class GetQuestionBySlugRouterTests
     private readonly IGetLatestResponsesQuery _getResponseQuery = Substitute.For<IGetLatestResponsesQuery>();
     private readonly ISubmissionStatusProcessor _submissionStatusProcessor = Substitute.For<ISubmissionStatusProcessor>();
     private readonly IUser _user = Substitute.For<IUser>();
-
     private readonly IGetSectionQuery _getSectionQuery = Substitute.For<IGetSectionQuery>();
+
     private readonly QuestionsController _controller;
-
     private readonly GetQuestionBySlugRouter _router;
-
     private readonly Section _section;
-
     private readonly SubmissionResponsesDto _responses;
 
     public GetQuestionBySlugRouterTests()
     {
         _controller = new QuestionsController(new NullLogger<QuestionsController>(), _getSectionQuery, _getResponseQuery, _user);
+        var httpContext = new DefaultHttpContext()
+        {
+            Request =
+            {
+                Scheme = "https",
+                Host = new HostString("plan-tech")
+            }
+        };
+        _controller.ControllerContext.HttpContext = httpContext;
         _user.GetEstablishmentId().Returns(1);
 
         var secondQuestion = new Question()
@@ -43,13 +50,16 @@ public class GetQuestionBySlugRouterTests
             {
                 Id = "q2"
             },
-            Answers = new(){
-        new(){
-          Sys = new SystemDetails(){
-            Id = "q2-a1"
-          }
-        }
-      }
+            Answers = new()
+            {
+                new()
+                {
+                    Sys = new SystemDetails()
+                    {
+                        Id = "q2-a1"
+                    }
+                }
+            }
         };
 
         var firstQuestion = new Question()
@@ -59,14 +69,17 @@ public class GetQuestionBySlugRouterTests
             {
                 Id = "q1"
             },
-            Answers = new(){
-        new(){
-          Sys = new SystemDetails(){
-            Id = "q1-a1"
-          },
-          NextQuestion = secondQuestion
-        },
-      }
+            Answers = new()
+            {
+                new()
+                {
+                    Sys = new SystemDetails()
+                    {
+                        Id = "q1-a1"
+                    },
+                    NextQuestion = secondQuestion
+                },
+            }
         };
 
         var thirdQuestion = new Question()
@@ -76,13 +89,16 @@ public class GetQuestionBySlugRouterTests
             {
                 Id = "q3"
             },
-            Answers = new(){
-        new(){
-          Sys = new SystemDetails(){
-            Id = "q3-a1"
-          }
-        }
-      }
+            Answers = new()
+            {
+                new()
+                {
+                    Sys = new SystemDetails()
+                    {
+                        Id = "q3-a1"
+                    }
+                }
+            }
         };
 
         _section = new Section()
@@ -101,16 +117,19 @@ public class GetQuestionBySlugRouterTests
 
         _responses = new()
         {
-            Responses = new List<QuestionWithAnswer>(){
-        new(){
-          QuestionRef = firstQuestion.Sys.Id,
-          AnswerRef = firstQuestion.Answers[0].Sys.Id
-        },
-        new(){
-          QuestionRef = secondQuestion.Sys.Id,
-          AnswerRef = secondQuestion.Answers[0].Sys.Id
-        }
-      }
+            Responses = new List<QuestionWithAnswer>()
+            {
+                new()
+                {
+                    QuestionRef = firstQuestion.Sys.Id,
+                    AnswerRef = firstQuestion.Answers[0].Sys.Id
+                },
+                new()
+                {
+                    QuestionRef = secondQuestion.Sys.Id,
+                    AnswerRef = secondQuestion.Answers[0].Sys.Id
+                }
+            }
         };
 
         _router = new GetQuestionBySlugRouter(_getResponseQuery, _user, _submissionStatusProcessor);
@@ -148,6 +167,7 @@ public class GetQuestionBySlugRouterTests
                                       _submissionStatusProcessor.Section.Returns(_section);
                                   });
 
+        _controller.ControllerContext.HttpContext.Request.Path = "/section/question";
         var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, nextQuestion.Slug, _controller, default);
 
         var viewResult = result as ViewResult;
@@ -163,6 +183,7 @@ public class GetQuestionBySlugRouterTests
         Assert.Equal(_section.Sys.Id, model.SectionId);
         Assert.Null(model.AnswerRef);
         Assert.Equal(nextQuestion, model.Question);
+        Assert.Equal("https://plan-tech/section/question", model.ShareUrl);
     }
 
     [Fact]
@@ -347,6 +368,7 @@ public class GetQuestionBySlugRouterTests
                                       _submissionStatusProcessor.Section.Returns(_section);
                                   });
 
+        _controller.ControllerContext.HttpContext.Request.Path = "/section/question";
         var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, firstQuestion.Slug, _controller, default);
 
         var viewResult = result as ViewResult;
@@ -362,5 +384,6 @@ public class GetQuestionBySlugRouterTests
         Assert.Equal(_section.Sys.Id, model.SectionId);
         Assert.Equal(responseForQuestion.AnswerRef, model.AnswerRef);
         Assert.Equal(firstQuestion, model.Question);
+        Assert.Equal("https://plan-tech/section/question", model.ShareUrl);
     }
 }
