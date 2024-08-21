@@ -155,7 +155,6 @@ export class Section {
   /**
    * Calcutes paths to select each answer to each question
    */
-    
     getPathsForAllAnswers() {
         const allAnswerPaths = [];
 
@@ -215,7 +214,7 @@ export class Section {
                 const nextQuestion = this.questions.find(question => question.id === lastAnswer.nextQuestion.sys.id);
                 const nextIndex = this.questions.lastIndexOf(nextQuestion);
                 const nextAnswer = this.assignBestAnswer(nextQuestion.answers, nextIndex);
-                newPath.push({ question: nextQuestion, answer: nextAnswer })
+                newPath.push({ question: nextQuestion, answer: nextAnswer });
                 lastAnswer = nextAnswer;
             }
 
@@ -228,7 +227,7 @@ export class Section {
             // Add answers to answersUsed
             newPath.forEach(pathPart => {
                 if (!answersUsed.includes(pathPart.answer.id)) {
-                    answersUsed.push(pathPart.answer.id)
+                    answersUsed.push(pathPart.answer.id);
                 }
             })
         }
@@ -256,7 +255,7 @@ export class Section {
     checkPathValid(path) {
         // Check final answer does not have a nextQuestion
         if (path[path.length - 1].answer.nextQuestion) {
-            console.error(`Final answer ${path[path.length - 1].answer.id} to Q${path.length - 1} does not terminate path.`)
+            console.error(`Final answer ${path[path.length - 1].answer.id} to Q${path.length - 1} does not terminate path.`);
             return false;
         }
 
@@ -264,21 +263,18 @@ export class Section {
         for (let i = 0; i < path.length - 1; i++) {
             // Check path does not terminate early
             if (!path[i].answer.nextQuestion) {
-                console.error(`Aanswer ${path[i].answer.id} to Q${i + 1} terminates path early.`)
+                console.error(`Aanswer ${path[i].answer.id} to Q${i + 1} terminates path early.`);
                 return false;
             }
 
             //Check each question in the path leads to the next
             if (path[i].answer.nextQuestion.sys.id !== path[i + 1].question.id) {
-                console.error(`Answer selected for Q${i + 1} does not lead to Q${i + 2}`)
+                console.error(`Answer selected for Q${i + 1} does not lead to Q${i + 2}`);
                 return false;
             }
         } 
         return true;
     }
-
-        
-        
 
     checkAllChunksTested() {
         const sectionChunks = this.recommendation.section.chunks.map(chunk => chunk.id);
@@ -295,13 +291,10 @@ export class Section {
         
         if (sectionChunks.length !== uniqueTestedChunks.length) {
             sectionChunks.filter(chunkId => !uniqueTestedChunks.includes(chunkId)).forEach(missingChunk => {
-                console.error(
-                    `Recommendation chunk ${missingChunk} in ${this.name} not included in any test paths.`
-                );
-            })
+                console.error(`Recommendation chunk ${missingChunk} in ${this.name} not included in any test paths.`);
+            });
         }
     }
-    
 
   /**
    * Calculates the statistics of the paths.
