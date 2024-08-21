@@ -121,6 +121,10 @@ video {
     margin-right: 20px;
 }
 
+#feedbackMessage {
+    display: none;
+}
+
 .guidance-container {
     border: 1px solid #b1b4b6;
 }
