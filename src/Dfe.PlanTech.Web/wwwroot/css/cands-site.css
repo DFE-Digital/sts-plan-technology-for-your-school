@@ -289,7 +289,6 @@ dl.gem-c-metadata__list {
     font-size: 19px;
     line-height: 1.25;
     font-weight: 600;
-    color: #505a5f;
     margin-bottom: 15px;
     padding-top: 0;
 }
@@ -336,10 +335,6 @@ dl.gem-c-metadata__list {
 
 .dfe-vertical-nav__section-item:hover {
     border-left: 4px solid #347ca9;
-}
-
-.dfe-vertical-nav__link:focus {
-    background: inherit;
 }
 
 .dfe-vertical-nav__section-item--current {
