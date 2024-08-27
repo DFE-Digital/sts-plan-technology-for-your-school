@@ -47,6 +47,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "keyvault_to_functionvn
   resource_group_name   = local.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.keyvault.name
   virtual_network_id    = azurerm_virtual_network.function_vnet.id
+  tags                  = local.tags
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "keyvault_to_defaultvnet" {
@@ -54,4 +55,5 @@ resource "azurerm_private_dns_zone_virtual_network_link" "keyvault_to_defaultvne
   resource_group_name   = local.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.keyvault.name
   virtual_network_id    = module.main_hosting.networking.vnet_id
+  tags                  = local.tags
 }

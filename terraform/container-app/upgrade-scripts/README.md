@@ -18,3 +18,11 @@ This folder contains various scripts designed to be ran before a specific sprint
 | Name                                                        | Description                                                                            |
 | ----------------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | [Key Vault State Import](./shared/keyvault/state_import.sh) | Retrieves a Key Vault secret's ID from Azure using the CLI, then imports into TF state |
+
+### Helpful functions
+
+#### Saving plan to file and removing formatting
+
+You can use `grep -v -P '\[\d{1,2}m~?'` to cleanup a plan by remove all formatting lines/colours from it.
+
+You can do this all in one line with `terraform plan -var-file=./var-file.tfvars | grep -v -P '\[\d{1,2}m~?' > 20240820-environment_plan.txt`

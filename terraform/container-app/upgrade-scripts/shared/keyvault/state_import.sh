@@ -24,5 +24,5 @@ if [[ -z "$SECRET_ID" ]]; then
   exit 1
 fi
 
-echo "Running command: terraform import -var-file=${TFVAR_PATH} $TF_ID_NAME $SECRET_ID"
-terraform import -var-file=../$TF_VARS $TF_NAME $secret_id
+echo "Running command: terraform import -var-file=${TFVAR_PATH} '$TF_ID_NAME' '$SECRET_ID'"
+terraform import -var-file=$TFVAR_PATH $TF_ID_NAME $SECRET_ID
