@@ -24,7 +24,7 @@ public class SubmissionStatusProcessor : ISubmissionStatusProcessor
     }
     public IUser User { get; init; }
     public Question? NextQuestion { get; set; }
-    public SectionStatusNew? SectionStatus { get; private set; }
+    public SectionStatus? SectionStatus { get; private set; }
     public SubmissionStatus Status { get; set; }
 
     public SubmissionStatusProcessor(IGetSectionQuery getSectionQuery,
