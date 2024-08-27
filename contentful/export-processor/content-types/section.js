@@ -234,7 +234,7 @@ export class Section {
 
         this.pathsForAllPossibleAnswers = allAnswerPaths.map((path) => {
             const userJourney = new UserJourney(path, this);
-            userJourney.setRecommendation(this.recommendation, path);
+            userJourney.setRecommendation(this.recommendation);
             return userJourney;
         });
     }
