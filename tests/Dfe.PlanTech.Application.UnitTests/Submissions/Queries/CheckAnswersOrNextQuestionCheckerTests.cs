@@ -106,7 +106,7 @@ public class CheckAnswersOrNextQuestionCheckerTests
     {
         var processor = Substitute.For<ISubmissionStatusProcessor>();
         processor.Section.Returns(new Section() { });
-        processor.SectionStatus.Returns(new SectionStatusNew() { Status = Status.InProgress });
+        processor.SectionStatus.Returns(new SectionStatus() { Status = Status.InProgress });
 
         var matches = StatusChecker.IsMatchingSubmissionStatus(processor);
 
@@ -118,7 +118,7 @@ public class CheckAnswersOrNextQuestionCheckerTests
     {
         var processor = Substitute.For<ISubmissionStatusProcessor>();
         processor.Section.Returns(new Section() { });
-        processor.SectionStatus.Returns(new SectionStatusNew() { Status = Status.NotStarted });
+        processor.SectionStatus.Returns(new SectionStatus() { Status = Status.NotStarted });
 
         var matches = StatusChecker.IsMatchingSubmissionStatus(processor);
 
@@ -130,7 +130,7 @@ public class CheckAnswersOrNextQuestionCheckerTests
     {
         var processor = Substitute.For<ISubmissionStatusProcessor>();
         processor.Section.Returns(new Section() { });
-        processor.SectionStatus.Returns(new SectionStatusNew() { Status = Status.Completed });
+        processor.SectionStatus.Returns(new SectionStatus() { Status = Status.Completed });
 
         var matches = StatusChecker.IsMatchingSubmissionStatus(processor);
 
@@ -165,7 +165,7 @@ public class CheckAnswersOrNextQuestionCheckerTests
         section.Questions.Returns(Questions);
 
         processor.Section.Returns(section);
-        processor.SectionStatus.Returns(new SectionStatusNew() { Status = Status.InProgress });
+        processor.SectionStatus.Returns(new SectionStatus() { Status = Status.InProgress });
 
         await StatusChecker.ProcessSubmission(processor, default);
 
@@ -198,7 +198,7 @@ public class CheckAnswersOrNextQuestionCheckerTests
         section.Questions.Returns(Questions);
 
         processor.Section.Returns(section);
-        processor.SectionStatus.Returns(new SectionStatusNew() { Status = Status.InProgress });
+        processor.SectionStatus.Returns(new SectionStatus() { Status = Status.InProgress });
 
         await StatusChecker.ProcessSubmission(processor, default);
 

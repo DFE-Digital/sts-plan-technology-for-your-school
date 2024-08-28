@@ -17,19 +17,20 @@ public class GetSubmissionStatusesQuery(IPlanTechDbContext db, IUser userHelper)
         return await db.ToListAsync(db.GetSectionStatuses(categoryId, establishmentId));
     }
 
-    public async Task<SectionStatusNew> GetSectionSubmissionStatusAsync(int establishmentId,
+    public async Task<SectionStatus> GetSectionSubmissionStatusAsync(int establishmentId,
                                                                          ISectionComponent section,
                                                                          bool completed,
                                                                          CancellationToken cancellationToken)
     {
-        var sectionStatus = db.GetSubmissions.Where(submission => submission.EstablishmentId == establishmentId &&
-                                                 submission.SectionId == section.Sys.Id && !submission.Deleted);
+        var sectionStatus = db.GetSubmissions.Where(submission => submission.EstablishmentId == establishmentId
+                                                                  && submission.SectionId == section.Sys.Id
+                                                                  && !submission.Deleted);
 
         var groupedAndLatest = GetLatestSubmissionStatus(sectionStatus, completed);
 
         var result = await db.FirstOrDefaultAsync(groupedAndLatest, cancellationToken);
 
-        return result ?? new SectionStatusNew()
+        return result ?? new SectionStatus()
         {
             SectionId = section.Sys.Id,
             Completed = false,
@@ -46,8 +47,8 @@ public class GetSubmissionStatusesQuery(IPlanTechDbContext db, IUser userHelper)
     /// <param name="submissionStatuses"></param>
     /// <param name="completed"></param>
     /// <returns></returns>
-    private static IQueryable<SectionStatusNew> GetLatestSubmissionStatus(IQueryable<Submission> submissionStatuses, bool completed)
-    => submissionStatuses.Select(submission => new SectionStatusNew()
+    private static IQueryable<SectionStatus> GetLatestSubmissionStatus(IQueryable<Submission> submissionStatuses, bool completed)
+    => submissionStatuses.Select(submission => new SectionStatus()
     {
         DateCreated = submission.DateCreated,
         Completed = submission.Completed,
@@ -56,8 +57,5 @@ public class GetSubmissionStatusesQuery(IPlanTechDbContext db, IUser userHelper)
         Status = submission.Completed ? Status.Completed : submission.Responses.Count != 0 ? Status.InProgress : Status.NotStarted,
     })
     .GroupBy(submission => submission.SectionId)
-    .Select(grouping => grouping
-        .OrderByDescending(status => completed && status.Completed)
-        .ThenByDescending(status => status.DateCreated)
-        .First());
+    .Select(grouping => grouping.OrderByDescending(status => completed && status.Completed).ThenByDescending(status => status.DateCreated).First());
 }
