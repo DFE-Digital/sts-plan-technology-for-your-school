@@ -1,10 +1,10 @@
+using Dfe.PlanTech.Domain.Exceptions;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
+using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Dfe.PlanTech.Web.Middleware;
-using Dfe.PlanTech.Domain.Exceptions;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
@@ -23,7 +23,7 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
     [HttpGet("{sectionSlug}/check-answers")]
     public async Task<IActionResult> CheckAnswersPage(string sectionSlug,
                                                       [FromServices] ICheckAnswersRouter checkAnswersValidator,
-                                                      [FromServices] UserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler,
+                                                      [FromServices] IUserJourneyMissingContentException userJourneyMissingContentExceptionHandler,
                                                       CancellationToken cancellationToken = default)
     {
         try

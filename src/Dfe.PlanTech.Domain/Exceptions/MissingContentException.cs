@@ -8,5 +8,5 @@ namespace Dfe.PlanTech.Domain.Exceptions;
 /// <param name="message"></param>
 public class UserJourneyMissingContentException(string message, ISectionComponent section) : Exception(message)
 {
-  public readonly ISectionComponent Section = section;
+    public readonly ISectionComponent Section = section;
 }
