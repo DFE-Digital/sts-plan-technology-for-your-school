@@ -67,7 +67,7 @@ builder.Services.AddScoped<ComponentViewsFactory>();
 
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddSingleton<IAuthorizationHandler, PageModelAuthorisationPolicy>();
-builder.Services.AddSingleton<IExceptionHandlerMiddleware, ServiceExceptionHandlerMiddleWare>();
+builder.Services.AddTransient<IExceptionHandlerMiddleware, ServiceExceptionHandlerMiddleWare>();
 
 builder.Services.AddTransient<ISubmissionStatusProcessor, SubmissionStatusProcessor>();
 builder.Services.AddTransient<IGetRecommendationRouter, GetRecommendationRouter>();
@@ -91,6 +91,8 @@ builder.Services.AddSingleton<ApiKeyAuthorisationFilter>();
 builder.Services.AddContentfulServices(builder.Configuration);
 builder.Services.AddSingleton<ISystemTime, SystemTime>();
 
+builder.Services.AddTransient<UserJourneyMissingContentExceptionHandler>();
+
 var app = builder.Build();
 
 app.UseSecurityHeaders();
@@ -112,12 +114,10 @@ if (!app.Environment.IsDevelopment())
 
 app.UseExceptionHandler(exceptionHandlerApp =>
 {
-    exceptionHandlerApp.Run(context =>
+    exceptionHandlerApp.Run(async context =>
     {
-        IExceptionHandlerMiddleware exceptionHandlerMiddleware = context.RequestServices.GetRequiredService<IExceptionHandlerMiddleware>();
-        exceptionHandlerMiddleware.ContextRedirect(context);
-
-        return Task.CompletedTask;
+        var exceptionHandlerMiddleware = context.RequestServices.GetRequiredService<IExceptionHandlerMiddleware>();
+        await exceptionHandlerMiddleware.HandleException(context);
     });
 });
 

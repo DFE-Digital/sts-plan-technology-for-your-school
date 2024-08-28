@@ -19,16 +19,19 @@ public class CheckAnswersRouter : ICheckAnswersRouter
     private readonly IProcessSubmissionResponsesCommand _processSubmissionResponsesCommand;
     private readonly IUser _user;
     private readonly ISubmissionStatusProcessor _router;
+    private readonly IDeleteCurrentSubmissionCommand _deleteCurrentSubmissionCommand;
 
     public CheckAnswersRouter(IGetPageQuery getPageQuery,
                               IProcessSubmissionResponsesCommand processSubmissionResponsesCommand,
                               IUser user,
-                              ISubmissionStatusProcessor router)
+                              ISubmissionStatusProcessor router,
+                              IDeleteCurrentSubmissionCommand deleteCurrentSubmissionCommand)
     {
         _getPageQuery = getPageQuery;
         _processSubmissionResponsesCommand = processSubmissionResponsesCommand;
         _user = user;
         _router = router;
+        _deleteCurrentSubmissionCommand = deleteCurrentSubmissionCommand;
     }
 
     public async Task<IActionResult> ValidateRoute(string sectionSlug, string? errorMessage, CheckAnswersController controller, CancellationToken cancellationToken)
