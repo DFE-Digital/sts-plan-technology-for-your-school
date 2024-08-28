@@ -91,7 +91,7 @@ builder.Services.AddSingleton<ApiKeyAuthorisationFilter>();
 builder.Services.AddContentfulServices(builder.Configuration);
 builder.Services.AddSingleton<ISystemTime, SystemTime>();
 
-builder.Services.AddTransient<UserJourneyMissingContentExceptionHandler>();
+builder.Services.AddTransient<IUserJourneyMissingContentException, UserJourneyMissingContentExceptionHandler>();
 
 var app = builder.Build();
 
