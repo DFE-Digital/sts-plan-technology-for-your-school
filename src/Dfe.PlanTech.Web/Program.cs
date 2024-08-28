@@ -114,10 +114,12 @@ if (!app.Environment.IsDevelopment())
 
 app.UseExceptionHandler(exceptionHandlerApp =>
 {
-    exceptionHandlerApp.Run(async context =>
+    exceptionHandlerApp.Run(context =>
     {
         var exceptionHandlerMiddleware = context.RequestServices.GetRequiredService<IExceptionHandlerMiddleware>();
-        await exceptionHandlerMiddleware.HandleException(context);
+        exceptionHandlerMiddleware.ContextRedirect(context);
+
+        return Task.CompletedTask;
     });
 });
 
