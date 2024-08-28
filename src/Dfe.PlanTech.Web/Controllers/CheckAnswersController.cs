@@ -3,6 +3,8 @@ using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Dfe.PlanTech.Web.Middleware;
+using Dfe.PlanTech.Domain.Exceptions;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
@@ -21,13 +23,21 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
     [HttpGet("{sectionSlug}/check-answers")]
     public async Task<IActionResult> CheckAnswersPage(string sectionSlug,
                                                       [FromServices] ICheckAnswersRouter checkAnswersValidator,
+                                                      [FromServices] UserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler,
                                                       CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug);
+        try
+        {
+            ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug);
 
-        var errorMessage = TempData["ErrorMessage"]?.ToString();
+            var errorMessage = TempData["ErrorMessage"]?.ToString();
 
-        return await checkAnswersValidator.ValidateRoute(sectionSlug, errorMessage, this, cancellationToken);
+            return await checkAnswersValidator.ValidateRoute(sectionSlug, errorMessage, this, cancellationToken);
+        }
+        catch (UserJourneyMissingContentException userJourneyException)
+        {
+            return await userJourneyMissingContentExceptionHandler.Handle(this, userJourneyException, cancellationToken);
+        }
     }
 
     [HttpPost("ConfirmCheckAnswers")]
