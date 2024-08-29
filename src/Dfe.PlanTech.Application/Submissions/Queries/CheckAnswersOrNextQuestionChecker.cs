@@ -36,7 +36,7 @@ public static class CheckAnswersOrNextQuestionChecker
 
             if (lastSelectedAnswer == null)
             {
-                throw new UserJourneyMissingContentException($"Could not find answer with ID {lastResponseInUserJourney.QuestionRef} in question {lastResponseInUserJourney.QuestionRef}", userJourneyRouter.Section);
+                throw new UserJourneyMissingContentException($"Could not find answer with ID {lastResponseInUserJourney.AnswerRef} in question {lastResponseInUserJourney.QuestionRef}", userJourneyRouter.Section);
             }
 
             if (lastSelectedAnswer.NextQuestion == null)

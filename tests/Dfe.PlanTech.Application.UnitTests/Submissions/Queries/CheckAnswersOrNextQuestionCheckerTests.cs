@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Submissions.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Exceptions;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
@@ -206,4 +207,111 @@ public class CheckAnswersOrNextQuestionCheckerTests
         Assert.Equal(Questions[3], processor.NextQuestion);
     }
 
+    [Fact]
+    public async Task Should_Throw_Exception_When_Question_NotFound()
+    {
+        var processor = Substitute.For<ISubmissionStatusProcessor>();
+
+        var user = Substitute.For<IUser>();
+        user.GetEstablishmentId().Returns(1);
+        processor.User.Returns(user);
+
+        var getResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
+        getResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
+                            .Returns(ResponsesForSubmissionDto);
+
+        processor.GetResponsesQuery.Returns(getResponsesQuery);
+
+        var section = Substitute.For<ISectionComponent>();
+        section.GetOrderedResponsesForJourney(Arg.Any<IEnumerable<QuestionWithAnswer>>())
+            .Returns([ResponsesForSubmissionDto.Responses[0], ResponsesForSubmissionDto.Responses[1]]);
+
+        section.Sys.Returns(new SystemDetails()
+        {
+            Id = "section-id"
+        });
+
+        section.Questions.Returns(new List<Question>()
+        {
+            new Question()
+            {
+                Text = "not a question text",
+                Slug = "not a slug",
+                Sys = new(){ Id = "Not a question id"}
+            }
+        });
+
+        processor.Section.Returns(section);
+        processor.SectionStatus.Returns(new SectionStatus() { Status = Status.InProgress });
+
+        var exception = await Assert.ThrowsAsync<UserJourneyMissingContentException>(() => StatusChecker.ProcessSubmission(processor, default));
+        Assert.Equal(section, exception.Section);
+
+        var lastResponse = section.GetOrderedResponsesForJourney(ResponsesForSubmissionDto.Responses).Last();
+
+        var expectedErrorMessage = $"Could not find question with ID {lastResponse.QuestionRef}";
+
+        Assert.Equal(expectedErrorMessage, exception.Message);
+    }
+
+    [Fact]
+    public async Task Should_Throw_Exception_When_Answer_NotFound()
+    {
+        var processor = Substitute.For<ISubmissionStatusProcessor>();
+
+        var user = Substitute.For<IUser>();
+        user.GetEstablishmentId().Returns(1);
+        processor.User.Returns(user);
+
+        var getResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
+        getResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<bool>(),
+                Arg.Any<CancellationToken>())
+            .Returns(ResponsesForSubmissionDto);
+
+        processor.GetResponsesQuery.Returns(getResponsesQuery);
+
+        var section = Substitute.For<ISectionComponent>();
+        section.GetOrderedResponsesForJourney(Arg.Any<IEnumerable<QuestionWithAnswer>>())
+            .Returns([ResponsesForSubmissionDto.Responses[0], ResponsesForSubmissionDto.Responses[1]]);
+
+        section.Sys.Returns(new SystemDetails()
+        {
+            Id = "section-id"
+        });
+
+        section.Questions.Returns(new List<Question>()
+        {
+            new Question()
+            {
+                Text = "Question text",
+                Slug = "Question Slug",
+                Sys = new()
+                {
+                    Id = "Question-Two",
+
+                },
+                Answers =
+                [
+                    new Answer()
+                    {
+                        Sys = new() { Id = "Not a found answer" }
+                    }
+                ]
+            }
+        });
+
+        processor.Section.Returns(section);
+        processor.SectionStatus.Returns(new SectionStatus() { Status = Status.InProgress });
+
+        var exception =
+            await Assert.ThrowsAsync<UserJourneyMissingContentException>(() =>
+                StatusChecker.ProcessSubmission(processor, default));
+        Assert.Equal(section, exception.Section);
+
+        var lastResponse = section.GetOrderedResponsesForJourney(ResponsesForSubmissionDto.Responses).Last();
+
+        var expectedErrorMessage = $"Could not find answer with ID {lastResponse.AnswerRef} in question {lastResponse.QuestionRef}";
+
+        Assert.Equal(expectedErrorMessage, exception.Message);
+    }
 }
