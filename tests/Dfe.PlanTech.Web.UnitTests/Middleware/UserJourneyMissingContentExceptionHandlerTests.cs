@@ -12,6 +12,8 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 
+namespace Dfe.PlanTech.Web.UnitTests.Middleware;
+
 public class MockController : Controller
 {
 
