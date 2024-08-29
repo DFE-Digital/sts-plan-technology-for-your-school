@@ -1,6 +1,9 @@
 using System.Diagnostics;
+using Dfe.PlanTech.Domain.Exceptions;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
+using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -15,6 +18,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private readonly CheckAnswersController _checkAnswersController;
         private readonly ICalculateMaturityCommand _calculateMaturityCommand;
         private readonly ICheckAnswersRouter _checkAnswersRouter;
+        private readonly IUserJourneyMissingContentExceptionHandler _userJourneyMissingContentExceptionHandler;
         private readonly string _sectionSlug = "section-slug";
 
         public CheckAnswersControllerTests()
@@ -22,6 +26,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var loggerSubstitute = Substitute.For<ILogger<CheckAnswersController>>();
             _calculateMaturityCommand = Substitute.For<ICalculateMaturityCommand>();
             _checkAnswersRouter = Substitute.For<ICheckAnswersRouter>();
+            _userJourneyMissingContentExceptionHandler = Substitute.For<IUserJourneyMissingContentExceptionHandler>();
 
             _checkAnswersController = new CheckAnswersController(loggerSubstitute)
             {
@@ -34,14 +39,31 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [InlineData(null)]
         public async Task CheckAnswersPage_Should_ThrowException_When_SectionSlug_NullOrEmpty(string? section)
         {
-            await Assert.ThrowsAnyAsync<ArgumentException>(() => _checkAnswersController.CheckAnswersPage(section!, _checkAnswersRouter, default));
+            await Assert.ThrowsAnyAsync<ArgumentException>(() => _checkAnswersController.CheckAnswersPage(section!, _checkAnswersRouter, _userJourneyMissingContentExceptionHandler, default));
         }
 
         [Fact]
         public async Task CheckAnswersPage_Should_Call_CheckAnswersRouter_When_Args_Valid()
         {
-            await _checkAnswersController.CheckAnswersPage(_sectionSlug, _checkAnswersRouter, default);
-            await _checkAnswersRouter.Received().ValidateRoute(_sectionSlug, null, _checkAnswersController, Arg.Any<CancellationToken>());
+            await _checkAnswersController.CheckAnswersPage(_sectionSlug, _checkAnswersRouter,
+                _userJourneyMissingContentExceptionHandler, default);
+            await _checkAnswersRouter.Received()
+                .ValidateRoute(_sectionSlug, null, _checkAnswersController, Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task CheckAnswersPage_Should_Call_UserJourneyMissingContentExceptionHandler_When_Exception_Thrown()
+        {
+            var exception = new UserJourneyMissingContentException("Exception thrown", new Section());
+
+            _checkAnswersRouter.ValidateRoute(Arg.Any<string>(), Arg.Any<string>(), _checkAnswersController,
+                    Arg.Any<CancellationToken>()).Throws(exception);
+
+             await _checkAnswersController.CheckAnswersPage(_sectionSlug, _checkAnswersRouter,
+                _userJourneyMissingContentExceptionHandler, default);
+
+             await _userJourneyMissingContentExceptionHandler.Received().Handle(_checkAnswersController, exception,
+                 Arg.Any<CancellationToken>());
         }
 
         [Theory]
