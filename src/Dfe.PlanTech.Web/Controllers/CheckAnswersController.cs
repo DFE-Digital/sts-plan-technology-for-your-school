@@ -23,7 +23,7 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
     [HttpGet("{sectionSlug}/check-answers")]
     public async Task<IActionResult> CheckAnswersPage(string sectionSlug,
                                                       [FromServices] ICheckAnswersRouter checkAnswersValidator,
-                                                      [FromServices] IUserJourneyMissingContentException userJourneyMissingContentExceptionHandler,
+                                                      [FromServices] IUserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler,
                                                       CancellationToken cancellationToken = default)
     {
         try

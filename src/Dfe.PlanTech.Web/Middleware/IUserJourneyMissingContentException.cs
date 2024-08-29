@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Web.Middleware;
 /// <summary>
 /// Handles <see cref="UserJourneyMissingContentException"/> exceptions by deleting the broken submission
 /// </summary>
-public interface IUserJourneyMissingContentException
+public interface IUserJourneyMissingContentExceptionHandler
 {
     /// <summary>
     /// Deletes the submission, then redirects the user back to the self-assessment page with an appropriate error message. 

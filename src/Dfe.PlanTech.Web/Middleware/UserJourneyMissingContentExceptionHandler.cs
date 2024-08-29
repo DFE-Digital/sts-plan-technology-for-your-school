@@ -5,8 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Middleware;
 
-public class UserJourneyMissingContentExceptionHandler : IUserJourneyMissingContentException
+public class UserJourneyMissingContentExceptionHandler : IUserJourneyMissingContentExceptionHandler
 {
+    public const string ErrorMessageConfigKey = "ErrorMessages:ConcurrentUsersOrContentChange";
+    public const string ErrorMessageTempDataKey = "SubtopicError";
+
     private readonly ILogger<UserJourneyMissingContentExceptionHandler> _logger;
     private readonly IDeleteCurrentSubmissionCommand _deleteCurrentSubmissionCommand;
     private readonly IConfiguration _configuration;
@@ -22,11 +25,11 @@ public class UserJourneyMissingContentExceptionHandler : IUserJourneyMissingCont
 
     public async Task<IActionResult> Handle(Controller controller, UserJourneyMissingContentException exception, CancellationToken cancellationToken)
     {
-        _logger.LogError(exception, "Handling errored user journey for section {Section}", exception.Section);
+        _logger.LogError(exception, "Handling errored user journey for section {Section}", exception.Section.Name);
 
         await _deleteCurrentSubmissionCommand.DeleteCurrentSubmission(exception.Section, cancellationToken);
 
-        controller.TempData["SubtopicError"] = _configuration["ErrorMessages:ConcurrentUsersOrContentChange"];
+        controller.TempData[ErrorMessageTempDataKey] = _configuration[ErrorMessageConfigKey];
 
         return controller.RedirectToAction(PagesController.GetPageByRouteAction, PagesController.ControllerName, new { route = "self-assessment" });
     }
