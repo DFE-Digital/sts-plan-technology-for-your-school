@@ -59,10 +59,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _checkAnswersRouter.ValidateRoute(Arg.Any<string>(), Arg.Any<string>(), _checkAnswersController,
                     Arg.Any<CancellationToken>()).Throws(exception);
 
-             await _checkAnswersController.CheckAnswersPage(_sectionSlug, _checkAnswersRouter,
-                _userJourneyMissingContentExceptionHandler, default);
+            await _checkAnswersController.CheckAnswersPage(_sectionSlug, _checkAnswersRouter,
+               _userJourneyMissingContentExceptionHandler, default);
 
-             await _userJourneyMissingContentExceptionHandler.Received().Handle(_checkAnswersController, exception, Arg.Any<CancellationToken>());
+            await _userJourneyMissingContentExceptionHandler.Received().Handle(_checkAnswersController, exception, Arg.Any<CancellationToken>());
         }
 
         [Theory]
