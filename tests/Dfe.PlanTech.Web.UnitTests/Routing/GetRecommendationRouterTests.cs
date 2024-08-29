@@ -386,7 +386,7 @@ public class GetRecommendationRouterTests
             .Do((callinfo) =>
             {
                 _submissionStatusProcessor.Status = SubmissionStatus.Completed;
-                _submissionStatusProcessor.SectionStatus.Returns(new SectionStatusNew()
+                _submissionStatusProcessor.SectionStatus.Returns(new SectionStatus()
                 {
                     Maturity = null
                 });
@@ -406,7 +406,7 @@ public class GetRecommendationRouterTests
             {
                 _submissionStatusProcessor.Status = SubmissionStatus.Completed;
                 _submissionStatusProcessor.Section.Returns(_section);
-                _submissionStatusProcessor.SectionStatus.Returns(new SectionStatusNew()
+                _submissionStatusProcessor.SectionStatus.Returns(new SectionStatus()
                 {
                     Maturity = "High"
                 });
@@ -430,7 +430,7 @@ public class GetRecommendationRouterTests
             {
                 _submissionStatusProcessor.Status = SubmissionStatus.Completed;
                 _submissionStatusProcessor.Section.Returns(_section);
-                _submissionStatusProcessor.SectionStatus.Returns(new SectionStatusNew()
+                _submissionStatusProcessor.SectionStatus.Returns(new SectionStatus()
                 {
                     Maturity = "not a real maturity"
                 });
@@ -589,7 +589,7 @@ public class GetRecommendationRouterTests
             {
                 _submissionStatusProcessor.Status = SubmissionStatus.Completed;
                 _submissionStatusProcessor.Section.Returns(_section);
-                _submissionStatusProcessor.SectionStatus.Returns(new SectionStatusNew()
+                _submissionStatusProcessor.SectionStatus.Returns(new SectionStatus()
                 {
                     Maturity = "High"
                 });
