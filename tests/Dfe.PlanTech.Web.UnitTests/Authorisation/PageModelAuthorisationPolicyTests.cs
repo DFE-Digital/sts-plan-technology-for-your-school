@@ -120,7 +120,9 @@ public class PageModelAuthorisationPolicyTests
     {
         _authContext = new AuthorizationHandlerContext([new PageAuthorisationRequirement()], new ClaimsPrincipal(), null);
         await _policy.HandleAsync(_authContext);
-        _logger.ReceivedMessages("Expected resource to be HttpContext but received null", LogLevel.Error, 1);
+
+        var receivedLoggerMessages = _logger.GetMatchingReceivedMessages("Expected resource to be HttpContext but received (null)", LogLevel.Error);
+        Assert.Single(receivedLoggerMessages);
     }
 
     [Fact]

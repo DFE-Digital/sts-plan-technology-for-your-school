@@ -89,8 +89,8 @@ public class GetNavigationQueryTests
 
         var result = await navQuery.GetNavigationLinks();
 
-        _logger.ReceivedMessages(GetNavigationQuery.ExceptionMessageDatabase, LogLevel.Error, 1);
-
+        var receivedLoggerMessages = _logger.GetMatchingReceivedMessages(GetNavigationQuery.ExceptionMessageDatabase, LogLevel.Error);
+        Assert.Single(receivedLoggerMessages);
         Assert.Equal(_contentfulLinks, result);
     }
 
@@ -119,7 +119,9 @@ public class GetNavigationQueryTests
 
         var receivedCalls = _logger.ReceivedCalls();
 
-        _logger.ReceivedMessages(GetNavigationQuery.ExceptionMessageContentful, LogLevel.Error, 1);
+        var receivedLoggerMessages = _logger.GetMatchingReceivedMessages(GetNavigationQuery.ExceptionMessageContentful, LogLevel.Error);
+
+        Assert.Single(receivedLoggerMessages);
         Assert.Empty(result);
     }
 

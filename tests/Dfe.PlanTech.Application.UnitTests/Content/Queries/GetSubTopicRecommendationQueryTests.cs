@@ -188,7 +188,8 @@ public class GetSubTopicRecommendationQueryTests
         Assert.Equal(subtopicRecommendation.Sys.Id, _subtopicRecommendation!.Sys.Id);
         Assert.Equal(subtopicRecommendation.Subtopic.Sys.Id, _subtopicRecommendation!.Subtopic.Sys.Id);
 
-        AssertFailureMessageLog(subtopicRecommendation);
+        Assert.Single(_logger.GetMatchingReceivedMessages(
+            $"Retrieved subtopic recommendation {_subtopicRecommendation.Subtopic.Sys.Id} from Contentful", LogLevel.Trace));
     }
 
     [Fact]
@@ -219,6 +220,8 @@ public class GetSubTopicRecommendationQueryTests
 
     private void AssertFailureMessageLog(SubtopicRecommendation? subtopicRecommendation)
     {
-        _logger.ReceivedMessages($"Was unable to find a subtopic recommendation for {subtopicRecommendation?.Subtopic.Sys.Id} from DB or Contentful", LogLevel.Error, 1);
+        Assert.Single(_logger.GetMatchingReceivedMessages(
+            $"Was unable to find a subtopic recommendation for {subtopicRecommendation?.Subtopic.Sys.Id} from DB or Contentful",
+            LogLevel.Error));
     }
 }

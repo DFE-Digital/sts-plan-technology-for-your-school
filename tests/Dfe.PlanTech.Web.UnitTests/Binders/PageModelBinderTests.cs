@@ -11,8 +11,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Binders;
 
 public class PageModelBinderTests
 {
-    private const string LogMessageTemplate = "Expected a page type, but received a different type.";
-
     [Fact]
     public async Task Should_Get_Page_From_Items()
     {
@@ -61,7 +59,7 @@ public class PageModelBinderTests
 
         await pageModelBinder.BindModelAsync(modelBinderContext);
 
-        logger.ReceivedMessages(LogMessageTemplate, LogLevel.Error, 1);
+        Assert.Single(logger.GetMatchingReceivedMessages($"Page is not {typeof(Page)}", LogLevel.Error));
         Assert.False(modelBinderContext.Result.IsModelSet);
     }
 
@@ -82,7 +80,7 @@ public class PageModelBinderTests
 
         await pageModelBinder.BindModelAsync(modelBinderContext);
 
-        logger.ReceivedMessages(LogMessageTemplate, LogLevel.Error, 1);
+        Assert.Single(logger.GetMatchingReceivedMessages("Page is not set", LogLevel.Error));
 
         Assert.False(modelBinderContext.Result.IsModelSet);
     }
