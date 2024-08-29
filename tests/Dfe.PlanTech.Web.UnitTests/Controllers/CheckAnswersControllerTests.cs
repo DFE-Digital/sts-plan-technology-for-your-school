@@ -62,8 +62,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
              await _checkAnswersController.CheckAnswersPage(_sectionSlug, _checkAnswersRouter,
                 _userJourneyMissingContentExceptionHandler, default);
 
-             await _userJourneyMissingContentExceptionHandler.Received().Handle(_checkAnswersController, exception,
-                 Arg.Any<CancellationToken>());
+             await _userJourneyMissingContentExceptionHandler.Received().Handle(_checkAnswersController, exception, Arg.Any<CancellationToken>());
         }
 
         [Theory]
