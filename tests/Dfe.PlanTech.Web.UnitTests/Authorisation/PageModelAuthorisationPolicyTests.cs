@@ -35,13 +35,16 @@ public class PageModelAuthorisationPolicyTests
         var serviceProvider = Substitute.For<IServiceProvider>();
         var serviceScope = Substitute.For<IServiceScope>();
         serviceScope.ServiceProvider.Returns(serviceProvider);
-        var asyncServiceScope = new AsyncServiceScope(serviceScope);
 
+        var asyncServiceScope = new AsyncServiceScope(serviceScope);
         serviceScopeFactory.CreateAsyncScope().Returns(asyncServiceScope);
         serviceProvider.GetService(typeof(IGetPageQuery)).Returns(_getPageQuery);
 
-        _httpContext.Request.RouteValues = new RouteValueDictionary();
-        _httpContext.Request.RouteValues[PageModelAuthorisationPolicy.RoutesValuesRouteNameKey] = "/slug";
+        _httpContext.Request.RouteValues = new RouteValueDictionary
+        {
+            [PageModelAuthorisationPolicy.RoutesValuesRouteNameKey] = "/slug",
+            [PageModelAuthorisationPolicy.RouteValuesControllerNameKey] = "Pages",
+        };
 
         _httpContext.Items = new Dictionary<object, object?>();
 
@@ -69,6 +72,7 @@ public class PageModelAuthorisationPolicyTests
             RequiresAuthorisation = false,
             Slug = "TestingSlug"
         };
+
         _getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(callInfo => testPage);
 
         await _policy.HandleAsync(_authContext);
@@ -139,5 +143,30 @@ public class PageModelAuthorisationPolicyTests
 
         Assert.True(_httpContext.Request.RouteValues.ContainsKey(PageModelAuthorisationPolicy.RoutesValuesRouteNameKey));
         Assert.Equal("/", _httpContext.Request.RouteValues[PageModelAuthorisationPolicy.RoutesValuesRouteNameKey]);
+    }
+
+    [Fact]
+    public async Task Should_Fail_When_NotPagesController_And_UserNotAuthenticated()
+    {
+        _httpContext.Request.RouteValues.Remove(PageModelAuthorisationPolicy.RoutesValuesRouteNameKey);
+        _httpContext.Request.RouteValues.Remove(PageModelAuthorisationPolicy.RouteValuesControllerNameKey);
+
+        await _policy.HandleAsync(_authContext);
+
+        Assert.False(_authContext.HasSucceeded);
+    }
+
+    [Fact]
+    public async Task Should_Success_When_NotPagesController_And_UserAuthenticated()
+    {
+        var claimsIdentity = new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, "Name")], CookieAuthenticationDefaults.AuthenticationScheme);
+        _authContext.User.AddIdentity(claimsIdentity);
+
+        _httpContext.Request.RouteValues.Remove(PageModelAuthorisationPolicy.RoutesValuesRouteNameKey);
+        _httpContext.Request.RouteValues.Remove(PageModelAuthorisationPolicy.RouteValuesControllerNameKey);
+
+        await _policy.HandleAsync(_authContext);
+
+        Assert.False(_authContext.HasSucceeded);
     }
 }
