@@ -82,7 +82,7 @@ builder.Services.AddAutoMapper(typeof(Dfe.PlanTech.Application.Mappings.CmsMappi
 
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorizationBuilder()
-                .AddDefaultPolicy(PageModelAuthorisationPolicy.POLICY_NAME, policy =>
+                .AddDefaultPolicy(PageModelAuthorisationPolicy.PolicyName, policy =>
                 {
                     policy.Requirements.Add(new PageAuthorisationRequirement());
                 });

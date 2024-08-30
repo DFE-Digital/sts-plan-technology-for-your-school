@@ -41,7 +41,7 @@ public class PageModelAuthorisationPolicyTests
         serviceProvider.GetService(typeof(IGetPageQuery)).Returns(_getPageQuery);
 
         _httpContext.Request.RouteValues = new RouteValueDictionary();
-        _httpContext.Request.RouteValues[PageModelAuthorisationPolicy.ROUTE_NAME] = "/slug";
+        _httpContext.Request.RouteValues[PageModelAuthorisationPolicy.RoutesValuesRouteNameKey] = "/slug";
 
         _httpContext.Items = new Dictionary<object, object?>();
 
@@ -133,11 +133,11 @@ public class PageModelAuthorisationPolicyTests
             RequiresAuthorisation = true
         });
 
-        _httpContext.Request.RouteValues.Remove(PageModelAuthorisationPolicy.ROUTE_NAME);
+        _httpContext.Request.RouteValues.Remove(PageModelAuthorisationPolicy.RoutesValuesRouteNameKey);
 
         await _policy.HandleAsync(_authContext);
 
-        Assert.True(_httpContext.Request.RouteValues.ContainsKey(PageModelAuthorisationPolicy.ROUTE_NAME));
-        Assert.Equal("/", _httpContext.Request.RouteValues[PageModelAuthorisationPolicy.ROUTE_NAME]);
+        Assert.True(_httpContext.Request.RouteValues.ContainsKey(PageModelAuthorisationPolicy.RoutesValuesRouteNameKey));
+        Assert.Equal("/", _httpContext.Request.RouteValues[PageModelAuthorisationPolicy.RoutesValuesRouteNameKey]);
     }
 }
