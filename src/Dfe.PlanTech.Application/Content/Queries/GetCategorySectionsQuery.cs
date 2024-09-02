@@ -29,7 +29,7 @@ public class GetCategorySectionsQuery(ICmsDbContext db, ILogger<GetCategorySecti
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error fetching categories for {page}", page.Id);
+            logger.LogError(ex, "Error fetching categories for {Page}", page.Id);
             throw new InvalidOperationException($"An error occurred while fetching the categories for the page with ID: {page.Id}", ex);
         }
     }
@@ -50,7 +50,7 @@ public class GetCategorySectionsQuery(ICmsDbContext db, ILogger<GetCategorySecti
 
             if (matching == null)
             {
-                logger.LogError("Could not find matching category {categoryId} in {pageSlug}", cat.Key, page.Slug);
+                logger.LogError("Could not find matching category {CategoryId} in {PageSlug}", cat.Key, page.Slug);
                 continue;
             }
 
@@ -84,7 +84,7 @@ public class GetCategorySectionsQuery(ICmsDbContext db, ILogger<GetCategorySecti
     /// <returns></returns>
     private IQueryable<SectionDbEntity> SectionsForPageQueryable(PageDbEntity page)
     => db.Sections.Where(section => section.Category != null && section.Category.ContentPages.Any(categoryPage => categoryPage.Slug == page.Slug))
-                .Where(section => section.Order != null)
+                .Where(section => section.Order != null && section.InterstitialPage != null)
                 .OrderBy(section => section.Order)
                 .Select(section => new SectionDbEntity()
                 {
@@ -98,8 +98,8 @@ public class GetCategorySectionsQuery(ICmsDbContext db, ILogger<GetCategorySecti
                     }).ToList(),
                     InterstitialPage = new PageDbEntity()
                     {
-                        Slug = section.InterstitialPage.Slug,
-                        Id = section.InterstitialPage.Id
+                        Slug = section.InterstitialPage!.Slug,
+                        Id = section.InterstitialPage!.Id
                     }
                 });
 }

@@ -10,5 +10,5 @@ public class ComponentDropDown : ContentComponent, IComponentDropDown<RichTextCo
 {
     public string Title { get; set; } = null!;
 
-    public RichTextContent Content { get; set; } = null!;
+    public RichTextContent? Content { get; set; } = null!;
 }

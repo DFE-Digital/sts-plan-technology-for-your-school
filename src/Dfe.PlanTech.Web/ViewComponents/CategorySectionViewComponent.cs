@@ -57,11 +57,11 @@ public class CategorySectionViewComponent(
         {
             var sectionStatus = category.SectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId == section.Sys.Id);
 
-            if (string.IsNullOrWhiteSpace(section.InterstitialPage.Slug))
+            if (string.IsNullOrWhiteSpace(section.InterstitialPage?.Slug))
                 _logger.LogError("No Slug found for Subtopic with ID: {sectionId}/ name: {sectionName}", section.Sys.Id, section.Name);
 
             yield return new CategorySectionDto(
-                slug: section.InterstitialPage.Slug,
+                slug: section.InterstitialPage?.Slug,
                 name: section.Name,
                 retrievalError: category.RetrievalError,
                 sectionStatus: sectionStatus,
