@@ -1,81 +1,85 @@
 @use "../../node_modules/dfe-frontend/packages/dfefrontend.scss";
 
 * {
-  font-family: BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu,
-    Cantarell, "Helvetica Neue", sans-serif !important;
+    font-family: BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu,
+        Cantarell, "Helvetica Neue", sans-serif !important;
 }
 
 .logo {
-  display: block;
-  max-height: 32px;
-  max-width: 100%;
+    display: block;
+    max-height: 32px;
+    max-width: 100%;
 }
 
 .govuk-table {
-  margin-top: 30px;
-  margin-bottom: 30px;
+    margin-top: 30px;
+    margin-bottom: 30px;
 }
 
 a.govuk-home-link {
-  position: relative;
-  display: inline-block;
-  margin-top: 15px;
-  margin-bottom: 15px;
+    position: relative;
+    display: inline-block;
+    margin-top: 15px;
+    margin-bottom: 15px;
 }
 
 //Remove the padding from paragraphs within lists
 li {
-  p.govuk-body {
-    margin-top: 0px;
-    margin-bottom: 0px;
-  }
+    p.govuk-body {
+        margin-top: 0px;
+        margin-bottom: 0px;
+    }
 }
 
 div.govuk-width-container {
-  @extend .dfe-width-container;
+    @extend .dfe-width-container;
 }
 
 strong.govuk-tag {
-  max-width: fit-content;
-  vertical-align: middle;
+    max-width: fit-content;
+    vertical-align: middle;
 
-  &:first-letter {
-    text-transform: uppercase;
-  }
+    &:first-letter {
+        text-transform: uppercase;
+    }
 }
 
 @media (min-width: 40.0625em) {
-  .dfe-self-assessment-list {
-    > .govuk-summary-list__row {
-      height: 4rem;
+    .dfe-self-assessment-list {
+        > .govuk-summary-list__row {
+            height: 4rem;
+        }
     }
-  }
 }
 
 .govuk-summary-list__key,
 .govuk-summary-list__value {
-  vertical-align: middle;
-
-  > .govuk-button {
     vertical-align: middle;
-  }
+
+    > .govuk-button {
+        vertical-align: middle;
+    }
 }
 
 .dfe-header {
-  border-bottom: 10px solid #347ca9
+    border-bottom: 10px solid #347ca9;
 }
 
 .share-html-img {
-  width: 100px;
-  float: left;
-  padding-right: 10px;
+    width: 100px;
+    float: left;
+    padding-right: 10px;
 }
 
 //Hide GTM iframe
 iframe {
-  display: none;
+    display: none;
 }
 
 .whitespace-preline {
-  white-space: pre-line;
+    white-space: pre-line;
+}
+
+button.govuk-button--secondary {
+    background-color: white;
 }
