@@ -123,10 +123,10 @@ public class GetSubmissionStatusesQueryTests
 
         Db.GetSubmissions.Returns(submissions.AsQueryable());
 
-        Db.FirstOrDefaultAsync(Arg.Any<IQueryable<SectionStatusNew>>(), Arg.Any<CancellationToken>())
+        Db.FirstOrDefaultAsync(Arg.Any<IQueryable<SectionStatus>>(), Arg.Any<CancellationToken>())
             .Returns((callinfo) =>
             {
-                var queryable = callinfo.ArgAt<IQueryable<SectionStatusNew>>(0);
+                var queryable = callinfo.ArgAt<IQueryable<SectionStatus>>(0);
 
                 return queryable.FirstOrDefault();
             });
