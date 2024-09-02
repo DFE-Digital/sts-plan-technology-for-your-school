@@ -173,20 +173,20 @@ export class Section {
         // Create paths until all answers are used
         while (answersUsed.length !== allAnswers.length) {
             let newPath = [];
-            const lastQuestionWithUnusedAnswers = this.questions.findLast(question => question.answers.some(answer => !answersUsed.includes(answer.id)));
+            const startIndex = this.questions.findLastIndex(question => question.answers.some(answer => !answersUsed.includes(answer.id)));
 
-            if (!lastQuestionWithUnusedAnswers) {
+            if (startIndex === -1) {
                 console.log("All answers have been used.");
                 break;
             }
 
-            // Assign an answer to the latest question in the sequence that has unused answers
-            const startIndex = this.questions.lastIndexOf(lastQuestionWithUnusedAnswers);
+            // Find the latest question in the sequence that has unused answers and assign an unused answer
+            const lastQuestionWithUnusedAnswers = this.questions[startIndex];
             const lastUnusedAnswers = lastQuestionWithUnusedAnswers.answers.filter(answer => !answersUsed.includes(answer.id));
-            let lastAnswer = this.assignBestAnswer(lastUnusedAnswers, startIndex);
+            let latestAnswer = this.assignBestAnswer(lastUnusedAnswers, startIndex);
             let nextNeeded = lastQuestionWithUnusedAnswers.id;
 
-            newPath.unshift({ question: lastQuestionWithUnusedAnswers, answer: lastAnswer });
+            newPath.unshift({ question: lastQuestionWithUnusedAnswers, answer: latestAnswer });
 
             // Loop backwards through questions leading up to the last with unused answers, adding answers that lead to needed questions
             for (let i = startIndex - 1; i >= 0; i--) {
@@ -210,19 +210,15 @@ export class Section {
             }
 
             // Loop forwards from the last question with unused answers, adding answers to complete the sequence, prioritising ending early or skipping questions
-            while (lastAnswer && lastAnswer.nextQuestion) {
-                const nextQuestion = this.questions.find(question => question.id === lastAnswer.nextQuestion.sys.id);
-                const nextIndex = this.questions.lastIndexOf(nextQuestion);
+            while (latestAnswer && latestAnswer.nextQuestion) {
+                const nextIndex = this.questions.findLastIndex(question => question.id === latestAnswer.nextQuestion.sys.id);
+                const nextQuestion = this.questions[nextIndex];
                 const nextAnswer = this.assignBestAnswer(nextQuestion.answers, nextIndex);
                 newPath.push({ question: nextQuestion, answer: nextAnswer });
-                lastAnswer = nextAnswer;
+                latestAnswer = nextAnswer;
             }
 
-
-            // Check all answers lead to next question and path terminates 
-            if (this.checkPathValid(newPath)) {
-                allAnswerPaths.push(newPath);
-            }
+            allAnswerPaths.push(newPath);
 
             // Add answers to answersUsed
             newPath.forEach(pathPart => {
@@ -239,41 +235,28 @@ export class Section {
         });
     }
 
+    /**
+     * Selects an answer, prioritising shortening the overall path (by favouring answers that end the path early or skip later questions).
+     *
+     * @param {array} answers - available answers for current question.
+     * @param {array} index - index of current question.
+     * @return {Answer} - selected answer.
+     */
     assignBestAnswer(answers, index) {
         if (index === this.questions.length - 1) {
             return answers[0];
         }
 
-        const nextQuestion = this.questions[index + 1];
+        const nextQuestionInSection = this.questions[index + 1];
+
         const pathEnder = answers.find(answer => !answer.nextQuestion);
-        const skipper = nextQuestion && answers.find(answer => answer.nextQuestion && answer.nextQuestion.id !== nextQuestion.id);
-        const toNextQuestion = nextQuestion && answers.find(answer => answer.nextQuestion && answer.nextQuestion.id === nextQuestion.id);
+        if (pathEnder) return pathEnder;
 
-        return pathEnder ?? (skipper ?? toNextQuestion);
-    }
+        const skipper = nextQuestionInSection && answers.find(answer => answer.nextQuestion && answer.nextQuestion.id !== nextQuestionInSection.id);
+        if (skipper) return skipper;
 
-    checkPathValid(path) {
-        // Check final answer does not have a nextQuestion
-        if (path[path.length - 1].answer.nextQuestion) {
-            console.error(`Final answer ${path[path.length - 1].answer.id} to Q${path.length - 1} does not terminate path.`);
-            return false;
-        }
+        return answers.find(answer => answer.nextQuestion && answer.nextQuestion.id === nextQuestionInSection.id);
 
-        // Check remaining answers follow sequence
-        for (let i = 0; i < path.length - 1; i++) {
-            // Check path does not terminate early
-            if (!path[i].answer.nextQuestion) {
-                console.error(`Aanswer ${path[i].answer.id} to Q${i + 1} terminates path early.`);
-                return false;
-            }
-
-            //Check each question in the path leads to the next
-            if (path[i].answer.nextQuestion.sys.id !== path[i + 1].question.id) {
-                console.error(`Answer selected for Q${i + 1} does not lead to Q${i + 2}`);
-                return false;
-            }
-        } 
-        return true;
     }
 
     checkAllChunksTested() {
