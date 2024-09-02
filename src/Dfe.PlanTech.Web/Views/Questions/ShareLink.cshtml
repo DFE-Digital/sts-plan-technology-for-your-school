@@ -17,7 +17,7 @@
     function copyLink() {
         navigator.clipboard.writeText("@Model");
 
-        let copied = document.createElement("p");
+        const copied = document.createElement("p");
         copied.textContent = "You have copied the link to your clipboard";
         document.getElementById("link-sharing-container").replaceWith(copied)
      }
