@@ -17,7 +17,6 @@ public class GetSubTopicRecommendationQueryTests
     private readonly SubtopicRecommendation _subtopicRecommendation;
     private readonly List<SubtopicRecommendation> _subtopicRecommendations = [];
 
-    private readonly List<string> _loggedMessages = [];
     public GetSubTopicRecommendationQueryTests()
     {
         var recommendationSectionOne = new RecommendationSection()
@@ -189,18 +188,8 @@ public class GetSubTopicRecommendationQueryTests
         Assert.Equal(subtopicRecommendation.Sys.Id, _subtopicRecommendation!.Sys.Id);
         Assert.Equal(subtopicRecommendation.Subtopic.Sys.Id, _subtopicRecommendation!.Subtopic.Sys.Id);
 
-        var receivedCalls = _logger.ReceivedCalls().ToArray();
-
-        Assert.Single(receivedCalls);
-        var callArguments = receivedCalls[0].GetArguments();
-
-        var logLevel = callArguments[0];
-
-        Assert.Equal(LogLevel.Trace, logLevel);
-
-        var formattableStringArguments = callArguments[2] as IReadOnlyList<KeyValuePair<string, object?>>;
-        var receivedFrom = formattableStringArguments!.FirstOrDefault(arg => arg.Key == "RetrievedFrom");
-        Assert.Equal("Contentful", receivedFrom.Value);
+        Assert.Single(_logger.GetMatchingReceivedMessages(
+            $"Retrieved subtopic recommendation {_subtopicRecommendation.Subtopic.Sys.Id} from Contentful", LogLevel.Trace));
     }
 
     [Fact]
@@ -216,14 +205,7 @@ public class GetSubTopicRecommendationQueryTests
 
         Assert.Null(result);
 
-        var receivedCalls = _logger.ReceivedCalls().ToArray();
-
-        Assert.Single(receivedCalls);
-        var callArguments = receivedCalls[0].GetArguments();
-
-        var logLevel = callArguments[0];
-
-        Assert.Equal(LogLevel.Error, logLevel);
+        AssertFailureMessageLog(_subtopicRecommendation);
 
         static Func<NSubstitute.Core.CallInfo, SubtopicRecommendation?> ReturnNullSubtopicRecommendation()
         {
@@ -236,4 +218,10 @@ public class GetSubTopicRecommendationQueryTests
         }
     }
 
+    private void AssertFailureMessageLog(SubtopicRecommendation? subtopicRecommendation)
+    {
+        Assert.Single(_logger.GetMatchingReceivedMessages(
+            $"Was unable to find a subtopic recommendation for {subtopicRecommendation?.Subtopic.Sys.Id} from DB or Contentful",
+            LogLevel.Error));
+    }
 }

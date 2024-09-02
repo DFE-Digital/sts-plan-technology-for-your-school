@@ -16,7 +16,6 @@ public class ServiceExceptionHandlerMiddleWare : IExceptionHandlerMiddleware
         string redirectUrl = GetRedirectUrlForException(exception);
 
         context.Response.Redirect(redirectUrl);
-
     }
 
     static string GetRedirectUrlForException(Exception? exception) =>

@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Web.Controllers;
 
 [Route("cache")]
 [LogInvalidModelState]
-public class CacheController(ILogger<CacheController> logger) : BaseController<CacheController>(logger)
+public class CacheController(ILogger<CacheController> cacheLogger) : BaseController<CacheController>(cacheLogger)
 {
     [HttpPost("clear")]
     [ValidateApiKey]

@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Dfe.PlanTech.Domain.Content.Queries;
+using Dfe.PlanTech.Web.Authorisation;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -10,7 +11,7 @@ using NSubstitute;
 using Xunit;
 using Page = Dfe.PlanTech.Domain.Content.Models.Page;
 
-namespace Dfe.PlanTech.Web.Authorisation;
+namespace Dfe.PlanTech.Web.UnitTests.Authorisation;
 
 public class PageModelAuthorisationPolicyTests
 {
@@ -34,17 +35,20 @@ public class PageModelAuthorisationPolicyTests
         var serviceProvider = Substitute.For<IServiceProvider>();
         var serviceScope = Substitute.For<IServiceScope>();
         serviceScope.ServiceProvider.Returns(serviceProvider);
-        var asyncServiceScope = new AsyncServiceScope(serviceScope);
 
+        var asyncServiceScope = new AsyncServiceScope(serviceScope);
         serviceScopeFactory.CreateAsyncScope().Returns(asyncServiceScope);
         serviceProvider.GetService(typeof(IGetPageQuery)).Returns(_getPageQuery);
 
-        _httpContext.Request.RouteValues = new RouteValueDictionary();
-        _httpContext.Request.RouteValues[PageModelAuthorisationPolicy.ROUTE_NAME] = "/slug";
+        _httpContext.Request.RouteValues = new RouteValueDictionary
+        {
+            [PageModelAuthorisationPolicy.RoutesValuesRouteNameKey] = "/slug",
+            [PageModelAuthorisationPolicy.RouteValuesControllerNameKey] = "Pages",
+        };
 
         _httpContext.Items = new Dictionary<object, object?>();
 
-        _authContext = new AuthorizationHandlerContext(new[] { new PageAuthorisationRequirement() }, new ClaimsPrincipal(), _httpContext);
+        _authContext = new AuthorizationHandlerContext([new PageAuthorisationRequirement()], new ClaimsPrincipal(), _httpContext);
     }
 
     [Fact]
@@ -60,7 +64,6 @@ public class PageModelAuthorisationPolicyTests
         Assert.True(_authContext.HasSucceeded);
     }
 
-
     [Fact]
     public async Task Should_Set_HttpContext_Item_For_Page()
     {
@@ -69,6 +72,7 @@ public class PageModelAuthorisationPolicyTests
             RequiresAuthorisation = false,
             Slug = "TestingSlug"
         };
+
         _getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(callInfo => testPage);
 
         await _policy.HandleAsync(_authContext);
@@ -93,7 +97,7 @@ public class PageModelAuthorisationPolicyTests
             RequiresAuthorisation = true
         });
 
-        var claimsIdentity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, "Name") }, CookieAuthenticationDefaults.AuthenticationScheme);
+        var claimsIdentity = new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, "Name")], CookieAuthenticationDefaults.AuthenticationScheme);
 
         _authContext.User.AddIdentity(claimsIdentity);
 
@@ -118,9 +122,11 @@ public class PageModelAuthorisationPolicyTests
     [Fact]
     public async Task Should_LogError_When_Resource_Not_HttpContext()
     {
-        _authContext = new AuthorizationHandlerContext(new[] { new PageAuthorisationRequirement() }, new ClaimsPrincipal(), null);
+        _authContext = new AuthorizationHandlerContext([new PageAuthorisationRequirement()], new ClaimsPrincipal(), null);
         await _policy.HandleAsync(_authContext);
-        _logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
+
+        var receivedLoggerMessages = _logger.GetMatchingReceivedMessages("Expected resource to be HttpContext but received (null)", LogLevel.Error);
+        Assert.Single(receivedLoggerMessages);
     }
 
     [Fact]
@@ -131,12 +137,36 @@ public class PageModelAuthorisationPolicyTests
             RequiresAuthorisation = true
         });
 
-        _httpContext.Request.RouteValues.Remove(PageModelAuthorisationPolicy.ROUTE_NAME);
+        _httpContext.Request.RouteValues.Remove(PageModelAuthorisationPolicy.RoutesValuesRouteNameKey);
 
         await _policy.HandleAsync(_authContext);
 
-        Assert.True(_httpContext.Request.RouteValues.ContainsKey(PageModelAuthorisationPolicy.ROUTE_NAME));
-        Assert.Equal("/", _httpContext.Request.RouteValues[PageModelAuthorisationPolicy.ROUTE_NAME]);
+        Assert.True(_httpContext.Request.RouteValues.ContainsKey(PageModelAuthorisationPolicy.RoutesValuesRouteNameKey));
+        Assert.Equal("/", _httpContext.Request.RouteValues[PageModelAuthorisationPolicy.RoutesValuesRouteNameKey]);
     }
 
+    [Fact]
+    public async Task Should_Fail_When_NotPagesController_And_UserNotAuthenticated()
+    {
+        _httpContext.Request.RouteValues.Remove(PageModelAuthorisationPolicy.RoutesValuesRouteNameKey);
+        _httpContext.Request.RouteValues.Remove(PageModelAuthorisationPolicy.RouteValuesControllerNameKey);
+
+        await _policy.HandleAsync(_authContext);
+
+        Assert.False(_authContext.HasSucceeded);
+    }
+
+    [Fact]
+    public async Task Should_Success_When_NotPagesController_And_UserAuthenticated()
+    {
+        var claimsIdentity = new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, "Name")], CookieAuthenticationDefaults.AuthenticationScheme);
+        _authContext.User.AddIdentity(claimsIdentity);
+
+        _httpContext.Request.RouteValues.Remove(PageModelAuthorisationPolicy.RoutesValuesRouteNameKey);
+        _httpContext.Request.RouteValues.Remove(PageModelAuthorisationPolicy.RouteValuesControllerNameKey);
+
+        await _policy.HandleAsync(_authContext);
+
+        Assert.False(_authContext.HasSucceeded);
+    }
 }

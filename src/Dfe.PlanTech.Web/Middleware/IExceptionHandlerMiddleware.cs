@@ -1,7 +1,6 @@
-﻿namespace Dfe.PlanTech.Web.Middleware
+﻿namespace Dfe.PlanTech.Web.Middleware;
+
+public interface IExceptionHandlerMiddleware
 {
-    public interface IExceptionHandlerMiddleware
-    {
-        void ContextRedirect(HttpContext context);
-    }
+    void ContextRedirect(HttpContext context);
 }

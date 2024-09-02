@@ -1,5 +1,5 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 
@@ -16,7 +16,7 @@ public class DeleteCurrentSubmissionCommand : IDeleteCurrentSubmissionCommand
         _user = user;
     }
 
-    public async Task DeleteCurrentSubmission(Section section, CancellationToken cancellationToken = default)
+    public async Task DeleteCurrentSubmission(ISectionComponent section, CancellationToken cancellationToken = default)
     {
         var establishmentId = await _user.GetEstablishmentId();
 

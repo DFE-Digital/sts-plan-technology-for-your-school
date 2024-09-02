@@ -12,14 +12,20 @@ namespace Dfe.PlanTech.AzureFunctions.Mappings;
 /// Maps a JSON payload to the given entity type
 /// </summary>
 /// <typeparam name="TEntity"></typeparam>
-public abstract class JsonToDbMapper<TEntity>(EntityRetriever entityRetriever, EntityUpdater entityUpdater, ILogger<JsonToDbMapper<TEntity>> logger, JsonSerializerOptions jsonSerialiserOptions) : JsonToDbMapper(entityRetriever, typeof(TEntity), logger, jsonSerialiserOptions)
-where TEntity : ContentComponentDbEntity, new()
+public abstract class JsonToDbMapper<TEntity>(
+    EntityRetriever entityRetriever,
+    EntityUpdater entityUpdater,
+    ILogger<JsonToDbMapper<TEntity>> logger,
+    JsonSerializerOptions jsonSerialiserOptions)
+    : JsonToDbMapper(entityRetriever, typeof(TEntity), logger, jsonSerialiserOptions)
+    where TEntity : ContentComponentDbEntity, new()
 {
     protected CmsWebHookPayload? Payload;
-    protected EntityUpdater _entityUpdater = entityUpdater;
+    protected readonly EntityUpdater _entityUpdater = entityUpdater;
 
     public virtual TEntity ToEntity(CmsWebHookPayload payload)
     {
+        ArgumentNullException.ThrowIfNull(payload);
         Payload = payload;
 
         var values = GetEntityValuesDictionary(payload);
@@ -30,7 +36,7 @@ where TEntity : ContentComponentDbEntity, new()
         }
 
         var asJson = JsonSerializer.Serialize(values, JsonOptions);
-        var serialised = JsonSerializer.Deserialize<TEntity>(asJson, JsonOptions) ?? throw new ArgumentNullException("Null returned");
+        var serialised = JsonSerializer.Deserialize<TEntity>(asJson, JsonOptions) ?? throw new JsonException("Deserialization returned null");
 
         return serialised;
     }
@@ -107,7 +113,7 @@ public abstract class JsonToDbMapper
     {
         if (field.Value == null)
         {
-            Logger.LogError("No value for {field}", field);
+            Logger.LogError("No value for {field}", field.Key);
             yield return null;
             yield break;
         }

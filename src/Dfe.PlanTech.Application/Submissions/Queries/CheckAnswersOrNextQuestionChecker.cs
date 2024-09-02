@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Domain.Exceptions;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
@@ -24,8 +25,19 @@ public static class CheckAnswersOrNextQuestionChecker
 
             var lastResponseInUserJourney = userJourneyRouter.Section.GetOrderedResponsesForJourney(responses.Responses).Last();
 
-            var lastSelectedAnswer = userJourneyRouter.Section.Questions.First(question => question.Sys.Id == lastResponseInUserJourney.QuestionRef)
-                                                                      .Answers.First(answer => answer.Sys.Id == lastResponseInUserJourney.AnswerRef);
+            var lastSelectedQuestion = userJourneyRouter.Section.Questions.FirstOrDefault(question => question.Sys.Id == lastResponseInUserJourney.QuestionRef);
+
+            if (lastSelectedQuestion == null)
+            {
+                throw new UserJourneyMissingContentException($"Could not find question with ID {lastResponseInUserJourney.QuestionRef}", userJourneyRouter.Section);
+            }
+
+            var lastSelectedAnswer = lastSelectedQuestion.Answers.FirstOrDefault(answer => answer.Sys.Id == lastResponseInUserJourney.AnswerRef);
+
+            if (lastSelectedAnswer == null)
+            {
+                throw new UserJourneyMissingContentException($"Could not find answer with ID {lastResponseInUserJourney.AnswerRef} in question {lastResponseInUserJourney.QuestionRef}", userJourneyRouter.Section);
+            }
 
             if (lastSelectedAnswer.NextQuestion == null)
             {
