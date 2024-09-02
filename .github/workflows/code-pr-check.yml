@@ -110,7 +110,8 @@ jobs:
           /d:sonar.coverage.exclusions=**/Program.cs,**/gulpfile.js,**/wwwroot/**,**/contentandsupport/**,**/Dfe.PlanTech.Web.SeedTestData/** \
           /d:sonar.issue.ignore.multicriteria=e1 \
           /d:sonar.issue.ignore.multicriteria.e1.ruleKey=csharpsquid:S6602 \
-          /d:sonar.issue.ignore.multicriteria.e1.resourceKey=src/**/*.cs
+          /d:sonar.issue.ignore.multicriteria.e1.resourceKey=src/**/*.cs \
+          /d:sonar.scanner.scanAll=false
 
       - name: Build web app
         uses: ./.github/actions/build-dotnet-app
