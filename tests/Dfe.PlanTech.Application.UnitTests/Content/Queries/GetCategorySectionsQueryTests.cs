@@ -186,9 +186,11 @@ public class GetCategorySectionsQueryTests
         _loadedPage.Content.Add(_emptyCategoryId);
         await _getCategorySectionsQuery.TryLoadChildren(_loadedPage, CancellationToken.None);
 
-        _logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
-        Assert.Empty(_loadedPage.Content[0].Id);
-        Assert.True(_loadedPage.ContentPages.Count == 0);
+        var errorMessage = $"Could not find matching category {_category.Id} in (null)";
+
+        Assert.Single(_logger.GetMatchingReceivedMessages(errorMessage, LogLevel.Error));
+        Assert.Equal("", _loadedPage.Content[0].Id);
+        Assert.Empty(_loadedPage.ContentPages);
     }
 
     [Fact]

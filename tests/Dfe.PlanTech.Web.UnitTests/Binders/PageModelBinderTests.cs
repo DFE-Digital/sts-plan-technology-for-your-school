@@ -59,7 +59,7 @@ public class PageModelBinderTests
 
         await pageModelBinder.BindModelAsync(modelBinderContext);
 
-        logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
+        Assert.Single(logger.GetMatchingReceivedMessages($"Page is not {typeof(Page)}", LogLevel.Error));
         Assert.False(modelBinderContext.Result.IsModelSet);
     }
 
@@ -80,7 +80,7 @@ public class PageModelBinderTests
 
         await pageModelBinder.BindModelAsync(modelBinderContext);
 
-        logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
+        Assert.Single(logger.GetMatchingReceivedMessages("Page is not set", LogLevel.Error));
 
         Assert.False(modelBinderContext.Result.IsModelSet);
     }

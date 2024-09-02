@@ -25,7 +25,7 @@ public class PageEntityRetriever(CmsDbContext db) : EntityRetriever(db)
                                         ContentComponentId = pageContent.ContentComponentId,
                                         Id = pageContent.Id,
                                         PageId = pageContent.PageId,
-                                        Order = pageContent.Order,
+                                        Order = pageContent.Order ?? 0,
                                     }).ToList(),
                                     Published = page.Published,
                                     Archived = page.Archived,

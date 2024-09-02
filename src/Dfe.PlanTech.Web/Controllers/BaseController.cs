@@ -2,12 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
-public class BaseController<TConcreteController> : Controller
+public class BaseController<TConcreteController>(ILogger<BaseController<TConcreteController>> logger) : Controller
 {
-    protected readonly ILogger<TConcreteController> logger;
-
-    public BaseController(ILogger<TConcreteController> logger)
-    {
-        this.logger = logger;
-    }
+    protected readonly ILogger<BaseController<TConcreteController>> logger = logger;
 }

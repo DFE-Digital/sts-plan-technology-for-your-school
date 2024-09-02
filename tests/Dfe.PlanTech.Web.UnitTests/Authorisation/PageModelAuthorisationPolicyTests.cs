@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Dfe.PlanTech.Domain.Content.Queries;
+using Dfe.PlanTech.Web.Authorisation;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -10,7 +11,7 @@ using NSubstitute;
 using Xunit;
 using Page = Dfe.PlanTech.Domain.Content.Models.Page;
 
-namespace Dfe.PlanTech.Web.Authorisation;
+namespace Dfe.PlanTech.Web.UnitTests.Authorisation;
 
 public class PageModelAuthorisationPolicyTests
 {
@@ -44,7 +45,7 @@ public class PageModelAuthorisationPolicyTests
 
         _httpContext.Items = new Dictionary<object, object?>();
 
-        _authContext = new AuthorizationHandlerContext(new[] { new PageAuthorisationRequirement() }, new ClaimsPrincipal(), _httpContext);
+        _authContext = new AuthorizationHandlerContext([new PageAuthorisationRequirement()], new ClaimsPrincipal(), _httpContext);
     }
 
     [Fact]
@@ -59,7 +60,6 @@ public class PageModelAuthorisationPolicyTests
 
         Assert.True(_authContext.HasSucceeded);
     }
-
 
     [Fact]
     public async Task Should_Set_HttpContext_Item_For_Page()
@@ -93,7 +93,7 @@ public class PageModelAuthorisationPolicyTests
             RequiresAuthorisation = true
         });
 
-        var claimsIdentity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, "Name") }, CookieAuthenticationDefaults.AuthenticationScheme);
+        var claimsIdentity = new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, "Name")], CookieAuthenticationDefaults.AuthenticationScheme);
 
         _authContext.User.AddIdentity(claimsIdentity);
 
@@ -118,9 +118,11 @@ public class PageModelAuthorisationPolicyTests
     [Fact]
     public async Task Should_LogError_When_Resource_Not_HttpContext()
     {
-        _authContext = new AuthorizationHandlerContext(new[] { new PageAuthorisationRequirement() }, new ClaimsPrincipal(), null);
+        _authContext = new AuthorizationHandlerContext([new PageAuthorisationRequirement()], new ClaimsPrincipal(), null);
         await _policy.HandleAsync(_authContext);
-        _logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
+
+        var receivedLoggerMessages = _logger.GetMatchingReceivedMessages("Expected resource to be HttpContext but received (null)", LogLevel.Error);
+        Assert.Single(receivedLoggerMessages);
     }
 
     [Fact]
@@ -138,5 +140,4 @@ public class PageModelAuthorisationPolicyTests
         Assert.True(_httpContext.Request.RouteValues.ContainsKey(PageModelAuthorisationPolicy.ROUTE_NAME));
         Assert.Equal("/", _httpContext.Request.RouteValues[PageModelAuthorisationPolicy.ROUTE_NAME]);
     }
-
 }

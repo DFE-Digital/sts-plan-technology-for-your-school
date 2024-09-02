@@ -5,19 +5,14 @@ using Microsoft.AspNetCore.Authorization;
 namespace Dfe.PlanTech.Web.Authorisation;
 
 /// <summary>
-/// Retrieves a given <see cref="Page"/> from Contentful, and authorises the user based off that 
+/// Retrieves a given <see cref="Page"/> from Contentful, and authorises the user based off that
 /// </summary>
-public class PageModelAuthorisationPolicy : AuthorizationHandler<PageAuthorisationRequirement>
+public class PageModelAuthorisationPolicy(ILogger<PageModelAuthorisationPolicy> logger) : AuthorizationHandler<PageAuthorisationRequirement>
 {
     public const string POLICY_NAME = "UsePageAuthentication";
     public const string ROUTE_NAME = "route";
 
-    private readonly ILogger<PageModelAuthorisationPolicy> _logger;
-
-    public PageModelAuthorisationPolicy(ILogger<PageModelAuthorisationPolicy> logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger<PageModelAuthorisationPolicy> _logger = logger;
 
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, PageAuthorisationRequirement requirement)
     {
@@ -39,7 +34,7 @@ public class PageModelAuthorisationPolicy : AuthorizationHandler<PageAuthorisati
         }
     }
 
-    private async Task<bool> ProcessPage(HttpContext httpContext)
+    private static async Task<bool> ProcessPage(HttpContext httpContext)
     {
         string slug = GetRequestRoute(httpContext);
 
