@@ -80,16 +80,12 @@ iframe {
     white-space: pre-line;
 }
 
-button.govuk-button--secondary {
+button.govuk-button--secondary,
+button.govuk-button--secondary:is(:hover, :active){
     background-color: white;
-}
 
-.govuk-button--white {
-    @extend .govuk-button--secondary;
-    &:not(:hover, :active){
-        background-color: white;
-    }
-    &:hover{
-        color: #0b0c0c;
+    &:focus{
+        background-color: white !important;
+        box-shadow: 0 0 0 1px #fd0 !important;
     }
 }
