@@ -92,7 +92,7 @@ async function getContentsAndPostToWebhook(content) {
     const result = await tryPostContent(entry);
     results.push(result);
 
-    sleep(SleepTimeInMs.BetweenContent);
+    await sleep(SleepTimeInMs.BetweenContent);
   }
 
   return results;
