@@ -44,7 +44,7 @@ public class GetNavigationQueryTests
             return queryable.ToList();
         });
 
-        GetNavigationQuery navQuery = new GetNavigationQuery(_db, _logger, _contentRepository);
+        GetNavigationQuery navQuery = new(_db, _logger, _contentRepository);
 
         var result = await navQuery.GetNavigationLinks();
 
@@ -65,7 +65,7 @@ public class GetNavigationQueryTests
             return queryable.ToList();
         });
 
-        GetNavigationQuery navQuery = new GetNavigationQuery(_db, _logger, _contentRepository);
+        GetNavigationQuery navQuery = new(_db, _logger, _contentRepository);
 
         var result = await navQuery.GetNavigationLinks();
 
@@ -85,11 +85,12 @@ public class GetNavigationQueryTests
             throw new Exception("Error occurred");
         });
 
-        GetNavigationQuery navQuery = new GetNavigationQuery(_db, _logger, _contentRepository);
+        GetNavigationQuery navQuery = new(_db, _logger, _contentRepository);
 
         var result = await navQuery.GetNavigationLinks();
 
-        _logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
+        var receivedLoggerMessages = _logger.GetMatchingReceivedMessages(GetNavigationQuery.ExceptionMessageDatabase, LogLevel.Error);
+        Assert.Single(receivedLoggerMessages);
         Assert.Equal(_contentfulLinks, result);
     }
 
@@ -112,11 +113,15 @@ public class GetNavigationQueryTests
         });
 
 
-        GetNavigationQuery navQuery = new GetNavigationQuery(_db, _logger, _contentRepository);
+        GetNavigationQuery navQuery = new(_db, _logger, _contentRepository);
 
         var result = await navQuery.GetNavigationLinks();
 
-        _logger.ReceivedWithAnyArgs(1).Log(default, default, default, default, default!);
+        var receivedCalls = _logger.ReceivedCalls();
+
+        var receivedLoggerMessages = _logger.GetMatchingReceivedMessages(GetNavigationQuery.ExceptionMessageContentful, LogLevel.Error);
+
+        Assert.Single(receivedLoggerMessages);
         Assert.Empty(result);
     }
 

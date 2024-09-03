@@ -124,8 +124,6 @@ public static class ProgramExtensions
 
     public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
-        IServiceProvider serviceProvider = services.BuildServiceProvider();
-
         void databaseOptionsAction(DbContextOptionsBuilder options) => options.UseSqlServer(configuration.GetConnectionString("Database"));
 
         services.AddDbContextPool<ICmsDbContext, CmsDbContext>((serviceProvider, optionsBuilder) =>

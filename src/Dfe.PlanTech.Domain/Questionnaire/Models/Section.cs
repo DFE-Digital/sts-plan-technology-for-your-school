@@ -14,12 +14,11 @@ public class Section : ContentComponent, ISectionComponent
 
     public string FirstQuestionId => Questions.Select(question => question.Sys.Id).FirstOrDefault() ?? "";
 
-    public Page InterstitialPage { get; init; } = null!;
+    public Page? InterstitialPage { get; init; }
 
     public IEnumerable<QuestionWithAnswer> GetOrderedResponsesForJourney(IEnumerable<QuestionWithAnswer> responses)
     {
-        var questionWithAnswerMap = responses
-            .ToDictionary(questionWithAnswer => questionWithAnswer.QuestionRef, questionWithAnswer => questionWithAnswer);
+        var questionWithAnswerMap = responses.ToDictionary(questionWithAnswer => questionWithAnswer.QuestionRef, questionWithAnswer => questionWithAnswer);
 
         Question? node = Questions.FirstOrDefault();
 
@@ -45,6 +44,5 @@ public class Section : ContentComponent, ISectionComponent
     }
 
     private Answer? GetAnswerForRef(QuestionWithAnswer questionWithAnswer)
-        => Questions.Find(q => q.Sys.Id == questionWithAnswer.QuestionRef)?
-                    .Answers.Find(answer => answer.Sys.Id == questionWithAnswer.AnswerRef);
+        => Questions.Find(q => q.Sys.Id == questionWithAnswer.QuestionRef)?.Answers.Find(answer => answer.Sys.Id == questionWithAnswer.AnswerRef);
 }

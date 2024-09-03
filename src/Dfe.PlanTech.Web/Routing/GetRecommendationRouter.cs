@@ -9,13 +9,20 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Routing;
 
-public class GetRecommendationRouter(ISubmissionStatusProcessor router,
-                                    IGetLatestResponsesQuery getLatestResponsesQuery,
-                                    IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery) : IGetRecommendationRouter
+public class GetRecommendationRouter : IGetRecommendationRouter
 {
-    private readonly ISubmissionStatusProcessor _router = router;
-    private readonly IGetLatestResponsesQuery _getLatestResponsesQuery = getLatestResponsesQuery;
-    private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery = getSubTopicRecommendationQuery;
+    private readonly ISubmissionStatusProcessor _router;
+    private readonly IGetLatestResponsesQuery _getLatestResponsesQuery;
+    private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
+
+    public GetRecommendationRouter(ISubmissionStatusProcessor router,
+                                   IGetLatestResponsesQuery getLatestResponsesQuery,
+                                   IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery)
+    {
+        _router = router;
+        _getLatestResponsesQuery = getLatestResponsesQuery;
+        _getSubTopicRecommendationQuery = getSubTopicRecommendationQuery;
+    }
 
     public async Task<IActionResult> ValidateRoute(
         string sectionSlug,
@@ -50,7 +57,8 @@ public class GetRecommendationRouter(ISubmissionStatusProcessor router,
     {
         await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken);
         var recommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(_router.Section.Sys.Id, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {_router.Section.Name}");
-        var intro = recommendation.Intros.FirstOrDefault(intro => string.Equals(intro.Maturity, maturity, StringComparison.InvariantCultureIgnoreCase)) ?? recommendation.Intros.First();
+
+        var intro = recommendation.Intros.FirstOrDefault(intro => string.Equals(intro.Maturity, maturity, StringComparison.InvariantCultureIgnoreCase)) ?? recommendation.Intros[0];
 
         var viewModel = new RecommendationsViewModel()
         {
