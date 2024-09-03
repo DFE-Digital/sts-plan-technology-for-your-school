@@ -14,3 +14,19 @@
         <partial name="ShareLink" model="@Model.ShareUrl"/>
     </div>
 </div>
+
+
+@section BodyEnd
+{
+    <script defer nonce="@Context.Items["nonce"]">
+    document.getElementById("question-link-copy-button").addEventListener("click", copyLink);
+
+    function copyLink() {
+        navigator.clipboard.writeText("@Model.ShareUrl");
+
+        const copied = document.createElement("p");
+        copied.textContent = "You have copied the link to your clipboard";
+        document.getElementById("link-sharing-container").replaceWith(copied)
+    }
+    </script>
+}
