@@ -30,7 +30,7 @@ export class Section {
 
     this.paths = this.getAllPaths(this.questions[0]).map((path) => {
       const userJourney = new UserJourney(path, this);
-        userJourney.setRecommendation(recommendation, path);
+      userJourney.setRecommendation(recommendation);
       return userJourney;
     });
 
@@ -158,17 +158,12 @@ export class Section {
     getPathsForAllAnswers() {
         const allAnswerPaths = [];
 
-        // Log ids of all answers in section
+        // Store ids of all answers in section
         const allAnswers = this.questions.flatMap(question => question.answers.map(answer => answer.id));
 
-        // Log ids of answers used in minimum paths for recommendations
+        // Store ids of answers used in minimum paths for recommendations
         const allRecommendationPaths = this.minimumPathsForRecommendations;
-        const answersUsed = Object.values(allRecommendationPaths).flat().reduce((previous, current) => {
-            if (previous.indexOf(current.answer.id) === -1) {
-                previous.push(current.answer.id);
-            }
-            return previous;
-        }, []);
+        const answersUsed = [...new Set(Object.values(allRecommendationPaths).flat().map(question => question.answer.id))];
 
         // Create paths until all answers are used
         while (answersUsed.length !== allAnswers.length) {
@@ -238,7 +233,7 @@ export class Section {
     /**
      * Selects an answer, prioritising shortening the overall path (by favouring answers that end the path early or skip later questions).
      *
-     * @param {array} answers - available answers for current question.
+     * @param {array} answers - answers to select from: unused answers (if called with the last question in the section with unusued answers) or all answers.
      * @param {array} index - index of current question.
      * @return {Answer} - selected answer.
      */
@@ -262,16 +257,10 @@ export class Section {
     checkAllChunksTested() {
         const sectionChunks = this.recommendation.section.chunks.map(chunk => chunk.id);
 
-        const uniqueTestedChunks = [...Object.values(this.minimumPathsForRecommendations), ...this.pathsForAllPossibleAnswers.map(userJourney => userJourney.path)]
+        const uniqueTestedChunks = [...new Set([...Object.values(this.minimumPathsForRecommendations), ...this.pathsForAllPossibleAnswers.map(userJourney => userJourney.path)]
             .map(path => this.recommendation.section.getChunksForPath(path))
-            .flat()
-            .reduce((uniqueChunks, current) => {
-                if (!uniqueChunks.includes(current.id)) {
-                    uniqueChunks.push(current.id);
-                }
-                return uniqueChunks;
-            }, [])
-        
+            .flat().map(chunk => chunk.id))]
+
         if (sectionChunks.length !== uniqueTestedChunks.length) {
             sectionChunks.filter(chunkId => !uniqueTestedChunks.includes(chunkId)).forEach(missingChunk => {
                 console.error(`Recommendation chunk ${missingChunk} in ${this.name} not included in any test paths.`);
