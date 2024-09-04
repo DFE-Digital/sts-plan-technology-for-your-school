@@ -1,7 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using Dfe.PlanTech.Application.SignIns.Interfaces;
 using Dfe.PlanTech.Domain.SignIns.Models;
-using Dfe.PlanTech.Infrastructure.SignIn.Services;
 using Dfe.PlanTech.Infrastructure.SignIns.ConnectEvents;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -21,12 +19,6 @@ public static class DfeSignInSetup
     public static IServiceCollection AddDfeSignIn(this IServiceCollection services, IConfiguration configuration)
     {
         var config = GetDfeSignInConfig(configuration);
-
-        services.AddHttpClient<IDfePublicApi, DfePublicApiService>(client =>
-        {
-            client.DefaultRequestHeaders.Add("Authorization",
-                $"Bearer {DfePublicApiService.GenerateToken(config.ApiSecret, config.ClientId)}");
-        });
 
         services.AddAuthentication(ConfigureAuthentication)
                 .AddOpenIdConnect(options => ConfigureOpenIdConnect(options, config))

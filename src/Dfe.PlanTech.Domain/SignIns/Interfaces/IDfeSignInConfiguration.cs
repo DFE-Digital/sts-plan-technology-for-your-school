@@ -17,7 +17,6 @@ public interface IDfeSignInConfiguration
     public IList<string> Scopes { get; set; }
     public string SignoutCallbackUrl { get; set; }
     public string SignoutRedirectUrl { get; set; }
-    public bool DiscoverRolesWithPublicApi { get; set; }
     public string FrontDoorUrl { get; init; }
     public string ApiSecret { get; set; }
 }
