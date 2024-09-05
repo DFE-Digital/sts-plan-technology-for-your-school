@@ -4,7 +4,6 @@ public interface IDfeSignInConfiguration
 {
     public string Authority { get; set; }
     public string MetaDataUrl { get; set; }
-    public string APIServiceProxyUrl { get; set; }
     public string CallbackUrl { get; set; }
     public string ClientId { get; set; }
     public string ClientSecret { get; set; }
@@ -18,5 +17,4 @@ public interface IDfeSignInConfiguration
     public string SignoutCallbackUrl { get; set; }
     public string SignoutRedirectUrl { get; set; }
     public string FrontDoorUrl { get; init; }
-    public string ApiSecret { get; set; }
 }

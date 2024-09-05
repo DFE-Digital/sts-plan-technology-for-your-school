@@ -9,9 +9,6 @@ public sealed class DfeSignInConfiguration : IDfeSignInConfiguration
     public string MetaDataUrl { get; set; } = null!;
 
     /// <inheritdoc/>
-    public string APIServiceProxyUrl { get; set; } = null!;
-
-    /// <inheritdoc/>
     public string CallbackUrl { get; set; } = null!;
 
     /// <inheritdoc/>
@@ -48,5 +45,4 @@ public sealed class DfeSignInConfiguration : IDfeSignInConfiguration
     public string SignoutRedirectUrl { get; set; } = null!;
 
     public string FrontDoorUrl { get; init; } = null!;
-    public string ApiSecret { get; set; } = null!;
 }
