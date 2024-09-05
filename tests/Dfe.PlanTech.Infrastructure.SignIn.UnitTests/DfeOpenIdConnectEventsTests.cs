@@ -80,7 +80,7 @@ public partial class DfeOpenIdConnectEventsTests
 
         Assert.Equal(expectedUrl, openIdConnectMessage.PostLogoutRedirectUri);
     }
-   
+
     [Fact]
     public async Task The_Users_Organisation_Does_Not_Exist()
     {
