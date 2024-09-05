@@ -46,6 +46,7 @@ module "main_hosting" {
   mssql_azuread_auth_only            = local.az_use_azure_ad_auth_only
   mssql_managed_identity_assign_role = false
   mssql_sku_name                     = local.az_sql_sku
+  mssql_max_size_gb                  = local.az_sql_max_size_gb
 
   ##############
   # Networking #
@@ -59,4 +60,9 @@ module "main_hosting" {
   registry_username = local.registry_username
   registry_password = local.registry_password
   image_tag         = local.image_tag
+
+  ###########
+  # Storage #
+  ###########
+  storage_account_sas_expiration_period = local.storage_account_expiration_period
 }

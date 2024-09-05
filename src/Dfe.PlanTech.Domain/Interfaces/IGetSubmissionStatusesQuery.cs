@@ -7,7 +7,7 @@ public interface IGetSubmissionStatusesQuery
 {
     Task<List<SectionStatusDto>> GetSectionSubmissionStatuses(string categoryId);
 
-    Task<SectionStatusNew> GetSectionSubmissionStatusAsync(int establishmentId,
+    Task<SectionStatus> GetSectionSubmissionStatusAsync(int establishmentId,
                                                            ISectionComponent section,
                                                            bool completed,
                                                            CancellationToken cancellationToken);

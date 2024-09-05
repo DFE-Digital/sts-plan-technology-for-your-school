@@ -33,7 +33,7 @@ public class TextBodyComparator(CmsDbContext db, ContentfulContent contentfulCon
         ValidateProperties(contentfulTextBody, matchingTextBody, GenerateDataValidationErrors(matchingTextBody, contentfulTextBody).ToArray());
     }
 
-    protected IEnumerable<DataValidationError> GenerateDataValidationErrors(TextBodyDbEntity dbTextbody, JsonNode contentfulTextBody)
+    protected static IEnumerable<DataValidationError> GenerateDataValidationErrors(TextBodyDbEntity dbTextbody, JsonNode contentfulTextBody)
     {
         var contentfulRichText = contentfulTextBody["richText"];
 

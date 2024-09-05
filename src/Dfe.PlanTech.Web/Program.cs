@@ -67,7 +67,7 @@ builder.Services.AddScoped<ComponentViewsFactory>();
 
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddSingleton<IAuthorizationHandler, PageModelAuthorisationPolicy>();
-builder.Services.AddSingleton<IExceptionHandlerMiddleware, ServiceExceptionHandlerMiddleWare>();
+builder.Services.AddTransient<IExceptionHandlerMiddleware, ServiceExceptionHandlerMiddleWare>();
 
 builder.Services.AddTransient<ISubmissionStatusProcessor, SubmissionStatusProcessor>();
 builder.Services.AddTransient<IGetRecommendationRouter, GetRecommendationRouter>();
@@ -82,7 +82,7 @@ builder.Services.AddAutoMapper(typeof(Dfe.PlanTech.Application.Mappings.CmsMappi
 
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorizationBuilder()
-                .AddDefaultPolicy(PageModelAuthorisationPolicy.POLICY_NAME, policy =>
+                .AddDefaultPolicy(PageModelAuthorisationPolicy.PolicyName, policy =>
                 {
                     policy.Requirements.Add(new PageAuthorisationRequirement());
                 });
@@ -90,6 +90,8 @@ builder.Services.AddSingleton<ApiKeyAuthorisationFilter>();
 
 builder.Services.AddContentfulServices(builder.Configuration);
 builder.Services.AddSingleton<ISystemTime, SystemTime>();
+
+builder.Services.AddTransient<IUserJourneyMissingContentExceptionHandler, UserJourneyMissingContentExceptionHandler>();
 
 var app = builder.Build();
 
@@ -114,7 +116,7 @@ app.UseExceptionHandler(exceptionHandlerApp =>
 {
     exceptionHandlerApp.Run(context =>
     {
-        IExceptionHandlerMiddleware exceptionHandlerMiddleware = context.RequestServices.GetRequiredService<IExceptionHandlerMiddleware>();
+        var exceptionHandlerMiddleware = context.RequestServices.GetRequiredService<IExceptionHandlerMiddleware>();
         exceptionHandlerMiddleware.ContextRedirect(context);
 
         return Task.CompletedTask;

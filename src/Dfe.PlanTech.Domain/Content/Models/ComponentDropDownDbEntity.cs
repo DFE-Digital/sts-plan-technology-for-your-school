@@ -13,11 +13,11 @@ public class ComponentDropDownDbEntity : ContentComponentDbEntity, IComponentDro
     /// </summary>
     public string Title { get; set; } = null!;
 
-    [ForeignKey("RichTextContentId")]
     /// <summary>
     /// The Content to display.
     /// </summary>
-    public RichTextContentDbEntity Content { get; set; } = null!;
+    [ForeignKey("RichTextContentId")]
+    public RichTextContentDbEntity? Content { get; set; }
 
-    public long RichTextContentId { get; set; }
+    public long? RichTextContentId { get; set; }
 }

@@ -7,10 +7,13 @@ namespace Dfe.PlanTech.Web.SeedTestData;
 public class SeedData(CmsDbContext db)
 {
     /// <summary>
-    /// List of all standalone mock content generators for the seeded database
+    /// List of all mock content generators for the seeded database.
+    /// These are ordered. If one generator depends on another it must come later in the list.
     /// </summary>
     private readonly List<ContentGenerator> _contentGenerators =
     [
+        new ConnectivityCategory(db),
+        new MissingDataCategory(db),
         new SelfAssessmentPage(db)
     ];
 

@@ -30,37 +30,8 @@ resource "azurerm_storage_account" "function_storage" {
   }
 
   network_rules {
-    bypass                     = ["Logging", "Metrics"]
-    default_action             = "Deny"
-    virtual_network_subnet_ids = [azurerm_subnet.function_infra_subnet.id]
-  }
-}
-
-resource "azurerm_virtual_network" "function_vnet" {
-  name                = local.function.vnet.name
-  address_space       = [local.function.vnet.address_space]
-  location            = local.function.location
-  resource_group_name = local.resource_group_name
-  tags                = local.tags
-}
-
-resource "azurerm_subnet" "function_infra_subnet" {
-  name                 = local.function.vnet.subnet.name
-  virtual_network_name = local.function.vnet.name
-  resource_group_name  = local.resource_group_name
-  address_prefixes     = local.function.vnet.subnet.address_prefixes
-
-  service_endpoints = ["Microsoft.KeyVault", "Microsoft.Storage"]
-
-  delegation {
-    name = "AFADelegationService"
-
-    service_delegation {
-      actions = [
-        "Microsoft.Network/virtualNetworks/subnets/join/action"
-      ]
-      name = "Microsoft.App/environments"
-    }
+    bypass         = ["Logging", "Metrics"]
+    default_action = "Deny"
   }
 }
 
@@ -97,9 +68,13 @@ resource "azapi_resource" "contentful_function" {
     properties = {
       serverFarmId = azurerm_service_plan.function_plan.id,
 
-      httpsOnly              = true,
-      virtualNetworkSubnetId = azurerm_subnet.function_infra_subnet.id,
-      vnetImagePullEnabled   = true,
+      keyVaultReferenceIdentity = azurerm_user_assigned_identity.user_assigned_identity.id,
+
+      virtualNetworkSubnetId  = azurerm_subnet.function_infra_subnet.id,
+      vnetContentShareEnabled = true,
+      vnetImagePullEnabled    = true,
+      vnetRouteAllEnabled     = true,
+
       functionAppConfig = {
         deployment = {
           storage = {
@@ -124,16 +99,8 @@ resource "azapi_resource" "contentful_function" {
         appSettings = [
           /* Connections */
           {
-            name  = "keyVaultReferenceIdentity",
-            value = azurerm_user_assigned_identity.user_assigned_identity.id
-          },
-          {
             name  = "APPLICATIONINSIGHTS_CONNECTION_STRING",
             value = azurerm_application_insights.functional_insights.connection_string
-          },
-          {
-            name  = "AZURE_SQL_CONNECTIONSTRING",
-            value = local.function.app_settings.sql_connection_string
           },
           {
             name  = "AzureWebJobsServiceBus",
@@ -147,18 +114,14 @@ resource "azapi_resource" "contentful_function" {
             name  = "AzureWebJobsStorage__accountName",
             value = azurerm_storage_account.function_storage.name
           },
-          /* Cache clearing */
+          /* Key Vault */
           {
-            name  = "WEBSITE_CACHE_CLEAR_APIKEY_NAME"
-            value = local.function.app_settings.cacheclear.apikey_name
+            name  = "Azure_KeyVault_Name",
+            value = azurerm_key_vault.vault.name
           },
           {
-            name  = "WEBSITE_CACHE_CLEAR_APIKEY_VALUE"
-            value = local.function.app_settings.cacheclear.apikey_value
-          },
-          {
-            name  = "WEBSITE_CACHE_CLEAR_ENDPOINT"
-            value = local.function.app_settings.cacheclear.endpoint
+            name  = "AZURE_CLIENT_ID",
+            value = azurerm_user_assigned_identity.user_assigned_identity.client_id
           }
         ],
         http20enabled = true
@@ -181,20 +144,4 @@ resource "azurerm_application_insights" "functional_insights" {
   application_type    = "web"
   retention_in_days   = 30
   tags                = local.tags
-}
-
-/* 
-* To fix an issue where the Key Vault connection fails on initial TF apply,
-* and the only solution is to set via CLI
-*/
-resource "null_resource" "function_set_keyVaultReferenceIdentity" {
-  triggers = {
-    identity = azurerm_user_assigned_identity.user_assigned_identity.id
-  }
-
-  provisioner "local-exec" {
-    command = "az rest --method PATCH --uri \"${azapi_resource.contentful_function.id}?api-version=2023-12-01\" --body \"{'properties':{'keyVaultReferenceIdentity':'${azurerm_user_assigned_identity.user_assigned_identity.id}'}}\""
-  }
-
-  depends_on = [azapi_resource.contentful_function, azurerm_user_assigned_identity.user_assigned_identity]
 }

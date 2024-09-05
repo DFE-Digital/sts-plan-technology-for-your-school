@@ -44,6 +44,13 @@ locals {
   az_use_azure_ad_auth_only     = var.az_tag_environment != "Dev"
   az_sql_sku                    = var.az_sql_sku
   az_sql_max_pool_size          = var.az_sql_max_pool_size
+  az_sql_max_size_gb            = local.az_sql_sku == "Basic" ? null : 512
+
+  az_sql_vnet = {
+    dns_zone_name = "privatelink.database.windows.net"
+    nic_name      = "${local.resource_prefix}-db-nic"
+    endpoint_name = "${local.resource_prefix}-db"
+  }
 
   ##################
   # Azure KeyVault #
@@ -54,6 +61,20 @@ locals {
   kv_secrets_csp_defaultsrc = local.csp_clarity_domains
   kv_secrets_csp_framesrc   = "${local.csp_google_tag_manager_domain} ${local.csp_clarity_domains}"
   kv_secrets_csp_imgsrc     = "${local.csp_google_tag_manager_domain} ${local.csp_clarity_domains}"
+
+  kv_networking = {
+    subnet = {
+      name             = "${local.resource_prefix}-keyvault-endpoint"
+      address_prefixes = ["172.16.7.0/24"]
+    }
+    private_dns_zone = {
+      name = "privatelink.vaultcore.azure.net"
+    }
+    endpoint = {
+      nic_name = "${local.resource_prefix}-keyvault-nic"
+      name     = "${local.resource_prefix}-keyvault"
+    }
+  }
 
   ##################
   # CDN/Front Door #
@@ -100,29 +121,43 @@ locals {
     runtime = var.function_runtime,
     scaling = var.function_scaling,
 
-    app_settings = {
-      sql_connection_string = local.function_appsetting_sql_connection_string
-      cacheclear = {
-        apikey_name  = local.function_appsetting_cacheclear_apikey_name,
-        apikey_value = local.function_appsetting_cacheclear_apikey_value,
-        endpoint     = local.function_appsetting_cacheclear_endpoint
-      }
-    }
-
     vnet = {
       name          = "${local.resource_prefix}-function-vn"
       address_space = "10.0.0.0/14"
 
-      subnet = {
-        name             = "${local.resource_prefix}-functioninfra"
-        address_prefixes = ["10.0.0.0/24"]
+      subnets = {
+        infra = {
+          name             = "${local.resource_prefix}-functioninfra"
+          address_prefixes = ["10.0.0.0/24"]
+        }
+
+        storage = {
+          name             = "${local.resource_prefix}-function-storage"
+          address_prefixes = ["10.0.1.0/24"]
+        }
+      }
+
+      dns = {
+        blob = {
+          name = "privatelink.blob.core.windows.net"
+        }
+
+        files = {
+          name = "privatelink.file.core.windows.net"
+        }
+      }
+
+      endpoints = {
+        blob = {
+          nic_name = "${local.resource_prefix}-blob-storage-nic"
+          name     = "${local.resource_prefix}-blob-storage"
+        }
+
+        files = {
+          nic_name = "${local.resource_prefix}-files-storage-nic"
+          name     = "${local.resource_prefix}-files-storage"
+        }
       }
     }
   }
-
-  # Settings
-  function_appsetting_sql_connection_string   = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=${azurerm_key_vault_secret.vault_secret_database_connectionstring.name})"
-  function_appsetting_cacheclear_apikey_name  = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=CacheClear--ApiKeyName)"
-  function_appsetting_cacheclear_apikey_value = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=CacheClear--ApiKeyValue)"
-  function_appsetting_cacheclear_endpoint     = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=CacheClear--Endpoint)"
 }

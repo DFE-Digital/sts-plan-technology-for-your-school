@@ -14,12 +14,13 @@ public class GetSubmissionStatusesQueryTests
     private readonly IPlanTechDbContext Db = Substitute.For<IPlanTechDbContext>();
     private readonly IUser user = Substitute.For<IUser>();
 
-    private readonly List<SectionStatusDto> SectionStatuses = [
+    private readonly List<SectionStatusDto> SectionStatuses = new List<SectionStatusDto>
+    {
         new SectionStatusDto { Completed = true, SectionId = "1", LastMaturity = "Low", DateCreated = DateTime.UtcNow },
         new SectionStatusDto { Completed = true, SectionId = "2", LastMaturity = "High", DateCreated = DateTime.UtcNow },
         new SectionStatusDto { Completed = false, SectionId = "3", DateCreated = DateTime.UtcNow },
         new SectionStatusDto { Completed = false, SectionId = "4", DateCreated = DateTime.UtcNow },
-    ];
+    };
 
     private const int establishmentId = 1;
     private const string maturity = "High";
@@ -122,10 +123,10 @@ public class GetSubmissionStatusesQueryTests
 
         Db.GetSubmissions.Returns(submissions.AsQueryable());
 
-        Db.FirstOrDefaultAsync(Arg.Any<IQueryable<SectionStatusNew>>(), Arg.Any<CancellationToken>())
+        Db.FirstOrDefaultAsync(Arg.Any<IQueryable<SectionStatus>>(), Arg.Any<CancellationToken>())
             .Returns((callinfo) =>
             {
-                var queryable = callinfo.ArgAt<IQueryable<SectionStatusNew>>(0);
+                var queryable = callinfo.ArgAt<IQueryable<SectionStatus>>(0);
 
                 return queryable.FirstOrDefault();
             });
