@@ -68,7 +68,8 @@ public class MappedEntityTests
             IncomingEntity = new InvalidMockDbEntity(),
             CmsEvent = CmsEvent.CREATE,
         };
-        Assert.False(mappedEntity.IsValidComponent(_cmsDbContextMock, _logger));
+        mappedEntity.UpdateEntity(_cmsDbContextMock);
+        Assert.False(mappedEntity.IsValidComponent(_logger));
     }
 
     [Fact]
@@ -80,7 +81,8 @@ public class MappedEntityTests
             IncomingEntity = incoming,
             CmsEvent = CmsEvent.CREATE,
         };
-        Assert.True(mappedEntity.IsValidComponent(_cmsDbContextMock, _logger));
+        mappedEntity.UpdateEntity(_cmsDbContextMock);
+        Assert.True(mappedEntity.IsValidComponent(_logger));
         Assert.Equal("", incoming.String);
         Assert.Equal(0, incoming.Int);
         Assert.False(incoming.Bool);
