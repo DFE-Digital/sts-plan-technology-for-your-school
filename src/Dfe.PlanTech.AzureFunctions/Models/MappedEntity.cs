@@ -33,7 +33,7 @@ public class MappedEntity
     /// <param name="dontCopyAttribute">The attribute to exclude from the validation.</param>
     /// <param name="logger">The logger instance.</param>
     /// <returns>True if the entity is valid, false otherwise.</returns>
-    public bool IsValidComponent(ILogger logger)
+    public bool IsValidComponent(CmsDbContext db, ILogger logger)
     {
         if (IsMinimalPayloadEvent)
         {
@@ -41,19 +41,19 @@ public class MappedEntity
             return true;
         }
 
+        // Set missing required properties on the incoming entity to a default value, excluding ones we don't process
+        IsValid = SetDefaultsOnRequiredProperties(db, _dontCopyValueAttribute);
+
+        // Log a message if the entity is not valid.
         if (!IsValid)
             logger.LogWarning("Content Component with ID {Id} has required properties that could not be set to a default value", IncomingEntity.Id);
 
         return IsValid;
     }
 
-    /// <summary>
-    /// Sets defaults on the incoming entity before properties are copied to the existing one
-    /// </summary>
-    public void UpdateEntity(CmsDbContext db)
+    public void UpdateEntity()
     {
         UpdateEntityStatus();
-        IsValid = SetDefaultsOnRequiredProperties(db, _dontCopyValueAttribute);
 
         if (ShouldCopyProperties)
         {
