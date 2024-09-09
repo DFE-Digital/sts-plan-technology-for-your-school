@@ -43,3 +43,4 @@ jobs:
         with:
           name: ${{ inputs.artifact }}
           path: ./build
+          include-hidden-files: true
