@@ -28,10 +28,10 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, CmsDbContext db)
             CmsEvent = cmsEvent
         };
 
-        mappedEntity.UpdateEntity();
+        mappedEntity.UpdateEntity(Db);
         await postUpdateEntityCallback(mappedEntity);
 
-        if (!mappedEntity.IsValidComponent(Db, _logger) || mappedEntity.IsMinimalPayloadEvent)
+        if (!mappedEntity.IsValidComponent(_logger) || mappedEntity.IsMinimalPayloadEvent)
         {
             return mappedEntity;
         }
