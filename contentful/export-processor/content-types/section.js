@@ -31,28 +31,28 @@ export class Section {
     this.paths = this.getAllPaths(this.questions[0]).map((path) => {
       const userJourney = new UserJourney(path, this);
       userJourney.setRecommendation(recommendation);
-
       return userJourney;
     });
 
-    this.getMinimumPathsForQuestions();
-    this.getMinimumPathsForRecommendations();
-
-    this.setNextQuestions();
+      this.getMinimumPathsForQuestions();
+      this.getMinimumPathsForRecommendations();
+      this.getPathsForAllAnswers();
+      this.setNextQuestions();
+      this.checkAllChunksTested();
   }
 
   /**
    * Find the minimum amount of paths possible that allows a user to navigate through every question.
    */
-  getMinimumPathsForQuestions() {
-    const sortedPaths = this.paths
-      .slice()
-      .sort((a, b) => b.path.length - a.path.length);
+    getMinimumPathsForQuestions() {
+        const sortedPaths = this.paths
+            .slice()
+            .sort((a, b) => b.path.length - a.path.length);
 
-    this.minimumPathsToNavigateQuestions = this.calculateMinimumPaths(
-      sortedPaths,
-      this.questions
-    );
+        this.minimumPathsToNavigateQuestions = this.calculateMinimumPaths(
+            sortedPaths,
+            this.questions
+        );
   }
 
   /**
@@ -151,6 +151,122 @@ export class Section {
 
     return minimumPathsForRecommendations;
   }
+
+  /**
+   * Calcutes paths to select each answer to each question
+   */
+    getPathsForAllAnswers() {
+        const allAnswerPaths = [];
+
+        // Store ids of all answers in section
+        const allAnswers = this.questions.flatMap(question => question.answers.map(answer => answer.id));
+
+        // Store ids of answers used in minimum paths for recommendations
+        const allRecommendationPaths = this.minimumPathsForRecommendations;
+        const answersUsed = [...new Set(Object.values(allRecommendationPaths).flat().map(question => question.answer.id))];
+
+        // Create paths until all answers are used
+        while (answersUsed.length !== allAnswers.length) {
+            let newPath = [];
+            const startIndex = this.questions.findLastIndex(question => question.answers.some(answer => !answersUsed.includes(answer.id)));
+
+            if (startIndex === -1) {
+                console.log("All answers have been used.");
+                break;
+            }
+
+            // Find the latest question in the sequence that has unused answers and assign an unused answer
+            const lastQuestionWithUnusedAnswers = this.questions[startIndex];
+            const lastUnusedAnswers = lastQuestionWithUnusedAnswers.answers.filter(answer => !answersUsed.includes(answer.id));
+            let latestAnswer = this.assignBestAnswer(lastUnusedAnswers, startIndex);
+            let nextNeeded = lastQuestionWithUnusedAnswers.id;
+
+            newPath.unshift({ question: lastQuestionWithUnusedAnswers, answer: latestAnswer });
+
+            // Loop backwards through questions leading up to the last with unused answers, adding answers that lead to needed questions
+            for (let i = startIndex - 1; i >= 0; i--) {
+                const currentQuestion = this.questions[i];
+                let currentAnswer;
+                const unusedAnswers = currentQuestion.answers.filter(answer => !answersUsed.includes(answer.id));
+
+                // Find answers that lead to the next question in the sequence, prioritising unused answers and skipping any that jump ahead
+                if (unusedAnswers.some(answer => answer.nextQuestion?.sys.id === nextNeeded)) {
+                    currentAnswer = unusedAnswers.find(answer => answer.nextQuestion.sys.id === nextNeeded);
+                } else if (currentQuestion.answers.some(answer => answer.nextQuestion.sys.id === nextNeeded)) {
+                    currentAnswer = currentQuestion.answers.find(answer => answer.nextQuestion.sys.id === nextNeeded);
+                } else {
+                    console.log(`No valid answer found for question ${currentQuestion.id}. Skipping.`);
+                }
+
+                if (currentAnswer) {
+                    nextNeeded = currentQuestion.id;
+                    newPath.unshift({ question: currentQuestion, answer: currentAnswer });
+                }
+            }
+
+            // Loop forwards from the last question with unused answers, adding answers to complete the sequence, prioritising ending early or skipping questions
+            while (latestAnswer && latestAnswer.nextQuestion) {
+                const nextIndex = this.questions.findLastIndex(question => question.id === latestAnswer.nextQuestion.sys.id);
+                const nextQuestion = this.questions[nextIndex];
+                const nextAnswer = this.assignBestAnswer(nextQuestion.answers, nextIndex);
+                newPath.push({ question: nextQuestion, answer: nextAnswer });
+                latestAnswer = nextAnswer;
+            }
+
+            allAnswerPaths.push(newPath);
+
+            // Add answers to answersUsed
+            newPath.forEach(pathPart => {
+                if (!answersUsed.includes(pathPart.answer.id)) {
+                    answersUsed.push(pathPart.answer.id);
+                }
+            })
+        }
+
+        this.pathsForAllPossibleAnswers = allAnswerPaths.map((path) => {
+            const userJourney = new UserJourney(path, this);
+            userJourney.setRecommendation(this.recommendation);
+            return userJourney;
+        });
+    }
+
+    /**
+     * Selects an answer, prioritising shortening the overall path (by favouring answers that end the path early or skip later questions).
+     *
+     * @param {array} answers - answers to select from: unused answers (if called with the last question in the section with unusued answers) or all answers.
+     * @param {array} index - index of current question.
+     * @return {Answer} - selected answer.
+     */
+    assignBestAnswer(answers, index) {
+        if (index === this.questions.length - 1) {
+            return answers[0];
+        }
+
+        const nextQuestionInSection = this.questions[index + 1];
+
+        const pathEnder = answers.find(answer => !answer.nextQuestion);
+        if (pathEnder) return pathEnder;
+
+        const skipper = nextQuestionInSection && answers.find(answer => answer.nextQuestion && answer.nextQuestion.id !== nextQuestionInSection.id);
+        if (skipper) return skipper;
+
+        return answers.find(answer => answer.nextQuestion && answer.nextQuestion.id === nextQuestionInSection.id);
+
+    }
+
+    checkAllChunksTested() {
+        const sectionChunks = this.recommendation.section.chunks.map(chunk => chunk.id);
+
+        const uniqueTestedChunks = [...new Set([...Object.values(this.minimumPathsForRecommendations), ...this.pathsForAllPossibleAnswers.map(userJourney => userJourney.path)]
+            .map(path => this.recommendation.section.getChunksForPath(path))
+            .flat().map(chunk => chunk.id))]
+
+        if (sectionChunks.length !== uniqueTestedChunks.length) {
+            sectionChunks.filter(chunkId => !uniqueTestedChunks.includes(chunkId)).forEach(missingChunk => {
+                console.error(`Recommendation chunk ${missingChunk} in ${this.name} not included in any test paths.`);
+            });
+        }
+    }
 
   /**
    * Calculates the statistics of the paths.

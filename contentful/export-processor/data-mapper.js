@@ -207,9 +207,7 @@ export default class DataMapper {
     return referencedTypesForField
       .map((type) => {
         const matchingContents = this.contents.get(type);
-        const matchingContent = matchingContents.get(id);
-
-        return matchingContent;
+        return matchingContents?.get(id);
       })
       .find((matching) => matching != null);
   }
