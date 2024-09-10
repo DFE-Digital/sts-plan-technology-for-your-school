@@ -24,11 +24,6 @@ public static class ClaimConstants
     public const string Birthday = "birthdate";
     public const string NameIdentifier = "nameidentifier";
     public const string Organisation = "organisation";
-    public const string Role = "role";
-    public const string RoleCode = "rolecode";
-    public const string RoleId = "roleid";
-    public const string RoleName = "rolename";
-    public const string RoleNumericId = "rolenumericid";
     public const string Locale = "locale";
     public const string PreferredPhoneNumber = "phone_number";
     public const string Address = "address";
