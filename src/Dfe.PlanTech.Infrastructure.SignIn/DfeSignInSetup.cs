@@ -77,7 +77,7 @@ public static class DfeSignInSetup
 
         options.Events = new OpenIdConnectEvents()
         {
-            OnUserInformationReceived = OnUserInformationReceivedEvent.OnUserInformationReceived,
+            OnUserInformationReceived = OnUserInformationReceivedEvent.RecordUserSignIn,
             OnRedirectToIdentityProvider = DfeOpenIdConnectEvents.OnRedirectToIdentityProvider,
             OnRedirectToIdentityProviderForSignOut = DfeOpenIdConnectEvents.OnRedirectToIdentityProviderForSignOut,
         };

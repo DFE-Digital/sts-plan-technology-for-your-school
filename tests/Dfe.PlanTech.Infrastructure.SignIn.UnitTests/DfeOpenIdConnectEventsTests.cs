@@ -107,7 +107,7 @@ public partial class DfeOpenIdConnectEventsTests
             new AuthenticationProperties());
 
         await Assert.ThrowsAnyAsync<KeyNotFoundException>(() =>
-            OnUserInformationReceivedEvent.OnUserInformationReceived(context));
+            OnUserInformationReceivedEvent.RecordUserSignIn(context));
     }
 
     [Theory]

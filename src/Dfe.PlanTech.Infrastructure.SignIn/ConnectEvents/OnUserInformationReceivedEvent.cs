@@ -12,23 +12,11 @@ namespace Dfe.PlanTech.Infrastructure.SignIns.ConnectEvents;
 public static class OnUserInformationReceivedEvent
 {
     /// <summary>
-    /// Runs once a user's info comes back from backend server - records sign in
-    /// </summary>
-    /// <param name="context"></param>
-    /// <returns></returns>
-    public static async Task OnUserInformationReceived(UserInformationReceivedContext context)
-    {
-        await RecordUserSign(context);
-
-        var config = context.HttpContext.RequestServices.GetRequiredService<IDfeSignInConfiguration>();
-    }
-
-    /// <summary>
     /// Records user sign in event
     /// </summary>
     /// <param name="context"></param>
     /// <returns></returns>
-    private static async Task RecordUserSign(UserInformationReceivedContext context)
+    public static async Task RecordUserSignIn(UserInformationReceivedContext context)
     {
         if (context.Principal?.Identity == null || !context.Principal.Identity.IsAuthenticated)
         {
