@@ -20,7 +20,7 @@
 - [x] NavigationLink
 - [x] Question
 - [x] RecommendationIntro 
-- [x] RecommendationChunk *
+- [x] RecommendationChunk
 - [x] RecommendationSection
 - [x] Section *
 - [x] TextBody *
@@ -33,7 +33,7 @@
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | Section             | Not currently testing for 'Not started' and 'In progress' section statuses                                                          |
 | TextBody            | Haven't added validations for all element types (e.g. hyperlinks, strong, italics, etc.), haven't validated classes for most things |
-| RecommendationChunk | WIP to create paths to ensure all RecommendationChunks are presented for test as chunks are no longer determined by	 maturity	    |
+
 
 ### Page routing validated
 
@@ -55,9 +55,9 @@
 - [ ] Complete documentation:
    - [ ] Merge with documentation in `contentful-helpers`
 - [x] Make a Node project for the `contentful-helpers` to allow re-use, and prevent the fact that the code is copied and pasted into two places
-- [ ] Clear section status before each run
 - [ ] Validate content order within a page
 - [ ] Break up tests further to prevent skipping of future tests in a path if early errors will not affect later tests
+- [ ] Refactor to reduce memory consumption (ideally get full test run < 5 minutes))
 
 #### Integrate with CI/CD Pipeline
 

@@ -1,5 +1,7 @@
+using Dfe.PlanTech.Domain.Exceptions;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
+using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +11,7 @@ namespace Dfe.PlanTech.Web.Controllers;
 [LogInvalidModelState]
 [Authorize]
 [Route("/")]
-public class CheckAnswersController(ILogger<CheckAnswersController> logger) : BaseController<CheckAnswersController>(logger)
+public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswersLogger) : BaseController<CheckAnswersController>(checkAnswersLogger)
 {
     public const string ControllerName = "CheckAnswers";
     public const string CheckAnswersAction = nameof(CheckAnswersPage);
@@ -21,13 +23,21 @@ public class CheckAnswersController(ILogger<CheckAnswersController> logger) : Ba
     [HttpGet("{sectionSlug}/check-answers")]
     public async Task<IActionResult> CheckAnswersPage(string sectionSlug,
                                                       [FromServices] ICheckAnswersRouter checkAnswersValidator,
+                                                      [FromServices] IUserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler,
                                                       CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug);
+        try
+        {
+            ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug);
 
-        var errorMessage = TempData["ErrorMessage"]?.ToString();
+            var errorMessage = TempData["ErrorMessage"]?.ToString();
 
-        return await checkAnswersValidator.ValidateRoute(sectionSlug, errorMessage, this, cancellationToken);
+            return await checkAnswersValidator.ValidateRoute(sectionSlug, errorMessage, this, cancellationToken);
+        }
+        catch (UserJourneyMissingContentException userJourneyException)
+        {
+            return await userJourneyMissingContentExceptionHandler.Handle(this, userJourneyException, cancellationToken);
+        }
     }
 
     [HttpPost("ConfirmCheckAnswers")]

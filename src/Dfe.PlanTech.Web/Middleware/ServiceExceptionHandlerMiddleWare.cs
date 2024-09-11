@@ -16,20 +16,17 @@ public class ServiceExceptionHandlerMiddleWare : IExceptionHandlerMiddleware
         string redirectUrl = GetRedirectUrlForException(exception);
 
         context.Response.Redirect(redirectUrl);
-
     }
 
     static string GetRedirectUrlForException(Exception? exception) =>
         exception switch
         {
             null => UrlConstants.Error,
-            UserAccessUnavailableException => UrlConstants.CombinedErrorPage,
-            UserAccessRoleNotFoundException => UrlConstants.CombinedErrorPage,
             ContentfulDataUnavailableException => UrlConstants.ServiceUnavailable,
             DatabaseException => UrlConstants.ServiceUnavailable,
             InvalidEstablishmentException => UrlConstants.ServiceUnavailable,
             PageNotFoundException => UrlConstants.ServiceUnavailable,
-            KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) => UrlConstants.CombinedErrorPage,
+            KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) => UrlConstants.OrgErrorPage,
             _ => GetRedirectUrlForException(exception.InnerException),
         };
 }

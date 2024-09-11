@@ -18,5 +18,5 @@ where TContent : IRichTextContent
     /// <summary>
     /// The Content to display.
     /// </summary>
-    public TContent Content { get; }
+    public TContent? Content { get; }
 }

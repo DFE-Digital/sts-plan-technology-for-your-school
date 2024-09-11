@@ -20,7 +20,7 @@ function getOutgoingReferences(dataMapper) {
   for (const [contentTypeName, contentType] of dataMapper.contentTypes.entries()) {
     const referenceFields = Object.entries(contentType.referenceFields);
 
-    const contentsForType = dataMapper.contents[contentTypeName];
+    const contentsForType = dataMapper.contents.get(contentTypeName);
 
     if (!contentsForType) {
       console.log(`Found no contents for type ${contentTypeName}`);

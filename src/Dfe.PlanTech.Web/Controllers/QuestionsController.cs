@@ -66,8 +66,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
         try
         {
-            var nextQuestion =
-                await getQuestionQuery.GetNextUnansweredQuestion(establishmentId, section, cancellationToken);
+            var nextQuestion = await getQuestionQuery.GetNextUnansweredQuestion(establishmentId, section, cancellationToken);
 
             if (nextQuestion == null)
                 return this.RedirectToCheckAnswers(sectionSlug);

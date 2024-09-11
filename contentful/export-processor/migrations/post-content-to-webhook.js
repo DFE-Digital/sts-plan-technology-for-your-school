@@ -4,7 +4,7 @@ const SleepTimeInMs = {
   BetweenGroups: 2000,
   BetweenContent: 50,
   OnError: 5000
-}
+};
 
 const MaxRetryCount = 5;
 
@@ -92,7 +92,7 @@ async function getContentsAndPostToWebhook(content) {
     const result = await tryPostContent(entry);
     results.push(result);
 
-    sleep(SleepTimeInMs.BetweenContent);
+    await sleep(SleepTimeInMs.BetweenContent);
   }
 
   return results;
@@ -122,9 +122,9 @@ async function tryPostContent(entry) {
       return result;
     }
 
-    console.log(`Waiting ${sleepTime / 1000} seconds`);
+    console.log(`Waiting ${errorSleepTime / 1000} seconds`);
     await sleep(errorSleepTime);
-    sleepTime *= 5;
+    errorSleepTime *= 5;
     retryCount++;
   }
 }
@@ -149,7 +149,7 @@ async function postToWebook(content) {
           "X-Contentful-Idempotency-Key": "984411c33c2bb09cd835ff44e66d74ea65b65247e3640e9698b19f85762b272f",
         }
       }
-    )
+    );
 
     if (!result.ok) {
       throw 'error ' + result.status + " " + result.text();

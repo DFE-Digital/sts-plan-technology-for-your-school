@@ -7,8 +7,9 @@ Project containing code for integrating with DFE Sign-in
 | File                                                            | Purpose/Functionality                                                                              |
 | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | [DfeSignInSetup.cs](./DfeSignInSetup.cs)                        | Methods to inject services + authentication to the web application                                 |
-| [DfeOpenIdConnectEvents](./DfeOpenIdConnectEvents.cs)           | Contains a method that runs on successful token validation, which pulls in user roles from DFE API |
-| [UserClaimsExtensions.cs](./Extensions/UserClaimsExtensions.cs) | Extensions for retrieving common values from user roles (currently UserId, and Organisation)       |
+| [DfeOpenIdConnectEvents](./DfeOpenIdConnectEvents.cs)           | Manages URIs and URLs for login and signout events |
+| [UserClaimsExtensions.cs](./Extensions/UserClaimsExtensions.cs) | Extensions for retrieving common values from user roles (currently UserId and Organisation)       |
+| [OnUserInformationReceivedEvent.cs](./ConnectEvents/OnUserInformationReceivedEvent.cs) | Records sign in and adds user and organisation claims to principal       |
 
 ## How to use
 

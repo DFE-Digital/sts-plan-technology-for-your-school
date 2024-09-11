@@ -1,8 +1,8 @@
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Submissions.Interfaces;
 
 public interface IDeleteCurrentSubmissionCommand
 {
-    public Task DeleteCurrentSubmission(Section section, CancellationToken cancellationToken = default);
+    public Task DeleteCurrentSubmission(ISectionComponent section, CancellationToken cancellationToken = default);
 }

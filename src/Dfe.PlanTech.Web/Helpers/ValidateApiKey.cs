@@ -3,9 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Helpers;
 
-public class ValidateApiKey : ServiceFilterAttribute
+[AttributeUsage(AttributeTargets.Method)]
+public class ValidateApiKeyAttribute : ServiceFilterAttribute
 {
-    public ValidateApiKey() : base(typeof(ApiKeyAuthorisationFilter))
+    public ValidateApiKeyAttribute() : base(typeof(ApiKeyAuthorisationFilter))
     {
     }
 }
