@@ -32,4 +32,23 @@ public abstract class ContentGenerator
         entity.Id = GenerateId();
         return entity;
     }
+
+    /// <summary>
+    /// Helper method for a text body with rich text contents
+    /// </summary>
+    protected static TextBodyDbEntity CreateTextBody(string text, bool published = true)
+    {
+        var textBody = CreateComponent(new TextBodyDbEntity()
+        {
+            RichText = new RichTextContentDbEntity()
+            {
+                Data = new RichTextDataDbEntity() { Uri = "uri" },
+                Marks = [new RichTextMarkDbEntity() { Type = "Bold" }],
+                Value = text,
+                NodeType = "paragraph"
+            }
+        });
+        if (!published) textBody.Published = false;
+        return textBody;
+    }
 }

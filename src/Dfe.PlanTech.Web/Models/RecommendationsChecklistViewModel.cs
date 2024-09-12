@@ -16,12 +16,7 @@ public class RecommendationsChecklistViewModel
     private static RecommendationChunk ConvertToNumberedChunk(RecommendationChunk content, int index)
     => new()
     {
-        Header = new Header
-        {
-            Text = $"{index + 1}. {content.Header.Text}",
-            Tag = HeaderTag.H3,
-            Size = HeaderSize.Medium
-        },
+        Header = $"{index + 1}. {content.Header}",
         Content = content.Content,
     };
 

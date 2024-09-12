@@ -43,7 +43,7 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
         var chunks = await _db.RecommendationChunks.Where(chunk => chunk.RecommendationSections.Any(section => section.Id == recommendation.SectionId))
                                                     .Select(chunk => new RecommendationChunkDbEntity()
                                                     {
-                                                        Header = new HeaderDbEntity() { Text = chunk.Header.Text, Size = chunk.Header.Size, Tag = chunk.Header.Tag },
+                                                        Header = chunk.Header,
                                                         Answers = chunk.Answers.Select(answer => new AnswerDbEntity() { Id = answer.Id }).ToList(),
                                                         Id = chunk.Id,
                                                         Order = chunk.Order,
@@ -100,7 +100,6 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
                 {
                     Id = chunk.Id,
                     Header = chunk.Header,
-                    HeaderId = chunk.HeaderId,
                     Answers = chunk.Answers,
                     Content = [.. chunkContent.Where(content => content.RecommendationChunkId == chunk.Id && content.ContentComponent != null)
                                             .Select(content => content.ContentComponent)

@@ -157,42 +157,27 @@ public class GetRecommendationRouterTests
             [
                 new()
                 {
-                    Header = new()
-                    {
-                        Text = "test-header-1"
-                    },
+                    Header = "test-header-1",
                     Answers = [AnswerOne]
                 },
                 new()
                 {
-                    Header = new()
-                    {
-                        Text = "test-header-2"
-                    },
+                    Header = "test-header-2",
                     Answers = [AnswerTwo]
                 },
                 new()
                 {
-                    Header = new()
-                    {
-                        Text = "test-header-3"
-                    },
+                    Header = "test-header-3",
                     Answers = [AnswerThree]
                 },
                 new()
                 {
-                    Header = new()
-                    {
-                        Text = "test-header-4"
-                    },
+                    Header = "test-header-4",
                     Answers = [AnswerFour]
                 },
                 new()
                 {
-                    Header = new()
-                    {
-                        Text = "test-header-5"
-                    },
+                    Header = "test-header-5",
                     Answers = [AnswerFive]
                 }
             ]

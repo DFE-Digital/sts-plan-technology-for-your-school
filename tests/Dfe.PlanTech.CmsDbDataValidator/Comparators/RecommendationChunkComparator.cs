@@ -35,12 +35,6 @@ public class RecommendationChunksComparatorclass(CmsDbContext db, ContentfulCont
 
     protected IEnumerable<DataValidationError> GetValidationErrors(RecommendationChunkDbEntity databaseRecommendationChunk, JsonNode contentfulRecommendationChunk)
     {
-        var headerValidationResult = ValidateChild<RecommendationChunkDbEntity>(databaseRecommendationChunk, "HeaderId", contentfulRecommendationChunk, "header");
-        if (headerValidationResult != null)
-        {
-            yield return new DataValidationError("Header", headerValidationResult);
-        }
-
         foreach (var child in ValidateChildren(contentfulRecommendationChunk, "answers", databaseRecommendationChunk, dbRecommendationChunk => dbRecommendationChunk.Answers))
         {
             yield return child;
@@ -57,7 +51,7 @@ public class RecommendationChunksComparatorclass(CmsDbContext db, ContentfulCont
         return _db.RecommendationChunks.Select(chunk => new RecommendationChunkDbEntity()
         {
             Id = chunk.Id,
-            HeaderId = chunk.HeaderId,
+            Header = chunk.Header,
             Answers = chunk.Answers.Select(answer => new AnswerDbEntity()
             {
                 Id = answer.Id

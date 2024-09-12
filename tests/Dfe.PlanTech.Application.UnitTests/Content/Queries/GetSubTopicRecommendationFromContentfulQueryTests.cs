@@ -53,13 +53,7 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
                             Sys = new SystemDetails() { Id = "3" }
                         }
                     },
-
-                    Header = new Header()
-                    {
-                        Tag = HeaderTag.H1,
-                        Size = HeaderSize.Large,
-                        Text = "chunk1"
-                    }
+                    Header = "chunk1"
 
                 },
                 new RecommendationChunk()
@@ -79,13 +73,7 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
                             Sys = new SystemDetails() { Id = "6" }
                         }
                     },
-
-                    Header = new Header()
-                    {
-                        Tag = HeaderTag.H1,
-                        Size = HeaderSize.Large,
-                        Text = "chunk3"
-                    }
+                    Header = "chunk3"
 
                 },
                 new RecommendationChunk()
@@ -105,13 +93,7 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
                             Sys = new SystemDetails() { Id = "9" }
                         }
                     },
-
-                    Header = new Header()
-                    {
-                        Tag = HeaderTag.H1,
-                        Size = HeaderSize.Large,
-                        Text = "chunk2"
-                    }
+                    Header = "chunk2"
                 }
             }
         };

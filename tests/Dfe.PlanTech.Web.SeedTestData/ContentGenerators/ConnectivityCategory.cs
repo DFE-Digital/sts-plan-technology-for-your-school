@@ -11,7 +11,7 @@ namespace Dfe.PlanTech.Web.SeedTestData.ContentGenerators;
 /// </summary>
 public class ConnectivityCategory(CmsDbContext db) : ContentGenerator
 {
-    private static SectionDbEntity GetWifiSubtopic()
+    private SectionDbEntity GetWifiSubtopic()
     {
         var q2 = CreateComponent(new QuestionDbEntity()
         {
@@ -32,29 +32,46 @@ public class ConnectivityCategory(CmsDbContext db) : ContentGenerator
                 }),
             ]
         });
+        var fibreAnswer = CreateComponent(new AnswerDbEntity()
+        {
+            Text = "Fibre",
+            Maturity = "Low",
+            NextQuestion = q2
+        });
+        var mobileAnswer = CreateComponent(new AnswerDbEntity()
+        {
+            Text = "Mobile",
+            Maturity = "Low",
+            NextQuestion = q2
+        });
         var q1 = CreateComponent(new QuestionDbEntity
         {
             Slug = "wifi-q1",
             Text = "What type of broadband do you have?",
             Order = 0,
-            Answers =
+            Answers = [fibreAnswer, mobileAnswer]
+        });
+
+        var recommendationSection = CreateComponent(new RecommendationSectionDbEntity()
+        {
+            Chunks =
             [
-                CreateComponent(new AnswerDbEntity()
+                CreateComponent(new RecommendationChunkDbEntity()
                 {
-                    Text = "Fibre",
-                    Maturity = "High",
-                    NextQuestion = q2
+                    Content = [CreateTextBody("recommendation chunk fibre contents")],
+                    Answers = [fibreAnswer],
+                    Header = "Recommendation for fibre"
                 }),
-                CreateComponent(new AnswerDbEntity()
+                CreateComponent(new RecommendationChunkDbEntity()
                 {
-                    Text = "Mobile",
-                    Maturity = "Medium",
-                    NextQuestion = q2
-                }),
+                    Content = [CreateTextBody("recommendation chunk mobile contents")],
+                    Answers = [mobileAnswer],
+                    Header = "Recommendation for mobile"
+                })
             ]
         });
 
-        return CreateComponent(new SectionDbEntity
+        var subtopic = CreateComponent(new SectionDbEntity
         {
             Name = "Wifi",
             InterstitialPage = CreateComponent(new PageDbEntity
@@ -80,6 +97,29 @@ public class ConnectivityCategory(CmsDbContext db) : ContentGenerator
             Order = 0,
             Questions = [q1, q2]
         });
+
+        db.SubtopicRecommendations.Add(CreateComponent(new SubtopicRecommendationDbEntity()
+        {
+            Intros =
+            [
+                CreateComponent(new RecommendationIntroDbEntity()
+                {
+                    Slug = "wifi-recommendation-intro",
+                    Maturity = "Low",
+                    Header = CreateComponent(new HeaderDbEntity()
+                    {
+                        Text = "Wifi recommendation intro",
+                        Tag = HeaderTag.H1,
+                        Size = HeaderSize.Large
+                    }),
+                    Content = [CreateTextBody("recommendation intro text")]
+                })
+            ],
+            Section = recommendationSection,
+            Subtopic = subtopic,
+        }));
+
+        return subtopic;
     }
 
     public override void CreateData()
