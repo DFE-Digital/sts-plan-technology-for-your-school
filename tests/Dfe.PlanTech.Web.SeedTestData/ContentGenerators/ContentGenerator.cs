@@ -48,7 +48,8 @@ public abstract class ContentGenerator
                 NodeType = "paragraph"
             }
         });
-        if (!published) textBody.Published = false;
+        if (!published)
+            textBody.Published = false;
         return textBody;
     }
 }

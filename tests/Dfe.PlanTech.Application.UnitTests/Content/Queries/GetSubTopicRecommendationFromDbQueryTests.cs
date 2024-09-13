@@ -1,7 +1,6 @@
 using AutoMapper;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Mappings;
-using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
