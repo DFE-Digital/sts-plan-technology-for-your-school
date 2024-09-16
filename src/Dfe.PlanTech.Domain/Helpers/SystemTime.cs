@@ -4,7 +4,7 @@ namespace Dfe.PlanTech.Domain.Helpers;
 
 public class SystemTime : ISystemTime
 {
-    public DateTime Today => DateTime.Today;
+    public DateTime Today => UkNow.Date;
 
     public DateTime UkNow => TimeZoneHelpers.ToUkTime(DateTime.UtcNow);
 }
