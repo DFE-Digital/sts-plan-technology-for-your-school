@@ -51,7 +51,7 @@ public class CategorySectionDto
     {
         if (date == null)
             return null;
-        var localTime = systemTime.ToUkTime(date.Value);
+        var localTime = TimeZoneHelpers.ToUkTime(date.Value);
         return localTime.Date == systemTime.Today.Date
             ? DateTimeFormatter.FormattedTime(localTime)
             : DateTimeFormatter.FormattedDateShort(localTime);
