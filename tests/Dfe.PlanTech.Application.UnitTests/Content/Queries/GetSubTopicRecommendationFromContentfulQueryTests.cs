@@ -248,7 +248,7 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
 
         Assert.NotNull(result);
         Assert.Equal(result.RecommendationSlug, expectedIntro.Slug);
-        Assert.Equal(result.DisplayName, expectedIntro.Header.Text);
+        Assert.Equal(result.DisplayName, expectedIntro.HeaderText);
     }
 
     [Fact]
