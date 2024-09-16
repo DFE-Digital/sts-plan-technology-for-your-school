@@ -65,6 +65,7 @@ public static class DfeSignInSetup
         options.SignedOutRedirectUri = new PathString(config.SignoutRedirectUrl);
         options.SignedOutCallbackPath = new PathString(config.SignoutCallbackUrl);
         options.ResponseType = OpenIdConnectResponseType.Code;
+        options.SkipUnrecognizedRequests = config.SkipUnrecognizedRequests;
 
         options.Scope.Clear();
         foreach (string scope in config.Scopes)

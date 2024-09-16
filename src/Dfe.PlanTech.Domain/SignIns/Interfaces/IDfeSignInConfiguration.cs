@@ -17,4 +17,5 @@ public interface IDfeSignInConfiguration
     public string SignoutCallbackUrl { get; set; }
     public string SignoutRedirectUrl { get; set; }
     public string FrontDoorUrl { get; init; }
+    public bool SkipUnrecognizedRequests { get; set; }
 }
