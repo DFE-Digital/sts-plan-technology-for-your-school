@@ -24,8 +24,9 @@
   - Where it is impossible to do this and the functionality of something on the page is only possible to achieve with javascript, it should:
     - Not be something critical
     - Be hidden when javascript is disabled
-  - This can be done by adding the classes `js-only govuk-visually-hidden` and `aria-hidden="true"` to any elements requiring javascript. This hides them, and at runtime the hidden class and attribute are removed from all `js-only` elements when javascript is enabled.
+  - This can be done by adding the class `js-only` to any elements requiring javascript. This hides them, and at runtime the hidden class and attribute are removed from all `js-only` elements when javascript is enabled.
     For example
     ```html
-    <div class="js-only govuk-visually-hidden" aria-hidden="true"></div>
+    <div class="js-only">This element will be hidden by default, but made visible via JS.</div>
     ```
+  - The code that unhides these elements is located in [_BodyEnd.cshtml](src/Dfe.PlanTech.Web/Views/Shared/_BodyEnd.cshtml)
