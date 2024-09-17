@@ -148,7 +148,7 @@ public class GetSubmissionStatusesQueryTests
         var sections = category.Sections;
         var result = await CreateStrut().GetSectionSubmissionStatuses(category.Sys.Id);
 
-        Assert.Equal(result.Count, sections.Count());
+        Assert.Equal(result.Count, sections.Count);
 
         foreach (var section in sections)
         {

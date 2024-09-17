@@ -16,14 +16,14 @@ public class WarningComponentTagHelper : TagHelper
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
         var inner = await output.GetChildContentAsync();
-        var html = GetHtml(inner.GetContent());
+        var html = WarningComponentTagHelper.GetHtml(inner.GetContent());
 
         output.TagName = null;
         output.TagMode = TagMode.StartTagAndEndTag;
         output.Content.SetHtmlContent(html);
     }
 
-    public string GetHtml(string innerHtml)
+    public static string GetHtml(string innerHtml)
     {
         var stringBuilder = new StringBuilder();
         AppendOpenTag(stringBuilder);

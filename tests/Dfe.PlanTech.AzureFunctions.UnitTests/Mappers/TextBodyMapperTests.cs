@@ -32,6 +32,7 @@ public class TextBodyMapperTests : BaseMapperTests
         var mapped = _mapper.ToEntity(payload);
 
         Assert.NotNull(mapped);
+        Assert.NotNull(mapped.RichText);
         Assert.True(RichTextContentMapperTests.ContentMatches<RichTextContent, RichTextData, RichTextMark, RichTextContentDbEntity, RichTextDataDbEntity, RichTextMarkDbEntity>(richText, mapped.RichText));
     }
 }
