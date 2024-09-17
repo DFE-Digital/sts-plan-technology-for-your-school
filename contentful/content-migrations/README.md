@@ -27,7 +27,7 @@ Currently migrations are run manually, there will likely be a follow on piece to
 ## Errors
 
 In the event of an error that causes the database to be updated with incorrect content,
-you can refresh the database from contentful using the [export-processor](contentful/export-processor/README.md)
+you can refresh the database from contentful using the [export-processor](../export-processor/README.md)
 
 ## References
 
