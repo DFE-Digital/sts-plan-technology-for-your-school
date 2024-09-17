@@ -83,3 +83,8 @@ iframe {
 button.govuk-button--secondary {
     background-color: white;
 }
+
+.js-only {
+    display: none !important;
+    visibility: hidden !important;
+}
