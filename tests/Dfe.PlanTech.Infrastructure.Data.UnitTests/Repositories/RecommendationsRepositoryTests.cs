@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
@@ -45,34 +44,39 @@ public class RecommendationsRepositoryTests
         {
             intro.SubtopicRecommendations.Add(_subtopicRecommendation);
         }
+
         _intros.AddRange(_subtopicRecommendation.Intros);
         _introContent.AddRange(_subtopicRecommendation.Intros.SelectMany((intro, introIndex) => intro.Content
-                                                                                             .Select((content, contentIndex) => new RecommendationIntroContentDbEntity()
-                                                                                             {
-                                                                                                 Id = introIndex + contentIndex,
-                                                                                                 RecommendationIntro = intro,
-                                                                                                 RecommendationIntroId = intro.Id,
-                                                                                                 ContentComponent = content,
-                                                                                                 ContentComponentId = content.Id
-                                                                                             })));
+            .Select((content, contentIndex) => new RecommendationIntroContentDbEntity()
+            {
+                Id = introIndex + contentIndex,
+                RecommendationIntro = intro,
+                RecommendationIntroId = intro.Id,
+                ContentComponent = content,
+                ContentComponentId = content.Id
+            })));
 
         foreach (var chunk in _subtopicRecommendation.Section.Chunks)
         {
             chunk.RecommendationSections.Add(_subtopicRecommendation.Section);
         }
+
         _chunks.AddRange(_subtopicRecommendation.Section.Chunks);
         _chunkContent.AddRange(_subtopicRecommendation.Section.Chunks.SelectMany((chunk, chunkIndex) => chunk.Content
-                                                                                                             .Select((content, contentIndex) => new RecommendationChunkContentDbEntity()
-                                                                                                             {
-                                                                                                                 Id = chunkIndex + contentIndex,
-                                                                                                                 RecommendationChunk = chunk,
-                                                                                                                 RecommendationChunkId = chunk.Id,
-                                                                                                                 ContentComponent = content,
-                                                                                                                 ContentComponentId = content.Id
-                                                                                                             })));
+            .Select((content, contentIndex) => new RecommendationChunkContentDbEntity()
+            {
+                Id = chunkIndex + contentIndex,
+                RecommendationChunk = chunk,
+                RecommendationChunkId = chunk.Id,
+                ContentComponent = content,
+                ContentComponentId = content.Id
+            })));
 
 
-        _answers.AddRange([.. _subtopicRecommendation.Section.Answers, .. _subtopicRecommendation.Section.Chunks.SelectMany(chunk => chunk.Answers)]);
+        _answers.AddRange([
+            .. _subtopicRecommendation.Section.Answers,
+            .. _subtopicRecommendation.Section.Chunks.SelectMany(chunk => chunk.Answers)
+        ]);
 
         var mockContext = Substitute.For<ICmsDbContext>();
 
@@ -104,11 +108,12 @@ public class RecommendationsRepositoryTests
     {
         var recommendationSectionOne = new RecommendationSectionDbEntity()
         {
-            Answers = [
-            new AnswerDbEntity()
-            {
-                Id = "section-answer-one",
-            },
+            Answers =
+            [
+                new AnswerDbEntity()
+                {
+                    Id = "section-answer-one",
+                },
                 new AnswerDbEntity()
                 {
                     Id = "section-answer-two",
@@ -119,11 +124,11 @@ public class RecommendationsRepositoryTests
                 },
             ],
             Chunks =
-              [
-              new RecommendationChunkDbEntity()
-              {
-                  Id = RecChunkOneId,
-                  Answers =
+            [
+                new RecommendationChunkDbEntity()
+                {
+                    Id = RecChunkOneId,
+                    Answers =
                     [
                         new AnswerDbEntity()
                         {
@@ -138,35 +143,30 @@ public class RecommendationsRepositoryTests
                             Id = "3"
                         }
                     ],
-                  Header = new HeaderDbEntity()
-                  {
-                      Tag = HeaderTag.H1,
-                      Size = HeaderSize.Large,
-                      Text = "chunk1",
-                      Id = "Header-one"
-                  },
-                  Content = [
+                    Header = "chunk1",
+                    Content =
+                    [
                         new TextBodyDbEntity()
                         {
                             Id = "Chunk-one-content-one",
                             Order = 0,
                         },
-                      new TextBodyDbEntity()
-                      {
-                          Id = "Chunk-one-content-two",
-                          Order = 1,
-                      },
-                      new TextBodyDbEntity()
-                      {
-                          Id = "Chunk-one-content-three",
-                          Order = 2,
-                      },
-                  ]
-              },
-                  new RecommendationChunkDbEntity()
-                  {
-                      Id = "recommendation-chunk-two",
-                      Answers =
+                        new TextBodyDbEntity()
+                        {
+                            Id = "Chunk-one-content-two",
+                            Order = 1,
+                        },
+                        new TextBodyDbEntity()
+                        {
+                            Id = "Chunk-one-content-three",
+                            Order = 2,
+                        },
+                    ]
+                },
+                new RecommendationChunkDbEntity()
+                {
+                    Id = "recommendation-chunk-two",
+                    Answers =
                     [
                         new AnswerDbEntity()
                         {
@@ -181,35 +181,30 @@ public class RecommendationsRepositoryTests
                             Id = "6"
                         }
                     ],
-                      Header = new HeaderDbEntity()
-                      {
-                          Tag = HeaderTag.H1,
-                          Size = HeaderSize.Large,
-                          Text = "chunk2",
-                          Id = "Header-two"
-                      },
-                      Content = [
+                    Header = "chunk2",
+                    Content =
+                    [
                         new TextBodyDbEntity()
                         {
                             Id = "Chunk-two-content-two",
                             Order = 1,
                         },
-                          new TextBodyDbEntity()
-                          {
-                              Id = "Chunk-two-content-thre",
-                              Order = 2,
-                          },
-                          new TextBodyDbEntity()
-                          {
-                              Id = "Chunk-two-content-one",
-                              Order = 0,
-                          }
+                        new TextBodyDbEntity()
+                        {
+                            Id = "Chunk-two-content-thre",
+                            Order = 2,
+                        },
+                        new TextBodyDbEntity()
+                        {
+                            Id = "Chunk-two-content-one",
+                            Order = 0,
+                        }
                     ]
-                  },
-                  new RecommendationChunkDbEntity()
-                  {
-                      Id = "recommendation-chunk-three",
-                      Answers =
+                },
+                new RecommendationChunkDbEntity()
+                {
+                    Id = "recommendation-chunk-three",
+                    Answers =
                     [
                         new AnswerDbEntity()
                         {
@@ -224,32 +219,27 @@ public class RecommendationsRepositoryTests
                             Id = "9"
                         }
                     ],
-                      Header = new HeaderDbEntity()
-                      {
-                          Tag = HeaderTag.H1,
-                          Size = HeaderSize.Large,
-                          Text = "chunk3",
-                          Id = "Header-three"
-                      },
-                      Content = [
+                    Header = "chunk3",
+                    Content =
+                    [
                         new TextBodyDbEntity()
                         {
                             Id = "Chunk-three-content-three",
                             Order = 2,
                         },
-                          new TextBodyDbEntity()
-                          {
-                              Id = "Chunk-three-content-two",
-                              Order = 1,
-                          },
-                          new TextBodyDbEntity()
-                          {
-                              Id = "Chunk-three-content-one",
-                              Order = 0,
-                          }
+                        new TextBodyDbEntity()
+                        {
+                            Id = "Chunk-three-content-two",
+                            Order = 1,
+                        },
+                        new TextBodyDbEntity()
+                        {
+                            Id = "Chunk-three-content-one",
+                            Order = 0,
+                        }
                     ]
-                  }
-              ],
+                }
+            ],
             Id = "recommendation-section-one"
         };
 
@@ -259,42 +249,44 @@ public class RecommendationsRepositoryTests
         {
             Intros =
             [
-              new RecommendationIntroDbEntity()
-              {
-                  Maturity = "Low",
-                  Id = RecIntroOneId,
-                  Slug = "Low-Maturity",
-                  Header = new HeaderDbEntity() { Text = "Low maturity header", Id = "Intro-header-one" },
-                  Content = [
-                    new TextBodyDbEntity()
-                    {
-                        Id = "Intro-one-content-three",
-                        Order = 2,
-                    },
-                      new TextBodyDbEntity()
-                      {
-                          Id = "Intro-one-content-two",
-                          Order = 1,
-                      },
-                      new TextBodyDbEntity()
-                      {
-                          Id = "Intro-one-content-one",
-                          Order = 0,
-                      }
-                ]
-              },
+                new RecommendationIntroDbEntity()
+                {
+                    Maturity = "Low",
+                    Id = RecIntroOneId,
+                    Slug = "Low-Maturity",
+                    Header = new HeaderDbEntity() { Text = "Low maturity header", Id = "Intro-header-one" },
+                    Content =
+                    [
+                        new TextBodyDbEntity()
+                        {
+                            Id = "Intro-one-content-three",
+                            Order = 2,
+                        },
+                        new TextBodyDbEntity()
+                        {
+                            Id = "Intro-one-content-two",
+                            Order = 1,
+                        },
+                        new TextBodyDbEntity()
+                        {
+                            Id = "Intro-one-content-one",
+                            Order = 0,
+                        }
+                    ]
+                },
                 new RecommendationIntroDbEntity()
                 {
                     Maturity = "Medium",
                     Id = "Intro-Two-Medium",
                     Slug = "Medium-Maturity",
                     Header = new HeaderDbEntity() { Text = "Medium maturity header", Id = "Intro-header-two" },
-                    Content = [
-                    new TextBodyDbEntity()
-                    {
-                        Id = "Intro-two-content-two",
-                        Order = 1,
-                    },
+                    Content =
+                    [
+                        new TextBodyDbEntity()
+                        {
+                            Id = "Intro-two-content-two",
+                            Order = 1,
+                        },
                         new TextBodyDbEntity()
                         {
                             Id = "Intro-two-content-three",
@@ -305,7 +297,7 @@ public class RecommendationsRepositoryTests
                             Id = "Intro-two-content-one",
                             Order = 0,
                         }
-                ]
+                    ]
                 },
                 new RecommendationIntroDbEntity()
                 {
@@ -313,12 +305,13 @@ public class RecommendationsRepositoryTests
                     Id = "Intro-Three-High",
                     Slug = "High-Maturity",
                     Header = new HeaderDbEntity() { Text = "High maturity header", Id = "Intro-header-three" },
-                    Content = [
-                    new TextBodyDbEntity()
-                    {
-                        Id = "Intro-three-content-three",
-                        Order = 2,
-                    },
+                    Content =
+                    [
+                        new TextBodyDbEntity()
+                        {
+                            Id = "Intro-three-content-three",
+                            Order = 2,
+                        },
                         new TextBodyDbEntity()
                         {
                             Id = "Intro-three-content-one",

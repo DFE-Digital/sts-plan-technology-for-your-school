@@ -1,21 +1,21 @@
 @model Dfe.PlanTech.Domain.Questionnaire.Interfaces.IHeaderWithContent;
 
 @{
-  var parentContainerClass = ViewData["ParentContainerClass"] ?? "header-with-content-container";
-  var headerClass = ViewData["HeaderClass"] ?? "header-with-content-header";
-  var contentClass = ViewData["ContentClass"] ?? "header-with-content-content";
+    var parentContainerClass = ViewData["ParentContainerClass"] ?? "header-with-content-container";
+    var headerClass = ViewData["HeaderClass"] ?? "header-with-content-header";
+    var contentClass = ViewData["ContentClass"] ?? "header-with-content-content";
 }
 
 <div class="@parentContainerClass" id="@Model.SlugifiedHeader">
-  <div class="@headerClass">
-    @{
-      await Html.RenderPartialAsync("Components/Header", Model.Header);
-    }
-  </div>
-  <div class="@contentClass">
-    @foreach (var content in Model.Content)
-    {
-      await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-    }
-  </div>
+    <div class="@headerClass">
+        <div class="recommendation-piece-header">
+            <h1 class="govuk-heading-xl">@Model.HeaderText</h1>
+        </div>
+    </div>
+    <div class="@contentClass">
+        @foreach (var content in Model.Content)
+        {
+            await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+        }
+    </div>
 </div>

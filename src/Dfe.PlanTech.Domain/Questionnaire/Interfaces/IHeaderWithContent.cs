@@ -6,7 +6,7 @@ public interface IHeaderWithContent
 {
     public string SlugifiedHeader { get; }
 
-    public Header Header { get; }
+    public string HeaderText { get; }
 
     public List<ContentComponent> Content { get; }
 }

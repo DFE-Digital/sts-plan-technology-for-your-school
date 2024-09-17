@@ -4,7 +4,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
-public class RecommendationSection : ContentComponent, IRecommendationSection<Answer, ContentComponent, Header, RecommendationChunk>
+public class RecommendationSection : ContentComponent, IRecommendationSection<Answer, ContentComponent, RecommendationChunk>
 {
     [NotMapped]
     public List<Answer> Answers { get; init; } = [];

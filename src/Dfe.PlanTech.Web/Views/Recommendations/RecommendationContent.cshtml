@@ -5,10 +5,10 @@
 @foreach (var headerWithContent in Model.AllContent)
 {
     <div class="recommendation-piece-container" id="@headerWithContent.SlugifiedHeader">
-    <div class="recommendation-piece-header">
-            @{
-                await Html.RenderPartialAsync("Components/Header", headerWithContent.Header);
-            }
+        <div class="recommendation-piece-header">
+            <div class="recommendation-piece-header">
+                <h1 class="govuk-heading-xl">@headerWithContent.HeaderText</h1>
+            </div>
         </div>
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-one-third">

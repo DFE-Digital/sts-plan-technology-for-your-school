@@ -1,7 +1,6 @@
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
-using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -53,13 +52,7 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
                             Sys = new SystemDetails() { Id = "3" }
                         }
                     },
-
-                    Header = new Header()
-                    {
-                        Tag = HeaderTag.H1,
-                        Size = HeaderSize.Large,
-                        Text = "chunk1"
-                    }
+                    Header = "chunk1"
 
                 },
                 new RecommendationChunk()
@@ -79,13 +72,7 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
                             Sys = new SystemDetails() { Id = "6" }
                         }
                     },
-
-                    Header = new Header()
-                    {
-                        Tag = HeaderTag.H1,
-                        Size = HeaderSize.Large,
-                        Text = "chunk3"
-                    }
+                    Header = "chunk3"
 
                 },
                 new RecommendationChunk()
@@ -105,13 +92,7 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
                             Sys = new SystemDetails() { Id = "9" }
                         }
                     },
-
-                    Header = new Header()
-                    {
-                        Tag = HeaderTag.H1,
-                        Size = HeaderSize.Large,
-                        Text = "chunk2"
-                    }
+                    Header = "chunk2"
                 }
             }
         };
@@ -267,7 +248,7 @@ public class GetSubTopicRecommendationFromContentfulQueryTests
 
         Assert.NotNull(result);
         Assert.Equal(result.RecommendationSlug, expectedIntro.Slug);
-        Assert.Equal(result.DisplayName, expectedIntro.Header.Text);
+        Assert.Equal(result.DisplayName, expectedIntro.HeaderText);
     }
 
     [Fact]

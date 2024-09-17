@@ -1,0 +1,25 @@
+# Scripting Contentful Migrations
+
+Guidance for making modifications to content types and updating entries programatically in contentful
+
+## Setup
+
+1. Setup `.env` (copy `.env.example` and setup fields as necessary)
+2. cd into the `content-migrations` directory
+3. run `npm install`
+
+## Usage
+
+Currently migrations are run manually, there will likely be a follow on piece to run these as part of a pipeline
+
+1. Add your migration script following the convention of `YYYYMMDD-HHMM-description-of-migration.js`
+2. run the migration script
+    ```bash
+    npm run migration YYYYMMDD-HHMM-description-of-migration.js
+    ```
+3. This will show you a plan for the migration about to happen, type `Y/N` to confirm
+
+## References
+
+This follows the guidance in the contentful documentation on [scripting migrations](https://www.contentful.com/developers/docs/tutorials/cli/scripting-migrations/)
+Code examples for various migrations can be found [here](https://github.com/contentful/contentful-migration/tree/main/examples)
