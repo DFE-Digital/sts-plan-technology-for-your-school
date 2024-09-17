@@ -10,7 +10,7 @@ The standard E2E tests that run against each environment are kept quite generic 
 
 The purpose of this project, seeding with realistic mock content, is to support writing more complex and detailed end to end tests that rely on content being consistent.
 
-This uses a very similar setup to the Azure Function E2E tests. See the [Readme](https://github.com/DFE-Digital/sts-plan-technology-for-your-school/blob/main/tests/Dfe.PlanTech.AzureFunctions.E2ETests/README.md)
+This uses a very similar setup to the Azure Function E2E tests. See the [Readme](/tests/Dfe.PlanTech.AzureFunctions.E2ETests/README.md)
 for a detailed guide on setting a mock database manually that this project can use.
 
 ## How to use
