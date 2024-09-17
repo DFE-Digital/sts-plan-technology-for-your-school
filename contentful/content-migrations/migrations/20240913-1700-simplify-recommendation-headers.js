@@ -1,11 +1,11 @@
 module.exports = function (migration, { makeRequest }) {
-    const contentType = 'recommendationChunk'
-    const recommendationChunk = migration.editContentType(contentType)
+    const contentType = "recommendationChunk";
+    const recommendationChunk = migration.editContentType(contentType);
 
     // Add new header as a short text field
-    recommendationChunk.createField('newHeader', {
-        name: 'Header',
-        type: 'Symbol',
+    recommendationChunk.createField("newHeader", {
+        name: "Header",
+        type: "Symbol",
         required: true,
     });
 
@@ -15,20 +15,26 @@ module.exports = function (migration, { makeRequest }) {
         from: ["header"],
         to: ["newHeader"],
         transformEntryForLocale: async (from, locale) => {
-            const headerId = from.header[locale].sys.id
-            const header = await makeRequest({
-                method: 'GET',
-                url: `/entries/${headerId}`
-            })
-            return {
-                newHeader: header.fields["text"][locale]
+            if (!from.header) {
+                return { newHeader: null };
             }
-        }
-    })
+            const headerId = from.header[locale].sys.id;
+            const header = await makeRequest({
+                method: "GET",
+                url: `/entries/${headerId}`,
+            });
+            return {
+                newHeader:
+                    header && header.fields["text"]
+                        ? header.fields["text"][locale]
+                        : null,
+            };
+        },
+    });
 
     // delete the old header and replace it with the new one
-    recommendationChunk.deleteField("header")
-    recommendationChunk.changeFieldId('newHeader', 'header')
-    recommendationChunk.moveField("header").afterField("internalName")
-    recommendationChunk.resetFieldControl('header');
-}
+    recommendationChunk.deleteField("header");
+    recommendationChunk.changeFieldId("newHeader", "header");
+    recommendationChunk.moveField("header").afterField("internalName");
+    recommendationChunk.resetFieldControl("header");
+};
