@@ -13,11 +13,21 @@ Guidance for making modifications to content types and updating entries programa
 Currently migrations are run manually, there will likely be a follow on piece to run these as part of a pipeline
 
 1. Add your migration script following the convention of `YYYYMMDD-HHMM-description-of-migration.js`
-2. run the migration script
+2. **Ensure you've disabled the Contentful Webhook** so that changes won't be posted during the migration or stacked up and posted when it's turned back on
+    - Go to `https://app.contentful.com/spaces/<space_id>/settings/webhooks`
+    - Click on the webhook for the relevant environment
+    - In Webhook settings, set `Active` to false and hit `Save`
+3. run the migration script
     ```bash
     npm run migration YYYYMMDD-HHMM-description-of-migration.js
     ```
-3. This will show you a plan for the migration about to happen, type `Y/N` to confirm
+4. This will show you a plan for the migration about to happen, type `Y/N` to confirm
+5. Re-enable the webhook
+
+## Errors
+
+In the event of an error that causes the database to be updated with incorrect content,
+you can refresh the database from contentful using the [export-processor](../export-processor/README.md)
 
 ## References
 
