@@ -14,6 +14,9 @@ Currently migrations are run manually, there will likely be a follow on piece to
 
 1. Add your migration script following the convention of `YYYYMMDD-HHMM-description-of-migration.js`
 2. **Ensure you've disabled the Contentful Webhook** so that changes won't be posted during the migration or stacked up and posted when it's turned back on
+    - Go to `https://app.contentful.com/spaces/<space_id>/settings/webhooks`
+    - Click on the webhook for the relevant environment
+    - In Webhook settings, set `Active` to false and hit `Save`
 3. run the migration script
     ```bash
     npm run migration YYYYMMDD-HHMM-description-of-migration.js
