@@ -16,7 +16,7 @@ public class WarningComponentTagHelper : TagHelper
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
         var inner = await output.GetChildContentAsync();
-        var html = WarningComponentTagHelper.GetHtml(inner.GetContent());
+        var html = GetHtml(inner.GetContent());
 
         output.TagName = null;
         output.TagMode = TagMode.StartTagAndEndTag;
