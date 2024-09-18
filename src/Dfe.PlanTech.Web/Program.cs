@@ -85,8 +85,11 @@ builder.Services.AddAuthorizationBuilder()
                 .AddDefaultPolicy(PageModelAuthorisationPolicy.PolicyName, policy =>
                 {
                     policy.Requirements.Add(new PageAuthorisationRequirement());
+                    policy.Requirements.Add(new UserOrganisationAuthorisationRequirement());
                 });
 
+builder.Services.AddSingleton<IAuthorizationHandler, UserOrganisationAuthorisationHandler>();
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, UserAuthorisationMiddlewareResultHandler>();
 builder.Services.AddSingleton<ApiKeyAuthorisationFilter>();
 builder.Services.AddContentfulServices(builder.Configuration);
 builder.Services.AddSingleton<ISystemTime, SystemTime>();
@@ -129,7 +132,7 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseMiddleware<UserAuthorizationRedirectMiddleware>();
+//app.UseMiddleware<UserAuthorizationRedirectMiddleware>();
 app.MapControllerRoute(
     pattern: "{controller=Pages}/{action=GetByRoute}/{id?}",
     name: "default"
