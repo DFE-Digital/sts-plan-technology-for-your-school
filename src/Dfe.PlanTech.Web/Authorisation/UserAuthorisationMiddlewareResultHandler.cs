@@ -39,13 +39,6 @@ namespace Dfe.PlanTech.Web.Authorisation
         return null;
       }
 
-      var isSignoutUrl = RequestIsSignoutUrl(context);
-
-      if (isSignoutUrl)
-      {
-        return null;
-      }
-
       bool userMissingOrganisation = UserMissingOrganisation(authorisationFailure);
 
       return userMissingOrganisation ? UrlConstants.OrgErrorPage : null;
@@ -53,7 +46,5 @@ namespace Dfe.PlanTech.Web.Authorisation
 
     private static bool UserMissingOrganisation(AuthorizationFailure authorisationFailure)
     => authorisationFailure.FailureReasons.Select(reason => reason.Handler).OfType<UserOrganisationAuthorisationHandler>().Any();
-
-    private static bool RequestIsSignoutUrl(HttpContext context) => context.Request.Path.HasValue && context.Request.Path.Value == "/auth/sign-out";
   }
 }

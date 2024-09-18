@@ -19,7 +19,7 @@ public class UserOrganisationAuthorisationHandler(ILogger<UserOrganisationAuthor
 
         var userAuthorisationResult = TryGetUserAuthorisationResult(httpContext);
 
-        if (userAuthorisationResult == null || !userAuthorisationResult.PageRequiresAuthorisation)
+        if (userAuthorisationResult == null || !userAuthorisationResult.PageRequiresAuthorisation || userAuthorisationResult.CanViewPage || RequestIsSignoutUrl(httpContext))
         {
             context.Succeed(requirement);
         }
@@ -40,4 +40,6 @@ public class UserOrganisationAuthorisationHandler(ILogger<UserOrganisationAuthor
 
         return null;
     }
+
+    private static bool RequestIsSignoutUrl(HttpContext context) => context.Request.Path.HasValue && context.Request.Path.Value == "/auth/sign-out";
 }
