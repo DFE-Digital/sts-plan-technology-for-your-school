@@ -4,44 +4,44 @@ using Microsoft.AspNetCore.Authorization.Policy;
 
 namespace Dfe.PlanTech.Web.Authorisation
 {
-  public class UserAuthorisationMiddlewareResultHandler : IAuthorizationMiddlewareResultHandler
-  {
-    private readonly AuthorizationMiddlewareResultHandler defaultHandler = new();
-
-    public async Task HandleAsync(
-        RequestDelegate next,
-        HttpContext context,
-        AuthorizationPolicy policy,
-        PolicyAuthorizationResult authoriseResult)
+    public class UserAuthorisationMiddlewareResultHandler : IAuthorizationMiddlewareResultHandler
     {
-      if (authoriseResult.Forbidden)
-      {
-        var redirectUrl = GetRedirectUrl(authoriseResult.AuthorizationFailure, context);
+        private readonly AuthorizationMiddlewareResultHandler defaultHandler = new();
 
-        if (redirectUrl != null)
+        public async Task HandleAsync(
+            RequestDelegate next,
+            HttpContext context,
+            AuthorizationPolicy policy,
+            PolicyAuthorizationResult authoriseResult)
         {
-          context.Response.Redirect(redirectUrl);
-          return;
+            if (authoriseResult.Forbidden)
+            {
+                var redirectUrl = GetRedirectUrl(authoriseResult.AuthorizationFailure, context);
+
+                if (redirectUrl != null)
+                {
+                    context.Response.Redirect(redirectUrl);
+                    return;
+                }
+            }
+
+            await defaultHandler.HandleAsync(next, context, policy, authoriseResult);
         }
-      }
 
-      await defaultHandler.HandleAsync(next, context, policy, authoriseResult);
+
+        public static string? GetRedirectUrl(AuthorizationFailure? authorisationFailure, HttpContext context)
+        {
+            if (authorisationFailure == null)
+            {
+                return null;
+            }
+
+            bool userMissingOrganisation = UserMissingOrganisation(authorisationFailure);
+
+            return userMissingOrganisation ? UrlConstants.OrgErrorPage : null;
+        }
+
+        private static bool UserMissingOrganisation(AuthorizationFailure authorisationFailure)
+        => authorisationFailure.FailureReasons.Select(reason => reason.Handler).OfType<UserOrganisationAuthorisationHandler>().Any();
     }
-
-
-    public static string? GetRedirectUrl(AuthorizationFailure? authorisationFailure, HttpContext context)
-    {
-      if (authorisationFailure == null)
-      {
-        return null;
-      }
-
-      bool userMissingOrganisation = UserMissingOrganisation(authorisationFailure);
-
-      return userMissingOrganisation ? UrlConstants.OrgErrorPage : null;
-    }
-
-    private static bool UserMissingOrganisation(AuthorizationFailure authorisationFailure)
-    => authorisationFailure.FailureReasons.Select(reason => reason.Handler).OfType<UserOrganisationAuthorisationHandler>().Any();
-  }
 }

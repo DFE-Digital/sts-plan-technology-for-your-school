@@ -4,8 +4,8 @@ namespace Dfe.PlanTech.Web.Authorisation;
 
 public class UserOrganisationAuthorisationRequirement : IAuthorizationRequirement
 {
-  public UserOrganisationAuthorisationRequirement()
-  {
+    public UserOrganisationAuthorisationRequirement()
+    {
 
-  }
+    }
 }
