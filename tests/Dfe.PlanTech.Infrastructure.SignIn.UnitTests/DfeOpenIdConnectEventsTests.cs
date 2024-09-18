@@ -6,6 +6,7 @@ using Dfe.PlanTech.Infrastructure.SignIns.ConnectEvents;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using NSubstitute;
 
@@ -107,7 +108,7 @@ public partial class DfeOpenIdConnectEventsTests
             new AuthenticationProperties());
 
         await Assert.ThrowsAnyAsync<KeyNotFoundException>(() =>
-            OnUserInformationReceivedEvent.RecordUserSignIn(context));
+            OnUserInformationReceivedEvent.RecordUserSignIn(new NullLogger<DfeSignIn>(), context));
     }
 
     [Theory]
