@@ -35,12 +35,6 @@ public class RecommendationIntrosComparator(CmsDbContext db, ContentfulContent c
 
     protected IEnumerable<DataValidationError> GetValidationErrors(RecommendationIntroDbEntity databaseRecommendationIntro, JsonNode contentfulRecommendationIntro)
     {
-        var headerValidationResult = ValidateChild<RecommendationIntroDbEntity>(databaseRecommendationIntro, "HeaderId", contentfulRecommendationIntro, "header");
-        if (headerValidationResult != null)
-        {
-            yield return new DataValidationError("Header", headerValidationResult);
-        }
-
         foreach (var child in ValidateChildren(contentfulRecommendationIntro, "content", databaseRecommendationIntro, dbRecommendationChunk => dbRecommendationChunk.Content))
         {
             yield return child;
@@ -55,7 +49,7 @@ public class RecommendationIntrosComparator(CmsDbContext db, ContentfulContent c
             Id = intro.Id,
             Slug = intro.Slug,
             Maturity = intro.Maturity,
-            HeaderId = intro.HeaderId,
+            Header = intro.Header,
             Content = intro.Content.Select(answer => new ContentComponentDbEntity()
             {
                 Id = answer.Id

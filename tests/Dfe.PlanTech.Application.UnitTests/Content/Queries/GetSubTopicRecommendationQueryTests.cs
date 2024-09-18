@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -46,14 +45,7 @@ public class GetSubTopicRecommendationQueryTests
                             Sys = new SystemDetails() { Id = "3" }
                         }
                     ],
-
-                    Header = new Header()
-                    {
-                        Tag = HeaderTag.H1,
-                        Size = HeaderSize.Large,
-                        Text = "chunk1"
-                    }
-
+                    Header = "chunk1"
                 },
                 new()
                 {
@@ -72,14 +64,7 @@ public class GetSubTopicRecommendationQueryTests
                             Sys = new SystemDetails() { Id = "6" }
                         }
                     ],
-
-                    Header = new Header()
-                    {
-                        Tag = HeaderTag.H1,
-                        Size = HeaderSize.Large,
-                        Text = "chunk3"
-                    }
-
+                    Header = "chunk3",
                 },
                 new RecommendationChunk()
                 {
@@ -98,13 +83,7 @@ public class GetSubTopicRecommendationQueryTests
                             Sys = new() { Id = "9" }
                         }
                     ],
-
-                    Header = new Header()
-                    {
-                        Tag = HeaderTag.H1,
-                        Size = HeaderSize.Large,
-                        Text = "chunk2"
-                    }
+                    Header = "chunk2"
                 }
             ]
         };

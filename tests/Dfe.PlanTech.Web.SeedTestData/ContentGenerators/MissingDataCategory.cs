@@ -119,7 +119,7 @@ public class MissingDataCategory(CmsDbContext db) : ContentGenerator
             Answers = [answer]
         });
 
-        var recommendationChunkNoHeader = CreateDraftComponent(new RecommendationChunkDbEntity()
+        var recommendationChunkBlankHeader = CreateDraftComponent(new RecommendationChunkDbEntity()
         {
             Content =
             [
@@ -134,23 +134,19 @@ public class MissingDataCategory(CmsDbContext db) : ContentGenerator
                     }
                 })
             ],
-            Answers = [answer]
+            Answers = [answer],
+            Header = ""
         });
         var recommendationChunkNoContent = CreateDraftComponent(new RecommendationChunkDbEntity()
         {
-            Header = CreateComponent(new HeaderDbEntity()
-            {
-                Text = "Recommendation Chunk with no content",
-                Tag = HeaderTag.H1,
-                Size = HeaderSize.Large
-            }),
+            Header = "Recommendation Chunk with no content",
             Answers = [answer]
         });
 
         var recommendationSection = CreateComponent(new RecommendationSectionDbEntity()
         {
             Answers = [],
-            Chunks = [recommendationChunkNoHeader, recommendationChunkNoContent]
+            Chunks = [recommendationChunkBlankHeader, recommendationChunkNoContent]
         });
 
         var subtopic = CreateComponent(new SectionDbEntity
@@ -191,7 +187,7 @@ public class MissingDataCategory(CmsDbContext db) : ContentGenerator
                 })
             ],
             Section = recommendationSection,
-            Subtopic = subtopic
+            Subtopic = subtopic,
         }));
 
         return subtopic;

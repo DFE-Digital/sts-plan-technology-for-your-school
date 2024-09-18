@@ -16,4 +16,6 @@ public class RecommendationIntro : ContentComponent, IRecommendationIntro<Header
     public List<ContentComponent> Content { get; init; } = [];
 
     public string SlugifiedHeader => Header.Text.Slugify();
+
+    public string HeaderText => Header.Text;
 }

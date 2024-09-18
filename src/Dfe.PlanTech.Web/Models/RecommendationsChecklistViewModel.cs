@@ -1,5 +1,3 @@
-using Dfe.PlanTech.Domain.Content.Enums;
-using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 
@@ -16,12 +14,7 @@ public class RecommendationsChecklistViewModel
     private static RecommendationChunk ConvertToNumberedChunk(RecommendationChunk content, int index)
     => new()
     {
-        Header = new Header
-        {
-            Text = $"{index + 1}. {content.Header.Text}",
-            Tag = HeaderTag.H3,
-            Size = HeaderSize.Medium
-        },
+        Header = $"{index + 1}. {content.Header}",
         Content = content.Content,
     };
 

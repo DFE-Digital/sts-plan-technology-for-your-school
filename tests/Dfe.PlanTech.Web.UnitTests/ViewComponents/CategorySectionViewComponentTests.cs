@@ -151,7 +151,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                         return null;
                     }
 
-                    return new RecommendationsViewDto(introForMaturity.Slug, introForMaturity.Header.Text);
+                    return new RecommendationsViewDto(introForMaturity.Slug, introForMaturity.HeaderText);
                 });
 
             var viewContext = new ViewContext();
@@ -493,7 +493,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var recommendation = model.CategorySectionDto.First().Recommendation;
             Assert.NotNull(recommendation);
             Assert.Equal(_subtopic.Intros[0].Slug, recommendation.RecommendationSlug);
-            Assert.Equal(_subtopic.Intros[0].Header.Text, recommendation.RecommendationDisplayName);
+            Assert.Equal(_subtopic.Intros[0].HeaderText, recommendation.RecommendationDisplayName);
             Assert.Null(recommendation.NoRecommendationFoundErrorMessage);
         }
 
@@ -525,7 +525,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.NotNull(_subtopic);
             Assert.Equal(_subtopic.Intros[0].Slug, recommendation.RecommendationSlug);
-            Assert.Equal(_subtopic.Intros[0].Header.Text, recommendation.RecommendationDisplayName);
+            Assert.Equal(_subtopic.Intros[0].HeaderText, recommendation.RecommendationDisplayName);
             Assert.Null(recommendation.NoRecommendationFoundErrorMessage);
             _loggerCategory.ReceivedWithAnyArgs(1).LogError("An exception has occurred while trying to retrieve section progress with the following message - test");
         }
@@ -616,7 +616,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var recommendation = model.CategorySectionDto.First().Recommendation;
             Assert.NotNull(recommendation);
             Assert.Equal(_subtopic.Intros[0].Slug, recommendation.RecommendationSlug);
-            Assert.Equal(_subtopic.Intros[0].Header.Text, recommendation.RecommendationDisplayName);
+            Assert.Equal(_subtopic.Intros[0].HeaderText, recommendation.RecommendationDisplayName);
             Assert.Null(recommendation.NoRecommendationFoundErrorMessage);
         }
     }
