@@ -28,7 +28,7 @@ public class PageModelAuthorisationPolicy(ILogger<PageModelAuthorisationPolicy> 
 
         var userAuthorisationResult = await GetUserAuthorisationResult(httpContext);
         httpContext.Items.Add(UserAuthorisationResult.HttpContextKey, userAuthorisationResult);
-        
+
         if (userAuthorisationResult.AuthenticationMatches)
         {
             context.Succeed(requirement);

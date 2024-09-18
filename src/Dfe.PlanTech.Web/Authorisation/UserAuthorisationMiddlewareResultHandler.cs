@@ -14,8 +14,6 @@ namespace Dfe.PlanTech.Web.Authorisation
         AuthorizationPolicy policy,
         PolicyAuthorizationResult authoriseResult)
     {
-      // If the authorization was forbidden and the resource had a specific requirement,
-      // provide a custom 404 response.
       if (authoriseResult.Forbidden)
       {
         var redirectUrl = GetRedirectUrl(authoriseResult.AuthorizationFailure, context);
@@ -27,7 +25,6 @@ namespace Dfe.PlanTech.Web.Authorisation
         }
       }
 
-      // Fall back to the default implementation.
       await defaultHandler.HandleAsync(next, context, policy, authoriseResult);
     }
 
