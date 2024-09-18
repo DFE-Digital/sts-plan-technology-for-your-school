@@ -1,37 +1,47 @@
-import "dotenv/config";
 import DataMapper from "./data-mapper.js";
 import ExportContentfulData from "./exporter.js";
 import GenerateTestSuites from "./generate-test-suites.js";
 import ErrorLogger from "./errors/error-logger.js";
 import WriteUserJourneyPaths from "./write-user-journey-paths.js";
 import fs from "fs";
+import options from "./options.js";
+import path from "path";
 
-const DefaultOutputDirectory = "./output/";
-const getOutputDirWithContentfulEnv = ({ outputDir, contentfulEnvironment }) => `${outputDir}${contentfulEnvironment}/`;
+const getOutputDirPath = ({ outputDir, contentfulEnvironment }) => {
+  const now = new Date().toISOString().replaceAll(":", "").replaceAll("-", "").replace("T", "").split(".")[0];
+
+  const subDirectory = `${outputDir}${contentfulEnvironment}-${now}/`;
+
+  const currentDirectory = process.cwd();
+
+  return path.join(currentDirectory, subDirectory);
+};
+
+const getAndCreateOutputDir = ({ outputDir, contentfulEnvironment }) => {
+  const path = getOutputDirPath({ outputDir, contentfulEnvironment });
+
+  createFileDirectoryIfNonExistent(path);
+
+  return path;
+};
 
 async function processContentfulData(args) {
-  if (!args.outputDir) {
-    args.outputDir = DefaultOutputDirectory;
-  }
-
   if (!args.generateTestSuites && !args.exportUserJourneyPaths) {
     console.error(`No options have been enabled`);
     return;
   }
 
-  const contentfulData = await ExportContentfulData();
+  const combinedOutputDir = getAndCreateOutputDir({ contentfulEnvironment: process.env.ENVIRONMENT, outputDir: args.outputDir });
+
+  const contentfulData = await ExportContentfulData({ exportDirectory: combinedOutputDir });
 
   const dataMapper = new DataMapper(contentfulData);
-
-  const combinedOutputDir = getOutputDirWithContentfulEnv({ contentfulEnvironment: process.env.ENVIRONMENT, outputDir: args.outputDir });
-
-  createFileDirectoryIfNonExistent(combinedOutputDir);
 
   if (args.generateTestSuites) {
     GenerateTestSuites({ dataMapper, outputDir: combinedOutputDir });
   }
 
-  if (args.exportUserJourneyPaths) {
+  if (!!args.exportUserJourneyPaths) {
     WriteUserJourneyPaths({ dataMapper, outputDir: combinedOutputDir, saveAllJourneys: args.saveAllJourneys });
   }
 
@@ -53,12 +63,5 @@ function createFileDirectoryIfNonExistent(outputDir) {
     return DefaultOutputDirectory;
   }
 }
-
-const options = {
-  generateTestSuites: process.env.GENERATE_TEST_SUITES === "true",
-  exportUserJourneyPaths: process.env.EXPORT_USER_JOURNEY_PATHS === 'true',
-  outputDir: process.env.OUTPUT_FILE_DIR ?? DefaultOutputDirectory,
-  saveAllJourneys: process.env.EXPORT_ALL_PATHS === "true" || process.env.EXPORT_ALL_PATHS === true
-};
 
 await processContentfulData(options);

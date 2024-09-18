@@ -1,4 +1,9 @@
 import contentfulExport from "contentful-export";
+
+const getBooleanValue = (obj, prop) => obj[prop] === 'true' || obj[prop] === true;
+
+const getBooleanValueFromEnv = (prop) => getBooleanValue(process.env, prop);
+
 /**
  * Exports Contentful data.
  *
@@ -6,7 +11,7 @@ import contentfulExport from "contentful-export";
  *
  * @return {object} The exported Contentful data.
  */
-export default function exportContentfulData({ spaceId, deliveryToken, managementToken, environment } = {}) {
+export default function exportContentfulData({ spaceId, deliveryToken, managementToken, environment, exportDirectory } = {}) {
   const options = {
     spaceId: spaceId ?? process.env.SPACE_ID,
     deliveryToken: deliveryToken ?? process.env.DELIVERY_TOKEN,
@@ -16,8 +21,9 @@ export default function exportContentfulData({ spaceId, deliveryToken, managemen
     skipEditorInterfaces: true,
     skipRoles: true,
     skipWebhooks: true,
-    saveFile: process.env.SAVE_FILE === "true" || process.env.SAVE_FILE === true,
-    includeDrafts: process.env.USE_PREVIEW === "true" || process.env.USE_PREVIEW === true,
+    exportDir: exportDirectory,
+    saveFile: getBooleanValueFromEnv('SAVE_FILE'),
+    includeDrafts: getBooleanValueFromEnv('USE_PREVIEW'),
   };
 
   return contentfulExport(options);

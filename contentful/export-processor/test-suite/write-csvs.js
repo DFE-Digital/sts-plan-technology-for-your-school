@@ -1,5 +1,6 @@
 import fs from "fs";
 import TestSuite from "./test-suite.js";
+import path from "path";
 
 const mainSheetColumns = [
   { testReference: "Test Reference" },
@@ -13,27 +14,33 @@ const mainSheetColumns = [
   { testApproved: "Test Approved" },
 ];
 
-const mainSheetKeys = [];
-const mainSheetHeaders = [];
-
-mainSheetColumns.forEach((columnObj) => {
-  const [key, header] = Object.entries(columnObj)[0];
-  mainSheetKeys.push(key);
-  mainSheetHeaders.push(header);
-});
-
 const appendixColumns = [
   { reference: "Reference" },
   { content: "Content" },
 ];
-const appendixSheetKeys = [];
-const appendixSheetHeaders = [];
 
-appendixColumns.forEach((columnObj) => {
-  const [key, header] = Object.entries(columnObj)[0];
-  appendixSheetKeys.push(key);
-  appendixSheetHeaders.push(header);
-});
+const createCsvInfo = (columns) => {
+  const keys = [];
+  const headers = [];
+
+  columns.forEach((columnObj) => {
+    const [key, header] = Object.entries(columnObj)[0];
+    keys.push(key);
+    headers.push(header);
+  });
+
+  return {
+    headers: headers,
+    keys: keys
+  };
+};
+
+const createCsvs = () => {
+  const mainCsv = createCsvInfo(mainSheetColumns);
+  const appendixCsv = createCsvInfo(appendixColumns);
+
+  return { mainCsv, appendixCsv };
+};
 
 /**
  * 
@@ -42,24 +49,49 @@ appendixColumns.forEach((columnObj) => {
  * @param {string} param0.outputDir - where to save files to
  */
 export default function writeTestSuites({ testSuites, outputDir }) {
-  writeSheet(testSuites.flatMap(suite => suite.testCases), mainSheetHeaders, mainSheetKeys, outputDir + "/plan-tech-test-suite.csv");
-  writeSheet(testSuites.flatMap(suite => suite.appendix), appendixSheetHeaders, appendixSheetKeys, outputDir + "/plan-tech-test-suite-appendix.csv");
+  const { mainCsv, appendixCsv } = createCsvs();
+
+  outputDir = createTestSuitesSubDirectory(outputDir);
+
+  writeSheet({
+    content: testSuites.flatMap(suite => suite.testCases),
+    outputDir,
+    fileName: "plan-tech-test-suite.csv",
+    ...mainCsv
+  });
+
+  writeSheet({
+    content: testSuites.flatMap(suite => suite.appendix),
+    outputDir,
+    fileName: "plan-tech-test-suite-appendix.csv",
+    ...appendixCsv
+  });
 }
 
-function writeSheet(content, headers, keys, filename) {
-  let csv = "";
-  csv += headers.join(",") + "\n";
+const createTestSuitesSubDirectory = (outputDir) => {
+  const subDirectory = path.join(outputDir, "test-suites");
 
-  content
+  try {
+    fs.mkdirSync(subDirectory, { recursive: true });
+  }
+  catch (e) {
+    console.error(`Error creating test-suites subdirectory`, e);
+    return outputDir;
+  }
+
+  return subDirectory;
+};
+
+const writeSheet = ({ content, headers, keys, fileName, outputDir }) => {
+  const rows = content
     .filter((testCase) => testCase != null)
-    .map((testCase) => Array.from(
-      keys.map((key) => {
-        return testCase[key] ?? " ";
-      })
-    )
-    )
-    .forEach((row) => (csv += '"' + row.join('","') + '"\n'));
+    .map((testCase) => `"${keys.map(key => testCase[key] ?? " ").join(`","`)}"`)
+    .join("\n");
 
-  fs.writeFileSync(filename, csv);
-}
+  const headerRow = headers.join(",");
+  const csv = `${headerRow}\n${rows}`;
 
+  const filePath = path.join(outputDir, fileName);
+
+  fs.writeFileSync(filePath, csv);
+};
