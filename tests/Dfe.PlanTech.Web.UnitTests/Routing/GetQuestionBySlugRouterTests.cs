@@ -148,22 +148,6 @@ public class GetQuestionBySlugRouterTests
                                       _submissionStatusProcessor.Status = submissionStatus;
                                       _submissionStatusProcessor.Section.Returns(_section);
                                   });
-
-        if (nextQuestion == null)
-        {
-            throw new InvalidOperationException("Next question cannot be null.");
-        }
-
-        if (nextQuestion == null)
-        {
-            throw new InvalidOperationException("Next question cannot be null.");
-        }
-
-        if (nextQuestion == null)
-        {
-            throw new InvalidOperationException("Next question cannot be null.");
-        }
-
         var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, nextQuestion.Slug, _controller, default);
 
         Assert.NotNull(result);
