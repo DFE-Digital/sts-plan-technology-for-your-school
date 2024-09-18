@@ -9,9 +9,15 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Dfe.PlanTech.Infrastructure.SignIns;
+
+public class DfeSignIn
+{
+
+}
 
 [ExcludeFromCodeCoverage]
 public static class DfeSignInSetup
@@ -21,7 +27,7 @@ public static class DfeSignInSetup
         var config = GetDfeSignInConfig(configuration);
 
         services.AddAuthentication(ConfigureAuthentication)
-                .AddOpenIdConnect(options => ConfigureOpenIdConnect(options, config))
+                .AddOpenIdConnect(options => ConfigureOpenIdConnect(services, options, config))
                 .AddCookie(options => ConfigureCookie(options, config));
 
         services.AddScoped((services) => config);
@@ -54,7 +60,7 @@ public static class DfeSignInSetup
         options.AccessDeniedPath = config.AccessDeniedPath;
     }
 
-    private static void ConfigureOpenIdConnect(OpenIdConnectOptions options, IDfeSignInConfiguration config)
+    private static void ConfigureOpenIdConnect(IServiceCollection services, OpenIdConnectOptions options, IDfeSignInConfiguration config)
     {
         options.ClientId = config.ClientId;
         options.ClientSecret = config.ClientSecret;
@@ -76,9 +82,12 @@ public static class DfeSignInSetup
         options.GetClaimsFromUserInfoEndpoint = config.GetClaimsFromUserInfoEndpoint;
         options.SaveTokens = config.SaveTokens;
 
+        var serviceProvider = services.BuildServiceProvider();
+        var logger = serviceProvider.GetRequiredService<ILogger<DfeSignIn>>();
+
         options.Events = new OpenIdConnectEvents()
         {
-            OnUserInformationReceived = OnUserInformationReceivedEvent.RecordUserSignIn,
+            OnUserInformationReceived = (UserInformationReceivedContext context) => OnUserInformationReceivedEvent.RecordUserSignIn(logger, context),
             OnRedirectToIdentityProvider = DfeOpenIdConnectEvents.OnRedirectToIdentityProvider,
             OnRedirectToIdentityProviderForSignOut = DfeOpenIdConnectEvents.OnRedirectToIdentityProviderForSignOut,
         };

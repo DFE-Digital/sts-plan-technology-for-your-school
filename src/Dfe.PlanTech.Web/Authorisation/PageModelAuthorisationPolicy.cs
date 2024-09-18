@@ -1,5 +1,7 @@
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Queries;
+using Dfe.PlanTech.Infrastructure.SignIns.Extensions;
+using Dfe.PlanTech.Infrastructure.SignIns.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Authorization;
 
@@ -24,9 +26,10 @@ public class PageModelAuthorisationPolicy(ILogger<PageModelAuthorisationPolicy> 
             return;
         }
 
-        var success = await UserAuthenticationMatchesRouteRequirements(httpContext);
+        var userAuthorisationResult = await GetUserAuthorisationResult(httpContext);
 
-        if (success)
+        httpContext.Items.Add(UserAuthorisationResult.HttpContextKey, userAuthorisationResult);
+        if (userAuthorisationResult.AuthenticationMatches)
         {
             context.Succeed(requirement);
         }
@@ -51,21 +54,22 @@ public class PageModelAuthorisationPolicy(ILogger<PageModelAuthorisationPolicy> 
     /// <param name="httpContext"></param>
     /// <returns></returns>
     /// <exception cref="KeyNotFoundException"></exception>
-    private async Task<bool> UserAuthenticationMatchesRouteRequirements(HttpContext httpContext)
+    private async Task<UserAuthorisationResult> GetUserAuthorisationResult(HttpContext httpContext)
     {
+        var userAuthorisationStatus = httpContext.User.AuthorisationStatus();
+
         string? slug = GetRequestRoute(httpContext);
 
         if (slug == null)
         {
-            return UserIsAuthenticated(httpContext);
+            return new UserAuthorisationResult(true, userAuthorisationStatus);
         }
 
         using var scope = httpContext.RequestServices.CreateAsyncScope();
         var pageQuery = scope.ServiceProvider.GetRequiredService<IGetPageQuery>();
 
         Page page = await GetPageForSlug(httpContext, slug, pageQuery);
-
-        return !page.RequiresAuthorisation || UserIsAuthenticated(httpContext);
+        return new UserAuthorisationResult(page.RequiresAuthorisation, userAuthorisationStatus);
     }
 
     /// <summary>
