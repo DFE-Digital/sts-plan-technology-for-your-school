@@ -72,14 +72,18 @@ graph TD
 
 1. **User Requests Access**
    - A user attempts to access a protected resource.
+  
 2. **Authentication Check**
    - The application checks if the user is authenticated.
    - If not, the user is redirected to the login page.
+
 3. **Page Authentication Requirement Check**
    - The application checks if the requested page requires authentication. This is done using `PageModelAuthorisationPolicy`.
-4. **User Organisation Requirement Check
+
+4. **User Organisation Requirement Check**
    - If the page requires authentication, the application checks if the user belongs to an organization.
    - This is done using `UserOrganisationAuthorisationHandler`.
+
 5. **Access Decision**
 - If the user is not authenticated, they are redirected to the DFE Signin login page
 - If the user is authenticated, and has an organisation, then access is granted.
