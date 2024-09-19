@@ -67,6 +67,7 @@ builder.Services.AddSingleton<ISystemTime, SystemTime>();
 var app = builder.Build();
 
 app.UseSecurityHeaders();
+app.UseMiddleware<HeadRequestMiddleware>();
 
 app.UseCookiePolicy(
     new CookiePolicyOptions
