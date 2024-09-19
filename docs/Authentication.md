@@ -92,6 +92,6 @@ graph TD
 ## See also
 
 - [Customize the behavior of AuthorizationMiddleware (Microsft official documentation)
-](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/customizingauthorizationmiddlewareresponse?view=aspnetcore-8.0): an overview of how to implemen t a class that implements `IAuthorizationMiddlewareResultHandler`
+](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/customizingauthorizationmiddlewareresponse?view=aspnetcore-8.0): an overview of how to implement a class that implements `IAuthorizationMiddlewareResultHandler`
 - [Policy-based authorization in ASP.NET Core
  (Microsoft official documentation)](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies?view=aspnetcore-8.0)
