@@ -6,7 +6,7 @@ using Dfe.PlanTech.Infrastructure.SignIns.ConnectEvents;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using NSubstitute;
 
@@ -83,17 +83,13 @@ public partial class DfeOpenIdConnectEventsTests
     }
 
     [Fact]
-    public async Task The_Users_Organisation_Does_Not_Exist()
+    public async Task RecordUserSignIn_Should_LogError_When_OrgDoesNotExist()
     {
         Guid userId = Guid.NewGuid();
 
         var identitySubstitute = Substitute.For<ClaimsIdentity>();
 
-
-        identitySubstitute.Claims.Returns(new List<Claim>()
-        {
-            new Claim(ClaimConstants.NameIdentifier, userId.ToString()),
-        });
+        identitySubstitute.Claims.Returns([new Claim(ClaimConstants.NameIdentifier, userId.ToString()),]);
 
         identitySubstitute.IsAuthenticated.Returns(true);
 
@@ -107,8 +103,11 @@ public partial class DfeOpenIdConnectEventsTests
             claimsPrincipal,
             new AuthenticationProperties());
 
-        await Assert.ThrowsAnyAsync<KeyNotFoundException>(() =>
-            OnUserInformationReceivedEvent.RecordUserSignIn(new NullLogger<DfeSignIn>(), context));
+        var logger = Substitute.For<ILogger<DfeSignIn>>();
+        await OnUserInformationReceivedEvent.RecordUserSignIn(logger, context);
+
+        Assert.Single(logger.GetMatchingReceivedMessages($"User {userId} is authenticated but has no establishment", LogLevel.Warning));
+
     }
 
     [Theory]
