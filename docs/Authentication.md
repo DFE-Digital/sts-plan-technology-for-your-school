@@ -81,7 +81,7 @@ graph TD
    - The application checks if the requested page requires authentication. This is done using `PageModelAuthorisationPolicy`.
 
 4. **User Organisation Requirement Check**
-   - If the page requires authentication, the application checks if the user belongs to an organization.
+   - If the page requires authentication, the application checks if the user belongs to an organisation.
    - This is done using `UserOrganisationAuthorisationHandler`.
 
 5. **Access Decision**
