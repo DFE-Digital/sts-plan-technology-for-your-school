@@ -8,11 +8,7 @@ namespace Dfe.PlanTech.Web.Authorisation
     {
         private readonly AuthorizationMiddlewareResultHandler defaultHandler = new();
 
-        public async Task HandleAsync(
-            RequestDelegate next,
-            HttpContext context,
-            AuthorizationPolicy policy,
-            PolicyAuthorizationResult authorizeResult)
+        public async Task HandleAsync(RequestDelegate next, HttpContext context, AuthorizationPolicy policy, PolicyAuthorizationResult authorizeResult)
         {
             if (authorizeResult.Forbidden)
             {
