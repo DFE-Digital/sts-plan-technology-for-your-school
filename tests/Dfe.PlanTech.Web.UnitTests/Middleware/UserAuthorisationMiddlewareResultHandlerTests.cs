@@ -5,6 +5,7 @@ using Xunit;
 using NSubstitute;
 using Dfe.PlanTech.Application.Constants;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.AspNetCore.Authentication;
 
 namespace Dfe.PlanTech.Web.Authorisation.Tests
 {
@@ -14,22 +15,29 @@ namespace Dfe.PlanTech.Web.Authorisation.Tests
     private readonly RequestDelegate _next;
     private readonly HttpContext _context;
     private readonly AuthorizationPolicy _policy;
+    private readonly IAuthenticationService _authenticationService;
 
     public UserAuthorisationMiddlewareResultHandlerTests()
     {
       _handler = new UserAuthorisationMiddlewareResultHandler();
       _next = Substitute.For<RequestDelegate>();
-      _context = Substitute.For<HttpContext>();
       _policy = new AuthorizationPolicy([new UserOrganisationAuthorisationRequirement()], []);
+
+      _context = Substitute.For<HttpContext>();
+      _context.Response.Returns(Substitute.For<HttpResponse>());
+      var serviceProvider = Substitute.For<IServiceProvider>();
+
+      _authenticationService = Substitute.For<IAuthenticationService>();
+
+      serviceProvider.GetService(typeof(IAuthenticationService)).Returns(_authenticationService);
+      _context.RequestServices.Returns(serviceProvider);
     }
 
     [Fact]
     public async Task HandleAsync_WhenForbiddenAndUserMissingOrganisation_ShouldRedirectToOrgErrorPage()
     {
-      var failures = new List<AuthorizationFailureReason>();
-      var authorizationFailure = AuthorizationFailure.Failed(failures);
+      var authorizationFailure = AuthorizationFailure.Failed([new AuthorizationFailureReason(new UserOrganisationAuthorisationHandler(new NullLogger<UserOrganisationAuthorisationHandler>()), "User missing org")]);
       var authoriseResult = PolicyAuthorizationResult.Forbid(authorizationFailure);
-      _context.Response.Returns(Substitute.For<HttpResponse>());
 
       await _handler.HandleAsync(_next, _context, _policy, authoriseResult);
 
@@ -42,22 +50,20 @@ namespace Dfe.PlanTech.Web.Authorisation.Tests
       var authorizationFailure = AuthorizationFailure.Failed([new AuthorizationFailureReason(new PageModelAuthorisationPolicy(new NullLogger<PageModelAuthorisationPolicy>()), "")]);
 
       var authoriseResult = PolicyAuthorizationResult.Forbid(authorizationFailure);
-      _context.Response.Returns(Substitute.For<HttpResponse>());
 
       await _handler.HandleAsync(_next, _context, _policy, authoriseResult);
 
-      await _next.Received(1).Invoke(_context);
+      _context.Response.Received(0).Redirect(UrlConstants.OrgErrorPage);
     }
 
     [Fact]
-    public async Task HandleAsync_WhenNotForbidden_ShouldCallDefaultHandler()
+    public async Task HandleAsync_WhenNotForbidden_ShouldNotRedirect()
     {
       var authoriseResult = PolicyAuthorizationResult.Success();
-      _context.Response.Returns(Substitute.For<HttpResponse>());
 
       await _handler.HandleAsync(_next, _context, _policy, authoriseResult);
 
-      await _next.Received(1).Invoke(_context);
+      _context.Response.Received(0).Redirect(UrlConstants.OrgErrorPage);
     }
 
     [Fact]
