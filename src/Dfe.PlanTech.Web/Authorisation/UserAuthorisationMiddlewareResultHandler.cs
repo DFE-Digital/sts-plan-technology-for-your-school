@@ -12,7 +12,7 @@ namespace Dfe.PlanTech.Web.Authorisation
         {
             if (authorizeResult.Forbidden)
             {
-                var redirectUrl = GetRedirectUrl(authorizeResult.AuthorizationFailure, context);
+                var redirectUrl = GetRedirectUrl(authorizeResult.AuthorizationFailure);
 
                 if (redirectUrl != null)
                 {
@@ -25,7 +25,7 @@ namespace Dfe.PlanTech.Web.Authorisation
         }
 
 
-        public static string? GetRedirectUrl(AuthorizationFailure? authorisationFailure, HttpContext context)
+        public static string? GetRedirectUrl(AuthorizationFailure? authorisationFailure)
         {
             if (authorisationFailure == null)
             {
