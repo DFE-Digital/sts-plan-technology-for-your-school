@@ -24,7 +24,6 @@ namespace Dfe.PlanTech.Web.Authorisation
             await defaultHandler.HandleAsync(next, context, policy, authorizeResult);
         }
 
-
         public static string? GetRedirectUrl(AuthorizationFailure? authorisationFailure)
         {
             if (authorisationFailure == null)
