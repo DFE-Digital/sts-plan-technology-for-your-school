@@ -1,0 +1,14 @@
+{
+  "name": "content-management",
+  "version": "1.0.0",
+  "description": "scripts for creating updating and deleting content entries",
+  "main": "main.js",
+  "scripts": {
+    "crud-operation": "node main.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "contentful-management": "^11.33.0"
+  }
+}
