@@ -270,8 +270,12 @@ public class GetRecommendationRouterTests
     [InlineData(true)]
     public async Task Should_Redirect_To_CheckAnswersPage_When_Status_CheckAnswers(bool checklist)
     {
+        Assert.NotNull(_section.InterstitialPage);
+
         _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
                                   .Do((callinfo) => { _submissionStatusProcessor.Status = SubmissionStatus.CheckAnswers; });
+
+        Assert.NotNull(_section.InterstitialPage);
 
         var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, "recommendation-slug", checklist, _controller,
             default);
@@ -294,6 +298,8 @@ public class GetRecommendationRouterTests
     [InlineData(true)]
     public async Task Should_Redirect_To_QuestionBySlug_When_Status_NextQuestion(bool checklist)
     {
+        Assert.NotNull(_section.InterstitialPage);
+
         var nextQuestion = new Question()
         {
             Slug = "next-question"
@@ -307,7 +313,8 @@ public class GetRecommendationRouterTests
                 _submissionStatusProcessor.NextQuestion = nextQuestion;
             });
 
-        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, "recommendation-slug", checklist, _controller,
+        var sectionSlug = _section.InterstitialPage?.Slug ?? "default-section-slug"; // Handle null appropriately
+        var result = await _router.ValidateRoute(sectionSlug, "recommendation-slug", checklist, _controller,
             default);
 
         var redirectResult = result as RedirectToActionResult;
@@ -320,6 +327,7 @@ public class GetRecommendationRouterTests
         var section = redirectResult.RouteValues?["sectionSlug"];
 
         Assert.NotNull(section);
+        Assert.NotNull(_section.InterstitialPage);
         Assert.Equal(_section.InterstitialPage.Slug, section);
 
         var questionSlug = redirectResult.RouteValues?["questionSlug"];
@@ -333,6 +341,7 @@ public class GetRecommendationRouterTests
     [InlineData(true)]
     public async Task Should_Redirect_To_InterstitialPage_When_NotStarted(bool checklist)
     {
+        Assert.NotNull(_section.InterstitialPage);
         var nextQuestion = new Question()
         {
             Slug = "next-question"
@@ -366,6 +375,7 @@ public class GetRecommendationRouterTests
     [InlineData(true)]
     public async Task Should_Throw_Exception_When_Maturity_Null(bool checklist)
     {
+        Assert.NotNull(_section.InterstitialPage);
         _submissionStatusProcessor.When(processor =>
                 processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
             .Do((callinfo) =>
@@ -386,6 +396,7 @@ public class GetRecommendationRouterTests
     [InlineData(true)]
     public async Task Should_Throw_Exception_When_Recommendation_Not_In_Section(bool checklist)
     {
+        Assert.NotNull(_section.InterstitialPage);
         _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
             .Do((callinfo) =>
             {
@@ -409,6 +420,7 @@ public class GetRecommendationRouterTests
     [InlineData(true)]
     public async Task Should_Throw_Exception_When_NotFind_Recommendation_For_Maturity(bool checklist)
     {
+        Assert.NotNull(_section.InterstitialPage);
         _submissionStatusProcessor.When(processor =>
                 processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
             .Do((callinfo) =>
@@ -434,6 +446,7 @@ public class GetRecommendationRouterTests
     [Fact]
     public async Task Should_Show_RecommendationPage_When_Status_Is_Recommendation_And_All_Valid()
     {
+        Assert.NotNull(_section.InterstitialPage);
         Setup_Valid_Recommendation();
         var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, "any-recommendation-slug", false, _controller, default);
 
@@ -450,6 +463,7 @@ public class GetRecommendationRouterTests
     [Fact]
     public async Task Should_Return_Only_Last_Recommendation_Journey()
     {
+        Assert.NotNull(_section.InterstitialPage);
         List<QuestionWithAnswer> responses = [
             new QuestionWithAnswer()
             {
@@ -510,6 +524,7 @@ public class GetRecommendationRouterTests
     [Fact]
     public async Task GetPreview_Should_Return_Preview()
     {
+        Assert.NotNull(_section.InterstitialPage);
         Setup_Valid_Recommendation();
 
         var result = await _router.GetRecommendationPreview(_section.InterstitialPage.Slug, null, _controller, default);
@@ -531,6 +546,8 @@ public class GetRecommendationRouterTests
     [InlineData("High")]
     public async Task GetPreview_Should_Return_MatchingIntroForMaturity(string maturity)
     {
+        Assert.NotNull(_section.InterstitialPage);
+
         Setup_Valid_Recommendation();
 
         var result = await _router.GetRecommendationPreview(_section.InterstitialPage.Slug, maturity, _controller, default);
@@ -553,6 +570,7 @@ public class GetRecommendationRouterTests
     [InlineData("")]
     public async Task GetPreview_Should_Return_FirstIntro_If_Invalid_Maturity(string maturity)
     {
+        Assert.NotNull(_section.InterstitialPage);
         Setup_Valid_Recommendation();
 
         var result = await _router.GetRecommendationPreview(_section.InterstitialPage.Slug, maturity, _controller, default);
@@ -569,6 +587,7 @@ public class GetRecommendationRouterTests
 
     private void Setup_Valid_Recommendation(List<QuestionWithAnswer>? responses = null)
     {
+        Assert.NotNull(_section.InterstitialPage);
         _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
             .Do(_ =>
             {
@@ -591,7 +610,8 @@ public class GetRecommendationRouterTests
         return new SubmissionResponsesDto()
         {
             SubmissionId = 1234,
-            Responses = responses ?? [
+            Responses = responses ??
+            [
                 new QuestionWithAnswer()
                 {
                     AnswerText = AnswerOne.Text,
