@@ -70,7 +70,7 @@ public class UserAuthorisationMiddlewareResultHandlerTests
     [Fact]
     public void GetRedirectUrl_WhenAuthorisationFailureIsNull_ShouldReturnNull()
     {
-        var result = UserAuthorisationMiddlewareResultHandler.GetRedirectUrl(null, _context);
+        var result = UserAuthorisationMiddlewareResultHandler.GetRedirectUrl(null);
 
         Assert.Null(result);
     }
@@ -80,7 +80,7 @@ public class UserAuthorisationMiddlewareResultHandlerTests
     {
         var authorizationFailure = AuthorizationFailure.Failed([new AuthorizationFailureReason(new UserOrganisationAuthorisationHandler(new NullLogger<UserOrganisationAuthorisationHandler>()), "")]);
 
-        var result = UserAuthorisationMiddlewareResultHandler.GetRedirectUrl(authorizationFailure, _context);
+        var result = UserAuthorisationMiddlewareResultHandler.GetRedirectUrl(authorizationFailure);
 
         Assert.Equal(UrlConstants.OrgErrorPage, result);
     }
@@ -90,7 +90,7 @@ public class UserAuthorisationMiddlewareResultHandlerTests
     {
         var authorizationFailure = AuthorizationFailure.Failed([new AuthorizationFailureReason(new PageModelAuthorisationPolicy(new NullLogger<PageModelAuthorisationPolicy>()), "some other reason")]);
 
-        var result = UserAuthorisationMiddlewareResultHandler.GetRedirectUrl(authorizationFailure, _context);
+        var result = UserAuthorisationMiddlewareResultHandler.GetRedirectUrl(authorizationFailure);
 
         Assert.Null(result);
     }
