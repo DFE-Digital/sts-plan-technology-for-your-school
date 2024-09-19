@@ -23,7 +23,7 @@ public class WarningComponentTagHelper : TagHelper
         output.Content.SetHtmlContent(html);
     }
 
-    public string GetHtml(string innerHtml)
+    public static string GetHtml(string innerHtml)
     {
         var stringBuilder = new StringBuilder();
         AppendOpenTag(stringBuilder);

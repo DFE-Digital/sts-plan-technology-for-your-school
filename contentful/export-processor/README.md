@@ -37,7 +37,10 @@ The main one of all of them is the [section](./src/contentful/export-processor/c
 1. Copy the `.env.example` file in the root of the folder and name it `.env`.
 2. Fill in the various values for the Contentful space, access token etc..
 3. Run `npm install` to install dependencies.
-4. Run `node data-tools` to generate the test suites.
+4. Run `node data-tools` to generate the test suites
+    - You can also use:
+        1. `npm run generate-test-suites` to generate the test suites
+        2. `npm run data-tools` to run the other data tools but not the test suites
 
 #### Environment variables
 
@@ -55,6 +58,17 @@ The main one of all of them is the [section](./src/contentful/export-processor/c
 | OUTPUT_FILE_DIR           |                                                                                                                                                        |
 | FUNCTION_APP_URL          | Webhook URL where to post content migrations to                                                                                                        |
 
+#### CLI Arguments
+
+Some variables can also be passed as CLI arguments.
+CLI arguments will take precedence over environment variables.
+
+| CLI Argument                | Description                                                             | Matching env variable       |
+| --------------------------- | ----------------------------------------------------------------------- | --------------------------- |
+| -ts, --test-suites          | Generate test suites                                                    | `GENERATE_TEST_SUITES`      |
+| -uj, --export-user-journeys | Export all user journeys                                                | `EXPORT_USER_JOURNEY_PATHS` |
+| -o, --output-dir            | Where to save the outputted data to                                     | `OUTPUT_FILE_DIR`           |
+| -s, --save-all-journeys     | Save all user journeys, not just the minimal required for various paths | `EXPORT_ALL_PATHS`          |
 
 ### Generate Test Suites
 

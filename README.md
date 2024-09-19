@@ -16,6 +16,7 @@ Web application to help schools plan a technology roadmap
 
 ## Documentation 
 
+- [Authentication](./docs/Authentication.md)
 - [Architecture Decision Records](./docs/adr/README.md)
 - [Contentful Caching Process](./docs/Contentful-Caching-Process.md)
 - [Contentful Integration](./docs/Contentful-Integration.md)

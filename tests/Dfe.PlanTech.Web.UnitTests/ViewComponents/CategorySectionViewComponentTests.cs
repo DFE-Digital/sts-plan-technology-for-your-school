@@ -213,7 +213,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [InlineData("2015/10/16 12:13:00", "last completed 1:13pm")] // British summer time GMT + 1
         public async Task Returns_CategorySectionInfo_If_Slug_Exists_And_SectionIsCompleted(string utcTime, string expectedBadge)
         {
-            _systemTime.Today.Returns(_ => new DateTime(2015, 10, 16));
+            _systemTime.Today.Returns(_ => new DateTime(2015, 10, 16, 0, 0, 0, DateTimeKind.Utc));
             _category.SectionStatuses.Add(new SectionStatusDto()
             {
                 SectionId = "Section1",
@@ -260,7 +260,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [InlineData("2015/03/06 10:13:00", "in progress 10:13am")] // GMT
         public async Task Returns_CategorySelectionInfo_If_Slug_Exists_And_SectionIsNotCompleted(string utcTime, string expectedBadge)
         {
-            _systemTime.Today.Returns(_ => new DateTime(2015, 3, 6));
+            _systemTime.Today.Returns(_ => new DateTime(2015, 3, 6, 0, 0, 0, DateTimeKind.Utc));
             _category.Completed = 0;
 
             _category.SectionStatuses.Add(new SectionStatusDto()

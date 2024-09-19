@@ -1,20 +1,14 @@
 using Azure.Identity;
-using Dfe.ContentSupport.Web.Extensions;
 using Dfe.PlanTech.Application.Helpers;
-using Dfe.PlanTech.Application.Submissions.Queries;
 using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
-using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.SignIns;
 using Dfe.PlanTech.Web;
-using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
-using Dfe.PlanTech.Web.Routing;
 using GovUk.Frontend.AspNetCore;
 using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 
@@ -57,45 +51,23 @@ if (!builder.Environment.IsDevelopment())
     }
 }
 
+builder.AddContentAndSupportServices()
+        .AddAuthorisationServices()
+        .AddCaching()
+        .AddContentfulServices(builder.Configuration)
+        .AddCQRSServices()
+        .AddDatabase(builder.Configuration)
+        .AddDfeSignIn(builder.Configuration)
+        .AddExceptionHandlingServices()
+        .AddRoutingServices();
 
-builder.InitCsDependencyInjection();
-
-builder.Services.AddCaching();
-builder.Services.AddCQRSServices();
-builder.Services.AddDfeSignIn(builder.Configuration);
 builder.Services.AddScoped<ComponentViewsFactory>();
-
-builder.Services.AddDatabase(builder.Configuration);
-builder.Services.AddSingleton<IAuthorizationHandler, PageModelAuthorisationPolicy>();
-builder.Services.AddTransient<IExceptionHandlerMiddleware, ServiceExceptionHandlerMiddleWare>();
-
-builder.Services.AddTransient<ISubmissionStatusProcessor, SubmissionStatusProcessor>();
-builder.Services.AddTransient<IGetRecommendationRouter, GetRecommendationRouter>();
-builder.Services.AddTransient<IGetQuestionBySlugRouter, GetQuestionBySlugRouter>();
-builder.Services.AddTransient<ICheckAnswersRouter, CheckAnswersRouter>();
-
-builder.Services.AddTransient((_) => SectionCompleteStatusChecker.SectionComplete);
-builder.Services.AddTransient((_) => SectionNotStartedStatusChecker.SectionNotStarted);
-builder.Services.AddTransient((_) => CheckAnswersOrNextQuestionChecker.CheckAnswersOrNextQuestion);
-
-builder.Services.AddAutoMapper(typeof(Dfe.PlanTech.Application.Mappings.CmsMappingProfile));
-
-builder.Services.AddAuthentication();
-builder.Services.AddAuthorizationBuilder()
-                .AddDefaultPolicy(PageModelAuthorisationPolicy.PolicyName, policy =>
-                {
-                    policy.Requirements.Add(new PageAuthorisationRequirement());
-                });
-builder.Services.AddSingleton<ApiKeyAuthorisationFilter>();
-
-builder.Services.AddContentfulServices(builder.Configuration);
 builder.Services.AddSingleton<ISystemTime, SystemTime>();
-
-builder.Services.AddTransient<IUserJourneyMissingContentExceptionHandler, UserJourneyMissingContentExceptionHandler>();
 
 var app = builder.Build();
 
 app.UseSecurityHeaders();
+app.UseMiddleware<HeadRequestMiddleware>();
 
 app.UseCookiePolicy(
     new CookiePolicyOptions
@@ -129,6 +101,7 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllerRoute(
     pattern: "{controller=Pages}/{action=GetByRoute}/{id?}",
     name: "default"
