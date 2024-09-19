@@ -45,4 +45,6 @@ public sealed class DfeSignInConfiguration : IDfeSignInConfiguration
     public string SignoutRedirectUrl { get; set; } = null!;
 
     public string FrontDoorUrl { get; init; } = null!;
+
+    public bool SkipUnrecognizedRequests { get; set; } = true;
 }
