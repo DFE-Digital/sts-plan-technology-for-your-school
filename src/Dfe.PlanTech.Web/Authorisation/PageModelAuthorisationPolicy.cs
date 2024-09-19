@@ -87,8 +87,6 @@ public class PageModelAuthorisationPolicy(ILogger<PageModelAuthorisationPolicy> 
         return page;
     }
 
-    private static bool UserIsAuthenticated(HttpContext httpContext) => httpContext.User.Identity?.IsAuthenticated == true;
-
     /// <summary>
     /// Gets the slug from the route if on the pages controller, or null if not.
     /// </summary>

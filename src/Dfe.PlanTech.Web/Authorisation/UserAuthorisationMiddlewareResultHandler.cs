@@ -12,11 +12,11 @@ namespace Dfe.PlanTech.Web.Authorisation
             RequestDelegate next,
             HttpContext context,
             AuthorizationPolicy policy,
-            PolicyAuthorizationResult authoriseResult)
+            PolicyAuthorizationResult authorizeResult)
         {
-            if (authoriseResult.Forbidden)
+            if (authorizeResult.Forbidden)
             {
-                var redirectUrl = GetRedirectUrl(authoriseResult.AuthorizationFailure, context);
+                var redirectUrl = GetRedirectUrl(authorizeResult.AuthorizationFailure, context);
 
                 if (redirectUrl != null)
                 {
@@ -25,7 +25,7 @@ namespace Dfe.PlanTech.Web.Authorisation
                 }
             }
 
-            await defaultHandler.HandleAsync(next, context, policy, authoriseResult);
+            await defaultHandler.HandleAsync(next, context, policy, authorizeResult);
         }
 
 
