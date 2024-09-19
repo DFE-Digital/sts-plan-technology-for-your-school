@@ -14,6 +14,9 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Dfe.PlanTech.Infrastructure.SignIns;
 
+/// <summary>
+/// Class for creating ILogger, as that requires a type
+/// </summary>
 public class DfeSignIn
 {
 
