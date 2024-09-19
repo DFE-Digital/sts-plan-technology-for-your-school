@@ -1,11 +1,11 @@
-using Microsoft.AspNetCore.Http;
+using Dfe.PlanTech.Application.Constants;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Policy;
-using Xunit;
-using NSubstitute;
-using Dfe.PlanTech.Application.Constants;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.AspNetCore.Authentication;
+using NSubstitute;
+using Xunit;
 
 namespace Dfe.PlanTech.Web.Authorisation.Tests
 {
