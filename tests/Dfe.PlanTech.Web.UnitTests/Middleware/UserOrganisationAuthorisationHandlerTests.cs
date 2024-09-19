@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using Dfe.PlanTech;
 using Dfe.PlanTech.Infrastructure.SignIns.Models;
 using Dfe.PlanTech.Web.Authorisation;
 using Microsoft.AspNetCore.Authorization;
@@ -7,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
+
+namespace Dfe.PlanTech.Web.UnitTests.Middleware;
 
 public class UserOrganisationAuthorisationHandlerTests
 {
