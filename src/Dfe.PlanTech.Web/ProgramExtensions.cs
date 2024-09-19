@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Dfe.ContentSupport.Web.Extensions;
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Content.Queries;
@@ -28,8 +29,12 @@ using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.Data.Repositories;
+using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Helpers;
+using Dfe.PlanTech.Web.Middleware;
+using Dfe.PlanTech.Web.Routing;
 using EFCoreSecondLevelCacheInterceptor;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
@@ -191,4 +196,52 @@ public static class ProgramExtensions
         services.AddTransient<CspConfiguration>();
         return services;
     }
+
+    public static IServiceCollection AddAuthorisationServices(this IServiceCollection services)
+    {
+        services.AddAuthentication();
+        services.AddAuthorizationBuilder()
+                        .AddDefaultPolicy(PageModelAuthorisationPolicy.PolicyName, policy =>
+                        {
+                            policy.Requirements.Add(new PageAuthorisationRequirement());
+                            policy.Requirements.Add(new UserOrganisationAuthorisationRequirement());
+                        });
+        services.AddSingleton<ApiKeyAuthorisationFilter>();
+        services.AddSingleton<IAuthorizationHandler, PageModelAuthorisationPolicy>();
+        services.AddSingleton<IAuthorizationHandler, UserOrganisationAuthorisationHandler>();
+        services.AddSingleton<IAuthorizationMiddlewareResultHandler, UserAuthorisationMiddlewareResultHandler>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddRoutingServices(this IServiceCollection services)
+    {
+        services.AddTransient<ISubmissionStatusProcessor, SubmissionStatusProcessor>();
+        services.AddTransient<IGetRecommendationRouter, GetRecommendationRouter>();
+        services.AddTransient<IGetQuestionBySlugRouter, GetQuestionBySlugRouter>();
+        services.AddTransient<ICheckAnswersRouter, CheckAnswersRouter>();
+
+        services.AddTransient((_) => SectionCompleteStatusChecker.SectionComplete);
+        services.AddTransient((_) => SectionNotStartedStatusChecker.SectionNotStarted);
+        services.AddTransient((_) => CheckAnswersOrNextQuestionChecker.CheckAnswersOrNextQuestion);
+
+        return services;
+    }
+
+    public static IServiceCollection AddContentAndSupportServices(this WebApplicationBuilder builder)
+    {
+        builder.InitCsDependencyInjection();
+        builder.Services.AddAutoMapper(typeof(Application.Mappings.CmsMappingProfile));
+
+        return builder.Services;
+    }
+
+    public static IServiceCollection AddExceptionHandlingServices(this IServiceCollection services)
+    {
+        services.AddTransient<IExceptionHandlerMiddleware, ServiceExceptionHandlerMiddleWare>();
+        services.AddTransient<IUserJourneyMissingContentExceptionHandler, UserJourneyMissingContentExceptionHandler>();
+
+        return services;
+    }
+
 }
