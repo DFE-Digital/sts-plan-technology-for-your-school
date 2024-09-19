@@ -46,7 +46,6 @@ public static partial class DfeOpenIdConnectEvents
         return Task.FromResult(0);
     }
 
-
     /// <summary>
     /// Gets the origin URL to be used for OpenID Connect redirects.
     /// </summary>
@@ -72,24 +71,18 @@ public static partial class DfeOpenIdConnectEvents
     /// <param name="callbackPath">The path of the callback URL.</param>
     public static string CreateCallbackUrl(RedirectContext context, IDfeSignInConfiguration config, string callbackPath)
     {
-        var originUrl = GetOriginUrl(context, config);
+        var originUrl = GetOriginUrl(context, config).EnsureScheme();
 
-        //Our config uses URls like "/auth/cb" for the redirect callback slug, signout slug, etc.
-        //So we should ensure that the URL does not end with a forward slash when returning
-        if (originUrl.EndsWith('/') && callbackPath.StartsWith('/'))
-        {
-            originUrl = originUrl[..^1];
-        }
-        else if (!originUrl.EndsWith('/') && !callbackPath.StartsWith('/'))
-        {
-            originUrl += '/';
-        }
+        var baseUri = new Uri(originUrl);
+        var callbackUri = new Uri(baseUri, callbackPath);
 
-        if (!SchemeMatchRegex.Match(originUrl).Success)
-        {
-            originUrl = $"https://{originUrl}";
-        }
-
-        return originUrl + callbackPath;
+        return callbackUri.ToString();
     }
+
+    /// <summary>
+    /// Ensures the URL has a URL scheme, if not prefixes the string with "https://"
+    /// </summary>
+    /// <param name="url"></param>
+    /// <returns></returns>
+    private static string EnsureScheme(this string url) => SchemeMatchRegex.Match(url).Success ? url : $"https://{url}";
 }
