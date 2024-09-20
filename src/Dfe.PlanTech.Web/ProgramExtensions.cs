@@ -187,7 +187,14 @@ public static class ProgramExtensions
 
     public static IServiceCollection AddGoogleTagManager(this IServiceCollection services)
     {
-        services.AddTransient<GtmConfiguration>();
+        services.AddOptions<GtmConfiguration>()
+                .Configure<IConfiguration>((settings, configuration) =>
+                {
+                    configuration.GetSection("GTM").Bind(settings);
+                });
+
+        services.AddTransient(services => services.GetRequiredService<IOptions<GtmConfiguration>>().Value);
+        services.AddTransient<GtmService>();
         return services;
     }
 
