@@ -34,6 +34,8 @@ locals {
     "ASPNETCORE_FORWARDEDHEADERS_ENABLED" = "true",
     "ASPNETCORE_ENVIRONMENT"              = var.container_environment
   }
+
+  container_environment_options   = ["Development", "Test", "Staging", "Production"]
   container_environment_variables = merge(local.container_environment_variables_default, var.container_environment_variables)
 
   ####################
