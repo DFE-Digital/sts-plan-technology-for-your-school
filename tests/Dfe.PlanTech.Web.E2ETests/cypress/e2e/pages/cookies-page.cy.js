@@ -9,7 +9,6 @@ describe("Cookies Page", () => {
       .contains("Cookies")
       .click();
     cy.url().should("contain", "/cookies");
-    cy.injectAxe();
   });
 
   it("Should Have Heading", () => {
@@ -41,12 +40,16 @@ describe("Cookies Page", () => {
   });
 
   it("Should accept cookies", () => {
-    cy.get("form div.govuk-radios div.govuk-radios__item").first().click();
+    cy.get("form div.govuk-radios div.govuk-radios__item input").first().click();
 
     cy.get("form button.govuk-button").contains("Save cookie settings").click();
 
     cy.get("div.govuk-notification-banner__header").should("exist");
-    cy.get("form div.govuk-radios div.govuk-radios__item input").eq(1).should("have.attr", "checked");
+    cy.get("form div.govuk-radios div.govuk-radios__item input").eq(0).should("have.attr", "checked");
+
+    cy.get("noscript").contains("www.googletagmanager.com").should("exist");
+    cy.get('meta[name="google-site-verification"]').should('exist');
+    cy.get('head script[src*="www.googletagmanager.com"]').should("exist");
   });
 
   it("Should reject cookies", () => {
@@ -56,9 +59,18 @@ describe("Cookies Page", () => {
 
     cy.get("div.govuk-notification-banner__header").should("exist");
     cy.get("form div.govuk-radios div.govuk-radios__item input").eq(1).should("have.attr", "checked");
+
+    const noScriptElementExists = Cypress.$("noscript").toArray().some(el => el.innerHTML.indexOf("www.googletagmanager.com") > -1);
+    if (noScriptElementExists) {
+      throw new Error("Found GTM <noscript> element but should be rejected");
+    }
+
+    cy.get('meta[name="google-site-verification"]').should('not.exist');
+    cy.get('head script[src*="www.googletagmanager.com"]').should("not.exist");
   });
 
   it("Passes Accessibility Testing", () => {
+    cy.injectAxe();
     cy.runAxe();
   });
 });
