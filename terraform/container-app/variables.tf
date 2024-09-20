@@ -126,7 +126,7 @@ variable "container_app_http_concurrency" {
 }
 
 variable "container_environment" {
-  description = "Additional environment variables to set on the Azure Container App"
+  description = "Container app environment - set to ASPNETCORE_ENVIRONMENT in the app environment variables"
   type        = string
   default     = ""
 
