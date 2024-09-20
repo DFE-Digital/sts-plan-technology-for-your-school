@@ -24,6 +24,8 @@ Further setup is required to use the Dynamic Page Validator - see the dedicated 
 | DSi_Url                | URL for DfE Sign-in Interactions                                                               |
 | DSi_Email              | DfE Sign-in Username                                                                           |
 | DSi_Password           | DfE Sign-in Password                                                                           |
+| DSi_NoOrg_Email        | DfE Sign-in Username for a user who has no organisation                                        |
+| DSi_NoOrg_Password     | Password for the DSi_NoOrg_Email user                                                          |
 | SPACE_ID               | Id of the PlanTech Contentful space                                                            |
 | DELIVERY_TOKEN         | Content Delivery API access token                                                              |
 | MANAGEMENT_TOKEN       | Contentful personal access token                                                               |
