@@ -27,7 +27,7 @@ describe("Cookies Page", () => {
     cy.get("p").should("exist");
   });
 
-  it("Should Contain Answers", () => {
+  it("Should have change cookie preferences form with options", () => {
     cy.get("form div.govuk-radios div.govuk-radios__item")
       .should("exist")
       .and("have.length", 2)
@@ -40,12 +40,22 @@ describe("Cookies Page", () => {
       });
   });
 
-  it("Should Accept Cookies On Submit By Default", () => {
+  it("Should accept cookies", () => {
     cy.get("form div.govuk-radios div.govuk-radios__item").first().click();
 
     cy.get("form button.govuk-button").contains("Save cookie settings").click();
 
     cy.get("div.govuk-notification-banner__header").should("exist");
+    cy.get("form div.govuk-radios div.govuk-radios__item input").eq(1).should("have.attr", "checked");
+  });
+
+  it("Should reject cookies", () => {
+    cy.get("form div.govuk-radios div.govuk-radios__item").eq(1).click();
+
+    cy.get("form button.govuk-button").contains("Save cookie settings").click();
+
+    cy.get("div.govuk-notification-banner__header").should("exist");
+    cy.get("form div.govuk-radios div.govuk-radios__item input").eq(1).should("have.attr", "checked");
   });
 
   it("Passes Accessibility Testing", () => {
