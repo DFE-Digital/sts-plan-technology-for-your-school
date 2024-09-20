@@ -131,8 +131,8 @@ variable "container_environment" {
   default     = ""
 
   validation {
-    condition     = contains(["Development", "Test", "Staging", "Production"], var.container_environment)
-    error_message = "container_environment must be one of ${jsonencode(["Development", "Test", "Staging", "Production"])}"
+    condition     = contains(["Dev", "Test", "Staging", "Prod"], var.container_environment)
+    error_message = "container_environment must be one of ${jsonencode(["Dev", "Test", "Staging", "Prod"])}"
   }
 }
 
