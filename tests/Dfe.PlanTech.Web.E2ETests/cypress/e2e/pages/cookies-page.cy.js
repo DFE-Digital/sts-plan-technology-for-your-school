@@ -9,6 +9,7 @@ describe("Cookies Page", () => {
       .contains("Cookies")
       .click();
     cy.url().should("contain", "/cookies");
+    cy.injectAxe();
   });
 
   it("Should Have Heading", () => {
@@ -70,7 +71,6 @@ describe("Cookies Page", () => {
   });
 
   it("Passes Accessibility Testing", () => {
-    cy.injectAxe();
     cy.runAxe();
   });
 });
