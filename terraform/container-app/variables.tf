@@ -125,6 +125,22 @@ variable "container_app_http_concurrency" {
   default     = 10
 }
 
+variable "container_environment" {
+  description = "Additional environment variables to set on the Azure Container App"
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.container_environment == "dev" || var.container_environment == "test" || var.container_environment == "staging" || var.container_environment == "prod"
+    error_message = "container_environment must be one of 'dev', 'test', 'staging', or 'prod'"
+  }
+}
+
+variable "container_environment_variables" {
+  description = "Additional environment variables to set on the Azure Container App"
+  type        = map(string)
+  default     = {}
+}
 
 ##################
 # CDN/Front Door #
