@@ -19,6 +19,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Dfe.PlanTech.Domain\Dfe.PlanTech.Domain.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ServiceBus\" />
+  </ItemGroup>
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>

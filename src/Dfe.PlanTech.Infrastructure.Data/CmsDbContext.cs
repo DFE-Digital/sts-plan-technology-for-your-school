@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
+using System.Reflection;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
@@ -226,4 +227,37 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
         => queryable.FirstOrDefaultAsync(cancellationToken);
+
+    public bool GetRequiredPropertiesForType(Type type, out IEnumerable<PropertyInfo> properties)
+    {
+        var entityType = Model.FindEntityType(type);
+
+        if (entityType == null)
+        {
+            properties = [];
+            return false;
+        }
+
+        properties = entityType.GetProperties()
+                               .Where(prop => !prop.IsNullable)
+                               .Select(prop => prop.PropertyInfo)
+                               .OfType<PropertyInfo>();
+
+        return true;
+    }
+
+    public void ClearChangeTracker()
+    {
+        ChangeTracker.Clear();
+    }
+
+    public void AddEntity<TEntity>(TEntity entity) where TEntity : ContentComponentDbEntity
+    {
+        Add(entity);
+    }
+
+    public void UpdateEntity<TEntity>(TEntity entity) where TEntity : ContentComponentDbEntity
+    {
+        Update(entity);
+    }
 }

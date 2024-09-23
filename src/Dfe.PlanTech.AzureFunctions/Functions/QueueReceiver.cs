@@ -127,7 +127,7 @@ public class QueueReceiver(
     /// <remarks>
     /// If we receive a create event, we return true.
     /// If we are NOT using preview mode (i.e. we are ignoring drafts), and the event is just a save or autosave, then return true.
-    /// 
+    ///
     /// Else, we return false.
     /// </remarks>
     /// <param name="cmsEvent"></param>
@@ -152,7 +152,7 @@ public class QueueReceiver(
     }
 
     /// <summary>
-    /// Retrieves the CmsEvent based on the provided subject. 
+    /// Retrieves the CmsEvent based on the provided subject.
     /// </summary>
     /// <param name="contentfulEvent">The Contentful event (from the service bus message subject)</param>
     /// <returns></returns>
@@ -196,11 +196,11 @@ public class QueueReceiver(
     {
         if (!mappedEntity.AlreadyExistsInDatabase)
         {
-            db.Add(mappedEntity.IncomingEntity);
+            db.AddEntity(mappedEntity.IncomingEntity);
         }
         else
         {
-            db.Update(mappedEntity.ExistingEntity!);
+            db.UpdateEntity(mappedEntity.ExistingEntity!);
         }
     }
 
