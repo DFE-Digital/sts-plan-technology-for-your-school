@@ -4,11 +4,10 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
 public interface IRecommendationSection { }
 
-public interface IRecommendationSection<TAnswer, TContentComponent, THeader, TRecommendationChunk> : IRecommendationSection
+public interface IRecommendationSection<TAnswer, TContentComponent, TRecommendationChunk> : IRecommendationSection
 where TAnswer : IAnswer
 where TContentComponent : IContentComponentType
-where TRecommendationChunk : IRecommendationChunk<TAnswer, TContentComponent, THeader>
-where THeader : IHeader
+where TRecommendationChunk : IRecommendationChunk<TAnswer, TContentComponent>
 {
     public List<TAnswer> Answers { get; }
 

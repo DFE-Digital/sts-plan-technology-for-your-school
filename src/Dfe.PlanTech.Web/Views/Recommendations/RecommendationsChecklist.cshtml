@@ -1,7 +1,11 @@
+@using Dfe.PlanTech.Domain.Helpers
+@using Dfe.PlanTech.Domain.Interfaces
 @model Dfe.PlanTech.Web.Models.RecommendationsChecklistViewModel
+@inject ISystemTime systemTime
 
 @{
     Layout = "_PrintLayout";
+    var currentTime = systemTime.UkNow;
 }
 
 <div class="govuk-grid-row" id="top">
@@ -11,17 +15,17 @@
             <p class="govuk-body">Plan technology for your school</p>
         </div>
         <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"/>
-        <p class="govuk-!-margin-top-4 govuk-body" id="printed-date-time">Date and time this document was printed: @($"{DateTime.Now:ddd MMM yyyy HH:mm:ss zzz}")</p>
+        <p class="govuk-!-margin-top-4 govuk-body" id="printed-date-time">Date and time this document was printed: @($"{DateTimeFormatter.FormattedDateLong(currentTime)} at {DateTimeFormatter.FormattedTime(currentTime)}")</p>
         <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"/>
         <partial name="RecommendationPrintContent" model="@Model.AllContent"/>
     </div>
     <div class="govuk-grid-column-one-third print-buttons__container noprint">
-        <div id="recommendations-print-page" class="govuk-button govuk-button--inverse print-buttons__button">
+        <div id="recommendations-print-page" class="govuk-button govuk-button--inverse print-buttons__button js-only">
             <img class="print-img" src="/assets/images/print.png" alt="Print"/><br>
             Print
         </div>
         <div class="print-buttons__row"></div>
-        <div id="recommendations-close-page" class="govuk-button govuk-button--inverse print-buttons__button">
+        <div id="recommendations-close-page" class="govuk-button govuk-button--inverse print-buttons__button js-only">
             Close
         </div>
     </div>

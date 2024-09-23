@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Dfe.PlanTech.Infrastructure.SignIn\Dfe.PlanTech.Infrastructure.SignIn.csproj" />
+    <ProjectReference Include="..\Dfe.PlanTech.UnitTests.Shared\Dfe.PlanTech.UnitTests.Shared.csproj" />
   </ItemGroup>
 
 </Project>

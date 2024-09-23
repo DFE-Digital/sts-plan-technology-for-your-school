@@ -27,6 +27,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             var actual = _componentBuilder.BuildDropDownComponent();
             Assert.NotNull(actual);
             Assert.Equal("Dropdown", actual.Title);
+            Assert.NotNull(actual.Content);
             Assert.Equal("Content", actual.Content.Value);
         }
 
@@ -92,6 +93,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             var recommendationIntro = ComponentBuilder.BuildRecommendationIntro(header);
 
             Assert.Equal(header, recommendationIntro.Header.Text);
+            Assert.Equal(header, recommendationIntro.HeaderText);
             Assert.Equal(expectedResult, recommendationIntro.SlugifiedHeader);
         }
 

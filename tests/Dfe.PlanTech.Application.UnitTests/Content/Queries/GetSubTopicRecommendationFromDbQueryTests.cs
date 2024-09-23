@@ -1,7 +1,6 @@
 using AutoMapper;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Mappings;
-using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -62,13 +61,7 @@ public class GetSubTopicRecommendationFromDbQueryTests
                             Id = "3"
                         }
                     ],
-                    Header = new HeaderDbEntity()
-                    {
-                        Tag = HeaderTag.H1,
-                        Size = HeaderSize.Large,
-                        Text = "chunk1",
-                        Id = "Header-one"
-                    },
+                    Header = "chunk1",
                     Content = [
                         new TextBodyDbEntity()
                         {
@@ -93,13 +86,7 @@ public class GetSubTopicRecommendationFromDbQueryTests
                             Id = "6"
                         }
                     ],
-                    Header = new HeaderDbEntity()
-                    {
-                        Tag = HeaderTag.H1,
-                        Size = HeaderSize.Large,
-                        Text = "chunk2",
-                        Id = "Header-two"
-                    },
+                    Header = "chunk2",
                     Content = [
                         new TextBodyDbEntity()
                         {
@@ -124,13 +111,7 @@ public class GetSubTopicRecommendationFromDbQueryTests
                             Id = "9"
                         }
                     ],
-                    Header = new HeaderDbEntity()
-                    {
-                        Tag = HeaderTag.H1,
-                        Size = HeaderSize.Large,
-                        Text = "chunk3",
-                        Id = "Header-three"
-                    },
+                    Header = "chunk3",
                     Content = [
                         new TextBodyDbEntity()
                         {

@@ -5,6 +5,7 @@ using Dfe.PlanTech.Domain.Users.Models;
 using Dfe.PlanTech.Infrastructure.SignIns.Extensions;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.SignIns.ConnectEvents;
 
@@ -15,7 +16,7 @@ public static class OnUserInformationReceivedEvent
     /// </summary>
     /// <param name="context"></param>
     /// <returns></returns>
-    public static async Task RecordUserSignIn(UserInformationReceivedContext context)
+    public static async Task RecordUserSignIn(ILogger logger, UserInformationReceivedContext context)
     {
         if (context.Principal?.Identity == null || !context.Principal.Identity.IsAuthenticated)
         {
@@ -24,7 +25,13 @@ public static class OnUserInformationReceivedEvent
         }
 
         var userId = context.Principal.Claims.GetUserId();
-        var establishment = context.Principal.Claims.GetOrganisation() ?? throw new KeyNotFoundException(ClaimConstants.Organisation);
+        var establishment = context.Principal.Claims.GetOrganisation();
+
+        if (establishment == null)
+        {
+            logger.LogWarning("User {UserId} is authenticated but has no establishment", userId);
+            return;
+        }
 
         var recordUserSignInCommand = context.HttpContext.RequestServices.GetRequiredService<IRecordUserSignInCommand>();
 

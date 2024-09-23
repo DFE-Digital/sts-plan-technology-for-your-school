@@ -62,7 +62,9 @@ public class GetSectionQueryTests
     {
         _dbSections.AddRange(_sections.Select((section) =>
         {
-            var interstitialPageId = $"{section.InterstitialPage.Slug}-ID";
+            var interstitialPageId = section.InterstitialPage != null
+                ? $"{section.InterstitialPage.Slug}-ID"
+                : throw new InvalidOperationException("InterstitialPage cannot be null");
 
             return new SectionDbEntity()
             {
@@ -96,7 +98,7 @@ public class GetSectionQueryTests
     [Fact]
     public async Task GetSectionBySlug_Returns_Section_From_Db()
     {
-        var sectionSlug = FirstSection.InterstitialPage.Slug;
+        var sectionSlug = FirstSection.InterstitialPage?.Slug ?? throw new InvalidOperationException("InterstitialPage cannot be null");
         var cancellationToken = CancellationToken.None;
 
         var repository = Substitute.For<IContentRepository>();
@@ -105,12 +107,15 @@ public class GetSectionQueryTests
         {
             var options = callinfo.ArgAt<GetEntitiesOptions>(0);
 
-            var slugQuery = (options.Queries?.FirstOrDefault(query => query is ContentQueryEquals equalsQuery &&
-                                                            equalsQuery.Field == GetSectionQuery.SlugFieldPath) as ContentQueryEquals) ??
-                                            throw new InvalidOperationException("Missing query for slug");
+            if (options.Queries == null)
+            {
+                throw new InvalidOperationException("Queries cannot be null");
+            }
 
+            var slugQuery = options.Queries.FirstOrDefault(query => query is ContentQueryEquals equalsQuery &&
+                                                            equalsQuery.Field == GetSectionQuery.SlugFieldPath) as ContentQueryEquals ?? throw new InvalidOperationException("Slug query cannot be null");
 
-            return _sections.Where(section => section.InterstitialPage.Slug == slugQuery.Value);
+            return _sections.Where(section => section.InterstitialPage?.Slug == slugQuery.Value);
         });
 
         var db = Substitute.For<ICmsDbContext>();
@@ -126,6 +131,7 @@ public class GetSectionQueryTests
         var getSectionQuery = new GetSectionQuery(db, repository, _mapper);
         var section = await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken);
 
+        Assert.NotNull(section); // Add this line to check for null
         Assert.Equal(FirstSection.InterstitialPage.Slug, sectionSlug);
 
         await db.Received(1).FirstOrDefaultAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
@@ -135,6 +141,7 @@ public class GetSectionQueryTests
     [Fact]
     public async Task GetSectionBySlug_Returns_Section_From_Repository_When_Db_Returns_Nothing()
     {
+        Assert.NotNull(FirstSection.InterstitialPage);
         var sectionSlug = FirstSection.InterstitialPage.Slug;
         var cancellationToken = CancellationToken.None;
 
@@ -149,7 +156,7 @@ public class GetSectionQueryTests
                                             throw new InvalidOperationException("Missing query for slug");
 
 
-            return _sections.Where(section => section.InterstitialPage.Slug == slugQuery.Value);
+            return _sections.Where(section => section.InterstitialPage?.Slug == slugQuery.Value);
         });
 
         var db = Substitute.For<ICmsDbContext>();

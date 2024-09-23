@@ -2,12 +2,11 @@ using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
-public interface IRecommendationChunk<TAnswer, TContentComponent, THeader>
+public interface IRecommendationChunk<TAnswer, TContentComponent>
 where TAnswer : IAnswer
 where TContentComponent : IContentComponentType
-where THeader : IHeader
 {
-    public THeader Header { get; }
+    public string Header { get; }
 
     public List<TContentComponent> Content { get; }
 

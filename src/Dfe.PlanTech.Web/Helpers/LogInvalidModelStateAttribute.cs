@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Dfe.PlanTech.Web.Helpers;
 
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false)]
 public sealed class LogInvalidModelStateAttribute : ActionFilterAttribute
 {
     public override void OnActionExecuting(ActionExecutingContext context)

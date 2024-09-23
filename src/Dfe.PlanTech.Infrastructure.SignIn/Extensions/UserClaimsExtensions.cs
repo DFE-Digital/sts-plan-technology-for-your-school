@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using Dfe.PlanTech.Domain.SignIns.Enums;
 using Dfe.PlanTech.Domain.SignIns.Models;
+using Dfe.PlanTech.Infrastructure.SignIns.Models;
 
 namespace Dfe.PlanTech.Infrastructure.SignIns.Extensions;
 
@@ -36,9 +37,7 @@ public static class UserClaimsExtensions
     {
         ArgumentNullException.ThrowIfNull(claims);
 
-        var organisationJson = claims.Where(c => c.Type == ClaimConstants.Organisation)
-            .Select(c => c.Value)
-            .FirstOrDefault();
+        string? organisationJson = GetUserOrganisationClaim(claims);
 
         if (organisationJson == null)
         {
@@ -55,4 +54,9 @@ public static class UserClaimsExtensions
         return organisation;
     }
 
+    public static Organisation? GetUserOrganisation(this ClaimsPrincipal claimsPrincipal) => claimsPrincipal.Claims.GetOrganisation();
+
+    public static UserAuthorisationStatus AuthorisationStatus(this ClaimsPrincipal claimsPrincipal) => new(claimsPrincipal.Identity?.IsAuthenticated == true, claimsPrincipal.GetUserOrganisation() != null);
+
+    private static string? GetUserOrganisationClaim(IEnumerable<Claim> claims) => claims.Where(c => c.Type == ClaimConstants.Organisation).Select(c => c.Value).FirstOrDefault();
 }

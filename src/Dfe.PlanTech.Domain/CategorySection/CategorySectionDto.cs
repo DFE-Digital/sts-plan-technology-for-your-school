@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Domain.Constants;
+using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
@@ -50,8 +51,9 @@ public class CategorySectionDto
     {
         if (date == null)
             return null;
-        var britishTimeZone = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
-        var localTime = TimeZoneInfo.ConvertTimeFromUtc(date.Value, britishTimeZone);
-        return localTime.Date == systemTime.Today.Date ? $"{localTime:h:mmtt}".ToLower() : $"{localTime:d MMM yyyy}";
+        var localTime = TimeZoneHelpers.ToUkTime(date.Value);
+        return localTime.Date == systemTime.Today.Date
+            ? DateTimeFormatter.FormattedTime(localTime)
+            : DateTimeFormatter.FormattedDateShort(localTime);
     }
 }

@@ -156,7 +156,7 @@ public class CheckAnswersRouterTests
     [Fact]
     public async Task Should_Return_CheckAnswersPage_When_Status_Is_CheckAnswers()
     {
-        var sectionSlug = _section.InterstitialPage.Slug;
+        var sectionSlug = _section.InterstitialPage?.Slug ?? throw new InvalidOperationException("InterstitialPage cannot be null.");
 
         _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, Arg.Any<CancellationToken>()))
                                   .Do(processor =>

@@ -5,8 +5,7 @@ namespace Dfe.PlanTech;
 
 public static class LoggingHelpers
 {
-    public static IEnumerable<ReceivedLoggerCall> GetMatchingReceivedMessages<T>(this ILogger<T> logger, string message,
-        LogLevel logLevel)
+    public static IEnumerable<ReceivedLoggerCall> GetMatchingReceivedMessages<T>(this ILogger<T> logger, string message, LogLevel logLevel)
         => logger.ReceivedCalls().Select(call =>
         {
             var args = call.GetArguments();
