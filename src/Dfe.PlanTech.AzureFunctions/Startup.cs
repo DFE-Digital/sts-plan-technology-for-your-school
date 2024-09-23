@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Azure.Identity;
@@ -121,7 +120,9 @@ namespace Dfe.PlanTech.AzureFunctions
         /// Get all <see cref="JsonToDbMapper"/> mappers using reflection 
         /// </summary>
         /// <returns></returns>
-        private static IEnumerable<Type> GetMappers() => Assembly.GetEntryAssembly()!.GetTypes()
-            .Where(type => type.IsAssignableTo(typeof(JsonToDbMapper)) && !type.IsAbstract);
+        private static IEnumerable<Type> GetMappers() =>
+            AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(assembly => assembly.GetTypes())
+                .Where(type => type.IsAssignableTo(typeof(JsonToDbMapper)) && !type.IsAbstract);
     }
 }

@@ -196,11 +196,11 @@ public class QueueReceiver(
     {
         if (!mappedEntity.AlreadyExistsInDatabase)
         {
-            db.AddEntity(mappedEntity.IncomingEntity);
+            db.Add(mappedEntity.IncomingEntity);
         }
         else
         {
-            db.UpdateEntity(mappedEntity.ExistingEntity!);
+            db.Update(mappedEntity.ExistingEntity!);
         }
     }
 

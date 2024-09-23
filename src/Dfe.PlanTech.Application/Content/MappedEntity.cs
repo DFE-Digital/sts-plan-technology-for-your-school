@@ -48,10 +48,10 @@ public class MappedEntity
     /// <summary>
     /// Sets defaults on the incoming entity before properties are copied to the existing one
     /// </summary>
-    public void UpdateEntity(ICmsDbContext db)
+    public void UpdateEntity(IDatabaseHelper<ICmsDbContext> databaseHelper)
     {
         UpdateEntityStatus();
-        IsValid = SetDefaultsOnRequiredProperties(db, _dontCopyValueAttribute);
+        IsValid = SetDefaultsOnRequiredProperties(databaseHelper, _dontCopyValueAttribute);
 
         if (ShouldCopyProperties)
         {
@@ -157,12 +157,9 @@ public class MappedEntity
     /// <param name="db"></param>
     /// <param name="dontCopyAttribute"></param>
     /// <returns>Whether all required properties were successfully updated</returns>
-    private bool SetDefaultsOnRequiredProperties(ICmsDbContext db, Type dontCopyAttribute)
+    private bool SetDefaultsOnRequiredProperties(IDatabaseHelper<ICmsDbContext> databaseHelper, Type dontCopyAttribute)
     {
-        if (!db.GetRequiredPropertiesForType(IncomingEntity.GetType(), out var existingProperties))
-        {
-            return false;
-        }
+        var existingProperties = databaseHelper.GetRequiredPropertiesForType(IncomingEntity.GetType());
 
         var missingRequiredProperties = existingProperties.Where(prop => !HasAttribute(dontCopyAttribute, prop)).Where(IncomingPropertyIsNull);
 
@@ -195,7 +192,7 @@ public class MappedEntity
             var currentValue = property.GetValue(ExistingEntity);
 
             // Don't update the existing property if the values are the same
-            if (newValue?.Equals(currentValue) == true)
+            if ((newValue == null && currentValue == null) || (newValue != null && newValue.Equals(currentValue)))
             {
                 continue;
             }
@@ -226,5 +223,4 @@ public class MappedEntity
     /// <returns></returns>
     private bool HasDontCopyValueAttribute(PropertyInfo property)
         => property.CustomAttributes.Any(attribute => attribute.AttributeType == _dontCopyValueAttribute);
-
 }

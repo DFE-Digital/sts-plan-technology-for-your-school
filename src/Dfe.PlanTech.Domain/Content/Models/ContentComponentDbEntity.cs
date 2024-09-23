@@ -5,6 +5,7 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 
 public class ContentComponentDbEntity : IContentComponentDbEntity
 {
+    [DontCopyValue]
     public string Id { get; set; } = null!;
 
     public bool Published { get; set; }

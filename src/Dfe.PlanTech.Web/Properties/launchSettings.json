@@ -10,7 +10,7 @@
             "environmentVariables": {
                 "Kestrel__Endpoints__Https__Url": "https://*:8081",
                 "DfeSignIn__FrontDoorUrl": "https://localhost:8081",
-                "ASPNETCORE_ENVIRONMENT": "E2E",
+                "ASPNETCORE_ENVIRONMENT": "Development",
                 "KeyVaultName": "s190d01-plantech-kv"
             }
         }

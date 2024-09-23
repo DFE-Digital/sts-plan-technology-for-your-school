@@ -170,11 +170,7 @@ public class MappedEntity
     /// <returns>Whether all required properties were successfully updated</returns>
     private bool SetDefaultsOnRequiredProperties(CmsDbContext db, Type dontCopyAttribute)
     {
-        if (!db.GetRequiredPropertiesForType(IncomingEntity.GetType(), out var existingProperties))
-        {
-            return false;
-        }
-
+        var existingProperties = new List<PropertyInfo>();
         var missingRequiredProperties = existingProperties.Where(prop => prop != null && prop.CustomAttributes.All(atr => atr.GetType() != dontCopyAttribute)).Where(prop => prop!.GetValue(IncomingEntity) == null);
 
         foreach (var prop in missingRequiredProperties)

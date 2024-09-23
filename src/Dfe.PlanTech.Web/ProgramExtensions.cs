@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using Dfe.ContentSupport.Web.Extensions;
-using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Cookie.Service;
