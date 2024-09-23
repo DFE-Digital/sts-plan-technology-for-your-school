@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
-using System.Reflection;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
@@ -206,6 +205,18 @@ public class CmsDbContext : DbContext, ICmsDbContext
         modelBuilder.Entity<ContentComponentDbEntity>().HasQueryFilter(ShouldShowEntity());
     }
 
+
+    /// <summary>
+    /// Sets the published and deleted statuses for a content component.
+    /// </summary>
+    /// <remarks>
+    /// Uses interpolated SQL for effeciency
+    /// </remarks>
+    /// <param name="contentComponent">The content component to update.</param>
+    /// <param name="published">Whether the content component should be published.</param>
+    /// <param name="deleted">Whether the content component should be deleted.</param>
+    /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
+    /// <returns>Task - result is amount of rows affected by the operation.</returns>
     public virtual Task<int> SetComponentPublishedAndDeletedStatuses(ContentComponentDbEntity contentComponent, bool published, bool deleted, CancellationToken cancellationToken = default)
         => Database.ExecuteSqlAsync($"UPDATE [Contentful].[ContentComponents] SET Published = {published}, Deleted = {deleted} WHERE [Id] = {contentComponent.Id}", cancellationToken: cancellationToken);
 
@@ -227,37 +238,4 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
         => queryable.FirstOrDefaultAsync(cancellationToken);
-
-    public bool GetRequiredPropertiesForType(Type type, out IEnumerable<PropertyInfo> properties)
-    {
-        var entityType = Model.FindEntityType(type);
-
-        if (entityType == null)
-        {
-            properties = [];
-            return false;
-        }
-
-        properties = entityType.GetProperties()
-                               .Where(prop => !prop.IsNullable)
-                               .Select(prop => prop.PropertyInfo)
-                               .OfType<PropertyInfo>();
-
-        return true;
-    }
-
-    public void ClearChangeTracker()
-    {
-        ChangeTracker.Clear();
-    }
-
-    public void AddEntity<TEntity>(TEntity entity) where TEntity : ContentComponentDbEntity
-    {
-        Add(entity);
-    }
-
-    public void UpdateEntity<TEntity>(TEntity entity) where TEntity : ContentComponentDbEntity
-    {
-        Update(entity);
-    }
 }

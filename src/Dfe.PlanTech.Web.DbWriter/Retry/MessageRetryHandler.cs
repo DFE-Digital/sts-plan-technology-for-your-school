@@ -10,7 +10,7 @@ public class MessageRetryHandler(
     IOptions<MessageRetryHandlingOptions> options)
     : IMessageRetryHandler
 {
-    private readonly ServiceBusSender _serviceBusSender = serviceBusSenderFactory.CreateClient("contentful");
+    private readonly ServiceBusSender _serviceBusSender = serviceBusSenderFactory.CreateClient("contentfulsender");
     private readonly MessageRetryHandlingOptions _messageRetryHandlingOptions = options.Value;
 
     private const string CustomMessageProperty = "DeliveryAttempts";

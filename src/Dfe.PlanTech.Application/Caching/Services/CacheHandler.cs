@@ -1,22 +1,11 @@
+using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Application.Caching.Services;
 
-public class CacheHandler(
-    HttpClient httpClient,
-    CacheRefreshConfiguration cacheRefreshConfiguration,
-    ILogger<CacheHandler> logger) : ICacheHandler
+public class CacheHandler(HttpClient httpClient, CacheRefreshConfiguration cacheRefreshConfiguration, ILogger<CacheHandler> logger) : ICacheHandler
 {
-
-    public CacheHandler(HttpClient httpClient,
-    IOptions<CacheRefreshConfiguration> cacheRefreshConfigurationOptions,
-    ILogger<CacheHandler> logger) : this(httpClient, cacheRefreshConfigurationOptions.Value, logger)
-    {
-
-    }
-
     /// <summary>
     /// Makes a call to the plan tech web app that invalidates the database cache.
     /// </summary>
