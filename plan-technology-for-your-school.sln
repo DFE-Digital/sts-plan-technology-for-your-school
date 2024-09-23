@@ -43,6 +43,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.Web.SeedTestDa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.Domain.UnitTests", "tests\Dfe.PlanTech.Domain.UnitTests\Dfe.PlanTech.Domain.UnitTests.csproj", "{199DF118-68E9-42D6-ABB2-47FCC9BFD515}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.Infrastructure.ServiceBus", "src\Dfe.PlanTech.Infrastructure.ServiceBus\Dfe.PlanTech.Infrastructure.ServiceBus.csproj", "{C9270214-57BE-4982-BD4E-03C8B731FDF6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.Web.DbWriter", "src\Dfe.PlanTech.Web.DbWriter\Dfe.PlanTech.Web.DbWriter.csproj", "{1B01479C-841B-4890-9E33-EDB1AC09011E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -121,6 +125,14 @@ Global
 		{199DF118-68E9-42D6-ABB2-47FCC9BFD515}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{199DF118-68E9-42D6-ABB2-47FCC9BFD515}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{199DF118-68E9-42D6-ABB2-47FCC9BFD515}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9270214-57BE-4982-BD4E-03C8B731FDF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9270214-57BE-4982-BD4E-03C8B731FDF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9270214-57BE-4982-BD4E-03C8B731FDF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9270214-57BE-4982-BD4E-03C8B731FDF6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B01479C-841B-4890-9E33-EDB1AC09011E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B01479C-841B-4890-9E33-EDB1AC09011E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B01479C-841B-4890-9E33-EDB1AC09011E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B01479C-841B-4890-9E33-EDB1AC09011E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -143,6 +155,8 @@ Global
 		{66E92A5E-5C8A-4245-A55F-087FE2D96EEF} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
 		{0E05B7CD-6CDC-41EE-89BB-AE415A359085} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
 		{199DF118-68E9-42D6-ABB2-47FCC9BFD515} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
+		{C9270214-57BE-4982-BD4E-03C8B731FDF6} = {20FD2D0C-81CA-4337-B00D-9CB0BB36FE46}
+		{1B01479C-841B-4890-9E33-EDB1AC09011E} = {20FD2D0C-81CA-4337-B00D-9CB0BB36FE46}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2661FAF0-D2EA-4265-846E-E6AB213C854C}

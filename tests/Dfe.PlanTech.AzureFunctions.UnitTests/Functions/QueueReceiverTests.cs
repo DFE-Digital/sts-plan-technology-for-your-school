@@ -66,7 +66,7 @@ public class QueueReceiverTests
         _cmsDbContextMock.Questions = mockQuestionSet;
         _cmsDbContextMock.Set<QuestionDbEntity>().Returns(mockQuestionSet);
 
-        _cmsDbContextMock.When(db => db.Add(Arg.Any<ContentComponentDbEntity>()))
+        _cmsDbContextMock.When(db => db.AddEntity(Arg.Any<ContentComponentDbEntity>()))
             .Do((callinfo) =>
             {
                 var contentComponent = callinfo.ArgAt<ContentComponentDbEntity>(0);
@@ -174,7 +174,7 @@ public class QueueReceiverTests
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>());
         await _cmsDbContextMock.ReceivedWithAnyArgs(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-        _cmsDbContextMock.ReceivedWithAnyArgs(1).Add(Arg.Any<ContentComponentDbEntity>());
+        _cmsDbContextMock.ReceivedWithAnyArgs(1).AddEntity(Arg.Any<ContentComponentDbEntity>());
 
         Assert.Equal(2, _questions.Count);
 
@@ -219,7 +219,7 @@ public class QueueReceiverTests
         await _queueReceiver.QueueReceiverDbWriter(new[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock, CancellationToken.None);
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
-        _cmsDbContextMock.ReceivedWithAnyArgs(0).Add(Arg.Any<ContentComponentDbEntity>());
+        _cmsDbContextMock.ReceivedWithAnyArgs(0).AddEntity(Arg.Any<ContentComponentDbEntity>());
         await _cmsDbContextMock.ReceivedWithAnyArgs(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
@@ -329,7 +329,7 @@ public class QueueReceiverTests
         await _queueReceiver.QueueReceiverDbWriter(new[] { serviceBusReceivedMessage }, serviceBusMessageActionsMock, CancellationToken.None);
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
-        _cmsDbContextMock.ReceivedWithAnyArgs(0).Add(Arg.Any<ContentComponentDbEntity>());
+        _cmsDbContextMock.ReceivedWithAnyArgs(0).AddEntity(Arg.Any<ContentComponentDbEntity>());
         await _cmsDbContextMock.ReceivedWithAnyArgs(0).SaveChangesAsync(Arg.Any<CancellationToken>());
 
         await _cmsDbContextMock.ReceivedWithAnyArgs(1).SetComponentPublishedAndDeletedStatuses(Arg.Any<QuestionDbEntity>(), false, false, Arg.Any<CancellationToken>());
@@ -531,6 +531,6 @@ public class QueueReceiverTests
 
         await serviceBusMessageActionsMock.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>());
         await _cmsDbContextMock.ReceivedWithAnyArgs(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-        _cmsDbContextMock.ReceivedWithAnyArgs(1).Add(Arg.Any<ContentComponentDbEntity>());
+        _cmsDbContextMock.ReceivedWithAnyArgs(1).AddEntity(Arg.Any<ContentComponentDbEntity>());
     }
 }

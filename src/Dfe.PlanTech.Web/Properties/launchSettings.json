@@ -1,15 +1,18 @@
 {
-  "iisSettings": {
-    "windowsAuthentication": false,
-    "anonymousAuthentication": true
-  },
-  "profiles": {
-    "Dfe.PlanTech.Web": {
-      "commandName": "Project",
-      "launchBrowser": true,
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+    "iisSettings": {
+        "windowsAuthentication": false,
+        "anonymousAuthentication": true
+    },
+    "profiles": {
+        "Dfe.PlanTech.Web": {
+            "commandName": "Project",
+            "launchBrowser": true,
+            "environmentVariables": {
+                "Kestrel__Endpoints__Https__Url": "https://*:8081",
+                "DfeSignIn__FrontDoorUrl": "https://localhost:8081",
+                "ASPNETCORE_ENVIRONMENT": "E2E",
+                "KeyVaultName": "s190d01-plantech-kv"
+            }
+        }
     }
-  }
 }

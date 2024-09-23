@@ -1,12 +1,12 @@
 using System.Reflection;
-using Dfe.PlanTech.Domain;
 using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Exceptions;
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.Extensions.Logging;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Domain;
+using Dfe.PlanTech.Domain.Content.Models;
 
-namespace Dfe.PlanTech.AzureFunctions.Models;
+namespace Dfe.PlanTech.Application.Content;
 
 public class MappedEntity
 {
@@ -29,8 +29,6 @@ public class MappedEntity
     /// <summary>
     /// Checks if the incoming entity is a valid component.
     /// </summary>
-    /// <param name="db">Database context.</param>
-    /// <param name="dontCopyAttribute">The attribute to exclude from the validation.</param>
     /// <param name="logger">The logger instance.</param>
     /// <returns>True if the entity is valid, false otherwise.</returns>
     public bool IsValidComponent(ILogger logger)
@@ -50,7 +48,7 @@ public class MappedEntity
     /// <summary>
     /// Sets defaults on the incoming entity before properties are copied to the existing one
     /// </summary>
-    public void UpdateEntity(CmsDbContext db)
+    public void UpdateEntity(ICmsDbContext db)
     {
         UpdateEntityStatus();
         IsValid = SetDefaultsOnRequiredProperties(db, _dontCopyValueAttribute);
@@ -61,8 +59,7 @@ public class MappedEntity
         }
     }
 
-    public (TEntity incoming, TEntity? existing) GetTypedEntities<TEntity>()
-        where TEntity : ContentComponentDbEntity
+    public (TEntity incoming, TEntity? existing) GetTypedEntities<TEntity>() where TEntity : ContentComponentDbEntity
     {
         if (IncomingEntity is not TEntity incoming)
         {
@@ -86,7 +83,6 @@ public class MappedEntity
     /// <summary>
     /// Updates the status of the mapped entity based on the provided CMS event, and the existing entity statuses.
     /// </summary>
-    /// <param name="cmsEvent">The event type of the payload.</param>
     private void UpdateEntityStatus()
     {
         if (ExistingEntity != null)
@@ -110,9 +106,6 @@ public class MappedEntity
     /// <summary>
     /// Updates the status of an entity based on the provided CMS event and entity information.
     /// </summary>
-    /// <param name="cmsEvent"></param>
-    /// <param name="mapped"></param>
-    /// <param name="existing"></param>
     /// <exception cref="CmsEventException"></exception>
     private void UpdateEntityStatusByEvent()
     {
@@ -133,14 +126,14 @@ public class MappedEntity
             case CmsEvent.UNPUBLISH:
                 if (ExistingEntity == null)
                 {
-                    throw new CmsEventException(string.Format("Content with Id \"{0}\" has event 'unpublish' despite not existing in the database!", IncomingEntity.Id));
+                    throw new CmsEventException($"Content with Id \"{IncomingEntity.Id}\" has event 'unpublish' despite not existing in the database!");
                 }
                 IncomingEntity.Published = false;
                 break;
             case CmsEvent.DELETE:
                 if (ExistingEntity == null)
                 {
-                    throw new CmsEventException(string.Format("Content with Id \"{0}\" has event 'delete' despite not existing in the database!", IncomingEntity.Id));
+                    throw new CmsEventException($"Content with Id \"{IncomingEntity.Id}\" has event 'delete' despite not existing in the database!");
                 }
                 IncomingEntity.Deleted = true;
                 break;
@@ -149,16 +142,12 @@ public class MappedEntity
 
     /// <summary>
     /// Provides a default value for a given type.
-    /// Ints and Bools default to 0 and false without intervention
     /// </summary>
     /// <param name="type"></param>
     /// <returns></returns>
     private static object? GetDefaultValue(Type type)
     {
-        if (type == typeof(string))
-            return "";
-
-        return null;
+        return type == typeof(string) ? "" : null;
     }
 
     /// <summary>
@@ -168,18 +157,18 @@ public class MappedEntity
     /// <param name="db"></param>
     /// <param name="dontCopyAttribute"></param>
     /// <returns>Whether all required properties were successfully updated</returns>
-    private bool SetDefaultsOnRequiredProperties(CmsDbContext db, Type dontCopyAttribute)
+    private bool SetDefaultsOnRequiredProperties(ICmsDbContext db, Type dontCopyAttribute)
     {
         if (!db.GetRequiredPropertiesForType(IncomingEntity.GetType(), out var existingProperties))
         {
             return false;
         }
 
-        var missingRequiredProperties = existingProperties.Where(prop => prop != null && prop.CustomAttributes.All(atr => atr.GetType() != dontCopyAttribute)).Where(prop => prop!.GetValue(IncomingEntity) == null);
+        var missingRequiredProperties = existingProperties.Where(prop => !HasAttribute(dontCopyAttribute, prop)).Where(IncomingPropertyIsNull);
 
         foreach (var prop in missingRequiredProperties)
         {
-            var defaultValue = GetDefaultValue(prop!.PropertyType);
+            var defaultValue = GetDefaultValue(prop.PropertyType);
             if (defaultValue is null)
                 return false;
             prop.SetValue(IncomingEntity, defaultValue);
@@ -187,6 +176,10 @@ public class MappedEntity
 
         return true;
     }
+
+    private bool IncomingPropertyIsNull(PropertyInfo prop) => prop.GetValue(IncomingEntity) == null;
+
+    private static bool HasAttribute(Type attribute, PropertyInfo prop) => prop.CustomAttributes.Any(atr => atr.GetType() == attribute);
 
     /// <summary>
     /// Updates the properties of the existing entity using the values from the incoming entity.
