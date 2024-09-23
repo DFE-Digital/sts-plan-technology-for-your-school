@@ -50,4 +50,4 @@ The connection happens regardless of whether the results are cached, which limit
 
 ## Decision Outcome
 
-TBC
+Option 2. Testing this in a spike has been a success and as the complexity is fairly low, it's worthwhile to make this switch.
