@@ -1,5 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
+using System.Security.Cryptography;
+using System.Text;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
@@ -8,6 +10,7 @@ using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
@@ -15,7 +18,8 @@ namespace Dfe.PlanTech.Infrastructure.Data;
 public class CmsDbContext : DbContext, ICmsDbContext
 {
     private const string Schema = "Contentful";
-
+    private static MemoryCache _cache = new(new MemoryCacheOptions());
+    private const int CacheDurationSeconds = 3000;
     public DbSet<AnswerDbEntity> Answers { get; set; }
 
     public DbSet<ButtonDbEntity> Buttons { get; set; }
@@ -215,15 +219,68 @@ public class CmsDbContext : DbContext, ICmsDbContext
         => entity => (_contentfulOptions.UsePreview || entity.Published) && !entity.Archived && !entity.Deleted;
 
     public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
-        => Pages.Include(page => page.BeforeTitleContent)
-            .Include(page => page.Content)
-            .Include(page => page.Title)
-            .AsSplitQuery()
-            .FirstOrDefaultAsync(page => page.Slug == slug, cancellationToken);
+     => FirstOrDefaultAsyncWithCache(
+         Pages.Where(page => page.Slug == slug).Include(page => page.BeforeTitleContent)
+         .Include(page => page.Content)
+         .Include(page => page.Title)
+         .AsSplitQuery(), cancellationToken);
 
-    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default) =>
-        queryable.ToListAsync(cancellationToken: cancellationToken);
+    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+        => ToListAsyncWithCache(queryable, cancellationToken);
 
     public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
-        => queryable.FirstOrDefaultAsync(cancellationToken);
+        => FirstOrDefaultAsyncWithCache(queryable, cancellationToken);
+
+    private static string GetCacheKey(IQueryable query)
+    {
+        var queryString = query.ToQueryString();
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(queryString));
+        return Convert.ToBase64String(hash);
+    }
+
+    private static async Task<TResult> GetOrCreateAsyncWithCache<T, TResult>(
+        IQueryable<T> queryable,
+        Func<IQueryable<T>, CancellationToken, Task<TResult>> queryFunc,
+        CancellationToken cancellationToken = default)
+    {
+        var key = GetCacheKey(queryable);
+        return await _cache.GetOrCreateAsync(key, cacheEntry =>
+        {
+            cacheEntry.AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(CacheDurationSeconds);
+            return queryFunc(queryable, cancellationToken);
+        });
+    }
+
+    private static TResult GetOrCreateWithCache<T, TResult>(
+        IQueryable<T> queryable,
+        Func<IQueryable<T>, TResult> queryFunc)
+    {
+        var key = GetCacheKey(queryable);
+        return _cache.GetOrCreate(key, cacheEntry =>
+        {
+            cacheEntry.AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(CacheDurationSeconds);
+            return queryFunc(queryable);
+        });
+    }
+
+    private static Task<List<T>> ToListAsyncWithCache<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+    {
+        return GetOrCreateAsyncWithCache(queryable, (q, ct) => q.ToListAsync(ct), cancellationToken);
+    }
+
+    private static Task<T?> FirstOrDefaultAsyncWithCache<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+    {
+        return GetOrCreateAsyncWithCache(queryable, (q, ct) => q.FirstOrDefaultAsync(ct), cancellationToken);
+    }
+
+    private static List<T> ToListWithCache<T>(IQueryable<T> queryable)
+    {
+        return GetOrCreateWithCache(queryable, q => q.ToList());
+    }
+
+    public static void ClearCache()
+    {
+        _cache.Dispose();
+        _cache = new MemoryCache(new MemoryCacheOptions());
+    }
 }
