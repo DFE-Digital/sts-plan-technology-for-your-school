@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Content;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 
@@ -19,8 +19,8 @@ public class RecommendationChunkMapper(EntityUpdater updater,
     {
         values = MoveValueToNewKey(values, "csLink", "csLinkId");
 
-        _incomingAnswers = _entityUpdater.GetAndOrderReferencedEntities<AnswerDbEntity>(values, "answers").ToList();
-        _incomingContent = _entityUpdater.GetAndOrderReferencedEntities<ContentComponentDbEntity>(values, "content").ToList();
+        _incomingAnswers = EntityUpdater.GetAndOrderReferencedEntities<AnswerDbEntity>(values, "answers").ToList();
+        _incomingContent = EntityUpdater.GetAndOrderReferencedEntities<ContentComponentDbEntity>(values, "content").ToList();
 
         return values;
     }
@@ -44,7 +44,7 @@ public class RecommendationChunkMapper(EntityUpdater updater,
             }
         }
 
-        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recChunk) => recChunk.Answers, _incomingAnswers, false, cancellationToken);
-        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recChunk) => recChunk.Content, _incomingContent, true, cancellationToken);
+        await EntityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recChunk) => recChunk.Answers, _incomingAnswers, false, cancellationToken);
+        await EntityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recChunk) => recChunk.Content, _incomingContent, true, cancellationToken);
     }
 }

@@ -4,9 +4,9 @@ using Azure.Identity;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.Application.Caching.Services;
 using Dfe.PlanTech.Application.Persistence.Commands;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Mappings;
 using Dfe.PlanTech.Domain.Caching.Interfaces;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.ServiceBus.Models;
 using Dfe.PlanTech.Infrastructure.Data;
@@ -19,6 +19,12 @@ namespace Dfe.PlanTech.Web.DbWriter;
 
 public static class DependencyInjection
 {
+  /// <summary>
+  /// Adds required services for the CMS->DB process
+  /// </summary>
+  /// <param name="services"></param>
+  /// <param name="configuration"></param>
+  /// <returns></returns>
   public static IServiceCollection AddDbWriterServices(this IServiceCollection services, IConfiguration configuration)
   {
     services.AddServiceBusServices(configuration)
@@ -44,7 +50,6 @@ public static class DependencyInjection
       builder.AddServiceBusClient(configuration.GetConnectionString("servicebusconnection"));
 
       builder.AddClient<ServiceBusProcessor, ServiceBusClientOptions>((_, _, provider) => provider.GetService<ServiceBusClient>()!.CreateProcessor("contentful", new ServiceBusProcessorOptions() { PrefetchCount = 10 })).WithName("contentfulprocessor");
-
       builder.AddClient<ServiceBusSender, ServiceBusClientOptions>((_, _, provider) => provider.GetService<ServiceBusClient>()!.CreateSender("contentful")).WithName("contentfulsender");
 
       builder.UseCredential(new DefaultAzureCredential());

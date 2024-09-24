@@ -5,9 +5,9 @@ using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Web.DbWriter.Retry;
 
-public class MessageRetryHandler(
-    IAzureClientFactory<ServiceBusSender> serviceBusSenderFactory,
-    IOptions<MessageRetryHandlingOptions> options)
+/// <inheritdoc cref="IMessageRetryHandler"/>
+public class MessageRetryHandler(IAzureClientFactory<ServiceBusSender> serviceBusSenderFactory,
+                                 IOptions<MessageRetryHandlingOptions> options)
     : IMessageRetryHandler
 {
     private readonly ServiceBusSender _serviceBusSender = serviceBusSenderFactory.CreateClient("contentfulsender");
@@ -15,6 +15,7 @@ public class MessageRetryHandler(
 
     private const string CustomMessageProperty = "DeliveryAttempts";
 
+    /// <inheritdoc cref="IMessageRetryHandler"/>
     public async Task<bool> RetryRequired(ServiceBusReceivedMessage message, CancellationToken cancellationToken)
     {
         var deliveryAttempts = 0;
@@ -35,6 +36,17 @@ public class MessageRetryHandler(
         return true;
     }
 
+    /// <summary>
+    /// Creates a new copy of the service bus message, with the delivery attempt incremented, and queues this.
+    /// </summary>
+    /// <remarks>
+    /// We create a new message to ensure it goes to the back of the queue.
+    /// Some failures could be fixed by changes from other messages, so by putting it to the back of the queue we increase the chance of success.
+    /// </remarks>
+    /// <param name="message"></param>
+    /// <param name="deliveryAttempts"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     private async Task RedeliverMessage(ServiceBusReceivedMessage message, int deliveryAttempts, CancellationToken cancellationToken)
     {
         var resubmittedMessage = new ServiceBusMessage()

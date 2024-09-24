@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Content;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 
@@ -17,8 +17,8 @@ public class RecommendationSectionMapper(EntityUpdater updater,
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
-        _incomingAnswers = _entityUpdater.GetAndOrderReferencedEntities<AnswerDbEntity>(values, "answers").ToList();
-        _incomingContent = _entityUpdater.GetAndOrderReferencedEntities<RecommendationChunkDbEntity>(values, "chunks").ToList();
+        _incomingAnswers = EntityUpdater.GetAndOrderReferencedEntities<AnswerDbEntity>(values, "answers").ToList();
+        _incomingContent = EntityUpdater.GetAndOrderReferencedEntities<RecommendationChunkDbEntity>(values, "chunks").ToList();
 
         return values;
     }
@@ -35,7 +35,7 @@ public class RecommendationSectionMapper(EntityUpdater updater,
             await GetEntitiesMatchingPredicate<RecommendationSectionChunkDbEntity, RecommendationChunkDbEntity>(recSecChunk => recSecChunk.RecommendationSectionId == existing.Id, recSecChunk => recSecChunk.RecommendationChunk, cancellationToken);
         }
 
-        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recSection) => recSection.Answers, _incomingAnswers, false, cancellationToken);
-        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recSection) => recSection.Chunks, _incomingContent, true, cancellationToken);
+        await EntityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recSection) => recSection.Answers, _incomingAnswers, false, cancellationToken);
+        await EntityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recSection) => recSection.Chunks, _incomingContent, true, cancellationToken);
     }
 }

@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Content;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 
@@ -19,7 +19,7 @@ public class RecommendationIntroMapper(EntityUpdater updater,
     {
         values = MoveValueToNewKey(values, "header", "headerId");
 
-        _incomingContent = _entityUpdater.GetAndOrderReferencedEntities<ContentComponentDbEntity>(values, "content").ToList();
+        _incomingContent = EntityUpdater.GetAndOrderReferencedEntities<ContentComponentDbEntity>(values, "content").ToList();
 
         return values;
     }
@@ -35,6 +35,6 @@ public class RecommendationIntroMapper(EntityUpdater updater,
             await GetEntitiesMatchingPredicate<RecommendationIntroContentDbEntity, ContentComponentDbEntity>(recChunkIntro => recChunkIntro.RecommendationIntroId == existing.Id, recIntro => recIntro.ContentComponent, cancellationToken);
         }
 
-        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recIntro) => recIntro.Content, _incomingContent, true, cancellationToken);
+        await EntityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recIntro) => recIntro.Content, _incomingContent, true, cancellationToken);
     }
 }

@@ -1,4 +1,4 @@
-namespace Dfe.PlanTech.Application.Persistence.Interfaces;
+namespace Dfe.PlanTech.Domain.Persistence.Interfaces;
 
 public interface IGetEntitiesOptions
 {

@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Content;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 
@@ -19,7 +19,7 @@ public class SubtopicRecommendationMapper(EntityUpdater updater,
         values = MoveValueToNewKey(values, "section", "sectionId");
         values = MoveValueToNewKey(values, "subtopic", "subtopicId");
 
-        _incomingIntros = _entityUpdater.GetAndOrderReferencedEntities<RecommendationIntroDbEntity>(values, "intros").ToList();
+        _incomingIntros = EntityUpdater.GetAndOrderReferencedEntities<RecommendationIntroDbEntity>(values, "intros").ToList();
 
         return values;
     }
@@ -35,6 +35,6 @@ public class SubtopicRecommendationMapper(EntityUpdater updater,
             await GetEntitiesMatchingPredicate<SubtopicRecommendationIntroDbEntity, RecommendationIntroDbEntity>(subRecIntro => subRecIntro.SubtopicRecommendation.Id == existing.Id, subRecIntro => subRecIntro.RecommendationIntro, cancellationToken);
         }
 
-        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (subtopicRec) => subtopicRec.Intros, _incomingIntros, false, cancellationToken);
+        await EntityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (subtopicRec) => subtopicRec.Intros, _incomingIntros, false, cancellationToken);
     }
 }

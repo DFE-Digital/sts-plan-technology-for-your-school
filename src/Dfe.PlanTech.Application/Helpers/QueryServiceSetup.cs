@@ -1,8 +1,8 @@
 using System.Reflection;
 using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Queries;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Dfe.PlanTech.Application.Helpers;
