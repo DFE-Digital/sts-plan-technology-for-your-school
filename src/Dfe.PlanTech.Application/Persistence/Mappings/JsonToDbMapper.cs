@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using System.Text.Json;
 using Dfe.PlanTech.Application.Content;
 using Dfe.PlanTech.Application.Persistence.Extensions;
@@ -43,7 +44,7 @@ public abstract class JsonToDbMapper<TEntity>(
         return serialised;
     }
 
-    public virtual Task PostUpdateEntityCallback(MappedEntity mappedEntity)
+    public virtual Task PostUpdateEntityCallback(MappedEntity mappedEntity, CancellationToken cancellationToken)
     {
         return Task.CompletedTask;
     }
@@ -54,7 +55,9 @@ public abstract class JsonToDbMapper<TEntity>(
 
         var existingEntity = await GetExistingEntity(incomingEntity, cancellationToken);
 
-        return await _entityUpdater.UpdateEntity(incomingEntity, existingEntity, cmsEvent, PostUpdateEntityCallback);
+        var postUpdatEntityCallback = (MappedEntity mappedEntity) => PostUpdateEntityCallback(mappedEntity, cancellationToken);
+
+        return await _entityUpdater.UpdateEntity(incomingEntity, existingEntity, cmsEvent, postUpdatEntityCallback);
     }
 
     public virtual Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
@@ -64,4 +67,13 @@ public abstract class JsonToDbMapper<TEntity>(
 
     protected virtual Task<TEntity?> GetExistingEntity(TEntity incomingEntity, CancellationToken cancellationToken)
     => DatabaseHelper.GetMatchingEntityById(incomingEntity, cancellationToken);
+
+    protected virtual Task<List<TDbEntity>> GetEntitiesMatchingPredicate<TDbEntity>(Expression<Func<TDbEntity, bool>> predicate, CancellationToken cancellationToken)
+    where TDbEntity : class
+    => DatabaseHelper.GetIQueryableForEntityWithoutAutoIncludes<TDbEntity>().Where(predicate).ToListAsync(DatabaseHelper, cancellationToken);
+
+    protected virtual Task<List<TDbEntity>> GetEntitiesMatchingPredicate<TDbEntity, TProperty>(Expression<Func<TDbEntity, bool>> predicate, Expression<Func<TDbEntity, TProperty?>> include, CancellationToken cancellationToken)
+        where TDbEntity : class
+        where TProperty : class
+        => DatabaseHelper.GetIQueryableForEntityWithoutAutoIncludes<TDbEntity>().Where(predicate).Include(include, DatabaseHelper).ToListAsync(DatabaseHelper, cancellationToken);
 }

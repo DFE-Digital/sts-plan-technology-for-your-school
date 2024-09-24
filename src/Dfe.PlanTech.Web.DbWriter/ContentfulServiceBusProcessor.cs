@@ -12,17 +12,15 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
                                            ILogger<ContentfulServiceBusProcessor> logger,
                                            WebhookToDbCommand webhookToDbCommand) : BackgroundService
 {
-    private CancellationToken cancellationToken = default;
     private readonly ServiceBusProcessor processor = processorFactory.CreateClient("contentfulprocessor");
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        cancellationToken = stoppingToken;
         processor.ProcessMessageAsync += MessageHandler;
         processor.ProcessErrorAsync += ErrorHandler;
 
-        await processor.StartProcessingAsync(cancellationToken);
-        cancellationToken.Register(async () => await StopProcessingAsync());
+        await processor.StartProcessingAsync(stoppingToken);
+        stoppingToken.Register(async () => await StopProcessingAsync());
     }
 
     private async Task MessageHandler(ProcessMessageEventArgs processMessageEventArgs)
@@ -30,13 +28,13 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
         try
         {
             var body = Encoding.UTF8.GetString(processMessageEventArgs.Message.Body);
-            var result = await webhookToDbCommand.ProcessMessage(processMessageEventArgs.Message.Subject, body, processMessageEventArgs.Message.MessageId, cancellationToken);
-            await resultProcessor.ProcessMessageResult(processMessageEventArgs, processMessageEventArgs.Message, result, cancellationToken);
+            var result = await webhookToDbCommand.ProcessMessage(processMessageEventArgs.Message.Subject, body, processMessageEventArgs.Message.MessageId, processMessageEventArgs.CancellationToken);
+            await resultProcessor.ProcessMessageResult(processMessageEventArgs, result, processMessageEventArgs.CancellationToken);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error processing message: {Message}", ex.Message);
-            await processMessageEventArgs.DeadLetterMessageAsync(processMessageEventArgs.Message, null, ex.Message, ex.StackTrace, CancellationToken.None);
+            await processMessageEventArgs.DeadLetterMessageAsync(processMessageEventArgs.Message, null, ex.Message, ex.StackTrace, processMessageEventArgs.CancellationToken);
             logger.LogInformation("Abandoned message: {MessageId}", processMessageEventArgs.Message);
         }
     }

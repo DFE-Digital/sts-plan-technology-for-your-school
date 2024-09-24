@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Content;
-using Dfe.PlanTech.Application.Persistence.Extensions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -26,7 +25,7 @@ public class RecommendationChunkMapper(EntityUpdater updater,
         return values;
     }
 
-    public override async Task PostUpdateEntityCallback(MappedEntity mappedEntity)
+    public override async Task PostUpdateEntityCallback(MappedEntity mappedEntity, CancellationToken cancellationToken)
     {
         var (incoming, existing) = mappedEntity.GetTypedEntities<RecommendationChunkDbEntity>();
 
@@ -36,16 +35,16 @@ public class RecommendationChunkMapper(EntityUpdater updater,
             //as the existing entity is being tracked by EF Core's ChangeTracker, and EF Core is aware of the relationship.
             if (existing.Answers == null || existing.Answers.Count == 0)
             {
-                await DatabaseHelper.GetIQueryableForEntityWithoutAutoIncludes<RecommendationChunkAnswerDbEntity>().Where(recChunkAnswer => recChunkAnswer.RecommendationChunkId == existing.Id).Include(rca => rca.Answer, DatabaseHelper).ToListAsync(DatabaseHelper, CancellationToken.None);
+                await GetEntitiesMatchingPredicate<RecommendationChunkAnswerDbEntity, AnswerDbEntity>(recChunkAnswer => recChunkAnswer.RecommendationChunkId == existing.Id, rca => rca.Answer, cancellationToken);
             }
 
             if (existing.Content == null || existing.Content.Count == 0)
             {
-                await DatabaseHelper.GetIQueryableForEntityWithoutAutoIncludes<RecommendationChunkContentDbEntity>().Where(recChunkContent => recChunkContent.RecommendationChunkId == existing.Id).Include(rca => rca.ContentComponent, DatabaseHelper).ToListAsync(DatabaseHelper, CancellationToken.None);
+                await GetEntitiesMatchingPredicate<RecommendationChunkContentDbEntity, ContentComponentDbEntity>(recChunkContent => recChunkContent.RecommendationChunkId == existing.Id, rca => rca.ContentComponent, cancellationToken);
             }
         }
 
-        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recChunk) => recChunk.Answers, _incomingAnswers, false);
-        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recChunk) => recChunk.Content, _incomingContent, true);
+        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recChunk) => recChunk.Answers, _incomingAnswers, false, cancellationToken);
+        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recChunk) => recChunk.Content, _incomingContent, true, cancellationToken);
     }
 }

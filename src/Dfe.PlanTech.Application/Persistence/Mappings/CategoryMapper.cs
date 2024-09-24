@@ -23,18 +23,18 @@ public class CategoryMapper(EntityUpdater updater,
         return values;
     }
 
-    public override async Task PostUpdateEntityCallback(MappedEntity mappedEntity)
+    public override async Task PostUpdateEntityCallback(MappedEntity mappedEntity, CancellationToken cancellationToken)
     {
         var (incoming, existing) = mappedEntity.GetTypedEntities<CategoryDbEntity>();
 
         if (existing != null)
         {
-            existing.Sections = await GetExistingSections(db, incoming);
+            existing.Sections = await GetExistingSections(db, incoming, cancellationToken);
         }
 
-        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (category) => category.Sections, _incomingSections, true);
+        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (category) => category.Sections, _incomingSections, true, cancellationToken);
     }
 
-    private static async Task<List<SectionDbEntity>> GetExistingSections(ICmsDbContext db, CategoryDbEntity incoming)
-        => await db.ToListAsync(db.Sections.Where(section => section.CategoryId == incoming.Id).Select(section => section));
+    private static async Task<List<SectionDbEntity>> GetExistingSections(ICmsDbContext db, CategoryDbEntity incoming, CancellationToken cancellationToken)
+        => await db.ToListAsync(db.Sections.Where(section => section.CategoryId == incoming.Id).Select(section => section), cancellationToken);
 }
