@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Content;
-using Dfe.PlanTech.Application.Persistence.Extensions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -25,7 +24,7 @@ public class RecommendationIntroMapper(EntityUpdater updater,
         return values;
     }
 
-    public override async Task PostUpdateEntityCallback(MappedEntity mappedEntity)
+    public override async Task PostUpdateEntityCallback(MappedEntity mappedEntity, CancellationToken cancellationToken)
     {
         var (incoming, existing) = mappedEntity.GetTypedEntities<RecommendationIntroDbEntity>();
 
@@ -33,9 +32,9 @@ public class RecommendationIntroMapper(EntityUpdater updater,
         {
             //There is no need for assignment as EF Core will automatically assigned the retrieved relationships to the existing entity,
             //as the existing entity is being tracked by EF Core's ChangeTracker, and EF Core is aware of the relationship.
-            await DatabaseHelper.GetIQueryableForEntityWithoutAutoIncludes<RecommendationIntroContentDbEntity>().Where(recChunkIntro => recChunkIntro.RecommendationIntroId == existing.Id).Include(recIntro => recIntro.ContentComponent, DatabaseHelper).ToListAsync(DatabaseHelper, default);
+            await GetEntitiesMatchingPredicate<RecommendationIntroContentDbEntity, ContentComponentDbEntity>(recChunkIntro => recChunkIntro.RecommendationIntroId == existing.Id, recIntro => recIntro.ContentComponent, cancellationToken);
         }
 
-        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recIntro) => recIntro.Content, _incomingContent, true);
+        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (recIntro) => recIntro.Content, _incomingContent, true, cancellationToken);
     }
 }

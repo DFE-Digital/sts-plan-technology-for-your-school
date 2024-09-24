@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Content;
-using Dfe.PlanTech.Application.Persistence.Extensions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
@@ -25,7 +24,7 @@ public class SubtopicRecommendationMapper(EntityUpdater updater,
         return values;
     }
 
-    public override async Task PostUpdateEntityCallback(MappedEntity mappedEntity)
+    public override async Task PostUpdateEntityCallback(MappedEntity mappedEntity, CancellationToken cancellationToken)
     {
         var (incoming, existing) = mappedEntity.GetTypedEntities<SubtopicRecommendationDbEntity>();
 
@@ -33,11 +32,9 @@ public class SubtopicRecommendationMapper(EntityUpdater updater,
         {
             //There is no need for assignment as EF Core will automatically assigned the retrieved relationships to the existing entity,
             //as the existing entity is being tracked by EF Core's ChangeTracker, and EF Core is aware of the relationship.
-            await DatabaseHelper.GetIQueryableForEntityWithoutAutoIncludes<SubtopicRecommendationIntroDbEntity>().Where(subRecIntro => subRecIntro.SubtopicRecommendation.Id == existing.Id)
-                                                                                                                .Include(subRecIntro => subRecIntro.RecommendationIntro, DatabaseHelper)
-                                                                                                                .ToListAsync(DatabaseHelper, default);
+            await GetEntitiesMatchingPredicate<SubtopicRecommendationIntroDbEntity, RecommendationIntroDbEntity>(subRecIntro => subRecIntro.SubtopicRecommendation.Id == existing.Id, subRecIntro => subRecIntro.RecommendationIntro, cancellationToken);
         }
 
-        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (subtopicRec) => subtopicRec.Intros, _incomingIntros, false);
+        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (subtopicRec) => subtopicRec.Intros, _incomingIntros, false, cancellationToken);
     }
 }

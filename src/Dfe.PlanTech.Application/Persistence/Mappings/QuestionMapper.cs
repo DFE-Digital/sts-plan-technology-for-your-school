@@ -20,19 +20,16 @@ public class QuestionMapper(EntityUpdater updater,
         return values;
     }
 
-    public override async Task PostUpdateEntityCallback(MappedEntity mappedEntity)
+    public override async Task PostUpdateEntityCallback(MappedEntity mappedEntity, CancellationToken cancellationToken)
     {
         var (incoming, existing) = mappedEntity.GetTypedEntities<QuestionDbEntity>();
 
         if (existing != null)
         {
-            var existingAnswers = DatabaseHelper.Database.ToListAsync(GetAnswersForQuestion(existing));
+            existing.Answers = await GetEntitiesMatchingPredicate<AnswerDbEntity>(answer => answer.ParentQuestionId == existing.Id, cancellationToken);
             Logger.LogTrace("Retrieved answers for existing question ID \"{QuestionId}\": \"{Answers}\"", existing.Id, string.Join(",", existing.Answers.Select(answer => answer.Id)));
         }
 
-        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (question) => question.Answers, _incomingAnswers, true);
+        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (question) => question.Answers, _incomingAnswers, true, cancellationToken);
     }
-
-    private IQueryable<AnswerDbEntity> GetAnswersForQuestion(QuestionDbEntity question)
-    => DatabaseHelper.GetIQueryableForEntityWithoutAutoIncludes<AnswerDbEntity>().Where(answer => answer.ParentQuestionId == question.Id);
 }

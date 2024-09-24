@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Content;
-using Dfe.PlanTech.Application.Persistence.Extensions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
@@ -23,15 +22,15 @@ public class SectionMapper(EntityUpdater updater,
         return values;
     }
 
-    public override async Task PostUpdateEntityCallback(MappedEntity mappedEntity)
+    public override async Task PostUpdateEntityCallback(MappedEntity mappedEntity, CancellationToken cancellationToken)
     {
         var (incoming, existing) = mappedEntity.GetTypedEntities<SectionDbEntity>();
 
         if (existing != null)
         {
-            existing.Questions = await DatabaseHelper.GetIQueryableForEntityWithoutAutoIncludes<QuestionDbEntity>().Where(question => question.SectionId == incoming.Id).ToListAsync(DatabaseHelper, default);
+            existing.Questions = await GetEntitiesMatchingPredicate<QuestionDbEntity>(question => question.SectionId == incoming.Id, cancellationToken);
         }
 
-        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (section) => section.Questions, _incomingQuestions, true);
+        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (section) => section.Questions, _incomingQuestions, true, cancellationToken);
     }
 }

@@ -91,7 +91,8 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, ICmsDbContext db, IDat
                                                                             TEntity? existingEntity,
                                                                             Func<TEntity, List<TReferencedEntity>> getReferencedEntities,
                                                                             List<TReferencedEntity> incomingReferencedEntities,
-                                                                            bool updateOrder = false)
+                                                                            bool updateOrder,
+                                                                            CancellationToken cancellationToken)
         where TEntity : ContentComponentDbEntity
         where TReferencedEntity : ContentComponentDbEntity
     {
@@ -103,13 +104,14 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, ICmsDbContext db, IDat
         var parentEntity = existingEntity ?? incomingEntity;
         var referenceEntityCollection = getReferencedEntities(existingEntity ?? incomingEntity);
 
-        await AddOrUpdateReferencedEntities(parentEntity, referenceEntityCollection, incomingReferencedEntities, updateOrder);
+        await AddOrUpdateReferencedEntities(parentEntity, referenceEntityCollection, incomingReferencedEntities, updateOrder, cancellationToken);
     }
 
     protected virtual async Task AddOrUpdateReferencedEntities<TEntity, TReferencedEntity>(TEntity entity,
                                                                                            List<TReferencedEntity> destinationReferenceEntityCollection,
                                                                                            List<TReferencedEntity> incomingReferencedEntities,
-                                                                                           bool updateOrder = false)
+                                                                                           bool updateOrder,
+                                                                                           CancellationToken cancellationToken)
           where TEntity : ContentComponentDbEntity
           where TReferencedEntity : ContentComponentDbEntity
     {
@@ -117,7 +119,7 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, ICmsDbContext db, IDat
 
         foreach (var incomingReferencedEntity in incomingReferencedEntities)
         {
-            var existingReferencedEntity = destinationReferenceEntityCollection.Find(existingReference => existingReference.Id == incomingReferencedEntity.Id) ?? await AddNewReferencedEntity(incomingReferencedEntity, destinationReferenceEntityCollection);
+            var existingReferencedEntity = await GetOrAddNewEntity(incomingReferencedEntity, destinationReferenceEntityCollection, cancellationToken);
 
             if (updateOrder && existingReferencedEntity != null)
             {
@@ -126,13 +128,20 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, ICmsDbContext db, IDat
 
             order++;
         }
-
     }
 
-    protected virtual async Task<TReferencedEntity?> AddNewReferencedEntity<TReferencedEntity>(TReferencedEntity referencedEntity, List<TReferencedEntity> referencedEntitiesCollection)
+    protected virtual async Task<TReferencedEntity?> GetOrAddNewEntity<TReferencedEntity>(TReferencedEntity entity,
+                                                                                        List<TReferencedEntity> entityCollection,
+                                                                                        CancellationToken cancellationToken)
+        where TReferencedEntity : ContentComponentDbEntity
+    => entityCollection.Find(existingReference => existingReference.Id == entity.Id) ?? await AddNewReferencedEntity(entity, entityCollection, cancellationToken);
+
+    protected virtual async Task<TReferencedEntity?> AddNewReferencedEntity<TReferencedEntity>(TReferencedEntity referencedEntity,
+                                                                                               List<TReferencedEntity> referencedEntitiesCollection,
+                                                                                               CancellationToken cancellationToken)
         where TReferencedEntity : ContentComponentDbEntity
     {
-        var dbReferencedEntity = await DatabaseHelper.GetMatchingEntityById(referencedEntity, default);
+        var dbReferencedEntity = await DatabaseHelper.GetMatchingEntityById(referencedEntity, cancellationToken);
         if (dbReferencedEntity == null)
         {
             Logger.LogError("Error trying to add referenced entity: {ChildReferenceType} {ChildReferenceId} was not found in the db", typeof(TReferencedEntity).Name, referencedEntity.Id);
