@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Content;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 
@@ -15,7 +15,7 @@ public class QuestionMapper(EntityUpdater updater,
 
     public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
-        _incomingAnswers = _entityUpdater.GetAndOrderReferencedEntities<AnswerDbEntity>(values, "answers").ToList();
+        _incomingAnswers = EntityUpdater.GetAndOrderReferencedEntities<AnswerDbEntity>(values, "answers").ToList();
 
         return values;
     }
@@ -30,6 +30,6 @@ public class QuestionMapper(EntityUpdater updater,
             Logger.LogTrace("Retrieved answers for existing question ID \"{QuestionId}\": \"{Answers}\"", existing.Id, string.Join(",", existing.Answers.Select(answer => answer.Id)));
         }
 
-        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (question) => question.Answers, _incomingAnswers, true, cancellationToken);
+        await EntityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (question) => question.Answers, _incomingAnswers, true, cancellationToken);
     }
 }

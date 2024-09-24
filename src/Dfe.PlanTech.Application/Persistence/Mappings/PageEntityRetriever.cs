@@ -1,5 +1,5 @@
-using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
 
 namespace Dfe.PlanTech.Application.Persistence.Mappings;
 
@@ -7,7 +7,7 @@ public class PageEntityRetriever(IDatabaseHelper<ICmsDbContext> databaseHelper)
 {
     public async Task<PageDbEntity?> GetExistingDbEntity(PageDbEntity entity, CancellationToken cancellationToken)
     {
-        var page = await databaseHelper.Database.FirstOrDefaultAsync(databaseHelper.GetIQueryableForEntityWithoutAutoIncludes<PageDbEntity>()
+        var page = await databaseHelper.Database.FirstOrDefaultAsync(databaseHelper.GetQueryableForEntityExcludingAutoIncludesAndFilters<PageDbEntity>()
                                 .Select(page => new PageDbEntity()
                                 {
                                     Id = page.Id,

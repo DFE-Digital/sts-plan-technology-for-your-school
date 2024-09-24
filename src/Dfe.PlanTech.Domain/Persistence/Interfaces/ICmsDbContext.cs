@@ -2,8 +2,11 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 
-namespace Dfe.PlanTech.Application.Persistence.Interfaces;
+namespace Dfe.PlanTech.Domain.Persistence.Interfaces;
 
+/// <summary>
+/// Interface for the DbContext responsible for storing CMS data
+/// </summary>
 public interface ICmsDbContext : IDbContext
 {
     public IQueryable<AnswerDbEntity> Answers { get; }

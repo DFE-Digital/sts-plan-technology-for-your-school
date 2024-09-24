@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Content;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 
@@ -18,7 +18,7 @@ public class CategoryMapper(EntityUpdater updater,
     {
         values = MoveValueToNewKey(values, "header", "headerId");
 
-        _incomingSections = _entityUpdater.GetAndOrderReferencedEntities<SectionDbEntity>(values, "sections").ToList();
+        _incomingSections = EntityUpdater.GetAndOrderReferencedEntities<SectionDbEntity>(values, "sections").ToList();
 
         return values;
     }
@@ -32,7 +32,7 @@ public class CategoryMapper(EntityUpdater updater,
             existing.Sections = await GetExistingSections(db, incoming, cancellationToken);
         }
 
-        await _entityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (category) => category.Sections, _incomingSections, true, cancellationToken);
+        await EntityUpdater.UpdateReferences(incomingEntity: incoming, existingEntity: existing, (category) => category.Sections, _incomingSections, true, cancellationToken);
     }
 
     private static async Task<List<SectionDbEntity>> GetExistingSections(ICmsDbContext db, CategoryDbEntity incoming, CancellationToken cancellationToken)

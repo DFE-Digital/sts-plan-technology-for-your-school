@@ -1,12 +1,11 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using Dfe.PlanTech.Application.Constants;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Establishments.Models;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Models;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
@@ -124,8 +123,8 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
 
     public Task<Establishment?> GetEstablishmentBy(Expression<Func<Establishment, bool>> predicate) => Establishments.FirstOrDefaultAsync(predicate);
 
-    public Task<int> CallStoredProcedureWithReturnInt(string sprocName, IEnumerable<SqlParameter> parms, CancellationToken cancellationToken = default)
-     => Database.ExecuteSqlRawAsync(sprocName, parms, cancellationToken: cancellationToken);
+    public Task<int> CallStoredProcedureWithReturnInt(string sprocName, IEnumerable<object> parameters, CancellationToken cancellationToken = default)
+     => Database.ExecuteSqlRawAsync(sprocName, parameters, cancellationToken: cancellationToken);
 
     public Task<int> ExecuteSqlAsync(FormattableString sql, CancellationToken cancellationToken = default)
     => Database.ExecuteSqlAsync(sql, cancellationToken);

@@ -3,10 +3,12 @@ using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Models;
-using Microsoft.Data.SqlClient;
 
-namespace Dfe.PlanTech.Application.Persistence.Interfaces;
+namespace Dfe.PlanTech.Domain.Persistence.Interfaces;
 
+/// <summary>
+/// Interface for the DbContext that handles user related tables (establishments, users, submissions, responses, etc.)
+/// </summary>
 public interface IPlanTechDbContext
 {
     // User Table & SignIn Table
@@ -22,7 +24,7 @@ public interface IPlanTechDbContext
 
     public Task<int> SaveChangesAsync();
 
-    Task<int> CallStoredProcedureWithReturnInt(string sprocName, IEnumerable<SqlParameter> parms, CancellationToken cancellationToken = default);
+    Task<int> CallStoredProcedureWithReturnInt(string sprocName, IEnumerable<object> parameters, CancellationToken cancellationToken = default);
 
     IQueryable<SectionStatusDto> GetSectionStatuses(string categoryId, int establishmentId);
 

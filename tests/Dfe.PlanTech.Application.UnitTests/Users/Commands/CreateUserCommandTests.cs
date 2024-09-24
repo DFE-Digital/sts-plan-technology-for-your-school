@@ -1,5 +1,5 @@
-﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Application.Users.Commands;
+﻿using Dfe.PlanTech.Application.Users.Commands;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 using NSubstitute;
