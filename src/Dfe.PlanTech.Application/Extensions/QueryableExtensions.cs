@@ -27,9 +27,9 @@ public static class QueryableExtensions
         CancellationToken cancellationToken = default)
     {
         var key = GetCacheKey(queryable);
-        return await _cache.GetOrCreateAsync(key, cacheEntry =>
+        return await _cache.GetOrCreateAsync(key, entry =>
         {
-            cacheEntry.AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(CacheDurationMinutes);
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(CacheDurationMinutes);
             return queryFunc(queryable, cancellationToken);
         }) ?? await queryFunc(queryable, cancellationToken);
     }
