@@ -20,7 +20,7 @@
         <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.Contentful\Dfe.PlanTech.Infrastructure.Contentful.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.Data\Dfe.PlanTech.Infrastructure.Data.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.SignIn\Dfe.PlanTech.Infrastructure.SignIn.csproj" />
-        <ProjectReference Include="..\Dfe.PlanTech.Web.DbWriter\Dfe.PlanTech.Web.DbWriter.csproj" />
+        <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.ServiceBus\Dfe.PlanTech.Infrastructure.ServiceBus.csproj" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Automapper" Version="13.0.1" />
