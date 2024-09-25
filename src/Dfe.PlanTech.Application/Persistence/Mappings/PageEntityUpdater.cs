@@ -1,19 +1,12 @@
 using Dfe.PlanTech.Application.Content;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Persistence.Mappings;
 
-public class PageEntityUpdater : EntityUpdater
+public class PageEntityUpdater(ILogger<PageEntityUpdater> logger, IDatabaseHelper<ICmsDbContext> databaseHelper) : EntityUpdater(logger, databaseHelper)
 {
-
-    public PageEntityUpdater(ILogger<PageEntityUpdater> logger,
-                                   ICmsDbContext db,
-                                   IDatabaseHelper<ICmsDbContext> databaseHelper) : base(logger, db, databaseHelper)
-    {
-    }
-
     public override MappedEntity UpdateEntityConcrete(MappedEntity entity)
     {
         if (!entity.AlreadyExistsInDatabase)

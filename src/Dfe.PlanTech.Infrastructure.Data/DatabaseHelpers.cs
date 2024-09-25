@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 using System.Reflection;
-using Dfe.PlanTech.Domain.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.DependencyInjection;

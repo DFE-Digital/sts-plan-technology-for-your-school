@@ -1,4 +1,6 @@
-namespace Dfe.PlanTech.Domain.Persistence.Interfaces;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
+
+namespace Dfe.PlanTech.Application.Persistence.Interfaces;
 
 /// <summary>
 /// Abstraction around repositories used for retrieving Content

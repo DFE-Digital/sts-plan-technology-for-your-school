@@ -1,21 +1,21 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Content;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Persistence.Mappings;
 
 public class RecommendationIntroMapper(EntityUpdater updater,
-                                       IDatabaseHelper<ICmsDbContext> databaseHelper,
                                        ILogger<RecommendationIntroMapper> logger,
-                                       JsonSerializerOptions jsonSerialiserOptions)
+                                       JsonSerializerOptions jsonSerialiserOptions,
+                                       IDatabaseHelper<ICmsDbContext> databaseHelper)
     : JsonToDbMapper<RecommendationIntroDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
 {
     private List<ContentComponentDbEntity> _incomingContent = [];
 
-    public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
+    protected override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
         values = MoveValueToNewKey(values, "header", "headerId");
 
@@ -24,7 +24,7 @@ public class RecommendationIntroMapper(EntityUpdater updater,
         return values;
     }
 
-    public override async Task PostUpdateEntityCallback(MappedEntity mappedEntity, CancellationToken cancellationToken)
+    protected override async Task PostUpdateEntityCallback(MappedEntity mappedEntity, CancellationToken cancellationToken)
     {
         var (incoming, existing) = mappedEntity.GetTypedEntities<RecommendationIntroDbEntity>();
 
