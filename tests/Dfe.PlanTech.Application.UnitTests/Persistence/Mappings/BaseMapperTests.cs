@@ -1,14 +1,13 @@
-using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Mappings;
+using Dfe.PlanTech.Application.UnitTests.TestHelpers;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using NSubstitute.Extensions;
 
 namespace Dfe.PlanTech.Application.UnitTests.Persistence.Mappings;
 
@@ -120,59 +119,14 @@ public abstract class BaseMapperTests
     }
 
     protected static CmsWebHookSystemDetailsInnerContainer CreateReferenceInnerForId(string id)
-    => new() {
-           Sys = new CmsWebHookSystemDetailsInner()
-           {
-               Id = id
-           }
-       };
-
-    private void MockFirstOrDefaultAsync<T>()
+    => new()
     {
-        Db.FirstOrDefaultAsync(Arg.Any<IQueryable<T>>(), Arg.Any<CancellationToken>())
-            .Returns((callInfo) => {
-                var queryable = callInfo.Arg<IQueryable<T>>();
-                var matching = queryable.FirstOrDefault();
-                return Task.FromResult(matching);
-            });
-    }
+        Sys = new CmsWebHookSystemDetailsInner()
+        {
+            Id = id
+        }
+    };
 
-    private void MockListAsync<T>()
-    {
-        Db.ToListAsync(Arg.Any<IQueryable<T>>(), Arg.Any<CancellationToken>())
-            .Returns((callInfo) => {
-                var queryable = callInfo.Arg<IQueryable<T>>();
-                return Task.FromResult(queryable.ToList());
-            });
-    }
-
-    protected void MockDatabaseCollection<T>(List<T> sourceEntities)
-        where T : class
-    {
-        var queryable = sourceEntities.AsQueryable();
-        Db.ReturnsForAll(queryable);
-        DatabaseHelper.GetQueryableForEntityExcludingAutoIncludesAndFilters<T>().Returns(queryable);
-        DatabaseHelper.GetQueryableForEntityExcludingAutoIncludesAndFilters(Arg.Any<T>()).Returns(queryable);
-        DatabaseHelper.When(dbHelper => dbHelper.Remove(Arg.Any<T>()))
-            .Do(callInfo =>
-            {
-                var entity = callInfo.ArgAt<T>(0);
-
-                if (entity == null)
-                {
-                    throw new Exception($"Entity is null");
-                }
-
-                var index = sourceEntities.FindIndex(existing => existing.Equals(entity));
-
-                if (index == -1)
-                {
-                    throw new Exception("Couldn't find matching entity");
-                }
-
-                sourceEntities.Remove(entity);
-            });
-        MockFirstOrDefaultAsync<T>();
-        MockListAsync<T>();
-    }
+    protected void MockDatabaseCollection<T>(List<T> sourceEntities) where T : class
+        => DatabaseHelper.MockDatabaseCollection(sourceEntities);
 }

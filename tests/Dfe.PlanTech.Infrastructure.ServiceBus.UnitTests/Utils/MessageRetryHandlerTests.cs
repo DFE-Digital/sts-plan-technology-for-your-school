@@ -1,10 +1,10 @@
 using System.Text;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.Domain.ServiceBus.Models;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Retry;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using Dfe.PlanTech.Infrastructure.ServiceBus.Retry;
 
 namespace Dfe.PlanTech.Infrastructure.ServiceBus.UnitTests.Utils;
 

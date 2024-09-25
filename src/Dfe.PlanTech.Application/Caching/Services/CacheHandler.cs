@@ -11,7 +11,7 @@ public class CacheHandler(HttpClient httpClient, CacheRefreshConfiguration cache
     /// </summary>
     public async Task RequestCacheClear(CancellationToken cancellationToken)
     {
-        if (cacheRefreshConfiguration.ApiKeyName is null)
+        if (string.IsNullOrEmpty(cacheRefreshConfiguration.ApiKeyName))
         {
             logger.LogError("No Api Key name has been configured but is required for clearing the website cache");
             return;

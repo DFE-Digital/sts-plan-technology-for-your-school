@@ -13,18 +13,16 @@ public class PageMapperTests : BaseMapperTests<PageDbEntity, PageMapper>
     private const string PageId = "Header Id";
 
     private readonly PageMapper _mapper;
-    private readonly ILogger<PageMapper> _logger;
     private readonly ILogger<PageEntityUpdater> _entityUpdaterLogger = Substitute.For<ILogger<PageEntityUpdater>>();
     private readonly List<PageContentDbEntity> _attachedPageContents = new(10);
     private readonly List<PageContentDbEntity> _pageContents = [];
+    private readonly List<PageDbEntity> _pages = [];
     private readonly Faker _faker = new();
 
     public PageMapperTests()
     {
-        _logger = Substitute.For<ILogger<PageMapper>>();
-        _mapper = new PageMapper(new PageEntityRetriever(DatabaseHelper), new PageEntityUpdater(_entityUpdaterLogger, DatabaseHelper), Logger, JsonOptions, DatabaseHelper);
-
-        var queryablePageContents = _pageContents.AsQueryable();
+        _mapper = new PageMapper(new PageRetriever(DatabaseHelper), new PageEntityUpdater(_entityUpdaterLogger, DatabaseHelper), Logger, JsonOptions, DatabaseHelper);
+        MockDatabaseCollection(_pages);
     }
 
     [Fact]
@@ -54,6 +52,34 @@ public class PageMapperTests : BaseMapperTests<PageDbEntity, PageMapper>
         ContentsExistAndAreCorrect(content, content => content.ContentComponentId);
     }
 
+    [Fact]
+    public async Task GetExistingEntity_Should_Call_Retriever()
+    {
+        await _mapper.InvokeNonPublicAsyncMethod("GetExistingEntity",
+            new object[] { new PageDbEntity(), CancellationToken.None });
+
+        await DatabaseHelper.Database.Received(1).FirstOrDefaultAsync(Arg.Any<IQueryable<PageDbEntity>>(),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task PerformAdditionalMapping_Should_LogError_If_Id_NotFound()
+    {
+        var values = new Dictionary<string, object>();
+
+        await Assert.ThrowsAsync<KeyNotFoundException>(() =>
+            _mapper.InvokeNonPublicAsyncMethod("PerformAdditionalMapping", new object?[] { values }));
+    }
+
+    [Fact]
+    public void CreatePageContentEntity_Should_LogError_When_Inner_Not_String()
+    {
+        _mapper.InvokePublicMethod("CreatePageContentEntity", new object?[] { 10, 0, true });
+        var messages = Logger.ReceivedLogMessages().ToArray();
+
+        Assert.Single(messages);
+        Assert.Contains("Expected string but received", messages[0].Message);
+    }
     private void ContentsExistAndAreCorrect(CmsWebHookSystemDetailsInnerContainer[] content, Func<PageContentDbEntity, string?> idSelector)
     {
         for (var index = 0; index < content.Length; index++)

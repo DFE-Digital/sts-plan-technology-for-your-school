@@ -8,9 +8,11 @@ using Dfe.PlanTech.Application.Persistence.Commands;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Mappings;
 using Dfe.PlanTech.Domain.Caching.Interfaces;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.ServiceBus.Models;
 using Dfe.PlanTech.Infrastructure.Data;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Results;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Retry;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
@@ -34,7 +36,7 @@ public static class DependencyInjection
                 .AddMessageRetryHandler()
                 .AddMappers();
 
-        services.AddTransient<WebhookToDbCommand>();
+        services.AddTransient<IWebhookToDbCommand, WebhookToDbCommand>();
         services.AddSingleton(new JsonSerializerOptions()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -58,13 +60,10 @@ public static class DependencyInjection
         });
 
         services.AddHostedService<ContentfulServiceBusProcessor>();
-        services.AddTransient<ServiceBusResultProcessor>();
+        services.AddTransient<IServiceBusResultProcessor, ServiceBusResultProcessor>();
         services.AddTransient<IMessageRetryHandler, MessageRetryHandler>();
 
-        services.AddSingleton(new ServiceBusOptions()
-        {
-            MessagesPerBatch = 10,
-        });
+        services.AddSingleton(new ServiceBusOptions() { MessagesPerBatch = 10 });
         return services;
     }
 
@@ -106,7 +105,7 @@ public static class DependencyInjection
         services.AddTransient<RichTextContentMapper>();
         services.AddTransient<JsonToEntityMappers>();
 
-        services.AddTransient<PageEntityRetriever>();
+        services.AddTransient<PageRetriever>();
         services.AddTransient<PageEntityUpdater>();
 
         services.AddTransient<EntityUpdater>();

@@ -20,7 +20,7 @@ public static class IDatabaseHelperExtensions
     public static Task<TDbEntity?> GetMatchingEntityById<TDbEntity, TDbContext>(this IDatabaseHelper<TDbContext> databaseHelper, TDbEntity entity, CancellationToken cancellationToken)
       where TDbEntity : ContentComponentDbEntity
       where TDbContext : IDbContext
-        =>  databaseHelper.Database.FirstOrDefaultAsync(databaseHelper.EntitiesMatchingId(entity), cancellationToken);
+        => databaseHelper.Database.FirstOrDefaultAsync(databaseHelper.EntitiesMatchingId(entity), cancellationToken);
 
     /// <summary>
     /// Include a related entity from the database when retrieved

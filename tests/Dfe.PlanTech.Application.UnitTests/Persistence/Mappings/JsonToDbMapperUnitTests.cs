@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Mappings;
 using Dfe.PlanTech.Domain.Caching.Models;
@@ -16,14 +17,15 @@ public class JsonToDbMapperUnitTests : BaseMapperTests
     private const int NumberValueTest = 10000;
     private const string EntityId = "Testing Id";
 
-    private readonly CmsWebHookSystemDetailsInnerContainer[] ReferencesValueTest = [
-          new CmsWebHookSystemDetailsInnerContainer()
-          {
-              Sys = new()
-              {
-                  Id = "First reference"
-              }
-          },
+    private readonly CmsWebHookSystemDetailsInnerContainer[] ReferencesValueTest =
+    [
+        new CmsWebHookSystemDetailsInnerContainer()
+        {
+            Sys = new()
+            {
+                Id = "First reference"
+            }
+        },
         new CmsWebHookSystemDetailsInnerContainer()
         {
             Sys = new()
@@ -31,11 +33,12 @@ public class JsonToDbMapperUnitTests : BaseMapperTests
                 Id = "Second reference"
             }
         }
-        ];
+    ];
 
     private readonly JsonToDbMapperImplementation _mapper;
 
-    private readonly ILogger<JsonToDbMapper<ContentComponentImplementationDbEntity>> _logger = Substitute.For<ILogger<JsonToDbMapper<ContentComponentImplementationDbEntity>>>();
+    private readonly ILogger<JsonToDbMapper<ContentComponentImplementationDbEntity>> _logger =
+        Substitute.For<ILogger<JsonToDbMapper<ContentComponentImplementationDbEntity>>>();
 
     public JsonToDbMapperUnitTests()
     {
@@ -83,6 +86,55 @@ public class JsonToDbMapperUnitTests : BaseMapperTests
             Assert.Contains(reference.Sys.Id, concrete.ReferenceIds);
         }
     }
+
+    [Fact]
+    public void GetValuesFromFields_ShouldLogErrorAndReturnNull_WhenFieldValueIsNull()
+    {
+        var field = new KeyValuePair<string, JsonNode>("testField", null!);
+
+        var result = _mapper.TestGetValuesFromFields(field).ToList();
+
+        Assert.Single(result);
+        Assert.False(result[0].HasValue);
+
+        var logMessages = _logger.GetMatchingReceivedMessages($"No value for {field.Key}", LogLevel.Error);
+        Assert.Single(logMessages);
+    }
+
+    [Fact]
+    public void GetValuesFromFields_Should_NotReturn_Anything()
+    {
+        var field = new KeyValuePair<string, JsonNode>("testField", CreateJsonNode()); // Replace with a valid JsonNode
+
+        var result = _mapper.TestGetValuesFromFields(field).ToList();
+
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public void GetValuesFromFields_Should_LogError_When_MoreThanOneChild()
+    {
+        var json = """{ "en-gb": {"child1": "value"}, "en-otherlanguage": 5}""";
+        var field = new KeyValuePair<string, JsonNode>("testField", CreateJsonNode(json)); // Replace with a valid JsonNode
+
+        var result = _mapper.TestGetValuesFromFields(field).ToList();
+
+        Assert.Single(result);
+
+        var first = result[0];
+
+        Assert.False(first.HasValue);
+        var receivedLoggerMessages =
+            _logger.GetMatchingReceivedMessages("Expected only one language - received 2", LogLevel.Error).ToArray();
+
+        Assert.Single(receivedLoggerMessages);
+    }
+
+    private JsonNode CreateJsonNode(string json = "{}")
+    {
+        var jsonObj = JsonSerializer.Deserialize<JsonNode>(json);
+        return jsonObj!;
+    }
 }
 
 public class JsonToDbMapperImplementation : JsonToDbMapper<ContentComponentImplementationDbEntity>
@@ -97,6 +149,11 @@ public class JsonToDbMapperImplementation : JsonToDbMapper<ContentComponentImple
     protected override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
         return values;
+    }
+
+    public IEnumerable<KeyValuePair<string, object?>?> TestGetValuesFromFields(KeyValuePair<string, JsonNode> field)
+    {
+        return GetValuesFromFields(field);
     }
 }
 

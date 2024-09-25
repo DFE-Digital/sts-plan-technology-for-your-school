@@ -3,20 +3,20 @@ using Dfe.PlanTech.Domain.Content.Models;
 
 namespace Dfe.PlanTech.Application.UnitTests.Persistence.Mappings;
 
-public class PageEntityRetrieverTests : BaseMapperTests
+public class PageRetrieverTests : BaseMapperTests
 {
     private const string ExistingPageId = "existing-page";
-    private readonly PageEntityRetriever _retriever;
+    private readonly PageRetriever _retriever;
 
     private readonly List<PageDbEntity> _pages = [];
 
     private readonly PageDbEntity _existingPage = new() { Id = ExistingPageId, };
 
-    public PageEntityRetrieverTests()
+    public PageRetrieverTests()
     {
         MockDatabaseCollection(_pages);
 
-        _retriever = new PageEntityRetriever(DatabaseHelper);
+        _retriever = new PageRetriever(DatabaseHelper);
         _pages.Add(_existingPage);
     }
 
