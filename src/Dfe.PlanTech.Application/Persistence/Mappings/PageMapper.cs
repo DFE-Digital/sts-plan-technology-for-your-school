@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Persistence.Mappings;
 
-public class PageMapper(PageEntityRetriever retriever,
+public class PageMapper(PageRetriever retriever,
                         PageEntityUpdater updater,
                         ILogger<PageMapper> logger,
                         JsonSerializerOptions jsonSerialiserOptions,
@@ -56,17 +56,17 @@ public class PageMapper(PageEntityRetriever retriever,
 
     private void UpdateContentIds(Dictionary<string, object?> values, string currentKey)
     {
-        bool isBeforeTitleContent = currentKey == BeforeTitleContentKey;
+        var isBeforeTitleContent = currentKey == BeforeTitleContentKey;
 
-        if (values.TryGetValue(currentKey, out object? contents) && contents is object[] inners)
+        if (!values.TryGetValue(currentKey, out object? contents) || contents is not object[] inners)
+            return;
+
+        for (var index = 0; index < inners.Length; index++)
         {
-            for (var index = 0; index < inners.Length; index++)
-            {
-                CreatePageContentEntity(inners[index], index, isBeforeTitleContent);
-            }
-
-            values.Remove(currentKey);
+            CreatePageContentEntity(inners[index], index, isBeforeTitleContent);
         }
+
+        values.Remove(currentKey);
     }
 
     /// <summary>

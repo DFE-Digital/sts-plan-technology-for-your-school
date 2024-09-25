@@ -39,7 +39,8 @@ public class RecommendationIntroMapperTests : BaseMapperTests<RecommendationIntr
 
             _contentComponents.Add(contentComponent);
 
-            if (x >= 3) continue;
+            if (x >= 3)
+                continue;
 
             var recommendationIntroContentDbEntity = new RecommendationIntroContentDbEntity()
             {

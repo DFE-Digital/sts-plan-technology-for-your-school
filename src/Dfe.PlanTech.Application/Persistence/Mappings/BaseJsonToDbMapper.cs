@@ -48,7 +48,7 @@ public abstract class JsonToDbMapper(Type entityType, ILogger logger, JsonSerial
     /// <returns></returns>
     protected virtual IEnumerable<KeyValuePair<string, object?>?> GetValuesFromFields(KeyValuePair<string, JsonNode> field)
     {
-        if (field.Value == null)
+        if (field.Value is null)
         {
             Logger.LogError("No value for {field}", field.Key);
             yield return null;
@@ -67,6 +67,7 @@ public abstract class JsonToDbMapper(Type entityType, ILogger logger, JsonSerial
         {
             Logger.LogError("Expected only one language - received {count}", fieldChildren.Count);
             yield return null;
+            yield break;
         }
 
         foreach (var child in fieldChildren)

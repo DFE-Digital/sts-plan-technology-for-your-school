@@ -14,7 +14,7 @@ public class CategoryMapperTests : BaseMapperTests<CategoryDbEntity, CategoryMap
     private readonly List<CategoryDbEntity> _categories = [];
 
     private readonly CategoryMapper _mapper;
-    private readonly CategoryDbEntity _existingCategory = new()  {  Id = ExistingCategoryId };
+    private readonly CategoryDbEntity _existingCategory = new() { Id = ExistingCategoryId };
 
     public CategoryMapperTests()
     {

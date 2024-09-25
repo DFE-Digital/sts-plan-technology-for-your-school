@@ -1,7 +1,10 @@
 using System.Text;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.Application.Persistence.Commands;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Results;
 using Microsoft.Extensions.Azure;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -13,24 +16,28 @@ namespace Dfe.PlanTech.Infrastructure.ServiceBus;
 /// <param name="processorFactory"></param>
 /// <param name="resultProcessor">Processes results from the <see cref="WebhookToDbCommand"/> </param>
 /// <param name="logger"></param>
-/// <param name="webhookToDbCommand">Processes Contentful webhook update payloads, and saves to the DB if appropriate</param>
+/// <param name="serviceScopeFactory">Service factory - used to create transient services to prevent state problems</param>
 public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcessor> processorFactory,
-                                           ServiceBusResultProcessor resultProcessor,
+                                           IServiceBusResultProcessor resultProcessor,
                                            ILogger<ContentfulServiceBusProcessor> logger,
-                                           WebhookToDbCommand webhookToDbCommand) : BackgroundService
+                                           IServiceScopeFactory serviceScopeFactory) : BackgroundService
 {
-    private readonly ServiceBusProcessor processor = processorFactory.CreateClient("contentfulprocessor");
+    private readonly ServiceBusProcessor _processor = processorFactory.CreateClient("contentfulprocessor");
 
     /// <summary>
     /// Adds event handlers for the message received event + error event
     /// </summary>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        processor.ProcessMessageAsync += MessageHandler;
-        processor.ProcessErrorAsync += ErrorHandler;
+        _processor.ProcessMessageAsync += MessageHandler;
+        _processor.ProcessErrorAsync += ErrorHandler;
 
-        await processor.StartProcessingAsync(stoppingToken);
-        stoppingToken.Register(async () => await StopProcessingAsync());
+        await _processor.StartProcessingAsync(stoppingToken);
+
+        stoppingToken.Register(CancellationRequestedCallback);
+        return;
+
+        async void CancellationRequestedCallback() => await StopProcessingAsync();
     }
 
     /// <summary>
@@ -39,17 +46,23 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
     /// <param name="processMessageEventArgs">Received Service Bus message</param>
     private async Task MessageHandler(ProcessMessageEventArgs processMessageEventArgs)
     {
+        using var scope = serviceScopeFactory.CreateScope();
+        var webhookToDbCommand = scope.ServiceProvider.GetRequiredService<IWebhookToDbCommand>();
+
         try
         {
             var body = Encoding.UTF8.GetString(processMessageEventArgs.Message.Body);
-            var result = await webhookToDbCommand.ProcessMessage(processMessageEventArgs.Message.Subject, body, processMessageEventArgs.Message.MessageId, processMessageEventArgs.CancellationToken);
-            await resultProcessor.ProcessMessageResult(processMessageEventArgs, result, processMessageEventArgs.CancellationToken);
+            var result = await webhookToDbCommand.ProcessMessage(processMessageEventArgs.Message.Subject, body,
+                processMessageEventArgs.Message.MessageId, processMessageEventArgs.CancellationToken);
+            await resultProcessor.ProcessMessageResult(processMessageEventArgs, result,
+                processMessageEventArgs.CancellationToken);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error processing message: {Message}", ex.Message);
-            await processMessageEventArgs.DeadLetterMessageAsync(processMessageEventArgs.Message, null, ex.Message, ex.StackTrace, processMessageEventArgs.CancellationToken);
-            logger.LogInformation("Abandoned message: {MessageId}", processMessageEventArgs.Message);
+            await processMessageEventArgs.DeadLetterMessageAsync(processMessageEventArgs.Message, null, ex.Message,
+                ex.StackTrace, processMessageEventArgs.CancellationToken);
+            logger.LogInformation("Abandoned message: {MessageId}", processMessageEventArgs.Message.MessageId);
         }
     }
 
@@ -71,8 +84,8 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
     /// <returns></returns>
     private async Task StopProcessingAsync()
     {
-        await processor.StopProcessingAsync();
-        await processor.DisposeAsync();
+        await _processor.StopProcessingAsync();
+        await _processor.DisposeAsync();
         logger.LogInformation("Stopped processing messages.");
     }
 }

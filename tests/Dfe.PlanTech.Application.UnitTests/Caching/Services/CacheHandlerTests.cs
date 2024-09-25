@@ -34,4 +34,23 @@ public class CacheHandlerTests
         Assert.True(request.Headers.TryGetValues(_refresh_api_key_name, out var headerValues));
         Assert.Contains(_refresh_api_key_value, headerValues);
     }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(null)]
+    public async Task RequestCacheClear_Should_LogError_When_ApiKeyName_NullOrEmpty(string? apiKey)
+    {
+        var config = new CacheRefreshConfiguration(_refresh_endpoint, apiKey, _refresh_api_key_value);
+        var httpClient = new HttpClient(_httpMessageHandler);
+        var logger = Substitute.For<ILogger<CacheHandler>>();
+        var cacheHandler = new CacheHandler(httpClient, config, logger);
+
+        await cacheHandler.RequestCacheClear(default);
+
+        var loggedMessages = logger.ReceivedLogMessages().ToArray();
+        Assert.Single(loggedMessages);
+
+        var message = loggedMessages[0];
+        Assert.Contains("No Api Key", message.Message);
+    }
 }

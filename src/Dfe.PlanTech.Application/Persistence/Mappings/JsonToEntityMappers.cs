@@ -14,7 +14,7 @@ public class JsonToEntityMappers(IEnumerable<JsonToDbMapper> mappers, JsonSerial
     {
         var payload = SerialiseToPayload(requestBody);
 
-        JsonToDbMapper mapper = GetMapperForPayload(payload);
+        var mapper = GetMapperForPayload(payload);
 
         return mapper.MapEntity(payload, cmsEvent, cancellationToken);
     }

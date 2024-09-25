@@ -2,7 +2,6 @@ using Dfe.PlanTech.Application.Persistence.Mappings;
 using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Microsoft.Extensions.Logging;
 
 using NSubstitute;
 

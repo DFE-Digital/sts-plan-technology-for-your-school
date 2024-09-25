@@ -3,7 +3,7 @@ using Dfe.PlanTech.Domain.Content.Models;
 
 namespace Dfe.PlanTech.Application.Persistence.Mappings;
 
-public class PageEntityRetriever(IDatabaseHelper<ICmsDbContext> databaseHelper)
+public class PageRetriever(IDatabaseHelper<ICmsDbContext> databaseHelper)
 {
     public async Task<PageDbEntity?> GetExistingDbEntity(PageDbEntity entity, CancellationToken cancellationToken)
     {

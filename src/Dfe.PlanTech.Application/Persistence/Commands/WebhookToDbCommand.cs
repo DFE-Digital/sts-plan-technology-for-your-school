@@ -14,8 +14,7 @@ using Microsoft.Extensions.Logging;
 namespace Dfe.PlanTech.Application.Persistence.Commands;
 
 /// <inheritdoc cref="IWebhookToDbCommand" />
-public class WebhookToDbCommand(ICmsDbContext db,
-                                ICacheHandler cacheHandler,
+public class WebhookToDbCommand(ICacheHandler cacheHandler,
                                 ContentfulOptions contentfulOptions,
                                 JsonToEntityMappers mappers,
                                 ILogger<WebhookToDbCommand> logger,
@@ -28,7 +27,7 @@ public class WebhookToDbCommand(ICmsDbContext db,
             databaseHelper.ClearTracking();
 
             var cmsEvent = GetCmsEvent(subject);
-            MappedEntity mapped = await MapMessageToEntity(body, cmsEvent, cancellationToken);
+            var mapped = await MapMessageToEntity(body, cmsEvent, cancellationToken);
 
             var isPublished = mapped.ExistingEntity?.Published ?? false;
 
@@ -58,11 +57,11 @@ public class WebhookToDbCommand(ICmsDbContext db,
         catch (Exception ex) when (ex is JsonException or CmsEventException)
         {
             logger.LogError(ex, "Error processing message ID {Message}", id);
-            return new ServiceBusDeadLetterResult(ex.Message, ex.StackTrace, false);
+            return new ServiceBusErrorResult(ex.Message, ex.StackTrace, false);
         }
         catch (Exception ex)
         {
-            return new ServiceBusDeadLetterResult(ex.Message, ex.StackTrace, true);
+            return new ServiceBusErrorResult(ex.Message, ex.StackTrace, true);
         }
     }
 
@@ -73,7 +72,7 @@ public class WebhookToDbCommand(ICmsDbContext db,
             throw new InvalidOperationException("ExistingEntity is null for removal event but various validations should have prevented this.");
         }
 
-        return db.SetComponentPublishedAndDeletedStatuses(mapped.ExistingEntity, mapped.IncomingEntity.Published, mapped.IncomingEntity.Deleted, cancellationToken);
+        return databaseHelper.Database.SetComponentPublishedAndDeletedStatuses(mapped.ExistingEntity, mapped.IncomingEntity.Published, mapped.IncomingEntity.Deleted, cancellationToken);
     }
 
     /// <summary>
@@ -90,20 +89,18 @@ public class WebhookToDbCommand(ICmsDbContext db,
     /// <returns></returns>
     private bool ShouldIgnoreMessage(CmsEvent cmsEvent, bool isPublished)
     {
-        if (cmsEvent == CmsEvent.CREATE)
+        switch (cmsEvent)
         {
-            logger.LogInformation("Dropping received event {CmsEvent}", cmsEvent);
-            return true;
+            case CmsEvent.CREATE:
+                logger.LogInformation("Dropping received event {CmsEvent}", cmsEvent);
+                return true;
+            case CmsEvent.SAVE or CmsEvent.AUTO_SAVE when isPublished && !contentfulOptions.UsePreview:
+                logger.LogInformation("Received {Event} but UsePreview is {UsePreview} - dropping message", cmsEvent,
+                    contentfulOptions.UsePreview);
+                return true;
+            default:
+                return false;
         }
-
-        if ((cmsEvent == CmsEvent.SAVE || cmsEvent == CmsEvent.AUTO_SAVE) && isPublished && !contentfulOptions.UsePreview)
-        {
-            logger.LogInformation("Received {Event} but UsePreview is {UsePreview} - dropping message", cmsEvent,
-                contentfulOptions.UsePreview);
-            return true;
-        }
-
-        return false;
     }
 
     /// <summary>
@@ -167,7 +164,7 @@ public class WebhookToDbCommand(ICmsDbContext db,
     /// <returns></returns>
     private async Task DbSaveChanges(CancellationToken cancellationToken)
     {
-        long rowsChangedInDatabase = await db.SaveChangesAsync(cancellationToken);
+        long rowsChangedInDatabase = await databaseHelper.Database.SaveChangesAsync(cancellationToken);
 
         if (rowsChangedInDatabase == 0L)
         {

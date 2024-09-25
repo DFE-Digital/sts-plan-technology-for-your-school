@@ -3,9 +3,9 @@ using Dfe.PlanTech.Domain.ServiceBus.Models;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Retry;
 using Microsoft.Extensions.Logging;
 
-namespace Dfe.PlanTech.Infrastructure.ServiceBus;
+namespace Dfe.PlanTech.Infrastructure.ServiceBus.Results;
 
-public class ServiceBusResultProcessor(IMessageRetryHandler retryHandler, ILogger<ServiceBusResultProcessor> logger)
+public class ServiceBusResultProcessor(IMessageRetryHandler retryHandler, ILogger<ServiceBusResultProcessor> logger) : IServiceBusResultProcessor
 {
     public async Task ProcessMessageResult(ProcessMessageEventArgs processMessageEventArgs, IServiceBusResult result, CancellationToken cancellationToken)
     {
@@ -16,7 +16,7 @@ public class ServiceBusResultProcessor(IMessageRetryHandler retryHandler, ILogge
                 case ServiceBusSuccessResult:
                     await ProcessSuccessResult(processMessageEventArgs, cancellationToken);
                     break;
-                case ServiceBusDeadLetterResult deadLetterResult:
+                case ServiceBusErrorResult deadLetterResult:
                     await ProcessDeadLetterResult(processMessageEventArgs, deadLetterResult, cancellationToken);
                     break;
                 default:
@@ -33,18 +33,18 @@ public class ServiceBusResultProcessor(IMessageRetryHandler retryHandler, ILogge
     private static async Task ProcessSuccessResult(ProcessMessageEventArgs processMessageEventArgs, CancellationToken cancellationToken)
       => await processMessageEventArgs.CompleteMessageAsync(processMessageEventArgs.Message, cancellationToken);
 
-    private async Task ProcessDeadLetterResult(ProcessMessageEventArgs processMessageEventArgs, ServiceBusDeadLetterResult deadLetterResult, CancellationToken cancellationToken)
+    private async Task ProcessDeadLetterResult(ProcessMessageEventArgs processMessageEventArgs, ServiceBusErrorResult errorResult, CancellationToken cancellationToken)
     {
         var shouldRetry = await retryHandler.RetryRequired(processMessageEventArgs.Message, cancellationToken);
 
         if (shouldRetry)
         {
-            logger.LogWarning("Error processing message ID {MessageId}.\n{Reason}\n{Description}\nWill retry again", processMessageEventArgs.Message.MessageId, deadLetterResult.Reason, deadLetterResult.Description ?? "");
+            logger.LogWarning("Error processing message ID {MessageId}.\n{Reason}\n{Description}\nWill retry again", processMessageEventArgs.Message.MessageId, errorResult.Reason, errorResult.Description ?? "");
             await processMessageEventArgs.CompleteMessageAsync(processMessageEventArgs.Message, cancellationToken);
             return;
         }
 
-        logger.LogError("Error processing message ID {MessageId}.\n{Reason}\n{Description}\nThe maximum delivery count has been reached", processMessageEventArgs.Message.MessageId, deadLetterResult.Reason, deadLetterResult.Description ?? "");
-        await processMessageEventArgs.DeadLetterMessageAsync(processMessageEventArgs.Message, null, deadLetterResult.Reason, deadLetterResult.Description, cancellationToken);
+        logger.LogError("Error processing message ID {MessageId}.\n{Reason}\n{Description}\nThe maximum delivery count has been reached", processMessageEventArgs.Message.MessageId, errorResult.Reason, errorResult.Description ?? "");
+        await processMessageEventArgs.DeadLetterMessageAsync(processMessageEventArgs.Message, null, errorResult.Reason, errorResult.Description, cancellationToken);
     }
 }

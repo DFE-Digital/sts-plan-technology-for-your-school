@@ -4,7 +4,7 @@ namespace Dfe.PlanTech.Domain.Content.Interfaces;
 
 public interface IContentComponentDbEntity : IContentComponentType
 {
-    public string Id { get; set; }
+    public string Id { get; }
 
     public List<PageDbEntity> BeforeTitleContentPages { get; set; }
 
