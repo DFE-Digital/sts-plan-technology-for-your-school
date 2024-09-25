@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Content;
-using Dfe.PlanTech.Domain.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 
@@ -13,14 +13,14 @@ public class QuestionMapper(EntityUpdater updater,
 {
     private List<AnswerDbEntity> _incomingAnswers = [];
 
-    public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
+    protected override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
         _incomingAnswers = EntityUpdater.GetAndOrderReferencedEntities<AnswerDbEntity>(values, "answers").ToList();
 
         return values;
     }
 
-    public override async Task PostUpdateEntityCallback(MappedEntity mappedEntity, CancellationToken cancellationToken)
+    protected override async Task PostUpdateEntityCallback(MappedEntity mappedEntity, CancellationToken cancellationToken)
     {
         var (incoming, existing) = mappedEntity.GetTypedEntities<QuestionDbEntity>();
 

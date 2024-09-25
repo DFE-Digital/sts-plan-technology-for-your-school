@@ -2,7 +2,7 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 
-namespace Dfe.PlanTech.Domain.Persistence.Interfaces;
+namespace Dfe.PlanTech.Application.Persistence.Interfaces;
 
 /// <summary>
 /// Interface for the DbContext responsible for storing CMS data

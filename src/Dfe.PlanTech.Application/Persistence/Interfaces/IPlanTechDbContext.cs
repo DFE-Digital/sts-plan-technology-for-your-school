@@ -4,7 +4,7 @@ using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Models;
 
-namespace Dfe.PlanTech.Domain.Persistence.Interfaces;
+namespace Dfe.PlanTech.Application.Persistence.Interfaces;
 
 /// <summary>
 /// Interface for the DbContext that handles user related tables (establishments, users, submissions, responses, etc.)

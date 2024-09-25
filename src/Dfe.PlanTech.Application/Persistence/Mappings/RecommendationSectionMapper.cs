@@ -1,21 +1,21 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Content;
-using Dfe.PlanTech.Domain.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Persistence.Mappings;
 
 public class RecommendationSectionMapper(EntityUpdater updater,
-                                         IDatabaseHelper<ICmsDbContext> databaseHelper,
                                          ILogger<RecommendationSectionMapper> logger,
-                                         JsonSerializerOptions jsonSerialiserOptions)
+                                         JsonSerializerOptions jsonSerialiserOptions,
+                                         IDatabaseHelper<ICmsDbContext> databaseHelper)
     : JsonToDbMapper<RecommendationSectionDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
 {
     private List<AnswerDbEntity> _incomingAnswers = [];
     private List<RecommendationChunkDbEntity> _incomingContent = [];
 
-    public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
+    protected override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
         _incomingAnswers = EntityUpdater.GetAndOrderReferencedEntities<AnswerDbEntity>(values, "answers").ToList();
         _incomingContent = EntityUpdater.GetAndOrderReferencedEntities<RecommendationChunkDbEntity>(values, "chunks").ToList();
@@ -23,7 +23,7 @@ public class RecommendationSectionMapper(EntityUpdater updater,
         return values;
     }
 
-    public override async Task PostUpdateEntityCallback(MappedEntity mappedEntity, CancellationToken cancellationToken)
+    protected override async Task PostUpdateEntityCallback(MappedEntity mappedEntity, CancellationToken cancellationToken)
     {
         var (incoming, existing) = mappedEntity.GetTypedEntities<RecommendationSectionDbEntity>();
 

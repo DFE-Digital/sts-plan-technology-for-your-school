@@ -2,10 +2,10 @@ using System.Linq.Expressions;
 using System.Text.Json;
 using Dfe.PlanTech.Application.Content;
 using Dfe.PlanTech.Application.Persistence.Extensions;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Persistence.Mappings;
@@ -44,26 +44,20 @@ public abstract class JsonToDbMapper<TEntity>(
         return serialised;
     }
 
-    public virtual Task PostUpdateEntityCallback(MappedEntity mappedEntity, CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
-    }
-
     public override async Task<MappedEntity> MapEntity(CmsWebHookPayload payload, CmsEvent cmsEvent, CancellationToken cancellationToken)
     {
         var incomingEntity = ToEntity(payload);
 
         var existingEntity = await GetExistingEntity(incomingEntity, cancellationToken);
 
-        var postUpdatEntityCallback = (MappedEntity mappedEntity) => PostUpdateEntityCallback(mappedEntity, cancellationToken);
+        return await EntityUpdater.UpdateEntity(incomingEntity, existingEntity, cmsEvent, PostUpdateEntityCallbackWithCancellationToken);
 
-        return await EntityUpdater.UpdateEntity(incomingEntity, existingEntity, cmsEvent, postUpdatEntityCallback);
+        Task PostUpdateEntityCallbackWithCancellationToken(MappedEntity mappedEntity) => this.PostUpdateEntityCallback(mappedEntity, cancellationToken);
     }
 
-    public virtual Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
-    {
-        return values;
-    }
+    protected virtual Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values) => values;
+
+    protected virtual Task PostUpdateEntityCallback(MappedEntity mappedEntity, CancellationToken cancellationToken) => Task.CompletedTask;
 
     protected virtual Task<TEntity?> GetExistingEntity(TEntity incomingEntity, CancellationToken cancellationToken)
     => DatabaseHelper.GetMatchingEntityById(incomingEntity, cancellationToken);

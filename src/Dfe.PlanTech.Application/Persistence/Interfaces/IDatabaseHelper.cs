@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Dfe.PlanTech.Domain.Persistence.Interfaces;
+namespace Dfe.PlanTech.Application.Persistence.Interfaces;
 
 /// <summary>
 /// Provides abstractions for interfacing with the EFCore DB without having to add the EF Core packages directly.

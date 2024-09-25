@@ -1,16 +1,15 @@
 using Dfe.PlanTech.Application.Content;
 using Dfe.PlanTech.Application.Persistence.Extensions;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Persistence.Mappings;
 
-public class EntityUpdater(ILogger<EntityUpdater> logger, ICmsDbContext db, IDatabaseHelper<ICmsDbContext> databaseHelper)
+public class EntityUpdater(ILogger<EntityUpdater> logger, IDatabaseHelper<ICmsDbContext> databaseHelper)
 {
-    private readonly ILogger<EntityUpdater> Logger = logger;
-    protected readonly ICmsDbContext Db = db;
+    protected readonly ILogger<EntityUpdater> Logger = logger;
     protected readonly IDatabaseHelper<ICmsDbContext> DatabaseHelper = databaseHelper;
 
     /// <summary>
@@ -19,6 +18,7 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, ICmsDbContext db, IDat
     /// <param name="incoming"></param>
     /// <param name="existing"></param>
     /// <param name="cmsEvent"></param>
+    /// <param name="postUpdateEntityCallback">Callback method to execute once we have done the initial entity updating</param>
     /// <returns></returns>
     public async Task<MappedEntity> UpdateEntity(ContentComponentDbEntity incoming, ContentComponentDbEntity? existing, CmsEvent cmsEvent, Func<MappedEntity, Task> postUpdateEntityCallback)
     {

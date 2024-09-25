@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Content;
-using Dfe.PlanTech.Domain.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 
@@ -13,7 +13,7 @@ public class SectionMapper(EntityUpdater updater,
 {
     private List<QuestionDbEntity> _incomingQuestions = [];
 
-    public override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
+    protected override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {
         values = MoveValueToNewKey(values, "interstitialPage", "interstitialPageId");
 
@@ -22,7 +22,7 @@ public class SectionMapper(EntityUpdater updater,
         return values;
     }
 
-    public override async Task PostUpdateEntityCallback(MappedEntity mappedEntity, CancellationToken cancellationToken)
+    protected override async Task PostUpdateEntityCallback(MappedEntity mappedEntity, CancellationToken cancellationToken)
     {
         var (incoming, existing) = mappedEntity.GetTypedEntities<SectionDbEntity>();
 

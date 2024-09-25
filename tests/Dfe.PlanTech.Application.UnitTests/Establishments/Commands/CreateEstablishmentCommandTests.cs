@@ -1,7 +1,7 @@
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Commands;
 using Dfe.PlanTech.Domain.Establishments.Exceptions;
 using Dfe.PlanTech.Domain.Establishments.Models;
-using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Establishments.Commands
