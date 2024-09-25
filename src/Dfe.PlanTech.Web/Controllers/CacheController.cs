@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Web.Helpers;
-using EFCoreSecondLevelCacheInterceptor;
 using Microsoft.AspNetCore.Mvc;
+using Dfe.PlanTech.Application.Extensions;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
@@ -10,11 +10,11 @@ public class CacheController(ILogger<CacheController> cacheLogger) : BaseControl
 {
     [HttpPost("clear")]
     [ValidateApiKey]
-    public IActionResult ClearCache([FromServices] IEFCacheServiceProvider cacheServiceProvider)
+    public IActionResult ClearCache()
     {
         try
         {
-            cacheServiceProvider.ClearAllCachedEntries();
+            QueryableExtensions.ClearCmsCache();
             logger.LogInformation("Database cache has been cleared");
             return Ok(true);
         }

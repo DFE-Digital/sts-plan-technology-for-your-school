@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Extensions;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Dfe.PlanTech.Domain.Exceptions;
@@ -215,15 +216,16 @@ public class CmsDbContext : DbContext, ICmsDbContext
         => entity => (_contentfulOptions.UsePreview || entity.Published) && !entity.Archived && !entity.Deleted;
 
     public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
-        => Pages.Include(page => page.BeforeTitleContent)
+        => Pages.Where(page => page.Slug == slug)
+            .Include(page => page.BeforeTitleContent)
             .Include(page => page.Content)
             .Include(page => page.Title)
             .AsSplitQuery()
-            .FirstOrDefaultAsync(page => page.Slug == slug, cancellationToken);
+            .FirstOrDefaultAsyncWithCache(cancellationToken);
 
     public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default) =>
-        queryable.ToListAsync(cancellationToken: cancellationToken);
+        queryable.ToListAsyncWithCache(cancellationToken: cancellationToken);
 
     public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
-        => queryable.FirstOrDefaultAsync(cancellationToken);
+        => queryable.FirstOrDefaultAsyncWithCache(cancellationToken);
 }

@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Extensions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -28,7 +29,7 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
                                                   SectionId = subtopicRecommendation!.SectionId,
                                                   Id = subtopicRecommendation.Id
                                               })
-                                              .FirstOrDefaultAsync(cancellationToken);
+                                              .FirstOrDefaultAsyncWithCache(cancellationToken);
 
         if (recommendation == null)
         {
@@ -37,7 +38,7 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
 
         var intros = await _db.RecommendationIntros.Where(intro => intro.SubtopicRecommendations.Any(subtopicRec => subtopicRec.Id == recommendation.Id))
                                                   .Include(intro => intro.Header)
-                                                  .ToListAsync(cancellationToken);
+                                                  .ToListAsyncWithCache(cancellationToken);
 
         var chunks = await _db.RecommendationChunks.Where(chunk => chunk.RecommendationSections.Any(section => section.Id == recommendation.SectionId))
                                                     .Select(chunk => new RecommendationChunkDbEntity()
@@ -49,7 +50,7 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
                                                         CSLink = chunk.CSLink
                                                     })
                                                     .OrderBy(chunk => chunk.Order)
-                                                    .ToListAsync(cancellationToken);
+                                                    .ToListAsyncWithCache(cancellationToken);
 
         var introContent = await _db.RecommendationIntroContents.Where(introContent => introContent.RecommendationIntro != null &&
                                                                                        introContent.RecommendationIntro.SubtopicRecommendations.Any(rec => rec.Id == recommendation.Id))
@@ -60,7 +61,7 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
                                                                     ContentComponentId = introContent.ContentComponentId,
                                                                     Id = introContent.Id
                                                                 })
-                                                                .ToListAsync(cancellationToken);
+                                                                .ToListAsyncWithCache(cancellationToken);
 
         var chunkContent = await _db.RecommendationChunkContents.Where(chunkContent => chunkContent.RecommendationChunk != null &&
                                                                                        chunkContent.RecommendationChunk.RecommendationSections.Any(section => section.Id == recommendation.SectionId))
@@ -71,14 +72,14 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
                                                                     ContentComponentId = chunkContent.ContentComponentId,
                                                                     Id = chunkContent.Id
                                                                 })
-                                                                .ToListAsync(cancellationToken);
+                                                                .ToListAsyncWithCache(cancellationToken);
 
         LogInvalidJoinRows(introContent);
         LogInvalidJoinRows(chunkContent);
 
         await _db.RichTextContentWithSubtopicRecommendationIds
           .Where(rt => rt.SubtopicRecommendationId == recommendation.Id)
-          .ToListAsync(cancellationToken);
+          .ToListAsyncWithCache(cancellationToken);
 
         return new SubtopicRecommendationDbEntity()
         {
@@ -117,7 +118,7 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
     => _db.SubtopicRecommendations.Where(subtopicRecommendation => subtopicRecommendation.SubtopicId == subtopicId)
                                   .Select(subtopicRecommendation => subtopicRecommendation.Intros.FirstOrDefault(intro => intro.Maturity == maturity))
                                   .Select(intro => intro != null ? new RecommendationsViewDto(intro.Slug, intro.Header.Text) : null)
-                                  .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                                  .FirstOrDefaultAsyncWithCache(cancellationToken: cancellationToken);
 
     /// <summary>
     /// Check for invalid join rows, and log any errored rows.

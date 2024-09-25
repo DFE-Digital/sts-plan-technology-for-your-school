@@ -1,6 +1,8 @@
-﻿using Dfe.PlanTech.Web.Controllers;
-using EFCoreSecondLevelCacheInterceptor;
+﻿using Dfe.PlanTech.Application.Extensions;
+using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -9,40 +11,38 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers;
 
 public class CacheControllerTests
 {
-    private readonly IEFCacheServiceProvider _cacheServiceProvider = Substitute.For<IEFCacheServiceProvider>();
     private readonly ILogger<CacheController> _logger = Substitute.For<ILogger<CacheController>>();
     private readonly CacheController _cacheController;
+
+    private readonly IQueryable<ContentComponent> _mockQueryable = Substitute.For<IQueryable<ContentComponent>>();
+    private int _queryCallCount;
 
     public CacheControllerTests()
     {
         _cacheController = new CacheController(_logger);
+
+        _mockQueryable
+            .When(query => query.ToListAsync())
+            .Do(_ => _queryCallCount++ );
     }
 
     [Fact]
-    public void ClearCache_Should_Return_True_On_Success()
+    public void ClearCache_Should_Empty_Cache()
     {
-        var clearCacheResult = _cacheController.ClearCache(_cacheServiceProvider);
+        _mockQueryable.ToListAsyncWithCache();
+        _mockQueryable.ToListAsyncWithCache();
+
+        Assert.Equal(1, _queryCallCount);
+
+        var clearCacheResult = _cacheController.ClearCache();
         Assert.NotNull(clearCacheResult);
 
         var result = clearCacheResult as ObjectResult;
         Assert.NotNull(result);
         Assert.Equal(200, result.StatusCode);
 
-        _cacheServiceProvider.Received(1).ClearAllCachedEntries();
-    }
+        _mockQueryable.ToListAsyncWithCache();
 
-    [Fact]
-    public void ClearCache_Should_Return_False_On_Failure()
-    {
-        _cacheServiceProvider
-            .When(call => call.ClearAllCachedEntries())
-            .Do(_ => throw new Exception("unexpected error"));
-
-        var clearCacheResult = _cacheController.ClearCache(_cacheServiceProvider);
-        Assert.NotNull(clearCacheResult);
-
-        var result = clearCacheResult as ObjectResult;
-        Assert.NotNull(result);
-        Assert.Equal(500, result.StatusCode);
+        Assert.Equal(2, _queryCallCount);
     }
 }
