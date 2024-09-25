@@ -30,3 +30,12 @@
     <div class="js-only">This element will be hidden by default, but made visible via JS.</div>
     ```
   - The code that unhides these elements is located in [_BodyEnd.cshtml](src/Dfe.PlanTech.Web/Views/Shared/_BodyEnd.cshtml)
+
+## EF Query Conventions
+- We use a Memory Cache to cache content queries by the hash of their query string. This is setup in  in [Dfe.PlanTech.Application](/src/Dfe.PlanTech.Application/Extensions/QueryableExtensions.cs).
+- Any queries using the `CmsDbContext` should be cached:
+  - either by using the `db.ToListAsync` or `db.FirstOrDefaultAsync` methods from `CmsDbContext`
+  - or by using the `ToListAsyncWithCache` and `FirstOrDefaultAsyncWithCache` extensions from `QueryableExtensions`
+  - the cache can be cleared with the `ClearCmsCache` method which clears everything
+- These extensions should not be used for any `PlanTechDbContext` queries as these tables are frequently updated
+- More about contentful caching is explained in [Contentful-Caching-Process](/docs/Contentful-Caching-Process.md)

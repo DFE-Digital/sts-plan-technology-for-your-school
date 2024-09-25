@@ -41,7 +41,7 @@
 - We normalise the incoming entry JSON. This involves essentially just copying the children within the "fields" object to a new JSON object, along with the "id" field from the "sys" object.
   - The end result of this is a JSON that should match the actual Contentful classes we use one-to-one.
 - We then deserialise this JSON to the appropriate database class for the content type
-- We retrieve the existing entity from our database, if it exists, using the id. 
+- We retrieve the existing entity from our database, if it exists, using the id.
   - If it does exist, we use reflection to copy over the values from the _incoming_ mapped entity, to the found _existing_ entity.
     - Certain properties are ignored during this, for a variety of reasons (e.g. they might be metadata, meaning they wouldn't exist on in the incoming data, which could cause errors or incorrect data copied over)
       - This is done by using our custom [DontCopyValueAttribute](./src/Dfe.PlanTech.Domain/DontCopyValueAttribute.cs) on each property we do not wish to copy, and checking for its existance per property
@@ -81,11 +81,11 @@ There are _some_ custom mappings done using LINQ `select` projections, due to va
 There are several steps to it:
 
 1. We retrieve the `Page` matching the Slug from the table, and Include all `BeforeTitleContent` and `Content`. Note: there are various AutoIncludes defined in the [/src/Dfe.PlanTech.Infrastructure.Data/CmsDbContext.cs](/src/Dfe.PlanTech.Infrastructure.Data/CmsDbContext.cs) for the majority of the content tables, to ensure all data is pulled in.
-  
+
 2. Due to various issues with certain navigations, we execute various other queries and then merge the data together. These are completed using various `IGetPageChildrenQuery` objects that are injected into the `GetPageQuery` in the constructor using DI.
 
   -  If there is any content which has a `RichTextContent` property (using the `IHasText` interface to check), we execute a query to retrieve all the `RichTextContent` for the Page. The `RichTextMark` and `RichTextData` tables are joined automatically. This is handled by the [GetRichTextsQuery](/src/Dfe.PlanTech.Application/Content/Queries/GetRichTextsQuery.cs) class.
-  
+
   - If there is any `ButtonWithEntryReference` content, then we retrieve the `LinkToEntry` property from it manually. This is to ensure we do not have a cartesian explosion (i.e. retrieving that entire page, + content, etc.), and to minimise the data we retrieve from the database (we only retrieve the slug and Id fields for the `LinkToEntry` property).  This is handled by the [GetButtonWithEntryReferencesQuery](/src/Dfe.PlanTech.Application/Content/Queries/GetButtonWithEntryReferencesQuery.cs) class.
 
   - If there are any `Category` content, we retrieve the `Sections` for them manually. This is because we also need to retrieve the `Question`s and `Recommendation`s for each Section, but only certain pieces of information. To prevent execessive data being retrieved, we only query the necessary fields. This is handled by the [GetCategorySectionsQuery](/src/Dfe.PlanTech.Application/Content/Queries/GetCategorySectionsQuery.cs) class.
@@ -94,6 +94,6 @@ There are several steps to it:
 
 ## Caching
 
-- Caching is handled by the open-source [EFCoreSecondLevelCacheInterceptor](https://github.com/VahidN/EFCoreSecondLevelCacheInterceptor) C# package.
-- It is enabled only in the [web project](./src/Dfe.PlanTech.Web), and is enabled in the services configuration in [ProgramExtensions.cs](./src/Dfe.PlanTech.Web/ProgramExtensions.cs). We currently have no functionality setup to amend the configuration (e.g. caching length) via any sort of environment variables, but this should be added when possible.
+- Caching is handled by an in memory cache defined in the QueryableExtensions class in [Dfe.PlanTech.Application](/src/Dfe.PlanTech.Application/Extensions/QueryableExtensions.cs).
+- It does not have any form of cache invalidation as it is only intended for use with the `CmsDbContext` and not any of the `dbo` tables which will be frequently updated. See [Conventions](/docs/Conventions.md) for more information.
 - The Cache can be invalidated by an API key protected endpoint in the website. This is called by the azure function whenever content is updated in the database. The API key is stored in the key vault and referenced by an environment variable for the function.
