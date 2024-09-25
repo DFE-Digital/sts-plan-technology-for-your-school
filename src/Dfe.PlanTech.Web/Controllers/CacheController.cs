@@ -1,6 +1,6 @@
+using Dfe.PlanTech.Application.Extensions;
 using Dfe.PlanTech.Web.Helpers;
 using Microsoft.AspNetCore.Mvc;
-using Dfe.PlanTech.Application.Extensions;
 
 namespace Dfe.PlanTech.Web.Controllers;
 

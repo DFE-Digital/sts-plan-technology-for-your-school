@@ -23,7 +23,7 @@ public class CacheControllerTests
 
         _mockQueryable
             .When(query => query.ToListAsync())
-            .Do(_ => _queryCallCount++ );
+            .Do(_ => _queryCallCount++);
     }
 
     [Fact]
