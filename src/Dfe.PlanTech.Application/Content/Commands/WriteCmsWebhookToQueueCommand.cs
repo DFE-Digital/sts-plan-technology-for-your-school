@@ -5,9 +5,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Content.Commands;
 
-public class WriteCmsWebhookToQueueCommand(ILogger<WriteCmsWebhookToQueueCommand> logger, IQueueWriter queueWriter) : IWriteCmsWebhookToQueueCommand
+public class WriteCmsWebhookToQueueCommand(IQueueWriter queueWriter, ILogger<WriteCmsWebhookToQueueCommand> logger) : IWriteCmsWebhookToQueueCommand
 {
-    private const string ContentfulTopicHeaderKey = "X-Contentful-Topic";
+    public const string ContentfulTopicHeaderKey = "X-Contentful-Topic";
 
     public async Task<string?> WriteMessageToQueue(JsonDocument json, HttpRequest request)
     {
@@ -19,7 +19,7 @@ public class WriteCmsWebhookToQueueCommand(ILogger<WriteCmsWebhookToQueueCommand
             if (cmsEvent == null)
             {
                 var errorMessage = $"Couldn't find header {ContentfulTopicHeaderKey}";
-                logger.LogError(errorMessage);
+                logger.LogError("Couldn't find header {ContentfulTopicHeaderKey}", ContentfulTopicHeaderKey);
                 return errorMessage;
             }
 
@@ -36,7 +36,6 @@ public class WriteCmsWebhookToQueueCommand(ILogger<WriteCmsWebhookToQueueCommand
             logger.LogError(ex, "Failed to save message to queue");
             throw;
         }
-
     }
 
     private static string? GetCmsEvent(HttpRequest request)

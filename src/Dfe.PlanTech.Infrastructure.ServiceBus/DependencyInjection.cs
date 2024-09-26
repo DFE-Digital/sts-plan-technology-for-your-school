@@ -96,11 +96,6 @@ public static class DependencyInjection
     /// <param name="services"></param>
     private static IServiceCollection AddMappers(this IServiceCollection services)
     {
-        var mappers = GetMappers().ToList();
-        var otherMappers = AppDomain.CurrentDomain.GetAssemblies()
-            .SelectMany(assembly => assembly.GetTypes())
-            .Where(type => type.IsAssignableFrom(typeof(JsonToDbMapper)) && !type.IsAbstract);
-
         foreach (var mapper in GetMappers())
         {
             services.AddTransient(typeof(JsonToDbMapper), mapper);

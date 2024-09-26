@@ -69,4 +69,18 @@ public class ServiceBusResultProcessorTests
 
         await _eventArgs.Received(1).DeadLetterMessageAsync(_message, null, result.Reason, result.Description, Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    public async Task Should_LogError_When_Unknown_ServiceBusResultType()
+    {
+        var result = new MockServiceBusResult();
+        await _processor.ProcessMessageResult(_eventArgs, result, default);
+
+        var expectedLogMessage = $"Unexpected service bus result type: {result.GetType().Name}";
+        var matchingLogMessages = _logger.GetMatchingReceivedMessages(expectedLogMessage, LogLevel.Error);
+
+        Assert.Single(matchingLogMessages);
+    }
 }
+
+public class MockServiceBusResult : IServiceBusResult { }

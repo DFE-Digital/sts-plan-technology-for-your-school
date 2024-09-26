@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.ServiceBus;
 
-public class QueueWriter(IAzureClientFactory<ServiceBusSender> serviceBusSenderFactory,  ILogger<QueueWriter> logger) : IQueueWriter
+public class QueueWriter(IAzureClientFactory<ServiceBusSender> serviceBusSenderFactory, ILogger<QueueWriter> logger) : IQueueWriter
 {
     private readonly ServiceBusSender _serviceBusSender = serviceBusSenderFactory.CreateClient("contentfulsender");
 
