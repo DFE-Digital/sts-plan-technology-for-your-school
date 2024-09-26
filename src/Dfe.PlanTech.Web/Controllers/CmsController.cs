@@ -16,7 +16,7 @@ public class CmsController(ILogger<CmsController> logger) : BaseController<CmsCo
         try
         {
             var result = await writeToQueueCommand.WriteMessageToQueue(json, HttpContext.Request);
-            if (result == null)
+            if (result.Success)
             {
                 return Ok();
             }

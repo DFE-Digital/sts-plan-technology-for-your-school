@@ -26,7 +26,7 @@ public class WebhookToDbCommandTests
 
     private readonly ILogger<WebhookToDbCommand> _logger = Substitute.For<ILogger<WebhookToDbCommand>>();
     private readonly JsonToEntityMappers _jsonToEntityMappers;
-    private readonly ICacheHandler _cacheHandler = Substitute.For<ICacheHandler>();
+    private readonly ICacheClearer _cacheClearer = Substitute.For<ICacheClearer>();
     private readonly IDatabaseHelper<ICmsDbContext> _databaseHelper = Substitute.For<IDatabaseHelper<ICmsDbContext>>();
 
     private readonly QuestionDbEntity _newQuestion = new()
@@ -72,7 +72,7 @@ public class WebhookToDbCommandTests
         _webhookToDbCommand = CreateWebhookToDbCommand(true);
     }
 
-    private WebhookToDbCommand CreateWebhookToDbCommand(bool usePreview) => new(_cacheHandler,
+    private WebhookToDbCommand CreateWebhookToDbCommand(bool usePreview) => new(_cacheClearer,
         new ContentfulOptions(usePreview), _jsonToEntityMappers, _logger, _databaseHelper);
 
     private JsonToEntityMappers CreateMappers()
@@ -102,7 +102,7 @@ public class WebhookToDbCommandTests
         Assert.IsType<ServiceBusSuccessResult>(result);
         _databaseHelper.Received(1).ClearTracking();
         await _databaseHelper.Database.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-        await _cacheHandler.Received(1).RequestCacheClear(Arg.Any<CancellationToken>());
+        _cacheClearer.Received(1).ClearCache();
         _databaseHelper.Received(1).Add(Arg.Any<ContentComponentDbEntity>());
 
         Assert.Equal(2, _questions.Count);
@@ -144,7 +144,7 @@ public class WebhookToDbCommandTests
         Assert.IsType<ServiceBusSuccessResult>(result);
         _databaseHelper.Received(1).ClearTracking();
         await _databaseHelper.Database.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-        await _cacheHandler.Received(1).RequestCacheClear(Arg.Any<CancellationToken>());
+        _cacheClearer.Received(1).ClearCache();
 
         _databaseHelper.ReceivedWithAnyArgs(0).Add(Arg.Any<ContentComponentDbEntity>());
         _databaseHelper.ReceivedWithAnyArgs(1).Update(Arg.Any<ContentComponentDbEntity>());
@@ -160,7 +160,7 @@ public class WebhookToDbCommandTests
             await _webhookToDbCommand.ProcessMessage(subject, QuestionJsonBody, "message id", CancellationToken.None);
 
         _databaseHelper.Received(1).ClearTracking();
-        await _cacheHandler.Received(1).RequestCacheClear(Arg.Any<CancellationToken>());
+        _cacheClearer.Received(1).ClearCache();
         _databaseHelper.Received(1).Update(Arg.Any<ContentComponentDbEntity>());
         await _databaseHelper.Database.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
 
@@ -184,7 +184,7 @@ public class WebhookToDbCommandTests
         Assert.IsType<ServiceBusSuccessResult>(result);
         _databaseHelper.Received(1).ClearTracking();
         await _databaseHelper.Database.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-        await _cacheHandler.Received(1).RequestCacheClear(Arg.Any<CancellationToken>());
+        _cacheClearer.Received(1).ClearCache();
         _databaseHelper.Received(1).Update(Arg.Any<ContentComponentDbEntity>());
 
         Assert.Equal(2, _questions.Count);
@@ -207,7 +207,7 @@ public class WebhookToDbCommandTests
         Assert.IsType<ServiceBusSuccessResult>(result);
         _databaseHelper.Received(1).ClearTracking();
         await _databaseHelper.Database.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-        await _cacheHandler.Received(1).RequestCacheClear(Arg.Any<CancellationToken>());
+        _cacheClearer.Received(1).ClearCache();
         await _databaseHelper.Database.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
         _databaseHelper.Received(1).Update(Arg.Any<QuestionDbEntity>());
         Assert.Equal(2, _questions.Count);
@@ -230,7 +230,7 @@ public class WebhookToDbCommandTests
         Assert.IsType<ServiceBusErrorResult>(result);
         _databaseHelper.Received(1).ClearTracking();
         await _databaseHelper.Database.Received(0).SaveChangesAsync(Arg.Any<CancellationToken>());
-        await _cacheHandler.Received(0).RequestCacheClear(Arg.Any<CancellationToken>());
+        _cacheClearer.Received(0).ClearCache();
         _databaseHelper.Received(0).Update(Arg.Any<ContentComponentDbEntity>());
         _databaseHelper.Received(0).Add(Arg.Any<ContentComponentDbEntity>());
 
@@ -252,7 +252,7 @@ public class WebhookToDbCommandTests
             await _webhookToDbCommand.ProcessMessage(subject, QuestionJsonBody, "message id", CancellationToken.None);
         Assert.IsType<ServiceBusSuccessResult>(result);
         _databaseHelper.Received(1).ClearTracking();
-        await _cacheHandler.Received(1).RequestCacheClear(Arg.Any<CancellationToken>());
+        _cacheClearer.Received(1).ClearCache();
         _databaseHelper.Received(0).Update(Arg.Any<ContentComponentDbEntity>());
         _databaseHelper.Received(0).Add(Arg.Any<ContentComponentDbEntity>());
         await _databaseHelper.Database.ReceivedWithAnyArgs(1)
@@ -280,7 +280,7 @@ public class WebhookToDbCommandTests
         await _databaseHelper.Database.ReceivedWithAnyArgs(1)
             .SetComponentPublishedAndDeletedStatuses(Arg.Any<QuestionDbEntity>(), false, true,
                 Arg.Any<CancellationToken>());
-        await _cacheHandler.Received(1).RequestCacheClear(Arg.Any<CancellationToken>());
+        _cacheClearer.Received(1).ClearCache();
 
         Assert.Equal(2, _questions.Count);
         Assert.True(_questions[1].Deleted);
@@ -304,7 +304,7 @@ public class WebhookToDbCommandTests
 
         _databaseHelper.Received(1).ClearTracking();
         await _databaseHelper.Database.Received(0).SaveChangesAsync(Arg.Any<CancellationToken>());
-        await _cacheHandler.Received(0).RequestCacheClear(Arg.Any<CancellationToken>());
+        _cacheClearer.Received(0).ClearCache();
     }
 
     [Theory]
@@ -326,7 +326,7 @@ public class WebhookToDbCommandTests
         _databaseHelper.Received(1).ClearTracking();
         await _databaseHelper.Database.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
         _databaseHelper.Received(1).Update(Arg.Any<QuestionDbEntity>());
-        await _cacheHandler.Received(1).RequestCacheClear(Arg.Any<CancellationToken>());
+        _cacheClearer.Received(1).ClearCache();
     }
 
     [Fact]
@@ -340,7 +340,7 @@ public class WebhookToDbCommandTests
         _databaseHelper.Received(1).ClearTracking();
         await _databaseHelper.Database.Received(0).SaveChangesAsync(Arg.Any<CancellationToken>());
         _databaseHelper.Received(0).Update(Arg.Any<QuestionDbEntity>());
-        await _cacheHandler.Received(0).RequestCacheClear(Arg.Any<CancellationToken>());
+        _cacheClearer.Received(0).ClearCache();
     }
 
     [Theory]
@@ -355,7 +355,7 @@ public class WebhookToDbCommandTests
         _databaseHelper.Received(1).ClearTracking();
         await _databaseHelper.Database.Received(0).SaveChangesAsync(Arg.Any<CancellationToken>());
         _databaseHelper.Received(0).Update(Arg.Any<QuestionDbEntity>());
-        await _cacheHandler.Received(0).RequestCacheClear(Arg.Any<CancellationToken>());
+        _cacheClearer.Received(0).ClearCache();
     }
 
     [Fact]
@@ -370,7 +370,7 @@ public class WebhookToDbCommandTests
         _databaseHelper.Received(1).ClearTracking();
         await _databaseHelper.Database.Received(0).SaveChangesAsync(Arg.Any<CancellationToken>());
         _databaseHelper.Received(0).Update(Arg.Any<QuestionDbEntity>());
-        await _cacheHandler.Received(0).RequestCacheClear(Arg.Any<CancellationToken>());
+        _cacheClearer.Received(0).ClearCache();
 
         Assert.Single(_questions);
     }
@@ -391,7 +391,7 @@ public class WebhookToDbCommandTests
         _databaseHelper.Received(1).ClearTracking();
         await _databaseHelper.Database.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
         _databaseHelper.Received(1).Add(Arg.Any<QuestionDbEntity>());
-        await _cacheHandler.Received(1).RequestCacheClear(Arg.Any<CancellationToken>());
+        _cacheClearer.Received(1).ClearCache();
     }
 
     [Fact]

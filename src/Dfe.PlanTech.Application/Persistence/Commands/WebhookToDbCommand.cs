@@ -14,7 +14,7 @@ using Microsoft.Extensions.Logging;
 namespace Dfe.PlanTech.Application.Persistence.Commands;
 
 /// <inheritdoc cref="IWebhookToDbCommand" />
-public class WebhookToDbCommand(ICacheHandler cacheHandler,
+public class WebhookToDbCommand(ICacheClearer cacheClearer,
                                 ContentfulOptions contentfulOptions,
                                 JsonToEntityMappers mappers,
                                 ILogger<WebhookToDbCommand> logger,
@@ -51,7 +51,7 @@ public class WebhookToDbCommand(ICacheHandler cacheHandler,
                 await DbSaveChanges(cancellationToken);
             }
 
-            await cacheHandler.RequestCacheClear(cancellationToken);
+            cacheClearer.ClearCache();
             return new ServiceBusSuccessResult();
         }
         catch (Exception ex) when (ex is JsonException or CmsEventException)

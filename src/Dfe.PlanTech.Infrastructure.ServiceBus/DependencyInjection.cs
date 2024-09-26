@@ -3,15 +3,12 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
-using Dfe.PlanTech.Application.Caching.Services;
 using Dfe.PlanTech.Application.Content.Commands;
 using Dfe.PlanTech.Application.Persistence.Commands;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Mappings;
 using Dfe.PlanTech.Application.Queues.Interfaces;
-using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
-using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.ServiceBus.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Results;
@@ -34,7 +31,6 @@ public static class DependencyInjection
     public static IServiceCollection AddDbWriterServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddServiceBusServices(configuration)
-                .AddCaching()
                 .AddMessageRetryHandler()
                 .AddMappers();
 
@@ -68,25 +64,6 @@ public static class DependencyInjection
         services.AddTransient<IWriteCmsWebhookToQueueCommand, WriteCmsWebhookToQueueCommand>();
 
         services.AddSingleton(new ServiceBusOptions() { MessagesPerBatch = 10 });
-        return services;
-    }
-
-    private static IServiceCollection AddCaching(this IServiceCollection services)
-    {
-        services.AddOptions<CacheRefreshConfiguration>()
-                .Configure<IConfiguration>((settings, configuration) =>
-                {
-                    configuration.GetSection("CacheClear").Bind(settings);
-                });
-
-        services.AddHttpClient<CacheHandler>()
-            .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler()
-            {
-                PooledConnectionLifetime = TimeSpan.FromMinutes(5)
-            });
-
-        services.AddTransient<ICacheHandler, CacheHandler>();
-
         return services;
     }
 
