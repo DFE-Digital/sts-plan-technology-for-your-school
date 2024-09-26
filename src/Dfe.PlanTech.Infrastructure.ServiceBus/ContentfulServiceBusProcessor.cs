@@ -49,10 +49,15 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
         try
         {
             var body = Encoding.UTF8.GetString(processMessageEventArgs.Message.Body);
-            var result = await webhookToDbCommand.ProcessMessage(processMessageEventArgs.Message.Subject, body,
-                processMessageEventArgs.Message.MessageId, processMessageEventArgs.CancellationToken);
-            await resultProcessor.ProcessMessageResult(processMessageEventArgs, result,
-                processMessageEventArgs.CancellationToken);
+
+            var result = await webhookToDbCommand.ProcessMessage(processMessageEventArgs.Message.Subject,
+                                                                 body,
+                                                                 processMessageEventArgs.Message.MessageId,
+                                                                 processMessageEventArgs.CancellationToken);
+
+            await resultProcessor.ProcessMessageResult(processMessageEventArgs,
+                                                       result,
+                                                       processMessageEventArgs.CancellationToken);
         }
         catch (Exception ex)
         {

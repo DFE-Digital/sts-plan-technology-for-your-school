@@ -17,7 +17,7 @@ public class ServiceBusResultProcessor(IMessageRetryHandler retryHandler, ILogge
                     await ProcessSuccessResult(processMessageEventArgs, cancellationToken);
                     break;
                 case ServiceBusErrorResult deadLetterResult:
-                    await ProcessDeadLetterResult(processMessageEventArgs, deadLetterResult, cancellationToken);
+                    await ProcessErrorResult(processMessageEventArgs, deadLetterResult, cancellationToken);
                     break;
                 default:
                     logger.LogError("Unexpected service bus result type: {Type}", result.GetType().Name);
@@ -33,7 +33,7 @@ public class ServiceBusResultProcessor(IMessageRetryHandler retryHandler, ILogge
     private static async Task ProcessSuccessResult(ProcessMessageEventArgs processMessageEventArgs, CancellationToken cancellationToken)
       => await processMessageEventArgs.CompleteMessageAsync(processMessageEventArgs.Message, cancellationToken);
 
-    private async Task ProcessDeadLetterResult(ProcessMessageEventArgs processMessageEventArgs, ServiceBusErrorResult errorResult, CancellationToken cancellationToken)
+    private async Task ProcessErrorResult(ProcessMessageEventArgs processMessageEventArgs, ServiceBusErrorResult errorResult, CancellationToken cancellationToken)
     {
         var shouldRetry = await retryHandler.RetryRequired(processMessageEventArgs.Message, cancellationToken);
 
