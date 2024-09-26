@@ -26,7 +26,7 @@ public class PagesController : BaseController<PagesController>
     [HttpGet("{route?}", Name = "GetPage")]
     public IActionResult GetByRoute([ModelBinder(typeof(PageModelBinder))] Page page, [FromServices] IUser user)
     {
-        var viewModel = new PageViewModel(page, this, user, logger);
+        var viewModel = new PageViewModel(page, this, user, Logger);
 
         return View("Page", viewModel);
     }

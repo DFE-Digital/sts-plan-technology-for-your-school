@@ -15,12 +15,12 @@ public class CacheController(ILogger<CacheController> cacheLogger) : BaseControl
         try
         {
             cacheServiceProvider.ClearAllCachedEntries();
-            logger.LogInformation("Database cache has been cleared");
+            Logger.LogInformation("Database cache has been cleared");
             return Ok(true);
         }
         catch (Exception e)
         {
-            logger.LogError(e, "An error occured while trying to clear the database cache: {message}", e.Message);
+            Logger.LogError(e, "An error occured while trying to clear the database cache: {message}", e.Message);
             return StatusCode(500, false);
         }
     }

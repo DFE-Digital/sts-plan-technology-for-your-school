@@ -15,4 +15,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Dfe.PlanTech.Domain\Dfe.PlanTech.Domain.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Queues\Commands\" />
+  </ItemGroup>
 </Project>

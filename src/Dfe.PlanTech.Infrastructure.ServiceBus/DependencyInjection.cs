@@ -4,9 +4,11 @@ using System.Text.Json.Serialization;
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.Application.Caching.Services;
+using Dfe.PlanTech.Application.Content.Commands;
 using Dfe.PlanTech.Application.Persistence.Commands;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Mappings;
+using Dfe.PlanTech.Application.Queues.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
@@ -51,7 +53,7 @@ public static class DependencyInjection
     {
         services.AddAzureClients(builder =>
         {
-            builder.AddServiceBusClient(configuration.GetConnectionString("servicebusconnection"));
+            builder.AddServiceBusClient(configuration.GetConnectionString("ServiceBus"));
 
             builder.AddClient<ServiceBusProcessor, ServiceBusClientOptions>((_, _, provider) => provider.GetService<ServiceBusClient>()!.CreateProcessor("contentful", new ServiceBusProcessorOptions() { PrefetchCount = 10 })).WithName("contentfulprocessor");
             builder.AddClient<ServiceBusSender, ServiceBusClientOptions>((_, _, provider) => provider.GetService<ServiceBusClient>()!.CreateSender("contentful")).WithName("contentfulsender");
@@ -62,6 +64,8 @@ public static class DependencyInjection
         services.AddHostedService<ContentfulServiceBusProcessor>();
         services.AddTransient<IServiceBusResultProcessor, ServiceBusResultProcessor>();
         services.AddTransient<IMessageRetryHandler, MessageRetryHandler>();
+        services.AddTransient<IQueueWriter, QueueWriter>();
+        services.AddTransient<IWriteCmsWebhookToQueueCommand, WriteCmsWebhookToQueueCommand>();
 
         services.AddSingleton(new ServiceBusOptions() { MessagesPerBatch = 10 });
         return services;
