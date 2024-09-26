@@ -126,14 +126,14 @@ public class MappedEntity
             case CmsEvent.UNPUBLISH:
                 if (ExistingEntity == null)
                 {
-                    throw new CmsEventException($"Content with Id \"{IncomingEntity.Id}\" has event 'unpublish' despite not existing in the database!");
+                    throw new InvalidDataException($"Content with Id \"{IncomingEntity.Id}\" has event 'unpublish' despite not existing in the database!");
                 }
                 IncomingEntity.Published = false;
                 break;
             case CmsEvent.DELETE:
                 if (ExistingEntity == null)
                 {
-                    throw new CmsEventException($"Content with Id \"{IncomingEntity.Id}\" has event 'delete' despite not existing in the database!");
+                    throw new InvalidDataException($"Content with Id \"{IncomingEntity.Id}\" has event 'delete' despite not existing in the database!");
                 }
                 IncomingEntity.Deleted = true;
                 break;

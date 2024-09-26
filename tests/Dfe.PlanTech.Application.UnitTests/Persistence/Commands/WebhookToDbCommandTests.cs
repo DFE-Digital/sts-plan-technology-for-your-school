@@ -30,10 +30,10 @@ public class WebhookToDbCommandTests
     private readonly IDatabaseHelper<ICmsDbContext> _databaseHelper = Substitute.For<IDatabaseHelper<ICmsDbContext>>();
 
     private readonly QuestionDbEntity _newQuestion = new()
-        { Archived = false, Published = true, Deleted = false, Id = QuestionId };
+    { Archived = false, Published = true, Deleted = false, Id = QuestionId };
 
     private readonly QuestionDbEntity _existingQuestion = new()
-        { Archived = false, Published = true, Deleted = false, Id = "other-content-component" };
+    { Archived = false, Published = true, Deleted = false, Id = "other-content-component" };
 
     private readonly List<QuestionDbEntity> _questions = [];
     private readonly List<AnswerDbEntity> _answers = [];
@@ -126,6 +126,9 @@ public class WebhookToDbCommandTests
             await _webhookToDbCommand.ProcessMessage(subject, nonMappableJson, "message id", CancellationToken.None);
 
         Assert.IsType<ServiceBusErrorResult>(result);
+
+        var errorResult = (ServiceBusErrorResult)result;
+        Assert.False(errorResult.IsRetryable);
     }
 
     [Fact]
@@ -213,12 +216,13 @@ public class WebhookToDbCommandTests
         Assert.True(added.Published);
     }
 
-    [Fact]
-    public async Task ProcessMessage_Should_DeadLetterQueue_After_New_Unpublish()
+    [Theory]
+    [InlineData("ContentManagement.Entry.unpublish", false, false)]
+    [InlineData("ContentManagement.Entry.delete", false, true)]
+    public async Task ProcessMessage_Should_DeadLetterQueue_After_Event_That_Requires_EntityToExist(string subject, bool published, bool deleted)
     {
-        _existingQuestion.Published = true;
-
-        var subject = "ContentManagement.Entry.unpublish";
+        _newQuestion.Published = published;
+        _newQuestion.Deleted = deleted;
 
         var result =
             await _webhookToDbCommand.ProcessMessage(subject, QuestionJsonBody, "message id", CancellationToken.None);
@@ -229,6 +233,10 @@ public class WebhookToDbCommandTests
         await _cacheHandler.Received(0).RequestCacheClear(Arg.Any<CancellationToken>());
         _databaseHelper.Received(0).Update(Arg.Any<ContentComponentDbEntity>());
         _databaseHelper.Received(0).Add(Arg.Any<ContentComponentDbEntity>());
+
+        var errorResult = (ServiceBusErrorResult)result;
+
+        Assert.True(errorResult.IsRetryable);
     }
 
     [Fact]
@@ -414,14 +422,14 @@ public class WebhookToDbCommandTests
                 new object?[] { mappedEntity }));
     }
 
-        [Fact]
-        public async Task DbSaveChanges_Should_LogMessage_When_RowsChanged()
-        {
-            var changedRows = 10;
-            _databaseHelper.Database.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(changedRows);
-            await _webhookToDbCommand.InvokeNonPublicAsyncMethod("DbSaveChanges", new object?[] { CancellationToken.None });
+    [Fact]
+    public async Task DbSaveChanges_Should_LogMessage_When_RowsChanged()
+    {
+        var changedRows = 10;
+        _databaseHelper.Database.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(changedRows);
+        await _webhookToDbCommand.InvokeNonPublicAsyncMethod("DbSaveChanges", new object?[] { CancellationToken.None });
 
-            var matchingLogMessages = _logger.GetMatchingReceivedMessages($"Updated {changedRows} rows in the database", LogLevel.Information);
-        }
+        var matchingLogMessages = _logger.GetMatchingReceivedMessages($"Updated {changedRows} rows in the database", LogLevel.Information);
+    }
 
 }
