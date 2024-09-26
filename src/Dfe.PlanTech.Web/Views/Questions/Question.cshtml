@@ -9,11 +9,11 @@
 
 <form asp-controller="Questions" asp-action="SubmitAnswer" asp-route-sectionSlug=@Model.SectionSlug
     asp-route-questionSlug=@Model.Question.Slug method="post">
-    <input id="QuestionText" hidden value="@Model.Question.Text" name="QuestionText" />
-    <input id="QuestionId" hidden value=@Model.Question.Sys.Id name="QuestionId" />
-    <input id="SectionId" hidden value="@Model.SectionId" name="SectionId" />
-    <input id="SectionName" hidden value="@Model.SectionName" name="SectionName" />
-    
+    <input id="QuestionText" type="hidden" value="@Model.Question.Text" name="QuestionText" />
+    <input id="QuestionId" type="hidden" value=@Model.Question.Sys.Id name="QuestionId" />
+    <input id="SectionId" type="hidden" value="@Model.SectionId" name="SectionId" />
+    <input id="SectionName" type="hidden" value="@Model.SectionName" name="SectionName" />
+
     <govuk-radios name="ChosenAnswerJson">
         <govuk-radios-fieldset>
             <govuk-radios-fieldset-legend is-page-heading="true" class="govuk-fieldset__legend--l">
