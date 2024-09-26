@@ -1,4 +1,4 @@
-import sharedConfig from "../../eslint.config.mjs"; // Adjust the path as necessary
+import sharedConfig from "../../eslint.config.mjs";
 
 export default [
   ...sharedConfig,
