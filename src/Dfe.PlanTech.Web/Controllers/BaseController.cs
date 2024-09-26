@@ -4,5 +4,5 @@ namespace Dfe.PlanTech.Web.Controllers;
 
 public class BaseController<TConcreteController>(ILogger<BaseController<TConcreteController>> logger) : Controller
 {
-    protected readonly ILogger<BaseController<TConcreteController>> logger = logger;
+    protected readonly ILogger<BaseController<TConcreteController>> Logger = logger;
 }

@@ -8,10 +8,7 @@
             "commandName": "Project",
             "launchBrowser": true,
             "environmentVariables": {
-                "Kestrel__Endpoints__Https__Url": "https://*:8081",
-                "DfeSignIn__FrontDoorUrl": "https://localhost:8081",
-                "ASPNETCORE_ENVIRONMENT": "Development",
-                "KeyVaultName": "s190d01-plantech-kv"
+                "ASPNETCORE_ENVIRONMENT": "Development"
             }
         }
     }
