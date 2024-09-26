@@ -4,7 +4,8 @@
     "description": "migration scripts for programmatic contentful changes",
     "main": "run-migrations.js",
     "scripts": {
-        "migration": "node run-migration.js"
+        "migration": "node run-migration.js",
+        "lint": "eslint"
     },
     "keywords": [],
     "author": "",
