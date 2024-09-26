@@ -1,7 +1,8 @@
-import { Section } from "./content-types/section.js";
 import ContentType from "./content-types/content-type.js";
 import SubtopicRecommendation from "./content-types/subtopic-recommendation.js";
 import ErrorLogger from "./errors/error-logger.js";
+// eslint-disable-next-line no-unused-vars
+import { Section } from "./content-types/section.js";
 
 /**
  * DataMapper class for mapping and combining data from a file
@@ -122,7 +123,7 @@ export default class DataMapper {
       throw `No subtopic recommendations found`;
     }
 
-    for (const [id, subtopicRecommendation] of subtopicRecommendations) {
+    for (const [, subtopicRecommendation] of subtopicRecommendations) {
       const mapped = new SubtopicRecommendation(subtopicRecommendation);
 
       yield mapped.subtopic;
@@ -167,7 +168,7 @@ export default class DataMapper {
     for (const [contentTypeId, contents] of this.contents.entries()) {
       const contentType = this.contentTypes.get(contentTypeId);
 
-      for (const [id, entry] of contents) {
+      for (const [, entry] of contents) {
         this.mapRelationshipsForEntry(entry, contentType);
       }
     }

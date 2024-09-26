@@ -1,4 +1,5 @@
 describe("Interstitial page", () => {
+  // eslint-disable-next-line no-unused-vars
   let url;
 
   beforeEach(() => {

@@ -1,6 +1,7 @@
 import fs from "fs";
-import TestSuite from "./test-suite.js";
 import path from "path";
+// eslint-disable-next-line no-unused-vars
+import TestSuite from "./test-suite.js";
 
 const mainSheetColumns = [
   { testReference: "Test Reference" },

@@ -31,7 +31,6 @@ export default [
     esConfig,
     {
         rules: {
-            "no-unused-vars": "warn",
             "no-extra-boolean-cast": "off",
         },
     },
