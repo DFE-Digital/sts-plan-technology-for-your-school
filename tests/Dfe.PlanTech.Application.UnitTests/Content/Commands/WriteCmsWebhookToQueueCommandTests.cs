@@ -52,15 +52,17 @@ public class WriteCmsWebhookToQueueCommandTests
     }
 
     [Fact]
-    public async Task WriteMessageToQueue_Should_Throw_Exception()
+    public async Task WriteMessageToQueue_Should_Handle_Exception()
     {
         AddCmsEventHeader();
         var body = CreateWebhookBody();
+        var exception = new Exception("Thrown exception");
+        _queueWriter.WriteMessage(Arg.Any<string>(), Arg.Any<string>()).ThrowsAsync(exception);
 
-        _queueWriter.WriteMessage(Arg.Any<string>(), Arg.Any<string>()).ThrowsAsync(new Exception("Thrown exception"));
+        var result = await _command.WriteMessageToQueue(body, _httpContext.Request);
 
-        await Assert.ThrowsAsync<Exception>(() => _command.WriteMessageToQueue(body, _httpContext.Request));
-
+        Assert.False(result.Success);
+        Assert.Equal(exception.Message, result.ErrorMessage);
         var loggedMessages = _logger.GetMatchingReceivedMessages("Failed to save message to queue", LogLevel.Error);
 
         Assert.Single(loggedMessages);

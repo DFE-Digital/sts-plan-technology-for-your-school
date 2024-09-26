@@ -34,7 +34,7 @@ public class QueueWriterTests
     }
 
     [Fact]
-    public async Task WriteMessage_Should_Throw_CaughtException()
+    public async Task WriteMessage_Should_Handle_Exception()
     {
         var body = "test-body";
         var subject = "test-subject";
@@ -43,7 +43,10 @@ public class QueueWriterTests
 
         _serviceBusSender.SendMessageAsync(Arg.Any<ServiceBusMessage>(), Arg.Any<CancellationToken>()).ThrowsAsync(exception);
 
-        await Assert.ThrowsAnyAsync<Exception>(() => _queueWriter.WriteMessage(body, subject));
+        var result = await _queueWriter.WriteMessage(body, subject);
+
+        Assert.False(result.Success);
+        Assert.Equal(exception.Message, result.ErrorMessage);
 
         await _serviceBusSender.Received(1)
             .SendMessageAsync(Arg.Any<ServiceBusMessage>(), Arg.Any<CancellationToken>());

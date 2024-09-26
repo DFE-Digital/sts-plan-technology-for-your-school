@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Content.Commands;
+using Dfe.PlanTech.Domain.Queues.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -30,8 +31,8 @@ public class CmsControllerTests
     {
         var json = "{}";
         var deserialised = JsonSerializer.Deserialize<JsonDocument>(json);
-        string? webhookResult = null;
-        _writeCmsWebhook.WriteMessageToQueue(deserialised!, Arg.Any<HttpRequest>()).Returns(webhookResult);
+        var expectedResult = new QueueWriteResult(true);
+        _writeCmsWebhook.WriteMessageToQueue(deserialised!, Arg.Any<HttpRequest>()).Returns(expectedResult);
 
         var result = await _controller.WebhookPayload(deserialised!, _writeCmsWebhook);
         Assert.IsType<OkResult>(result);
@@ -42,8 +43,9 @@ public class CmsControllerTests
     {
         var json = "{}";
         var deserialised = JsonSerializer.Deserialize<JsonDocument>(json);
-        string? webhookResult = "Expected error message";
-        _writeCmsWebhook.WriteMessageToQueue(deserialised!, Arg.Any<HttpRequest>()).Returns(webhookResult);
+        var expectedResult = new QueueWriteResult("Expected error message");
+
+        _writeCmsWebhook.WriteMessageToQueue(deserialised!, Arg.Any<HttpRequest>()).Returns(expectedResult);
 
         var result = await _controller.WebhookPayload(deserialised!, _writeCmsWebhook);
         Assert.IsType<BadRequestObjectResult>(result);
@@ -52,9 +54,12 @@ public class CmsControllerTests
 
         var body = badRequestResult.Value;
         Assert.NotNull(body);
-        Assert.IsType<string>(body);
+        Assert.IsType<QueueWriteResult>(body);
 
-        Assert.Equal(webhookResult, (string)body);
+        var queueWriteResult = (QueueWriteResult)body;
+        Assert.NotNull(queueWriteResult);
+        Assert.Equal(expectedResult.Success, queueWriteResult.Success);
+        Assert.Equal(expectedResult.ErrorMessage, queueWriteResult.ErrorMessage);
     }
 
     [Fact]

@@ -13,21 +13,14 @@ namespace Dfe.PlanTech.Infrastructure.Data;
 [ExcludeFromCodeCoverage]
 public class PlanTechDbContext : DbContext, IPlanTechDbContext
 {
-    public DbSet<User> Users { get; set; } = null!;
-
     public DbSet<Establishment> Establishments { get; set; } = null!;
-
-    public DbSet<SignIn> SignIn { get; set; } = null!;
-
-    public DbSet<ResponseQuestion> Questions { get; set; } = null!;
-
-    public DbSet<ResponseAnswer> Answers { get; set; } = null!;
-
-    public DbSet<Submission> Submissions { get; set; } = null!;
-
     public DbSet<Response> Responses { get; set; } = null!;
-
+    public DbSet<ResponseAnswer> Answers { get; set; } = null!;
+    public DbSet<ResponseQuestion> Questions { get; set; } = null!;
     public DbSet<SectionStatusDto> SectionStatusesSp { get; set; } = null!;
+    public DbSet<SignIn> SignIn { get; set; } = null!;
+    public DbSet<Submission> Submissions { get; set; } = null!;
+    public DbSet<User> Users { get; set; } = null!;
 
     public PlanTechDbContext() { }
 

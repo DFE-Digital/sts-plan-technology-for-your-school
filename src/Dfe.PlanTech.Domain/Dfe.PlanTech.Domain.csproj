@@ -10,13 +10,4 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Users\" />
-    <None Remove="Users\Models\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Queues\" />
-    <Folder Include="Users\Models\" />
-  </ItemGroup>
 </Project>
