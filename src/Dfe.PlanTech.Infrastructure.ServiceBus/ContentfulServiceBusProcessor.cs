@@ -34,10 +34,7 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
 
         await _processor.StartProcessingAsync(stoppingToken);
 
-        stoppingToken.Register(CancellationRequestedCallback);
-        return;
-
-        async void CancellationRequestedCallback() => await StopProcessingAsync();
+        stoppingToken.Register(async () => await StopProcessingAsync());
     }
 
     /// <summary>

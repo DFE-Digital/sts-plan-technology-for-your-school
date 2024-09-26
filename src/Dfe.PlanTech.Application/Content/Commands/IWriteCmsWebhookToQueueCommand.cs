@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Application.Content.Commands;
 public interface IWriteCmsWebhookToQueueCommand
 {
     /// <summary>
-    ///
+    /// Writes CMS webhook payload to queue
     /// </summary>
     /// <param name="json"></param>
     /// <param name="request"></param>

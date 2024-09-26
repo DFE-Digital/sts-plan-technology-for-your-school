@@ -430,6 +430,7 @@ public class WebhookToDbCommandTests
         await _webhookToDbCommand.InvokeNonPublicAsyncMethod("DbSaveChanges", new object?[] { CancellationToken.None });
 
         var matchingLogMessages = _logger.GetMatchingReceivedMessages($"Updated {changedRows} rows in the database", LogLevel.Information);
+        Assert.Single(matchingLogMessages);
     }
 
 }

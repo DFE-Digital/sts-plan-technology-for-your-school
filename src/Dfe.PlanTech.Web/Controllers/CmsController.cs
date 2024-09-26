@@ -1,8 +1,6 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Content.Commands;
-using Dfe.PlanTech.Application.Queues.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
-using EFCoreSecondLevelCacheInterceptor;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
@@ -30,7 +28,7 @@ public class CmsController(ILogger<CmsController> logger) : BaseController<CmsCo
         catch (Exception e)
         {
             Logger.LogError(e, "An error occured while trying to write the message to the queue: {message}", e.Message);
-            return StatusCode(500, false);
+            return BadRequest(e.Message);
         }
     }
 }
