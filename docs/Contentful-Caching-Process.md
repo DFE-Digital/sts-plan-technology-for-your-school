@@ -11,13 +11,25 @@
 
 ### Webhook -> Queue
 
-- We have a webhook on Contentful setup for entries
-- The webhook is setup to trigger on all events (Create, Save, Autosave, Archive, Unarchive, Publish, Unpublish, Delete) for an entry
-- The webhook points to an API hosted as an Azure Function [/src/Dfe.PlanTech.AzureFunctions/ContentfulWebHook.cs](/src/Dfe.PlanTech.AzureFunctions/ContentfulWebHook.cs)
-- The API receives the JSON payload from the webhook, and writes it to an Azure Servicebus queue.
-  - There is no validation of the JSON payload at this point.
+We have a webhook on Contentful setup for entries. The webhook is setup to trigger on all events (Create, Save, Autosave, Archive, Unarchive, Publish, Unpublish, Delete) for an entry. The webhook fires to a route on our webapp, which writes to a Service Bus queue for later processing.
 
-- The Azure Function for this is secured by the inbuilt Azure Function HTTP authentication
+```mermaid
+flowchart TD
+    A[Contentful] -->|sends webhook| B[CMSController]
+    B -->|sends payload| C[WriteCmsWebhookToQueueCommand]
+    C -->|sends body + CmsEvent| D[QueueWriter]
+    D -->|writes to| E[Service Bus]
+```
+
+### Explanation:
+- **A**: `Contentful` sends the webhook to the `CMSController`.
+- **B**: The `CMSController` receives the webhook payload.
+- **C**: The `WriteCmsWebhookToQueueCommand` processes the payload.
+- **D**: The `CmsEvent` is retrieved and validated from the headers.
+- **E**: The `QueueWriter` sends the body and `CmsEvent`.
+- **F**: The message is written to the Service Bus.
+
+You can visualize this updated diagram using a MermaidJS live editor or in a compatible Markdown viewer.```
 
 ### Queue -> DB
 
