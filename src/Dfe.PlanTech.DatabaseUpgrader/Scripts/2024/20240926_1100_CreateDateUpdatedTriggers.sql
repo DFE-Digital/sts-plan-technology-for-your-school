@@ -126,7 +126,7 @@ SELECT
     CurrentSubmission.completed,
     LastCompleteSubmission.maturity AS lastMaturity,
     CurrentSubmission.dateCreated,
-    CurrentSubmission.dateLastUpdated
+    CurrentSubmission.dateLastUpdated AS dateUpdated
 FROM Contentful.Sections CS
 -- The current submission
 CROSS APPLY (
