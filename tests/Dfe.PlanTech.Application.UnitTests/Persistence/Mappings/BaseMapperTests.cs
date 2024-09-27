@@ -13,7 +13,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Persistence.Mappings;
 
 public abstract class BaseMapperTests<TEntity, TMapper> : BaseMapperTests
     where TEntity : ContentComponentDbEntity, new()
-    where TMapper : JsonToDbMapper<TEntity>
+    where TMapper : BaseJsonToDbMapper<TEntity>
 {
     protected readonly ILogger<TMapper> Logger = Substitute.For<ILogger<TMapper>>();
 

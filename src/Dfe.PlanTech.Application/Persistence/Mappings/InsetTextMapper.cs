@@ -8,6 +8,6 @@ namespace Dfe.PlanTech.Application.Persistence.Mappings;
 public class InsetTextMapper(EntityUpdater updater,
                              ILogger<InsetTextMapper> logger,
                              JsonSerializerOptions jsonSerialiserOptions,
-                             IDatabaseHelper<ICmsDbContext> databaseHelper) : JsonToDbMapper<InsetTextDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
+                             IDatabaseHelper<ICmsDbContext> databaseHelper) : BaseJsonToDbMapper<InsetTextDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
 {
 }

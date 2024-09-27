@@ -7,9 +7,9 @@ using Microsoft.Extensions.Logging;
 namespace Dfe.PlanTech.Application.Persistence.Mappings;
 
 public class QuestionMapper(EntityUpdater updater,
-                            ILogger<JsonToDbMapper<QuestionDbEntity>> logger,
+                            ILogger<BaseJsonToDbMapper<QuestionDbEntity>> logger,
                             JsonSerializerOptions jsonSerialiserOptions,
-                            IDatabaseHelper<ICmsDbContext> databaseHelper) : JsonToDbMapper<QuestionDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
+                            IDatabaseHelper<ICmsDbContext> databaseHelper) : BaseJsonToDbMapper<QuestionDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
 {
     private List<AnswerDbEntity> _incomingAnswers = [];
 

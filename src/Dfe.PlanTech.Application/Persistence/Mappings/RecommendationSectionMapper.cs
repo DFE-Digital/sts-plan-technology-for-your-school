@@ -10,7 +10,7 @@ public class RecommendationSectionMapper(EntityUpdater updater,
                                          ILogger<RecommendationSectionMapper> logger,
                                          JsonSerializerOptions jsonSerialiserOptions,
                                          IDatabaseHelper<ICmsDbContext> databaseHelper)
-    : JsonToDbMapper<RecommendationSectionDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
+    : BaseJsonToDbMapper<RecommendationSectionDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
 {
     private List<AnswerDbEntity> _incomingAnswers = [];
     private List<RecommendationChunkDbEntity> _incomingContent = [];

@@ -44,11 +44,11 @@ public class ComponentDropDownMapperTests : BaseMapperTests<ComponentDropDownDbE
     };
 
     private readonly ComponentDropDownMapper _mapper;
-    private readonly ILogger<JsonToDbMapper<ComponentDropDownDbEntity>> _logger;
+    private readonly ILogger<BaseJsonToDbMapper<ComponentDropDownDbEntity>> _logger;
 
     public ComponentDropDownMapperTests()
     {
-        _logger = Substitute.For<ILogger<JsonToDbMapper<ComponentDropDownDbEntity>>>();
+        _logger = Substitute.For<ILogger<BaseJsonToDbMapper<ComponentDropDownDbEntity>>>();
         _mapper = new ComponentDropDownMapper(EntityUpdater, Logger, JsonOptions, DatabaseHelper);
     }
 

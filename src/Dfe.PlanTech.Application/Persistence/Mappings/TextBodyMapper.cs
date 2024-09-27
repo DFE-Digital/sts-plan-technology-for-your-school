@@ -10,7 +10,7 @@ public class TextBodyMapper(EntityUpdater updater,
                             RichTextContentMapper richTextMapper,
                             ILogger<TextBodyMapper> logger,
                             JsonSerializerOptions jsonSerialiserOptions,
-                            IDatabaseHelper<ICmsDbContext> databaseHelper) : JsonToDbMapper<TextBodyDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
+                            IDatabaseHelper<ICmsDbContext> databaseHelper) : BaseJsonToDbMapper<TextBodyDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
 {
     private readonly RichTextContentMapper _richTextMapper = richTextMapper;
 

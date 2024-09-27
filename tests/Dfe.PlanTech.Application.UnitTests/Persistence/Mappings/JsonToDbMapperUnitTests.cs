@@ -35,14 +35,14 @@ public class JsonToDbMapperUnitTests : BaseMapperTests
         }
     ];
 
-    private readonly JsonToDbMapperImplementation _mapper;
+    private readonly BaseJsonToDbMapperImplementation _mapper;
 
-    private readonly ILogger<JsonToDbMapper<ContentComponentImplementationDbEntity>> _logger =
-        Substitute.For<ILogger<JsonToDbMapper<ContentComponentImplementationDbEntity>>>();
+    private readonly ILogger<BaseJsonToDbMapper<ContentComponentImplementationDbEntity>> _logger =
+        Substitute.For<ILogger<BaseJsonToDbMapper<ContentComponentImplementationDbEntity>>>();
 
     public JsonToDbMapperUnitTests()
     {
-        _mapper = new JsonToDbMapperImplementation(EntityUpdater, _logger, JsonOptions, DatabaseHelper);
+        _mapper = new BaseJsonToDbMapperImplementation(EntityUpdater, _logger, JsonOptions, DatabaseHelper);
     }
 
     [Theory]
@@ -124,10 +124,27 @@ public class JsonToDbMapperUnitTests : BaseMapperTests
         var first = result[0];
 
         Assert.False(first.HasValue);
-        var receivedLoggerMessages =
-            _logger.GetMatchingReceivedMessages("Expected only one language - received 2", LogLevel.Error).ToArray();
+        var receivedLoggerMessages = _logger.GetMatchingReceivedMessages("Expected only one language - received 2", LogLevel.Error).ToArray();
 
         Assert.Single(receivedLoggerMessages);
+    }
+
+    [Fact]
+    public void GetValueAsObject_Handles_NonObjects()
+    {
+        var jsonArray = "[\"Key\", \"Value\"]";
+        JsonNode? jsonNode = JsonNode.Parse(jsonArray);
+        object arg = new KeyValuePair<string, JsonNode>("Testing key", jsonNode);
+
+        var result = _mapper.InvokeNonPublicMethod<BaseJsonToDbMapper>("GetValueAsObject", new[] { arg });
+        Assert.Null(result);
+
+        var loggedMessages = _logger.ReceivedLogMessages().ToArray();
+
+        Assert.Single(loggedMessages);
+
+        Assert.Equal(LogLevel.Error, loggedMessages[0].LogLevel);
+        Assert.Contains("Error when serialising field", loggedMessages[0].Message);
     }
 
     private static JsonNode CreateJsonNode(string json = "{}")
@@ -137,10 +154,10 @@ public class JsonToDbMapperUnitTests : BaseMapperTests
     }
 }
 
-public class JsonToDbMapperImplementation : JsonToDbMapper<ContentComponentImplementationDbEntity>
+public class BaseJsonToDbMapperImplementation : BaseJsonToDbMapper<ContentComponentImplementationDbEntity>
 {
-    public JsonToDbMapperImplementation(EntityUpdater entityUpdater,
-                                        ILogger<JsonToDbMapper<ContentComponentImplementationDbEntity>> logger,
+    public BaseJsonToDbMapperImplementation(EntityUpdater entityUpdater,
+                                        ILogger<BaseJsonToDbMapper<ContentComponentImplementationDbEntity>> logger,
                                         JsonSerializerOptions jsonSerialiserOptions,
                                         IDatabaseHelper<ICmsDbContext> databaseHelper) : base(entityUpdater, logger, jsonSerialiserOptions, databaseHelper)
     {

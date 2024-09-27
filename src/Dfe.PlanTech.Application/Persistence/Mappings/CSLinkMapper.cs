@@ -7,6 +7,6 @@ namespace Dfe.PlanTech.Application.Persistence.Mappings;
 public class CSLinkMapper(EntityUpdater updater,
                           ILogger<CSLinkMapper> logger,
                           JsonSerializerOptions jsonSerialiserOptions,
-                          IDatabaseHelper<ICmsDbContext> databaseHelper) : JsonToDbMapper<CSLinkDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
+                          IDatabaseHelper<ICmsDbContext> databaseHelper) : BaseJsonToDbMapper<CSLinkDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
 {
 }

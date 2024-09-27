@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Application.Persistence.Mappings;
 public class HeaderMapper(EntityUpdater updater,
                           ILogger<HeaderMapper> logger,
                           JsonSerializerOptions jsonSerialiserOptions,
-                          IDatabaseHelper<ICmsDbContext> databaseHelper) : JsonToDbMapper<HeaderDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
+                          IDatabaseHelper<ICmsDbContext> databaseHelper) : BaseJsonToDbMapper<HeaderDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
 {
 
 }

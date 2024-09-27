@@ -8,7 +8,7 @@ public static class ReflectionHelpers
     {
         try
         {
-            var task = (Task)toInvoke.InvokePublicMethod(methodName, parameters);
+            var task = (Task)toInvoke.InvokeNonPublicMethod(methodName, parameters);
             await task;
         }
         catch (TargetInvocationException ex)
@@ -17,12 +17,18 @@ public static class ReflectionHelpers
         }
     }
 
-    public static object InvokePublicMethod(this object toInvoke, string methodName, object?[]? parameters)
+    public static object InvokeNonPublicMethod(this object toInvoke, string methodName, object?[]? parameters)
+        => toInvoke.InvokeNonPublicMethod(toInvoke.GetType(), methodName, parameters);
+
+    public static object InvokeNonPublicMethod<T>(this object toInvoke, string methodName, object?[]? parameters)
+        => toInvoke.InvokeNonPublicMethod(typeof(T), methodName, parameters);
+
+
+    public static object InvokeNonPublicMethod(this object toInvoke, Type type, string methodName, object?[]? parameters)
     {
         try
         {
-            var method = toInvoke.GetType().GetMethod(methodName,
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var method = type.GetMethod(methodName,  BindingFlags.NonPublic | BindingFlags.Instance);
 
             if (method == null)
             {
@@ -36,4 +42,6 @@ public static class ReflectionHelpers
             throw ex.InnerException ?? ex;
         }
     }
+
+
 }

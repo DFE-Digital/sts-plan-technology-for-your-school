@@ -9,7 +9,7 @@ namespace Dfe.PlanTech.Application.Persistence.Mappings;
 public class SectionMapper(EntityUpdater updater,
                            ILogger<SectionMapper> logger,
                            JsonSerializerOptions jsonSerialiserOptions,
-                           IDatabaseHelper<ICmsDbContext> databaseHelper) : JsonToDbMapper<SectionDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
+                           IDatabaseHelper<ICmsDbContext> databaseHelper) : BaseJsonToDbMapper<SectionDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
 {
     private List<QuestionDbEntity> _incomingQuestions = [];
 

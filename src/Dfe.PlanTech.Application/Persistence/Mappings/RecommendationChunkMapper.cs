@@ -10,7 +10,7 @@ namespace Dfe.PlanTech.Application.Persistence.Mappings;
 public class RecommendationChunkMapper(EntityUpdater updater,
                                        ILogger<RecommendationChunkMapper> logger,
                                        JsonSerializerOptions jsonSerialiserOptions,
-                                       IDatabaseHelper<ICmsDbContext> databaseHelper) : JsonToDbMapper<RecommendationChunkDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
+                                       IDatabaseHelper<ICmsDbContext> databaseHelper) : BaseJsonToDbMapper<RecommendationChunkDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
 {
     private List<AnswerDbEntity> _incomingAnswers = [];
     private List<ContentComponentDbEntity> _incomingContent = [];

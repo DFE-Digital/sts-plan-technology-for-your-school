@@ -14,12 +14,12 @@ namespace Dfe.PlanTech.Application.Persistence.Mappings;
 /// Maps a JSON payload to the given entity type
 /// </summary>
 /// <typeparam name="TEntity"></typeparam>
-public abstract class JsonToDbMapper<TEntity>(
+public abstract class BaseJsonToDbMapper<TEntity>(
     EntityUpdater entityUpdater,
-    ILogger<JsonToDbMapper<TEntity>> logger,
+    ILogger<BaseJsonToDbMapper<TEntity>> logger,
     JsonSerializerOptions jsonSerialiserOptions,
     IDatabaseHelper<ICmsDbContext> databaseHelper)
-    : JsonToDbMapper(typeof(TEntity), logger, jsonSerialiserOptions)
+    : BaseJsonToDbMapper(typeof(TEntity), logger, jsonSerialiserOptions)
     where TEntity : ContentComponentDbEntity, new()
 {
     protected CmsWebHookPayload? Payload;
