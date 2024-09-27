@@ -20,50 +20,29 @@ builder.Services.AddResponseCompression(options =>
     options.EnableForHttps = true;
 });
 
-builder.Services.AddApplicationInsightsTelemetry();
-
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddSingleton<ITelemetryInitializer, CustomRequestDimensionsTelemetryInitializer>();
-
-builder.Services.AddGoogleTagManager();
-builder.Services.AddCspConfiguration();
-// Add services to the container.
-
 builder.Services.AddControllersWithViews();
-
-builder.Services.AddGovUkFrontend();
 
 if (!builder.Environment.IsDevelopment())
 {
-    var keyVaultUri = $"https://{builder.Configuration["KeyVaultName"]}.vault.azure.net/";
-    var azureCredentials = new DefaultAzureCredential();
-
-    builder.Configuration.AddAzureKeyVault(new Uri(keyVaultUri), azureCredentials);
-
-    builder.Services.AddDbContext<DataProtectionDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Database")));
-    builder.Services.AddDataProtection()
-        .PersistKeysToDbContext<DataProtectionDbContext>()
-        .ProtectKeysWithAzureKeyVault(new Uri(keyVaultUri + "keys/dataprotection"), azureCredentials);
-
-    //Add overrides json for overwriting KV values for testing
-    if (builder.Environment.IsStaging())
-    {
-        builder.Configuration.AddJsonFile("overrides.json", true);
-    }
+    builder.Services.AddReleaseServices(builder.Configuration);
 }
 
 builder.AddContentAndSupportServices()
-        .AddAuthorisationServices()
-        .AddCaching()
-        .AddContentfulServices(builder.Configuration)
-        .AddCQRSServices()
-        .AddDatabase(builder.Configuration)
-        .AddDfeSignIn(builder.Configuration)
-        .AddExceptionHandlingServices()
-        .AddRoutingServices()
-        .AddDbWriterServices(builder.Configuration);
+    .AddAuthorisationServices()
+    .AddCaching()
+    .AddContentfulServices(builder.Configuration)
+    .AddCQRSServices()
+    .AddCspConfiguration()
+    .AddCustomTelemetry()
+    .AddDatabase(builder.Configuration)
+    .AddDbWriterServices(builder.Configuration)
+    .AddDfeSignIn(builder.Configuration)
+    .AddExceptionHandlingServices()
+    .AddGoogleTagManager()
+    .AddGovUkFrontend()
+    .AddHttpContextAccessor()
+    .AddRoutingServices();
 
-builder.Services.AddScoped<ComponentViewsFactory>();
 builder.Services.AddSingleton<ISystemTime, SystemTime>();
 
 var app = builder.Build();
