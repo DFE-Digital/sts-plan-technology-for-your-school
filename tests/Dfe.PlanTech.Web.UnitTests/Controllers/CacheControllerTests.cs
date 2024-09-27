@@ -29,14 +29,14 @@ public class CacheControllerTests
         Assert.NotNull(result);
         Assert.Equal(200, result.StatusCode);
 
-        _queryCacher.Received(1).ClearCmsCache();
+        _queryCacher.Received(1).ClearCache();
     }
 
     [Fact]
     public void ClearCache_Should_Return_False_On_Failure()
     {
         _queryCacher
-            .When(call => call.ClearCmsCache())
+            .When(call => call.ClearCache())
             .Do(_ => throw new Exception("unexpected error"));
 
         var clearCacheResult = _cacheController.ClearCache();

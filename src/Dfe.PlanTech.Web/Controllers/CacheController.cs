@@ -14,7 +14,7 @@ public class CacheController([FromServices] IQueryCacher queryCacher, ILogger<Ca
     {
         try
         {
-            queryCacher.ClearCmsCache();
+            queryCacher.ClearCache();
             logger.LogInformation("Database cache has been cleared");
             return Ok(true);
         }

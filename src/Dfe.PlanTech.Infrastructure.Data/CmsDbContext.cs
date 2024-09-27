@@ -1,5 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
+using System.Security.Cryptography;
+using System.Text;
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -120,6 +123,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     public CmsDbContext()
     {
         _contentfulOptions = new ContentfulOptions(false);
+        _queryCacher = this.GetService<QueryCacher>() ?? throw new MissingServiceException($"Could not find service {nameof(QueryCacher)}");
     }
 
     public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
@@ -217,8 +221,15 @@ public class CmsDbContext : DbContext, ICmsDbContext
     private Expression<Func<ContentComponentDbEntity, bool>> ShouldShowEntity()
         => entity => (_contentfulOptions.UsePreview || entity.Published) && !entity.Archived && !entity.Deleted;
 
+    private static string GetCacheKey(IQueryable query)
+    {
+        var queryString = query.ToQueryString();
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(queryString));
+        return Convert.ToBase64String(hash);
+    }
+
     public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
-        => _queryCacher.FirstOrDefaultAsyncWithCache(
+        => FirstOrDefaultAsync(
             Pages.Where(page => page.Slug == slug)
                 .Include(page => page.BeforeTitleContent)
                 .Include(page => page.Content)
@@ -226,9 +237,17 @@ public class CmsDbContext : DbContext, ICmsDbContext
                 .AsSplitQuery(),
             cancellationToken);
 
-    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default) =>
-        _queryCacher.ToListAsyncWithCache(queryable, cancellationToken);
+    public async Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+    {
+        var key = GetCacheKey(queryable);
+        return await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
+            (q, ctoken) => q.ToListAsync(ctoken), cancellationToken);
+    }
 
-    public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
-        => _queryCacher.FirstOrDefaultAsyncWithCache(queryable, cancellationToken);
+    public async Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+    {
+        var key = GetCacheKey(queryable);
+        return await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
+            (q, ctoken) => q.FirstOrDefaultAsync(ctoken), cancellationToken);
+    }
 }
