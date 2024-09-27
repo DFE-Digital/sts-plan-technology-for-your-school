@@ -4,6 +4,7 @@ using Dfe.PlanTech.Infrastructure.ServiceBus.Results;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Retry;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace Dfe.PlanTech.Infrastructure.ServiceBus.UnitTests;
 
@@ -79,6 +80,20 @@ public class ServiceBusResultProcessorTests
         var expectedLogMessage = $"Unexpected service bus result type: {result.GetType().Name}";
         var matchingLogMessages = _logger.GetMatchingReceivedMessages(expectedLogMessage, LogLevel.Error);
 
+        Assert.Single(matchingLogMessages);
+    }
+
+    [Fact]
+    public async Task Should_Handle_Exceptions()
+    {
+        var exception = new Exception("Thrown exception");
+        _eventArgs.CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>())
+            .ThrowsAsync(exception);
+
+        await _processor.ProcessMessageResult(_eventArgs, new ServiceBusSuccessResult() { }, default);
+
+        var expectedLogMessage = $"Error processing message result: {exception.Message}";
+        var matchingLogMessages = _logger.GetMatchingReceivedMessages(expectedLogMessage, LogLevel.Error);
         Assert.Single(matchingLogMessages);
     }
 }
