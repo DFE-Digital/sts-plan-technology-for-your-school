@@ -28,7 +28,7 @@ public static class ReflectionHelpers
     {
         try
         {
-            var method = type.GetMethod(methodName,  BindingFlags.NonPublic | BindingFlags.Instance);
+            var method = type.GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
 
             if (method == null)
             {
