@@ -34,7 +34,7 @@ public class WriteCmsWebhookToQueueCommand(IQueueWriter queueWriter, ILogger<Wri
             var body = JsonSerializer.Serialize(json);
 
             logger.LogTrace("Message body is {Body}", body);
-           return await queueWriter.WriteMessage(body, cmsEvent);
+            return await queueWriter.WriteMessage(body, cmsEvent);
         }
         catch (Exception ex)
         {

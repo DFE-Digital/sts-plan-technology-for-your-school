@@ -13,7 +13,7 @@ public class PageMapperTests : BaseMapperTests<PageDbEntity, PageMapper>
     private const string PageId = "Header Id";
 
     private readonly PageMapper _mapper;
-    private readonly ILogger<PageEntityUpdater> _entityUpdaterLogger = Substitute.For<ILogger<PageEntityUpdater>>();
+    private readonly ILogger<PageUpdater> _entityUpdaterLogger = Substitute.For<ILogger<PageUpdater>>();
     private readonly List<PageContentDbEntity> _attachedPageContents = new(10);
     private readonly List<PageContentDbEntity> _pageContents = [];
     private readonly List<PageDbEntity> _pages = [];
@@ -21,7 +21,7 @@ public class PageMapperTests : BaseMapperTests<PageDbEntity, PageMapper>
 
     public PageMapperTests()
     {
-        _mapper = new PageMapper(new PageRetriever(DatabaseHelper), new PageEntityUpdater(_entityUpdaterLogger, DatabaseHelper), Logger, JsonOptions, DatabaseHelper);
+        _mapper = new PageMapper(new PageRetriever(DatabaseHelper), new PageUpdater(_entityUpdaterLogger, DatabaseHelper), Logger, JsonOptions, DatabaseHelper);
         MockDatabaseCollection(_pages);
     }
 

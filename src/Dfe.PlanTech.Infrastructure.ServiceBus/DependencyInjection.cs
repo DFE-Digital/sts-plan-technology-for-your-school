@@ -82,7 +82,7 @@ public static class DependencyInjection
         services.AddTransient<JsonToEntityMappers>();
 
         services.AddTransient<PageRetriever>();
-        services.AddTransient<PageEntityUpdater>();
+        services.AddTransient<PageUpdater>();
 
         services.AddTransient<EntityUpdater>();
 

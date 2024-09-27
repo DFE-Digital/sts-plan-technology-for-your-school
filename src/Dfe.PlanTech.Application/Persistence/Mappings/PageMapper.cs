@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace Dfe.PlanTech.Application.Persistence.Mappings;
 
 public class PageMapper(PageRetriever retriever,
-                        PageEntityUpdater updater,
+                        PageUpdater updater,
                         ILogger<PageMapper> logger,
                         JsonSerializerOptions jsonSerialiserOptions,
                         IDatabaseHelper<ICmsDbContext> databaseHelper) : JsonToDbMapper<PageDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
