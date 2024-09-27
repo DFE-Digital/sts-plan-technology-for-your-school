@@ -3,7 +3,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Dfe.PlanTech.Application.Caching.Models;
 
-public class QueryCacher: IQueryCacher
+public class QueryCacher : IQueryCacher
 {
     private MemoryCache _cache = new(new MemoryCacheOptions());
     private const int CacheDurationMinutes = 30;
