@@ -8,7 +8,6 @@ using Dfe.PlanTech.Application.UnitTests.TestHelpers;
 using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.ServiceBus.Models;
@@ -40,7 +39,7 @@ public class WebhookToDbCommandTests
 
     private readonly List<ContentComponentDbEntity> _contentComponents = [];
 
-    private readonly IWebhookToDbCommand _webhookToDbCommand;
+    private readonly WebhookToDbCommand _webhookToDbCommand;
 
     public WebhookToDbCommandTests()
     {

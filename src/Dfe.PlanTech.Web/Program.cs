@@ -1,17 +1,11 @@
-using Azure.Identity;
 using Dfe.PlanTech.Application.Helpers;
 using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
-using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.ServiceBus;
 using Dfe.PlanTech.Infrastructure.SignIns;
 using Dfe.PlanTech.Web;
-using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using GovUk.Frontend.AspNetCore;
-using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 

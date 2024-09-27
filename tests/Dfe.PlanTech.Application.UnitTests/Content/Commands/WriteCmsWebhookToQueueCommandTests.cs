@@ -20,7 +20,7 @@ public class WriteCmsWebhookToQueueCommandTests
 
     private readonly HttpContext _httpContext = new DefaultHttpContext();
 
-    private readonly IWriteCmsWebhookToQueueCommand _command;
+    private readonly WriteCmsWebhookToQueueCommand _command;
 
 
     public WriteCmsWebhookToQueueCommandTests()

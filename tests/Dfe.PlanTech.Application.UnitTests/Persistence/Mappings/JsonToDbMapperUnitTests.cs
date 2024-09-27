@@ -130,7 +130,7 @@ public class JsonToDbMapperUnitTests : BaseMapperTests
         Assert.Single(receivedLoggerMessages);
     }
 
-    private JsonNode CreateJsonNode(string json = "{}")
+    private static JsonNode CreateJsonNode(string json = "{}")
     {
         var jsonObj = JsonSerializer.Deserialize<JsonNode>(json);
         return jsonObj!;

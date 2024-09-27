@@ -38,7 +38,8 @@ public class RichTextGenerator : Faker<RichTextContent>
         {
             var amountToGenerate = faker.Random.Int(0, 2).OrNull(faker, 0.8f);
 
-            if (amountToGenerate == null) { return []; };
+            if (amountToGenerate == null)
+            { return []; };
 
             return Enumerable.Range(0, amountToGenerate ?? 0).Select(_ => new RichTextMark() { Type = faker.PickRandom<MarkType>().ToString().ToLower() }).ToList();
         });

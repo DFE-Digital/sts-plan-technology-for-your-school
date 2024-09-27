@@ -1,5 +1,4 @@
 using Azure.Messaging.ServiceBus;
-using Dfe.PlanTech.Application.Queues.Interfaces;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -13,7 +12,7 @@ public class QueueWriterTests
     private readonly IAzureClientFactory<ServiceBusSender> _serviceBusFactory = Substitute.For<IAzureClientFactory<ServiceBusSender>>();
     private readonly ServiceBusSender _serviceBusSender = Substitute.For<ServiceBusSender>();
     private readonly ILogger<QueueWriter> _logger = Substitute.For<ILogger<QueueWriter>>();
-    private readonly IQueueWriter _queueWriter;
+    private readonly QueueWriter _queueWriter;
 
     public QueueWriterTests()
     {
