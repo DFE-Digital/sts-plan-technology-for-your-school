@@ -1,4 +1,3 @@
-@inject GtmConfiguration GtmConfiguration
 @using Dfe.PlanTech.Web.Helpers;
 
 @section Head {
@@ -17,8 +16,7 @@
 }
 
 @section Header {
-    @Html.Raw(GtmConfiguration.Body)
-
+    <partial name="GoogleTagManager/_Body" />
     <partial name="CookiesBanner/_CookieBanner" />
     <partial name="_Header" />
 

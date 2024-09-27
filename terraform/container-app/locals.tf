@@ -29,6 +29,14 @@ locals {
   container_app_max_replicas     = var.container_app_max_replicas
   container_app_http_concurrency = var.container_app_http_concurrency
 
+  container_environment_variables_default = {
+    "Kestrel__Endpoints__Http__Url"       = local.kestrel_endpoint,
+    "ASPNETCORE_FORWARDEDHEADERS_ENABLED" = "true",
+    "ASPNETCORE_ENVIRONMENT"              = var.container_environment
+  }
+
+  container_environment_variables = merge(local.container_environment_variables_default, var.container_environment_variables)
+
   ####################
   # Managed Identity #
   ####################

@@ -139,10 +139,12 @@ jobs:
         shell: bash
         working-directory: ./build
         run: |
-          export ASPNETCORE_ENVIRONMENT=Staging
+          export ASPNETCORE_ENVIRONMENT=E2E
           export KeyVaultName=${{ env.KEYVAULT_NAME }}
           export Kestrel__Endpoints__Https__Url=https://*:8081
           export DfeSignIn__FrontDoorUrl=https://localhost:8081
+          export GTM__Id=gtm_id
+          export GTM__SiteVerificationId=testing_site_verification_id
           dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 &
 
       - name: Cypress tests
