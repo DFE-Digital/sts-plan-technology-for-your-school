@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
+using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
@@ -114,6 +115,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     #endregion
 
     private readonly ContentfulOptions _contentfulOptions;
+    private readonly QueryCacher _queryCacher;
 
     public CmsDbContext()
     {
@@ -123,6 +125,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
     {
         _contentfulOptions = this.GetService<ContentfulOptions>() ?? throw new MissingServiceException($"Could not find service {nameof(ContentfulOptions)}");
+        _queryCacher = this.GetService<QueryCacher>() ?? throw new MissingServiceException($"Could not find service {nameof(QueryCacher)}");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -215,15 +218,17 @@ public class CmsDbContext : DbContext, ICmsDbContext
         => entity => (_contentfulOptions.UsePreview || entity.Published) && !entity.Archived && !entity.Deleted;
 
     public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
-        => Pages.Include(page => page.BeforeTitleContent)
-            .Include(page => page.Content)
-            .Include(page => page.Title)
-            .AsSplitQuery()
-            .FirstOrDefaultAsync(page => page.Slug == slug, cancellationToken);
+        => _queryCacher.FirstOrDefaultAsyncWithCache(
+            Pages.Where(page => page.Slug == slug)
+                .Include(page => page.BeforeTitleContent)
+                .Include(page => page.Content)
+                .Include(page => page.Title)
+                .AsSplitQuery(),
+            cancellationToken);
 
     public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default) =>
-        queryable.ToListAsync(cancellationToken: cancellationToken);
+        _queryCacher.ToListAsyncWithCache(queryable, cancellationToken);
 
     public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
-        => queryable.FirstOrDefaultAsync(cancellationToken);
+        => _queryCacher.FirstOrDefaultAsyncWithCache(queryable, cancellationToken);
 }

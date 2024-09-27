@@ -33,7 +33,6 @@ using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Routing;
-using EFCoreSecondLevelCacheInterceptor;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -126,6 +125,7 @@ public static class ProgramExtensions
         services.AddTransient<ICacher, Cacher>();
         services.AddTransient<IQuestionnaireCacher, QuestionnaireCacher>();
         services.AddTransient<IUser, UserHelper>();
+        services.AddSingleton<IQueryCacher, QueryCacher>();
 
         return services;
     }
@@ -144,15 +144,7 @@ public static class ProgramExtensions
                             .CommandTimeout((int)TimeSpan.FromSeconds(30).TotalSeconds)
                             .EnableRetryOnFailure();
                     })
-                .AddInterceptors(serviceProvider.GetRequiredService<SecondLevelCacheInterceptor>())
         );
-
-        services.AddEFSecondLevelCache(options =>
-        {
-            options.UseMemoryCacheProvider().ConfigureLogging(false).UseCacheKeyPrefix("EF_");
-            options.CacheAllQueries(CacheExpirationMode.Absolute, TimeSpan.FromMinutes(30));
-            options.UseDbCallsIfCachingProviderIsDown(TimeSpan.FromMinutes(1));
-        });
 
         services.AddDbContext<IPlanTechDbContext, PlanTechDbContext>(databaseOptionsAction);
         ConfigureCookies(services, configuration);
