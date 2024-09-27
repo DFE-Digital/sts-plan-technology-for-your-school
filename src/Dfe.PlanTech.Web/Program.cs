@@ -21,6 +21,11 @@ if (!builder.Environment.IsDevelopment())
     builder.Services.AddReleaseServices(builder.Configuration);
 }
 
+if (builder.Environment.EnvironmentName != "E2E")
+{
+    builder.Services.AddDbWriterServices(builder.Configuration);
+}
+
 builder.AddContentAndSupportServices()
     .AddAuthorisationServices()
     .AddCaching()
@@ -29,7 +34,6 @@ builder.AddContentAndSupportServices()
     .AddCspConfiguration()
     .AddCustomTelemetry()
     .AddDatabase(builder.Configuration)
-    .AddDbWriterServices(builder.Configuration)
     .AddDfeSignIn(builder.Configuration)
     .AddExceptionHandlingServices()
     .AddGoogleTagManager()
