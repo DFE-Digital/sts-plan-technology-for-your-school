@@ -132,9 +132,7 @@ public class JsonToDbMapperUnitTests : BaseMapperTests
     [Fact]
     public void GetValueAsObject_Handles_NonObjects()
     {
-        var jsonArray = "[\"Key\", \"Value\"]";
-        JsonNode? jsonNode = JsonNode.Parse(jsonArray);
-        object arg = new KeyValuePair<string, JsonNode>("Testing key", jsonNode!);
+        var arg = CreateJsonNodeFromArray();
 
         var result = _mapper.InvokeNonPublicMethod<BaseJsonToDbMapper>("GetValueAsObject", new[] { arg });
 
@@ -150,9 +148,7 @@ public class JsonToDbMapperUnitTests : BaseMapperTests
     [Fact]
     public void GetValuesFromFields_Handles_NullChildren()
     {
-        var jsonArray = "[\"Key\", \"Value\"]";
-        JsonNode? jsonNode = JsonNode.Parse(jsonArray);
-        object arg = new KeyValuePair<string, JsonNode>("Testing key", jsonNode!);
+        var arg = CreateJsonNodeFromArray();
 
         var result = ((IEnumerable<KeyValuePair<string, object?>?>)_mapper.InvokeNonPublicMethod<BaseJsonToDbMapper>("GetValuesFromFields", new[] { arg })).ToArray();
 
@@ -165,6 +161,15 @@ public class JsonToDbMapperUnitTests : BaseMapperTests
         Assert.Single(loggedMessages);
         Assert.Equal(LogLevel.Error, loggedMessages[0].LogLevel);
         Assert.Contains("Error when serialising field", loggedMessages[0].Message);
+    }
+
+    private static object CreateJsonNodeFromArray()
+    {
+        var jsonArray = "[\"Key\", \"Value\"]";
+        JsonNode? jsonNode = JsonNode.Parse(jsonArray);
+        Assert.NotNull(jsonNode);
+
+        return new KeyValuePair<string, JsonNode>("Testing key", jsonNode!);
     }
 
     private static JsonNode CreateJsonNode(string json = "{}")
