@@ -134,15 +134,35 @@ public class JsonToDbMapperUnitTests : BaseMapperTests
     {
         var jsonArray = "[\"Key\", \"Value\"]";
         JsonNode? jsonNode = JsonNode.Parse(jsonArray);
-        object arg = new KeyValuePair<string, JsonNode>("Testing key", jsonNode);
+        object arg = new KeyValuePair<string, JsonNode>("Testing key", jsonNode!);
 
         var result = _mapper.InvokeNonPublicMethod<BaseJsonToDbMapper>("GetValueAsObject", new[] { arg });
+
         Assert.Null(result);
 
         var loggedMessages = _logger.ReceivedLogMessages().ToArray();
 
         Assert.Single(loggedMessages);
+        Assert.Equal(LogLevel.Error, loggedMessages[0].LogLevel);
+        Assert.Contains("Error when serialising field", loggedMessages[0].Message);
+    }
 
+    [Fact]
+    public void GetValuesFromFields_Handles_NullChildren()
+    {
+        var jsonArray = "[\"Key\", \"Value\"]";
+        JsonNode? jsonNode = JsonNode.Parse(jsonArray);
+        object arg = new KeyValuePair<string, JsonNode>("Testing key", jsonNode!);
+
+        var result = ((IEnumerable<KeyValuePair<string, object?>?>)_mapper.InvokeNonPublicMethod<BaseJsonToDbMapper>("GetValuesFromFields", new[] { arg })).ToArray();
+
+        Assert.Single(result);
+        Assert.True(result[0].HasValue);
+        Assert.Null(result[0]!.Value.Value);
+
+        var loggedMessages = _logger.ReceivedLogMessages().ToArray();
+
+        Assert.Single(loggedMessages);
         Assert.Equal(LogLevel.Error, loggedMessages[0].LogLevel);
         Assert.Contains("Error when serialising field", loggedMessages[0].Message);
     }
