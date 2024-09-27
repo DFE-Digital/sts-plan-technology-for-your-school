@@ -2,16 +2,22 @@
 
 ## Overview
 
-- Webhook posts to Azure function
-- Azure function writes to queue
-- Another Azure function reads from queue + writes to database
-- Data is read from DB where applicable, if any failure then an attempt to load from Contentful is performed
+We save content from Contentful in our database for various purposes, the main ones being:
+1. Reduce calls to Contentful to avoid rate limiting
+2. Caching data 
+
+To do this, we have setup webhooks on Contentful that fire under certain status changes to content types (e.g. content is created, or saved, etc.).
+This webhook points to a route on our web app. We then save the webhook payload to an Azure Service Bus queue, with minimal to no validation.
+
+A second process, using a `BackgroundService` hosted on the web app, reads messages from the queue, processes them (e.g. validation, mapping them to the relevant DB class for the content, etc.), and updates the database.
+
+When using content on our webapp, we read from the DB using EF Core. If there is a failure for whatever reason (e.g. connection issues, or even just content not being found that was requested), then we attempt to retrieve the same content from Contentful.
 
 ## Contentful -> DB Process
 
 ### Webhook -> Queue
 
-We have a webhook on Contentful setup for entries. The webhook is setup to trigger on all events (Create, Save, Autosave, Archive, Unarchive, Publish, Unpublish, Delete) for an entry. The webhook fires to a route on our webapp, which writes to a Service Bus queue for later processing.
+We have a webhook on Contentful setup for entries. The webhook is setup to trigger on all events (Create, Save, Autosave, Archive, Unarchive, Publish, Unpublish, Delete) for an entry. The webhook fires to a route on our web app, which writes to a Service Bus queue for later processing.
 
 ```mermaid
 flowchart TD
