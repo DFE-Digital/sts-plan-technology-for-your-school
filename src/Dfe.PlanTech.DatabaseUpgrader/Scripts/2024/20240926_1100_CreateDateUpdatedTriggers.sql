@@ -31,6 +31,16 @@ WHERE
 
 GO
 
+-- Add defaults to all cols
+ALTER TABLE dbo.[user]
+    ADD CONSTRAINT DF_user_dateLastUpdated DEFAULT GETUTCDATE() FOR dateLastUpdated
+ALTER TABLE dbo.[establishment]
+    ADD CONSTRAINT DF_establishment_dateLastUpdated DEFAULT GETUTCDATE() FOR dateLastUpdated
+ALTER TABLE dbo.[response]
+    ADD CONSTRAINT DF_response_dateLastUpdated DEFAULT GETUTCDATE() FOR dateLastUpdated
+ALTER TABLE dbo.[submission]
+    ADD CONSTRAINT DF_submission_dateLastUpdated DEFAULT GETUTCDATE() FOR dateLastUpdated
+
 -- Make all dateUpdated columns non-nullable
 
 ALTER TABLE dbo.[user]
@@ -52,7 +62,7 @@ CREATE TRIGGER dbo.tr_user
     AS
 BEGIN
     UPDATE U
-    SET dateLastUpdated = GETDATE()
+    SET dateLastUpdated = GETUTCDATE()
     FROM dbo.[user] U
     JOIN inserted I ON I.id = U.id
 END
@@ -65,7 +75,7 @@ CREATE TRIGGER dbo.tr_establishment
     AS
 BEGIN
     UPDATE E
-    SET dateLastUpdated = GETDATE()
+    SET dateLastUpdated = GETUTCDATE()
     FROM dbo.[establishment] E
     JOIN inserted I ON I.id = E.id
 END
@@ -77,7 +87,7 @@ CREATE TRIGGER dbo.tr_response
     FOR INSERT, UPDATE
     AS
 BEGIN
-    DECLARE @now DATETIME = GETDATE()
+    DECLARE @now DATETIME = GETUTCDATE()
 
     UPDATE R
     SET dateLastUpdated = @now
@@ -99,7 +109,7 @@ CREATE TRIGGER dbo.tr_submission
     AS
 BEGIN
     UPDATE S
-    SET dateLastUpdated = GETDATE()
+    SET dateLastUpdated = GETUTCDATE()
     FROM dbo.[submission] S
     JOIN inserted I ON I.id = S.id
 END
@@ -108,38 +118,42 @@ GO
 
 -- Simplify GetSectionStatusesProc with the new columns
 
-ALTER PROCEDURE dbo.GetSectionStatuses @categoryId nvarchar(30), @establishmentId int
+ALTER PROCEDURE dbo.GetSectionStatuses @categoryId NVARCHAR(30), @establishmentId INT
 AS
 
 SELECT
     CurrentSubmission.sectionId,
     CurrentSubmission.completed,
-    LastCompleteSubmission.maturity as lastMaturity,
+    LastCompleteSubmission.maturity AS lastMaturity,
     CurrentSubmission.dateCreated,
     CurrentSubmission.dateLastUpdated
 FROM Contentful.Sections CS
 -- The current submission
 CROSS APPLY (
-    SELECT TOP 1 sectionId, completed, S.id, dateCreated, dateLastUpdated
+    SELECT TOP 1
+        sectionId,
+        completed,
+        S.id,
+        dateCreated,
+        dateLastUpdated
     FROM [dbo].submission S
     WHERE
           CS.Id = S.sectionId
       AND S.establishmentId = @establishmentId
       AND S.deleted = 0
-    ORDER BY
-        S.dateCreated DESC
+    ORDER BY S.dateCreated DESC
 ) CurrentSubmission
 -- Use maturity from most recent complete submission (if there is one) so that user always sees recommendation
 OUTER APPLY (
-    SELECT TOP 1 maturity
+    SELECT TOP 1
+        maturity
     FROM [dbo].submission S
     WHERE
           CS.Id = S.sectionId
       AND S.establishmentId = @establishmentId
       AND S.deleted = 0
       AND s.completed = 1
-    ORDER BY
-        S.dateCreated DESC
+    ORDER BY S.dateCreated DESC
 ) LastCompleteSubmission
 WHERE
     CS.CategoryId = @categoryId
