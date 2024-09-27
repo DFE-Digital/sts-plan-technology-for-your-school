@@ -1,7 +1,6 @@
 
 using Dfe.PlanTech.CmsDbMigrations.E2ETests.Generators;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.CmsDbMigrations.E2ETests.EntityTests;

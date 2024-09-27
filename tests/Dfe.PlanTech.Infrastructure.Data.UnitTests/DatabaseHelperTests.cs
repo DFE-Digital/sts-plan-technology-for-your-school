@@ -92,7 +92,7 @@ public class DatabaseHelperTests
         var type = typeof(QuestionDbEntity);
         var properties = _databaseHelper.GetRequiredPropertiesForType(type).ToArray();
         Assert.NotEmpty(properties);
-        Assert.All(properties, property => _nonNullablePropertyNames.Contains(property.Name));
+        Assert.True(properties.All(property => _nonNullablePropertyNames.Contains(property.Name)));
     }
 
     [Fact]
