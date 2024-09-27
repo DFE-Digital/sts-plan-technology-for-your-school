@@ -63,7 +63,7 @@ public class MappedEntity
     {
         if (IncomingEntity is not TEntity incoming)
         {
-            throw new InvalidCastException($"Entities are not expected type. Received {IncomingEntity.GetType()} and {ExistingEntity!.GetType()} but expected {typeof(TEntity)}");
+            throw new InvalidCastException($"Incoming entity is not the expected type. It is {IncomingEntity.GetType()} but expected {typeof(TEntity)}");
         }
 
         if (ExistingEntity == null)
@@ -73,7 +73,7 @@ public class MappedEntity
 
         if (ExistingEntity is not TEntity existing)
         {
-            throw new InvalidCastException($"Entities are not expected type. Received  {IncomingEntity.GetType()} and  {ExistingEntity!.GetType()} but expected  {typeof(TEntity)}");
+            throw new InvalidCastException($"Existing entity is not the expected type. It is {IncomingEntity.GetType()} but expected {typeof(TEntity)}");
         }
 
         return (incoming, existing);

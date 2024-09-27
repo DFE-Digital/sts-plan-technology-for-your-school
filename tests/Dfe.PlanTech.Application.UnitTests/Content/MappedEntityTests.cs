@@ -30,12 +30,12 @@ public class MappedEntityTests
 {
     private readonly ICmsDbContext _cmsDbContextMock = Substitute.For<ICmsDbContext>();
     private readonly IDatabaseHelper<ICmsDbContext> _databaseHelper = Substitute.For<IDatabaseHelper<ICmsDbContext>>();
-    private readonly ILogger _logger;
+    private readonly ILogger<MappedEntity> _logger;
 
     public MappedEntityTests()
     {
         _databaseHelper.Database.Returns(_cmsDbContextMock);
-        _logger = Substitute.For<ILogger>();
+        _logger = Substitute.For<ILogger<MappedEntity>>();
 
         MockGetRequiredProperties(["String", "Int", "Bool"], typeof(MockDbEntity));
         MockGetRequiredProperties(["Answer"], typeof(InvalidMockDbEntity));
@@ -75,4 +75,30 @@ public class MappedEntityTests
         Assert.Equal(0, incoming.Int);
         Assert.False(incoming.Bool);
     }
+
+    [Fact]
+    public void GetTypedEntities_Should_Error_If_IncomingEntity_Type_DoesntMatch()
+    {
+        var mappedEntity = new MappedEntity()
+        {
+            IncomingEntity = new MockDbEntity(),
+            CmsEvent = CmsEvent.CREATE,
+        };
+
+        Assert.ThrowsAny<InvalidCastException>(() => mappedEntity.GetTypedEntities<QuestionDbEntity>());
+    }
+
+    [Fact]
+    public void GetTypedEntities_Should_Error_If_ExistingEntity_Type_DoesntMatch()
+    {
+        var mappedEntity = new MappedEntity()
+        {
+            IncomingEntity = new QuestionDbEntity(),
+            ExistingEntity = new MockDbEntity(),
+            CmsEvent = CmsEvent.CREATE,
+        };
+
+        Assert.Throws<InvalidCastException>(() => mappedEntity.GetTypedEntities<QuestionDbEntity>());
+    }
+
 }
