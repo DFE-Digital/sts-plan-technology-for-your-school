@@ -21,16 +21,6 @@ flowchart TD
     D -->|writes to| E[Service Bus]
 ```
 
-### Explanation:
-- **A**: `Contentful` sends the webhook to the `CMSController`.
-- **B**: The `CMSController` receives the webhook payload.
-- **C**: The `WriteCmsWebhookToQueueCommand` processes the payload.
-- **D**: The `CmsEvent` is retrieved and validated from the headers.
-- **E**: The `QueueWriter` sends the body and `CmsEvent`.
-- **F**: The message is written to the Service Bus.
-
-You can visualize this updated diagram using a MermaidJS live editor or in a compatible Markdown viewer.```
-
 ### Queue -> DB
 
 ```mermaid
