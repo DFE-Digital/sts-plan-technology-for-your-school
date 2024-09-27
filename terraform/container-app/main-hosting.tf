@@ -20,10 +20,7 @@ module "main_hosting" {
     "KeyVaultName"    = local.kv_name
   }
 
-  container_environment_variables = {
-    "Kestrel__Endpoints__Http__Url"       = local.kestrel_endpoint,
-    "ASPNETCORE_FORWARDEDHEADERS_ENABLED" = "true"
-  }
+  container_environment_variables = local.container_environment_variables
 
   container_app_identities = {
     type         = "UserAssigned",

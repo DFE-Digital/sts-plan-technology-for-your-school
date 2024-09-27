@@ -33,6 +33,7 @@ using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Routing;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -101,6 +102,8 @@ public static class ProgramExtensions
         services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationFromDbQuery>(GetSubTopicRecommendationFromDbQuery.ServiceKey);
         services.AddTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationQuery>();
         services.AddTransient<IRecommendationsRepository, RecommendationsRepository>();
+
+        services.AddScoped<ComponentViewsFactory>();
 
         return services;
     }
@@ -178,7 +181,14 @@ public static class ProgramExtensions
 
     public static IServiceCollection AddGoogleTagManager(this IServiceCollection services)
     {
-        services.AddTransient<GtmConfiguration>();
+        services.AddOptions<GtmConfiguration>()
+                .Configure<IConfiguration>((settings, configuration) =>
+                {
+                    configuration.GetSection("GTM").Bind(settings);
+                });
+
+        services.AddTransient(services => services.GetRequiredService<IOptions<GtmConfiguration>>().Value);
+        services.AddTransient<GtmService>();
         return services;
     }
 
@@ -235,4 +245,11 @@ public static class ProgramExtensions
         return services;
     }
 
+    public static IServiceCollection AddCustomTelemetry(this IServiceCollection services)
+    {
+        services.AddApplicationInsightsTelemetry();
+        services.AddSingleton<ITelemetryInitializer, CustomRequestDimensionsTelemetryInitializer>();
+
+        return services;
+    }
 }

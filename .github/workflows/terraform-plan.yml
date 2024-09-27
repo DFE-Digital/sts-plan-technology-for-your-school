@@ -48,6 +48,8 @@ env:
   container_app_max_replicas: ${{secrets.CONTAINER_MAX_REPLICAS}}
   container_app_http_concurrency: ${{secrets.CONTAINER_HTTP_CONCURRENCY}}
 
+  container_environment: ${{ inputs.environment }}
+
   TF_WORKING_DIRECTORY: terraform/container-app
 
 jobs:
@@ -100,6 +102,11 @@ jobs:
               echo "TF_VAR_$var=$env_value" >> $GITHUB_ENV
             fi
           done
+
+          if [ "$container_environment" == "Tst" ]; then
+            export container_environment="Test"
+          fi
+            echo "TF_VAR_container_environment=$container_environment" >> $GITHUB_ENV
 
       - name: Terraform init
         id: init
