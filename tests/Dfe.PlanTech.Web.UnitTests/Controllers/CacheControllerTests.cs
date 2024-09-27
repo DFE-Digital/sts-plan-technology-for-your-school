@@ -1,8 +1,6 @@
-﻿using Dfe.PlanTech.Application.Extensions;
-using Dfe.PlanTech.Domain.Content.Models;
+﻿using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -11,38 +9,41 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers;
 
 public class CacheControllerTests
 {
+    private readonly IQueryCacher _queryCacher = Substitute.For<IQueryCacher>();
     private readonly ILogger<CacheController> _logger = Substitute.For<ILogger<CacheController>>();
     private readonly CacheController _cacheController;
 
-    private readonly IQueryable<ContentComponent> _mockQueryable = Substitute.For<IQueryable<ContentComponent>>();
-    private int _queryCallCount;
-
     public CacheControllerTests()
     {
-        _cacheController = new CacheController(_logger);
-
-        _mockQueryable
-            .When(query => query.ToListAsync())
-            .Do(_ => _queryCallCount++);
+        _cacheController = new CacheController(_queryCacher, _logger);
     }
 
     [Fact]
-    public void ClearCache_Should_Empty_Cache()
+    public void ClearCache_Should_Return_True_On_Success()
     {
-        _mockQueryable.ToListAsyncWithCache();
-        _mockQueryable.ToListAsyncWithCache();
-
-        Assert.Equal(1, _queryCallCount);
-
         var clearCacheResult = _cacheController.ClearCache();
+
         Assert.NotNull(clearCacheResult);
 
         var result = clearCacheResult as ObjectResult;
         Assert.NotNull(result);
         Assert.Equal(200, result.StatusCode);
 
-        _mockQueryable.ToListAsyncWithCache();
+        _queryCacher.Received(1).ClearCache();
+    }
 
-        Assert.Equal(2, _queryCallCount);
+    [Fact]
+    public void ClearCache_Should_Return_False_On_Failure()
+    {
+        _queryCacher
+            .When(call => call.ClearCache())
+            .Do(_ => throw new Exception("unexpected error"));
+
+        var clearCacheResult = _cacheController.ClearCache();
+        Assert.NotNull(clearCacheResult);
+
+        var result = clearCacheResult as ObjectResult;
+        Assert.NotNull(result);
+        Assert.Equal(500, result.StatusCode);
     }
 }

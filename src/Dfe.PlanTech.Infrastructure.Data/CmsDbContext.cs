@@ -1,6 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
-using Dfe.PlanTech.Application.Extensions;
+using System.Security.Cryptography;
+using System.Text;
+using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
@@ -115,15 +118,18 @@ public class CmsDbContext : DbContext, ICmsDbContext
     #endregion
 
     private readonly ContentfulOptions _contentfulOptions;
+    private readonly QueryCacher _queryCacher;
 
     public CmsDbContext()
     {
         _contentfulOptions = new ContentfulOptions(false);
+        _queryCacher = this.GetService<QueryCacher>() ?? throw new MissingServiceException($"Could not find service {nameof(QueryCacher)}");
     }
 
     public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
     {
         _contentfulOptions = this.GetService<ContentfulOptions>() ?? throw new MissingServiceException($"Could not find service {nameof(ContentfulOptions)}");
+        _queryCacher = this.GetService<QueryCacher>() ?? throw new MissingServiceException($"Could not find service {nameof(QueryCacher)}");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -215,17 +221,33 @@ public class CmsDbContext : DbContext, ICmsDbContext
     private Expression<Func<ContentComponentDbEntity, bool>> ShouldShowEntity()
         => entity => (_contentfulOptions.UsePreview || entity.Published) && !entity.Archived && !entity.Deleted;
 
+    private static string GetCacheKey(IQueryable query)
+    {
+        var queryString = query.ToQueryString();
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(queryString));
+        return Convert.ToBase64String(hash);
+    }
+
     public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
-        => Pages.Where(page => page.Slug == slug)
-            .Include(page => page.BeforeTitleContent)
-            .Include(page => page.Content)
-            .Include(page => page.Title)
-            .AsSplitQuery()
-            .FirstOrDefaultAsyncWithCache(cancellationToken);
+        => FirstOrDefaultAsync(
+            Pages.Where(page => page.Slug == slug)
+                .Include(page => page.BeforeTitleContent)
+                .Include(page => page.Content)
+                .Include(page => page.Title)
+                .AsSplitQuery(),
+            cancellationToken);
 
-    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default) =>
-        queryable.ToListAsyncWithCache(cancellationToken: cancellationToken);
+    public async Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+    {
+        var key = GetCacheKey(queryable);
+        return await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
+            (q, ctoken) => q.ToListAsync(ctoken), cancellationToken);
+    }
 
-    public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
-        => queryable.FirstOrDefaultAsyncWithCache(cancellationToken);
+    public async Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+    {
+        var key = GetCacheKey(queryable);
+        return await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
+            (q, ctoken) => q.FirstOrDefaultAsync(ctoken), cancellationToken);
+    }
 }

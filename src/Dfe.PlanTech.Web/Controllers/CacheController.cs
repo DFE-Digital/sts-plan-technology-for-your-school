@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Application.Extensions;
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Web.Controllers;
 
 [Route("cache")]
 [LogInvalidModelState]
-public class CacheController(ILogger<CacheController> cacheLogger) : BaseController<CacheController>(cacheLogger)
+public class CacheController([FromServices] IQueryCacher queryCacher, ILogger<CacheController> cacheLogger) : BaseController<CacheController>(cacheLogger)
 {
     [HttpPost("clear")]
     [ValidateApiKey]
@@ -14,7 +14,7 @@ public class CacheController(ILogger<CacheController> cacheLogger) : BaseControl
     {
         try
         {
-            QueryableExtensions.ClearCmsCache();
+            queryCacher.ClearCache();
             logger.LogInformation("Database cache has been cleared");
             return Ok(true);
         }
