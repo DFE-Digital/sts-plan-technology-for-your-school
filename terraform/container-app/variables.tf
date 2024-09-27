@@ -125,6 +125,22 @@ variable "container_app_http_concurrency" {
   default     = 10
 }
 
+variable "container_environment" {
+  description = "Container app environment - set to ASPNETCORE_ENVIRONMENT in the app environment variables"
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = contains(["Dev", "Test", "Staging", "Prod"], var.container_environment)
+    error_message = "container_environment must be one of ${jsonencode(["Dev", "Test", "Staging", "Prod"])}"
+  }
+}
+
+variable "container_environment_variables" {
+  description = "Additional environment variables to set on the Azure Container App"
+  type        = map(string)
+  default     = {}
+}
 
 ##################
 # CDN/Front Door #
