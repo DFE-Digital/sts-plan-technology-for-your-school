@@ -9,10 +9,6 @@
 
 ## Contentful -> DB Process
 
-![Contentful to database architecture][/docs/diagrams/cms-to-db-process-flow.png]
-
-- Code is contained in the [/src/Dfe.PlanTech.AzureFunctions/](/src/Dfe.PlanTech.AzureFunctions/) project.
-
 ### Webhook -> Queue
 
 - We have a webhook on Contentful setup for entries
@@ -25,16 +21,25 @@
 
 ### Queue -> DB
 
-- We have another Azure Function which is triggered by messages on the Azure Servicebus (/src/Dfe.PlanTech.AzureFunctions/QueueReceiver.cs)
-  - These messages are batched where applicable, using the default batch settings
-
-- The Azure Function reads the message from the queue and, for each message,
-  1. Strips out unnecessary information from the JSON payload, converting the JSON to just be what the entry value is
-  2. Adds necessary relationship data for an entry, if any, into the JSON
-  3. Desrialises the JSON to the _database entity model_
-  4. Updates the entry status columns where appropriate (i.e. archived/published/deleted)
-  5. Upserts the entry in the database
-  6. Makes a call to the Plan Tech service to invalidate the cache
+```mermaid
+flowchart TD
+    A[ContentfulServiceBusProcessor] -->|reads messages| B[Service Bus Queue]
+    B -->|sends message| C[WebhookToDbCommand]
+    C -->|maps payload| D[JsonToDbMapper]
+    D -->|retrieves mapper| E[JsonToDbMappers]
+    C -->|uses for db operations| F[IDatabaseHelper<ICmsDbContext>]
+    C -->|returns result| G[IServiceBusResult]
+    A -->|passes result| H[ServiceBusResultProcessor]
+    
+    H -->|if ServiceBusSuccessResult| I[Complete Message]
+    H -->|if ServiceBusErrorResult| J[MessageRetryHandler]
+    
+    J -->|checks if retryable| K{Is Retryable?}
+    K -->|Yes| L[Check Retry Limit]
+    L -->|Within Limit| M[Complete Message & Add Copy to Queue]
+    L -->|Exceeded Limit| N[Dead Letter Message]
+    K -->|No| N
+```
 
 #### Mapping
 
