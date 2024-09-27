@@ -8,6 +8,6 @@ namespace Dfe.PlanTech.Application.Persistence.Mappings;
 public class TitleMapper(EntityUpdater updater,
                          ILogger<TitleMapper> logger,
                          JsonSerializerOptions jsonSerialiserOptions,
-                         IDatabaseHelper<ICmsDbContext> databaseHelper) : JsonToDbMapper<TitleDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
+                         IDatabaseHelper<ICmsDbContext> databaseHelper) : BaseJsonToDbMapper<TitleDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
 {
 }

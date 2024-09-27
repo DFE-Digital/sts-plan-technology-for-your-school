@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Persistence.Mappings;
 
-public abstract class JsonToDbMapper(Type entityType, ILogger logger, JsonSerializerOptions jsonSerialiserOptions)
+public abstract class BaseJsonToDbMapper(Type entityType, ILogger logger, JsonSerializerOptions jsonSerialiserOptions)
 {
     protected readonly ILogger Logger = logger;
     protected readonly JsonSerializerOptions JsonOptions = jsonSerialiserOptions;

@@ -74,7 +74,7 @@ public class PageMapperTests : BaseMapperTests<PageDbEntity, PageMapper>
     [Fact]
     public void CreatePageContentEntity_Should_LogError_When_Inner_Not_String()
     {
-        _mapper.InvokePublicMethod("CreatePageContentEntity", new object?[] { 10, 0, true });
+        _mapper.InvokeNonPublicMethod("CreatePageContentEntity", new object?[] { 10, 0, true });
         var messages = Logger.ReceivedLogMessages().ToArray();
 
         Assert.Single(messages);

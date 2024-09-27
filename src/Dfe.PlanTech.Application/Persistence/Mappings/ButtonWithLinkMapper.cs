@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Application.Persistence.Mappings;
 public class ButtonWithLinkMapper(EntityUpdater updater,
                                   ILogger<ButtonWithLinkMapper> logger,
                                   JsonSerializerOptions jsonSerialiserOptions,
-                                  IDatabaseHelper<ICmsDbContext> databaseHelper) : JsonToDbMapper<ButtonWithLinkDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
+                                  IDatabaseHelper<ICmsDbContext> databaseHelper) : BaseJsonToDbMapper<ButtonWithLinkDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
 {
     protected override Dictionary<string, object?> PerformAdditionalMapping(Dictionary<string, object?> values)
     {

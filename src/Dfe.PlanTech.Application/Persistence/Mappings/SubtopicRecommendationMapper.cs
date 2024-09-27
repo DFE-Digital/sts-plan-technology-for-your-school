@@ -10,7 +10,7 @@ public class SubtopicRecommendationMapper(EntityUpdater updater,
                                           ILogger<SubtopicRecommendationMapper> logger,
                                           JsonSerializerOptions jsonSerialiserOptions,
                                           IDatabaseHelper<ICmsDbContext> databaseHelper)
-    : JsonToDbMapper<SubtopicRecommendationDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
+    : BaseJsonToDbMapper<SubtopicRecommendationDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
 {
     private List<RecommendationIntroDbEntity> _incomingIntros = [];
 

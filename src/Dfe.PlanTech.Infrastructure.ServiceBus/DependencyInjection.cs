@@ -68,14 +68,14 @@ public static class DependencyInjection
     }
 
     /// <summary>
-    /// Finds all <see cref="JsonToDbMapper"/> mappers using reflection, and then injects them as dependencies
+    /// Finds all <see cref="BaseJsonToDbMapper"/> mappers using reflection, and then injects them as dependencies
     /// </summary>
     /// <param name="services"></param>
     private static IServiceCollection AddMappers(this IServiceCollection services)
     {
         foreach (var mapper in GetMappers())
         {
-            services.AddTransient(typeof(JsonToDbMapper), mapper);
+            services.AddTransient(typeof(BaseJsonToDbMapper), mapper);
         }
 
         services.AddTransient<RichTextContentMapper>();
@@ -102,12 +102,12 @@ public static class DependencyInjection
     }
 
     /// <summary>
-    /// Get all <see cref="JsonToDbMapper"/> mappers using reflection
+    /// Get all <see cref="BaseJsonToDbMapper"/> mappers using reflection
     /// </summary>
     /// <returns></returns>
     private static IEnumerable<Type> GetMappers() =>
       AppDomain.CurrentDomain.GetAssemblies()
           .SelectMany(assembly => assembly.GetTypes())
-          .Where(type => type.IsAssignableTo(typeof(JsonToDbMapper)) && !type.IsAbstract);
+          .Where(type => type.IsAssignableTo(typeof(BaseJsonToDbMapper)) && !type.IsAbstract);
 
 }

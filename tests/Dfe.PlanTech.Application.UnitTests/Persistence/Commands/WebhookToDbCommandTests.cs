@@ -83,7 +83,7 @@ public class WebhookToDbCommandTests
         };
 
         return Substitute.For<JsonToEntityMappers>(
-            new JsonToDbMapper[]
+            new BaseJsonToDbMapper[]
             {
                 new QuestionMapper(new EntityUpdater(Substitute.For<ILogger<EntityUpdater>>(), _databaseHelper),
                     Substitute.For<ILogger<QuestionMapper>>(), jsonOptions, _databaseHelper)

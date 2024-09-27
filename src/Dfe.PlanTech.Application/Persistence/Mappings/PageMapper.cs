@@ -10,7 +10,7 @@ public class PageMapper(PageRetriever retriever,
                         PageUpdater updater,
                         ILogger<PageMapper> logger,
                         JsonSerializerOptions jsonSerialiserOptions,
-                        IDatabaseHelper<ICmsDbContext> databaseHelper) : JsonToDbMapper<PageDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
+                        IDatabaseHelper<ICmsDbContext> databaseHelper) : BaseJsonToDbMapper<PageDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
 {
     private const string BeforeTitleContentKey = "beforeTitleContent";
     private const string ContentKey = "content";

@@ -11,7 +11,7 @@ public class RecommendationIntroMapper(EntityUpdater updater,
                                        ILogger<RecommendationIntroMapper> logger,
                                        JsonSerializerOptions jsonSerialiserOptions,
                                        IDatabaseHelper<ICmsDbContext> databaseHelper)
-    : JsonToDbMapper<RecommendationIntroDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
+    : BaseJsonToDbMapper<RecommendationIntroDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
 {
     private List<ContentComponentDbEntity> _incomingContent = [];
 

@@ -8,6 +8,6 @@ namespace Dfe.PlanTech.Application.Persistence.Mappings;
 public class ButtonMapper(EntityUpdater updater,
                             ILogger<ButtonMapper> logger,
                             JsonSerializerOptions jsonSerialiserOptions,
-                            IDatabaseHelper<ICmsDbContext> databaseHelper) : JsonToDbMapper<ButtonDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
+                            IDatabaseHelper<ICmsDbContext> databaseHelper) : BaseJsonToDbMapper<ButtonDbEntity>(updater, logger, jsonSerialiserOptions, databaseHelper)
 {
 }
