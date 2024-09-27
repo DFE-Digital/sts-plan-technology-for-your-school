@@ -153,8 +153,7 @@ public class JsonToDbMapperUnitTests : BaseMapperTests
         var result = ((IEnumerable<KeyValuePair<string, object?>?>)_mapper.InvokeNonPublicMethod<BaseJsonToDbMapper>("GetValuesFromFields", new[] { arg })).ToArray();
 
         Assert.Single(result);
-        Assert.True(result[0].HasValue);
-        Assert.Null(result[0]!.Value.Value);
+        Assert.False(result[0].HasValue);
 
         var loggedMessages = _logger.ReceivedLogMessages().ToArray();
 
