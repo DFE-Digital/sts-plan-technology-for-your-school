@@ -15,7 +15,7 @@ public class DatabaseHelperTests
     private readonly IServiceProvider _serviceProvider = Substitute.For<IServiceProvider>();
     private readonly CmsDbContext _mockDb = Substitute.For<CmsDbContext>();
     private readonly DatabaseHelper<ICmsDbContext> _databaseHelper;
-    private readonly string[] _nonNullablePropertyNames = ["Id", "Archived", "Published", "Deleted"];
+    private readonly string[] _nonNullablePropertyNames = ["Id", "Archived", "Published", "Deleted", "Slug", "Text"];
 
     public DatabaseHelperTests()
     {
@@ -92,6 +92,7 @@ public class DatabaseHelperTests
         var type = typeof(QuestionDbEntity);
         var properties = _databaseHelper.GetRequiredPropertiesForType(type).ToArray();
         Assert.NotEmpty(properties);
+        Assert.Equal(_nonNullablePropertyNames.Length, properties.Length);
         Assert.True(properties.All(property => _nonNullablePropertyNames.Contains(property.Name)));
     }
 
