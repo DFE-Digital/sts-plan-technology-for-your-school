@@ -119,16 +119,16 @@ public class CmsDbContext : DbContext, ICmsDbContext
     private readonly ContentfulOptions _contentfulOptions;
     private readonly QueryCacher _queryCacher;
 
-    public CmsDbContext()
+    public CmsDbContext(QueryCacher queryCacher)
     {
         _contentfulOptions = new ContentfulOptions(false);
-        _queryCacher = this.GetService<QueryCacher>() ?? throw new MissingServiceException($"Could not find service {nameof(QueryCacher)}");
+        _queryCacher = queryCacher ?? throw new MissingServiceException($"Could not find service {nameof(QueryCacher)}");
     }
 
-    public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
+    public CmsDbContext(QueryCacher queryCacher, DbContextOptions<CmsDbContext> options) : base(options)
     {
         _contentfulOptions = this.GetService<ContentfulOptions>() ?? throw new MissingServiceException($"Could not find service {nameof(ContentfulOptions)}");
-        _queryCacher = this.GetService<QueryCacher>() ?? throw new MissingServiceException($"Could not find service {nameof(QueryCacher)}");
+        _queryCacher = queryCacher ?? throw new MissingServiceException($"Could not find service {nameof(QueryCacher)}");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

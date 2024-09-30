@@ -125,7 +125,6 @@ public static class ProgramExtensions
         services.AddTransient<ICacher, Cacher>();
         services.AddTransient<IQuestionnaireCacher, QuestionnaireCacher>();
         services.AddTransient<IUser, UserHelper>();
-        services.AddSingleton<IQueryCacher, QueryCacher>();
 
         return services;
     }
@@ -133,6 +132,7 @@ public static class ProgramExtensions
     public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
         void databaseOptionsAction(DbContextOptionsBuilder options) => options.UseSqlServer(configuration.GetConnectionString("Database"));
+        services.AddSingleton<IQueryCacher, QueryCacher>();
 
         services.AddDbContextPool<ICmsDbContext, CmsDbContext>((serviceProvider, optionsBuilder) =>
             optionsBuilder

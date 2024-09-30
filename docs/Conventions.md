@@ -41,5 +41,5 @@
     // do this instead
     db.FirstOrDefaultAsync(db.RecommendationChunks.Where(condition), cancellationToken);
     ```
-- the cache can be cleared with the `ClearCmsCache` method which clears everything
+- the cache can be cleared with the `ClearCache` method which clears everything
 - More about contentful caching is explained in [Contentful-Caching-Process](/docs/Contentful-Caching-Process.md)
