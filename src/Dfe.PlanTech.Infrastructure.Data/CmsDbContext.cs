@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Text;
-using Dfe.PlanTech.Application.Caching.Models;
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
@@ -117,18 +117,18 @@ public class CmsDbContext : DbContext, ICmsDbContext
     #endregion
 
     private readonly ContentfulOptions _contentfulOptions;
-    private readonly QueryCacher _queryCacher;
+    private readonly IQueryCacher _queryCacher;
 
-    public CmsDbContext(QueryCacher queryCacher)
+    public CmsDbContext()
     {
         _contentfulOptions = new ContentfulOptions(false);
-        _queryCacher = queryCacher ?? throw new MissingServiceException($"Could not find service {nameof(QueryCacher)}");
+        _queryCacher = this.GetService<IQueryCacher>() ?? throw new MissingServiceException($"Could not find service {nameof(IQueryCacher)}");
     }
 
-    public CmsDbContext(QueryCacher queryCacher, DbContextOptions<CmsDbContext> options) : base(options)
+    public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
     {
         _contentfulOptions = this.GetService<ContentfulOptions>() ?? throw new MissingServiceException($"Could not find service {nameof(ContentfulOptions)}");
-        _queryCacher = queryCacher ?? throw new MissingServiceException($"Could not find service {nameof(QueryCacher)}");
+        _queryCacher = this.GetService<IQueryCacher>() ?? throw new MissingServiceException($"Could not find service {nameof(IQueryCacher)}");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
