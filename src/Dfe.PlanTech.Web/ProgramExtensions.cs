@@ -125,6 +125,7 @@ public static class ProgramExtensions
         services.AddTransient<ICacher, Cacher>();
         services.AddTransient<IQuestionnaireCacher, QuestionnaireCacher>();
         services.AddTransient<IUser, UserHelper>();
+        services.AddSingleton<IQueryCacher, QueryCacher>();
 
         return services;
     }

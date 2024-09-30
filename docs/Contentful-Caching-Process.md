@@ -94,6 +94,6 @@ There are several steps to it:
 
 ## Caching
 
-- Caching is handled by an in memory cache defined in the QueryableExtensions class in [Dfe.PlanTech.Application/Extensions/QueryableExtensions.cs](/src/Dfe.PlanTech.Application/Extensions/QueryableExtensions.cs)
-- It does not have any form of cache invalidation as it is only intended for use with the `CmsDbContext` and not any of the `dbo` tables which will be frequently updated. See [Conventions](/docs/Conventions.md) for more information.
+- Caching is handled by an in memory cache defined in the QueryCacher class in [Dfe.PlanTech.Application/Caching/Models/QueryCacher.cs](/src/Dfe.PlanTech.Application/Caching/Models/QueryCacher.cs)
+- The only cache invalidation is invalidation of the whole cache as it intended only for use with the `CmsDbContext` and not any of the `dbo` tables which will be frequently updated. See [Conventions](/docs/Conventions.md) for more information.
 - The Cache can be invalidated by an API key protected endpoint in the website. This is called by the azure function whenever content is updated in the database. The API key is stored in the key vault and referenced by an environment variable for the function.
