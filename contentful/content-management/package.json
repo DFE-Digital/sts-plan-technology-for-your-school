@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "contentful-management": "^11.33.0"
+    "contentful-management": "^11.33.0",
+    "dotenv": "^16.4.5"
   }
 }

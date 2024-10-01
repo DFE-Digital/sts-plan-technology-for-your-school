@@ -1,7 +1,3 @@
-@using Dfe.PlanTech.Web.Helpers
-@inject GtmConfiguration GtmConfiguration
-
 <link rel="stylesheet" as="style" href="~/css/application.css" asp-append-version="true">
 
-@Html.Raw(GtmConfiguration.Analytics)
-<script nonce="@Context.Items["nonce"]">@Html.Raw(GtmConfiguration.Head)</script>
+<partial name="GoogleTagManager/_Head" />

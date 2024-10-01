@@ -11,6 +11,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "contentful-migration": "^4.23.2"
+        "contentful-migration": "^4.23.2",
+        "dotenv": "^16.4.5"
     }
 }
