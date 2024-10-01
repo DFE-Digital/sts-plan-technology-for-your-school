@@ -25,8 +25,4 @@ where TContentComponent : ContentComponent
 
     public IEnumerable<UpdatedEntity<TContentComponent>> CopyWithDifferentValues(IEnumerable<TContentComponent> entities)
      => entities.Select(originalEntity => new UpdatedEntity<TContentComponent>(originalEntity, CopyWithDifferentValues(originalEntity)));
-
-    protected TContent CreateCopyOfEntityWithJustSys<TContent>(TContent content)
-      where TContent : ContentComponent, new()
-      => new() { Sys = content.Sys };
 }

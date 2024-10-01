@@ -4,6 +4,7 @@ using Dfe.PlanTech.Application.Persistence.Commands;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Mappings;
 using Dfe.PlanTech.CmsDbMigrations.E2ETests.Generators;
+using Dfe.PlanTech.CmsDbMigrations.E2ETests.Utilities;
 using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -59,6 +60,7 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
     protected readonly ICacheClearer cacheClearer;
     protected readonly IDatabaseHelper<ICmsDbContext> DatabaseHelper;
     protected readonly ILogger<WebhookToDbCommand> WebhookLogger;
+
     [Fact]
     public async Task Should_Publish_Entities()
     {
@@ -80,7 +82,7 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
 
         foreach (var entity in updatedEntities)
         {
-            await WebhookToDbCommand.ProcessMessage(cmsEvent.ToString(), JsonSerializer.Serialize(entity), entity.Original.Sys.Id, default);
+            await WebhookToDbCommand.ProcessMessage(cmsEvent.ToString(), CreateWebhookBody(entity.Updated), entity.Original.Sys.Id, default);
 
             var dbEntity = await GetDbEntityById(entity.Original.Sys.Id);
             ValidateDbMatches(entity.Updated, dbEntity, published: true);
@@ -101,7 +103,7 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
         {
             var newEntity = EntityGenerator.CopyWithDifferentValues(entity);
 
-            await WebhookToDbCommand.ProcessMessage(cmsEvent.ToString(), JsonSerializer.Serialize(entity), entity.Sys.Id, default);
+            await WebhookToDbCommand.ProcessMessage(cmsEvent.ToString(), CreateWebhookBody(entity), entity.Sys.Id, default);
 
             var dbEntity = await GetDbEntityById(entity.Sys.Id);
             ValidateDbMatches(entity, dbEntity, published: true);
@@ -141,7 +143,7 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
 
         foreach (var entity in updatedEntities)
         {
-            await WebhookToDbCommand.ProcessMessage(cmsEvent.ToString(), JsonSerializer.Serialize(entity.Updated), entity.Original.Sys.Id, default);
+            await WebhookToDbCommand.ProcessMessage(cmsEvent.ToString(), CreateWebhookBody(entity.Updated), entity.Original.Sys.Id, default);
 
             var dbEntity = await GetDbEntityById(entity.Original.Sys.Id);
             ValidateDbMatches(entity.Updated, dbEntity, published: true);
@@ -167,7 +169,7 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
 
         foreach (var entity in updatedEntities)
         {
-            await WebhookToDbCommand.ProcessMessage(cmsEvent.ToString(), JsonSerializer.Serialize(entity.Updated), entity.Original.Sys.Id, default);
+            await WebhookToDbCommand.ProcessMessage(cmsEvent.ToString(), CreateWebhookBody(entity.Updated), entity.Original.Sys.Id, default);
 
             var dbEntity = await GetDbEntityById(entity.Original.Sys.Id);
             ValidateDbMatches(entity.Updated, dbEntity, published: true);
@@ -188,7 +190,7 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
 
         foreach (var entity in updatedEntities)
         {
-            await WebhookToDbCommand.ProcessMessage(cmsEvent.ToString(), JsonSerializer.Serialize(entity.Updated), entity.Original.Sys.Id, default);
+            await WebhookToDbCommand.ProcessMessage(cmsEvent.ToString(), CreateWebhookBody(entity.Updated), entity.Original.Sys.Id, default);
 
             var dbEntity = await GetDbEntityById(entity.Original.Sys.Id);
             ValidateDbMatches(entity.Updated, dbEntity, published: true, archived: true);
@@ -209,11 +211,11 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
         {
             Db.ChangeTracker.Clear();
 
-            await WebhookToDbCommand.ProcessMessage(CmsEvent.ARCHIVE.ToString(), JsonSerializer.Serialize(entity.Updated), entity.Original.Sys.Id, default);
+            await WebhookToDbCommand.ProcessMessage(CmsEvent.ARCHIVE.ToString(), CreateWebhookBody(entity.Updated), entity.Original.Sys.Id, default);
 
             Db.ChangeTracker.Clear();
 
-            await WebhookToDbCommand.ProcessMessage(CmsEvent.UNARCHIVE.ToString(), JsonSerializer.Serialize(entity.Updated), entity.Original.Sys.Id, default);
+            await WebhookToDbCommand.ProcessMessage(CmsEvent.UNARCHIVE.ToString(), CreateWebhookBody(entity.Updated), entity.Original.Sys.Id, default);
 
             Db.ChangeTracker.Clear();
 
@@ -252,7 +254,7 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
 
         foreach (var entity in entities)
         {
-            await WebhookToDbCommand.ProcessMessage(cmsEvent.ToString(), JsonSerializer.Serialize(entity), entity.Sys.Id, default);
+            await WebhookToDbCommand.ProcessMessage(cmsEvent.ToString(), CreateWebhookBody(entity), entity.Sys.Id, default);
 
             var dbEntity = await GetDbEntityById(entity.Sys.Id);
             ValidateDbMatches(entity, dbEntity, published: false);
@@ -275,7 +277,7 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
 
         foreach (var entity in entities)
         {
-            await WebhookToDbCommand.ProcessMessage(cmsEvent.ToString(), JsonSerializer.Serialize(entity), entity.Sys.Id, default);
+            await WebhookToDbCommand.ProcessMessage(cmsEvent.ToString(), CreateWebhookBody(entity), entity.Sys.Id, default);
 
             Db.ChangeTracker.Clear();
 
@@ -306,7 +308,7 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
             Db.ChangeTracker.Clear();
 
             //Update with SAVE event
-            await WebhookToDbCommand.ProcessMessage(CmsEvent.SAVE.ToString(), JsonSerializer.Serialize(entity.Updated), entity.Updated.Sys.Id, default);
+            await WebhookToDbCommand.ProcessMessage(CmsEvent.SAVE.ToString(), CreateWebhookBody(entity.Updated), entity.Updated.Sys.Id, default);
 
             //Assert changed
             var dbEntity = await GetDbEntityById(entity.Original.Sys.Id);
@@ -334,7 +336,7 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
             Db.ChangeTracker.Clear();
 
             //Update with SAVE event
-            await WebhookToDbCommand.ProcessMessage(CmsEvent.AUTO_SAVE.ToString(), JsonSerializer.Serialize(entity.Updated), entity.Updated.Sys.Id, default);
+            await WebhookToDbCommand.ProcessMessage(CmsEvent.AUTO_SAVE.ToString(), CreateWebhookBody(entity.Updated), entity.Updated.Sys.Id, default);
 
             //Assert changed
             var dbEntity = await GetDbEntityById(entity.Original.Sys.Id);
@@ -348,7 +350,7 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
 
     private async Task UpdateEntityStatus(TEntity entity, CmsEvent cmsEvent)
     {
-        await WebhookToDbCommand.ProcessMessage(cmsEvent.ToString(), JsonSerializer.Serialize(entity), entity.Sys.Id, default);
+        await WebhookToDbCommand.ProcessMessage(cmsEvent.ToString(), CreateWebhookBody(entity), entity.Sys.Id, default);
         Db.ChangeTracker.Clear();
     }
 
@@ -375,7 +377,7 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
 
         foreach (var entity in entities)
         {
-            await WebhookToDbCommand.ProcessMessage(cmsEvent.ToString(), JsonSerializer.Serialize(entity), entity.Sys.Id, default);
+            await WebhookToDbCommand.ProcessMessage(cmsEvent.ToString(), CreateWebhookBody(entity), entity.Sys.Id, default);
 
             Db.ChangeTracker.Clear();
 
@@ -393,9 +395,7 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
 
     protected virtual Task<TDbEntity?> GetDbEntityById(TEntity entity) => GetDbEntityById(entity.Sys.Id);
 
-    protected virtual Task<TDbEntity?> GetDbEntityById(string id) => GetDbEntitiesQuery()
-                                                                                .AsNoTracking()
-                                                                                .FirstOrDefaultAsync(dbEntity => dbEntity.Id == id);
+    protected virtual Task<TDbEntity?> GetDbEntityById(string id) => GetDbEntitiesQuery().AsNoTracking().FirstOrDefaultAsync(dbEntity => dbEntity.Id == id);
 
     protected virtual void ValidateEntityState(TDbEntity dbEntity, bool published, bool archived, bool deleted)
     {
@@ -418,4 +418,10 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
         return sub;
     }
 
+    private string CreateWebhookBody(TEntity entity)
+    {
+        var dictionary = CreateEntityValuesDictionary(entity);
+
+        return EntityToPayload.ConvertEntityToPayload(entity, dictionary);
+    }
 }

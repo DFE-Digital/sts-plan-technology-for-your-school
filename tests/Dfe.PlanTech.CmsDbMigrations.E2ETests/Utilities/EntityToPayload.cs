@@ -24,20 +24,6 @@ public static class EntityToPayload
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    public static ServiceBusReceivedMessage CreateServiceBusMessage<T>(T entity, Dictionary<string, object?> fields, CmsEvent cmsEvent, ILogger logger)
-      where T : ContentComponent
-    {
-        var payload = ConvertEntityToPayload(entity, fields);
-
-        logger.LogInformation("Created JSON payload {Payload} from entity {Entity}", payload, JsonSerializer.Serialize(entity));
-
-        var subject = "ContentManagement.Entry." + cmsEvent.ToString().ToLower();
-        var serviceBusMessage = new ServiceBusMessage(payload) { Subject = subject };
-
-        var receivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(serviceBusMessage.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes("")));
-        return receivedMessage;
-    }
-
     public static string ConvertEntityToPayload<T>(T entity, Dictionary<string, object?> fields)
       where T : ContentComponent
     {
