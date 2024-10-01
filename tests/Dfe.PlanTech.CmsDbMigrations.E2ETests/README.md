@@ -1,6 +1,6 @@
-# DFE - Plan Tech - Azure Functions - E2E Tests
+# DFE - Plan Tech - Cms to DB migrations E2E Tests
 
-This project contains end-to-end tests for the Azure Functions.
+This project contains end-to-end tests for the CMS -> DB migrations E2E testing.
 
 ## Detailed Overview
 
