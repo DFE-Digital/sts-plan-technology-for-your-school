@@ -1,4 +1,3 @@
-const contentful = require("contentful-management");
 const getClient = require("../helpers/get-client");
 
 module.exports = async function deleteEntry(entry) {

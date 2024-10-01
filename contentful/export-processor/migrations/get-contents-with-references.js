@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 import DataMapper from "../data-mapper.js";
 
 /**

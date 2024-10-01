@@ -2,7 +2,7 @@ import { ValidatePage } from "../helpers/index.js";
 
 export const validateNonAuthorisedPages = (dataMapper) => {
     Array.from(dataMapper?.pages ?? [])
-        .map(([_, page]) => page)
+        .map(([, page]) => page)
         .filter((page) => !page.fields.requiresAuthorisation)
         .forEach((page) => {
             it(

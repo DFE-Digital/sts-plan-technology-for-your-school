@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "gulp": "gulp",
-    "build": "node esbuild.config.js"
+    "build": "node esbuild.config.js",
+    "lint": "eslint"
   },
   "keywords": [],
   "author": "",

@@ -4,11 +4,13 @@
   "description": "scripts for creating updating and deleting content entries",
   "main": "main.js",
   "scripts": {
-    "crud-operation": "node main.js"
+    "crud-operation": "node main.js",
+    "lint": "eslint"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "contentful-management": "^11.33.0"
+    "contentful-management": "^11.33.0",
+    "dotenv": "^16.4.5"
   }
 }

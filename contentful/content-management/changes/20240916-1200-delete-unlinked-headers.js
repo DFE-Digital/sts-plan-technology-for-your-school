@@ -1,4 +1,3 @@
-const contentful = require("contentful-management");
 const deleteEntry = require("../helpers/delete-entry");
 const getClient = require("../helpers/get-client");
 
