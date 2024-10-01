@@ -1,5 +1,6 @@
-import SubtopicRecommendation from "../content-types/subtopic-recommendation.js";
 import ErrorLogger from "../errors/error-logger.js";
+// eslint-disable-next-line no-unused-vars
+import SubtopicRecommendation from "../content-types/subtopic-recommendation.js";
 
 export class UserJourney {
   path;

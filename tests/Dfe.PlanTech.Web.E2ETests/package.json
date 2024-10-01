@@ -7,7 +7,8 @@
     "preinstall": "npm install ../../contentful/export-processor -S && npm link ../../contentful/export-processor",
     "test": "cypress run",
     "report:merge": "mochawesome-merge cypress/results/json/*.json > index.json",
-    "report:generate": "marge index.json --reportDir public --assetsDir public/assets --reportPageTitle index.html"
+    "report:generate": "marge index.json --reportDir public --assetsDir public/assets --reportPageTitle index.html",
+    "lint": "eslint"
   },
   "keywords": [],
   "author": "",

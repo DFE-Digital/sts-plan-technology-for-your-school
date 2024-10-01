@@ -1,7 +1,7 @@
 import { CleanText, ValidateContent, slugifyChunks } from "../helpers/index.js";
 
 
-export const validateRecommendationChunks = (chunks) => {
+export const validateRecommendationChunks = (introPage, chunks) => {
 
     cy.get("h2.dfe-vertical-nav__theme").contains("List of actions").should("exist");
 

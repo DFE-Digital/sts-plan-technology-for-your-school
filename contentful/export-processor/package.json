@@ -140,7 +140,8 @@
     },
     "scripts": {
         "generate-test-suites": "node data-tools.js -ts true",
-        "data-tools": "node data-tools.js -ts false -uj true -s true"
+        "data-tools": "node data-tools.js -ts false -uj true -s true",
+        "lint": "eslint"
     },
     "keywords": [],
     "author": "",
