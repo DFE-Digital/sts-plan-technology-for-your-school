@@ -192,7 +192,7 @@ public class MappedEntity
             var currentValue = property.GetValue(ExistingEntity);
 
             // Don't update the existing property if the values are the same
-            if ((newValue == null && currentValue == null) || (newValue != null && newValue.Equals(currentValue)))
+            if (newValue?.Equals(currentValue) == true)
             {
                 continue;
             }
