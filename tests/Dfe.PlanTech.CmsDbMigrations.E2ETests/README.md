@@ -18,9 +18,9 @@ For each content type, the `WebhookToDbCommand.cs` is ran with tests that:
 
 For each of these tests it will create JSON payloads that would match the Contentful Webhook payloads, converts them into the Service Bus message class type, and runs the WebhookToDbCommand. Since we use a local database (described below) for the tests, we can be ensured that the tests are running against the same database as the production code, and work as they should in production.
 
-Each content type test is created by inherting [`EntityTests`](/EntityTests/EntityTests.cs), which contains the common setup and teardown methods for each content type, along with the actual tests themselves. Each derived class should not have much code.
+Each content type test is created by inherting [`EntityTests`](./EntityTests/EntityTests.cs), which contains the common setup and teardown methods for each content type, along with the actual tests themselves. Each derived class should not have much code.
 
-In addition to the above, there are various [entity generators](/Generators/BaseGenerator.cs), which are used by the entity tests to generate JSON payloads for each content type. They use [Bogus](https://github.com/bchavez/Bogus) to generate random data.
+In addition to the above, there are various [entity generators](./Generators/BaseGenerator.cs), which are used by the entity tests to generate JSON payloads for each content type. They use [Bogus](https://github.com/bchavez/Bogus) to generate random data.
 
 For each content type test, there are potentially _thousands_ of various contents being created (e.g. related entities), meaning the tests _may_ take a while to run. At the moment these tests are excluded from the CI/CD pipeline intentionally as a result.
 
@@ -58,7 +58,7 @@ Notes:
    - To connect to the server with the connection string before the database has been created, just remove the database parameter
 
 3. Create the connection string for the testing database. With the above settings the connection string would be `Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=Pa5ssw0rd@G0esH3r3;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;Max Pool Size=1000;Database=plantech-mock-db`
-4. Initialise the database with our schema by running the [Dfe.PlanTech.DatabaseUpgrader](../../src/Dfe.PlanTech.DatabaseUpgrader/) project against it. View that project's README (linked) for more information on how to do this.
+4. Initialise the database with our schema by running the [Dfe.PlanTech.DatabaseUpgrader](/src/Dfe.PlanTech.DatabaseUpgrader/) project against it. View that project's README (linked) for more information on how to do this.
 
 #### Configure environment variables
 
