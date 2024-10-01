@@ -10,7 +10,7 @@ The standard E2E tests that run against each environment are kept quite generic 
 
 The purpose of this project, seeding with realistic mock content, is to support writing more complex and detailed end to end tests that rely on content being consistent.
 
-This uses a very similar setup to the Azure Function E2E tests. See the [Readme](/tests/Dfe.PlanTech.AzureFunctions.E2ETests/README.md)
+This uses a very similar setup to the Azure Function E2E tests. See the [Readme](/tests/Dfe.PlanTech.CmsDbMigrations.E2ETests/README.md)
 for a detailed guide on setting a mock database manually that this project can use.
 
 ## How to use
@@ -56,7 +56,7 @@ chmod +x ./scripts/setup.sh
 
 If having issues with the bash scripts or wanting more control over each step you can instead
 
-1. Follow the steps in the [Azure E2E Tests setup](tests/Dfe.PlanTech.AzureFunctions.E2ETests/README.md) to create a database and run the database upgrader against it
+1. Follow the steps in the [Azure E2E Tests setup](tests/Dfe.PlanTech.CmsDbMigrations.E2ETests/README.md) to create a database and run the database upgrader against it
 2. Setup dotnet secrets for this project with the same connection string the Azure E2E test setup would require
 3. Run this project to populate the database
 

@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Domain.Caching.Interfaces;
 
 namespace Dfe.PlanTech.Application.Caching.Models;
 

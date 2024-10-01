@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using Dfe.ContentSupport.Web.Extensions;
-using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Cookie.Service;
@@ -20,7 +19,6 @@ using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
-using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
@@ -30,6 +28,7 @@ using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.Data.Repositories;
 using Dfe.PlanTech.Web.Authorisation;
+using Dfe.PlanTech.Web.Caching;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Routing;
@@ -92,11 +91,16 @@ public static class ProgramExtensions
         services.AddOptions<ContentfulOptions>()
                 .Configure<IConfiguration>((settings, configuration) => configuration.GetSection("Contentful").Bind(settings));
 
-        services.AddOptions<CacheRefreshConfiguration>()
-                .Configure<IConfiguration>((settings, configuration) => configuration.GetSection("CacheClear").Bind(settings));
+        services.AddOptions<ApiAuthenticationConfiguration>()
+                .Configure<IConfiguration>((settings, configuration) => configuration.GetSection("Api:Authentication").Bind(settings));
 
         services.AddTransient((services) => services.GetRequiredService<IOptions<ContentfulOptions>>().Value);
-        services.AddTransient((services) => services.GetRequiredService<IOptions<CacheRefreshConfiguration>>().Value);
+        services.AddTransient((services) =>
+        {
+            var testing = services.GetRequiredService<IOptions<ApiAuthenticationConfiguration>>().Value;
+
+            return testing;
+        });
 
         services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubtopicRecommendationFromContentfulQuery>(GetSubtopicRecommendationFromContentfulQuery.ServiceKey);
         services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationFromDbQuery>(GetSubTopicRecommendationFromDbQuery.ServiceKey);
@@ -121,10 +125,11 @@ public static class ProgramExtensions
         });
 
         services.AddHttpContextAccessor();
-        services.AddSingleton<ICacheOptions>((services) => new CacheOptions());
+        services.AddSingleton<ICacheOptions>(new CacheOptions());
         services.AddTransient<ICacher, Cacher>();
         services.AddTransient<IQuestionnaireCacher, QuestionnaireCacher>();
         services.AddTransient<IUser, UserHelper>();
+        services.AddTransient<ICacheClearer, CacheClearer>();
 
         return services;
     }

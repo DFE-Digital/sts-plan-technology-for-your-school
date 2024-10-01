@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Helpers;
 using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
+using Dfe.PlanTech.Infrastructure.ServiceBus;
 using Dfe.PlanTech.Infrastructure.SignIns;
 using Dfe.PlanTech.Web;
 using Dfe.PlanTech.Web.Middleware;
@@ -20,20 +21,25 @@ if (!builder.Environment.IsDevelopment())
     builder.Services.AddReleaseServices(builder.Configuration);
 }
 
+if (builder.Environment.EnvironmentName != "E2E")
+{
+    builder.Services.AddDbWriterServices(builder.Configuration);
+}
+
 builder.AddContentAndSupportServices()
-        .AddAuthorisationServices()
-        .AddCaching()
-        .AddContentfulServices(builder.Configuration)
-        .AddCQRSServices()
-        .AddCspConfiguration()
-        .AddCustomTelemetry()
-        .AddDatabase(builder.Configuration)
-        .AddDfeSignIn(builder.Configuration)
-        .AddExceptionHandlingServices()
-        .AddGoogleTagManager()
-        .AddGovUkFrontend()
-        .AddHttpContextAccessor()
-        .AddRoutingServices();
+    .AddAuthorisationServices()
+    .AddCaching()
+    .AddContentfulServices(builder.Configuration)
+    .AddCQRSServices()
+    .AddCspConfiguration()
+    .AddCustomTelemetry()
+    .AddDatabase(builder.Configuration)
+    .AddDfeSignIn(builder.Configuration)
+    .AddExceptionHandlingServices()
+    .AddGoogleTagManager()
+    .AddGovUkFrontend()
+    .AddHttpContextAccessor()
+    .AddRoutingServices();
 
 builder.Services.AddSingleton<ISystemTime, SystemTime>();
 

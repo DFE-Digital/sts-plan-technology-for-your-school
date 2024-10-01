@@ -2,6 +2,7 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Infrastructure.SignIns.Extensions;
 using Dfe.PlanTech.Infrastructure.SignIns.Models;
+using Dfe.PlanTech.Web.Binders;
 using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Authorization;
 

@@ -33,12 +33,3 @@ resource "azurerm_private_dns_zone_virtual_network_link" "database_default" {
 
   tags = local.tags
 }
-
-resource "azurerm_private_dns_zone_virtual_network_link" "database_function" {
-  name                  = "function_vnet"
-  resource_group_name   = local.resource_group_name
-  private_dns_zone_name = azurerm_private_dns_zone.database.name
-  virtual_network_id    = azurerm_virtual_network.function_vnet.id
-
-  tags = local.tags
-}

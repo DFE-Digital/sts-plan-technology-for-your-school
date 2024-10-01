@@ -52,7 +52,7 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
         }
         catch (Exception e)
         {
-            logger.LogError(e, "There has been an error while trying to calculate maturity");
+            Logger.LogError(e, "There has been an error while trying to calculate maturity");
             TempData["ErrorMessage"] = InlineRecommendationUnavailableErrorMessage;
             return this.RedirectToCheckAnswers(sectionSlug);
         }

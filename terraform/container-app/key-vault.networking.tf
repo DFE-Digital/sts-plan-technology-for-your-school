@@ -42,14 +42,6 @@ resource "azurerm_private_endpoint" "keyvault" {
   }
 }
 
-resource "azurerm_private_dns_zone_virtual_network_link" "keyvault_to_functionvnet" {
-  name                  = "function_vnet"
-  resource_group_name   = local.resource_group_name
-  private_dns_zone_name = azurerm_private_dns_zone.keyvault.name
-  virtual_network_id    = azurerm_virtual_network.function_vnet.id
-  tags                  = local.tags
-}
-
 resource "azurerm_private_dns_zone_virtual_network_link" "keyvault_to_defaultvnet" {
   name                  = "default_vnet"
   resource_group_name   = local.resource_group_name

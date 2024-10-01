@@ -211,7 +211,19 @@ public class CmsDbContext : DbContext, ICmsDbContext
         modelBuilder.Entity<ContentComponentDbEntity>().HasQueryFilter(ShouldShowEntity());
     }
 
-    public virtual Task<int> SetComponentPublishedAndDeletedStatuses(ContentComponentDbEntity contentComponent, bool published, bool deleted, CancellationToken cancellationToken = default)
+
+    /// <summary>
+    /// Sets the published and deleted statuses for a content component.
+    /// </summary>
+    /// <remarks>
+    /// Uses interpolated SQL for effeciency
+    /// </remarks>
+    /// <param name="contentComponent">The content component to update.</param>
+    /// <param name="published">Whether the content component should be published.</param>
+    /// <param name="deleted">Whether the content component should be deleted.</param>
+    /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
+    /// <returns>Task - result is amount of rows affected by the operation.</returns>
+    public virtual Task<int> SetComponentPublishedAndDeletedStatuses(ContentComponentDbEntity contentComponent, bool published, bool deleted, CancellationToken cancellationToken)
         => Database.ExecuteSqlAsync($"UPDATE [Contentful].[ContentComponents] SET Published = {published}, Deleted = {deleted} WHERE [Id] = {contentComponent.Id}", cancellationToken: cancellationToken);
 
     /// <summary>

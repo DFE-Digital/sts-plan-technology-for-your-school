@@ -5,21 +5,21 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Authorisation;
 
 public class ApiKeyAuthorisationFilterTests
 {
-    private const string RefreshEndpoint = "mock-refresh-endpoint";
-    private const string RefreshApiKeyName = "X-WEBSITE-CACHE-CLEAR-API-KEY";
-    private const string RefreshApiKeyValue = "mock-refresh-api-key";
+    private const string KeyValue = "mock-refresh-api-key";
     private readonly ApiKeyAuthorisationFilter _authorisationFilter;
-
+    private readonly ILogger<ApiKeyAuthorisationFilter> _logger = Substitute.For<ILogger<ApiKeyAuthorisationFilter>>();
     public ApiKeyAuthorisationFilterTests()
     {
-        var cacheRefreshConfiguration = new CacheRefreshConfiguration(RefreshEndpoint, RefreshApiKeyName, RefreshApiKeyValue);
-        _authorisationFilter = new ApiKeyAuthorisationFilter(cacheRefreshConfiguration);
+        var config = new ApiAuthenticationConfiguration { KeyValue = KeyValue };
+        _authorisationFilter = new ApiKeyAuthorisationFilter(config, _logger);
     }
 
     [Fact]
@@ -36,11 +36,15 @@ public class ApiKeyAuthorisationFilterTests
         Assert.IsType<UnauthorizedResult>(filterContext.Result);
     }
 
-    [Fact]
-    public void ShouldReturn_Unauthorised_Result_If_Invalid_ApiKey()
+    [Theory]
+    [InlineData("invalid-api-key")]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("Bearer invalid-api-key")]
+    public void ShouldReturn_Unauthorised_Result_If_Invalid_ApiKey(string? apiKey)
     {
         var httpContext = new DefaultHttpContext();
-        httpContext.Request.Headers.Append(RefreshApiKeyName, "invalid-api-key");
+        httpContext.Request.Headers.Append(ApiKeyAuthorisationFilter.AuthHeaderKey, apiKey);
         var actionContext = new ActionContext
         {
             HttpContext = httpContext,
@@ -56,7 +60,7 @@ public class ApiKeyAuthorisationFilterTests
     public void Should_Continue_Authorised_If_Valid_ApiKey()
     {
         var httpContext = new DefaultHttpContext();
-        httpContext.Request.Headers.Append(RefreshApiKeyName, RefreshApiKeyValue);
+        httpContext.Request.Headers.Append(ApiKeyAuthorisationFilter.AuthHeaderKey, ApiKeyAuthorisationFilter.AuthValuePrefix + KeyValue);
         var actionContext = new ActionContext
         {
             HttpContext = httpContext,
