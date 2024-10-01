@@ -1,14 +1,8 @@
 describe("Interstitial page", () => {
-  // eslint-disable-next-line no-unused-vars
-  let url;
 
   beforeEach(() => {
     cy.loginWithEnv("/self-assessment");
     cy.clickFirstSection();
-
-    cy.url().then((currentUrl) => {
-      url = currentUrl;
-    });
 
     cy.injectAxe();
   });
