@@ -106,7 +106,7 @@ public class WebhookToDbCommand(ICacheClearer cacheClearer,
     /// <summary>
     /// Retrieves the CmsEvent based on the provided subject.
     /// </summary>
-    /// <param name="contentfulEvent">The Contentful event (from the service bus message subject)</param>
+    /// <param name="contentfulEvent">The Contentful event (from the Service Bus message subject), e.g. "ContentManagement.Entry.publish"</param>
     /// <returns></returns>
     /// <exception cref="CmsEventException">Exception thrown if we are unable to parse the event to a valid <see cref="CmsEvent"/></exception>
     private CmsEvent GetCmsEvent(string contentfulEvent)
