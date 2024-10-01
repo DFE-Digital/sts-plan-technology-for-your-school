@@ -15,7 +15,7 @@ public class DatabaseHelperTests
 {
     private readonly IServiceProvider _serviceProvider = Substitute.For<IServiceProvider>();
     private readonly IQueryCacher _queryCacher = Substitute.For<IQueryCacher>();
-    private readonly CmsDbContext _mockDb;
+    private readonly CmsDbContext _mockDb = Substitute.For<CmsDbContext>();
     private readonly DatabaseHelper<ICmsDbContext> _databaseHelper;
     private readonly string[] _nonNullablePropertyNames = ["Id", "Archived", "Published", "Deleted", "Slug", "Text"];
 
@@ -24,7 +24,6 @@ public class DatabaseHelperTests
         _serviceProvider.GetService(typeof(IQueryCacher)).Returns(_queryCacher);
         _serviceProvider.GetService(typeof(CmsDbContext)).Returns(_mockDb);
         _serviceProvider.GetService(typeof(ICmsDbContext)).Returns(_mockDb);
-        _mockDb = Substitute.For<CmsDbContext>();
         AddRealDbProperties();
 
         _databaseHelper = new DatabaseHelper<ICmsDbContext>(_serviceProvider);
@@ -38,6 +37,7 @@ public class DatabaseHelperTests
         var services = new ServiceCollection();
 
         services.AddSingleton(new ContentfulOptions());
+        services.AddSingleton(_queryCacher);
         dbContextOptionsBuilder.UseApplicationServiceProvider(services.BuildServiceProvider());
         var actualDbContext = new CmsDbContext(dbContextOptionsBuilder.Options);
 

@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Text;
 using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
@@ -122,7 +123,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     public CmsDbContext()
     {
         _contentfulOptions = new ContentfulOptions(false);
-        _queryCacher = this.GetService<IQueryCacher>() ?? throw new MissingServiceException($"Could not find service {nameof(IQueryCacher)}");
+        _queryCacher = new QueryCacher();
     }
 
     public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
