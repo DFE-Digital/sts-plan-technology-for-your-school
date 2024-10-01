@@ -26,11 +26,13 @@ public static class Startup
             opts.EnableSensitiveDataLogging(true);
         });
 
+        services.AddTransient<IDatabaseHelper<ICmsDbContext>, DatabaseHelper<ICmsDbContext>>();
+
         services.AddLogging(opts =>
-        {
-            opts.AddConsole();
-            opts.SetMinimumLevel(LogLevel.Warning);
-        });
+            {
+                opts.AddConsole();
+                opts.SetMinimumLevel(LogLevel.Warning);
+            });
 
         services.AddSingleton(new JsonSerializerOptions()
         {
@@ -49,7 +51,6 @@ public static class Startup
 
         AddMappers(services);
 
-        services.AddTransient<IDatabaseHelper<ICmsDbContext>>();
         return services.BuildServiceProvider();
     }
 
@@ -57,7 +58,7 @@ public static class Startup
     {
         foreach (var mapper in GetMappers())
         {
-            services.AddScoped(typeof(JsonToDbMapper), mapper);
+            services.AddScoped(typeof(BaseJsonToDbMapper), mapper);
         }
 
         services.AddScoped<RichTextContentMapper>();
@@ -72,7 +73,7 @@ public static class Startup
     private static IEnumerable<Type> GetMappers()
      => AppDomain.CurrentDomain.GetAssemblies()
                                 .SelectMany(assembley => assembley.GetTypes())
-                                .Where(type => type.IsAssignableTo(typeof(JsonToDbMapper)) && !type.IsAbstract);
+                                .Where(type => type.IsAssignableTo(typeof(BaseJsonToDbMapper)) && !type.IsAbstract);
 
     public static IConfiguration CreateConfiguration()
     {
