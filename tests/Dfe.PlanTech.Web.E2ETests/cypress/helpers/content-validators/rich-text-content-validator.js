@@ -13,7 +13,6 @@ function ValidateRichTextContent(parent) {
 }
 
 export default ValidateRichTextContent;
-const regex = /(\r\n|\n|\r)/g;
 
 function validateByNodeType(content) {
   switch (content.nodeType) {

@@ -1,5 +1,6 @@
 import { Question } from "./question.js";
 import { UserJourney } from "../user-journey/user-journey.js";
+// eslint-disable-next-line no-unused-vars
 import SubtopicRecommendation from "./subtopic-recommendation.js";
 import ErrorLogger from "../errors/error-logger.js";
 
