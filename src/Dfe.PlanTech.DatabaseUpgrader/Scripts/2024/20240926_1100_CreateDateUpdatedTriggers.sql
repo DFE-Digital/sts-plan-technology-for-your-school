@@ -32,6 +32,7 @@ WHERE
 GO
 
 -- Add defaults to all cols
+
 ALTER TABLE dbo.[user]
     ADD CONSTRAINT DF_user_dateLastUpdated DEFAULT GETUTCDATE() FOR dateLastUpdated
 ALTER TABLE dbo.[establishment]
@@ -157,3 +158,39 @@ OUTER APPLY (
 ) LastCompleteSubmission
 WHERE
     CS.CategoryId = @categoryId
+
+GO
+
+-- Remove OUTPUT clause from SelectOrInsertSubmissionId as the trigger causes it to error
+-- SCOPE_IDENTITY already captures the id of the insert so it isn't required
+
+ALTER PROCEDURE SelectOrInsertSubmissionId
+    @sectionId NVARCHAR(50),
+    @sectionName NVARCHAR(50),
+    @establishmentId INT,
+    @submissionId INT OUTPUT
+AS
+
+BEGIN TRY
+    BEGIN TRAN
+        EXEC GetCurrentSubmissionId
+            @sectionid=@sectionId,
+            @establishmentId=@establishmentId,
+            @submissionId=@submissionId OUTPUT
+
+        IF @submissionId IS NULL
+            BEGIN
+                INSERT INTO [dbo].[submission]
+                    (establishmentId, completed, sectionId, sectionName)
+                VALUES
+                    (@establishmentId, 0, @sectionId, @sectionName)
+
+                SELECT @submissionId = SCOPE_IDENTITY()
+            END
+    COMMIT TRAN
+END TRY
+BEGIN CATCH
+    ROLLBACK TRAN
+END CATCH
+GO
+
