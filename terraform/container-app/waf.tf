@@ -22,6 +22,8 @@ module "waf" {
     }
   }
 
+  waf_custom_rules = local.waf_custom_rules
+
   cdn_sku = "Premium_AzureFrontDoor"
 
   cdn_waf_enable_rate_limiting              = true
