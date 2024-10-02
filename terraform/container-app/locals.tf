@@ -103,7 +103,7 @@ locals {
 
   waf_custom_rules = {
     //WAF policy to allow payloads to the CMS webhook route
-    waf_webhook_bypass_policy = {
+    ContentfulWebhookBypassPolicy = {
       priority = 2
       action   = "Allow"
 
