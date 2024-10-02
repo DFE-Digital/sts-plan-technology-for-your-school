@@ -1,5 +1,5 @@
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Web.Caching;
-using EFCoreSecondLevelCacheInterceptor;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -9,12 +9,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Caching;
 public class CacheClearerTests
 {
     private readonly CacheClearer _cacheHandler;
-    private readonly IEFCacheServiceProvider _cacheServiceProvider = Substitute.For<IEFCacheServiceProvider>();
+    private readonly IQueryCacher _queryCacher = Substitute.For<IQueryCacher>();
     private readonly ILogger<CacheClearer> _logger = Substitute.For<ILogger<CacheClearer>>();
 
     public CacheClearerTests()
     {
-        _cacheHandler = new CacheClearer(_cacheServiceProvider, _logger);
+        _cacheHandler = new CacheClearer(_queryCacher, _logger);
     }
 
     [Fact]
@@ -33,7 +33,7 @@ public class CacheClearerTests
     public void CacheHandler_Should_LogErrors()
     {
         var exception = new Exception("Exception thrown");
-        _cacheServiceProvider.When(cp => cp.ClearAllCachedEntries()).Throw(exception);
+        _queryCacher.When(cp => cp.ClearCache()).Throw(exception);
 
         var result = _cacheHandler.ClearCache();
         Assert.False(result);

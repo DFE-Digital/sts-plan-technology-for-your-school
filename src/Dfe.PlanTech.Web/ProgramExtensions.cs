@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Dfe.ContentSupport.Web.Extensions;
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Cookie.Service;
@@ -32,7 +33,6 @@ using Dfe.PlanTech.Web.Caching;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Routing;
-using EFCoreSecondLevelCacheInterceptor;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -138,6 +138,7 @@ public static class ProgramExtensions
     public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
         void databaseOptionsAction(DbContextOptionsBuilder options) => options.UseSqlServer(configuration.GetConnectionString("Database"));
+        services.AddSingleton<IQueryCacher, QueryCacher>();
 
         services.AddDbContextPool<ICmsDbContext, CmsDbContext>((serviceProvider, optionsBuilder) =>
             optionsBuilder
@@ -149,15 +150,7 @@ public static class ProgramExtensions
                             .CommandTimeout((int)TimeSpan.FromSeconds(30).TotalSeconds)
                             .EnableRetryOnFailure();
                     })
-                .AddInterceptors(serviceProvider.GetRequiredService<SecondLevelCacheInterceptor>())
         );
-
-        services.AddEFSecondLevelCache(options =>
-        {
-            options.UseMemoryCacheProvider().ConfigureLogging(false).UseCacheKeyPrefix("EF_");
-            options.CacheAllQueries(CacheExpirationMode.Absolute, TimeSpan.FromMinutes(30));
-            options.UseDbCallsIfCachingProviderIsDown(TimeSpan.FromMinutes(1));
-        });
 
         services.AddDbContext<IPlanTechDbContext, PlanTechDbContext>(databaseOptionsAction);
         ConfigureCookies(services, configuration);

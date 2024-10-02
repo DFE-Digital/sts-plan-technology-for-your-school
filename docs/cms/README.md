@@ -24,7 +24,6 @@ Or our [database content](./db-content.md) documentation for information on how 
 
 We cache content data that was retrieved by the DB in-memory in our web app.
 
-Currently caching is handled by the open-source [EFCoreSecondLevelCacheInterceptor](https://github.com/VahidN/EFCoreSecondLevelCacheInterceptor) C# package.
-
-It is enabled only in the [web project](./src/Dfe.PlanTech.Web), and is enabled in the services configuration in [ProgramExtensions.cs](./src/Dfe.PlanTech.Web/ProgramExtensions.cs). We currently have no functionality setup to amend the configuration (e.g. caching length) via any sort of environment variables, but this should be added when possible.
-The Cache can be invalidated by an API key protected endpoint in the website. This is called by the azure function whenever content is updated in the database. The API key is stored in the key vault and referenced by an environment variable for the function.
+Currently caching is handled by an in memory cache defined in the QueryCacher class in [Dfe.PlanTech.Application/Caching/Models/QueryCacher.cs](/src/Dfe.PlanTech.Application/Caching/Models/QueryCacher.cs)
+The only cache invalidation is invalidation of the whole cache as it intended only for use with the `CmsDbContext` and not any of the `dbo` tables which will be frequently updated. See [Conventions](/docs/Conventions.md) for more information.
+The cache is invalided anytime a cms message with a content update is successfully processed.
