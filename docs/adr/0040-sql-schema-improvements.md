@@ -35,8 +35,9 @@ Options looked into that don't form part of the initial recommended actions off 
 Schema change suggestions in a diagram:
 blue is tables we could change, red tables to delete (displayed with two different layouts, content is identical)
 
-<img alt="hierarchic layout" src="/docs/assets/adr_diagrams/adr_40_hierarchic_layout.svg" width="40%" />
-<img alt="radial layout" src="/docs/assets/adr_diagrams/adr_40_radial_layout.svg" width="30%" />
+| Hierachic layout                                                             | Radial layout                                                        |
+|------------------------------------------------------------------------------|----------------------------------------------------------------------|
+| ![hierarchic layout](/docs/assets/adr_diagrams/adr_40_hierarchic_layout.svg) | ![radial layout](/docs/assets/adr_diagrams/adr_40_radial_layout.svg) |
 
 ## Recommendations
 
