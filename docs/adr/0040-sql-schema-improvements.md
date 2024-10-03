@@ -33,6 +33,8 @@ Options looked into that don't form part of the initial recommended actions off 
 - Schema simplification
     - The `Contentful.RichTextDataDbEntity` table could be removed and the `Uri` placed directly on the
       `RichTextContent` table, as its often empty, and rarely big, so little is saved from it being in a separate table
+- Improving the performance of fetching page contents
+    - This is the slowest query we have because the structure of the schema requires it to join to every table. However it is still fast, and as it is cached, it doesn't seem worthwhile to overhaul the schema to improve it, as it won't make much difference.
 
 Schema change suggestions in a diagram:
 blue is tables we could change, red tables to delete (displayed with two different layouts, content is identical)
