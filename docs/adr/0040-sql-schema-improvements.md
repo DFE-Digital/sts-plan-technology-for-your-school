@@ -28,6 +28,8 @@ Options looked into that don't form part of the initial recommended actions off 
     - **This would need input from Content Designers so the same changes can be mirrored in Contentful, currently, the
       purpose of this structure is for ordering the recommendation chunks, but if we were able to do that based off the
       question, this would potentially not be required. A future suggestion**
+    - A smaller change, that preserves ordering would be to merge the `RecommendationSections` and `SubtopicRecommendationIntros` tables
+        - This would make the naming clearer, and preserve ordering
 - Schema simplification
     - The `Contentful.RichTextDataDbEntity` table could be removed and the `Uri` placed directly on the
       `RichTextContent` table, as its often empty, and rarely big, so little is saved from it being in a separate table
@@ -73,5 +75,6 @@ blue is tables we could change, red tables to delete (displayed with two differe
       doesn't already exist or has changed
 - Write a datafix to do this for existing records, find all duplicate (ref, text) pairs, point responses at the first
   duplicate, and delete the others.
+- Add an index to the `response` table on `submissionId` as this is frequently used to connect the two tables
 
 ## Decision Outcome
