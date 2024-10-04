@@ -1,9 +1,10 @@
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Interfaces;
-using EFCoreSecondLevelCacheInterceptor;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Caching;
 
-public class CacheClearer(IEFCacheServiceProvider cacheServiceProvider, ILogger<CacheClearer> logger) : ICacheClearer
+public class CacheClearer([FromServices] IQueryCacher queryCacher, ILogger<CacheClearer> logger) : ICacheClearer
 {
     /// <summary>
     /// Makes a call to the plan tech web app that invalidates the database cache.
@@ -12,7 +13,7 @@ public class CacheClearer(IEFCacheServiceProvider cacheServiceProvider, ILogger<
     {
         try
         {
-            cacheServiceProvider.ClearAllCachedEntries();
+            queryCacher.ClearCache();
             logger.LogInformation("Database cache has been cleared");
             return true;
         }

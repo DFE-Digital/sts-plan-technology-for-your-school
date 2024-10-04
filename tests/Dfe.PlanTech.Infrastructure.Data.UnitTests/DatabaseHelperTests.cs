@@ -1,4 +1,5 @@
 using System.Reflection;
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -13,12 +14,14 @@ namespace Dfe.PlanTech.Infrastructure.Data.UnitTests;
 public class DatabaseHelperTests
 {
     private readonly IServiceProvider _serviceProvider = Substitute.For<IServiceProvider>();
+    private readonly IQueryCacher _queryCacher = Substitute.For<IQueryCacher>();
     private readonly CmsDbContext _mockDb = Substitute.For<CmsDbContext>();
     private readonly DatabaseHelper<ICmsDbContext> _databaseHelper;
     private readonly string[] _nonNullablePropertyNames = ["Id", "Archived", "Published", "Deleted", "Slug", "Text"];
 
     public DatabaseHelperTests()
     {
+        _serviceProvider.GetService(typeof(IQueryCacher)).Returns(_queryCacher);
         _serviceProvider.GetService(typeof(CmsDbContext)).Returns(_mockDb);
         _serviceProvider.GetService(typeof(ICmsDbContext)).Returns(_mockDb);
         AddRealDbProperties();
@@ -34,6 +37,7 @@ public class DatabaseHelperTests
         var services = new ServiceCollection();
 
         services.AddSingleton(new ContentfulOptions());
+        services.AddSingleton(_queryCacher);
         dbContextOptionsBuilder.UseApplicationServiceProvider(services.BuildServiceProvider());
         var actualDbContext = new CmsDbContext(dbContextOptionsBuilder.Options);
 

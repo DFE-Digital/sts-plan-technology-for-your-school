@@ -4,7 +4,10 @@ using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data.Repositories;
+using Dfe.PlanTech.Questionnaire.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using MockQueryable.EntityFrameworkCore;
 using MockQueryable.NSubstitute;
 using NSubstitute;
 
@@ -78,30 +81,46 @@ public class RecommendationsRepositoryTests
             .. _subtopicRecommendation.Section.Chunks.SelectMany(chunk => chunk.Answers)
         ]);
 
-        var mockContext = Substitute.For<ICmsDbContext>();
-
         var subtopicRecDbSetMock = _subtopicRecommendations.BuildMock();
         _db.SubtopicRecommendations.Returns(subtopicRecDbSetMock);
+        SetupMockQueryable<SubtopicRecommendationDbEntity>();
 
         var sectionsDbSetMock = _sections.BuildMock();
         _db.Sections.Returns(sectionsDbSetMock);
+        SetupMockQueryable<SectionDbEntity>();
 
         var introsMockSet = _intros.BuildMock();
         _db.RecommendationIntros.Returns(introsMockSet);
+        SetupMockQueryable<RecommendationIntroDbEntity>();
 
         var chunksMockSet = _chunks.BuildMock();
         _db.RecommendationChunks.Returns(chunksMockSet);
+        SetupMockQueryable<RecommendationChunkDbEntity>();
 
         var introContentMock = _introContent.BuildMock();
         _db.RecommendationIntroContents.Returns(introContentMock);
+        SetupMockQueryable<RecommendationIntroContentDbEntity>();
 
         var chunkContentMock = _chunkContent.BuildMock();
         _db.RecommendationChunkContents.Returns(chunkContentMock);
+        SetupMockQueryable<RecommendationChunkContentDbEntity>();
 
         var richTextsMock = _richTexts.BuildMock();
         _db.RichTextContentWithSubtopicRecommendationIds.Returns(richTextsMock);
+        SetupMockQueryable<RichTextContentWithSubtopicRecommendationId>();
 
         _repository = new RecommendationsRepository(_db, _logger);
+
+        _db.FirstOrDefaultAsync(Arg.Any<TestAsyncEnumerableEfCore<RecommendationsViewDto>>())
+            .Returns(args => ((TestAsyncEnumerableEfCore<RecommendationsViewDto>)args[0]).FirstOrDefaultAsync());
+    }
+
+    private void SetupMockQueryable<TEntity>()
+    {
+        _db.ToListAsync(Arg.Any<IQueryable<TEntity>>())
+            .Returns(args => ((IQueryable<TEntity>)args[0]).ToListAsync());
+        _db.FirstOrDefaultAsync(Arg.Any<IQueryable<TEntity>>())
+            .Returns(args => ((IQueryable<TEntity>)args[0]).FirstOrDefaultAsync());
     }
 
     private static SubtopicRecommendationDbEntity CreateSubtopicRecommendationDbEntity()
