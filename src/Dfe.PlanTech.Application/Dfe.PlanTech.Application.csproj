@@ -1,28 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <ItemGroup>
-    <Compile Remove="Persistence\Commands\**" />
-    <EmbeddedResource Remove="Persistence\Commands\**" />
-    <None Remove="Persistence\Commands\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="13.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Persistence\Commands\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Dfe.PlanTech.Domain\Dfe.PlanTech.Domain.csproj" />
-  </ItemGroup>
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dfe.PlanTech.Domain\Dfe.PlanTech.Domain.csproj" />
+  </ItemGroup>
 </Project>

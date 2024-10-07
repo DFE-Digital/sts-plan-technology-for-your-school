@@ -20,7 +20,6 @@ using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
-using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
@@ -30,10 +29,11 @@ using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.Data.Repositories;
 using Dfe.PlanTech.Web.Authorisation;
+using Dfe.PlanTech.Web.Caching;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Routing;
-using EFCoreSecondLevelCacheInterceptor;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -92,16 +92,23 @@ public static class ProgramExtensions
         services.AddOptions<ContentfulOptions>()
                 .Configure<IConfiguration>((settings, configuration) => configuration.GetSection("Contentful").Bind(settings));
 
-        services.AddOptions<CacheRefreshConfiguration>()
-                .Configure<IConfiguration>((settings, configuration) => configuration.GetSection("CacheClear").Bind(settings));
+        services.AddOptions<ApiAuthenticationConfiguration>()
+                .Configure<IConfiguration>((settings, configuration) => configuration.GetSection("Api:Authentication").Bind(settings));
 
         services.AddTransient((services) => services.GetRequiredService<IOptions<ContentfulOptions>>().Value);
-        services.AddTransient((services) => services.GetRequiredService<IOptions<CacheRefreshConfiguration>>().Value);
+        services.AddTransient((services) =>
+        {
+            var testing = services.GetRequiredService<IOptions<ApiAuthenticationConfiguration>>().Value;
+
+            return testing;
+        });
 
         services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubtopicRecommendationFromContentfulQuery>(GetSubtopicRecommendationFromContentfulQuery.ServiceKey);
         services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationFromDbQuery>(GetSubTopicRecommendationFromDbQuery.ServiceKey);
         services.AddTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationQuery>();
         services.AddTransient<IRecommendationsRepository, RecommendationsRepository>();
+
+        services.AddScoped<ComponentViewsFactory>();
 
         return services;
     }
@@ -119,10 +126,11 @@ public static class ProgramExtensions
         });
 
         services.AddHttpContextAccessor();
-        services.AddSingleton<ICacheOptions>((services) => new CacheOptions());
+        services.AddSingleton<ICacheOptions>(new CacheOptions());
         services.AddTransient<ICacher, Cacher>();
         services.AddTransient<IQuestionnaireCacher, QuestionnaireCacher>();
         services.AddTransient<IUser, UserHelper>();
+        services.AddTransient<ICacheClearer, CacheClearer>();
 
         return services;
     }
@@ -130,6 +138,7 @@ public static class ProgramExtensions
     public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
         void databaseOptionsAction(DbContextOptionsBuilder options) => options.UseSqlServer(configuration.GetConnectionString("Database"));
+        services.AddSingleton<IQueryCacher, QueryCacher>();
 
         services.AddDbContextPool<ICmsDbContext, CmsDbContext>((serviceProvider, optionsBuilder) =>
             optionsBuilder
@@ -141,15 +150,7 @@ public static class ProgramExtensions
                             .CommandTimeout((int)TimeSpan.FromSeconds(30).TotalSeconds)
                             .EnableRetryOnFailure();
                     })
-                .AddInterceptors(serviceProvider.GetRequiredService<SecondLevelCacheInterceptor>())
         );
-
-        services.AddEFSecondLevelCache(options =>
-        {
-            options.UseMemoryCacheProvider().ConfigureLogging(false).UseCacheKeyPrefix("EF_");
-            options.CacheAllQueries(CacheExpirationMode.Absolute, TimeSpan.FromMinutes(30));
-            options.UseDbCallsIfCachingProviderIsDown(TimeSpan.FromMinutes(1));
-        });
 
         services.AddDbContext<IPlanTechDbContext, PlanTechDbContext>(databaseOptionsAction);
         ConfigureCookies(services, configuration);
@@ -187,7 +188,14 @@ public static class ProgramExtensions
 
     public static IServiceCollection AddGoogleTagManager(this IServiceCollection services)
     {
-        services.AddTransient<GtmConfiguration>();
+        services.AddOptions<GtmConfiguration>()
+                .Configure<IConfiguration>((settings, configuration) =>
+                {
+                    configuration.GetSection("GTM").Bind(settings);
+                });
+
+        services.AddTransient(services => services.GetRequiredService<IOptions<GtmConfiguration>>().Value);
+        services.AddTransient<GtmService>();
         return services;
     }
 
@@ -244,4 +252,11 @@ public static class ProgramExtensions
         return services;
     }
 
+    public static IServiceCollection AddCustomTelemetry(this IServiceCollection services)
+    {
+        services.AddApplicationInsightsTelemetry();
+        services.AddSingleton<ITelemetryInitializer, CustomRequestDimensionsTelemetryInitializer>();
+
+        return services;
+    }
 }

@@ -36,5 +36,5 @@ export const validateRecommendationForMaturity = (section, maturity, path) => {
         })
 
     validateRecommendationIntro(introPage, recommendationUrl);
-    validateRecommendationChunks(chunks);
+    validateRecommendationChunks(introPage, chunks);
 }

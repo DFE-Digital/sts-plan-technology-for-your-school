@@ -4,7 +4,7 @@ import GenerateTestSuites from "./generate-test-suites.js";
 import ErrorLogger from "./errors/error-logger.js";
 import WriteUserJourneyPaths from "./write-user-journey-paths.js";
 import fs from "fs";
-import options from "./options.js";
+import { options, DefaultOutputDirectory } from "./options.js";
 import path from "path";
 
 const getOutputDirPath = ({ outputDir, contentfulEnvironment }) => {

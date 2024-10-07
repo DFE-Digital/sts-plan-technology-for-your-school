@@ -1,3 +1,5 @@
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
+
 namespace Dfe.PlanTech.Application.Persistence.Interfaces;
 
 /// <summary>

@@ -38,7 +38,6 @@ We use two external modules to create the majority of the resources required:
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azapi"></a> [azapi](#provider\_azapi) | 1.15.0 |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.113.0 |
 
 ## Modules
@@ -52,8 +51,6 @@ We use two external modules to create the majority of the resources required:
 
 | Name | Type |
 |------|------|
-| [azapi_resource.contentful_function](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) | resource |
-| [azurerm_application_insights.functional_insights](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/application_insights) | resource |
 | [azurerm_key_vault.vault](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/key_vault) | resource |
 | [azurerm_key_vault_access_policy.vault_access_policy_mi](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/key_vault_access_policy) | resource |
 | [azurerm_key_vault_access_policy.vault_access_policy_tf](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/key_vault_access_policy) | resource |
@@ -67,37 +64,21 @@ We use two external modules to create the majority of the resources required:
 | [azurerm_key_vault_secret.vault_secret_contentful_previewapikey](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault_secret.vault_secret_contentful_spaceid](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault_secret.vault_secret_database_connectionstring](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/key_vault_secret) | resource |
-| [azurerm_private_dns_zone.blob_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone) | resource |
 | [azurerm_private_dns_zone.database](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone) | resource |
-| [azurerm_private_dns_zone.files_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone) | resource |
 | [azurerm_private_dns_zone.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone) | resource |
-| [azurerm_private_dns_zone_virtual_network_link.blob_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone_virtual_network_link) | resource |
 | [azurerm_private_dns_zone_virtual_network_link.database_default](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone_virtual_network_link) | resource |
-| [azurerm_private_dns_zone_virtual_network_link.database_function](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone_virtual_network_link) | resource |
-| [azurerm_private_dns_zone_virtual_network_link.files_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone_virtual_network_link) | resource |
 | [azurerm_private_dns_zone_virtual_network_link.keyvault_to_defaultvnet](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone_virtual_network_link) | resource |
-| [azurerm_private_dns_zone_virtual_network_link.keyvault_to_functionvnet](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_dns_zone_virtual_network_link) | resource |
-| [azurerm_private_endpoint.blob_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_endpoint) | resource |
 | [azurerm_private_endpoint.database](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_endpoint) | resource |
-| [azurerm_private_endpoint.files_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_endpoint) | resource |
 | [azurerm_private_endpoint.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/private_endpoint) | resource |
-| [azurerm_service_plan.function_plan](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/service_plan) | resource |
 | [azurerm_servicebus_namespace.service_bus](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/servicebus_namespace) | resource |
 | [azurerm_servicebus_queue.contentful_queue](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/servicebus_queue) | resource |
 | [azurerm_servicebus_queue_authorization_rule.azurefunction](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/servicebus_queue_authorization_rule) | resource |
 | [azurerm_storage_account.costing_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/storage_account) | resource |
-| [azurerm_storage_account.function_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/storage_account) | resource |
 | [azurerm_storage_container.blobforcost](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/storage_container) | resource |
-| [azurerm_subnet.function_infra_subnet](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/subnet) | resource |
-| [azurerm_subnet.function_storage](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/subnet) | resource |
 | [azurerm_subnet.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/subnet) | resource |
 | [azurerm_subnet_route_table_association.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/subnet_route_table_association) | resource |
 | [azurerm_user_assigned_identity.user_assigned_identity](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/user_assigned_identity) | resource |
-| [azurerm_virtual_network.function_vnet](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/virtual_network) | resource |
-| [azurerm_virtual_network_peering.function_to_main](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/virtual_network_peering) | resource |
-| [azurerm_virtual_network_peering.main_to_function](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/resources/virtual_network_peering) | resource |
 | [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/data-sources/client_config) | data source |
-| [azurerm_resource_group.resource_group](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/data-sources/resource_group) | data source |
 | [azurerm_route_table.default](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/data-sources/route_table) | data source |
 | [azurerm_sql_server.database](https://registry.terraform.io/providers/hashicorp/azurerm/3.113.0/docs/data-sources/sql_server) | data source |
 
@@ -122,9 +103,9 @@ We use two external modules to create the majority of the resources required:
 | <a name="input_container_app_max_replicas"></a> [container\_app\_max\_replicas](#input\_container\_app\_max\_replicas) | Maximum replicas for the container app | `number` | `2` | no |
 | <a name="input_container_app_min_replicas"></a> [container\_app\_min\_replicas](#input\_container\_app\_min\_replicas) | Minimum replicas for the container app | `number` | `1` | no |
 | <a name="input_container_app_storage_account_shared_access_key_enabled"></a> [container\_app\_storage\_account\_shared\_access\_key\_enabled](#input\_container\_app\_storage\_account\_shared\_access\_key\_enabled) | Enable shared access key | `bool` | `false` | no |
+| <a name="input_container_environment"></a> [container\_environment](#input\_container\_environment) | Container app environment - set to ASPNETCORE\_ENVIRONMENT in the app environment variables | `string` | `""` | no |
+| <a name="input_container_environment_variables"></a> [container\_environment\_variables](#input\_container\_environment\_variables) | Additional environment variables to set on the Azure Container App | `map(string)` | `{}` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | Environment name, used along with `project_name` as a prefix for all resources | `string` | n/a | yes |
-| <a name="input_function_runtime"></a> [function\_runtime](#input\_function\_runtime) | Azure Function runtime settings; language, verison, etc. | <pre>object({<br>    name    = string<br>    version = string<br>  })</pre> | <pre>{<br>  "name": "dotnet-isolated",<br>  "version": "8.0"<br>}</pre> | no |
-| <a name="input_function_scaling"></a> [function\_scaling](#input\_function\_scaling) | Azure Function scaling settings; max instance count + RAM | <pre>object({<br>    max_instance_count = number<br>    memory             = number<br>  })</pre> | <pre>{<br>  "max_instance_count": 40,<br>  "memory": 2048<br>}</pre> | no |
 | <a name="input_image_tag"></a> [image\_tag](#input\_image\_tag) | Image tag | `string` | n/a | yes |
 | <a name="input_key_ops"></a> [key\_ops](#input\_key\_ops) | The permitted JSON web key operations of the key to be created. | `list(string)` | <pre>[<br>  "decrypt",<br>  "encrypt",<br>  "sign",<br>  "unwrapKey",<br>  "verify",<br>  "wrapKey"<br>]</pre> | no |
 | <a name="input_key_size"></a> [key\_size](#input\_key\_size) | The size in bits of the key to be created. | `number` | `2048` | no |

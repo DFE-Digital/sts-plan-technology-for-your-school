@@ -1,0 +1,25 @@
+{
+  "name": "plan-technology-for-your-school",
+  "version": "1.0.0",
+  "description": "Web application to help schools plan a technology roadmap",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "eslint": "^9.11.1",
+    "eslint-plugin-cypress": "^3.5.0",
+    "eslint-plugin-jest": "^28.8.3",
+    "globals": "^15.9.0",
+    "jest": "^29.7.0"
+  }
+}

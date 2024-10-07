@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -7,17 +6,10 @@ namespace Dfe.PlanTech.Web.Helpers;
 /// <summary>
 /// Retrieves + stores values in IMemoryCache
 /// </summary>
-public class Cacher : ICacher
+public class Cacher(ICacheOptions options, IMemoryCache memoryCache) : ICacher
 {
-    private readonly ICacheOptions _options;
-
-    private readonly IMemoryCache _memoryCache;
-
-    public Cacher(ICacheOptions options, IMemoryCache memoryCache)
-    {
-        _options = options ?? throw new ArgumentNullException(nameof(options));
-        _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
-    }
+    private readonly ICacheOptions _options = options ?? throw new ArgumentNullException(nameof(options));
+    private readonly IMemoryCache _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
 
     public T? Get<T>(string key, Func<T> getFromService, TimeSpan timeToLive)
     {

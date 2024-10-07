@@ -1,9 +1,8 @@
-
-using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 
-namespace Dfe.PlanTech.Application.UnitTests;
+namespace Dfe.PlanTech.Application.UnitTests.Persistence;
 
 public class GetEntitiesOptionsTests
 {

@@ -5,7 +5,8 @@ namespace Dfe.PlanTech;
 
 public static class LoggingHelpers
 {
-    public static IEnumerable<ReceivedLoggerCall> GetMatchingReceivedMessages<T>(this ILogger<T> logger, string message, LogLevel logLevel)
+
+    public static IEnumerable<ReceivedLoggerCall> ReceivedLogMessages<T>(this ILogger<T> logger)
         => logger.ReceivedCalls().Select(call =>
         {
             var args = call.GetArguments();
@@ -15,7 +16,10 @@ public static class LoggingHelpers
             var level = Enum.Parse<LogLevel>(args[0]?.ToString() ?? "");
 
             return new ReceivedLoggerCall(level, msg);
-        }).Where(LogMessageMatches(message, logLevel));
+        });
+
+    public static IEnumerable<ReceivedLoggerCall> GetMatchingReceivedMessages<T>(this ILogger<T> logger, string message, LogLevel logLevel)
+        => logger.ReceivedLogMessages().Where(LogMessageMatches(message, logLevel));
 
     private static Func<ReceivedLoggerCall, bool> LogMessageMatches(string message, LogLevel logLevel)
     => args => args.Message.Equals(message) && args.LogLevel == logLevel;

@@ -43,7 +43,8 @@ env:
   TF_VAR_image_tag: "latest"
   TF_VAR_registry_username: ${{ github.repository_owner }}
   TF_VAR_registry_password: ${{ secrets.GITHUB_TOKEN }}
-
+  TF_VAR_container_environment: "Dev"
+  
   TF_WORKING_DIRECTORY: terraform/container-app
 
 jobs:

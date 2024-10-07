@@ -1,5 +1,4 @@
-﻿@inject GtmConfiguration GtmConfiguration
-@using Dfe.PlanTech.Web.Helpers;
+﻿@using Dfe.PlanTech.Web.Helpers;
 
 @section Head {
     <partial name="_Head"/>
@@ -17,7 +16,7 @@
 }
 
 @section Header {
-    @Html.Raw(GtmConfiguration.Body)
+    <partial name="GoogleTagManager/_Body" />
     @await RenderSectionAsync("Header", false)
 }
 

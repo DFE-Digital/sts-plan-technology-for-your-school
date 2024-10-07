@@ -6,7 +6,6 @@ using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Models;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
@@ -14,21 +13,14 @@ namespace Dfe.PlanTech.Infrastructure.Data;
 [ExcludeFromCodeCoverage]
 public class PlanTechDbContext : DbContext, IPlanTechDbContext
 {
-    public DbSet<User> Users { get; set; } = null!;
-
     public DbSet<Establishment> Establishments { get; set; } = null!;
-
-    public DbSet<SignIn> SignIn { get; set; } = null!;
-
-    public DbSet<ResponseQuestion> Questions { get; set; } = null!;
-
-    public DbSet<ResponseAnswer> Answers { get; set; } = null!;
-
-    public DbSet<Submission> Submissions { get; set; } = null!;
-
     public DbSet<Response> Responses { get; set; } = null!;
-
+    public DbSet<ResponseAnswer> Answers { get; set; } = null!;
+    public DbSet<ResponseQuestion> Questions { get; set; } = null!;
     public DbSet<SectionStatusDto> SectionStatusesSp { get; set; } = null!;
+    public DbSet<SignIn> SignIn { get; set; } = null!;
+    public DbSet<Submission> Submissions { get; set; } = null!;
+    public DbSet<User> Users { get; set; } = null!;
 
     public PlanTechDbContext() { }
 
@@ -124,8 +116,8 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
 
     public Task<Establishment?> GetEstablishmentBy(Expression<Func<Establishment, bool>> predicate) => Establishments.FirstOrDefaultAsync(predicate);
 
-    public Task<int> CallStoredProcedureWithReturnInt(string sprocName, IEnumerable<SqlParameter> parms, CancellationToken cancellationToken = default)
-     => Database.ExecuteSqlRawAsync(sprocName, parms, cancellationToken: cancellationToken);
+    public Task<int> CallStoredProcedureWithReturnInt(string sprocName, IEnumerable<object> parameters, CancellationToken cancellationToken = default)
+     => Database.ExecuteSqlRawAsync(sprocName, parameters, cancellationToken: cancellationToken);
 
     public Task<int> ExecuteSqlAsync(FormattableString sql, CancellationToken cancellationToken = default)
     => Database.ExecuteSqlAsync(sql, cancellationToken);

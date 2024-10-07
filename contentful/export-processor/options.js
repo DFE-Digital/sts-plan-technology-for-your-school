@@ -62,4 +62,4 @@ const getArgumentValue = (args, prop, isBoolean) => {
 
 const options = getOptions();
 
-export default options;
+export default { options, DefaultOutputDirectory }
