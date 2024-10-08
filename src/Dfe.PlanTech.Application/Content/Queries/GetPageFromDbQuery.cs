@@ -77,7 +77,7 @@ public class GetPageFromDbQuery : IGetPageQuery
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error fetching {page} from database", slug);
-            throw new InvalidOperationException("Error while fetching page from database", ex);
+            return null;
         }
     }
 
