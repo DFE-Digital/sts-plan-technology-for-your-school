@@ -20,7 +20,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
 {
     //HashSet of all the types used for DbSets
     //E.g. DbSet<AnswerDbEntity> -> AnswerDbEntity
-    private readonly HashSet<Type> _dbSetTypes;
+    private readonly HashSet<Type> _dbSetTypes = GetDbSetTypes();
 
     private const string Schema = "Contentful";
 
@@ -128,8 +128,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
     {
         _contentfulOptions = new ContentfulOptions(false);
         _queryCacher = new QueryCacher();
-        _dbSetTypes = GetDbSetTypes();
-
     }
 
     public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
@@ -309,6 +307,12 @@ public class CmsDbContext : DbContext, ICmsDbContext
         base.Attach(entity);
     }
 
+    ///<summary>
+    ///Creates a HashSet of all types of DbSet in the CmsDbContext.
+    ///</summary>
+    ///<remarks>
+    ///E.g. AnswerDbEntity, QuestionDbEntity, etc.
+    ///</remarks>
     private HashSet<Type> GetDbSetTypes() => this.GetType()
                                                 .GetProperties()
                                                 .Where(prop => prop.PropertyType.IsGenericType &&
