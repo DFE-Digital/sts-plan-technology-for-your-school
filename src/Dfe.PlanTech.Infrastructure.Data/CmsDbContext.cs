@@ -20,7 +20,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
 {
     //HashSet of all the types used for DbSets
     //E.g. DbSet<AnswerDbEntity> -> AnswerDbEntity
-    private readonly HashSet<Type> _dbSetTypes = GetDbSetTypes();
+    private readonly HashSet<Type> _dbSetTypes;
 
     private const string Schema = "Contentful";
 
@@ -128,12 +128,14 @@ public class CmsDbContext : DbContext, ICmsDbContext
     {
         _contentfulOptions = new ContentfulOptions(false);
         _queryCacher = new QueryCacher();
+        _dbSetTypes = GetDbSetTypes();
     }
 
     public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
     {
         _contentfulOptions = this.GetService<ContentfulOptions>() ?? throw new MissingServiceException($"Could not find service {nameof(ContentfulOptions)}");
         _queryCacher = this.GetService<IQueryCacher>() ?? throw new MissingServiceException($"Could not find service {nameof(IQueryCacher)}");
+        _dbSetTypes = GetDbSetTypes();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -282,7 +284,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     }
 
     ///<summary>
-    ///Attachs the entity/marks it as "tracked" in the DbContext change tracker
+    ///Attaches the entity/marks it as "tracked" in the DbContext change tracker
     ///</summary>
     ///<remarks>
     ///If the result was retrieved from the cache, or it is going to be used by another entity that _was_ retrieved from the cache,
