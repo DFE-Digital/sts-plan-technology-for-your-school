@@ -1,10 +1,11 @@
 using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Caching.Models;
 
-public class QueryCacher : IQueryCacher
+public class QueryCacher(ILogger<QueryCacher> logger) : IQueryCacher
 {
     private readonly MemoryCache _cache = new(new MemoryCacheOptions());
     private const int CacheDurationMinutes = 30;
@@ -25,13 +26,16 @@ public class QueryCacher : IQueryCacher
 
     private bool TryGetFromCache<TResult>(string key, out QueryCacheResult<TResult>? queryCacheResult)
     {
+        logger.LogTrace("Attempting to retrieve key \"{Key}\" from the cache as type \"{Type}\"", key, typeof(TResult));
         if (_cache.TryGetValue(key, out TResult? cachedEntry) && cachedEntry != null)
         {
             queryCacheResult = new(cachedEntry, CacheRetrievalSource.Cache);
+            logger.LogTrace("Retrieved key \"{Key}\" from the cache", key);
             return true;
         }
 
         queryCacheResult = null;
+        logger.LogTrace("Key \"{Key}\" not found in cache", key);
         return false;
     }
 
@@ -41,9 +45,12 @@ public class QueryCacher : IQueryCacher
         Func<IQueryable<T>, CancellationToken, Task<TResult>> queryFunc,
         CancellationToken cancellationToken = default)
     {
-        var retrievedEntry = await queryFunc(queryable, cancellationToken);
-        _cache.Set(key, retrievedEntry, TimeSpan.FromMinutes(CacheDurationMinutes));
+        logger.LogTrace("Retrieving value for \"{Key}\" from DB", key);
 
+        var retrievedEntry = await queryFunc(queryable, cancellationToken);
+
+        _cache.Set(key, retrievedEntry, TimeSpan.FromMinutes(CacheDurationMinutes));
+        logger.LogTrace("Saved value for \"{Key}\" in cache", key);
         return new QueryCacheResult<TResult>(retrievedEntry, CacheRetrievalSource.Db);
     }
 
