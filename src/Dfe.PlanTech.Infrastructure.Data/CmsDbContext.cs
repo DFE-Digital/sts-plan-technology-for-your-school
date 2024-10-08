@@ -329,5 +329,5 @@ public class CmsDbContext : DbContext, ICmsDbContext
                                                 .ToHashSet();
 
     private ILogger<CmsDbContext> GetLogger()
-        =>this.GetService<ILogger<CmsDbContext>>() ?? throw new MissingServiceException($"Could not find service for {typeof(ILogger<CmsDbContext>)}");
+        => this.GetService<ILogger<CmsDbContext>>() ?? throw new MissingServiceException($"Could not find service for {typeof(ILogger<CmsDbContext>)}");
 }
