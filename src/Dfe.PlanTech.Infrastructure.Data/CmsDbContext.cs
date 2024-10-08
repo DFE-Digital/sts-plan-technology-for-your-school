@@ -250,7 +250,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
             cancellationToken);
 
     public async Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
-        where T : class
     {
         var key = GetCacheKey(queryable);
         var result = await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
@@ -267,13 +266,12 @@ public class CmsDbContext : DbContext, ICmsDbContext
         return result ?? new List<T>();
     }
 
-    public void AttachEntity<T>(T entity) where T : class
+    public void AttachEntity<T>(T entity)
     {
         base.Attach(entity);
     }
 
     public async Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
-    where T : class
     {
         var key = GetCacheKey(queryable);
         var result = await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,

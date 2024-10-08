@@ -78,5 +78,5 @@ public interface ICmsDbContext : IDbContext
 
     public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default);
     public Task<int> SetComponentPublishedAndDeletedStatuses(ContentComponentDbEntity contentComponent, bool published, bool deleted, CancellationToken cancellationToken);
-    public void AttachEntity<T>(T entity) where T : class;
+    public void AttachEntity<T>(T entity);
 }
