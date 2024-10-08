@@ -2,21 +2,14 @@ using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
-public class GetButtonWithEntryReferencesQuery : IGetPageChildrenQuery
+public class GetButtonWithEntryReferencesQuery(ICmsDbContext db, ILogger<GetButtonWithEntryReferencesQuery> logger)
+    : IGetPageChildrenQuery
 {
-    private readonly ICmsDbContext _db;
-    private readonly ILogger<GetButtonWithEntryReferencesQuery> _logger;
-
-    public GetButtonWithEntryReferencesQuery(ICmsDbContext db, ILogger<GetButtonWithEntryReferencesQuery> logger)
-    {
-        _db = db;
-        _logger = logger;
-    }
-
     /// <summary>
     /// If the Page.Content has any <see cref="ButtonWithEntryReferenceDbEntity"/>s, load the link to entry reference from the database for it
     /// </summary>
@@ -27,18 +20,31 @@ public class GetButtonWithEntryReferencesQuery : IGetPageChildrenQuery
     {
         try
         {
-            var buttons = page.Content.Exists(content => content is ButtonWithEntryReferenceDbEntity);
+            var pageButtonWithEntryReferences = page.GetAllContentOfType<ButtonWithEntryReferenceDbEntity>().ToArray();
 
-            if (!buttons)
+            if (pageButtonWithEntryReferences.Length == 0)
                 return;
 
             var buttonQuery = ButtonWithEntryReferencesQueryable(page);
 
-            await _db.ToListAsync(buttonQuery, cancellationToken);
+            var buttons = await db.ToListAsync(buttonQuery, cancellationToken);
+
+            foreach (var button in buttons)
+            {
+                var matching = pageButtonWithEntryReferences.FirstOrDefault(pb => pb.Id == button.Id);
+
+                if (matching == null)
+                {
+                    logger.LogError("Couldn't find matching button for Id {Id}", button.Id);
+                    continue;
+                }
+
+                matching.LinkToEntry = button.LinkToEntry;
+            }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error loading button references for {page}", page.Id);
+            logger.LogError(ex, "Error loading button references for {page}", page.Id);
             throw new InvalidOperationException("An unexpected error occurred while loading button references.", ex);
         }
     }
@@ -49,13 +55,34 @@ public class GetButtonWithEntryReferencesQuery : IGetPageChildrenQuery
     /// <param name="page"></param>
     /// <returns></returns>
     private IQueryable<ButtonWithEntryReferenceDbEntity> ButtonWithEntryReferencesQueryable(PageDbEntity page)
-    => _db.ButtonWithEntryReferences.Where(button => button.ContentPages.Any(contentPage => contentPage.Id == page.Id))
-                                    .Select(button => new ButtonWithEntryReferenceDbEntity()
+    {
+        var buttonWithEntryReferences = db.ButtonWithEntryReferences.Where(button => button.ContentPages.Any(contentPage => contentPage.Id == page.Id));
+
+        var pageButtons = db.Pages.Where(p => buttonWithEntryReferences.Any(button => button.LinkToEntryId == p.Id))
+                                    .Select(p => new
                                     {
-                                        Id = button.Id,
-                                        LinkToEntry = new PageDbEntity()
-                                        {
-                                            Slug = ((IHasSlug)button.LinkToEntry).Slug
-                                        }
+                                        p.Id,
+                                        p.Slug
                                     });
+
+        var questionButtons = db.Questions.Where(question => buttonWithEntryReferences.Any(button => button.LinkToEntryId == page.Id))
+                                            .Select(q => new
+                                            {
+                                                q.Id,
+                                                q.Slug
+                                            });
+
+        return buttonWithEntryReferences.Select(button => new
+        {
+            button.Id,
+            page = pageButtons.FirstOrDefault(pageButton => pageButton.Id == button.Id),
+            question = questionButtons.FirstOrDefault(quesionButton => quesionButton.Id == button.Id),
+        }).Select(button => new ButtonWithEntryReferenceDbEntity
+        {
+            Id = button.Id,
+            LinkToEntry = button.page != null ?
+                            new PageDbEntity() { Slug = button.page.Slug } :
+                            new QuestionDbEntity() { Slug = button.question!.Slug }
+        });
+    }
 }
