@@ -5,7 +5,6 @@ using Dfe.ContentSupport.Web.Models;
 using Dfe.ContentSupport.Web.Models.Mapped.Custom;
 using Dfe.ContentSupport.Web.Models.Mapped.Standard;
 using Dfe.ContentSupport.Web.Models.Mapped.Types;
-using ContentType = Dfe.ContentSupport.Web.Models.ContentType;
 using File = Contentful.Core.Models.File;
 using FileDetails = Contentful.Core.Models.FileDetails;
 

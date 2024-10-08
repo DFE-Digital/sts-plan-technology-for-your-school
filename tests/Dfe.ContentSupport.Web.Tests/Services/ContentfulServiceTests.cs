@@ -1,6 +1,4 @@
 ﻿using Contentful.Core;
-using Dfe.ContentSupport.Web.Configuration;
-using Contentful.Core.Errors;
 using Contentful.Core.Search;
 
 namespace Dfe.ContentSupport.Web.Tests.Http;
@@ -14,8 +12,8 @@ public class ContentfulServiceTests
     {
         var sut = new ContentfulService(_clientMock.Object);
 
-        await sut.GetContentSupportPages(It.IsAny<string>(), It.IsAny<string>(),It.IsAny<CancellationToken>());
-        
-        _clientMock.Verify(o=>o.GetEntries(It.IsAny<QueryBuilder<ContentSupportPage>>(), It.IsAny<CancellationToken>()),Times.Once);
+        await sut.GetContentSupportPages(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>());
+
+        _clientMock.Verify(o => o.GetEntries(It.IsAny<QueryBuilder<ContentSupportPage>>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }

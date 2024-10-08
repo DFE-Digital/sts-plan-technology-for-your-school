@@ -17,5 +17,5 @@ public class CsPage
     public DateTime? UpdatedAt { get; init; }
     public bool HasFeedbackBanner { get; set; }
     public List<PageLink>? MenuItems { get; set; }
-    public List<string> Tags { get;set; } = null!;
+    public List<string> Tags { get; set; } = null!;
 }

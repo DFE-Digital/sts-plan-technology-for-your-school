@@ -1,5 +1,5 @@
-﻿using Dfe.ContentSupport.Web.Models.Mapped.Types;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+using Dfe.ContentSupport.Web.Models.Mapped.Types;
 
 namespace Dfe.ContentSupport.Web.Models.Mapped.Custom;
 

@@ -30,7 +30,7 @@ public class ModelMapperTests
                  SystemProperties = new SystemProperties()
             },
             new()
-            { 
+            {
                 SystemProperties = new SystemProperties()
             }
         };
@@ -137,8 +137,8 @@ public class ModelMapperTests
             {
                 ContentType = new Contentful.Core.Models.ContentType
                 {
-                    
-                    SystemProperties = new SystemProperties 
+
+                    SystemProperties = new SystemProperties
                     {
                         Id = "DUMMY"
                     }

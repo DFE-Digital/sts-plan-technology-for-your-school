@@ -24,8 +24,11 @@ public class ModelMapper(SupportedAssetTypes supportedAssetTypes) : IModelMapper
             ? MapRichTextContent(entry.RichText, entry)!
             : new CsContentItem
             {
-                InternalName = entry.InternalName, Slug = entry.Slug, Title = entry.Title,
-                Subtitle = entry.Subtitle, UseParentHero = entry.UseParentHero
+                InternalName = entry.InternalName,
+                Slug = entry.Slug,
+                Title = entry.Title,
+                Subtitle = entry.Subtitle,
+                UseParentHero = entry.UseParentHero
             };
         return item;
     }
@@ -33,7 +36,7 @@ public class ModelMapper(SupportedAssetTypes supportedAssetTypes) : IModelMapper
     public List<RichTextContentItem> MapRichTextNodes(List<ContentItem> nodes)
     {
         return nodes.Select(node => MapContent(node) ?? new RichTextContentItem
-            { NodeType = RichTextNodeType.Unknown, InternalName = node.InternalName }).ToList();
+        { NodeType = RichTextNodeType.Unknown, InternalName = node.InternalName }).ToList();
     }
 
 
@@ -114,7 +117,8 @@ public class ModelMapper(SupportedAssetTypes supportedAssetTypes) : IModelMapper
     public CustomComponent? GenerateCustomComponent(Target target)
     {
         var contentType = target.SystemProperties.ContentType?.SystemProperties.Id;
-        if (contentType is null) return null;
+        if (contentType is null)
+            return null;
         return contentType switch
         {
             "CSAccordion" => GenerateCustomAccordion(target),
@@ -175,7 +179,8 @@ public class ModelMapper(SupportedAssetTypes supportedAssetTypes) : IModelMapper
 
     private static List<string> FlattenMetadata(ContentfulMetadata item)
     {
-        if (item is null) return [];
+        if (item is null)
+            return [];
 
         return item.Tags.Select(o => o.Sys.Id).ToList();
     }
@@ -187,7 +192,8 @@ public class ModelMapper(SupportedAssetTypes supportedAssetTypes) : IModelMapper
 
     public RichTextContentItem? MapRichTextContent(ContentItemBase? richText, Entry entry)
     {
-        if (richText is null) return null;
+        if (richText is null)
+            return null;
         var item =
             new RichTextContentItem
             {
@@ -255,8 +261,10 @@ public class ModelMapper(SupportedAssetTypes supportedAssetTypes) : IModelMapper
 
     public AssetContentType ConvertToAssetContentType(string str)
     {
-        if (supportedAssetTypes.ImageTypes.Contains(str)) return AssetContentType.Image;
-        if (supportedAssetTypes.VideoTypes.Contains(str)) return AssetContentType.Video;
+        if (supportedAssetTypes.ImageTypes.Contains(str))
+            return AssetContentType.Image;
+        if (supportedAssetTypes.VideoTypes.Contains(str))
+            return AssetContentType.Video;
         return AssetContentType.Unknown;
     }
 }
