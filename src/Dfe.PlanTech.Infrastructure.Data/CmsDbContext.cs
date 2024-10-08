@@ -305,8 +305,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
             return;
         }
 
-        //Would ideally check if it's null, but it _has_ to be null to be a Db set entity
-        if (entity is default(T) || entity is null)
+        //Sonarcloud will complain about default(T), but it _has_ to be a class at this point
+        if (entity is null)
         {
             _logger.LogWarning("Tried to attach null or default entity of type {EntityType}", typeof(T));
             return;
