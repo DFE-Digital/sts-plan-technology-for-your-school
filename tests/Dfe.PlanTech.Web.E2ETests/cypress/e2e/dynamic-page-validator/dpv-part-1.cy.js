@@ -23,13 +23,13 @@ describe("Self assessment page", () => {
 
 });
 
-describe("Sections and all-questions paths", () => {
+describe("Sections and all-questions paths", { testIsolation: false }, () => {
+    it('Logs in correctly', () => {
+        cy.loginWithEnv(`${selfAssessmentSlug}`);
+    });
 
     (dataMapper?.mappedSections ?? []).forEach((section) => {
         section.getMinimumPathsForQuestions();
-        it(`${section.name} should have every question with correct content`, () => {
-            cy.loginWithEnv(`${selfAssessmentSlug}`);
-            validateSections(section, section.minimumPathsToNavigateQuestions, dataMapper);
-        });
+        validateSections(section, section.minimumPathsToNavigateQuestions, dataMapper);
     });
 });
