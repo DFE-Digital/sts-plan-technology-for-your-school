@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Infrastructure.Data.UnitTests;
@@ -36,9 +37,11 @@ public class DatabaseHelperTests
 
         var services = new ServiceCollection();
 
+        services.AddSingleton(Substitute.For<ILogger<CmsDbContext>>());
         services.AddSingleton(new ContentfulOptions());
         services.AddSingleton(_queryCacher);
         dbContextOptionsBuilder.UseApplicationServiceProvider(services.BuildServiceProvider());
+
         var actualDbContext = new CmsDbContext(dbContextOptionsBuilder.Options);
 
         var mockChangeTracker = Substitute.For<ChangeTracker>(actualDbContext,

@@ -13,6 +13,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
@@ -126,12 +127,13 @@ public class CmsDbContext : DbContext, ICmsDbContext
     private readonly ContentfulOptions _contentfulOptions;
     private readonly IQueryCacher _queryCacher;
 
+    //Constructor used for mocking - should never be used elsewhere
     public CmsDbContext()
     {
         _contentfulOptions = new ContentfulOptions(false);
         _queryCacher = new QueryCacher();
         _dbSetTypes = GetDbSetTypes();
-        _logger = GetLogger();
+        _logger = new NullLogger<CmsDbContext>();
     }
 
     public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
