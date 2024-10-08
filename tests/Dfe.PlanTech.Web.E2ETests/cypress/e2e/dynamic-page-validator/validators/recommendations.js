@@ -25,16 +25,22 @@ export const validateRecommendationForMaturity = (section, maturity, path) => {
 
     const recommendationUrl = `${section.interstitialPage.fields.slug}/recommendation` 
 
-    // Validate self-assessment page post-section completion
-    validateCompletionTags(section, introPage);
+    it(`${section.name} should should show recent completion tags on self-assessment page`, () => {
+        // Validate self-assessment page post-section completion
+        validateCompletionTags(section, introPage);
+    });
 
-    cy.get("a.govuk-link")
-        .contains(section.name.trim())
-        .parent().next().next()
-        .within(() => {
-            cy.get("a.govuk-button").contains("View Recommendation").click();
-        })
+    it(`${section.name} should retrieve recommendation intro for ${maturity} maturity, with correct content`, () => {
+        cy.get("a.govuk-link")
+            .contains(section.name.trim())
+            .parent().next().next()
+            .within(() => {
+                cy.get("a.govuk-button").contains("View Recommendation").click();
+            })
+        validateRecommendationIntro(introPage, recommendationUrl);
+    });
 
-    validateRecommendationIntro(introPage, recommendationUrl);
-    validateRecommendationChunks(introPage, chunks);
+    it(`${section.name} should retrieve correct recommendation chunks with correct content`, () => {
+        validateRecommendationChunks(introPage, chunks);
+    });
 }

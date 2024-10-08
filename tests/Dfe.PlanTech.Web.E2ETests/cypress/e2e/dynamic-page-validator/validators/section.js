@@ -1,4 +1,4 @@
-cd import { FindPageForSlug, selfAssessmentSlug, ValidatePage } from "../helpers/index.js";
+import { FindPageForSlug, selfAssessmentSlug, ValidatePage } from "../helpers/index.js";
 import { navigateAndValidateQuestionPages, validateCheckAnswersPage } from "./index.js";
 
 /**

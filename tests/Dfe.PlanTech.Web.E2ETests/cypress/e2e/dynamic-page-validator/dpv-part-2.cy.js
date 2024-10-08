@@ -5,17 +5,16 @@ import { validateRecommendationForMaturity, validateSections } from "./validator
 
 const dataMapper = new DataMapper(require('../../fixtures/contentful-data'));
 
-describe("Recommendations", () => {
+describe("Recommendations", { testIsolation: false }, () => {
+    it('Logs in correctly', () => {
+        cy.loginWithEnv(`/${selfAssessmentSlug}`);
+    });
 
     (dataMapper?.mappedSections ?? []).forEach((section) => {
         section.getMinimumPathsForRecommendations();
         Object.keys(section.minimumPathsForRecommendations).forEach((maturity) => {
-
-            it(`${section.name} should retrieve correct recommendation for ${maturity} maturity, and all content is valid`, () => {
-                cy.loginWithEnv(`${selfAssessmentSlug}`);
-                validateSections(section, [section.minimumPathsForRecommendations[maturity]], dataMapper, (path) => {
-                    validateRecommendationForMaturity(section, maturity, path);
-                });
+            validateSections(section, [section.minimumPathsForRecommendations[maturity]], dataMapper, (path) => {
+                validateRecommendationForMaturity(section, maturity, path);
             });
         });
     });
