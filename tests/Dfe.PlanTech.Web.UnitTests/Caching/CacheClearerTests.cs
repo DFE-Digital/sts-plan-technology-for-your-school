@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Web.Caching;
 using Microsoft.Extensions.Logging;
 using NSubstitute;

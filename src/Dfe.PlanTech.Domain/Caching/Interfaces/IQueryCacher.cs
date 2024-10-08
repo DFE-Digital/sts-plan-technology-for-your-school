@@ -1,8 +1,10 @@
-namespace Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Domain.Caching.Models;
+
+namespace Dfe.PlanTech.Domain.Caching.Interfaces;
 
 public interface IQueryCacher
 {
-    public Task<TResult> GetOrCreateAsyncWithCache<T, TResult>(
+    public Task<QueryCacheResult<TResult>> GetOrCreateAsyncWithCache<T, TResult>(
         string key,
         IQueryable<T> queryable,
         Func<IQueryable<T>, CancellationToken, Task<TResult>> queryFunc,

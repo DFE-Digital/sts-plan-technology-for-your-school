@@ -2,9 +2,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Text;
-using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Domain.Caching.Interfaces;
+using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Dfe.PlanTech.Domain.Exceptions;
@@ -267,12 +268,18 @@ public class CmsDbContext : DbContext, ICmsDbContext
     public async Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     {
         var key = GetCacheKey(queryable);
-        var result = await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
+        var (result, queryCacheRetrievalLocation) = await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
             (q, ctoken) => q.ToListAsync(ctoken), cancellationToken);
+
+        if (result == null) return [];
+        if (queryCacheRetrievalLocation == CacheRetrievalSource.Db)
+        {
+            return result;
+        }
 
         foreach (var item in result)
         {
-            AttachEntity(item);
+            TryAttachEntity(item);
         }
 
         return result;
@@ -284,9 +291,14 @@ public class CmsDbContext : DbContext, ICmsDbContext
         var result = await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
             (q, ctoken) => q.FirstOrDefaultAsync(ctoken), cancellationToken);
 
-        AttachEntity(result);
+        if (result.RetrievedFrom == CacheRetrievalSource.Db)
+        {
+            return result.Result;
+        }
 
-        return result;
+        TryAttachEntity(result);
+
+        return result.Result;
     }
 
     ///<summary>
@@ -296,7 +308,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     ///If the result was retrieved from the cache, or it is going to be used by another entity that _was_ retrieved from the cache,
     ///Then we need to ensure that EF Core is aware of it, otherwise it will not fix-up the navigations as it would normally
     ///</remarks>
-    private void AttachEntity<T>([DisallowNull] T entity)
+    private void TryAttachEntity<T>(T entity)
     {
         //T can be any type, since FirstOrDefaultAsync or ToListAsync etc can return any type
         //Therefore we need to check if there is actually a DbSet for the entity first, before attaching it
@@ -309,44 +321,13 @@ public class CmsDbContext : DbContext, ICmsDbContext
         }
 
         //Sonarcloud will complain about default(T), but it _has_ to be a class at this point
-        if (EqualityComparer<T>.Default.Equals(entity, default))
+        if (entity == null || EqualityComparer<T>.Default.Equals(entity, default))
         {
             _logger.LogWarning("Tried to attach null or default entity of type {EntityType}", typeof(T));
             return;
         }
 
-        if (entity is ContentComponentDbEntity contentComponentDbEntity)
-        {
-            TryDetatchExistingEntry(entity, contentComponentDbEntity);
-        }
-
         base.Attach(entity);
-    }
-
-    private void TryDetatchExistingEntry<T>([DisallowNull] T entity, ContentComponentDbEntity contentComponentDbEntity)
-    {
-        var trackedEntity = ChangeTracker.Entries().FirstOrDefault(entry => IsMatchingEntryForEntity(entity, contentComponentDbEntity, entry));
-
-        if (trackedEntity != null)
-        {
-            Entry(trackedEntity.Entity).State = EntityState.Detached;
-        }
-    }
-
-    private static bool IsMatchingEntryForEntity<T>(T entity, ContentComponentDbEntity contentComponentDbEntity,  EntityEntry entry)
-    {
-        if (entry.Entity.Equals(entity))
-        {
-            return true;
-        }
-
-        if (entry.Entity is not T)
-        {
-            return false;
-        }
-
-        return entry.Entity is ContentComponentDbEntity contentComponentEntry &&
-               contentComponentEntry.Id == contentComponentDbEntity.Id;
     }
 
     ///<summary>
