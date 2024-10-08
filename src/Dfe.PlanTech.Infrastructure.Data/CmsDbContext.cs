@@ -296,13 +296,15 @@ public class CmsDbContext : DbContext, ICmsDbContext
         //Therefore we need to check if there is actually a DbSet for the entity first, before attaching it
         var isExistingDbSet = _dbSetTypes.Contains(typeof(T));
 
-        if(!isExistingDbSet){
+        if (!isExistingDbSet)
+        {
             //ADD LOGGING
             return;
         }
 
         //Would ideally check if it's null, but it _has_ to be null to be a Db set entity
-        if(entity is default(T)){
+        if (entity is default(T))
+        {
             return;
         }
 
