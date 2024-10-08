@@ -263,7 +263,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
         var key = GetCacheKey(queryable);
         var result = await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
             (q, ctoken) => q.FirstOrDefaultAsync(ctoken), cancellationToken);
-        if (result is not null) base.Attach(result);
+        if (result is not null)
+            base.Attach(result);
         return result;
     }
 }
