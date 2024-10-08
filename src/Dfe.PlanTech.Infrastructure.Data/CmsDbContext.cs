@@ -18,6 +18,10 @@ namespace Dfe.PlanTech.Infrastructure.Data;
 [ExcludeFromCodeCoverage]
 public class CmsDbContext : DbContext, ICmsDbContext
 {
+    //HashSet of all the types used for DbSets
+    //E.g. DbSet<AnswerDbEntity> -> AnswerDbEntity
+    private readonly HashSet<Type> _dbSetTypes;
+
     private const string Schema = "Contentful";
 
     public DbSet<AnswerDbEntity> Answers { get; set; }
@@ -124,6 +128,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
     {
         _contentfulOptions = new ContentfulOptions(false);
         _queryCacher = new QueryCacher();
+        _dbSetTypes = GetDbSetTypes();
+
     }
 
     public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
@@ -275,19 +281,42 @@ public class CmsDbContext : DbContext, ICmsDbContext
         var result = await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
             (q, ctoken) => q.FirstOrDefaultAsync(ctoken), cancellationToken);
 
-        //Attach the result to the DbContext change tracker.
-        //If the result was retrieved from the cache, or it is going to be used by another entity that _was_ retrieved from the cache,
-        //Then we need to ensure that EF Core is aware of it, otherwise it will not fix-up the navigations as it would normally
-        if (result != null)
-        {
-            AttachEntity(result);
-        }
+        AttachEntity(result);
 
         return result;
     }
 
-    public void AttachEntity<T>(T entity)
+    ///<summary>
+    ///Attachs the entity/marks it as "tracked" in the DbContext change tracker
+    ///</summary>
+    ///<remarks>
+    ///If the result was retrieved from the cache, or it is going to be used by another entity that _was_ retrieved from the cache,
+    ///Then we need to ensure that EF Core is aware of it, otherwise it will not fix-up the navigations as it would normally
+    ///</remarks>
+    private void AttachEntity<T>(T entity)
     {
+        //T can be any type, since FirstOrDefaultAsync or ToListAsync etc can return any type
+        //Therefore we need to check if there is actually a DbSet for the entity first, before attaching it
+        var isExistingDbSet = _dbSetTypes.Contains(typeof(T));
+
+        if(!isExistingDbSet){
+            //ADD LOGGING
+            return;
+        }
+
+        //Would ideally check if it's null, but it _has_ to be null to be a Db set entity
+        if(entity is default(T)){
+            return;
+        }
+
         base.Attach(entity);
     }
+
+    private HashSet<Type> GetDbSetTypes() => this.GetType()
+                                                .GetProperties()
+                                                .Where(prop => prop.PropertyType.IsGenericType &&
+                                                            prop.PropertyType.GetGenericTypeDefinition() == typeof(DbSet<>))
+                                                .Select(prop => prop.PropertyType.GetGenericArguments()[0])
+                                                .ToHashSet();
+
 }
