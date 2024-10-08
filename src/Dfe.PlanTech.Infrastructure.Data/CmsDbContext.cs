@@ -11,6 +11,7 @@ using Dfe.PlanTech.Domain.Exceptions;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -295,7 +296,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     ///If the result was retrieved from the cache, or it is going to be used by another entity that _was_ retrieved from the cache,
     ///Then we need to ensure that EF Core is aware of it, otherwise it will not fix-up the navigations as it would normally
     ///</remarks>
-    private void AttachEntity<T>(T entity)
+    private void AttachEntity<T>([DisallowNull] T entity)
     {
         //T can be any type, since FirstOrDefaultAsync or ToListAsync etc can return any type
         //Therefore we need to check if there is actually a DbSet for the entity first, before attaching it
@@ -308,13 +309,44 @@ public class CmsDbContext : DbContext, ICmsDbContext
         }
 
         //Sonarcloud will complain about default(T), but it _has_ to be a class at this point
-        if (entity is null)
+        if (EqualityComparer<T>.Default.Equals(entity, default))
         {
             _logger.LogWarning("Tried to attach null or default entity of type {EntityType}", typeof(T));
             return;
         }
 
+        if (entity is ContentComponentDbEntity contentComponentDbEntity)
+        {
+            TryDetatchExistingEntry(entity, contentComponentDbEntity);
+        }
+
         base.Attach(entity);
+    }
+
+    private void TryDetatchExistingEntry<T>([DisallowNull] T entity, ContentComponentDbEntity contentComponentDbEntity)
+    {
+        var trackedEntity = ChangeTracker.Entries().FirstOrDefault(entry => IsMatchingEntryForEntity(entity, contentComponentDbEntity, entry));
+
+        if (trackedEntity != null)
+        {
+            Entry(trackedEntity.Entity).State = EntityState.Detached;
+        }
+    }
+
+    private static bool IsMatchingEntryForEntity<T>(T entity, ContentComponentDbEntity contentComponentDbEntity,  EntityEntry entry)
+    {
+        if (entry.Entity.Equals(entity))
+        {
+            return true;
+        }
+
+        if (entry.Entity is not T)
+        {
+            return false;
+        }
+
+        return entry.Entity is ContentComponentDbEntity contentComponentEntry &&
+               contentComponentEntry.Id == contentComponentDbEntity.Id;
     }
 
     ///<summary>
