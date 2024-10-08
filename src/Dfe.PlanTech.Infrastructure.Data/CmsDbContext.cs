@@ -12,17 +12,19 @@ using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
 [ExcludeFromCodeCoverage]
 public class CmsDbContext : DbContext, ICmsDbContext
 {
+    private const string Schema = "Contentful";
+
     //HashSet of all the types used for DbSets
     //E.g. DbSet<AnswerDbEntity> -> AnswerDbEntity
     private readonly HashSet<Type> _dbSetTypes;
-
-    private const string Schema = "Contentful";
+    private readonly ILogger<CmsDbContext> _logger;
 
     public DbSet<AnswerDbEntity> Answers { get; set; }
 
@@ -129,13 +131,17 @@ public class CmsDbContext : DbContext, ICmsDbContext
         _contentfulOptions = new ContentfulOptions(false);
         _queryCacher = new QueryCacher();
         _dbSetTypes = GetDbSetTypes();
+        _logger = GetLogger();
     }
 
     public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
     {
-        _contentfulOptions = this.GetService<ContentfulOptions>() ?? throw new MissingServiceException($"Could not find service {nameof(ContentfulOptions)}");
-        _queryCacher = this.GetService<IQueryCacher>() ?? throw new MissingServiceException($"Could not find service {nameof(IQueryCacher)}");
+        _contentfulOptions = this.GetService<ContentfulOptions>() ??
+                             throw new MissingServiceException($"Could not find service {nameof(ContentfulOptions)}");
+        _queryCacher = this.GetService<IQueryCacher>() ??
+                       throw new MissingServiceException($"Could not find service {nameof(IQueryCacher)}");
         _dbSetTypes = GetDbSetTypes();
+        _logger = GetLogger();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -261,15 +267,12 @@ public class CmsDbContext : DbContext, ICmsDbContext
         var result = await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
             (q, ctoken) => q.ToListAsync(ctoken), cancellationToken);
 
-        if (result != null)
+        foreach (var item in result)
         {
-            foreach (var item in result)
-            {
-                AttachEntity(item);
-            }
+            AttachEntity(item);
         }
 
-        return result ?? new List<T>();
+        return result;
     }
 
     public async Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
@@ -298,13 +301,14 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         if (!isExistingDbSet)
         {
-            //ADD LOGGING
+            _logger.LogWarning("Tried to attach entity of type {EntityType} but was not found in DbSets", typeof(T));
             return;
         }
 
         //Would ideally check if it's null, but it _has_ to be null to be a Db set entity
-        if (entity is default(T))
+        if (entity is default(T) || entity is null)
         {
+            _logger.LogWarning("Tried to attach null or default entity of type {EntityType}", typeof(T));
             return;
         }
 
@@ -324,4 +328,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
                                                 .Select(prop => prop.PropertyType.GetGenericArguments()[0])
                                                 .ToHashSet();
 
+    private ILogger<CmsDbContext> GetLogger()
+        =>this.GetService<ILogger<CmsDbContext>>() ?? throw new MissingServiceException($"Could not find service for {typeof(ILogger<CmsDbContext>)}");
 }
