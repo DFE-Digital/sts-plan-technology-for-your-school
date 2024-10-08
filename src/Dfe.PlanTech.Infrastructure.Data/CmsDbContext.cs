@@ -263,9 +263,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         if (result != null)
         {
-            //Attach the result to the DbContext change tracker.
-            //If the result was retrieved from the cache, or it is going to be used by another entity that _was_ retrieved from the cache,
-            //Then we need to ensure that EF Core is aware of it, otherwise it will not fix-up the navigations as it would normally
             foreach (var item in result)
             {
                 AttachEntity(item);
