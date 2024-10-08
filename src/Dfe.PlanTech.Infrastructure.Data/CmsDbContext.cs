@@ -250,16 +250,37 @@ public class CmsDbContext : DbContext, ICmsDbContext
             cancellationToken);
 
     public async Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+        where T : class
     {
         var key = GetCacheKey(queryable);
-        return await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
+        var result = await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
             (q, ctoken) => q.ToListAsync(ctoken), cancellationToken);
+
+        if(result != null){
+            foreach(var item in result){
+                AttachEntity(item);
+            }
+        }
+
+        return result ?? new List<T>();
+    }
+
+    public void AttachEntity<T>(T entity) where T : class
+    {
+        base.Attach(entity);
     }
 
     public async Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+    where T : class
     {
         var key = GetCacheKey(queryable);
-        return await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
+        var result = await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
             (q, ctoken) => q.FirstOrDefaultAsync(ctoken), cancellationToken);
+
+        if(result != null){
+            AttachEntity(result);
+        }
+
+        return result;
     }
 }
