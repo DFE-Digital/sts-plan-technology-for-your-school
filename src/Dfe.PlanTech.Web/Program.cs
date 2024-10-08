@@ -26,20 +26,21 @@ if (builder.Environment.EnvironmentName != "E2E")
     builder.Services.AddDbWriterServices(builder.Configuration);
 }
 
+builder.Services.AddCustomTelemetry();
+
 builder.AddContentAndSupportServices()
-    .AddAuthorisationServices()
-    .AddCaching()
-    .AddContentfulServices(builder.Configuration)
-    .AddCQRSServices()
-    .AddCspConfiguration()
-    .AddCustomTelemetry()
-    .AddDatabase(builder.Configuration)
-    .AddDfeSignIn(builder.Configuration)
-    .AddExceptionHandlingServices()
-    .AddGoogleTagManager()
-    .AddGovUkFrontend()
-    .AddHttpContextAccessor()
-    .AddRoutingServices();
+        .AddAuthorisationServices()
+        .AddCaching()
+        .AddContentfulServices(builder.Configuration)
+        .AddCQRSServices()
+        .AddCspConfiguration()
+        .AddDatabase(builder.Configuration)
+        .AddDfeSignIn(builder.Configuration)
+        .AddExceptionHandlingServices()
+        .AddGoogleTagManager()
+        .AddGovUkFrontend()
+        .AddHttpContextAccessor()
+        .AddRoutingServices();
 
 builder.Services.AddSingleton<ISystemTime, SystemTime>();
 
