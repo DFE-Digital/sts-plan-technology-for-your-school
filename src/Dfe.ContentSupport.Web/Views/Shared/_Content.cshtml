@@ -1,0 +1,9 @@
+@model CsContentItem;
+
+@{
+    if (Model.GetType() == typeof(RichTextContentItem))
+    {
+        var richText = Model as RichTextContentItem;
+        <partial name="RichText/_RichText" model="@richText"/>
+    }
+}

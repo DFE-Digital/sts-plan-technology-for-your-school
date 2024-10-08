@@ -14,7 +14,7 @@
         </Content>
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\..\contentandsupport\src\Dfe.ContentSupport.Web\Dfe.ContentSupport.Web.csproj" />
+        <ProjectReference Include="..\Dfe.ContentSupport.Web\Dfe.ContentSupport.Web.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.Application\Dfe.PlanTech.Application.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.Domain\Dfe.PlanTech.Domain.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.Contentful\Dfe.PlanTech.Infrastructure.Contentful.csproj" />
@@ -41,10 +41,6 @@
 
     <ItemGroup>
         <None Remove="Views\Recommendations\" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="BackgroundTasks\" />
     </ItemGroup>
 
     <Target Name="BuildWebAssets" BeforeTargets="Build" Condition="'$(buildWebAssets)' == 'true'">
