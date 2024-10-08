@@ -256,8 +256,10 @@ public class CmsDbContext : DbContext, ICmsDbContext
         var result = await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
             (q, ctoken) => q.ToListAsync(ctoken), cancellationToken);
 
-        if(result != null){
-            foreach(var item in result){
+        if (result != null)
+        {
+            foreach (var item in result)
+            {
                 AttachEntity(item);
             }
         }
@@ -277,7 +279,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
         var result = await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
             (q, ctoken) => q.FirstOrDefaultAsync(ctoken), cancellationToken);
 
-        if(result != null){
+        if (result != null)
+        {
             AttachEntity(result);
         }
 
