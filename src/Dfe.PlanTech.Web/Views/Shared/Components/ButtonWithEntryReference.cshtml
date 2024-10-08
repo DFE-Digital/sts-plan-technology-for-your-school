@@ -1,6 +1,7 @@
 @using Dfe.PlanTech.Domain.Content.Models;
 @using Dfe.PlanTech.Domain.Content.Models.Buttons;
 @using Dfe.PlanTech.Domain.Questionnaire.Models;
+@using Dfe.PlanTech.Web;
 @model Dfe.PlanTech.Domain.Content.Models.Buttons.ButtonWithEntryReference;
 
 @{
@@ -18,7 +19,11 @@
                             Button = Model.Button,
                             Href = pageContent.Slug
                         };
-                <button-with-link model=@buttonWithLink />
+
+                <govuk-button-link href="@pageContent.Slug">
+                    class="govuk-link">
+                    @Model.Button.Value
+                </govuk-button-link>
                 break;
             }
         case Question _:

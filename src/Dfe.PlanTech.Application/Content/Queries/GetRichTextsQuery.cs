@@ -22,16 +22,27 @@ public class GetRichTextsForPageQuery(ICmsDbContext db, ILogger<GetRichTextsForP
     {
         try
         {
-            var hasTextBodyContents = page.Content.Concat(page.BeforeTitleContent)
-                                                .OfType<IHasRichText>()
-                                                .Any();
+            var richTextParents = page.GetAllContentOfType<IHasRichText>().ToArray();
 
-            if (!hasTextBodyContents)
+            if (richTextParents.Length == 0)
                 return;
 
             var richTextContentQuery = _db.RichTextContentWithSlugs.Where(PageMatchesSlugAndPublishedOrIsPreview(page));
 
-            await _db.ToListAsync(richTextContentQuery, cancellationToken);
+            var richTexts = await _db.ToListAsync(richTextContentQuery, cancellationToken);
+
+            foreach (var parent in richTextParents)
+            {
+                var matching = richTexts.FirstOrDefault(rt => rt.Id == parent.RichTextId);
+
+                if (matching == null)
+                {
+                    logger.LogError("Unable to find matching rich text for rich text Id {Id}", parent.RichTextId);
+                    continue;
+                }
+
+                parent.RichText = matching;
+            }
         }
         catch (Exception ex)
         {

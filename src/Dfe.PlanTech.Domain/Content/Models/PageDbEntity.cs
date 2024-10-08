@@ -37,7 +37,7 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
     public SectionDbEntity? Section { get; set; }
 
     /// <summary>
-    /// Combined joins for <see cref="Content"/> and <see cref="BeforeTitleContent"/> 
+    /// Combined joins for <see cref="Content"/> and <see cref="BeforeTitleContent"/>
     /// </summary>
     [DontCopyValue]
     public List<PageContentDbEntity> AllPageContents { get; set; } = [];
@@ -59,4 +59,6 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
                             })
                             .OrderBy(joined => joined.order)
                             .Select(joined => joined.content);
+
+    public IEnumerable<T> GetAllContentOfType<T>() => Content.Concat(BeforeTitleContent).OfType<T>();
 }
