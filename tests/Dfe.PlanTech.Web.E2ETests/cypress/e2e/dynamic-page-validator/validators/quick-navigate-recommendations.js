@@ -9,8 +9,7 @@ import { quickNavigateQuestions, validateRecommendationForMaturity } from "./ind
  * 
  */
 
-export const quickNavigateToRecommendations = (section, maturity) => {
-    const paths = [section.minimumPathsForRecommendations[maturity]];
+export const quickNavigateToRecommendations = (section, paths, maturity) => {
 
     for (const path of paths) {
 

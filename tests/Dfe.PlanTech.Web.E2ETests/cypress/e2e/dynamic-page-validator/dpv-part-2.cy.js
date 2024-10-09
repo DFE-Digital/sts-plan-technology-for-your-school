@@ -42,7 +42,7 @@ describe("Recommendations", { testIsolation: false }, () => {
 
             section.getMinimumPathsForRecommendations();
             Object.keys(section.minimumPathsForRecommendations).forEach((maturity) => {
-                quickNavigateToRecommendations(section, maturity);
+                quickNavigateToRecommendations(section, [section.minimumPathsForRecommendations[maturity]], maturity);
             });
         });
     });
