@@ -20,10 +20,7 @@
                             Href = pageContent.Slug
                         };
 
-                <govuk-button-link href="@pageContent.Slug">
-                    class="govuk-link">
-                    @Model.Button.Value
-                </govuk-button-link>
+                <partial name="components/ButtonWithLink" model=@buttonWithLink/>
                 break;
             }
         case Question _:
