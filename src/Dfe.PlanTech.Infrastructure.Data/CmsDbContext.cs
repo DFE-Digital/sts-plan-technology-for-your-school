@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Text;
 using Dfe.PlanTech.Application.Caching.Interfaces;
@@ -13,7 +12,6 @@ using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data.EntityTypeConfigurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
@@ -119,8 +117,9 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<WarningComponentDbEntity> ICmsDbContext.Warnings => Warnings;
     #endregion
 
-    private readonly ContentfulOptions _contentfulOptions;
+    private ContentfulOptions? _contentfulOptions;
     private readonly IQueryCacher _queryCacher;
+    private ContentfulOptions ContentfulOptions => _contentfulOptions ??= GetRequiredService<ContentfulOptions>();
 
     public CmsDbContext()
     {
@@ -130,37 +129,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
     {
-        _contentfulOptions = this.GetService<ContentfulOptions>() ?? throw new MissingServiceException($"Could not find service {nameof(ContentfulOptions)}");
-        _queryCacher = this.GetService<IQueryCacher>() ?? throw new MissingServiceException($"Could not find service {nameof(IQueryCacher)}");
+        _queryCacher = GetRequiredService<IQueryCacher>();
     }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.HasDefaultSchema(Schema);
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(CmsDbContext).Assembly);
-
-        modelBuilder.Entity<RecommendationChunkContentDbEntity>()
-            .ToTable("RecommendationChunkContents", Schema);
-
-        modelBuilder.Entity<RecommendationIntroDbEntity>()
-            .ToTable("RecommendationIntros", Schema);
-
-        modelBuilder.Entity<RecommendationSectionDbEntity>()
-            .ToTable("RecommendationSections", Schema);
-
-        modelBuilder.Entity<SubtopicRecommendationIntroDbEntity>()
-            .ToTable("SubtopicRecommendationIntros", Schema);
-
-        modelBuilder.Entity<ButtonWithLinkDbEntity>()
-            .Navigation(button => button.Button).AutoInclude();
-
-        modelBuilder.Entity<RichTextContentWithSlugDbEntity>(entity => { entity.ToView("RichTextContentsBySlug"); });
-        modelBuilder.Entity<RichTextContentWithSubtopicRecommendationId>(entity => { entity.ToView("RichTextContentsBySubtopicRecommendationId"); });
-
-        //For some reason this doesn't work if done higher up
-        modelBuilder.Entity<ContentComponentDbEntity>().HasQueryFilter(entity => (_contentfulOptions.UsePreview || entity.Published) && !entity.Archived && !entity.Deleted);
-    }
-
 
     /// <summary>
     /// Sets the published and deleted statuses for a content component.
@@ -175,19 +145,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
     /// <returns>Task - result is amount of rows affected by the operation.</returns>
     public virtual Task<int> SetComponentPublishedAndDeletedStatuses(ContentComponentDbEntity contentComponent, bool published, bool deleted, CancellationToken cancellationToken)
         => Database.ExecuteSqlAsync($"UPDATE [Contentful].[ContentComponents] SET Published = {published}, Deleted = {deleted} WHERE [Id] = {contentComponent.Id}", cancellationToken: cancellationToken);
-
-    /// <summary>
-    /// Should the given entity be displayed? I.e. is it not archived, not deleted, and either published or use preview mode is enabled
-    /// </summary>
-    private Expression<Func<ContentComponentDbEntity, bool>> ShouldShowEntity()
-        => entity => (_contentfulOptions.UsePreview || entity.Published) && !entity.Archived && !entity.Deleted;
-
-    private static string GetCacheKey(IQueryable query)
-    {
-        var queryString = query.ToQueryString();
-        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(queryString));
-        return Convert.ToBase64String(hash);
-    }
 
     public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
         => FirstOrDefaultAsync(
@@ -210,5 +167,21 @@ public class CmsDbContext : DbContext, ICmsDbContext
         var key = GetCacheKey(queryable);
         return await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
             (q, ctoken) => q.FirstOrDefaultAsync(ctoken), cancellationToken);
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.HasDefaultSchema(Schema);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(CmsDbContext).Assembly);
+        modelBuilder.ApplyConfiguration(new ContentComponentEntityTypeConfiguration(ContentfulOptions.UsePreview));
+    }
+
+    private T GetRequiredService<T>() where T : class => this.GetService<T>() ?? throw new MissingServiceException($"Could not find service {typeof(T).Name}");
+
+    private static string GetCacheKey(IQueryable query)
+    {
+        var queryString = query.ToQueryString();
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(queryString));
+        return Convert.ToBase64String(hash);
     }
 }
