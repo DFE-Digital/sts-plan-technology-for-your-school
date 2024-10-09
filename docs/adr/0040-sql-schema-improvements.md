@@ -1,6 +1,6 @@
 # 0040 - SQL Schema Improvements
 
-* **Status**: proposed
+* **Status**: accepted
 
 ## Context and Problem Statement
 
@@ -47,8 +47,6 @@ blue is tables we could change, red tables to delete (displayed with two differe
 
 ### Contentful schema
 
-- Change `GetCurrentSubmissionId` to a UDF
-    - It calculates one value and outputs it, which is what UDFs are perfect for and will simplify existing usage of it
 - Add a dateCreated and dateLastUpdated column to the `ContentComponents` table.
     - This is useful for developers to see when content has changed, and makes it easier to debug content issues.
 - Add missing foreign keys
@@ -69,6 +67,8 @@ blue is tables we could change, red tables to delete (displayed with two differe
 
 ### dbo schema
 
+- Change `GetCurrentSubmissionId` to a UDF
+    - It calculates one value and outputs it, which is what UDFs are perfect for and will simplify existing usage of it
 - Alter the `SubmitAnswer` procedure to reduce data duplication
     - Currently every time an answer is submitted it puts a new record into the `questions` and `answers` tables with
       the question and answer text
@@ -80,3 +80,5 @@ blue is tables we could change, red tables to delete (displayed with two differe
 - Add an index to the `response` table on `submissionId` as this is frequently used to connect the two tables
 
 ## Decision Outcome
+
+Make the recommended changes outlined above to the dbo and Contentful schemas.

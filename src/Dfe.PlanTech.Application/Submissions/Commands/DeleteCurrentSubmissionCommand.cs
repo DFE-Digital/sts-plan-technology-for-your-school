@@ -22,8 +22,7 @@ public class DeleteCurrentSubmissionCommand : IDeleteCurrentSubmissionCommand
 
         await _db.ExecuteSqlAsync($@"EXEC DeleteCurrentSubmission
                                         @establishmentId={establishmentId},
-                                        @sectionId={section.Sys.Id},
-                                        @sectionName={section.Name}",
+                                        @sectionId={section.Sys.Id}",
                                         cancellationToken);
     }
 }
