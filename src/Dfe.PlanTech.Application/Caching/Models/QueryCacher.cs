@@ -27,7 +27,7 @@ public class QueryCacher(ILogger<QueryCacher> logger) : IQueryCacher
     private bool TryGetFromCache<TResult>(string key, out QueryCacheResult<TResult>? queryCacheResult)
     {
         logger.LogTrace("Attempting to retrieve key \"{Key}\" from the cache as type \"{Type}\"", key, typeof(TResult));
-        if (_cache.TryGetValue(key, out TResult? cachedEntry) && EqualityComparer<TResult>.Default.Equals(cachedEntry, default))
+        if (_cache.TryGetValue(key, out TResult? cachedEntry) && !EqualityComparer<TResult>.Default.Equals(cachedEntry, default))
         {
             queryCacheResult = new(cachedEntry, CacheRetrievalSource.Cache);
             logger.LogTrace("Retrieved key \"{Key}\" from the cache", key);
