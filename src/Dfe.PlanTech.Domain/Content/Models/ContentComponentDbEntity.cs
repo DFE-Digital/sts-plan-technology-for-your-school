@@ -21,7 +21,7 @@ public class ContentComponentDbEntity : IContentComponentDbEntity
 
 
     public List<PageDbEntity> ContentPages { get; set; } = [];
-    
+
     public List<RecommendationChunkDbEntity> RecommendationChunk { get; set; } = [];
 
     public List<RecommendationChunkContentDbEntity> RecommendationChunkContentJoins { get; set; } = [];
@@ -31,4 +31,5 @@ public class ContentComponentDbEntity : IContentComponentDbEntity
 
     public List<RecommendationIntroContentDbEntity> RecommendationIntroContentJoins { get; set; } = [];
 
+    public bool Matches(ContentComponentDbEntity otherContentComponent) => Id.Equals(otherContentComponent.Id);
 }

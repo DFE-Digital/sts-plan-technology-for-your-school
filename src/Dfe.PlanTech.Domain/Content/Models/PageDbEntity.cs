@@ -21,7 +21,6 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
     public bool RequiresAuthorisation { get; set; } = true;
 
     [DontCopyValue]
-    [NotMapped]
     public List<ContentComponentDbEntity> BeforeTitleContent { get; set; } = [];
 
     [DontCopyValue]
@@ -30,15 +29,13 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
     public string? TitleId { get; set; }
 
     [DontCopyValue]
-    [NotMapped]
     public List<ContentComponentDbEntity> Content { get; set; } = [];
+    [DontCopyValue]
 
     [DontCopyValue]
     public SectionDbEntity? Section { get; set; }
 
-    public void OrderContents()
-    {
-    }
+    [DontCopyValue] public List<PageContentDbEntity> AllPageContents { get; set; } = [];
 
     public IEnumerable<T> GetAllContentOfType<T>() => Content.Concat(BeforeTitleContent).OfType<T>();
 }

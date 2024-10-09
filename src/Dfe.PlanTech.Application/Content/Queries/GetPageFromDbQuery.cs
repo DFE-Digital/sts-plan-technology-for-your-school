@@ -59,11 +59,6 @@ public class GetPageFromDbQuery(
         {
             var page = await db.GetPageBySlug(slug, cancellationToken);
 
-            if (page == null)
-                return null;
-
-            page.OrderContents();
-
             return page;
         }
         catch (Exception ex)
