@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Caching;
@@ -13,7 +14,7 @@ public class QueryCacherTests
 
     public QueryCacherTests()
     {
-        _queryCacher = new QueryCacher();
+        _queryCacher = new QueryCacher(new NullLogger<QueryCacher>());
         _mockQueryFunc = Substitute.For<Func<IQueryable<ContentComponent>, CancellationToken, Task<ContentComponent>>>();
         _mockQueryFunc.Invoke(_mockQueryable, Arg.Any<CancellationToken>()).Returns(Task.FromResult(_mockResult));
         _queryCacher.ClearCache();
