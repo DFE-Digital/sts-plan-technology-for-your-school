@@ -12,7 +12,6 @@ using Dfe.PlanTech.Domain.Exceptions;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -269,9 +268,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
         if (result == null)
             return [];
         if (queryCacheRetrievalLocation == CacheRetrievalSource.Db)
-        {
             return result;
-        }
 
         foreach (var item in result)
         {
@@ -308,64 +305,17 @@ public class CmsDbContext : DbContext, ICmsDbContext
     {
         try
         {
-            if (!IsValidDbEntity(entity))
+            if (!this.IsValidDbEntity(entity, _logger) || this.EntityAlreadyAttached(entity!))
                 return;
-
-            if (EntityAlreadyAttached(entity!)) return;
 
             base.Attach(entity!);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to attach entity of type {EntityType} to DbContext change tracker", typeof(T));
-            return;
+            throw;
         }
     }
-
-    private bool IsValidDbEntity<T>(T entity)
-    {
-        if (entity == null || EqualityComparer<T>.Default.Equals(entity, default))
-        {
-            _logger.LogWarning("Tried to attach null or default entity of type {EntityType}", typeof(T));
-            return false;
-        }
-
-        var entityModel = Model.FindEntityType(entity.GetType());
-
-        if (entityModel == null)
-        {
-            _logger.LogWarning("Entity type \"{EntityType}\" was not found in DbContext model", entity.GetType());
-            return false;
-        }
-
-        var primaryKey = entityModel.FindPrimaryKey();
-
-        if (primaryKey == null)
-        {
-            _logger.LogWarning("Could not find primary key for type \"{EntityType}\" in IEntityType for type in DbContext", entity.GetType());
-            return false;
-        }
-
-        foreach (var property in primaryKey.Properties)
-        {
-            if (property.PropertyInfo == null)
-            {
-                //Not sure if this can ever happen?
-                continue;
-            }
-
-            var value = property.PropertyInfo.GetValue(entity);
-            if (value == null)
-            {
-                //Cannot attach entity as PK is null
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private bool EntityAlreadyAttached<T>([DisallowNull] T entity) => ChangeTracker.Entries().Any(entry => entity.Equals(entry.Entity));
 
     private ILogger<CmsDbContext> GetLogger()
         => this.GetService<ILogger<CmsDbContext>>() ?? throw new MissingServiceException($"Could not find service for {typeof(ILogger<CmsDbContext>)}");

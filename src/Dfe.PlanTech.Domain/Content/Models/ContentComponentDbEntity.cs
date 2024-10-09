@@ -3,7 +3,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Domain.Content.Models;
 
-public class ContentComponentDbEntity : IContentComponentDbEntity, IEquatable<ContentComponentDbEntity>
+public sealed class ContentComponentDbEntity : IContentComponentDbEntity, IEquatable<ContentComponentDbEntity>
 {
     [DontCopyValue]
     public string Id { get; set; } = null!;
@@ -43,16 +43,21 @@ public class ContentComponentDbEntity : IContentComponentDbEntity, IEquatable<Co
 
     public bool Equals(ContentComponentDbEntity? other)
     {
-        if (other is null) return false;
-        if (ReferenceEquals(this, other)) return true;
+        if (other is null)
+            return false;
+        if (ReferenceEquals(this, other))
+            return true;
         return Id == other.Id;
     }
 
     public override bool Equals(object? obj)
     {
-        if (obj is null) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != GetType()) return false;
+        if (obj is null)
+            return false;
+        if (ReferenceEquals(this, obj))
+            return true;
+        if (obj.GetType() != GetType())
+            return false;
         return Equals((ContentComponentDbEntity)obj);
     }
 
@@ -60,5 +65,5 @@ public class ContentComponentDbEntity : IContentComponentDbEntity, IEquatable<Co
 
     public static bool operator ==(ContentComponentDbEntity? left, ContentComponentDbEntity? right) => Equals(left, right);
 
-    public static bool operator !=(ContentComponentDbEntity? left, ContentComponentDbEntity? right) =>!Equals(left, right);
+    public static bool operator !=(ContentComponentDbEntity? left, ContentComponentDbEntity? right) => !Equals(left, right);
 }
