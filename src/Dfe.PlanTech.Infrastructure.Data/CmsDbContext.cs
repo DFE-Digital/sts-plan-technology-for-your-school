@@ -10,6 +10,7 @@ using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Dfe.PlanTech.Domain.Exceptions;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Infrastructure.Data.EntityTypeConfigurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -19,7 +20,7 @@ namespace Dfe.PlanTech.Infrastructure.Data;
 [ExcludeFromCodeCoverage]
 public class CmsDbContext : DbContext, ICmsDbContext
 {
-    private const string Schema = "Contentful";
+    public const string Schema = "Contentful";
 
     public DbSet<AnswerDbEntity> Answers { get; set; }
 
@@ -135,7 +136,19 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(CmsDbContext).Assembly);
+        modelBuilder.HasDefaultSchema(Schema);
+        var oneAssembley = typeof(CmsDbContext).Assembly;
+        var secondAssembley = typeof(AnswerEntityTypeConfiguration).Assembly;
+        var equal = oneAssembley == secondAssembley;
+
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(CmsDbContext).Assembly, t =>
+        {
+            var matches = t.GetInterfaces().Any(i =>
+                i.IsGenericType &&
+                i.GetGenericTypeDefinition() == typeof(IEntityTypeConfiguration<>));
+
+            return matches;
+        });
 
         modelBuilder.Entity<RecommendationChunkContentDbEntity>()
             .ToTable("RecommendationChunkContents", Schema);
@@ -149,72 +162,11 @@ public class CmsDbContext : DbContext, ICmsDbContext
         modelBuilder.Entity<SubtopicRecommendationIntroDbEntity>()
             .ToTable("SubtopicRecommendationIntros", Schema);
 
-        modelBuilder.HasDefaultSchema(Schema);
-
-        modelBuilder.Entity<ContentComponentDbEntity>(entity =>
-        {
-            entity.ToTable("ContentComponents", Schema);
-            entity.Property(e => e.Id).HasMaxLength(30);
-            entity.HasQueryFilter(ShouldShowEntity());
-        });
-
-        modelBuilder.Entity<AnswerDbEntity>(entity =>
-        {
-            entity.HasOne(a => a.NextQuestion).WithMany(q => q.PreviousAnswers).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne(a => a.ParentQuestion).WithMany(q => q.Answers).OnDelete(DeleteBehavior.Restrict);
-
-            entity.ToTable("Answers", Schema);
-        });
-
-        modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>(entity =>
-        {
-            entity.ToView("ButtonWithEntryReferencesWithSlug");
-            entity.Navigation(button => button.Button).AutoInclude();
-            entity.Property(button => button.LinkType)
-                .HasConversion(linkType => linkType.ToString(), linkType => (LinkToEntryType)Enum.Parse(typeof(LinkToEntryType), linkType))
-                .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
-
-            entity.Property(button => button.Slug).Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
-        });
-
         modelBuilder.Entity<ButtonWithLinkDbEntity>()
             .Navigation(button => button.Button).AutoInclude();
 
-        modelBuilder.Entity<PageContentDbEntity>(entity =>
-        {
-            entity.HasOne(pc => pc.BeforeContentComponent).WithMany(c => c.BeforeTitleContentPagesJoins);
-
-            entity.HasOne(pc => pc.ContentComponent).WithMany(c => c.ContentPagesJoins);
-
-            entity.HasOne(pc => pc.Page).WithMany(p => p.AllPageContents);
-        });
-
-
-        modelBuilder.Entity<RecommendationChunkContentDbEntity>(entity =>
-        {
-            entity.HasOne(pc => pc.ContentComponent).WithMany(c => c.RecommendationChunkContentJoins);
-        });
-
-        modelBuilder.Entity<RecommendationIntroContentDbEntity>(entity =>
-        {
-            entity.HasOne(pc => pc.ContentComponent).WithMany(c => c.RecommendationIntroContentJoins);
-        });
-
-        modelBuilder.Entity<QuestionDbEntity>().ToTable("Questions", Schema);
-
         modelBuilder.Entity<RichTextContentWithSlugDbEntity>(entity => { entity.ToView("RichTextContentsBySlug"); });
         modelBuilder.Entity<RichTextContentWithSubtopicRecommendationId>(entity => { entity.ToView("RichTextContentsBySubtopicRecommendationId"); });
-
-        modelBuilder.Entity<TitleDbEntity>(entity => { entity.ToTable("Titles", Schema); });
-
-        modelBuilder.Entity<WarningComponentDbEntity>(entity =>
-        {
-            entity.HasOne(warning => warning.Text).WithMany(text => text.Warnings).OnDelete(DeleteBehavior.Restrict);
-
-            entity.Navigation(warningComponent => warningComponent.Text).AutoInclude();
-        });
-
-        modelBuilder.Entity<ContentComponentDbEntity>().HasQueryFilter(ShouldShowEntity());
     }
 
 
