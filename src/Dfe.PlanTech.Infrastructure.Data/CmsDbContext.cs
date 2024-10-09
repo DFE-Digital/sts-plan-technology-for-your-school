@@ -12,6 +12,7 @@ using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
@@ -167,13 +168,17 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>(entity =>
         {
+            entity.ToView("ButtonWithEntryReferencesWithSlug");
             entity.Navigation(button => button.Button).AutoInclude();
+            entity.Property(button => button.LinkType)
+                .HasConversion(linkType => linkType.ToString(), linkType => (LinkToEntryType)Enum.Parse(typeof(LinkToEntryType), linkType))
+                .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
+
+            entity.Property(button => button.Slug).Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
         });
 
         modelBuilder.Entity<ButtonWithLinkDbEntity>()
             .Navigation(button => button.Button).AutoInclude();
-
-        modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>().Navigation(button => button.Button).AutoInclude();
 
         modelBuilder.Entity<PageContentDbEntity>(entity =>
         {
@@ -261,5 +266,10 @@ public class CmsDbContext : DbContext, ICmsDbContext
         var key = GetCacheKey(queryable);
         return await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
             (q, ctoken) => q.FirstOrDefaultAsync(ctoken), cancellationToken);
+    }
+
+    public string? GetSlugForButtonWithEntryReferenceDbEntity(string linkToEntryId)
+    {
+       return Set<QuestionDbEntity>().Where(q => q.Id == linkToEntryId).Select(q => q.Slug).FirstOrDefault() ?? Set<PageDbEntity>().Where(q => q.Id == linkToEntryId).Select(q => q.Slug).FirstOrDefault();
     }
 }
