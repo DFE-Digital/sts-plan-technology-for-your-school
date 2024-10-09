@@ -313,7 +313,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to attach entity of type {EntityType} to DbContext change tracker", typeof(T));
-            throw;
         }
     }
 

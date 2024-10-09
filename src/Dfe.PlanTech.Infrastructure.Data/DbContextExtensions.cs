@@ -60,7 +60,7 @@ public static class DbContextExtensions
   }
 
   public static bool EntityAlreadyAttached<T>(this DbContext db, [DisallowNull] T entity)
-  => db.ChangeTracker.Entries<ContentComponentDbEntity>().Any(entry => EntitiesMatch(entity, entry.Entity));
+  => db.ChangeTracker.Entries().Any(entry => EntitiesMatch(entity, entry.Entity));
 
   private static bool EntitiesMatch(object? x, object? y)
   {
