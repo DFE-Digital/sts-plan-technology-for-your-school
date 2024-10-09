@@ -74,13 +74,13 @@ public class CustomAccordionTests
         customComponent.Should().BeAssignableTo<CustomAccordion>();
         var accordion = (customComponent as CustomAccordion)!;
 
-        var expectedBody=  new RichTextContentItem
+        var expectedBody = new RichTextContentItem
         {
             InternalName = InternalName,
             NodeType = RichTextNodeType.Paragraph,
             Content = []
         };
-        
+
         accordion.Type.Should().Be(CustomComponentType.Accordion);
         accordion.InternalName.Should().Be(InternalName);
         accordion.Title.Should().Be(Title);

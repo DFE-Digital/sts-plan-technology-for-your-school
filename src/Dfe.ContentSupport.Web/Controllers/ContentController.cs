@@ -18,7 +18,7 @@ public class ContentController(
     : Controller
 {
     public const string ErrorActionName = "error";
-    
+
     [HttpGet("{slug}/{page?}")]
     public async Task<IActionResult> Index(string slug, string page = "", bool isPreview = false,
         [FromQuery] List<string>? tags = null)
@@ -64,6 +64,6 @@ public class ContentController(
     public IActionResult Error()
     {
         return View(new ErrorViewModel
-            { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Xml.Linq;
-using Dfe.ContentSupport.Web.Configuration;
 using Contentful.Core.Models;
+using Dfe.ContentSupport.Web.Configuration;
 using Dfe.ContentSupport.Web.Models.Mapped;
 
 namespace Dfe.ContentSupport.Web.Tests.Services;
@@ -22,14 +22,14 @@ public class ContentServiceTests
     };
 
     private ContentService GetService() => new(_httpContentClientMock.Object, _cacheMock.Object, _mapperMock.Object);
-    
+
     private void SetupResponse(ContentfulCollection<ContentSupportPage>? response = null)
     {
         var res = response ?? _response;
 
         _httpContentClientMock.Setup(o => o.GetContentSupportPages(It.IsAny<string>(),
             It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(res);
-        
+
         _mapperMock.Setup(o => o.MapToCsPages(res))
             .Returns(res.Items
                 .Select(page => new ModelMapper(new SupportedAssetTypes()).MapToCsPage(page))

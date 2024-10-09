@@ -55,14 +55,16 @@ public class ContentService(
         if (!isPreview)
         {
             var fromCache = cache.GetFromCache(key);
-            if (fromCache is not null) return fromCache;
+            if (fromCache is not null)
+                return fromCache;
         }
 
 
         var result = await contentfulService.GetContentSupportPages(field, value);
         var pages = modelMapper.MapToCsPages(result);
 
-        if (!isPreview) cache.AddToCache(key, pages);
+        if (!isPreview)
+            cache.AddToCache(key, pages);
 
         return pages;
     }

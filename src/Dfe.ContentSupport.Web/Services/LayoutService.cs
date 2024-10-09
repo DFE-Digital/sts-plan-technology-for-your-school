@@ -7,7 +7,8 @@ public class LayoutService : ILayoutService
 {
     public CsPage GenerateLayout(CsPage page, HttpRequest request, string pageSlug)
     {
-        if (!page.ShowVerticalNavigation) return page;
+        if (!page.ShowVerticalNavigation)
+            return page;
 
         return new CsPage
         {
