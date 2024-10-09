@@ -18,6 +18,7 @@ public class PageContentEntityTypeConfiguration : IEntityTypeConfiguration<PageC
                 .WithMany()
                 .HasForeignKey(pc => pc.ContentComponentId);
 
+
         builder.HasOne(pc => pc.Page).WithMany().HasForeignKey("PageId");
     }
 }
