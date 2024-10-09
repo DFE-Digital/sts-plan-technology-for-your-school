@@ -1,7 +1,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
