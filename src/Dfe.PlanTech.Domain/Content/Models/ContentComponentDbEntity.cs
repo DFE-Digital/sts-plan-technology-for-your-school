@@ -19,19 +19,9 @@ public class ContentComponentDbEntity : IContentComponentDbEntity
 
     public List<PageDbEntity> BeforeTitleContentPages { get; set; } = [];
 
-    /// <summary>
-    /// Joins for <see cref="BeforeTitleContentPages"/> 
-    /// </summary>
-    public List<PageContentDbEntity> BeforeTitleContentPagesJoins { get; set; } = [];
 
     public List<PageDbEntity> ContentPages { get; set; } = [];
-
-    /// <summary>
-    /// Joins for <see cref="ContentPages"/> 
-    /// </summary>
-    public List<PageContentDbEntity> ContentPagesJoins { get; set; } = [];
-
-
+    
     public List<RecommendationChunkDbEntity> RecommendationChunk { get; set; } = [];
 
     public List<RecommendationChunkContentDbEntity> RecommendationChunkContentJoins { get; set; } = [];
