@@ -270,6 +270,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public string? GetSlugForButtonWithEntryReferenceDbEntity(string linkToEntryId)
     {
-       return Set<QuestionDbEntity>().Where(q => q.Id == linkToEntryId).Select(q => q.Slug).FirstOrDefault() ?? Set<PageDbEntity>().Where(q => q.Id == linkToEntryId).Select(q => q.Slug).FirstOrDefault();
+        return Set<QuestionDbEntity>().Where(q => q.Id == linkToEntryId).Select(q => q.Slug).FirstOrDefault() ?? Set<PageDbEntity>().Where(q => q.Id == linkToEntryId).Select(q => q.Slug).FirstOrDefault();
     }
 }
