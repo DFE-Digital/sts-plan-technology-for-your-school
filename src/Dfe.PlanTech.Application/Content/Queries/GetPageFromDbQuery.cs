@@ -68,7 +68,7 @@ public class GetPageFromDbQuery(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching {page} from database", slug);
+            logger.LogError(ex, "Error fetching {page} from database", slug);
             return null;
         }
     }

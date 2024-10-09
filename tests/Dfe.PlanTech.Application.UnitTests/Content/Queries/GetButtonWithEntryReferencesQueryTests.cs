@@ -3,6 +3,7 @@ using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
@@ -15,56 +16,60 @@ public class GetButtonWithEntryReferencesQueryTests
 
     private readonly GetButtonWithEntryReferencesQuery _getButtonWithEntryReferencesQuery;
 
-    private readonly static PageDbEntity _pageWithButton = new()
+    private static readonly PageDbEntity _pageWithButton = new()
     {
         Id = "Page-id",
-        Content = new()
-        {
-
-        }
+        Content = []
     };
 
-
-    private readonly static PageDbEntity _pageWithoutButton = new()
+    private static readonly PageDbEntity _pageWithoutButton = new()
     {
         Id = "Page-id",
-        Content = new()
-        {
-
-        }
+        Content = []
     };
 
-    private readonly static PageDbEntity _linkedPage = new()
+    private static readonly PageDbEntity _linkedPage = new()
     {
         Id = "linked-page",
         Slug = "/linked-page-slug"
     };
 
-    private readonly static ButtonWithEntryReferenceDbEntity _button = new()
+    private readonly ButtonWithEntryReferenceDbEntity _button = new()
     {
         Id = "ABCD",
         LinkToEntryId = _linkedPage.Id,
         LinkToEntry = _linkedPage,
-        ContentPages = new(){
-      _pageWithButton
-    }
+        ContentPages = [_pageWithButton]
     };
 
-    private readonly List<ButtonWithEntryReferenceDbEntity> _buttons;
-
-    private readonly List<ButtonWithEntryReferenceDbEntity> _returnedButtons = new();
+    private readonly List<ButtonWithEntryReferenceDbEntity> _returnedButtons = [];
+    private readonly List<PageDbEntity> _pages = [_pageWithButton, _linkedPage, _pageWithoutButton];
+    private readonly List<QuestionDbEntity> _questions = [];
 
     public GetButtonWithEntryReferencesQueryTests()
     {
         _getButtonWithEntryReferencesQuery = new GetButtonWithEntryReferencesQuery(_db, _logger);
 
-        _buttons = new()
-    {
-      _button
-    };
+        List<ButtonWithEntryReferenceDbEntity> buttons = [_button];
 
         _pageWithButton.Content.Add(_button);
-        _db.ButtonWithEntryReferences.Returns(_buttons.AsQueryable());
+        _db.ButtonWithEntryReferences.Returns(buttons.AsQueryable());
+
+        _db.Pages.Returns(_pages.AsQueryable());
+        _db.Questions.Returns(_questions.AsQueryable());
+        _db.ToListAsync(Arg.Any<IQueryable<PageDbEntity>>(), Arg.Any<CancellationToken>()).Returns(callinfo =>
+        {
+            var queryable = callinfo.ArgAt<IQueryable<PageDbEntity>>(0);
+
+            return queryable.ToList();
+        });
+
+        _db.ToListAsync(Arg.Any<IQueryable<QuestionDbEntity>>(), Arg.Any<CancellationToken>()).Returns(callinfo =>
+        {
+            var queryable = callinfo.ArgAt<IQueryable<QuestionDbEntity>>(0);
+
+            return queryable.ToList();
+        });
 
         _db.ToListAsync(Arg.Any<IQueryable<ButtonWithEntryReferenceDbEntity>>(), Arg.Any<CancellationToken>())
             .Returns(callinfo =>
@@ -84,8 +89,7 @@ public class GetButtonWithEntryReferencesQueryTests
     {
         await _getButtonWithEntryReferencesQuery.TryLoadChildren(_pageWithButton, CancellationToken.None);
 
-        await _db.ReceivedWithAnyArgs(1)
-                     .ToListAsync(Arg.Any<IQueryable<ButtonWithEntryReferenceDbEntity>>(), Arg.Any<CancellationToken>());
+        await _db.ReceivedWithAnyArgs(1).ToListAsync(Arg.Any<IQueryable<ButtonWithEntryReferenceDbEntity>>(), Arg.Any<CancellationToken>());
 
         Assert.Single(_returnedButtons);
 
@@ -110,7 +114,6 @@ public class GetButtonWithEntryReferencesQueryTests
     {
         await _getButtonWithEntryReferencesQuery.TryLoadChildren(_pageWithoutButton, CancellationToken.None);
 
-        await _db.ReceivedWithAnyArgs(0)
-                     .ToListAsync(Arg.Any<IQueryable<ButtonWithEntryReferenceDbEntity>>(), Arg.Any<CancellationToken>());
+        await _db.ReceivedWithAnyArgs(0).ToListAsync(Arg.Any<IQueryable<ButtonWithEntryReferenceDbEntity>>(), Arg.Any<CancellationToken>());
     }
 }

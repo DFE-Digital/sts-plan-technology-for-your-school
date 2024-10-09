@@ -58,14 +58,14 @@ public class GetButtonWithEntryReferencesQuery(ICmsDbContext db, ILogger<GetButt
     {
         var buttonWithEntryReferences = db.ButtonWithEntryReferences.Where(button => button.ContentPages.Any(contentPage => contentPage.Id == page.Id));
 
-        var pageButtons = db.Pages.Where(p => buttonWithEntryReferences.Any(button => button.LinkToEntryId == p.Id))
+        var linkedPages = db.Pages.Where(p => buttonWithEntryReferences.Any(button => button.LinkToEntryId == p.Id))
                                     .Select(p => new
                                     {
                                         p.Id,
                                         p.Slug
                                     });
 
-        var questionButtons = db.Questions.Where(question => buttonWithEntryReferences.Any(button => button.LinkToEntryId == page.Id))
+        var linkedQuestions = db.Questions.Where(question => buttonWithEntryReferences.Any(button => button.LinkToEntryId == page.Id))
                                             .Select(q => new
                                             {
                                                 q.Id,
@@ -75,14 +75,12 @@ public class GetButtonWithEntryReferencesQuery(ICmsDbContext db, ILogger<GetButt
         return buttonWithEntryReferences.Select(button => new
         {
             button.Id,
-            page = pageButtons.FirstOrDefault(pageButton => pageButton.Id == button.Id),
-            question = questionButtons.FirstOrDefault(quesionButton => quesionButton.Id == button.Id),
+            page = linkedPages.FirstOrDefault(pageForButton => pageForButton.Id == button.LinkToEntryId),
+            question = linkedQuestions.FirstOrDefault(questionForButton => questionForButton.Id == button.LinkToEntryId),
         }).Select(button => new ButtonWithEntryReferenceDbEntity
         {
             Id = button.Id,
-            LinkToEntry = button.page != null ?
-                            new PageDbEntity() { Slug = button.page.Slug } :
-                            new QuestionDbEntity() { Slug = button.question!.Slug }
+            LinkToEntry = button.page != null ? new PageDbEntity { Slug = button.page.Slug } : new QuestionDbEntity { Slug = button.question!.Slug }
         });
     }
 }
