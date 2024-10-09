@@ -137,18 +137,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
-        var oneAssembley = typeof(CmsDbContext).Assembly;
-        var secondAssembley = typeof(AnswerEntityTypeConfiguration).Assembly;
-        var equal = oneAssembley == secondAssembley;
-
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(CmsDbContext).Assembly, t =>
-        {
-            var matches = t.GetInterfaces().Any(i =>
-                i.IsGenericType &&
-                i.GetGenericTypeDefinition() == typeof(IEntityTypeConfiguration<>));
-
-            return matches;
-        });
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(CmsDbContext).Assembly);
 
         modelBuilder.Entity<RecommendationChunkContentDbEntity>()
             .ToTable("RecommendationChunkContents", Schema);
@@ -167,6 +156,9 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         modelBuilder.Entity<RichTextContentWithSlugDbEntity>(entity => { entity.ToView("RichTextContentsBySlug"); });
         modelBuilder.Entity<RichTextContentWithSubtopicRecommendationId>(entity => { entity.ToView("RichTextContentsBySubtopicRecommendationId"); });
+
+        //For some reason this doesn't work if done higher up
+        modelBuilder.Entity<ContentComponentDbEntity>().HasQueryFilter(entity => (_contentfulOptions.UsePreview || entity.Published) && !entity.Archived && !entity.Deleted);
     }
 
 
