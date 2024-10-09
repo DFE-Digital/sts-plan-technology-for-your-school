@@ -9,7 +9,7 @@ import { navigateAndValidateQuestionPages, validateCheckAnswersPage } from "./in
  * @param {Function} validator - optional validation function to call at the end of every path
  */
 
-export const validateSections = (section, paths, dataMapper, validator) => {
+export const validateSections = (section, paths, dataMapper) => {
 
     for (const path of paths) {
 
@@ -36,10 +36,5 @@ export const validateSections = (section, paths, dataMapper, validator) => {
             validateCheckAnswersPage(path, section);
             cy.url().should("include", selfAssessmentSlug);
         });
-
-        // Call recommendations validation function(s) if applicable
-        if (validator) {
-            validator(path);
-        }
     }
 }

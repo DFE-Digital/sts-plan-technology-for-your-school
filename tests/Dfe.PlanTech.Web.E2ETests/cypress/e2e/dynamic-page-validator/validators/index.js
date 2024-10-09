@@ -9,3 +9,5 @@ export { validateRecommendationIntro } from "./recommendation-intro.js";
 export { validateRecommendationForMaturity } from "./recommendations.js";
 export { validateSelfAssessmentPage } from "./self-assessment-page.js";
 export { validateSections } from "./section.js";
+export { quickNavigateQuestions } from "./quick-questions.js";
+export { quickNavigateToRecommendations } from "./quick-navigate-recommendations.js";
