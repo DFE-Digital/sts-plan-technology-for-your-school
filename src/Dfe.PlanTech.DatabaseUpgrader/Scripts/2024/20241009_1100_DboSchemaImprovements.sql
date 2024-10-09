@@ -168,9 +168,10 @@ SELECT
 INTO #AnswerKeep
 FROM dbo.answer
 GROUP BY answerText, contentfulRef
+GO
 
 -- Disable trigger so that users don't see "Last completed" get updated to the time that this fix was run
-DISABLE TRIGGER tr_response on dbo.response
+DISABLE TRIGGER dbo.tr_response on dbo.response
 GO
 
 UPDATE R
@@ -183,7 +184,7 @@ JOIN #QuestionKeep QK ON Q.contentfulRef = QK.contentfulRef AND Q.questionText =
 JOIN #AnswerKeep AK ON A.contentfulRef = AK.contentfulRef AND A.answerText = AK.answerText
 GO
 
-ENABLE TRIGGER tr_response on dbo.response
+ENABLE TRIGGER dbo.tr_response on dbo.response
 GO
 
 -- deleteDataForEstablishment doesn't remove the questions and answers tied to the responses that get deleted
