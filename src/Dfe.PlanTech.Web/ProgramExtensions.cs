@@ -38,7 +38,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
-using HttpClientPolicyExtensions = Dfe.PlanTech.Web.Helpers.HttpClientPolicyExtensions;
 
 namespace Dfe.PlanTech.Web;
 
