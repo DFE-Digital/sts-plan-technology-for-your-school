@@ -151,7 +151,6 @@ public class PageUpdaterTests : BaseMapperTests
         _updater.UpdateEntityConcrete(mappedEntity);
 
         Assert.DoesNotContain(removedEntity, existingPage.AllPageContents);
-        Assert.DoesNotContain(removedEntity, _pageContents);
     }
 
     [Fact]

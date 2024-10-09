@@ -1,9 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Dfe.PlanTech.Infrastructure.Data.EntityTypeConfigurations;
 
+[ExcludeFromCodeCoverage]
 public class RichTextContentEntityTypeConfiguration : IEntityTypeConfiguration<RichTextContentDbEntity>
 {
     public void Configure(EntityTypeBuilder<RichTextContentDbEntity> builder)

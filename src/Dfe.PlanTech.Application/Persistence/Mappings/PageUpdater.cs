@@ -30,7 +30,7 @@ public class PageUpdater(ILogger<PageUpdater> logger, IDatabaseHelper<ICmsDbCont
     /// </summary>
     /// <param name="incomingPage"></param>
     /// <param name="existingPage"></param>
-    private void DeleteRemovedPageContents(PageDbEntity incomingPage, PageDbEntity existingPage)
+    private static void DeleteRemovedPageContents(PageDbEntity incomingPage, PageDbEntity existingPage)
     {
         var contentsToRemove = existingPage.AllPageContents.Where(pageContent => !HasPageContent(incomingPage, pageContent))
                                                             .ToArray();
@@ -38,7 +38,6 @@ public class PageUpdater(ILogger<PageUpdater> logger, IDatabaseHelper<ICmsDbCont
         foreach (var pageContent in contentsToRemove)
         {
             existingPage.AllPageContents.Remove(pageContent);
-            DatabaseHelper.Remove(pageContent);
         }
     }
 

@@ -38,4 +38,22 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
     [DontCopyValue] public List<PageContentDbEntity> AllPageContents { get; set; } = [];
 
     public IEnumerable<T> GetAllContentOfType<T>() => Content.Concat(BeforeTitleContent).OfType<T>();
+
+    public void OrderContents()
+    {
+        BeforeTitleContent = OrderContents(BeforeTitleContent, pageContent => pageContent.BeforeContentComponentId).ToList();
+        Content = OrderContents(Content, pageContent => pageContent.ContentComponentId).ToList();
+    }
+
+    private IEnumerable<ContentComponentDbEntity> OrderContents(List<ContentComponentDbEntity> contents, Func<PageContentDbEntity, string?> idSelector)
+        => contents.GroupJoin(AllPageContents,
+                content => content.Id,
+                idSelector,
+                (content, pageContent) => new
+                {
+                    content,
+                    order = pageContent.OrderByDescending(pc => pc.Id).Select(join => join.Order).First()
+                })
+            .OrderBy(joined => joined.order)
+            .Select(joined => joined.content);
 }
