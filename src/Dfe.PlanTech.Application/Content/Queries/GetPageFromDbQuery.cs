@@ -7,21 +7,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
-public class GetPageFromDbQuery : IGetPageQuery
+public class GetPageFromDbQuery(
+    ICmsDbContext db,
+    ILogger<GetPageFromDbQuery> logger,
+    IMapper mapperConfiguration,
+    IEnumerable<IGetPageChildrenQuery> getPageChildrenQueries)
+    : IGetPageQuery
 {
-    private readonly ICmsDbContext _db;
-    private readonly ILogger<GetPageFromDbQuery> _logger;
-    private readonly IMapper _mapperConfiguration;
-    private readonly IEnumerable<IGetPageChildrenQuery> _getPageChildrenQueries;
-
-    public GetPageFromDbQuery(ICmsDbContext db, ILogger<GetPageFromDbQuery> logger, IMapper mapperConfiguration, IEnumerable<IGetPageChildrenQuery> getPageChildrenQueries)
-    {
-        _db = db;
-        _logger = logger;
-        _mapperConfiguration = mapperConfiguration;
-        _getPageChildrenQueries = getPageChildrenQueries;
-    }
-
     /// <summary>
     /// Fetches page from <see cref="ICmsDbContext"/> by slug
     /// </summary>
@@ -36,11 +28,11 @@ public class GetPageFromDbQuery : IGetPageQuery
             if (page == null)
                 return null;
 
-            return _mapperConfiguration.Map<PageDbEntity, Page>(page);
+            return mapperConfiguration.Map<PageDbEntity, Page>(page);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching {page} from database", slug);
+            logger.LogError(ex, "Error fetching {page} from database", slug);
             throw new InvalidOperationException("Error while fetching page", ex);
         }
     }
@@ -56,7 +48,7 @@ public class GetPageFromDbQuery : IGetPageQuery
 
         await LoadPageChildrenFromDatabase(page, cancellationToken);
 
-        _logger.LogTrace("Successfully retrieved {page} from DB", slug);
+        logger.LogTrace("Successfully retrieved {page} from DB", slug);
 
         return page;
     }
@@ -65,7 +57,7 @@ public class GetPageFromDbQuery : IGetPageQuery
     {
         try
         {
-            var page = await _db.GetPageBySlug(slug, cancellationToken);
+            var page = await db.GetPageBySlug(slug, cancellationToken);
 
             if (page == null)
                 return null;
@@ -76,7 +68,7 @@ public class GetPageFromDbQuery : IGetPageQuery
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching {page} from database", slug);
+            logger.LogError(ex, "Error fetching {page} from database", slug);
             return null;
         }
     }
@@ -85,14 +77,14 @@ public class GetPageFromDbQuery : IGetPageQuery
     {
         try
         {
-            foreach (var query in _getPageChildrenQueries)
+            foreach (var query in getPageChildrenQueries)
             {
                 await query.TryLoadChildren(page!, cancellationToken);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error loading children from database for {page}", page!.Id);
+            logger.LogError(ex, "Error loading children from database for {page}", page!.Id);
             throw new InvalidOperationException("Error while loading page children", ex);
         }
     }
@@ -107,16 +99,15 @@ public class GetPageFromDbQuery : IGetPageQuery
     {
         if (page == null)
         {
-            _logger.LogInformation("Could not find page {slug} in DB - checking Contentful", slug);
+            logger.LogInformation("Could not find page {slug} in DB - checking Contentful", slug);
             return false;
         }
 
-        if (page.Content == null || page.Content.Count == 0)
-        {
-            _logger.LogWarning("Page {slug} has no 'Content' in DB - checking Contentful", slug);
-            return false;
-        }
+        if (page.Content.Count != 0)
+            return true;
 
-        return true;
+        logger.LogWarning("Page {slug} has no 'Content' in DB - checking Contentful", slug);
+        return false;
+
     }
 }
