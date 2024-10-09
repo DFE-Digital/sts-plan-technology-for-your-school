@@ -24,9 +24,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
 {
     private const string Schema = "Contentful";
 
-    //HashSet of all the types used for DbSets
-    //E.g. DbSet<AnswerDbEntity> -> AnswerDbEntity
-    private readonly HashSet<Type> _dbSetTypes;
     private readonly ILogger<CmsDbContext> _logger;
 
     public DbSet<AnswerDbEntity> Answers { get; set; }
@@ -133,8 +130,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     public CmsDbContext()
     {
         _contentfulOptions = new ContentfulOptions(false);
-        _queryCacher = new QueryCacher();
-        _dbSetTypes = GetDbSetTypes();
+        _queryCacher = new QueryCacher(new NullLogger<QueryCacher>());
         _logger = new NullLogger<CmsDbContext>();
     }
 
@@ -144,7 +140,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
                              throw new MissingServiceException($"Could not find service {nameof(ContentfulOptions)}");
         _queryCacher = this.GetService<IQueryCacher>() ??
                        throw new MissingServiceException($"Could not find service {nameof(IQueryCacher)}");
-        _dbSetTypes = GetDbSetTypes();
         _logger = GetLogger();
     }
 
@@ -271,7 +266,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
         var (result, queryCacheRetrievalLocation) = await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
             (q, ctoken) => q.ToListAsync(ctoken), cancellationToken);
 
-        if (result == null) return [];
+        if (result == null)
+            return [];
         if (queryCacheRetrievalLocation == CacheRetrievalSource.Db)
         {
             return result;
@@ -288,17 +284,17 @@ public class CmsDbContext : DbContext, ICmsDbContext
     public async Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     {
         var key = GetCacheKey(queryable);
-        var result = await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
+        var (result, cacheRetrievalSource) = await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
             (q, ctoken) => q.FirstOrDefaultAsync(ctoken), cancellationToken);
 
-        if (result.RetrievedFrom == CacheRetrievalSource.Db)
+        if (cacheRetrievalSource == CacheRetrievalSource.Db)
         {
-            return result.Result;
+            return result;
         }
 
         TryAttachEntity(result);
 
-        return result.Result;
+        return result;
     }
 
     ///<summary>
@@ -310,38 +306,66 @@ public class CmsDbContext : DbContext, ICmsDbContext
     ///</remarks>
     private void TryAttachEntity<T>(T entity)
     {
-        //T can be any type, since FirstOrDefaultAsync or ToListAsync etc can return any type
-        //Therefore we need to check if there is actually a DbSet for the entity first, before attaching it
-        var isExistingDbSet = _dbSetTypes.Contains(typeof(T));
-
-        if (!isExistingDbSet)
+        try
         {
-            _logger.LogWarning("Tried to attach entity of type {EntityType} but was not found in DbSets", typeof(T));
+            if (!IsValidDbEntity(entity))
+                return;
+
+            if (EntityAlreadyAttached(entity!)) return;
+
+            base.Attach(entity!);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to attach entity of type {EntityType} to DbContext change tracker", typeof(T));
             return;
         }
+    }
 
-        //Sonarcloud will complain about default(T), but it _has_ to be a class at this point
+    private bool IsValidDbEntity<T>(T entity)
+    {
         if (entity == null || EqualityComparer<T>.Default.Equals(entity, default))
         {
             _logger.LogWarning("Tried to attach null or default entity of type {EntityType}", typeof(T));
-            return;
+            return false;
         }
 
-        base.Attach(entity);
+        var entityModel = Model.FindEntityType(entity.GetType());
+
+        if (entityModel == null)
+        {
+            _logger.LogWarning("Entity type \"{EntityType}\" was not found in DbContext model", entity.GetType());
+            return false;
+        }
+
+        var primaryKey = entityModel.FindPrimaryKey();
+
+        if (primaryKey == null)
+        {
+            _logger.LogWarning("Could not find primary key for type \"{EntityType}\" in IEntityType for type in DbContext", entity.GetType());
+            return false;
+        }
+
+        foreach (var property in primaryKey.Properties)
+        {
+            if (property.PropertyInfo == null)
+            {
+                //Not sure if this can ever happen?
+                continue;
+            }
+
+            var value = property.PropertyInfo.GetValue(entity);
+            if (value == null)
+            {
+                //Cannot attach entity as PK is null
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    ///<summary>
-    ///Creates a HashSet of all types of DbSet in the CmsDbContext.
-    ///</summary>
-    ///<remarks>
-    ///E.g. AnswerDbEntity, QuestionDbEntity, etc.
-    ///</remarks>
-    private HashSet<Type> GetDbSetTypes() => this.GetType()
-                                                .GetProperties()
-                                                .Where(prop => prop.PropertyType.IsGenericType &&
-                                                            prop.PropertyType.GetGenericTypeDefinition() == typeof(DbSet<>))
-                                                .Select(prop => prop.PropertyType.GetGenericArguments()[0])
-                                                .ToHashSet();
+    private bool EntityAlreadyAttached<T>([DisallowNull] T entity) => ChangeTracker.Entries().Any(entry => entity.Equals(entry.Entity));
 
     private ILogger<CmsDbContext> GetLogger()
         => this.GetService<ILogger<CmsDbContext>>() ?? throw new MissingServiceException($"Could not find service for {typeof(ILogger<CmsDbContext>)}");
