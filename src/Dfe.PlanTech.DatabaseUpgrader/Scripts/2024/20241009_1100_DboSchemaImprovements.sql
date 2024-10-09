@@ -81,7 +81,7 @@ GO
 
 -- Reduce duplication in SubmitAnswer sproc by reusing question & answer ids where applicable
 
-CREATE PROCEDURE SubmitAnswer
+ALTER PROCEDURE SubmitAnswer
     @sectionId NVARCHAR(50),
     @sectionName NVARCHAR(50),
     @questionContentfulId NVARCHAR(50),
@@ -169,6 +169,10 @@ INTO #AnswerKeep
 FROM dbo.answer
 GROUP BY answerText, contentfulRef
 
+-- Disable trigger so that users don't see "Last completed" get updated to the time that this fix was run
+DISABLE TRIGGER tr_response on dbo.response
+GO
+
 UPDATE R
 SET questionId = QK.questionId,
     answerId   = AK.answerId
@@ -177,6 +181,10 @@ JOIN dbo.answer A ON R.answerId = A.id
 JOIN dbo.question Q ON R.questionId = Q.id
 JOIN #QuestionKeep QK ON Q.contentfulRef = QK.contentfulRef AND Q.questionText = QK.questionText
 JOIN #AnswerKeep AK ON A.contentfulRef = AK.contentfulRef AND A.answerText = AK.answerText
+GO
+
+ENABLE TRIGGER tr_response on dbo.response
+GO
 
 -- deleteDataForEstablishment doesn't remove the questions and answers tied to the responses that get deleted
 -- it now doesn't need to because the ids are shared between responses, but we can clean out all the old ones
@@ -188,7 +196,7 @@ WHERE
     R.id IS NULL
 
 DELETE A
-FROM dbo.question A
+FROM dbo.answer A
 LEFT JOIN dbo.response R ON A.id = R.answerId
 WHERE
     R.id IS NULL
