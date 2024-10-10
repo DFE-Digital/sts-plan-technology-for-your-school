@@ -36,8 +36,8 @@ FROM
     FROM RichTexts
     LEFT JOIN Contents ON [Contents].[ContentId] = [RichTexts].[ContentId]
     LEFT JOIN [Contentful].[ContentComponents] CC ON [CC].[Id] = [RichTexts].[ContentId]
-    ) AS RichTextContents
-    OUTER APPLY (
+) AS RichTextContents
+OUTER APPLY (
     SELECT
         [Id],
         [Value],
