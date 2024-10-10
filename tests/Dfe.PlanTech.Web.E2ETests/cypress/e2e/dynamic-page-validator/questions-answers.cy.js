@@ -1,27 +1,9 @@
 import DataMapper from "export-processor/data-mapper.js";
 import { selfAssessmentSlug } from "./helpers/index.js";
-import { validateNavigationLinks, validateNonAuthorisedPages, validateAndTestSections, validateSelfAssessmentPage } from "./validators/index.js";
+import { validateAndTestSections } from "./validators/index.js";
 
 
 const dataMapper = new DataMapper(require('../../fixtures/contentful-data'));
-
-describe("Navigation links and non-authorised pages", () => {
-
-    it("Should render navigation links", () => {
-        validateNavigationLinks(dataMapper);
-    });
-
-    validateNonAuthorisedPages(dataMapper);
-
-});
-
-describe("Self assessment page", () => {
-
-    it("Should validate self-assessment page", () => {
-        validateSelfAssessmentPage(dataMapper);
-    });
-
-});
 
 describe("Sections and all-questions paths", { testIsolation: false }, () => {
 
