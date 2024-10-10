@@ -1,6 +1,6 @@
 import DataMapper from "export-processor/data-mapper.js";
 import { selfAssessmentSlug } from "./helpers/index.js";
-import { validateNavigationLinks, validateNonAuthorisedPages, validateSections, validateSelfAssessmentPage } from "./validators/index.js";
+import { validateNavigationLinks, validateNonAuthorisedPages, validateAndTestSections, validateSelfAssessmentPage } from "./validators/index.js";
 
 
 const dataMapper = new DataMapper(require('../../fixtures/contentful-data'));
