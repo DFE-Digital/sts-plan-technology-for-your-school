@@ -14,8 +14,7 @@ describe("Recommendations", { testIsolation: false }, () => {
     (dataMapper?.mappedSections ?? []).forEach((section) => {
         describe(`${section.name} recommendations`, { testIsolation: false }, () => {
 
-            // Establish section status using self-assessment page tag
-            
+            // Establish section status using self-assessment page tag    
             before(function () {
                 cy.checkSectionStatus(section.name, selfAssessmentSlug)
                     .then((inProgress) => {
@@ -26,7 +25,6 @@ describe("Recommendations", { testIsolation: false }, () => {
                     });
             });
 
-            section.getMinimumPathsForRecommendations();
             Object.keys(section.minimumPathsForRecommendations).forEach((maturity) => {
                 quickNavigateToRecommendations(section, [section.minimumPathsForRecommendations[maturity]], maturity);
             });

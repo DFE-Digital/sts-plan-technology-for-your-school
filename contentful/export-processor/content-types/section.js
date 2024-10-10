@@ -34,8 +34,9 @@ export class Section {
       userJourney.setRecommendation(recommendation);
       return userJourney;
     });
-
-      this.setNextQuestions();
+    this.getMinimumPathsForQuestions();
+    this.getMinimumPathsForRecommendations();
+    this.setNextQuestions();
   }
 
   /**

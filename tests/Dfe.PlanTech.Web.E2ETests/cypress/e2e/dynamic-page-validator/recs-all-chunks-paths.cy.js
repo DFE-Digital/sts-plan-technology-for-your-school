@@ -11,7 +11,6 @@ describe("Remaining-answer paths", { testIsolation: false }, () => {
     });
 
     (dataMapper?.mappedSections ?? []).forEach((section) => {
-        section.getMinimumPathsForRecommendations();
         section.getPathsForAllAnswers();
         section.checkAllChunksTested();
 
