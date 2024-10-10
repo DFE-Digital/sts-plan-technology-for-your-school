@@ -34,12 +34,9 @@ export class Section {
       userJourney.setRecommendation(recommendation);
       return userJourney;
     });
-
-      this.getMinimumPathsForQuestions();
-      this.getMinimumPathsForRecommendations();
-      this.getPathsForAllAnswers();
-      this.setNextQuestions();
-      this.checkAllChunksTested();
+    this.getMinimumPathsForQuestions();
+    this.getMinimumPathsForRecommendations();
+    this.setNextQuestions();
   }
 
   /**
@@ -191,10 +188,10 @@ export class Section {
                 const unusedAnswers = currentQuestion.answers.filter(answer => !answersUsed.includes(answer.id));
 
                 // Find answers that lead to the next question in the sequence, prioritising unused answers and skipping any that jump ahead
-                if (unusedAnswers.some(answer => answer.nextQuestion?.sys.id === nextNeeded)) {
-                    currentAnswer = unusedAnswers.find(answer => answer.nextQuestion.sys.id === nextNeeded);
-                } else if (currentQuestion.answers.some(answer => answer.nextQuestion.sys.id === nextNeeded)) {
-                    currentAnswer = currentQuestion.answers.find(answer => answer.nextQuestion.sys.id === nextNeeded);
+                if (unusedAnswers.some(answer => answer.nextQuestion.id === nextNeeded)) {
+                    currentAnswer = unusedAnswers.find(answer => answer.nextQuestion.id === nextNeeded);
+                } else if (currentQuestion.answers.some(answer => answer.nextQuestion.id === nextNeeded)) {
+                    currentAnswer = currentQuestion.answers.find(answer => answer.nextQuestion.id === nextNeeded);
                 } else {
                     console.log(`No valid answer found for question ${currentQuestion.id}. Skipping.`);
                 }
@@ -207,7 +204,7 @@ export class Section {
 
             // Loop forwards from the last question with unused answers, adding answers to complete the sequence, prioritising ending early or skipping questions
             while (latestAnswer && latestAnswer.nextQuestion) {
-                const nextIndex = this.questions.findLastIndex(question => question.id === latestAnswer.nextQuestion.sys.id);
+                const nextIndex = this.questions.findLastIndex(question => question.id === latestAnswer.nextQuestion.id);
                 const nextQuestion = this.questions[nextIndex];
                 const nextAnswer = this.assignBestAnswer(nextQuestion.answers, nextIndex);
                 newPath.push({ question: nextQuestion, answer: nextAnswer });

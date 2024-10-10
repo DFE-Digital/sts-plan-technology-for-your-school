@@ -1,5 +1,5 @@
 import { FindPageForSlug, selfAssessmentSlug, ValidatePage } from "../helpers/index.js";
-import { navigateAndValidateQuestionPages, validateCheckAnswersPage } from "./index.js";
+import { validateAndTestQuestionPages, validateCheckAnswersPage } from "./index.js";
 
 /**
  * Validates sections using the given paths
@@ -9,30 +9,32 @@ import { navigateAndValidateQuestionPages, validateCheckAnswersPage } from "./in
  * @param {Function} validator - optional validation function to call at the end of every path
  */
 
-export const validateSections = (section, paths, dataMapper, validator) => {
-    cy.visit(`/${selfAssessmentSlug}`);
+export const validateAndTestSections = (section, paths, dataMapper) => {
 
     for (const path of paths) {
 
-        // Navigate through interstitial page
-        cy.get("div.govuk-summary-list__row > dt a").contains(section.name).click();
-        cy.url().should("include", section.interstitialPage.fields.slug);
+        it(`${section.name} should have interstitial page with correct content`, () => {
+            cy.visit(`/${selfAssessmentSlug}`);
 
-        // Validate interstititial page content
-        const interstitialPage = FindPageForSlug({ slug: section.interstitialPage.fields.slug, dataMapper });
-        ValidatePage(section.interstitialPage.fields.slug, interstitialPage);
+            // Navigate through interstitial page
+            cy.get("div.govuk-summary-list__row > dt a").contains(section.name).click();
+            cy.url().should("include", section.interstitialPage.fields.slug);
 
-        // Conduct self assessment according to path
-        cy.get("a.govuk-button.govuk-link").contains("Continue").click();
-        navigateAndValidateQuestionPages(path, section);
+            // Validate interstititial page content
+            const interstitialPage = FindPageForSlug({ slug: section.interstitialPage.fields.slug, dataMapper });
+            ValidatePage(section.interstitialPage.fields.slug, interstitialPage);
+        });
 
-        // Validate check answers page (questions and answers correspond to those listed in path) and return to self assessment page
-        validateCheckAnswersPage(path, section);
-        cy.url().should("include", selfAssessmentSlug);
+        it(`${section.name} should have every question with correct content`, () => {
+            // Conduct self assessment according to path
+            cy.get("a.govuk-button.govuk-link").contains("Continue").click();
+            validateAndTestQuestionPages(path, section);
+        });
 
-        // Call recommendations validation function(s) if applicable
-        if (validator) {
-            validator(path);
-        }
+        it(`${section.name} should have Check Answers page with correct content`, () => {
+            // Validate check answers page (questions and answers correspond to those listed in path) and return to self assessment page
+            validateCheckAnswersPage(path, section);
+            cy.url().should("include", selfAssessmentSlug);
+        });
     }
 }

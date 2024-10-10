@@ -21,7 +21,7 @@ export default function exportContentfulData({ spaceId, deliveryToken, managemen
     skipEditorInterfaces: true,
     skipRoles: true,
     skipWebhooks: true,
-    exportDir: exportDirectory,
+    exportDir: exportDirectory ?? "./output",
     saveFile: getBooleanValueFromEnv('SAVE_FILE'),
     includeDrafts: getBooleanValueFromEnv('USE_PREVIEW'),
   };

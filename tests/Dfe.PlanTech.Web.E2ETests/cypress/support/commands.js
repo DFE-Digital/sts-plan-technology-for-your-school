@@ -4,3 +4,4 @@ import "../commands/axe-tools.js";
 import "../commands/helpers.js";
 import "../commands/question-page.js";
 import "../commands/questionnaire-stages.js";
+import "../commands/section-status-check.js";
