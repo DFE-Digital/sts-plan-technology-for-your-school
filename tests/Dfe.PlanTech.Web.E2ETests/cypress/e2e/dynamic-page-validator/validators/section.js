@@ -1,5 +1,5 @@
 import { FindPageForSlug, selfAssessmentSlug, ValidatePage } from "../helpers/index.js";
-import { navigateAndValidateQuestionPages, validateCheckAnswersPage } from "./index.js";
+import { validateAndTestQuestionPages, validateCheckAnswersPage } from "./index.js";
 
 /**
  * Validates sections using the given paths
@@ -9,7 +9,7 @@ import { navigateAndValidateQuestionPages, validateCheckAnswersPage } from "./in
  * @param {Function} validator - optional validation function to call at the end of every path
  */
 
-export const validateSections = (section, paths, dataMapper) => {
+export const validateAndTestSections = (section, paths, dataMapper) => {
 
     for (const path of paths) {
 
@@ -28,7 +28,7 @@ export const validateSections = (section, paths, dataMapper) => {
         it(`${section.name} should have every question with correct content`, () => {
             // Conduct self assessment according to path
             cy.get("a.govuk-button.govuk-link").contains("Continue").click();
-            navigateAndValidateQuestionPages(path, section);
+            validateAndTestQuestionPages(path, section);
         });
 
         it(`${section.name} should have Check Answers page with correct content`, () => {

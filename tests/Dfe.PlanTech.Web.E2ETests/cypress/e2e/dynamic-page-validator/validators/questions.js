@@ -1,7 +1,7 @@
 import { CleanText } from "../helpers/index.js";
 import { validateAnswers } from "./index.js";
 
-export const navigateAndValidateQuestionPages = (path, section) => {
+export const validateAndTestQuestionPages = (path, section) => {
 
     for (const question of path) {
         const matchingQuestion = section.questions.find((q) => q.text === question.question.text);
