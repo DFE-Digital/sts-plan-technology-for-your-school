@@ -57,7 +57,7 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
     /// <param name="contents">Contents to order - i.e. <see cref="Content"/> or <see cref="BeforeTitleContent"/> </param>
     /// <param name="idSelector">Func to select the relevant id - i.e.<see cref="PageContentDbEntity.ContentComponentId"/> or <see cref="PageContentDbEntity.BeforeContentComponentId"/></param>
     /// <returns>The contents ordered by the ordering specified in the related <see cref="PageContentDbEntity"/></returns>
-    private IEnumerable<ContentComponentDbEntity> OrderContents(List<ContentComponentDbEntity> contents,Func<PageContentDbEntity, string?> idSelector)
+    private IEnumerable<ContentComponentDbEntity> OrderContents(List<ContentComponentDbEntity> contents, Func<PageContentDbEntity, string?> idSelector)
         => contents.GroupJoin(AllPageContents,
                 content => content.Id,
                 idSelector,
