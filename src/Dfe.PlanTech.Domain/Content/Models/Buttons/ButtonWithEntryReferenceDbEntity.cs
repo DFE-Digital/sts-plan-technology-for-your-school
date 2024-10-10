@@ -16,5 +16,11 @@ public class ButtonWithEntryReferenceDbEntity : ContentComponentDbEntity, IButto
     public ContentComponentDbEntity LinkToEntry { get; set; } = null!;
 
     public string LinkToEntryId { get; set; } = null!;
+
+    [DontCopyValue]
+    public string Slug { get; set; } = "";
+
+    [DontCopyValue]
+    public LinkToEntryType LinkType { get; set; } = LinkToEntryType.Unknown;
 }
 

@@ -1,28 +1,29 @@
 @using Dfe.PlanTech.Domain.Content.Models;
 @using Dfe.PlanTech.Domain.Content.Models.Buttons;
 @using Dfe.PlanTech.Domain.Questionnaire.Models;
+@using Dfe.PlanTech.Web;
+
 @model Dfe.PlanTech.Domain.Content.Models.Buttons.ButtonWithEntryReference;
 
 @{
-    var sectionSlug = Context.GetRouteData().Values.First(value => value.Key == "sectionSlug" || value.Key == "route").Value
-    as string;
-}
-
-@{
-    switch (Model.LinkToEntry)
+    switch (Model.LinkType)
     {
-        case Page pageContent:
+        case LinkToEntryType.Page:
             {
                 var buttonWithLink = new ButtonWithLink()
                         {
                             Button = Model.Button,
-                            Href = pageContent.Slug
+                            Href = Model.Slug
                         };
-                <button-with-link model=@buttonWithLink />
+
+                <partial name="components/ButtonWithLink" model=@buttonWithLink/>
                 break;
             }
-        case Question _:
+
+        case LinkToEntryType.Question:
             {
+                var sectionSlug = Context.GetRouteData().Values.First(value => value.Key == "sectionSlug" || value.Key == "route").Value as string;
+
                 <govuk-button-link asp-controller="Questions" asp-action="GetNextUnansweredQuestion" asp-route-sectionSlug=@sectionSlug
                     class="govuk-link">
                     @Model.Button.Value

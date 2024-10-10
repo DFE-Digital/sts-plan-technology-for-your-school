@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 
@@ -21,7 +20,6 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
     public bool RequiresAuthorisation { get; set; } = true;
 
     [DontCopyValue]
-    [NotMapped]
     public List<ContentComponentDbEntity> BeforeTitleContent { get; set; } = [];
 
     [DontCopyValue]
@@ -30,17 +28,22 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
     public string? TitleId { get; set; }
 
     [DontCopyValue]
-    [NotMapped]
     public List<ContentComponentDbEntity> Content { get; set; } = [];
 
     [DontCopyValue]
     public SectionDbEntity? Section { get; set; }
 
     /// <summary>
-    /// Combined joins for <see cref="Content"/> and <see cref="BeforeTitleContent"/> 
+    /// Combined joins for <see cref="Content"/> and <see cref="BeforeTitleContent"/>
     /// </summary>
     [DontCopyValue]
     public List<PageContentDbEntity> AllPageContents { get; set; } = [];
+
+    /// <summary>
+    /// Gets all content, from both <see cref="Content"/> and <see cref="BeforeTitleContent"/>, that match the type
+    /// </summary>
+    /// <typeparam name="T">Type of content to find</typeparam>
+    public IEnumerable<T> GetAllContentOfType<T>() => Content.Concat(BeforeTitleContent).OfType<T>();
 
     public void OrderContents()
     {
@@ -48,15 +51,21 @@ public class PageDbEntity : ContentComponentDbEntity, IPage<ContentComponentDbEn
         Content = OrderContents(Content, pageContent => pageContent.ContentComponentId).ToList();
     }
 
+    /// <summary>
+    /// Orders the contents based on the value of <see cref="PageContentDbEntity.Order"/>
+    /// </summary>
+    /// <param name="contents">Contents to order - i.e. <see cref="Content"/> or <see cref="BeforeTitleContent"/> </param>
+    /// <param name="idSelector">Func to select the relevant id - i.e.<see cref="PageContentDbEntity.ContentComponentId"/> or <see cref="PageContentDbEntity.BeforeContentComponentId"/></param>
+    /// <returns>The contents ordered by the ordering specified in the related <see cref="PageContentDbEntity"/></returns>
     private IEnumerable<ContentComponentDbEntity> OrderContents(List<ContentComponentDbEntity> contents, Func<PageContentDbEntity, string?> idSelector)
         => contents.GroupJoin(AllPageContents,
-                            content => content.Id,
-                            idSelector,
-                            (content, pageContent) => new
-                            {
-                                content,
-                                order = pageContent.OrderByDescending(pc => pc.Id).Select(join => join.Order).First()
-                            })
-                            .OrderBy(joined => joined.order)
-                            .Select(joined => joined.content);
+                content => content.Id,
+                idSelector,
+                (content, pageContent) => new
+                {
+                    content,
+                    order = pageContent.OrderByDescending(pc => pc.Id).Select(join => join.Order).First()
+                })
+            .OrderBy(joined => joined.order)
+            .Select(joined => joined.content);
 }
