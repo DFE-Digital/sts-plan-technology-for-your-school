@@ -5,6 +5,8 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
 public class AnswerDbEntity : ContentComponentDbEntity, IAnswer<QuestionDbEntity>
 {
+    public string InternalName { get; set; } = null!;
+
     public string Text { get; set; } = null!;
 
     public string? NextQuestionId { get; set; }

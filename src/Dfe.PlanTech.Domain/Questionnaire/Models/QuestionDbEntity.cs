@@ -6,6 +6,8 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
 public class QuestionDbEntity : ContentComponentDbEntity, IQuestion<AnswerDbEntity>, IHasSlug
 {
+    public string InternalName { get; set; } = null!;
+
     public string Text { get; set; } = null!;
 
     public string? HelpText { get; set; }
