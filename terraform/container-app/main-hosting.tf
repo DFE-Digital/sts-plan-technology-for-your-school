@@ -1,5 +1,5 @@
 module "main_hosting" {
-  source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v1.10.3"
+  source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v1.13.0"
 
   ###########
   # General #
@@ -16,16 +16,12 @@ module "main_hosting" {
   image_name                = local.container_app_image_name
   container_port            = local.container_port
   container_secret_environment_variables = {
-    "AZURE_CLIENT_ID" = azurerm_user_assigned_identity.user_assigned_identity.client_id,
-    "KeyVaultName"    = local.kv_name
+    "KeyVaultName" = local.kv_name
   }
 
   container_environment_variables = local.container_environment_variables
 
-  container_app_identities = {
-    type         = "UserAssigned",
-    identity_ids = [azurerm_user_assigned_identity.user_assigned_identity.id]
-  }
+  container_app_identities = [azurerm_user_assigned_identity.user_assigned_identity.id]
 
   container_max_replicas           = local.container_app_max_replicas
   container_min_replicas           = local.container_app_min_replicas
