@@ -267,9 +267,4 @@ public class CmsDbContext : DbContext, ICmsDbContext
         return await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
             (q, ctoken) => q.FirstOrDefaultAsync(ctoken), cancellationToken);
     }
-
-    public string? GetSlugForButtonWithEntryReferenceDbEntity(string linkToEntryId)
-    {
-        return Set<QuestionDbEntity>().Where(q => q.Id == linkToEntryId).Select(q => q.Slug).FirstOrDefault() ?? Set<PageDbEntity>().Where(q => q.Id == linkToEntryId).Select(q => q.Slug).FirstOrDefault();
-    }
 }
