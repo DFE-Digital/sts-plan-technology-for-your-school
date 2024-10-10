@@ -1,0 +1,19 @@
+{
+  "name": "dfe.contentsupport.web.e2etests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "cypress run"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "cypress": "^13.9.0",
+    "cypress-axe": "^1.5.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  }
+}

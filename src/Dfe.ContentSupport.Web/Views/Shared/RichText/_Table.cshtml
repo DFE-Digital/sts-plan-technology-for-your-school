@@ -1,0 +1,30 @@
+@model RichTextContentItem
+
+<table>
+    <thead>
+    @if (Model.Content.Any())
+    {
+        foreach (var childNode in Model.Content)
+        {
+            if (childNode.NodeType == RichTextNodeType.TableRow && childNode.Content[0].NodeType ==
+                RichTextNodeType.TableHeaderCell)
+            {
+                <partial name="RichText/_TableRow" model="@childNode"/>
+            }
+        }
+    }
+    </thead>
+    <tbody>
+    @if (Model.Content.Any())
+    {
+        foreach (var childNode in Model.Content)
+        {
+            if (childNode.NodeType == RichTextNodeType.TableRow && childNode.Content[0].NodeType ==
+                RichTextNodeType.TableCell)
+            {
+                <partial name="RichText/_TableRow" model="@childNode"/>
+            }
+        }
+    }
+    </tbody>
+</table>

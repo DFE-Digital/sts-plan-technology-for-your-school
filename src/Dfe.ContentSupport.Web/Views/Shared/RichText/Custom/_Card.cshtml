@@ -1,0 +1,22 @@
+﻿@model CustomCard
+
+@{
+<div class="dfe-card">
+    @if (Model.ImageUri is not null)
+    {
+        <img src="@Model.ImageUri" alt="@Model.ImageAlt">
+    }
+    <div class="dfe-card-container">
+        <h3 class="govuk-heading-m">
+            <a href="@Model.Uri" class="govuk-link govuk-link--no-visited-state dfe-card-link--header">@Model.Title</a>
+        </h3>
+        @if (string.IsNullOrEmpty(Model.Description) is false)
+        {
+            <p>@Model.Description</p>
+        }
+        @if (string.IsNullOrEmpty(Model.Meta) is false)
+        {
+            <p class="govuk-body-s">@Model.Meta</p>
+        }
+    </div>
+</div>}

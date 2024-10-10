@@ -1,0 +1,10 @@
+@model Hyperlink
+
+@if (Model.IsVimeo)
+{
+    <partial name="RichText/_Vimeo" model="@Model"/>
+}
+else
+{
+    <a href="@Model.Uri" target="_blank" rel="noopener noreferrer"><partial name="RichText/_Text" model="@Model.Content[0]"/></a>
+}
