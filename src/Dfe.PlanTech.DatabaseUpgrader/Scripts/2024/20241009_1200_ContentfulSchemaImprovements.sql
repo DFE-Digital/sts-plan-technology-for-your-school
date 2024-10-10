@@ -40,28 +40,6 @@ ALTER TABLE Contentful.RecommendationIntros
         FOREIGN KEY (Id) REFERENCES Contentful.ContentComponents
             ON DELETE CASCADE
 
-GO
-
--- Add a dateCreated and dateLastUpdated column to the ContentComponents table
-
-ALTER TABLE Contentful.ContentComponents
-    ADD dateCreated DATETIME DEFAULT GETUTCDATE(),
-        dateLastUpdated DATETIME DEFAULT GETUTCDATE()
-
-GO
-
--- Add a trigger to the ContentfulComponents table to automatically update dateLastUpdated whenever a record is updated
-
-CREATE TRIGGER Contentful.tr_ContentComponents
-    ON Contentful.ContentComponents
-    FOR INSERT, UPDATE
-    AS
-BEGIN
-    UPDATE CC
-    SET dateLastUpdated = GETUTCDATE()
-    FROM ContentComponents CC
-    JOIN inserted I ON I.id = CC.id
-END
 
 GO
 
@@ -148,3 +126,262 @@ ALTER TABLE Contentful.Pages ALTER COLUMN [InternalName] NVARCHAR(256) NOT NULL
 ALTER TABLE Contentful.Pages ALTER COLUMN [Slug] NVARCHAR(256) NOT NULL
 ALTER TABLE Contentful.ComponentDropDowns ALTER COLUMN [Title] NVARCHAR(256) NOT NULL
 GO
+
+
+-- Add a dateCreated and dateLastUpdated column to the ContentComponents table
+
+ALTER TABLE Contentful.ContentComponents
+    ADD dateCreated DATETIME DEFAULT GETUTCDATE(),
+        dateLastUpdated DATETIME DEFAULT GETUTCDATE()
+
+GO
+
+-- Add a trigger to the ContentfulComponents for dateLastUpdated
+
+CREATE TRIGGER Contentful.tr_ContentComponents
+    ON Contentful.ContentComponents
+    FOR INSERT, UPDATE
+    AS
+BEGIN
+    UPDATE CC
+    SET dateLastUpdated = GETUTCDATE()
+    FROM Contentful.ContentComponents CC
+    JOIN inserted I ON I.id = CC.id
+END
+GO
+
+-- Add triggers to all connected content tables to update the dateLastUpdated column whenever changes occur
+
+CREATE TRIGGER Contentful.tr_TextBodies
+    ON Contentful.TextBodies
+    FOR INSERT, UPDATE
+    AS
+BEGIN
+    UPDATE CC
+    SET dateLastUpdated = GETUTCDATE()
+    FROM Contentful.ContentComponents CC
+    JOIN inserted I ON I.id = CC.id
+END
+GO
+
+
+CREATE TRIGGER Contentful.tr_Sections
+    ON Contentful.Sections
+    FOR INSERT, UPDATE
+    AS
+BEGIN
+    UPDATE CC
+    SET dateLastUpdated = GETUTCDATE()
+    FROM Contentful.ContentComponents CC
+    JOIN inserted I ON I.id = CC.id
+END
+GO
+
+
+CREATE TRIGGER Contentful.tr_Warnings
+    ON Contentful.Warnings
+    FOR INSERT, UPDATE
+    AS
+BEGIN
+    UPDATE CC
+    SET dateLastUpdated = GETUTCDATE()
+    FROM Contentful.ContentComponents CC
+    JOIN inserted I ON I.id = CC.id
+END
+GO
+
+
+CREATE TRIGGER Contentful.tr_Questions
+    ON Contentful.Questions
+    FOR INSERT, UPDATE
+    AS
+BEGIN
+    UPDATE CC
+    SET dateLastUpdated = GETUTCDATE()
+    FROM Contentful.ContentComponents CC
+    JOIN inserted I ON I.id = CC.id
+END
+GO
+
+
+CREATE TRIGGER Contentful.tr_Answers
+    ON Contentful.Answers
+    FOR INSERT, UPDATE
+    AS
+BEGIN
+    UPDATE CC
+    SET dateLastUpdated = GETUTCDATE()
+    FROM Contentful.ContentComponents CC
+    JOIN inserted I ON I.id = CC.id
+END
+GO
+
+
+CREATE TRIGGER Contentful.tr_RecommendationChunks
+    ON Contentful.RecommendationChunks
+    FOR INSERT, UPDATE
+    AS
+BEGIN
+    UPDATE CC
+    SET dateLastUpdated = GETUTCDATE()
+    FROM Contentful.ContentComponents CC
+    JOIN inserted I ON I.id = CC.id
+END
+GO
+
+
+CREATE TRIGGER Contentful.tr_RecommendationIntros
+    ON Contentful.RecommendationIntros
+    FOR INSERT, UPDATE
+    AS
+BEGIN
+    UPDATE CC
+    SET dateLastUpdated = GETUTCDATE()
+    FROM Contentful.ContentComponents CC
+    JOIN inserted I ON I.id = CC.id
+END
+GO
+
+
+CREATE TRIGGER Contentful.tr_CSLinks
+    ON Contentful.CSLinks
+    FOR INSERT, UPDATE
+    AS
+BEGIN
+    UPDATE CC
+    SET dateLastUpdated = GETUTCDATE()
+    FROM Contentful.ContentComponents CC
+    JOIN inserted I ON I.id = CC.id
+END
+GO
+
+
+CREATE TRIGGER Contentful.tr_Buttons
+    ON Contentful.Buttons
+    FOR INSERT, UPDATE
+    AS
+BEGIN
+    UPDATE CC
+    SET dateLastUpdated = GETUTCDATE()
+    FROM Contentful.ContentComponents CC
+    JOIN inserted I ON I.id = CC.id
+END
+GO
+
+
+CREATE TRIGGER Contentful.tr_Headers
+    ON Contentful.Headers
+    FOR INSERT, UPDATE
+    AS
+BEGIN
+    UPDATE CC
+    SET dateLastUpdated = GETUTCDATE()
+    FROM Contentful.ContentComponents CC
+    JOIN inserted I ON I.id = CC.id
+END
+GO
+
+
+CREATE TRIGGER Contentful.tr_InsetTexts
+    ON Contentful.InsetTexts
+    FOR INSERT, UPDATE
+    AS
+BEGIN
+    UPDATE CC
+    SET dateLastUpdated = GETUTCDATE()
+    FROM Contentful.ContentComponents CC
+    JOIN inserted I ON I.id = CC.id
+END
+GO
+
+
+CREATE TRIGGER Contentful.tr_NavigationLink
+    ON Contentful.NavigationLink
+    FOR INSERT, UPDATE
+    AS
+BEGIN
+    UPDATE CC
+    SET dateLastUpdated = GETUTCDATE()
+    FROM Contentful.ContentComponents CC
+    JOIN inserted I ON I.id = CC.id
+END
+GO
+
+
+CREATE TRIGGER Contentful.tr_ButtonWithLinks
+    ON Contentful.ButtonWithLinks
+    FOR INSERT, UPDATE
+    AS
+BEGIN
+    UPDATE CC
+    SET dateLastUpdated = GETUTCDATE()
+    FROM Contentful.ContentComponents CC
+    JOIN inserted I ON I.id = CC.id
+END
+GO
+
+
+CREATE TRIGGER Contentful.tr_ButtonWithEntryReferences
+    ON Contentful.ButtonWithEntryReferences
+    FOR INSERT, UPDATE
+    AS
+BEGIN
+    UPDATE CC
+    SET dateLastUpdated = GETUTCDATE()
+    FROM Contentful.ContentComponents CC
+    JOIN inserted I ON I.id = CC.id
+END
+GO
+
+
+CREATE TRIGGER Contentful.tr_Titles
+    ON Contentful.Titles
+    FOR INSERT, UPDATE
+    AS
+BEGIN
+    UPDATE CC
+    SET dateLastUpdated = GETUTCDATE()
+    FROM Contentful.ContentComponents CC
+    JOIN inserted I ON I.id = CC.id
+END
+GO
+
+
+CREATE TRIGGER Contentful.tr_Categories
+    ON Contentful.Categories
+    FOR INSERT, UPDATE
+    AS
+BEGIN
+    UPDATE CC
+    SET dateLastUpdated = GETUTCDATE()
+    FROM Contentful.ContentComponents CC
+    JOIN inserted I ON I.id = CC.id
+END
+GO
+
+
+CREATE TRIGGER Contentful.tr_Pages
+    ON Contentful.Pages
+    FOR INSERT, UPDATE
+    AS
+BEGIN
+    UPDATE CC
+    SET dateLastUpdated = GETUTCDATE()
+    FROM Contentful.ContentComponents CC
+    JOIN inserted I ON I.id = CC.id
+END
+GO
+
+
+CREATE TRIGGER Contentful.tr_ComponentDropDowns
+    ON Contentful.ComponentDropDowns
+    FOR INSERT, UPDATE
+    AS
+BEGIN
+    UPDATE CC
+    SET dateLastUpdated = GETUTCDATE()
+    FROM Contentful.ContentComponents CC
+    JOIN inserted I ON I.id = CC.id
+END
+GO
+
