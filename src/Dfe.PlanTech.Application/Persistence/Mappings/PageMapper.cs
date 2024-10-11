@@ -21,6 +21,8 @@ public class PageMapper(PageRetriever retriever,
 
     public override PageDbEntity ToEntity(CmsWebHookPayload payload)
     {
+        _pageContents.Clear();
+
         var mappedPage = base.ToEntity(payload);
         foreach (var content in PageContents)
         {
@@ -52,7 +54,32 @@ public class PageMapper(PageRetriever retriever,
     }
 
     protected override async Task<PageDbEntity?> GetExistingEntity(PageDbEntity incomingEntity, CancellationToken cancellationToken)
-    => await retriever.GetExistingDbEntity(incomingEntity, cancellationToken);
+    {
+        await RemoveMissingPageContents(incomingEntity, cancellationToken);
+        var page = await retriever.GetExistingDbEntity(incomingEntity, cancellationToken);
+
+        return page;
+    }
+
+    private async Task RemoveMissingPageContents(PageDbEntity incomingEntity, CancellationToken cancellationToken)
+    {
+        var allContentComponentIds = PageContents.Select(pc => pc.BeforeContentComponentId ?? pc.ContentComponentId);
+
+        var existingComponentIds = await DatabaseHelper.Database.ToListAsync(DatabaseHelper.Database
+                                                    .ContentComponents
+                                                    .Where(cc => allContentComponentIds.Any(id => cc.Id == id))
+                                                    .Select(cc => cc.Id), cancellationToken);
+
+        var idsMissingInDb = allContentComponentIds.Except(existingComponentIds).ToArray();
+
+        if (idsMissingInDb.Length == 0)
+        {
+            return;
+        }
+
+        Logger.LogError("Page {Id} has incoming content that are missing in the DB: {ContentIds}", incomingEntity.Id, string.Join(",", idsMissingInDb));
+        incomingEntity.AllPageContents.RemoveAll(apc => idsMissingInDb.Any(id => apc.ContentComponentId == id || apc.BeforeContentComponentId == id));
+    }
 
     private void UpdateContentIds(Dictionary<string, object?> values, string currentKey)
     {

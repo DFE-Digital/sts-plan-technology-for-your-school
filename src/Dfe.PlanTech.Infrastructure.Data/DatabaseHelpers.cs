@@ -79,13 +79,6 @@ where TIDbContext : IDbContext
         }
     }
 
-    public void MarkNavigationAsUnchanged<TEntity>(TEntity entity, string navigation)
-    where TEntity : class
-    {
-        EntityEntry entry = _concreteDb.Entry(entity);
-
-    }
-
     public IQueryable<TDbEntity> Include<TDbEntity, TProperty>(IQueryable<TDbEntity> queryable, Expression<Func<TDbEntity, TProperty>> expression) where TDbEntity : class
     => queryable.Include(expression);
 

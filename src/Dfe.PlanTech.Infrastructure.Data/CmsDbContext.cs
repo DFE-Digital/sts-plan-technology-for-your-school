@@ -148,7 +148,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
         => Database.ExecuteSqlAsync($"UPDATE [Contentful].[ContentComponents] SET Published = {published}, Deleted = {deleted} WHERE [Id] = {contentComponent.Id}", cancellationToken: cancellationToken);
 
     public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
-        => FirstOrDefaultAsync(
+        => FirstOrDefaultCachedAsync(
             Pages.Where(page => page.Slug == slug)
                 .Include(page => page.BeforeTitleContent)
                 .Include(page => page.Content)
@@ -156,19 +156,26 @@ public class CmsDbContext : DbContext, ICmsDbContext
                 .AsSplitQuery(),
             cancellationToken);
 
-    public async Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+    public async Task<List<T>> ToListCachedAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     {
         var key = GetCacheKey(queryable);
         return await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
             (q, ctoken) => q.ToListAsync(ctoken), cancellationToken);
     }
 
-    public async Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+     => queryable.ToListAsync(cancellationToken: cancellationToken);
+
+    public async Task<T?> FirstOrDefaultCachedAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     {
         var key = GetCacheKey(queryable);
         return await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
             (q, ctoken) => q.FirstOrDefaultAsync(ctoken), cancellationToken);
     }
+
+    public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+        => queryable.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

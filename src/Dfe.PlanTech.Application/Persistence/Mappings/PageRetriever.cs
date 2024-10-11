@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Application.Persistence.Mappings;
 public class PageRetriever(IDatabaseHelper<ICmsDbContext> databaseHelper)
 {
     public Task<PageDbEntity?> GetExistingDbEntity(PageDbEntity entity, CancellationToken cancellationToken)
-      => databaseHelper.Database.FirstOrDefaultAsync(databaseHelper.GetQueryableForEntityExcludingAutoIncludesAndFilters<PageDbEntity>()
+      => databaseHelper.Database.FirstOrDefaultCachedAsync(databaseHelper.GetQueryableForEntityExcludingAutoIncludesAndFilters<PageDbEntity>()
                                     .Select(page => new PageDbEntity()
                                     {
                                         Id = page.Id,

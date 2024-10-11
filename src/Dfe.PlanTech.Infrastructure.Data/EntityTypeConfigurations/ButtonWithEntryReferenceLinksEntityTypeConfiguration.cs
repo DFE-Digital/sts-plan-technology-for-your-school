@@ -9,9 +9,9 @@ namespace Dfe.PlanTech.Infrastructure.Data.EntityTypeConfigurations;
 [ExcludeFromCodeCoverage]
 public class ButtonWithEntryReferenceLinksEntityTypeConfiguration : IEntityTypeConfiguration<ButtonWithEntryReferenceLinkDbEntity>
 {
-  public void Configure(EntityTypeBuilder<ButtonWithEntryReferenceLinkDbEntity> builder)
-  {
-    builder.ToView("SlugsForButtonWithEntryReferences");
-    builder.HasKey("ButtonWithEntryReferenceId");
-  }
+    public void Configure(EntityTypeBuilder<ButtonWithEntryReferenceLinkDbEntity> builder)
+    {
+        builder.ToView("SlugsForButtonWithEntryReferences");
+        builder.HasKey("ButtonWithEntryReferenceId");
+    }
 }

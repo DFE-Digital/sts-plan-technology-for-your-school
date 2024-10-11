@@ -58,7 +58,7 @@ public class PageMapperTests : BaseMapperTests<PageDbEntity, PageMapper>
         await _mapper.InvokeNonPublicAsyncMethod("GetExistingEntity",
             new object[] { new PageDbEntity(), CancellationToken.None });
 
-        await DatabaseHelper.Database.Received(1).FirstOrDefaultAsync(Arg.Any<IQueryable<PageDbEntity>>(),
+        await DatabaseHelper.Database.Received(1).FirstOrDefaultCachedAsync(Arg.Any<IQueryable<PageDbEntity>>(),
             Arg.Any<CancellationToken>());
     }
 

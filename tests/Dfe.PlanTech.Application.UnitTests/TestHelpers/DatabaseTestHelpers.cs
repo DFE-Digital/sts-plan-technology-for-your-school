@@ -98,7 +98,7 @@ public static class DatabaseTestHelpers
 
     private static void MockFirstOrDefaultAsync<T>(this ICmsDbContext db)
     {
-        db.FirstOrDefaultAsync(Arg.Any<IQueryable<T>>(), Arg.Any<CancellationToken>())
+        db.FirstOrDefaultCachedAsync(Arg.Any<IQueryable<T>>(), Arg.Any<CancellationToken>())
             .Returns((callInfo) =>
             {
                 var queryable = callInfo.Arg<IQueryable<T>>();
@@ -109,7 +109,7 @@ public static class DatabaseTestHelpers
 
     private static void MockListAsync<T>(this ICmsDbContext db)
     {
-        db.ToListAsync(Arg.Any<IQueryable<T>>(), Arg.Any<CancellationToken>())
+        db.ToListCachedAsync(Arg.Any<IQueryable<T>>(), Arg.Any<CancellationToken>())
             .Returns((callInfo) =>
             {
                 var queryable = callInfo.Arg<IQueryable<T>>();

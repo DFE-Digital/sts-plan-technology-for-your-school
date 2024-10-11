@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Dfe.PlanTech.Infrastructure.Data.EntityTypeConfigurations;

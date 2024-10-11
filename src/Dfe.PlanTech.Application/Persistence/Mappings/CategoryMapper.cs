@@ -35,5 +35,5 @@ public class CategoryMapper(EntityUpdater updater,
     }
 
     private static async Task<List<SectionDbEntity>> GetExistingSections(ICmsDbContext db, CategoryDbEntity incoming, CancellationToken cancellationToken)
-        => await db.ToListAsync(db.Sections.Where(section => section.CategoryId == incoming.Id).Select(section => section), cancellationToken);
+        => await db.ToListCachedAsync(db.Sections.Where(section => section.CategoryId == incoming.Id).Select(section => section), cancellationToken);
 }
