@@ -1,18 +1,15 @@
 @using Newtonsoft.Json.Linq
 @{
-    var csTrack = Context.Request.Cookies[".AspNet.Consent"] is "yes" or "true";
-    bool ptTrack = false;
+    bool track = false;
     var ptCookiePreferences = Context.Request.Cookies["user_cookies_preferences"];
     if (ptCookiePreferences is not null)
     {
         var ptTracking = JObject.Parse(ptCookiePreferences)["UserAcceptsCookies"];
         if (ptTracking != null)
         {
-            bool.TryParse(ptTracking.ToString(), out ptTrack);
+            bool.TryParse(ptTracking.ToString(), out track);
         }
     }
-
-    var track = csTrack || ptTrack;
 }
 
 @if (track)

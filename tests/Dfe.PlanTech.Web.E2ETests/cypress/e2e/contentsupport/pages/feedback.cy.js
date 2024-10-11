@@ -18,7 +18,7 @@ describe('Feedback banner', () => {
     cy.visit('content/hello-world',
       {
         headers: {
-          'Cookie': '.AspNet.Consent=no'
+          'Cookie': 'user_cookies_preferences=%7B%22UserAcceptsCookies%22%3Afalse%2C%22IsVisible%22%3Afalse%7D'
         }
       }
     );

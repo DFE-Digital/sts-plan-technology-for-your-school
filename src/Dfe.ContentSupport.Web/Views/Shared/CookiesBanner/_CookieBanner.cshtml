@@ -4,10 +4,7 @@
 var consentFeature = Context.Features.Get<ITrackingConsentFeature>();
 var cookieString = consentFeature?.CreateConsentCookie();
 
-var csCookieNotSet = Context.Request.Cookies[".AspNet.Consent"] is null;
-var ptCookieNotSet = Context.Request.Cookies["user_cookies_preferences"] is null;
-
-var showBanner = csCookieNotSet && ptCookieNotSet;
+var showBanner = Context.Request.Cookies["user_cookies_preferences"] is null;
 }
 
 @if (showBanner)
