@@ -159,9 +159,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         modelBuilder.Entity<AnswerDbEntity>(entity =>
         {
-            entity.HasOne(a => a.NextQuestion).WithMany(q => q.PreviousAnswers).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(a => a.ParentQuestion).WithMany(q => q.Answers).OnDelete(DeleteBehavior.Restrict);
-
             entity.ToTable("Answers", Schema);
         });
 
@@ -249,17 +247,13 @@ public class CmsDbContext : DbContext, ICmsDbContext
                 .AsSplitQuery(),
             cancellationToken);
 
-    public async Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     {
-        var key = GetCacheKey(queryable);
-        return await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
-            (q, ctoken) => q.ToListAsync(ctoken), cancellationToken);
+        return queryable.ToListAsync(cancellationToken);
     }
 
-    public async Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+    public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     {
-        var key = GetCacheKey(queryable);
-        return await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
-            (q, ctoken) => q.FirstOrDefaultAsync(ctoken), cancellationToken);
+        return queryable.FirstOrDefaultAsync(cancellationToken);
     }
 }

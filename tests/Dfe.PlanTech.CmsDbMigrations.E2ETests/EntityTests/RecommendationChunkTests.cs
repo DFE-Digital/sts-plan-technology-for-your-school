@@ -35,7 +35,6 @@ public class RecommendationChunkTests() : EntityTests<RecommendationChunk, Recom
         .IgnoreQueryFilters()
         .Include(recChunk => recChunk.Content)
         .Include(recChunk => recChunk.Answers)
-        .Include(recChunk => recChunk.Header)
         .AsNoTracking();
 
     protected override void ValidateDbMatches(RecommendationChunk entity, RecommendationChunkDbEntity? dbEntity, bool published = true, bool archived = false, bool deleted = false)

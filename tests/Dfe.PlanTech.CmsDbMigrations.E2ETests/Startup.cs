@@ -1,5 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Mappings;
 using Dfe.PlanTech.Domain.Persistence.Models;
@@ -31,7 +33,7 @@ public static class Startup
         services.AddLogging(opts =>
             {
                 opts.AddConsole();
-                opts.SetMinimumLevel(LogLevel.Warning);
+                opts.SetMinimumLevel(LogLevel.Information);
             });
 
         services.AddSingleton(new JsonSerializerOptions()
@@ -49,6 +51,8 @@ public static class Startup
                 configuration.GetSection("MessageRetryHandlingOptions").Bind(settings);
             });
 
+
+        services.AddTransient<IQueryCacher, QueryCacher>();
         AddMappers(services);
 
         return services.BuildServiceProvider();
