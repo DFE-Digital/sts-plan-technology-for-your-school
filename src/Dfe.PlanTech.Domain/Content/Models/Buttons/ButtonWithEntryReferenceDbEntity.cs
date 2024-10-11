@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Runtime.Serialization;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Content.Models.Buttons;
