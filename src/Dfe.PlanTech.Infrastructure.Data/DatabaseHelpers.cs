@@ -41,8 +41,6 @@ where TIDbContext : IDbContext
 
     public void Add<TDbEntity>(TDbEntity entity) where TDbEntity : class => _concreteDb.Add(entity);
 
-    public void Update<TDbEntity>(TDbEntity entity) where TDbEntity : class => _concreteDb.Update(entity);
-
     public void Remove<TDbEntity>(TDbEntity entity) where TDbEntity : class => _concreteDb.Remove(entity);
 
     /// <summary>

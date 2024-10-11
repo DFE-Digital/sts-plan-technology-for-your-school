@@ -147,11 +147,11 @@ public class WebhookToDbCommand(ICacheClearer cacheClearer,
         {
             databaseHelper.Add(mappedEntity.IncomingEntity);
         }
-        else if (mappedEntity.ExistingEntity != null)
+        else if (mappedEntity.ExistingEntity != null && !mappedEntity.HaveUpdatedProperties)
         {
-            databaseHelper.Update(mappedEntity.ExistingEntity!);
+            logger.LogWarning("No properties were found to be updated");
         }
-        else
+        else if (mappedEntity.ExistingEntity == null)
         {
             throw new InvalidDataException($"Entity {mappedEntity.IncomingEntity.Id} does not already exist in database, but existing entity is null");
         }

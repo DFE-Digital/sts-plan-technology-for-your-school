@@ -26,6 +26,8 @@ public class MappedEntity
 
     public bool ShouldCopyProperties => AlreadyExistsInDatabase && !IsMinimalPayloadEvent;
 
+    public bool HaveUpdatedProperties { get; private set; }
+
     /// <summary>
     /// Checks if the incoming entity is a valid component.
     /// </summary>
@@ -55,7 +57,7 @@ public class MappedEntity
 
         if (ShouldCopyProperties)
         {
-            UpdateProperties();
+            HaveUpdatedProperties = UpdateProperties();
         }
     }
 
@@ -183,9 +185,12 @@ public class MappedEntity
     /// It only updates the properties if the values have changed, to minimise unnecessary
     /// update calls to the database.
     /// </summary>
-    private void UpdateProperties()
+    /// <returns> Whether any properties were updated or not </returns>
+    private bool UpdateProperties()
     {
-        foreach (var property in PropertiesToCopy(IncomingEntity))
+        var updatedAnyProperties = false;
+        var propertiesToCopy = PropertiesToCopy(IncomingEntity);
+        foreach (var property in propertiesToCopy)
         {
             //Get the new and current values from the incoming and existing entities using reflection
             var newValue = property.GetValue(IncomingEntity);
@@ -199,7 +204,10 @@ public class MappedEntity
 
             // Update the value of the property in the existing entity with the value from the incoming entity
             property.SetValue(ExistingEntity, property.GetValue(IncomingEntity));
+            updatedAnyProperties = true;
         }
+
+        return updatedAnyProperties;
     }
 
     /// <summary>

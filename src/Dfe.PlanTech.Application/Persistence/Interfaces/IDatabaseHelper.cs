@@ -50,13 +50,6 @@ public interface IDatabaseHelper<TIDbContext> where TIDbContext : IDbContext
     public void Add<TDbEntity>(TDbEntity entity) where TDbEntity : class;
 
     /// <summary>
-    /// Updates the entity in the DB. Does not save - requires executing SaveChanges/SaveChangesAsync
-    /// </summary>
-    /// <typeparam name="TDbEntity"></typeparam>
-    /// <param name="entity"></param>
-    public void Update<TDbEntity>(TDbEntity entity) where TDbEntity : class;
-
-    /// <summary>
     /// Removes the entity from the DB. Does not save - requires executing SaveChanges/SaveChangesAsync
     /// </summary>
     /// <typeparam name="TDbEntity"></typeparam>

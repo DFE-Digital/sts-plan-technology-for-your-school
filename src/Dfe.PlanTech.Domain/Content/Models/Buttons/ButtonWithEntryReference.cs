@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Content.Models.Buttons;
@@ -12,9 +11,7 @@ public class ButtonWithEntryReference : ContentComponent, IButtonWithEntryRefere
 
     public ContentComponent LinkToEntry { get; init; } = null!;
 
-    [NotMapped]
     public string Slug { get; set; } = "";
 
-    [NotMapped]
     public LinkToEntryType LinkType { get; set; } = LinkToEntryType.Unknown;
 }
