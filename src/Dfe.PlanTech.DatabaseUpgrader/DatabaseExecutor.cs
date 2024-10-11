@@ -14,6 +14,7 @@ public class DatabaseExecutor
 
     private const string SCRIPTS_NAMESPACE = "Dfe.PlanTech.DatabaseUpgrader.Scripts";
     private const string ENVIRONMENT_SPECIFIC_SCRIPTS_NAMESPACE = "Dfe.PlanTech.DatabaseUpgrader.EnvironmentSpecificScripts";
+    private const int EXECUTION_TIMEOUT_MINUTES = 10;
 
     public DatabaseExecutor(Options options, Logger logger)
     {
@@ -43,6 +44,7 @@ public class DatabaseExecutor
         return engine.LogToConsole()
         .LogScriptOutput()
         .WithTransaction()
+        .WithExecutionTimeout(TimeSpan.FromMinutes(EXECUTION_TIMEOUT_MINUTES))
         .Build();
     }
 
