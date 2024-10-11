@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.Serialization;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Content.Models.Buttons;
@@ -18,9 +20,11 @@ public class ButtonWithEntryReferenceDbEntity : ContentComponentDbEntity, IButto
     public string LinkToEntryId { get; set; } = null!;
 
     [DontCopyValue]
+    [NotMapped]
     public string Slug { get; set; } = "";
 
     [DontCopyValue]
+    [NotMapped]
     public LinkToEntryType LinkType { get; set; } = LinkToEntryType.Unknown;
 }
 

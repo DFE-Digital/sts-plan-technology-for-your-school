@@ -12,6 +12,7 @@ public class ButtonWithEntryReferenceEntityTypeConfiguration : IEntityTypeConfig
 {
     public void Configure(EntityTypeBuilder<ButtonWithEntryReferenceDbEntity> builder)
     {
+        builder.ToTable("ButtonWithEntryReferences", CmsDbContext.Schema);
         builder.ToView("ButtonWithEntryReferencesWithSlug");
         builder.Navigation(button => button.Button).AutoInclude();
         builder.Property(button => button.LinkType)
