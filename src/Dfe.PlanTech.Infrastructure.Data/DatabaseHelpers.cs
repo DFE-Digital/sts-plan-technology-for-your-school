@@ -67,7 +67,16 @@ where TIDbContext : IDbContext
     {
         EntityEntry entry = _concreteDb.Entry(entity);
 
-        entry.Property(property).EntityEntry.State = EntityState.Unchanged;
+        var navigation = entry.Navigations.FirstOrDefault(nav => nav.Metadata.Name == property);
+
+        if (navigation != null)
+        {
+            navigation.EntityEntry.State = EntityState.Unchanged;
+        }
+        else
+        {
+            entry.Property(property).EntityEntry.State = EntityState.Unchanged;
+        }
     }
 
     public void MarkNavigationAsUnchanged<TEntity>(TEntity entity, string navigation)
@@ -75,7 +84,6 @@ where TIDbContext : IDbContext
     {
         EntityEntry entry = _concreteDb.Entry(entity);
 
-        entry.Navigation(navigation).EntityEntry.State = EntityState.Unchanged;
     }
 
     public IQueryable<TDbEntity> Include<TDbEntity, TProperty>(IQueryable<TDbEntity> queryable, Expression<Func<TDbEntity, TProperty>> expression) where TDbEntity : class

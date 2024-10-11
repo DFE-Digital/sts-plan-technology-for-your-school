@@ -45,7 +45,7 @@ public class WebhookToDbCommand(ICacheClearer cacheClearer,
             {
                 logger.LogWarning("Entity {MappedEntityType} is invalid", mapped.IncomingEntity?.GetType());
             }
-            else
+            else if (mapped.HaveUpdatedProperties)
             {
                 UpsertEntity(mapped);
                 await DbSaveChanges(cancellationToken);

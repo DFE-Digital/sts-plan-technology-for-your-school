@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Content;
 
-public class MappedEntity
+public class MappedEntity(IDatabaseHelper<ICmsDbContext> databaseHelper)
 {
     private readonly Type _dontCopyValueAttribute = typeof(DontCopyValueAttribute);
 
@@ -24,7 +24,7 @@ public class MappedEntity
 
     public bool IsMinimalPayloadEvent => CmsEvent == CmsEvent.UNPUBLISH || CmsEvent == CmsEvent.DELETE;
 
-    public bool ShouldCopyProperties => AlreadyExistsInDatabase && !IsMinimalPayloadEvent;
+    public bool ShouldCopyProperties => !IsMinimalPayloadEvent;
 
     public bool HaveUpdatedProperties { get; private set; }
 
@@ -170,6 +170,7 @@ public class MappedEntity
             var defaultValue = GetDefaultValue(prop.PropertyType);
             if (defaultValue is null)
                 return false;
+
             prop.SetValue(IncomingEntity, defaultValue);
         }
 
@@ -189,25 +190,46 @@ public class MappedEntity
     private bool UpdateProperties()
     {
         var updatedAnyProperties = false;
-        var propertiesToCopy = PropertiesToCopy(IncomingEntity);
-        foreach (var property in propertiesToCopy)
+        var properties = PropertiesToCopy(IncomingEntity);
+        foreach (var (Property, HasDontCopyValueAttribute) in properties)
         {
-            //Get the new and current values from the incoming and existing entities using reflection
-            var newValue = property.GetValue(IncomingEntity);
-            var currentValue = property.GetValue(ExistingEntity);
+            if (HasDontCopyValueAttribute)
+            {
+                databaseHelper.MarkPropertyAsUnchanged(ExistingEntity ?? IncomingEntity, Property.Name);
+                continue;
+            }
 
-            // Don't update the existing property if the values are the same
-            if (newValue?.Equals(currentValue) == true)
+            if (!AlreadyExistsInDatabase)
             {
                 continue;
             }
 
-            // Update the value of the property in the existing entity with the value from the incoming entity
-            property.SetValue(ExistingEntity, property.GetValue(IncomingEntity));
-            updatedAnyProperties = true;
+            if (TryUpdateProperty(Property))
+            {
+                updatedAnyProperties = true;
+            }
         }
 
-        return updatedAnyProperties;
+        return ExistingEntity == null || updatedAnyProperties;
+    }
+
+    ///
+    ///<returns> Whether the property was updated or not</return>
+    private bool TryUpdateProperty(PropertyInfo Property)
+    {
+        //Get the new and current values from the incoming and existing entities using reflection
+        var newValue = Property.GetValue(IncomingEntity);
+        var currentValue = Property.GetValue(ExistingEntity);
+
+        // Don't update the existing property if the values are the same
+        if (newValue?.Equals(currentValue) == true)
+        {
+            return false;
+        }
+
+        // Update the value of the property in the existing entity with the value from the incoming entity
+        Property.SetValue(ExistingEntity, Property.GetValue(IncomingEntity));
+        return true;
     }
 
     /// <summary>
@@ -219,10 +241,10 @@ public class MappedEntity
     /// </remarks>
     /// <param name="entity">Entity to get copyable properties for</param>
     /// <returns></returns>
-    private IEnumerable<PropertyInfo> PropertiesToCopy(ContentComponentDbEntity entity)
+    private IEnumerable<PropertyToModify> PropertiesToCopy(ContentComponentDbEntity entity)
         => entity.GetType()
                 .GetProperties()
-                .Where(property => !HasDontCopyValueAttribute(property));
+                .Select(property => new PropertyToModify(property, HasDontCopyValueAttribute(property)));
 
     /// <summary>
     /// Does the property have a <see cref="DontCopyValueAttribute"/> property attached to it?
@@ -231,4 +253,6 @@ public class MappedEntity
     /// <returns></returns>
     private bool HasDontCopyValueAttribute(PropertyInfo property)
         => property.CustomAttributes.Any(attribute => attribute.AttributeType == _dontCopyValueAttribute);
+
+    private record PropertyToModify(PropertyInfo Property, bool HasDontCopyValueAttribute);
 }

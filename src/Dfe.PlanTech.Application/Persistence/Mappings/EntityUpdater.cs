@@ -22,7 +22,7 @@ public class EntityUpdater(ILogger<EntityUpdater> logger, IDatabaseHelper<ICmsDb
     /// <returns></returns>
     public async Task<MappedEntity> UpdateEntity(ContentComponentDbEntity incoming, ContentComponentDbEntity? existing, CmsEvent cmsEvent, Func<MappedEntity, Task> postUpdateEntityCallback)
     {
-        var mappedEntity = new MappedEntity()
+        var mappedEntity = new MappedEntity(DatabaseHelper)
         {
             IncomingEntity = incoming,
             ExistingEntity = existing,

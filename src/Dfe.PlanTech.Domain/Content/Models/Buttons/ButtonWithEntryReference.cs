@@ -7,9 +7,8 @@ namespace Dfe.PlanTech.Domain.Content.Models.Buttons;
 /// </summary>
 public class ButtonWithEntryReference : ContentComponent, IButtonWithEntryReference<Button, ContentComponent>
 {
-    public Button Button { get; init; } = null!;
-
-    public ContentComponent LinkToEntry { get; init; } = null!;
+    public Button? Button { get; init; } = null!;
+    public ContentComponent? LinkToEntry { get; init; } = null!;
 
     public ButtonWithEntryReferenceLink? Link { get; set; }
 

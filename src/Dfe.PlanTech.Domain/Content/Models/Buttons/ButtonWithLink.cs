@@ -7,7 +7,7 @@ namespace Dfe.PlanTech.Domain.Content.Models.Buttons;
 /// </summary>
 public class ButtonWithLink : ContentComponent, IButtonWithLink<Button>
 {
-    public Button Button { get; init; } = null!;
+    public Button? Button { get; init; }
 
     public string Href { get; init; } = null!;
 }

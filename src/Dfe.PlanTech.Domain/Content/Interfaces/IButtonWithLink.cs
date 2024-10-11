@@ -14,6 +14,6 @@ public interface IButtonWithLink
 public interface IButtonWithLink<out TButton> : IButtonWithLink
 where TButton : IButton
 {
-    public TButton Button { get; }
+    public TButton? Button { get; }
 }
 
