@@ -20,7 +20,8 @@ public abstract class ContentGenerator
     private static void SetInternalNameDefault<T>(T entity) where T : ContentComponentDbEntity
     {
         var internalName = entity.GetType().GetProperty("InternalName");
-        if (internalName != null && internalName.GetValue(entity) == null) internalName.SetValue(entity, "");
+        if (internalName != null && internalName.GetValue(entity) == null)
+            internalName.SetValue(entity, "");
     }
 
     /// <summary>
