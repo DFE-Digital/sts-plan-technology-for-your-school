@@ -159,7 +159,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         modelBuilder.Entity<AnswerDbEntity>(entity =>
         {
-            entity.HasOne(a => a.NextQuestion).WithMany(q => q.PreviousAnswers).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(a => a.ParentQuestion).WithMany(q => q.Answers).OnDelete(DeleteBehavior.Restrict);
 
             entity.ToTable("Answers", Schema);

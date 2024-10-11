@@ -10,12 +10,6 @@ public class AnswerTests : EntityTests<Answer, AnswerDbEntity, AnswerGenerator>
 {
     protected override AnswerGenerator CreateEntityGenerator() => new();
 
-    protected override void ClearDatabase()
-    {
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Answers]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
-    }
-
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(Answer entity)
      => new()
      {
