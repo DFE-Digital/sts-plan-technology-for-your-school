@@ -26,13 +26,6 @@ public class ButtonWithEntryReferenceTests : EntityTests<ButtonWithEntryReferenc
         return new ButtonWithEntryReferenceGenerator(buttons, pages);
     }
 
-    protected override void ClearDatabase()
-    {
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ButtonWithEntryReferences]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Buttons]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
-    }
-
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(ButtonWithEntryReference entity)
      => new()
      {

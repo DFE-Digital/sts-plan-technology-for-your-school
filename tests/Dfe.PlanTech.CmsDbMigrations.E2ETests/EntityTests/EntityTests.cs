@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.Application.Persistence.Commands;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
@@ -404,7 +403,36 @@ public abstract class EntityTests<TEntity, TDbEntity, TEntityGenerator>
         Assert.Equal(deleted, dbEntity.Deleted);
     }
 
-    protected abstract void ClearDatabase();
+    protected virtual void ClearDatabase()
+    {
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[PageContents]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RecommendationSectionAnswers]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RecommendationSectionChunks]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RecommendationSections]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RecommendationIntroContents]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RecommendationIntros]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RecommendationChunkContents]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RecommendationChunkAnswers]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RecommendationChunks]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ButtonWithEntryReferences]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Answers]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Questions]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[NavigationLink]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Sections]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Categories]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Headers]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ButtonWithLinks]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Buttons]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[InsetTexts]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Warnings]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[TextBodies]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Pages]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Titles]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RichTextMarkDbEntity]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RichTextContents]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RichTextDataDbEntity]");
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
+    }
     protected abstract TEntityGenerator CreateEntityGenerator();
     protected abstract Dictionary<string, object?> CreateEntityValuesDictionary(TEntity entity);
     protected abstract void ValidateDbMatches(TEntity entity, TDbEntity? dbEntity, bool published = true, bool archived = false, bool deleted = false);
