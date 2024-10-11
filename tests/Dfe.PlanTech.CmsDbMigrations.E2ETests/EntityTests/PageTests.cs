@@ -10,14 +10,6 @@ public class PageTests() : EntityTests<Page, PageDbEntity, PageGenerator>
 {
     protected override PageGenerator CreateEntityGenerator() => PageGenerator.CreateInstance(Db);
 
-    protected override void ClearDatabase()
-    {
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[PageContents]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Pages]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Titles]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
-    }
-
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(Page entity)
         => new()
         {

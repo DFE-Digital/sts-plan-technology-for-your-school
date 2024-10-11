@@ -16,9 +16,6 @@ public class QuestionDbEntity : ContentComponentDbEntity, IQuestion<AnswerDbEnti
     public string Slug { get; set; } = null!;
 
     [DontCopyValue]
-    public List<AnswerDbEntity> PreviousAnswers { get; set; } = [];
-
-    [DontCopyValue]
     public SectionDbEntity? Section { get; set; }
 
     [DontCopyValue]

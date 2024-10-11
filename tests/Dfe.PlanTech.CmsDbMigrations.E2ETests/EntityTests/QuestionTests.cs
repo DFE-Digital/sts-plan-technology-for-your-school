@@ -9,14 +9,6 @@ namespace Dfe.PlanTech.CmsDbMigrations.E2ETests.EntityTests;
 public class QuestionTests() : EntityTests<Question, QuestionDbEntity, QuestionGenerator>
 {
     protected override QuestionGenerator CreateEntityGenerator() => QuestionGenerator.CreateInstance(Db);
-
-    protected override void ClearDatabase()
-    {
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Answers]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Questions]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
-    }
-
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(Question entity)
      => new()
      {

@@ -1,14 +1,9 @@
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Azure.Messaging.ServiceBus;
-using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;
-using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.CmsDbMigrations.E2ETests.Utilities;
-
 
 public static class EntityToPayload
 {
