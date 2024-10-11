@@ -10,6 +10,9 @@ namespace Dfe.PlanTech.Infrastructure.Data.EntityTypeConfigurations;
 [ExcludeFromCodeCoverage]
 public class ButtonWithEntryReferenceEntityTypeConfiguration : IEntityTypeConfiguration<ButtonWithEntryReferenceDbEntity>
 {
+    /// <summary>
+    /// Configure both as table and as view so that it saves to the table but fetches from the view
+    /// </summary>
     public void Configure(EntityTypeBuilder<ButtonWithEntryReferenceDbEntity> builder)
     {
         builder.ToTable("ButtonWithEntryReferences", CmsDbContext.Schema);
