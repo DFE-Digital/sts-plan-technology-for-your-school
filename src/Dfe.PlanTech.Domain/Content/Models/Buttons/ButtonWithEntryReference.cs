@@ -11,7 +11,7 @@ public class ButtonWithEntryReference : ContentComponent, IButtonWithEntryRefere
 
     public ContentComponent LinkToEntry { get; init; } = null!;
 
-    public string Slug { get; set; } = "";
+    public ButtonWithEntryReferenceLink? Link { get; set; }
 
-    public LinkToEntryType LinkType { get; set; } = LinkToEntryType.Unknown;
+    public LinkToEntryType LinkType => Enum.TryParse<LinkToEntryType>(Link?.LinkType, out var result) ? result : LinkToEntryType.Unknown;
 }

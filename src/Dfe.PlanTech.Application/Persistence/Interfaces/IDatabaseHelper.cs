@@ -69,4 +69,8 @@ public interface IDatabaseHelper<TIDbContext> where TIDbContext : IDbContext
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+
+    public void MarkPropertyAsUnchanged<TEntity>(TEntity entity, string property) where TEntity : class;
+    public void MarkNavigationAsUnchanged<TEntity>(TEntity entity, string navigation) where TEntity : class;
+
 }

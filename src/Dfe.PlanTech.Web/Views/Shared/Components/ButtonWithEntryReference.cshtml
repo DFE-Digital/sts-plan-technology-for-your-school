@@ -6,6 +6,9 @@
 @model Dfe.PlanTech.Domain.Content.Models.Buttons.ButtonWithEntryReference;
 
 @{
+    if(Model.Link is null){
+        return;
+    }
     switch (Model.LinkType)
     {
         case LinkToEntryType.Page:
@@ -13,7 +16,7 @@
                 var buttonWithLink = new ButtonWithLink()
                         {
                             Button = Model.Button,
-                            Href = Model.Slug
+                            Href = Model.Link.Slug
                         };
 
                 <partial name="components/ButtonWithLink" model=@buttonWithLink/>

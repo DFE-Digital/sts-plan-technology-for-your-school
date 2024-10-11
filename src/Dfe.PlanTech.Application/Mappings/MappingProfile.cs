@@ -39,6 +39,7 @@ public class CmsMappingProfile : Profile
         CreateMap<ButtonDbEntity, Button>();
         CreateMap<ButtonWithEntryReferenceDbEntity, ButtonWithEntryReference>();
         CreateMap<ButtonWithLinkDbEntity, ButtonWithLink>();
+        CreateMap<ButtonWithEntryReferenceLinkDbEntity, ButtonWithEntryReferenceLink>();
         CreateMap<CategoryDbEntity, Category>();
         CreateMap<CSLinkDbEntity, CSLink>();
         CreateMap<HeaderDbEntity, Header>();

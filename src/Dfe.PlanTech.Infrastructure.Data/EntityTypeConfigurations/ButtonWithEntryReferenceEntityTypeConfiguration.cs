@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Dfe.PlanTech.Infrastructure.Data.EntityTypeConfigurations;
@@ -11,10 +12,8 @@ public class ButtonWithEntryReferenceEntityTypeConfiguration : IEntityTypeConfig
 {
     public void Configure(EntityTypeBuilder<ButtonWithEntryReferenceDbEntity> builder)
     {
-        builder.ToView("ButtonWithEntryReferencesWithSlug").ToTable("ButtonWithEntryReferencesWithSlug");
+        builder.ToTable("ButtonWithEntryReferences", CmsDbContext.Schema);
         builder.Navigation(button => button.Button).AutoInclude();
-
-        builder.Property(button => button.LinkType)
-            .HasConversion(linkType => linkType.ToString(), linkType => (LinkToEntryType)Enum.Parse(typeof(LinkToEntryType), linkType));
+        builder.Navigation(button => button.Link).AutoInclude();
     }
 }

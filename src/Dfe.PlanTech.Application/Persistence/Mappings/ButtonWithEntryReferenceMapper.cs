@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Dfe.PlanTech.Application.Content;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Microsoft.Extensions.Logging;
@@ -16,5 +17,14 @@ public class ButtonWithEntryReferenceMapper(EntityUpdater updater,
         values = MoveValueToNewKey(values, "linkToEntry", "linkToEntryId");
 
         return values;
+    }
+
+    protected override Task PostUpdateEntityCallback(MappedEntity mappedEntity, CancellationToken cancellationToken)
+    {
+        var entity = mappedEntity.ExistingEntity ?? mappedEntity.IncomingEntity;
+
+        DatabaseHelper.MarkNavigationAsUnchanged(entity, "Link");
+
+        return Task.CompletedTask;
     }
 }

@@ -150,7 +150,7 @@ public static class ProgramExtensions
                         sqlServerOptionsBuilder
                             .CommandTimeout((int)TimeSpan.FromSeconds(30).TotalSeconds)
                             .EnableRetryOnFailure();
-                    })
+                    }).EnableSensitiveDataLogging()
         );
 
         services.AddDbContext<IPlanTechDbContext, PlanTechDbContext>(databaseOptionsAction);

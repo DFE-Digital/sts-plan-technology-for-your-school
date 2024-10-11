@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -60,6 +61,22 @@ where TIDbContext : IDbContext
     }
 
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken) => _concreteDb.SaveChangesAsync(cancellationToken);
+
+    public void MarkPropertyAsUnchanged<TEntity>(TEntity entity, string property)
+    where TEntity : class
+    {
+        EntityEntry entry = _concreteDb.Entry(entity);
+
+        entry.Property(property).EntityEntry.State = EntityState.Unchanged;
+    }
+
+    public void MarkNavigationAsUnchanged<TEntity>(TEntity entity, string navigation)
+    where TEntity : class
+    {
+        EntityEntry entry = _concreteDb.Entry(entity);
+
+        entry.Navigation(navigation).EntityEntry.State = EntityState.Unchanged;
+    }
 
     public IQueryable<TDbEntity> Include<TDbEntity, TProperty>(IQueryable<TDbEntity> queryable, Expression<Func<TDbEntity, TProperty>> expression) where TDbEntity : class
     => queryable.Include(expression);

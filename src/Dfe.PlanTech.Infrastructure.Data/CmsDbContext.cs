@@ -24,6 +24,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public DbSet<ButtonDbEntity> Buttons { get; set; }
 
+    public DbSet<ButtonWithEntryReferenceLinkDbEntity> ButtonWithEntryReferenceLinks { get; set; }
     public DbSet<ButtonWithEntryReferenceDbEntity> ButtonWithEntryReferences { get; set; }
 
     public DbSet<ButtonWithLinkDbEntity> ButtonWithLinks { get; set; }
