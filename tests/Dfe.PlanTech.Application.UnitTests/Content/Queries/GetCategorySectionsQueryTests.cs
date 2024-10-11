@@ -9,47 +9,47 @@ namespace Dfe.PlanTech.Application.UnitTests.Content.Queries;
 
 public class GetCategorySectionsQueryTests
 {
-  private readonly ICmsDbContext _db = Substitute.For<ICmsDbContext>();
-  private readonly ILogger<GetCategorySectionsQuery> _logger = Substitute.For<ILogger<GetCategorySectionsQuery>>();
-  private readonly PageDbEntity? _nullPageDbEntity = null;
-  private readonly GetCategorySectionsQuery _getCategorySectionsQuery;
+    private readonly ICmsDbContext _db = Substitute.For<ICmsDbContext>();
+    private readonly ILogger<GetCategorySectionsQuery> _logger = Substitute.For<ILogger<GetCategorySectionsQuery>>();
+    private readonly PageDbEntity? _nullPageDbEntity = null;
+    private readonly GetCategorySectionsQuery _getCategorySectionsQuery;
 
-  private readonly static PageDbEntity _loadedPage = new()
-  {
-    Id = "Page-id",
-    Content = new()
+    private readonly static PageDbEntity _loadedPage = new()
     {
+        Id = "Page-id",
+        Content = new()
+        {
 
-    }
-  };
+        }
+    };
 
-  private readonly static CategoryDbEntity _category = new()
-  {
-    Id = "category-id",
-    ContentPages = new()
+    private readonly static CategoryDbEntity _category = new()
     {
+        Id = "category-id",
+        ContentPages = new()
+        {
 
-    },
-    Sections = new()
+        },
+        Sections = new()
+        {
+
+        }
+    };
+
+    private readonly static CategoryDbEntity _emptyCategoryId = new()
     {
+        Id = "",
+        ContentPages = new()
+        {
 
-    }
-  };
+        },
+        Sections = new()
+        {
 
-  private readonly static CategoryDbEntity _emptyCategoryId = new()
-  {
-    Id = "",
-    ContentPages = new()
-    {
+        }
+    };
 
-    },
-    Sections = new()
-    {
-
-    }
-  };
-
-  private readonly List<SectionDbEntity> _categorySections = new(){
+    private readonly List<SectionDbEntity> _categorySections = new(){
     new(){
       Category = _category,
       CategoryId = _category.Id,
@@ -111,7 +111,7 @@ public class GetCategorySectionsQueryTests
     },
   };
 
-  private readonly List<SectionDbEntity> _sections = new()
+    private readonly List<SectionDbEntity> _sections = new()
     {
     new(){
       Category = new(){
@@ -121,83 +121,83 @@ public class GetCategorySectionsQueryTests
       }
     };
 
-  public GetCategorySectionsQueryTests()
-  {
-    _loadedPage.Content.Clear();
-    _category.ContentPages.Add(_loadedPage);
-    _sections.AddRange(_categorySections);
-
-    _getCategorySectionsQuery = new GetCategorySectionsQuery(_db, _logger);
-
-    _db.Sections.Returns(_sections.AsQueryable());
-
-    _db.ToListCachedAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>())
-        .Returns(callinfo =>
-        {
-          var queryable = callinfo.ArgAt<IQueryable<SectionDbEntity>>(0);
-
-          return queryable.ToList();
-        });
-  }
-
-  [Fact]
-  public async Task Should_Retrieve_Sections_When_Page_Has_Category()
-  {
-    _loadedPage.Content.Add(_category);
-
-    await _getCategorySectionsQuery.TryLoadChildren(_loadedPage, CancellationToken.None);
-
-    await _db.ReceivedWithAnyArgs(1)
-                 .ToListCachedAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
-
-    var category = _category;
-
-    Assert.Equal(_categorySections.Count, category.Sections.Count);
-
-    foreach (var section in _categorySections)
+    public GetCategorySectionsQueryTests()
     {
-      var matching = category.Sections.Find(s => section.Id == s.Id);
+        _loadedPage.Content.Clear();
+        _category.ContentPages.Add(_loadedPage);
+        _sections.AddRange(_categorySections);
 
-      Assert.NotNull(matching);
+        _getCategorySectionsQuery = new GetCategorySectionsQuery(_db, _logger);
 
-      foreach (var question in section.Questions)
-      {
-        var matchingQuestion = matching.Questions.Find(q => q.Id == question.Id);
-        Assert.NotNull(matchingQuestion);
-        Assert.Equal(question.Slug, matchingQuestion.Slug);
-        Assert.Null(matchingQuestion.Text);
-        Assert.Null(matchingQuestion.HelpText);
-      }
+        _db.Sections.Returns(_sections.AsQueryable());
+
+        _db.ToListCachedAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>())
+            .Returns(callinfo =>
+            {
+                var queryable = callinfo.ArgAt<IQueryable<SectionDbEntity>>(0);
+
+                return queryable.ToList();
+            });
     }
-  }
 
-  [Fact]
-  public async Task Should_Not_Retrieve_ButtonWithEntryReferences_For_Page_When_NoButtons()
-  {
-    await _getCategorySectionsQuery.TryLoadChildren(_loadedPage, CancellationToken.None);
+    [Fact]
+    public async Task Should_Retrieve_Sections_When_Page_Has_Category()
+    {
+        _loadedPage.Content.Add(_category);
 
-    await _db.ReceivedWithAnyArgs(0)
-                 .ToListCachedAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
-  }
+        await _getCategorySectionsQuery.TryLoadChildren(_loadedPage, CancellationToken.None);
 
-  [Fact]
-  public async Task Should_Log_No_Matching_Category_Error()
-  {
-    _loadedPage.Content.Add(_emptyCategoryId);
-    await _getCategorySectionsQuery.TryLoadChildren(_loadedPage, CancellationToken.None);
+        await _db.ReceivedWithAnyArgs(1)
+                     .ToListCachedAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
 
-    var errorMessage = $"Could not find matching category {_category.Id} in (null)";
+        var category = _category;
 
-    Assert.Single(_logger.GetMatchingReceivedMessages(errorMessage, LogLevel.Error));
-    Assert.Equal("", _loadedPage.Content[0].Id);
-    Assert.Empty(_loadedPage.ContentPages);
-  }
+        Assert.Equal(_categorySections.Count, category.Sections.Count);
 
-  [Fact]
-  public async Task Should_Throw_Null_Reference_Exception()
-  {
+        foreach (var section in _categorySections)
+        {
+            var matching = category.Sections.Find(s => section.Id == s.Id);
+
+            Assert.NotNull(matching);
+
+            foreach (var question in section.Questions)
+            {
+                var matchingQuestion = matching.Questions.Find(q => q.Id == question.Id);
+                Assert.NotNull(matchingQuestion);
+                Assert.Equal(question.Slug, matchingQuestion.Slug);
+                Assert.Null(matchingQuestion.Text);
+                Assert.Null(matchingQuestion.HelpText);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task Should_Not_Retrieve_ButtonWithEntryReferences_For_Page_When_NoButtons()
+    {
+        await _getCategorySectionsQuery.TryLoadChildren(_loadedPage, CancellationToken.None);
+
+        await _db.ReceivedWithAnyArgs(0)
+                     .ToListCachedAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Should_Log_No_Matching_Category_Error()
+    {
+        _loadedPage.Content.Add(_emptyCategoryId);
+        await _getCategorySectionsQuery.TryLoadChildren(_loadedPage, CancellationToken.None);
+
+        var errorMessage = $"Could not find matching category {_category.Id} in (null)";
+
+        Assert.Single(_logger.GetMatchingReceivedMessages(errorMessage, LogLevel.Error));
+        Assert.Equal("", _loadedPage.Content[0].Id);
+        Assert.Empty(_loadedPage.ContentPages);
+    }
+
+    [Fact]
+    public async Task Should_Throw_Null_Reference_Exception()
+    {
 #pragma warning disable CS8604 // Possible null reference argument.
-    await Assert.ThrowsAsync<NullReferenceException>(async () => await _getCategorySectionsQuery.TryLoadChildren(_nullPageDbEntity, CancellationToken.None));
+        await Assert.ThrowsAsync<NullReferenceException>(async () => await _getCategorySectionsQuery.TryLoadChildren(_nullPageDbEntity, CancellationToken.None));
 #pragma warning restore CS8604 // Possible null reference argument.
-  }
+    }
 }
