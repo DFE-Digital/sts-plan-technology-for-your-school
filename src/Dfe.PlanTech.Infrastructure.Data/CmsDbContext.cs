@@ -12,7 +12,6 @@ using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Dfe.PlanTech.Infrastructure.Data;
 
@@ -168,17 +167,13 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>(entity =>
         {
-            entity.ToView("ButtonWithEntryReferencesWithSlug");
             entity.Navigation(button => button.Button).AutoInclude();
-            entity.Property(button => button.LinkType)
-                .HasConversion(linkType => linkType.ToString(), linkType => (LinkToEntryType)Enum.Parse(typeof(LinkToEntryType), linkType))
-                .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
-
-            entity.Property(button => button.Slug).Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
         });
 
         modelBuilder.Entity<ButtonWithLinkDbEntity>()
             .Navigation(button => button.Button).AutoInclude();
+
+        modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>().Navigation(button => button.Button).AutoInclude();
 
         modelBuilder.Entity<PageContentDbEntity>(entity =>
         {
