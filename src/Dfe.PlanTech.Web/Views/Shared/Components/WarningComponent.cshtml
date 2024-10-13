@@ -1,5 +1,10 @@
 @model Dfe.PlanTech.Domain.Content.Models.WarningComponent;
 
+@if (Model.Text == null)
+{
+    return;
+}
+
 <warning-component>
   @{
     await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Text);

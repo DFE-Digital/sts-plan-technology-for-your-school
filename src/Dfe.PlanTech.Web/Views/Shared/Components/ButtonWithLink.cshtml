@@ -1,3 +1,8 @@
 @model Dfe.PlanTech.Domain.Content.Models.Buttons.ButtonWithLink;
 
+@if (Model.Button == null)
+{
+    return;
+}
+
 <govuk-button-link href=@Model.Href is-start-button=@Model.Button.IsStartButton>@Model.Button.Value</govuk-button-link>

@@ -11,10 +11,10 @@ public interface IButtonWithEntryReference<out TButton, out TContent> : IButtonW
 where TButton : IButton
 where TContent : IContentComponentType
 {
-    public TButton Button { get; }
+    public TButton? Button { get; }
 
     /// <summary>
     /// What content this button should link to
     /// </summary>
-    public TContent LinkToEntry { get; }
+    public TContent? LinkToEntry { get; }
 }

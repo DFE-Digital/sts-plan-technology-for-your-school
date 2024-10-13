@@ -10,6 +10,11 @@
 }
 
 @{
+    if (Model.Button == null || Model.LinkToEntry == null)
+    {
+        return;
+    }
+    
     switch (Model.LinkToEntry)
     {
         case Page pageContent:

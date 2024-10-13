@@ -5,5 +5,5 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 
 public class WarningComponent : ContentComponent, IWarningComponent<TextBody>
 {
-    public TextBody Text { get; init; } = null!;
+    public TextBody? Text { get; init; }
 }

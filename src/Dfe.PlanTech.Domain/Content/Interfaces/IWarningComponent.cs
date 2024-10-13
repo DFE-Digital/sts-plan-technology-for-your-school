@@ -15,5 +15,5 @@ where TTextBody : ITextBody
     /// <summary>
     /// Warning text
     /// </summary>
-    public TTextBody Text { get; }
+    public TTextBody? Text { get; }
 }
