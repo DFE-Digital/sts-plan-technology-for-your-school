@@ -25,8 +25,6 @@ public class PageEntityTypeConfiguration : IEntityTypeConfiguration<PageDbEntity
                 right => right.HasOne(pageContent => pageContent.Page).WithMany().HasForeignKey("PageId").OnDelete(DeleteBehavior.Restrict)
               );
 
-        builder.HasMany(p => p.AllPageContents).WithOne(pc => pc.Page).HasForeignKey(pc => pc.PageId);
-
         builder.HasOne(page => page.Title).WithMany(title => title.Pages).OnDelete(DeleteBehavior.Restrict);
     }
 }
