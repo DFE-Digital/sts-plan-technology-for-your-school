@@ -10,12 +10,6 @@ public class NavigationLinkTests : EntityTests<NavigationLink, NavigationLinkDbE
 {
     protected override NavigationLinkGenerator CreateEntityGenerator() => new();
 
-    protected override void ClearDatabase()
-    {
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[NavigationLink]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
-    }
-
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(NavigationLink entity)
      => new()
      {

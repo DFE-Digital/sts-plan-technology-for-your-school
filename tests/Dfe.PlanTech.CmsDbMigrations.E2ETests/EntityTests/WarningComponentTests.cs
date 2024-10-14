@@ -19,15 +19,6 @@ public class WarningComponentTests() : EntityTests<WarningComponent, WarningComp
         return new WarningComponentGenerator(textBodies);
     }
 
-    protected override void ClearDatabase()
-    {
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Warnings]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[TextBodies]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RichTextMarkDbEntity]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RichTextContents]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RichTextDataDbEntity]");
-    }
-
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(WarningComponent entity)
     => new()
     {

@@ -159,7 +159,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         modelBuilder.Entity<AnswerDbEntity>(entity =>
         {
-            entity.HasOne(a => a.NextQuestion).WithMany(q => q.PreviousAnswers).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(a => a.ParentQuestion).WithMany(q => q.Answers).OnDelete(DeleteBehavior.Restrict);
 
             entity.ToTable("Answers", Schema);
@@ -241,7 +240,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
     }
 
     public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
-        => FirstOrDefaultAsync(
+        => FirstOrDefaultCachedAsync(
             Pages.Where(page => page.Slug == slug)
                 .Include(page => page.BeforeTitleContent)
                 .Include(page => page.Content)
@@ -249,17 +248,23 @@ public class CmsDbContext : DbContext, ICmsDbContext
                 .AsSplitQuery(),
             cancellationToken);
 
-    public async Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+    public async Task<List<T>> ToListCachedAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     {
         var key = GetCacheKey(queryable);
         return await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
             (q, ctoken) => q.ToListAsync(ctoken), cancellationToken);
     }
 
-    public async Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+    public async Task<T?> FirstOrDefaultCachedAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     {
         var key = GetCacheKey(queryable);
         return await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
             (q, ctoken) => q.FirstOrDefaultAsync(ctoken), cancellationToken);
     }
+
+    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+        => queryable.ToListAsync(cancellationToken);
+
+    public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+        => queryable.FirstOrDefaultAsync(cancellationToken);
 }

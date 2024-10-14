@@ -38,9 +38,19 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
         modelBuilder.Entity<User>(builder =>
         {
             builder.HasKey(user => user.Id);
+            builder.ToTable(tb => tb.HasTrigger("tr_user"));
             builder.Property(user => user.Id).ValueGeneratedOnAdd();
             builder.Property(user => user.DateCreated).ValueGeneratedOnAdd();
             builder.Property(user => user.DfeSignInRef).HasMaxLength(30);
+            builder.Property(user => user.DateLastUpdated).HasColumnType("datetime").HasDefaultValue();
+        });
+
+        //Setup Establishment Table
+        modelBuilder.Entity<Establishment>(builder =>
+        {
+            builder.HasKey(establishment => establishment.Id);
+            builder.ToTable(tb => tb.HasTrigger("tr_establishment"));
+            builder.Property(establishment => establishment.DateLastUpdated).HasColumnType("datetime").HasDefaultValue();
         });
 
         // Setup SignIn Table
@@ -82,13 +92,17 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
         modelBuilder.Entity<Submission>(builder =>
         {
             builder.HasKey(submission => submission.Id);
+            builder.ToTable(tb => tb.HasTrigger("tr_submission"));
             builder.Property(submission => submission.DateCreated).HasColumnType("datetime").HasDefaultValue();
+            builder.Property(submission => submission.DateLastUpdated).HasColumnType("datetime").HasDefaultValue();
         });
 
         modelBuilder.Entity<Response>(builder =>
         {
             builder.HasKey(response => response.Id);
+            builder.ToTable(tb => tb.HasTrigger("tr_response"));
             builder.Property(response => response.DateCreated).HasColumnType("datetime").ValueGeneratedOnAdd();
+            builder.Property(submission => submission.DateLastUpdated).HasColumnType("datetime").HasDefaultValue();
         });
 
         modelBuilder.Entity<SectionStatusDto>(builder =>

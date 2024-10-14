@@ -23,7 +23,7 @@ public class GetCategorySectionsQuery(ICmsDbContext db, ILogger<GetCategorySecti
             if (!pageHasCategories)
                 return;
 
-            var sections = await db.ToListAsync(SectionsForPageQueryable(page), cancellationToken);
+            var sections = await db.ToListCachedAsync(SectionsForPageQueryable(page), cancellationToken);
 
             CopySectionsToPage(page, sections);
         }
@@ -45,8 +45,7 @@ public class GetCategorySectionsQuery(ICmsDbContext db, ILogger<GetCategorySecti
 
         foreach (var cat in sectionsGroupedByCategory)
         {
-            var matching = page.Content.OfType<CategoryDbEntity>()
-                                        .FirstOrDefault(category => category != null && category.Id == cat.Key);
+            var matching = page.Content.OfType<CategoryDbEntity>().FirstOrDefault(category => category.Id == cat.Key);
 
             if (matching == null)
             {
@@ -54,7 +53,7 @@ public class GetCategorySectionsQuery(ICmsDbContext db, ILogger<GetCategorySecti
                 continue;
             }
 
-            bool sectionsValid = AllSectionsValid(sections);
+            var sectionsValid = AllSectionsValid(sections);
 
             if (!sectionsValid)
             {
