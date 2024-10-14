@@ -1,5 +1,5 @@
 import { selfAssessmentSlug } from "../helpers/index.js";
-import { quickNavigateQuestions, validateRecommendationForMaturity } from "./index.js";
+import { quickNavigateQuestions, validateRecommendationForMaturity, validateAndTestQuestionPages } from "./index.js";
 
 /**
  * Navigates through sections according the given paths, using minimal validation
@@ -22,7 +22,8 @@ export const quickNavigateToRecommendations = (section, paths, maturity) => {
             cy.get("a.govuk-button.govuk-link").contains("Continue").click();
 
             // Conduct self assessment according to path
-            quickNavigateQuestions(path, section);
+//            quickNavigateQuestions(path, section);
+            validateAndTestQuestionPages(path, section, false)
 
             // Navigate through Check Answers page and return to self assessment page
             cy.url().should("include", `${section.interstitialPage.fields.slug}/check-answers`);
