@@ -131,7 +131,7 @@ public class GetCategorySectionsQueryTests
 
         _db.Sections.Returns(_sections.AsQueryable());
 
-        _db.ToListAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>())
+        _db.ToListCachedAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>())
             .Returns(callinfo =>
             {
                 var queryable = callinfo.ArgAt<IQueryable<SectionDbEntity>>(0);
@@ -148,7 +148,7 @@ public class GetCategorySectionsQueryTests
         await _getCategorySectionsQuery.TryLoadChildren(_loadedPage, CancellationToken.None);
 
         await _db.ReceivedWithAnyArgs(1)
-                     .ToListAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
+                     .ToListCachedAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
 
         var category = _category;
 
@@ -177,7 +177,7 @@ public class GetCategorySectionsQueryTests
         await _getCategorySectionsQuery.TryLoadChildren(_loadedPage, CancellationToken.None);
 
         await _db.ReceivedWithAnyArgs(0)
-                     .ToListAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
+                     .ToListCachedAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]

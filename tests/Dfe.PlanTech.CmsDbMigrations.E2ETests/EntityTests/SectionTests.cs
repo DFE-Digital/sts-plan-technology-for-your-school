@@ -29,6 +29,7 @@ public class SectionTests() : EntityTests<Section, SectionDbEntity, SectionGener
 
     protected override void ClearDatabase()
     {
+        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Answers]");
         Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Questions]");
         Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Sections]");
         Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[PageContents]");

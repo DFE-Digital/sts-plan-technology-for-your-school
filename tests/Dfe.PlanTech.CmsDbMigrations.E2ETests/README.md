@@ -35,7 +35,6 @@ For each content type test, there are potentially _thousands_ of various content
 _Note: These instructions require Docker, but that is not required to run the tests. You can skip the Docker instructions and move on to the next section if you already have an MSSQL Server to test against._
 
 #### Setup a database
-
 1. Create an [Azure SQL Edge server] by running the following command in your terminal:
 ```bash
 docker run --cap-add SYS_PTRACE -e 'ACCEPT_EULA=1' -e "MSSQL_SA_PASSWORD=Pa5ssw0rd@G0esH3r3" -p 1433:1433 --name azuresqledge -d mcr.microsoft.com/azure-sql-edge`.
@@ -47,7 +46,7 @@ Notes:
 2. Connect to the server and create a new database by either:
    - running the following command (not supported on Arm64 chips):
        ```bash
-       docker exec -it azuresqledge /opt/mssql-tools/bin/sqlcmd \
+       docker exec -it plantechtest /opt/mssql-tools/bin/sqlcmd \
           -S localhost -U SA -P "Pa5ssw0rd@G0esH3r3" \
           -Q 'CREATE DATABASE [plantech-mock-db]'
        ```

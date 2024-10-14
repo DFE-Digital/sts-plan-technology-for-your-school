@@ -111,15 +111,15 @@ public class RecommendationsRepositoryTests
 
         _repository = new RecommendationsRepository(_db, _logger);
 
-        _db.FirstOrDefaultAsync(Arg.Any<TestAsyncEnumerableEfCore<RecommendationsViewDto>>())
+        _db.FirstOrDefaultCachedAsync(Arg.Any<TestAsyncEnumerableEfCore<RecommendationsViewDto>>())
             .Returns(args => ((TestAsyncEnumerableEfCore<RecommendationsViewDto>)args[0]).FirstOrDefaultAsync());
     }
 
     private void SetupMockQueryable<TEntity>()
     {
-        _db.ToListAsync(Arg.Any<IQueryable<TEntity>>())
+        _db.ToListCachedAsync(Arg.Any<IQueryable<TEntity>>())
             .Returns(args => ((IQueryable<TEntity>)args[0]).ToListAsync());
-        _db.FirstOrDefaultAsync(Arg.Any<IQueryable<TEntity>>())
+        _db.FirstOrDefaultCachedAsync(Arg.Any<IQueryable<TEntity>>())
             .Returns(args => ((IQueryable<TEntity>)args[0]).FirstOrDefaultAsync());
     }
 

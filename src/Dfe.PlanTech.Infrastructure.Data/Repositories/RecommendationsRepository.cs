@@ -13,7 +13,7 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
 
     public async Task<SubtopicRecommendationDbEntity?> GetCompleteRecommendationsForSubtopic(string subtopicId, CancellationToken cancellationToken)
     {
-        var recommendation = await _db.FirstOrDefaultAsync(
+        var recommendation = await _db.FirstOrDefaultCachedAsync(
             _db.SubtopicRecommendations.Where(subtopicRecommendation => subtopicRecommendation.SubtopicId == subtopicId)
                 .Select(subtopicRecommendation => new SubtopicRecommendationDbEntity()
                 {
@@ -36,12 +36,12 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
             return null;
         }
 
-        var intros = await _db.ToListAsync(
+        var intros = await _db.ToListCachedAsync(
             _db.RecommendationIntros
                 .Where(intro => intro.SubtopicRecommendations.Any(subtopicRec => subtopicRec.Id == recommendation.Id))
                 .Include(intro => intro.Header), cancellationToken);
 
-        var chunks = await _db.ToListAsync(
+        var chunks = await _db.ToListCachedAsync(
             _db.RecommendationChunks
                 .Where(chunk => chunk.RecommendationSections.Any(section => section.Id == recommendation.SectionId))
                 .Select(chunk => new RecommendationChunkDbEntity()
@@ -54,7 +54,7 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
                 })
                 .OrderBy(chunk => chunk.Order), cancellationToken);
 
-        var introContent = await _db.ToListAsync(
+        var introContent = await _db.ToListCachedAsync(
             _db.RecommendationIntroContents.Where(introContent => introContent.RecommendationIntro != null &&
                                                                   introContent.RecommendationIntro
                                                                       .SubtopicRecommendations
@@ -67,7 +67,7 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
                     Id = introContent.Id
                 }), cancellationToken);
 
-        var chunkContent = await _db.ToListAsync(
+        var chunkContent = await _db.ToListCachedAsync(
             _db.RecommendationChunkContents.Where(chunkContent =>
                     chunkContent.RecommendationChunk != null &&
                     chunkContent.RecommendationChunk.RecommendationSections.Any(section =>
@@ -83,7 +83,7 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
         LogInvalidJoinRows(introContent);
         LogInvalidJoinRows(chunkContent);
 
-        await _db.ToListAsync(
+        await _db.ToListCachedAsync(
             _db.RichTextContentWithSubtopicRecommendationIds
                 .Where(rt => rt.SubtopicRecommendationId == recommendation.Id), cancellationToken);
 
@@ -122,7 +122,7 @@ public class RecommendationsRepository(ICmsDbContext db, ILogger<IRecommendation
 
     public Task<RecommendationsViewDto?> GetRecommenationsViewDtoForSubtopicAndMaturity(string subtopicId,
         string maturity, CancellationToken cancellationToken)
-        => _db.FirstOrDefaultAsync(
+        => _db.FirstOrDefaultCachedAsync(
             _db.SubtopicRecommendations.Where(subtopicRecommendation => subtopicRecommendation.SubtopicId == subtopicId)
                 .Select(subtopicRecommendation => subtopicRecommendation.Intros.FirstOrDefault(intro => intro.Maturity == maturity))
                 .Select(intro => intro != null ? new RecommendationsViewDto(intro.Slug, intro.Header.Text) : null),

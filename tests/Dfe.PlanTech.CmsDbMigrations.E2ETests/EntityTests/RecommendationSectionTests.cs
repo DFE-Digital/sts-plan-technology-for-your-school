@@ -11,17 +11,6 @@ public class RecommendationSectionTests() : EntityTests<RecommendationSection, R
 {
     protected override RecommendationSectionGenerator CreateEntityGenerator() => RecommendationSectionGenerator.CreateInstance(Db);
 
-    protected override void ClearDatabase()
-    {
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RecommendationSectionAnswers]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RecommendationSectionChunks]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RecommendationSections]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RecommendationChunkAnswers]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RecommendationChunks]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Answers]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Headers]");
-    }
-
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(RecommendationSection entity)
      => new()
      {

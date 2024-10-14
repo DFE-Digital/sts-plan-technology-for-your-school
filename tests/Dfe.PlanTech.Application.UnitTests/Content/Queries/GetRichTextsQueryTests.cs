@@ -71,7 +71,7 @@ public class GetRichTextsQueryTests
 
         _db.RichTextContentWithSlugs.Returns(_richTextContentsWithSlug.AsQueryable());
 
-        _db.ToListAsync(Arg.Any<IQueryable<RichTextContentDbEntity>>(), Arg.Any<CancellationToken>())
+        _db.ToListCachedAsync(Arg.Any<IQueryable<RichTextContentDbEntity>>(), Arg.Any<CancellationToken>())
             .Returns(callinfo =>
             {
                 var queryable = callinfo.ArgAt<IQueryable<RichTextContentDbEntity>>(0);
@@ -79,7 +79,7 @@ public class GetRichTextsQueryTests
                 return queryable.ToList();
             });
 
-        _db.ToListAsync(Arg.Any<IQueryable<RichTextContentWithSlugDbEntity>>(), Arg.Any<CancellationToken>())
+        _db.ToListCachedAsync(Arg.Any<IQueryable<RichTextContentWithSlugDbEntity>>(), Arg.Any<CancellationToken>())
             .Returns(callinfo =>
             {
                 var queryable = callinfo.ArgAt<IQueryable<RichTextContentWithSlugDbEntity>>(0);
@@ -101,7 +101,7 @@ public class GetRichTextsQueryTests
 
         await _getRichTextsQuery.TryLoadChildren(_loadedPage, CancellationToken.None);
 
-        await _db.ReceivedWithAnyArgs(1).ToListAsync(Arg.Any<IQueryable<RichTextContentWithSlugDbEntity>>(), Arg.Any<CancellationToken>());
+        await _db.ReceivedWithAnyArgs(1).ToListCachedAsync(Arg.Any<IQueryable<RichTextContentWithSlugDbEntity>>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -110,7 +110,7 @@ public class GetRichTextsQueryTests
         await _getRichTextsQuery.TryLoadChildren(_loadedPage, CancellationToken.None);
 
         await _db.ReceivedWithAnyArgs(0)
-            .ToListAsync(Arg.Any<IQueryable<RichTextContentWithSlugDbEntity>>(), Arg.Any<CancellationToken>());
+            .ToListCachedAsync(Arg.Any<IQueryable<RichTextContentWithSlugDbEntity>>(), Arg.Any<CancellationToken>());
     }
 
     [Theory]
@@ -131,7 +131,7 @@ public class GetRichTextsQueryTests
         await richTextQuery.TryLoadChildren(_loadedPage, CancellationToken.None);
 
         await _db.Received(1)
-            .ToListAsync(Arg.Is<IQueryable<RichTextContentWithSlugDbEntity>>(
+            .ToListCachedAsync(Arg.Is<IQueryable<RichTextContentWithSlugDbEntity>>(
                 arg => arg.Count() == expectedContentCount
                 ), Arg.Any<CancellationToken>());
     }
