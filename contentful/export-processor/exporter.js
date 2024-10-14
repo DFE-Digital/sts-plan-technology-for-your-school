@@ -1,8 +1,16 @@
 import contentfulExport from "contentful-export";
+import { getArgumentValue } from "./options.js";
 
-const getBooleanValue = (obj, prop) => obj[prop] === 'true' || obj[prop] === true;
+const DefaultExportOptions = {
+  content: true,
+  contentmodel: true,
+  webhooks: false,
+  roles: false,
+  editorinterfaces: false,
+  tags: false,
+};
 
-const getBooleanValueFromEnv = (prop) => getBooleanValue(process.env, prop);
+const getBooleanValueFromEnv = (prop) => getArgumentValue(process.env, prop, true);
 
 /**
  * Exports Contentful data.
@@ -11,19 +19,22 @@ const getBooleanValueFromEnv = (prop) => getBooleanValue(process.env, prop);
  *
  * @return {object} The exported Contentful data.
  */
-export default function exportContentfulData({ spaceId, deliveryToken, managementToken, environment, exportDirectory } = {}) {
+export default function exportContentfulData({ spaceId, deliveryToken, managementToken, environment, saveFile, usePreview, exportDirectory = "./output", exportOptions = DefaultExportOptions }) {
   const options = {
     spaceId: spaceId ?? process.env.SPACE_ID,
     deliveryToken: deliveryToken ?? process.env.DELIVERY_TOKEN,
     managementToken: managementToken ?? process.env.MANAGEMENT_TOKEN,
     environmentId: environment ?? process.env.ENVIRONMENT,
     host: "api.contentful.com",
-    skipEditorInterfaces: true,
-    skipRoles: true,
-    skipWebhooks: true,
+    skipEditorInterfaces: !exportOptions.editorinterfaces,
+    skipRoles: !exportOptions.roles,
+    skipWebhooks: !exportOptions.webhooks,
+    skipContentModel: !exportOptions.contentmodel,
+    skipContent: !exportOptions.content,
+    skipTags: !exportOptions.tags,
     exportDir: exportDirectory,
-    saveFile: getBooleanValueFromEnv('SAVE_FILE'),
-    includeDrafts: getBooleanValueFromEnv('USE_PREVIEW'),
+    saveFile: saveFile !== undefined ? saveFile : getBooleanValueFromEnv('SAVE_FILE'),
+    includeDrafts: usePreview !== undefined ? usePreview : getBooleanValueFromEnv('USE_PREVIEW'),
   };
 
   return contentfulExport(options);
