@@ -27,7 +27,7 @@ public class GetButtonWithEntryReferencesQuery(ICmsDbContext db, ILogger<GetButt
 
             var buttonQuery = ButtonWithEntryReferencesQueryable(page);
 
-            var buttons = await db.ToListAsync(buttonQuery, cancellationToken);
+            var buttons = await db.ToListCachedAsync(buttonQuery, cancellationToken);
 
             foreach (var button in buttons)
             {

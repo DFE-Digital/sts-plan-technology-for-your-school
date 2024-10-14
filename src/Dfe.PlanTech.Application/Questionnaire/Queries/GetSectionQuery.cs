@@ -34,7 +34,7 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
         var query = _db.Sections.Where(SlugMatchesInterstitialPage(sectionSlug))
                                 .Select(ProjectSection);
 
-        var section = await _db.FirstOrDefaultAsync(query, cancellationToken);
+        var section = await _db.FirstOrDefaultCachedAsync(query, cancellationToken);
 
         if (section == null)
             return null;

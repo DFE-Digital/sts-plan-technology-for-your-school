@@ -148,7 +148,7 @@ public class GetPageFromDbQueryTests
 
     public GetPageFromDbQueryTests()
     {
-        _cmsDbSubstitute.ToListAsync(Arg.Any<IQueryable<SectionDbEntity>>())
+        _cmsDbSubstitute.ToListCachedAsync(Arg.Any<IQueryable<SectionDbEntity>>())
                         .Returns(callinfo =>
                         {
                             var queryable = callinfo.ArgAt<IQueryable<SectionDbEntity>>(0);
@@ -243,8 +243,8 @@ public class GetPageFromDbQueryTests
         Assert.Equal(LANDING_PAGE_SLUG, result.Slug);
 
         await _cmsDbSubstitute.ReceivedWithAnyArgs(1).GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>());
-        await _cmsDbSubstitute.ReceivedWithAnyArgs(0).ToListAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
-        await _cmsDbSubstitute.ReceivedWithAnyArgs(0).ToListAsync(Arg.Any<IQueryable<ButtonWithEntryReferenceDbEntity>>(), Arg.Any<CancellationToken>());
+        await _cmsDbSubstitute.ReceivedWithAnyArgs(0).ToListCachedAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
+        await _cmsDbSubstitute.ReceivedWithAnyArgs(0).ToListCachedAsync(Arg.Any<IQueryable<ButtonWithEntryReferenceDbEntity>>(), Arg.Any<CancellationToken>());
         await _getPageChildrenQuery.ReceivedWithAnyArgs(1).TryLoadChildren(Arg.Any<PageDbEntity>(), Arg.Any<CancellationToken>());
     }
 }
