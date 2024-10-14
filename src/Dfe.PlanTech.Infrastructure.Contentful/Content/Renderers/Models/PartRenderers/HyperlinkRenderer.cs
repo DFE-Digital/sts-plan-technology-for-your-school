@@ -24,39 +24,46 @@ public class HyperlinkRenderer : BaseRichTextContentPartRender
             return stringBuilder;
         }
 
-        AddTagAndHref(content, stringBuilder);
+        stringBuilder.Append("<a ");
+
+        var external = IsExternalLink(content);
+        AddAttributes(content, stringBuilder, external);
 
         if (_options.Classes != null)
         {
             _options.AddClasses(stringBuilder);
         }
 
-        var external = IsExternalLink(content);
-        if (external)
-        {
-            AddBlankTarget(stringBuilder);
-        }
-
         stringBuilder.Append('>');
 
         rendererCollection.RenderChildren(content, stringBuilder);
 
-        stringBuilder.Append(content.Value);
-
-        if (external)
-        {
-            stringBuilder.Append(" (opens in new tab)");
-        }
+        AddLinkText(content, stringBuilder, external);
 
         stringBuilder.Append("</a>");
         return stringBuilder;
     }
 
-    private static void AddTagAndHref(RichTextContent content, StringBuilder stringBuilder)
+    private static void AddAttributes(RichTextContent content, StringBuilder stringBuilder, bool isExternalLink)
     {
-        stringBuilder.Append("<a href=\"");
+        stringBuilder.Append("href=\"");
         stringBuilder.Append(content.Data?.Uri ?? "");
         stringBuilder.Append('"');
+
+        if (isExternalLink)
+        {
+            AddBlankTarget(stringBuilder);
+        }
+    }
+
+    private static void AddLinkText(RichTextContent content, StringBuilder stringBuilder, bool isExternalLink)
+    {
+        stringBuilder.Append(content.Value);
+
+        if (isExternalLink)
+        {
+            stringBuilder.Append(" (opens in new tab)");
+        }
     }
 
     private static void AddBlankTarget(StringBuilder stringBuilder)
