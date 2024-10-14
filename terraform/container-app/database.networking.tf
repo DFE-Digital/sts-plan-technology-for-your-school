@@ -20,7 +20,7 @@ resource "azurerm_private_endpoint" "database" {
   private_service_connection {
     is_manual_connection           = false
     name                           = local.az_sql_vnet.endpoint_name
-    private_connection_resource_id = data.azurerm_sql_server.database.id
+    private_connection_resource_id = data.azurerm_mssql_server.database.id
     subresource_names              = ["sqlServer"]
   }
 }
