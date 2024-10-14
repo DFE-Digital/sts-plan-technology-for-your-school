@@ -37,7 +37,7 @@ public class GetNavigationQueryTests
     public async Task Should_Retrieve_Nav_Links_From_Database()
     {
         _db.NavigationLink.Returns(_dbLinks.AsQueryable());
-        _db.ToListAsync(Arg.Any<IQueryable<NavigationLinkDbEntity>>()).Returns(callInfo =>
+        _db.ToListCachedAsync(Arg.Any<IQueryable<NavigationLinkDbEntity>>()).Returns(callInfo =>
         {
             var queryable = callInfo.ArgAt<IQueryable<NavigationLinkDbEntity>>(0);
 
@@ -58,7 +58,7 @@ public class GetNavigationQueryTests
 
         var emptyNavLinksList = new List<NavigationLinkDbEntity>();
         _db.NavigationLink.Returns(emptyNavLinksList.AsQueryable());
-        _db.ToListAsync(Arg.Any<IQueryable<NavigationLinkDbEntity>>()).Returns(callInfo =>
+        _db.ToListCachedAsync(Arg.Any<IQueryable<NavigationLinkDbEntity>>()).Returns(callInfo =>
         {
             var queryable = callInfo.ArgAt<IQueryable<NavigationLinkDbEntity>>(0);
 
@@ -80,7 +80,7 @@ public class GetNavigationQueryTests
         var emptyNavLinksList = new List<NavigationLinkDbEntity>();
         _db.NavigationLink.Returns(emptyNavLinksList.AsQueryable());
 
-        _db.ToListAsync(Arg.Any<IQueryable<NavigationLinkDbEntity>>()).Throws(callInfo =>
+        _db.ToListCachedAsync(Arg.Any<IQueryable<NavigationLinkDbEntity>>()).Throws(callInfo =>
         {
             throw new Exception("Error occurred");
         });
@@ -100,7 +100,7 @@ public class GetNavigationQueryTests
         var emptyNavLinksList = new List<NavigationLinkDbEntity>();
         _db.NavigationLink.Returns(emptyNavLinksList.AsQueryable());
 
-        _db.ToListAsync(Arg.Any<IQueryable<NavigationLinkDbEntity>>()).Returns(callInfo =>
+        _db.ToListCachedAsync(Arg.Any<IQueryable<NavigationLinkDbEntity>>()).Returns(callInfo =>
         {
             var queryable = callInfo.ArgAt<IQueryable<NavigationLinkDbEntity>>(0);
 

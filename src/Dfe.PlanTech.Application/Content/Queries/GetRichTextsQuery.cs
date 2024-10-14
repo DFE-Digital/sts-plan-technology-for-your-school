@@ -29,7 +29,7 @@ public class GetRichTextsForPageQuery(ICmsDbContext db, ILogger<GetRichTextsForP
 
             var richTextContentQuery = _db.RichTextContentWithSlugs.Where(PageMatchesSlugAndPublishedOrIsPreview(page));
 
-            var richTexts = await _db.ToListAsync(richTextContentQuery, cancellationToken);
+            var richTexts = await _db.ToListCachedAsync(richTextContentQuery, cancellationToken);
 
             foreach (var parent in richTextParents)
             {

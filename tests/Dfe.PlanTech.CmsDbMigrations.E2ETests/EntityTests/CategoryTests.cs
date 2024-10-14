@@ -7,16 +7,6 @@ namespace Dfe.PlanTech.CmsDbMigrations.E2ETests.EntityTests;
 
 public class CategoryTests : EntityTests<Category, CategoryDbEntity, CategoryGenerator>
 {
-    protected override void ClearDatabase()
-    {
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[PageContents]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Questions]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Sections]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Categories]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Headers]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
-    }
-
     protected override CategoryGenerator CreateEntityGenerator()
     {
         var headerGenerator = new HeaderGenerator();

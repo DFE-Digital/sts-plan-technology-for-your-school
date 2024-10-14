@@ -10,12 +10,6 @@ public class ButtonTests : EntityTests<Button, ButtonDbEntity, ButtonGenerator>
 {
     protected override ButtonGenerator CreateEntityGenerator() => new();
 
-    protected override void ClearDatabase()
-    {
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Buttons]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
-    }
-
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(Button entity)
      => new()
      {

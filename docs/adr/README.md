@@ -50,4 +50,4 @@ General information about architectural decision records is available at <https:
 | [0037 - Content Validation Process](./0037-content-validation-process.md)                                   | Proposed |
 | [0038 - SQL Caching Mechanism](0038-sql-caching-mechanism.md)                                               | Proposed |
 | [0039 - Consolidate Azure Function App into Web App](0039-consolidate-function-app.md)                      | Accepted |
-| [0040 - SQL Schema Improvements](0040-sql-schema-improvements.md)                                           | Proposed |
+| [0040 - SQL Schema Improvements](0040-sql-schema-improvements.md)                                           | Accepted |

@@ -10,12 +10,6 @@ public class HeaderTests : EntityTests<Header, HeaderDbEntity, HeaderGenerator>
 {
     protected override HeaderGenerator CreateEntityGenerator() => new();
 
-    protected override void ClearDatabase()
-    {
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Headers]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
-    }
-
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(Header entity)
      => new()
      {
