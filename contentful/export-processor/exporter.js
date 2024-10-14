@@ -13,7 +13,6 @@ const DefaultExportOptions = {
   tags: false,
 };
 
-
 /**
  * Exports Contentful data.
  *
@@ -22,7 +21,6 @@ const DefaultExportOptions = {
  * @return {object} The exported Contentful data.
  */
 export default function exportContentfulData({ spaceId, deliveryToken, managementToken, environment, exportDirectory = "./output", exportOptions = DefaultExportOptions }) {
-  console.log('exporting with options', exportOptions);
   const options = {
     spaceId: spaceId ?? process.env.SPACE_ID,
     deliveryToken: deliveryToken ?? process.env.DELIVERY_TOKEN,
@@ -40,6 +38,5 @@ export default function exportContentfulData({ spaceId, deliveryToken, managemen
     includeDrafts: getBooleanValueFromEnv('USE_PREVIEW'),
   };
 
-  console.log('contentful export options', options);
   return contentfulExport(options);
 }

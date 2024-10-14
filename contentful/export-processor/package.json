@@ -142,6 +142,7 @@
     "scripts": {
         "generate-test-suites": "node data-tools.js -ts true",
         "data-tools": "node data-tools.js -ts false -uj true -s true",
+        "export-all-only": "node data-tools.js -ts false -uj false -s true -e content contentmodel editorinterfaces tags webhooks roles",
         "lint": "eslint"
     },
     "keywords": [],

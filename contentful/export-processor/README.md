@@ -41,6 +41,7 @@ The main one of all of them is the [section](./src/contentful/export-processor/c
     - You can also use:
         1. `npm run generate-test-suites` to generate the test suites
         2. `npm run data-tools` to run the other data tools but not the test suites
+        3. `npm run export-all-only` to export all data from Contentful, but not run any of the data validations etc.
 
 #### Environment variables
 
@@ -63,12 +64,17 @@ The main one of all of them is the [section](./src/contentful/export-processor/c
 Some variables can also be passed as CLI arguments.
 CLI arguments will take precedence over environment variables.
 
-| CLI Argument                | Description                                                             | Matching env variable       |
-| --------------------------- | ----------------------------------------------------------------------- | --------------------------- |
-| -ts, --test-suites          | Generate test suites                                                    | `GENERATE_TEST_SUITES`      |
-| -uj, --export-user-journeys | Export all user journeys                                                | `EXPORT_USER_JOURNEY_PATHS` |
-| -o, --output-dir            | Where to save the outputted data to                                     | `OUTPUT_FILE_DIR`           |
-| -s, --save-all-journeys     | Save all user journeys, not just the minimal required for various paths | `EXPORT_ALL_PATHS`          |
+| CLI Argument                | Description                                                                                                                                                                                                                                                              | Matching env variable       |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- |
+| -ts, --test-suites          | Generate test suites                                                                                                                                                                                                                                                     | `GENERATE_TEST_SUITES`      |
+| -uj, --export-user-journeys | Export all user journeys                                                                                                                                                                                                                                                 | `EXPORT_USER_JOURNEY_PATHS` |
+| -o, --output-dir            | Where to save the outputted data to                                                                                                                                                                                                                                      | `OUTPUT_FILE_DIR`           |
+| -s, --save-all-journeys     | Save all user journeys, not just the minimal required for various paths                                                                                                                                                                                                  | `EXPORT_ALL_PATHS`          |
+| --environment               | Contentful environment                                                                                                                                                                                                                                                   | `ENV` or `ENVIRONMENT`      |
+| --space-id                  | Contentful space ID                                                                                                                                                                                                                                                      | `SPACE_ID`                  |
+| --delivery-token            |                                                                                                                                                                                                                                                                          | `DELIVERY_TOKEN`            |
+| --management-token          |                                                                                                                                                                                                                                                                          | `MANAGEMENT_TOKEN`          |
+| -e, --export                | What data to export from Contentful (e.g. content, contentmodel). HAS to be the lst option provided. Anything supplied will default to 'true', but can be explicitly stated by adding `=<true/false>` after it. E.g. `--export content contentmodel=false webhooks=true` |                             |
 
 ### Generate Test Suites
 

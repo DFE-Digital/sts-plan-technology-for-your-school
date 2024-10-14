@@ -19,8 +19,7 @@ const getCliArgs = () => {
     .option('--delivery-token <delivery-token>', "Contentful delivery token.")
     .option('--management-token <management-token>', "Contentful management token.");
 
-  program.option('-e --export [name..]',
-    `What stuff to export from Contentful. Options are 'content', 'contentmodel', 'webhooks', 'roles', 'editorinterfaces'. Defaults to content and contentmodel. E.g. --export "content=false contentmodel=false"`);
+  program.option('-e, --export [export...]', `What stuff to export from Contentful; this HAS to be the last option provided. Options are 'content', 'contentmodel', 'webhooks', 'roles', 'editorinterfaces'. Defaults to content and contentmodel. Specify '<TYPE>=<true/false> or just <TYPE> for true. E.g. --export "content=false contentmodel=false webhooks" would result in content and content model not being exported, but would export webhooks.`);
 
   program.parse();
 
@@ -37,17 +36,16 @@ const getExportOptions = (args) => {
     webhooks: false
   };
 
-  const exportArguments = args.export.indexOf(" ") > -1 ? args.export.split(" ") : [args.export];
-
-  for (const option of exportArguments) {
-    if (option.indexOf("=") == -1) {
-      console.log("Option was not supplied correctly. Must be in format whattoexport=<boolean, e.g. content=true", option);
+  for (const option of args.export) {
+    if (!option.includes("=")) {
+      exportOptions[option] = true;
       continue;
     }
 
     const [whatToExport, shouldExport] = option.split("=");
 
     if (shouldExport != "true" && shouldExport != "false") {
+      console.error(`Invalid option "${option}". Expected "true" or "false".`);
       continue;
     }
 
@@ -77,11 +75,11 @@ const getOptions = () => {
     spaceId: args.spceId ?? process.env.SPACE_ID,
     deliveryToken: args.deliveryToken ?? process.env.DELIVERY_TOKEN,
     managementToken: args.managementToken ?? process.env.MANAGEMENT_TOKEN,
-    environment: args.environment ?? process.env.ENV ?? "master"
+    environment: args.environment ?? process.env.ENV ?? process.env.ENVIRONMENT ?? "master"
   };
 
   options.exportDirectory = getAndCreateOutputDir(options);
-  console.log('options', options);
+  options.outputDir = options.exportDirectory;;
   return options;
 };
 

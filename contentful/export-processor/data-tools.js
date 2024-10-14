@@ -9,6 +9,7 @@ async function processContentfulData(args) {
   const contentfulData = await ExportContentfulData({ ...args });
 
   if (!args.generateTestSuites && !args.exportUserJourneyPaths && !args.exportUserJourneyPaths) {
+    console.log(`No options set for using data - ending run`);
     return;
   }
 
@@ -19,6 +20,8 @@ async function processContentfulData(args) {
 
   const dataMapper = new DataMapper(contentfulData);
 
+  const outputDir = args.outputDir;
+
   if (args.generateTestSuites) {
     GenerateTestSuites({ dataMapper, outputDir });
   }
@@ -27,7 +30,7 @@ async function processContentfulData(args) {
     WriteUserJourneyPaths({ dataMapper, outputDir, saveAllJourneys: args.saveAllJourneys });
   }
 
-  ErrorLogger.outputDir = combinedOutputDir;
+  ErrorLogger.outputDir = outputDir;
   ErrorLogger.writeErrorsToFile();
 }
 
