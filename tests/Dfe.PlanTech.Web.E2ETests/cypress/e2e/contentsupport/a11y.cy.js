@@ -2,7 +2,7 @@ import 'cypress-axe';
 
 describe('Rich Text Rendering', () => {
   beforeEach(() => {
-    cy.visit('/hello-world');
+    cy.visit('/content/hello-world');
     cy.injectAxe();
   });
 
