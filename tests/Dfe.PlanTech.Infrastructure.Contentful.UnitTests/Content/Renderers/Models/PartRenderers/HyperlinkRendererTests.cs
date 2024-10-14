@@ -50,15 +50,14 @@ public class HyperlinkRendererTests
         Assert.False(accepted);
     }
 
-    [Theory]
-    [InlineData("https://www.test-url.com", "Click Here", "Click Here (opens in new tab)")]
-    [InlineData("https://www.gov.uk/guidance", "Govuk Link", "Govuk Link (opens in new tab)")]
-    [InlineData("content/hello-world", "C&S Link", "C&S Link")]
-    [InlineData("other/internal-link", "Internal Link", "Internal Link")]
-    public void Should_CreateLink_When_PassedValidData(string url, string linkText, string expectedLinkText)
+    [Fact]
+    public void Should_Create_Link_For_New_Tab_When_PassedValidExternalLink()
     {
         var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
         var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
+
+        const string linkText = "Click Here";
+        const string url = "https://www.test-url.com";
 
         var content = new RichTextContent()
         {
@@ -75,7 +74,36 @@ public class HyperlinkRendererTests
         var html = result.ToString();
 
         Assert.Contains($"<a href=\"{url}\"", html);
-        Assert.Contains($">{expectedLinkText}</a>", html);
+        Assert.Contains("target=\"_blank\" rel=\"noopener\"", html);
+        Assert.Contains($">{linkText} (opens in new tab)</a>", html);
+    }
+
+    [Fact]
+    public void Should_Create_Link_For_Same_Tab_When_PassedValidInternalLink()
+    {
+        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
+        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
+
+        const string linkText = "Click Here";
+        const string url = "content/hello-world";
+
+        var content = new RichTextContent()
+        {
+            NodeType = NODE_TYPE,
+            Value = linkText,
+            Data = new RichTextData()
+            {
+                Uri = url
+            }
+        };
+
+        var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
+
+        var html = result.ToString();
+
+        Assert.Contains($"<a href=\"{url}\"", html);
+        Assert.DoesNotContain("target=\"_blank\" rel=\"noopener\"", html);
+        Assert.Contains($">{linkText}</a>", html);
     }
 
     [Fact]
