@@ -1,8 +1,5 @@
 import contentfulExport from "contentful-export";
-
-const getBooleanValue = (obj, prop) => obj[prop] === 'true' || obj[prop] === true;
-
-const getBooleanValueFromEnv = (prop) => getBooleanValue(process.env, prop);
+import { getArgumentValue } from "./options.js";
 
 const DefaultExportOptions = {
   content: true,
@@ -13,6 +10,8 @@ const DefaultExportOptions = {
   tags: false,
 };
 
+const getBooleanValueFromEnv = (prop) => getArgumentValue(process.env, prop, true);
+
 /**
  * Exports Contentful data.
  *
@@ -20,7 +19,7 @@ const DefaultExportOptions = {
  *
  * @return {object} The exported Contentful data.
  */
-export default function exportContentfulData({ spaceId, deliveryToken, managementToken, environment, exportDirectory = "./output", exportOptions = DefaultExportOptions }) {
+export default function exportContentfulData({ spaceId, deliveryToken, managementToken, environment, saveFile, usePreview, exportDirectory = "./output", exportOptions = DefaultExportOptions }) {
   const options = {
     spaceId: spaceId ?? process.env.SPACE_ID,
     deliveryToken: deliveryToken ?? process.env.DELIVERY_TOKEN,
@@ -34,8 +33,8 @@ export default function exportContentfulData({ spaceId, deliveryToken, managemen
     skipContent: !exportOptions.content,
     skipTags: !exportOptions.tags,
     exportDir: exportDirectory,
-    saveFile: getBooleanValueFromEnv('SAVE_FILE'),
-    includeDrafts: getBooleanValueFromEnv('USE_PREVIEW'),
+    saveFile: saveFile !== undefined ? saveFile : getBooleanValueFromEnv('SAVE_FILE'),
+    includeDrafts: usePreview !== undefined ? usePreview : getBooleanValueFromEnv('USE_PREVIEW'),
   };
 
   return contentfulExport(options);

@@ -75,6 +75,8 @@ CLI arguments will take precedence over environment variables.
 | --delivery-token            |                                                                                                                                                                                                                                                                          | `DELIVERY_TOKEN`            |
 | --management-token          |                                                                                                                                                                                                                                                                          | `MANAGEMENT_TOKEN`          |
 | -e, --export                | What data to export from Contentful (e.g. content, contentmodel). HAS to be the lst option provided. Anything supplied will default to 'true', but can be explicitly stated by adding `=<true/false>` after it. E.g. `--export content contentmodel=false webhooks=true` |                             |
+| `--save-file`               | Whether to save the exported Contentful data to a JSON file or not. Defaults to true.                                                                                                                                                                                    | `SAVE_FILE`                 |
+| `--use-preview`             | Export preview/draft from Contentful. Defaults to false                                                                                                                                                                                                                  | `USE_PREVIEW`               |
 
 ### Generate Test Suites
 
