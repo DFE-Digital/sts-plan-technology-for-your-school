@@ -31,11 +31,22 @@ public class HyperlinkRenderer : BaseRichTextContentPartRender
             _options.AddClasses(stringBuilder);
         }
 
-        stringBuilder.Append("\">");
+        var external = IsExternalLink(content);
+        if (external)
+        {
+            AddBlankTarget(stringBuilder);
+        }
+
+        stringBuilder.Append('>');
 
         rendererCollection.RenderChildren(content, stringBuilder);
 
         stringBuilder.Append(content.Value);
+
+        if (external)
+        {
+            stringBuilder.Append(" (opens in new tab)");
+        }
 
         stringBuilder.Append("</a>");
         return stringBuilder;
@@ -46,5 +57,16 @@ public class HyperlinkRenderer : BaseRichTextContentPartRender
         stringBuilder.Append("<a href=\"");
         stringBuilder.Append(content.Data?.Uri ?? "");
         stringBuilder.Append('"');
+    }
+
+    private static void AddBlankTarget(StringBuilder stringBuilder)
+    {
+        stringBuilder.Append("target=\"_blank\" rel=\"noopener\"");
+    }
+
+    private static bool IsExternalLink(RichTextContent content)
+    {
+        var uri = content.Data?.Uri ?? "";
+        return uri.StartsWith("http", StringComparison.InvariantCultureIgnoreCase);
     }
 }

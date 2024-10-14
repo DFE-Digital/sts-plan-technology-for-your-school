@@ -50,14 +50,15 @@ public class HyperlinkRendererTests
         Assert.False(accepted);
     }
 
-    [Fact]
-    public void Should_CreateLink_When_PassedValidData()
+    [Theory]
+    [InlineData("https://www.test-url.com", "Click Here", "Click Here (opens in new tab)")]
+    [InlineData("https://www.gov.uk/guidance", "Govuk Link", "Govuk Link (opens in new tab)")]
+    [InlineData("content/hello-world", "C&S Link", "C&S Link")]
+    [InlineData("other/internal-link", "Internal Link", "Internal Link")]
+    public void Should_CreateLink_When_PassedValidData(string url, string linkText, string expectedLinkText)
     {
         var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
         var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
-
-        const string linkText = "Click Here";
-        const string url = "https://www.test-url.com";
 
         var content = new RichTextContent()
         {
@@ -74,7 +75,7 @@ public class HyperlinkRendererTests
         var html = result.ToString();
 
         Assert.Contains($"<a href=\"{url}\"", html);
-        Assert.Contains($">{linkText}</a>", html);
+        Assert.Contains($">{expectedLinkText}</a>", html);
     }
 
     [Fact]
