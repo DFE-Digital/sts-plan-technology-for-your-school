@@ -39,7 +39,7 @@ public class GetNavigationQuery : ContentRetriever, IGetNavigationQuery
     {
         try
         {
-            var navigationLinks = await _db.ToListAsync(_db.NavigationLink);
+            var navigationLinks = await _db.ToListCachedAsync(_db.NavigationLink);
 
             return navigationLinks;
         }
