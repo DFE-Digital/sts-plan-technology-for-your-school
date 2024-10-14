@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Text;
 using Dfe.PlanTech.Application.Caching.Interfaces;
@@ -9,7 +10,6 @@ using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Dfe.PlanTech.Domain.Exceptions;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Infrastructure.Data.EntityTypeConfigurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
@@ -18,7 +18,7 @@ namespace Dfe.PlanTech.Infrastructure.Data;
 [ExcludeFromCodeCoverage]
 public class CmsDbContext : DbContext, ICmsDbContext
 {
-    public const string Schema = "Contentful";
+    private const string Schema = "Contentful";
 
     public DbSet<AnswerDbEntity> Answers { get; set; }
 
@@ -117,9 +117,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
     IQueryable<WarningComponentDbEntity> ICmsDbContext.Warnings => Warnings;
     #endregion
 
-    private ContentfulOptions? _contentfulOptions;
+    private readonly ContentfulOptions _contentfulOptions;
     private readonly IQueryCacher _queryCacher;
-    private ContentfulOptions ContentfulOptions => _contentfulOptions ??= GetRequiredService<ContentfulOptions>();
 
     public CmsDbContext()
     {
@@ -129,8 +128,89 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public CmsDbContext(DbContextOptions<CmsDbContext> options) : base(options)
     {
-        _queryCacher = GetRequiredService<IQueryCacher>();
+        _contentfulOptions = this.GetService<ContentfulOptions>() ?? throw new MissingServiceException($"Could not find service {nameof(ContentfulOptions)}");
+        _queryCacher = this.GetService<IQueryCacher>() ?? throw new MissingServiceException($"Could not find service {nameof(IQueryCacher)}");
     }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(CmsDbContext).Assembly);
+
+        modelBuilder.Entity<RecommendationChunkContentDbEntity>()
+            .ToTable("RecommendationChunkContents", Schema);
+
+        modelBuilder.Entity<RecommendationIntroDbEntity>()
+            .ToTable("RecommendationIntros", Schema);
+
+        modelBuilder.Entity<RecommendationSectionDbEntity>()
+            .ToTable("RecommendationSections", Schema);
+
+        modelBuilder.Entity<SubtopicRecommendationIntroDbEntity>()
+            .ToTable("SubtopicRecommendationIntros", Schema);
+
+        modelBuilder.HasDefaultSchema(Schema);
+
+        modelBuilder.Entity<ContentComponentDbEntity>(entity =>
+        {
+            entity.ToTable("ContentComponents", Schema);
+            entity.Property(e => e.Id).HasMaxLength(30);
+            entity.HasQueryFilter(ShouldShowEntity());
+        });
+
+        modelBuilder.Entity<AnswerDbEntity>(entity =>
+        {
+            entity.HasOne(a => a.ParentQuestion).WithMany(q => q.Answers).OnDelete(DeleteBehavior.Restrict);
+
+            entity.ToTable("Answers", Schema);
+        });
+
+        modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>(entity =>
+        {
+            entity.Navigation(button => button.Button).AutoInclude();
+        });
+
+        modelBuilder.Entity<ButtonWithLinkDbEntity>()
+            .Navigation(button => button.Button).AutoInclude();
+
+        modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>().Navigation(button => button.Button).AutoInclude();
+
+        modelBuilder.Entity<PageContentDbEntity>(entity =>
+        {
+            entity.HasOne(pc => pc.BeforeContentComponent).WithMany(c => c.BeforeTitleContentPagesJoins);
+
+            entity.HasOne(pc => pc.ContentComponent).WithMany(c => c.ContentPagesJoins);
+
+            entity.HasOne(pc => pc.Page).WithMany(p => p.AllPageContents);
+        });
+
+
+        modelBuilder.Entity<RecommendationChunkContentDbEntity>(entity =>
+        {
+            entity.HasOne(pc => pc.ContentComponent).WithMany(c => c.RecommendationChunkContentJoins);
+        });
+
+        modelBuilder.Entity<RecommendationIntroContentDbEntity>(entity =>
+        {
+            entity.HasOne(pc => pc.ContentComponent).WithMany(c => c.RecommendationIntroContentJoins);
+        });
+
+        modelBuilder.Entity<QuestionDbEntity>().ToTable("Questions", Schema);
+
+        modelBuilder.Entity<RichTextContentWithSlugDbEntity>(entity => { entity.ToView("RichTextContentsBySlug"); });
+        modelBuilder.Entity<RichTextContentWithSubtopicRecommendationId>(entity => { entity.ToView("RichTextContentsBySubtopicRecommendationId"); });
+
+        modelBuilder.Entity<TitleDbEntity>(entity => { entity.ToTable("Titles", Schema); });
+
+        modelBuilder.Entity<WarningComponentDbEntity>(entity =>
+        {
+            entity.HasOne(warning => warning.Text).WithMany(text => text.Warnings).OnDelete(DeleteBehavior.Restrict);
+
+            entity.Navigation(warningComponent => warningComponent.Text).AutoInclude();
+        });
+
+        modelBuilder.Entity<ContentComponentDbEntity>().HasQueryFilter(ShouldShowEntity());
+    }
+
 
     /// <summary>
     /// Sets the published and deleted statuses for a content component.
@@ -146,37 +226,11 @@ public class CmsDbContext : DbContext, ICmsDbContext
     public virtual Task<int> SetComponentPublishedAndDeletedStatuses(ContentComponentDbEntity contentComponent, bool published, bool deleted, CancellationToken cancellationToken)
         => Database.ExecuteSqlAsync($"UPDATE [Contentful].[ContentComponents] SET Published = {published}, Deleted = {deleted} WHERE [Id] = {contentComponent.Id}", cancellationToken: cancellationToken);
 
-    public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
-        => FirstOrDefaultAsync(
-            Pages.Where(page => page.Slug == slug)
-                .Include(page => page.BeforeTitleContent)
-                .Include(page => page.Content)
-                .Include(page => page.Title)
-                .AsSplitQuery(),
-            cancellationToken);
-
-    public async Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
-    {
-        var key = GetCacheKey(queryable);
-        return await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
-            (q, ctoken) => q.ToListAsync(ctoken), cancellationToken);
-    }
-
-    public async Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
-    {
-        var key = GetCacheKey(queryable);
-        return await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
-            (q, ctoken) => q.FirstOrDefaultAsync(ctoken), cancellationToken);
-    }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.HasDefaultSchema(Schema);
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(CmsDbContext).Assembly);
-        modelBuilder.ApplyConfiguration(new ContentComponentEntityTypeConfiguration(ContentfulOptions.UsePreview));
-    }
-
-    private T GetRequiredService<T>() where T : class => this.GetService<T>() ?? throw new MissingServiceException($"Could not find service {typeof(T).Name}");
+    /// <summary>
+    /// Should the given entity be displayed? I.e. is it not archived, not deleted, and either published or use preview mode is enabled
+    /// </summary>
+    private Expression<Func<ContentComponentDbEntity, bool>> ShouldShowEntity()
+        => entity => (_contentfulOptions.UsePreview || entity.Published) && !entity.Archived && !entity.Deleted;
 
     private static string GetCacheKey(IQueryable query)
     {
@@ -184,4 +238,33 @@ public class CmsDbContext : DbContext, ICmsDbContext
         var hash = SHA256.HashData(Encoding.UTF8.GetBytes(queryString));
         return Convert.ToBase64String(hash);
     }
+
+    public Task<PageDbEntity?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
+        => FirstOrDefaultCachedAsync(
+            Pages.Where(page => page.Slug == slug)
+                .Include(page => page.BeforeTitleContent)
+                .Include(page => page.Content)
+                .Include(page => page.Title)
+                .AsSplitQuery(),
+            cancellationToken);
+
+    public async Task<List<T>> ToListCachedAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+    {
+        var key = GetCacheKey(queryable);
+        return await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
+            (q, ctoken) => q.ToListAsync(ctoken), cancellationToken);
+    }
+
+    public async Task<T?> FirstOrDefaultCachedAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+    {
+        var key = GetCacheKey(queryable);
+        return await _queryCacher.GetOrCreateAsyncWithCache(key, queryable,
+            (q, ctoken) => q.FirstOrDefaultAsync(ctoken), cancellationToken);
+    }
+
+    public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+        => queryable.ToListAsync(cancellationToken);
+
+    public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
+        => queryable.FirstOrDefaultAsync(cancellationToken);
 }

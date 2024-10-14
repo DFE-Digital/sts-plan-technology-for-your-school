@@ -14,8 +14,6 @@ public class PageMapperTests : BaseMapperTests<PageDbEntity, PageMapper>
 
     private readonly PageMapper _mapper;
     private readonly ILogger<PageUpdater> _entityUpdaterLogger = Substitute.For<ILogger<PageUpdater>>();
-    private readonly List<PageContentDbEntity> _attachedPageContents = new(10);
-    private readonly List<PageContentDbEntity> _pageContents = [];
     private readonly List<PageDbEntity> _pages = [];
     private readonly Faker _faker = new();
 

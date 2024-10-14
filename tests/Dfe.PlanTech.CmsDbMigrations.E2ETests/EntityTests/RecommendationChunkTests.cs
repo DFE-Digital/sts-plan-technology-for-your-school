@@ -11,16 +11,6 @@ public class RecommendationChunkTests() : EntityTests<RecommendationChunk, Recom
 {
     protected override RecommendationChunkGenerator CreateEntityGenerator() => RecommendationChunkGenerator.CreateInstance(Db);
 
-    protected override void ClearDatabase()
-    {
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RecommendationChunkContents]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RecommendationChunkAnswers]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RecommendationChunks]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Titles]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Answers]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Headers]");
-    }
-
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(RecommendationChunk entity)
      => new()
      {
@@ -35,7 +25,6 @@ public class RecommendationChunkTests() : EntityTests<RecommendationChunk, Recom
         .IgnoreQueryFilters()
         .Include(recChunk => recChunk.Content)
         .Include(recChunk => recChunk.Answers)
-        .Include(recChunk => recChunk.Header)
         .AsNoTracking();
 
     protected override void ValidateDbMatches(RecommendationChunk entity, RecommendationChunkDbEntity? dbEntity, bool published = true, bool archived = false, bool deleted = false)

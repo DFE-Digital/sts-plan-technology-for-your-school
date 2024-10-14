@@ -12,7 +12,6 @@ public class TitleTests() : EntityTests<Title, TitleDbEntity, TitleGenerator>
 
     protected override void ClearDatabase()
     {
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Titles]");
         Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
     }
 

@@ -19,13 +19,6 @@ public class ButtonWithLinkTests : EntityTests<ButtonWithLink, ButtonWithLinkDbE
         return new ButtonWithLinkGenerator(buttons);
     }
 
-    protected override void ClearDatabase()
-    {
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ButtonWithLinks]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Buttons]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[ContentComponents]");
-    }
-
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(ButtonWithLink entity)
      => new()
      {

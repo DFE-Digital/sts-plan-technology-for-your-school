@@ -11,15 +11,6 @@ public class RecommendationIntroTests() : EntityTests<RecommendationIntro, Recom
 {
     protected override RecommendationIntroGenerator CreateEntityGenerator() => RecommendationIntroGenerator.CreateInstance(Db);
 
-    protected override void ClearDatabase()
-    {
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RecommendationIntroContents]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Titles]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Answers]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[RecommendationIntros]");
-        Db.Database.ExecuteSqlRaw("DELETE FROM [Contentful].[Headers]");
-    }
-
     protected override Dictionary<string, object?> CreateEntityValuesDictionary(RecommendationIntro entity)
      => new()
      {

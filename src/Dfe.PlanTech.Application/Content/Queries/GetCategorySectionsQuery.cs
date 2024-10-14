@@ -23,7 +23,7 @@ public class GetCategorySectionsQuery(ICmsDbContext db, ILogger<GetCategorySecti
             if (!pageHasCategories)
                 return;
 
-            var sections = await db.ToListAsync(SectionsForPageQueryable(page), cancellationToken);
+            var sections = await db.ToListCachedAsync(SectionsForPageQueryable(page), cancellationToken);
 
             CopySectionsToPage(page, sections);
         }

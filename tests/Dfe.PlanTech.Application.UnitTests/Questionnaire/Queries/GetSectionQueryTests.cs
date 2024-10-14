@@ -120,7 +120,7 @@ public class GetSectionQueryTests
 
         var db = Substitute.For<ICmsDbContext>();
         db.Sections.Returns(_dbSections.AsQueryable());
-        db.FirstOrDefaultAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>())
+        db.FirstOrDefaultCachedAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>())
                 .Returns(callinfo =>
                 {
                     var queryable = callinfo.ArgAt<IQueryable<SectionDbEntity>>(0);
@@ -134,7 +134,7 @@ public class GetSectionQueryTests
         Assert.NotNull(section); // Add this line to check for null
         Assert.Equal(FirstSection.InterstitialPage.Slug, sectionSlug);
 
-        await db.Received(1).FirstOrDefaultAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
+        await db.Received(1).FirstOrDefaultCachedAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
         await repository.Received(0).GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>());
     }
 
@@ -162,7 +162,7 @@ public class GetSectionQueryTests
         var db = Substitute.For<ICmsDbContext>();
         var nullList = new List<SectionDbEntity>();
         db.Sections.Returns(nullList.AsQueryable());
-        db.FirstOrDefaultAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>())
+        db.FirstOrDefaultCachedAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>())
                 .Returns(callinfo =>
                 {
                     var queryable = callinfo.ArgAt<IQueryable<SectionDbEntity>>(0);
@@ -175,7 +175,7 @@ public class GetSectionQueryTests
 
         Assert.Equal(FirstSection.InterstitialPage.Slug, sectionSlug);
 
-        await db.Received(1).FirstOrDefaultAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
+        await db.Received(1).FirstOrDefaultCachedAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
         await repository.Received(1).GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>());
     }
 
