@@ -1,6 +1,5 @@
 ﻿using Dfe.ContentSupport.Web.Extensions;
 using Dfe.ContentSupport.Web.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.ContentSupport.Web.Controllers;
