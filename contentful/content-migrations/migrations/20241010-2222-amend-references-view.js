@@ -39,11 +39,11 @@ module.exports = function (migration) {
  * @param {string[]} references 
  */
 function updateContentType(migration, contentType, references) {
-    var page = migration.editContentType(contentType);
+    var contentType = migration.editContentType(contentType);
 
     for (const reference of references) {
-        page.changeFieldControl(reference, "builtin", "entryLinksEditor", { bulkEditing: true });
+        contentType.changeFieldControl(reference, "builtin", "entryLinksEditor", { bulkEditing: true });
     }
 
-    page.addSidebarWidget("builtin", "publication-widget", undefined, "releases-widget");
+    contentType.addSidebarWidget("builtin", "releases-widget", undefined, "publication-widget");
 }
