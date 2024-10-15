@@ -10,5 +10,6 @@ public class RichTextPartRendererOptions
     {
         stringBuilder.Append(" class=\"");
         stringBuilder.Append(Classes);
+        stringBuilder.Append('"');
     }
 }
