@@ -61,7 +61,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.6.2
+          terraform_version: 1.9.7
 
       - name: Get GitHub Runner IP
         id: whats-my-ip

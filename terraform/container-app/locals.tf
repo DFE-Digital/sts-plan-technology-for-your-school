@@ -101,7 +101,68 @@ locals {
       "value" = "1",
   }]
 
+  waf_custom_rules = {
+    //WAF policy to allow payloads to the CMS webhook route
+    ContentfulWebhookBypassPolicy = {
+      priority = 2
+      action   = "Allow"
 
+      match_conditions = {
+        has_contentful_topic_header = {
+          match_variable = "RequestHeader"
+          selector       = "X-Contentful-Topic"
+          operator       = "Any"
+          match_values   = []
+        }
+        has_contentful_webhookname_header = {
+          match_variable = "RequestHeader"
+          selector       = "X-Contentful-Webhook-Name"
+          operator       = "Any"
+          match_values   = []
+        }
+        has_contentful_eventdatetime_header = {
+          match_variable = "RequestHeader"
+          selector       = "X-Contentful-Event-Datetime"
+          operator       = "Any"
+          match_values   = []
+        }
+        has_contentful_crn_header = {
+          match_variable = "RequestHeader"
+          selector       = "X-Contentful-CRN"
+          operator       = "Any"
+          match_values   = []
+        }
+        is_json_payload = {
+          match_variable = "RequestHeader"
+          selector       = "Content-Type"
+          operator       = "Equal"
+          match_values   = ["application/json"]
+        }
+        has_auth_header = {
+          match_variable = "RequestHeader"
+          selector       = "Authorization"
+          operator       = "Any"
+          match_values   = []
+        }
+        is_webhook_uri = {
+          match_variable = "RequestUri"
+          operator       = "Contains"
+          match_values   = ["/api/cms/webhook"]
+        }
+      }
+    }
+  }
+
+  /*
+    match_condition {
+      match_variable     = "RequestHeader"
+      selector           = "UserAgent"
+      operator           = "Contains"
+      negation_condition = false
+      match_values       = ["windows"]
+      transforms         = ["Lowercase", "Trim"]
+    }
+  */
   ####################x
   # Storage Accounts #
   ####################
