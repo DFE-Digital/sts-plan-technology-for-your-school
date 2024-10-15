@@ -154,6 +154,7 @@ jobs:
           dsi_url: ${{ secrets.DSI_URL }}
           dsi_username: ${{ secrets.DSI_USERNAME }}
           dsi_password: ${{ secrets.DSI_PASSWORD }}
+          environment: "E2E"
 
       - name: Remove Azure firewall rules
         if: always()

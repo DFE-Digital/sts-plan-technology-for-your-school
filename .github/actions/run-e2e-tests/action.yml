@@ -14,15 +14,26 @@ inputs:
   dsi_password:
     required: true
     type: string
+  environment:
+    required: true
+    type: string
+    default: "E2E"
+    description: What environment the App is running under.
 
 runs:
   using: composite
 
   steps:
+    - name: Define artifact name variables
+      shell: bash
+      run: |
+        NOW=$(date +'%Y%m%d-%H%M')
+        echo "ARTIFACT_PREFIX=-${{ inputs.environment }}-$NOW" >> $GITHUB_ENV
+
     - name: Create Cypress config
       shell: bash
       run: |
-        echo "{\"URL\": \"${{ inputs.url }}\", \"DSi_Url\": \"${{ inputs.dsi_url }}\", \"DSi_Email\": \"${{ inputs.dsi_username }}\", \"DSi_Password\": \"${{inputs. dsi_password }}\" }" > cypress.env.json
+        echo "{\"URL\": \"${{ inputs.url }}\", \"DSi_Url\": \"${{ inputs.dsi_url }}\", \"DSi_Email\": \"${{ inputs.dsi_username }}\", \"DSi_Password\": \"${{inputs.dsi_password }}\", \"APPENVIRONMENT\": \"${{ inputs.environment}}\" }" > cypress.env.json
       working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
 
     - name: Build and test project
@@ -36,7 +47,7 @@ runs:
       uses: actions/upload-artifact@v4
       if: failure()
       with:
-        name: cypress-screenshots
+        name: cypress-screenshots${{ env.ARTIFACT_PREFIX }}
         path: ./tests/Dfe.PlanTech.Web.E2ETests/cypress/screenshots
         if-no-files-found: ignore
 
@@ -44,6 +55,6 @@ runs:
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: cypress-videos
+        name: cypress-videos${{ env.ARTIFACT_PREFIX }}
         path: ./tests/Dfe.PlanTech.Web.E2ETests/cypress/videos
         if-no-files-found: ignore
