@@ -42,11 +42,13 @@ describe('Rich Text Rendering', () => {
 
   describe('Table', () => {
     it('renders table with headings', () => {
-      cy.get('table thead tr').find('th').should('contain', 'Col 1 heading');
+      cy.get('table thead tr').first().find('th').should('contain', 'Col 1 heading');
+      cy.get('table').find('thead tr').first().find('th').eq(1).should('contain', 'Col 2 heading');
     });
 
     it('renders table with rows', () => {
-      cy.get('table tbody tr').find('td').should('contain', 'Col 1 row 1');
+      cy.get('table tbody tr').first().find('td').should('contain', 'Col 1 row 1');
+      cy.get('table').find('tbody tr').first().find('td').eq(1).should('contain', 'Col 2 row 1');
     });
   });
 
