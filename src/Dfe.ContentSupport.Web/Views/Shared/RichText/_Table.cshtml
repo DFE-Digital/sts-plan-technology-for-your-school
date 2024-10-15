@@ -10,28 +10,26 @@
                 RichTextNodeType.TableHeaderCell)
                 
             {
-                    <tr>
-                        @if (childNode.Content.Any())
+                <tr>
+                    @foreach (var grandChildNode in childNode.Content)
+                    {
+                        foreach (var greatGrandChildNode in grandChildNode.Content)
                         {
-                            foreach (var grandChildNode in childNode.Content)
+                            if (greatGrandChildNode.NodeType == RichTextNodeType.Paragraph)
                             {
-                                if (grandChildNode.NodeType == RichTextNodeType.Paragraph)
-                                {
-                                    <th scope="col">
-                                        <partial name="RichText/_Items" model="@grandChildNode"/>
-                                    </th>
-                                }
-                                else
-                                {
-                                    <th scope="col">
-                                        <partial name="RichText/_RichText" model="@grandChildNode"/>
-                                    </th>
-                                }
-                                
+                                <th scope="col">
+                                    <partial name="RichText/_Items" model="@greatGrandChildNode"/>
+                                </th>
+                            }
+                            else
+                            {
+                                <th scope="col">
+                                    <partial name="RichText/_TableHeaderCell" model="@greatGrandChildNode"/>
+                                </th>
                             }
                         }
-                    </tr>
-                @* <partial name="RichText/_TableRow" model="@childNode"/> *@
+                    }
+                </tr>
             }
         }
     }
