@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.ContentSupport.Web.Controllers;
 
-[Route("/sitemap")]
-[AllowAnonymous]
 public class SitemapController(
     [FromKeyedServices(WebApplicationBuilderExtensions.ContentAndSupportServiceKey)]
     IContentService contentfulService) : Controller
