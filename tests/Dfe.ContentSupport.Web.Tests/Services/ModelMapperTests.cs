@@ -9,7 +9,7 @@ namespace Dfe.ContentSupport.Web.Tests.Services;
 
 public class ModelMapperTests
 {
-    private static IModelMapper GetService() => new ModelMapper(new SupportedAssetTypes());
+    private static ModelMapper GetService() => new ModelMapper(new SupportedAssetTypes());
 
     private static ContentItem DummyContentItem() => new()
     {

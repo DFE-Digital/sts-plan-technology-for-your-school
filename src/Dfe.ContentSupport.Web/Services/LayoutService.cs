@@ -61,7 +61,7 @@ public class LayoutService : ILayoutService
     }
 
 
-    public static List<CsContentItem> GetVisiblePageList(CsPage page, string pageSlug)
+    public List<CsContentItem> GetVisiblePageList(CsPage page, string pageSlug)
     {
         if (!string.IsNullOrEmpty(pageSlug))
             return page.Content.Where(o => o.Slug == pageSlug).ToList();
@@ -71,7 +71,7 @@ public class LayoutService : ILayoutService
     }
 
 
-    public static string GetNavigationUrl(HttpRequest request)
+    public string GetNavigationUrl(HttpRequest request)
     {
         var splitUrl = request.Path.ToString().Split("/");
         return string.Join("/", splitUrl.Take(3));

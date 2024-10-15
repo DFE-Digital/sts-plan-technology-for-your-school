@@ -9,7 +9,7 @@ namespace Dfe.ContentSupport.Web.Tests.Models.Mapped.Standard;
 
 public class CsTextTests
 {
-    private static IModelMapper GetService() => new ModelMapper(new SupportedAssetTypes());
+    private static ModelMapper GetService() => new ModelMapper(new SupportedAssetTypes());
 
     private const string InternalName = "Internal Name";
 
