@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
@@ -274,5 +275,30 @@ public class QuestionsControllerTests
         var sectionSlug = routeValues.FirstOrDefault(routeValue => routeValue.Key == "sectionSlug").Value as string;
 
         Assert.Equal(SectionSlug, sectionSlug);
+    }
+
+    [Fact]
+    public async Task QuestionPreview_Should_Redirect_When_PreviewApi_Is_False()
+    {
+        var result = await _controller.GetQuestionPreviewBySlug(SectionSlug, QuestionSlug, new ContentfulOptions(false));
+
+        var redirectResult = result as RedirectResult;
+        Assert.NotNull(redirectResult);
+        Assert.Equal("/self-assessment", redirectResult.Url);
+    }
+
+    [Fact]
+    public async Task QuestionPreview_Should_Return_Valid_Model_When_PreviewApi_Is_True()
+    {
+        var result = await _controller.GetQuestionPreviewBySlug(SectionSlug, QuestionSlug, new ContentfulOptions(true));
+
+        var viewResult = Assert.IsType<ViewResult>(result);
+        Assert.Equal("Question", viewResult.ViewName);
+
+        var viewModel = Assert.IsType<QuestionViewModel>(viewResult.Model);
+
+        Assert.NotNull(viewModel);
+        Assert.Equal(SectionSlug, viewModel.SectionSlug);
+        Assert.Equal(QuestionSlug, viewModel.Question.Slug);
     }
 }

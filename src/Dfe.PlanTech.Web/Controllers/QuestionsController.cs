@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Exceptions;
+using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
@@ -47,6 +48,26 @@ public class QuestionsController : BaseController<QuestionsController>
         return await router.ValidateRoute(sectionSlug, questionSlug, this, cancellationToken);
     }
 
+    [LogInvalidModelState]
+    [HttpGet("{sectionSlug}/{questionSlug}/preview")]
+    public async Task<IActionResult> GetQuestionPreviewBySlug(string sectionSlug,
+                                                              string questionSlug,
+                                                              [FromServices] ContentfulOptions contentfulOptions,
+                                                              CancellationToken cancellationToken = default)
+    {
+        if (!contentfulOptions.UsePreview)
+            return new RedirectResult("/self-assessment");
+
+        if (string.IsNullOrEmpty(sectionSlug))
+            throw new ArgumentNullException(nameof(sectionSlug));
+        if (string.IsNullOrEmpty(questionSlug))
+            throw new ArgumentNullException(nameof(questionSlug));
+
+        var viewModel = await GenerateViewModel(sectionSlug, questionSlug, cancellationToken);
+        viewModel.AnswerRef = null;
+        return RenderView(viewModel);
+    }
+
 
     [LogInvalidModelState]
     [HttpGet("{sectionSlug}/next-question")]
@@ -62,7 +83,7 @@ public class QuestionsController : BaseController<QuestionsController>
         var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
                         throw new ContentfulDataUnavailableException($"Could not find section with slug {sectionSlug}");
 
-        int establishmentId = await _user.GetEstablishmentId();
+        var establishmentId = await _user.GetEstablishmentId();
 
         try
         {
@@ -71,7 +92,7 @@ public class QuestionsController : BaseController<QuestionsController>
             if (nextQuestion == null)
                 return this.RedirectToCheckAnswers(sectionSlug);
 
-            return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = nextQuestion!.Slug });
+            return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = nextQuestion.Slug });
         }
         catch (DatabaseException)
         {
@@ -124,10 +145,10 @@ public class QuestionsController : BaseController<QuestionsController>
         var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
                         throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
 
-        var question = section.Questions.FirstOrDefault(question => question.Slug == questionSlug) ??
+        var question = section.Questions.Find(question => question.Slug == questionSlug) ??
                             throw new KeyNotFoundException($"Could not find question slug {questionSlug} under section {sectionSlug}");
 
-        int establishmentId = await _user.GetEstablishmentId();
+        var establishmentId = await _user.GetEstablishmentId();
 
         var latestResponseForQuestion = await _getResponseQuery.GetLatestResponseForQuestion(establishmentId,
                                                                                 section.Sys.Id,
