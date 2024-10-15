@@ -63,8 +63,10 @@ public class QuestionsController : BaseController<QuestionsController>
         if (string.IsNullOrEmpty(questionSlug))
             throw new ArgumentNullException(nameof(questionSlug));
 
-        var viewModel = await GenerateViewModel(sectionSlug, questionSlug, cancellationToken);
-        viewModel.AnswerRef = null;
+        var section = await GetSectionBySlug(sectionSlug, cancellationToken);
+        var question = GetQuestionFromSection(section, questionSlug);
+
+        var viewModel = GenerateViewModel(sectionSlug, question, section, null);
         return RenderView(viewModel);
     }
 
@@ -80,8 +82,7 @@ public class QuestionsController : BaseController<QuestionsController>
         if (string.IsNullOrEmpty(sectionSlug))
             throw new ArgumentNullException(nameof(sectionSlug));
 
-        var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
-                        throw new ContentfulDataUnavailableException($"Could not find section with slug {sectionSlug}");
+        var section = await GetSectionBySlug(sectionSlug, cancellationToken);
 
         var establishmentId = await _user.GetEstablishmentId();
 
@@ -142,12 +143,8 @@ public class QuestionsController : BaseController<QuestionsController>
     [NonAction]
     private async Task<QuestionViewModel> GenerateViewModel(string sectionSlug, string questionSlug, CancellationToken cancellationToken)
     {
-        var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
-                        throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
-
-        var question = section.Questions.Find(question => question.Slug == questionSlug) ??
-                            throw new KeyNotFoundException($"Could not find question slug {questionSlug} under section {sectionSlug}");
-
+        var section = await GetSectionBySlug(sectionSlug, cancellationToken);
+        var question = GetQuestionFromSection(section, questionSlug);
         var establishmentId = await _user.GetEstablishmentId();
 
         var latestResponseForQuestion = await _getResponseQuery.GetLatestResponseForQuestion(establishmentId,
@@ -174,5 +171,13 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
     public static IActionResult RedirectToQuestionBySlug(string sectionSlug, string questionSlug, Controller controller)
-    => controller.RedirectToAction(GetQuestionBySlugActionName, Controller, new { sectionSlug, questionSlug });
+        => controller.RedirectToAction(GetQuestionBySlugActionName, Controller, new { sectionSlug, questionSlug });
+
+    private async Task<Section> GetSectionBySlug(string sectionSlug, CancellationToken cancellationToken)
+        => await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
+           throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
+
+    private static Question GetQuestionFromSection(Section section, string questionSlug)
+        => section.Questions.Find(question => question.Slug == questionSlug) ??
+           throw new KeyNotFoundException($"Could not find question slug {questionSlug} under section {section.Name}");
 }
