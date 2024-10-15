@@ -1,6 +1,6 @@
 import DataMapper from "export-processor/data-mapper.js";
 import { selfAssessmentSlug } from "./helpers/index.js";
-import { quickNavigateToRecommendations } from "./validators/index.js";
+import { minimalSectionValidationForRecommendations } from "./validators/index.js";
 
 const dataMapper = new DataMapper(require('../../fixtures/contentful-data'));
 
@@ -29,7 +29,7 @@ describe("Remaining-answer paths", { testIsolation: false }, () => {
             section.pathsForAllPossibleAnswers.forEach((userJourney, index) => {
                 const { path, maturity } = userJourney
                 describe(`${section.name} should retrieve correct recommendations for additional path ${index + 1} of ${section.pathsForAllPossibleAnswers.length}`, () => {
-                    quickNavigateToRecommendations(section, [path], maturity)
+                    minimalSectionValidationForRecommendations(section, [path], maturity)
                 });
             });
         });

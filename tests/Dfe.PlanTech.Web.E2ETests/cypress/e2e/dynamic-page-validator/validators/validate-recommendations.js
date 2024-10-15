@@ -9,7 +9,7 @@ import { validateCompletionTags, validateRecommendationChunks, validateRecommend
  */
 
 
-export const validateRecommendationForMaturity = (section, maturity, path) => {
+export const validateAndTestRecommendations = (section, maturity, path) => {
     const introPage = section.recommendation.intros.find(
         (recommendation) => recommendation.maturity == maturity
     );

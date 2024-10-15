@@ -1,6 +1,6 @@
 import { CleanText } from "../helpers/index.js";
 
-export const navigateAndValidateQuestionPages = (path, section, extraTests) => {
+export const validateQuestionPages = (path, section, validateAnswersHintAndUrl) => {
 
     for (const question of path) {
         const matchingQuestion = section.questions.find((q) => q.text === question.question.text);
@@ -11,8 +11,8 @@ export const navigateAndValidateQuestionPages = (path, section, extraTests) => {
             );
         }
 
-        if (extraTests) {
-            extraTests(matchingQuestion, section);
+        if (validateAnswersHintAndUrl) {
+            validateAnswersHintAndUrl(matchingQuestion, section);
         }
 
         // Page contains question

@@ -1,6 +1,6 @@
 import DataMapper from "export-processor/data-mapper.js";
 import { selfAssessmentSlug } from "./helpers/index.js";
-import { quickNavigateToRecommendations } from "./validators/index.js";
+import { minimalSectionValidationForRecommendations } from "./validators/index.js";
 
 
 const dataMapper = new DataMapper(require('../../fixtures/contentful-data'));
@@ -26,7 +26,7 @@ describe("Recommendations", { testIsolation: false }, () => {
             });
 
             Object.keys(section.minimumPathsForRecommendations).forEach((maturity) => {
-                quickNavigateToRecommendations(section, [section.minimumPathsForRecommendations[maturity]], maturity);
+                minimalSectionValidationForRecommendations(section, [section.minimumPathsForRecommendations[maturity]], maturity);
             });
         });
     });

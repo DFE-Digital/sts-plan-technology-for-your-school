@@ -1,7 +1,7 @@
 import { CleanText } from "../helpers/index.js";
 import { validateAnswers } from "./index.js";
 
-export const extraQuestionTests = (matchingQuestion, section) => {
+export const validateAnswersHintAndUrl = (matchingQuestion, section) => {
     // Url contains question slug
     cy.url().should("include", `/${section.interstitialPage.fields.slug}/${matchingQuestion.slug}`);
     // Page contains question help text
