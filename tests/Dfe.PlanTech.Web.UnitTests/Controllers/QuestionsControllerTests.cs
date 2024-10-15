@@ -137,7 +137,7 @@ public class QuestionsControllerTests
     [Fact]
     public async Task GetNextUnansweredQuestion_Should_Error_When_SectionSlug_NotFound()
     {
-        await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() => _controller.GetNextUnansweredQuestion("Not a real section", _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand, _configuration));
+        await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetNextUnansweredQuestion("Not a real section", _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand, _configuration));
     }
 
     [Fact]
@@ -300,5 +300,6 @@ public class QuestionsControllerTests
         Assert.NotNull(viewModel);
         Assert.Equal(SectionSlug, viewModel.SectionSlug);
         Assert.Equal(QuestionSlug, viewModel.Question.Slug);
+        Assert.Null(viewModel.AnswerRef);
     }
 }
