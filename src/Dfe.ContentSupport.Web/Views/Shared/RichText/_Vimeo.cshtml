@@ -1,7 +1,7 @@
 @model Hyperlink
 
 @{
-    var vimeoId = Model.Uri.Split('/').Last();
+    var vimeoId = Model.Uri.Split('/')[0];
 }
 
 <div class="column-full vimeo-player">
