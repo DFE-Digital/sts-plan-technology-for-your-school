@@ -8,8 +8,30 @@
         {
             if (childNode.NodeType == RichTextNodeType.TableRow && childNode.Content[0].NodeType ==
                 RichTextNodeType.TableHeaderCell)
+                
             {
-                <partial name="RichText/_TableRow" model="@childNode"/>
+                    <tr>
+                        @if (childNode.Content.Any())
+                        {
+                            foreach (var grandChildNode in childNode.Content)
+                            {
+                                if (grandChildNode.NodeType == RichTextNodeType.Paragraph)
+                                {
+                                    <th scope="col">
+                                        <partial name="RichText/_Items" model="@grandChildNode"/>
+                                    </th>
+                                }
+                                else
+                                {
+                                    <th scope="col">
+                                        <partial name="RichText/_RichText" model="@grandChildNode"/>
+                                    </th>
+                                }
+                                
+                            }
+                        }
+                    </tr>
+                @* <partial name="RichText/_TableRow" model="@childNode"/> *@
             }
         }
     }
