@@ -39,7 +39,7 @@ runs:
     - name: Create Cypress config
       shell: bash
       run: |
-        echo "{\"URL\": \"${{ inputs.url }}\", \"DSi_Url\": \"${{ inputs.dsi_url }}\", \"DSi_Email\": \"${{ inputs.dsi_username }}\", \"DSi_Password\": \"${{inputs.dsi_password }}\", \"APPENVIRONMENT\": \"${{ inputs.environment}}\" }" > cypress.env.json
+        echo "{\"URL\": \"${{ inputs.url }}\", \"DSi_Url\": \"${{ inputs.dsi_url }}\", \"DSi_Email\": \"${{ inputs.dsi_username }}\", \"DSi_Password\": \"${{inputs.dsi_password }}\", \"APPENVIRONMENT\": \"${{ inputs.environment}}\" }", \"DSi_NoOrg_Email\": \"${{ inputs.dsi_noorg_username }}\", \"DSi_NoOrg_Password\": \"${{ inputs.dsi_noorg_password }}\" > cypress.env.json
       working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
 
     - name: Build and test project
