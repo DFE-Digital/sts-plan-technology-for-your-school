@@ -210,3 +210,33 @@ variable "storage_account_expiration_period" {
   type        = string
   default     = "00.01:00:00"
 }
+
+##############
+# Contentful #
+##############
+
+variable "contentful_management_token" {
+  description = "Contentful management token"
+  type        = string
+  sensitive   = true
+  default     = null
+}
+
+variable "contentful_webhook_endpoint" {
+  description = "Endpoint for Contentful webhook"
+  type        = string
+  sensitive   = false
+  default     = "/api/cms/webhook"
+}
+
+variable "contentful_upsert_webhook" {
+  description = "Whether to create/update the webhook or not"
+  type        = bool
+  default     = false
+}
+
+variable "contentful_webhook_name" {
+  description = "Prefix for the Contentful webhook name"
+  type        = string
+  default     = "Plan Tech Webhook"
+}
