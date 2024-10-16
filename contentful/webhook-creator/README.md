@@ -12,11 +12,12 @@ Simple Javascript script that creates a Contentful webhook, ensuring it follows 
 
 ## Environment Variables
 
-| Variable         | Description                         | Example                     |
-| ---------------- | ----------------------------------- | --------------------------- |
-| SPACE_ID         | Your Contentful space ID            |                             |
-| ENVIRONMENT_ID   | Your Contentful environment ID      |                             |
-| MANAGEMENT_TOKEN | Contentful management token         |                             |
-| WEBHOOK_NAME     | Name of webhook to create           |                             |
-| WEBHOOK_URL      | URL for the webhook to send data to | https://example.com/webhook |
-| WEBHOOK_API_KEY  |                                     |                             |
+| Variable         | Description                                                                                                            | Example                           |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| SPACE_ID         | Your Contentful space ID                                                                                               | coolspaceid                       |
+| ENVIRONMENT_ID   | Your Contentful environment ID                                                                                         | master                            |
+| ENVIRONMENT_NAME | The name that the webhook is for - should match the Azure environment but doesn't really matter. Used for webhook name | Dev                               |
+| MANAGEMENT_TOKEN | Contentful management token                                                                                            | CFPAT-secrettokenhere             |
+| WEBHOOK_NAME     | Prefix for the webhook name. Combined with ENVIRONMENT_NAME                                                            | Plan Tech                         |
+| WEBHOOK_URL      | URL for the webhook to send data to                                                                                    | https://plan-tech.com/api/webhook |
+| WEBHOOK_API_KEY  | The API key for the webhook                                                                                            | super-secret-bearer-token         |
