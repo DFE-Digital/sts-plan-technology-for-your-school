@@ -278,7 +278,7 @@ public class QuestionsControllerTests
     }
 
     [Fact]
-    public async Task QuestionPreview_Should_Redirect_When_PreviewApi_Is_False()
+    public async Task QuestionPreview_Should_Redirect_When_UsePreview_Is_False()
     {
         var result = await _controller.GetQuestionPreviewBySlug(SectionSlug, QuestionSlug, new ContentfulOptions(false));
 
@@ -288,7 +288,7 @@ public class QuestionsControllerTests
     }
 
     [Fact]
-    public async Task QuestionPreview_Should_Return_Valid_Model_When_PreviewApi_Is_True()
+    public async Task QuestionPreview_Should_Return_Valid_Model_When_UsePreview_Is_True()
     {
         var result = await _controller.GetQuestionPreviewBySlug(SectionSlug, QuestionSlug, new ContentfulOptions(true));
 
