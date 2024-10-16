@@ -39,6 +39,8 @@ We use two external modules to create the majority of the resources required:
 | Name | Version |
 |------|---------|
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.4.0 |
+| <a name="provider_null"></a> [null](#provider\_null) | 3.2.3 |
+| <a name="provider_random"></a> [random](#provider\_random) | 3.6.3 |
 
 ## Modules
 
@@ -55,6 +57,7 @@ We use two external modules to create the majority of the resources required:
 | [azurerm_key_vault_access_policy.vault_access_policy_mi](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault_access_policy) | resource |
 | [azurerm_key_vault_access_policy.vault_access_policy_tf](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault_access_policy) | resource |
 | [azurerm_key_vault_key.data_protection_key](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault_key) | resource |
+| [azurerm_key_vault_secret.api_key](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault_secret.csp_connect_src](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault_secret.csp_default_src](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault_secret.csp_frame_src](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault_secret) | resource |
@@ -78,6 +81,9 @@ We use two external modules to create the majority of the resources required:
 | [azurerm_subnet.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/subnet) | resource |
 | [azurerm_subnet_route_table_association.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/subnet_route_table_association) | resource |
 | [azurerm_user_assigned_identity.user_assigned_identity](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/user_assigned_identity) | resource |
+| [null_resource.upsert_contentful_webhook](https://registry.terraform.io/providers/hashicorp/null/3.2.3/docs/resources/resource) | resource |
+| [random_password.api_key_value](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs/resources/password) | resource |
+| [azurerm_cdn_frontdoor_endpoint.app](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/data-sources/cdn_frontdoor_endpoint) | data source |
 | [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/data-sources/client_config) | data source |
 | [azurerm_mssql_server.database](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/data-sources/mssql_server) | data source |
 | [azurerm_route_table.default](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/data-sources/route_table) | data source |
@@ -105,6 +111,10 @@ We use two external modules to create the majority of the resources required:
 | <a name="input_container_app_storage_account_shared_access_key_enabled"></a> [container\_app\_storage\_account\_shared\_access\_key\_enabled](#input\_container\_app\_storage\_account\_shared\_access\_key\_enabled) | Enable shared access key | `bool` | `false` | no |
 | <a name="input_container_environment"></a> [container\_environment](#input\_container\_environment) | Container app environment - set to ASPNETCORE\_ENVIRONMENT in the app environment variables | `string` | `""` | no |
 | <a name="input_container_environment_variables"></a> [container\_environment\_variables](#input\_container\_environment\_variables) | Additional environment variables to set on the Azure Container App | `map(string)` | `{}` | no |
+| <a name="input_contentful_management_token"></a> [contentful\_management\_token](#input\_contentful\_management\_token) | Contentful management token | `string` | `null` | no |
+| <a name="input_contentful_upsert_webhook"></a> [contentful\_upsert\_webhook](#input\_contentful\_upsert\_webhook) | Whether to create/update the webhook or not | `bool` | `false` | no |
+| <a name="input_contentful_webhook_endpoint"></a> [contentful\_webhook\_endpoint](#input\_contentful\_webhook\_endpoint) | Endpoint for Contentful webhook | `string` | `"/api/cms/webhook"` | no |
+| <a name="input_contentful_webhook_name"></a> [contentful\_webhook\_name](#input\_contentful\_webhook\_name) | Prefix for the Contentful webhook name | `string` | `"Plan Tech Webhook"` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | Environment name, used along with `project_name` as a prefix for all resources | `string` | n/a | yes |
 | <a name="input_image_tag"></a> [image\_tag](#input\_image\_tag) | Image tag | `string` | n/a | yes |
 | <a name="input_key_ops"></a> [key\_ops](#input\_key\_ops) | The permitted JSON web key operations of the key to be created. | `list(string)` | <pre>[<br>  "decrypt",<br>  "encrypt",<br>  "sign",<br>  "unwrapKey",<br>  "verify",<br>  "wrapKey"<br>]</pre> | no |
