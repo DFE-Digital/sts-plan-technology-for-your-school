@@ -4,7 +4,8 @@
 <div class="dfe-card">
     @if (Model.ImageUri is not null)
     {
-        <img src="@Model.ImageUri" alt="@Model.ImageAlt">
+        string altText = Model.ImageAlt;
+        <img src="@Model.ImageUri" alt="@altText">
     }
     <div class="dfe-card-container">
         <h3 class="govuk-heading-m">

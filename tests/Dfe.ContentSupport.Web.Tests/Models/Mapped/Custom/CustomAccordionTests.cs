@@ -47,7 +47,7 @@ public class CustomAccordionTests
                 ],
                 RichText = new ContentItem
                 {
-                    InternalName = null,
+                    InternalName = "content name",
                     NodeType = "paragraph"
                 }
             }
