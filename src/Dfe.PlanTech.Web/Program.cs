@@ -95,4 +95,6 @@ app.MapControllerRoute(
     name: "default"
 );
 
+await app.Services.GetRequiredService<IDistCache>().InitialiseAsync();
+
 await app.RunAsync();
