@@ -188,8 +188,33 @@ resource "azurerm_key_vault_key" "data_protection_key" {
 
   tags = local.tags
 
+  rotation_policy {
+    automatic {
+      time_before_expiry = "P30D"
+    }
+
+    expire_after         = "P90D"
+    notify_before_expiry = "P29D"
+  }
+
   lifecycle {
     ignore_changes = all
   }
 }
 
+#######
+# API #
+#######
+
+resource "random_password" "api_key_value" {
+  length  = 32
+  special = true
+}
+
+resource "azurerm_key_vault_secret" "api_key" {
+  name         = "api--authentication--keyvalue"
+  key_vault_id = azurerm_key_vault.vault.id
+  value        = random_password.api_key_value.result
+
+  expiration_date = timeadd(timestamp(), "365d")
+}
