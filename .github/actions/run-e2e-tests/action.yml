@@ -38,18 +38,18 @@ runs:
 
     - name: Build and test project
       uses: cypress-io/github-action@v6
+      env:
+        URL: ${{ inputs.url }}
+        DSi_Url: ${{inputs.dsi_url}}
+        DSi_Email: ${{ inputs.dsi_username }}
+        DSi_Password: ${{inputs.dsi_password }}
+        APPENVIRONMENT: ${{ inputs.environment}}
+        DSi_NoOrg_Email: ${{inputs.dsi_noorg_username}}
+        DSi_NoOrg_Password: ${{inputs.dsi_noorg_password}}
       with:
         working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
         browser: chrome
         config: baseUrl=${{ inputs.url }}
-        env:
-          URL: ${{ inputs.url }}
-          DSi_Url: ${{inputs.dsi_url}}
-          DSi_Email: ${{ inputs.dsi_username }}
-          DSi_Password: ${{inputs.dsi_password }}
-          APPENVIRONMENT: ${{ inputs.environment}}
-          DSi_NoOrg_Email: ${{inputs.dsi_noorg_username}}
-          DSi_NoOrg_Password: ${{inputs.dsi_noorg_password}}
 
     - name: Store screenshots on test failure
       uses: actions/upload-artifact@v4
