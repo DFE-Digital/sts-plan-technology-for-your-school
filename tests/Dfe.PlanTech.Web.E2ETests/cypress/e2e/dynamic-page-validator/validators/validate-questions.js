@@ -1,7 +1,6 @@
 import { CleanText } from "../helpers/index.js";
-import { validateAnswers } from "./index.js";
 
-export const navigateAndValidateQuestionPages = (path, section) => {
+export const validateQuestionPages = (path, section, validateAnswersHintAndUrl) => {
 
     for (const question of path) {
         const matchingQuestion = section.questions.find((q) => q.text === question.question.text);
@@ -12,18 +11,12 @@ export const navigateAndValidateQuestionPages = (path, section) => {
             );
         }
 
-        // Url contains question slug
-        cy.url().should("include", `/${section.interstitialPage.fields.slug}/${matchingQuestion.slug}`);
+        if (validateAnswersHintAndUrl) {
+            validateAnswersHintAndUrl(matchingQuestion, section);
+        }
 
         // Page contains question
         cy.get("h1.govuk-fieldset__heading").contains(CleanText(question.question.text));
-
-        // Page contains question help text
-        if (matchingQuestion.helpText) {
-            cy.get("div.govuk-hint").contains(CleanText(matchingQuestion.helpText));
-        }
-        // Contains each answer
-        validateAnswers(matchingQuestion);
 
         //Select answer for path and continue
         cy.get("div.govuk-radios div.govuk-radios__item label.govuk-radios__label.govuk-label")
