@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Helpers;
+using Dfe.PlanTech.Cache.Redis;
 using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Infrastructure.ServiceBus;
@@ -44,6 +45,13 @@ builder.AddContentAndSupportServices()
 
 builder.Services.AddSingleton<ISystemTime, SystemTime>();
 
+// ----------------
+// KD: it should be as straightforward as creating a redis instance, putting the connection string in secrets and refing here. It's designed to be singleton.
+// Just inject IDistCache where you need it
+// ----------------
+builder.Services.AddSingleton(new RedisConnectionString(builder.Configuration.GetConnectionString("redis") ?? throw new Exception("Redis connection string is empty!")));
+builder.Services.AddSingleton<IDistCache, RedisCache>();
+
 var app = builder.Build();
 
 app.UseSecurityHeaders();
@@ -86,5 +94,7 @@ app.MapControllerRoute(
     pattern: "{controller=Pages}/{action=GetByRoute}/{id?}",
     name: "default"
 );
+
+await app.Services.GetRequiredService<IDistCache>().InitialiseAsync();
 
 await app.RunAsync();
