@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -24,7 +25,7 @@ public class QuestionsControllerTests
     private readonly IGetNextUnansweredQuestionQuery _getNextUnansweredQuestionQuery;
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetLatestResponsesQuery _getResponseQuery;
-    private readonly IGetEntityByIdQuery _getEntityByIdQuery;
+    private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery;
     private readonly IDeleteCurrentSubmissionCommand _deleteCurrentSubmissionCommand;
     private readonly IGetQuestionBySlugRouter _getQuestionBySlugRouter;
     private readonly IUser _user;
@@ -67,9 +68,9 @@ public class QuestionsControllerTests
         _configuration = Substitute.For<IConfiguration>();
 
         _getSectionQuery = Substitute.For<IGetSectionQuery>();
-        _getEntityByIdQuery = Substitute.For<IGetEntityByIdQuery>();
+        _getEntityFromContentfulQuery = Substitute.For<IGetEntityFromContentfulQuery>();
 
-        _getEntityByIdQuery.GetQuestion(Arg.Any<string>(), Arg.Any<CancellationToken>())
+        _getEntityFromContentfulQuery.GetEntityById<Question>(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns((callinfo) =>
             {
                 var questionId = callinfo.ArgAt<string>(0);
@@ -115,7 +116,7 @@ public class QuestionsControllerTests
         _user = Substitute.For<IUser>();
         _user.GetEstablishmentId().Returns(EstablishmentId);
 
-        _controller = new QuestionsController(_logger, _getSectionQuery, _getResponseQuery, _getEntityByIdQuery, _user);
+        _controller = new QuestionsController(_logger, _getSectionQuery, _getResponseQuery, _getEntityFromContentfulQuery, _user);
     }
 
     [Fact]

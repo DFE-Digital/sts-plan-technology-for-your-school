@@ -22,18 +22,18 @@ public class QuestionsController : BaseController<QuestionsController>
 
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetLatestResponsesQuery _getResponseQuery;
-    private readonly IGetEntityByIdQuery _getEntityByIdQuery;
+    private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery;
     private readonly IUser _user;
 
     public QuestionsController(ILogger<QuestionsController> logger,
                                IGetSectionQuery getSectionQuery,
                                IGetLatestResponsesQuery getResponseQuery,
-                               IGetEntityByIdQuery getEntityByIdQuery,
+                               IGetEntityFromContentfulQuery getEntityByIdQuery,
                                IUser user) : base(logger)
     {
         _getResponseQuery = getResponseQuery;
         _getSectionQuery = getSectionQuery;
-        _getEntityByIdQuery = getEntityByIdQuery;
+        _getEntityFromContentfulQuery = getEntityByIdQuery;
         _user = user;
     }
 
@@ -61,7 +61,7 @@ public class QuestionsController : BaseController<QuestionsController>
         if (!contentfulOptions.UsePreview)
             return new RedirectResult("/self-assessment");
 
-        var question = await _getEntityByIdQuery.GetQuestion(questionId, cancellationToken) ??
+        var question = await _getEntityFromContentfulQuery.GetEntityById<Question>(questionId, cancellationToken) ??
                        throw new KeyNotFoundException($"Could not find question with Id {questionId}");
 
         var section = await _getSectionQuery.GetSectionForQuestion(questionId, cancellationToken) ??
