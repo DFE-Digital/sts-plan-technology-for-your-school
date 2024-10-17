@@ -1,5 +1,5 @@
 import contentfulExport from "contentful-export";
-import { getArgumentValue } from "./options.js";
+import { getArgumentValue } from "./options-helpers.js";
 
 const DefaultExportOptions = {
   content: true,
