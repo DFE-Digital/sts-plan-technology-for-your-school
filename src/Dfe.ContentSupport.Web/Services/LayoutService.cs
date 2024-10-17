@@ -71,7 +71,7 @@ public class LayoutService : ILayoutService
     }
 
 
-    public string GetNavigationUrl(HttpRequest request)
+    public static string GetNavigationUrl(HttpRequest request)
     {
         var splitUrl = request.Path.ToString().Split("/");
         return string.Join("/", splitUrl.Take(3));

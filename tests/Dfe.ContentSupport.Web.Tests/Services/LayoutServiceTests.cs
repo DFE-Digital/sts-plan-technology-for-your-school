@@ -195,7 +195,7 @@ namespace Dfe.ContentSupport.Web.Tests.Services
             context.Request.Path = GetSegmentLength(4);
 
             // Act
-            var result = _layoutService.GetNavigationUrl(context.Request);
+            var result = LayoutService.GetNavigationUrl(context.Request);
 
             // Assert
             Assert.Equal(GetSegmentLength(2), result);
@@ -210,7 +210,7 @@ namespace Dfe.ContentSupport.Web.Tests.Services
             context.Request.Path = GetSegmentLength(2);
 
             // Act
-            var result = _layoutService.GetNavigationUrl(context.Request);
+            var result = LayoutService.GetNavigationUrl(context.Request);
 
             // Assert
             Assert.Equal(GetSegmentLength(2), result);
@@ -225,7 +225,7 @@ namespace Dfe.ContentSupport.Web.Tests.Services
             context.Request.Path = GetSegmentLength(1);
 
             // Act
-            var result = _layoutService.GetNavigationUrl(context.Request);
+            var result = LayoutService.GetNavigationUrl(context.Request);
 
             // Assert
             Assert.Equal(GetSegmentLength(1), result);
@@ -241,7 +241,7 @@ namespace Dfe.ContentSupport.Web.Tests.Services
             context.Request.Path = emptyRequestPath;
 
             // Act
-            var result = _layoutService.GetNavigationUrl(context.Request);
+            var result = LayoutService.GetNavigationUrl(context.Request);
 
             // Assert
             Assert.Equal(emptyRequestPath, result);
