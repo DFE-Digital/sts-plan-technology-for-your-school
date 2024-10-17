@@ -159,6 +159,7 @@ public static class ProgramExtensions
         services.AddTransient<ICalculateMaturityCommand, CalculateMaturityCommand>();
         services.AddTransient<ICreateEstablishmentCommand, CreateEstablishmentCommand>();
         services.AddTransient<ICreateUserCommand, CreateUserCommand>();
+        services.AddTransient<IGetEntityByIdQuery, GetEntityByIdQuery>();
         services.AddTransient<IGetEstablishmentIdQuery, GetEstablishmentIdQuery>();
         services.AddTransient<IGetLatestResponsesQuery, GetLatestResponsesQuery>();
         services.AddTransient<IGetNavigationQuery, GetNavigationQuery>();

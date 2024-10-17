@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Exceptions;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
@@ -23,6 +24,7 @@ public class QuestionsControllerTests
     private readonly IGetNextUnansweredQuestionQuery _getNextUnansweredQuestionQuery;
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetLatestResponsesQuery _getResponseQuery;
+    private readonly IGetEntityByIdQuery _getEntityByIdQuery;
     private readonly IDeleteCurrentSubmissionCommand _deleteCurrentSubmissionCommand;
     private readonly IGetQuestionBySlugRouter _getQuestionBySlugRouter;
     private readonly IUser _user;
@@ -65,18 +67,32 @@ public class QuestionsControllerTests
         _configuration = Substitute.For<IConfiguration>();
 
         _getSectionQuery = Substitute.For<IGetSectionQuery>();
+        _getEntityByIdQuery = Substitute.For<IGetEntityByIdQuery>();
+
+        _getEntityByIdQuery.GetQuestion(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns((callinfo) =>
+            {
+                var questionId = callinfo.ArgAt<string>(0);
+                if (questionId == _validQuestion.Sys.Id)
+                {
+                    return _validQuestion;
+                }
+
+                return null;
+            });
+
         _getSectionQuery.GetSectionBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                    .Returns((callInfo) =>
-                    {
-                        var sectionSlug = callInfo.ArgAt<string>(0);
+            .Returns((callInfo) =>
+            {
+                var sectionSlug = callInfo.ArgAt<string>(0);
 
-                        if (sectionSlug == _validSection.InterstitialPage.Slug)
-                        {
-                            return _validSection;
-                        }
+                if (sectionSlug == _validSection.InterstitialPage.Slug)
+                {
+                    return _validSection;
+                }
 
-                        return null;
-                    });
+                return null;
+            });
 
         _getSectionQuery.GetSectionForQuestion(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns((callInfo) =>
@@ -99,7 +115,7 @@ public class QuestionsControllerTests
         _user = Substitute.For<IUser>();
         _user.GetEstablishmentId().Returns(EstablishmentId);
 
-        _controller = new QuestionsController(_logger, _getSectionQuery, _getResponseQuery, _user);
+        _controller = new QuestionsController(_logger, _getSectionQuery, _getResponseQuery, _getEntityByIdQuery, _user);
     }
 
     [Fact]

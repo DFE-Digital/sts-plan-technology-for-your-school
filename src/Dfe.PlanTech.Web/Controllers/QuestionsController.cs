@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Exceptions;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -21,15 +22,18 @@ public class QuestionsController : BaseController<QuestionsController>
 
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetLatestResponsesQuery _getResponseQuery;
+    private readonly IGetEntityByIdQuery _getEntityByIdQuery;
     private readonly IUser _user;
 
     public QuestionsController(ILogger<QuestionsController> logger,
                                IGetSectionQuery getSectionQuery,
                                IGetLatestResponsesQuery getResponseQuery,
+                               IGetEntityByIdQuery getEntityByIdQuery,
                                IUser user) : base(logger)
     {
         _getResponseQuery = getResponseQuery;
         _getSectionQuery = getSectionQuery;
+        _getEntityByIdQuery = getEntityByIdQuery;
         _user = user;
     }
 
@@ -57,15 +61,16 @@ public class QuestionsController : BaseController<QuestionsController>
         if (!contentfulOptions.UsePreview)
             return new RedirectResult("/self-assessment");
 
+        var question = await _getEntityByIdQuery.GetQuestion(questionId, cancellationToken) ??
+                       throw new KeyNotFoundException($"Could not find question with Id {questionId}");
+
         var section = await _getSectionQuery.GetSectionForQuestion(questionId, cancellationToken) ??
                       throw new KeyNotFoundException($"Could not find section for question with Id {questionId}");
-
-        var question = section.Questions.Find(question => question.Sys.Id == questionId);
 
         var sectionSlug = section.InterstitialPage?.Slug ??
                           throw new KeyNotFoundException($"{section.Name} section has no Interstitial Page");
 
-        var viewModel = GenerateViewModel(sectionSlug, question!, section, null);
+        var viewModel = GenerateViewModel(sectionSlug, question, section, null);
         return RenderView(viewModel);
     }
 

@@ -267,4 +267,8 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
     public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
         => queryable.FirstOrDefaultAsync(cancellationToken);
+
+    public async Task<TEntity?> GetEntityById<TEntity>(string contentId, CancellationToken cancellationToken = default)
+        where TEntity : ContentComponentDbEntity
+        => await FindAsync<TEntity>([contentId], cancellationToken);
 }
