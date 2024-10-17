@@ -29,6 +29,17 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
         return section ?? await GetSectionFromContentful(sectionSlug, cancellationToken);
     }
 
+    public async Task<Section?> GetSectionForQuestion(string questionId, CancellationToken cancellationToken = default)
+    {
+        var query = _db.Sections.Where(section => section.Questions.Any(question => question.Id == questionId)).Select(ProjectSection);
+        var section = await _db.FirstOrDefaultCachedAsync(query, cancellationToken);
+
+        if (section == null)
+            return null;
+
+        return _mapper.Map<Section>(section);
+    }
+
     private async Task<Section?> GetSectionFromDb(string sectionSlug, CancellationToken cancellationToken)
     {
         var query = _db.Sections.Where(SlugMatchesInterstitialPage(sectionSlug))
@@ -46,6 +57,7 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
     {
         Id = section.Id,
         Name = section.Name,
+        InterstitialPage = section.InterstitialPage,
         Questions = section.Questions
                             .OrderBy(question => question.Order)
                             .Select(question => new QuestionDbEntity()
