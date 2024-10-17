@@ -18,16 +18,19 @@ Further setup is required to use the Dynamic Page Validator - see the dedicated 
 
 ### Variables
 
-| Name                    | Description                                              |
-| ----------------------- | -------------------------------------------------------- |
-| URL                     | URL on which to run tests                                |
-| DSi_Url                 | URL for DfE Sign-in Interactions                         |
-| DSi_Email               | DfE Sign-in Username                                     |
-| DSi_Password            | DfE Sign-in Password                                     |
-| SPACE_ID                | Id of the PlanTech Contentful space                      | 
-| DELIVERY_TOKEN          | Content Delivery API access token                        | 
-| MANAGEMENT_TOKEN        | Contentful personal access token                         |
-| CONTENTFUL_ENVIRONMENT  | Corresponding Contentful environment eg 'dev', 'master'  |
+| Name                   | Description                                                                                    |
+| ---------------------- | ---------------------------------------------------------------------------------------------- |
+| URL                    | URL on which to run tests                                                                      |
+| DSi_Url                | URL for DfE Sign-in Interactions                                                               |
+| DSi_Email              | DfE Sign-in Username                                                                           |
+| DSi_Password           | DfE Sign-in Password                                                                           |
+| DSi_NoOrg_Email        | DfE Sign-in Username for a user who has no organisation                                        |
+| DSi_NoOrg_Password     | Password for the DSi_NoOrg_Email user                                                          |
+| SPACE_ID               | Id of the PlanTech Contentful space                                                            |
+| DELIVERY_TOKEN         | Content Delivery API access token                                                              |
+| MANAGEMENT_TOKEN       | Contentful personal access token                                                               |
+| CONTENTFUL_ENVIRONMENT | Corresponding Contentful environment eg 'dev', 'master'                                        |
+| APP_ENVIRONMENT        | What environment the web app is running under, e.g. 'dev', 'test', 'staging', 'production' etc |
 
 To obtain DELIVERY_TOKEN and SPACE_ID, log in to Contentful and select 'API Keys' from the Settings menu. Ensure the environment that you will be testing is selected and saved, and copy the hidden value from 'Content Delivery API - access token'. This page also displays the space ID.
 

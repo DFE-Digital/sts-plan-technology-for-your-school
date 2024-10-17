@@ -1,6 +1,6 @@
 import { ValidatePage } from "../helpers/index.js";
 
-export const validateNonAuthorisedPages = (dataMapper) => {
+export const validateAndTestNonAuthorisedPages = (dataMapper) => {
     Array.from(dataMapper?.pages ?? [])
         .map(([, page]) => page)
         .filter((page) => !page.fields.requiresAuthorisation)

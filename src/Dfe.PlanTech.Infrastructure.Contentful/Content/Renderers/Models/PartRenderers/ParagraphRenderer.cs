@@ -24,7 +24,7 @@ public class ParagraphRenderer : BaseRichTextContentPartRender
         {
             stringBuilder.Append("<p");
             _options.AddClasses(stringBuilder);
-            stringBuilder.Append("\">");
+            stringBuilder.Append('>');
         }
 
         rendererCollection.RenderChildren(content, stringBuilder);

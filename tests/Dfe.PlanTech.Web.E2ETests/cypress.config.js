@@ -2,7 +2,6 @@ const { defineConfig } = require('cypress');
 const { loadAndSave, readFromJson } = require("./cypress/contentful-data-loader");
 
 module.exports = defineConfig({
-    numTestsKeptInMemory: 5,
     chromeWebSecurity: false,
     video: true,
     reporter: "cypress-multi-reporters",
@@ -28,7 +27,8 @@ module.exports = defineConfig({
              */
             "cypress/e2e/components/*.cy.js",
             "cypress/e2e/pages/*.cy.js",
-            "cypress/e2e/dynamic-page-validator/dynamic-page-validator.cy.js",
+            "cypress/e2e/authentication/*.cy.js",
+            "cypress/e2e/dynamic-page-validator/*.cy.js",
         ],
         setupNodeEvents(on, config) {
             /**
