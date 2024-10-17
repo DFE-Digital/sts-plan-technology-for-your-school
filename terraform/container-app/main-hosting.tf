@@ -27,6 +27,7 @@ module "main_hosting" {
   container_max_replicas           = local.container_app_max_replicas
   container_min_replicas           = local.container_app_min_replicas
   container_scale_http_concurrency = local.container_app_http_concurrency
+
   #############
   # Azure SQL #
   #############
