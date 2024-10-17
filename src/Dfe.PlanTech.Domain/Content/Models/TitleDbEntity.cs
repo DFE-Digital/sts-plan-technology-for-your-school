@@ -7,6 +7,8 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 /// </summary>
 public class TitleDbEntity : ContentComponentDbEntity, ITitle
 {
+    public string InternalName { get; set; } = null!;
+
     public string Text { get; set; } = null!;
 
     public List<PageDbEntity> Pages { get; set; } = new();

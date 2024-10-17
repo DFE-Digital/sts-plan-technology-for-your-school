@@ -15,12 +15,23 @@ public abstract class ContentGenerator
     }
 
     /// <summary>
+    /// Helper method to set Internal name to empty string for any component that has it
+    /// </summary>
+    private static void SetInternalNameDefault<T>(T entity) where T : ContentComponentDbEntity
+    {
+        var internalName = entity.GetType().GetProperty("InternalName");
+        if (internalName != null && internalName.GetValue(entity) == null)
+            internalName.SetValue(entity, "");
+    }
+
+    /// <summary>
     /// Helper method to create a ContentComponentDbEntity with Published = true
     /// </summary>
     protected static T CreateComponent<T>(T entity) where T : ContentComponentDbEntity
     {
         entity.Id = GenerateId();
         entity.Published = true;
+        SetInternalNameDefault(entity);
         return entity;
     }
 
@@ -30,6 +41,7 @@ public abstract class ContentGenerator
     protected static T CreateDraftComponent<T>(T entity) where T : ContentComponentDbEntity
     {
         entity.Id = GenerateId();
+        SetInternalNameDefault(entity);
         return entity;
     }
 
