@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.ContentSupport.Web.Controllers;
 
-[Route("/content")]
+[Route("[controller]")]
 [AllowAnonymous]
 public class ContentController(
     [FromKeyedServices(WebApplicationBuilderExtensions.ContentAndSupportServiceKey)]

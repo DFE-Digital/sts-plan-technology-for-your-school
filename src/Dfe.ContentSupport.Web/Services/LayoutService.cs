@@ -61,7 +61,7 @@ public class LayoutService : ILayoutService
     }
 
 
-    public List<CsContentItem> GetVisiblePageList(CsPage page, string pageSlug)
+    public static List<CsContentItem> GetVisiblePageList(CsPage page, string pageSlug)
     {
         if (!string.IsNullOrEmpty(pageSlug))
             return page.Content.Where(o => o.Slug == pageSlug).ToList();

@@ -135,7 +135,7 @@ namespace Dfe.ContentSupport.Web.Tests.Services
             var page = GetPage();
 
             // Act
-            var result = _layoutService.GetVisiblePageList(page, AboutSlug);
+            var result = LayoutService.GetVisiblePageList(page, AboutSlug);
 
             // Assert
             Assert.Single(result);
@@ -150,7 +150,7 @@ namespace Dfe.ContentSupport.Web.Tests.Services
             var page = GetPage();
 
             // Act
-            var result = _layoutService.GetVisiblePageList(page, Contact);
+            var result = LayoutService.GetVisiblePageList(page, Contact);
 
             // Assert
             Assert.Empty(result);
@@ -164,7 +164,7 @@ namespace Dfe.ContentSupport.Web.Tests.Services
             var page = GetPage();
 
             // Act
-            var result = _layoutService.GetVisiblePageList(page, string.Empty);
+            var result = LayoutService.GetVisiblePageList(page, string.Empty);
 
             // Assert
             Assert.Single(result);
@@ -180,7 +180,7 @@ namespace Dfe.ContentSupport.Web.Tests.Services
             page.Content = new();
 
             // Act
-            var result = _layoutService.GetVisiblePageList(page, Home);
+            var result = LayoutService.GetVisiblePageList(page, Home);
 
             // Assert
             Assert.Empty(result);
