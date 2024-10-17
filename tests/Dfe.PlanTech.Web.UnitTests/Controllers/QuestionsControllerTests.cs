@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
