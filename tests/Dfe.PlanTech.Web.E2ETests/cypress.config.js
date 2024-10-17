@@ -29,6 +29,7 @@ module.exports = defineConfig({
             "cypress/e2e/pages/*.cy.js",
             "cypress/e2e/contentsupport/*.cy.js",
             "cypress/e2e/contentsupport/pages/*.cy.js",
+            "cypress/e2e/authentication/*.cy.js",
             "cypress/e2e/dynamic-page-validator/*.cy.js",
         ],
         setupNodeEvents(on, config) {
