@@ -49,24 +49,23 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
     [LogInvalidModelState]
-    [HttpGet("{sectionSlug}/{questionSlug}/preview")]
-    public async Task<IActionResult> GetQuestionPreviewBySlug(string sectionSlug,
-                                                              string questionSlug,
-                                                              [FromServices] ContentfulOptions contentfulOptions,
-                                                              CancellationToken cancellationToken = default)
+    [HttpGet("question/preview/{questionId}")]
+    public async Task<IActionResult> GetQuestionPreviewById(string questionId,
+                                                            [FromServices] ContentfulOptions contentfulOptions,
+                                                            CancellationToken cancellationToken = default)
     {
         if (!contentfulOptions.UsePreview)
             return new RedirectResult("/self-assessment");
 
-        if (string.IsNullOrEmpty(sectionSlug))
-            throw new ArgumentNullException(nameof(sectionSlug));
-        if (string.IsNullOrEmpty(questionSlug))
-            throw new ArgumentNullException(nameof(questionSlug));
+        var section = await _getSectionQuery.GetSectionForQuestion(questionId, cancellationToken) ??
+                      throw new KeyNotFoundException($"Could not find section for question with Id {questionId}");
 
-        var section = await GetSectionBySlug(sectionSlug, cancellationToken);
-        var question = GetQuestionFromSection(section, questionSlug);
+        var question = section.Questions.Find(question => question.Sys.Id == questionId);
 
-        var viewModel = GenerateViewModel(sectionSlug, question, section, null);
+        var sectionSlug = section.InterstitialPage?.Slug ??
+                          throw new KeyNotFoundException($"{section.Name} section has no Interstitial Page");
+
+        var viewModel = GenerateViewModel(sectionSlug, question!, section, null);
         return RenderView(viewModel);
     }
 

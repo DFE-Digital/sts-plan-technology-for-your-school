@@ -78,6 +78,19 @@ public class QuestionsControllerTests
                         return null;
                     });
 
+        _getSectionQuery.GetSectionForQuestion(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns((callInfo) =>
+            {
+                var questionId = callInfo.ArgAt<string>(0);
+
+                if (questionId == _validQuestion.Sys.Id)
+                {
+                    return _validSection;
+                }
+
+                return null;
+            });
+
         _getResponseQuery = Substitute.For<IGetLatestResponsesQuery>();
         _getQuestionBySlugRouter = Substitute.For<IGetQuestionBySlugRouter>();
         _getNextUnansweredQuestionQuery = Substitute.For<IGetNextUnansweredQuestionQuery>();
@@ -280,7 +293,7 @@ public class QuestionsControllerTests
     [Fact]
     public async Task QuestionPreview_Should_Redirect_When_UsePreview_Is_False()
     {
-        var result = await _controller.GetQuestionPreviewBySlug(SectionSlug, QuestionSlug, new ContentfulOptions(false));
+        var result = await _controller.GetQuestionPreviewById(_validQuestion.Sys.Id, new ContentfulOptions(false));
 
         var redirectResult = result as RedirectResult;
         Assert.NotNull(redirectResult);
@@ -290,7 +303,7 @@ public class QuestionsControllerTests
     [Fact]
     public async Task QuestionPreview_Should_Return_Valid_Model_When_UsePreview_Is_True()
     {
-        var result = await _controller.GetQuestionPreviewBySlug(SectionSlug, QuestionSlug, new ContentfulOptions(true));
+        var result = await _controller.GetQuestionPreviewById(_validQuestion.Sys.Id, new ContentfulOptions(true));
 
         var viewResult = Assert.IsType<ViewResult>(result);
         Assert.Equal("Question", viewResult.ViewName);
