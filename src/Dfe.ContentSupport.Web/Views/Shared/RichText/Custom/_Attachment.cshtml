@@ -6,7 +6,7 @@
         <div class="attachment-thumbnail govuk-!-margin-right-8">
             <a href="@Model.Uri" download>
                 @{
-                var fileExtension = Model.ContentType.Split('/').Last().ToLower();
+                var fileExtension = Model.ContentType.Split('/')[^1].ToLower();
                     if (fileExtension == "vnd.openxmlformats-officedocument.spreadsheetml.sheet")
                     {
                         fileExtension = "xlsx";
