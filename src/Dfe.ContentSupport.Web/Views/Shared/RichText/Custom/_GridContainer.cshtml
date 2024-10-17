@@ -1,0 +1,9 @@
+﻿@model CustomGridContainer
+
+@{
+<div class="dfe-grid-container">
+    @foreach (var card in Model.Cards)
+    {
+        <partial name="RichText/Custom/_Card" model="card"/>
+    }
+</div>}

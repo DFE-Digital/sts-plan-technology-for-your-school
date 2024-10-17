@@ -1,0 +1,22 @@
+@model CustomComponent
+
+@{
+    switch (Model.Type)
+    {
+        case CustomComponentType.Attachment:
+            <partial name="RichText/Custom/_Attachment" model="Model"/>
+            break;
+        case CustomComponentType.Accordion:
+            <partial name="RichText/Custom/_Accordion" model="Model"/>
+            break;
+        case CustomComponentType.Card:
+            <partial name="RichText/Custom/_Card" model="Model"/>
+            break;
+        case CustomComponentType.GridContainer:
+            <partial name="RichText/Custom/_GridContainer" model="Model"/>
+            break;
+        default:
+            <partial name="_UnsupportedElement" model="Model"/>
+            break;
+    }
+}
