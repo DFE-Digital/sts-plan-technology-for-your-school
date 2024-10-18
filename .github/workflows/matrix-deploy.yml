@@ -7,7 +7,6 @@ on:
     paths:
       - "src/**"
       - ".github/workflows/matrix-deploy.yml"
-      - "contentandsupport/**"
       - ".gitmodules"
 
 jobs:

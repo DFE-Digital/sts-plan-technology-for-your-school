@@ -37,12 +37,6 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.ref }}
-          submodules: true
-
-      - name: Git Submodule Update
-        run: |
-            git pull --recurse-submodules
-            git submodule update --remote --recursive
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
@@ -106,8 +100,7 @@ jobs:
           /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
           /d:sonar.host.url="https://sonarcloud.io" \
           /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml \
-          /d:sonar.exclusions=**/contentandsupport/** \
-          /d:sonar.coverage.exclusions=**/Program.cs,**/gulpfile.js,**/wwwroot/**,**/contentandsupport/**,**/Dfe.PlanTech.Web.SeedTestData/** \
+          /d:sonar.coverage.exclusions=**/Program.cs,**/gulpfile.js,**/wwwroot/**,**/Dfe.PlanTech.Web.SeedTestData/** \
           /d:sonar.issue.ignore.multicriteria=e1 \
           /d:sonar.issue.ignore.multicriteria.e1.ruleKey=csharpsquid:S6602 \
           /d:sonar.issue.ignore.multicriteria.e1.resourceKey=src/**/*.cs \
