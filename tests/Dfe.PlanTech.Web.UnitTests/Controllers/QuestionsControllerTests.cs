@@ -94,19 +94,6 @@ public class QuestionsControllerTests
                 return null;
             });
 
-        _getSectionQuery.GetSectionForQuestion(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns((callInfo) =>
-            {
-                var questionId = callInfo.ArgAt<string>(0);
-
-                if (questionId == _validQuestion.Sys.Id)
-                {
-                    return _validSection;
-                }
-
-                return null;
-            });
-
         _getResponseQuery = Substitute.For<IGetLatestResponsesQuery>();
         _getQuestionBySlugRouter = Substitute.For<IGetQuestionBySlugRouter>();
         _getNextUnansweredQuestionQuery = Substitute.For<IGetNextUnansweredQuestionQuery>();
@@ -317,7 +304,7 @@ public class QuestionsControllerTests
     }
 
     [Fact]
-    public async Task QuestionPreview_Should_Return_Valid_Model_When_UsePreview_Is_True()
+    public async Task QuestionPreview_Should_Return_Valid_Model_With_Section_Omitted_When_UsePreview_Is_True()
     {
         var result = await _controller.GetQuestionPreviewById(_validQuestion.Sys.Id, new ContentfulOptions(true));
 
@@ -327,8 +314,8 @@ public class QuestionsControllerTests
         var viewModel = Assert.IsType<QuestionViewModel>(viewResult.Model);
 
         Assert.NotNull(viewModel);
-        Assert.Equal(SectionSlug, viewModel.SectionSlug);
         Assert.Equal(QuestionSlug, viewModel.Question.Slug);
+        Assert.Null(viewModel.SectionSlug);
         Assert.Null(viewModel.AnswerRef);
     }
 }

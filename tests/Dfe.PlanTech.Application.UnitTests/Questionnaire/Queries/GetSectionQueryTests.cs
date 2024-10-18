@@ -13,15 +13,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Questionnaire.Queries;
 
 public class GetSectionQueryTests
 {
-    private static readonly Question FirstQuestion = new()
-    {
-        Sys = new SystemDetails { Id = "first-section-question" }
-    };
-    private static readonly Question SecondQuestion = new()
-    {
-        Sys = new SystemDetails { Id = "second-section-question" }
-    };
-    private static readonly Section FirstSection = new()
+    private readonly static Section FirstSection = new()
     {
         Name = "First section",
         InterstitialPage = new Page()
@@ -31,11 +23,10 @@ public class GetSectionQueryTests
         Sys = new SystemDetails()
         {
             Id = "1"
-        },
-        Questions = [FirstQuestion]
+        }
     };
 
-    private static readonly Section SecondSection = new()
+    private readonly static Section SecondSection = new()
     {
         Name = "Second section",
         InterstitialPage = new Page()
@@ -45,11 +36,10 @@ public class GetSectionQueryTests
         Sys = new SystemDetails()
         {
             Id = "2"
-        },
-        Questions = [SecondQuestion]
+        }
     };
 
-    private static readonly Section ThirdSection = new()
+    private readonly static Section ThirdSection = new()
     {
         Name = "Thurd section",
         InterstitialPage = new Page()
@@ -63,16 +53,13 @@ public class GetSectionQueryTests
     };
 
     private readonly List<SectionDbEntity> _dbSections = new(3);
-    private readonly List<QuestionDbEntity> _dbQuestions = new(2);
 
     private readonly Section[] _sections = new[] { FirstSection, SecondSection, ThirdSection };
-    private readonly Question[] _questions = new[] { FirstQuestion, SecondQuestion };
 
     private readonly IMapper _mapper = Substitute.For<IMapper>();
 
     public GetSectionQueryTests()
     {
-        _dbQuestions.AddRange(_questions.Select((question) => new QuestionDbEntity { Id = question.Sys.Id }));
         _dbSections.AddRange(_sections.Select((section) =>
         {
             var interstitialPageId = section.InterstitialPage != null
@@ -88,8 +75,7 @@ public class GetSectionQueryTests
                     Id = interstitialPageId
                 },
                 InterstitialPageId = interstitialPageId,
-                Id = section.Sys.Id,
-                Questions = section.Questions.Select(question => new QuestionDbEntity { Id = question.Sys.Id }).ToList()
+                Id = section.Sys.Id
             };
         }));
 
@@ -135,11 +121,12 @@ public class GetSectionQueryTests
         var db = Substitute.For<ICmsDbContext>();
         db.Sections.Returns(_dbSections.AsQueryable());
         db.FirstOrDefaultCachedAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>())
-            .Returns(callinfo =>
-            {
-                var queryable = callinfo.ArgAt<IQueryable<SectionDbEntity>>(0);
-                return queryable.FirstOrDefault();
-            });
+                .Returns(callinfo =>
+                {
+                    var queryable = callinfo.ArgAt<IQueryable<SectionDbEntity>>(0);
+
+                    return queryable.FirstOrDefault();
+                });
 
         var getSectionQuery = new GetSectionQuery(db, repository, _mapper);
         var section = await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken);
@@ -192,6 +179,8 @@ public class GetSectionQueryTests
         await repository.Received(1).GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>());
     }
 
+
+
     [Fact]
     public async Task GetSectionBySlug_ThrowsExceptionOnRepositoryError()
     {
@@ -212,32 +201,6 @@ public class GetSectionQueryTests
         await Assert.ThrowsAsync<ContentfulDataUnavailableException>(
             async () => await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken)
         );
-    }
-
-    [Theory]
-    [InlineData("first-section-question", "1")]
-    [InlineData("second-section-question", "2")]
-    public async Task GetSectionForQuestion_ReturnsCorrectSection(string questionId, string sectionId)
-    {
-        var cancellationToken = CancellationToken.None;
-
-        var db = Substitute.For<ICmsDbContext>();
-        var repository = Substitute.For<IContentRepository>();
-
-        db.Sections.Returns(_dbSections.AsQueryable());
-        db.Questions.Returns(_dbQuestions.AsQueryable());
-        db.FirstOrDefaultCachedAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>())
-            .Returns(callinfo =>
-            {
-                var queryable = callinfo.ArgAt<IQueryable<SectionDbEntity>>(0);
-                return queryable.FirstOrDefault();
-            });
-
-        var getSectionQuery = new GetSectionQuery(db, repository, _mapper);
-        var section = await getSectionQuery.GetSectionForQuestion(questionId, cancellationToken);
-
-        Assert.NotNull(section);
-        Assert.Equal(sectionId, section.Sys.Id);
     }
 }
 

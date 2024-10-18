@@ -64,13 +64,7 @@ public class QuestionsController : BaseController<QuestionsController>
         var question = await _getEntityFromContentfulQuery.GetEntityById<Question>(questionId, cancellationToken) ??
                        throw new KeyNotFoundException($"Could not find question with Id {questionId}");
 
-        var section = await _getSectionQuery.GetSectionForQuestion(questionId, cancellationToken) ??
-                      throw new KeyNotFoundException($"Could not find section for question with Id {questionId}");
-
-        var sectionSlug = section.InterstitialPage?.Slug ??
-                          throw new KeyNotFoundException($"{section.Name} section has no Interstitial Page");
-
-        var viewModel = GenerateViewModel(sectionSlug, question, section, null);
+        var viewModel = GenerateViewModel(null, question, null, null);
         return RenderView(viewModel);
     }
 
@@ -160,7 +154,7 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
     [NonAction]
-    public QuestionViewModel GenerateViewModel(string sectionSlug, Question question, ISectionComponent section, string? latestAnswerContentfulId)
+    public QuestionViewModel GenerateViewModel(string? sectionSlug, Question question, ISectionComponent? section, string? latestAnswerContentfulId)
     {
         ViewData["Title"] = question.Text;
 
@@ -168,9 +162,9 @@ public class QuestionsController : BaseController<QuestionsController>
         {
             Question = question,
             AnswerRef = latestAnswerContentfulId,
-            SectionName = section.Name,
+            SectionName = section?.Name,
             SectionSlug = sectionSlug,
-            SectionId = section.Sys.Id
+            SectionId = section?.Sys.Id
         };
     }
 
