@@ -26,8 +26,7 @@ public class GetEntityFromContentfulQuery : ContentRetriever, IGetEntityFromCont
     {
         try
         {
-            var entities = await repository.GetEntities<TContent>(cancellationToken);
-            return entities.FirstOrDefault(entity => entity.Sys.Id == contentId);
+            return await repository.GetEntityById<TContent>(contentId, cancellationToken: cancellationToken);
         }
         catch (Exception ex)
         {

@@ -46,7 +46,6 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
     {
         Id = section.Id,
         Name = section.Name,
-        InterstitialPage = section.InterstitialPage,
         Questions = section.Questions
                             .OrderBy(question => question.Order)
                             .Select(question => new QuestionDbEntity()
