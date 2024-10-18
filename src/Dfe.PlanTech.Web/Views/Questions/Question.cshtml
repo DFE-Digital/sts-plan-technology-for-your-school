@@ -8,11 +8,11 @@
 }
 
 <form asp-controller="Questions" asp-action="SubmitAnswer" asp-route-sectionSlug=@Model.SectionSlug
-    asp-route-questionSlug=@Model.Question.Slug method="post">
-    <input id="QuestionText" type="hidden" value="@Model.Question.Text" name="QuestionText" />
-    <input id="QuestionId" type="hidden" value=@Model.Question.Sys.Id name="QuestionId" />
-    <input id="SectionId" type="hidden" value="@Model.SectionId" name="SectionId" />
-    <input id="SectionName" type="hidden" value="@Model.SectionName" name="SectionName" />
+      asp-route-questionSlug=@Model.Question.Slug method="post">
+    <input id="QuestionText" type="hidden" value="@Model.Question.Text" name="QuestionText"/>
+    <input id="QuestionId" type="hidden" value=@Model.Question.Sys.Id name="QuestionId"/>
+    <input id="SectionId" type="hidden" value="@Model.SectionId" name="SectionId"/>
+    <input id="SectionName" type="hidden" value="@Model.SectionName" name="SectionName"/>
 
     <govuk-radios name="ChosenAnswerJson">
         <govuk-radios-fieldset>
@@ -44,5 +44,10 @@
         </govuk-radios-fieldset>
     </govuk-radios>
 
-    <govuk-button type="submit">Save and continue</govuk-button>
+    @{
+        // Question preview omits section details and submission should be disabled in this case
+        var disabled = Model.SectionSlug == null;
+        <govuk-button type="submit" disabled="disabled">Save and continue</govuk-button>
+    }
+
 </form>

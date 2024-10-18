@@ -1,5 +1,7 @@
 using Dfe.PlanTech.Application.Exceptions;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
@@ -22,6 +24,7 @@ public class QuestionsControllerTests
     private readonly IGetNextUnansweredQuestionQuery _getNextUnansweredQuestionQuery;
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetLatestResponsesQuery _getResponseQuery;
+    private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery;
     private readonly IDeleteCurrentSubmissionCommand _deleteCurrentSubmissionCommand;
     private readonly IGetQuestionBySlugRouter _getQuestionBySlugRouter;
     private readonly IUser _user;
@@ -64,18 +67,32 @@ public class QuestionsControllerTests
         _configuration = Substitute.For<IConfiguration>();
 
         _getSectionQuery = Substitute.For<IGetSectionQuery>();
+        _getEntityFromContentfulQuery = Substitute.For<IGetEntityFromContentfulQuery>();
+
+        _getEntityFromContentfulQuery.GetEntityById<Question>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns((callinfo) =>
+            {
+                var questionId = callinfo.ArgAt<string>(0);
+                if (questionId == _validQuestion.Sys.Id)
+                {
+                    return _validQuestion;
+                }
+
+                return null;
+            });
+
         _getSectionQuery.GetSectionBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                    .Returns((callInfo) =>
-                    {
-                        var sectionSlug = callInfo.ArgAt<string>(0);
+            .Returns((callInfo) =>
+            {
+                var sectionSlug = callInfo.ArgAt<string>(0);
 
-                        if (sectionSlug == _validSection.InterstitialPage.Slug)
-                        {
-                            return _validSection;
-                        }
+                if (sectionSlug == _validSection.InterstitialPage.Slug)
+                {
+                    return _validSection;
+                }
 
-                        return null;
-                    });
+                return null;
+            });
 
         _getResponseQuery = Substitute.For<IGetLatestResponsesQuery>();
         _getQuestionBySlugRouter = Substitute.For<IGetQuestionBySlugRouter>();
@@ -85,7 +102,7 @@ public class QuestionsControllerTests
         _user = Substitute.For<IUser>();
         _user.GetEstablishmentId().Returns(EstablishmentId);
 
-        _controller = new QuestionsController(_logger, _getSectionQuery, _getResponseQuery, _user);
+        _controller = new QuestionsController(_logger, _getSectionQuery, _getResponseQuery, _getEntityFromContentfulQuery, _user);
     }
 
     [Fact]
@@ -136,7 +153,7 @@ public class QuestionsControllerTests
     [Fact]
     public async Task GetNextUnansweredQuestion_Should_Error_When_SectionSlug_NotFound()
     {
-        await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() => _controller.GetNextUnansweredQuestion("Not a real section", _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand, _configuration));
+        await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetNextUnansweredQuestion("Not a real section", _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand, _configuration));
     }
 
     [Fact]
@@ -274,5 +291,31 @@ public class QuestionsControllerTests
         var sectionSlug = routeValues.FirstOrDefault(routeValue => routeValue.Key == "sectionSlug").Value as string;
 
         Assert.Equal(SectionSlug, sectionSlug);
+    }
+
+    [Fact]
+    public async Task QuestionPreview_Should_Redirect_When_UsePreview_Is_False()
+    {
+        var result = await _controller.GetQuestionPreviewById(_validQuestion.Sys.Id, new ContentfulOptions(false));
+
+        var redirectResult = result as RedirectResult;
+        Assert.NotNull(redirectResult);
+        Assert.Equal("/self-assessment", redirectResult.Url);
+    }
+
+    [Fact]
+    public async Task QuestionPreview_Should_Return_Valid_Model_With_Section_Omitted_When_UsePreview_Is_True()
+    {
+        var result = await _controller.GetQuestionPreviewById(_validQuestion.Sys.Id, new ContentfulOptions(true));
+
+        var viewResult = Assert.IsType<ViewResult>(result);
+        Assert.Equal("Question", viewResult.ViewName);
+
+        var viewModel = Assert.IsType<QuestionViewModel>(viewResult.Model);
+
+        Assert.NotNull(viewModel);
+        Assert.Equal(QuestionSlug, viewModel.Question.Slug);
+        Assert.Null(viewModel.SectionSlug);
+        Assert.Null(viewModel.AnswerRef);
     }
 }
