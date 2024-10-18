@@ -7,6 +7,11 @@
         element.classList.remove("js-only");
     }
 
+    function deleteNonJsElement(element){
+        element.parentNode.removeChild(element);
+    }
+
     // unhide all js-only elements when js is enabled
     [...document.getElementsByClassName("js-only")].forEach(showHiddenElement);
+    [...document.getElementsByClassName("non-js-only")].forEach(deleteNonJsElement);
 </script>
