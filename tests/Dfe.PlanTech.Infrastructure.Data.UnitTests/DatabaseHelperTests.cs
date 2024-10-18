@@ -17,7 +17,7 @@ public class DatabaseHelperTests
     private readonly IQueryCacher _queryCacher = Substitute.For<IQueryCacher>();
     private readonly CmsDbContext _mockDb = Substitute.For<CmsDbContext>();
     private readonly DatabaseHelper<ICmsDbContext> _databaseHelper;
-    private readonly string[] _nonNullablePropertyNames = ["Id", "Archived", "Published", "Deleted", "Slug", "Text"];
+    private readonly string[] _nonNullablePropertyNames = ["InternalName", "Id", "Archived", "Published", "Deleted", "Slug", "Text"];
 
     public DatabaseHelperTests()
     {

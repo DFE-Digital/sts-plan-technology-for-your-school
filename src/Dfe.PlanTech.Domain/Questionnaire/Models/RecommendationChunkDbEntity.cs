@@ -8,6 +8,8 @@ public class RecommendationChunkDbEntity
     : ContentComponentDbEntity,
         IRecommendationChunk<AnswerDbEntity, ContentComponentDbEntity>
 {
+    public string InternalName { get; set; } = null!;
+
     public string Header { get; init; } = null!;
 
     [NotMapped]

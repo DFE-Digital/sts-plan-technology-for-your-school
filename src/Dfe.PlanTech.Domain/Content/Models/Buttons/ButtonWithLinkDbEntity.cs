@@ -3,11 +3,13 @@ using Dfe.PlanTech.Domain.Content.Interfaces;
 namespace Dfe.PlanTech.Domain.Content.Models.Buttons;
 
 /// <summary>
-/// Class for the table for the <see cref="ButtonWithLink"/> button that links somewhere 
+/// Class for the table for the <see cref="ButtonWithLink"/> button that links somewhere
 /// </summary>
 /// <inheritdoc/>
 public class ButtonWithLinkDbEntity : ContentComponentDbEntity, IButtonWithLink<ButtonDbEntity>
 {
+    public string InternalName { get; set; } = null!;
+
     [DontCopyValue]
     public ButtonDbEntity Button { get; set; } = null!;
 
