@@ -1,0 +1,18 @@
+@model RichTextContentItem
+
+<th scope="col">
+    @if (Model.Content.Any())
+    {
+        foreach (var childNode in Model.Content)
+        {
+            if (childNode.NodeType == RichTextNodeType.Paragraph)
+            {
+                <partial name="RichText/_Items" model="@childNode"/>
+            }
+            else
+            {
+                <partial name="RichText/_RichText" model="@childNode"/>
+            }
+        }
+    }
+</th>
