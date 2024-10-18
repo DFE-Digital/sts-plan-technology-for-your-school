@@ -90,8 +90,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: true
 
       - name: Azure CLI Login
         uses: ./.github/actions/azure-login
