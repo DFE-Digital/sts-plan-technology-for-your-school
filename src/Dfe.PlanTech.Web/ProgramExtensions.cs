@@ -95,13 +95,12 @@ public static class ProgramExtensions
         services.AddOptions<ApiAuthenticationConfiguration>()
                 .Configure<IConfiguration>((settings, configuration) => configuration.GetSection("Api:Authentication").Bind(settings));
 
-        services.AddTransient((services) => services.GetRequiredService<IOptions<ContentfulOptions>>().Value);
-        services.AddTransient((services) =>
-        {
-            var testing = services.GetRequiredService<IOptions<ApiAuthenticationConfiguration>>().Value;
+        services.AddOptions<SigningSecretConfiguration>()
+                .Configure<IConfiguration>((settings, configuration) => configuration.GetSection("Contentful").Bind(settings));
 
-            return testing;
-        });
+        services.AddTransient((services) => services.GetRequiredService<IOptions<ContentfulOptions>>().Value);
+        services.AddTransient((services) => services.GetRequiredService<IOptions<ApiAuthenticationConfiguration>>().Value);
+        services.AddTransient((services) => services.GetRequiredService<IOptions<SigningSecretConfiguration>>().Value);
 
         services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubtopicRecommendationFromContentfulQuery>(GetSubtopicRecommendationFromContentfulQuery.ServiceKey);
         services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationFromDbQuery>(GetSubTopicRecommendationFromDbQuery.ServiceKey);
@@ -215,6 +214,7 @@ public static class ProgramExtensions
                             policy.Requirements.Add(new UserOrganisationAuthorisationRequirement());
                         });
         services.AddSingleton<ApiKeyAuthorisationFilter>();
+        services.AddSingleton<SigningSecretAuthorisationFilter>();
         services.AddSingleton<IAuthorizationHandler, PageModelAuthorisationPolicy>();
         services.AddSingleton<IAuthorizationHandler, UserOrganisationAuthorisationHandler>();
         services.AddSingleton<IAuthorizationMiddlewareResultHandler, UserAuthorisationMiddlewareResultHandler>();

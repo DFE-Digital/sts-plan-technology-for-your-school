@@ -12,6 +12,7 @@ Set the following environment variables:
 Contentful:DeliveryApiKey = "<content_delivery_api_key>",
 Contentful:PreviewApiKey, "<content_preview_api_key>"
 Contentful:SpaceId = "<space_id>",
+Contentful:SigningSecret = "<contentful_signing_secret>"
 
 //OPTIONAL
 Contentful:UsePreviewApi = true OR false

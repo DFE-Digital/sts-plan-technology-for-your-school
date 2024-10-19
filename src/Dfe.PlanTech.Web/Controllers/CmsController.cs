@@ -11,6 +11,7 @@ public class CmsController(ILogger<CmsController> logger) : BaseController<CmsCo
 {
     [HttpPost("webhook")]
     [ValidateApiKey]
+    [ValidateSigningSecret]
     public async Task<IActionResult> WebhookPayload([FromBody] JsonDocument json, [FromServices] IWriteCmsWebhookToQueueCommand writeToQueueCommand)
     {
         try
@@ -20,10 +21,7 @@ public class CmsController(ILogger<CmsController> logger) : BaseController<CmsCo
             {
                 return Ok();
             }
-            else
-            {
-                return BadRequest(result);
-            }
+            return BadRequest(result);
         }
         catch (Exception e)
         {
