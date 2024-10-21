@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
-using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -12,7 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace Dfe.PlanTech.Web.Authorisation;
 
 public class SigningSecretAuthorisationFilter(
-    [FromServices]ISystemTime systemTime,
+    [FromServices] ISystemTime systemTime,
     SigningSecretConfiguration signingSecretConfiguration,
     ILogger<SigningSecretAuthorisationFilter> logger
 ) : IAuthorizationFilter
