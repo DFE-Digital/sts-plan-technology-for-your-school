@@ -1,10 +1,8 @@
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
-using Azure.Core;
 using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Persistence.Models;
-using Microsoft.ApplicationInsights.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -15,7 +13,7 @@ namespace Dfe.PlanTech.Web.Authorisation;
 public class SigningSecretAuthorisationFilter(SigningSecretConfiguration signingSecretConfiguration, ILogger<ApiKeyAuthorisationFilter> logger) : IAuthorizationFilter
 {
     private const string HeaderSignature = "x-contentful-signature";
-    private const string HeaderTimestap = "x-contentful-timestap";
+    private const string HeaderTimestamp = "x-contentful-timestamp";
     private const string HeaderSignedValues = "x-contentful-signed-headers";
     private const int RequestTimeToLiveMinutes = 5;
 
@@ -42,7 +40,7 @@ public class SigningSecretAuthorisationFilter(SigningSecretConfiguration signing
     private bool VerifyRequest(string signingKey, HttpRequest request)
     {
         if (!request.Headers.TryGetValue(HeaderSignature, out var requestSignature) ||
-            !request.Headers.TryGetValue(HeaderTimestap, out var requestTimestamp) ||
+            !request.Headers.TryGetValue(HeaderTimestamp, out var requestTimestamp) ||
             !request.Headers.TryGetValue(HeaderSignedValues, out var requestSignedHeaders) ||
             string.IsNullOrEmpty(requestSignature) ||
             string.IsNullOrEmpty(requestTimestamp) ||
@@ -60,19 +58,16 @@ public class SigningSecretAuthorisationFilter(SigningSecretConfiguration signing
             return false;
         }
 
-        // Get utf-8 encoded request path excluding protocol, hostname and port
         var requestPath = request.GetEncodedPathAndQuery();
-
-        // Headers should be converted to lower case in a semi-colon separated list
         var requestHeaders = string.Join(";", requestSignedHeaders
             .ToString()
             .Split(',')
             .Select(header => header.ToLower() + ":" + request.Headers[header]));
+        var requestBody = new StreamReader(request.Body).ReadToEndAsync().Result;
 
-        var canonicalRepresentation = string.Join("\n", request.Method, requestPath, requestHeaders, request.Body);
+        var canonicalRepresentation = string.Join("\n", request.Method, requestPath, requestHeaders, requestBody);
         var signature = CreateSignature(canonicalRepresentation, signingKey);
 
-        // Compare request signature to generated signature
         return signature == requestSignature;
     }
 
