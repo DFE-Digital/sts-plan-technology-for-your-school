@@ -153,16 +153,6 @@ locals {
     }
   }
 
-  /*
-    match_condition {
-      match_variable     = "RequestHeader"
-      selector           = "UserAgent"
-      operator           = "Contains"
-      negation_condition = false
-      match_values       = ["windows"]
-      transforms         = ["Lowercase", "Trim"]
-    }
-  */
   ####################x
   # Storage Accounts #
   ####################
@@ -183,7 +173,8 @@ locals {
   # Contentful Webhook #
   ######################
 
-  contentful_webhook_name          = var.contentful_webhook_name
-  contentful_webhook_url           = "https://${data.azurerm_cdn_frontdoor_endpoint.app.host_name}${var.contentful_webhook_endpoint}"
-  contentful_webhook_shell_command = var.contentful_management_token != null && var.contentful_upsert_webhook == true ? "bash ./scripts/create-contentful-webhook.sh --env-id ${azurerm_key_vault_secret.vault_secret_contentful_environment.value} --env-name \"${var.container_environment}\" --management-token \"${var.contentful_management_token}\" --space-id ${azurerm_key_vault_secret.vault_secret_contentful_spaceid.value} --webhook-api-key \"${random_password.api_key_value.result}\" --webhook-name \"${local.contentful_webhook_name}\" --webhook-url ${local.contentful_webhook_url} | tee /Users/jimwashbrook/Documents/Projects/output.log" : "echo Not updating webhook"
+  contentful_webhook_name                    = var.contentful_webhook_name
+  contentful_webhook_url                     = "https://${data.azurerm_cdn_frontdoor_endpoint.app.host_name}${var.contentful_webhook_endpoint}"
+  contentful_webhook_shell_command           = var.contentful_management_token != null && var.contentful_upsert_webhook == true ? "bash ./scripts/create-contentful-webhook.sh --env-id ${azurerm_key_vault_secret.vault_secret_contentful_environment.value} --env-name \"${var.container_environment}\" --management-token \"${var.contentful_management_token}\" --space-id ${azurerm_key_vault_secret.vault_secret_contentful_spaceid.value} --webhook-api-key \"${random_password.api_key_value.result}\" --webhook-name \"${local.contentful_webhook_name}\" --webhook-url ${local.contentful_webhook_url}" : "echo Not updating webhook"
+  contentful_webhook_secret_timetolive_hours = 365 * 24
 }

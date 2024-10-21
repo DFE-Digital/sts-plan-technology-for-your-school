@@ -216,5 +216,5 @@ resource "azurerm_key_vault_secret" "api_key" {
   key_vault_id = azurerm_key_vault.vault.id
   value        = random_password.api_key_value.result
 
-  expiration_date = timeadd(timestamp(), "365d")
+  expiration_date = timeadd(timestamp(), "${local.contentful_webhook_secret_timetolive_hours}h")
 }

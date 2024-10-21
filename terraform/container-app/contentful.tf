@@ -1,13 +1,12 @@
-//Double check this is the right thing
 data "azurerm_cdn_frontdoor_endpoint" "app" {
-  name                = "s190d01-plantech-container-app-url"
-  profile_name        = "s190d01-plantech-cdnwaf"
-  resource_group_name = "s190d01-plantech"
+  name                = "${local.resource_prefix}-container-app-url"
+  profile_name        = "${local.resource_prefix}-cdnwaf"
+  resource_group_name = local.resource_prefix
 }
 
 resource "null_resource" "upsert_contentful_webhook" {
   triggers = {
-    api_key_change         = random_password.api_key_value.result
+    api_key_change         = azurerm_key_vault_secret.api_key.value
     url_change             = data.azurerm_cdn_frontdoor_endpoint.app.host_name
     management_token       = var.contentful_management_token
     contentful_environment = azurerm_key_vault_secret.vault_secret_contentful_environment.value
