@@ -15,10 +15,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Authorisation;
 
 public class SigningSecretAuthorisationFilterTests
 {
-    private const string CorrectSigningSecret = "correct-signing-secret";
+    private const string MockSigningSecret = "super-secret-signing-secret";
     private const string MockHeaderSignedValues = "x-contentful-signed-headers,x-contentful-timestamp";
     private const string MockRequestBody = "{\"body\":\"something\"}";
-    private const string CorrectSignature = "2370b988c5585881053ab2bd478e0ab45178b3779642de50eaad0a1676d65bf0";
+    private const string CorrectSignature = "6af1bb2c169c7e4ef43486f6c6f5e0ea676bda94eab980c3eb39a52c016b1808";
 
     private readonly DateTime _requestTime;
     private readonly string _requestTimestamp;
@@ -29,12 +29,21 @@ public class SigningSecretAuthorisationFilterTests
 
     public SigningSecretAuthorisationFilterTests()
     {
-        var config = new SigningSecretConfiguration() { SigningSecret = CorrectSigningSecret };
+        var config = new SigningSecretConfiguration() { SigningSecret = MockSigningSecret };
         _authorisationFilter = new SigningSecretAuthorisationFilter(_systemTime, config, _logger);
 
         _requestTime = new DateTime(2024, 1, 1, 10, 0, 0, DateTimeKind.Utc);
         _requestTimestamp = new DateTimeOffset(_requestTime).ToUnixTimeMilliseconds().ToString();
         _systemTime.UtcNow.Returns(_ => _requestTime);
+    }
+
+    [Fact]
+    public void Should_Generate_Correct_Canonical_Representation()
+    {
+        const string canonicalRepresentation = "POST\n/api/cms/webhook\nx-contentful-signed-headers:x-contentful-signed-headers,x-contentful-timestamp;x-contentful-timestamp:1704103200000\n{\"body\":\"something\"}";
+        var httpContext = CreateMockHttpContext();
+        var representation = SigningSecretAuthorisationFilter.CreateCanonicalRepresentation(httpContext.Request, MockHeaderSignedValues);
+        Assert.Equal(canonicalRepresentation, representation);
     }
 
     [Fact]

@@ -6,6 +6,7 @@ using Dfe.PlanTech.Domain.Persistence.Models;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Dfe.PlanTech.Web.Authorisation;
@@ -62,17 +63,22 @@ public class SigningSecretAuthorisationFilter(
             return false;
         }
 
+        var canonicalRepresentation = CreateCanonicalRepresentation(request, requestSignedHeaders);
+        var signature = CreateSignature(canonicalRepresentation, signingKey);
+
+        return signature == requestSignature;
+    }
+
+    public static string CreateCanonicalRepresentation(HttpRequest request, StringValues signedHeaders)
+    {
         var requestPath = request.GetEncodedPathAndQuery();
-        var requestHeaders = string.Join(";", requestSignedHeaders
+        var requestHeaders = string.Join(";", signedHeaders
             .ToString()
             .Split(',')
             .Select(header => header.ToLower() + ":" + request.Headers[header]));
         var requestBody = new StreamReader(request.Body).ReadToEndAsync().Result;
 
-        var canonicalRepresentation = string.Join("\n", request.Method, requestPath, requestHeaders, requestBody);
-        var signature = CreateSignature(canonicalRepresentation, signingKey);
-
-        return signature == requestSignature;
+        return string.Join("\n", request.Method, requestPath, requestHeaders, requestBody);
     }
 
     private static string CreateSignature(string message, string key)
