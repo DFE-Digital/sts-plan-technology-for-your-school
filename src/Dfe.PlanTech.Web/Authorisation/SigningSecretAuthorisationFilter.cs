@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using Dfe.PlanTech.Domain.Helpers;
+using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +11,11 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Dfe.PlanTech.Web.Authorisation;
 
-public class SigningSecretAuthorisationFilter(SigningSecretConfiguration signingSecretConfiguration, ILogger<ApiKeyAuthorisationFilter> logger) : IAuthorizationFilter
+public class SigningSecretAuthorisationFilter(
+    [FromServices]ISystemTime systemTime,
+    SigningSecretConfiguration signingSecretConfiguration,
+    ILogger<ApiKeyAuthorisationFilter> logger
+) : IAuthorizationFilter
 {
     private const string HeaderSignature = "x-contentful-signature";
     private const string HeaderTimestamp = "x-contentful-timestamp";
@@ -52,7 +57,7 @@ public class SigningSecretAuthorisationFilter(SigningSecretConfiguration signing
 
         // Check timestamp is within the TTL
         var timestamp = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(requestTimestamp!, CultureInfo.InvariantCulture));
-        if (timestamp.AddMinutes(RequestTimeToLiveMinutes) <= SystemTime.UtcNow)
+        if (timestamp.AddMinutes(RequestTimeToLiveMinutes) <= systemTime.UtcNow)
         {
             logger.LogError("Request to CMS route denied due to expired timestamp");
             return false;

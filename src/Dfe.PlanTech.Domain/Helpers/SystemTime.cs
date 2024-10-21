@@ -8,5 +8,5 @@ public class SystemTime : ISystemTime
 
     public DateTime UkNow => TimeZoneHelpers.ToUkTime(DateTime.UtcNow);
 
-    public static DateTime UtcNow => DateTime.UtcNow;
+    public DateTime UtcNow => DateTime.UtcNow;
 }

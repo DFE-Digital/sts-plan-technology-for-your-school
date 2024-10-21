@@ -6,5 +6,5 @@ public interface ISystemTime
 
     public DateTime UkNow { get; }
 
-    public static DateTime UtcNow { get; }
+    public DateTime UtcNow { get; }
 }
