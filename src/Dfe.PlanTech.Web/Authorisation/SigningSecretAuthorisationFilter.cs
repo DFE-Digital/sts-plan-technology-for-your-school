@@ -76,10 +76,8 @@ public class SigningSecretAuthorisationFilter(SigningSecretConfiguration signing
         var keyBytes = Encoding.UTF8.GetBytes(key);
         var messageBytes = Encoding.UTF8.GetBytes(message);
 
-        using (var hmacsha256 = new HMACSHA256(keyBytes))
-        {
-            var hashBytes = hmacsha256.ComputeHash(messageBytes);
-            return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
-        }
+        using var hmacsha256 = new HMACSHA256(keyBytes);
+        var hashBytes = hmacsha256.ComputeHash(messageBytes);
+        return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
     }
 }
