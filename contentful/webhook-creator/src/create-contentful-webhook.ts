@@ -20,8 +20,7 @@ const createOrUpdateWebhook = async () => {
 
   if (error || !success || !options) {
     console.error(
-      `Error retrieving environment variable options: ${
-        error ?? "unknown error"
+      `Error retrieving environment variable options: ${error ?? "unknown error"
       }`
     );
     return;
@@ -38,6 +37,7 @@ const createOrUpdateWebhook = async () => {
   if (matchingWebhook) {
     console.log("Found existing webhook");
     await updateWebhook(webhookOptions, matchingWebhook);
+    return;
   }
 
   await createWebhook(space, webhookOptions);
