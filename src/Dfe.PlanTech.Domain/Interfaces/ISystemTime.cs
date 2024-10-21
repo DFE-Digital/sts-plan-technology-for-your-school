@@ -5,4 +5,6 @@ public interface ISystemTime
     public DateTime Today { get; }
 
     public DateTime UkNow { get; }
+
+    public static DateTime UtcNow { get; }
 }
