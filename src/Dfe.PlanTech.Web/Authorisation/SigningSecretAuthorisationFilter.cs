@@ -14,13 +14,13 @@ namespace Dfe.PlanTech.Web.Authorisation;
 public class SigningSecretAuthorisationFilter(
     [FromServices]ISystemTime systemTime,
     SigningSecretConfiguration signingSecretConfiguration,
-    ILogger<ApiKeyAuthorisationFilter> logger
+    ILogger<SigningSecretAuthorisationFilter> logger
 ) : IAuthorizationFilter
 {
-    private const string HeaderSignature = "x-contentful-signature";
-    private const string HeaderTimestamp = "x-contentful-timestamp";
-    private const string HeaderSignedValues = "x-contentful-signed-headers";
-    private const int RequestTimeToLiveMinutes = 5;
+    public const string HeaderSignature = "x-contentful-signature";
+    public const string HeaderTimestamp = "x-contentful-timestamp";
+    public const string HeaderSignedValues = "x-contentful-signed-headers";
+    public const int RequestTimeToLiveMinutes = 5;
 
     public void OnAuthorization(AuthorizationFilterContext context)
     {
