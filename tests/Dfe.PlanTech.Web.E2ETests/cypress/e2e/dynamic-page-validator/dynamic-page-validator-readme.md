@@ -5,7 +5,7 @@
 1. When branching from development, a dummy version of `contentful-data.json` will be in the `\fixtures` folder. This file exists to ensure that pipeline tests will be skipped. 
 2. Delete `contentful-data.json` to enable a fresh data file to be created when the DPV is run.
 3. Before running Cypress, run `npm install` from `\Dfe.PlanTech.Web.E2ETests` to install the Contentful export processor.
-4. Run Cypress as normal (using `npx cypress open --config "baseUrl=URL"` where URL is that listed in your `cypress.env.json` file) and select each of the dynamic page validator files from the Specs when in Cypress (NB: test files do not need to be run in order, but running recommendation-focused files in isolation will skip validation of questions, answers, etc. Run all three to ensure coverage).
+4. Run Cypress as normal (using `npx cypress open --config "baseUrl=URL"` where URL is that listed in your `cypress.env.json` file) and select each of the dynamic page validator files from the Specs when in Cypress (NB: test files do not need to be run in order, but running recommendation-focused files in isolation will skip validation of questions, answers, etc. Run all files in the dynamic page validator section to ensure coverage).
 5. Ensure that you do not commit a modified `contentful-data.json` file. If needed, update the index to ignore changes to this file using `git update-index --assume-unchanged cypress/fixtures/contentful-data.json`.
 
 ### Components content validated
