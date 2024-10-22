@@ -45,7 +45,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             Assert.Equal("/not-found", context.Response.Headers.Values.FirstOrDefault());
         }
 
-                [Fact]
+        [Fact]
         public void Should_Get_Not_Found_Redirect_PageNotFound_Exception()
         {
             // Arrange
