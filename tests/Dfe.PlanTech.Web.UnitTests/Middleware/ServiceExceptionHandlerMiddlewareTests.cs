@@ -26,7 +26,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
         }
 
         [Fact]
-        public void Should_Get_Service_Unavailable_Redirect_ContentfulDataUnavailableException_Exception()
+        public void Should_Get_Not_Found_Redirect_ContentfulDataUnavailableException_Exception()
         {
             // Arrange
             var exception = new ContentfulDataUnavailableException("not-found exception");
@@ -50,7 +50,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             // Arrange
             var exception = new DatabaseException("service-unavailable exception");
             var feature = new ExceptionHandlerFeature { Error = exception };
-            
+
             var context = new DefaultHttpContext();
             context.Features.Set<IExceptionHandlerPathFeature>(feature);
             var middleware = new ServiceExceptionHandlerMiddleWare();
