@@ -34,7 +34,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
-          submodules: true
 
       - name: Azure CLI Login
         uses: ./.github/actions/azure-login
@@ -95,7 +94,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
-          submodules: true
 
       - name: Azure CLI Login
         uses: ./.github/actions/azure-login
@@ -136,8 +134,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          submodules: true
 
       - name: Azure CLI Login
         uses: ./.github/actions/azure-login

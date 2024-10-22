@@ -8,7 +8,6 @@ on:
       - "src/**"
       - "tests/Dfe.PlanTech.Web.E2ETests/**"
       - ".github/workflows/e2e-tests.yml"
-      - "contentandsupport/**"
       - ".gitmodules"
 
 concurrency:
@@ -91,8 +90,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: true
 
       - name: Azure CLI Login
         uses: ./.github/actions/azure-login
