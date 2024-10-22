@@ -1,6 +1,7 @@
 ﻿using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Establishments.Exceptions;
+using Dfe.PlanTech.Domain.Users.Exceptions;
 using Dfe.PlanTech.Web.Middleware;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
@@ -30,6 +31,25 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
         {
             // Arrange
             var exception = new ContentfulDataUnavailableException("not-found exception");
+            var feature = new ExceptionHandlerFeature { Error = exception };
+
+            var context = new DefaultHttpContext();
+            context.Features.Set<IExceptionHandlerPathFeature>(feature);
+            var middleware = new ServiceExceptionHandlerMiddleWare();
+
+            // Act
+            middleware.ContextRedirect(context);
+
+            //Assert
+            Assert.NotNull(context.Response);
+            Assert.Equal("/not-found", context.Response.Headers.Values.FirstOrDefault());
+        }
+
+                [Fact]
+        public void Should_Get_Not_Found_Redirect_PageNotFound_Exception()
+        {
+            // Arrange
+            var exception = new PageNotFoundException("not-found exception");
             var feature = new ExceptionHandlerFeature { Error = exception };
 
             var context = new DefaultHttpContext();
