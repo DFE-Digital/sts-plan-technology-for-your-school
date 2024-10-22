@@ -1,10 +1,10 @@
-describe("landing page", () => {
+describe("not found", () => {
 	beforeEach(() => {
 	  cy.visit("/some-slug-that-doesnt-exist");
 	  cy.injectAxe();
 	});
   
-	it("should contain title", () => {
+	it("should contain heading", () => {
 	  cy.get("h1.govuk-heading-xl").should("exist").and("contain", "Page not found");
 	});
   
