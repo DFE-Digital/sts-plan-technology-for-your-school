@@ -212,9 +212,13 @@ public static class ProgramExtensions
                         {
                             policy.Requirements.Add(new PageAuthorisationRequirement());
                             policy.Requirements.Add(new UserOrganisationAuthorisationRequirement());
+                        })
+                        .AddPolicy(SignedRequestAuthorisationPolicy.PolicyName, policy =>
+                        {
+                            policy.AddRequirements(new SignedRequestAuthorisationRequirement());
                         });
         services.AddSingleton<ApiKeyAuthorisationFilter>();
-        services.AddSingleton<SigningSecretAuthorisationFilter>();
+        services.AddSingleton<IAuthorizationHandler, SignedRequestAuthorisationPolicy>();
         services.AddSingleton<IAuthorizationHandler, PageModelAuthorisationPolicy>();
         services.AddSingleton<IAuthorizationHandler, UserOrganisationAuthorisationHandler>();
         services.AddSingleton<IAuthorizationMiddlewareResultHandler, UserAuthorisationMiddlewareResultHandler>();

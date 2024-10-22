@@ -3,46 +3,52 @@ using System.Security.Cryptography;
 using System.Text;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Dfe.PlanTech.Web.Authorisation;
 
-public class SigningSecretAuthorisationFilter(
+public class SignedRequestAuthorisationPolicy(
     [FromServices] ISystemTime systemTime,
     SigningSecretConfiguration signingSecretConfiguration,
-    ILogger<SigningSecretAuthorisationFilter> logger
-) : IAuthorizationFilter
+    ILogger<SignedRequestAuthorisationPolicy> logger
+) : AuthorizationHandler<SignedRequestAuthorisationRequirement>
 {
+    public const string PolicyName = "UseSignedRequestAuthentication";
+
     public const string HeaderSignature = "x-contentful-signature";
     public const string HeaderTimestamp = "x-contentful-timestamp";
     public const string HeaderSignedValues = "x-contentful-signed-headers";
     public const int RequestTimeToLiveMinutes = 5;
 
-    public void OnAuthorization(AuthorizationFilterContext context)
+    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, SignedRequestAuthorisationRequirement requirement)
     {
         var signingSecret = signingSecretConfiguration.SigningSecret;
         if (signingSecret.IsNullOrEmpty())
         {
             logger.LogError("Signing secret config value missing");
-            context.Result = new UnauthorizedResult();
+            context.Fail();
+            return;
         }
 
-        if (VerifyRequest(signingSecret, context.HttpContext.Request))
+        if (context.Resource is HttpContext httpContext && await VerifyRequest(signingSecret, httpContext.Request))
+        {
+            context.Succeed(requirement);
             return;
+        }
 
         logger.LogError("Request verification with signing secret failed");
-        context.Result = new UnauthorizedResult();
+        context.Fail();
     }
 
     /// <summary>
     /// Forms a canonical representation of the request, uses the signing secret to generate a HMAC_SHA256 hash
     /// and then compares the generated signature with the one in the request.
     /// </summary>
-    private bool VerifyRequest(string signingKey, HttpRequest request)
+    private async Task<bool> VerifyRequest(string signingKey, HttpRequest request)
     {
         if (!request.Headers.TryGetValue(HeaderSignature, out var requestSignature) ||
             !request.Headers.TryGetValue(HeaderTimestamp, out var requestTimestamp) ||
@@ -63,20 +69,23 @@ public class SigningSecretAuthorisationFilter(
             return false;
         }
 
-        var canonicalRepresentation = CreateCanonicalRepresentation(request, requestSignedHeaders);
+        var canonicalRepresentation = await CreateCanonicalRepresentation(request, requestSignedHeaders);
         var signature = CreateSignature(canonicalRepresentation, signingKey);
 
         return signature == requestSignature;
     }
 
-    public static string CreateCanonicalRepresentation(HttpRequest request, StringValues signedHeaders)
+    public static async Task<string> CreateCanonicalRepresentation(HttpRequest request, StringValues signedHeaders)
     {
         var requestPath = request.GetEncodedPathAndQuery();
         var requestHeaders = string.Join(";", signedHeaders
             .ToString()
             .Split(',')
             .Select(header => header.ToLower() + ":" + request.Headers[header]));
-        var requestBody = new StreamReader(request.Body).ReadToEndAsync().Result;
+
+        request.EnableBuffering();
+        var requestBody = await new StreamReader(request.Body).ReadToEndAsync();
+        request.Body.Position = 0;
 
         return string.Join("\n", request.Method, requestPath, requestHeaders, requestBody);
     }
