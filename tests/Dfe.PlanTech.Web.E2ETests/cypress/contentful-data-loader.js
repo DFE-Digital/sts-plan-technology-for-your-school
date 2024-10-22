@@ -44,6 +44,7 @@ async function fetchContentfulExport({ exportContentfulData, config }) {
     managementToken: config.env.MANAGEMENT_TOKEN,
     deliveryToken: config.env.DELIVERY_TOKEN,
     environment: config.env.CONTENTFUL_ENVIRONMENT,
+    usePreview: config.env.USE_PREVIEW
   });
 
   /**As the data is passed to/from the dev server + browser, it has to be serialisable.
