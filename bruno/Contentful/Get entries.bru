@@ -1,0 +1,23 @@
+meta {
+  name: Get entries
+  type: http
+  seq: 2
+}
+
+get {
+  url: https://cdn.contentful.com/spaces/{{contentful_space_id}}/environments/{{contentful_environment_id}}/entries?access_token={{contentful_access_token}}&content_type={{content_type}}&include={{include}}
+  body: none
+  auth: none
+}
+
+params:query {
+  access_token: {{contentful_access_token}}
+  content_type: {{content_type}}
+  include: {{include}}
+}
+
+vars:pre-request {
+  include: 5
+  content_type: page
+  select: fields.intros
+}
