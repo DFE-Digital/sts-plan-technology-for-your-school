@@ -22,10 +22,10 @@ public class ServiceExceptionHandlerMiddleWare : IExceptionHandlerMiddleware
         exception switch
         {
             null => UrlConstants.Error,
-            ContentfulDataUnavailableException => UrlConstants.ServiceUnavailable,
+            ContentfulDataUnavailableException => UrlConstants.NotFound,
             DatabaseException => UrlConstants.ServiceUnavailable,
             InvalidEstablishmentException => UrlConstants.ServiceUnavailable,
-            PageNotFoundException => UrlConstants.ServiceUnavailable,
+            PageNotFoundException => UrlConstants.NotFound,
             KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) => UrlConstants.OrgErrorPage,
             _ => GetRedirectUrlForException(exception.InnerException),
         };

@@ -215,5 +215,19 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             Assert.IsType<ServiceUnavailableViewModel>(model);
         }
+
+        [Fact]
+        public void Should_Render_NotFound_Page()
+        {
+            var httpContextSubstitute = Substitute.For<HttpContext>();
+            var controllerContext = new ControllerContext
+            {
+                HttpContext = httpContextSubstitute
+            };
+            _controller.ControllerContext = controllerContext;
+            var result = _controller.NotFound();
+            var viewResult = result as ViewResult;
+            Assert.NotNull(viewResult);
+        }
     }
 }
