@@ -13,7 +13,7 @@
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-one-third">
                 @{ ViewData["VerticalNavigationSection"] = headerWithContent.SlugifiedHeader; }
-                <partial name="Components/VerticalNavigation/Default" model="@Model.Chunks"/>
+                <partial name="Components/VerticalNavigation/Default" model="@Model.AllContent"/>
             </div>
             <div class="govuk-grid-column-two-thirds">
                 <div class="govuk-section-break govuk-!-margin-top-0 govuk-section-break--m govuk-section-break--visible">

@@ -1,4 +1,4 @@
-@model IEnumerable<Dfe.PlanTech.Domain.Questionnaire.Models.RecommendationChunk>
+@model IEnumerable<Dfe.PlanTech.Domain.Questionnaire.Interfaces.IHeaderWithContent>
 
 <nav class="dfe-vertical-nav">
     <h2 class="dfe-vertical-nav__theme govuk-heading-m">List of actions</h2>
@@ -10,7 +10,7 @@
                 : "";
 
             <li class="dfe-vertical-nav__section-item">
-                <a class="dfe-vertical-nav__link @classes" href="#@chunk.SlugifiedHeader">@chunk.Header</a>
+                <a class="dfe-vertical-nav__link @classes" href="#@chunk.SlugifiedHeader">@chunk.HeaderText</a>
             </li>
         }
     </ul>
