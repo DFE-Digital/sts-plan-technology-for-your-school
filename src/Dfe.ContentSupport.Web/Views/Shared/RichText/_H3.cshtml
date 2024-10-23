@@ -1,0 +1,11 @@
+@model ContentItemBase
+
+<h3>
+    @if (Model.Content.Any())
+    {
+    foreach (var childNode in Model.Content)
+    {
+    <partial name="RichText/_RichText" model="@childNode"/>
+    }
+    }
+</h3>
