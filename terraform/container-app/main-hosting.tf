@@ -21,7 +21,7 @@ module "main_hosting" {
 
   container_environment_variables = local.container_environment_variables
 
-  container_app_identities           = [azurerm_user_assigned_identity.user_assigned_identity.id]
+  container_app_identities           = [azurerm_user_assigned_identity.user_assigned_identity.client_id]
   container_app_use_managed_identity = false
 
   container_max_replicas           = local.container_app_max_replicas
