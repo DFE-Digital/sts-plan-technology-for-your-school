@@ -11,6 +11,11 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 public class NavigationLinkDbEntity : ContentComponentDbEntity, INavigationLink
 {
     /// <summary>
+    /// The Internal Name (for development and reference purposes)
+    /// </summary>
+    public string InternalName { get; set; } = null!;
+
+    /// <summary>
     /// Display text (i.e. <a>{DisplayText}</a>)
     /// </summary>
     public string DisplayText { get; set; } = null!;

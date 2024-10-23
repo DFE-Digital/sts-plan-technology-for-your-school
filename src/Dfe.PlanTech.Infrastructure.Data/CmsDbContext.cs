@@ -164,6 +164,11 @@ public class CmsDbContext : DbContext, ICmsDbContext
             entity.ToTable("Answers", Schema);
         });
 
+        modelBuilder.Entity<ButtonDbEntity>(entity =>
+        {
+            entity.ToTable("Buttons", Schema);
+        });
+
         modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>(entity =>
         {
             entity.Navigation(button => button.Button).AutoInclude();
@@ -171,8 +176,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         modelBuilder.Entity<ButtonWithLinkDbEntity>()
             .Navigation(button => button.Button).AutoInclude();
-
-        modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>().Navigation(button => button.Button).AutoInclude();
 
         modelBuilder.Entity<PageContentDbEntity>(entity =>
         {
