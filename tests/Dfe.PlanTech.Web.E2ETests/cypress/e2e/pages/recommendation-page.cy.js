@@ -6,7 +6,7 @@ describe("Recommendation Page", () => {
 
     cy.completeFirstSubtopic();
   });
-  
+
   beforeEach(() => {
     cy.loginWithEnv(url);
     cy.navigateToRecommendationPage();
@@ -37,10 +37,9 @@ describe("Recommendation Page", () => {
       cy.get("li.dfe-vertical-nav__section-item").should("exist");
   })
 
-  it("Should have a link to print open the page in another tab in a checklist format", () => {
+  it("Should have a link to print open the page in printout format", () => {
       cy.get("a.govuk-link")
-          .contains("Share or download this recommendation in a checklist format")
-          .should("have.attr", "target", "_blank")
+          .contains("View a printable version of your school's recommendations")
   })
 
     //Links

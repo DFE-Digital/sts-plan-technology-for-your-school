@@ -41,7 +41,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
         return _router.Status switch
         {
             SubmissionStatus.Completed => checklist ?
-                await HandleChecklist(controller, cancellationToken) :
+                await HandleChecklist(controller, recommendationSlug, cancellationToken) :
                 await HandleCompleteStatus(controller, recommendationSlug, cancellationToken),
             SubmissionStatus.CheckAnswers => controller.RedirectToCheckAnswers(sectionSlug),
             SubmissionStatus.NextQuestion => HandleQuestionStatus(sectionSlug, controller),
@@ -58,7 +58,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
         await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken);
         var recommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(_router.Section.Sys.Id, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {_router.Section.Name}");
 
-        var intro = recommendation.Intros.FirstOrDefault(intro => string.Equals(intro.Maturity, maturity, StringComparison.InvariantCultureIgnoreCase)) ?? recommendation.Intros[0];
+        var intro = recommendation.Intros.Find(intro => string.Equals(intro.Maturity, maturity, StringComparison.InvariantCultureIgnoreCase)) ?? recommendation.Intros[0];
 
         var viewModel = new RecommendationsViewModel()
         {
@@ -108,20 +108,6 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     }
 
     /// <summary>
-    /// Fetch the model for the recommendation checklist (if correct recommendation for section + maturity),
-    /// </summary>
-    private async Task<RecommendationsChecklistViewModel> GetRecommendationChecklistViewModel(CancellationToken cancellationToken)
-    {
-        var (_, subTopicIntro, subTopicChunks) = await GetSubtopicRecommendation(cancellationToken);
-
-        return new RecommendationsChecklistViewModel()
-        {
-            Intro = subTopicIntro,
-            Chunks = subTopicChunks
-        };
-    }
-
-    /// <summary>
     /// Render the recommendation page
     /// </summary>
     private async Task<IActionResult> HandleCompleteStatus(RecommendationsController controller, string recommendationSlug, CancellationToken cancellationToken)
@@ -134,9 +120,9 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     /// <summary>
     /// Render the share recommendations checklist page
     /// </summary>
-    private async Task<IActionResult> HandleChecklist(RecommendationsController controller, CancellationToken cancellationToken)
+    private async Task<IActionResult> HandleChecklist(RecommendationsController controller, string recommendationSlug, CancellationToken cancellationToken)
     {
-        var viewModel = await GetRecommendationChecklistViewModel(cancellationToken);
+        var viewModel = await GetRecommendationViewModel(recommendationSlug, cancellationToken);
 
         return controller.View("~/Views/Recommendations/RecommendationsChecklist.cshtml", viewModel);
     }

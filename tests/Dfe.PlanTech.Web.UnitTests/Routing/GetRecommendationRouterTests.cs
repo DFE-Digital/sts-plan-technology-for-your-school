@@ -509,7 +509,7 @@ public class GetRecommendationRouterTests
 
         Assert.NotNull(viewResult);
 
-        var model = viewResult.Model as RecommendationsChecklistViewModel;
+        var model = viewResult.Model as RecommendationsViewModel;
 
         Assert.NotNull(model);
         Assert.Equal(_subtopicRecommendation!.Intros[0], model.Intro);

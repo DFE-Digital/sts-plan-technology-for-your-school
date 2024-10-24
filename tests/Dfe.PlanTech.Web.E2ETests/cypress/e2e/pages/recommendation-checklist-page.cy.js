@@ -5,14 +5,13 @@ describe("Recommendation Checklist Page", () => {
     cy.loginWithEnv(url);
     cy.completeFirstSubtopic();
   });
-  
+
   beforeEach(() => {
     cy.loginWithEnv(url);
     cy.navigateToRecommendationPage();
     cy.get("a.govuk-link")
-        .contains("Share or download this recommendation in a checklist format")
+        .contains("View a printable version of your school's recommendations")
         .then(($a) => {
-          expect($a).to.have.attr('target','_blank')
           $a.attr('target', '_self')
         })
         .click()
@@ -42,8 +41,11 @@ describe("Recommendation Checklist Page", () => {
       cy.get("#recommendations-print-page").should("exist");
   });
 
-  it("Should have a close button", () => {
-      cy.get("#recommendations-close-page").should("exist");
+  it("Should Have Back Button", () => {
+    cy.get('a:contains("Back")')
+      .should("exist")
+      .should("have.attr", "href")
+      .and("include", "/");
   });
 
   //Accessibility
