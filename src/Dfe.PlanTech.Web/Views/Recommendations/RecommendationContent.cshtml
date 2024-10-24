@@ -1,9 +1,16 @@
 @model Dfe.PlanTech.Web.Models.RecommendationsViewModel
 @using Dfe.PlanTech.Domain.Questionnaire.Models;
-
-
-@foreach (var headerWithContent in Model.AllContent)
+@{
+    var allContent = Model.AllContent.ToArray();
+}
+@for (var x = 0; x < allContent.Length; x++)
 {
+    var headerWithContent = allContent[x];
+
+    var previousContent = x - 1 >= 0 ? allContent[x - 1] : null;
+
+    var nextContent = x + 1 < allContent.Length ? allContent[x+1] : null;
+
     <div class="recommendation-piece-container" id="@headerWithContent.SlugifiedHeader">
         <div class="recommendation-piece-header">
             <div class="recommendation-piece-header">
@@ -32,7 +39,17 @@
                         </div>
                     }
                 </div>
+                <div>
+                    <govuk-pagination>
+                    @if(previousContent != null){
+                        <govuk-pagination-previous href="#@previousContent.SlugifiedHeader" label-text="@previousContent.HeaderText" />
+                    }
 
+                    @if(nextContent != null){
+                        <govuk-pagination-next href="#@nextContent.SlugifiedHeader" label-text="@nextContent.HeaderText" />
+                        }
+                    </govuk-pagination>
+                </div>
                 <div>
                     <h2 class="govuk-heading-m">Share this recommendation</h2>
                     <p class="govuk-body">
