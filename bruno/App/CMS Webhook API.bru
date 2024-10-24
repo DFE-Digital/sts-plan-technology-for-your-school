@@ -1,0 +1,53 @@
+meta {
+  name: CMS Webhook API
+  type: http
+  seq: 1
+}
+
+post {
+  url: https://localhost:8080/api/cms/webhook
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{app_api_token}}
+  X-Contentful-Topic: {{contentful_x_topic}}
+  X-Contentful-Webhook-Name: {{contentful_webhook_name}}
+  X-Contentful-Webhook-Request-Attempt: {{contentful_webhook_request_attempt}}
+  X-Contentful-Event-Datetime: {{contentful_event_datetime}}
+  Content-Type: application/json
+  X-Contentful-CRN: {{contentful_crn}}
+  X-Contentful-Idempotency-Key: {{contentful_idempotency_key}}
+  x-contentful-signature: {{contentful_signature}}
+  x-contentful-signed-headers: {{contentful_signed_headers}}
+  x-contentful-timestamp: {{contentful_timestamp}}
+}
+
+body:json {
+  {
+    "metadata": {
+      "tags": [],
+      "concepts": []
+    },
+    "fields": {
+    },
+    "sys": {
+      "type": "Entry",
+      "id": "Entry ID"
+    }
+  }
+  
+}
+
+vars:pre-request {
+  contentful_x_topic: 
+  contentful_webhook_name: 
+  contentful_webhook_request_attempt: 
+  contentful_event_datetime: 
+  contentful_crn: 
+  contentful_idempotency_key: 
+  contentful_signature: 
+  contentful_signed_headers: 
+  contentful_timestamp: 
+}
