@@ -6,5 +6,11 @@
 }
 else
 {
-    <a href="@Model.Uri" target="_blank" rel="noopener noreferrer"><partial name="RichText/_Text" model="@Model.Content[0]"/></a>
+    var textContainsOpenInNewTab = Model.Content[0].Value?.ToLower().Contains("(opens in new tab)") ?? false;
+    var linkClass = textContainsOpenInNewTab ? "opens-in-new-tab" : "";
+    if(textContainsOpenInNewTab){
+        Model.Content[0].Value = Model.Content[0].Value?.Replace(" (opens in new tab)", "") ?? "";
+    }
+
+    <a href="@Model.Uri" target="_blank" rel="noopener noreferrer" class="@linkClass">@Model.Content[0].Value</a>
 }

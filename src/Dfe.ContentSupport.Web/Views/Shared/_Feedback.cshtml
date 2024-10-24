@@ -14,43 +14,43 @@
 
 @if (track)
 {
-    <div class="dfe-feedback-banner govuk-!-margin-top-9 js-only" id="feedback-banner">
-        <div class="dfe-feedback-banner--content">
-            <form id="feedbackForm">
-                <div class="dfe-feedback-banner--content-questions">
-                    <div class="dfe-feedback-banner--content-question" id="questionForm">
-                        <h2 class="govuk-heading-s dfe-feedback-banner--content-question-text">
-                            Is this page
-                            useful?
-                        </h2>
-                        <div class="govuk-button-group">
-                            <button id="feedbackYes" type="button" class="govuk-button govuk-button--secondary" value="Yes"
-                                    data-module="govuk-button">
-                                Yes
-                            </button>
-                            <button id="feedbackNo" type="button" class="govuk-button govuk-button--secondary" value="No"
-                                    data-module="govuk-button">
-                                No
-                            </button>
+        <div class="dfe-feedback-banner govuk-!-margin-top-9 js-only govuk-!-display-none-print" id="feedback-banner">
+            <div class="dfe-feedback-banner--content">
+                <form id="feedbackForm">
+                    <div class="dfe-feedback-banner--content-questions">
+                        <div class="dfe-feedback-banner--content-question" id="questionForm">
+                            <h2 class="govuk-heading-s dfe-feedback-banner--content-question-text">
+                                Is this page
+                                useful?
+                            </h2>
+                            <div class="govuk-button-group">
+                                <button id="feedbackYes" type="button" class="govuk-button govuk-button--secondary" value="Yes"
+                                        data-module="govuk-button">
+                                    Yes
+                                </button>
+                                <button id="feedbackNo" type="button" class="govuk-button govuk-button--secondary" value="No"
+                                        data-module="govuk-button">
+                                    No
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div id="feedbackMessage" class="govuk-body govuk-!-margin-bottom-0">
-                    Thank you for your feedback.
-                </div>
-            </form>
+                    <div id="feedbackMessage" class="govuk-body govuk-!-margin-bottom-0">
+                        Thank you for your feedback.
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
 
-    <script nonce="@Context.Items["nonce"]">
-    function onAction (){
-        document.getElementById('questionForm').style.display = 'none';
-        document.getElementById('feedbackMessage').style.display = 'block';
-    }
+        <script nonce="@Context.Items["nonce"]">
+        function onAction (){
+            document.getElementById('questionForm').style.display = 'none';
+            document.getElementById('feedbackMessage').style.display = 'block';
+        }
 
-    const YesBtn = document.getElementById('feedbackYes')
-    const NoBtn = document.getElementById('feedbackNo')
-    YesBtn.addEventListener('click', ()=>onAction());
-    NoBtn.addEventListener('click', ()=>onAction());
-</script>
+        const YesBtn = document.getElementById('feedbackYes')
+        const NoBtn = document.getElementById('feedbackNo')
+        YesBtn.addEventListener('click', ()=>onAction());
+        NoBtn.addEventListener('click', ()=>onAction());
+    </script>
 }
