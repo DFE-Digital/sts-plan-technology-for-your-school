@@ -43,4 +43,8 @@ public class PagesController : BaseController<PagesController>
          RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
          ContactUsEmail = configuration["ContactUs:Email"]
      });
+
+    [HttpGet(UrlConstants.NotFound, Name = UrlConstants.NotFound)]
+    public IActionResult NotFoundError()
+    => View();
 }

@@ -94,17 +94,17 @@ public class GetPageFromContentfulQueryTests
     {
         var query = CreateGetPageQuery();
 
-        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(async () => await query.GetPageBySlug("NOT A REAL SLUG"));
+        await Assert.ThrowsAsync<ContentfulPageUnavailableException>(async () => await query.GetPageBySlug("NOT A REAL SLUG"));
     }
 
     [Fact]
-    public async Task ContentfulDataUnavailable_Exception_Is_Thrown_When_There_Is_An_Issue_Retrieving_Data()
+    public async Task ContentfulPageUnavailable_Exception_Is_Thrown_When_There_Is_An_Issue_Retrieving_Data()
     {
         _repoSubstitute.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>())
             .Throws(new Exception("Test Exception"));
 
         var query = CreateGetPageQuery();
 
-        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(async () => await query.GetPageBySlug(SECTION_SLUG));
+        await Assert.ThrowsAsync<ContentfulPageUnavailableException>(async () => await query.GetPageBySlug(SECTION_SLUG));
     }
 }
