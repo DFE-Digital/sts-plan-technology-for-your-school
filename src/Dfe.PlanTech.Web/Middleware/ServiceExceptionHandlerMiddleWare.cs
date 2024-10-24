@@ -22,7 +22,8 @@ public class ServiceExceptionHandlerMiddleWare : IExceptionHandlerMiddleware
         exception switch
         {
             null => UrlConstants.Error,
-            ContentfulDataUnavailableException => UrlConstants.NotFound,
+            ContentfulPageUnavailableException => UrlConstants.NotFound,
+            ContentfulDataUnavailableException => UrlConstants.ServiceUnavailable,
             DatabaseException => UrlConstants.ServiceUnavailable,
             InvalidEstablishmentException => UrlConstants.ServiceUnavailable,
             PageNotFoundException => UrlConstants.NotFound,

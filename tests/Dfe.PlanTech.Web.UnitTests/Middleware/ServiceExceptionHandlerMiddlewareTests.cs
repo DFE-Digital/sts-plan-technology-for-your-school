@@ -27,10 +27,29 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
         }
 
         [Fact]
-        public void Should_Get_Not_Found_Redirect_ContentfulDataUnavailableException_Exception()
+        public void Should_Get_Service_Unavailable_Redirect_ContentfulDataUnavailableException_Exception()
         {
             // Arrange
-            var exception = new ContentfulDataUnavailableException("not-found exception");
+            var exception = new ContentfulDataUnavailableException("service-unavailable exception");
+            var feature = new ExceptionHandlerFeature { Error = exception };
+
+            var context = new DefaultHttpContext();
+            context.Features.Set<IExceptionHandlerPathFeature>(feature);
+            var middleware = new ServiceExceptionHandlerMiddleWare();
+
+            // Act
+            middleware.ContextRedirect(context);
+
+            //Assert
+            Assert.NotNull(context.Response);
+            Assert.Equal("/service-unavailable", context.Response.Headers.Values.FirstOrDefault());
+        }
+
+        [Fact]
+        public void Should_Get_Not_Found_Redirect_ContentfulPageUnavailableException_Exception()
+        {
+            // Arrange
+            var exception = new ContentfulPageUnavailableException("not-found exception");
             var feature = new ExceptionHandlerFeature { Error = exception };
 
             var context = new DefaultHttpContext();
