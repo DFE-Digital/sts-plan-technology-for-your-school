@@ -46,25 +46,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
         }
 
         [Fact]
-        public void Should_Get_Not_Found_Redirect_ContentfulPageUnavailableException_Exception()
-        {
-            // Arrange
-            var exception = new ContentfulPageUnavailableException("not-found exception");
-            var feature = new ExceptionHandlerFeature { Error = exception };
-
-            var context = new DefaultHttpContext();
-            context.Features.Set<IExceptionHandlerPathFeature>(feature);
-            var middleware = new ServiceExceptionHandlerMiddleWare();
-
-            // Act
-            middleware.ContextRedirect(context);
-
-            //Assert
-            Assert.NotNull(context.Response);
-            Assert.Equal("/not-found", context.Response.Headers.Values.FirstOrDefault());
-        }
-
-        [Fact]
         public void Should_Get_Not_Found_Redirect_PageNotFound_Exception()
         {
             // Arrange

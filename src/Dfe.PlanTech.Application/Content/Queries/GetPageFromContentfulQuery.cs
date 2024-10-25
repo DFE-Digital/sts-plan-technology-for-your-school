@@ -68,7 +68,7 @@ public class GetPageFromContentfulQuery : IGetPageQuery
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error fetching page {slug} from Contentful", slug);
-            throw new ContentfulPageUnavailableException($"Could not retrieve page with slug {slug}", ex);
+            throw new PageNotFoundException($"Could not retrieve page with slug {slug}", ex);
         }
     }
 
