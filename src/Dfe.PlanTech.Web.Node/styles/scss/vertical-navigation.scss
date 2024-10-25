@@ -1,41 +1,46 @@
 :root {
-  --govuk-link-color: #1d70b8;
-  --govuk-dark-link-color: #003A69;
-  --govuk-black: #0b0c0c;
+    --govuk-link-color: #1d70b8;
+    --govuk-dark-link-color: #003a69;
+    --govuk-black: #0b0c0c;
 }
 
 .dfe-vertical-nav__section-item {
-  list-style-type: none;
-  font-size: 1rem;
+    list-style-type: none;
+    font-size: 1rem;
 }
 
 .dfe-vertical-nav__link {
-  color: var(--govuk-link-color);
-  display: block;
-  padding: 7px 30px 8px 10px;
-  border-left: 4px solid #b1b4b6;
-  text-decoration: none;
+    color: var(--govuk-link-color);
+    display: block;
+    padding: 7px 30px 8px 10px;
+    border-left: 4px solid #b1b4b6;
+    text-decoration: none;
 }
 
 .dfe-vertical-nav__link--selected {
-  color: var(--govuk-dark-link-color);
-  border-left: 4px solid var(--govuk-dark-link-color);
-  background-color: #f3f2f1;
-  font-weight: bold;
+    color: var(--govuk-dark-link-color);
+    border-left: 4px solid var(--govuk-dark-link-color);
+    background-color: #f3f2f1;
+    font-weight: bold;
 }
 
 .dfe-vertical-nav__link,
 .dfe-vertical-nav__link--selected {
-  &:active, &:hover {
-    background-color: #fd0;
-    color: var(--govuk-black);
-    border-left: 4px solid var(--govuk-black);
-  }
+    &:active,
+    &:hover {
+        background-color: #fd0;
+        color: var(--govuk-black);
+        border-left: 4px solid var(--govuk-black);
+    }
 }
 
 .dfe-vertical-nav__theme {
-  border-top: 1px solid var(--govuk-link-color);
-  padding-top: 5px;
-  margin-top: 10px;
-  margin-left: 0;
+    padding-top: 5px;
+    margin-top: 10px;
+    margin-left: 0;
+}
+
+h2.dfe-vertical-nav__theme.govuk-heading-m {
+    font-size: 19px;
+    color: #505a5f;
 }
