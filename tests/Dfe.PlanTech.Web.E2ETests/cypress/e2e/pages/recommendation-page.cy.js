@@ -59,6 +59,18 @@ describe("Recommendation Page", () => {
         });
     });
 
+    // back button
+    it("should have back button", () => {
+      cy.get("a.govuk-back-link").contains("Back").should("exist");
+    });
+
+    it ("should have back button that goes to back to self assessment page", () => {
+      cy.get("a.govuk-back-link")
+        .should("exist")
+        .and("have.attr", "href")
+        .and("include", url);
+     });
+
   //Accessibility
   it("Passes Accessibility Testing", () => {
     cy.runAxe();
