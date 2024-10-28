@@ -15,11 +15,13 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("/")]
 public class PagesController : BaseController<PagesController>
 {
+    private readonly ILogger _logger;
     public const string ControllerName = "Pages";
     public const string GetPageByRouteAction = nameof(GetByRoute);
 
     public PagesController(ILogger<PagesController> logger) : base(logger)
     {
+        _logger = logger;
     }
 
     [Authorize(Policy = PageModelAuthorisationPolicy.PolicyName)]
@@ -28,7 +30,8 @@ public class PagesController : BaseController<PagesController>
     {
         if (page == null)
         {
-            return View("NotFoundError");
+            _logger.LogInformation($"Could not find page");
+            return RedirectToAction("NotFoundError");
         }
         var viewModel = new PageViewModel(page, this, user, Logger);
 

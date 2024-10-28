@@ -3,7 +3,6 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
-using Dfe.PlanTech.Domain.Users.Exceptions;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
@@ -54,8 +53,7 @@ public class CheckAnswersRouter : ICheckAnswersRouter
         if (submissionResponsesDto == null || submissionResponsesDto.Responses == null)
             throw new DatabaseException("Could not retrieve the answered question list");
 
-        var checkAnswerPageContent = await _getPageQuery.GetPageBySlug(CheckAnswersController.CheckAnswersPageSlug, cancellationToken) ??
-                                    throw new PageNotFoundException($"Could not find page for {CheckAnswersController.CheckAnswersPageSlug}");
+        var checkAnswerPageContent = await _getPageQuery.GetPageBySlug(CheckAnswersController.CheckAnswersPageSlug, cancellationToken);
 
         var model = new CheckAnswersViewModel()
         {

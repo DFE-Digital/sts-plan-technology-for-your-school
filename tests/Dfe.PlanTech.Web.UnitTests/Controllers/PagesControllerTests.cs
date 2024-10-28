@@ -219,7 +219,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public void Should_ReturnNotFoundError_Page_When_Page_Is_Null()
         {
-            Page? page = null;
             var establishment = new EstablishmentDto()
             {
                 OrgName = "Test Org",
@@ -232,12 +231,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             };
 
             userSubstitute.GetOrganisationData().Returns(establishment);
-
-            _controller.GetByRoute(page, userSubstitute);
-
-            var result = _controller.NotFoundError();
-
-            Assert.IsType<ViewResult>(result);
+            
+            var result = _controller.GetByRoute(null, userSubstitute) as RedirectToActionResult;
+    
+            Assert.NotNull(result);
+            Assert.Equal("NotFoundError", result.ActionName;);
         }
 
         [Fact]

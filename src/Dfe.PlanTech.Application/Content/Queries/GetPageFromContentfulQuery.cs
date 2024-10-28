@@ -59,7 +59,7 @@ public class GetPageFromContentfulQuery : IGetPageQuery
     {
         try
         {
-            var pages = await _repository.GetEntities<Page>(options, cancellationToken);
+            var pages = await _repository.GetEntities<Page?>(options, cancellationToken);
 
             var page = pages.FirstOrDefault();
 
@@ -68,7 +68,7 @@ public class GetPageFromContentfulQuery : IGetPageQuery
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error fetching page {slug} from Contentful", slug);
-            return null;
+            throw new ContentfulDataUnavailableException($"Could not retrieve page with slug {slug}", ex);
         }
     }
 

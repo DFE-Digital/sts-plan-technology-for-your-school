@@ -2,7 +2,6 @@
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Establishments.Exceptions;
 using Dfe.PlanTech.Domain.SignIns.Enums;
-using Dfe.PlanTech.Domain.Users.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 namespace Dfe.PlanTech.Web.Middleware;
 
@@ -25,7 +24,6 @@ public class ServiceExceptionHandlerMiddleWare : IExceptionHandlerMiddleware
             ContentfulDataUnavailableException => UrlConstants.ServiceUnavailable,
             DatabaseException => UrlConstants.ServiceUnavailable,
             InvalidEstablishmentException => UrlConstants.ServiceUnavailable,
-            PageNotFoundException => UrlConstants.NotFound,
             KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) => UrlConstants.OrgErrorPage,
             _ => GetRedirectUrlForException(exception.InnerException),
         };

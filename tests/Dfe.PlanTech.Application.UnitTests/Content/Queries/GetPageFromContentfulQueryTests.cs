@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
@@ -98,14 +99,13 @@ public class GetPageFromContentfulQueryTests
     }
 
     [Fact]
-    public async Task Returns_Null_When_There_Is_An_Issue_Retrieving_Data()
+    public async Task Page_Not_Found_Exception_Is_Thrown_When_There_Is_An_Issue_Retrieving_Data()
     {
         _repoSubstitute.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>())
             .Throws(new Exception("Test Exception"));
 
         var query = CreateGetPageQuery();
 
-        var result = await query.GetPageBySlug(SECTION_SLUG);
-        Assert.Null(result);
+        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(async () => await query.GetPageBySlug(SECTION_SLUG));
     }
 }
