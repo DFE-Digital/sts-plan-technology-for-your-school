@@ -217,6 +217,30 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
+        public void Should_ReturnNotFoundError_Page_When_Page_Is_Null()
+        {
+            Page? page = null;
+            var establishment = new EstablishmentDto()
+            {
+                OrgName = "Test Org",
+                Ukprn = "12345678",
+                Urn = "123456",
+                Type = new EstablishmentTypeDto()
+                {
+                    Name = "Test Name"
+                }
+            };
+
+            userSubstitute.GetOrganisationData().Returns(establishment);
+            
+            _controller.GetByRoute(page, userSubstitute);
+
+            var result = _controller.NotFoundError();
+
+            Assert.IsType<ViewResult>(result);
+        }
+
+        [Fact]
         public void Should_Render_NotFound_Page()
         {
             var httpContextSubstitute = Substitute.For<HttpContext>();

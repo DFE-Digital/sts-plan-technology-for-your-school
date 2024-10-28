@@ -73,7 +73,7 @@ public class PageModelAuthorisationPolicy(ILogger<PageModelAuthorisationPolicy> 
 
         if (page == null)
         {
-            return new UserAuthorisationResult(true, userAuthorisationStatus);
+            return new UserAuthorisationResult(false, userAuthorisationStatus);
         }
 
         return new UserAuthorisationResult(page.RequiresAuthorisation, userAuthorisationStatus);
