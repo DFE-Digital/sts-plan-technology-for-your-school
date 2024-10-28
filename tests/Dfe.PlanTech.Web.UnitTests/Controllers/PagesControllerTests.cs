@@ -235,7 +235,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var result = _controller.GetByRoute(null, userSubstitute) as RedirectToActionResult;
 
             Assert.NotNull(result);
-            Assert.Equal("NotFoundError", result.ActionName;);
+            Assert.Equal("NotFoundError", result.ActionName);
         }
 
         [Fact]
