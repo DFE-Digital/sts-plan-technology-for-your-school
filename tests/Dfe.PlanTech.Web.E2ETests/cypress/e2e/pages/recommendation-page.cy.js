@@ -37,11 +37,10 @@ describe("Recommendation Page", () => {
     cy.get("li.dfe-vertical-nav__section-item").should("exist");
   });
 
-  it("Should have a link to print open the page in another tab in a checklist format", () => {
-    cy.get("a.govuk-link")
-      .contains("Share or download this recommendation in a checklist format")
-      .should("have.attr", "target", "_blank");
-  });
+  it("Should have a link to print open the page in printout format", () => {
+      cy.get("a.govuk-link")
+          .contains("View a printable version of your school's recommendations")
+  })
 
   //Links
   it("Should have no broken links", () => {
