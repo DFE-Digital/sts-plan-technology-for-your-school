@@ -3,7 +3,6 @@ using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
-using Dfe.PlanTech.Domain.Users.Exceptions;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
