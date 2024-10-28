@@ -90,21 +90,23 @@ public class GetPageFromContentfulQueryTests
     }
 
     [Fact]
-    public async Task Should_Throw_Exception_When_Slug_Not_Found()
+    public async Task Should_Return_Null_When_Slug_Not_Found()
     {
         var query = CreateGetPageQuery();
+        var result = await query.GetPageBySlug("NOT A REAL SLUG");
 
-        await Assert.ThrowsAsync<PageNotFoundException>(async () => await query.GetPageBySlug("NOT A REAL SLUG"));
+        Assert.Null(result);
     }
 
     [Fact]
-    public async Task Page_Not_Found_Exception_Is_Thrown_When_There_Is_An_Issue_Retrieving_Data()
+    public async Task Returns_Null_When_There_Is_An_Issue_Retrieving_Data()
     {
         _repoSubstitute.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>())
             .Throws(new Exception("Test Exception"));
 
         var query = CreateGetPageQuery();
 
-        await Assert.ThrowsAsync<PageNotFoundException>(async () => await query.GetPageBySlug(SECTION_SLUG));
+        var result = await query.GetPageBySlug(SECTION_SLUG);
+        Assert.Null(result);
     }
 }

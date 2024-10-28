@@ -24,8 +24,12 @@ public class PagesController : BaseController<PagesController>
 
     [Authorize(Policy = PageModelAuthorisationPolicy.PolicyName)]
     [HttpGet("{route?}", Name = "GetPage")]
-    public IActionResult GetByRoute([ModelBinder(typeof(PageModelBinder))] Page page, [FromServices] IUser user)
+    public IActionResult GetByRoute([ModelBinder(typeof(PageModelBinder))] Page? page, [FromServices] IUser user)
     {
+        if (page == null)
+        {
+            return View("NotFoundError");
+        }
         var viewModel = new PageViewModel(page, this, user, Logger);
 
         return View("Page", viewModel);
