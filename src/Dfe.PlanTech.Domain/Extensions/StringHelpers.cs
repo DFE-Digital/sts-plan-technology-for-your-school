@@ -21,5 +21,4 @@ public static partial class StringHelpers
 
     private static string ReplaceNonSlugCharacters(this string text, string replacement)
     => MatchNonAlphaNumericExceptHyphensPattern().Replace(text, replacement);
-
 }
