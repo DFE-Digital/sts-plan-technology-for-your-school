@@ -232,7 +232,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             };
 
             userSubstitute.GetOrganisationData().Returns(establishment);
-            
+
             _controller.GetByRoute(page, userSubstitute);
 
             var result = _controller.NotFoundError();
