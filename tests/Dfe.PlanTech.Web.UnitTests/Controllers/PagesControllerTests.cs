@@ -231,9 +231,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             };
 
             userSubstitute.GetOrganisationData().Returns(establishment);
-            
+
             var result = _controller.GetByRoute(null, userSubstitute) as RedirectToActionResult;
-    
+
             Assert.NotNull(result);
             Assert.Equal("NotFoundError", result.ActionName;);
         }
