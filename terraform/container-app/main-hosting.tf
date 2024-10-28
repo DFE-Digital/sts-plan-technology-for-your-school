@@ -1,5 +1,5 @@
 module "main_hosting" {
-  source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=568617c"
+  source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=93096d1"
 
   ###########
   # General #
@@ -16,7 +16,8 @@ module "main_hosting" {
   image_name                = local.container_app_image_name
   container_port            = local.container_port
   container_secret_environment_variables = {
-    "KeyVaultName" = local.kv_name
+    "KeyVaultName"    = local.kv_name,
+    "AZURE_CLIENT_ID" = azurerm_user_assigned_identity.user_assigned_identity.client_id,
   }
 
   container_environment_variables = local.container_environment_variables
