@@ -30,7 +30,7 @@ public class PagesController : BaseController<PagesController>
     {
         if (page == null)
         {
-            _logger.LogInformation($"Could not find page");
+            _logger.LogInformation($"Could not find page at {Request.Path.Value}");
             return RedirectToAction("NotFoundError");
         }
         var viewModel = new PageViewModel(page, this, user, Logger);
