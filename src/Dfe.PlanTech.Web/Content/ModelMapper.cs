@@ -35,7 +35,7 @@ public class ModelMapper(SupportedAssetTypes supportedAssetTypes) : IModelMapper
     public List<RichTextContentItem> MapRichTextNodes(List<ContentItem> nodes)
     {
         return nodes.Select(node => MapContent(node) ?? new RichTextContentItem
-            { NodeType = RichTextNodeType.Unknown, InternalName = node.InternalName }).ToList();
+        { NodeType = RichTextNodeType.Unknown, InternalName = node.InternalName }).ToList();
     }
 
 

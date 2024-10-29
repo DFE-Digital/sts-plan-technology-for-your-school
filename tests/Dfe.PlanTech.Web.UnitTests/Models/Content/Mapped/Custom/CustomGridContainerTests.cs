@@ -49,7 +49,7 @@ public class CustomGridContainerTests
         {
             Fields = new Fields
             {
-                File = new Dfe.PlanTech.Web.Models.Content. FileDetails
+                File = new Dfe.PlanTech.Web.Models.Content.FileDetails
                 {
                     Url = CardImageUri
                 }
