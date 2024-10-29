@@ -1,0 +1,64 @@
+@using System
+@model Dfe.PlanTech.Web.Models.Content.Mapped.Custom.CustomAttachment
+
+<div class="guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8">
+    <div class="attachment">
+        <div class="attachment-thumbnail govuk-!-margin-right-8">
+            <a href="@Model.Uri" download>
+                @{
+                var fileExtension = Model.ContentType.Split('/')[^1].ToLower();
+                    if (fileExtension == "vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    {
+                        fileExtension = "xlsx";
+                    }
+                    
+                    switch (fileExtension)
+                    {
+                        case "pdf":
+                            <img src="/assets/images/pdf-file-icon.svg" alt="pdf file type">
+                            break;
+                        case "csv":
+                        case "xls":
+                        case "xlsx":
+                            <img src="/assets/images/spreadsheet-file-icon.svg" alt="spreadsheet file type" />
+                            break;
+                        case "html":
+                        case "htm":
+                            <img src="/assets/images/html-file-icon.svg" alt="html file type">
+                            break;
+                        default:
+                            <img src="/assets/images/generic-file-icon.svg" alt="generic file type">
+                            break;
+
+                    }
+                }
+
+
+            </a>
+        </div>
+
+        <div class="attachment-details">
+            <h2 class="attachment-title">
+                <a href="@Model.Uri" aria-describedby="file-details" class="govuk-link attachment-link" download>
+                    @Model.Title
+                </a>
+            </h2>
+
+            <p class="attachment-metadata" id="file-details">
+                <span class="attachment-attribute" aria-label="file type">@fileExtension.ToUpper()</span>,
+                <span class="attachment-attribute" aria-label="file size">
+                    @(Model.Size / 1024) KB
+                </span>
+            </p>
+            @if (Model.UpdatedAt.HasValue)
+            {
+                <p class="attachment-metadata">
+                    <span class="attachment-attribute" aria-label="updated date">Last updated
+                        @Model.UpdatedAt.Value.ToString("d MMMM yyyy")
+                    </span>
+                </p>
+            }
+        </div>
+
+    </div>
+</div>

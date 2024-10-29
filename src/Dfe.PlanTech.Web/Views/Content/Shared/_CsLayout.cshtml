@@ -1,0 +1,37 @@
+@model Dfe.PlanTech.Web.Models.Content.Mapped.CsPage;
+
+@{
+    Layout = "_GovUkPageTemplate";
+    ViewData["Title"] = Model.Heading.Title;
+    ViewData["containerClasses"] = "dfe-width-container";
+}
+
+@section Head {
+    <partial name="_Head"/>
+}
+
+@section Header {
+    <link rel="stylesheet" as="style" href="~/css/application.css">
+    <link rel="stylesheet" as="style" href="~/css/cands-site.css">
+    <partial name="Shared/_CsHeader"/>
+    @await RenderSectionAsync("Header", false)
+}
+
+@section BeforeContent {
+    <script
+        defer>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
+    <partial name="Shared/_CsBeforeContent"/>
+    @await RenderSectionAsync("BeforeContent", false)
+}
+
+
+@RenderBody()
+
+@section Footer {
+    <partial name="Shared/_Footer"/>
+}
+
+@section BodyEnd {
+    <partial name="Shared/_BodyEnd"/>
+    @await RenderSectionAsync("BodyEnd", false)
+}

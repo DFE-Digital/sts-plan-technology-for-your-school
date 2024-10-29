@@ -12,13 +12,25 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
-    <PackageReference Include="NSubstitute" Version="5.1.0" />
+    <PackageReference Include="Moq" Version="4.20.70" />
+      <PackageReference Include="FluentAssertions" Version="7.0.0-alpha.3" />
+      <PackageReference Include="NSubstitute" Version="5.1.0" />
 
     <PackageReference Include="xunit" Version="2.7.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.8">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\Content\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="StubData\ContentfulCollection.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <PropertyGroup>

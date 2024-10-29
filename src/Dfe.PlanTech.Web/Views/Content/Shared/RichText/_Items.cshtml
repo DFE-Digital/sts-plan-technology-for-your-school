@@ -1,0 +1,9 @@
+﻿@model Dfe.PlanTech.Web.Models.Content.Mapped.RichTextContentItem
+
+@if (Model.Content is not null && Model.Content.Any())
+{
+    foreach (var childNode in Model.Content)
+    {
+        <partial name="Shared/RichText/_RichText" model="@childNode"/>
+    }
+}

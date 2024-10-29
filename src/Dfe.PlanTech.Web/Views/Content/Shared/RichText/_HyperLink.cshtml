@@ -1,0 +1,10 @@
+@model Dfe.PlanTech.Web.Models.Content.Mapped.Standard.Hyperlink
+
+@if (Model.IsVimeo)
+{
+    <partial name="Shared/RichText/_Vimeo" model="@Model"/>
+}
+else
+{
+    <a href="@Model.Uri" target="_blank" rel="noopener noreferrer"><partial name="Shared/RichText/_Text" model="@Model.Content[0]"/></a>
+}

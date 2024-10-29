@@ -14,7 +14,6 @@
         </Content>
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\Dfe.ContentSupport.Web\Dfe.ContentSupport.Web.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.Application\Dfe.PlanTech.Application.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.Domain\Dfe.PlanTech.Domain.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.Contentful\Dfe.PlanTech.Infrastructure.Contentful.csproj" />
