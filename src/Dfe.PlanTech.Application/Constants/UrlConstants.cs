@@ -7,4 +7,6 @@ public static class UrlConstants
     public const string Error = "/error";
 
     public const string OrgErrorPage = "/dsi-error-not-associated-organisation";
+
+    public const string NotFound = "/not-found";
 }

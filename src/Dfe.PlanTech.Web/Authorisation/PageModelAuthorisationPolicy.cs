@@ -69,7 +69,13 @@ public class PageModelAuthorisationPolicy(ILogger<PageModelAuthorisationPolicy> 
         using var scope = httpContext.RequestServices.CreateAsyncScope();
         var pageQuery = scope.ServiceProvider.GetRequiredService<IGetPageQuery>();
 
-        Page page = await GetPageForSlug(httpContext, slug, pageQuery);
+        Page? page = await GetPageForSlug(httpContext, slug, pageQuery);
+
+        if (page == null)
+        {
+            return new UserAuthorisationResult(false, userAuthorisationStatus);
+        }
+
         return new UserAuthorisationResult(page.RequiresAuthorisation, userAuthorisationStatus);
     }
 
@@ -80,9 +86,9 @@ public class PageModelAuthorisationPolicy(ILogger<PageModelAuthorisationPolicy> 
     /// The page ias added to the HttpContext for use in the <see cref="PageModelBinder"/>, 
     /// to prevent the page being loaded multiple times for a single request
     /// </remarks>
-    private static async Task<Page> GetPageForSlug(HttpContext httpContext, string slug, IGetPageQuery pageQuery)
+    private static async Task<Page?> GetPageForSlug(HttpContext httpContext, string slug, IGetPageQuery pageQuery)
     {
-        var page = await pageQuery.GetPageBySlug(slug, httpContext.RequestAborted) ?? throw new KeyNotFoundException($"Could not find page with slug {slug}");
+        var page = await pageQuery.GetPageBySlug(slug, httpContext.RequestAborted);
         httpContext.Items.Add(nameof(Page), page);
 
         return page;

@@ -44,6 +44,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             Assert.Equal("/service-unavailable", context.Response.Headers.Values.FirstOrDefault());
         }
 
+
         [Fact]
         public void Should_Get_Service_Unavailable_Redirect_DatabaseException_Exception()
         {
