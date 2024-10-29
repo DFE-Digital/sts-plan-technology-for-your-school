@@ -100,6 +100,7 @@ locals {
       "name"  = "X-XSS-Protection",
       "value" = "1",
   }]
+  cdn_frontdoor_url_path_redirects = var.cdn_frontdoor_url_path_redirects
 
   waf_custom_rules = {
     //WAF policy to allow payloads to the CMS webhook route

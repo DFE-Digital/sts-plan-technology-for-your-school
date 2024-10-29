@@ -157,6 +157,22 @@ variable "cdn_frontdoor_host_add_response_headers" {
   default     = []
 }
 
+variable "cdn_frontdoor_url_path_redirects" {
+  description = "List of url path redirects to add at the CDN Front Door `[{ \"redirect_type\": \"PermanentRedirect\", \"destination_path\": \"/example\", \"destination_hostname\": \"www.example.uk\", \"operator\": \"Equals\", \"match_values\": [\"/example\"] }]`"
+  type = list(object({
+    redirect_type        = string
+    redirect_protocol    = optional(string)
+    destination_path     = optional(string)
+    destination_hostname = optional(string)
+    destination_fragment = optional(string)
+    query_string         = optional(string)
+    operator             = string
+    match_values         = optional(list(string))
+    transforms           = optional(list(string))
+  }))
+  default = []
+}
+
 ###################
 # Github Registry #
 ###################

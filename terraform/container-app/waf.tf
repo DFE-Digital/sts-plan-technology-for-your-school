@@ -1,5 +1,5 @@
 module "waf" {
-  source = "github.com/dfe-digital/terraform-azurerm-front-door-app-gateway-waf?ref=v1.3.0"
+  source = "github.com/katie-gardner/terraform-azurerm-front-door-app-gateway-waf?ref=b2b19a5"
 
   depends_on = [module.main_hosting]
 
@@ -72,6 +72,7 @@ module "waf" {
   cdn_waf_custom_block_response_body        = base64encode("<h1>Service unavailable</h1>")
 
   cdn_add_response_headers = local.cdn_frontdoor_host_add_response_headers
+  cdn_url_path_redirects   = local.cdn_frontdoor_url_path_redirects
 
   tags = local.tags
 }
