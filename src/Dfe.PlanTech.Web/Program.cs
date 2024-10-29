@@ -1,10 +1,6 @@
-using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Helpers;
-using Dfe.PlanTech.Domain.Caching.Interfaces;
-using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
-using Dfe.PlanTech.Infrastructure.Redis;
 using Dfe.PlanTech.Infrastructure.ServiceBus;
 using Dfe.PlanTech.Infrastructure.SignIns;
 using Dfe.PlanTech.Web;
@@ -44,7 +40,8 @@ builder.AddContentAndSupportServices()
         .AddGoogleTagManager()
         .AddGovUkFrontend()
         .AddHttpContextAccessor()
-        .AddRoutingServices();
+        .AddRoutingServices()
+        .AddRedisServices(builder.Configuration);
 
 builder.Services.AddSingleton<ISystemTime, SystemTime>();
 
@@ -52,12 +49,6 @@ builder.Services.AddSingleton<ISystemTime, SystemTime>();
 // KD: it should be as straightforward as creating a redis instance, putting the connection string in secrets and refing here. It's designed to be singleton.
 // Just inject IDistCache where you need it
 // ----------------
-
-//TODO: Different exception type
-builder.Services.AddSingleton(
-    new DistributedCachingOptions(ConnectionSting: builder.Configuration.GetConnectionString("redis") ?? throw new Exception("Redis connection string is empty!")));
-builder.Services.AddSingleton<IDistributedCache, RedisCache>();
-builder.Services.AddSingleton<IDistributedLockProvider, RedisLockProvider>();
 
 var app = builder.Build();
 
@@ -101,7 +92,5 @@ app.MapControllerRoute(
     pattern: "{controller=Pages}/{action=GetByRoute}/{id?}",
     name: "default"
 );
-
-await app.Services.GetRequiredService<IDistCache>().InitialiseAsync();
 
 await app.RunAsync();

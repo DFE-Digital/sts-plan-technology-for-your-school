@@ -1,9 +1,9 @@
 namespace Dfe.PlanTech.Domain.Caching.Models;
 
 public record DistributedCachingOptions(
-    string ConnectionSting,
+    string ConnectionString,
     int DistLockAcquisitionTimeoutInSeconds = 30,
     int DistLockMaxDurationInSeconds = 200)
 {
-    public bool HaveConnectionString => !string.IsNullOrEmpty(ConnectionSting);
+    public bool HaveConnectionString => !string.IsNullOrEmpty(ConnectionString);
 }

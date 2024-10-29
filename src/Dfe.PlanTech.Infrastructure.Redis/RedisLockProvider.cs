@@ -7,7 +7,7 @@ using StackExchange.Redis;
 
 namespace Dfe.PlanTech.Infrastructure.Redis;
 
-public class RedisLockProvider(DistributedCachingOptions options, RedisConnectionManager connectionManager, ILogger<RedisLockProvider> logger) : IDistributedLockProvider
+public class RedisLockProvider(DistributedCachingOptions options, IRedisConnectionManager connectionManager, ILogger<RedisLockProvider> logger) : IDistributedLockProvider
 {
     public async Task<bool> LockReleaseAsync(string key, string lockValue, int databaseId = -1)
     {
@@ -23,7 +23,7 @@ public class RedisLockProvider(DistributedCachingOptions options, RedisConnectio
         return await database.LockExtendAsync(key, lockValue, duration, CommandFlags.DemandMaster);
     }
 
-    public async Task<string> WaitForLockAsync(string key, bool throwExceptionIfLockNotAcquired = true)
+    public async Task<string?> WaitForLockAsync(string key, bool throwExceptionIfLockNotAcquired = true)
     {
         //TODO: use polly here
         var lockValue = Guid.NewGuid().ToString();
@@ -41,7 +41,7 @@ public class RedisLockProvider(DistributedCachingOptions options, RedisConnectio
             if (lockAchieved)
             {
                 logger.LogInformation("Lock acquired for key: {Key} with lock value: {LockValue}", key, lockValue);
-                break;
+                return lockValue;
             }
 
             logger.LogWarning("Lock not acquired for key: {Key}, retrying...", key);
@@ -55,7 +55,7 @@ public class RedisLockProvider(DistributedCachingOptions options, RedisConnectio
             throw new LockException($"Failed to get lock for: {key}");
         }
 
-        return lockValue;
+        return null;
     }
 
     public async Task LockAndRun(string key, Func<Task> runWithLock, int databaseId = -1)
@@ -71,7 +71,6 @@ public class RedisLockProvider(DistributedCachingOptions options, RedisConnectio
         catch (Exception ex)
         {
             logger.LogError(ex, "Error while executing locked operation for key: {Key}", key);
-            throw;
         }
         finally
         {
@@ -86,6 +85,7 @@ public class RedisLockProvider(DistributedCachingOptions options, RedisConnectio
             return default;
 
         T? result = default;
+
         try
         {
             result = await runWithLock();
@@ -93,7 +93,6 @@ public class RedisLockProvider(DistributedCachingOptions options, RedisConnectio
         catch (Exception ex)
         {
             logger.LogError(ex, "Error while executing locked operation for key: {Key}", key);
-            throw;
         }
         finally
         {

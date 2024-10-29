@@ -1,11 +1,9 @@
-using Dfe.PlanTech.Application.Caching.Interfaces;
-using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Queries;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
-public class GetPageQuery(GetPageFromContentfulQuery getPageFromContentfulQuery, GetPageFromDbQuery getPageFromDbQuery, IDistributedCache cache) : IGetPageQuery
+public class GetPageQuery(GetPageFromContentfulQuery getPageFromContentfulQuery, GetPageFromDbQuery getPageFromDbQuery) : IGetPageQuery
 {
     /// <summary>
     /// Fetches page from <see chref="IContentRepository"/> by slug
@@ -15,7 +13,7 @@ public class GetPageQuery(GetPageFromContentfulQuery getPageFromContentfulQuery,
     /// <returns>Page matching slug</returns>
     public async Task<Page?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
     {
-        var page = await cache.GetOrCreateAsync($"Page:{slug}", () => GetPage(slug, cancellationToken));
+        var page = await GetPage(slug, cancellationToken);
 
         return page;
     }

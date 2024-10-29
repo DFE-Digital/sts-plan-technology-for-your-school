@@ -9,11 +9,11 @@ namespace Dfe.PlanTech.Infrastructure.Redis;
 
 public class RedisCache : IDistributedCache
 {
-    private readonly RedisConnectionManager _connectionManager;
+    private readonly IRedisConnectionManager _connectionManager;
     private readonly AsyncRetryPolicy _retryPolicyAsync;
     private readonly ILogger<RedisCache> _logger;
 
-    public RedisCache(RedisConnectionManager connectionManager, ILogger<RedisCache> logger)
+    public RedisCache(IRedisConnectionManager connectionManager, ILogger<RedisCache> logger)
     {
         _connectionManager = connectionManager;
         _logger = logger;
@@ -43,18 +43,17 @@ public class RedisCache : IDistributedCache
 
         _logger.LogInformation("Cache item with key: {Key} not found, executing action to create it", key);
         var result = await action();
-        if (result != null)
-        {
-            await SetAsync(db, key, result, expiry);
-            _logger.LogInformation("Cache item with key: {Key} created and stored", key);
-            if (onCacheItemCreation != null)
-            {
-                await onCacheItemCreation(result).ConfigureAwait(false);
-            }
-        }
-        else
+        if (result == null)
         {
             _logger.LogWarning("Action returned null for cache item with key: {Key}", key);
+            return result;
+        }
+
+        await SetAsync(db, key, result, expiry);
+        _logger.LogInformation("Cache item with key: {Key} created and stored", key);
+        if (onCacheItemCreation != null)
+        {
+            await onCacheItemCreation(result).ConfigureAwait(false);
         }
 
         return result;
@@ -130,7 +129,7 @@ public class RedisCache : IDistributedCache
     {
         _logger.LogInformation("Removing multiple items from set with key: {Key}", key);
         var database = await _connectionManager.GetDatabaseAsync(databaseId);
-        await _retryPolicyAsync.ExecuteAsync(() =>database.SetRemoveAsync(key, items.Select(x => (RedisValue)x).ToArray()));
+        await _retryPolicyAsync.ExecuteAsync(() => database.SetRemoveAsync(key, items.Select(x => (RedisValue)x).ToArray()));
     }
 
     private async Task<string> SetAsync<T>(IDatabase database, string key, T value, TimeSpan? expiry = null)
