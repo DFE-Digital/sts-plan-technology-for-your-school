@@ -181,6 +181,12 @@ public class CmsDbContext : DbContext, ICmsDbContext
         modelBuilder.Entity<ComponentDropDownDbEntity>()
             .ToTable("ComponentDropDowns", Schema, tb => tb.HasTrigger("tr_ComponentDropDowns"));
 
+        modelBuilder.Entity<PageDbEntity>()
+            .ToTable("Pages", Schema, tb => tb.HasTrigger("tr_Pages"));
+
+        modelBuilder.Entity<CategoryDbEntity>()
+            .ToTable("Categories", Schema, tb => tb.HasTrigger("tr_Categories"));
+
         modelBuilder.HasDefaultSchema(Schema);
 
         modelBuilder.Entity<ContentComponentDbEntity>(entity =>
