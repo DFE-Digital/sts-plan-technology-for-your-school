@@ -9,19 +9,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
-public class GetPageFromContentfulQuery : IGetPageQuery
+public class GetPageFromContentfulQuery(
+    IContentRepository repository,
+    ILogger<GetPageFromContentfulQuery> logger,
+    GetPageFromContentfulOptions options) : IGetPageQuery
 {
-    private readonly IContentRepository _repository;
-    private readonly ILogger<GetPageFromContentfulQuery> _logger;
-    private readonly GetPageFromContentfulOptions _options;
-
-    public GetPageFromContentfulQuery(IContentRepository repository, ILogger<GetPageFromContentfulQuery> logger, GetPageFromContentfulOptions options)
-    {
-        _repository = repository;
-        _logger = logger;
-        _options = options;
-    }
-
     /// <summary>
     /// Retrieves the page for the given slug from Contentful
     /// </summary>
@@ -59,7 +51,7 @@ public class GetPageFromContentfulQuery : IGetPageQuery
     {
         try
         {
-            var pages = await _repository.GetEntities<Page?>(options, cancellationToken);
+            var pages = await repository.GetEntities<Page?>(options, cancellationToken);
 
             var page = pages.FirstOrDefault();
 
@@ -67,11 +59,11 @@ public class GetPageFromContentfulQuery : IGetPageQuery
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching page {slug} from Contentful", slug);
+            logger.LogError(ex, "Error fetching page {slug} from Contentful", slug);
             throw new ContentfulDataUnavailableException($"Could not retrieve page with slug {slug}", ex);
         }
     }
 
     private GetEntitiesOptions CreateGetEntityOptions(string slug) =>
-      new(_options.Include, new[] { new ContentQueryEquals() { Field = "fields.slug", Value = slug } });
+      new(options.Include, new[] { new ContentQueryEquals() { Field = "fields.slug", Value = slug } });
 }

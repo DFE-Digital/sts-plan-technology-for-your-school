@@ -1,7 +1,10 @@
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Helpers;
-using Dfe.PlanTech.Cache.Redis;
+using Dfe.PlanTech.Domain.Caching.Interfaces;
+using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
+using Dfe.PlanTech.Infrastructure.Redis;
 using Dfe.PlanTech.Infrastructure.ServiceBus;
 using Dfe.PlanTech.Infrastructure.SignIns;
 using Dfe.PlanTech.Web;
@@ -49,8 +52,12 @@ builder.Services.AddSingleton<ISystemTime, SystemTime>();
 // KD: it should be as straightforward as creating a redis instance, putting the connection string in secrets and refing here. It's designed to be singleton.
 // Just inject IDistCache where you need it
 // ----------------
-builder.Services.AddSingleton(new RedisConnectionString(builder.Configuration.GetConnectionString("redis") ?? throw new Exception("Redis connection string is empty!")));
-builder.Services.AddSingleton<IDistCache, RedisCache>();
+
+//TODO: Different exception type
+builder.Services.AddSingleton(
+    new DistributedCachingOptions(ConnectionSting: builder.Configuration.GetConnectionString("redis") ?? throw new Exception("Redis connection string is empty!")));
+builder.Services.AddSingleton<IDistributedCache, RedisCache>();
+builder.Services.AddSingleton<IDistributedLockProvider, RedisLockProvider>();
 
 var app = builder.Build();
 

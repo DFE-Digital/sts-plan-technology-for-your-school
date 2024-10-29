@@ -14,7 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Dfe.PlanTech.Cache\Dfe.PlanTech.Cache.csproj" />
     <ProjectReference Include="..\Dfe.PlanTech.Domain\Dfe.PlanTech.Domain.csproj" />
   </ItemGroup>
 </Project>

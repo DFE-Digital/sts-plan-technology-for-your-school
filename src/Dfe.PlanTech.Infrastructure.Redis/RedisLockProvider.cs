@@ -1,0 +1,112 @@
+using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Domain.Caching.Models;
+using Dfe.PlanTech.Domain.Exceptions;
+using Dfe.PlanTech.Domain.Helpers;
+using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
+
+namespace Dfe.PlanTech.Infrastructure.Redis;
+
+public class RedisLockProvider(DistributedCachingOptions options, RedisConnectionManager connectionManager, ILogger<RedisLockProvider> logger) : IDistributedLockProvider
+{
+    public async Task<bool> LockReleaseAsync(string key, string lockValue, int databaseId = -1)
+    {
+        logger.LogInformation("Releasing lock for key: {Key} with lock value: {LockValue}", key, lockValue);
+        var database = await connectionManager.GetDatabaseAsync(databaseId);
+        return await database.LockReleaseAsync(key, lockValue, CommandFlags.DemandMaster);
+    }
+
+    public async Task<bool> LockExtendAsync(string key, string lockValue, TimeSpan duration, int databaseId = -1)
+    {
+        logger.LogInformation("Extending lock for key: {Key} with lock value: {LockValue} for duration: {Duration}", key, lockValue, duration);
+        var database = await connectionManager.GetDatabaseAsync(databaseId);
+        return await database.LockExtendAsync(key, lockValue, duration, CommandFlags.DemandMaster);
+    }
+
+    public async Task<string> WaitForLockAsync(string key, bool throwExceptionIfLockNotAcquired = true)
+    {
+        //TODO: use polly here
+        var lockValue = Guid.NewGuid().ToString();
+        var totalTime = TimeSpan.Zero;
+        var maxTime = TimeSpan.FromSeconds(options.DistLockMaxDurationInSeconds);
+        var expiration = TimeSpan.FromSeconds(options.DistLockAcquisitionTimeoutInSeconds);
+        var sleepTime = TimeSpan.FromMilliseconds(RandomNumber.Local.Next(50, 600));
+        var lockAchieved = false;
+
+        logger.LogInformation("Attempting to acquire lock for key: {Key}", key);
+
+        while (!lockAchieved && totalTime < maxTime)
+        {
+            lockAchieved = await LockTakeAsync(key, lockValue, expiration);
+            if (lockAchieved)
+            {
+                logger.LogInformation("Lock acquired for key: {Key} with lock value: {LockValue}", key, lockValue);
+                break;
+            }
+
+            logger.LogWarning("Lock not acquired for key: {Key}, retrying...", key);
+            await Task.Delay(sleepTime);
+            totalTime += sleepTime;
+        }
+
+        if (throwExceptionIfLockNotAcquired && !lockAchieved)
+        {
+            logger.LogError("Failed to acquire lock for key: {Key}", key);
+            throw new LockException($"Failed to get lock for: {key}");
+        }
+
+        return lockValue;
+    }
+
+    public async Task LockAndRun(string key, Func<Task> runWithLock, int databaseId = -1)
+    {
+        string? lockValue = await WaitForLockAsync(key, true);
+        if (string.IsNullOrEmpty(lockValue))
+            return;
+
+        try
+        {
+            await runWithLock();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error while executing locked operation for key: {Key}", key);
+            throw;
+        }
+        finally
+        {
+            await LockReleaseAsync(key, lockValue, databaseId);
+        }
+    }
+
+    public async Task<T?> LockAndGet<T>(string key, Func<Task<T>> runWithLock, int databaseId = -1)
+    {
+        string? lockValue = await WaitForLockAsync(key, true);
+        if (string.IsNullOrEmpty(lockValue))
+            return default;
+
+        T? result = default;
+        try
+        {
+            result = await runWithLock();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error while executing locked operation for key: {Key}", key);
+            throw;
+        }
+        finally
+        {
+            await LockReleaseAsync(key, lockValue, databaseId);
+        }
+
+        return result;
+    }
+
+    private async Task<bool> LockTakeAsync(string key, string lockValue, TimeSpan duration, int databaseId = -1)
+    {
+        logger.LogInformation("Taking lock for key: {Key} with lock value: {LockValue} for duration: {Duration}", key, lockValue, duration);
+        var database = await connectionManager.GetDatabaseAsync(databaseId);
+        return await database.LockTakeAsync(key, lockValue, duration);
+    }
+}

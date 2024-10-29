@@ -1,5 +1,5 @@
-using StackExchange.Redis;
 using System.IO.Compression;
+using StackExchange.Redis;
 
 namespace Dfe.PlanTech.Infrastructure.Redis;
 
