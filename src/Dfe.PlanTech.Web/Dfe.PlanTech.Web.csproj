@@ -42,6 +42,10 @@
         <None Remove="Views\Recommendations\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Views\Content\Shared\CookiesBanner\_CookieBanner.cshtml" />
+    </ItemGroup>
+
     <Target Name="BuildWebAssets" BeforeTargets="Build" Condition="'$(buildWebAssets)' == 'true'">
         <Exec Command="npm install" WorkingDirectory="../Dfe.PlanTech.Web.Node" />
         <Exec Command="npm run build" WorkingDirectory="../Dfe.PlanTech.Web.Node" />

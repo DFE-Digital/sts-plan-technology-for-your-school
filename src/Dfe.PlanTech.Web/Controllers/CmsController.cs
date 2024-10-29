@@ -1,6 +1,8 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Content.Commands;
+using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Helpers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
@@ -11,6 +13,7 @@ public class CmsController(ILogger<CmsController> logger) : BaseController<CmsCo
 {
     [HttpPost("webhook")]
     [ValidateApiKey]
+    [Authorize(SignedRequestAuthorisationPolicy.PolicyName)]
     public async Task<IActionResult> WebhookPayload([FromBody] JsonDocument json, [FromServices] IWriteCmsWebhookToQueueCommand writeToQueueCommand)
     {
         try
@@ -20,10 +23,7 @@ public class CmsController(ILogger<CmsController> logger) : BaseController<CmsCo
             {
                 return Ok();
             }
-            else
-            {
-                return BadRequest(result);
-            }
+            return BadRequest(result);
         }
         catch (Exception e)
         {

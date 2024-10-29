@@ -178,6 +178,8 @@ jobs:
           dsi_username: ${{ secrets.DSI_USERNAME }}
           dsi_password: ${{ secrets.DSI_PASSWORD }}
           environment: ${{ inputs.environment}}
+          dsi_noorg_username: ${{ secrets.DSI_NOORG_USERNAME }}
+          dsi_noorg_password: ${{ secrets.DSI_NOORG_PASSWORD }}
 
       - name: Remove Azure Firewall Rules
         if: always()

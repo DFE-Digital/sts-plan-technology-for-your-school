@@ -49,27 +49,22 @@ public static class ProgramExtensions
 {
     public const string ContentAndSupportServiceKey = "content-and-support";
 
-    public static IServiceCollection AddContentfulServices(this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddContentfulServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddTransient<IContractResolver, DependencyInjectionContractResolver>();
 
-        services.SetupContentfulClient(configuration, "Contentful",
-            HttpClientPolicyExtensions.AddRetryPolicy);
+        services.SetupContentfulClient(configuration, "Contentful", HttpClientPolicyExtensions.AddRetryPolicy);
 
         services.AddScoped((services) =>
         {
             var logger = services.GetRequiredService<ILogger<TextRendererOptions>>();
 
-            return new TextRendererOptions(logger, new List<MarkOption>()
-            {
-                new()
-                {
+            return new TextRendererOptions(logger, new List<MarkOption>() {
+                new(){
                     Mark = "bold",
                     HtmlTag = "span",
                     Classes = "govuk-body govuk-!-font-weight-bold",
-                }
-            });
+                }});
         });
 
         services.AddScoped((_) => new ParagraphRendererOptions()
@@ -88,8 +83,7 @@ public static class ProgramExtensions
 
             if (!int.TryParse(configValue, out int include))
             {
-                throw new FormatException(
-                    $"Could not parse CONTENTFUL_GET_ENTITY_INT environment variable to int. Value: {configValue}");
+                throw new FormatException($"Could not parse CONTENTFUL_GET_ENTITY_INT environment variable to int. Value: {configValue}");
             }
 
             return new GetPageFromContentfulOptions()
@@ -101,31 +95,20 @@ public static class ProgramExtensions
         services.AddTransient<GetPageFromContentfulQuery>();
 
         services.AddOptions<ContentfulOptions>()
-            .Configure<IConfiguration>((settings, configuration) =>
-                configuration.GetSection("Contentful").Bind(settings));
+                .Configure<IConfiguration>((settings, configuration) => configuration.GetSection("Contentful").Bind(settings));
 
         services.AddOptions<ApiAuthenticationConfiguration>()
-            .Configure<IConfiguration>((settings, configuration) =>
-                configuration.GetSection("Api:Authentication").Bind(settings));
+                .Configure<IConfiguration>((settings, configuration) => configuration.GetSection("Api:Authentication").Bind(settings));
 
-        services.AddTransient((services) =>
-            services.GetRequiredService<IOptions<ContentfulOptions>>().Value);
-        services.AddTransient((services) =>
-        {
-            var testing = services.GetRequiredService<IOptions<ApiAuthenticationConfiguration>>()
-                .Value;
+        services.AddOptions<SigningSecretConfiguration>()
+                .Configure<IConfiguration>((settings, configuration) => configuration.GetSection("Contentful").Bind(settings));
 
-            return testing;
-        });
+        services.AddTransient((services) => services.GetRequiredService<IOptions<ContentfulOptions>>().Value);
+        services.AddTransient((services) => services.GetRequiredService<IOptions<ApiAuthenticationConfiguration>>().Value);
+        services.AddTransient((services) => services.GetRequiredService<IOptions<SigningSecretConfiguration>>().Value);
 
-        services
-            .AddKeyedTransient<IGetSubTopicRecommendationQuery,
-                GetSubtopicRecommendationFromContentfulQuery>(
-                GetSubtopicRecommendationFromContentfulQuery.ServiceKey);
-        services
-            .AddKeyedTransient<IGetSubTopicRecommendationQuery,
-                GetSubTopicRecommendationFromDbQuery>(GetSubTopicRecommendationFromDbQuery
-                .ServiceKey);
+        services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubtopicRecommendationFromContentfulQuery>(GetSubtopicRecommendationFromContentfulQuery.ServiceKey);
+        services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationFromDbQuery>(GetSubTopicRecommendationFromDbQuery.ServiceKey);
         services.AddTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationQuery>();
         services.AddTransient<IRecommendationsRepository, RecommendationsRepository>();
 
@@ -156,12 +139,9 @@ public static class ProgramExtensions
         return services;
     }
 
-    public static IServiceCollection AddDatabase(this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
-        void databaseOptionsAction(DbContextOptionsBuilder options) =>
-            options.UseSqlServer(configuration.GetConnectionString("Database"));
-
+        void databaseOptionsAction(DbContextOptionsBuilder options) => options.UseSqlServer(configuration.GetConnectionString("Database"));
         services.AddSingleton<IQueryCacher, QueryCacher>();
 
         services.AddDbContextPool<ICmsDbContext, CmsDbContext>((serviceProvider, optionsBuilder) =>
@@ -182,6 +162,7 @@ public static class ProgramExtensions
         services.AddTransient<ICalculateMaturityCommand, CalculateMaturityCommand>();
         services.AddTransient<ICreateEstablishmentCommand, CreateEstablishmentCommand>();
         services.AddTransient<ICreateUserCommand, CreateUserCommand>();
+        services.AddTransient<IGetEntityFromContentfulQuery, GetEntityFromContentfulQuery>();
         services.AddTransient<IGetEstablishmentIdQuery, GetEstablishmentIdQuery>();
         services.AddTransient<IGetLatestResponsesQuery, GetLatestResponsesQuery>();
         services.AddTransient<IGetNavigationQuery, GetNavigationQuery>();
@@ -206,21 +187,19 @@ public static class ProgramExtensions
         {
             var options = configuration.GetSection("Cookies").Get<CookiesCleanerOptions>();
 
-            return new CookiesCleaner(options ?? new CookiesCleanerOptions()
-                { EssentialCookies = [] });
+            return new CookiesCleaner(options ?? new CookiesCleanerOptions() { EssentialCookies = [] });
         });
     }
 
     public static IServiceCollection AddGoogleTagManager(this IServiceCollection services)
     {
         services.AddOptions<GtmConfiguration>()
-            .Configure<IConfiguration>((settings, configuration) =>
-            {
-                configuration.GetSection("GTM").Bind(settings);
-            });
+                .Configure<IConfiguration>((settings, configuration) =>
+                {
+                    configuration.GetSection("GTM").Bind(settings);
+                });
 
-        services.AddTransient(services =>
-            services.GetRequiredService<IOptions<GtmConfiguration>>().Value);
+        services.AddTransient(services => services.GetRequiredService<IOptions<GtmConfiguration>>().Value);
         services.AddTransient<GtmService>();
         return services;
     }
@@ -235,17 +214,20 @@ public static class ProgramExtensions
     {
         services.AddAuthentication();
         services.AddAuthorizationBuilder()
-            .AddDefaultPolicy(PageModelAuthorisationPolicy.PolicyName, policy =>
-            {
-                policy.Requirements.Add(new PageAuthorisationRequirement());
-                policy.Requirements.Add(new UserOrganisationAuthorisationRequirement());
-            });
+                        .AddDefaultPolicy(PageModelAuthorisationPolicy.PolicyName, policy =>
+                        {
+                            policy.Requirements.Add(new PageAuthorisationRequirement());
+                            policy.Requirements.Add(new UserOrganisationAuthorisationRequirement());
+                        })
+                        .AddPolicy(SignedRequestAuthorisationPolicy.PolicyName, policy =>
+                        {
+                            policy.AddRequirements(new SignedRequestAuthorisationRequirement());
+                        });
         services.AddSingleton<ApiKeyAuthorisationFilter>();
+        services.AddSingleton<IAuthorizationHandler, SignedRequestAuthorisationPolicy>();
         services.AddSingleton<IAuthorizationHandler, PageModelAuthorisationPolicy>();
         services.AddSingleton<IAuthorizationHandler, UserOrganisationAuthorisationHandler>();
-        services
-            .AddSingleton<IAuthorizationMiddlewareResultHandler,
-                UserAuthorisationMiddlewareResultHandler>();
+        services.AddSingleton<IAuthorizationMiddlewareResultHandler, UserAuthorisationMiddlewareResultHandler>();
 
         return services;
     }
@@ -264,8 +246,7 @@ public static class ProgramExtensions
         return services;
     }
 
-    public static IServiceCollection AddContentAndSupportServices(
-        this WebApplicationBuilder builder)
+    public static IServiceCollection AddContentAndSupportServices(this WebApplicationBuilder builder)
     {
         builder.InitCsDependencyInjection();
         builder.Services.AddAutoMapper(typeof(Application.Mappings.CmsMappingProfile));
@@ -276,9 +257,7 @@ public static class ProgramExtensions
     public static IServiceCollection AddExceptionHandlingServices(this IServiceCollection services)
     {
         services.AddTransient<IExceptionHandlerMiddleware, ServiceExceptionHandlerMiddleWare>();
-        services
-            .AddTransient<IUserJourneyMissingContentExceptionHandler,
-                UserJourneyMissingContentExceptionHandler>();
+        services.AddTransient<IUserJourneyMissingContentExceptionHandler, UserJourneyMissingContentExceptionHandler>();
 
         return services;
     }

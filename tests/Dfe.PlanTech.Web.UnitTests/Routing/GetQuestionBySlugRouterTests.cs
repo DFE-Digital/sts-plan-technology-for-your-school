@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Exceptions;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -20,6 +21,7 @@ public class GetQuestionBySlugRouterTests
 {
     private readonly IGetLatestResponsesQuery _getResponseQuery = Substitute.For<IGetLatestResponsesQuery>();
     private readonly ISubmissionStatusProcessor _submissionStatusProcessor = Substitute.For<ISubmissionStatusProcessor>();
+    private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery = Substitute.For<IGetEntityFromContentfulQuery>();
     private readonly IUser _user = Substitute.For<IUser>();
 
     private readonly IGetSectionQuery _getSectionQuery = Substitute.For<IGetSectionQuery>();
@@ -33,7 +35,7 @@ public class GetQuestionBySlugRouterTests
 
     public GetQuestionBySlugRouterTests()
     {
-        _controller = new QuestionsController(new NullLogger<QuestionsController>(), _getSectionQuery, _getResponseQuery, _user);
+        _controller = new QuestionsController(new NullLogger<QuestionsController>(), _getSectionQuery, _getResponseQuery, _getEntityFromContentfulQuery, _user);
         _user.GetEstablishmentId().Returns(1);
 
         var secondQuestion = new Question()

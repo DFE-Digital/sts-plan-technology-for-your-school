@@ -1,17 +1,17 @@
 @using System
 @model Dfe.PlanTech.Web.Models.Content.Mapped.Custom.CustomAttachment
 
-<div class="guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8">
+<div class="guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print">
     <div class="attachment">
         <div class="attachment-thumbnail govuk-!-margin-right-8">
             <a href="@Model.Uri" download>
                 @{
-                var fileExtension = Model.ContentType.Split('/')[^1].ToLower();
+                    var fileExtension = Model.ContentType.Split('/')[^1].ToLower();
                     if (fileExtension == "vnd.openxmlformats-officedocument.spreadsheetml.sheet")
                     {
                         fileExtension = "xlsx";
                     }
-                    
+
                     switch (fileExtension)
                     {
                         case "pdf":
