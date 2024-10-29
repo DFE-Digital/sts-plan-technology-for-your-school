@@ -167,10 +167,10 @@ public class CmsDbContext : DbContext, ICmsDbContext
             .ToTable("Headers", Schema, tb => tb.HasTrigger("tr_Headers"));
 
         modelBuilder.Entity<InsetTextDbEntity>()
-            .ToTable("InsetTexts", Schema, tb => tb.HasTrigger("tr_InsetText"));
+            .ToTable("InsetTexts", Schema, tb => tb.HasTrigger("tr_InsetTexts"));
 
         modelBuilder.Entity<NavigationLinkDbEntity>()
-            .ToTable("NavigationLinks", Schema, tb => tb.HasTrigger("tr_NavigationLink"));
+            .ToTable("NavigationLink", Schema, tb => tb.HasTrigger("tr_NavigationLink"));
 
         modelBuilder.Entity<ButtonWithLinkDbEntity>()
             .ToTable("ButtonWithLinks", Schema, tb => tb.HasTrigger("tr_ButtonWithLinks"));
