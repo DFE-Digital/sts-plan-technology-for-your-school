@@ -81,31 +81,31 @@ public class RecommendationsRepositoryTests
             .. _subtopicRecommendation.Section.Chunks.SelectMany(chunk => chunk.Answers)
         ]);
 
-        var subtopicRecDbSetMock = _subtopicRecommendations.BuildMock();
+        var subtopicRecDbSetMock = _subtopicRecommendations.BuildMockDbSet();
         _db.SubtopicRecommendations.Returns(subtopicRecDbSetMock);
         SetupMockQueryable<SubtopicRecommendationDbEntity>();
 
-        var sectionsDbSetMock = _sections.BuildMock();
+        var sectionsDbSetMock = _sections.BuildMockDbSet();
         _db.Sections.Returns(sectionsDbSetMock);
         SetupMockQueryable<SectionDbEntity>();
 
-        var introsMockSet = _intros.BuildMock();
+        var introsMockSet = _intros.BuildMockDbSet();
         _db.RecommendationIntros.Returns(introsMockSet);
         SetupMockQueryable<RecommendationIntroDbEntity>();
 
-        var chunksMockSet = _chunks.BuildMock();
+        var chunksMockSet = _chunks.BuildMockDbSet();
         _db.RecommendationChunks.Returns(chunksMockSet);
         SetupMockQueryable<RecommendationChunkDbEntity>();
 
-        var introContentMock = _introContent.BuildMock();
+        var introContentMock = _introContent.BuildMockDbSet();
         _db.RecommendationIntroContents.Returns(introContentMock);
         SetupMockQueryable<RecommendationIntroContentDbEntity>();
 
-        var chunkContentMock = _chunkContent.BuildMock();
+        var chunkContentMock = _chunkContent.BuildMockDbSet();
         _db.RecommendationChunkContents.Returns(chunkContentMock);
         SetupMockQueryable<RecommendationChunkContentDbEntity>();
 
-        var richTextsMock = _richTexts.BuildMock();
+        var richTextsMock = _richTexts.BuildMockDbSet();
         _db.RichTextContentWithSubtopicRecommendationIds.Returns(richTextsMock);
         SetupMockQueryable<RichTextContentWithSubtopicRecommendationId>();
 
