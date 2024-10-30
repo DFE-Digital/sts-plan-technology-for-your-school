@@ -10,7 +10,7 @@ describe('Print button', () => {
   });
 
   it("should be visible", () => {
-    cy.get("div.print-button")
+    cy.get("button.print-button")
       .should('exist')
       .not("govuk-visually-hidden")
       .should('not.have.attr', 'aria-hidden');
