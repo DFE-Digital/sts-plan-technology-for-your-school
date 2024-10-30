@@ -1,57 +1,45 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Dfe.PlanTech.Infrastructure.Data\Dfe.PlanTech.Infrastructure.Data.csproj" />
-    <ProjectReference Include="..\..\src\Dfe.PlanTech.Web\Dfe.PlanTech.Web.csproj" />
-    <ProjectReference Include="..\Dfe.PlanTech.UnitTests.Shared\Dfe.PlanTech.UnitTests.Shared.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Dfe.PlanTech.Infrastructure.Data\Dfe.PlanTech.Infrastructure.Data.csproj"/>
+        <ProjectReference Include="..\..\src\Dfe.PlanTech.Web\Dfe.PlanTech.Web.csproj"/>
+        <ProjectReference Include="..\Dfe.PlanTech.UnitTests.Shared\Dfe.PlanTech.UnitTests.Shared.csproj"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="coverlet.collector" Version="6.0.2">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
-    <PackageReference Include="Moq" Version="4.20.70" />
-      <PackageReference Include="FluentAssertions" Version="7.0.0-alpha.3" />
-      <PackageReference Include="NSubstitute" Version="5.1.0" />
-=======
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
-    <PackageReference Include="NSubstitute" Version="5.3.0" />
->>>>>>> 9ec3fd2d3debaf8834fdb37eca6f949783224a12
+    <ItemGroup>
+        <PackageReference Include="coverlet.collector" Version="6.0.2">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1"/>
+        <PackageReference Include="Moq" Version="4.20.70"/>
+        <PackageReference Include="FluentAssertions" Version="7.0.0-alpha.3"/>
+        <PackageReference Include="NSubstitute" Version="5.3.0"/>
+        <PackageReference Include="NSubstitute" Version="5.3.0"/>
+        <PackageReference Include="xunit" Version="2.9.2"/>
+    </ItemGroup>
 
-    <PackageReference Include="xunit" Version="2.9.2" />
-  </ItemGroup>
+    <ItemGroup>
+        <None Update="StubData\ContentfulCollection.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0"/>
+        <PackageReference Include="Moq" Version="4.20.70"/>
+        <PackageReference Include="FluentAssertions" Version="7.0.0-alpha.3"/>
+        <PackageReference Include="NSubstitute" Version="5.1.0"/>
+        <PackageReference Include="xunit" Version="2.9.2"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\Content\" />
-  </ItemGroup>
+    <ItemGroup>
+        <None Update="StubData\ContentfulCollection.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Update="StubData\ContentfulCollection.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
-    <PackageReference Include="Moq" Version="4.20.70" />
-      <PackageReference Include="FluentAssertions" Version="7.0.0-alpha.3" />
-      <PackageReference Include="NSubstitute" Version="5.1.0" />
-    <PackageReference Include="xunit" Version="2.9.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Models\Content\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="StubData\ContentfulCollection.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 
 </Project>
