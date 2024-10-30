@@ -15,7 +15,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models.Content.Mapped.Custom;
 
 public class CustomAttachmentTests
 {
-    private static ModelMapper GetService() => new ModelMapper(new SupportedAssetTypes());
+    private static ModelMapper GetService() => new(new SupportedAssetTypes());
 
     private const string ContentId = "Attachment";
     private const string InternalName = "Internal Name";
