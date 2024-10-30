@@ -59,9 +59,9 @@ public class GetPageFromContentfulQuery : IGetPageQuery
     {
         try
         {
-            var pages = await _repository.GetEntities<Page>(options, cancellationToken);
+            var pages = await _repository.GetEntities<Page?>(options, cancellationToken);
 
-            var page = pages.FirstOrDefault() ?? throw new KeyNotFoundException($"Could not find page with slug {slug}");
+            var page = pages.FirstOrDefault();
 
             return page;
         }

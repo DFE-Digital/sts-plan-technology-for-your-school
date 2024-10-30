@@ -15,17 +15,24 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("/")]
 public class PagesController : BaseController<PagesController>
 {
+    private readonly ILogger _logger;
     public const string ControllerName = "Pages";
     public const string GetPageByRouteAction = nameof(GetByRoute);
 
     public PagesController(ILogger<PagesController> logger) : base(logger)
     {
+        _logger = logger;
     }
 
     [Authorize(Policy = PageModelAuthorisationPolicy.PolicyName)]
     [HttpGet("{route?}", Name = "GetPage")]
-    public IActionResult GetByRoute([ModelBinder(typeof(PageModelBinder))] Page page, [FromServices] IUser user)
+    public IActionResult GetByRoute([ModelBinder(typeof(PageModelBinder))] Page? page, [FromServices] IUser user)
     {
+        if (page == null)
+        {
+            _logger.LogInformation("Could not find page at {Path}", Request.Path.Value);
+            return RedirectToAction("NotFoundError");
+        }
         var viewModel = new PageViewModel(page, this, user, Logger);
 
         return View("Page", viewModel);
@@ -43,4 +50,8 @@ public class PagesController : BaseController<PagesController>
          RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
          ContactUsEmail = configuration["ContactUs:Email"]
      });
+
+    [HttpGet(UrlConstants.NotFound, Name = UrlConstants.NotFound)]
+    public IActionResult NotFoundError()
+    => View();
 }

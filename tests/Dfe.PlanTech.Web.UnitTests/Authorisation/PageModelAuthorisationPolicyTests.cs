@@ -157,6 +157,14 @@ public class PageModelAuthorisationPolicyTests
     }
 
     [Fact]
+    public async Task Should_Succeed_When_Page_Does_Not_Exist()
+    {
+        _getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(callInfo => (Page?)null);
+        await _policy.HandleAsync(_authContext);
+        Assert.True(_authContext.HasSucceeded);
+    }
+
+    [Fact]
     public async Task Should_Success_When_NotPagesController_And_UserAuthenticated()
     {
         var claimsIdentity = new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, "Name")], CookieAuthenticationDefaults.AuthenticationScheme);
