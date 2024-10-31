@@ -4,15 +4,24 @@ namespace Dfe.PlanTech.Domain.Helpers;
 
 public static class RandomNumber
 {
-    [ThreadStatic]
-    private static RandomNumberGenerator? _local;
-
-    public static RandomNumberGenerator Local
+    public static int GenerateRandomInt(int min, int max)
     {
-        get
+        if (min >= max)
         {
-            _local ??= RandomNumberGenerator.Create();
-            return _local;
+            throw new ArgumentOutOfRangeException(nameof(min), "Minimum value must be less than maximum value.");
         }
+
+        long range = (long)max - min;
+
+        byte[] randomNumber = new byte[4];
+
+        using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+        {
+            rng.GetBytes(randomNumber);
+        }
+
+        uint randomValue = BitConverter.ToUInt32(randomNumber, 0);
+
+        return (int)(min + (randomValue % (uint)range));
     }
 }

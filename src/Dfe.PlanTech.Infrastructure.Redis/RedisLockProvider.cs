@@ -29,7 +29,7 @@ public class RedisLockProvider(DistributedCachingOptions options, IRedisConnecti
         var totalTime = TimeSpan.Zero;
         var maxTime = TimeSpan.FromSeconds(options.DistLockMaxDurationInSeconds);
         var expiration = TimeSpan.FromSeconds(options.DistLockAcquisitionTimeoutInSeconds);
-        var sleepTime = TimeSpan.FromMilliseconds(RandomNumber.Local.Next(50, 600));
+        var sleepTime = TimeSpan.FromMilliseconds(RandomNumber.GenerateRandomInt(50, 600));
 
         logger.LogInformation("Attempting to acquire lock for key: {Key}", key);
 
