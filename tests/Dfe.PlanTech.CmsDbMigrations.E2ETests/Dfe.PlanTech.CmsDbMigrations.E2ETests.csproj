@@ -22,7 +22,8 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="NSubstitute" Version="5.1.0" />
     <PackageReference Include="xunit" Version="2.5.3" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.8" />
+
   </ItemGroup>
 
   <ItemGroup>
@@ -32,8 +33,10 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Dfe.PlanTech.Application\Dfe.PlanTech.Application.csproj" />
     <ProjectReference Include="..\..\src\Dfe.PlanTech.Domain\Dfe.PlanTech.Domain.csproj" />
-    <ProjectReference Include="..\..\src\Dfe.PlanTech.Infrastructure.Data\Dfe.PlanTech.Infrastructure.Data.csproj" />
-    <ProjectReference Include="..\..\src\Dfe.PlanTech.Infrastructure.ServiceBus\Dfe.PlanTech.Infrastructure.ServiceBus.csproj" />
+    <ProjectReference
+      Include="..\..\src\Dfe.PlanTech.Infrastructure.Data\Dfe.PlanTech.Infrastructure.Data.csproj" />
+    <ProjectReference
+      Include="..\..\src\Dfe.PlanTech.Infrastructure.ServiceBus\Dfe.PlanTech.Infrastructure.ServiceBus.csproj" />
   </ItemGroup>
 
 </Project>

@@ -84,7 +84,7 @@ public class GetPageQueryTests
 
                         var queries = options.Queries;
 
-                        var slugQuery = (queries?.OfType<ContentQueryEquals>()).FirstOrDefault(query => query.Field == "fields.slug");
+                        var slugQuery = queries == null ? null : (queries.OfType<ContentQueryEquals>()).FirstOrDefault(query => query.Field == "fields.slug");
                         if (slugQuery != null && slugQuery.Value.Equals(_page.Slug))
                         {
                             pages.Add(_page);
