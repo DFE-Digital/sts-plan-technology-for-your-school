@@ -45,11 +45,6 @@ builder.AddContentAndSupportServices()
 
 builder.Services.AddSingleton<ISystemTime, SystemTime>();
 
-// ----------------
-// KD: it should be as straightforward as creating a redis instance, putting the connection string in secrets and refing here. It's designed to be singleton.
-// Just inject IDistCache where you need it
-// ----------------
-
 var app = builder.Build();
 
 app.UseSecurityHeaders();

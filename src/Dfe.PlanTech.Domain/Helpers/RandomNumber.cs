@@ -4,6 +4,13 @@ namespace Dfe.PlanTech.Domain.Helpers;
 
 public static class RandomNumber
 {
+    /// <summary>
+    /// Generates a random integer within the specified range.
+    /// </summary>
+    /// <param name="min">The minimum value of the range (inclusive). Must be smaller than max.</param>
+    /// <param name="max">The maximum value of the range (exclusive).</param>
+    /// <returns>A random integer between min and max.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when min is greater than or equal to max.</exception>
     public static int GenerateRandomInt(int min, int max)
     {
         if (min >= max)

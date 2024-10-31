@@ -21,12 +21,18 @@ public class RedisConnectionManager : IRedisConnectionManager
         this.logger = logger;
     }
 
+    /// <inheritdoc/>
     public async Task<IDatabase> GetDatabaseAsync(int databaseId)
     {
         _connection ??= await ConnectionMultiplexer.ConnectAsync(options.ConnectionString) ?? throw new InvalidOperationException("Failed to create Redis connection");
         return _connection.GetDatabase(databaseId);
     }
 
+    /// <summary>
+    /// Flushes all databases for all connections on the Redis server
+    /// </summary>
+    /// <param name="databaseId"></param>
+    /// <returns></returns>
     public async Task FlushAsync(int databaseId = 0)
     {
         if (_connection == null)

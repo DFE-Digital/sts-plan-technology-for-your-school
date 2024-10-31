@@ -4,9 +4,16 @@ using Dfe.PlanTech.Domain.Helpers;
 
 namespace Dfe.PlanTech.Domain.Content.Models;
 
+/// <summary>
+/// Provides Json type info mapping for <see cref="ContentComponent"/> to handle deserialising objects to their concrete classes 
+/// </summary>
 public static class ContentComponentJsonExtensions
 {
     private const string TypeDiscriminatorName = "$contentcomponenttype";
+
+    /// <summary>
+    /// Gets all classes that inherit from <see cref="ContentComponent"/> and creates <see cref="JsonDerivedType"/> mapping information for deserialisation 
+    /// </summary>
     private static readonly List<JsonDerivedType> ContentComponentTypes = ReflectionHelpers
         .GetTypesInheritingFrom<ContentComponent>()
         .Select(type => new JsonDerivedType(type, type.Name))
@@ -19,6 +26,10 @@ public static class ContentComponentJsonExtensions
     private static JsonPolymorphismOptions ContentComponentPolymorphismOptions =>
         _contentComponentPolymorphismOptions ??= CreateJsonPolymorphismOptions();
 
+    /// <summary>
+    /// Creates polymorphism support for the <see cref="ContentComponent"/> class.
+    /// </summary>
+    /// <returns></returns>
     private static JsonPolymorphismOptions CreateJsonPolymorphismOptions()
     {
         var options = new JsonPolymorphismOptions()
@@ -36,6 +47,10 @@ public static class ContentComponentJsonExtensions
         return options;
     }
 
+    /// <summary>
+    /// Adds polymorphism support for the <see cref="ContentComponent"/> class.
+    /// </summary>
+    /// <param name="jsonTypeInfo"></param>
     public static void AddContentComponentPolymorphicInfo(JsonTypeInfo jsonTypeInfo)
     {
         if (jsonTypeInfo.Type != ContentComponentType)

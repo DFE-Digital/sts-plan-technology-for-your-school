@@ -7,6 +7,9 @@ using StackExchange.Redis;
 
 namespace Dfe.PlanTech.Infrastructure.Redis;
 
+/// <summary>
+/// Represents a Redis-based implementation of a distributed cache.
+/// </summary>
 public class RedisCache : IDistributedCache
 {
     private readonly IRedisConnectionManager _connectionManager;
@@ -28,6 +31,7 @@ public class RedisCache : IDistributedCache
         _retryPolicyAsync = retryPolicyBuilder.WaitAndRetryAsync(3, _ => TimeSpan.FromSeconds(2));
     }
 
+    /// <inheritdoc/>
     public async Task<T?> GetOrCreateAsync<T>(string key, Func<Task<T>> action, TimeSpan? expiry = null, Func<T, Task>? onCacheItemCreation = null, int databaseId = -1)
     {
         _logger.LogInformation("Attempting to get or create cache item with key: {Key}", key);
@@ -59,6 +63,7 @@ public class RedisCache : IDistributedCache
         return result;
     }
 
+    /// <inheritdoc/>
     public async Task<string> SetAsync<T>(string key, T value, TimeSpan? expiry = null, int databaseId = -1)
     {
         _logger.LogInformation("Setting cache item with key: {Key}", key);
@@ -66,6 +71,7 @@ public class RedisCache : IDistributedCache
         return await SetAsync(database, key, value, expiry);
     }
 
+    /// <inheritdoc/>
     public async Task<bool> RemoveAsync(string key, int databaseId = -1)
     {
         _logger.LogInformation("Removing cache item with key: {Key}", key);
@@ -73,12 +79,14 @@ public class RedisCache : IDistributedCache
         return await RemoveAsync(database, key);
     }
 
+    /// <inheritdoc/>
     public Task RemoveAsync(params string[] keys)
     {
         _logger.LogInformation("Removing cache items with keys: {Keys}", string.Join(", ", keys));
         return Task.WhenAll(keys.Select(key => RemoveAsync(key)));
     }
 
+    /// <inheritdoc/>
     public async Task RemoveAsync(int databaseId, params string[] keys)
     {
         _logger.LogInformation("Removing cache items with keys: {Keys} from database {DatabaseId}", string.Join(", ", keys), databaseId);
@@ -86,12 +94,14 @@ public class RedisCache : IDistributedCache
         await Task.WhenAll(keys.Select(key => RemoveAsync(database, key)));
     }
 
+    /// <inheritdoc/>
     public async Task AppendAsync(string key, string item, int databaseId = -1)
     {
         _logger.LogInformation("Appending item to cache with key: {Key}", key);
         await (await _connectionManager.GetDatabaseAsync(databaseId)).StringAppendAsync(key, item);
     }
 
+    /// <inheritdoc/>
     public async Task<T?> GetAsync<T>(string key, int databaseId = -1)
     {
         if (string.IsNullOrEmpty(key))
@@ -106,6 +116,7 @@ public class RedisCache : IDistributedCache
         return result.CacheValue;
     }
 
+    /// <inheritdoc/>
     public async Task SetAddAsync(string key, string item, int databaseId = -1)
     {
         _logger.LogInformation("Adding item to set with key: {Key}", key);
@@ -116,18 +127,21 @@ public class RedisCache : IDistributedCache
         await _retryPolicyAsync.ExecuteAsync(() => database.SetAddAsync(key, item));
     }
 
+    /// <inheritdoc/>
     public async Task<string[]> GetSetMembersAsync(string key, int databaseId = -1)
     {
         _logger.LogInformation("Getting set members for key: {Key}", key);
         return await _retryPolicyAsync.ExecuteAsync(async () => (await (await _connectionManager.GetDatabaseAsync(databaseId)).SetMembersAsync(key)).Select(x => x.ToString()).ToArray());
     }
 
+    /// <inheritdoc/>
     public Task SetRemoveAsync(string key, string item, int databaseId = -1)
     {
         _logger.LogInformation("Removing item from set with key: {Key}", key);
         return _retryPolicyAsync.ExecuteAsync(async () => (await _connectionManager.GetDatabaseAsync(databaseId)).SetRemoveAsync(key, item));
     }
 
+    /// <inheritdoc/>
     public async Task SetRemoveItemsAsync(string key, string[] items, int databaseId = -1)
     {
         _logger.LogInformation("Removing multiple items from set with key: {Key}", key);
@@ -135,6 +149,7 @@ public class RedisCache : IDistributedCache
         await _retryPolicyAsync.ExecuteAsync(() => database.SetRemoveAsync(key, items.Select(x => (RedisValue)x).ToArray()));
     }
 
+    /// <inheritdoc/>
     private async Task<string> SetAsync<T>(IDatabase database, string key, T value, TimeSpan? expiry = null)
     {
         var redisValue = value as string ?? value.Serialise();
@@ -143,6 +158,13 @@ public class RedisCache : IDistributedCache
         return key;
     }
 
+    /// <summary>
+    /// Gets an item from the provided Redis.
+    /// </summary>
+    /// <typeparam name="T">Type of expected result; will be serialised from JSON</typeparam>
+    /// <param name="database">Redis database to fetch from</param>
+    /// <param name="key">Key of the value to fetch</param>
+    /// <returns></returns>
     private async Task<CacheResult<T>> GetAsync<T>(IDatabase database, string key)
     {
         if (string.IsNullOrEmpty(key))
@@ -157,6 +179,12 @@ public class RedisCache : IDistributedCache
         return CreateCacheResult<T>(redisResult);
     }
 
+    /// <summary>
+    /// Removes an item from the Redis database
+    /// </summary>
+    /// <param name="database">Database to remove the item from</param>
+    /// <param name="key">Key of the item to remove</param>
+    /// <returns>True if successful, otherwise false</returns>
     private static Task<bool> RemoveAsync(IDatabase database, string key)
     {
         if (string.IsNullOrEmpty(key))
@@ -167,6 +195,12 @@ public class RedisCache : IDistributedCache
         return database.KeyDeleteAsync(key);
     }
 
+    /// <summary>
+    /// Creates a <see cref="CacheResult{T}"/> from the provided Redis result.
+    /// </summary>
+    /// <typeparam name="T">Type of the expected result</typeparam>
+    /// <param name="redisResult">Result from the Redis get operation</param>
+    /// <returns></returns>
     private static CacheResult<T> CreateCacheResult<T>(RedisValue redisResult)
     {
         if (!redisResult.HasValue)

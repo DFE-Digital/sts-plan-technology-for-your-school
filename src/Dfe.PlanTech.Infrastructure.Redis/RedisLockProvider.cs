@@ -9,6 +9,7 @@ namespace Dfe.PlanTech.Infrastructure.Redis;
 
 public class RedisLockProvider(DistributedCachingOptions options, IRedisConnectionManager connectionManager, ILogger<RedisLockProvider> logger) : IDistributedLockProvider
 {
+    /// <inheritdoc />
     public async Task<bool> LockReleaseAsync(string key, string lockValue, int databaseId = -1)
     {
         logger.LogInformation("Releasing lock for key: {Key} with lock value: {LockValue}", key, lockValue);
@@ -16,6 +17,7 @@ public class RedisLockProvider(DistributedCachingOptions options, IRedisConnecti
         return await database.LockReleaseAsync(key, lockValue, CommandFlags.DemandMaster);
     }
 
+    /// <inheritdoc />
     public async Task<bool> LockExtendAsync(string key, string lockValue, TimeSpan duration, int databaseId = -1)
     {
         logger.LogInformation("Extending lock for key: {Key} with lock value: {LockValue} for duration: {Duration}", key, lockValue, duration);
@@ -23,6 +25,7 @@ public class RedisLockProvider(DistributedCachingOptions options, IRedisConnecti
         return await database.LockExtendAsync(key, lockValue, duration, CommandFlags.DemandMaster);
     }
 
+    /// <inheritdoc />
     public async Task<string?> WaitForLockAsync(string key, bool throwExceptionIfLockNotAcquired = true)
     {
         var lockValue = Guid.NewGuid().ToString();
@@ -55,6 +58,7 @@ public class RedisLockProvider(DistributedCachingOptions options, IRedisConnecti
         return null;
     }
 
+    /// <inheritdoc />
     public async Task LockAndRun(string key, Func<Task> runWithLock, int databaseId = -1)
     {
         string? lockValue = await WaitForLockAsync(key, true);
@@ -75,6 +79,7 @@ public class RedisLockProvider(DistributedCachingOptions options, IRedisConnecti
         }
     }
 
+    /// <inheritdoc />
     public async Task<T?> LockAndGet<T>(string key, Func<Task<T>> runWithLock, int databaseId = -1)
     {
         string? lockValue = await WaitForLockAsync(key, true);
@@ -99,6 +104,14 @@ public class RedisLockProvider(DistributedCachingOptions options, IRedisConnecti
         return result;
     }
 
+    /// <summary>
+    /// Attempts to take a distributed lock.
+    /// </summary>
+    /// <param name="key">The key associated with the lock.</param>
+    /// <param name="lockValue">The lock value used to acquire the lock.</param>
+    /// <param name="duration">The duration for which the lock should be held.</param>
+    /// <param name="databaseId">The Redis database ID to use. Defaults to -1, which means using the default database.</param>
+    /// <returns>True if the lock was successfully taken; otherwise, false.</returns>
     private async Task<bool> LockTakeAsync(string key, string lockValue, TimeSpan duration, int databaseId = -1)
     {
         logger.LogInformation("Taking lock for key: {Key} with lock value: {LockValue} for duration: {Duration}", key, lockValue, duration);
