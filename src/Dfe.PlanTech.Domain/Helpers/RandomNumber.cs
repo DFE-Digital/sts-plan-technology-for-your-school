@@ -1,22 +1,17 @@
+using System.Security.Cryptography;
+
 namespace Dfe.PlanTech.Domain.Helpers;
 
 public static class RandomNumber
 {
-    private static readonly Random _global = new();
-
     [ThreadStatic]
-    private static Random? _local;
+    private static RandomNumberGenerator? _local;
 
-    public static Random Local
+    public static RandomNumberGenerator Local
     {
         get
         {
-            int seed;
-            lock (_global)
-            {
-                seed = _global.Next();
-            }
-            _local = new Random(seed);
+            _local ??= RandomNumberGenerator.Create();
             return _local;
         }
     }

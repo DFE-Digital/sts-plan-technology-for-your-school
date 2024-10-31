@@ -30,7 +30,12 @@ public static class GZipRedisValueCompressor
 
     public static RedisValue Compress(RedisValue redisValue)
     {
-        byte[] valueBlob = redisValue;
+        if (redisValue.IsNull || !redisValue.HasValue)
+        {
+            return redisValue;
+        }
+
+        byte[] valueBlob = redisValue!;
         Compress(ref valueBlob);
         return valueBlob;
     }
@@ -55,7 +60,12 @@ public static class GZipRedisValueCompressor
 
     public static RedisValue Decompress(RedisValue redisValue)
     {
-        byte[] valueBlob = redisValue;
+        if (redisValue.IsNull || !redisValue.HasValue)
+        {
+            return redisValue;
+        }
+
+        byte[] valueBlob = redisValue!;
         Decompress(ref valueBlob);
         return valueBlob;
     }

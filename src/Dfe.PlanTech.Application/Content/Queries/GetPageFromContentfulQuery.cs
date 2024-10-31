@@ -24,9 +24,9 @@ public class GetPageFromContentfulQuery(
     /// <exception cref="ContentfulDataUnavailableException"></exception>
     public async Task<Page?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
     {
-        var options = CreateGetEntityOptions(slug);
+        var queryOptions = CreateGetEntityOptions(slug);
 
-        return await FetchFromContentful(slug, options, cancellationToken);
+        return await FetchFromContentful(slug, queryOptions, cancellationToken);
     }
 
     /// <summary>
@@ -40,10 +40,10 @@ public class GetPageFromContentfulQuery(
 
     public async Task<Page?> GetPageBySlug(string slug, IEnumerable<string> fieldsToReturn, CancellationToken cancellationToken = default)
     {
-        var options = CreateGetEntityOptions(slug);
-        options.Select = fieldsToReturn;
+        var queryOptions = CreateGetEntityOptions(slug);
+        queryOptions.Select = fieldsToReturn;
 
-        return await FetchFromContentful(slug, options, cancellationToken);
+        return await FetchFromContentful(slug, queryOptions, cancellationToken);
     }
 
     /// <exception cref="ContentfulDataUnavailableException"></exception>
@@ -65,5 +65,5 @@ public class GetPageFromContentfulQuery(
     }
 
     private GetEntitiesOptions CreateGetEntityOptions(string slug) =>
-      new(options.Include, new[] { new ContentQueryEquals() { Field = "fields.slug", Value = slug } });
+      new(options.Include, [new ContentQueryEquals() { Field = "fields.slug", Value = slug }]);
 }

@@ -25,20 +25,17 @@ public class RedisLockProvider(DistributedCachingOptions options, IRedisConnecti
 
     public async Task<string?> WaitForLockAsync(string key, bool throwExceptionIfLockNotAcquired = true)
     {
-        //TODO: use polly here
         var lockValue = Guid.NewGuid().ToString();
         var totalTime = TimeSpan.Zero;
         var maxTime = TimeSpan.FromSeconds(options.DistLockMaxDurationInSeconds);
         var expiration = TimeSpan.FromSeconds(options.DistLockAcquisitionTimeoutInSeconds);
         var sleepTime = TimeSpan.FromMilliseconds(RandomNumber.Local.Next(50, 600));
-        var lockAchieved = false;
 
         logger.LogInformation("Attempting to acquire lock for key: {Key}", key);
 
-        while (!lockAchieved && totalTime < maxTime)
+        while (totalTime < maxTime)
         {
-            lockAchieved = await LockTakeAsync(key, lockValue, expiration);
-            if (lockAchieved)
+            if (await LockTakeAsync(key, lockValue, expiration))
             {
                 logger.LogInformation("Lock acquired for key: {Key} with lock value: {LockValue}", key, lockValue);
                 return lockValue;
@@ -49,7 +46,7 @@ public class RedisLockProvider(DistributedCachingOptions options, IRedisConnecti
             totalTime += sleepTime;
         }
 
-        if (throwExceptionIfLockNotAcquired && !lockAchieved)
+        if (throwExceptionIfLockNotAcquired)
         {
             logger.LogError("Failed to acquire lock for key: {Key}", key);
             throw new LockException($"Failed to get lock for: {key}");

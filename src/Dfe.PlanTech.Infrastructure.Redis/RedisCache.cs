@@ -37,13 +37,13 @@ public class RedisCache : IDistributedCache
 
         if (redisResult.ExistedInCache == true)
         {
-            _logger.LogInformation("Cache item with key: {Key} found", key);
+            _logger.LogTrace("Cache item with key: {Key} found", key);
             return redisResult.CacheValue;
         }
 
-        _logger.LogInformation("Cache item with key: {Key} not found, executing action to create it", key);
+        _logger.LogTrace("Cache item with key: {Key} not found, executing action to create it", key);
         var result = await action();
-        if (result == null)
+        if (EqualityComparer<T>.Default.Equals(result, default))
         {
             _logger.LogWarning("Action returned null for cache item with key: {Key}", key);
             return result;
@@ -109,14 +109,17 @@ public class RedisCache : IDistributedCache
     public async Task SetAddAsync(string key, string item, int databaseId = -1)
     {
         _logger.LogInformation("Adding item to set with key: {Key}", key);
+
+        ArgumentNullException.ThrowIfNull(item);
+
         var database = await _connectionManager.GetDatabaseAsync(databaseId);
-        await _retryPolicyAsync.ExecuteAsync(() => database.SetAddAsync(key, item ?? throw new ArgumentNullException(nameof(item))));
+        await _retryPolicyAsync.ExecuteAsync(() => database.SetAddAsync(key, item));
     }
 
     public async Task<string[]> GetSetMembersAsync(string key, int databaseId = -1)
     {
         _logger.LogInformation("Getting set members for key: {Key}", key);
-        return await _retryPolicyAsync.ExecuteAsync(async () => (await (await _connectionManager.GetDatabaseAsync(databaseId)).SetMembersAsync(key)).Select(x => x.ToString()).ToArray() ?? []);
+        return await _retryPolicyAsync.ExecuteAsync(async () => (await (await _connectionManager.GetDatabaseAsync(databaseId)).SetMembersAsync(key)).Select(x => x.ToString()).ToArray());
     }
 
     public Task SetRemoveAsync(string key, string item, int databaseId = -1)
@@ -151,11 +154,7 @@ public class RedisCache : IDistributedCache
         _logger.LogInformation("Getting cache item with key: {Key}", key);
         var redisResult = await _retryPolicyAsync.ExecuteAsync(async () => GZipRedisValueCompressor.Decompress(await database.StringGetAsync(key)));
 
-        return !redisResult.HasValue
-            ? new CacheResult<T>(ExistedInCache: false)
-            : redisResult is T typed
-                ? new CacheResult<T>(ExistedInCache: true, CacheValue: typed)
-                : new CacheResult<T>(ExistedInCache: true, CacheValue: redisResult.Deserialise<T>());
+        return CreateCacheResult<T>(redisResult);
     }
 
     private static Task<bool> RemoveAsync(IDatabase database, string key)
@@ -167,4 +166,15 @@ public class RedisCache : IDistributedCache
 
         return database.KeyDeleteAsync(key);
     }
+
+    private static CacheResult<T> CreateCacheResult<T>(RedisValue redisResult)
+    {
+        if (!redisResult.HasValue)
+        {
+            return new CacheResult<T>(ExistedInCache: false);
+        }
+
+        return redisResult is T typed ? new CacheResult<T>(ExistedInCache: true, CacheValue: typed) : new CacheResult<T>(ExistedInCache: true, CacheValue: redisResult.Deserialise<T>());
+    }
+
 }

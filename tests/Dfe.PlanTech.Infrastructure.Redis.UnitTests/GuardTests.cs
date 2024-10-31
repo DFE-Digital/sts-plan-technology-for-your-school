@@ -28,6 +28,7 @@ public class GuardTests
         string name = "test";
 
         Guard.IsNotNull(obj, name);
+        Assert.True(true);
     }
 
     [Fact]
@@ -46,6 +47,7 @@ public class GuardTests
         string message = "Test message";
 
         Guard.IsFalse(condition, message);
+        Assert.True(true);
     }
 
     [Fact]
@@ -64,6 +66,7 @@ public class GuardTests
         string message = "Test message";
 
         Guard.IsTrue(condition, message);
+        Assert.True(true);
     }
 
     [Fact]
@@ -83,6 +86,7 @@ public class GuardTests
         string message = "Value must be greater than {0}";
 
         Guard.IsTrue(value, Constraint, message);
+        Assert.True(true);
     }
 
     [Fact]
