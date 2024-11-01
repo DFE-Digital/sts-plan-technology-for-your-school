@@ -1,5 +1,5 @@
 module "waf" {
-  source = "github.com/dfe-digital/terraform-azurerm-front-door-app-gateway-waf?ref=v1.1.0"
+  source = "github.com/dfe-digital/terraform-azurerm-front-door-app-gateway-waf?ref=v1.3.0"
 
   depends_on = [module.main_hosting]
 
@@ -21,6 +21,8 @@ module "waf" {
       custom_fqdn               = module.main_hosting.container_fqdn
     }
   }
+
+  waf_custom_rules = local.waf_custom_rules
 
   cdn_sku = "Premium_AzureFrontDoor"
 

@@ -8,6 +8,8 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 /// </summary>
 public class SectionDbEntity : ContentComponentDbEntity, ISection<QuestionDbEntity, PageDbEntity>
 {
+    public string InternalName { get; set; } = null!;
+
     public string Name { get; set; } = null!;
 
     [DontCopyValue]

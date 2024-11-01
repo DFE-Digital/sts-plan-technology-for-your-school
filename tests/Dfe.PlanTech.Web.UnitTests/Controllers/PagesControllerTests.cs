@@ -215,5 +215,41 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             Assert.IsType<ServiceUnavailableViewModel>(model);
         }
+
+        [Fact]
+        public void Should_ReturnNotFoundError_Page_When_Page_Is_Null()
+        {
+            var establishment = new EstablishmentDto()
+            {
+                OrgName = "Test Org",
+                Ukprn = "12345678",
+                Urn = "123456",
+                Type = new EstablishmentTypeDto()
+                {
+                    Name = "Test Name"
+                }
+            };
+
+            userSubstitute.GetOrganisationData().Returns(establishment);
+
+            var result = _controller.GetByRoute(null, userSubstitute) as RedirectToActionResult;
+
+            Assert.NotNull(result);
+            Assert.Equal("NotFoundError", result.ActionName);
+        }
+
+        [Fact]
+        public void Should_Render_NotFound_Page()
+        {
+            var httpContextSubstitute = Substitute.For<HttpContext>();
+            var controllerContext = new ControllerContext
+            {
+                HttpContext = httpContextSubstitute
+            };
+            _controller.ControllerContext = controllerContext;
+            var result = _controller.NotFoundError();
+            var viewResult = result as ViewResult;
+            Assert.NotNull(viewResult);
+        }
     }
 }

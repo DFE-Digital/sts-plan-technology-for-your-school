@@ -7,6 +7,8 @@ namespace Dfe.PlanTech.Domain.Content.Models.Buttons;
 /// </summary>
 public class ButtonWithEntryReferenceDbEntity : ContentComponentDbEntity, IButtonWithEntryReference<ButtonDbEntity, ContentComponentDbEntity>
 {
+    public string InternalName { get; set; } = null!;
+
     [DontCopyValue]
     public ButtonDbEntity Button { get; set; } = null!;
 

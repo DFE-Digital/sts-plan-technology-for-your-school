@@ -1,0 +1,8 @@
+﻿@model RichTextContentItem
+
+@if (!Model.HasContent){ return; }
+
+@foreach (var childNode in Model.Content)
+{
+    <partial name="RichText/_RichText" model="@childNode"/>
+}

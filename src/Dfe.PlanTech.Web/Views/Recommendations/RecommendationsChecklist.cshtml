@@ -1,45 +1,37 @@
 @using Dfe.PlanTech.Domain.Helpers
 @using Dfe.PlanTech.Domain.Interfaces
-@model Dfe.PlanTech.Web.Models.RecommendationsChecklistViewModel
-@inject ISystemTime systemTime
+@model Dfe.PlanTech.Web.Models.RecommendationsViewModel
+@inject ISystemTime SystemTime
 
 @{
     Layout = "_PrintLayout";
-    var currentTime = systemTime.UkNow;
+    var currentTime = SystemTime.UkNow;
 }
 
-<div class="govuk-grid-row" id="top">
-    <div class="govuk-grid-column-two-thirds recommendation-content print">
-        <div class="dfe-header__logo print-header">
-            <img src="/assets/images/dfe-logo-alt.png" class="dfe-logo govuk-!-padding-bottom-2" alt="DfE Logo">
-            <p class="govuk-body">Plan technology for your school</p>
-        </div>
-        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"/>
-        <p class="govuk-!-margin-top-4 govuk-body" id="printed-date-time">Date and time this document was printed: @($"{DateTimeFormatter.FormattedDateLong(currentTime)} at {DateTimeFormatter.FormattedTime(currentTime)}")</p>
-        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"/>
-        <partial name="RecommendationPrintContent" model="@Model.AllContent"/>
+<div class="recommendation-content">
+    <div class="dfe-header__logo print-header">
+        <img src="/assets/images/dfe-logo-alt.png" class="dfe-logo govuk-!-padding-bottom-2" alt="DfE Logo">
+        <p class="govuk-body">Plan technology for your school</p>
     </div>
-    <div class="govuk-grid-column-one-third print-buttons__container noprint">
-        <div id="recommendations-print-page" class="govuk-button govuk-button--inverse print-buttons__button js-only">
-            <img class="print-img" src="/assets/images/print.png" alt="Print"/><br>
-            Print
-        </div>
-        <div class="print-buttons__row"></div>
-        <div id="recommendations-close-page" class="govuk-button govuk-button--inverse print-buttons__button js-only">
-            Close
-        </div>
+    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"/>
+    <p class="govuk-!-margin-top-4 govuk-body" id="printed-date-time">Date and time this document was printed: @($"{DateTimeFormatter.FormattedDateLong(currentTime)} at {DateTimeFormatter.FormattedTime(currentTime)}")</p>
+    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"/>
+    <div id="back-button-container" class="noprint">
+        @{
+            await Html.RenderPartialAsync("BackButton", Model);
+        }
     </div>
+    <div class="noprint govuk-!-margin-bottom-6 govuk-!-margin-top-4 js-only">
+        <button class="govuk-link print-button govuk-!-font-size-16" id="recommendations-print-page">Print this page</button>
+    </div>
+    <partial name="RecommendationPrintContent" model="@Model.AllContent"/>
 </div>
 
 
 <script defer nonce="@Context.Items["nonce"]">
     document.getElementById("recommendations-print-page").addEventListener("click", printPage);
-    document.getElementById("recommendations-close-page").addEventListener("click", closePage);
 
     function printPage() {
         window.print();
-    }
-    function closePage() {
-        window.close();
     }
 </script>

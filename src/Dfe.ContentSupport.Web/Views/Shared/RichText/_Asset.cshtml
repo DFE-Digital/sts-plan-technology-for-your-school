@@ -1,0 +1,19 @@
+@model EmbeddedAsset
+
+<div class="column-full">
+    @switch (Model.AssetContentType)
+    {
+        case AssetContentType.Image:
+            <img src="@Model.Uri" alt="@Model.Description" title="@Model.Title"/>
+            break;
+        case AssetContentType.Video:
+            <video controls class="govuk-!-display-none-print">
+                <source src="@Model.Uri" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            break;
+        default:
+            <partial name="_UnsupportedElement" model="@Model"/>
+            break;
+    }
+</div>

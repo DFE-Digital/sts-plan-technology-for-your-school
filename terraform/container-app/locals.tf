@@ -101,6 +101,57 @@ locals {
       "value" = "1",
   }]
 
+  waf_custom_rules = {
+    //WAF policy to allow payloads to the CMS webhook route
+    ContentfulWebhookBypassPolicy = {
+      priority = 2
+      action   = "Allow"
+
+      match_conditions = {
+        has_contentful_topic_header = {
+          match_variable = "RequestHeader"
+          selector       = "X-Contentful-Topic"
+          operator       = "Any"
+          match_values   = []
+        }
+        has_contentful_webhookname_header = {
+          match_variable = "RequestHeader"
+          selector       = "X-Contentful-Webhook-Name"
+          operator       = "Any"
+          match_values   = []
+        }
+        has_contentful_eventdatetime_header = {
+          match_variable = "RequestHeader"
+          selector       = "X-Contentful-Event-Datetime"
+          operator       = "Any"
+          match_values   = []
+        }
+        has_contentful_crn_header = {
+          match_variable = "RequestHeader"
+          selector       = "X-Contentful-CRN"
+          operator       = "Any"
+          match_values   = []
+        }
+        is_json_payload = {
+          match_variable = "RequestHeader"
+          selector       = "Content-Type"
+          operator       = "Equal"
+          match_values   = ["application/json"]
+        }
+        has_auth_header = {
+          match_variable = "RequestHeader"
+          selector       = "Authorization"
+          operator       = "Any"
+          match_values   = []
+        }
+        is_webhook_uri = {
+          match_variable = "RequestUri"
+          operator       = "Contains"
+          match_values   = ["/api/cms/webhook"]
+        }
+      }
+    }
+  }
 
   ####################x
   # Storage Accounts #
@@ -117,4 +168,13 @@ locals {
 
   csp_clarity_domains           = "https://www.clarity.ms https://c.bing.com https://a.clarity.ms https://b.clarity.ms https://c.clarity.ms https://d.clarity.ms https://e.clarity.ms https://f.clarity.ms https://g.clarity.ms https://h.clarity.ms https://i.clarity.ms https://j.clarity.ms https://k.clarity.ms https://l.clarity.ms https://m.clarity.ms https://n.clarity.ms https://o.clarity.ms https://p.clarity.ms https://q.clarity.ms https://r.clarity.ms https://s.clarity.ms https://t.clarity.ms https://u.clarity.ms https://v.clarity.ms https://w.clarity.ms https://x.clarity.ms https://y.clarity.ms https://z.clarity.ms"
   csp_google_tag_manager_domain = "www.googletagmanager.com"
+
+  ######################
+  # Contentful Webhook #
+  ######################
+
+  contentful_webhook_name                    = var.contentful_webhook_name
+  contentful_webhook_url                     = "https://${data.azurerm_cdn_frontdoor_endpoint.app.host_name}${var.contentful_webhook_endpoint}"
+  contentful_webhook_shell_command           = var.contentful_management_token != null && var.contentful_upsert_webhook == true ? "bash ./scripts/create-contentful-webhook.sh --env-id ${azurerm_key_vault_secret.vault_secret_contentful_environment.value} --env-name \"${var.container_environment}\" --management-token \"${var.contentful_management_token}\" --space-id ${azurerm_key_vault_secret.vault_secret_contentful_spaceid.value} --webhook-api-key \"${random_password.api_key_value.result}\" --webhook-name \"${local.contentful_webhook_name}\" --webhook-url ${local.contentful_webhook_url}" : "echo Not updating webhook"
+  contentful_webhook_secret_timetolive_hours = 365 * 24
 }

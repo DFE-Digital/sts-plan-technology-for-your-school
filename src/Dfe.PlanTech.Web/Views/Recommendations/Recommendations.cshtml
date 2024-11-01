@@ -6,16 +6,9 @@
 
 @section BeforeContent
 {
-    <div class="govuk-breadcrumbs">
-        <ol class="govuk-breadcrumbs__list">
-            <li class="govuk-breadcrumbs__list-item">
-                <a class="govuk-breadcrumbs__link" href="/self-assessment">Technology self-assessment</a>
-            </li>
-            <li class="govuk-breadcrumbs__list-item">
-                <a class="govuk-breadcrumbs__link" href="@Model.Slug">@Model.Intro.Header.Text</a>
-            </li>
-        </ol>
-    </div>
+    @{
+        await Html.RenderPartialAsync("BackButton");
+    }
 }
 
 <div class="recommendation-content">

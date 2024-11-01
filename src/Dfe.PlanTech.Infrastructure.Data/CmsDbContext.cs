@@ -140,7 +140,7 @@ public class CmsDbContext : DbContext, ICmsDbContext
             .ToTable("RecommendationChunkContents", Schema);
 
         modelBuilder.Entity<RecommendationIntroDbEntity>()
-            .ToTable("RecommendationIntros", Schema);
+            .ToTable("RecommendationIntros", Schema, tb => tb.HasTrigger("tr_RecommendationIntros"));
 
         modelBuilder.Entity<RecommendationSectionDbEntity>()
             .ToTable("RecommendationSections", Schema);
@@ -148,11 +148,50 @@ public class CmsDbContext : DbContext, ICmsDbContext
         modelBuilder.Entity<SubtopicRecommendationIntroDbEntity>()
             .ToTable("SubtopicRecommendationIntros", Schema);
 
+        modelBuilder.Entity<TextBodyDbEntity>()
+            .ToTable("TextBodies", Schema, tb => tb.HasTrigger("tr_TextBodies"));
+
+        modelBuilder.Entity<SectionDbEntity>()
+            .ToTable("Sections", Schema, tb => tb.HasTrigger("tr_Sections"));
+
+        modelBuilder.Entity<WarningComponentDbEntity>()
+            .ToTable("Warnings", Schema, tb => tb.HasTrigger("tr_Warnings"));
+
+        modelBuilder.Entity<RecommendationChunkDbEntity>()
+            .ToTable("RecommendationChunks", Schema, tb => tb.HasTrigger("tr_RecommendationChunks"));
+
+        modelBuilder.Entity<CSLinkDbEntity>()
+            .ToTable("CSLinks", Schema, tb => tb.HasTrigger("tr_CSLinks"));
+
+        modelBuilder.Entity<HeaderDbEntity>()
+            .ToTable("Headers", Schema, tb => tb.HasTrigger("tr_Headers"));
+
+        modelBuilder.Entity<InsetTextDbEntity>()
+            .ToTable("InsetTexts", Schema, tb => tb.HasTrigger("tr_InsetTexts"));
+
+        modelBuilder.Entity<NavigationLinkDbEntity>()
+            .ToTable("NavigationLink", Schema, tb => tb.HasTrigger("tr_NavigationLink"));
+
+        modelBuilder.Entity<ButtonWithLinkDbEntity>()
+            .ToTable("ButtonWithLinks", Schema, tb => tb.HasTrigger("tr_ButtonWithLinks"));
+
+        modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>()
+            .ToTable("ButtonWithEntryReferences", Schema, tb => tb.HasTrigger("tr_ButtonWithEntryReferences"));
+
+        modelBuilder.Entity<ComponentDropDownDbEntity>()
+            .ToTable("ComponentDropDowns", Schema, tb => tb.HasTrigger("tr_ComponentDropDowns"));
+
+        modelBuilder.Entity<PageDbEntity>()
+            .ToTable("Pages", Schema, tb => tb.HasTrigger("tr_Pages"));
+
+        modelBuilder.Entity<CategoryDbEntity>()
+            .ToTable("Categories", Schema, tb => tb.HasTrigger("tr_Categories"));
+
         modelBuilder.HasDefaultSchema(Schema);
 
         modelBuilder.Entity<ContentComponentDbEntity>(entity =>
         {
-            entity.ToTable("ContentComponents", Schema);
+            entity.ToTable("ContentComponents", Schema, tb => tb.HasTrigger("tr_ContentComponents"));
             entity.Property(e => e.Id).HasMaxLength(30);
             entity.HasQueryFilter(ShouldShowEntity());
         });
@@ -161,7 +200,12 @@ public class CmsDbContext : DbContext, ICmsDbContext
         {
             entity.HasOne(a => a.ParentQuestion).WithMany(q => q.Answers).OnDelete(DeleteBehavior.Restrict);
 
-            entity.ToTable("Answers", Schema);
+            entity.ToTable("Answers", Schema, tb => tb.HasTrigger("tr_Answers"));
+        });
+
+        modelBuilder.Entity<ButtonDbEntity>(entity =>
+        {
+            entity.ToTable("Buttons", Schema, tb => tb.HasTrigger("tr_Buttons"));
         });
 
         modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>(entity =>
@@ -171,8 +215,6 @@ public class CmsDbContext : DbContext, ICmsDbContext
 
         modelBuilder.Entity<ButtonWithLinkDbEntity>()
             .Navigation(button => button.Button).AutoInclude();
-
-        modelBuilder.Entity<ButtonWithEntryReferenceDbEntity>().Navigation(button => button.Button).AutoInclude();
 
         modelBuilder.Entity<PageContentDbEntity>(entity =>
         {
@@ -194,12 +236,12 @@ public class CmsDbContext : DbContext, ICmsDbContext
             entity.HasOne(pc => pc.ContentComponent).WithMany(c => c.RecommendationIntroContentJoins);
         });
 
-        modelBuilder.Entity<QuestionDbEntity>().ToTable("Questions", Schema);
+        modelBuilder.Entity<QuestionDbEntity>().ToTable("Questions", Schema, tb => tb.HasTrigger("tr_Questions"));
 
         modelBuilder.Entity<RichTextContentWithSlugDbEntity>(entity => { entity.ToView("RichTextContentsBySlug"); });
         modelBuilder.Entity<RichTextContentWithSubtopicRecommendationId>(entity => { entity.ToView("RichTextContentsBySubtopicRecommendationId"); });
 
-        modelBuilder.Entity<TitleDbEntity>(entity => { entity.ToTable("Titles", Schema); });
+        modelBuilder.Entity<TitleDbEntity>(entity => { entity.ToTable("Titles", Schema, tb => tb.HasTrigger("tr_Titles")); });
 
         modelBuilder.Entity<WarningComponentDbEntity>(entity =>
         {

@@ -1,0 +1,12 @@
+@model Hyperlink
+
+@{
+    var vimeoId = Model.Uri.Split('/')[Model.Uri.Split('/').Length - 1];
+}
+
+<div class="column-full vimeo-player govuk-!-display-none-print">
+    <iframe src="https://player.vimeo.com/video/@vimeoId" width="640" height="360"
+        allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="embedded vimeo clip"></iframe>
+</div>
+
+testing

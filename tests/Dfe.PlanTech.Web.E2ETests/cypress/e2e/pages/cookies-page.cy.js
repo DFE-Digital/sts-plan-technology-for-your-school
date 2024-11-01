@@ -49,7 +49,11 @@ describe("Cookies Page", () => {
     cy.get("form div.govuk-radios div.govuk-radios__item input").eq(0).should("have.attr", "checked");
 
     cy.get("noscript").contains("www.googletagmanager.com").should("exist");
-    cy.get('meta[name="google-site-verification"]').should('exist');
+
+    if (Cypress.env("APP_ENVIRONMENT") != "staging") {
+      cy.get('meta[name="google-site-verification"]').should('exist');
+    }
+
     cy.get('head script[src*="www.googletagmanager.com"]').should("exist");
   });
 

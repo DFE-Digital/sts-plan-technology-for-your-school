@@ -34,7 +34,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
-          submodules: true
 
       - name: Azure CLI Login
         uses: ./.github/actions/azure-login
@@ -95,7 +94,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
-          submodules: true
 
       - name: Azure CLI Login
         uses: ./.github/actions/azure-login
@@ -136,8 +134,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          submodules: true
 
       - name: Azure CLI Login
         uses: ./.github/actions/azure-login
@@ -181,6 +177,9 @@ jobs:
           dsi_url: ${{ secrets.DSI_URL }}
           dsi_username: ${{ secrets.DSI_USERNAME }}
           dsi_password: ${{ secrets.DSI_PASSWORD }}
+          environment: ${{ inputs.environment}}
+          dsi_noorg_username: ${{ secrets.DSI_NOORG_USERNAME }}
+          dsi_noorg_password: ${{ secrets.DSI_NOORG_PASSWORD }}
 
       - name: Remove Azure Firewall Rules
         if: always()

@@ -9,6 +9,8 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 /// <inheritdoc/>
 public class HeaderDbEntity : ContentComponentDbEntity, IHeader
 {
+    public string InternalName { get; set; } = null!;
+
     public string Text { get; set; } = null!;
 
     public HeaderTag Tag { get; set; }

@@ -9,6 +9,8 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 /// <inheritdoc/>
 public class TextBodyDbEntity : ContentComponentDbEntity, ITextBody<RichTextContentDbEntity>, IHasRichText
 {
+    public string InternalName { get; set; } = null!;
+
     public RichTextContentDbEntity? RichText { get; set; }
 
     public long? RichTextId { get; set; }
