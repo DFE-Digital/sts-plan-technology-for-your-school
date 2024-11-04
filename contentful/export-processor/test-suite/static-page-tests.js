@@ -7,6 +7,9 @@ export default class StaticPageTests {
 
   testCaseGenerators = [
     this.generateAccessibilityPage.bind(this),
+    this.generateContactUsPage.bind(this),
+    this.generateCookiesPage.bind(this),
+    this.generatePrivacyPolicyPage.bind(this),
   ];
 
   testCases = [];
@@ -38,4 +41,29 @@ export default class StaticPageTests {
     const expectedOutcome = 'Accessility information is rendered correctly';
     return this.createRow(testScenario, testSteps, expectedOutcome);
   }
+
+  generateContactUsPage() {
+    const testScenario = `User can access the contact us page`;
+    const testSteps = `1 - click the footer 'Contact us' link
+    2 - Verify that the contact us page renders correctly`;
+    const expectedOutcome = 'Contact information is rendered correctly';
+    return this.createRow(testScenario, testSteps, expectedOutcome);
+  }
+
+  generateCookiesPage() {
+    const testScenario = `User can access the cookies page`;
+    const testSteps = `1 - click the footer 'Cookies' link
+    2 - Verify that the cookies page renders correctly`;
+    const expectedOutcome = 'Cookie preference information is rendered correctly';
+    return this.createRow(testScenario, testSteps, expectedOutcome);
+  }
+
+  generatePrivacyPolicyPage() {
+    const testScenario = `User can access the privacy policy page`;
+    const testSteps = `1 - click the footer 'Privacy Policy' link
+    2 - Verify that you are taken to the correct privacy page`;
+    const expectedOutcome =  'Privacy policy page is accessible';
+    return this.createRow(testScenario, testSteps, expectedOutcome);
+  }
+
 }
