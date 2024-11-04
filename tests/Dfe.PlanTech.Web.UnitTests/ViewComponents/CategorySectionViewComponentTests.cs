@@ -222,7 +222,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 DateUpdated = DateTime.Parse(utcTime),
             });
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
@@ -271,7 +271,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 DateUpdated = DateTime.Parse(utcTime)
             });
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
@@ -310,7 +310,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         {
             _category.Completed = 0;
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
@@ -363,7 +363,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Completed = true
             });
 
-            _ = _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
+            _ = _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
@@ -401,7 +401,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public async Task Returns_ProgressRetrievalError_When_ProgressCanNotBeRetrieved()
         {
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(Arg.Any<string>())
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(Arg.Any<IEnumerable<Section>>())
                                         .ThrowsAsync(new Exception("Error occurred fection sections"));
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
@@ -447,7 +447,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 }
             };
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns([.. _category.SectionStatuses]);
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
@@ -479,7 +479,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             });
 
             _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns(_category.SectionStatuses.ToList());
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses.ToList());
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
@@ -509,7 +509,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             });
 
             _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Throws(new Exception("test"));
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Throws(new Exception("test"));
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
@@ -541,7 +541,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 LastMaturity = "Low",
             });
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns(_category.SectionStatuses.ToList());
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses.ToList());
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
@@ -572,7 +572,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 LastMaturity = null
             });
 
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns(_category.SectionStatuses.ToList());
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses.ToList());
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
@@ -602,7 +602,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             });
 
             _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopic);
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sys.Id).Returns(_category.SectionStatuses.ToList());
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns(_category.SectionStatuses.ToList());
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
