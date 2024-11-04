@@ -10,6 +10,7 @@ export default class StaticPageTests {
     this.generateContactUsPage.bind(this),
     this.generateCookiesPage.bind(this),
     this.generatePrivacyPolicyPage.bind(this),
+    this.generate404Page.bind(this)
   ];
 
   testCases = [];
@@ -66,4 +67,10 @@ export default class StaticPageTests {
     return this.createRow(testScenario, testSteps, expectedOutcome);
   }
 
+  generate404Page() {
+    const testScenario = `User can access a 404 page`;
+    const testSteps = `1 - Navigate to a non-existent page (e.g. BASEURL/doesnt-exist)`;
+    const expectedOutcome = 'A 404 page is rendered';
+    return this.createRow(testScenario, testSteps, expectedOutcome);
+  }
 }
