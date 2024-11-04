@@ -20,4 +20,10 @@ public class RecommendationIntro : ContentComponent, IRecommendationIntro<Header
     public string SlugifiedHeader => _slugifiedHeader ??= Header.Text.Slugify();
 
     public string HeaderText => Header.Text;
+
+    public string LinkText => "Overview";
+
+    private string? _slugifiedLinkText;
+
+    public string SlugifiedLinkText => _slugifiedLinkText ??= LinkText.Slugify();
 }

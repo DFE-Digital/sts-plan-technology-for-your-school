@@ -18,4 +18,10 @@ public class RecommendationChunk : ContentComponent, IRecommendationChunk<Answer
     public CSLink? CSLink { get; init; }
 
     public string HeaderText => Header;
+
+    public string LinkText => HeaderText;
+
+    private string? _slugifiedLinkText;
+
+    public string SlugifiedLinkText => _slugifiedLinkText ??= LinkText.Slugify();
 }
