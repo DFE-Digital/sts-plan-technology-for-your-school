@@ -27,9 +27,6 @@ public static class QueryServiceSetup
         }
 
         services.AddScoped<IGetPageQuery, GetPageQuery>();
-        services.AddScoped<IGetPageChildrenQuery, GetButtonWithEntryReferencesQuery>();
-        services.AddScoped<IGetPageChildrenQuery, GetCategorySectionsQuery>();
-        services.AddScoped<IGetPageChildrenQuery, GetRichTextsForPageQuery>();
 
         return services;
     }
