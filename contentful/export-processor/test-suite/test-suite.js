@@ -170,7 +170,6 @@ export default class TestSuiteForSubTopic {
     }
 
     const testScenario = `User receives recommendation for ${maturity} maturity`;
-    let index = 3;
 
     const testSteps = [`1 - Navigate to the ${this.subtopicName} subtopic`, `2 - Navigate through the interstitial page`,
     ...pathForLow.map((pathPart, index) => `3.${index + 1} - Choose answer '${pathPart.answer.text}' for question '${pathPart.question.text}'`),
@@ -257,8 +256,6 @@ export default class TestSuiteForSubTopic {
   
     const filteredChunks = this.getAnswerBasedChunks(chunks, answerIds)
   
-    let pathIndex = 3;
-  
     const testScenario = `User can navigate between recommendation chunks`;
     const testSteps = [
       `1 - Navigate to the ${this.subtopicName} subtopic`,
@@ -292,8 +289,6 @@ export default class TestSuiteForSubTopic {
       console.log(`No chunks with CSLink for maturity '${maturity}' in ${this.subtopicName}.`);
       return;
     }
-  
-    let pathIndex = 3;
   
     const testScenario = `User can navigate between recommendation chunks with C&S links and to C&S content`;
     const testSteps = [
