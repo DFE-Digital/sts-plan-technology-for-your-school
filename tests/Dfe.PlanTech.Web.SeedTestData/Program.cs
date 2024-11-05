@@ -1,6 +1,4 @@
 using System.Reflection;
-using Dfe.PlanTech.Application.Caching.Interfaces;
-using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
