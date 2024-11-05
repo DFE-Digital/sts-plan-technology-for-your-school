@@ -228,7 +228,6 @@ public static class ProgramExtensions
     public static IServiceCollection AddContentAndSupportServices(this WebApplicationBuilder builder)
     {
         builder.InitCsDependencyInjection();
-        builder.Services.AddAutoMapper(typeof(Application.Mappings.CmsMappingProfile));
 
         return builder.Services;
     }
