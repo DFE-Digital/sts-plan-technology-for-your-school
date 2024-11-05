@@ -60,5 +60,4 @@ public class GetNavigationQueryTests
         Assert.Single(receivedLoggerMessages);
         Assert.Empty(result);
     }
-
 }

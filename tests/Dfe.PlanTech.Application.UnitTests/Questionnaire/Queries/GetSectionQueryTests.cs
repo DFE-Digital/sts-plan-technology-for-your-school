@@ -1,5 +1,3 @@
-
-using AutoMapper;
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
@@ -53,49 +51,11 @@ public class GetSectionQueryTests
         }
     };
 
-    private readonly List<SectionDbEntity> _dbSections = new(3);
-
     private readonly Section[] _sections = new[] { FirstSection, SecondSection, ThirdSection };
-
-    private readonly IMapper _mapper = Substitute.For<IMapper>();
     private readonly ICmsCache _cache = Substitute.For<ICmsCache>();
 
     public GetSectionQueryTests()
     {
-        _dbSections.AddRange(_sections.Select((section) =>
-        {
-            var interstitialPageId = section.InterstitialPage != null
-                ? $"{section.InterstitialPage.Slug}-ID"
-                : throw new InvalidOperationException("InterstitialPage cannot be null");
-
-            return new SectionDbEntity()
-            {
-                Name = section.Name,
-                InterstitialPage = new PageDbEntity()
-                {
-                    Slug = section.InterstitialPage.Slug,
-                    Id = interstitialPageId
-                },
-                InterstitialPageId = interstitialPageId,
-                Id = section.Sys.Id
-            };
-        }));
-
-        _mapper.Map<Section>(Arg.Any<SectionDbEntity>())
-                .Returns(callinfo =>
-                {
-                    var section = callinfo.ArgAt<SectionDbEntity>(0);
-
-                    return new Section()
-                    {
-                        Name = section.Name,
-                        Sys = new()
-                        {
-                            Id = section.Id
-                        }
-                    };
-                });
-
         _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<Section>>>())
             .Returns(callInfo =>
             {
@@ -125,9 +85,7 @@ public class GetSectionQueryTests
             return _sections.Where(section => section.InterstitialPage?.Slug == slugQuery.Value);
         });
 
-        var db = Substitute.For<ICmsDbContext>();
-
-        var getSectionQuery = new GetSectionQuery(db, repository, _mapper, _cache);
+        var getSectionQuery = new GetSectionQuery(repository, _cache);
         await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken);
 
         Assert.Equal(FirstSection.InterstitialPage.Slug, sectionSlug);
@@ -148,11 +106,7 @@ public class GetSectionQueryTests
             .When(repo => repo.GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), cancellationToken))
             .Throw(new Exception("Dummy Exception"));
 
-        var db = Substitute.For<ICmsDbContext>();
-
-        var mapper = Substitute.For<IMapper>();
-
-        var getSectionQuery = new GetSectionQuery(db, repository, mapper, _cache);
+        var getSectionQuery = new GetSectionQuery(repository, _cache);
 
         await Assert.ThrowsAsync<ContentfulDataUnavailableException>(
             async () => await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken)
