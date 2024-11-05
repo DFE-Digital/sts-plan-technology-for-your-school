@@ -22,7 +22,6 @@ export default class TestSuiteForSubTopic {
     this.generateChangeAnswersCheckYourAnswers.bind(this),
     this.generateReturnToSelfAssessment.bind(this),
     this.generateUseBackButton.bind(this),
-    this.generate404Page.bind(this),
     this.generateSharePage.bind(this),
     this.generateNavigateLowMatChunks.bind(this),
     this.generateNavigateLowMatCSLinks.bind(this),
@@ -125,14 +124,6 @@ export default class TestSuiteForSubTopic {
     return this.createRow(testScenario, testSteps, expectedOutcome);
   }
 
-  generate404Page() {
-    const testScenario = `User attempts to access a page doesn't exist`;
-    const testSteps = `1 - Navigate to a plan tech endpoint that doesn't exist
-                        4 - Verify that you are redirected to the 'not found' page`;
-    const expectedOutcome = `User is redirected to the 'not found' page.`;
-    return this.createRow(testScenario, testSteps, expectedOutcome);
-  }
-
   generateSharePage() {
     const testScenario = `User navigates to the share/download page`;
     const testSteps = `1 - Navigate to ${this.subtopicName} subtopic
@@ -182,7 +173,7 @@ export default class TestSuiteForSubTopic {
     let index = 3;
 
     const testSteps = [`1 - Navigate to the ${this.subtopicName} subtopic`, `2 - Navigate through the interstitial page`,
-    ...pathForLow.map(pathPart => `${index++} - Choose answer '${pathPart.answer.text}' for question '${pathPart.question.text}'`),
+    ...pathForLow.map((pathPart, index) => `3.${index + 1} - Choose answer '${pathPart.answer.text}' for question '${pathPart.question.text}'`),
       `4 - Save and continue`, `5 - View ${this.subtopicName} recommendation`].join("\n").replace(",", "");
 
     const content = this.subtopic.recommendation.getContentForMaturityAndPath({ maturity, path: pathForLow });
@@ -243,8 +234,8 @@ export default class TestSuiteForSubTopic {
 
   generateUseBackButton() {
     const testScenario = `User uses back button to navigate back through questions to self assesment page`;
-    const testSteps =
-      `1 - Navigate to the ${this.subtopicName} subtopic
+    const testSteps = 
+    `1 - Navigate to the ${this.subtopicName} subtopic
     2 - Navigate through the interstitial page
     3 - Answer first question, save and continue
     4 - Use back button to return to first queston
@@ -267,17 +258,16 @@ export default class TestSuiteForSubTopic {
     const filteredChunks = this.getAnswerBasedChunks(chunks, answerIds)
   
     let pathIndex = 3;
-    let chunkIndex = 1;
   
     const testScenario = `User can navigate between recommendation chunks`;
     const testSteps = [
       `1 - Navigate to the ${this.subtopicName} subtopic`,
       `2 - Navigate through the interstitial page`,
-      ...pathForMaturity.map(pathPart => `${pathIndex++} - Choose answer '${pathPart.answer.text}' for question '${pathPart.question.text}'`),
+      ...pathForMaturity.map((pathPart, index) => `3.${index + 1} - Choose answer '${pathPart.answer.text}' for question '${pathPart.question.text}'`),
       `4 - Save and continue`,
       `5 - View ${this.subtopicName} recommendation`,
       `6 - Using the navigation bar and pagination buttons, navigate between the different recommendation chunks:`,
-      ...filteredChunks.map(chunk => `6.${chunkIndex++} - Navigate to the '${chunk.header}' chunk`)
+      ...filteredChunks.map((chunk, index) => `6.${index + 1} - Navigate to the '${chunk.header}' chunk`)
     ].join("\n").replace(",", "");
   
     const expectedOutcome = `User is able to view each recommendation chunk.`;
@@ -304,21 +294,20 @@ export default class TestSuiteForSubTopic {
     }
   
     let pathIndex = 3;
-    let chunkIndex = 1;
   
     const testScenario = `User can navigate between recommendation chunks with C&S links and to C&S content`;
     const testSteps = [
       `1 - Navigate to the ${this.subtopicName} subtopic`,
       `2 - Navigate through the interstitial page`,
-      ...pathForMaturity.map(pathPart => `${pathIndex++} - Choose answer '${pathPart.answer.text}' for question '${pathPart.question.text}'`),
+      ...pathForMaturity.map((pathPart, index) => `3.${index} - Choose answer '${pathPart.answer.text}' for question '${pathPart.question.text}'`),
       `4 - Save and continue`,
       `5 - View ${this.subtopicName} recommendation`,
       `6 - Using the navigation bar and pagination buttons, navigate between the different recommendation chunks with unique csLink:`,
-      ...filteredChunks.flatMap(chunk => [
-        `6.${chunkIndex++} - Navigate to the '${chunk.header}' chunk`,
-        `6.${chunkIndex++} - Click the link with text '${chunk.csLink.linkText}'`,
-        `6.${chunkIndex++} - Verify the C&S content renders correctly`,
-        `6.${chunkIndex++} - Go back to the recommendation chunks using the back button`
+      ...filteredChunks.flatMap((chunk, index) => [
+        `6.${index} - Navigate to the '${chunk.header}' chunk`,
+        `6.${index} - Click the link with text '${chunk.csLink.linkText}'`,
+        `6.${index} - Verify the C&S content renders correctly`,
+        `6.${index} - Go back to the recommendation chunks using the back button`
       ])
     ].join("\n").replace(",", "");
   

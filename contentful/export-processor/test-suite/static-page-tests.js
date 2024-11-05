@@ -69,7 +69,8 @@ export default class StaticPageTests {
 
   generate404Page() {
     const testScenario = `User can access a 404 page`;
-    const testSteps = `1 - Navigate to a non-existent page (e.g. BASEURL/doesnt-exist)`;
+    const testSteps = `1 - Navigate to a non-existent page (e.g. BASEURL/doesnt-exist)
+    2 - Verify that the 404 page renders correctly`;
     const expectedOutcome = 'A 404 page is rendered';
     return this.createRow(testScenario, testSteps, expectedOutcome);
   }

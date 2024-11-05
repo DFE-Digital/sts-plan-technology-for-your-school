@@ -104,7 +104,7 @@ For each sub-topic, the following tests should be created:
 9. A path for "Low" recommendations
 10. A path for "Medium" recommendations
 11. A path for "High" recommendations
-12. A used can navigate the chunks of a recommendation
+12. A user can navigate the chunks of a recommendation
 13. A user can access C&S resources from their recommendation
 13. The accessibility page is accessibile from the footer link
 14. The contact page is accessibile from the footer link
