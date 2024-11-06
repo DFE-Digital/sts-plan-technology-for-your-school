@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="polly" Version="8.4.2" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dfe.PlanTech.Application\Dfe.PlanTech.Application.csproj" />
+    <ProjectReference Include="..\Dfe.PlanTech.Domain\Dfe.PlanTech.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -9,9 +9,6 @@ namespace Dfe.PlanTech.Application.Content.Queries;
 
 public class GetRichTextsForPageQuery(ICmsDbContext db, ILogger<GetRichTextsForPageQuery> logger, ContentfulOptions contentfulOptions) : IGetPageChildrenQuery
 {
-    private readonly ICmsDbContext _db = db;
-    private readonly ContentfulOptions _contentfulOptions = contentfulOptions;
-
     /// <summary>
     /// Load RichTextContents for the given page from database
     /// </summary>
@@ -27,9 +24,9 @@ public class GetRichTextsForPageQuery(ICmsDbContext db, ILogger<GetRichTextsForP
             if (richTextParents.Length == 0)
                 return;
 
-            var richTextContentQuery = _db.RichTextContentWithSlugs.Where(PageMatchesSlugAndPublishedOrIsPreview(page));
+            var richTextContentQuery = db.RichTextContentWithSlugs.Where(PageMatchesSlugAndPublishedOrIsPreview(page));
 
-            var richTexts = await _db.ToListCachedAsync(richTextContentQuery, cancellationToken);
+            var richTexts = await db.ToListCachedAsync(richTextContentQuery, cancellationToken);
 
             foreach (var parent in richTextParents)
             {
@@ -53,6 +50,6 @@ public class GetRichTextsForPageQuery(ICmsDbContext db, ILogger<GetRichTextsForP
 
     private Expression<Func<RichTextContentWithSlugDbEntity, bool>> PageMatchesSlugAndPublishedOrIsPreview(PageDbEntity page)
     {
-        return content => content.Slug == page.Slug && (_contentfulOptions.UsePreview || content.Published);
+        return content => content.Slug == page.Slug && (contentfulOptions.UsePreview || content.Published);
     }
 }

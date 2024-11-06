@@ -13,8 +13,11 @@ public class GetPageQuery(GetPageFromContentfulQuery getPageFromContentfulQuery,
     /// <returns>Page matching slug</returns>
     public async Task<Page?> GetPageBySlug(string slug, CancellationToken cancellationToken = default)
     {
-        var page = await getPageFromDbQuery.GetPageBySlug(slug, cancellationToken) ?? await getPageFromContentfulQuery.GetPageBySlug(slug, cancellationToken);
+        var page = await GetPage(slug, cancellationToken);
 
         return page;
     }
+
+    private async Task<Page?> GetPage(string slug, CancellationToken cancellationToken)
+    => await getPageFromDbQuery.GetPageBySlug(slug, cancellationToken) ?? await getPageFromContentfulQuery.GetPageBySlug(slug, cancellationToken);
 }
