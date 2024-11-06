@@ -28,6 +28,7 @@ using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.Data.Repositories;
+using Dfe.PlanTech.Infrastructure.Redis;
 using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Caching;
 using Dfe.PlanTech.Web.Helpers;
@@ -261,6 +262,17 @@ public static class ProgramExtensions
     {
         services.AddApplicationInsightsTelemetry();
         services.AddSingleton<ITelemetryInitializer, CustomRequestDimensionsTelemetryInitializer>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddRedisServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddSingleton(
+            new DistributedCachingOptions(ConnectionString: configuration.GetConnectionString("redis") ?? ""));
+        services.AddSingleton<IDistributedCache, RedisCache>();
+        services.AddSingleton<IRedisConnectionManager, RedisConnectionManager>();
+        services.AddSingleton<IDistributedLockProvider, RedisLockProvider>();
 
         return services;
     }

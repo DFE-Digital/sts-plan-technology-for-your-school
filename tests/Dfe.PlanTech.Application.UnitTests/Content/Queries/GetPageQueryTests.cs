@@ -22,7 +22,6 @@ public class GetPageQueryTests
 
     private readonly IContentRepository _repository = Substitute.For<IContentRepository>();
     private readonly ICmsDbContext _db = Substitute.For<ICmsDbContext>();
-
     private readonly Page _page = new()
     {
         Slug = ContentfulPageSlug

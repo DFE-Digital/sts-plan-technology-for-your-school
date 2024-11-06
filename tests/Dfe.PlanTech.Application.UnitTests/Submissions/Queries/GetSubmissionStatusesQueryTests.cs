@@ -25,7 +25,7 @@ public class GetSubmissionStatusesQueryTests
     private const int establishmentId = 1;
     private const string maturity = "High";
 
-    private readonly static Section completeSection = new()
+    private static readonly Section completeSection = new()
     {
         Sys = new SystemDetails()
         {
@@ -34,7 +34,7 @@ public class GetSubmissionStatusesQueryTests
         Name = "section one"
     };
 
-    private readonly static Section inprogressSection = new()
+    private static readonly Section inprogressSection = new()
     {
         Sys = new SystemDetails()
         {
@@ -43,7 +43,7 @@ public class GetSubmissionStatusesQueryTests
         Name = "section two"
     };
 
-    private readonly static Section notstartedSection = new()
+    private static readonly Section notstartedSection = new()
     {
         Sys = new SystemDetails()
         {
@@ -106,7 +106,6 @@ public class GetSubmissionStatusesQueryTests
         }
     };
 
-
     private GetSubmissionStatusesQuery CreateStrut() => new GetSubmissionStatusesQuery(Db, user);
 
     public GetSubmissionStatusesQueryTests()
@@ -114,10 +113,8 @@ public class GetSubmissionStatusesQueryTests
         Db.GetSectionStatuses(Arg.Any<string>(), Arg.Any<int>())
         .Returns((callinfo) =>
         {
-            var categoryId = callinfo.ArgAt<string>(0);
-            var category = categories.FirstOrDefault(category => category.Sys.Id == categoryId);
-            Assert.NotNull(category);
-            return SectionStatuses.Where(sectionStatus => category.Sections.Select(section => section.Sys.Id).Any(id => id == sectionStatus.SectionId)).AsQueryable();
+            var sectionIds = callinfo.ArgAt<string>(0).Split(",");
+            return SectionStatuses.Where(sectionStatus => sectionIds.Contains(sectionStatus.SectionId)).AsQueryable();
         });
 
 
@@ -146,7 +143,7 @@ public class GetSubmissionStatusesQueryTests
     {
         var category = categories[0];
         var sections = category.Sections;
-        var result = await CreateStrut().GetSectionSubmissionStatuses(category.Sys.Id);
+        var result = await CreateStrut().GetSectionSubmissionStatuses(category.Sections);
 
         Assert.Equal(result.Count, sections.Count);
 
