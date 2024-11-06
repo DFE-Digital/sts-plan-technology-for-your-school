@@ -282,7 +282,6 @@ export default class TestSuiteForSubTopic {
     const answerIds = this.getAnswerIds(pathForMaturity);
     const chunks = this.subtopic.recommendation.section.chunks;
   
-    
     const filteredChunks = this.getCSLinkChunks(chunks, answerIds)
   
     if (filteredChunks.length === 0) {
