@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Questionnaire.Models;
@@ -8,7 +9,8 @@ namespace Dfe.PlanTech.Application.Content.Queries;
 
 public class GetSubTopicRecommendationQuery([FromKeyedServices(GetSubtopicRecommendationFromContentfulQuery.ServiceKey)] IGetSubTopicRecommendationQuery getFromContentfulQuery,
                                             [FromKeyedServices(GetSubTopicRecommendationFromDbQuery.ServiceKey)] IGetSubTopicRecommendationQuery getFromDbQuery,
-                                            ILogger<GetSubTopicRecommendationQuery> logger) : IGetSubTopicRecommendationQuery
+                                            ILogger<GetSubTopicRecommendationQuery> logger,
+                                            IDistributedCache cache) : IGetSubTopicRecommendationQuery
 {
     private readonly IGetSubTopicRecommendationQuery _getFromContentfulQuery = getFromContentfulQuery;
     private readonly IGetSubTopicRecommendationQuery _getFromDbQuery = getFromDbQuery;
@@ -18,7 +20,7 @@ public class GetSubTopicRecommendationQuery([FromKeyedServices(GetSubtopicRecomm
     {
         Task<RecommendationsViewDto?> func(IGetSubTopicRecommendationQuery repository) => repository.GetRecommendationsViewDto(subtopicId, maturity, cancellationToken);
 
-        var recommendationsView = await GetFromDbOrContentfulIfNotFound(func, subtopicId);
+        var recommendationsView = await cache.GetOrCreateAsync($"RecommendationViewDto:{subtopicId}", () => GetFromDbOrContentfulIfNotFound(func, subtopicId));
 
         if (recommendationsView == null)
         {
@@ -32,7 +34,7 @@ public class GetSubTopicRecommendationQuery([FromKeyedServices(GetSubtopicRecomm
     {
         Task<SubtopicRecommendation?> func(IGetSubTopicRecommendationQuery repository) => repository.GetSubTopicRecommendation(subtopicId, cancellationToken);
 
-        var recommendation = await GetFromDbOrContentfulIfNotFound(func, subtopicId);
+        var recommendation = await cache.GetOrCreateAsync($"SubtopicRecommendation:{subtopicId}", () => GetFromDbOrContentfulIfNotFound(func, subtopicId));
 
         if (recommendation == null)
         {
@@ -45,14 +47,6 @@ public class GetSubTopicRecommendationQuery([FromKeyedServices(GetSubtopicRecomm
     private async Task<T?> GetFromDbOrContentfulIfNotFound<T>(Func<IGetSubTopicRecommendationQuery, Task<T?>> getFromInterface, string subtopicId)
       where T : class
     {
-        var fromDb = await getFromInterface(_getFromDbQuery);
-
-        if (fromDb != null)
-        {
-            LogRetrievalTrace(subtopicId, "database");
-            return fromDb;
-        }
-
         var fromContentful = await getFromInterface(_getFromContentfulQuery);
 
         if (fromContentful != null)

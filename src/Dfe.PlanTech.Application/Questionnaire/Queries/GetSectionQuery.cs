@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using AutoMapper;
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
@@ -15,18 +16,18 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
     public const string SlugFieldPath = "fields.interstitialPage.fields.slug";
     private readonly ICmsDbContext _db;
     private readonly IMapper _mapper;
+    private readonly IDistributedCache _cache;
 
-    public GetSectionQuery(ICmsDbContext db, IContentRepository repository, IMapper mapper) : base(repository)
+    public GetSectionQuery(ICmsDbContext db, IContentRepository repository, IMapper mapper, IDistributedCache cache) : base(repository)
     {
         _db = db;
         _mapper = mapper;
+        _cache = cache;
     }
 
     public async Task<Section?> GetSectionBySlug(string sectionSlug, CancellationToken cancellationToken = default)
     {
-        var section = await GetSectionFromDb(sectionSlug, cancellationToken);
-
-        return section ?? await GetSectionFromContentful(sectionSlug, cancellationToken);
+        return await _cache.GetOrCreateAsync($"Section:{sectionSlug}", () => GetSectionFromContentful(sectionSlug, cancellationToken));
     }
 
     private async Task<Section?> GetSectionFromDb(string sectionSlug, CancellationToken cancellationToken)

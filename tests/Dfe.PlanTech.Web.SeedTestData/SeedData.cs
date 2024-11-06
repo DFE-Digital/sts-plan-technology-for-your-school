@@ -1,30 +1,13 @@
 using Dfe.PlanTech.Infrastructure.Data;
-using Dfe.PlanTech.Web.SeedTestData.ContentGenerators;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Web.SeedTestData;
 
 public class SeedData(CmsDbContext db)
 {
-    /// <summary>
-    /// List of all mock content generators for the seeded database.
-    /// These are ordered. If one generator depends on another it must come later in the list.
-    /// </summary>
-    private readonly List<ContentGenerator> _contentGenerators =
-    [
-        new ConnectivityCategory(db),
-        new MissingDataCategory(db),
-        new SelfAssessmentPage(db)
-    ];
-
     public void CreateData()
     {
         CreateBaseData();
-        foreach (var generator in _contentGenerators)
-        {
-            generator.CreateData();
-            db.SaveChanges();
-        }
     }
 
     /// <summary>

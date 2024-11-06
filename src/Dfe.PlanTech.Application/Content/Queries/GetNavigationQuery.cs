@@ -1,4 +1,5 @@
 
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Interfaces;
@@ -8,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace Dfe.PlanTech.Application.Content.Queries;
 
 /// <summary>
-/// Retrieves Navigation links from the CMS 
+/// Retrieves Navigation links from the CMS
 /// </summary>
 public class GetNavigationQuery : ContentRetriever, IGetNavigationQuery
 {
@@ -18,21 +19,18 @@ public class GetNavigationQuery : ContentRetriever, IGetNavigationQuery
 
     private readonly ICmsDbContext _db;
     private readonly ILogger<GetNavigationQuery> _logger;
+    private readonly IDistributedCache _cache;
 
-    public GetNavigationQuery(ICmsDbContext db, ILogger<GetNavigationQuery> logger, IContentRepository repository) : base(repository)
+    public GetNavigationQuery(ICmsDbContext db, ILogger<GetNavigationQuery> logger, IContentRepository repository, IDistributedCache cache) : base(repository)
     {
         _db = db;
         _logger = logger;
+        _cache = cache;
     }
 
     public async Task<IEnumerable<INavigationLink>> GetNavigationLinks(CancellationToken cancellationToken = default)
     {
-        var navigationLinks = await GetFromDatabase();
-
-        if (navigationLinks.Count > 0)
-            return navigationLinks;
-
-        return await GetFromContentful(cancellationToken);
+        return await _cache.GetOrCreateAsync("NavigationLinks", () => GetFromContentful(cancellationToken)) ?? [];
     }
 
     private async Task<List<NavigationLinkDbEntity>> GetFromDatabase()

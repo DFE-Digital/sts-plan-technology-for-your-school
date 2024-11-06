@@ -210,5 +210,4 @@ public class RedisCache : IDistributedCache
 
         return redisResult is T typed ? new CacheResult<T>(ExistedInCache: true, CacheValue: typed) : new CacheResult<T>(ExistedInCache: true, CacheValue: redisResult.Deserialise<T>());
     }
-
 }
