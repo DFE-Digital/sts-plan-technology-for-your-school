@@ -41,7 +41,6 @@ public static class DependencyInjection
             Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
         });
 
-        services.AddTransient<IDatabaseHelper<ICmsDbContext>, DatabaseHelper<ICmsDbContext>>();
         return services;
     }
 

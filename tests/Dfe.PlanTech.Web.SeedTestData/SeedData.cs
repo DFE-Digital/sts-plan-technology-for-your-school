@@ -3,8 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Web.SeedTestData;
 
-public class SeedData(CmsDbContext db)
+public class SeedData(PlanTechDbContext db)
 {
+
     public void CreateData()
     {
         CreateBaseData();

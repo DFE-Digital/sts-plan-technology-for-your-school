@@ -87,7 +87,7 @@ public static class ProgramExtensions
             };
         });
 
-        services.AddTransient<GetPageFromContentfulQuery>();
+        services.AddTransient<GetPageQuery>();
 
         services.AddOptions<ContentfulOptions>()
                 .Configure<IConfiguration>((settings, configuration) => configuration.GetSection("Contentful").Bind(settings));
@@ -105,7 +105,6 @@ public static class ProgramExtensions
         services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubtopicRecommendationFromContentfulQuery>(GetSubtopicRecommendationFromContentfulQuery.ServiceKey);
         services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationFromDbQuery>(GetSubTopicRecommendationFromDbQuery.ServiceKey);
         services.AddTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationQuery>();
-        services.AddTransient<IRecommendationsRepository, RecommendationsRepository>();
 
         services.AddScoped<ComponentViewsFactory>();
 
@@ -138,18 +137,6 @@ public static class ProgramExtensions
         void databaseOptionsAction(DbContextOptionsBuilder options) => options.UseSqlServer(configuration.GetConnectionString("Database"));
         services.AddSingleton<IQueryCacher, QueryCacher>();
 
-        services.AddDbContextPool<ICmsDbContext, CmsDbContext>((serviceProvider, optionsBuilder) =>
-            optionsBuilder
-                .UseSqlServer(
-                    configuration.GetConnectionString("Database"),
-                    sqlServerOptionsBuilder =>
-                    {
-                        sqlServerOptionsBuilder
-                            .CommandTimeout((int)TimeSpan.FromSeconds(30).TotalSeconds)
-                            .EnableRetryOnFailure();
-                    })
-        );
-
         services.AddDbContext<IPlanTechDbContext, PlanTechDbContext>(databaseOptionsAction);
         ConfigureCookies(services, configuration);
 
@@ -168,8 +155,6 @@ public static class ProgramExtensions
         services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
         services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
         services.AddTransient<IDeleteCurrentSubmissionCommand, DeleteCurrentSubmissionCommand>();
-
-        services.AddTransient<GetPageFromDbQuery>();
 
         return services;
     }

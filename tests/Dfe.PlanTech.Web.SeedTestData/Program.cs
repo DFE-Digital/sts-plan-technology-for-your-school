@@ -21,8 +21,7 @@ public static class Program
         var configuration = configurationBuilder.Build();
         var services = new ServiceCollection();
 
-        services.AddSingleton<IQueryCacher, QueryCacher>();
-        services.AddDbContext<CmsDbContext>(opts =>
+        services.AddDbContext<PlanTechDbContext>(opts =>
         {
             opts.UseSqlServer(configuration.GetConnectionString("Database"));
             opts.EnableSensitiveDataLogging();

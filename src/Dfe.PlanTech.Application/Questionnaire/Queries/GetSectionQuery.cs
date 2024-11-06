@@ -14,14 +14,10 @@ namespace Dfe.PlanTech.Application.Questionnaire.Queries;
 public class GetSectionQuery : ContentRetriever, IGetSectionQuery
 {
     public const string SlugFieldPath = "fields.interstitialPage.fields.slug";
-    private readonly ICmsDbContext _db;
-    private readonly IMapper _mapper;
     private readonly ICmsCache _cache;
 
-    public GetSectionQuery(ICmsDbContext db, IContentRepository repository, IMapper mapper, ICmsCache cache) : base(repository)
+    public GetSectionQuery(IContentRepository repository, ICmsCache cache) : base(repository)
     {
-        _db = db;
-        _mapper = mapper;
         _cache = cache;
     }
 
@@ -29,51 +25,6 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
     {
         return await _cache.GetOrCreateAsync($"Section:{sectionSlug}", () => GetSectionFromContentful(sectionSlug, cancellationToken));
     }
-
-    private async Task<Section?> GetSectionFromDb(string sectionSlug, CancellationToken cancellationToken)
-    {
-        var query = _db.Sections.Where(SlugMatchesInterstitialPage(sectionSlug))
-                                .Select(ProjectSection);
-
-        var section = await _db.FirstOrDefaultCachedAsync(query, cancellationToken);
-
-        if (section == null)
-            return null;
-
-        return _mapper.Map<Section>(section);
-    }
-
-    private static readonly Expression<Func<SectionDbEntity, SectionDbEntity>> ProjectSection = section => new SectionDbEntity()
-    {
-        Id = section.Id,
-        Name = section.Name,
-        Questions = section.Questions
-                            .OrderBy(question => question.Order)
-                            .Select(question => new QuestionDbEntity()
-                            {
-                                Answers = question.Answers.OrderBy(answer => answer.Order)
-                                                        .Select(answer => new AnswerDbEntity()
-                                                        {
-                                                            Id = answer.Id,
-                                                            Maturity = answer.Maturity,
-                                                            NextQuestion = answer.NextQuestion == null ? null : new QuestionDbEntity()
-                                                            {
-                                                                Id = answer.NextQuestion.Id,
-                                                                Slug = answer.NextQuestion.Slug,
-                                                                Text = answer.NextQuestion.Text
-                                                            },
-                                                            NextQuestionId = answer.NextQuestionId,
-                                                            Text = answer.Text,
-                                                        }).ToList(),
-                                Id = question.Id,
-                                HelpText = question.HelpText,
-                                Text = question.Text,
-                                Slug = question.Slug,
-                            }).ToList(),
-    };
-
-    private static Expression<Func<SectionDbEntity, bool>> SlugMatchesInterstitialPage(string sectionSlug)
-        => section => section.InterstitialPage != null && section.InterstitialPage.Slug == sectionSlug;
 
     private async Task<Section?> GetSectionFromContentful(string sectionSlug, CancellationToken cancellationToken)
     {

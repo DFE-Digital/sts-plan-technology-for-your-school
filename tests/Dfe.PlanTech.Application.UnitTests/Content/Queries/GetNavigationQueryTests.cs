@@ -24,8 +24,6 @@ public class GetNavigationQueryTests
 
     private readonly ILogger<GetNavigationQuery> _logger = Substitute.For<ILogger<GetNavigationQuery>>();
 
-    private readonly ICmsDbContext _db = Substitute.For<ICmsDbContext>();
-
     public GetNavigationQueryTests()
     {
         _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<IEnumerable<NavigationLink>>>>())
@@ -41,7 +39,7 @@ public class GetNavigationQueryTests
     {
         _contentRepository.GetEntities<NavigationLink>(CancellationToken.None).Returns(_contentfulLinks);
 
-        GetNavigationQuery navQuery = new(_db, _logger, _contentRepository, _cache);
+        GetNavigationQuery navQuery = new(_logger, _contentRepository, _cache);
 
         var result = await navQuery.GetNavigationLinks();
 
@@ -53,7 +51,7 @@ public class GetNavigationQueryTests
     {
         _contentRepository.GetEntities<NavigationLink>(CancellationToken.None).Throws(_ => new Exception("Contentful error"));
 
-        GetNavigationQuery navQuery = new(_db, _logger, _contentRepository, _cache);
+        GetNavigationQuery navQuery = new(_logger, _contentRepository, _cache);
 
         var result = await navQuery.GetNavigationLinks();
 
