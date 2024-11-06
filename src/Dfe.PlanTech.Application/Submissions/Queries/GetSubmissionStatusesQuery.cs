@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
@@ -10,11 +11,13 @@ namespace Dfe.PlanTech.Application.Submissions.Queries;
 public class GetSubmissionStatusesQuery(IPlanTechDbContext db, IUser userHelper) : IGetSubmissionStatusesQuery
 {
 
-    public async Task<List<SectionStatusDto>> GetSectionSubmissionStatuses(string categoryId)
+    public async Task<List<SectionStatusDto>> GetSectionSubmissionStatuses(IEnumerable<Section> sections)
     {
         int establishmentId = await userHelper.GetEstablishmentId();
 
-        return await db.ToListAsync(db.GetSectionStatuses(categoryId, establishmentId));
+        var sectionIds = String.Join(',', sections.Select(section => section.Sys.Id));
+
+        return await db.ToListAsync(db.GetSectionStatuses(sectionIds, establishmentId));
     }
 
     public async Task<SectionStatus> GetSectionSubmissionStatusAsync(int establishmentId,
@@ -39,8 +42,8 @@ public class GetSubmissionStatusesQuery(IPlanTechDbContext db, IUser userHelper)
     }
 
     /// <summary>
-    /// For each submission, convert to SectionStatus, 
-    /// group by Section, 
+    /// For each submission, convert to SectionStatus,
+    /// group by Section,
     /// then return latest for each grouping
     /// optionally choosing from completed submissions first
     /// </summary>
