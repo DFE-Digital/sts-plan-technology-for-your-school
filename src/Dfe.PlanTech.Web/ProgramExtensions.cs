@@ -27,7 +27,6 @@ using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
 using Dfe.PlanTech.Infrastructure.Data;
-using Dfe.PlanTech.Infrastructure.Data.Repositories;
 using Dfe.PlanTech.Infrastructure.Redis;
 using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Caching;
@@ -93,7 +92,7 @@ public static class ProgramExtensions
             };
         });
 
-        services.AddTransient<GetPageFromContentfulQuery>();
+        services.AddTransient<GetPageQuery>();
 
         services.AddOptions<ContentfulOptions>()
                 .Configure<IConfiguration>((settings, configuration) => configuration.GetSection("Contentful").Bind(settings));
@@ -108,10 +107,7 @@ public static class ProgramExtensions
         services.AddTransient((services) => services.GetRequiredService<IOptions<ApiAuthenticationConfiguration>>().Value);
         services.AddTransient((services) => services.GetRequiredService<IOptions<SigningSecretConfiguration>>().Value);
 
-        services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubtopicRecommendationFromContentfulQuery>(GetSubtopicRecommendationFromContentfulQuery.ServiceKey);
-        services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationFromDbQuery>(GetSubTopicRecommendationFromDbQuery.ServiceKey);
         services.AddTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationQuery>();
-        services.AddTransient<IRecommendationsRepository, RecommendationsRepository>();
 
         services.AddScoped<ComponentViewsFactory>();
 
@@ -135,7 +131,6 @@ public static class ProgramExtensions
         services.AddTransient<ICacher, Cacher>();
         services.AddTransient<IQuestionnaireCacher, QuestionnaireCacher>();
         services.AddTransient<IUser, UserHelper>();
-        services.AddTransient<ICacheClearer, CacheClearer>();
 
         return services;
     }
@@ -143,19 +138,6 @@ public static class ProgramExtensions
     public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
         void databaseOptionsAction(DbContextOptionsBuilder options) => options.UseSqlServer(configuration.GetConnectionString("Database"));
-        services.AddSingleton<IQueryCacher, QueryCacher>();
-
-        services.AddDbContextPool<ICmsDbContext, CmsDbContext>((serviceProvider, optionsBuilder) =>
-            optionsBuilder
-                .UseSqlServer(
-                    configuration.GetConnectionString("Database"),
-                    sqlServerOptionsBuilder =>
-                    {
-                        sqlServerOptionsBuilder
-                            .CommandTimeout((int)TimeSpan.FromSeconds(30).TotalSeconds)
-                            .EnableRetryOnFailure();
-                    })
-        );
 
         services.AddDbContext<IPlanTechDbContext, PlanTechDbContext>(databaseOptionsAction);
         ConfigureCookies(services, configuration);
@@ -175,8 +157,6 @@ public static class ProgramExtensions
         services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
         services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
         services.AddTransient<IDeleteCurrentSubmissionCommand, DeleteCurrentSubmissionCommand>();
-
-        services.AddTransient<GetPageFromDbQuery>();
 
         return services;
     }
@@ -250,7 +230,6 @@ public static class ProgramExtensions
     public static IServiceCollection AddContentAndSupportServices(this WebApplicationBuilder builder)
     {
         builder.InitCsDependencyInjection();
-        builder.Services.AddAutoMapper(typeof(Application.Mappings.CmsMappingProfile));
 
         return builder.Services;
     }
@@ -328,7 +307,7 @@ public static class ProgramExtensions
     {
         services.AddSingleton(
             new DistributedCachingOptions(ConnectionString: configuration.GetConnectionString("redis") ?? ""));
-        services.AddSingleton<IDistributedCache, RedisCache>();
+        services.AddSingleton<ICmsCache, RedisCache>();
         services.AddSingleton<IRedisConnectionManager, RedisConnectionManager>();
         services.AddSingleton<IDistributedLockProvider, RedisLockProvider>();
 

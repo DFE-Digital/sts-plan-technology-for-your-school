@@ -1,6 +1,4 @@
 using System.Reflection;
-using Dfe.PlanTech.Application.Caching.Interfaces;
-using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -21,8 +19,7 @@ public static class Program
         var configuration = configurationBuilder.Build();
         var services = new ServiceCollection();
 
-        services.AddSingleton<IQueryCacher, QueryCacher>();
-        services.AddDbContext<CmsDbContext>(opts =>
+        services.AddDbContext<PlanTechDbContext>(opts =>
         {
             opts.UseSqlServer(configuration.GetConnectionString("Database"));
             opts.EnableSensitiveDataLogging();

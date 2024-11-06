@@ -32,14 +32,10 @@
   - The code that unhides these elements is located in [_BodyEnd.cshtml](src/Dfe.PlanTech.Web/Views/Shared/_BodyEnd.cshtml)
 
 ## EF Query Conventions
-- We use a Memory Cache to cache content queries by the hash of their query string. This is setup in [Dfe.PlanTech.Application/Caching/Models/QueryCacher.cs](/src/Dfe.PlanTech.Application/Caching/Models/QueryCacher.cs).
-- Any queries using the `CmsDbContext` should be cached by using the `db.ToListAsync` or `db.FirstOrDefaultAsync` methods from `CmsDbContext` rather than extension methods
+- We use a redis cache to cache contentful requests. This is setup in [Dfe.PlanTech.Infrastructure.Redis](/src/Dfe.PlanTech.Infrastructure.Redis/).
+- Any requests to contentful should use the `GetOrCreateAysnc` method from [Dfe.PlanTech.Infrastructure.Redis/RedisCache.cs](/src/Dfe.PlanTech.Infrastructure.Redis/RedisCache.cs) to cache the result
   - For example
     ```csharp
-    // don't do this
-    db.RecommendationChunks.Where(condition).FirstOrDefaultAsync(cancellationToken);
-    // do this instead
-    db.FirstOrDefaultAsync(db.RecommendationChunks.Where(condition), cancellationToken);
+    await _cache.GetOrCreateAsync($"Page:{slug}", () => _repository.GetEntities<Page?>(options, cancellationToken))
     ```
-- the cache can be cleared with the `ClearCache` method which clears everything
-- More about contentful caching is explained in [Contentful-Caching-Process](/docs/Contentful-Caching-Process.md)
+- More about contentful caching is explained in [contentful redis caching documentation](docs/cms/contentful-redis-caching.md)
