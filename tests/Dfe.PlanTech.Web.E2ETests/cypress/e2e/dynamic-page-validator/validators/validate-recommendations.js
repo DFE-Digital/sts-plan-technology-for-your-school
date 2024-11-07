@@ -35,7 +35,7 @@ export const validateAndTestRecommendations = (section, maturity, path) => {
             .contains(section.name.trim())
             .parent().next().next()
             .within(() => {
-                cy.get("a.govuk-button").contains("View Recommendation").click();
+                cy.get("a.govuk-button").contains("View recommendation").click();
             })
         validateRecommendationIntro(introPage, recommendationUrl);
     });

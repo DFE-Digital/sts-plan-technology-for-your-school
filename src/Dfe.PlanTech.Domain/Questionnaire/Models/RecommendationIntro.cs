@@ -6,8 +6,6 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 
 public class RecommendationIntro : ContentComponent, IRecommendationIntro<Header, ContentComponent>, IHeaderWithContent
 {
-    private string? _slugifiedHeader;
-
     public string Slug { get; init; } = null!;
 
     public Header Header { get; init; } = null!;
@@ -17,7 +15,11 @@ public class RecommendationIntro : ContentComponent, IRecommendationIntro<Header
     [NotMapped]
     public List<ContentComponent> Content { get; init; } = [];
 
-    public string SlugifiedHeader => _slugifiedHeader ??= Header.Text.Slugify();
-
     public string HeaderText => Header.Text;
+
+    public string LinkText => "Overview";
+
+    private string? _slugifiedLinkText;
+
+    public string SlugifiedLinkText => _slugifiedLinkText ??= LinkText.Slugify();
 }
