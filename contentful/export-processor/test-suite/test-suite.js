@@ -21,6 +21,10 @@ export default class TestSuiteForSubTopic {
     this.generateReceivesMidScoringLogic.bind(this),
     this.generateChangeAnswersCheckYourAnswers.bind(this),
     this.generateReturnToSelfAssessment.bind(this),
+    this.generateUseBackButton.bind(this),
+    this.generateSharePage.bind(this),
+    this.generateNavigateLowMatChunks.bind(this),
+    this.generateNavigateLowMatCSLinks.bind(this),
   ];
 
   testCases = [];
@@ -120,6 +124,22 @@ export default class TestSuiteForSubTopic {
     return this.createRow(testScenario, testSteps, expectedOutcome);
   }
 
+  generateSharePage() {
+    const testScenario = `User navigates to the share/download page`;
+    const testSteps = `1 - Navigate to ${this.subtopicName} subtopic
+                        2 - Navigate through the interstitial page
+                        3 - Navigate through questions all questions and the check answers page
+                        4 - Save and continue
+                        5 - View ${this.subtopicName} recommendation
+                        6 - Click on the 'Share or download this recommendation' link,
+                        7 - Verify that you are redirected to the share/download page,
+                        8 - Verify that the print button is present and works as expected`;
+
+
+    const expectedOutcome = `User can access the share/download page.`;
+    return this.createRow(testScenario, testSteps, expectedOutcome);
+  }
+
   generateUpdateResubmitResponses() {
     const testScenario = `A different user can update and re-submit their responses`;
     const testSteps = `1 - Navigate to the ${this.subtopicName} subtopic
@@ -143,17 +163,16 @@ export default class TestSuiteForSubTopic {
   }
 
   generateTestForMaturity(maturity) {
-    const pathForLow = this.subtopic.minimumPathsForRecommendations[maturity];
+    const pathForLow = this.getPathForMaturity(maturity)
     if (!pathForLow) {
       console.error(`No '${maturity}' maturity journey for ${this.subtopicName}`);
       return;
     }
 
     const testScenario = `User receives recommendation for ${maturity} maturity`;
-    let index = 3;
 
     const testSteps = [`1 - Navigate to the ${this.subtopicName} subtopic`, `2 - Navigate through the interstitial page`,
-    ...pathForLow.map(pathPart => `${index++} - Choose answer '${pathPart.answer.text}' for question '${pathPart.question.text}'`),
+    ...pathForLow.map((pathPart, index) => `3.${index + 1} - Choose answer '${pathPart.answer.text}' for question '${pathPart.question.text}'`),
       `4 - Save and continue`, `5 - View ${this.subtopicName} recommendation`].join("\n").replace(",", "");
 
     const content = this.subtopic.recommendation.getContentForMaturityAndPath({ maturity, path: pathForLow });
@@ -210,5 +229,119 @@ export default class TestSuiteForSubTopic {
     4 - User clicks PTFYS header`;
     const expectedOutcome = `User returned to self - assessment page.${this.subtopicName} subtopic shows 'In progress'.`;
     return this.createRow(testScenario, testSteps, expectedOutcome);
+  }
+
+  generateUseBackButton() {
+    const testScenario = `User uses back button to navigate back through questions to self assesment page`;
+    const testSteps = 
+    `1 - Navigate to the ${this.subtopicName} subtopic
+    2 - Navigate through the interstitial page
+    3 - Answer first question, save and continue
+    4 - Use back button to return to first queston
+    5 - use back button again to return to self assesment page`;
+    const expectedOutcome = `User returned to self - assessment page.${this.subtopicName} subtopic shows 'In progress'.`;
+    return this.createRow(testScenario, testSteps, expectedOutcome);
+  }
+
+  generateNavigateForRecommendationChunks(maturity) {
+    const pathForMaturity = this.getPathForMaturity(maturity)
+  
+    if (!pathForMaturity) {
+      console.error(`No '${maturity}' maturity journey for ${this.subtopicName}`);
+      return;
+    }
+  
+    const answerIds = this.getAnswerIds(pathForMaturity);
+    const chunks = this.subtopic.recommendation.section.chunks;
+  
+    const filteredChunks = this.getAnswerBasedChunks(chunks, answerIds)
+  
+    const testScenario = `User can navigate between recommendation chunks`;
+    const testSteps = [
+      `1 - Navigate to the ${this.subtopicName} subtopic`,
+      `2 - Navigate through the interstitial page`,
+      ...pathForMaturity.map((pathPart, index) => `3.${index + 1} - Choose answer '${pathPart.answer.text}' for question '${pathPart.question.text}'`),
+      `4 - Save and continue`,
+      `5 - View ${this.subtopicName} recommendation`,
+      `6 - Using the navigation bar and pagination buttons, navigate between the different recommendation chunks:`,
+      ...filteredChunks.map((chunk, index) => `6.${index + 1} - Navigate to the '${chunk.header}' chunk`)
+    ].join("\n").replace(",", "");
+  
+    const expectedOutcome = `User is able to view each recommendation chunk.`;
+    return this.createRow(testScenario, testSteps, expectedOutcome);
+  }
+
+  generateCSLinkChunks(maturity) {
+    const pathForMaturity = this.getPathForMaturity(maturity);
+  
+    if (!pathForMaturity) {
+      console.error(`No '${maturity}' maturity journey for ${this.subtopicName}`);
+      return;
+    }
+  
+    const answerIds = this.getAnswerIds(pathForMaturity);
+    const chunks = this.subtopic.recommendation.section.chunks;
+  
+    const filteredChunks = this.getCSLinkChunks(chunks, answerIds)
+  
+    if (filteredChunks.length === 0) {
+      console.log(`No chunks with CSLink for maturity '${maturity}' in ${this.subtopicName}.`);
+      return;
+    }
+  
+    const testScenario = `User can navigate between recommendation chunks with C&S links and to C&S content`;
+    const testSteps = [
+      `1 - Navigate to the ${this.subtopicName} subtopic`,
+      `2 - Navigate through the interstitial page`,
+      ...pathForMaturity.map((pathPart, index) => `3.${index} - Choose answer '${pathPart.answer.text}' for question '${pathPart.question.text}'`),
+      `4 - Save and continue`,
+      `5 - View ${this.subtopicName} recommendation`,
+      `6 - Using the navigation bar and pagination buttons, navigate between the different recommendation chunks with unique csLink:`,
+      ...filteredChunks.flatMap((chunk, index) => [
+        `6.${index} - Navigate to the '${chunk.header}' chunk`,
+        `6.${index} - Click the link with text '${chunk.csLink.linkText}'`,
+        `6.${index} - Verify the C&S content renders correctly`,
+        `6.${index} - Go back to the recommendation chunks using the back button`
+      ])
+    ].join("\n").replace(",", "");
+  
+    const expectedOutcome = `User is able to view the recommendation chunk with C&S link and verify the C&S content.`;
+    return this.createRow(testScenario, testSteps, expectedOutcome);
+  }
+
+  generateNavigateLowMatChunks() {
+    return this.generateNavigateForRecommendationChunks('Low');
+  }
+
+  generateNavigateLowMatCSLinks() {
+    return this.generateCSLinkChunks('Low');
+  }
+
+  getPathForMaturity(maturity) {
+    return this.subtopic.minimumPathsForRecommendations[maturity];
+  }
+  
+  getAnswerIds(pathForMaturity) {
+    return pathForMaturity.map(q => q.answer.id);
+  }
+  
+  getAnswerBasedChunks(chunks, answerIds) {
+    return chunks.filter(chunk => 
+      chunk.answers.some(answer => answerIds.includes(answer.id))
+    );
+  }
+
+  getCSLinkChunks(chunks, answerIds) {
+    const uniqueCsLinks = new Set();
+    return chunks.filter(chunk => {
+      if (chunk.csLink && chunk.answers.some(answer => answerIds.includes(answer.id))) {
+        const linkText = chunk.csLink.linkText;
+        if (!uniqueCsLinks.has(linkText)) {
+          uniqueCsLinks.add(linkText);
+          return true;
+        }
+      }
+      return false;
+    });
   }
 }
