@@ -41,6 +41,11 @@
                         </div>
                     }
                 </div>
+                <div class="govuk-!-margin-bottom-6 govuk-!-margin-top-6">
+                    <p class="govuk-body">
+                        <a class="govuk-link" href="@Model.Slug/print">View a printable version of your school's recommendations</a>
+                    </p>
+                </div>
                 <div>
                     <govuk-pagination>
                     @if(previousContent != null){
@@ -51,11 +56,6 @@
                         <govuk-pagination-next href="#@nextContent.SlugifiedHeader" label-text="@nextContent.HeaderText" />
                         }
                     </govuk-pagination>
-                </div>
-                <div>
-                    <p class="govuk-body">
-                        <a class="govuk-link" href="@Model.Slug/print">View a printable version of your school's recommendations</a>
-                    </p>
                 </div>
             </div>
         </div>
