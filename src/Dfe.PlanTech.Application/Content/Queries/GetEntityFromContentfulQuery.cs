@@ -16,9 +16,9 @@ public class GetEntityFromContentfulQuery : ContentRetriever, IGetEntityFromCont
     public const string ExceptionMessageContentful = "Error fetching Entity from Contentful";
 
     private readonly ILogger<GetEntityFromContentfulQuery> _logger;
-    private readonly IDistributedCache _cache;
+    private readonly ICmsCache _cache;
 
-    public GetEntityFromContentfulQuery(ILogger<GetEntityFromContentfulQuery> logger, IContentRepository repository, IDistributedCache cache) : base(repository)
+    public GetEntityFromContentfulQuery(ILogger<GetEntityFromContentfulQuery> logger, IContentRepository repository, ICmsCache cache) : base(repository)
     {
         _logger = logger;
         _cache = cache;

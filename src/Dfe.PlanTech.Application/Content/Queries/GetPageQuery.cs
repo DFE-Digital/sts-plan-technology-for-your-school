@@ -4,7 +4,7 @@ using Dfe.PlanTech.Domain.Content.Queries;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
 
-public class GetPageQuery(GetPageFromContentfulQuery getPageFromContentfulQuery, GetPageFromDbQuery getPageFromDbQuery, IDistributedCache cache) : IGetPageQuery
+public class GetPageQuery(GetPageFromContentfulQuery getPageFromContentfulQuery, GetPageFromDbQuery getPageFromDbQuery, ICmsCache cache) : IGetPageQuery
 {
     /// <summary>
     /// Fetches page from <see chref="IContentRepository"/> by slug
@@ -20,5 +20,5 @@ public class GetPageQuery(GetPageFromContentfulQuery getPageFromContentfulQuery,
     }
 
     private async Task<Page?> GetPage(string slug, CancellationToken cancellationToken)
-    => await getPageFromDbQuery.GetPageBySlug(slug, cancellationToken) ?? await getPageFromContentfulQuery.GetPageBySlug(slug, cancellationToken);
+    => await getPageFromContentfulQuery.GetPageBySlug(slug, cancellationToken);
 }

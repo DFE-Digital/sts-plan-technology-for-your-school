@@ -1,11 +1,10 @@
 using System.Text.Json;
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Application.Persistence.Mappings;
 using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Exceptions;
-using Dfe.PlanTech.Domain.Caching.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.ServiceBus.Models;
@@ -14,9 +13,9 @@ using Microsoft.Extensions.Logging;
 namespace Dfe.PlanTech.Application.Persistence.Commands;
 
 /// <inheritdoc cref="IWebhookToDbCommand" />
-public class WebhookToDbCommand(ICacheClearer cacheClearer,
+public class WebhookToDbCommand(ICmsCache cache,
                                 ContentfulOptions contentfulOptions,
-                                JsonToEntityMappers mappers,
+                                JsonSerializerOptions jsonSerialiserOptions,
                                 ILogger<WebhookToDbCommand> logger,
                                 IDatabaseHelper<ICmsDbContext> databaseHelper) : IWebhookToDbCommand
 {
@@ -24,34 +23,9 @@ public class WebhookToDbCommand(ICacheClearer cacheClearer,
     {
         try
         {
-            databaseHelper.ClearTracking();
+            var payload = MapMessageToPayload(body);
 
-            var cmsEvent = GetCmsEvent(subject);
-            var mapped = await MapMessageToEntity(body, cmsEvent, cancellationToken);
-
-            var isPublished = mapped.ExistingEntity?.Published ?? false;
-
-            if (ShouldIgnoreMessage(cmsEvent, isPublished))
-            {
-                return new ServiceBusSuccessResult();
-            }
-
-            if (mapped.IsMinimalPayloadEvent)
-            {
-                logger.LogInformation("Processing minimal payload event {CmsEvent} for entity with ID {Id}", mapped.CmsEvent, mapped.IncomingEntity.Id);
-                await ProcessEntityRemovalEvent(mapped, cancellationToken);
-            }
-            else if (!mapped.IsValid)
-            {
-                logger.LogWarning("Entity {MappedEntityType} is invalid", mapped.IncomingEntity?.GetType());
-            }
-            else
-            {
-                UpsertEntity(mapped);
-                await DbSaveChanges(cancellationToken);
-            }
-
-            cacheClearer.ClearCache();
+            await cache.InvalidateCacheAsync(payload.Sys.Id);
             return new ServiceBusSuccessResult();
         }
         catch (Exception ex) when (ex is JsonException or CmsEventException)
@@ -124,17 +98,15 @@ public class WebhookToDbCommand(ICacheClearer cacheClearer,
     }
 
     /// <summary>
-    /// Maps the incoming message to the appropriate <see cref="ContentComponentDbEntity"/>
+    /// Maps the incoming message to a CmsWebHookPayload
     /// </summary>
     /// <param name="body"></param>
-    /// <param name="cmsEvent"></param>
-    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private Task<MappedEntity> MapMessageToEntity(string body, CmsEvent cmsEvent, CancellationToken cancellationToken)
+    private CmsWebHookPayload MapMessageToPayload(string body)
     {
         logger.LogInformation("Processing mesasge:\n{MessageBody}", body);
 
-        return mappers.ToEntity(body, cmsEvent, cancellationToken);
+        return JsonSerializer.Deserialize<CmsWebHookPayload>(body, jsonSerialiserOptions) ?? throw new InvalidOperationException($"Could not serialise body to {typeof(CmsWebHookPayload)}. Body was {body}");
     }
 
     /// <summary>

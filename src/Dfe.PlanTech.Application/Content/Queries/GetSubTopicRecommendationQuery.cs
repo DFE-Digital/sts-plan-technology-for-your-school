@@ -10,7 +10,7 @@ namespace Dfe.PlanTech.Application.Content.Queries;
 public class GetSubTopicRecommendationQuery([FromKeyedServices(GetSubtopicRecommendationFromContentfulQuery.ServiceKey)] IGetSubTopicRecommendationQuery getFromContentfulQuery,
                                             [FromKeyedServices(GetSubTopicRecommendationFromDbQuery.ServiceKey)] IGetSubTopicRecommendationQuery getFromDbQuery,
                                             ILogger<GetSubTopicRecommendationQuery> logger,
-                                            IDistributedCache cache) : IGetSubTopicRecommendationQuery
+                                            ICmsCache cache) : IGetSubTopicRecommendationQuery
 {
     private readonly IGetSubTopicRecommendationQuery _getFromContentfulQuery = getFromContentfulQuery;
     private readonly IGetSubTopicRecommendationQuery _getFromDbQuery = getFromDbQuery;

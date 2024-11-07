@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Caching;
 
-public class CacheClearer([FromServices] IQueryCacher queryCacher, IDistributedCache cache, ILogger<CacheClearer> logger) : ICacheClearer
+public class CacheClearer([FromServices] IQueryCacher queryCacher, ILogger<CacheClearer> logger) : ICacheClearer
 {
     /// <summary>
     /// Makes a call to the plan tech web app that invalidates the database cache.

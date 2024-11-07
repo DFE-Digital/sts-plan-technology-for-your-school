@@ -130,7 +130,6 @@ public static class ProgramExtensions
         services.AddTransient<ICacher, Cacher>();
         services.AddTransient<IQuestionnaireCacher, QuestionnaireCacher>();
         services.AddTransient<IUser, UserHelper>();
-        services.AddTransient<ICacheClearer, CacheClearer>();
 
         return services;
     }
@@ -270,7 +269,7 @@ public static class ProgramExtensions
     {
         services.AddSingleton(
             new DistributedCachingOptions(ConnectionString: configuration.GetConnectionString("redis") ?? ""));
-        services.AddSingleton<IDistributedCache, RedisCache>();
+        services.AddSingleton<ICmsCache, RedisCache>();
         services.AddSingleton<IRedisConnectionManager, RedisConnectionManager>();
         services.AddSingleton<IDistributedLockProvider, RedisLockProvider>();
 

@@ -16,9 +16,9 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
     public const string SlugFieldPath = "fields.interstitialPage.fields.slug";
     private readonly ICmsDbContext _db;
     private readonly IMapper _mapper;
-    private readonly IDistributedCache _cache;
+    private readonly ICmsCache _cache;
 
-    public GetSectionQuery(ICmsDbContext db, IContentRepository repository, IMapper mapper, IDistributedCache cache) : base(repository)
+    public GetSectionQuery(ICmsDbContext db, IContentRepository repository, IMapper mapper, ICmsCache cache) : base(repository)
     {
         _db = db;
         _mapper = mapper;

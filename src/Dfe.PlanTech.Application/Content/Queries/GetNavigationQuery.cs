@@ -19,9 +19,9 @@ public class GetNavigationQuery : ContentRetriever, IGetNavigationQuery
 
     private readonly ICmsDbContext _db;
     private readonly ILogger<GetNavigationQuery> _logger;
-    private readonly IDistributedCache _cache;
+    private readonly ICmsCache _cache;
 
-    public GetNavigationQuery(ICmsDbContext db, ILogger<GetNavigationQuery> logger, IContentRepository repository, IDistributedCache cache) : base(repository)
+    public GetNavigationQuery(ICmsDbContext db, ILogger<GetNavigationQuery> logger, IContentRepository repository, ICmsCache cache) : base(repository)
     {
         _db = db;
         _logger = logger;
