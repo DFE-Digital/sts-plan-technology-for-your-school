@@ -264,7 +264,7 @@ public class RedisCacheTests
         var dependencies = keys.Select(dep => new RedisValue(dep)).ToArray();
 
         _database.SetMembersAsync(firstAnswerKey, Arg.Any<CommandFlags>()).Returns(dependencies);
-        await _cache.InvalidateCacheAsync(firstAnswerKey);
+        await _cache.InvalidateCacheAsync(_firstAnswer.Sys.Id);
 
         await _database.Received(1).SetRemoveAsync(
             firstAnswerKey,
