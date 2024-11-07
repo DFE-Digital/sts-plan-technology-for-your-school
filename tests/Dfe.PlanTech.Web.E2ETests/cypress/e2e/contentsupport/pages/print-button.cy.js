@@ -1,6 +1,6 @@
 describe('Print button', () => {
   beforeEach(() => {
-    cy.visit('content/hello-world', {
+    cy.visit('content/digital-technology-asset-register', {
       onBeforeLoad(win) {
         //Stub the print functionality so we can see if it was called
         //Note: could spy instead, but I don't want the print dialog to actually show.
@@ -12,10 +12,8 @@ describe('Print button', () => {
   it("should be visible", () => {
     cy.get("button.print-button")
       .should('exist')
-      .not("govuk-visually-hidden")
-      .should('not.have.attr', 'aria-hidden');
-
-    cy.get("button#print-link").should("exist");
+      .and('be.visible')
+      .and('not.have.attr', 'aria-hidden');
   });
 
   it("should print on click", () => {
