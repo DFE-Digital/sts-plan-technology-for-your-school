@@ -30,7 +30,7 @@ export const validateCompletionTags = (section, introPage) => {
         .parent().next().next()
         .within(() => {
             cy.get("strong.app-task-list__tag").should("include.text", "New").and("have.class", "govuk-tag--yellow");
-            cy.get("a.govuk-button").contains("View Recommendation")
+            cy.get("a.govuk-button").contains("View recommendation")
                 .should("have.attr", "href")
                 .and("include", expectedPath);
         })
