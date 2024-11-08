@@ -35,8 +35,7 @@ public class WebhookMessageProcessorTests
         _webhookMessageProcessor = CreateWebhookToDbCommand(true);
     }
 
-    private WebhookMessageProcessor CreateWebhookToDbCommand(bool usePreview) => new(_cache,
-        new ContentfulOptions(usePreview), _jsonSerializerOptions, _logger, _databaseHelper);
+    private WebhookMessageProcessor CreateWebhookToDbCommand(bool usePreview) => new(_cache, _jsonSerializerOptions, _logger);
 
     [Fact]
     public async Task ProcessMessage_Should_Execute_Successfully()
