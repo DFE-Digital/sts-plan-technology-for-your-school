@@ -13,7 +13,7 @@
             {
                 await Html.RenderPartialAsync("Components/PageComponentFactory", content);
             }
-            @{ ViewData["RecommendationsActionsHeader"] = headerWithContent.SlugifiedHeader; }
+            @{ ViewData["RecommendationsActionsHeader"] = headerWithContent.SlugifiedLinkText; }
         </div>
     }
 }
