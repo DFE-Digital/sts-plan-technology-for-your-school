@@ -19,7 +19,6 @@ public class WebhookMessageProcessorTests
     private readonly ILogger<WebhookMessageProcessor> _logger = Substitute.For<ILogger<WebhookMessageProcessor>>();
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly ICmsCache _cache = Substitute.For<ICmsCache>();
-    private readonly IDatabaseHelper<ICmsDbContext> _databaseHelper = Substitute.For<IDatabaseHelper<ICmsDbContext>>();
 
     private readonly WebhookMessageProcessor _webhookMessageProcessor;
 
