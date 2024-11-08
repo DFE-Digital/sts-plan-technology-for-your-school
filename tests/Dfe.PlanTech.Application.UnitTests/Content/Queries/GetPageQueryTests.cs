@@ -81,7 +81,7 @@ public class GetPageQueryTests
     }
 
     private GetPageQuery CreateGetPageQuery()
-        => new(_repoSubstitute, _logger, new GetPageFromContentfulOptions() { Include = 4 });
+        => new(_cache, _repoSubstitute, _logger, new GetPageFromContentfulOptions() { Include = 4 });
 
 
     [Fact]
