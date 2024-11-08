@@ -8,6 +8,8 @@ async function importContentfulData() {
     contentFile: process.env.CONTENT_FILE,
     spaceId: process.env.SPACE_ID,
     managementToken: process.env.MANAGEMENT_TOKEN,
+
+    // the default env is master
     environmentId: process.env.ENVIRONMENT,
 	  skipContentModel: process.env.SKIP_CONTENT_MODEL === 'true' ? true : false
   };
