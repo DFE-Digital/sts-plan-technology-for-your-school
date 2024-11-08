@@ -132,7 +132,6 @@ public static class ProgramExtensions
     public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
         void databaseOptionsAction(DbContextOptionsBuilder options) => options.UseSqlServer(configuration.GetConnectionString("Database"));
-        services.AddSingleton<IQueryCacher, QueryCacher>();
 
         services.AddDbContext<IPlanTechDbContext, PlanTechDbContext>(databaseOptionsAction);
         ConfigureCookies(services, configuration);
