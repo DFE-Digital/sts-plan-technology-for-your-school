@@ -1,11 +1,9 @@
-using Dfe.PlanTech.Domain.Content.Models;
-
 namespace Dfe.PlanTech.Application.Caching.Interfaces;
 
 /// <summary>
 /// Represents a CMS specifc cache interface for managing cache items, their dependencies, and cache invalidation.
 /// </summary>
-public interface ICmsCache: IDistributedCache
+public interface ICmsCache : IDistributedCache
 {
     /// <summary>
     /// Marks the key as a dependency of all the ContentIds and Slugs within the cached body

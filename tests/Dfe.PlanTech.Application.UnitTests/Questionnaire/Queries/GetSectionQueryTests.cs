@@ -58,7 +58,7 @@ public class GetSectionQueryTests
     private readonly Section[] _sections = new[] { FirstSection, SecondSection, ThirdSection };
 
     private readonly IMapper _mapper = Substitute.For<IMapper>();
-    private readonly ICmsCache _cache  = Substitute.For<ICmsCache>();
+    private readonly ICmsCache _cache = Substitute.For<ICmsCache>();
 
     public GetSectionQueryTests()
     {

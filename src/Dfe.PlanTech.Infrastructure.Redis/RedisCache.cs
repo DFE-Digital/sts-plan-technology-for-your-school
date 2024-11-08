@@ -1,4 +1,3 @@
-using System.Reflection;
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Models;

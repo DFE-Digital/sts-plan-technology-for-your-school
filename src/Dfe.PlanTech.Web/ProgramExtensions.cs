@@ -30,7 +30,6 @@ using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.Data.Repositories;
 using Dfe.PlanTech.Infrastructure.Redis;
 using Dfe.PlanTech.Web.Authorisation;
-using Dfe.PlanTech.Web.Caching;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Routing;

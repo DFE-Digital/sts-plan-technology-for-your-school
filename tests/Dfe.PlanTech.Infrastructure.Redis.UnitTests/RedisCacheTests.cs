@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -260,7 +259,7 @@ public class RedisCacheTests
     public async Task InvalidateCacheAsync_RemovesAllDependencies()
     {
         var firstAnswerKey = _cache.GetDependencyKey(_firstAnswer.Sys.Id);
-        var keys = new List<string>{"one", "two", "three"};
+        var keys = new List<string> { "one", "two", "three" };
         var dependencies = keys.Select(dep => new RedisValue(dep)).ToArray();
 
         _database.SetMembersAsync(firstAnswerKey, Arg.Any<CommandFlags>()).Returns(dependencies);
