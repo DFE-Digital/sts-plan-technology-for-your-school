@@ -1,5 +1,3 @@
-using System.Linq.Expressions;
-using AutoMapper;
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Exceptions;
@@ -23,32 +21,31 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
 
     public async Task<Section?> GetSectionBySlug(string sectionSlug, CancellationToken cancellationToken = default)
     {
-        return await _cache.GetOrCreateAsync($"Section:{sectionSlug}", () => GetSectionFromContentful(sectionSlug, cancellationToken));
-    }
-
-    private async Task<Section?> GetSectionFromContentful(string sectionSlug, CancellationToken cancellationToken)
-    {
         var options = new GetEntitiesOptions()
         {
-            Queries = new[] {
-                    new ContentQueryEquals(){
-                        Field = SlugFieldPath,
-                        Value = sectionSlug
-                    },
-                    new ContentQueryEquals(){
-                    Field="fields.interstitialPage.sys.contentType.sys.id",
-                    Value="page"
-                    }
+            Queries =
+            [
+                new ContentQueryEquals()
+                {
+                    Field = SlugFieldPath,
+                    Value = sectionSlug
+                },
+                new ContentQueryEquals()
+                {
+                    Field = "fields.interstitialPage.sys.contentType.sys.id",
+                    Value = "page"
                 }
+            ]
         };
 
         try
         {
-            return (await repository.GetEntities<Section>(options, cancellationToken)).FirstOrDefault();
+            var sections = await _cache.GetOrCreateAsync($"Section:{sectionSlug}", () => repository.GetEntities<Section>(options, cancellationToken)) ?? [];
+            return sections.FirstOrDefault();
         }
         catch (Exception ex)
         {
-            throw new ContentfulDataUnavailableException($"Error getting section with slug {sectionSlug}", ex);
+            throw new ContentfulDataUnavailableException($"Error getting section with slug {sectionSlug} from Contentful", ex);
         }
     }
 }

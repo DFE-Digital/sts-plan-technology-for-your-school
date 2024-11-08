@@ -14,14 +14,12 @@ public class GetSubTopicRecommendationQuery(IContentRepository repository,
                                             ILogger<GetSubTopicRecommendationQuery> logger,
                                             ICmsCache cache) : IGetSubTopicRecommendationQuery
 {
-    private readonly ILogger<GetSubTopicRecommendationQuery> _logger = logger;
-    private readonly IContentRepository _repository = repository;
-    public const string ServiceKey = "Contentful";
-
     public async Task<SubtopicRecommendation?> GetSubTopicRecommendation(string subtopicId, CancellationToken cancellationToken = default)
     {
         var options = CreateGetEntityOptions(subtopicId);
-        IEnumerable<SubtopicRecommendation> subTopicRecommendations = await cache.GetOrCreateAsync($"SubtopicRecommendation:{subtopicId}", () => _repository.GetEntities<SubtopicRecommendation>(options, cancellationToken));
+        var subTopicRecommendations = await cache.GetOrCreateAsync($"SubtopicRecommendation:{subtopicId}",
+            () => repository.GetEntities<SubtopicRecommendation>(options, cancellationToken)) ?? [];
+
         var subtopicRecommendation = subTopicRecommendations.FirstOrDefault();
 
         if (subtopicRecommendation == null)
@@ -37,7 +35,10 @@ public class GetSubTopicRecommendationQuery(IContentRepository repository,
         var options = CreateGetEntityOptions(subtopicId, 2);
         options.Select = ["fields.intros", "sys"];
 
-        var subtopicRecommendation = (await cache.GetOrCreateAsync($"SubtopicRecommendation:{subtopicId}", () => _repository.GetEntities<SubtopicRecommendation>(options, cancellationToken))).FirstOrDefault();
+        var subtopicRecommendations = await cache.GetOrCreateAsync($"RecommendationViewDto:{subtopicId}",
+            () => repository.GetEntities<SubtopicRecommendation>(options, cancellationToken)) ?? [];
+
+        var subtopicRecommendation = subtopicRecommendations.FirstOrDefault();
 
         if (subtopicRecommendation == null)
         {
@@ -49,7 +50,7 @@ public class GetSubTopicRecommendationQuery(IContentRepository repository,
 
         if (introForMaturity == null)
         {
-            _logger.LogError("Could not find intro with maturity {Maturity} for subtopic {SubtopicId}", maturity, subtopicId);
+            logger.LogError("Could not find intro with maturity {Maturity} for subtopic {SubtopicId}", maturity, subtopicId);
             return null;
         }
 
@@ -60,5 +61,5 @@ public class GetSubTopicRecommendationQuery(IContentRepository repository,
         new(depth, [new ContentQueryEquals() { Field = "fields.subtopic.sys.id", Value = sectionId }, .. additionalQueries]);
 
     private void LogMissingRecommendationError(string subtopicId)
-    => _logger.LogError("Could not find subtopic recommendation in Contentful for {SubtopicId}", subtopicId);
+    => logger.LogError("Could not find subtopic recommendation in Contentful for {SubtopicId}", subtopicId);
 }

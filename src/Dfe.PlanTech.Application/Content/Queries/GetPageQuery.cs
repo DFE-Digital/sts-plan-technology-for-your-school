@@ -62,7 +62,7 @@ public class GetPageQuery : IGetPageQuery
     {
         try
         {
-            var pages = await _cache.GetOrCreateAsync($"Page:{slug}", () => _repository.GetEntities<Page?>(options, cancellationToken));
+            var pages = await _cache.GetOrCreateAsync($"Page:{slug}", () => _repository.GetEntities<Page?>(options, cancellationToken)) ?? [];
 
             var page = pages.FirstOrDefault();
 
