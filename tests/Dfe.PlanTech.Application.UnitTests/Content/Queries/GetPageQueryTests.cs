@@ -51,7 +51,7 @@ public class GetPageQueryTests
     public GetPageQueryTests()
     {
         SetupRepository();
-        _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<Page>>>())
+        _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<IEnumerable<Page>>>>())
             .Returns(callInfo =>
             {
                 var func = callInfo.ArgAt<Func<Task<IEnumerable<Page>>>>(1);

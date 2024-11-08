@@ -136,7 +136,7 @@ public class GetSubTopicRecommendationQueryTests
         _subtopicRecommendations.Add(_subtopicRecommendationTwo);
 
         _query = new(_repoSubstitute, _logger, _cache);
-        _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<SubtopicRecommendation>>>())
+        _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<IEnumerable<SubtopicRecommendation>>>>())
             .Returns(callInfo =>
             {
                 var func = callInfo.ArgAt<Func<Task<IEnumerable<SubtopicRecommendation>>>>(1);
