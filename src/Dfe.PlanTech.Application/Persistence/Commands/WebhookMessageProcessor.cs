@@ -1,12 +1,8 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Caching.Interfaces;
-using Dfe.PlanTech.Application.Content;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Domain.Caching.Enums;
 using Dfe.PlanTech.Domain.Caching.Exceptions;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
-using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.ServiceBus.Models;
 using Microsoft.Extensions.Logging;
 
