@@ -10,6 +10,7 @@ Uses ASP .NET Core MVC.
 
 - Setup your SignIn secrets, using the instructions in the [Dfe.PlanTech.Infrastructure.SignIn](../Dfe.PlanTech.Infrastructure.SignIn/README.md) project
 - Setup your Contentful secrets, using the instructions in the [Dfe.PlanTech.Infrastructure.Contentful](../Dfe.PlanTech.Infrastructure.Contentful/README.md) project
+- Setup your Redis connection, using the instructions in the [Dfe.PlanTech.Infrastructure.Redis](../Dfe.PlanTech.Infrastructure.Redis/README.md) project
 
 ## Project References
 
@@ -18,6 +19,7 @@ Uses ASP .NET Core MVC.
 - Dfe.PlanTech.Infrastructure.Contentful
 - Dfe.PlanTech.Infrastructure.Data
 - Dfe.PlanTech.Infrastructure.SignIn
+- Dfe.PlanTech.Infrastructure.Redis
 
 ## C# Packages
 
