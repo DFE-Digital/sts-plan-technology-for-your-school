@@ -13,10 +13,10 @@ using Microsoft.Extensions.Logging;
 namespace Dfe.PlanTech.Application.Persistence.Commands;
 
 /// <inheritdoc cref="IWebhookToDbCommand" />
-public class WebhookToDbCommand(ICmsCache cache,
+public class WebhookMessageProcessor(ICmsCache cache,
                                 ContentfulOptions contentfulOptions,
                                 JsonSerializerOptions jsonSerialiserOptions,
-                                ILogger<WebhookToDbCommand> logger,
+                                ILogger<WebhookMessageProcessor> logger,
                                 IDatabaseHelper<ICmsDbContext> databaseHelper) : IWebhookToDbCommand
 {
     public async Task<IServiceBusResult> ProcessMessage(string subject, string body, string id, CancellationToken cancellationToken)

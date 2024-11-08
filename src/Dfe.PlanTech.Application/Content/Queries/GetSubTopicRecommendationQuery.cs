@@ -20,7 +20,7 @@ public class GetSubTopicRecommendationQuery([FromKeyedServices(GetSubtopicRecomm
     {
         Task<RecommendationsViewDto?> func(IGetSubTopicRecommendationQuery repository) => repository.GetRecommendationsViewDto(subtopicId, maturity, cancellationToken);
 
-        var recommendationsView = await cache.GetOrCreateAsync($"RecommendationViewDto:{subtopicId}", () => GetFromDbOrContentfulIfNotFound(func, subtopicId));
+        var recommendationsView = await cache.GetOrCreateAsync($"RecommendationViewDto:{subtopicId}", () => GetFromContentful(func, subtopicId));
 
         if (recommendationsView == null)
         {
@@ -34,7 +34,7 @@ public class GetSubTopicRecommendationQuery([FromKeyedServices(GetSubtopicRecomm
     {
         Task<SubtopicRecommendation?> func(IGetSubTopicRecommendationQuery repository) => repository.GetSubTopicRecommendation(subtopicId, cancellationToken);
 
-        var recommendation = await cache.GetOrCreateAsync($"SubtopicRecommendation:{subtopicId}", () => GetFromDbOrContentfulIfNotFound(func, subtopicId));
+        var recommendation = await cache.GetOrCreateAsync($"SubtopicRecommendation:{subtopicId}", () => GetFromContentful(func, subtopicId));
 
         if (recommendation == null)
         {
@@ -44,7 +44,7 @@ public class GetSubTopicRecommendationQuery([FromKeyedServices(GetSubtopicRecomm
         return recommendation;
     }
 
-    private async Task<T?> GetFromDbOrContentfulIfNotFound<T>(Func<IGetSubTopicRecommendationQuery, Task<T?>> getFromInterface, string subtopicId)
+    private async Task<T?> GetFromContentful<T>(Func<IGetSubTopicRecommendationQuery, Task<T?>> getFromInterface, string subtopicId)
       where T : class
     {
         var fromContentful = await getFromInterface(_getFromContentfulQuery);

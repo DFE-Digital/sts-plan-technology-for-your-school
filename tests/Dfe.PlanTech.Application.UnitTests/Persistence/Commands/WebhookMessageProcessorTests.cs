@@ -10,21 +10,21 @@ using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Persistence.Commands;
 
-public class WebhookToDbCommandTests
+public class WebhookMessageProcessorTests
 {
     private const string QuestionJsonBody =
         "{\"metadata\":{\"tags\":[]},\"fields\":{\"internalName\":{\"en-US\":\"TestingQuestion\"},\"text\":{\"en-US\":\"TestingQuestion\"},\"helpText\":{\"en-US\":\"HelpText\"},\"answers\":{\"en-US\":[{\"sys\":{\"type\":\"Link\",\"linkType\":\"Entry\",\"id\":\"4QscetbCYG4MUsGdoDU0C3\"}}]},\"slug\":{\"en-US\":\"testing-slug\"}},\"sys\":{\"type\":\"Entry\",\"id\":\"2VSR0emw0SPy8dlR9XlgfF\",\"space\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"Space\",\"id\":\"py5afvqdlxgo\"}},\"environment\":{\"sys\":{\"id\":\"dev\",\"type\":\"Link\",\"linkType\":\"Environment\"}},\"contentType\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"ContentType\",\"id\":\"question\"}},\"createdBy\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"User\",\"id\":\"5yhMQOCN9P2vGpfjyZKiey\"}},\"updatedBy\":{\"sys\":{\"type\":\"Link\",\"linkType\":\"User\",\"id\":\"4hiJvkyVWdhTt6c4ZoDkMf\"}},\"revision\":13,\"createdAt\":\"2023-12-04T14:36:46.614Z\",\"updatedAt\":\"2023-12-15T16:16:45.034Z\"}}";
 
     private const string QuestionId = "2VSR0emw0SPy8dlR9XlgfF";
 
-    private readonly ILogger<WebhookToDbCommand> _logger = Substitute.For<ILogger<WebhookToDbCommand>>();
+    private readonly ILogger<WebhookMessageProcessor> _logger = Substitute.For<ILogger<WebhookMessageProcessor>>();
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly ICmsCache _cache = Substitute.For<ICmsCache>();
     private readonly IDatabaseHelper<ICmsDbContext> _databaseHelper = Substitute.For<IDatabaseHelper<ICmsDbContext>>();
 
-    private readonly WebhookToDbCommand _webhookToDbCommand;
+    private readonly WebhookMessageProcessor _webhookMessageProcessor;
 
-    public WebhookToDbCommandTests()
+    public WebhookMessageProcessorTests()
     {
         _jsonSerializerOptions = new JsonSerializerOptions
         {
@@ -32,10 +32,10 @@ public class WebhookToDbCommandTests
             Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
         };
 
-        _webhookToDbCommand = CreateWebhookToDbCommand(true);
+        _webhookMessageProcessor = CreateWebhookToDbCommand(true);
     }
 
-    private WebhookToDbCommand CreateWebhookToDbCommand(bool usePreview) => new(_cache,
+    private WebhookMessageProcessor CreateWebhookToDbCommand(bool usePreview) => new(_cache,
         new ContentfulOptions(usePreview), _jsonSerializerOptions, _logger, _databaseHelper);
 
     [Fact]
@@ -43,7 +43,7 @@ public class WebhookToDbCommandTests
     {
         var subject = "ContentManagement.Entry.save";
 
-        var result = await _webhookToDbCommand.ProcessMessage(subject, QuestionJsonBody, "message id", CancellationToken.None);
+        var result = await _webhookMessageProcessor.ProcessMessage(subject, QuestionJsonBody, "message id", CancellationToken.None);
 
         Assert.IsType<ServiceBusSuccessResult>(result);
         await _cache.Received(1).InvalidateCacheAsync(QuestionId);
@@ -56,7 +56,7 @@ public class WebhookToDbCommandTests
 
         var subject = "ContentManagement.Entry.save";
 
-        var result = await _webhookToDbCommand.ProcessMessage(subject, nonMappableJson, "message id", CancellationToken.None);
+        var result = await _webhookMessageProcessor.ProcessMessage(subject, nonMappableJson, "message id", CancellationToken.None);
 
         Assert.IsType<ServiceBusErrorResult>(result);
 

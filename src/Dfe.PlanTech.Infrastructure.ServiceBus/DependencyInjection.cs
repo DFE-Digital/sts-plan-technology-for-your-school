@@ -34,7 +34,7 @@ public static class DependencyInjection
                 .AddMessageRetryHandler()
                 .AddMappers();
 
-        services.AddTransient<IWebhookToDbCommand, WebhookToDbCommand>();
+        services.AddTransient<IWebhookToDbCommand, WebhookMessageProcessor>();
         services.AddSingleton(new JsonSerializerOptions()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
