@@ -2,7 +2,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Commands;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.ServiceBus.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
