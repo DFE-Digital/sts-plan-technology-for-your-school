@@ -1,6 +1,7 @@
 import "dotenv/config";
 import TestSuite from "#src/test-suite/test-suite";
 import writeTestSuites from "./test-suite/write-csvs.js";
+import StaticPageTests from "./test-suite/static-page-tests.js";
 
 /**
  * @param {object} args
@@ -9,6 +10,7 @@ import writeTestSuites from "./test-suite/write-csvs.js";
  */
 export default function generateTestSuites({ dataMapper, outputDir }) {
   let index = 1;
+  const staticPageTests = new StaticPageTests();
 
   const testSuites = Object.values(dataMapper.mappedSections)
     .filter(section => !!section)
@@ -23,5 +25,6 @@ export default function generateTestSuites({ dataMapper, outputDir }) {
       return testSuite;
     });
 
+  testSuites.push(staticPageTests); 
   writeTestSuites({ testSuites, outputDir });
 }

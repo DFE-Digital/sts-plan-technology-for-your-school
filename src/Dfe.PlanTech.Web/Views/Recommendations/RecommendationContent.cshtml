@@ -11,7 +11,7 @@
 
     var nextContent = x + 1 < allContent.Length ? allContent[x+1] : null;
 
-    <div class="recommendation-piece-container" id="@headerWithContent.SlugifiedHeader">
+    <div class="recommendation-piece-container" id="@headerWithContent.SlugifiedLinkText">
     <div class="recommendation-piece-header">
         <div class="recommendation-piece-header">
             <h1 class="govuk-heading-xl">@headerWithContent.HeaderText</h1>
@@ -20,7 +20,7 @@
     <div class="govuk-grid-row">
         <div class="govuk-grid-column-one-quarter">
             @{
-                    ViewData["VerticalNavigationSection"] = headerWithContent.SlugifiedHeader;
+                    ViewData["VerticalNavigationSection"] = headerWithContent.SlugifiedLinkText;
                 }
                 <partial name="Components/VerticalNavigation/Default" model="@Model.AllContent" />
             </div>
@@ -49,11 +49,11 @@
                 <div>
                     <govuk-pagination>
                     @if(previousContent != null){
-                        <govuk-pagination-previous href="#@previousContent.SlugifiedHeader" label-text="@previousContent.HeaderText" />
+                        <govuk-pagination-previous href="#@previousContent.SlugifiedLinkText" label-text="@previousContent.LinkText" />
                     }
 
                     @if(nextContent != null){
-                        <govuk-pagination-next href="#@nextContent.SlugifiedHeader" label-text="@nextContent.HeaderText" />
+                        <govuk-pagination-next href="#@nextContent.SlugifiedLinkText" label-text="@nextContent.LinkText" />
                         }
                     </govuk-pagination>
                 </div>
