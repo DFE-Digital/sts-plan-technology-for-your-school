@@ -39,4 +39,4 @@ Required Environment variables
 `SPACE_ID`
 `MANAGEMENT_TOKEN`
 `ENVIRONMENT` (environmentId default is 'master')
-`SKIP_CONTENT_MODE` (optional, default is false)
+`SKIP_CONTENT_MODEL` (optional, default is false)
