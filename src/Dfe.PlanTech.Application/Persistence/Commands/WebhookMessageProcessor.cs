@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Caching.Interfaces;
-using Dfe.PlanTech.Domain.Caching.Exceptions;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.ServiceBus.Models;
@@ -22,7 +21,7 @@ public class WebhookMessageProcessor(ICmsCache cache,
             await cache.InvalidateCacheAsync(payload.Sys.Id);
             return new ServiceBusSuccessResult();
         }
-        catch (Exception ex) when (ex is JsonException or CmsEventException)
+        catch (Exception ex) when (ex is JsonException)
         {
             logger.LogError(ex, "Error processing message ID {Message}", id);
             return new ServiceBusErrorResult(ex.Message, ex.StackTrace, false);
