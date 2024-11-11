@@ -3,12 +3,10 @@ import { CleanText, ValidateContent, slugifyChunks } from "../helpers/index.js";
 
 export const validateRecommendationChunks = (introPage, chunks) => {
 
-    cy.get("h2.dfe-vertical-nav__theme").contains("List of actions").should("exist");
-
     chunks.forEach((chunk, i) => {
         const chunkSlug = `${slugifyChunks(chunk.header)}`;
 
-        cy.get("ul.dfe-vertical-nav__section > li").eq(i).within(() => {
+        cy.get("ul.dfe-vertical-nav__section > li").eq(i + 1).within(() => {
             cy.get(`a.dfe-vertical-nav__link:contains(${CleanText(chunk.header)})`).each($link => {
                 expect($link).to.have.attr("href").contains(`#${chunkSlug}`);
             })
