@@ -60,6 +60,7 @@ public class PagesController : BaseController<PagesController>
         string contactId = "7ezhOgrTAdhP4NeGiNj8VY";
         var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(contactId) ??
                 _logger.LogError("Could not find navigation link with Id {ContactId}", contactId);
+                throw new KeyNotFoundException($"Could not find question with Id {questionId}");
 
         var viewModel = new NotFoundViewModel
         {
