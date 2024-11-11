@@ -5,12 +5,9 @@ using Azure.Identity;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.Application.Content.Commands;
 using Dfe.PlanTech.Application.Persistence.Commands;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Application.Persistence.Mappings;
 using Dfe.PlanTech.Application.Queues.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.ServiceBus.Models;
-using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Results;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Retry;
 using Microsoft.Extensions.Azure;
@@ -31,17 +28,15 @@ public static class DependencyInjection
     public static IServiceCollection AddDbWriterServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddServiceBusServices(configuration)
-                .AddMessageRetryHandler()
-                .AddMappers();
+            .AddMessageRetryHandler();
 
-        services.AddTransient<IWebhookToDbCommand, WebhookToDbCommand>();
+        services.AddTransient<IWebhookToDbCommand, WebhookMessageProcessor>();
         services.AddSingleton(new JsonSerializerOptions()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
         });
 
-        services.AddTransient<IDatabaseHelper<ICmsDbContext>, DatabaseHelper<ICmsDbContext>>();
         return services;
     }
 
@@ -67,28 +62,6 @@ public static class DependencyInjection
         return services;
     }
 
-    /// <summary>
-    /// Finds all <see cref="BaseJsonToDbMapper"/> mappers using reflection, and then injects them as dependencies
-    /// </summary>
-    /// <param name="services"></param>
-    private static IServiceCollection AddMappers(this IServiceCollection services)
-    {
-        foreach (var mapper in GetMappers())
-        {
-            services.AddTransient(typeof(BaseJsonToDbMapper), mapper);
-        }
-
-        services.AddTransient<RichTextContentMapper>();
-        services.AddTransient<JsonToEntityMappers>();
-
-        services.AddTransient<PageRetriever>();
-        services.AddTransient<PageUpdater>();
-
-        services.AddTransient<EntityUpdater>();
-
-        return services;
-    }
-
     private static IServiceCollection AddMessageRetryHandler(this IServiceCollection services)
     {
         services.AddOptions<MessageRetryHandlingOptions>()
@@ -100,14 +73,4 @@ public static class DependencyInjection
         services.AddTransient<IMessageRetryHandler, MessageRetryHandler>();
         return services;
     }
-
-    /// <summary>
-    /// Get all <see cref="BaseJsonToDbMapper"/> mappers using reflection
-    /// </summary>
-    /// <returns></returns>
-    private static IEnumerable<Type> GetMappers() =>
-      AppDomain.CurrentDomain.GetAssemblies()
-          .SelectMany(assembly => assembly.GetTypes())
-          .Where(type => type.IsAssignableTo(typeof(BaseJsonToDbMapper)) && !type.IsAbstract);
-
 }
