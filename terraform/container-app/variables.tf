@@ -68,6 +68,33 @@ variable "az_sql_max_pool_size" {
   default     = 100
 }
 
+#####################
+# Azure Redis Cache #
+#####################
+variable "redis_capacity" {
+  description = "Redis cache capacity (0-6 for C and 1-5 for P)"
+  type        = number
+  default     = 0
+}
+
+variable "redis_family" {
+  description = "Redis cache family (C for basic/standard, P for premium)"
+  type        = string
+  default     = "C"
+}
+
+variable "redis_sku_name" {
+  description = "SKU for Redis cache (Basic, Standard or Premium)"
+  type        = string
+  default     = "Standard"
+}
+
+variable "redis_tls_version" {
+  description = "Minimum TLS version for Redis"
+  type        = string
+  default     = "1.2"
+}
+
 ############
 # KeyVault #
 ############
@@ -155,6 +182,22 @@ variable "cdn_frontdoor_host_add_response_headers" {
   description = "List of response headers to add at the CDN Front Door `[{ \"Name\" = \"Strict-Transport-Security\", \"value\" = \"max-age=31536000\" }]`"
   type        = list(map(string))
   default     = []
+}
+
+variable "cdn_frontdoor_url_path_redirects" {
+  description = "List of url path redirects to add at the CDN Front Door `[{ \"redirect_type\": \"PermanentRedirect\", \"destination_path\": \"/example\", \"destination_hostname\": \"www.example.uk\", \"operator\": \"Equals\", \"match_values\": [\"/example\"] }]`"
+  type = list(object({
+    redirect_type        = string
+    redirect_protocol    = optional(string)
+    destination_path     = optional(string)
+    destination_hostname = optional(string)
+    destination_fragment = optional(string)
+    query_string         = optional(string)
+    operator             = string
+    match_values         = optional(list(string))
+    transforms           = optional(list(string))
+  }))
+  default = []
 }
 
 ###################
