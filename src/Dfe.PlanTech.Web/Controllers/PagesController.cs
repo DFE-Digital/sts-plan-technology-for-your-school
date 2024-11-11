@@ -48,7 +48,7 @@ public class PagesController : BaseController<PagesController>
 
     [HttpGet(UrlConstants.ServiceUnavailable, Name = UrlConstants.ServiceUnavailable)]
     public async Task<IActionResult> ServiceUnavailable([FromServices] IConfiguration configuration)
-     {
+    {
         var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(configuration["ContactUs:LinkId"]);
 
         var viewModel = new ServiceUnavailableViewModel
