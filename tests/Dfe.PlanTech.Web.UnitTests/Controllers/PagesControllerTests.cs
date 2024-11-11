@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
@@ -25,7 +26,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         readonly ICookieService cookiesSubstitute = Substitute.For<ICookieService>();
         readonly IUser userSubstitute = Substitute.For<IUser>();
         private readonly IConfiguration _configuration = Substitute.For<IConfiguration>();
-
+        private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery;
         private readonly PagesController _controller;
         private readonly ControllerContext _controllerContext;
 
@@ -35,7 +36,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             _controllerContext = ControllerHelpers.SubstituteControllerContext();
 
-            _controller = new PagesController(Logger)
+            _getEntityFromContentfulQuery = Substitute.For<IGetEntityFromContentfulQuery>();
+            _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(Arg.Any<string>()).Returns(new NavigationLink { DisplayText = "contact us", Href = "/contact-us", OpenInNewTab = true });
+
+            _controller = new PagesController(Logger, _getEntityFromContentfulQuery)
             {
                 ControllerContext = _controllerContext,
                 TempData = Substitute.For<ITempDataDictionary>()
@@ -196,7 +200,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public void Should_Render_Service_Unavailable_Page()
+        public async Task Should_Render_Service_Unavailable_Page()
         {
             var httpContextSubstitute = Substitute.For<HttpContext>();
 
@@ -209,7 +213,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var result = _controller.ServiceUnavailable(_configuration);
 
-            var viewResult = result as ViewResult;
+            var viewResult = await result as ViewResult;
 
             var model = viewResult!.Model;
 
@@ -239,7 +243,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public void Should_Render_NotFound_Page()
+        public async Task Should_Render_NotFound_Page()
         {
             var httpContextSubstitute = Substitute.For<HttpContext>();
             var controllerContext = new ControllerContext
@@ -248,7 +252,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             };
             _controller.ControllerContext = controllerContext;
             var result = _controller.NotFoundError();
-            var viewResult = result as ViewResult;
+            var viewResult = await result as ViewResult;
             Assert.NotNull(viewResult);
         }
     }

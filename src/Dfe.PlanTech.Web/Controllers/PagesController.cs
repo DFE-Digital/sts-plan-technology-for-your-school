@@ -49,16 +49,16 @@ public class PagesController : BaseController<PagesController>
 
     [HttpGet(UrlConstants.ServiceUnavailable, Name = UrlConstants.ServiceUnavailable)]
     public async Task<IActionResult> ServiceUnavailable([FromServices] IConfiguration configuration)
-    {
-        var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(contactId) ??
-                throw new KeyNotFoundException($"Could not find navigation link with Id {contactId}");
+     {
+        var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(contactId);
 
-        return View(new ServiceUnavailableViewModel
+        var viewModel = new ServiceUnavailableViewModel
         {
             RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-            ContactHref = contactLink.Href
-        });
-    }
+            ContactHref = contactLink?.Href
+        };
+        return View(viewModel);
+     }
 
     [HttpGet(UrlConstants.NotFound, Name = UrlConstants.NotFound)]
     public async Task<IActionResult> NotFoundError()
