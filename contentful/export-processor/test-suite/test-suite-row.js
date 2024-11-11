@@ -26,7 +26,7 @@ export default class TestSuiteRow {
     this.subtopic = subtopic;
     this.testScenario = testScenario;
     this.preConditions = preConditions;
-    this.testSteps = testSteps;
+    this.testSteps = testSteps.replace(/^\s+/gm, '');
     this.expectedOutcome = expectedOutcome;
     this.testApproved = testApproved;
   }

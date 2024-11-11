@@ -68,6 +68,33 @@ variable "az_sql_max_pool_size" {
   default     = 100
 }
 
+#####################
+# Azure Redis Cache #
+#####################
+variable "redis_capacity" {
+  description = "Redis cache capacity (0-6 for C and 1-5 for P)"
+  type        = number
+  default     = 0
+}
+
+variable "redis_family" {
+  description = "Redis cache family (C for basic/standard, P for premium)"
+  type        = string
+  default     = "C"
+}
+
+variable "redis_sku_name" {
+  description = "SKU for Redis cache (Basic, Standard or Premium)"
+  type        = string
+  default     = "Standard"
+}
+
+variable "redis_tls_version" {
+  description = "Minimum TLS version for Redis"
+  type        = string
+  default     = "1.2"
+}
+
 ############
 # KeyVault #
 ############

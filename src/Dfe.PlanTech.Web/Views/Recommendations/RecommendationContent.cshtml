@@ -11,7 +11,7 @@
 
     var nextContent = x + 1 < allContent.Length ? allContent[x+1] : null;
 
-    <div class="recommendation-piece-container" id="@headerWithContent.SlugifiedHeader">
+    <div class="recommendation-piece-container" id="@headerWithContent.SlugifiedLinkText">
     <div class="recommendation-piece-header">
         <div class="recommendation-piece-header">
             <h1 class="govuk-heading-xl">@headerWithContent.HeaderText</h1>
@@ -20,7 +20,7 @@
     <div class="govuk-grid-row">
         <div class="govuk-grid-column-one-quarter">
             @{
-                    ViewData["VerticalNavigationSection"] = headerWithContent.SlugifiedHeader;
+                    ViewData["VerticalNavigationSection"] = headerWithContent.SlugifiedLinkText;
                 }
                 <partial name="Components/VerticalNavigation/Default" model="@Model.AllContent" />
             </div>
@@ -41,21 +41,21 @@
                         </div>
                     }
                 </div>
-                <div>
-                    <govuk-pagination>
-                    @if(previousContent != null){
-                        <govuk-pagination-previous href="#@previousContent.SlugifiedHeader" label-text="@previousContent.HeaderText" />
-                    }
-
-                    @if(nextContent != null){
-                        <govuk-pagination-next href="#@nextContent.SlugifiedHeader" label-text="@nextContent.HeaderText" />
-                        }
-                    </govuk-pagination>
-                </div>
-                <div>
+                <div class="govuk-!-margin-bottom-6 govuk-!-margin-top-6">
                     <p class="govuk-body">
                         <a class="govuk-link" href="@Model.Slug/print">View a printable version of your school's recommendations</a>
                     </p>
+                </div>
+                <div>
+                    <govuk-pagination>
+                    @if(previousContent != null){
+                        <govuk-pagination-previous href="#@previousContent.SlugifiedLinkText" label-text="@previousContent.LinkText" />
+                    }
+
+                    @if(nextContent != null){
+                        <govuk-pagination-next href="#@nextContent.SlugifiedLinkText" label-text="@nextContent.LinkText" />
+                        }
+                    </govuk-pagination>
                 </div>
             </div>
         </div>

@@ -60,6 +60,20 @@ locals {
     endpoint_name = "${local.resource_prefix}-db"
   }
 
+  #####################
+  # Azure Redis Cache #
+  #####################
+  redis_capacity    = var.redis_capacity
+  redis_family      = var.redis_family
+  redis_sku_name    = var.redis_sku_name
+  redis_tls_version = var.redis_tls_version
+
+  redis_vnet = {
+    dns_zone_name = "privatelink.redis.cache.windows.net"
+    nic_name      = "${local.resource_prefix}-redis-cache-nic"
+    endpoint_name = "${local.resource_prefix}-redis-cache"
+  }
+
   ##################
   # Azure KeyVault #
   ##################
