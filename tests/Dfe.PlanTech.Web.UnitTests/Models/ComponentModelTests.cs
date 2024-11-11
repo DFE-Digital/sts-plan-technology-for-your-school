@@ -81,24 +81,49 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         [InlineData("This is a string with loads of spaces at the end        ", "this-is-a-string-with-loads-of-spaces-at-the-end")]
         [InlineData("This is a string with loads of spaces at the end        and-this", "this-is-a-string-with-loads-of-spaces-at-the-end--------and-this")]
         [InlineData(" spaces either side     ", "spaces-either-side")]
-        [InlineData(@"Line separator character ", "line-separator-character")]
-        public void Slugify_Should_Slugify_Strings(string header, string expectedResult)
+        [InlineData(@"Line
+separator
+character
+", "line-separator-character")]
+        public void Slugify_Should_Slugify_Strings(string linkText, string expectedResult)
         {
-            var recommendationChunk = ComponentBuilder.BuildRecommendationChunk(header);
+            var recommendationChunk = ComponentBuilder.BuildRecommendationChunk(linkText);
 
-            Assert.Equal(expectedResult, recommendationChunk.SlugifiedHeader);
+            Assert.Equal(expectedResult, recommendationChunk.SlugifiedLinkText);
         }
 
         [Theory]
-        [InlineData("Random test Topic", "random-test-topic")]
-        [InlineData("Y867as ()&ycj Cool Thing", "y867as-ycj-cool-thing")]
-        public void RecommendationIntro_Should_Return_Correct_Header_And_Title(string header, string expectedResult)
+        [InlineData("Random test Topic")]
+        [InlineData("Y867as ()&ycj Cool Thing")]
+        public void RecommendationIntro_Should_Return_Correct_Header_And_Title(string header)
         {
             var recommendationIntro = ComponentBuilder.BuildRecommendationIntro(header);
 
             Assert.Equal(header, recommendationIntro.Header.Text);
             Assert.Equal(header, recommendationIntro.HeaderText);
-            Assert.Equal(expectedResult, recommendationIntro.SlugifiedHeader);
+        }
+
+        [Theory]
+        [InlineData("Random test Topic", "overview")]
+        [InlineData("Pasdw!345      dsdoiu()=2 Yo ", "overview")]
+        public void RecommendationIntro_Should_Return_Correct_LinkText(string header, string expectedResult)
+        {
+            var recommendationIntro = ComponentBuilder.BuildRecommendationIntro(header);
+
+            Assert.Equal("Overview", recommendationIntro.LinkText);
+            Assert.Equal(expectedResult, recommendationIntro.SlugifiedLinkText);
+        }
+
+        [Theory]
+        [InlineData("Random test Topic", "random-test-topic")]
+        [InlineData("Y867as ()&ycj Cool Thing", "y867as-ycj-cool-thing")]
+        public void RecommendationChunk_Should_Return_Correct_Header_Title_And_LinkText(string header, string expectedResult)
+        {
+            var recommendationChunk = ComponentBuilder.BuildRecommendationChunk(header);
+
+            Assert.Equal(header, recommendationChunk.HeaderText);
+            Assert.Equal(header, recommendationChunk.LinkText);
+            Assert.Equal(expectedResult, recommendationChunk.SlugifiedLinkText);
         }
 
         [Fact]
