@@ -6,14 +6,6 @@ namespace Dfe.PlanTech.Application.Caching.Interfaces;
 public interface ICmsCache : IDistributedCache
 {
     /// <summary>
-    /// Marks the key as a dependency of all the ContentIds and Slugs within the cached body
-    /// </summary>
-    /// <param name="key">Key of the cache item</param>
-    /// <param name="value">value being stored</param>
-    /// <returns></returns>
-    Task RegisterDependenciesAsync<T>(string key, T value);
-
-    /// <summary>
     /// Iterates through all items in a dependency array and removes them from the cache
     /// Then removes the dependency array itself
     /// </summary>
