@@ -47,7 +47,7 @@ We use two external modules to create the majority of the resources required:
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_main_hosting"></a> [main\_hosting](#module\_main\_hosting) | github.com/DFE-Digital/terraform-azurerm-container-apps-hosting | 568617c |
-| <a name="module_waf"></a> [waf](#module\_waf) | github.com/dfe-digital/terraform-azurerm-front-door-app-gateway-waf | v1.3.0 |
+| <a name="module_waf"></a> [waf](#module\_waf) | github.com/dfe-digital/terraform-azurerm-front-door-app-gateway-waf | f0ca7eb |
 
 ## Resources
 
@@ -108,6 +108,7 @@ We use two external modules to create the majority of the resources required:
 | <a name="input_azure_location"></a> [azure\_location](#input\_azure\_location) | Recourse location | `string` | n/a | yes |
 | <a name="input_cdn_create_custom_domain"></a> [cdn\_create\_custom\_domain](#input\_cdn\_create\_custom\_domain) | A flag to create the A and TXT records for the container app as part of setting up the cdn | `bool` | `false` | no |
 | <a name="input_cdn_frontdoor_host_add_response_headers"></a> [cdn\_frontdoor\_host\_add\_response\_headers](#input\_cdn\_frontdoor\_host\_add\_response\_headers) | List of response headers to add at the CDN Front Door `[{ "Name" = "Strict-Transport-Security", "value" = "max-age=31536000" }]` | `list(map(string))` | `[]` | no |
+| <a name="input_cdn_frontdoor_url_path_redirects"></a> [cdn\_frontdoor\_url\_path\_redirects](#input\_cdn\_frontdoor\_url\_path\_redirects) | List of url path redirects to add at the CDN Front Door `[{ "redirect_type": "PermanentRedirect", "destination_path": "/example", "destination_hostname": "www.example.uk", "operator": "Equals", "match_values": ["/example"] }]` | <pre>list(object({<br>    redirect_type        = string<br>    redirect_protocol    = optional(string)<br>    destination_path     = optional(string)<br>    destination_hostname = optional(string)<br>    destination_fragment = optional(string)<br>    query_string         = optional(string)<br>    operator             = string<br>    match_values         = optional(list(string))<br>    transforms           = optional(list(string))<br>  }))</pre> | `[]` | no |
 | <a name="input_container_app_blob_storage_public_access_enabled"></a> [container\_app\_blob\_storage\_public\_access\_enabled](#input\_container\_app\_blob\_storage\_public\_access\_enabled) | Enable app blob storage public access | `bool` | `false` | no |
 | <a name="input_container_app_http_concurrency"></a> [container\_app\_http\_concurrency](#input\_container\_app\_http\_concurrency) | Scale up at this number of HTTP requests | `number` | `10` | no |
 | <a name="input_container_app_max_replicas"></a> [container\_app\_max\_replicas](#input\_container\_app\_max\_replicas) | Maximum replicas for the container app | `number` | `2` | no |
