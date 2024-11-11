@@ -25,7 +25,7 @@ public class DateTimeFormatterTests
     }
 
     [Theory]
-    [InlineData("2015/09/15", "15 Sept 2015")]
+    [InlineData("2015/09/15", "15 Sep 2015")]
     [InlineData("2020/01/09", "9 Jan 2020")]
     public void FormattedDateShort_Should_Display_Correctly(string inputDate, string expected)
     {
