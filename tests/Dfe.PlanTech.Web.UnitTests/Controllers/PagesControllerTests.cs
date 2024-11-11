@@ -251,7 +251,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 HttpContext = httpContextSubstitute
             };
             _controller.ControllerContext = controllerContext;
-            var result = _controller.NotFoundError();
+            var result = _controller.NotFoundError(_configuration);
             var viewResult = await result as ViewResult;
             Assert.NotNull(viewResult);
         }
