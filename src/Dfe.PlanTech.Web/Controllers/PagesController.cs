@@ -49,7 +49,7 @@ public class PagesController : BaseController<PagesController>
 
     [HttpGet(UrlConstants.ServiceUnavailable, Name = UrlConstants.ServiceUnavailable)]
     public async Task<IActionResult> ServiceUnavailable([FromServices] IConfiguration configuration)
-     {
+    {
         var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(contactId);
 
         var viewModel = new ServiceUnavailableViewModel
@@ -58,7 +58,7 @@ public class PagesController : BaseController<PagesController>
             ContactHref = contactLink?.Href
         };
         return View(viewModel);
-     }
+    }
 
     [HttpGet(UrlConstants.NotFound, Name = UrlConstants.NotFound)]
     public async Task<IActionResult> NotFoundError()
