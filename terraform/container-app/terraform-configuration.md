@@ -47,7 +47,7 @@ We use two external modules to create the majority of the resources required:
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_main_hosting"></a> [main\_hosting](#module\_main\_hosting) | github.com/DFE-Digital/terraform-azurerm-container-apps-hosting | 568617c |
-| <a name="module_waf"></a> [waf](#module\_waf) | github.com/katie-gardner/terraform-azurerm-front-door-app-gateway-waf | b2b19a5 |
+| <a name="module_waf"></a> [waf](#module\_waf) | github.com/dfe-digital/terraform-azurerm-front-door-app-gateway-waf | f0ca7eb |
 
 ## Resources
 
