@@ -29,7 +29,7 @@ public class RedisCache : ICmsCache
             .OrInner<RedisServerException>()
             .OrInner<RedisException>();
 
-        _retryPolicyAsync = retryPolicyBuilder.WaitAndRetryAsync(3, _ => TimeSpan.FromSeconds(2));
+        _retryPolicyAsync = retryPolicyBuilder.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(50));
     }
 
     /// <inheritdoc/>
@@ -219,12 +219,13 @@ public class RedisCache : ICmsCache
     {
         var dependencies = await GetDependenciesAsync(value);
         var batch = database.CreateBatch();
-        foreach (var dependency in dependencies)
-        {
-            await batch.SetAddAsync(key, dependency);
-        }
+
+        var tasks = dependencies.Select(dependency => batch.SetAddAsync(GetDependencyKey(dependency), key)).ToArray();
         batch.Execute();
+
+        await Task.WhenAll(tasks);
     }
+
 
     /// <inheritdoc/>
     public async Task InvalidateCacheAsync(string contentComponentId)
