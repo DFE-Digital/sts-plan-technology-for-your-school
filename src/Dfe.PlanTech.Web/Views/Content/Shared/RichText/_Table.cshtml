@@ -1,0 +1,51 @@
+@using Dfe.PlanTech.Web.Models.Content.Mapped.Types
+@model Dfe.PlanTech.Web.Models.Content.Mapped.RichTextContentItem
+
+<table>
+    <thead>
+    @if (Model.Content.Any())
+    {
+        foreach (var childNode in Model.Content)
+        {
+            if (childNode.NodeType == RichTextNodeType.TableRow && childNode.Content[0].NodeType ==
+                RichTextNodeType.TableHeaderCell)
+
+            {
+                <tr>
+                    @foreach (var grandChildNode in childNode.Content)
+                    {
+                        foreach (var greatGrandChildNode in grandChildNode.Content)
+                        {
+                            if (greatGrandChildNode.NodeType == RichTextNodeType.Paragraph)
+                            {
+                                <th scope="col">
+                                    <partial name="Shared/RichText/_Items" model="@greatGrandChildNode"/>
+                                </th>
+                            }
+                            else
+                            {
+                                <th scope="col">
+                                    <partial name="Shared/RichText/_TableHeaderCell" model="@greatGrandChildNode"/>
+                                </th>
+                            }
+                        }
+                    }
+                </tr>
+            }
+        }
+    }
+    </thead>
+    <tbody>
+    @if (Model.Content.Any())
+    {
+        foreach (var childNode in Model.Content)
+        {
+            if (childNode.NodeType == RichTextNodeType.TableRow && childNode.Content[0].NodeType ==
+                RichTextNodeType.TableCell)
+            {
+                <partial name="Shared/RichText/_TableRow" model="@childNode"/>
+            }
+        }
+    }
+    </tbody>
+</table>
