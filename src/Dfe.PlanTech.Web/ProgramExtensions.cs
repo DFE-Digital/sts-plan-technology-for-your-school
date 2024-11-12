@@ -29,7 +29,6 @@ using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.Redis;
 using Dfe.PlanTech.Web.Authorisation;
-using Dfe.PlanTech.Web.Caching;
 using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Content;
 using Dfe.PlanTech.Web.Helpers;
