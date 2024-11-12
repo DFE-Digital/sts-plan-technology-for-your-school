@@ -1,0 +1,64 @@
+@using Dfe.PlanTech.Web.Models.Content.Mapped.Types
+@model Dfe.PlanTech.Web.Models.Content.Mapped.RichTextContentItem
+@{
+    var tags = ViewBag.tags ?? new List<string>();
+}
+
+
+@if (tags.Count == 0 || (Model.Tags.Count == 0 || Model.Tags.Exists(el => tags.Contains(el))))
+{
+    var nodeType = Model.NodeType;
+
+    switch (nodeType)
+    {
+        case RichTextNodeType.Document:
+            <partial name="Shared/RichText/_Document" model="@Model" />
+            break;
+        case RichTextNodeType.Paragraph:
+            <partial name="Shared/RichText/_Paragraph" model="@Model" />
+            break;
+        case RichTextNodeType.Heading2:
+        case RichTextNodeType.Heading3:
+        case RichTextNodeType.Heading4:
+        case RichTextNodeType.Heading5:
+        case RichTextNodeType.Heading6:
+            <partial name="Shared/RichText/_H" model="@Model" />
+            break;
+        case RichTextNodeType.UnorderedList:
+            <partial name="Shared/RichText/_UnorderedList" model="@Model" />
+            break;
+        case RichTextNodeType.OrderedList:
+            <partial name="Shared/RichText/_OrderedList" model="@Model" />
+            break;
+        case RichTextNodeType.Hyperlink:
+            <partial name="Shared/RichText/_Hyperlink" model="@Model" />
+            break;
+        case RichTextNodeType.Table:
+            <partial name="Shared/RichText/_Table" model="@Model" />
+            break;
+        case RichTextNodeType.TableRow:
+            <partial name="Shared/RichText/_TableRow" model="@Model" />
+            break;
+        case RichTextNodeType.TableHeaderCell:
+            <partial name="Shared/RichText/_TableHeaderCell" model="@Model" />
+            break;
+        case RichTextNodeType.TableCell:
+            <partial name="Shared/RichText/_TableCell" model="@Model" />
+            break;
+        case RichTextNodeType.Hr:
+            <hr />
+            break;
+        case RichTextNodeType.EmbeddedAsset:
+            <partial name="Shared/RichText/_Asset" model="@Model" />
+            break;
+        case RichTextNodeType.Text:
+            <partial name="Shared/RichText/_Text" model="@Model" />
+            break;
+        case RichTextNodeType.EmbeddedEntry:
+            <partial name="Shared/RichText/_Entry" model="@Model" />
+            break;
+        default:
+            <partial name="Shared/_UnsupportedElement" model="@Model" />
+            break;
+    }
+}
