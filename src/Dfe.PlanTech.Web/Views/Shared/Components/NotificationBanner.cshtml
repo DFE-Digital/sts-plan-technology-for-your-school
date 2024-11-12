@@ -1,0 +1,7 @@
+@model Dfe.PlanTech.Domain.Content.Models.NotificationBanner;
+
+<govuk-notification-banner>
+  @{
+    await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Text);
+  }
+</govuk-notification-banner>
