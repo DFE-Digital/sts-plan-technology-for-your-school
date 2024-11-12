@@ -1,0 +1,67 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Dfe.PlanTech.Web.Models.Content.Mapped.CsPage
+
+@{
+    Layout = "Shared/_CsLayout";
+}
+
+<div class="govuk-grid-row">
+
+    @if (Model.MenuItems is not null)
+    {
+        <partial name="Shared/_VerticalNavigation" model="@Model.MenuItems"/>
+    }
+
+    <div class="govuk-grid-column-three-quarters">
+
+        @foreach (var content in Model.Content)
+        {
+            <partial name="Shared/_Content" model="@content"/>
+        }
+
+        @if (Model.HasCitation)
+        {
+            <partial name="Shared/_Citation" model="Model"/>
+        }
+
+        @if (Model.HasBackToTop)
+        {
+            <partial name="Shared/_BackToTop"/>
+        }
+
+        @if (Model.HasPrint)
+        {
+            <partial name="Shared/_Print"/>
+        }
+
+        @if (Model.HasFeedbackBanner)
+        {
+            <partial name="Shared/_Feedback"/>
+        }
+    </div>
+</div>
+
+@section BodyEnd{
+    @if (Model.HasPrint)
+    {
+        <script nonce="@Context.Items["nonce"]" defer>
+            /**
+            * Adds functionality for printing a page to the Print Page button (_Print.cshtml)
+            */
+            const printPage = () => window.print();
+
+
+            const addPrintButtonEventListener = () => {
+                const printButton = document.getElementById("print-link");
+
+                if(!printButton){
+                    return;
+                }
+
+                printButton.addEventListener('click', printPage);
+            }
+
+            addPrintButtonEventListener();
+        </script>
+    }
+}

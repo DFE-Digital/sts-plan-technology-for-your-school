@@ -1,0 +1,19 @@
+@using Dfe.PlanTech.Web.Models.Content.Mapped.Types
+@model Dfe.PlanTech.Web.Models.Content.Mapped.RichTextContentItem
+
+<th scope="col">
+    @if (Model.Content.Any())
+    {
+        foreach (var childNode in Model.Content)
+        {
+            if (childNode.NodeType == RichTextNodeType.Paragraph)
+            {
+                <partial name="Shared/RichText/_Items" model="@childNode"/>
+            }
+            else
+            {
+                <partial name="Shared/RichText/_RichText" model="@childNode"/>
+            }
+        }
+    }
+</th>
