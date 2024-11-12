@@ -23,7 +23,7 @@ ____
 
 ## Importing Content
 
-- importing content can be acheived using he `import-content` script, which will import content from a json file into a specified environment. The json file should be in the format of the `export-processor` export outputs
+- importing content can be achieved using the `import-content` script, which will import content from a json file into a specified environment. The json file should be in the format of the `export-processor` export outputs
 - `import-content` uses the `contentful-import` npm package to do the importing
 
 
