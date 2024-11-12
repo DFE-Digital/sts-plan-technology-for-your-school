@@ -1,6 +1,6 @@
 @model Dfe.PlanTech.Web.Models.PageViewModel;
 
-@section BeforeContent {
+@section DfePageHeaderOuter {
     @if (Model.Page.DisplayBackButton)
     {
         await Html.RenderPartialAsync("BackButton", Model);
@@ -10,6 +10,19 @@
         await Html.RenderPartialAsync("HomeButton", Model);
     }
 }
+
+@section DfePageHeaderInner {
+    @if (Model.Page.DisplayOrganisationName)
+    {
+        <span class="govuk-caption-xl govuk-!-margin-top-5">@Model.Page.OrganisationName</span>
+    }
+
+    @if (Model.Page.Title != null)
+    {
+        await Html.RenderPartialAsync("Components/Title", Model.Page.Title);
+    }
+}
+
 @{
     if (Model.Page.Slug == "self-assessment" && TempData.ContainsKey("SubtopicError"))
     {
@@ -27,9 +40,5 @@
         </div>
     }
 
-    if (Model.Page.DisplayOrganisationName)
-    {
-        <span class="govuk-caption-xl">@Model.Page.OrganisationName</span>
-    }
     await Html.RenderPartialAsync("Components/Page", Model.Page);
 }

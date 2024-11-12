@@ -11,11 +11,6 @@
         <span class="govuk-caption-xl">@Model.SectionTitle</span>
     }
 
-    if (Model.Title != null)
-    {
-        await Html.RenderPartialAsync("Components/Title", Model.Title);
-    }
-    
     foreach (var content in Model.Content)
     {
         await Html.RenderPartialAsync("Components/PageComponentFactory", content);
