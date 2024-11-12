@@ -10,7 +10,7 @@ describe('Print button', () => {
   });
 
   it("should be visible", () => {
-    cy.get("button#print-link")
+    cy.get("button.print-button")
       .should('exist')
       .and('be.visible')
       .and('not.have.attr', 'aria-hidden');

@@ -1,0 +1,11 @@
+@model Dfe.PlanTech.Web.Models.Content.ContentItemBase
+
+<h5>
+    @if (Model.Content.Any())
+    {
+    foreach (var childNode in Model.Content)
+    {
+    <partial name="Shared/RichText/_RichText" model="@childNode"/>
+    }
+    }
+</h5>
