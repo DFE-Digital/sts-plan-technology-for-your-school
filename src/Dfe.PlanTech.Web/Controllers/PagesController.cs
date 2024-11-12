@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Dfe.PlanTech.Application.Constants;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Authorisation;
@@ -16,12 +17,14 @@ namespace Dfe.PlanTech.Web.Controllers;
 public class PagesController : BaseController<PagesController>
 {
     private readonly ILogger _logger;
+    private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery;
     public const string ControllerName = "Pages";
     public const string GetPageByRouteAction = nameof(GetByRoute);
 
-    public PagesController(ILogger<PagesController> logger) : base(logger)
+    public PagesController(ILogger<PagesController> logger, IGetEntityFromContentfulQuery getEntityByIdQuery) : base(logger)
     {
         _logger = logger;
+        _getEntityFromContentfulQuery = getEntityByIdQuery;
     }
 
     [Authorize(Policy = PageModelAuthorisationPolicy.PolicyName)]
@@ -44,14 +47,30 @@ public class PagesController : BaseController<PagesController>
     => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 
     [HttpGet(UrlConstants.ServiceUnavailable, Name = UrlConstants.ServiceUnavailable)]
-    public IActionResult ServiceUnavailable([FromServices] IConfiguration configuration)
-     => View(new ServiceUnavailableViewModel
-     {
-         RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-         ContactUsEmail = configuration["ContactUs:Email"]
-     });
+    public async Task<IActionResult> ServiceUnavailable([FromServices] IConfiguration configuration)
+    {
+        var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(configuration["ContactUs:LinkId"]);
+
+        var viewModel = new ServiceUnavailableViewModel
+        {
+            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+            ContactHref = contactLink?.Href
+        };
+        return View(viewModel);
+    }
 
     [HttpGet(UrlConstants.NotFound, Name = UrlConstants.NotFound)]
-    public IActionResult NotFoundError()
-    => View();
+    public async Task<IActionResult> NotFoundError([FromServices] IConfiguration configuration)
+    {
+        var contentId = configuration["ContactUs:LinkId"];
+        var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(contentId) ??
+                throw new KeyNotFoundException($"Could not find navigation link with Id {contentId}");
+
+        var viewModel = new NotFoundViewModel
+        {
+            ContactLinkHref = contactLink?.Href
+        };
+
+        return View(viewModel);
+    }
 }
