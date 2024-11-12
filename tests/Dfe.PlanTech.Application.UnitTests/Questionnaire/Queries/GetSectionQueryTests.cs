@@ -1,5 +1,4 @@
-
-using AutoMapper;
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
@@ -52,94 +51,21 @@ public class GetSectionQueryTests
         }
     };
 
-    private readonly List<SectionDbEntity> _dbSections = new(3);
-
     private readonly Section[] _sections = new[] { FirstSection, SecondSection, ThirdSection };
-
-    private readonly IMapper _mapper = Substitute.For<IMapper>();
+    private readonly ICmsCache _cache = Substitute.For<ICmsCache>();
 
     public GetSectionQueryTests()
     {
-        _dbSections.AddRange(_sections.Select((section) =>
-        {
-            var interstitialPageId = section.InterstitialPage != null
-                ? $"{section.InterstitialPage.Slug}-ID"
-                : throw new InvalidOperationException("InterstitialPage cannot be null");
-
-            return new SectionDbEntity()
+        _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<IEnumerable<Section>>>>())
+            .Returns(callInfo =>
             {
-                Name = section.Name,
-                InterstitialPage = new PageDbEntity()
-                {
-                    Slug = section.InterstitialPage.Slug,
-                    Id = interstitialPageId
-                },
-                InterstitialPageId = interstitialPageId,
-                Id = section.Sys.Id
-            };
-        }));
-
-        _mapper.Map<Section>(Arg.Any<SectionDbEntity>())
-                .Returns(callinfo =>
-                {
-                    var section = callinfo.ArgAt<SectionDbEntity>(0);
-
-                    return new Section()
-                    {
-                        Name = section.Name,
-                        Sys = new()
-                        {
-                            Id = section.Id
-                        }
-                    };
-                });
+                var func = callInfo.ArgAt<Func<Task<IEnumerable<Section>>>>(1);
+                return func();
+            });
     }
 
     [Fact]
-    public async Task GetSectionBySlug_Returns_Section_From_Db()
-    {
-        var sectionSlug = FirstSection.InterstitialPage?.Slug ?? throw new InvalidOperationException("InterstitialPage cannot be null");
-        var cancellationToken = CancellationToken.None;
-
-        var repository = Substitute.For<IContentRepository>();
-        repository.GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>())
-        .Returns((callinfo) =>
-        {
-            var options = callinfo.ArgAt<GetEntitiesOptions>(0);
-
-            if (options.Queries == null)
-            {
-                throw new InvalidOperationException("Queries cannot be null");
-            }
-
-            var slugQuery = options.Queries.FirstOrDefault(query => query is ContentQueryEquals equalsQuery &&
-                                                            equalsQuery.Field == GetSectionQuery.SlugFieldPath) as ContentQueryEquals ?? throw new InvalidOperationException("Slug query cannot be null");
-
-            return _sections.Where(section => section.InterstitialPage?.Slug == slugQuery.Value);
-        });
-
-        var db = Substitute.For<ICmsDbContext>();
-        db.Sections.Returns(_dbSections.AsQueryable());
-        db.FirstOrDefaultCachedAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>())
-                .Returns(callinfo =>
-                {
-                    var queryable = callinfo.ArgAt<IQueryable<SectionDbEntity>>(0);
-
-                    return queryable.FirstOrDefault();
-                });
-
-        var getSectionQuery = new GetSectionQuery(db, repository, _mapper);
-        var section = await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken);
-
-        Assert.NotNull(section); // Add this line to check for null
-        Assert.Equal(FirstSection.InterstitialPage.Slug, sectionSlug);
-
-        await db.Received(1).FirstOrDefaultCachedAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
-        await repository.Received(0).GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task GetSectionBySlug_Returns_Section_From_Repository_When_Db_Returns_Nothing()
+    public async Task GetSectionBySlug_Returns_Section_From_Repository()
     {
         Assert.NotNull(FirstSection.InterstitialPage);
         var sectionSlug = FirstSection.InterstitialPage.Slug;
@@ -159,23 +85,11 @@ public class GetSectionQueryTests
             return _sections.Where(section => section.InterstitialPage?.Slug == slugQuery.Value);
         });
 
-        var db = Substitute.For<ICmsDbContext>();
-        var nullList = new List<SectionDbEntity>();
-        db.Sections.Returns(nullList.AsQueryable());
-        db.FirstOrDefaultCachedAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>())
-                .Returns(callinfo =>
-                {
-                    var queryable = callinfo.ArgAt<IQueryable<SectionDbEntity>>(0);
-
-                    return queryable.FirstOrDefault();
-                });
-
-        var getSectionQuery = new GetSectionQuery(db, repository, _mapper);
-        var section = await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken);
+        var getSectionQuery = new GetSectionQuery(repository, _cache);
+        await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken);
 
         Assert.Equal(FirstSection.InterstitialPage.Slug, sectionSlug);
 
-        await db.Received(1).FirstOrDefaultCachedAsync(Arg.Any<IQueryable<SectionDbEntity>>(), Arg.Any<CancellationToken>());
         await repository.Received(1).GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>());
     }
 
@@ -192,11 +106,7 @@ public class GetSectionQueryTests
             .When(repo => repo.GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), cancellationToken))
             .Throw(new Exception("Dummy Exception"));
 
-        var db = Substitute.For<ICmsDbContext>();
-
-        var mapper = Substitute.For<IMapper>();
-
-        var getSectionQuery = new GetSectionQuery(db, repository, mapper);
+        var getSectionQuery = new GetSectionQuery(repository, _cache);
 
         await Assert.ThrowsAsync<ContentfulDataUnavailableException>(
             async () => await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken)

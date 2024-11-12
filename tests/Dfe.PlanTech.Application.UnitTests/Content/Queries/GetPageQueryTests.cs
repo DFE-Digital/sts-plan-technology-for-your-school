@@ -1,127 +1,119 @@
-using AutoMapper;
+using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Application.Persistence.Models;
-using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Options;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Infrastructure.Application.Models;
-using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace Dfe.PlanTech.Application.UnitTests.Content.Queries;
 
 public class GetPageQueryTests
 {
-    private readonly static string DbPageSlug = "/retrieved-from-db";
-    private readonly static string ContentfulPageSlug = "/retrieved-from-contentful";
+    private const string TEST_PAGE_SLUG = "test-page-slug";
+    private const string SECTION_SLUG = "SectionSlugTest";
+    private const string LANDING_PAGE_SLUG = "LandingPage";
 
-    private readonly GetPageFromDbQuery _getPageFromDbQuery;
-    private readonly GetPageFromContentfulQuery _getPageFromContentfulQuery;
+    private readonly IContentRepository _repoSubstitute = Substitute.For<IContentRepository>();
+    private readonly ILogger<GetPageQuery> _logger = Substitute.For<ILogger<GetPageQuery>>();
+    private readonly ICmsCache _cache = Substitute.For<ICmsCache>();
 
-    private readonly IContentRepository _repository = Substitute.For<IContentRepository>();
-    private readonly ICmsDbContext _db = Substitute.For<ICmsDbContext>();
-    private readonly Page _page = new()
-    {
-        Slug = ContentfulPageSlug
+    private readonly List<Page> _pages = new() {
+        new Page(){
+            Slug = "Index"
+        },
+        new Page(){
+            Slug = LANDING_PAGE_SLUG,
+        },
+        new Page(){
+            Slug = "AuditStart"
+        },
+        new Page(){
+            Slug = SECTION_SLUG,
+            DisplayTopicTitle = true,
+            DisplayHomeButton= false,
+            DisplayBackButton = false,
+        },
+        new Page(){
+            Slug = TEST_PAGE_SLUG,
+            Sys = new() {
+                Id = "test-page-id"
+            }
+        },
+
     };
 
-    private readonly PageDbEntity _pageDbEntity = new()
-    {
-        Id = "PageId",
-        Slug = DbPageSlug,
-        Content = [
-            new QuestionDbEntity()
-            {
-                Id = "QuestionId"
-            }
-        ],
-        AllPageContents = [
-            new PageContentDbEntity()
-            {
-                Id = 1,
-                PageId = "PageId",
-                ContentComponentId = "QuestionId"
-            }
-        ]
-    };
 
     public GetPageQueryTests()
     {
-        var mapper = Substitute.For<IMapper>();
-
-        _getPageFromDbQuery = new GetPageFromDbQuery(_db, new NullLogger<GetPageFromDbQuery>(), mapper, Array.Empty<IGetPageChildrenQuery>());
-
-        _db.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(callinfo =>
-        {
-            var slug = callinfo.ArgAt<string>(0);
-
-            var test = slug.Equals(DbPageSlug);
-            return slug.Equals(DbPageSlug) ? _pageDbEntity : null;
-        });
-
-        mapper.Map<PageDbEntity, Page>(Arg.Any<PageDbEntity>()).Returns(callinfo =>
-        {
-            var page = callinfo.ArgAt<PageDbEntity>(0);
-
-            return new Page()
+        SetupRepository();
+        _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<IEnumerable<Page>>>>())
+            .Returns(callInfo =>
             {
-                Slug = page.Slug
-            };
-        });
+                var func = callInfo.ArgAt<Func<Task<IEnumerable<Page>>>>(1);
+                return func();
+            });
+    }
 
-
-        _repository = Substitute.For<IContentRepository>();
-
-        _repository.GetEntities<Page>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>())
-                    .Returns(callinfo =>
+    private void SetupRepository()
+    {
+        _repoSubstitute.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>())
+        .Returns((callInfo) =>
+        {
+            IGetEntitiesOptions options = (IGetEntitiesOptions)callInfo[0];
+            if (options.Queries != null)
+            {
+                foreach (var query in options.Queries)
+                {
+                    if (query is ContentQueryEquals equalsQuery && query.Field == "fields.slug")
                     {
-                        var pages = new List<Page>();
+                        return _pages.Where(page => page.Slug == equalsQuery.Value);
+                    }
+                }
+            }
 
-                        var options = callinfo.ArgAt<GetEntitiesOptions>(0);
+            return [];
+        });
+    }
 
-                        var queries = options.Queries;
+    private GetPageQuery CreateGetPageQuery()
+        => new(_cache, _repoSubstitute, _logger, new GetPageFromContentfulOptions() { Include = 4 });
 
-                        var slugQuery = queries == null ? null : (queries.OfType<ContentQueryEquals>()).FirstOrDefault(query => query.Field == "fields.slug");
-                        if (slugQuery != null && slugQuery.Value.Equals(_page.Slug))
-                        {
-                            pages.Add(_page);
-                        }
 
-                        return pages;
-                    });
+    [Fact]
+    public async Task Should_Retrieve_Page_By_Slug_From_Contentful()
+    {
+        var query = CreateGetPageQuery();
 
-        _getPageFromContentfulQuery = new GetPageFromContentfulQuery(_repository,
-                                                                    new NullLogger<GetPageFromContentfulQuery>(),
-                                                                    new GetPageFromContentfulOptions() { Include = 4 });
+        var result = await query.GetPageBySlug(LANDING_PAGE_SLUG);
+
+        Assert.NotNull(result);
+        Assert.Equal(LANDING_PAGE_SLUG, result.Slug);
+
+        await _repoSubstitute.ReceivedWithAnyArgs(1).GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task Should_Retrieve_Page_By_Slug_From_Db()
+    public async Task Should_Return_Null_When_Slug_Not_Found()
     {
-        var query = new GetPageQuery(_getPageFromContentfulQuery, _getPageFromDbQuery);
+        var query = CreateGetPageQuery();
+        var result = await query.GetPageBySlug("NOT A REAL SLUG");
 
-        var result = await query.GetPageBySlug(DbPageSlug);
-
-        Assert.NotNull(result);
-        Assert.Equal(DbPageSlug, result.Slug);
-
-        await _db.Received(1).GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>());
-        await _repository.Received(0).GetEntities<Page>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>());
+        Assert.Null(result);
     }
 
     [Fact]
-    public async Task Should_Retrieve_Page_By_Slug_From_Contentful_When_Db_Page_Not_Found()
+    public async Task Page_Not_Found_Exception_Is_Thrown_When_There_Is_An_Issue_Retrieving_Data()
     {
-        var query = new GetPageQuery(_getPageFromContentfulQuery, _getPageFromDbQuery);
+        _repoSubstitute.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>())
+            .Throws(new Exception("Test Exception"));
 
-        var result = await query.GetPageBySlug(ContentfulPageSlug);
+        var query = CreateGetPageQuery();
 
-        Assert.NotNull(result);
-        Assert.Equal(ContentfulPageSlug, result.Slug);
-
-        await _db.Received(1).GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>());
-        await _repository.Received(1).GetEntities<Page>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>());
+        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(async () => await query.GetPageBySlug(SECTION_SLUG));
     }
 }
