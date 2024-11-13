@@ -19,3 +19,24 @@ This can be used as a fallback
     ```bash
     npm run crud-operation YYYYMMDD-HHMM-description-of-crud-operation.js
     ```
+____
+
+## Importing Content
+
+- importing content can be achieved using the `import-content` script, which will import content from a json file into a specified environment. The json file should be in the format of the `export-processor` export outputs
+- `import-content` uses the `contentful-import` npm package to do the importing
+
+
+### Usage
+
+1. Setup `.env` (copy `.env.example` and setup fields as necessary)
+2. cd into the `content-management` directory
+3. Run `npm install`
+4. run `node import-content`
+
+Required Environment variables
+`CONTENT_FILE`
+`SPACE_ID`
+`MANAGEMENT_TOKEN`
+`ENVIRONMENT` (environmentId default is 'master')
+`SKIP_CONTENT_MODEL` (optional, default is false)

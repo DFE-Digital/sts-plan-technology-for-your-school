@@ -1,0 +1,18 @@
+@model Dfe.PlanTech.Web.Models.Content.Mapped.Standard.EmbeddedEntry
+
+@{
+    if (Model.JumpIdentifier is not null)
+    {
+        <div id=@Model.JumpIdentifier></div>
+    }
+
+    else if (Model.CustomComponent is not null)
+    {
+        <partial name="Shared/RichText/_GDSComponent" model="@Model.CustomComponent"/>
+    }
+
+    if (Model.RichText is not null)
+    {
+        <partial name="Shared/RichText/_RichText" model="@Model.RichText"/>
+    }
+}
