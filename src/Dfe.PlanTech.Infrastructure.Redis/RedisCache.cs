@@ -29,7 +29,7 @@ public class RedisCache : ICmsCache
             .OrInner<RedisServerException>()
             .OrInner<RedisException>();
 
-        _retryPolicyAsync = retryPolicyBuilder.WaitAndRetryAsync(3, _ => TimeSpan.FromSeconds(2));
+        _retryPolicyAsync = retryPolicyBuilder.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(50));
     }
 
     /// <inheritdoc/>
@@ -58,7 +58,7 @@ public class RedisCache : ICmsCache
     {
         _logger.LogInformation("Setting cache item with key: {Key}", key);
         var database = await _connectionManager.GetDatabaseAsync(databaseId);
-        await RegisterDependenciesAsync(key, value);
+        await RegisterDependenciesAsync(database, key, value);
         return await SetAsync(database, key, value, expiry);
     }
 
@@ -140,7 +140,7 @@ public class RedisCache : ICmsCache
         var redisValue = value as string ?? value.Serialise();
         _logger.LogInformation("Setting cache item with key: {Key} and value: {Value}", key, redisValue);
         await _retryPolicyAsync.ExecuteAsync(() => database.StringSetAsync(key, GZipRedisValueCompressor.Compress(redisValue), expiry));
-        await RegisterDependenciesAsync(key, value);
+        await RegisterDependenciesAsync(database, key, value);
         return key;
     }
 
@@ -206,20 +206,17 @@ public class RedisCache : ICmsCache
     }
 
     /// <inheritdoc/>
-    public async Task RegisterDependenciesAsync<T>(string key, T value)
+    public async Task RegisterDependenciesAsync<T>(IDatabase database, string key, T value)
     {
-        if (value is IEnumerable<ContentComponent> enumerable)
-        {
-            foreach (var item in enumerable)
-            {
-                await RegisterDependenciesAsync(key, item);
-            }
-        }
-        else if (value is ContentComponent contentComponent)
-        {
-            await RegisterContentDependenciesAsync(key, contentComponent);
-        }
+        var dependencies = await GetDependenciesAsync(value);
+        var batch = database.CreateBatch();
+
+        var tasks = dependencies.Select(dependency => batch.SetAddAsync(GetDependencyKey(dependency), key)).ToArray();
+        batch.Execute();
+
+        await Task.WhenAll(tasks);
     }
+
 
     /// <inheritdoc/>
     public async Task InvalidateCacheAsync(string contentComponentId)
@@ -234,24 +231,48 @@ public class RedisCache : ICmsCache
         await SetRemoveItemsAsync(key, dependencies);
     }
 
+    /// <inheritdoc/>
+    private async Task<IEnumerable<string>> GetDependenciesAsync<T>(T value)
+    {
+        var result = new List<string>();
+
+        if (value is IEnumerable<ContentComponent> enumerable)
+        {
+            foreach (var item in enumerable)
+            {
+                var nestedDependencies = await GetDependenciesAsync(item);
+                result.AddRange(nestedDependencies);
+            }
+        }
+        else if (value is ContentComponent contentComponent)
+        {
+            var nestedDependencies = await GetContentDependenciesAsync(contentComponent);
+            result.AddRange(nestedDependencies);
+        }
+
+        return result;
+    }
+
     /// <summary>
     /// Uses reflection to check for any ContentIds within the component and register the parent as a dependency
     /// </summary>
-    /// <param name="key"></param>
     /// <param name="value"></param>
-    private async Task RegisterContentDependenciesAsync(string key, ContentComponent value)
+    private async Task<IEnumerable<string>> GetContentDependenciesAsync(ContentComponent value)
     {
         // add the item itself as a dependency
-        await SetAddAsync(GetDependencyKey(value.Sys.Id), key);
+        var results = new List<string> { value.Sys.Id };
 
         var properties = value.GetType().GetProperties();
         foreach (var property in properties)
         {
             if (property.PropertyType == typeof(ContentComponent) || typeof(IEnumerable<ContentComponent>).IsAssignableFrom(property.PropertyType))
             {
-                await RegisterDependenciesAsync(key, property.GetValue(value));
+                var nestedDependencies = await GetDependenciesAsync(property.GetValue(value));
+                results.AddRange(nestedDependencies);
             }
         }
+
+        return results;
     }
 
     /// <summary>

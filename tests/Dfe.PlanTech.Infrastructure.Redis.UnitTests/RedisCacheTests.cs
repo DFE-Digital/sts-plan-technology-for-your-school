@@ -266,10 +266,12 @@ public class RedisCacheTests
     [Fact]
     public async Task RegisterDependencyAsync_StoresAllContentIds()
     {
-        await _cache.RegisterDependenciesAsync(key, _question);
-        await _database.Received(1).SetAddAsync(_cache.GetDependencyKey(_question.Sys.Id), key);
-        await _database.Received(1).SetAddAsync(_cache.GetDependencyKey(_firstAnswer.Sys.Id), key);
-        await _database.Received(1).SetAddAsync(_cache.GetDependencyKey(_secondAnswer.Sys.Id), key);
+        var batch = Substitute.For<IBatch>();
+        _database.CreateBatch().Returns(batch);
+        await _cache.RegisterDependenciesAsync(_database, key, _question);
+        await batch.Received(1).SetAddAsync(_cache.GetDependencyKey(_question.Sys.Id), key);
+        await batch.Received(1).SetAddAsync(_cache.GetDependencyKey(_firstAnswer.Sys.Id), key);
+        await batch.Received(1).SetAddAsync(_cache.GetDependencyKey(_secondAnswer.Sys.Id), key);
     }
 
     [Fact]
