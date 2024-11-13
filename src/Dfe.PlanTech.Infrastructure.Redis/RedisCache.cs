@@ -259,13 +259,17 @@ public class RedisCache : ICmsCache
     /// <param name="value"></param>
     private async Task<IEnumerable<string>> GetContentDependenciesAsync(ContentComponent value)
     {
+        // RichText is a sub-component that doesn't have SystemDetails, exit for such types
+        if (value.Sys is null)
+            return [];
+
         // add the item itself as a dependency
         var results = new List<string> { value.Sys.Id };
 
         var properties = value.GetType().GetProperties();
         foreach (var property in properties)
         {
-            if (property.PropertyType == typeof(ContentComponent) || typeof(IEnumerable<ContentComponent>).IsAssignableFrom(property.PropertyType))
+            if (typeof(ContentComponent).IsAssignableFrom(property.PropertyType) || typeof(IEnumerable<ContentComponent>).IsAssignableFrom(property.PropertyType))
             {
                 var nestedDependencies = await GetDependenciesAsync(property.GetValue(value));
                 results.AddRange(nestedDependencies);
