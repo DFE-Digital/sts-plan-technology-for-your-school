@@ -3,6 +3,7 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using StackExchange.Redis;
 
 namespace Dfe.PlanTech.Infrastructure.Redis.UnitTests;
@@ -152,6 +153,22 @@ public class RedisCacheTests
         var loggedMessages = _logger.ReceivedLogMessages();
         var matching = loggedMessages.FirstOrDefault(msg => msg.LogLevel == LogLevel.Warning && msg.Message.Contains("Action returned null for cache item with key"));
         Assert.NotNull(matching);
+    }
+
+    [Fact]
+    public async Task GetOrCreateAsync_Handles_GetErrors()
+    {
+        string otherValue = """{ "thisis" : "another value" }""";
+        var serialised = JsonSerialiser.Deserialise<JsonElement>(otherValue);
+        Task<JsonElement> action() => Task.FromResult(serialised);
+
+        _database.StringGetAsync(Arg.Any<RedisKey>(), Arg.Any<CommandFlags>()).ThrowsAsync((callinfo) =>
+                {
+                    throw new Exception("Error");
+                });
+
+        var result = await _cache.GetOrCreateAsync(key, action);
+        Assert.Equal(serialised, result);
     }
 
     [Fact]
