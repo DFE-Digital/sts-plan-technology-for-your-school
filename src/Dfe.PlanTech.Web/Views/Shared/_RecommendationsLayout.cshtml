@@ -1,0 +1,34 @@
+@using Dfe.PlanTech.Web.Helpers;
+
+@section Head {
+    <partial name="_Head" />
+    @await RenderSectionAsync("Head", required: false)
+}
+
+@{
+    Layout = "_GovUkPageTemplate";
+
+    if (ViewData["Title"] == null)
+    {
+        var routeData = Context.GetRouteData();
+        ViewData["Title"] = routeData.GetTitleForPage();
+    }
+}
+
+@section Header {
+    <partial name="GoogleTagManager/_Body" />
+    <partial name="CookiesBanner/_CookieBanner" />
+    <partial name="_Header" />
+    @await RenderSectionAsync("Header", required: false)
+}
+
+@RenderBody()
+
+@section Footer {
+    <partial name="_Footer" />
+}
+
+@section BodyEnd {
+    <partial name="_BodyEnd" />
+    @await RenderSectionAsync("BodyEnd", required: false)
+}

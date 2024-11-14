@@ -5,7 +5,7 @@
     <ul class="dfe-vertical-nav__section govuk-!-padding-left-0">
         @foreach (var content in Model)
         {
-            var classes = content.SlugifiedLinkText == ViewData["VerticalNavigationSection"]?.ToString()
+            var classes = content.SlugifiedLinkText == ViewBag.VerticalNavigationSection?.ToString()
                 ? "dfe-vertical-nav__link--selected"
                 : "";
 
