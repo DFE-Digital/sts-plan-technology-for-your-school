@@ -1,6 +1,6 @@
 describe("not found", () => {
     beforeEach(() => {
-        cy.visit("/some-slug-that-doesnt-exist");
+        cy.visit("/content/some-slug-that-doesnt-exist");
         cy.injectAxe();
     });
 
