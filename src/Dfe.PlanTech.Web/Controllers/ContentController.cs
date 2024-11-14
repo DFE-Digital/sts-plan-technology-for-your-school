@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using Dfe.PlanTech.Web.Content;
-using Dfe.PlanTech.Web.Models;
+﻿using Dfe.PlanTech.Web.Content;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,14 +25,14 @@ public class ContentController(
             logger.LogError(
                 "Invalid model state received for {Controller} {Action} with slug {Slug}",
                 nameof(ContentController), nameof(Index), slug);
-            return RedirectToAction(ErrorActionName);
+            return RedirectToAction(ErrorActionName, PagesController.ControllerName);
         }
 
         if (string.IsNullOrEmpty(slug))
         {
             logger.LogError("No slug received for C&S {Controller} {Action}",
                 nameof(ContentController), nameof(Index));
-            return RedirectToAction(ErrorActionName);
+            return RedirectToAction(PagesController.NotFoundPage, PagesController.ControllerName);
         }
 
         try
@@ -44,7 +42,7 @@ public class ContentController(
             {
                 logger.LogError("Failed to load content for C&S page {Slug}; no content received.",
                     slug);
-                return RedirectToAction(ErrorActionName);
+                return RedirectToAction(PagesController.NotFoundPage, PagesController.ControllerName);
             }
 
             resp = layoutService.GenerateLayout(resp, Request, page);
@@ -55,14 +53,7 @@ public class ContentController(
         catch (Exception ex)
         {
             logger.LogError(ex, "Error loading C&S content page {Slug}", slug);
-            return RedirectToAction(ErrorActionName);
+            return RedirectToAction(ErrorActionName, PagesController.ControllerName);
         }
-    }
-
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel
-        { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }

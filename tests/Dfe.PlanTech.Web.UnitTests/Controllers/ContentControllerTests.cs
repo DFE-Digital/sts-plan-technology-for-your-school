@@ -1,9 +1,7 @@
 ﻿using Dfe.PlanTech.Web.Content;
 using Dfe.PlanTech.Web.Controllers;
-using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Models.Content.Mapped;
 using FluentAssertions;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -29,7 +27,7 @@ public class ContentControllerTests
         var result = await sut.Index(string.Empty);
 
         result.Should().BeOfType<RedirectToActionResult>();
-        (result as RedirectToActionResult)!.ActionName.Should().BeEquivalentTo("error");
+        (result as RedirectToActionResult)!.ActionName.Should().BeEquivalentTo(PagesController.NotFoundPage);
 
         _loggerMock.Verify(
                x => x.Log(
@@ -65,7 +63,7 @@ public class ContentControllerTests
         var result = await sut.Index(slug);
 
         result.Should().BeOfType<RedirectToActionResult>();
-        (result as RedirectToActionResult)!.ActionName.Should().BeEquivalentTo("error");
+        (result as RedirectToActionResult)!.ActionName.Should().BeEquivalentTo(PagesController.NotFoundPage);
 
         _loggerMock.Verify(x => x.Log(
            LogLevel.Error,
@@ -110,16 +108,5 @@ public class ContentControllerTests
 
         result.Should().BeOfType<ViewResult>();
         (result as ViewResult)!.Model.Should().BeOfType<CsPage>();
-    }
-
-    [Fact]
-    public void Error_Returns_ErrorView()
-    {
-        var sut = GetController();
-        sut.ControllerContext.HttpContext = new DefaultHttpContext();
-        var result = sut.Error();
-
-        result.Should().BeOfType<ViewResult>();
-        (result as ViewResult)!.Model.Should().BeOfType<ErrorViewModel>();
     }
 }
