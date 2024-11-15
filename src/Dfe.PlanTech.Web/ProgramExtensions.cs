@@ -1,5 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using Dfe.ContentSupport.Web.Extensions;
+using Contentful.Core;
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Content.Queries;
@@ -27,11 +27,13 @@ using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
 using Dfe.PlanTech.Infrastructure.Data;
-using Dfe.PlanTech.Infrastructure.Data.Repositories;
+using Dfe.PlanTech.Infrastructure.Redis;
 using Dfe.PlanTech.Web.Authorisation;
-using Dfe.PlanTech.Web.Caching;
+using Dfe.PlanTech.Web.Configuration;
+using Dfe.PlanTech.Web.Content;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
+using Dfe.PlanTech.Web.Models.Content.Mapped;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authorization;
@@ -44,6 +46,8 @@ namespace Dfe.PlanTech.Web;
 [ExcludeFromCodeCoverage]
 public static class ProgramExtensions
 {
+    public const string ContentAndSupportServiceKey = "content-and-support";
+
     public static IServiceCollection AddContentfulServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddTransient<IContractResolver, DependencyInjectionContractResolver>();
@@ -87,7 +91,7 @@ public static class ProgramExtensions
             };
         });
 
-        services.AddTransient<GetPageFromContentfulQuery>();
+        services.AddTransient<GetPageQuery>();
 
         services.AddOptions<ContentfulOptions>()
                 .Configure<IConfiguration>((settings, configuration) => configuration.GetSection("Contentful").Bind(settings));
@@ -102,10 +106,7 @@ public static class ProgramExtensions
         services.AddTransient((services) => services.GetRequiredService<IOptions<ApiAuthenticationConfiguration>>().Value);
         services.AddTransient((services) => services.GetRequiredService<IOptions<SigningSecretConfiguration>>().Value);
 
-        services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubtopicRecommendationFromContentfulQuery>(GetSubtopicRecommendationFromContentfulQuery.ServiceKey);
-        services.AddKeyedTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationFromDbQuery>(GetSubTopicRecommendationFromDbQuery.ServiceKey);
         services.AddTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationQuery>();
-        services.AddTransient<IRecommendationsRepository, RecommendationsRepository>();
 
         services.AddScoped<ComponentViewsFactory>();
 
@@ -129,7 +130,6 @@ public static class ProgramExtensions
         services.AddTransient<ICacher, Cacher>();
         services.AddTransient<IQuestionnaireCacher, QuestionnaireCacher>();
         services.AddTransient<IUser, UserHelper>();
-        services.AddTransient<ICacheClearer, CacheClearer>();
 
         return services;
     }
@@ -137,19 +137,6 @@ public static class ProgramExtensions
     public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
         void databaseOptionsAction(DbContextOptionsBuilder options) => options.UseSqlServer(configuration.GetConnectionString("Database"));
-        services.AddSingleton<IQueryCacher, QueryCacher>();
-
-        services.AddDbContextPool<ICmsDbContext, CmsDbContext>((serviceProvider, optionsBuilder) =>
-            optionsBuilder
-                .UseSqlServer(
-                    configuration.GetConnectionString("Database"),
-                    sqlServerOptionsBuilder =>
-                    {
-                        sqlServerOptionsBuilder
-                            .CommandTimeout((int)TimeSpan.FromSeconds(30).TotalSeconds)
-                            .EnableRetryOnFailure();
-                    })
-        );
 
         services.AddDbContext<IPlanTechDbContext, PlanTechDbContext>(databaseOptionsAction);
         ConfigureCookies(services, configuration);
@@ -169,8 +156,6 @@ public static class ProgramExtensions
         services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
         services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
         services.AddTransient<IDeleteCurrentSubmissionCommand, DeleteCurrentSubmissionCommand>();
-
-        services.AddTransient<GetPageFromDbQuery>();
 
         return services;
     }
@@ -244,7 +229,6 @@ public static class ProgramExtensions
     public static IServiceCollection AddContentAndSupportServices(this WebApplicationBuilder builder)
     {
         builder.InitCsDependencyInjection();
-        builder.Services.AddAutoMapper(typeof(Application.Mappings.CmsMappingProfile));
 
         return builder.Services;
     }
@@ -261,6 +245,70 @@ public static class ProgramExtensions
     {
         services.AddApplicationInsightsTelemetry();
         services.AddSingleton<ITelemetryInitializer, CustomRequestDimensionsTelemetryInitializer>();
+
+        return services;
+    }
+
+    public static void InitCsDependencyInjection(this WebApplicationBuilder app)
+    {
+        app.Services.Configure<TrackingOptions>(app.Configuration.GetSection("tracking"))
+            .AddSingleton(sp => sp.GetRequiredService<IOptions<TrackingOptions>>().Value);
+
+        app.Services
+            .Configure<SupportedAssetTypes>(app.Configuration.GetSection("cs:supportedAssetTypes"))
+            .AddSingleton(sp => sp.GetRequiredService<IOptions<SupportedAssetTypes>>().Value);
+
+        app.Services.SetupContentfulClient(app);
+
+        app.Services.AddKeyedTransient<ICacheService<List<CsPage>>, CsPagesCacheService>(
+            ContentAndSupportServiceKey);
+        app.Services.AddKeyedTransient<IModelMapper, ModelMapper>(ContentAndSupportServiceKey);
+        app.Services
+            .AddKeyedTransient<IContentService, ContentService>(ContentAndSupportServiceKey);
+        app.Services.AddKeyedTransient<ILayoutService, LayoutService>(ContentAndSupportServiceKey);
+
+        app.Services.Configure<CookiePolicyOptions>(options =>
+        {
+            options.CheckConsentNeeded = context => true;
+            options.MinimumSameSitePolicy = SameSiteMode.Strict;
+            options.ConsentCookieValue = "false";
+        });
+    }
+
+    public static void SetupContentfulClient(this IServiceCollection services,
+        WebApplicationBuilder app)
+    {
+        app.Services.Configure<Contentful.Core.Configuration.ContentfulOptions>(app.Configuration.GetSection("cs:contentful"))
+            .AddKeyedSingleton(ContentAndSupportServiceKey, (IServiceProvider sp) =>
+                sp.GetRequiredService<IOptions<Contentful.Core.Configuration.ContentfulOptions>>().Value);
+
+        services.AddKeyedScoped<IContentfulClient, ContentfulClient>(ContentAndSupportServiceKey,
+            (sp, _) =>
+            {
+                var contentfulOptions =
+                    sp.GetRequiredKeyedService<Func<IServiceProvider,
+                        Contentful.Core.Configuration.ContentfulOptions>>(
+                        ContentAndSupportServiceKey)(sp);
+                var httpClient = sp.GetRequiredService<HttpClient>();
+                return new ContentfulClient(httpClient, contentfulOptions);
+            });
+
+        if (app.Environment.EnvironmentName.Equals("e2e"))
+            services.AddKeyedScoped<IContentfulService, StubContentfulService>(
+                ContentAndSupportServiceKey);
+        else
+            services.AddKeyedScoped<IContentfulService, ContentfulService>(
+                ContentAndSupportServiceKey);
+
+        HttpClientPolicyExtensions.AddRetryPolicy(services.AddHttpClient<ContentfulClient>());
+    }
+    public static IServiceCollection AddRedisServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddSingleton(
+            new DistributedCachingOptions(ConnectionString: configuration.GetConnectionString("redis") ?? ""));
+        services.AddSingleton<ICmsCache, RedisCache>();
+        services.AddSingleton<IRedisConnectionManager, RedisConnectionManager>();
+        services.AddSingleton<IDistributedLockProvider, RedisLockProvider>();
 
         return services;
     }

@@ -6,5 +6,5 @@ public class ServiceUnavailableViewModel
 
     public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 
-    public string? ContactUsEmail { get; set; }
+    public string? ContactHref { get; set; }
 }

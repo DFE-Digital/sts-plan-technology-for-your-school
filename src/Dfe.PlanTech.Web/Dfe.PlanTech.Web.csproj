@@ -14,13 +14,13 @@
         </Content>
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\Dfe.ContentSupport.Web\Dfe.ContentSupport.Web.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.Application\Dfe.PlanTech.Application.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.Domain\Dfe.PlanTech.Domain.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.Contentful\Dfe.PlanTech.Infrastructure.Contentful.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.Data\Dfe.PlanTech.Infrastructure.Data.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.SignIn\Dfe.PlanTech.Infrastructure.SignIn.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.ServiceBus\Dfe.PlanTech.Infrastructure.ServiceBus.csproj" />
+        <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.Redis\Dfe.PlanTech.Infrastructure.Redis.csproj" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Automapper" Version="13.0.1" />

@@ -40,7 +40,8 @@ builder.AddContentAndSupportServices()
         .AddGoogleTagManager()
         .AddGovUkFrontend()
         .AddHttpContextAccessor()
-        .AddRoutingServices();
+        .AddRoutingServices()
+        .AddRedisServices(builder.Configuration);
 
 builder.Services.AddSingleton<ISystemTime, SystemTime>();
 

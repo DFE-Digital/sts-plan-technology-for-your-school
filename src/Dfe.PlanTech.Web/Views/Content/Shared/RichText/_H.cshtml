@@ -1,0 +1,36 @@
+﻿@using Dfe.PlanTech.Web.Models.Content.Mapped.Types
+@model Dfe.PlanTech.Web.Models.Content.Mapped.RichTextContentItem
+
+@{
+    switch (Model.NodeType)
+    {
+        case RichTextNodeType.Heading2:
+            <h2 class="govuk-!-margin-top-4 govuk-heading-l">
+                <partial name="Shared/RichText/_Items" model="@Model"/>
+            </h2>
+            break;
+        case RichTextNodeType.Heading3:
+            <h3 class="govuk-heading-m">
+                <partial name="Shared/RichText/_Items" model="@Model"/>
+            </h3>
+            break;
+        case RichTextNodeType.Heading4:
+            <h4>
+                <partial name="Shared/RichText/_Items" model="@Model"/>
+            </h4>
+            break;
+        case RichTextNodeType.Heading5:
+            <h5>
+                <partial name="Shared/RichText/_Items" model="@Model"/>
+            </h5>
+            break;
+        case RichTextNodeType.Heading6:
+            <h6>
+                <partial name="Shared/RichText/_Items" model="@Model"/>
+            </h6>
+            break;
+        default:
+            <partial name="Shared/_UnsupportedElement" model="@Model"/>
+            break;
+    }
+}
