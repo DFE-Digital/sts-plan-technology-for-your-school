@@ -1,6 +1,6 @@
 describe('Print button', () => {
   beforeEach(() => {
-    cy.visit('content/digital-technology-asset-register', {
+    cy.visit('content/hello-world', {
       onBeforeLoad(win) {
         //Stub the print functionality so we can see if it was called
         //Note: could spy instead, but I don't want the print dialog to actually show.

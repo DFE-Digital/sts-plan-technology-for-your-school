@@ -1,6 +1,6 @@
 describe('C&S Page', () => {
   beforeEach(() => {
-    cy.visit('content/digital-technology-asset-register');
+    cy.visit('content/hello-world');
     cy.injectAxe();
   });
 
