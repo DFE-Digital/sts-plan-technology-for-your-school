@@ -7,16 +7,10 @@ namespace Dfe.PlanTech.Web.ViewComponents;
 /// <summary>
 /// View component that retrieves and displays links in the layout's footer
 /// </summary>
-public class FooterLinksViewComponent : ViewComponent
+public class FooterLinksViewComponent(IGetNavigationQuery getNavQuery, ILogger<FooterLinksViewComponent> logger) : ViewComponent
 {
-    private readonly IGetNavigationQuery _getNavQuery;
-    private readonly ILogger<FooterLinksViewComponent> _logger;
-
-    public FooterLinksViewComponent(IGetNavigationQuery getNavQuery, ILogger<FooterLinksViewComponent> logger)
-    {
-        _getNavQuery = getNavQuery;
-        _logger = logger;
-    }
+    private readonly IGetNavigationQuery _getNavQuery = getNavQuery;
+    private readonly ILogger<FooterLinksViewComponent> _logger = logger;
 
     /// <summary>
     /// Retrieve the navigation links using <see cref="IGetNavigationQuery"/> then return the view
