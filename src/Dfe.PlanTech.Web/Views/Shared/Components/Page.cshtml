@@ -6,6 +6,11 @@
         await Html.RenderPartialAsync("Components/PageComponentFactory", content);
     }
 
+    if (Model.DisplayOrganisationName)
+    {
+        <span class="govuk-caption-xl">@Model.OrganisationName</span>
+    }
+
     if (Model.DisplayTopicTitle)
     {
         <span class="govuk-caption-xl">@Model.SectionTitle</span>
@@ -15,7 +20,7 @@
     {
         await Html.RenderPartialAsync("Components/Title", Model.Title);
     }
-    
+
     foreach (var content in Model.Content)
     {
         await Html.RenderPartialAsync("Components/PageComponentFactory", content);
