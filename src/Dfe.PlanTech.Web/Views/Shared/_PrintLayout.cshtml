@@ -18,10 +18,10 @@
 @section Header {
     <partial name="GoogleTagManager/_Body" />
     @await RenderSectionAsync("Header", false)
-    <partial name="BetaHeader" />
 }
 
 @section BeforeContent {
+    <partial name="BetaHeader" />
     <partial name="_BeforeContent"/>
     @await RenderSectionAsync("BeforeContent", required: false)
 }
