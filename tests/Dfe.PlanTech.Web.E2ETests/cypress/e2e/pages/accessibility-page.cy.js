@@ -16,8 +16,8 @@ describe("Accessibility Page - Unauthenticated", () => {
     cy.get("h1.govuk-heading-xl").should("exist");
   });
 
-  it("Should Have Back Button", () => {
-    cy.get('a:contains("Back")')
+  it("Should Have Home Button", () => {
+    cy.get('a:contains("Home")')
       .should("exist")
       .should("have.attr", "href")
       .and("include", "/");
