@@ -1,9 +1,18 @@
+@using Dfe.PlanTech.Web.Helpers
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @section Head {
     <partial name="_Head" />
     @await RenderSectionAsync("Head", required: false)
 }
 
-@{ Layout = "_GovUkPageTemplate"; }
+@{
+    Layout = "_GovUkPageTemplate";
+    if (ViewData["Title"] == null)
+    {
+        var routeData = Context.GetRouteData();
+        ViewData["Title"] = routeData.GetTitleForPage();
+    }
+}
 
 @section Header {
     <partial name="GoogleTagManager/_Body" />
