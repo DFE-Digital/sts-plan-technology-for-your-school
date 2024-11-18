@@ -1,11 +1,16 @@
 @model Dfe.PlanTech.Domain.Content.Models.NotificationBanner;
-
-<div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
-        <govuk-notification-banner>
-            @{
-                await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Text);
-            }
-        </govuk-notification-banner>
-    </div>
-</div>
+@{
+    var error = TempData["SubtopicError"] as string;
+    if (String.IsNullOrEmpty(error))
+    {
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <govuk-notification-banner>
+                    @{
+                        await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Text);
+                    }
+                </govuk-notification-banner>
+            </div>
+        </div>
+    }
+}
