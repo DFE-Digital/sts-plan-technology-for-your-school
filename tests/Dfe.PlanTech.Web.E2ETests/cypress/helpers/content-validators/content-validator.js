@@ -8,6 +8,7 @@ import ValidateInsetTextContent from "./inset-text-validator.js";
 import ValidateNavigationLink from "./nav-link-validator.js";
 import ValidateRichTextContent from "./rich-text-content-validator.js";
 import ValidateWarningComponent from "./warning-validator.js";
+import ValidateNotificationBanner from "./notification-banner-validator.js";
 
 export const ValidateContent = (content) => {
     if (!content.sys || !content.fields) {
@@ -32,6 +33,10 @@ export const ValidateContent = (content) => {
         }
         case "warningComponent": {
             ValidateWarningComponent(content);
+            break;
+        }
+        case "notificationBanner": {
+            ValidateNotificationBanner(content);
             break;
         }
         case "buttonWithEntryReference": {

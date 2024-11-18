@@ -144,5 +144,16 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
                 }
             };
         }
+
+        public static NotificationBanner BuildNotificationBanner(string text)
+        {
+            return new NotificationBanner()
+            {
+                Text = new TextBody
+                {
+                    RichText = BuildRichContent(text)
+                }
+            };
+        }
     }
 }

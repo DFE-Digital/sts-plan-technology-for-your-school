@@ -1,6 +1,6 @@
 describe('Print button', () => {
   beforeEach(() => {
-    cy.visit('content/digital-technology-asset-register', {
+    cy.visit('content/hello-world', {
       onBeforeLoad(win) {
         //Stub the print functionality so we can see if it was called
         //Note: could spy instead, but I don't want the print dialog to actually show.
@@ -10,7 +10,7 @@ describe('Print button', () => {
   });
 
   it("should be visible", () => {
-    cy.get("button#print-link")
+    cy.get("button.print-button")
       .should('exist')
       .and('be.visible')
       .and('not.have.attr', 'aria-hidden');

@@ -29,7 +29,7 @@ public class RedisCache : ICmsCache
             .OrInner<RedisServerException>()
             .OrInner<RedisException>();
 
-        _retryPolicyAsync = retryPolicyBuilder.WaitAndRetryAsync(3, _ => TimeSpan.FromSeconds(2));
+        _retryPolicyAsync = retryPolicyBuilder.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(50));
     }
 
     /// <inheritdoc/>
@@ -45,23 +45,12 @@ public class RedisCache : ICmsCache
             _logger.LogTrace("Cache item with key: {Key} found", key);
             return redisResult.CacheValue;
         }
-
-        _logger.LogTrace("Cache item with key: {Key} not found, executing action to create it", key);
-        var result = await action();
-        if (EqualityComparer<T>.Default.Equals(result, default))
+        else if (redisResult.Errored)
         {
-            _logger.LogWarning("Action returned null for cache item with key: {Key}", key);
-            return result;
+            return await action();
         }
 
-        await SetAsync(db, key, result, expiry);
-        _logger.LogInformation("Cache item with key: {Key} created and stored", key);
-        if (onCacheItemCreation != null)
-        {
-            await onCacheItemCreation(result).ConfigureAwait(false);
-        }
-
-        return result;
+        return await CreateAndCacheItemAsync(db, key, action, expiry, onCacheItemCreation);
     }
 
     /// <inheritdoc/>
@@ -69,7 +58,7 @@ public class RedisCache : ICmsCache
     {
         _logger.LogInformation("Setting cache item with key: {Key}", key);
         var database = await _connectionManager.GetDatabaseAsync(databaseId);
-        await RegisterDependenciesAsync(key, value);
+        await RegisterDependenciesAsync(database, key, value);
         return await SetAsync(database, key, value, expiry);
     }
 
@@ -106,12 +95,6 @@ public class RedisCache : ICmsCache
     /// <inheritdoc/>
     public async Task<T?> GetAsync<T>(string key, int databaseId = -1)
     {
-        if (string.IsNullOrEmpty(key))
-        {
-            _logger.LogError("Attempt made to retrieve items with empty key");
-            return default;
-        }
-
         _logger.LogInformation("Retrieving cache item with key: {Key}", key);
         var database = await _connectionManager.GetDatabaseAsync(databaseId);
         var result = await GetAsync<T>(database, key);
@@ -157,7 +140,7 @@ public class RedisCache : ICmsCache
         var redisValue = value as string ?? value.Serialise();
         _logger.LogInformation("Setting cache item with key: {Key} and value: {Value}", key, redisValue);
         await _retryPolicyAsync.ExecuteAsync(() => database.StringSetAsync(key, GZipRedisValueCompressor.Compress(redisValue), expiry));
-        await RegisterDependenciesAsync(key, value);
+        await RegisterDependenciesAsync(database, key, value);
         return key;
     }
 
@@ -170,16 +153,24 @@ public class RedisCache : ICmsCache
     /// <returns></returns>
     private async Task<CacheResult<T>> GetAsync<T>(IDatabase database, string key)
     {
-        if (string.IsNullOrEmpty(key))
+        try
         {
-            _logger.LogError("Attempt made to retrieve items with empty key");
-            return new CacheResult<T>(Error: "Key is null or empty");
+            if (string.IsNullOrEmpty(key))
+            {
+                _logger.LogError("Attempt made to retrieve items with empty key");
+                return new CacheResult<T>(Error: "Key is null or empty");
+            }
+
+            _logger.LogInformation("Getting cache item with key: {Key}", key);
+            var redisResult = await _retryPolicyAsync.ExecuteAsync(async () => GZipRedisValueCompressor.Decompress(await database.StringGetAsync(key)));
+
+            return CreateCacheResult<T>(redisResult);
         }
-
-        _logger.LogInformation("Getting cache item with key: {Key}", key);
-        var redisResult = await _retryPolicyAsync.ExecuteAsync(async () => GZipRedisValueCompressor.Decompress(await database.StringGetAsync(key)));
-
-        return CreateCacheResult<T>(redisResult);
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching {Key} from cache", key);
+            return new CacheResult<T>(Error: ex.Message);
+        }
     }
 
     /// <summary>
@@ -215,20 +206,17 @@ public class RedisCache : ICmsCache
     }
 
     /// <inheritdoc/>
-    public async Task RegisterDependenciesAsync<T>(string key, T value)
+    public async Task RegisterDependenciesAsync<T>(IDatabase database, string key, T value)
     {
-        if (value is IEnumerable<ContentComponent> enumerable)
-        {
-            foreach (var item in enumerable)
-            {
-                await RegisterDependenciesAsync(key, item);
-            }
-        }
-        else if (value is ContentComponent contentComponent)
-        {
-            await RegisterContentDependenciesAsync(key, contentComponent);
-        }
+        var dependencies = await GetDependenciesAsync(value);
+        var batch = database.CreateBatch();
+
+        var tasks = dependencies.Select(dependency => batch.SetAddAsync(GetDependencyKey(dependency), key)).ToArray();
+        batch.Execute();
+
+        await Task.WhenAll(tasks);
     }
+
 
     /// <inheritdoc/>
     public async Task InvalidateCacheAsync(string contentComponentId)
@@ -243,24 +231,87 @@ public class RedisCache : ICmsCache
         await SetRemoveItemsAsync(key, dependencies);
     }
 
+    /// <inheritdoc/>
+    private async Task<IEnumerable<string>> GetDependenciesAsync<T>(T value)
+    {
+        var result = new List<string>();
+
+        if (value is IEnumerable<ContentComponent> enumerable)
+        {
+            foreach (var item in enumerable)
+            {
+                var nestedDependencies = await GetDependenciesAsync(item);
+                result.AddRange(nestedDependencies);
+            }
+        }
+        else if (value is ContentComponent contentComponent)
+        {
+            var nestedDependencies = await GetContentDependenciesAsync(contentComponent);
+            result.AddRange(nestedDependencies);
+        }
+
+        return result;
+    }
+
     /// <summary>
     /// Uses reflection to check for any ContentIds within the component and register the parent as a dependency
     /// </summary>
-    /// <param name="key"></param>
     /// <param name="value"></param>
-    private async Task RegisterContentDependenciesAsync(string key, ContentComponent value)
+    private async Task<IEnumerable<string>> GetContentDependenciesAsync(ContentComponent value)
     {
+        // RichText is a sub-component that doesn't have SystemDetails, exit for such types
+        if (value.Sys is null)
+            return [];
+
         // add the item itself as a dependency
-        await SetAddAsync(GetDependencyKey(value.Sys.Id), key);
+        var results = new List<string> { value.Sys.Id };
 
         var properties = value.GetType().GetProperties();
         foreach (var property in properties)
         {
-            if (property.PropertyType == typeof(ContentComponent) || typeof(IEnumerable<ContentComponent>).IsAssignableFrom(property.PropertyType))
+            if (typeof(ContentComponent).IsAssignableFrom(property.PropertyType) || typeof(IEnumerable<ContentComponent>).IsAssignableFrom(property.PropertyType))
             {
-                await RegisterDependenciesAsync(key, property.GetValue(value));
+                var nestedDependencies = await GetDependenciesAsync(property.GetValue(value));
+                results.AddRange(nestedDependencies);
             }
         }
+
+        return results;
+    }
+
+    /// <summary>
+    /// Creates a new cache item and stores it in the cache.
+    /// </summary>
+    /// <typeparam name="T">The type of the cached item.</typeparam>
+    /// <param name="db">The database connection to use for caching.</param>
+    /// <param name="key">The key associated with the cached item.</param>
+    /// <param name="action">A function that creates the item asynchronously.</param>
+    /// <param name="expiry">Optional. The time span after which the cached item expires.</param>
+    /// <param name="onCacheItemCreation">Optional. A function that is called after the item is created and cached.</param>
+    /// <returns>The newly created cached item or default value if the action returned null.</returns>
+    private async Task<T?> CreateAndCacheItemAsync<T>(IDatabase db, string key, Func<Task<T>> action, TimeSpan? expiry, Func<T, Task>? onCacheItemCreation)
+    {
+        _logger.LogTrace("Cache item with key: {Key} not found, executing action to create it", key);
+        var result = await action();
+
+        if (EqualityComparer<T>.Default.Equals(result, default))
+        {
+            _logger.LogWarning("Action returned null for cache item with key: {Key}", key);
+            return result;
+        }
+
+        var setValue = await SetAsync(db, key, result, expiry);
+        if (!string.IsNullOrEmpty(setValue))
+        {
+            _logger.LogInformation("Cache item with key: {Key} created and stored", key);
+
+            if (onCacheItemCreation != null)
+            {
+                await onCacheItemCreation(result).ConfigureAwait(false);
+            }
+        }
+
+        return result;
     }
 
     public string GetDependencyKey(string contentComponentId)

@@ -1,0 +1,15 @@
+@using Dfe.PlanTech.Web.Models.Content.Mapped.Types
+@model Dfe.PlanTech.Web.Models.Content.Mapped.RichTextContentItem
+
+<ul class="govuk-list govuk-list--bullet">
+        @foreach (var item in Model.Content)
+
+        {
+                if(item.NodeType == RichTextNodeType.ListItem)
+                {
+                    <li>
+                        <partial name="Shared/RichText/_Items" model="@item"/>
+                    </li>
+                }
+        }
+</ul>

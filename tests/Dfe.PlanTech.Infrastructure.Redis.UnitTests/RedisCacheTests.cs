@@ -3,6 +3,7 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using StackExchange.Redis;
 
 namespace Dfe.PlanTech.Infrastructure.Redis.UnitTests;
@@ -155,6 +156,22 @@ public class RedisCacheTests
     }
 
     [Fact]
+    public async Task GetOrCreateAsync_Handles_GetErrors()
+    {
+        string otherValue = """{ "thisis" : "another value" }""";
+        var serialised = JsonSerialiser.Deserialise<JsonElement>(otherValue);
+        Task<JsonElement> action() => Task.FromResult(serialised);
+
+        _database.StringGetAsync(Arg.Any<RedisKey>(), Arg.Any<CommandFlags>()).ThrowsAsync((callinfo) =>
+                {
+                    throw new Exception("Error");
+                });
+
+        var result = await _cache.GetOrCreateAsync(key, action);
+        Assert.Equal(serialised, result);
+    }
+
+    [Fact]
     public async Task SetAsync_Succeeds()
     {
         var result = await _cache.SetAsync(key, value);
@@ -249,10 +266,12 @@ public class RedisCacheTests
     [Fact]
     public async Task RegisterDependencyAsync_StoresAllContentIds()
     {
-        await _cache.RegisterDependenciesAsync(key, _question);
-        await _database.Received(1).SetAddAsync(_cache.GetDependencyKey(_question.Sys.Id), key);
-        await _database.Received(1).SetAddAsync(_cache.GetDependencyKey(_firstAnswer.Sys.Id), key);
-        await _database.Received(1).SetAddAsync(_cache.GetDependencyKey(_secondAnswer.Sys.Id), key);
+        var batch = Substitute.For<IBatch>();
+        _database.CreateBatch().Returns(batch);
+        await _cache.RegisterDependenciesAsync(_database, key, _question);
+        await batch.Received(1).SetAddAsync(_cache.GetDependencyKey(_question.Sys.Id), key);
+        await batch.Received(1).SetAddAsync(_cache.GetDependencyKey(_firstAnswer.Sys.Id), key);
+        await batch.Received(1).SetAddAsync(_cache.GetDependencyKey(_secondAnswer.Sys.Id), key);
     }
 
     [Fact]

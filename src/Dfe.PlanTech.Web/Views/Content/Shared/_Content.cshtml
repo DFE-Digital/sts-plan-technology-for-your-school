@@ -1,0 +1,10 @@
+@using Dfe.PlanTech.Web.Models.Content.Mapped
+@model Dfe.PlanTech.Web.Models.Content.Mapped.CsContentItem;
+
+@{
+    if (Model.GetType() == typeof(RichTextContentItem))
+    {
+        var richText = Model as RichTextContentItem;
+        <partial name="Shared/RichText/_RichText" model="@richText"/>
+    }
+}
