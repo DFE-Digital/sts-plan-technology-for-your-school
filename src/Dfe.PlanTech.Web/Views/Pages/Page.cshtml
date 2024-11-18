@@ -10,19 +10,24 @@
         await Html.RenderPartialAsync("HomeButton", Model);
     }
 }
+
 @{
     if (Model.Page.Slug == "self-assessment" && TempData.ContainsKey("SubtopicError"))
     {
         var error = TempData["SubtopicError"] as string;
-        <div class="govuk-error-summary" data-module="govuk-error-summary">
-            <div role="alert">
-                <h2 class="govuk-error-summary__title">
-                    There is a problem
-                </h2>
-                @if (!string.IsNullOrEmpty(error))
-                {
-                    <div class="govuk-error-summary__body whitespace-preline">@error</div>
-                }
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <div class="govuk-error-summary" data-module="govuk-error-summary">
+                    <div role="alert">
+                        <h2 class="govuk-error-summary__title">
+                            There is a problem
+                        </h2>
+                        @if (!string.IsNullOrEmpty(error))
+                        {
+                            <div class="govuk-error-summary__body whitespace-preline">@error</div>
+                        }
+                    </div>
+                </div>
             </div>
         </div>
     }
