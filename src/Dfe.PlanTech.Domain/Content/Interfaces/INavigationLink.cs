@@ -26,7 +26,7 @@ public interface INavigationLink
     /// <summary>
     /// Does this link contain all necessary information (Href + DisplayText)?
     /// </summary>
-    public bool IsValid => !string.IsNullOrEmpty(DisplayText) && !string.IsNullOrEmpty(Href);
+    public bool IsValid => !string.IsNullOrEmpty(DisplayText) && !(string.IsNullOrEmpty(Href) && ContentToLinkTo == null);
 
     /// <summary>
     /// The content to link to.

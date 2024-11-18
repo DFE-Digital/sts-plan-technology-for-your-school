@@ -1,8 +1,6 @@
-using System.Text;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Models.Content;
-using Dfe.PlanTech.Web.Models.Content.Mapped;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Dfe.PlanTech.Web.TagHelpers;
@@ -17,46 +15,41 @@ public class FooterLinkTagHelper(ILogger<FooterLinkTagHelper> logger) : TagHelpe
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
-        if (Link == null || !Link.IsValid)
+        if (Link == null || !Link.IsValid || !TryBuildElement(output))
         {
-            logger.LogWarning("Missing {link}", nameof(Link));
+            output.TagName = null;
+            output.Content.SetHtmlContent("");
+            logger.LogWarning("Missing or invalid {Name} {Link}", nameof(NavigationLink), Link);
             return;
         }
 
-        var html = GetHtml();
-
-        output.TagName = null;
+        output.TagName = "a";
         output.TagMode = TagMode.StartTagAndEndTag;
-        output.Content.SetHtmlContent(html);
     }
 
-    public string GetHtml()
+    /// <summary>
+    /// Adds attributes to element
+    /// </summary>
+    /// <param name="output"></param>
+    /// <returns>True; valid element. False; invalid</returns>
+    public bool TryBuildElement(TagHelperOutput output)
     {
-        var stringBuilder = new StringBuilder();
-        AppendOpenTag(stringBuilder);
-        stringBuilder.Append(Link!.DisplayText);
-        AppendCloseTag(stringBuilder);
+        var href = GetHref();
 
-        return stringBuilder.ToString();
-    }
+        if (string.IsNullOrEmpty(href))
+        {
+            return false;
+        }
 
-    private static void AppendCloseTag(StringBuilder stringBuilder)
-    {
-        stringBuilder.Append("</a>");
-    }
-
-    private void AppendOpenTag(StringBuilder stringBuilder)
-    {
-        stringBuilder.Append("""<a class="govuk-footer__link" """).Append(" href=\"");
-        stringBuilder.Append(GetHref());
-        stringBuilder.Append('"');
+        output.Attributes.Add("href", href);
+        output.Attributes.Add("class", "govuk-footer__link");
 
         if (Link!.OpenInNewTab)
         {
-            stringBuilder.Append(" target=\"_blank\"");
+            output.Attributes.Add("target", "_blank");
         }
 
-        stringBuilder.Append('>');
+        return true;
     }
 
     private string GetHref()
@@ -77,18 +70,29 @@ public class FooterLinkTagHelper(ILogger<FooterLinkTagHelper> logger) : TagHelpe
             return null;
         }
 
+        if (Link.ContentToLinkTo is not IHasSlug hasSlug)
+        {
+            logger.LogError("Invalid content type received for Link. Expected {Interface} but type is {Concrete}", typeof(IHasSlug), Link.ContentToLinkTo.GetType());
+            return null;
+        }
+
+        var firstCharacterIsSlash = hasSlug.Slug[0] == '/';
+
+        var slug = firstCharacterIsSlash ? hasSlug.Slug.AsSpan(1) : hasSlug.Slug.AsSpan();
+
         return Link.ContentToLinkTo switch
         {
-            IPage page => $"/{page.Slug}",
-            CsPage csPage  => $"/content/{csPage.Slug}", 
-            ContentSupportPage contentSupportPage => $"/content/{contentSupportPage.Slug}", 
+            IPage => $"/{slug}",
+            IContentSupportPage => $"/content/{slug}",
             _ => LogInvalidContentTypeAndReturnNull(Link.ContentToLinkTo)
         };
     }
 
+
+
     private string? LogInvalidContentTypeAndReturnNull(object content)
     {
-        logger.LogError("Unsupported content type {ContentType} in {TagHelper}", 
+        logger.LogError("Unsupported content type {ContentType} in {TagHelper}",
             content.GetType().Name,
             nameof(FooterLinkTagHelper));
         return null;
