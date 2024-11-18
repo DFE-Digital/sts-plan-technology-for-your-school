@@ -44,7 +44,7 @@ describe("Recommendation Page", () => {
 
   //Links
   it("Should have no broken links", () => {
-    cy.get(".govuk-main-wrapper").within(() => {
+    cy.get(".govuk-main-wrapper").each(() => {
       cy.get("a").each(($link) => {
         cy.wrap($link).should("have.attr", "href");
         cy.request({ url: $link.prop("href") });
