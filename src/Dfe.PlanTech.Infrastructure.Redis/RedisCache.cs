@@ -37,20 +37,28 @@ public class RedisCache : ICmsCache
     {
         _logger.LogInformation("Attempting to get or create cache item with key: {Key}", key);
 
-        var db = await _connectionManager.GetDatabaseAsync(databaseId);
-        var redisResult = await GetAsync<T>(db, key);
+        try
+        {
+            var db = await _connectionManager.GetDatabaseAsync(databaseId);
+            var redisResult = await GetAsync<T>(db, key);
 
-        if (redisResult.ExistedInCache == true)
-        {
-            _logger.LogTrace("Cache item with key: {Key} found", key);
-            return redisResult.CacheValue;
+            if (redisResult.ExistedInCache == true)
+            {
+                _logger.LogTrace("Cache item with key: {Key} found", key);
+                return redisResult.CacheValue;
+            }
+            else if (redisResult.Errored)
+            {
+                return await action();
+            }
+
+            return await CreateAndCacheItemAsync(db, key, action, expiry, onCacheItemCreation);
         }
-        else if (redisResult.Errored)
+        catch (RedisConnectionException redisException)
         {
+            _logger.LogError(redisException, "Failed to connect to Redis server: \"{Message}\". Retrieving server using {Action}.", redisException.Message, nameof(Action));
             return await action();
         }
-
-        return await CreateAndCacheItemAsync(db, key, action, expiry, onCacheItemCreation);
     }
 
     /// <inheritdoc/>
