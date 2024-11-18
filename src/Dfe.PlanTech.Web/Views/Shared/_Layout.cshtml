@@ -1,7 +1,7 @@
 @using Dfe.PlanTech.Web.Helpers;
 
 @section Head {
-    <partial name="_Head" />
+    <partial name="_Head"/>
     @await RenderSectionAsync("Head", required: false)
 }
 
@@ -16,37 +16,45 @@
 }
 
 @section Header {
-    <partial name="GoogleTagManager/_Body" />
-    <partial name="CookiesBanner/_CookieBanner" />
-    <partial name="_Header" />
+    <partial name="GoogleTagManager/_Body"/>
+    <partial name="CookiesBanner/_CookieBanner"/>
+    <partial name="_Header"/>
     @await RenderSectionAsync("Header", required: false)
 
-    <section class="dfe-page-header">
-        <div class="govuk-width-container">
-            <div class="govuk-grid-row">
-                <div class="govuk-grid-column-two-thirds">
-                    @await RenderSectionAsync("DfePageHeaderOuter", required: false)
-                    <div class="dfe-page-header-inner">
-                        @await RenderSectionAsync("DfePageHeaderInner", required: false)
+    @if (IsSectionDefined("DfePageHeaderOuter") || IsSectionDefined("DfePageHeaderInner"))
+    {
+        <section class="dfe-page-header">
+            <div class="govuk-width-container">
+                <div class="govuk-grid-row">
+                    <div class="govuk-grid-column-two-thirds">
+                        <partial name="BetaHeader"/>
+                        @await RenderSectionAsync("DfePageHeaderOuter", required: false)
+                        <div class="dfe-page-header-inner">
+                            @await RenderSectionAsync("DfePageHeaderInner", required: false)
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+    }
 }
 
 @section BeforeContent {
-    <partial name="_BeforeContent" />
+    @if (!IsSectionDefined("DfePageHeaderOuter") && !IsSectionDefined("DfePageHeaderInner"))
+    {
+        <partial name="BetaHeader"/>
+    }
+    <partial name="_BeforeContent"/>
     @await RenderSectionAsync("BeforeContent", required: false)
 }
 
 @RenderBody()
 
 @section Footer {
-    <partial name="_Footer" />
+    <partial name="_Footer"/>
 }
 
 @section BodyEnd {
-    <partial name="_BodyEnd" />
+    <partial name="_BodyEnd"/>
     @await RenderSectionAsync("BodyEnd", required: false)
 }
