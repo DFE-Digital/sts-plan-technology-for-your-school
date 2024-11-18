@@ -16,7 +16,7 @@ public interface INavigationLink
     /// <summary>
     /// Href value (i.e. <a href="{Href}"></a>)
     /// </summary>
-    public string Href { get; set; }
+    public string? Href { get; set; }
 
     /// <summary>
     /// Should this link open in a new tab?
@@ -27,4 +27,9 @@ public interface INavigationLink
     /// Does this link contain all necessary information (Href + DisplayText)?
     /// </summary>
     public bool IsValid => !string.IsNullOrEmpty(DisplayText) && !string.IsNullOrEmpty(Href);
+
+    /// <summary>
+    /// The content to link to.
+    /// </summary>
+    public IContentComponent? ContentToLinkTo { get; set; }
 }

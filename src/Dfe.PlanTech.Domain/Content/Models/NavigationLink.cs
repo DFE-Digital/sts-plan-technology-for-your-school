@@ -18,10 +18,15 @@ public class NavigationLink : ContentComponent, INavigationLink
     /// <summary>
     /// Href value (i.e. <a href="{Href}"></a>)
     /// </summary>
-    public string Href { get; set; } = null!;
+    public string? Href { get; set; } = null;
 
     /// <summary>
     /// Should this link open in a new tab?
     /// </summary>
     public bool OpenInNewTab { get; set; } = false;
+
+    /// <summary>
+    /// The content to link to.
+    /// </summary>
+    public IContentComponent? ContentToLinkTo { get; set; }
 }
