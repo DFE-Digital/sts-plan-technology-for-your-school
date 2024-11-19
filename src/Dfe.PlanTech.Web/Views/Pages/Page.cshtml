@@ -12,6 +12,11 @@
 }
 
 @section DfePageHeaderInner {
+    @foreach (var content in Model.Page.BeforeTitleContent)
+    {
+        await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+    }
+
     @if (Model.Page.DisplayOrganisationName)
     {
         <span class="govuk-caption-xl govuk-!-margin-top-5">@Model.Page.OrganisationName</span>
