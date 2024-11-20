@@ -2,14 +2,10 @@
 @{
     if (!TempData.ContainsKey("SubtopicError"))
     {
-        <div class="govuk-grid-row">
-            <div class="govuk-grid-column-two-thirds">
-                <govuk-notification-banner>
-                    @{
-                        await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Text);
-                    }
-                </govuk-notification-banner>
-            </div>
-        </div>
+        <govuk-notification-banner>
+            @{
+                await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Text);
+            }
+        </govuk-notification-banner>
     }
 }
