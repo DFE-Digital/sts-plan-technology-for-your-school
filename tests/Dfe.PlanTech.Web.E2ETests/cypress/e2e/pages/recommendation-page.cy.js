@@ -46,8 +46,8 @@ describe("Recommendation Page", () => {
   it("Should have no broken internal links", () => {
     cy.get(".govuk-main-wrapper").each(() => {
       cy.get("a").each(($link) => {
-        const href = $link.prop("href");
         cy.wrap($link).should("have.attr", "href");
+        const href = $link.prop("href");
         // For internal links, check that they work - some external links block access from tools like cypress
         if (href && (href.startsWith('/') || href.includes(window.location.origin))) {
           cy.request({url: href});
@@ -57,8 +57,8 @@ describe("Recommendation Page", () => {
 
     cy.get(".recommendation-content").within(() => {
       cy.get("a").each(($link) => {
-        const href = $link.prop("href");
         cy.wrap($link).should("have.attr", "href");
+        const href = $link.prop("href");
         if (href && (href.startsWith('/') || href.includes(window.location.origin))) {
           cy.request({url: href});
         }
