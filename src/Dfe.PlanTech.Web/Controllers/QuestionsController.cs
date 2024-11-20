@@ -3,6 +3,7 @@ using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
@@ -97,7 +98,16 @@ public class QuestionsController : BaseController<QuestionsController>
         {
             // Remove the current invalid submission and redirect to self-assessment page
             await deleteCurrentSubmissionCommand.DeleteCurrentSubmission(section, cancellationToken);
-            TempData["SubtopicError"] = configuration["ErrorMessages:ConcurrentUsersOrContentChange"];
+
+            var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(configuration["ContactUs:LinkId"]);
+            var errorMessage = configuration["ErrorMessages:ConcurrentUsersOrContentChange"];
+
+            if (contactLink != null && !string.IsNullOrEmpty(contactLink.Href))
+            {
+                errorMessage = errorMessage.Replace("contact us", $"<a href=\"{contactLink.Href}\" target=\"_blank\">contact us</a>");
+            }
+
+            TempData["SubtopicError"] = errorMessage;
             return RedirectToAction(
                 PagesController.GetPageByRouteAction,
                 PagesController.ControllerName,
