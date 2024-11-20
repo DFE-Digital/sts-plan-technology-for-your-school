@@ -99,20 +99,25 @@ public class QuestionsController : BaseController<QuestionsController>
             // Remove the current invalid submission and redirect to self-assessment page
             await deleteCurrentSubmissionCommand.DeleteCurrentSubmission(section, cancellationToken);
 
-            var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(configuration["ContactUs:LinkId"]);
-            var errorMessage = configuration["ErrorMessages:ConcurrentUsersOrContentChange"];
-
-            if (contactLink != null && !string.IsNullOrEmpty(contactLink.Href))
-            {
-                errorMessage = errorMessage.Replace("contact us", $"<a href=\"{contactLink.Href}\" target=\"_blank\">contact us</a>");
-            }
-
-            TempData["SubtopicError"] = errorMessage;
+            TempData["SubtopicError"] = await BuildErrorMessage(configuration);
             return RedirectToAction(
                 PagesController.GetPageByRouteAction,
                 PagesController.ControllerName,
                 new { route = "self-assessment" });
         }
+    }
+
+    private async Task<string> BuildErrorMessage(IConfiguration configuration)
+    {
+        var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(configuration["ContactUs:LinkId"]);
+        var errorMessage = configuration["ErrorMessages:ConcurrentUsersOrContentChange"];
+
+        if (contactLink != null && !string.IsNullOrEmpty(contactLink.Href))
+        {
+            errorMessage = errorMessage.Replace("contact us", $"<a href=\"{contactLink.Href}\" target=\"_blank\">contact us</a>");
+        }
+
+        return errorMessage;
     }
 
     [HttpPost("{sectionSlug}/{questionSlug}")]
