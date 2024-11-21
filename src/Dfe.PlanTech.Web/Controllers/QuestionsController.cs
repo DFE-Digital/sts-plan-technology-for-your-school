@@ -9,6 +9,7 @@ using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
+using Dfe.PlanTech.Web.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;

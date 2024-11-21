@@ -3,6 +3,7 @@ using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Infrastructure.ServiceBus;
 using Dfe.PlanTech.Infrastructure.SignIns;
+using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web;
 using Dfe.PlanTech.Web.Middleware;
 using GovUk.Frontend.AspNetCore;
