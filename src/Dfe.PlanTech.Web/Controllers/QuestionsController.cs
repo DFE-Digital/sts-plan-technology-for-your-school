@@ -26,6 +26,7 @@ public class QuestionsController : BaseController<QuestionsController>
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetLatestResponsesQuery _getResponseQuery;
     private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery;
+    private readonly IGetNavigationQuery _getNavigationQuery;
     private readonly IUser _user;
     private readonly ErrorMessages _errorMessages;
     private readonly ContactOptions _contactOptions;
@@ -34,6 +35,7 @@ public class QuestionsController : BaseController<QuestionsController>
                                IGetSectionQuery getSectionQuery,
                                IGetLatestResponsesQuery getResponseQuery,
                                IGetEntityFromContentfulQuery getEntityByIdQuery,
+                               IGetNavigationQuery getNavigationQuery,
                                IUser user,
                                IOptions<ErrorMessages> errorMessages,
                                IOptions<ContactOptions> contactOptions) : base(logger)
@@ -41,6 +43,7 @@ public class QuestionsController : BaseController<QuestionsController>
         _getResponseQuery = getResponseQuery;
         _getSectionQuery = getSectionQuery;
         _getEntityFromContentfulQuery = getEntityByIdQuery;
+        _getNavigationQuery = getNavigationQuery;
         _user = user;
         _errorMessages = errorMessages.Value;
         _contactOptions = contactOptions.Value;
@@ -116,7 +119,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
     private async Task<string> BuildErrorMessage()
     {
-        var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(_contactOptions.LinkId);
+        var contactLink =  await _getNavigationQuery.GetLinkById(_contactOptions.LinkId);
         var errorMessage = _errorMessages.ConcurrentUsersOrContentChange;
 
         if (contactLink != null && !string.IsNullOrEmpty(contactLink.Href))

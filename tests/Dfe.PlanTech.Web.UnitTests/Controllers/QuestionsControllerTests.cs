@@ -27,6 +27,7 @@ public class QuestionsControllerTests
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetLatestResponsesQuery _getResponseQuery;
     private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery;
+    private readonly IGetNavigationQuery _getNavigationQuery;
     private readonly IDeleteCurrentSubmissionCommand _deleteCurrentSubmissionCommand;
     private readonly IGetQuestionBySlugRouter _getQuestionBySlugRouter;
     private readonly IUser _user;
@@ -72,6 +73,7 @@ public class QuestionsControllerTests
 
         _getSectionQuery = Substitute.For<IGetSectionQuery>();
         _getEntityFromContentfulQuery = Substitute.For<IGetEntityFromContentfulQuery>();
+        _getNavigationQuery = Substitute.For<IGetNavigationQuery>();
 
         _getEntityFromContentfulQuery.GetEntityById<Question>(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns((callinfo) =>
@@ -119,7 +121,7 @@ public class QuestionsControllerTests
         _user = Substitute.For<IUser>();
         _user.GetEstablishmentId().Returns(EstablishmentId);
 
-        _controller = new QuestionsController(_logger, _getSectionQuery, _getResponseQuery, _getEntityFromContentfulQuery, _user, _errorMessages, _contactOptions);
+        _controller = new QuestionsController(_logger, _getSectionQuery, _getResponseQuery, _getEntityFromContentfulQuery, _getNavigationQuery, _user, _errorMessages, _contactOptions);
     }
 
     [Fact]

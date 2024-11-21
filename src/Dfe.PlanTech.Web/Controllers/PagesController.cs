@@ -16,10 +16,10 @@ namespace Dfe.PlanTech.Web.Controllers;
 
 [LogInvalidModelState]
 [Route("/")]
-public class PagesController(ILogger<PagesController> logger, IGetEntityFromContentfulQuery getEntityByIdQuery, IOptions<ContactOptions> contactOptions) : BaseController<PagesController>(logger)
+public class PagesController(ILogger<PagesController> logger, IGetNavigationQuery getNavigationQuery, IOptions<ContactOptions> contactOptions) : BaseController<PagesController>(logger)
 {
     private readonly ILogger _logger = logger;
-    private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery = getEntityByIdQuery;
+    private readonly IGetNavigationQuery _getNavigationQuery = getNavigationQuery;
     private readonly ContactOptions _contactOptions = contactOptions.Value;
     public const string ControllerName = "Pages";
     public const string GetPageByRouteAction = nameof(GetByRoute);
@@ -47,8 +47,7 @@ public class PagesController(ILogger<PagesController> logger, IGetEntityFromCont
     [HttpGet(UrlConstants.ServiceUnavailable, Name = UrlConstants.ServiceUnavailable)]
     public async Task<IActionResult> ServiceUnavailable()
     {
-        var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(_contactOptions.LinkId) ??
-                throw new KeyNotFoundException($"Could not find navigation link with Id {_contactOptions.LinkId}");
+        var contactLink = await GetContactLinkAsync();
 
         var viewModel = new ServiceUnavailableViewModel
         {
@@ -61,8 +60,7 @@ public class PagesController(ILogger<PagesController> logger, IGetEntityFromCont
     [HttpGet(UrlConstants.NotFound, Name = UrlConstants.NotFound)]
     public async Task<IActionResult> NotFoundError()
     {
-        var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(_contactOptions.LinkId) ??
-                throw new KeyNotFoundException($"Could not find navigation link with Id {_contactOptions.LinkId}");
+        var contactLink = await GetContactLinkAsync();
 
         var viewModel = new NotFoundViewModel
         {
@@ -70,5 +68,10 @@ public class PagesController(ILogger<PagesController> logger, IGetEntityFromCont
         };
 
         return View(viewModel);
+    }
+
+    private async Task<INavigationLink> GetContactLinkAsync()
+    {
+        return await _getNavigationQuery.GetLinkById(_contactOptions.LinkId);
     }
 }

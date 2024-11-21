@@ -10,4 +10,10 @@ public interface IGetNavigationQuery
     /// </summary>
     /// <returns>Found navigation links</returns>
     Task<IEnumerable<INavigationLink>> GetNavigationLinks(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieve link by id
+    /// </summary>
+    /// <returns>Found navigation link</returns>
+    Task<INavigationLink> GetLinkById(string contentId, CancellationToken cancellationToken = default);
 }
