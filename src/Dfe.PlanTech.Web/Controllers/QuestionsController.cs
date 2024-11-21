@@ -107,7 +107,7 @@ public class QuestionsController : BaseController<QuestionsController>
             // Remove the current invalid submission and redirect to self-assessment page
             await deleteCurrentSubmissionCommand.DeleteCurrentSubmission(section, cancellationToken);
 
-            TempData["SubtopicError"] = await BuildErrorMessage(configuration);
+            TempData["SubtopicError"] = await BuildErrorMessage();
             return RedirectToAction(
                 PagesController.GetPageByRouteAction,
                 PagesController.ControllerName,
@@ -115,7 +115,7 @@ public class QuestionsController : BaseController<QuestionsController>
         }
     }
 
-    private async Task<string> BuildErrorMessage(IConfiguration configuration)
+    private async Task<string> BuildErrorMessage()
     {
         var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(_contactOptions.LinkId);
         var errorMessage = _errorMessages.ConcurrentUsersOrContentChange;
