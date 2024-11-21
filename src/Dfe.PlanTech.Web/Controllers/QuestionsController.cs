@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -119,7 +118,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
     private async Task<string> BuildErrorMessage()
     {
-        var contactLink =  await _getNavigationQuery.GetLinkById(_contactOptions.LinkId);
+        var contactLink = await _getNavigationQuery.GetLinkById(_contactOptions.LinkId);
         var errorMessage = _errorMessages.ConcurrentUsersOrContentChange;
 
         if (contactLink != null && !string.IsNullOrEmpty(contactLink.Href))
