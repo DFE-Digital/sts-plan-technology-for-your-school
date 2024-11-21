@@ -164,19 +164,19 @@ public class QuestionsControllerTests
     [Fact]
     public async Task GetNextUnansweredQuestion_Should_Error_When_SectionSlug_Null()
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetNextUnansweredQuestion(null!, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand, _configuration));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetNextUnansweredQuestion(null!, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand));
     }
 
     [Fact]
     public async Task GetNextUnansweredQuestion_Should_Error_When_SectionSlug_NotFound()
     {
-        await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetNextUnansweredQuestion("Not a real section", _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand, _configuration));
+        await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetNextUnansweredQuestion("Not a real section", _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand));
     }
 
     [Fact]
     public async Task GetNextUnansweredQuestion_Should_Redirect_To_CheckAnswersPage_When_No_Question_Returned()
     {
-        var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand, _configuration);
+        var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand);
 
         var redirectResult = result as RedirectToActionResult;
         Assert.NotNull(redirectResult);
@@ -190,7 +190,7 @@ public class QuestionsControllerTests
         _getNextUnansweredQuestionQuery.GetNextUnansweredQuestion(EstablishmentId, _validSection, Arg.Any<CancellationToken>())
                                         .Returns((callinfo) => _validQuestion);
 
-        var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand, _configuration);
+        var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand);
 
         var redirectResult = result as RedirectToActionResult;
         Assert.NotNull(redirectResult);
@@ -215,7 +215,7 @@ public class QuestionsControllerTests
 
         _controller.TempData = Substitute.For<ITempDataDictionary>();
 
-        var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand, _configuration);
+        var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand);
 
         var errorMessage = _controller.TempData["SubtopicError"] as string;
         var redirectResult = result as RedirectToActionResult;

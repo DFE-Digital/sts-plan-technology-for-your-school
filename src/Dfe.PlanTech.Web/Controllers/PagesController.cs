@@ -45,9 +45,10 @@ public class PagesController(ILogger<PagesController> logger, IGetEntityFromCont
     => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 
     [HttpGet(UrlConstants.ServiceUnavailable, Name = UrlConstants.ServiceUnavailable)]
-    public async Task<IActionResult> ServiceUnavailable([FromServices] IConfiguration configuration)
+    public async Task<IActionResult> ServiceUnavailable()
     {
-        var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(_contactOptions.LinkId);
+        var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(_contactOptions.LinkId) ??
+                throw new KeyNotFoundException($"Could not find navigation link with Id {_contactOptions.LinkId}");
 
         var viewModel = new ServiceUnavailableViewModel
         {
@@ -58,7 +59,7 @@ public class PagesController(ILogger<PagesController> logger, IGetEntityFromCont
     }
 
     [HttpGet(UrlConstants.NotFound, Name = UrlConstants.NotFound)]
-    public async Task<IActionResult> NotFoundError([FromServices] IConfiguration configuration)
+    public async Task<IActionResult> NotFoundError()
     {
         var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(_contactOptions.LinkId) ??
                 throw new KeyNotFoundException($"Could not find navigation link with Id {_contactOptions.LinkId}");

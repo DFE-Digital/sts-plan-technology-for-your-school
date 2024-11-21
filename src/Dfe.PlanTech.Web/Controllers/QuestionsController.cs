@@ -83,7 +83,6 @@ public class QuestionsController : BaseController<QuestionsController>
     public async Task<IActionResult> GetNextUnansweredQuestion(string sectionSlug,
                                                                 [FromServices] IGetNextUnansweredQuestionQuery getQuestionQuery,
                                                                 [FromServices] IDeleteCurrentSubmissionCommand deleteCurrentSubmissionCommand,
-                                                                [FromServices] IConfiguration configuration,
                                                                 CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(sectionSlug))
