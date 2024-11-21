@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 using Xunit;
 
@@ -29,6 +30,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery;
         private readonly PagesController _controller;
         private readonly ControllerContext _controllerContext;
+        private readonly IOptions<ContactOptions> _contactOptions;
 
         public PagesControllerTests()
         {
@@ -39,7 +41,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _getEntityFromContentfulQuery = Substitute.For<IGetEntityFromContentfulQuery>();
             _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(Arg.Any<string>()).Returns(new NavigationLink { DisplayText = "contact us", Href = "/contact-us", OpenInNewTab = true });
 
-            _controller = new PagesController(Logger, _getEntityFromContentfulQuery)
+            var contactUs = new ContactOptions
+            {
+                LinkId = "LinkId"
+            };
+            _contactOptions = Options.Create(contactUs);
+
+            _controller = new PagesController(Logger, _getEntityFromContentfulQuery, _contactOptions)
             {
                 ControllerContext = _controllerContext,
                 TempData = Substitute.For<ITempDataDictionary>()

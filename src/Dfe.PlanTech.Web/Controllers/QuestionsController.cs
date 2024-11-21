@@ -27,19 +27,22 @@ public class QuestionsController : BaseController<QuestionsController>
     private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery;
     private readonly IUser _user;
     private readonly ErrorMessages _errorMessages;
+    private readonly ContactOptions _contactOptions;
 
     public QuestionsController(ILogger<QuestionsController> logger,
                                IGetSectionQuery getSectionQuery,
                                IGetLatestResponsesQuery getResponseQuery,
                                IGetEntityFromContentfulQuery getEntityByIdQuery,
                                IUser user,
-                               IOptions<ErrorMessages> errorMessages) : base(logger)
+                               IOptions<ErrorMessages> errorMessages,
+                               IOptions<ContactOptions> contactOptions) : base(logger)
     {
         _getResponseQuery = getResponseQuery;
         _getSectionQuery = getSectionQuery;
         _getEntityFromContentfulQuery = getEntityByIdQuery;
         _user = user;
         _errorMessages = errorMessages.Value;
+        _contactOptions = contactOptions.Value;
     }
 
     [LogInvalidModelState]
@@ -113,7 +116,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
     private async Task<string> BuildErrorMessage(IConfiguration configuration)
     {
-        var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(configuration["ContactUs:LinkId"]);
+        var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(_contactOptions.LinkId);
         var errorMessage = _errorMessages.ConcurrentUsersOrContentChange;
 
         if (contactLink != null && !string.IsNullOrEmpty(contactLink.Href))

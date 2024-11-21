@@ -28,6 +28,7 @@ if (builder.Environment.EnvironmentName != "E2E")
 
 builder.Services.AddCustomTelemetry();
 builder.Services.Configure<ErrorMessages>(builder.Configuration.GetSection("ErrorMessages"));
+builder.Services.Configure<ContactOptions>(builder.Configuration.GetSection("ContactUs"));
 
 builder.AddContentAndSupportServices()
         .AddAuthorisationServices()

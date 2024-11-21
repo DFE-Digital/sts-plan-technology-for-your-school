@@ -30,6 +30,7 @@ public class QuestionsControllerTests
     private readonly IGetQuestionBySlugRouter _getQuestionBySlugRouter;
     private readonly IUser _user;
     private readonly IOptions<ErrorMessages> _errorMessages;
+    private readonly IOptions<ContactOptions> _contactOptions;
     private readonly QuestionsController _controller;
     private readonly IConfiguration _configuration;
 
@@ -100,8 +101,14 @@ public class QuestionsControllerTests
         {
             ConcurrentUsersOrContentChange = "An error occurred. Please contact us."
         };
-
         _errorMessages = Options.Create(message);
+
+
+        var contactUs = new ContactOptions
+        {
+            LinkId = "LinkId"
+        };
+        _contactOptions = Options.Create(contactUs);
 
         _getResponseQuery = Substitute.For<IGetLatestResponsesQuery>();
         _getQuestionBySlugRouter = Substitute.For<IGetQuestionBySlugRouter>();
@@ -111,7 +118,7 @@ public class QuestionsControllerTests
         _user = Substitute.For<IUser>();
         _user.GetEstablishmentId().Returns(EstablishmentId);
 
-        _controller = new QuestionsController(_logger, _getSectionQuery, _getResponseQuery, _getEntityFromContentfulQuery, _user, _errorMessages);
+        _controller = new QuestionsController(_logger, _getSectionQuery, _getResponseQuery, _getEntityFromContentfulQuery, _user, _errorMessages, _contactOptions);
     }
 
     [Fact]

@@ -9,15 +9,17 @@ using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
 [LogInvalidModelState]
 [Route("/")]
-public class PagesController(ILogger<PagesController> logger, IGetEntityFromContentfulQuery getEntityByIdQuery) : BaseController<PagesController>(logger)
+public class PagesController(ILogger<PagesController> logger, IGetEntityFromContentfulQuery getEntityByIdQuery, IOptions<ContactOptions> contactOptions) : BaseController<PagesController>(logger)
 {
     private readonly ILogger _logger = logger;
     private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery = getEntityByIdQuery;
+    private readonly ContactOptions _contactOptions = contactOptions.Value;
     public const string ControllerName = "Pages";
     public const string GetPageByRouteAction = nameof(GetByRoute);
     public const string NotFoundPage = "NotFoundError";
@@ -44,7 +46,7 @@ public class PagesController(ILogger<PagesController> logger, IGetEntityFromCont
     [HttpGet(UrlConstants.ServiceUnavailable, Name = UrlConstants.ServiceUnavailable)]
     public async Task<IActionResult> ServiceUnavailable([FromServices] IConfiguration configuration)
     {
-        var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(configuration["ContactUs:LinkId"]);
+        var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(_contactOptions.LinkId);
 
         var viewModel = new ServiceUnavailableViewModel
         {
@@ -57,9 +59,8 @@ public class PagesController(ILogger<PagesController> logger, IGetEntityFromCont
     [HttpGet(UrlConstants.NotFound, Name = UrlConstants.NotFound)]
     public async Task<IActionResult> NotFoundError([FromServices] IConfiguration configuration)
     {
-        var contentId = configuration["ContactUs:LinkId"];
-        var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(contentId) ??
-                throw new KeyNotFoundException($"Could not find navigation link with Id {contentId}");
+        var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(_contactOptions.LinkId) ??
+                throw new KeyNotFoundException($"Could not find navigation link with Id {_contactOptions.LinkId}");
 
         var viewModel = new NotFoundViewModel
         {

@@ -25,6 +25,7 @@ public class GetQuestionBySlugRouterTests
     private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery = Substitute.For<IGetEntityFromContentfulQuery>();
     private readonly IUser _user = Substitute.For<IUser>();
     private readonly IOptions<ErrorMessages> _errorMessages = Substitute.For<IOptions<ErrorMessages>>();
+    private readonly IOptions<ContactOptions> _contactOptions = Substitute.For<IOptions<ContactOptions>>();
 
     private readonly IGetSectionQuery _getSectionQuery = Substitute.For<IGetSectionQuery>();
     private readonly QuestionsController _controller;
@@ -37,7 +38,7 @@ public class GetQuestionBySlugRouterTests
 
     public GetQuestionBySlugRouterTests()
     {
-        _controller = new QuestionsController(new NullLogger<QuestionsController>(), _getSectionQuery, _getResponseQuery, _getEntityFromContentfulQuery, _user, _errorMessages);
+        _controller = new QuestionsController(new NullLogger<QuestionsController>(), _getSectionQuery, _getResponseQuery, _getEntityFromContentfulQuery, _user, _errorMessages, _contactOptions);
         _user.GetEstablishmentId().Returns(1);
 
         var secondQuestion = new Question()
