@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 using Xunit;
 
@@ -28,6 +29,7 @@ public class QuestionsControllerTests
     private readonly IDeleteCurrentSubmissionCommand _deleteCurrentSubmissionCommand;
     private readonly IGetQuestionBySlugRouter _getQuestionBySlugRouter;
     private readonly IUser _user;
+    private readonly IOptions<ErrorMessages> _errorMessages;
     private readonly QuestionsController _controller;
     private readonly IConfiguration _configuration;
 
@@ -94,6 +96,13 @@ public class QuestionsControllerTests
                 return null;
             });
 
+        var message = new ErrorMessages
+        {
+            ConcurrentUsersOrContentChange = "An error occurred. Please contact us."
+        };
+
+        _errorMessages = Options.Create(message);
+
         _getResponseQuery = Substitute.For<IGetLatestResponsesQuery>();
         _getQuestionBySlugRouter = Substitute.For<IGetQuestionBySlugRouter>();
         _getNextUnansweredQuestionQuery = Substitute.For<IGetNextUnansweredQuestionQuery>();
@@ -102,7 +111,7 @@ public class QuestionsControllerTests
         _user = Substitute.For<IUser>();
         _user.GetEstablishmentId().Returns(EstablishmentId);
 
-        _controller = new QuestionsController(_logger, _getSectionQuery, _getResponseQuery, _getEntityFromContentfulQuery, _user);
+        _controller = new QuestionsController(_logger, _getSectionQuery, _getResponseQuery, _getEntityFromContentfulQuery, _user, _errorMessages);
     }
 
     [Fact]
@@ -200,10 +209,12 @@ public class QuestionsControllerTests
 
         var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand, _configuration);
 
+        var errorMessage = _controller.TempData["SubtopicError"] as string;
         var redirectResult = result as RedirectToActionResult;
         Assert.NotNull(redirectResult);
         Assert.Equal(PagesController.ControllerName, redirectResult.ControllerName);
         Assert.Equal(PagesController.GetPageByRouteAction, redirectResult.ActionName);
+        Assert.Contains("Please contact us.", errorMessage);
     }
 
     [Fact]

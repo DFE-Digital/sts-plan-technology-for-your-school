@@ -11,6 +11,7 @@ using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
@@ -25,17 +26,20 @@ public class QuestionsController : BaseController<QuestionsController>
     private readonly IGetLatestResponsesQuery _getResponseQuery;
     private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery;
     private readonly IUser _user;
+    private readonly ErrorMessages _errorMessages;
 
     public QuestionsController(ILogger<QuestionsController> logger,
                                IGetSectionQuery getSectionQuery,
                                IGetLatestResponsesQuery getResponseQuery,
                                IGetEntityFromContentfulQuery getEntityByIdQuery,
-                               IUser user) : base(logger)
+                               IUser user,
+                               IOptions<ErrorMessages> errorMessages) : base(logger)
     {
         _getResponseQuery = getResponseQuery;
         _getSectionQuery = getSectionQuery;
         _getEntityFromContentfulQuery = getEntityByIdQuery;
         _user = user;
+        _errorMessages = errorMessages.Value;
     }
 
     [LogInvalidModelState]
@@ -110,7 +114,7 @@ public class QuestionsController : BaseController<QuestionsController>
     private async Task<string> BuildErrorMessage(IConfiguration configuration)
     {
         var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(configuration["ContactUs:LinkId"]);
-        var errorMessage = configuration["ErrorMessages:ConcurrentUsersOrContentChange"];
+        var errorMessage = _errorMessages.ConcurrentUsersOrContentChange;
 
         if (contactLink != null && !string.IsNullOrEmpty(contactLink.Href))
         {
