@@ -2,11 +2,9 @@ using Dfe.PlanTech.Domain.Content.Models;
 
 namespace Dfe.PlanTech.Domain.Content.Interfaces;
 
-public interface IPage
+public interface IPage : IHasSlug
 {
     public string InternalName { get; }
-
-    public string Slug { get; }
 
     public bool DisplayBackButton { get; }
 

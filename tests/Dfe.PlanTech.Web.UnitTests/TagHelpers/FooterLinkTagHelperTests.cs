@@ -1,4 +1,8 @@
+using System.Reflection;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Web.Models.Content;
+using Dfe.PlanTech.Web.Models.Content.Mapped;
 using Dfe.PlanTech.Web.TagHelpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Logging;
@@ -12,9 +16,10 @@ public class FooterLinkTagHelperTests
     private readonly FooterLinkTagHelper _tagHelper;
     private readonly TagHelperContext _context;
     private readonly TagHelperOutput _output;
+    private readonly ILogger<FooterLinkTagHelper> logger = Substitute.For<ILogger<FooterLinkTagHelper>>();
+
     public FooterLinkTagHelperTests()
     {
-        var logger = Substitute.For<ILogger<FooterLinkTagHelper>>();
         _tagHelper = new FooterLinkTagHelper(logger);
 
         _context = new TagHelperContext(tagName: "footer-link",
@@ -23,15 +28,15 @@ public class FooterLinkTagHelperTests
                                                     uniqueId: "footer-link-test");
 
         _output = new TagHelperOutput("footer-link-tag",
-                                        attributes: new TagHelperAttributeList(),
+                                        attributes: [],
                                         getChildContentAsync: (useCachedResult, encoder) =>
                                         {
                                             var tagHelperContent = new DefaultTagHelperContent();
                                             tagHelperContent.SetContent("");
                                             return Task.FromResult<TagHelperContent>(tagHelperContent);
                                         });
-
     }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -48,21 +53,16 @@ public class FooterLinkTagHelperTests
 
         await _tagHelper.ProcessAsync(_context, _output);
 
-        var html = _output.Content.ToHtmlString();
+        Assert.Equal("a", _output.TagName);
+        Assert.Equal(link.Href, _output.Attributes["href"].Value);
 
-        Assert.StartsWith("<a", html);
-        Assert.Contains($"href=\"{link.Href}\"", html);
-        Assert.Contains($">{link.DisplayText}<", html);
-        Assert.EndsWith("</a>", html);
-
-        var targetHtml = " target=\"_blank\"";
         if (link.OpenInNewTab)
         {
-            Assert.Contains(targetHtml, html);
+            Assert.Equal("_blank", _output.Attributes["target"].Value);
         }
         else
         {
-            Assert.DoesNotContain(targetHtml, html);
+            Assert.Null(_output.Attributes["target"]);
         }
     }
 
@@ -71,8 +71,85 @@ public class FooterLinkTagHelperTests
     {
         await _tagHelper.ProcessAsync(_context, _output);
 
-        var html = _output.Content.ToHtmlString();
+        Assert.Empty(_output.Attributes);
+    }
 
-        Assert.Empty(html);
+    [Theory]
+    [InlineData("/test-page", "test-page", typeof(Page))]
+    [InlineData("/content/test-page", "test-page", typeof(CsPage))]
+    [InlineData("/content/test-page", "test-page", typeof(ContentSupportPage))]
+    [InlineData("/content/prefixed-slash", "/prefixed-slash", typeof(ContentSupportPage))]
+    [InlineData("/content/prefixed-slash", "/prefixed-slash", typeof(CsPage))]
+    [InlineData("/prefixed-slash", "/prefixed-slash", typeof(Page))]
+    public async Task Should_Render_Correct_Url_For_ContentToLinkTo(string expectedUrl, string slug, Type contentType)
+    {
+        IContentComponent content = contentType switch
+        {
+            var t when t == typeof(Page) => new Page { Slug = slug },
+            var t when t == typeof(CsPage) => new CsPage { Slug = slug },
+            _ => new ContentSupportPage { Slug = slug }
+        };
+
+        var link = new NavigationLink()
+        {
+            DisplayText = "Content link",
+            ContentToLinkTo = content
+        };
+
+        _tagHelper.Link = link;
+
+        await _tagHelper.ProcessAsync(_context, _output);
+
+        Assert.Equal(expectedUrl, _output.Attributes["href"].Value);
+    }
+
+    [Fact]
+    public async Task Should_Log_Error_And_Return_Empty_When_Invalid_Content_Type()
+    {
+        var invalidContent = Substitute.For<IContentComponent>();
+        var link = new NavigationLink()
+        {
+            DisplayText = "Invalid content",
+            ContentToLinkTo = invalidContent
+        };
+
+        _tagHelper.Link = link;
+
+        await _tagHelper.ProcessAsync(_context, _output);
+
+        Assert.Empty(_output.Attributes);
+    }
+
+    [Fact]
+    public async Task Should_Return_Empty_When_No_Href_Or_Content()
+    {
+        var link = new NavigationLink()
+        {
+            DisplayText = "Empty link"
+        };
+
+        _tagHelper.Link = link;
+
+        await _tagHelper.ProcessAsync(_context, _output);
+
+        Assert.Empty(_output.Attributes);
+        Assert.Null(_output.TagName);
+    }
+
+    [Fact]
+    public void Should_Log_Error_When_No_Href_Or_Content()
+    {
+        var link = new NavigationLink()
+        {
+            DisplayText = "Empty"
+        };
+
+        _tagHelper.Link = link;
+        var methodInfo = typeof(FooterLinkTagHelper).GetMethod("GetHref", BindingFlags.NonPublic | BindingFlags.Instance);
+
+        methodInfo?.Invoke(_tagHelper, []);
+
+        var logMessage = logger.ReceivedLogMessages().FirstOrDefault(msg => msg.LogLevel == LogLevel.Error && msg.Message.Contains("No href or content to link to for"));
+        Assert.NotNull(logMessage);
     }
 }
