@@ -38,11 +38,11 @@ public class GetNavigationQuery : ContentRetriever, IGetNavigationQuery
         }
     }
 
-    public async Task<INavigationLink> GetLinkById(string contentId, CancellationToken cancellationToken = default)
+        public async Task<INavigationLink?> GetLinkById(string contentId, CancellationToken cancellationToken = default)
     {
         try
         {
-            return await _cache.GetOrCreateAsync("NavigationLink", () => repository.GetEntityById<NavigationLink>(contentId, cancellationToken: cancellationToken));
+            return await _cache.GetOrCreateAsync($"NavigationLink:{contentId}", () => repository.GetEntityById<NavigationLink>(contentId, cancellationToken: cancellationToken));
         }
         catch (Exception ex)
         {

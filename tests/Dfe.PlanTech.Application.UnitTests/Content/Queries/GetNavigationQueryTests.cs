@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.Extensions.Logging;
@@ -13,25 +14,26 @@ public class GetNavigationQueryTests
     private readonly IContentRepository _contentRepository = Substitute.For<IContentRepository>();
     private readonly ICmsCache _cache = Substitute.For<ICmsCache>();
 
-    private readonly IList<NavigationLink> _contentfulLinks = new List<NavigationLink>()
+    private readonly NavigationLink _contentfulLink = new NavigationLink
     {
-        new()
-        {
-            Href = "ContentfulHref",
-            DisplayText = "ContentfulDisplayText"
-        }
+        Href = "ContentfulHref",
+        DisplayText = "ContentfulDisplayText"
     };
+
+    private readonly IList<NavigationLink> _contentfulLinks;
 
     private readonly ILogger<GetNavigationQuery> _logger = Substitute.For<ILogger<GetNavigationQuery>>();
 
     public GetNavigationQueryTests()
     {
+        _contentfulLinks = new List<NavigationLink> { _contentfulLink };
+
         _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<IEnumerable<NavigationLink>>>>())
             .Returns(callInfo =>
             {
                 var func = callInfo.ArgAt<Func<Task<IEnumerable<NavigationLink>>>>(1);
                 return func();
-            });
+            });   
     }
 
     [Fact]
@@ -59,5 +61,30 @@ public class GetNavigationQueryTests
 
         Assert.Single(receivedLoggerMessages);
         Assert.Empty(result);
+    }
+
+        [Fact]
+    public async Task Should_Retrieve_Nav_Link_By_Id_When_Exists()
+    {
+        _contentRepository.GetEntityById<NavigationLink>(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(_contentfulLink);
+
+        var navQuery = new GetNavigationQuery(_logger, _contentRepository, _cache);
+        var result = await navQuery.GetLinkById("contentId");
+
+        Assert.NotNull(result);
+        Assert.Equal(_contentfulLink.Href, result.Href);
+        Assert.Equal(_contentfulLink.DisplayText, result.DisplayText);
+    }
+
+    [Fact]
+    public async Task Should_Return_Null_When_Nav_Link_Does_Not_Exist()
+    {
+        _contentRepository.GetEntityById<NavigationLink>(Arg.Any<string>(), Arg.Any<int>(), cancellationToken: CancellationToken.None).Returns((NavigationLink)null);
+
+        var navQuery = new GetNavigationQuery(_logger, _contentRepository, _cache);
+
+        var result = await navQuery.GetLinkById("NonExistentId");
+
+        Assert.Null(result);
     }
 }
