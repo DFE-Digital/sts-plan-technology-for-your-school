@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.Extensions.Logging;
@@ -33,7 +32,7 @@ public class GetNavigationQueryTests
             {
                 var func = callInfo.ArgAt<Func<Task<IEnumerable<NavigationLink>>>>(1);
                 return func();
-            });   
+            });
     }
 
     [Fact]
@@ -63,7 +62,7 @@ public class GetNavigationQueryTests
         Assert.Empty(result);
     }
 
-        [Fact]
+    [Fact]
     public async Task Should_Retrieve_Nav_Link_By_Id_When_Exists()
     {
         _contentRepository.GetEntityById<NavigationLink>(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(_contentfulLink);
