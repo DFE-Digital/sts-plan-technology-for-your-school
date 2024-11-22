@@ -32,6 +32,15 @@ public class GetNavigationQueryTests
             {
                 var func = callInfo.ArgAt<Func<Task<IEnumerable<NavigationLink>>>>(1);
                 return func();
+            });   
+
+        _cache.GetOrCreateAsync<NavigationLink>(
+            Arg.Any<string>(),
+            Arg.Any<Func<Task<NavigationLink>>>())
+            .Returns(callInfo =>
+            {
+                var func = callInfo.ArgAt<Func<Task<NavigationLink>>>(1);
+                return func();
             });
     }
 
@@ -66,7 +75,6 @@ public class GetNavigationQueryTests
     public async Task Should_Retrieve_Nav_Link_By_Id_When_Exists()
     {
         _contentRepository.GetEntityById<NavigationLink>(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(_contentfulLink);
-
         var navQuery = new GetNavigationQuery(_logger, _contentRepository, _cache);
         var result = await navQuery.GetLinkById("contentId");
 
