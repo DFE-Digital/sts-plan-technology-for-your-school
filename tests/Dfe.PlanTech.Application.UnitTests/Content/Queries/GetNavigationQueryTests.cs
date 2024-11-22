@@ -32,7 +32,7 @@ public class GetNavigationQueryTests
             {
                 var func = callInfo.ArgAt<Func<Task<IEnumerable<NavigationLink>>>>(1);
                 return func();
-            });   
+            });
 
         _cache.GetOrCreateAsync<NavigationLink>(
             Arg.Any<string>(),
