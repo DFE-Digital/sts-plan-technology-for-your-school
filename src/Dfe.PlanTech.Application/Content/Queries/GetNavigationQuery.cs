@@ -42,7 +42,7 @@ public class GetNavigationQuery : ContentRetriever, IGetNavigationQuery
     {
         try
         {
-            return await _cache.GetOrCreateAsync($"NavigationLink:{contentId}", () => repository.GetEntityById<NavigationLink>(contentId, cancellationToken: cancellationToken));
+            return await _cache.GetOrCreateAsync($"NavigationLink:{contentId}", () => repository.GetEntityById<NavigationLink?>(contentId, cancellationToken: cancellationToken));
         }
         catch (Exception ex)
         {

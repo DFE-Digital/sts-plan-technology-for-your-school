@@ -34,12 +34,12 @@ public class GetNavigationQueryTests
                 return func();
             });
 
-        _cache.GetOrCreateAsync<NavigationLink>(
+        _cache.GetOrCreateAsync<NavigationLink?>(
             Arg.Any<string>(),
-            Arg.Any<Func<Task<NavigationLink>>>())
+            Arg.Any<Func<Task<NavigationLink?>>>())
             .Returns(callInfo =>
             {
-                var func = callInfo.ArgAt<Func<Task<NavigationLink>>>(1);
+                var func = callInfo.ArgAt<Func<Task<NavigationLink?>>>(1);
                 return func();
             });
     }
@@ -86,7 +86,7 @@ public class GetNavigationQueryTests
     [Fact]
     public async Task Should_Return_Null_When_Nav_Link_Does_Not_Exist()
     {
-        _contentRepository.GetEntityById<NavigationLink>(Arg.Any<string>(), Arg.Any<int>(), cancellationToken: CancellationToken.None).Returns((NavigationLink)null);
+        _contentRepository.GetEntityById<NavigationLink?>(Arg.Any<string>(), Arg.Any<int>(), cancellationToken: CancellationToken.None).Returns((NavigationLink?)null);
 
         var navQuery = new GetNavigationQuery(_logger, _contentRepository, _cache);
 
