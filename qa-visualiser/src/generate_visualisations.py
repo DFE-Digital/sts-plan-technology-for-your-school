@@ -61,8 +61,7 @@ def _create_questionnaire_flowchart(section: Section) -> Digraph:
         for answer in question["answers"]:
             answer_text = _wrap_text(answer["text"], 20)
 
-            if next_question := answer["nextQuestion"]:
-                next_question_id = next_question["sys"]["id"]
+            if next_question_id := answer["nextQuestionId"]:
                 tree.node(
                     next_question_id,
                     "Missing Content",

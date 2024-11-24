@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.Extensions.Logging;
@@ -13,7 +14,8 @@ namespace Dfe.PlanTech.Application.Content.Queries;
 /// </summary>
 public class GetEntityFromContentfulQuery : ContentRetriever, IGetEntityFromContentfulQuery
 {
-    public const string ExceptionMessageContentful = "Error fetching Entity from Contentful";
+    public const string ExceptionMessageEntityContentful = "Error fetching Entity from Contentful";
+    private const string ExceptionMessageEntitiesContentful = "Error fetching Entities from Contentful";
 
     private readonly ILogger<GetEntityFromContentfulQuery> _logger;
     private readonly ICmsCache _cache;
@@ -34,7 +36,23 @@ public class GetEntityFromContentfulQuery : ContentRetriever, IGetEntityFromCont
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, ExceptionMessageContentful);
+            _logger.LogError(ex, ExceptionMessageEntityContentful);
+            return null;
+        }
+    }
+
+    public async Task<IEnumerable<TContent>?> GetEntities<TContent>(int depth = 2, CancellationToken cancellationToken = default)
+        where TContent : ContentComponent
+    {
+        try
+        {
+            var options = new GetEntitiesOptions(include: depth);
+            return await _cache.GetOrCreateAsync($"Entities:{typeof(TContent).Name}:(depth {depth})",
+                () => repository.GetEntities<TContent>(options, cancellationToken: cancellationToken));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ExceptionMessageEntitiesContentful);
             return null;
         }
     }

@@ -37,7 +37,7 @@ public class GetEntityFromContentfulQueryTests
             .Throws(_ => new Exception("Contentful error"));
 
         var result = await _getEntityFromContentfulQuery.GetEntityById<Question>(_firstQuestion.Sys.Id);
-        var receivedLoggerMessages = _logger.GetMatchingReceivedMessages(GetEntityFromContentfulQuery.ExceptionMessageContentful, LogLevel.Error);
+        var receivedLoggerMessages = _logger.GetMatchingReceivedMessages(GetEntityFromContentfulQuery.ExceptionMessageEntityContentful, LogLevel.Error);
 
         Assert.Single(receivedLoggerMessages);
         Assert.Null(result);

@@ -36,8 +36,8 @@ public class CmsController(ILogger<CmsController> logger) : BaseController<CmsCo
 
     [HttpGet("sections")]
     [ValidateApiKey]
-    public async Task<IEnumerable<Section?>> GetSections([FromServices] GetSectionsQuery getSectionsQuery)
+    public async Task<IEnumerable<Section>?> GetSections([FromServices] GetEntityFromContentfulQuery getEntityFromContentful)
     {
-        return await getSectionsQuery.GetSections();
+        return await getEntityFromContentful.GetEntities<Section>(depth: 3);
     }
 }

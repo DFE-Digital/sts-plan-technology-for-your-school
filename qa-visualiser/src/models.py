@@ -11,6 +11,7 @@ class Answer(TypedDict):
     sys: SystemDetails
     text: str
     nextQuestion: Question | None
+    nextQuestionId: str | None
 
 
 class Question(TypedDict):
