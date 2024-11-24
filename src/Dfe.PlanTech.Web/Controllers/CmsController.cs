@@ -34,10 +34,31 @@ public class CmsController(ILogger<CmsController> logger) : BaseController<CmsCo
         }
     }
 
+    /// <summary>
+    /// Returns all sections from the CMS, used by the qa-visualiser
+    /// </summary>
     [HttpGet("sections")]
     [ValidateApiKey]
     public async Task<IEnumerable<Section>?> GetSections([FromServices] GetEntityFromContentfulQuery getEntityFromContentful)
     {
-        return await getEntityFromContentful.GetEntities<Section>(depth: 3);
+        var sections = await getEntityFromContentful.GetEntities<Section>(depth: 3);
+        return sections?.Select(section => new Section()
+        {
+            Sys = section.Sys,
+            Name = section.Name,
+            Questions = section.Questions.Select(question => new Question()
+            {
+                Sys = question.Sys,
+                Text = question.Text,
+                Answers = question.Answers.Select(answer => new Answer()
+                {
+                    Sys = answer.Sys,
+                    Text = answer.Text,
+                    NextQuestion = answer.NextQuestion != null
+                        ? new Question() { Sys = answer.NextQuestion.Sys, Text = answer.NextQuestion.Text }
+                        : null
+                }).ToList()
+            }).ToList()
+        });
     }
 }

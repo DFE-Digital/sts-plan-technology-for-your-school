@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
@@ -27,17 +28,36 @@ public class GetEntityFromContentfulQueryTests
                 var func = callInfo.ArgAt<Func<Task<Question>>>(1);
                 return func();
             });
+        _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<IEnumerable<Section>>>>())
+            .Returns(callInfo =>
+            {
+                var func = callInfo.ArgAt<Func<Task<IEnumerable<Section>>>>(1);
+                return func();
+            });
     }
 
 
     [Fact]
-    public async Task Should_LogError_When_Contentful_Exception()
+    public async Task Should_LogError_When_Single_Entity_Contentful_Exception()
     {
         _contentRepository.GetEntityById<Question>(Arg.Any<string>(), cancellationToken: CancellationToken.None)
             .Throws(_ => new Exception("Contentful error"));
 
         var result = await _getEntityFromContentfulQuery.GetEntityById<Question>(_firstQuestion.Sys.Id);
         var receivedLoggerMessages = _logger.GetMatchingReceivedMessages(GetEntityFromContentfulQuery.ExceptionMessageEntityContentful, LogLevel.Error);
+
+        Assert.Single(receivedLoggerMessages);
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task Should_LogError_When_Multiple_Entities_Contentful_Exception()
+    {
+        _contentRepository.GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), cancellationToken: CancellationToken.None)
+            .Throws(_ => new Exception("Contentful error"));
+
+        var result = await _getEntityFromContentfulQuery.GetEntities<Section>();
+        var receivedLoggerMessages = _logger.GetMatchingReceivedMessages(GetEntityFromContentfulQuery.ExceptionMessageEntitiesContentful, LogLevel.Error);
 
         Assert.Single(receivedLoggerMessages);
         Assert.Null(result);

@@ -1,30 +1,33 @@
 from __future__ import annotations
 
-from typing import TypedDict
+from pydantic import BaseModel, ConfigDict
+from pydantic.alias_generators import to_camel
 
 
-class SystemDetails(TypedDict):
+class BaseSchema(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel)
+
+
+class SystemDetails(BaseSchema):
     id: str
 
 
-class Answer(TypedDict):
+class Answer(BaseSchema):
     sys: SystemDetails
     text: str
-    nextQuestion: Question | None
-    nextQuestionId: str | None
+    next_question: Question | None
 
 
-class Question(TypedDict):
+class Question(BaseSchema):
     answers: list[Answer]
-    helpText: str | None
-    slug: str
+    help_text: str | None
     sys: SystemDetails
     text: str
 
 
-class Section(TypedDict):
+class Section(BaseSchema):
     name: str
     questions: list[Question]
-    firstQuestionId: str
-    interstitialPage: dict | None
+    first_question_id: str
+    interstitial_page: dict | None
     sys: SystemDetails
