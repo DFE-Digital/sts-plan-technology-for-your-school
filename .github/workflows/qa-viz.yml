@@ -3,17 +3,20 @@ name: QA Visualisation Workflow
 
 on:
   workflow_dispatch:
-    inputs: 
+    inputs:
       environment:
         description: Environment to run the visualisation for
         required: true
         type: choice
-        options: ['Dev', 'Tst', 'Staging', 'Production']
+        options: [ 'Dev', 'Tst', 'Staging', 'Production' ]
   workflow_call:
     inputs:
       environment:
         type: string
         required: true
+
+env:
+  DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
 
 jobs:
   generate_images:
@@ -22,12 +25,13 @@ jobs:
       az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
       az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
       az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      az_keyvault_plantech_api_key_name: api--authentication--keyvalue
       SQL_IP_NAME: qa-viz
     environment: ${{ inputs.environment || 'Staging' }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        
+
       - name: Login with AZ
         uses: ./.github/actions/azure-login
         with:
@@ -35,6 +39,12 @@ jobs:
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
           az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+
+      - name: Build web app
+        uses: ./.github/actions/build-dotnet-app
+        with:
+          dotnet_version: ${{ env.DOTNET_VERSION }}
+          solution_filename: plan-technology-for-your-school.sln
 
       - name: Get workflow IP address
         id: whats-my-ip
@@ -49,37 +59,48 @@ jobs:
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.az_resource_group_name}}
           az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
-        
+
+      - name: Run project
+        shell: bash
+        working-directory: ./build
+        run: |
+          export ASPNETCORE_ENVIRONMENT=E2E
+          export KeyVaultName=${{ env.az_keyvault_name }}
+          export Kestrel__Endpoints__Https__Url=https://*:8081
+          export DfeSignIn__FrontDoorUrl=https://localhost:8081
+          export GTM__Id=gtm_id
+          export GTM__SiteVerificationId=testing_site_verification_id
+          dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 &
+
       - name: Install Graphviz
         run: sudo apt-get install graphviz -y
-          
-      - name: Install Microsoft ODBC
-        run: sudo ACCEPT_EULA=Y apt-get install msodbcsql17 -y
-      
-      - name: Set up Python
-        uses: actions/setup-python@v5
+
+      - name: Get api key
+        id: get-plantech-api-key
+        uses: ./.github/actions/azure-get-keyvault-secret
         with:
-          python-version: 3.9
-          
-      - name: Install pyodbc
-        run: pip install pyodbc
-    
-      - name: Install graphviz
-        run: pip install graphviz
-          
-      - name: Install azure identity
-        run: pip install azure-identity
-          
-      - name: Run data script
-        run: python ./.github/scripts/qa-data.py
+          az_keyvault_name: ${{ env.az_keyvault_name }}
+          az_keyvault_secret_name: ${{ env.az_keyvault_plantech_api_key_name }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Set up Python
+        working-directory: ./qa-visualiser
+        run: uv python install
+
+      - name: Install requirements
+        working-directory: ./qa-visualiser
+        run: uv sync
+
+      - name: Run visualisation script
+        working-directory: ./qa-visualiser
+        run: uv run main.py
         env:
-          SQL_CONNECTION_STRING: "Driver={ODBC Driver 17 for SQL Server};Server=tcp:${{ env.az_sql_database_server_name }}.database.windows.net,1433;Database=${{ env.az_sql_database_server_name }}-sqldb;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30"
-          
-      - name: List data files
-        run: ls -l ./data
-          
+          PLANTECH_API_URL: https://localhost:8081/api/cms
+          PLANTECH_API_KEY: ${{ steps.get-plantech-api-key.outputs.secret_value }}
+
       - name: Remove Azure firewall rules
-        if: always()
         uses: ./.github/actions/azure-ip-whitelist
         with:
           ip_address: ${{ steps.whats-my-ip.outputs.ip }}
@@ -88,18 +109,10 @@ jobs:
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.az_resource_group_name}}
           az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
-            
-      - name: Run Visaulisation Script
-        run: python ./.github/scripts/qa-visualisations.py 
-        
+
       - name: Upload image
         id: artifact-upload-step
         uses: actions/upload-artifact@v4
         with:
           name: qa-visualisations
-          path: ./visualisations
-        
-      - name: Call Teams Webhook
-        run: |
-            curl -X POST -H 'Content-Type: application/json' -d '{"text": "New Visualisations Available for ${{ inputs.environment }} : https://github.com/DFE-Digital/plan-technology-for-your-school/actions/runs/${{ github.run_id }}/artifacts/${{ steps.artifact-upload-step.outputs.artifact-id }}"}' ${{ secrets.PLANTECH_TEAMS_WEBHOOK }}
-          
+          path: ./qa-visualiser/visualisations

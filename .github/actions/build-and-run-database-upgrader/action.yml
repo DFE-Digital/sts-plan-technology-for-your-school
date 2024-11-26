@@ -7,16 +7,16 @@ inputs:
     type: string
   az_keyvault_name:
     required: true
-    type: string  
+    type: string
   az_keyvault_database_connectionstring_name:
     required: true
-    type: string  
+    type: string
   az_sql_database_server_name:
     required: true
-    type: string  
+    type: string
   az_resource_group_name:
     required: true
-    type: string 
+    type: string
   environment:
     required: true
     type: string
@@ -30,16 +30,16 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Build database upgrader  
+    - name: Build database upgrader
       uses: ./.github/actions/build-dotnet-app
       with:
-        dotnet_version: ${{ inputs.dotnet_version }}  
+        dotnet_version: ${{ inputs.dotnet_version }}
         solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
 
     - name: Get workflow IP address
       id: whats-my-ip
       uses: ./.github/actions/whats-my-ip-address
-      
+
     - name: Add Azure firewall rules
       shell: bash
       run: |
@@ -48,14 +48,14 @@ runs:
 
     - name: Get connection string
       id: get-db-connection-string
-      uses: ./.github/actions/azure-get-db-connectionstring
+      uses: ./.github/actions/azure-get-keyvault-secret
       with:
         az_keyvault_name: ${{ inputs.az_keyvault_name }}
-        az_keyvault_database_connectionstring_name: ${{ inputs.az_keyvault_database_connectionstring_name }}
+        az_keyvault_secret_name: ${{ inputs.az_keyvault_database_connectionstring_name }}
 
     - name: Run database upgrader
       shell: bash
-      run: dotnet ./build/Dfe.PlanTech.DatabaseUpgrader.dll -c "${{ steps.get-db-connection-string.outputs.connection_string }}" --env ${{ inputs.environment }} -p Analytics_Username=${{ inputs.sql_analytics_username }} Analytics_Password=${{ inputs.sql_analytics_password }}
+      run: dotnet ./build/Dfe.PlanTech.DatabaseUpgrader.dll -c "${{ steps.get-db-connection-string.outputs.secret_value }}" --env ${{ inputs.environment }} -p Analytics_Username=${{ inputs.sql_analytics_username }} Analytics_Password=${{ inputs.sql_analytics_password }}
 
     - name: Remove Azure firewall rules
       shell: bash
