@@ -1,4 +1,4 @@
-name: QA Visualiser Unit Tests
+name: QA Visualiser Lint and Test
 
 on:
   workflow_dispatch:
@@ -11,10 +11,18 @@ on:
 jobs:
   run-tests:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: write
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+          
       - name: Install uv
         uses: astral-sh/setup-uv@v3
 
@@ -25,6 +33,25 @@ jobs:
       - name: Install requirements
         working-directory: ./qa-visualiser
         run: uv sync
+
+      - name: Lint and format code
+        working-directory: ./qa-visualiser
+        run: |
+          uv run ruff check --fix
+          uv run ruff format
+
+      - name: Commit and push changes if necessary
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          if [[ `git status --porcelain` ]]; then
+            git add qa-visualiser/*
+            git commit -m "chore: Linted code for qa-visualiser"
+            git push
+          else
+            echo 'No linting changes'
+          fi
 
       - name: Run tests
         working-directory: ./qa-visualiser
