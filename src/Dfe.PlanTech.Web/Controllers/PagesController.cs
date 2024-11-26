@@ -72,6 +72,6 @@ public class PagesController(ILogger<PagesController> logger, IGetNavigationQuer
 
     private async Task<INavigationLink> GetContactLinkAsync()
     {
-        return await _getNavigationQuery.GetLinkById(_contactOptions.Value.LinkId);
+        return await _getNavigationQuery.GetLinkById(_contactOptions.LinkId);
     }
 }

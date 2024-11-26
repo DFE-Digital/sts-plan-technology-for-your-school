@@ -36,7 +36,7 @@ public class QuestionsController : BaseController<QuestionsController>
                                IGetEntityFromContentfulQuery getEntityByIdQuery,
                                IGetNavigationQuery getNavigationQuery,
                                IUser user,
-                               IOptions<ErrorMessages> errorMessages,
+                               IOptions<ErrorMessages> errorMessageOptions,
                                IOptions<ContactOptions> contactOptions) : base(logger)
     {
         _getResponseQuery = getResponseQuery;
@@ -44,7 +44,7 @@ public class QuestionsController : BaseController<QuestionsController>
         _getEntityFromContentfulQuery = getEntityByIdQuery;
         _getNavigationQuery = getNavigationQuery;
         _user = user;
-        _errorMessages = errorMessages.Value;
+        _errorMessages = errorMessageOptions.Value;
         _contactOptions = contactOptions.Value;
     }
 
