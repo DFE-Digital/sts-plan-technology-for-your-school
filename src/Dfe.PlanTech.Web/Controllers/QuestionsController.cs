@@ -5,11 +5,13 @@ using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
+using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
@@ -23,18 +25,27 @@ public class QuestionsController : BaseController<QuestionsController>
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetLatestResponsesQuery _getResponseQuery;
     private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery;
+    private readonly IGetNavigationQuery _getNavigationQuery;
     private readonly IUser _user;
+    private readonly ErrorMessages _errorMessages;
+    private readonly ContactOptions _contactOptions;
 
     public QuestionsController(ILogger<QuestionsController> logger,
                                IGetSectionQuery getSectionQuery,
                                IGetLatestResponsesQuery getResponseQuery,
                                IGetEntityFromContentfulQuery getEntityByIdQuery,
-                               IUser user) : base(logger)
+                               IGetNavigationQuery getNavigationQuery,
+                               IUser user,
+                               IOptions<ErrorMessages> errorMessageOptions,
+                               IOptions<ContactOptions> contactOptions) : base(logger)
     {
         _getResponseQuery = getResponseQuery;
         _getSectionQuery = getSectionQuery;
         _getEntityFromContentfulQuery = getEntityByIdQuery;
+        _getNavigationQuery = getNavigationQuery;
         _user = user;
+        _errorMessages = errorMessageOptions.Value;
+        _contactOptions = contactOptions.Value;
     }
 
     [LogInvalidModelState]
@@ -74,7 +85,6 @@ public class QuestionsController : BaseController<QuestionsController>
     public async Task<IActionResult> GetNextUnansweredQuestion(string sectionSlug,
                                                                 [FromServices] IGetNextUnansweredQuestionQuery getQuestionQuery,
                                                                 [FromServices] IDeleteCurrentSubmissionCommand deleteCurrentSubmissionCommand,
-                                                                [FromServices] IConfiguration configuration,
                                                                 CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(sectionSlug))
@@ -97,12 +107,26 @@ public class QuestionsController : BaseController<QuestionsController>
         {
             // Remove the current invalid submission and redirect to self-assessment page
             await deleteCurrentSubmissionCommand.DeleteCurrentSubmission(section, cancellationToken);
-            TempData["SubtopicError"] = configuration["ErrorMessages:ConcurrentUsersOrContentChange"];
+
+            TempData["SubtopicError"] = await BuildErrorMessage();
             return RedirectToAction(
                 PagesController.GetPageByRouteAction,
                 PagesController.ControllerName,
                 new { route = "self-assessment" });
         }
+    }
+
+    private async Task<string> BuildErrorMessage()
+    {
+        var contactLink = await _getNavigationQuery.GetLinkById(_contactOptions.LinkId);
+        var errorMessage = _errorMessages.ConcurrentUsersOrContentChange;
+
+        if (contactLink != null && !string.IsNullOrEmpty(contactLink.Href))
+        {
+            errorMessage = errorMessage.Replace("contact us", $"<a href=\"{contactLink.Href}\" target=\"_blank\">contact us</a>");
+        }
+
+        return errorMessage;
     }
 
     [HttpPost("{sectionSlug}/{questionSlug}")]

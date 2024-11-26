@@ -37,4 +37,17 @@ public class GetNavigationQuery : ContentRetriever, IGetNavigationQuery
             return [];
         }
     }
+
+    public async Task<INavigationLink?> GetLinkById(string contentId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _cache.GetOrCreateAsync($"NavigationLink:{contentId}", () => repository.GetEntityById<NavigationLink?>(contentId, cancellationToken: cancellationToken));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ExceptionMessageContentful);
+            return null;
+        }
+    }
 }
