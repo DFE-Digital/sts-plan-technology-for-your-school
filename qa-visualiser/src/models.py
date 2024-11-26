@@ -5,6 +5,11 @@ from pydantic.alias_generators import to_camel
 
 
 class BaseSchema(BaseModel):
+    """
+    Use an alias generator to recieve json with attributes in camelcase
+    and convert them to snake_case on serialisation
+    """
+
     model_config = ConfigDict(alias_generator=to_camel)
 
 
@@ -12,15 +17,18 @@ class SystemDetails(BaseSchema):
     id: str
 
 
+class QuestionReference(BaseSchema):
+    sys: SystemDetails
+
+
 class Answer(BaseSchema):
     sys: SystemDetails
     text: str
-    next_question: Question | None
+    next_question: QuestionReference | None
 
 
 class Question(BaseSchema):
     answers: list[Answer]
-    help_text: str | None
     sys: SystemDetails
     text: str
 
@@ -28,6 +36,4 @@ class Question(BaseSchema):
 class Section(BaseSchema):
     name: str
     questions: list[Question]
-    first_question_id: str
-    interstitial_page: dict | None
     sys: SystemDetails

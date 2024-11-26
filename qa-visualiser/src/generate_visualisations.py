@@ -34,7 +34,8 @@ def _create_blank_digraph() -> Digraph:
     )
 
 
-def _create_questionnaire_flowchart(section: Section) -> Digraph:
+def create_questionnaire_flowchart(section: Section) -> Digraph:
+    """Create a graph of all possible paths you can take through a section"""
     tree = _create_blank_digraph()
 
     tree.node(
@@ -82,11 +83,12 @@ def _create_questionnaire_flowchart(section: Section) -> Digraph:
 
 
 def process_sections(sections: list[Section]) -> None:
+    """Generates a graph for each section and saves it to the visualisations folder by section name"""
     png_folder = Path("visualisations")
     png_folder.mkdir(exist_ok=True)
 
     for section in sections:
         logger.info(f"Generating visualisation for section {section.name}")
         output_file = Path(png_folder, section.name)
-        flowchart = _create_questionnaire_flowchart(section)
+        flowchart = create_questionnaire_flowchart(section)
         flowchart.render(output_file, cleanup=True)
