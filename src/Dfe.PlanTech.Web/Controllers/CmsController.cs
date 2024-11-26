@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Content.Commands;
-using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Helpers;
@@ -39,26 +39,8 @@ public class CmsController(ILogger<CmsController> logger) : BaseController<CmsCo
     /// </summary>
     [HttpGet("sections")]
     [ValidateApiKey]
-    public async Task<IEnumerable<Section>?> GetSections([FromServices] GetEntityFromContentfulQuery getEntityFromContentful)
+    public async Task<IEnumerable<Section?>> GetSections([FromServices] GetSectionQuery getSectionQuery)
     {
-        var sections = await getEntityFromContentful.GetEntities<Section>(depth: 3);
-        return sections?.Select(section => new Section()
-        {
-            Sys = section.Sys,
-            Name = section.Name,
-            Questions = section.Questions.Select(question => new Question()
-            {
-                Sys = question.Sys,
-                Text = question.Text,
-                Answers = question.Answers.Select(answer => new Answer()
-                {
-                    Sys = answer.Sys,
-                    Text = answer.Text,
-                    NextQuestion = answer.NextQuestion != null
-                        ? new Question() { Sys = answer.NextQuestion.Sys, Text = answer.NextQuestion.Text }
-                        : null
-                }).ToList()
-            }).ToList()
-        });
+        return await getSectionQuery.GetAllSections();
     }
 }
