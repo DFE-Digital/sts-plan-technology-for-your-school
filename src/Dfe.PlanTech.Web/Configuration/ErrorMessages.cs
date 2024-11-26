@@ -1,6 +1,6 @@
 namespace Dfe.PlanTech.Web.Configuration;
 
-public class ErrorMessages
+public record ErrorMessages
 {
     public string ConcurrentUsersOrContentChange { get; set; } = "";
 }
