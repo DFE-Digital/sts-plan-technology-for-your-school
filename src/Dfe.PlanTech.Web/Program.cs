@@ -4,6 +4,7 @@ using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Infrastructure.ServiceBus;
 using Dfe.PlanTech.Infrastructure.SignIns;
 using Dfe.PlanTech.Web;
+using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Middleware;
 using GovUk.Frontend.AspNetCore;
 
@@ -27,6 +28,8 @@ if (builder.Environment.EnvironmentName != "E2E")
 }
 
 builder.Services.AddCustomTelemetry();
+builder.Services.Configure<ErrorMessages>(builder.Configuration.GetSection("ErrorMessages"));
+builder.Services.Configure<ContactOptions>(builder.Configuration.GetSection("ContactUs"));
 
 builder.AddContentAndSupportServices()
         .AddAuthorisationServices()

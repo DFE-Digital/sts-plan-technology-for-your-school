@@ -39,7 +39,7 @@
                 </h2>
                 @if (!string.IsNullOrEmpty(error))
                 {
-                    <div class="govuk-error-summary__body whitespace-preline">@error</div>
+                    <div class="govuk-error-summary__body whitespace-preline">@Html.Raw(error)</div>
                 }
             </div>
         </div>

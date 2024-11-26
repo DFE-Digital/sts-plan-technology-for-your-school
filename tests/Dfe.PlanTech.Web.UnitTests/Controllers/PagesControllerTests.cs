@@ -5,14 +5,15 @@ using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
+using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 using Xunit;
 
@@ -25,10 +26,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private const string SELF_ASSESSMENT_SLUG = "self-assessment";
         readonly ICookieService cookiesSubstitute = Substitute.For<ICookieService>();
         readonly IUser userSubstitute = Substitute.For<IUser>();
-        private readonly IConfiguration _configuration = Substitute.For<IConfiguration>();
-        private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery;
+        private readonly IGetNavigationQuery _getNavigationQuery;
         private readonly PagesController _controller;
         private readonly ControllerContext _controllerContext;
+        private readonly IOptions<ContactOptions> _contactOptions;
 
         public PagesControllerTests()
         {
@@ -36,10 +37,16 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             _controllerContext = ControllerHelpers.SubstituteControllerContext();
 
-            _getEntityFromContentfulQuery = Substitute.For<IGetEntityFromContentfulQuery>();
-            _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(Arg.Any<string>()).Returns(new NavigationLink { DisplayText = "contact us", Href = "/contact-us", OpenInNewTab = true });
+            _getNavigationQuery = Substitute.For<IGetNavigationQuery>();
+            _getNavigationQuery.GetLinkById(Arg.Any<string>()).Returns(new NavigationLink { DisplayText = "contact us", Href = "/contact-us", OpenInNewTab = true });
 
-            _controller = new PagesController(Logger, _getEntityFromContentfulQuery)
+            var contactUs = new ContactOptions
+            {
+                LinkId = "LinkId"
+            };
+            _contactOptions = Options.Create(contactUs);
+
+            _controller = new PagesController(Logger, _getNavigationQuery, _contactOptions)
             {
                 ControllerContext = _controllerContext,
                 TempData = Substitute.For<ITempDataDictionary>()
@@ -211,7 +218,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             _controller.ControllerContext = controllerContext;
 
-            var result = _controller.ServiceUnavailable(_configuration);
+            var result = _controller.ServiceUnavailable();
 
             var viewResult = await result as ViewResult;
 
@@ -251,7 +258,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 HttpContext = httpContextSubstitute
             };
             _controller.ControllerContext = controllerContext;
-            var result = _controller.NotFoundError(_configuration);
+            var result = _controller.NotFoundError();
             var viewResult = await result as ViewResult;
             Assert.NotNull(viewResult);
         }
