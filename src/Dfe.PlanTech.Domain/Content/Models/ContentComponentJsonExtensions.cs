@@ -9,53 +9,37 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 /// </summary>
 public static class ContentComponentJsonExtensions
 {
-    private const string TypeDiscriminatorName = "$contentcomponenttype";
-
     /// <summary>
-    /// Gets all classes that inherit from <see cref="ContentComponent"/> and creates <see cref="JsonDerivedType"/> mapping information for deserialisation 
+    /// Gets all types inheriting <see cref="Type"/> that would be valid for serialisation
     /// </summary>
-    private static readonly List<JsonDerivedType> ContentComponentTypes = ReflectionHelpers
-        .GetTypesInheritingFrom<ContentComponent>()
-        .Select(type => new JsonDerivedType(type, type.Name))
-        .ToList();
-
-    private static readonly Type ContentComponentType = typeof(ContentComponent);
-
-    private static JsonPolymorphismOptions? _contentComponentPolymorphismOptions = null;
-
-    private static JsonPolymorphismOptions ContentComponentPolymorphismOptions =>
-        _contentComponentPolymorphismOptions ??= CreateJsonPolymorphismOptions();
-
-    /// <summary>
-    /// Creates polymorphism support for the <see cref="ContentComponent"/> class.
-    /// </summary>
+    /// <param name="type"></param>
     /// <returns></returns>
-    private static JsonPolymorphismOptions CreateJsonPolymorphismOptions()
-    {
-        var options = new JsonPolymorphismOptions()
-        {
-            TypeDiscriminatorPropertyName = TypeDiscriminatorName,
-            IgnoreUnrecognizedTypeDiscriminators = true,
-            UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FailSerialization,
-        };
-
-        foreach (var derivedType in ContentComponentTypes)
-        {
-            options.DerivedTypes.Add(derivedType);
-        }
-
-        return options;
-    }
+    private static List<JsonDerivedType> GetInheritingTypes(Type type) => [.. ReflectionHelpers
+        .GetTypesInheritingFrom(type)
+        .Where(derivedType => derivedType != type && derivedType.IsConcreteClass() && derivedType.HasParameterlessConstructor())
+        .Select(type => new JsonDerivedType(type, type.Name))];
 
     /// <summary>
     /// Adds polymorphism support for the <see cref="ContentComponent"/> class.
     /// </summary>
     /// <param name="jsonTypeInfo"></param>
-    public static void AddContentComponentPolymorphicInfo(JsonTypeInfo jsonTypeInfo)
+    public static void AddContentComponentPolymorphicInfo<TType>(JsonTypeInfo jsonTypeInfo)
     {
-        if (jsonTypeInfo.Type != ContentComponentType)
+        if (jsonTypeInfo.Type != typeof(TType))
             return;
 
-        jsonTypeInfo.PolymorphismOptions = ContentComponentPolymorphismOptions;
+        var options = new JsonPolymorphismOptions
+        {
+            TypeDiscriminatorPropertyName = $"${typeof(TType).Name.ToLower()}",
+            IgnoreUnrecognizedTypeDiscriminators = true,
+            UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FailSerialization,
+        };
+
+        foreach (var derivedType in GetInheritingTypes(typeof(TType)))
+        {
+            options.DerivedTypes.Add(derivedType);
+        }
+
+        jsonTypeInfo.PolymorphismOptions = options;
     }
 }
