@@ -15,5 +15,5 @@ public interface IGetNavigationQuery
     /// Retrieve link by id
     /// </summary>
     /// <returns>Found navigation link</returns>
-    Task<INavigationLink> GetLinkById(string contentId, CancellationToken cancellationToken = default);
+    Task<INavigationLink?> GetLinkById(string contentId, CancellationToken cancellationToken = default);
 }
