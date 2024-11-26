@@ -113,7 +113,7 @@ jobs:
         target: [Staging]
     uses: ./.github/workflows/qa-viz.yml
     with:
-      environment: ${{ matrix.target }}
+      usepreview: ${{ matrix.target == 'Staging' }}
     secrets: inherit
 
   plan-terraform-for-staging:

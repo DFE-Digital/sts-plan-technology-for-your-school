@@ -22,7 +22,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.ref }}
-          
+
       - name: Install uv
         uses: astral-sh/setup-uv@v3
 

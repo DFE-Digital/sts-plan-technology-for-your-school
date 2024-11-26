@@ -4,14 +4,14 @@ name: QA Visualisation Workflow
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        description: Environment to run the visualisation for
+      usepreview:
+        description: Whether to include preview content
         required: true
-        type: choice
-        options: [ 'Dev', 'Tst', 'Staging', 'Production' ]
+        type: boolean
+        default: true
   workflow_call:
     inputs:
-      environment:
+      usepreview:
         type: string
         required: true
 
@@ -27,7 +27,7 @@ jobs:
       az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
       az_keyvault_plantech_api_key_name: api--authentication--keyvalue
       SQL_IP_NAME: qa-viz
-    environment: ${{ inputs.environment || 'Staging' }}
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -64,6 +64,7 @@ jobs:
         shell: bash
         working-directory: ./build
         run: |
+          export Contentful__UsePreview=${{ inputs.usepreview }}
           export ASPNETCORE_ENVIRONMENT=E2E
           export KeyVaultName=${{ env.az_keyvault_name }}
           export Kestrel__Endpoints__Https__Url=https://*:8081
