@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       usepreview:
-        description: Whether to include preview content
+        description: Include preview content
         required: true
         type: boolean
         default: true
