@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [ "main", "development" ]
     paths:
-      - "qa-visualiser/**"
+      - "contentful/qa-visualiser/**"
       - ".github/workflows/qa-viz-tests.yml"
 
 jobs:
@@ -27,15 +27,15 @@ jobs:
         uses: astral-sh/setup-uv@v3
 
       - name: Set up Python
-        working-directory: ./qa-visualiser
+        working-directory: ./contentful/qa-visualiser
         run: uv python install
 
       - name: Install requirements
-        working-directory: ./qa-visualiser
+        working-directory: ./contentful/qa-visualiser
         run: uv sync
 
       - name: Lint and format code
-        working-directory: ./qa-visualiser
+        working-directory: ./contentful/qa-visualiser
         run: |
           uv run ruff check --fix
           uv run ruff format
@@ -46,7 +46,7 @@ jobs:
           git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
           if [[ `git status --porcelain` ]]; then
-            git add qa-visualiser/*
+            git add contentful/qa-visualiser/*
             git commit -m "chore: Linted code for qa-visualiser"
             git push
           else
@@ -54,5 +54,5 @@ jobs:
           fi
 
       - name: Run tests
-        working-directory: ./qa-visualiser
+        working-directory: ./contentful/qa-visualiser
         run: uv run pytest

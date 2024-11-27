@@ -74,7 +74,7 @@ jobs:
           dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 &
 
       - name: Export dev certificate
-        run: dotnet dev-certs https --export-path qa-visualiser/localhost.crt --format PEM
+        run: dotnet dev-certs https --export-path contentful/qa-visualiser/localhost.crt --format PEM
 
       - name: Install Graphviz
         run: sudo apt-get install graphviz -y
