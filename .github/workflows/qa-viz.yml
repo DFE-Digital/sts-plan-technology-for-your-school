@@ -64,6 +64,7 @@ jobs:
         shell: bash
         working-directory: ./build
         run: |
+          export Contentful__PreviewApiKey=${{ inputs.usepreview }}
           export Contentful__UsePreview=${{ inputs.usepreview }}
           export ASPNETCORE_ENVIRONMENT=E2E
           export KeyVaultName=${{ env.az_keyvault_name }}
