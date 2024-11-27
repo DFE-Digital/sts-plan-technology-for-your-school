@@ -1,6 +1,7 @@
 import logging
 import os
 
+import certifi
 import requests
 from dotenv import load_dotenv
 from pydantic import ValidationError
@@ -27,12 +28,13 @@ def fetch_sections() -> list[Section]:
                 "Accept": "application/json",
                 "Authorization": f"Bearer {token}",
             },
+            verify=certifi.where(),
         )
         logger.info("Validating retrieved sections")
         return [Section.model_validate(item) for item in data.json()]
     except RequestException as ex:
         logger.error(f"Error fetching sections: {ex}")
-        return []
+        raise ex
     except (JSONDecodeError, ValidationError, TypeError) as ex:
         logger.error(f"Error converting response to Sections: {ex}")
-        return []
+        raise ex
