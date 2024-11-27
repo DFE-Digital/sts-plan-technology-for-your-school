@@ -90,15 +90,15 @@ jobs:
         uses: astral-sh/setup-uv@v3
 
       - name: Set up Python
-        working-directory: ./qa-visualiser
+        working-directory: ./contentful/qa-visualiser
         run: uv python install
 
       - name: Install requirements
-        working-directory: ./qa-visualiser
+        working-directory: ./contentful/qa-visualiser
         run: uv sync
 
       - name: Run visualisation script
-        working-directory: ./qa-visualiser
+        working-directory: ./contentful/qa-visualiser
         run: uv run main.py
         env:
           PLANTECH_API_URL: https://localhost:8081/api/cms
@@ -120,4 +120,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: qa-visualisations
-          path: ./qa-visualiser/visualisations
+          path: ./contentful/qa-visualiser/visualisations
