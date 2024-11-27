@@ -27,7 +27,6 @@ def fetch_sections() -> list[Section]:
                 "Accept": "application/json",
                 "Authorization": f"Bearer {token}",
             },
-            verify=False,
         )
         logger.info("Validating retrieved sections")
         return [Section.model_validate(item) for item in data.json()]
