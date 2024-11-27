@@ -83,6 +83,10 @@ jobs:
           az_keyvault_name: ${{ env.az_keyvault_name }}
           az_keyvault_secret_name: ${{ env.az_keyvault_plantech_api_key_name }}
 
+      - name: Install certificates
+        id: install-certificates
+        run: sudo apt-get install ca-certificates
+
       - name: Install uv
         uses: astral-sh/setup-uv@v3
 
