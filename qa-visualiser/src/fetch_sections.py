@@ -5,7 +5,7 @@ import certifi
 import requests
 from dotenv import load_dotenv
 from pydantic import ValidationError
-from requests.exceptions import JSONDecodeError, RequestException
+from requests.exceptions import RequestException
 
 from src.models import Section
 
@@ -35,6 +35,6 @@ def fetch_sections() -> list[Section]:
     except RequestException as ex:
         logger.error(f"Error fetching sections: {ex}")
         raise ex
-    except (JSONDecodeError, ValidationError, TypeError) as ex:
+    except (ValidationError, TypeError) as ex:
         logger.error(f"Error converting response to Sections: {ex}")
         raise ex

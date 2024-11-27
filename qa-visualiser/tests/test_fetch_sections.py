@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+import pytest
 import responses
 from pytest import fixture
 from requests import RequestException
@@ -39,5 +40,6 @@ def test_fetch_sections_failure():
         body=RequestException("error"),
         status=500,
     )
-    sections = fetch_sections()
-    assert sections == []
+
+    with pytest.raises(RequestException):
+        fetch_sections()
