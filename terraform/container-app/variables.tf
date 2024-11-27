@@ -283,3 +283,19 @@ variable "contentful_webhook_name" {
   type        = string
   default     = "Plan Tech Webhook"
 }
+
+#######
+# DNS #
+#######
+
+variable "subdomains" {
+  description = "A list of subdomains that can be associated with the primary domain"
+  type        = set(string)
+  default     = []
+}
+
+variable "primary_fqdn" {
+  description = "The fully qualified domain name for the primary dns zone"
+  type        = string
+  default     = null
+}

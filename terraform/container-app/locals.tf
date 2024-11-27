@@ -192,4 +192,14 @@ locals {
   contentful_webhook_url                     = "https://${data.azurerm_cdn_frontdoor_endpoint.app.host_name}${var.contentful_webhook_endpoint}"
   contentful_webhook_shell_command           = var.contentful_management_token != null && var.contentful_upsert_webhook == true ? "bash ./scripts/create-contentful-webhook.sh --env-id ${azurerm_key_vault_secret.vault_secret_contentful_environment.value} --env-name \"${var.container_environment}\" --management-token \"${var.contentful_management_token}\" --space-id ${azurerm_key_vault_secret.vault_secret_contentful_spaceid.value} --webhook-api-key \"${random_password.api_key_value.result}\" --webhook-name \"${local.contentful_webhook_name}\" --webhook-url ${local.contentful_webhook_url}" : "echo Not updating webhook"
   contentful_webhook_secret_timetolive_hours = 365 * 24
+
+  #######
+  # DNS #
+  #######
+
+  dns = {
+    enable_dns   = var.primary_fqdn != null
+    primary_fqdn = var.primary_fqdn
+    subdomains   = var.subdomains
+  }
 }
