@@ -220,7 +220,6 @@ name = "qa-visualiser"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "certifi" },
     { name = "graphviz" },
     { name = "pydantic" },
     { name = "python-dotenv" },
@@ -236,7 +235,6 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "certifi", specifier = ">=2024.8.30" },
     { name = "graphviz", specifier = ">=0.20.3" },
     { name = "pydantic", specifier = ">=2.10.1" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
