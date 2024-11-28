@@ -1,10 +1,14 @@
 const { runMigration } = require("contentful-migration");
+const validateEnvironment = require("./helpers/validate-environment");
 const path = require("path");
 const fs = require("fs");
 require("dotenv/config");
+
 async function main() {
     const fileName = process.argv[2];
     const filePath = fileName && path.join(__dirname, "migrations", fileName);
+
+    validateEnvironment();
 
     if (!fs.existsSync(filePath)) {
         console.error("Invalid migration filename provided");
