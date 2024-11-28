@@ -250,6 +250,26 @@ public class GetLatestResponsesQueryTests
         Assert.False(submission.Deleted);
     }
 
+    [Fact]
+    public async Task ViewLatestSubmission_Should_Mark_Completed_Submission_As_Viewed()
+    {
+        var submission = GetCompletedSubmissionForCompletedSection();
+
+        await _getLatestResponseListForSubmissionQuery.ViewLatestSubmission(ESTABLISHMENT_ID, submission.SectionId);
+
+        Assert.True(submission.Viewed);
+    }
+
+    [Fact]
+    public async Task ViewLatestSubmission_Should_Not_Mark_Incomplete_Submission_As_Viewed()
+    {
+        var submission = GetIncompleteSubmissionForIncompleteSection();
+
+        await _getLatestResponseListForSubmissionQuery.ViewLatestSubmission(ESTABLISHMENT_ID, submission.SectionId);
+
+        Assert.False(submission.Viewed);
+    }
+
     private IEnumerable<Response> GenerateResponses(List<Section> sections,
                                                     Submission submission,
                                                     Faker faker)

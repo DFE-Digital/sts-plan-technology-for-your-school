@@ -95,8 +95,14 @@ describe("Check answers page", () => {
   });
 
   //This needs to be last on this test run, so that the question-page tests have a clean slate to work from!
-  it("submits answers and shows notification", () => {
+  it("submits answers, shows notification and preserves notification", () => {
     cy.submitAnswers();
+
+    cy.get(".govuk-tag--yellow")
+      .should("exist")
+      .and("contain", "New");
+
+    cy.reload();
 
     cy.get(".govuk-tag--yellow")
       .should("exist")
