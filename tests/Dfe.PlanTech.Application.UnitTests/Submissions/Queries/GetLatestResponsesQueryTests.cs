@@ -151,6 +151,7 @@ public class GetLatestResponsesQueryTests
                 submission.Completed = true;
                 submission.DateCompleted = faker.Date.Future(1, submission.DateCreated);
                 submission.Maturity = faker.PickRandom(maturities);
+                submission.Viewed = false;
             }
 
             yield return submissions;
@@ -251,13 +252,18 @@ public class GetLatestResponsesQueryTests
     }
 
     [Fact]
-    public async Task ViewLatestSubmission_Should_Mark_Completed_Submission_As_Viewed()
+    public async Task ViewLatestSubmission_Should_Mark_Latest_Completed_Submission_As_Viewed()
     {
         var submission = GetCompletedSubmissionForCompletedSection();
+        var latestResponse = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(ESTABLISHMENT_ID, submission.SectionId, true);
+        var latestSubmission = _submissions.FirstOrDefault(sub => sub.Id == latestResponse?.SubmissionId);
+
+        Assert.NotNull(latestSubmission);
+        Assert.False(latestSubmission.Viewed);
 
         await _getLatestResponseListForSubmissionQuery.ViewLatestSubmission(ESTABLISHMENT_ID, submission.SectionId);
 
-        Assert.True(submission.Viewed);
+        Assert.True(latestSubmission.Viewed);
     }
 
     [Fact]
