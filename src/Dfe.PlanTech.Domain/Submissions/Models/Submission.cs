@@ -27,4 +27,6 @@ public class Submission
     public List<Response> Responses { get; set; } = new();
 
     public bool Deleted { get; set; }
+
+    public bool Viewed { get; set; }
 }
