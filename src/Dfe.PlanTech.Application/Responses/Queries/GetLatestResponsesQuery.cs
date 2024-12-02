@@ -56,7 +56,7 @@ public class GetLatestResponsesQuery(IPlanTechDbContext db) : IGetLatestResponse
 
     public async Task ViewLatestSubmission(int establishmentId, string sectionId)
     {
-        var currentSubmission = GetCurrentSubmission(establishmentId, sectionId, true).FirstOrDefault();
+        var currentSubmission = await db.FirstOrDefaultAsync(GetCurrentSubmission(establishmentId, sectionId, true));
         if (currentSubmission != null)
         {
             currentSubmission.Viewed = true;
