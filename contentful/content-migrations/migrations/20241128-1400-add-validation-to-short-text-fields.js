@@ -1,5 +1,5 @@
 const freeTextFields = {
-    CSBodyText: ["title", "subTitle"],
+    CSBodyText: ["title", "subTitle", "Slug"],
     ContentSupportPage: ["Slug"],
     page: ["slug"],
     section: ["name"],
@@ -17,9 +17,11 @@ const freeTextFields = {
     csLink: ["url", "linkText"],
 };
 const urlFieldTypes = ["href", "url", "slug"];
-const regexNoLeadingOrTrailingWhitespace = "^(?!\\s).*(?<!\\s)$";
-const regexNoWhitespace = "[^\\s]+$";
-const regexValidQuestion = "^(?!\\s).*\?$";
+
+// Contentful does not like negative lookahead so regexes have to be marginally more complex
+const regexNoLeadingOrTrailingWhitespace = "^[^\\s]+.*[^\\s]+$|^[^\\s]+$";
+const regexNoWhitespace = "^[^\\s]+$";
+const regexValidQuestion = "^[^\\s]+.*\\?$";
 
 /**
  *
@@ -28,12 +30,13 @@ const regexValidQuestion = "^(?!\\s).*\?$";
 module.exports = function (migration) {
     Object.entries(freeTextFields).forEach(([contentTypeId, textFields]) => {
         textFields.forEach((fieldId) => {
-            addValidationToTextField(migration, contentTypeId, fieldId);
             stripWhitespaceFromTextField(migration, contentTypeId, fieldId);
+            addValidationToTextField(migration, contentTypeId, fieldId);
         });
     });
 
     // Question text is a bit different, and should terminate in a question mark
+    stripWhitespaceFromTextField(migration, "question", "text")
     let contentType = migration.editContentType("question");
     let field = contentType.editField("text");
     field.validations([
@@ -54,19 +57,17 @@ function addValidationToTextField(migration, contentTypeName, fieldId) {
     let contentType = migration.editContentType(contentTypeName);
     let field = contentType.editField(fieldId);
 
-    console.log(`Adding validation to ${contentTypeName}: ${fieldId}`);
-
-    if (urlFieldTypes.includes(fieldId)) {
+    if (urlFieldTypes.includes(fieldId.toLowerCase())) {
         field.validations([
             {
-                regexp: { pattern: regexNoWhitespace },
+                regexp: { pattern: regexNoWhitespace, flags: null },
                 message: "Urls cannot contain whitespace.",
             },
         ]);
     } else {
         field.validations([
             {
-                regexp: { pattern: regexNoLeadingOrTrailingWhitespace },
+                regexp: { pattern: regexNoLeadingOrTrailingWhitespace, flags: null },
                 message: "Cannot have leading or trailing whitespace.",
             },
         ]);
@@ -80,8 +81,6 @@ function addValidationToTextField(migration, contentTypeName, fieldId) {
  * @param {string} fieldId
  */
 function stripWhitespaceFromTextField(migration, contentType, fieldId) {
-    console.log(`Stripping whitespace from ${contentType}: ${fieldId}`);
-
     migration.transformEntries({
         contentType: contentType,
         from: [fieldId],
