@@ -58,3 +58,19 @@ The tests use pytest and can be run with:
 ```bash
 uv run pytest
 ```
+
+## Certificates
+
+By default, the python project may not trust your locally running instance of plan-tech.
+You can provide a path to its certificate in your environment variables to fix this.
+
+First from the plan-tech repo run
+```bash
+dotnet dev-certs https --export-path contentful/qa-visualiser/localhost.crt --format PEM
+```
+
+Then either run
+```bash
+export REQUESTS_CA_BUNDLE=path/to/localhost.crt
+```
+or put `REQUESTS_CA_BUNDLE` in your `.env` file.
