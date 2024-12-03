@@ -110,7 +110,7 @@ async function processField({
             fieldItems: fieldValue,
         });
     } else if (fieldKey.sys?.type === "Link") {
-        await removeFieldIfMissing({
+        await removeLinkIfMissing({
             client: client,
             entry: entry,
             validEntryIds: validEntryIds,
@@ -120,14 +120,14 @@ async function processField({
 }
 
 /**
- * Checks a particular field on a contentful entry and removes it if it is missing/invalid.
+ * Checks a particular link on a contentful entry and removes it if it is missing/invalid.
  *
  * @param {ClientAPI} params.client - Contentful management client instance
  * @param {object} params.entry - The Contentful entry object being processed.
  * @param {Set<string>} params.validEntryIds - All valid entry Ids.
  * @param {string} params.fieldKey - Key of the field in the entry.
  */
-async function removeFieldIfMissing({
+async function removeLinkIfMissing({
     client,
     entry,
     validEntryIds,
