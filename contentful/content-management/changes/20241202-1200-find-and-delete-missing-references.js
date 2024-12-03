@@ -18,6 +18,7 @@ module.exports = async function () {
 async function removeInvalidReferences(client) {
     const contentTypes = await client.contentType.getMany();
     const entryIds = await getAllValidEntryIds(client);
+
     for (const contentType of contentTypes.items) {
         await removeInvalidReferencesForContentType({
             client: client,
@@ -33,15 +34,17 @@ async function removeInvalidReferences(client) {
  * @param {ClientAPI} client - Contentful management client instance.
  */
 async function getAllValidEntryIds(client) {
-    console.log("Finding all valid entryIds")
+    console.log("Finding all valid entryIds");
     const contentTypes = await client.contentType.getMany();
     const entryIds = new Set();
+
     for (const contentType of contentTypes.items) {
         const entries = await client.entry.getMany({
             query: { limit: 1000, content_type: contentType.sys.id },
         });
         entries.items.map((entry) => entryIds.add(entry.sys.id));
     }
+
     return entryIds;
 }
 
@@ -98,45 +101,93 @@ async function processField({
     fieldValue,
 } = {}) {
     if (Array.isArray(fieldValue)) {
-        let updated = false;
-        validReferences = []
-        for (const reference of fieldValue) {
-            if (reference.sys?.type === "Link") {
-                if (validEntryIds.has(reference.sys?.id)) {
-                    validReferences.push(reference);
-                }
-                else {
-                    console.log(
-                        `Removing invalid link in entry "${entry.sys.id}" array "${fieldKey}" value "${reference.sys.id}}".`
-                    );
-                    updated = true;
-                }
+        await removeMissingReferencesInArray({
+            client: client,
+            entry: entry,
+            validEntryIds: validEntryIds,
+            locale: locale,
+            fieldKey: fieldKey,
+            fieldItems: fieldValue,
+        });
+    } else if (fieldKey.sys?.type === "Link") {
+        await removeFieldIfMissing({
+            client: client,
+            entry: entry,
+            validEntryIds: validEntryIds,
+            fieldKey: fieldKey,
+        });
+    }
+}
+
+/**
+ * Checks a particular field on a contentful entry and removes it if it is missing/invalid.
+ *
+ * @param {ClientAPI} params.client - Contentful management client instance
+ * @param {object} params.entry - The Contentful entry object being processed.
+ * @param {Set<string>} params.validEntryIds - All valid entry Ids.
+ * @param {string} params.fieldKey - Key of the field in the entry.
+ */
+async function removeFieldIfMissing({
+    client,
+    entry,
+    validEntryIds,
+    fieldKey,
+} = {}) {
+    if (!validEntryIds.has(fieldKey.sys?.id)) {
+        console.log(
+            `Removing invalid link in entry "${entry.sys.id}" field "${fieldKey}" value "${fieldKey.sys.id}}".`
+        );
+        delete entry.fields[fieldKey.sys?.id];
+        await client.entry.update(
+            { entryId: entry.sys.id },
+            {
+                sys: entry.sys,
+                fields: entry.fields,
+            }
+        );
+    }
+}
+
+/**
+ * Removes any invalid/missing content items with in an array of entries.
+ *
+ * @param {ClientAPI} params.client - Contentful management client instance
+ * @param {object} params.entry - The Contentful entry object being processed.
+ * @param {Set<string>} params.validEntryIds - All valid entry Ids.
+ * @param {string} params.locale - Locale of the field value.
+ * @param {string} params.fieldKey - Key of the field in the entry.
+ * @param {object[]} params.fieldItems - Value of the field in the entry.
+ */
+async function removeMissingReferencesInArray({
+    client,
+    entry,
+    validEntryIds,
+    locale,
+    fieldKey,
+    fieldItems,
+} = {}) {
+    let updated = false;
+    let validReferences = [];
+    for (const reference of fieldItems) {
+        if (reference.sys?.type === "Link") {
+            if (validEntryIds.has(reference.sys?.id)) {
+                validReferences.push(reference);
+            } else {
+                console.log(
+                    `Removing invalid link in entry "${entry.sys.id}" array "${fieldKey}" value "${reference.sys.id}}".`
+                );
+                updated = true;
             }
         }
-        if(updated) {
-            entry.fields[fieldKey][locale] = validReferences;
-            await client.entry.update(
-                { entryId: entry.sys.id },
-                {
-                    sys: entry.sys,
-                    fields: entry.fields
-                }
-            );
-        }
-    } else if (fieldKey.sys?.type === "Link") {
-        // Handle single reference
-        if (!validEntryIds.has(fieldKey.sys?.id)) {
-            console.log(
-                `Removing invalid link in entry "${entry.sys.id}" field "${fieldKey}" value "${fieldKey.sys.id}}".`
-            );
-            delete entry.fields[fieldKey.sys?.id];
-            await client.entry.update(
-                { entryId: entry.sys.id },
-                {
-                    sys: entry.sys,
-                    fields: entry.fields
-                }
-            );
-        }
+    }
+    if (updated) {
+        entry.fields[fieldKey][locale] = validReferences;
+        await client.entry.update(
+            { entryId: entry.sys.id },
+            {
+                sys: entry.sys,
+                fields: entry.fields,
+            }
+        );
     }
 }
