@@ -72,4 +72,31 @@ public class ApiKeyAuthorisationFilterTests
         Assert.IsNotType<UnauthorizedResult>(filterContext.Result);
         Assert.Null(filterContext.Result);
     }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(null)]
+    public void Should_Handle_MissingApiKeyConfiguration(string? apiKey)
+    {
+        var config = new ApiAuthenticationConfiguration { KeyValue = apiKey! };
+        var authorisationFilter = new ApiKeyAuthorisationFilter(config, _logger);
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.Request.Headers.Append(ApiKeyAuthorisationFilter.AuthHeaderKey, ApiKeyAuthorisationFilter.AuthValuePrefix + KeyValue);
+        var actionContext = new ActionContext
+        {
+            HttpContext = httpContext,
+            RouteData = new RouteData(),
+            ActionDescriptor = new ActionDescriptor()
+        };
+        var filterContext = new AuthorizationFilterContext(actionContext, []);
+        authorisationFilter.OnAuthorization(filterContext);
+        Assert.IsType<UnauthorizedResult>(filterContext.Result);
+
+        var loggedMessages = _logger.ReceivedLogMessages().ToArray();
+
+        Assert.Single(loggedMessages);
+        Assert.Equal($"API key {nameof(config.KeyValue)} is missing", loggedMessages[0].Message);
+        Assert.Equal(LogLevel.Error, loggedMessages[0].LogLevel);
+    }
 }
