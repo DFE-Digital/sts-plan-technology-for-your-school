@@ -1,4 +1,3 @@
-using System.Text;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Helpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
@@ -18,45 +17,31 @@ public class HeaderComponentTagHelper : TagHelper
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
-        if (Model == null)
+        if (Model == null || Model.Tag == Domain.Content.Enums.HeaderTag.Unknown || !TryBuildElement(output))
         {
-            _logger.LogWarning($"Missing {nameof(Model)}");
+            output.TagName = null;
+            output.Content.SetHtmlContent("");
+            _logger.LogWarning("Missing or invalid {Name} {Model}", nameof(Header), Model);
             return;
         }
 
-        if (Model.Tag == Domain.Content.Enums.HeaderTag.Unknown)
+        output.TagMode = TagMode.StartTagAndEndTag;
+    }
+
+    public bool TryBuildElement(TagHelperOutput output)
+    {
+        var tagName = Model!.Tag.ToString().ToLower();
+        var classForSize = Model.GetClassForSize();
+
+        if (string.IsNullOrEmpty(tagName))
         {
-            _logger.LogWarning($"Could not find {nameof(Model.Tag)} for {nameof(Model)}");
+            return false;
         }
 
-        var html = GetHtml();
+        output.TagName = tagName;
+        output.Attributes.Add("class", classForSize);
+        output.Content.SetHtmlContent(Model.Text);
 
-        output.Content.SetHtmlContent(html);
-    }
-
-    public string GetHtml()
-    {
-        var stringBuilder = new StringBuilder();
-        AppendOpenTag(stringBuilder);
-        stringBuilder.Append(Model!.Text);
-        AppendCloseTag(stringBuilder);
-
-        return stringBuilder.ToString();
-    }
-
-    private void AppendCloseTag(StringBuilder stringBuilder)
-    {
-        stringBuilder.Append("</");
-        stringBuilder.Append(Model!.Tag.ToString());
-        stringBuilder.Append('>');
-    }
-
-    private void AppendOpenTag(StringBuilder stringBuilder)
-    {
-        stringBuilder.Append('<');
-        stringBuilder.Append(Model!.Tag.ToString());
-        stringBuilder.Append(" class=\"");
-        stringBuilder.Append(Model.GetClassForSize());
-        stringBuilder.Append("\">");
+        return true;
     }
 }
