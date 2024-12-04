@@ -9,4 +9,6 @@ public class CategorySectionRecommendationDto
     public string? NoRecommendationFoundErrorMessage { get; init; }
 
     public string? SectionSlug { get; init; }
+
+    public bool Viewed { get; init; }
 }

@@ -54,6 +54,16 @@ public class GetLatestResponsesQuery(IPlanTechDbContext db) : IGetLatestResponse
             .Where(IsMatchingIncompleteSubmission(establishmentId, sectionId, completedSubmission))
             .OrderByDescending(submission => submission.DateCreated);
 
+    public async Task ViewLatestSubmission(int establishmentId, string sectionId)
+    {
+        var currentSubmission = await db.FirstOrDefaultAsync(GetCurrentSubmission(establishmentId, sectionId, true));
+        if (currentSubmission != null)
+        {
+            currentSubmission.Viewed = true;
+            await db.SaveChangesAsync();
+        }
+    }
+
     private static Expression<Func<Submission, bool>> IsMatchingIncompleteSubmission(int establishmentId, string sectionId, bool completedSubmission)
     => submission => (submission.Completed == completedSubmission) &&
                      !submission.Deleted &&
