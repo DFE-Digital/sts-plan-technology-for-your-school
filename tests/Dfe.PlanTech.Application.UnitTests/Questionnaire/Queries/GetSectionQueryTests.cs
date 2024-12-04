@@ -12,6 +12,20 @@ namespace Dfe.PlanTech.Application.UnitTests.Questionnaire.Queries;
 
 public class GetSectionQueryTests
 {
+    private readonly static Answer FirstAnswer = new()
+    {
+        Text = "Answer1",
+        Sys = new SystemDetails() { Id = "Answer-1" },
+        NextQuestion = new Question()
+        {
+            Text = "Question 2",
+            Sys = new SystemDetails() { Id = "Question-2" },
+            Answers = new List<Answer>()
+            {
+
+            }
+        }
+    };
     private readonly static Section FirstSection = new()
     {
         Name = "First section",
@@ -22,6 +36,15 @@ public class GetSectionQueryTests
         Sys = new SystemDetails()
         {
             Id = "1"
+        },
+        Questions = new List<Question>()
+        {
+            new Question()
+            {
+                Text = "Question 1",
+                Sys = new SystemDetails() { Id = "Question-1" },
+                Answers = new List<Answer>() { FirstAnswer }
+            }
         }
     };
 
@@ -111,6 +134,46 @@ public class GetSectionQueryTests
         await Assert.ThrowsAsync<ContentfulDataUnavailableException>(
             async () => await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken)
         );
+    }
+
+    [Fact]
+    public async Task GetAllSections_ThrowsExceptionOnRepositoryError()
+    {
+        var repository = Substitute.For<IContentRepository>();
+        repository
+            .When(repo => repo.GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()))
+            .Throw(new Exception("Dummy Exception"));
+
+        var getSectionQuery = new GetSectionQuery(repository, _cache);
+
+        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(
+            async () => await getSectionQuery.GetAllSections(CancellationToken.None)
+        );
+    }
+
+    [Fact]
+    public async Task GetAllSections_Should_Omit_NextQuestion_Answers()
+    {
+        var repository = Substitute.For<IContentRepository>();
+        repository.GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>())
+            .Returns(_ => _sections);
+
+        var getSectionQuery = new GetSectionQuery(repository, _cache);
+        var sections = (await getSectionQuery.GetAllSections()).ToList();
+        Assert.Equal(_sections.Length, sections.Count);
+
+        var nextQuestions = sections
+            .SelectMany(section => section!.Questions)
+            .SelectMany(question => question.Answers)
+            .Where(answer => answer.NextQuestion != null)
+            .Select(answer => answer.NextQuestion!)
+            .ToList();
+
+        Assert.All(nextQuestions, nextQuestion =>
+        {
+            Assert.NotNull(nextQuestion.Sys);
+            Assert.Empty(nextQuestion.Answers);
+        });
     }
 }
 

@@ -48,4 +48,56 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
             throw new ContentfulDataUnavailableException($"Error getting section with slug {sectionSlug} from Contentful", ex);
         }
     }
+
+    /// <summary>
+    /// Returns sections from contentful but only containing system details, question and answer text
+    /// </summary>
+    public async Task<IEnumerable<Section?>> GetAllSections(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var sections = await _cache.GetOrCreateAsync("Sections", async () =>
+            {
+                var options = new GetEntitiesOptions(include: 3);
+                var sections = await repository.GetEntities<Section>(options, cancellationToken);
+                return sections.Select(MapSection);
+            }) ?? [];
+            return sections;
+        }
+        catch (Exception ex)
+        {
+            throw new ContentfulDataUnavailableException("Error getting sections from Contentful", ex);
+        }
+    }
+
+    /// <summary>
+    /// Returns a mapped section only containing the text and ids required to see the paths through a section.
+    /// </summary>
+    private Section MapSection(Section section)
+    {
+        return new Section()
+        {
+            Name = section.Name,
+            Sys = section.Sys,
+            Questions = section.Questions.Select(question => new Question()
+            {
+                Sys = question.Sys,
+                Text = question.Text,
+                Answers = question.Answers.Select(MapAnswer).ToList()
+            }).ToList()
+        };
+    }
+
+    /// <summary>
+    /// Removes details from nextQuestion other than system details to avoid infinite reference loops
+    /// </summary>
+    private Answer MapAnswer(Answer answer)
+    {
+        return new Answer()
+        {
+            Text = answer.Text,
+            Sys = answer.Sys,
+            NextQuestion = answer.NextQuestion != null ? new Question() { Sys = answer.NextQuestion.Sys, } : null
+        };
+    }
 }
