@@ -33,11 +33,6 @@ public class HeaderComponentTagHelper : TagHelper
         var tagName = Model!.Tag.ToString().ToLower();
         var classForSize = Model.GetClassForSize();
 
-        if (string.IsNullOrEmpty(tagName))
-        {
-            return false;
-        }
-
         output.TagName = tagName;
         output.Attributes.Add("class", classForSize);
         output.Content.SetHtmlContent(Model.Text);
