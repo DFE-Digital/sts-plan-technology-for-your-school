@@ -157,17 +157,17 @@ jobs:
           az_resource_group: ${{ env.az_resource_group_name}}
           az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
 
-      - name: Get Connection String
+      - name: Get Connection string
         id: get-connection-string
-        uses: ./.github/actions/azure-get-db-connectionstring
+        uses: ./.github/actions/azure-get-keyvault-secret
         with:
           az_keyvault_name: ${{ env.az_keyvault_name }}
-          az_keyvault_database_connectionstring_name: ${{ env.az_keyvault_database_connectionstring_name }}
+          az_keyvault_secret_name: ${{ env.az_keyvault_database_connectionstring_name }}
 
       - name: Execute Clear Database Stored Procedure
         uses: azure/sql-action@v2.2
         with:
-          connection-string: ${{ steps.get-connection-string.outputs.connection_string }}
+          connection-string: ${{ steps.get-connection-string.outputs.secret_value }}
           path: "./.github/scripts/drop-establishment-data.sql"
 
       - name: Cypress Testing

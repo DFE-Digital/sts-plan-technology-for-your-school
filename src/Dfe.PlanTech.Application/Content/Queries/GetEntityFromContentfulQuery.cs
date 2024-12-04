@@ -13,7 +13,7 @@ namespace Dfe.PlanTech.Application.Content.Queries;
 /// </summary>
 public class GetEntityFromContentfulQuery : ContentRetriever, IGetEntityFromContentfulQuery
 {
-    public const string ExceptionMessageContentful = "Error fetching Entity from Contentful";
+    public const string ExceptionMessageEntityContentful = "Error fetching Entity from Contentful";
 
     private readonly ILogger<GetEntityFromContentfulQuery> _logger;
     private readonly ICmsCache _cache;
@@ -34,7 +34,7 @@ public class GetEntityFromContentfulQuery : ContentRetriever, IGetEntityFromCont
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, ExceptionMessageContentful);
+            _logger.LogError(ex, ExceptionMessageEntityContentful);
             return null;
         }
     }
