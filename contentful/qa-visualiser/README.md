@@ -19,24 +19,25 @@ Extra fields are allowed but missing fields raise a validation error.
 To run the qa-visualiser locally:
 
 1. Install [uv](https://github.com/astral-sh/uv)
-2. Setup your .env file by copying .env.example and filling in the required environment variables:
+2. Install [graphviz](https://graphviz.org/download/)
+3. Setup your .env file by copying .env.example and filling in the required environment variables:
 
    | Variable         | Description                                            | Example / Location                                 |
    |------------------|--------------------------------------------------------|----------------------------------------------------|
    | PLANTECH_API_KEY | The API key the cms controller uses for authentication | Keyvault value for `api--authentication--keyvalue` |
    | PLANTECH_API_URL | Base url of the cms controller                         | https://localhost:8080/api/cms                     |
 
-3. create and activate a virtual environment with:
+4. create and activate a virtual environment with:
     ```bash
     cd qa-visualiser
     uv venv
     source .venv/bin/activate
     ```
-4. Install project dependencies with:
+5. Install project dependencies with:
     ```bash
     uv sync
     ```
-5. Run the tool to generate visualisations with:
+6. Run the tool to generate visualisations with:
     ```bash
     uv run main.py
     ```
