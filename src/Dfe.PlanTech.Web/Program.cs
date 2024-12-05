@@ -6,6 +6,7 @@ using Dfe.PlanTech.Infrastructure.SignIns;
 using Dfe.PlanTech.Web;
 using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Middleware;
+using Dfe.PlanTech.Web.Models;
 using GovUk.Frontend.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -47,8 +48,12 @@ builder.AddContentAndSupportServices()
         .AddRedisServices(builder.Configuration);
 
 builder.Services.AddSingleton<ISystemTime, SystemTime>();
+builder.Services.Configure<RobotsConfiguration>(builder.Configuration.GetSection("Robots"));
+
 
 var app = builder.Build();
+
+app.UseRobotsTxtMiddleware();
 
 app.UseSecurityHeaders();
 app.UseMiddleware<HeadRequestMiddleware>();
