@@ -1,5 +1,5 @@
 ﻿using Dfe.PlanTech.Web.Content;
-using Dfe.PlanTech.Web.Models.Content.Mapped;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;

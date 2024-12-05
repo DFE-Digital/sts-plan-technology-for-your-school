@@ -1,4 +1,6 @@
-using Dfe.PlanTech.Web.Models.Content;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
+using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Web.Content;
 

@@ -1,12 +1,12 @@
 ﻿using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Content;
-using Dfe.PlanTech.Web.Models.Content;
-using Dfe.PlanTech.Web.Models.Content.Mapped.Standard;
-using Dfe.PlanTech.Web.Models.Content.Mapped.Types;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Standard;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Types;
 using FluentAssertions;
 using Xunit;
-using FileDetails = Dfe.PlanTech.Web.Models.Content.FileDetails;
+using FileDetails = Dfe.PlanTech.Domain.Content.Models.ContentSupport.FileDetails;
 
 namespace Dfe.PlanTech.Web.UnitTests.Models.Content.Mapped.Standard;
 

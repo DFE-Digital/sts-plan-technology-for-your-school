@@ -1,5 +1,7 @@
-﻿using Dfe.PlanTech.Web.Models.Content;
-using Dfe.PlanTech.Web.Models.Content.Mapped;
+﻿using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
+using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Web.Content;
 
@@ -26,12 +28,12 @@ public class LayoutService : ILayoutService
     }
 
 
-    public Heading GetHeading(CsPage page, string pageSlug)
+    public CSHeading GetHeading(CsPage page, string pageSlug)
     {
         var selectedPage = page.Content.Find(o => o.Slug == pageSlug);
 
         if (selectedPage is { UseParentHero: false })
-            return new Heading
+            return new CSHeading
             {
                 Title = selectedPage.Title ?? string.Empty,
                 Subtitle = selectedPage.Subtitle ?? string.Empty

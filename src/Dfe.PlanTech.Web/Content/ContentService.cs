@@ -1,18 +1,28 @@
 using System.Xml.Linq;
-using Dfe.PlanTech.Web.Models.Content;
-using Dfe.PlanTech.Web.Models.Content.Mapped;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
+using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Domain.Content.Queries;
+using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Web.Content;
-
-public class ContentService(
-    [FromKeyedServices(ProgramExtensions.ContentAndSupportServiceKey)]
-    IContentfulService contentfulService,
-    [FromKeyedServices(ProgramExtensions.ContentAndSupportServiceKey)]
-    ICacheService<List<CsPage>> cache,
-    [FromKeyedServices(ProgramExtensions.ContentAndSupportServiceKey)]
-    IModelMapper modelMapper)
-    : IContentService
+public class ContentService : IContentService // This indicates that ContentService implements IContentService
 {
+    private readonly IGetContentSupportPageQuery _getContentSupportPageQuery;
+    private readonly IModelMapper _modelMapper;
+
+    public ContentService(
+        [FromKeyedServices(ProgramExtensions.ContentAndSupportServiceKey)]
+        ICacheService<List<CsPage>> cache,
+        [FromKeyedServices(ProgramExtensions.ContentAndSupportServiceKey)]
+        IModelMapper modelMapper,
+        IGetContentSupportPageQuery getContentSupportPageQuery)
+    {
+        _getContentSupportPageQuery = getContentSupportPageQuery;
+        _modelMapper = modelMapper;
+    }
+
     public async Task<CsPage?> GetContent(string slug, bool isPreview = false)
     {
         var resp = await GetContentSupportPages(nameof(ContentSupportPage.Slug), slug, isPreview);
@@ -49,19 +59,8 @@ public class ContentService(
 
     public async Task<List<CsPage>> GetContentSupportPages(string field, string value, bool isPreview)
     {
-        var key = $"{field}_{value}";
-        if (!isPreview)
-        {
-            var fromCache = cache.GetFromCache(key);
-            if (fromCache is not null)
-                return fromCache;
-        }
-
-        var result = await contentfulService.GetContentSupportPages(field, value);
-        var pages = modelMapper.MapToCsPages(result);
-
-        if (!isPreview)
-            cache.AddToCache(key, pages);
+        var result = await _getContentSupportPageQuery.GetContentSupportPages();
+        var pages = _modelMapper.MapToCsPages(result);
 
         return pages;
     }

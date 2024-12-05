@@ -11,15 +11,18 @@ using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Domain.Content.Queries;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
 [LogInvalidModelState]
 [Route("/")]
-public class PagesController(ILogger<PagesController> logger, IGetNavigationQuery getNavigationQuery, IOptions<ContactOptions> contactOptions) : BaseController<PagesController>(logger)
+public class PagesController(ILogger<PagesController> logger, IGetNavigationQuery getNavigationQuery, IGetContentSupportPageQuery getContentSupportPageQuery, IOptions<ContactOptions> contactOptions) : BaseController<PagesController>(logger)
 {
     private readonly ILogger _logger = logger;
     private readonly IGetNavigationQuery _getNavigationQuery = getNavigationQuery;
+        private readonly IGetContentSupportPageQuery _getContentSupportPageQuery = getContentSupportPageQuery;
     private readonly ContactOptions _contactOptions = contactOptions.Value;
     public const string ControllerName = "Pages";
     public const string GetPageByRouteAction = nameof(GetByRoute);

@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Web.Models.Content.Mapped;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
 
 namespace Dfe.PlanTech.Web.Content;
 

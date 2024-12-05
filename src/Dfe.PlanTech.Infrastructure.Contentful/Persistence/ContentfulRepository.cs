@@ -62,5 +62,14 @@ public class ContentfulRepository : IContentRepository
         return entities.FirstOrDefault();
     }
 
-    private static string LowerCaseFirstLetter(string toLowerCase) => char.ToLower(toLowerCase[0]) + toLowerCase.Substring(1);
+    // private static string LowerCaseFirstLetter(string toLowerCase) => char.ToLower(toLowerCase[0]) + toLowerCase.Substring(1);
+    private static string LowerCaseFirstLetter(string input) 
+    {
+        if (input == "ContentSupportPage")
+            return input;
+        
+        char[] array = input.ToCharArray();
+        array[0] = char.ToLower(array[0]);
+        return new string(array);
+    }
 }

@@ -1,12 +1,14 @@
 using Contentful.Core.Models;
 using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Web.Configuration;
-using Dfe.PlanTech.Web.Models.Content;
-using Dfe.PlanTech.Web.Models.Content.Mapped;
-using Dfe.PlanTech.Web.Models.Content.Mapped.Custom;
-using Dfe.PlanTech.Web.Models.Content.Mapped.Standard;
-using Dfe.PlanTech.Web.Models.Content.Mapped.Types;
-using Hyperlink = Dfe.PlanTech.Web.Models.Content.Mapped.Standard.Hyperlink;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Custom;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Standard;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Types;
+using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Content.Interfaces;
+using Hyperlink = Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Standard.Hyperlink;
 
 namespace Dfe.PlanTech.Web.Content;
 
@@ -184,7 +186,7 @@ public class ModelMapper(SupportedAssetTypes supportedAssetTypes) : IModelMapper
         return item.Tags.Select(o => o.Sys.Id).ToList();
     }
 
-    private List<CsContentItem> MapEntriesToContent(List<Entry> entries)
+    private List<CsContentItem> MapEntriesToContent(List<CSBodyText> entries)
     {
         return entries.Select(ConvertEntryToContentItem).ToList();
     }

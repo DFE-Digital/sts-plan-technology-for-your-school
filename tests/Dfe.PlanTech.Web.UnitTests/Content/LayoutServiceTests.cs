@@ -1,6 +1,6 @@
 ﻿using Dfe.PlanTech.Web.Content;
-using Dfe.PlanTech.Web.Models.Content;
-using Dfe.PlanTech.Web.Models.Content.Mapped;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Xunit;

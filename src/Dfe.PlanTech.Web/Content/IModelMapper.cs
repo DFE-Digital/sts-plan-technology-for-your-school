@@ -1,7 +1,9 @@
-﻿using Dfe.PlanTech.Web.Models.Content;
-using Dfe.PlanTech.Web.Models.Content.Mapped;
-using Dfe.PlanTech.Web.Models.Content.Mapped.Custom;
-using Dfe.PlanTech.Web.Models.Content.Mapped.Types;
+﻿using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Custom;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Types;
+using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Web.Content;
 
