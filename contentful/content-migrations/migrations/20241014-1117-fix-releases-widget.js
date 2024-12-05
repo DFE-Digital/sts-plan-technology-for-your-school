@@ -1,18 +1,18 @@
 const Migration = require("contentful-migration");
-const { runForEachContentType } = require("../helpers");
+const { runForEachContentType } = require("../helpers/content-types");
 
 /**
- * 
- * @param {Migration} migration 
+ *
+ * @param {Migration} migration
  */
 module.exports = function (migration) {
   runForEachContentType((contentTypeName) => updateContentType(migration, contentTypeName));
 };
 
 /**
- * 
- * @param {Migration} migration 
- * @param {string} contentType 
+ *
+ * @param {Migration} migration
+ * @param {string} contentType
  */
 function updateContentType(migration, contentType) {
   var contentType = migration.editContentType(contentType);

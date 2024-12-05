@@ -2,7 +2,7 @@ const deleteEntry = require("../helpers/delete-entry");
 const getClient = require("../helpers/get-client");
 
 module.exports = async function () {
-    const client = getClient();
+    const client = await getClient();
     const headers = await client.entry.getMany({
         query: {
             content_type: "header",
