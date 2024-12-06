@@ -1,0 +1,30 @@
+name: Run mutations tests
+description: Runs mutations testing against a solution and publishes them to the workflow runs
+
+inputs:
+  solution_path:
+    description: "Filepath for the solution to run mutations testing on"
+    required: true
+    type: string
+  config_path:
+    type: string
+    default: ".github/actions/run-mutations-testing/stryker-config.json"
+    description: "Relative path for the Stryker Config file to use"
+
+runs:
+  using: composite
+  steps:
+    - name: Install Stryker tool
+      shell: bash
+      run: dotnet tool install -g dotnet-stryker
+
+    - name: Run mutations tests
+      shell: bash
+      run: dotnet stryker -s ${{ inputs.solution_path }} -f .github/actions/run-mutations-testing/stryker-config.json
+      
+    - name: Upload results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: mutations-report
+        path: StrykerOutput/**/**/*.html

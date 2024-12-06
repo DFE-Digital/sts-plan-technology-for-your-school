@@ -1,0 +1,34 @@
+name: Mutations testing
+on:
+  push:
+    branches: ["main", "development"]
+    paths:
+      - "src/**"
+      - "tests/**"
+
+concurrency:
+  group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  mutations-testing:
+    name: Run mutations testing
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Stryker tool
+        run: dotnet tool install -g dotnet-stryker
+
+      - name: Run unit tests
+        uses: ./.github/actions/run-mutations-testing
+        with:
+          solution_path: plan-technology-for-your-school.sln
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: html-report
+          path: StrykerOutput/**/**/*.html
