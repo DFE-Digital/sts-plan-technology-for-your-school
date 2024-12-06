@@ -14,21 +14,7 @@
             "break": 0
         },
         "verbosity": "info",
-        "reporters": ["Progress", "Html"],
-        "since": {
-            "enabled": false,
-            "ignore-changes-in": [],
-            "target": "master"
-        },
-        "baseline": {
-            "enabled": false,
-            "provider": "disk",
-            "azure-fileshare-url": "",
-            "fallback-version": "master"
-        },
-        "dashboard-url": "https://dashboard.stryker-mutator.io",
-        "test-projects": [],
-        "test-case-filter": "",
+        "reporters": ["Progress", "Html", "markdown", "json"],
         "ignore-mutations": [],
         "ignore-methods": [],
         "report-file-name": "mutation-report",

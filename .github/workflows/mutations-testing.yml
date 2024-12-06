@@ -5,6 +5,7 @@ on:
     paths:
       - "src/**"
       - "tests/**"
+  pull_request:
 
 concurrency:
   group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
@@ -26,9 +27,16 @@ jobs:
         with:
           solution_path: plan-technology-for-your-school.sln
 
-      - name: Upload results
-        if: always()
-        uses: actions/upload-artifact@v3
+      - name: Get markdown results
+        run: |
+          MUTATION_RESULTS=$(cat $(find StrykerOutput -type f -name "mutation-report.md"))
+          echo "MUTATION_RESULTS=$MUTATION_RESULTS" >> $GITHUB_ENV
+
+      - name: Comment results
+        uses: ./.github/actions/post-pr-comment
         with:
-          name: html-report
-          path: StrykerOutput/**/**/*.html
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_actor: ${{ github.actor }}
+          github_event_name: ${{ github.event_name }}
+          github_workflow: ${{ github.workflow }}
+          content: ${{ env.MUTATION_RESULTS }}
