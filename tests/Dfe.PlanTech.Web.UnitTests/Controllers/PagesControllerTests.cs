@@ -46,7 +46,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 LinkId = "LinkId"
             };
             _contactOptions = Options.Create(contactUs);
-            _errorPages = Options.Create(new ErrorPages{ InternalErrorPageId = "InternalErrorPageId"});
+            _errorPages = Options.Create(new ErrorPages { InternalErrorPageId = "InternalErrorPageId" });
 
             _controller = new PagesController(Logger, _getPageQuery, _getNavigationQuery, _contactOptions, _errorPages)
             {
