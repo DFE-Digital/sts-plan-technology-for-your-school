@@ -16,11 +16,15 @@ namespace Dfe.PlanTech.Web.Controllers;
 
 [LogInvalidModelState]
 [Route("/")]
-public class PagesController(ILogger<PagesController> logger, IGetNavigationQuery getNavigationQuery, IOptions<ContactOptions> contactOptions) : BaseController<PagesController>(logger)
+public class PagesController(
+    ILogger<PagesController> logger,
+    IGetPageQuery getPageQuery,
+    IGetNavigationQuery getNavigationQuery,
+    IOptions<ContactOptions> contactOptions,
+    IOptions<ErrorPages> errorPages) : BaseController<PagesController>(logger)
 {
-    private readonly ILogger _logger = logger;
-    private readonly IGetNavigationQuery _getNavigationQuery = getNavigationQuery;
     private readonly ContactOptions _contactOptions = contactOptions.Value;
+    private readonly ErrorPages _errorPages = errorPages.Value;
     public const string ControllerName = "Pages";
     public const string GetPageByRouteAction = nameof(GetByRoute);
     public const string NotFoundPage = "NotFoundError";
@@ -31,7 +35,7 @@ public class PagesController(ILogger<PagesController> logger, IGetNavigationQuer
     {
         if (page == null)
         {
-            _logger.LogInformation("Could not find page at {Path}", Request.Path.Value);
+            logger.LogInformation("Could not find page at {Path}", Request.Path.Value);
             return RedirectToAction(NotFoundPage);
         }
         var viewModel = new PageViewModel(page, this, user, Logger);
@@ -45,16 +49,20 @@ public class PagesController(ILogger<PagesController> logger, IGetNavigationQuer
     => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 
     [HttpGet(UrlConstants.ServiceUnavailable, Name = UrlConstants.ServiceUnavailable)]
-    public async Task<IActionResult> ServiceUnavailable()
+    public async Task<IActionResult> ServiceUnavailable([FromServices] IUser user)
     {
-        var contactLink = await GetContactLinkAsync();
+        var internalErrorPage = await getPageQuery.GetPageById(_errorPages.InternalErrorPageId);
 
-        var viewModel = new ServiceUnavailableViewModel
+        if (internalErrorPage == null)
         {
-            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-            ContactHref = contactLink?.Href
-        };
-        return View(viewModel);
+            logger.LogError("Could not find internal error page");
+            return RedirectToAction("Error");
+        }
+
+        ViewData["DfeHeaderClass"] = "";
+
+        var viewModel = new PageViewModel(internalErrorPage, this, user, logger);
+        return View("Page", viewModel);
     }
 
     [HttpGet(UrlConstants.NotFound, Name = UrlConstants.NotFound)]
@@ -72,6 +80,6 @@ public class PagesController(ILogger<PagesController> logger, IGetNavigationQuer
 
     private async Task<INavigationLink> GetContactLinkAsync()
     {
-        return await _getNavigationQuery.GetLinkById(_contactOptions.LinkId);
+        return await getNavigationQuery.GetLinkById(_contactOptions.LinkId);
     }
 }

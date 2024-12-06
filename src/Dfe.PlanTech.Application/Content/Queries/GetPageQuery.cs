@@ -4,7 +4,7 @@ using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Options;
-using Dfe.PlanTech.Domain.Content.Queries;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Microsoft.Extensions.Logging;
 
@@ -41,20 +41,25 @@ public class GetPageQuery : IGetPageQuery
     }
 
     /// <summary>
-    /// Get page by slug + only return specific fields
+    /// Retrieves the page for the given Id from Contentful
     /// </summary>
-    /// <param name="slug"></param>
-    /// <param name="fieldsToReturn"></param>
+    /// <param name="pageId"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
+    /// <exception cref="KeyNotFoundException"></exception>
     /// <exception cref="ContentfulDataUnavailableException"></exception>
-
-    public async Task<Page?> GetPageBySlug(string slug, IEnumerable<string> fieldsToReturn, CancellationToken cancellationToken = default)
+    public async Task<Page?> GetPageById(string pageId, CancellationToken cancellationToken = default)
     {
-        var options = CreateGetEntityOptions(slug);
-        options.Select = fieldsToReturn;
-
-        return await FetchFromContentful(slug, options, cancellationToken);
+        try
+        {
+            return await _cache.GetOrCreateAsync($"Page:{pageId}", () =>
+                _repository.GetEntityById<Page?>(pageId, cancellationToken: cancellationToken));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching page with id: {pageId} from Contentful", pageId);
+            throw new ContentfulDataUnavailableException($"Could not retrieve page with id: {pageId}", ex);
+        }
     }
 
     /// <exception cref="ContentfulDataUnavailableException"></exception>

@@ -1,5 +1,5 @@
 using Dfe.PlanTech.Application.Exceptions;
-using Dfe.PlanTech.Domain.Content.Queries;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
