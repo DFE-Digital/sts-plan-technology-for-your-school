@@ -27,11 +27,27 @@ jobs:
         with:
           solution_path: plan-technology-for-your-school.sln
 
-      - name: Get markdown results
+      - name: Get summary
         run: |
-          MUTATION_RESULTS=$(cat $(find StrykerOutput -type f -name "mutation-report.md"))
-          echo "MUTATION_RESULTS=$MUTATION_RESULTS" >> $GITHUB_ENV
-
+          # Find the mutation report file
+          MUTATION_FILE=$(find StrykerOutput -type f -name "mutation-report.md")
+          
+          if [ -n "$MUTATION_FILE" ]; then
+              FINAL_SCORE=$(grep -m 1 'The final mutation score is' "$MUTATION_FILE")
+              COVERAGE_THRESHOLDS=$(grep -m 1 'Coverage Thresholds:' "$MUTATION_FILE")
+              
+              # Combine the results into a single variable
+              RESULTS="$FINAL_SCORE\n$COVERAGE_THRESHOLDS"
+              
+              # Set the environment variable
+              echo "MUTATION_RESULTS<<EOF" >> $GITHUB_ENV
+              echo -e "$RESULTS" >> $GITHUB_ENV
+              echo "EOF" >> $GITHUB_ENV
+          else
+              echo "No mutation report found."
+              exit 1
+          fi
+  
       - name: Comment results
         uses: ./.github/actions/post-pr-comment
         with:
