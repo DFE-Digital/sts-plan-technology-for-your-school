@@ -1,0 +1,59 @@
+name: Mutations testing
+on:
+  push:
+    branches: ["main", "development"]
+    paths:
+      - "src/**"
+      - "tests/**"
+  pull_request:
+
+concurrency:
+  group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  mutations-testing:
+    name: Run mutations testing
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Stryker tool
+        run: dotnet tool install -g dotnet-stryker
+
+      - name: Run unit tests
+        uses: ./.github/actions/run-mutations-testing
+        with:
+          solution_path: plan-technology-for-your-school.sln
+
+      - name: Get summary
+        run: |
+          # Find the mutation report file
+          MUTATION_FILE=$(find StrykerOutput -type f -name "mutation-report.md")
+          
+          if [ -n "$MUTATION_FILE" ]; then
+              FINAL_SCORE=$(grep -m 1 'The final mutation score is' "$MUTATION_FILE")
+              COVERAGE_THRESHOLDS=$(grep -m 1 'Coverage Thresholds:' "$MUTATION_FILE")
+              
+              # Combine the results into a single variable
+              RESULTS="$FINAL_SCORE\n$COVERAGE_THRESHOLDS"
+              
+              # Set the environment variable
+              echo "MUTATION_RESULTS<<EOF" >> $GITHUB_ENV
+              echo -e "$RESULTS" >> $GITHUB_ENV
+              echo "EOF" >> $GITHUB_ENV
+          else
+              echo "No mutation report found."
+              exit 1
+          fi
+  
+      - name: Comment results
+        uses: ./.github/actions/post-pr-comment
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_actor: ${{ github.actor }}
+          github_event_name: ${{ github.event_name }}
+          github_workflow: ${{ github.workflow }}
+          content: ${{ env.MUTATION_RESULTS }}
+          comment_matcher: "final mutation score"
