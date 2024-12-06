@@ -1,0 +1,147 @@
+name: Mutations testing
+on:
+  push:
+    branches: ["development"]
+    paths:
+      - "src/**"
+      - "tests/**"
+  workflow_dispatch:
+    inputs:
+      branch:
+        type: string
+        description: "The branch to run tests against"
+        default: "development"
+      mutations_threshold:
+        type: number
+        description: "Minimum % of passing mutations tests"
+        default: 70
+
+env:
+  MUTATIONS_THRESHOLD: 70
+
+jobs:
+  mutations-testing:
+    name: Run mutations testing
+    runs-on: ubuntu-22.04
+    outputs:
+      ARTIFACT_URL: ${{ steps.mutations-test-step.outputs.reports_artifact_url }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check for daily commits
+        id: check-commits
+        run: |
+          # Get the timestamp 24 hours ago in ISO format
+          YESTERDAY=$(date -d "24 hours ago" --iso-8601=seconds)
+
+          # Check if there are any commits since yesterday
+          COMMIT_COUNT=$(git log --since="$YESTERDAY" --oneline | wc -l)
+
+          if [ $COMMIT_COUNT -eq 0 ]; then
+            echo "No commits found in the last 24 hours"
+            echo "HAS_CHANGES=false" >> $GITHUB_ENV
+          else
+            echo "Found $COMMIT_COUNT commits in the last 24 hours"
+            echo "HAS_CHANGES=true" >> $GITHUB_ENV
+          fi
+
+      - name: Run mutations testing
+        if: ${{ env.HAS_CHANGES == 'true' || env.HAS_CHANGES == true }}
+        id: mutations-test-step
+        uses: ./.github/actions/run-mutations-testing
+        with:
+          solution_path: plan-technology-for-your-school.sln
+
+  create-issue-if-needed:
+    name: Run mutations testing
+    runs-on: ubuntu-22.04
+    needs: mutations-testing
+    env:
+      ARTIFACT_URL: ${{needs.mutations-testing.outputs.ARTIFACT_URL}}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download arifactt
+        uses: actions/download-artifact@v4
+        with:
+          name: mutations-report
+          path: ./artifacts
+          run-id: ${{ github.run_id }}
+
+      - name: Get summary
+        run: |
+          export MUTATIONS_THRESHOLD=${{inputs.mutations_threshold && inputs.mutations_threshold || env.MUTATIONS_THRESHOLD }}
+          export MUTATIONS_FILE=$(find artifacts -type f -name "mutation-report.md")
+
+          if [ ! -f "$MUTATIONS_FILE" ]; then
+            echo "Error: $MUTATIONS_FILE file not found"
+            echo $(ls)
+            exit 1
+          fi
+
+          MUTATIONS_SCORE=$(grep -E "^## The final mutation score is [0-9]+\.[0-9]+%" $MUTATIONS_FILE | sed -E 's/^## The final mutation score is ([0-9]+\.[0-9]+)%/\1/')
+
+          echo "Mutation score $MUTATIONS_SCORE"
+          echo "Threshold $MUTATIONS_THRESHOLD" 
+
+          MUTATIONS_PASSED=$(echo "$MUTATIONS_SCORE >= $MUTATIONS_THRESHOLD" | bc -l)
+          if (( $MUTATIONS_PASSED )); then
+              echo "Mutation score ($MUTATIONS_SCORE%) meets or exceeds threshold ($MUTATIONS_THRESHOLD%)"
+          else
+              echo "Mutation score ($MUTATIONS_SCORE%) below threshold ($MUTATIONS_THRESHOLD%)"
+          fi
+
+          echo "MUTATIONS_PASSED=$(echo $MUTATIONS_PASSED)" >> $GITHUB_ENV
+          echo "MUTATIONS_SCORE=$(echo $MUTATIONS_SCORE)" >> $GITHUB_ENV
+          echo "MUTATIONS_THRESHOLD=$(echo $MUTATIONS_THRESHOLD)" >> $GITHUB_ENV
+
+      - name: Create issue
+        if: ${{ env.MUTATIONS_PASSED }}
+        run: |
+          export INPUT_PATH=$(find artifacts -type f -name "mutation-report.md")
+          export OUTPUT_PATH=filtered_report_table.md
+          export MUTATIONS_THRESHOLD=${{env.MUTATIONS_THRESHOLD}}
+          node ./.github/actions/run-mutations-testing/process_mutation_report.js
+          REPORT=$(cat $OUTPUT_PATH)
+
+          BODY=$(cat <<EOF
+            ### Mutations score below threshold
+
+            The latest mutations test score is **$MUTATIONS_SCORE%**, which is below the minimum threshold of **$MUTATIONS_THRESHOLD%**.
+
+            Below is an excerpt of the results:
+            $REPORT
+
+            For the full report [please view the uploaded artifact]($ARTIFACT_URL).
+          EOF
+          )
+
+          if [[ $CLOSE_PREVIOUS == true ]]; then
+            previous_issue_number=$(gh issue list \
+              --label "$LABELS" \
+              --json number \
+              --jq '.[0].number')
+            if [[ -n $previous_issue_number ]]; then
+              gh issue close "$previous_issue_number"
+              gh issue unpin "$previous_issue_number"
+            fi
+          fi
+          new_issue_url=$(gh issue create \
+            --title "$TITLE" \
+            --label "$LABELS" \
+            --body "$BODY")
+          if [[ $PINNED == true ]]; then
+            gh issue pin "$new_issue_url"
+          fi
+
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TITLE: Mutations Score ${{ env.MUTATIONS_SCORE }} Below Threshold ${{ env.MUTATIONS_THRESHOLD }}
+          LABELS: mutations-testing-failed
+          PINNED: false
+          CLOSE_PREVIOUS: true

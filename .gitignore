@@ -507,3 +507,5 @@ contentful/migration-scripts/contentful-export-*.json
 # Secrets
 .env
 *.env
+
+StrykerOutput/
