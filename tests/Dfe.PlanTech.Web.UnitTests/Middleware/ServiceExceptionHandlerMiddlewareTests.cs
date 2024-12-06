@@ -8,8 +8,11 @@ using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Middleware
 {
+
     public class ServiceExceptionHandlerMiddlewareTests
     {
+        private const string InternalErrorSlug = "/server-error";
+
         [Fact]
         public void Should_Get_Error_Redirect_On_Null_Exception()
         {
@@ -18,11 +21,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             var middleware = new ServiceExceptionHandlerMiddleWare();
 
             // Act
-            middleware.ContextRedirect(context);
+            middleware.ContextRedirect(InternalErrorSlug, context);
 
             //Assert
             Assert.NotNull(context.Response);
-            Assert.Equal("/error", context.Response.Headers.Values.FirstOrDefault());
+            Assert.Equal("/server-error", context.Response.Headers.Values.FirstOrDefault());
         }
 
         [Fact]
@@ -37,11 +40,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             var middleware = new ServiceExceptionHandlerMiddleWare();
 
             // Act
-            middleware.ContextRedirect(context);
+            middleware.ContextRedirect(InternalErrorSlug, context);
 
             //Assert
             Assert.NotNull(context.Response);
-            Assert.Equal("/service-unavailable", context.Response.Headers.Values.FirstOrDefault());
+            Assert.Equal("/server-error", context.Response.Headers.Values.FirstOrDefault());
         }
 
 
@@ -49,7 +52,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
         public void Should_Get_Service_Unavailable_Redirect_DatabaseException_Exception()
         {
             // Arrange
-            var exception = new DatabaseException("service-unavailable exception");
+            var exception = new DatabaseException("server-error exception");
             var feature = new ExceptionHandlerFeature { Error = exception };
 
             var context = new DefaultHttpContext();
@@ -57,11 +60,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             var middleware = new ServiceExceptionHandlerMiddleWare();
 
             // Act
-            middleware.ContextRedirect(context);
+            middleware.ContextRedirect(InternalErrorSlug, context);
 
             //Assert
             Assert.NotNull(context.Response);
-            Assert.Equal("/service-unavailable", context.Response.Headers.Values.FirstOrDefault());
+            Assert.Equal("/server-error", context.Response.Headers.Values.FirstOrDefault());
         }
 
         [Fact]
@@ -76,11 +79,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             var middleware = new ServiceExceptionHandlerMiddleWare();
 
             // Act
-            middleware.ContextRedirect(context);
+            middleware.ContextRedirect(InternalErrorSlug, context);
 
             //Assert
             Assert.NotNull(context.Response);
-            Assert.Equal("/service-unavailable", context.Response.Headers.Values.FirstOrDefault());
+            Assert.Equal("/server-error", context.Response.Headers.Values.FirstOrDefault());
         }
 
         [Fact]
@@ -95,7 +98,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             var middleware = new ServiceExceptionHandlerMiddleWare();
 
             // Act
-            middleware.ContextRedirect(context);
+            middleware.ContextRedirect(InternalErrorSlug, context);
 
             //Assert
             Assert.NotNull(context.Response);
