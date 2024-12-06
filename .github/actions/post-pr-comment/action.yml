@@ -41,15 +41,15 @@ runs:
             issue_number: context.issue.number,
           })
           const botComment = comments.find(comment => {
-            return comment.user.type === 'Bot' && comment.body.includes("`${{inputs.comment_matcher}}`")
+            return comment.user.type === 'Bot' && comment.body.includes("${{inputs.comment_matcher}}")
           })
 
-          let commentFooter = "`${{ inputs.comment_footer }}`"  
+          let commentFooter = `${{ inputs.comment_footer }}`
           if(commentFooter.length < 3){
-            commentFooter = `*Pusher: @$\`{{ github.actor }}\`, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.TF_WORKING_DIRECTORY }}\`, Workflow: \`${{ github.workflow }}\`*`;
+            commentFooter = `*Pusher: @${{ github.actor }}, Action: ${{ github.event_name }}, Working Directory: ${{ env.TF_WORKING_DIRECTORY }}, Workflow: ${{ github.workflow }}*`;
           }
 
-          const output = "`${{ inputs.content}}`" + "\n\n" + commentFooter;
+          const output = `${{ inputs.content}}`+ "\n\n" + commentFooter;
           
           // 3. If we have a comment, update it, otherwise create a new one
           if (botComment) {

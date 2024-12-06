@@ -56,3 +56,4 @@ jobs:
           github_event_name: ${{ github.event_name }}
           github_workflow: ${{ github.workflow }}
           content: ${{ env.MUTATION_RESULTS }}
+          comment_matcher: "final mutation score"
