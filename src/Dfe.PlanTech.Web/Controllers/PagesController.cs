@@ -2,6 +2,7 @@
 using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Binders;
@@ -16,10 +17,11 @@ namespace Dfe.PlanTech.Web.Controllers;
 
 [LogInvalidModelState]
 [Route("/")]
-public class PagesController(ILogger<PagesController> logger, IGetNavigationQuery getNavigationQuery, IOptions<ContactOptions> contactOptions) : BaseController<PagesController>(logger)
+public class PagesController(ILogger<PagesController> logger, IGetNavigationQuery getNavigationQuery, IGetContentSupportPageQuery getContentSupportPageQuery, IOptions<ContactOptions> contactOptions) : BaseController<PagesController>(logger)
 {
     private readonly ILogger _logger = logger;
     private readonly IGetNavigationQuery _getNavigationQuery = getNavigationQuery;
+    private readonly IGetContentSupportPageQuery _getContentSupportPageQuery = getContentSupportPageQuery;
     private readonly ContactOptions _contactOptions = contactOptions.Value;
     public const string ControllerName = "Pages";
     public const string GetPageByRouteAction = nameof(GetByRoute);

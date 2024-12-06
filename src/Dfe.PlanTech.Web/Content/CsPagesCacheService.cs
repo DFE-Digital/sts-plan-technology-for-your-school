@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Dfe.PlanTech.Web.Models.Content.Mapped;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace Dfe.PlanTech.Web.Content;

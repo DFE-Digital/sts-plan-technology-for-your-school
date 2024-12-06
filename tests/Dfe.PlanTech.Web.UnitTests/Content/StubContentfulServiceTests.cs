@@ -1,5 +1,4 @@
 ﻿using Contentful.Core.Configuration;
-using Dfe.PlanTech.Web.Content;
 using FluentAssertions;
 using Moq;
 using Xunit;
