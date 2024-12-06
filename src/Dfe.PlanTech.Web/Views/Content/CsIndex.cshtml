@@ -7,10 +7,10 @@
 
 <div class="govuk-grid-row">
 
-    @* @if (Model.MenuItems is not null)
+    @if (Model.MenuItems is not null)
     {
         <partial name="Shared/_VerticalNavigation" model="@Model.MenuItems"/>
-    } *@
+    }
 
     <div class="govuk-grid-column-three-quarters">
 
@@ -19,7 +19,7 @@
             <partial name="Shared/_Content" model="@content"/>
         }
 
-        @* @if (Model.HasCitation)
+        @if (Model.HasCitation)
         {
             <partial name="Shared/_Citation" model="Model"/>
         }
@@ -37,7 +37,7 @@
         @if (Model.HasFeedbackBanner)
         {
             <partial name="Shared/_Feedback"/>
-        } *@
+        }
     </div>
 </div>
 

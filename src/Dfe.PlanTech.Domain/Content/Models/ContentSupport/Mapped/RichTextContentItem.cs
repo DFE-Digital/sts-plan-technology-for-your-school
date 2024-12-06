@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-namespace Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
 using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Types;
+
+namespace Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
 
 [ExcludeFromCodeCoverage]
 public class RichTextContentItem : CsContentItem
