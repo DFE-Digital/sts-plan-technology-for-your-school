@@ -18,11 +18,11 @@ public class CreateUserCommand : ICreateUserCommand
     /// </summary>
     /// <param name="createUserDTO"></param>
     /// <returns></returns>
-    public async Task<int> CreateUser(RecordUserSignInDto createUserDTO)
+    public async Task<int> CreateUser(string dfeSignInRef)
     {
-        var user = new User()
+        var user = new User
         {
-            DfeSignInRef = createUserDTO.DfeSignInRef,
+            DfeSignInRef = dfeSignInRef,
             DateCreated = DateTime.UtcNow
         };
 
