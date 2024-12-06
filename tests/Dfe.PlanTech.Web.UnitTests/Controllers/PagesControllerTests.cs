@@ -24,20 +24,21 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private const string INDEX_SLUG = "/";
         private const string INDEX_TITLE = "Index";
         private const string SELF_ASSESSMENT_SLUG = "self-assessment";
+        private const string ERROR_SLUG = "/error";
         readonly ICookieService cookiesSubstitute = Substitute.For<ICookieService>();
         readonly IUser userSubstitute = Substitute.For<IUser>();
-        private readonly IGetNavigationQuery _getNavigationQuery;
+        private readonly IGetNavigationQuery _getNavigationQuery = Substitute.For<IGetNavigationQuery>();
+        private readonly IGetPageQuery _getPageQuery = Substitute.For<IGetPageQuery>();
         private readonly PagesController _controller;
         private readonly ControllerContext _controllerContext;
         private readonly IOptions<ContactOptions> _contactOptions;
+        private readonly IOptions<ErrorPages> _errorPages;
 
         public PagesControllerTests()
         {
             var Logger = Substitute.For<ILogger<PagesController>>();
 
             _controllerContext = ControllerHelpers.SubstituteControllerContext();
-
-            _getNavigationQuery = Substitute.For<IGetNavigationQuery>();
             _getNavigationQuery.GetLinkById(Arg.Any<string>()).Returns(new NavigationLink { DisplayText = "contact us", Href = "/contact-us", OpenInNewTab = true });
 
             var contactUs = new ContactOptions
@@ -45,8 +46,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 LinkId = "LinkId"
             };
             _contactOptions = Options.Create(contactUs);
+            _errorPages = Options.Create(new ErrorPages{ InternalErrorPageId = "InternalErrorPageId"});
 
-            _controller = new PagesController(Logger, _getNavigationQuery, _contactOptions)
+            _controller = new PagesController(Logger, _getPageQuery, _getNavigationQuery, _contactOptions, _errorPages)
             {
                 ControllerContext = _controllerContext,
                 TempData = Substitute.For<ITempDataDictionary>()
@@ -210,6 +212,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public async Task Should_Render_Service_Unavailable_Page()
         {
             var httpContextSubstitute = Substitute.For<HttpContext>();
+            var user = Substitute.For<IUser>();
 
             var controllerContext = new ControllerContext
             {
@@ -217,14 +220,21 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             };
 
             _controller.ControllerContext = controllerContext;
+            _getPageQuery.GetPageById(Arg.Any<string>()).Returns(new Page()
+            {
+                Slug = ERROR_SLUG
+            });
 
-            var result = _controller.ServiceUnavailable();
+            var result = _controller.ServerError(user);
 
             var viewResult = await result as ViewResult;
 
             var model = viewResult!.Model;
 
-            Assert.IsType<ServiceUnavailableViewModel>(model);
+            Assert.IsType<PageViewModel>(model);
+
+            var asPage = model as PageViewModel;
+            Assert.Equal(ERROR_SLUG, asPage?.Page.Slug);
         }
 
         [Fact]

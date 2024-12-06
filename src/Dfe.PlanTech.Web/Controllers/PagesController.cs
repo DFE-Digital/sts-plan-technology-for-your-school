@@ -48,18 +48,16 @@ public class PagesController(
     public IActionResult Error()
     => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 
-    [HttpGet(UrlConstants.ServiceUnavailable, Name = UrlConstants.ServiceUnavailable)]
-    public async Task<IActionResult> ServiceUnavailable([FromServices] IUser user)
+    [HttpGet(UrlConstants.ServerError, Name = UrlConstants.ServerError)]
+    public async Task<IActionResult> ServerError([FromServices] IUser user)
     {
         var internalErrorPage = await getPageQuery.GetPageById(_errorPages.InternalErrorPageId);
 
-        if (internalErrorPage == null)
+        if (internalErrorPage is null)
         {
             logger.LogError("Could not find internal error page");
             return RedirectToAction("Error");
         }
-
-        ViewData["DfeHeaderClass"] = "";
 
         var viewModel = new PageViewModel(internalErrorPage, this, user, logger);
         return View("Page", viewModel);

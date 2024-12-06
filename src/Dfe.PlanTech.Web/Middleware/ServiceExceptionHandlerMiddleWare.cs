@@ -20,10 +20,10 @@ public class ServiceExceptionHandlerMiddleWare : IExceptionHandlerMiddleware
     static string GetRedirectUrlForException(Exception? exception) =>
         exception switch
         {
-            null => UrlConstants.Error,
-            ContentfulDataUnavailableException => UrlConstants.ServiceUnavailable,
-            DatabaseException => UrlConstants.ServiceUnavailable,
-            InvalidEstablishmentException => UrlConstants.ServiceUnavailable,
+            null => UrlConstants.ServerError,
+            ContentfulDataUnavailableException => UrlConstants.ServerError,
+            DatabaseException => UrlConstants.ServerError,
+            InvalidEstablishmentException => UrlConstants.ServerError,
             KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) => UrlConstants.OrgErrorPage,
             _ => GetRedirectUrlForException(exception.InnerException),
         };
