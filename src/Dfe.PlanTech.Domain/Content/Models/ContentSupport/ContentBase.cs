@@ -8,5 +8,7 @@ public class ContentBase : Contentful.Core.Models.Entry<ContentBase>, IContentCo
 {
     public string InternalName { get; set; } = null!;
     public string Slug { get; set; } = null!;
+    public string? Title { get; set; }
+    public string? Subtitle { get; set; }
     public SystemDetails Sys { get; set; } = null!;
 }

@@ -3,4 +3,4 @@
 namespace Dfe.PlanTech.Domain.Content.Models.ContentSupport;
 
 [ExcludeFromCodeCoverage]
-public class CSHeading : ContentBase
+public class CSHeading : ContentBase;
