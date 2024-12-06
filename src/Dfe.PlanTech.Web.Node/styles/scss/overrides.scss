@@ -24,11 +24,9 @@ a.govuk-home-link {
 }
 
 //Remove the padding from paragraphs within lists
-li {
-    p.govuk-body {
-        margin-top: 0px;
-        margin-bottom: 0px;
-    }
+li > p {
+    margin-top: 0px;
+    margin-bottom: 0px;
 }
 
 div.govuk-width-container {

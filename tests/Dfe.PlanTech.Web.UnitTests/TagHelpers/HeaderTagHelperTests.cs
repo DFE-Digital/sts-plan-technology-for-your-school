@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Helpers;
@@ -11,228 +12,128 @@ namespace Dfe.PlanTech.Web.UnitTests.TagHelpers;
 
 public class HeaderComponentTagHelperTests
 {
-    [Fact]
-    public void Should_RenderH1Tag_When_H1()
+    private ILogger<HeaderComponentTagHelper> _loggerSubstitute;
+    private HeaderComponentTagHelper? _tagHelper;
+    private TagHelperContext _context;
+    private TagHelperOutput _output;
+
+    public HeaderComponentTagHelperTests()
     {
-        var header = new Header()
-        {
-            Text = "Header text",
-            Tag = HeaderTag.H1,
-            Size = HeaderSize.Small
-        };
-
-        var loggerSubstitute = Substitute.For<ILogger<HeaderComponentTagHelper>>();
-        var tagHelper = new HeaderComponentTagHelper(loggerSubstitute)
-        {
-            Model = header
-        };
-
-        var html = tagHelper.GetHtml();
-
-        Assert.StartsWith("<H1", html);
-        Assert.Contains(header.Text, html);
-        Assert.EndsWith("</H1>", html);
+        _loggerSubstitute = Substitute.For<ILogger<HeaderComponentTagHelper>>();
+        _context = CreateTagHelperContext();
+        _output = CreateTagHelperOutput();
     }
 
-    [Fact]
-    public void Should_RenderH2Tag_When_H2()
+
+    private TagHelperContext CreateTagHelperContext()
     {
-        var header = new Header()
-        {
-            Text = "Header text",
-            Tag = HeaderTag.H2,
-            Size = HeaderSize.Small
-        };
-
-        var loggerSubstitute = Substitute.For<ILogger<HeaderComponentTagHelper>>();
-        var tagHelper = new HeaderComponentTagHelper(loggerSubstitute)
-        {
-            Model = header
-        };
-
-        var html = tagHelper.GetHtml();
-
-        Assert.StartsWith("<H2", html);
-        Assert.Contains(header.Text, html);
-        Assert.EndsWith("</H2>", html);
+        return new TagHelperContext(
+            tagName: "header",
+            allAttributes: new TagHelperAttributeList(),
+            items: new Dictionary<object, object>(),
+            uniqueId: "header-test");
     }
 
-    [Fact]
-    public void Should_RenderH3Tag_When_H3()
+    private TagHelperOutput CreateTagHelperOutput()
     {
-        var header = new Header()
-        {
-            Text = "Header text",
-            Tag = HeaderTag.H3,
-            Size = HeaderSize.Small
-        };
-
-        var loggerSubstitute = Substitute.For<ILogger<HeaderComponentTagHelper>>();
-        var tagHelper = new HeaderComponentTagHelper(loggerSubstitute)
-        {
-            Model = header
-        };
-
-        var html = tagHelper.GetHtml();
-
-        Assert.StartsWith("<H3", html);
-        Assert.Contains(header.Text, html);
-        Assert.EndsWith("</H3>", html);
+        return new TagHelperOutput(
+            "header",
+            attributes: new TagHelperAttributeList(),
+            getChildContentAsync: (useCachedResult, encoder) =>
+            {
+                var tagHelperContent = new DefaultTagHelperContent();
+                tagHelperContent.SetContent("");
+                return Task.FromResult<TagHelperContent>(tagHelperContent);
+            });
     }
 
-    [Fact]
-    public void Should_RenderRightClass_When_SmallSize()
+    [Theory]
+    [InlineData(HeaderTag.H1, "h1", HeaderSize.Small)]
+    [InlineData(HeaderTag.H2, "h2", HeaderSize.Small)]
+    [InlineData(HeaderTag.H3, "h3", HeaderSize.Small)]
+    [InlineData(HeaderTag.H1, "h1", HeaderSize.Medium)]
+    [InlineData(HeaderTag.H1, "h1", HeaderSize.Large)]
+    [InlineData(HeaderTag.H1, "h1", HeaderSize.ExtraLarge)]
+    public void Should_Render_Valid_Tag_And_Class(HeaderTag headerTag, string expectedTag, HeaderSize headerSize)
     {
         var header = new Header()
         {
             Text = "Header text",
-            Tag = HeaderTag.H1,
-            Size = HeaderSize.Small
+            Tag = headerTag,
+            Size = headerSize
         };
 
-        var loggerSubstitute = Substitute.For<ILogger<HeaderComponentTagHelper>>();
-        var tagHelper = new HeaderComponentTagHelper(loggerSubstitute)
+        _tagHelper = new HeaderComponentTagHelper(_loggerSubstitute)
         {
             Model = header
         };
 
-        var html = tagHelper.GetHtml();
+        _tagHelper.Process(_context, _output);
 
         var expectedClass = header.GetClassForSize();
 
-        Assert.Contains($" class=\"{expectedClass}\">", html);
-    }
-
-    [Fact]
-    public void Should_RenderRightClass_When_MediumSize()
-    {
-        var header = new Header()
-        {
-            Text = "Header text",
-            Tag = HeaderTag.H1,
-            Size = HeaderSize.Medium
-        };
-
-        var loggerSubstitute = Substitute.For<ILogger<HeaderComponentTagHelper>>();
-        var tagHelper = new HeaderComponentTagHelper(loggerSubstitute)
-        {
-            Model = header
-        };
-
-        var html = tagHelper.GetHtml();
-
-        var expectedClass = header.GetClassForSize();
-
-        Assert.Contains($" class=\"{expectedClass}\">", html);
-    }
-
-    [Fact]
-    public void Should_RenderRightClass_When_LargeSize()
-    {
-        var header = new Header()
-        {
-            Text = "Header text",
-            Tag = HeaderTag.H1,
-            Size = HeaderSize.Large
-        };
-
-        var loggerSubstitute = Substitute.For<ILogger<HeaderComponentTagHelper>>();
-        var tagHelper = new HeaderComponentTagHelper(loggerSubstitute)
-        {
-            Model = header
-        };
-
-        var html = tagHelper.GetHtml();
-
-        var expectedClass = header.GetClassForSize();
-
-        Assert.Contains($" class=\"{expectedClass}\">", html);
-    }
-
-    [Fact]
-    public void Should_RenderRightClass_When_ExtraLarge()
-    {
-        var header = new Header()
-        {
-            Text = "Header text",
-            Tag = HeaderTag.H1,
-            Size = HeaderSize.ExtraLarge
-        };
-
-        var loggerSubstitute = Substitute.For<ILogger<HeaderComponentTagHelper>>();
-        var tagHelper = new HeaderComponentTagHelper(loggerSubstitute)
-        {
-            Model = header
-        };
-
-        var html = tagHelper.GetHtml();
-
-        var expectedClass = header.GetClassForSize();
-
-        Assert.Contains($" class=\"{expectedClass}\">", html);
+        Assert.Equal(expectedTag, _output.TagName);
+        Assert.Contains(header.Text, _output.Content.GetContent());
+        Assert.Contains($"{expectedClass}", _output.Attributes["class"].Value.ToString());
     }
 
     [Fact]
     public async Task Should_LogWarning_When_Model_Is_Null()
     {
-        var content = "content";
-
         var loggerSubstitute = Substitute.For<ILogger<HeaderComponentTagHelper>>();
+        var tagHelper = new HeaderComponentTagHelper(loggerSubstitute);
 
-        var tagHelper = new HeaderComponentTagHelper(loggerSubstitute) { };
-
-        var context = new TagHelperContext(tagName: "header",
-                                            allAttributes: new TagHelperAttributeList(),
-                                            items: new Dictionary<object, object>(),
-                                            uniqueId: "header-test");
-
-        var output = new TagHelperOutput("header-tag",
-                                        attributes: new TagHelperAttributeList(),
-                                        getChildContentAsync: (useCachedResult, encoder) =>
-                                        {
-                                            var tagHelperContent = new DefaultTagHelperContent();
-                                            tagHelperContent.SetContent(content);
-                                            return Task.FromResult<TagHelperContent>(tagHelperContent);
-                                        });
+        var context = CreateTagHelperContext();
+        var output = CreateTagHelperOutput();
 
         await tagHelper.ProcessAsync(context, output);
 
-        Assert.Equal("header-tag", output.TagName);
-        Assert.Equal("header-test", context.UniqueId);
+        var logMessage = loggerSubstitute.ReceivedLogMessages().FirstOrDefault();
+        Assert.NotNull(logMessage?.Message);
+        Assert.Contains($"Missing or invalid Header {tagHelper.Model}", logMessage.Message);
+        Assert.Equal(LogLevel.Warning, logMessage.LogLevel);
     }
 
     [Fact]
     public async Task Should_LogWarning_When_HeaderTag_Is_Unknown()
     {
-        var content = "content";
-
-        var loggerSubstitute = Substitute.For<ILogger<HeaderComponentTagHelper>>();
-
-        var tagHelper = new HeaderComponentTagHelper(loggerSubstitute)
+        var header = new Header()
         {
-            Model = new Header()
-            {
-                Tag = HeaderTag.Unknown
-            }
+            Text = "Header text",
+            Tag = HeaderTag.Unknown
         };
 
-        var context = new TagHelperContext(tagName: "header",
-                                            allAttributes: new TagHelperAttributeList(),
-                                            items: new Dictionary<object, object>(),
-                                            uniqueId: "header-test");
+        _tagHelper = new HeaderComponentTagHelper(_loggerSubstitute)
+        {
+            Model = header
+        };
 
-        var output = new TagHelperOutput("header-tag",
-                                        attributes: new TagHelperAttributeList(),
-                                        getChildContentAsync: (useCachedResult, encoder) =>
-                                        {
-                                            var tagHelperContent = new DefaultTagHelperContent();
-                                            tagHelperContent.SetContent(content);
-                                            return Task.FromResult<TagHelperContent>(tagHelperContent);
-                                        });
+        await _tagHelper.ProcessAsync(_context, _output);
 
-        await Assert.ThrowsAnyAsync<Exception>(() => tagHelper.ProcessAsync(context, output));
+        var logMessage = _loggerSubstitute.ReceivedLogMessages().FirstOrDefault();
 
-        loggerSubstitute.HadMethodCalled("Log");
+        Assert.NotNull(logMessage?.Message);
+        Assert.Contains($"Missing or invalid Header {_tagHelper.Model}", logMessage.Message);
+        Assert.Equal(LogLevel.Warning, logMessage.LogLevel);
     }
 
+    [Fact]
+    public async Task Should_Throw_Exception_When_HeaderSize_Is_Unknown()
+    {
+        var header = new Header()
+        {
+            Text = "Header text",
+            Tag = HeaderTag.H1,
+            Size = HeaderSize.Unknown
+        };
+
+        _tagHelper = new HeaderComponentTagHelper(_loggerSubstitute)
+        {
+            Model = header
+        };
+
+        var exception = await Assert.ThrowsAsync<InvalidEnumArgumentException>(async () => await _tagHelper.ProcessAsync(_context, _output));
+
+        Assert.Equal($"Could not find header size for {header.Size}", exception.Message);
+    }
 }
