@@ -59,7 +59,7 @@ public class PagesController(
             return RedirectToAction("Error");
         }
 
-        var viewModel = new PageViewModel(internalErrorPage, this, user, logger);
+        var viewModel = new PageViewModel(internalErrorPage, this, user, logger, false);
         return View("Page", viewModel);
     }
 

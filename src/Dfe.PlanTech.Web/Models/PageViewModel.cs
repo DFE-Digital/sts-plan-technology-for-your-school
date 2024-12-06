@@ -8,11 +8,12 @@ public class PageViewModel
 {
     public Page Page { get; init; }
 
-    public PageViewModel(Page page, Controller controller, IUser user, ILogger logger)
+    public PageViewModel(Page page, Controller controller, IUser user, ILogger logger, bool displayBlueBanner = true)
     {
         controller.ViewData["Title"] = System.Net.WebUtility.HtmlDecode(page.Title?.Text) ??
                                        "Plan Technology For Your School";
         Page = page;
+        DisplayBlueBanner = displayBlueBanner;
         TryLoadOrganisationName(controller.HttpContext, user, logger);
     }
 
@@ -31,4 +32,6 @@ public class PageViewModel
 
         Page.OrganisationName = establishment.OrgName;
     }
+
+    public bool DisplayBlueBanner { get; init; }
 }

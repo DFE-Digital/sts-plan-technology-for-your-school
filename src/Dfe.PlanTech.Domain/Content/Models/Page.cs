@@ -16,8 +16,6 @@ public class Page : ContentComponent, IPageContent
 
     public bool DisplayOrganisationName { get; init; }
 
-    public bool DisplayBlueBanner { get; init; } = true;
-
     public bool RequiresAuthorisation { get; init; } = true;
 
     public string? SectionTitle { get; set; }
