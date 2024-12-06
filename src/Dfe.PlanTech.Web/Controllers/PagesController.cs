@@ -38,7 +38,12 @@ public class PagesController(
             logger.LogInformation("Could not find page at {Path}", Request.Path.Value);
             return RedirectToAction(NotFoundPage);
         }
+
         var viewModel = new PageViewModel(page, this, user, Logger);
+        if (page.Sys.Id == errorPages.Value.InternalErrorPageId)
+        {
+            viewModel.DisplayBlueBanner = false;
+        }
 
         return View("Page", viewModel);
     }
@@ -47,21 +52,6 @@ public class PagesController(
     [HttpGet(UrlConstants.Error, Name = UrlConstants.Error)]
     public IActionResult Error()
     => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-
-    [HttpGet(UrlConstants.ServerError, Name = UrlConstants.ServerError)]
-    public async Task<IActionResult> ServerError([FromServices] IUser user)
-    {
-        var internalErrorPage = await getPageQuery.GetPageById(_errorPages.InternalErrorPageId);
-
-        if (internalErrorPage is null)
-        {
-            logger.LogError("Could not find internal error page");
-            return RedirectToAction("Error");
-        }
-
-        var viewModel = new PageViewModel(internalErrorPage, this, user, logger, false);
-        return View("Page", viewModel);
-    }
 
     [HttpGet(UrlConstants.NotFound, Name = UrlConstants.NotFound)]
     public async Task<IActionResult> NotFoundError()

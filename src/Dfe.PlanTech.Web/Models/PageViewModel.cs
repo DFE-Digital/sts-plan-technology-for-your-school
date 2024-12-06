@@ -33,5 +33,5 @@ public class PageViewModel
         Page.OrganisationName = establishment.OrgName;
     }
 
-    public bool DisplayBlueBanner { get; init; }
+    public bool DisplayBlueBanner { get; set; }
 }

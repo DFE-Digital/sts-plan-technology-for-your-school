@@ -24,7 +24,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private const string INDEX_SLUG = "/";
         private const string INDEX_TITLE = "Index";
         private const string SELF_ASSESSMENT_SLUG = "self-assessment";
-        private const string ERROR_SLUG = "/error";
         readonly ICookieService cookiesSubstitute = Substitute.For<ICookieService>();
         readonly IUser userSubstitute = Substitute.For<IUser>();
         private readonly IGetNavigationQuery _getNavigationQuery = Substitute.For<IGetNavigationQuery>();
@@ -79,6 +78,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var page = new Page()
             {
+                Sys = new SystemDetails() { Id = "index-id" },
                 Slug = INDEX_SLUG,
                 Title = new Title()
                 {
@@ -121,6 +121,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var page = new Page()
             {
+                Sys = new SystemDetails() { Id = "self-assessment-id" },
                 Slug = SELF_ASSESSMENT_SLUG,
                 Title = new Title()
                 {
@@ -164,6 +165,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var page = new Page()
             {
+                Sys = new SystemDetails() { Id = "self-assessment-id" },
                 Slug = SELF_ASSESSMENT_SLUG,
                 Title = new Title()
                 {
@@ -206,35 +208,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var model = viewResult!.Model;
 
             Assert.IsType<ErrorViewModel>(model);
-        }
-
-        [Fact]
-        public async Task Should_Render_Service_Unavailable_Page()
-        {
-            var httpContextSubstitute = Substitute.For<HttpContext>();
-            var user = Substitute.For<IUser>();
-
-            var controllerContext = new ControllerContext
-            {
-                HttpContext = httpContextSubstitute
-            };
-
-            _controller.ControllerContext = controllerContext;
-            _getPageQuery.GetPageById(Arg.Any<string>()).Returns(new Page()
-            {
-                Slug = ERROR_SLUG
-            });
-
-            var result = _controller.ServerError(user);
-
-            var viewResult = await result as ViewResult;
-
-            var model = viewResult!.Model;
-
-            Assert.IsType<PageViewModel>(model);
-
-            var asPage = model as PageViewModel;
-            Assert.Equal(ERROR_SLUG, asPage?.Page.Slug);
         }
 
         [Fact]

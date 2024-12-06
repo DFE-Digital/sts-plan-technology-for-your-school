@@ -8,8 +8,11 @@ using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Middleware
 {
+
     public class ServiceExceptionHandlerMiddlewareTests
     {
+        private const string InternalErrorSlug = "/server-error";
+
         [Fact]
         public void Should_Get_Error_Redirect_On_Null_Exception()
         {
@@ -18,7 +21,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             var middleware = new ServiceExceptionHandlerMiddleWare();
 
             // Act
-            middleware.ContextRedirect(context);
+            middleware.ContextRedirect(InternalErrorSlug, context);
 
             //Assert
             Assert.NotNull(context.Response);
@@ -37,7 +40,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             var middleware = new ServiceExceptionHandlerMiddleWare();
 
             // Act
-            middleware.ContextRedirect(context);
+            middleware.ContextRedirect(InternalErrorSlug, context);
 
             //Assert
             Assert.NotNull(context.Response);
@@ -57,7 +60,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             var middleware = new ServiceExceptionHandlerMiddleWare();
 
             // Act
-            middleware.ContextRedirect(context);
+            middleware.ContextRedirect(InternalErrorSlug, context);
 
             //Assert
             Assert.NotNull(context.Response);
@@ -76,7 +79,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             var middleware = new ServiceExceptionHandlerMiddleWare();
 
             // Act
-            middleware.ContextRedirect(context);
+            middleware.ContextRedirect(InternalErrorSlug, context);
 
             //Assert
             Assert.NotNull(context.Response);
@@ -95,7 +98,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             var middleware = new ServiceExceptionHandlerMiddleWare();
 
             // Act
-            middleware.ContextRedirect(context);
+            middleware.ContextRedirect(InternalErrorSlug, context);
 
             //Assert
             Assert.NotNull(context.Response);
