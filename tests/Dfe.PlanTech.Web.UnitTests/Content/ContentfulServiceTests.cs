@@ -1,6 +1,5 @@
 ﻿using Contentful.Core;
 using Contentful.Core.Search;
-using Dfe.PlanTech.Web.Content;
 using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
 using Moq;
 using Xunit;

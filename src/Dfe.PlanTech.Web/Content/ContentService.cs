@@ -1,10 +1,7 @@
 using System.Xml.Linq;
 using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
 using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
-using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Domain.Content.Queries;
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Web.Content;
 public class ContentService : IContentService // This indicates that ContentService implements IContentService

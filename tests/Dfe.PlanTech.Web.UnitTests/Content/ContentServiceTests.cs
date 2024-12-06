@@ -1,9 +1,9 @@
 ﻿using System.Xml.Linq;
 using Contentful.Core.Models;
-using Dfe.PlanTech.Web.Configuration;
-using Dfe.PlanTech.Web.Content;
 using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
 using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
+using Dfe.PlanTech.Web.Configuration;
+using Dfe.PlanTech.Web.Content;
 using FluentAssertions;
 using Moq;
 using Xunit;

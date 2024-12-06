@@ -1,5 +1,5 @@
-﻿using Dfe.PlanTech.Domain.Content.Interfaces;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Content.Models.ContentSupport;
 

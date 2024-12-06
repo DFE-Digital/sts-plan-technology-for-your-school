@@ -1,13 +1,11 @@
 using Contentful.Core.Models;
 using Dfe.PlanTech.Application.Constants;
-using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
 using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
 using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Custom;
 using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Standard;
 using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Types;
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Web.Configuration;
 using Hyperlink = Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Standard.Hyperlink;
 
 namespace Dfe.PlanTech.Web.Content;

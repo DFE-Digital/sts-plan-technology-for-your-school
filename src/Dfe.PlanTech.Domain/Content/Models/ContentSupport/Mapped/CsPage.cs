@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
 
 namespace Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
 

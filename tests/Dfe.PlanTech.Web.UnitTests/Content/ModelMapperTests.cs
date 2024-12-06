@@ -1,10 +1,10 @@
 ﻿using Contentful.Core.Models;
 using Dfe.PlanTech.Application.Constants;
-using Dfe.PlanTech.Web.Configuration;
-using Dfe.PlanTech.Web.Content;
 using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
 using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
 using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Types;
+using Dfe.PlanTech.Web.Configuration;
+using Dfe.PlanTech.Web.Content;
 using FluentAssertions;
 using Moq;
 using Xunit;

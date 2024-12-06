@@ -2,6 +2,7 @@
 using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Binders;
@@ -11,8 +12,6 @@ using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Domain.Content.Queries;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
@@ -22,7 +21,7 @@ public class PagesController(ILogger<PagesController> logger, IGetNavigationQuer
 {
     private readonly ILogger _logger = logger;
     private readonly IGetNavigationQuery _getNavigationQuery = getNavigationQuery;
-        private readonly IGetContentSupportPageQuery _getContentSupportPageQuery = getContentSupportPageQuery;
+    private readonly IGetContentSupportPageQuery _getContentSupportPageQuery = getContentSupportPageQuery;
     private readonly ContactOptions _contactOptions = contactOptions.Value;
     public const string ControllerName = "Pages";
     public const string GetPageByRouteAction = nameof(GetByRoute);
