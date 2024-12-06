@@ -1,5 +1,7 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Content.Commands;
+using Dfe.PlanTech.Application.Questionnaire.Queries;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Helpers;
 using Microsoft.AspNetCore.Authorization;
@@ -30,5 +32,15 @@ public class CmsController(ILogger<CmsController> logger) : BaseController<CmsCo
             Logger.LogError(e, "An error occured while trying to write the message to the queue: {message}", e.Message);
             return BadRequest(e.Message);
         }
+    }
+
+    /// <summary>
+    /// Returns all sections from the CMS, used by the qa-visualiser
+    /// </summary>
+    [HttpGet("sections")]
+    [ValidateApiKey]
+    public async Task<IEnumerable<Section?>> GetSections([FromServices] GetSectionQuery getSectionQuery)
+    {
+        return await getSectionQuery.GetAllSections();
     }
 }

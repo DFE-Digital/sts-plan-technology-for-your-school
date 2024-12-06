@@ -31,6 +31,16 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
         return signIn;
     }
 
+    public async Task<SignIn> RecordSignInUserOnly(string dfeSignInRef)
+    {
+        var userId = await GetUserId(dfeSignInRef);
+        var signIn = MapToSignIn(userId);
+
+        await AddSignInDetails(signIn);
+
+        return signIn;
+    }
+
     /// <summary>
     /// Creates SignIn row
     /// </summary>
@@ -38,7 +48,7 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
     /// <returns></returns>
     private async Task<SignIn> CreateSignIn(RecordUserSignInDto recordUserSignInDto)
     {
-        int userId = await GetUserId(recordUserSignInDto);
+        int userId = await GetUserId(recordUserSignInDto.DfeSignInRef);
         var establishmentId = await GetEstablishmentId(recordUserSignInDto);
         var signIn = MapToSignIn(userId, establishmentId);
 
@@ -48,18 +58,18 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
     /// <summary>
     /// Gets existing ID for user, or creates a new user in database if non existing
     /// </summary>
-    /// <param name="recordUserSignInDto"></param>
+    /// <param name="dfeSignInRef"></param>
     /// <returns></returns>
-    private async Task<int> GetUserId(RecordUserSignInDto recordUserSignInDto)
+    private async Task<int> GetUserId(string dfeSignInRef)
     {
-        var existingUserId = await _getUserIdQuery.GetUserId(recordUserSignInDto.DfeSignInRef);
+        var existingUserId = await _getUserIdQuery.GetUserId(dfeSignInRef);
 
         if (existingUserId != null)
         {
             return existingUserId.Value;
         }
 
-        return await _createUserCommand.CreateUser(recordUserSignInDto);
+        return await _createUserCommand.CreateUser(dfeSignInRef);
     }
 
     /// <summary>
@@ -88,7 +98,7 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
         });
     }
 
-    private static SignIn MapToSignIn(int userId, int establishmentId)
+    private static SignIn MapToSignIn(int userId, int? establishmentId = null)
     {
         if (userId == 0)
             throw new ArgumentNullException(nameof(userId), "User id cannot be null");

@@ -136,6 +136,54 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
 
         }
 
+        [Theory]
+        [InlineData(1)]
+        [InlineData(50)]
+        [InlineData(2402)]
+        public async Task RecordSignInForUser_WithNoOrganisation_UpdatesSignInDetailsAnd_ReturnsId(int userId)
+        {
+            User? createdUser = null;
+            SignIn? createdSignIn = null;
+            int signInId = 1;
+
+            Db.GetUserBy(Arg.Any<Expression<Func<User, bool>>>()).ReturnsNull();
+            Db.When(x => x.AddUser(Arg.Any<User>())).Do((callInfo) =>
+            {
+                User user = (User)callInfo[0];
+                createdUser = user;
+            });
+
+            Db.When(x => x.AddSignIn(Arg.Any<SignIn>())).Do((callInfo) =>
+            {
+                createdSignIn = (SignIn)callInfo[0];
+            });
+
+            Db.SaveChangesAsync().Returns((callInfo) =>
+            {
+                if (createdUser != null)
+                {
+                    createdUser.Id = userId;
+                }
+
+                if (createdSignIn != null)
+                {
+                    createdSignIn.Id = signInId;
+                }
+                return 0;
+            });
+
+            var createUserCommand = new CreateUserCommand(Db);
+            var dfeSignInRef = Guid.NewGuid().ToString();
+
+            var recordUserSignInCommand = new RecordUserSignInCommand(Db, CreateEstablishmentCommand, createUserCommand, GetEstablishmentIdQuery, UserQuery);
+            await recordUserSignInCommand.RecordSignInUserOnly(dfeSignInRef);
+
+            Assert.Equal(userId, createdUser?.Id);
+            await Db.Received(2).SaveChangesAsync();
+            Assert.Equal(signInId, createdSignIn?.Id);
+
+        }
+
         [Fact]
         public async Task RecordSignIn_ThrowsException_WhenUserIsNull()
         {

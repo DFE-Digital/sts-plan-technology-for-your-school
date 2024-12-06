@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Dfe.PlanTech.Domain.SignIns.Enums;
+using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Domain.Users.Models;
 using Dfe.PlanTech.Infrastructure.SignIns.Extensions;
@@ -26,14 +27,14 @@ public static class OnUserInformationReceivedEvent
 
         var userId = context.Principal.Claims.GetUserId();
         var establishment = context.Principal.Claims.GetOrganisation();
+        var recordUserSignInCommand = context.HttpContext.RequestServices.GetRequiredService<IRecordUserSignInCommand>();
 
         if (establishment == null)
         {
             logger.LogWarning("User {UserId} is authenticated but has no establishment", userId);
+            await recordUserSignInCommand.RecordSignInUserOnly(userId);
             return;
         }
-
-        var recordUserSignInCommand = context.HttpContext.RequestServices.GetRequiredService<IRecordUserSignInCommand>();
 
         var signin = await recordUserSignInCommand.RecordSignIn(new RecordUserSignInDto()
         {
@@ -44,7 +45,7 @@ public static class OnUserInformationReceivedEvent
         AddClaimsToPrincipal(context, signin);
     }
 
-    private static void AddClaimsToPrincipal(UserInformationReceivedContext context, Domain.SignIns.Models.SignIn signin)
+    private static void AddClaimsToPrincipal(UserInformationReceivedContext context, SignIn signin)
     {
         var principal = context.Principal;
 
