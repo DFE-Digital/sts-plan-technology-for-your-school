@@ -24,6 +24,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private const string INDEX_SLUG = "/";
         private const string INDEX_TITLE = "Index";
         private const string SELF_ASSESSMENT_SLUG = "self-assessment";
+        private const string INTERNAL_ERROR_ID = "InternalError";
         readonly ICookieService cookiesSubstitute = Substitute.For<ICookieService>();
         readonly IUser userSubstitute = Substitute.For<IUser>();
         private readonly IGetNavigationQuery _getNavigationQuery = Substitute.For<IGetNavigationQuery>();
@@ -45,7 +46,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 LinkId = "LinkId"
             };
             _contactOptions = Options.Create(contactUs);
-            _errorPages = Options.Create(new ErrorPages { InternalErrorPageId = "InternalErrorPageId" });
+            _errorPages = Options.Create(new ErrorPages { InternalErrorPageId = INTERNAL_ERROR_ID });
 
             _controller = new PagesController(Logger, _getPageQuery, _getNavigationQuery, _contactOptions, _errorPages)
             {
@@ -78,7 +79,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var page = new Page()
             {
-                Sys = new SystemDetails() { Id = "index-id" },
+                Sys = new SystemDetails { Id = "index-id" },
                 Slug = INDEX_SLUG,
                 Title = new Title()
                 {
@@ -121,7 +122,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var page = new Page()
             {
-                Sys = new SystemDetails() { Id = "self-assessment-id" },
+                Sys = new SystemDetails { Id = "self-assessment-id" },
                 Slug = SELF_ASSESSMENT_SLUG,
                 Title = new Title()
                 {
@@ -165,7 +166,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var page = new Page()
             {
-                Sys = new SystemDetails() { Id = "self-assessment-id" },
+                Sys = new SystemDetails { Id = "self-assessment-id" },
                 Slug = SELF_ASSESSMENT_SLUG,
                 Title = new Title()
                 {
@@ -187,6 +188,52 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var asPage = model as PageViewModel;
             Assert.Null(asPage!.Page.OrganisationName);
             Assert.Equal(SELF_ASSESSMENT_SLUG, asPage!.Page.Slug);
+        }
+
+        [Fact]
+        public void Should_Disable_Blue_Banner_For_ServerError_Page()
+        {
+            var page = new Page()
+            {
+                Sys = new SystemDetails { Id = INTERNAL_ERROR_ID },
+            };
+
+            var result = _controller.GetByRoute(page, userSubstitute);
+
+            Assert.IsType<ViewResult>(result);
+
+            var viewResult = result as ViewResult;
+
+            var model = viewResult!.Model;
+
+            Assert.IsType<PageViewModel>(model);
+
+            var asPage = model as PageViewModel;
+            Assert.NotNull(asPage);
+            Assert.False(asPage.DisplayBlueBanner);
+        }
+
+        [Fact]
+        public void Should_Not_Disable_Blue_Banner_For_Non_Error_Pages()
+        {
+            var page = new Page()
+            {
+                Sys = new SystemDetails { Id = "normal-page" },
+            };
+
+            var result = _controller.GetByRoute(page, userSubstitute);
+
+            Assert.IsType<ViewResult>(result);
+
+            var viewResult = result as ViewResult;
+
+            var model = viewResult!.Model;
+
+            Assert.IsType<PageViewModel>(model);
+
+            var asPage = model as PageViewModel;
+            Assert.NotNull(asPage);
+            Assert.True(asPage.DisplayBlueBanner);
         }
 
         [Fact]
