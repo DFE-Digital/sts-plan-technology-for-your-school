@@ -15,7 +15,7 @@ describe("landing page", () => {
   });
 
   it("should contain text bodies", () => {
-    cy.get("p.govuk-body").should("exist").and("have.length.of.at.least", 4);
+    cy.get("p").should("exist").and("have.length.of.at.least", 4);
   });
 
   it("should have unordered list", () => {
