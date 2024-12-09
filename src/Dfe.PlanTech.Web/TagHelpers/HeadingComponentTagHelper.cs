@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Helpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
+using Dfe.PlanTech.Domain.Content.Enums;
 
 namespace Dfe.PlanTech.Web.TagHelpers;
 
@@ -17,7 +18,7 @@ public class HeaderComponentTagHelper : TagHelper
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
-        if (Model == null || Model.Tag == Domain.Content.Enums.HeaderTag.Unknown || !TryBuildElement(output))
+        if (Model == null || Model.Tag == HeaderTag.Unknown || !TryBuildElement(output))
         {
             output.TagName = null;
             output.Content.SetHtmlContent("");
