@@ -1,0 +1,5 @@
+# Outputs
+visualisations/*
+
+# Local certificates
+*.crt

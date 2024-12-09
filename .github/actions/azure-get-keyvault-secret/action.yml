@@ -1,0 +1,26 @@
+name: Get Keyvault secret
+description: Gets a secret from the Azure Keyvault
+
+inputs:
+  az_keyvault_secret_name:
+    required: true
+    type: string
+  az_keyvault_name:
+    required: true
+    type: string
+
+outputs:
+  secret_value:
+    description: Value of secret from the keyvault
+    value: ${{ steps.get-secret.outputs.secret_value }}
+
+runs:
+  using: composite
+  steps:
+    - name: Get secret
+      id: get-secret
+      shell: bash
+      run: |
+        secret_value=$(az keyvault secret show --name ${{ inputs.az_keyvault_secret_name }} --vault-name ${{ inputs.az_keyvault_name }} --query value -o tsv)
+        echo "::add-mask::$secret_value"
+        echo "secret_value=$secret_value" >> $GITHUB_OUTPUT

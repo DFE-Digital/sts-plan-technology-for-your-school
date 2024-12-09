@@ -11,4 +11,6 @@ public class SectionStatusDto
     public DateTime DateCreated { get; set; }
 
     public DateTime DateUpdated { get; set; }
+
+    public bool Viewed { get; set; }
 }

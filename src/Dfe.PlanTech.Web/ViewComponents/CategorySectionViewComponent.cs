@@ -110,7 +110,8 @@ public class CategorySectionViewComponent(
             {
                 RecommendationSlug = recommendation.RecommendationSlug,
                 RecommendationDisplayName = recommendation.DisplayName,
-                SectionSlug = section.InterstitialPage?.Slug
+                SectionSlug = section.InterstitialPage?.Slug,
+                Viewed = sectionStatus.Viewed
             };
         }
         catch (Exception e)

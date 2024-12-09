@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Text.RegularExpressions;
 using Dfe.PlanTech.Domain.SignIns.Enums;
 using Dfe.PlanTech.Domain.SignIns.Models;
+using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Infrastructure.SignIns.ConnectEvents;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -96,6 +97,14 @@ public partial class DfeOpenIdConnectEventsTests
         var claimsPrincipal = new ClaimsPrincipal(identitySubstitute);
 
         var contextSubstitute = Substitute.For<HttpContext>();
+        var signInSubstitute = Substitute.For<IRecordUserSignInCommand>();
+        var serviceProvider = Substitute.For<IServiceProvider>();
+
+        contextSubstitute.RequestServices.Returns(serviceProvider);
+
+        serviceProvider
+            .GetService(typeof(IRecordUserSignInCommand))
+            .Returns(signInSubstitute);
 
         var context = new UserInformationReceivedContext(contextSubstitute,
             new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
@@ -107,7 +116,7 @@ public partial class DfeOpenIdConnectEventsTests
         await OnUserInformationReceivedEvent.RecordUserSignIn(logger, context);
 
         Assert.Single(logger.GetMatchingReceivedMessages($"User {userId} is authenticated but has no establishment", LogLevel.Warning));
-
+        await signInSubstitute.Received(1).RecordSignInUserOnly(Arg.Any<string>());
     }
 
     [Theory]

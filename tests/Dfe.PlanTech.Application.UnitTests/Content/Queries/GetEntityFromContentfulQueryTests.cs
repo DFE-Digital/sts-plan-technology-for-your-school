@@ -31,13 +31,13 @@ public class GetEntityFromContentfulQueryTests
 
 
     [Fact]
-    public async Task Should_LogError_When_Contentful_Exception()
+    public async Task Should_LogError_When_Single_Entity_Contentful_Exception()
     {
         _contentRepository.GetEntityById<Question>(Arg.Any<string>(), cancellationToken: CancellationToken.None)
             .Throws(_ => new Exception("Contentful error"));
 
         var result = await _getEntityFromContentfulQuery.GetEntityById<Question>(_firstQuestion.Sys.Id);
-        var receivedLoggerMessages = _logger.GetMatchingReceivedMessages(GetEntityFromContentfulQuery.ExceptionMessageContentful, LogLevel.Error);
+        var receivedLoggerMessages = _logger.GetMatchingReceivedMessages(GetEntityFromContentfulQuery.ExceptionMessageEntityContentful, LogLevel.Error);
 
         Assert.Single(receivedLoggerMessages);
         Assert.Null(result);
