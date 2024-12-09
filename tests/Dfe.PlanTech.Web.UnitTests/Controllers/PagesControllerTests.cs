@@ -28,7 +28,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         readonly ICookieService cookiesSubstitute = Substitute.For<ICookieService>();
         readonly IUser userSubstitute = Substitute.For<IUser>();
         private readonly IGetNavigationQuery _getNavigationQuery = Substitute.For<IGetNavigationQuery>();
-        private readonly IGetPageQuery _getPageQuery = Substitute.For<IGetPageQuery>();
         private readonly PagesController _controller;
         private readonly ControllerContext _controllerContext;
         private readonly IOptions<ContactOptions> _contactOptions;
@@ -48,7 +47,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _contactOptions = Options.Create(contactUs);
             _errorPages = Options.Create(new ErrorPages { InternalErrorPageId = INTERNAL_ERROR_ID });
 
-            _controller = new PagesController(Logger, _getPageQuery, _getNavigationQuery, _contactOptions, _errorPages)
+            _controller = new PagesController(Logger, _getNavigationQuery, _contactOptions, _errorPages)
             {
                 ControllerContext = _controllerContext,
                 TempData = Substitute.For<ITempDataDictionary>()

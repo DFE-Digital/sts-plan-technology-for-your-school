@@ -18,13 +18,11 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("/")]
 public class PagesController(
     ILogger<PagesController> logger,
-    IGetPageQuery getPageQuery,
     IGetNavigationQuery getNavigationQuery,
     IOptions<ContactOptions> contactOptions,
     IOptions<ErrorPages> errorPages) : BaseController<PagesController>(logger)
 {
     private readonly ContactOptions _contactOptions = contactOptions.Value;
-    private readonly ErrorPages _errorPages = errorPages.Value;
     public const string ControllerName = "Pages";
     public const string GetPageByRouteAction = nameof(GetByRoute);
     public const string NotFoundPage = "NotFoundError";
@@ -66,7 +64,7 @@ public class PagesController(
         return View(viewModel);
     }
 
-    private async Task<INavigationLink> GetContactLinkAsync()
+    private async Task<INavigationLink?> GetContactLinkAsync()
     {
         return await getNavigationQuery.GetLinkById(_contactOptions.LinkId);
     }
