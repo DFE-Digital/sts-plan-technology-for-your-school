@@ -21,10 +21,10 @@ public class GetEntityFromContentfulQueryTests
     public GetEntityFromContentfulQueryTests()
     {
         _getEntityFromContentfulQuery = new GetEntityFromContentfulQuery(_logger, _contentRepository, _cache);
-        _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<Question>>>())
+        _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<Question?>>>())
             .Returns(callInfo =>
             {
-                var func = callInfo.ArgAt<Func<Task<Question>>>(1);
+                var func = callInfo.ArgAt<Func<Task<Question?>>>(1);
                 return func();
             });
     }
