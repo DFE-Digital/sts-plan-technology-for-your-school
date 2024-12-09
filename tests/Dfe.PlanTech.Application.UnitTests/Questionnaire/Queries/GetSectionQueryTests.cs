@@ -79,10 +79,10 @@ public class GetSectionQueryTests
 
     public GetSectionQueryTests()
     {
-        _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<IEnumerable<Section>>>>())
+        _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<IEnumerable<Section>?>>>())
             .Returns(callInfo =>
             {
-                var func = callInfo.ArgAt<Func<Task<IEnumerable<Section>>>>(1);
+                var func = callInfo.ArgAt<Func<Task<IEnumerable<Section>?>>>(1);
                 return func();
             });
     }

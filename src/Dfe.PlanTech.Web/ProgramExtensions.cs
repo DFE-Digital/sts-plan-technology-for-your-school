@@ -17,7 +17,6 @@ using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models.Options;
-using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Database;
