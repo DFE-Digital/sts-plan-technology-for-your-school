@@ -66,10 +66,7 @@ public static class ProgramExtensions
                 }});
         });
 
-        services.AddScoped((_) => new ParagraphRendererOptions()
-        {
-            Classes = "govuk-body",
-        });
+        services.AddScoped((_) => new ParagraphRendererOptions());
 
         services.AddScoped((_) => new HyperlinkRendererOptions()
         {
