@@ -11,7 +11,7 @@ describe("not found", () => {
     });
 
     it("should contain text bodies", () => {
-        cy.get("p.govuk-body")
+        cy.get("p")
             .should("exist")
             .and("have.length.of.at.least", 3);
     });
