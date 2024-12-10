@@ -23,7 +23,7 @@ public class ContentService : IContentService // This indicates that ContentServ
     public async Task<CsPage?> GetContent(string slug, bool isPreview = false)
     {
         var resp = await GetContentSupportPages(nameof(ContentSupportPage.Slug), slug, isPreview);
-        return resp is not null && resp.Count != 0 ? resp[0] : null;
+        return resp is not null && resp.Count != 0 ? resp.FirstOrDefault(page => page.Slug == slug) : null;
     }
 
     public async Task<string> GenerateSitemap(string baseUrl)
