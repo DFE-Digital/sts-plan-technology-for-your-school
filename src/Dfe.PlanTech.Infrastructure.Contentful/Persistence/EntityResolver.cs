@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Contentful.Core.Configuration;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -34,6 +35,6 @@ public class EntityResolver(ILogger<EntityResolver> logger) : IContentTypeResolv
 
         _logger.LogWarning("Could not find content type for ID {contentTypeId}", contentTypeId);
 
-        return typeof(MissingComponent);
+        return typeof(Target);
     }
 }

@@ -20,10 +20,10 @@ public class ContentService : IContentService // This indicates that ContentServ
         _modelMapper = modelMapper;
     }
 
-    public async Task<CsPage?> GetContent(string slug, bool isPreview = false)
+    public async Task<CsPage?> GetContent(string slug, CancellationToken cancellationToken)
     {
-        var resp = await GetContentSupportPages(nameof(ContentSupportPage.Slug), slug, isPreview);
-        return resp is not null && resp.Count != 0 ? resp.FirstOrDefault(page => page.Slug == slug) : null;
+        var resp = await _getContentSupportPageQuery.GetContentSupportPage(slug, cancellationToken);
+        return resp == null ? null : _modelMapper.MapToCsPage(resp);
     }
 
     public async Task<string> GenerateSitemap(string baseUrl)
