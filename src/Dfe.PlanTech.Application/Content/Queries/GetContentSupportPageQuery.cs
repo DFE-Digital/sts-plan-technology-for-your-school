@@ -93,6 +93,5 @@ public class GetContentSupportPageQuery : IGetContentSupportPageQuery
             _logger.LogError(ex, "Error fetching content support page {slug} from Contentful", slug);
             throw new ContentfulDataUnavailableException($"Could not retrieve content support page with slug {slug}", ex);
         }
-
     }
 }
