@@ -1,6 +1,7 @@
 using Contentful.Core.Configuration;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
 using Dfe.PlanTech.Domain.Helpers;
 using Microsoft.Extensions.Logging;
 

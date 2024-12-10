@@ -25,23 +25,23 @@ public class GetContentSupportPageQuery : IGetContentSupportPageQuery
         _options = options;
     }
 
-    /// <exception cref="ContentfulDataUnavailableException"></exception>
-    public async Task<ContentSupportPage?> GetContentSupportPageBySlug(string slug, CancellationToken cancellationToken = default)
-    {
-        var options = CreateGetEntityOptions(slug);
+    // /// <exception cref="ContentfulDataUnavailableException"></exception>
+    // public async Task<ContentSupportPage?> GetContentSupportPageBySlug(string slug, CancellationToken cancellationToken = default)
+    // {
+    //     var options = CreateGetEntityOptions();
 
-        var res = await FetchFromContentful(slug, options, cancellationToken);
-        return res;
-    }
+    //     var res = await FetchFromContentful(slug, options, cancellationToken);
+    //     return res;
+    // }
 
-    public async Task<ContentSupportPage?> GetContentSupportPageBySlug(string slug, IEnumerable<string> fieldsToReturn, CancellationToken cancellationToken = default)
-    {
+    // public async Task<ContentSupportPage?> GetContentSupportPageBySlug(string slug, IEnumerable<string> fieldsToReturn, CancellationToken cancellationToken = default)
+    // {
 
-        var options = CreateGetEntityOptions(slug);
-        options.Select = fieldsToReturn;
+    //     var options = CreateGetEntityOptions();
+    //     options.Select = fieldsToReturn;
 
-        return await FetchFromContentful(slug, options, cancellationToken);
-    }
+    //     return await FetchFromContentful(slug, options, cancellationToken);
+    // }
 
     /// <exception cref="ContentfulDataUnavailableException"></exception>
     private async Task<ContentSupportPage?> FetchFromContentful(string slug, GetEntitiesOptions options, CancellationToken cancellationToken)
@@ -66,6 +66,7 @@ public class GetContentSupportPageQuery : IGetContentSupportPageQuery
     {
         try
         {
+            var options = CreateGetEntityOptions();
             var contentSupportPages = await _cache.GetOrCreateAsync("ContentSupportPages", () => _repository.GetEntities<ContentSupportPage>(cancellationToken)) ?? [];
             return contentSupportPages;
         }
@@ -76,6 +77,7 @@ public class GetContentSupportPageQuery : IGetContentSupportPageQuery
         }
     }
 
-    private GetEntitiesOptions CreateGetEntityOptions(string slug) =>
-      new(_options.Include, new[] { new ContentQueryEquals() { Field = "fields.Slug", Value = slug } });
+    private GetEntitiesOptions CreateGetEntityOptions() =>
+        new GetEntitiesOptions(10);
+    
 }

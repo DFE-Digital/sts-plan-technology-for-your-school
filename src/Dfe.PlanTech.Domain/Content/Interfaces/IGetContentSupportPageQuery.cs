@@ -12,6 +12,6 @@ public interface IGetContentSupportPageQuery
     /// </summary>
     /// <param name="slug">Slug for the Page</param>
     /// <returns>Page matching slug</returns>
-    public Task<ContentSupportPage?> GetContentSupportPageBySlug(string slug, CancellationToken cancellationToken = default);
+    // public Task<ContentSupportPage?> GetContentSupportPageBySlug(string slug, CancellationToken cancellationToken = default);
     Task<IEnumerable<ContentSupportPage>> GetContentSupportPages(CancellationToken cancellationToken = default);
 }
