@@ -6,5 +6,9 @@ public enum CustomComponentType
     Accordion,
     Attachment,
     Card,
-    GridContainer
+    GridContainer,
+    CSAccordion,
+    csCard,
+    AccordionSection,
+    csJumpLinkComponent
 }
