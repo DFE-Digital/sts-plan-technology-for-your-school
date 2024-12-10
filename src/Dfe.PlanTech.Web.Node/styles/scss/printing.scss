@@ -13,6 +13,10 @@
     float: none;
 }
 
+.print-only {
+    display: none;
+}
+
 .print-button {
     background: url(/assets/icon-print.png) no-repeat 10px 50%;
     background-size: 16px 18px;
