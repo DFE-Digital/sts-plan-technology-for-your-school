@@ -16,7 +16,7 @@ runs:
 
     - name: Verify at least one test has run
       shell: bash
-      run: ./scripts/verify-unit-test-run.sh
+      run: .github/scripts/verify-unit-test-run.sh
 
     - name: Test Report
       uses: dorny/test-reporter@v1
