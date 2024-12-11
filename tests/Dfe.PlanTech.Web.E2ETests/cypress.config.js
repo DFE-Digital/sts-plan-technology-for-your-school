@@ -25,12 +25,7 @@ module.exports = defineConfig({
              * For some reason the dynamic page validator would hang when trying to create a session.
              * So we order it last so that a session already exists.
              */
-            "cypress/e2e/components/*.cy.js",
-            "cypress/e2e/pages/*.cy.js",
-            "cypress/e2e/contentsupport/*.cy.js",
-            "cypress/e2e/contentsupport/pages/*.cy.js",
             "cypress/e2e/authentication/*.cy.js",
-            "cypress/e2e/dynamic-page-validator/*.cy.js",
         ],
         setupNodeEvents(on, config) {
             /**
