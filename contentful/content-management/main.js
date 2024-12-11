@@ -1,5 +1,6 @@
 const path = require("path");
 const fs = require("fs");
+require("dotenv/config");
 
 async function main() {
     const fileName = process.argv[2];

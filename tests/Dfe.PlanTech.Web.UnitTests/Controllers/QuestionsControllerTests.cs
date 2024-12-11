@@ -6,6 +6,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
+using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 using Xunit;
 
@@ -25,9 +27,12 @@ public class QuestionsControllerTests
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetLatestResponsesQuery _getResponseQuery;
     private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery;
+    private readonly IGetNavigationQuery _getNavigationQuery;
     private readonly IDeleteCurrentSubmissionCommand _deleteCurrentSubmissionCommand;
     private readonly IGetQuestionBySlugRouter _getQuestionBySlugRouter;
     private readonly IUser _user;
+    private readonly IOptions<ErrorMessages> _errorMessages;
+    private readonly IOptions<ContactOptions> _contactOptions;
     private readonly QuestionsController _controller;
     private readonly IConfiguration _configuration;
 
@@ -68,6 +73,7 @@ public class QuestionsControllerTests
 
         _getSectionQuery = Substitute.For<IGetSectionQuery>();
         _getEntityFromContentfulQuery = Substitute.For<IGetEntityFromContentfulQuery>();
+        _getNavigationQuery = Substitute.For<IGetNavigationQuery>();
 
         _getEntityFromContentfulQuery.GetEntityById<Question>(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns((callinfo) =>
@@ -94,6 +100,19 @@ public class QuestionsControllerTests
                 return null;
             });
 
+        var message = new ErrorMessages
+        {
+            ConcurrentUsersOrContentChange = "An error occurred. Please contact us."
+        };
+        _errorMessages = Options.Create(message);
+
+
+        var contactUs = new ContactOptions
+        {
+            LinkId = "LinkId"
+        };
+        _contactOptions = Options.Create(contactUs);
+
         _getResponseQuery = Substitute.For<IGetLatestResponsesQuery>();
         _getQuestionBySlugRouter = Substitute.For<IGetQuestionBySlugRouter>();
         _getNextUnansweredQuestionQuery = Substitute.For<IGetNextUnansweredQuestionQuery>();
@@ -102,7 +121,7 @@ public class QuestionsControllerTests
         _user = Substitute.For<IUser>();
         _user.GetEstablishmentId().Returns(EstablishmentId);
 
-        _controller = new QuestionsController(_logger, _getSectionQuery, _getResponseQuery, _getEntityFromContentfulQuery, _user);
+        _controller = new QuestionsController(_logger, _getSectionQuery, _getResponseQuery, _getEntityFromContentfulQuery, _getNavigationQuery, _user, _errorMessages, _contactOptions);
     }
 
     [Fact]
@@ -147,19 +166,19 @@ public class QuestionsControllerTests
     [Fact]
     public async Task GetNextUnansweredQuestion_Should_Error_When_SectionSlug_Null()
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetNextUnansweredQuestion(null!, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand, _configuration));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetNextUnansweredQuestion(null!, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand));
     }
 
     [Fact]
     public async Task GetNextUnansweredQuestion_Should_Error_When_SectionSlug_NotFound()
     {
-        await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetNextUnansweredQuestion("Not a real section", _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand, _configuration));
+        await Assert.ThrowsAnyAsync<KeyNotFoundException>(() => _controller.GetNextUnansweredQuestion("Not a real section", _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand));
     }
 
     [Fact]
     public async Task GetNextUnansweredQuestion_Should_Redirect_To_CheckAnswersPage_When_No_Question_Returned()
     {
-        var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand, _configuration);
+        var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand);
 
         var redirectResult = result as RedirectToActionResult;
         Assert.NotNull(redirectResult);
@@ -173,7 +192,7 @@ public class QuestionsControllerTests
         _getNextUnansweredQuestionQuery.GetNextUnansweredQuestion(EstablishmentId, _validSection, Arg.Any<CancellationToken>())
                                         .Returns((callinfo) => _validQuestion);
 
-        var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand, _configuration);
+        var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand);
 
         var redirectResult = result as RedirectToActionResult;
         Assert.NotNull(redirectResult);
@@ -198,12 +217,14 @@ public class QuestionsControllerTests
 
         _controller.TempData = Substitute.For<ITempDataDictionary>();
 
-        var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand, _configuration);
+        var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand);
 
+        var errorMessage = _controller.TempData["SubtopicError"] as string;
         var redirectResult = result as RedirectToActionResult;
         Assert.NotNull(redirectResult);
         Assert.Equal(PagesController.ControllerName, redirectResult.ControllerName);
         Assert.Equal(PagesController.GetPageByRouteAction, redirectResult.ActionName);
+        Assert.Contains("Please contact us.", errorMessage);
     }
 
     [Fact]

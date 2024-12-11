@@ -17,9 +17,9 @@ using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models.Options;
-using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
+using Dfe.PlanTech.Domain.Database;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
@@ -66,10 +66,7 @@ public static class ProgramExtensions
                 }});
         });
 
-        services.AddScoped((_) => new ParagraphRendererOptions()
-        {
-            Classes = "govuk-body",
-        });
+        services.AddScoped((_) => new ParagraphRendererOptions());
 
         services.AddScoped((_) => new HyperlinkRendererOptions()
         {
@@ -136,7 +133,12 @@ public static class ProgramExtensions
 
     public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
-        void databaseOptionsAction(DbContextOptionsBuilder options) => options.UseSqlServer(configuration.GetConnectionString("Database"));
+        void databaseOptionsAction(DbContextOptionsBuilder options) => options.UseSqlServer(configuration.GetConnectionString("Database"),
+        opts =>
+        {
+            var databaseRetryOptions = configuration.GetSection("Database").Get<DatabaseOptions>();
+            opts.EnableRetryOnFailure(databaseRetryOptions.MaxRetryCount, TimeSpan.FromMilliseconds(databaseRetryOptions.MaxDelayInMilliseconds), null);
+        });
 
         services.AddDbContext<IPlanTechDbContext, PlanTechDbContext>(databaseOptionsAction);
         ConfigureCookies(services, configuration);

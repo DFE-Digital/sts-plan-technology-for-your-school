@@ -1,10 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Domain.Content.Models;
 
 namespace Dfe.PlanTech.Web.Models.Content.Mapped;
 
 [ExcludeFromCodeCoverage]
-public class CsPage
+public class CsPage : IContentSupportPage<CsContentItem>
 {
+    public SystemDetails Sys { get; set; } = null!;
     public Heading Heading { get; set; } = null!;
     public string Slug { get; set; } = null!;
     public bool IsSitemap { get; set; }

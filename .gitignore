@@ -478,7 +478,7 @@ $RECYCLE.BIN/
 *.msp
 
 # Windows shortcuts
-*.lnk 
+*.lnk
 
 # Draw.io files
 *.bkp
@@ -501,3 +501,11 @@ build/
 
 contentful/migration-scripts/config.json
 contentful/migration-scripts/contentful-export-*.json
+
+.sonarqube/
+
+# Secrets
+.env
+*.env
+
+StrykerOutput/

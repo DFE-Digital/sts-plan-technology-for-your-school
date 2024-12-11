@@ -151,6 +151,7 @@ public class GetLatestResponsesQueryTests
                 submission.Completed = true;
                 submission.DateCompleted = faker.Date.Future(1, submission.DateCreated);
                 submission.Maturity = faker.PickRandom(maturities);
+                submission.Viewed = false;
             }
 
             yield return submissions;
@@ -248,6 +249,31 @@ public class GetLatestResponsesQueryTests
         Assert.NotNull(submission);
 
         Assert.False(submission.Deleted);
+    }
+
+    [Fact]
+    public async Task ViewLatestSubmission_Should_Mark_Latest_Completed_Submission_As_Viewed()
+    {
+        var submission = GetCompletedSubmissionForCompletedSection();
+        var latestResponse = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(ESTABLISHMENT_ID, submission.SectionId, true);
+        var latestSubmission = _submissions.FirstOrDefault(sub => sub.Id == latestResponse?.SubmissionId);
+
+        Assert.NotNull(latestSubmission);
+        Assert.False(latestSubmission.Viewed);
+
+        await _getLatestResponseListForSubmissionQuery.ViewLatestSubmission(ESTABLISHMENT_ID, submission.SectionId);
+
+        Assert.True(latestSubmission.Viewed);
+    }
+
+    [Fact]
+    public async Task ViewLatestSubmission_Should_Not_Mark_Incomplete_Submission_As_Viewed()
+    {
+        var submission = GetIncompleteSubmissionForIncompleteSection();
+
+        await _getLatestResponseListForSubmissionQuery.ViewLatestSubmission(ESTABLISHMENT_ID, submission.SectionId);
+
+        Assert.False(submission.Viewed);
     }
 
     private IEnumerable<Response> GenerateResponses(List<Section> sections,

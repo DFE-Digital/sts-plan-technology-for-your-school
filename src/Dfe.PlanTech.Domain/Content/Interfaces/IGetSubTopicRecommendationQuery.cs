@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Questionnaire.Models;
 
-namespace Dfe.PlanTech.Domain.Content.Queries;
+namespace Dfe.PlanTech.Domain.Content.Interfaces;
 
 public interface IGetSubTopicRecommendationQuery
 {

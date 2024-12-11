@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Domain.SignIns.Models
 
         public int UserId { get; set; }
 
-        public int EstablishmentId { get; set; }
+        public int? EstablishmentId { get; set; }
 
         public DateTime SignInDateTime { get; set; }
 

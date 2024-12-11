@@ -1,15 +1,63 @@
 @model Dfe.PlanTech.Web.Models.PageViewModel;
 
-@section BeforeContent {
-    @if (Model.Page.DisplayBackButton)
-    {
-        await Html.RenderPartialAsync("BackButton", Model);
+@if (Model.DisplayBlueBanner)
+{
+    @section DfePageHeaderOuter {
+        @if (Model.Page.DisplayBackButton)
+        {
+            await Html.RenderPartialAsync("BackButton", Model);
+        }
+        @if (Model.Page.DisplayHomeButton)
+        {
+            await Html.RenderPartialAsync("HomeButton", Model);
+        }
     }
-    @if (Model.Page.DisplayHomeButton)
-    {
-        await Html.RenderPartialAsync("HomeButton", Model);
+
+    @section DfePageHeaderInner {
+        @foreach (var content in Model.Page.BeforeTitleContent)
+        {
+            await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+        }
+
+        @if (Model.Page.DisplayOrganisationName)
+        {
+            <span class="govuk-caption-xl govuk-!-margin-top-5">@Model.Page.OrganisationName</span>
+        }
+
+        @if (Model.Page.Title != null)
+        {
+            await Html.RenderPartialAsync("Components/Title", Model.Page.Title);
+        }
     }
 }
+else
+{
+    @section BeforeContent {
+        @if (Model.Page.DisplayBackButton)
+        {
+            await Html.RenderPartialAsync("BackButton", Model);
+        }
+        @if (Model.Page.DisplayHomeButton)
+        {
+            await Html.RenderPartialAsync("HomeButton", Model);
+        }
+    }
+    foreach (var content in Model.Page.BeforeTitleContent)
+    {
+        await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+    }
+
+    if (Model.Page.DisplayOrganisationName)
+    {
+        <span class="govuk-caption-xl govuk-!-margin-top-5">@Model.Page.OrganisationName</span>
+    }
+
+    if (Model.Page.Title != null)
+    {
+        await Html.RenderPartialAsync("Components/Title", Model.Page.Title);
+    }
+}
+
 @{
     if (Model.Page.Slug == "self-assessment" && TempData.ContainsKey("SubtopicError"))
     {
@@ -21,7 +69,7 @@
                 </h2>
                 @if (!string.IsNullOrEmpty(error))
                 {
-                    <div class="govuk-error-summary__body whitespace-preline">@error</div>
+                    <div class="govuk-error-summary__body whitespace-preline">@Html.Raw(error)</div>
                 }
             </div>
         </div>

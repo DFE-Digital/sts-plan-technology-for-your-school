@@ -47,8 +47,7 @@ public class ContentService(
         return pages.ToList();
     }
 
-    public async Task<List<CsPage>> GetContentSupportPages(
-        string field, string value, bool isPreview)
+    public async Task<List<CsPage>> GetContentSupportPages(string field, string value, bool isPreview)
     {
         var key = $"{field}_{value}";
         if (!isPreview)
@@ -57,7 +56,6 @@ public class ContentService(
             if (fromCache is not null)
                 return fromCache;
         }
-
 
         var result = await contentfulService.GetContentSupportPages(field, value);
         var pages = modelMapper.MapToCsPages(result);

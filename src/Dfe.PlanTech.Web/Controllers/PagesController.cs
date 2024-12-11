@@ -5,19 +5,24 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Binders;
+using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
 [LogInvalidModelState]
 [Route("/")]
-public class PagesController(ILogger<PagesController> logger, IGetEntityFromContentfulQuery getEntityByIdQuery) : BaseController<PagesController>(logger)
+public class PagesController(
+    ILogger<PagesController> logger,
+    IGetNavigationQuery getNavigationQuery,
+    IOptions<ContactOptions> contactOptions,
+    IOptions<ErrorPages> errorPages) : BaseController<PagesController>(logger)
 {
-    private readonly ILogger _logger = logger;
-    private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery = getEntityByIdQuery;
+    private readonly ContactOptions _contactOptions = contactOptions.Value;
     public const string ControllerName = "Pages";
     public const string GetPageByRouteAction = nameof(GetByRoute);
     public const string NotFoundPage = "NotFoundError";
@@ -28,10 +33,15 @@ public class PagesController(ILogger<PagesController> logger, IGetEntityFromCont
     {
         if (page == null)
         {
-            _logger.LogInformation("Could not find page at {Path}", Request.Path.Value);
+            logger.LogInformation("Could not find page at {Path}", Request.Path.Value);
             return RedirectToAction(NotFoundPage);
         }
+
         var viewModel = new PageViewModel(page, this, user, Logger);
+        if (page.Sys.Id == errorPages.Value.InternalErrorPageId)
+        {
+            viewModel.DisplayBlueBanner = false;
+        }
 
         return View("Page", viewModel);
     }
@@ -41,25 +51,10 @@ public class PagesController(ILogger<PagesController> logger, IGetEntityFromCont
     public IActionResult Error()
     => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 
-    [HttpGet(UrlConstants.ServiceUnavailable, Name = UrlConstants.ServiceUnavailable)]
-    public async Task<IActionResult> ServiceUnavailable([FromServices] IConfiguration configuration)
-    {
-        var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(configuration["ContactUs:LinkId"]);
-
-        var viewModel = new ServiceUnavailableViewModel
-        {
-            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-            ContactHref = contactLink?.Href
-        };
-        return View(viewModel);
-    }
-
     [HttpGet(UrlConstants.NotFound, Name = UrlConstants.NotFound)]
-    public async Task<IActionResult> NotFoundError([FromServices] IConfiguration configuration)
+    public async Task<IActionResult> NotFoundError()
     {
-        var contentId = configuration["ContactUs:LinkId"];
-        var contactLink = await _getEntityFromContentfulQuery.GetEntityById<NavigationLink>(contentId) ??
-                throw new KeyNotFoundException($"Could not find navigation link with Id {contentId}");
+        var contactLink = await GetContactLinkAsync();
 
         var viewModel = new NotFoundViewModel
         {
@@ -67,5 +62,10 @@ public class PagesController(ILogger<PagesController> logger, IGetEntityFromCont
         };
 
         return View(viewModel);
+    }
+
+    private async Task<INavigationLink?> GetContactLinkAsync()
+    {
+        return await getNavigationQuery.GetLinkById(_contactOptions.LinkId);
     }
 }

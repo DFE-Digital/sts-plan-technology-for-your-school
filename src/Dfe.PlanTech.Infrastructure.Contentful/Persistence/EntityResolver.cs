@@ -1,6 +1,7 @@
 using Contentful.Core.Configuration;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful;
@@ -15,8 +16,7 @@ public class EntityResolver(ILogger<EntityResolver> logger) : IContentTypeResolv
 
     private readonly ILogger<EntityResolver> _logger = logger;
 
-    private readonly Dictionary<string, Type> _types = typeof(IContentComponent).Assembly.GetTypes()
-                                                                        .Where(type => type.IsAssignableTo(typeof(IContentComponent)))
+    private readonly Dictionary<string, Type> _types = ReflectionHelpers.GetTypesInheritingFrom<IContentComponent>()
                                                                         .ToDictionary(type => type.Name.ToLower());
 
     /// <summary>

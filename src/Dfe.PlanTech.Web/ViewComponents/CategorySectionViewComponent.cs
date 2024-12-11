@@ -1,5 +1,5 @@
 using Dfe.PlanTech.Domain.CategorySection;
-using Dfe.PlanTech.Domain.Content.Queries;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -110,7 +110,8 @@ public class CategorySectionViewComponent(
             {
                 RecommendationSlug = recommendation.RecommendationSlug,
                 RecommendationDisplayName = recommendation.DisplayName,
-                SectionSlug = section.InterstitialPage?.Slug
+                SectionSlug = section.InterstitialPage?.Slug,
+                Viewed = sectionStatus.Viewed
             };
         }
         catch (Exception e)

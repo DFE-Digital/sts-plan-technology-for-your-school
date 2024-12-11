@@ -2,10 +2,10 @@
 
 <ul class="govuk-footer__inline-list">
   @{
-    foreach (var link in Model)
+    foreach (var link in Model.Where(link => link.IsValid))
     {
       <li class="govuk-footer__inline-list-item">
-        <footer-link link=@link />
+        <footer-link link=@link>@link.DisplayText</footer-link>
       </li>
     }
   }
