@@ -48,7 +48,7 @@ runs:
       if: always()
       run: |
         while read file; do
-          count=$(xmllint --xpath "string(//TestRun/ResultSummary/Counters/@total)" "$file" 2>/dev/null)
+          count=$(xmllint --xpath "string(//*[local-name()='TestRun']/*[local-name()='ResultSummary']/*[local-name()='Counters']/@total)" "$file" 2>/dev/null)
           echo "$file: $count tests executed"
         done < <(find tests -name "*.trx")
 
