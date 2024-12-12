@@ -29,10 +29,7 @@ runs:
     - name: Debug 3
       shell: bash
       if: always()
-      run: |
-        find tests -name "*.trx" | while read file; do
-          echo "$file"
-        done
+      run: which xmllint
 
     - name: Debug 4
       shell: bash
@@ -47,7 +44,7 @@ runs:
       if: always()
       run: |
         while read file; do
-          count=$(xpath -q -e "//TestRun/ResultSummary/Counters/@total" "$file" 2>/dev/null)
+          count=$(xmllint --xpath "string(//TestRun/ResultSummary/Counters/@total)" "$file" 2>/dev/null)
           echo "$file: $count tests executed"
         done < <(find tests -name "*.trx")
 
