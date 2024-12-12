@@ -1,5 +1,5 @@
 using Dfe.PlanTech.Application.Exceptions;
-using Dfe.PlanTech.Domain.Content.Queries;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
@@ -108,11 +108,14 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     }
 
     /// <summary>
-    /// Render the recommendation page
+    /// Render the recommendation page and mark the recommendation as viewed in the database
     /// </summary>
     private async Task<IActionResult> HandleCompleteStatus(RecommendationsController controller, string recommendationSlug, CancellationToken cancellationToken)
     {
         var viewModel = await GetRecommendationViewModel(recommendationSlug, cancellationToken);
+
+        var establishmentId = await _router.User.GetEstablishmentId();
+        await _getLatestResponsesQuery.ViewLatestSubmission(establishmentId, _router.Section.Sys.Id);
 
         return controller.View("~/Views/Recommendations/Recommendations.cshtml", viewModel);
     }

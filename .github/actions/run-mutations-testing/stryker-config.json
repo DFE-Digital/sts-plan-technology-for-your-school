@@ -1,0 +1,23 @@
+{
+    "stryker-config": {
+        "concurrency": 2,
+        "mutation-level": "Standard",
+        "language-version": "latest",
+        "additional-timeout": 5000,
+        "mutate": ["**/*"],
+        "coverage-analysis": "perTest",
+        "disable-bail": false,
+        "disable-mix-mutants": false,
+        "thresholds": {
+            "high": 80,
+            "low": 60,
+            "break": 0
+        },
+        "verbosity": "info",
+        "reporters": ["Progress", "Html", "markdown", "json"],
+        "ignore-mutations": [],
+        "ignore-methods": [],
+        "report-file-name": "mutation-report",
+        "break-on-initial-test-failure": false
+    }
+}

@@ -2,5 +2,5 @@
 
 public interface IExceptionHandlerMiddleware
 {
-    void ContextRedirect(HttpContext context);
+    void ContextRedirect(string internalErrorSlug, HttpContext context);
 }

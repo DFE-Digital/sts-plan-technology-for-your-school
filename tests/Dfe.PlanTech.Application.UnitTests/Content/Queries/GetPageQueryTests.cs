@@ -17,6 +17,7 @@ public class GetPageQueryTests
     private const string TEST_PAGE_SLUG = "test-page-slug";
     private const string SECTION_SLUG = "SectionSlugTest";
     private const string LANDING_PAGE_SLUG = "LandingPage";
+    private const string LANDING_PAGE_ID = "LandingPageId";
 
     private readonly IContentRepository _repoSubstitute = Substitute.For<IContentRepository>();
     private readonly ILogger<GetPageQuery> _logger = Substitute.For<ILogger<GetPageQuery>>();
@@ -24,15 +25,19 @@ public class GetPageQueryTests
 
     private readonly List<Page> _pages = new() {
         new Page(){
+            Sys = new SystemDetails { Id = "index-page-id" },
             Slug = "Index"
         },
         new Page(){
+            Sys = new SystemDetails { Id = LANDING_PAGE_ID },
             Slug = LANDING_PAGE_SLUG,
         },
         new Page(){
+            Sys = new SystemDetails { Id = "audit-page-id" },
             Slug = "AuditStart"
         },
         new Page(){
+            Sys = new SystemDetails { Id = "section-page-id" },
             Slug = SECTION_SLUG,
             DisplayTopicTitle = true,
             DisplayHomeButton= false,
@@ -51,10 +56,16 @@ public class GetPageQueryTests
     public GetPageQueryTests()
     {
         SetupRepository();
-        _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<IEnumerable<Page>>>>())
+        _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<IEnumerable<Page>?>>>())
             .Returns(callInfo =>
             {
-                var func = callInfo.ArgAt<Func<Task<IEnumerable<Page>>>>(1);
+                var func = callInfo.ArgAt<Func<Task<IEnumerable<Page>?>>>(1);
+                return func();
+            });
+        _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<Page?>>>())
+            .Returns(callInfo =>
+            {
+                var func = callInfo.ArgAt<Func<Task<Page?>>>(1);
                 return func();
             });
     }
@@ -78,6 +89,12 @@ public class GetPageQueryTests
 
             return [];
         });
+        _repoSubstitute.GetEntityById<Page>(Arg.Any<string>(), cancellationToken: Arg.Any<CancellationToken>())
+            .Returns((callInfo) =>
+            {
+                var pageId = (string)callInfo[0];
+                return _pages.FirstOrDefault(page => page.Sys.Id == pageId);
+            });
     }
 
     private GetPageQuery CreateGetPageQuery()
@@ -95,6 +112,19 @@ public class GetPageQueryTests
         Assert.Equal(LANDING_PAGE_SLUG, result.Slug);
 
         await _repoSubstitute.ReceivedWithAnyArgs(1).GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Should_Retrieve_Page_By_Id_From_Contentful()
+    {
+        var query = CreateGetPageQuery();
+
+        var result = await query.GetPageById(LANDING_PAGE_ID);
+
+        Assert.NotNull(result);
+        Assert.Equal(LANDING_PAGE_SLUG, result.Slug);
+
+        await _repoSubstitute.ReceivedWithAnyArgs(1).GetEntityById<Page>(Arg.Any<string>(), cancellationToken: Arg.Any<CancellationToken>());
     }
 
     [Fact]

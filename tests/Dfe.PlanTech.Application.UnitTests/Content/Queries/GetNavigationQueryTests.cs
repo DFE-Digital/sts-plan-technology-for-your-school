@@ -27,10 +27,10 @@ public class GetNavigationQueryTests
     {
         _contentfulLinks = new List<NavigationLink> { _contentfulLink };
 
-        _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<IEnumerable<NavigationLink>>>>())
+        _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<IEnumerable<NavigationLink>?>>>())
             .Returns(callInfo =>
             {
-                var func = callInfo.ArgAt<Func<Task<IEnumerable<NavigationLink>>>>(1);
+                var func = callInfo.ArgAt<Func<Task<IEnumerable<NavigationLink>?>>>(1);
                 return func();
             });
 

@@ -1,28 +1,58 @@
 @model Dfe.PlanTech.Web.Models.PageViewModel;
 
-@section DfePageHeaderOuter {
-    @if (Model.Page.DisplayBackButton)
-    {
-        await Html.RenderPartialAsync("BackButton", Model);
+@if (Model.DisplayBlueBanner)
+{
+    @section DfePageHeaderOuter {
+        @if (Model.Page.DisplayBackButton)
+        {
+            await Html.RenderPartialAsync("BackButton", Model);
+        }
+        @if (Model.Page.DisplayHomeButton)
+        {
+            await Html.RenderPartialAsync("HomeButton", Model);
+        }
     }
-    @if (Model.Page.DisplayHomeButton)
-    {
-        await Html.RenderPartialAsync("HomeButton", Model);
+
+    @section DfePageHeaderInner {
+        @foreach (var content in Model.Page.BeforeTitleContent)
+        {
+            await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+        }
+
+        @if (Model.Page.DisplayOrganisationName)
+        {
+            <span class="govuk-caption-xl govuk-!-margin-top-5">@Model.Page.OrganisationName</span>
+        }
+
+        @if (Model.Page.Title != null)
+        {
+            await Html.RenderPartialAsync("Components/Title", Model.Page.Title);
+        }
     }
 }
-
-@section DfePageHeaderInner {
-    @foreach (var content in Model.Page.BeforeTitleContent)
+else
+{
+    @section BeforeContent {
+        @if (Model.Page.DisplayBackButton)
+        {
+            await Html.RenderPartialAsync("BackButton", Model);
+        }
+        @if (Model.Page.DisplayHomeButton)
+        {
+            await Html.RenderPartialAsync("HomeButton", Model);
+        }
+    }
+    foreach (var content in Model.Page.BeforeTitleContent)
     {
         await Html.RenderPartialAsync("Components/PageComponentFactory", content);
     }
 
-    @if (Model.Page.DisplayOrganisationName)
+    if (Model.Page.DisplayOrganisationName)
     {
         <span class="govuk-caption-xl govuk-!-margin-top-5">@Model.Page.OrganisationName</span>
     }
 
-    @if (Model.Page.Title != null)
+    if (Model.Page.Title != null)
     {
         await Html.RenderPartialAsync("Components/Title", Model.Page.Title);
     }

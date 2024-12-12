@@ -1,4 +1,6 @@
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Helpers;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Infrastructure.ServiceBus;
@@ -6,7 +8,9 @@ using Dfe.PlanTech.Infrastructure.SignIns;
 using Dfe.PlanTech.Web;
 using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Middleware;
+using Dfe.PlanTech.Web.Models;
 using GovUk.Frontend.AspNetCore;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +33,7 @@ if (builder.Environment.EnvironmentName != "E2E")
 
 builder.Services.AddCustomTelemetry();
 builder.Services.Configure<ErrorMessages>(builder.Configuration.GetSection("ErrorMessages"));
+builder.Services.Configure<ErrorPages>(builder.Configuration.GetSection("ErrorPages"));
 builder.Services.Configure<ContactOptions>(builder.Configuration.GetSection("ContactUs"));
 
 builder.AddContentAndSupportServices()
@@ -47,8 +52,12 @@ builder.AddContentAndSupportServices()
         .AddRedisServices(builder.Configuration);
 
 builder.Services.AddSingleton<ISystemTime, SystemTime>();
+builder.Services.Configure<RobotsConfiguration>(builder.Configuration.GetSection("Robots"));
+
 
 var app = builder.Build();
+
+app.UseRobotsTxtMiddleware();
 
 app.UseSecurityHeaders();
 app.UseMiddleware<HeadRequestMiddleware>();
@@ -70,12 +79,16 @@ if (!app.Environment.IsDevelopment())
 
 app.UseExceptionHandler(exceptionHandlerApp =>
 {
-    exceptionHandlerApp.Run(context =>
+    exceptionHandlerApp.Run(async context =>
     {
         var exceptionHandlerMiddleware = context.RequestServices.GetRequiredService<IExceptionHandlerMiddleware>();
-        exceptionHandlerMiddleware.ContextRedirect(context);
+        var pageQuery = context.RequestServices.GetRequiredService<IGetPageQuery>();
+        var errorPages = context.RequestServices.GetRequiredService<IOptions<ErrorPages>>();
 
-        return Task.CompletedTask;
+        var internalErrorPage = await pageQuery.GetPageById(errorPages.Value.InternalErrorPageId);
+        var internalErrorSlug = internalErrorPage?.Slug ?? UrlConstants.Error;
+
+        exceptionHandlerMiddleware.ContextRedirect(internalErrorSlug, context);
     });
 });
 

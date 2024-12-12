@@ -17,7 +17,6 @@ using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
 using Dfe.PlanTech.Domain.Content.Models.Options;
-using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Database;
@@ -66,10 +65,7 @@ public static class ProgramExtensions
                 }});
         });
 
-        services.AddScoped((_) => new ParagraphRendererOptions()
-        {
-            Classes = "govuk-body",
-        });
+        services.AddScoped((_) => new ParagraphRendererOptions());
 
         services.AddScoped((_) => new HyperlinkRendererOptions()
         {
