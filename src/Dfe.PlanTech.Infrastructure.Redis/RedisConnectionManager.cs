@@ -1,3 +1,5 @@
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
@@ -24,7 +26,10 @@ public class RedisConnectionManager : IRedisConnectionManager
     /// <inheritdoc/>
     public async Task<IDatabase> GetDatabaseAsync(int databaseId)
     {
-        _connection ??= await ConnectionMultiplexer.ConnectAsync(options.ConnectionString) ?? throw new InvalidOperationException("Failed to create Redis connection");
+        var redisOptions = ConfigurationOptions.Parse(options.ConnectionString);
+        redisOptions.CertificateValidation += ValidateServerCertificate;
+
+        _connection ??= await ConnectionMultiplexer.ConnectAsync(redisOptions) ?? throw new InvalidOperationException("Failed to create Redis connection");
         return _connection.GetDatabase(databaseId);
     }
 
@@ -44,4 +49,19 @@ public class RedisConnectionManager : IRedisConnectionManager
         var tasks = _connection.GetEndPoints().Select(x => _connection.GetServer(x).FlushDatabaseAsync(databaseId));
         await Task.WhenAll(tasks);
     }
+
+    public static bool ValidateServerCertificate(
+        object sender,
+        X509Certificate? certificate,
+        X509Chain? chain,
+        SslPolicyErrors sslPolicyErrors)
+    {
+        if (sslPolicyErrors == SslPolicyErrors.None)
+            return true;
+
+        Console.WriteLine("Certificate error: {0}", sslPolicyErrors);
+
+        return false;
+    }
+
 }
