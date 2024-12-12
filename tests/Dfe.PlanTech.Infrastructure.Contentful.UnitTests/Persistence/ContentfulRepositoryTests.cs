@@ -6,7 +6,6 @@ using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
-using Xunit;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
 {
@@ -47,16 +46,16 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
                 return Task.FromResult(collection);
             });
 
-        _clientSubstitute.GetEntries(Arg.Any<QueryBuilder<OtherTestClass>>(), Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult(new ContentfulCollection<OtherTestClass> { Items = new List<OtherTestClass>(), Errors = new List<ContentfulError>() }));
+            _clientSubstitute.GetEntries(Arg.Any<QueryBuilder<OtherTestClass>>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(new ContentfulCollection<OtherTestClass> { Items = new List<OtherTestClass>(), Errors = new List<ContentfulError>() }));
 
-        _clientSubstitute.GetEntry<TestClass>(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns((CallInfo) =>
-            {
-                string id = string.Empty;
-                var matching = _substituteData.FirstOrDefault(test => test.Id == id);
-                return Task.FromResult(matching == null ? new ContentfulResult<TestClass>() : new ContentfulResult<TestClass>("etag", matching));
-            });
+            _clientSubstitute.GetEntry<TestClass>(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns((CallInfo) =>
+                {
+                    string id = string.Empty;
+                    var matching = _substituteData.FirstOrDefault(test => test.Id == id);
+                    return Task.FromResult(matching == null ? new ContentfulResult<TestClass>() : new ContentfulResult<TestClass>("etag", matching));
+                });
         }
 
         [Fact]
