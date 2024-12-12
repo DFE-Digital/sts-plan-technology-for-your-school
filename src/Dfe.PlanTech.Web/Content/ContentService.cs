@@ -20,45 +20,9 @@ public class ContentService : IContentService // This indicates that ContentServ
         _modelMapper = modelMapper;
     }
 
-    public async Task<CsPage?> GetContent(string slug, CancellationToken cancellationToken)
+    public async Task<CsPage?> GetContent(string slug, CancellationToken cancellationToken = default)
     {
         var resp = await _getContentSupportPageQuery.GetContentSupportPage(slug, cancellationToken);
         return resp == null ? null : _modelMapper.MapToCsPage(resp);
-    }
-
-    public async Task<string> GenerateSitemap(string baseUrl)
-    {
-        var resp =
-            await GetContentSupportPages(nameof(ContentSupportPage.IsSitemap), "true", false);
-
-        XNamespace xmlns = "http://www.sitemaps.org/schemas/sitemap/0.9";
-        var sitemap = new XDocument(
-            new XDeclaration("1.0", "UTF-8", null),
-            new XElement(xmlns + "urlset", new XAttribute("xmlns", xmlns),
-                from url in resp
-                select
-                    new XElement(xmlns + "url",
-                        new XElement(xmlns + "loc", $"{baseUrl}{url.Slug}"),
-                        new XElement(xmlns + "changefreq", "yearly")
-                    )
-            )
-        );
-
-        return sitemap.ToString();
-    }
-
-    public async Task<List<CsPage>> GetCsPages(bool isPreview = true)
-    {
-        var pages =
-            await GetContentSupportPages(nameof(ContentSupportPage.IsSitemap), "true", isPreview);
-        return pages.ToList();
-    }
-
-    public async Task<List<CsPage>> GetContentSupportPages(string field, string value, bool isPreview)
-    {
-        var result = await _getContentSupportPageQuery.GetContentSupportPages();
-        var pages = _modelMapper.MapToCsPages(result);
-
-        return pages;
     }
 }

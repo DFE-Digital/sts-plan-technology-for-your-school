@@ -17,7 +17,7 @@ public class ContentController(
     public const string ErrorActionName = "error";
 
     [HttpGet("{slug}/{page?}")]
-    public async Task<IActionResult> Index(string slug, string page = "", bool isPreview = false, [FromQuery] List<string>? tags = null, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Index(string slug, string page = "", [FromQuery] List<string>? tags = null, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
         {

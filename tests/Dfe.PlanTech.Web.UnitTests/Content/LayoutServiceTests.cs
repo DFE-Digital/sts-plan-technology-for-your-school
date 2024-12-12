@@ -1,5 +1,6 @@
 ﻿using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
 using Dfe.PlanTech.Web.Content;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Xunit;
@@ -27,7 +28,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Content
         {
             return new CsPage
             {
-                Heading = new Heading
+                Heading = new CSHeading
                 {
                     Title = HeadingTitle,
                     Subtitle = HeadingSubtitle

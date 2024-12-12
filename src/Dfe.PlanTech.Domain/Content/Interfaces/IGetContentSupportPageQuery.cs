@@ -8,12 +8,10 @@ namespace Dfe.PlanTech.Domain.Content.Queries;
 public interface IGetContentSupportPageQuery
 {
     /// <summary>
-    /// Fetches page from <see chref="IContentRepository"/> by slug
+    /// Fetches content suppot page from <see chref="IContentRepository"/> by slug
     /// </summary>
-    /// <param name="slug">Slug for the Page</param>
-    /// <returns>Page matching slug</returns>
-    // public Task<ContentSupportPage?> GetContentSupportPageBySlug(string slug, CancellationToken cancellationToken = default);
-    Task<IEnumerable<ContentSupportPage>> GetContentSupportPages(CancellationToken cancellationToken = default);
+    /// <param name="slug">Slug for the C&S Page</param>
+    /// <returns>ContentSupportPage matching slug</returns>
     Task<ContentSupportPage?> GetContentSupportPage(string slug, CancellationToken cancellationToken = default);
 
 }
