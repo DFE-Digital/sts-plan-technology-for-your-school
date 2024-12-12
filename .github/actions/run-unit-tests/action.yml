@@ -16,41 +16,7 @@ runs:
 
     - name: Install XML tools
       shell: bash
-      run: sudo apt-get update && sudo apt-get install -y libxml2-utils
-
-    - name: Debug 1
-      shell: bash
-      if: always()
-      run: |
-        echo "Current shell: $0"
-        bash --version
-
-    - name: Debug 2
-      shell: bash
-      if: always()
-      run: which xpath
-
-    - name: Debug 3
-      shell: bash
-      if: always()
-      run: which xmllint
-
-    - name: Debug 4
-      shell: bash
-      if: always()
-      run: |
-        while read file; do
-          echo "$file"
-        done < <(find tests -name "*.trx")
-
-    - name: Debug 5
-      shell: bash
-      if: always()
-      run: |
-        while read file; do
-          count=$(xmllint --xpath "string(//*[local-name()='TestRun']/*[local-name()='ResultSummary']/*[local-name()='Counters']/@total)" "$file" 2>/dev/null)
-          echo "$file: $count tests executed"
-        done < <(find tests -name "*.trx")
+      run: sudo apt-get install -y libxml2-utils
 
     - name: Verify at least one test has run
       shell: bash
@@ -58,7 +24,7 @@ runs:
         #!/bin/bash
         total_count=0
         while read file; do
-          count=$(xpath -q -e "//TestRun/ResultSummary/Counters/@total" "$file" 2>/dev/null | cut -d'"' -f2)
+          count=$(xmllint --xpath "string(//*[local-name()='TestRun']/*[local-name()='ResultSummary']/*[local-name()='Counters']/@total)" "$file" 2>/dev/null)
           echo "$file: $count tests executed"
           total_count=$((total_count + count))
         done < <(find tests -name "*.trx")
