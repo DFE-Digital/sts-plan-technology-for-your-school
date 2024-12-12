@@ -6,15 +6,21 @@ using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
+using Xunit;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
 {
     public class ContentfulRepositoryTests
     {
         private readonly IContentfulClient _clientSubstitute = Substitute.For<IContentfulClient>();
-
-        private readonly List<TestClass> _substituteData = new() {
-            new TestClass(), new TestClass("testId"), new TestClass("anotherId"), new TestClass("abcd1234"), new TestClass("duplicateId"), new TestClass("duplicateId")
+        private readonly List<TestClass> _substituteData = new()
+        {
+            new TestClass(),
+            new TestClass("testId"),
+            new TestClass("anotherId"),
+            new TestClass("abcd1234"),
+            new TestClass("duplicateId"),
+            new TestClass("duplicateId")
         };
 
         public ContentfulRepositoryTests()
@@ -26,7 +32,6 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
                 var queryString = query.Build();
                 var parsedQueryString = HttpUtility.ParseQueryString(queryString);
                 var sysId = parsedQueryString.Get("sys.id");
-
                 var items = _substituteData.AsEnumerable();
 
                 if (sysId != null)
@@ -36,75 +41,54 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
 
                 var collection = new ContentfulCollection<TestClass>
                 {
-                    Items = items
+                    Items = items.ToList(),
+                    Errors = new List<ContentfulError>()
                 };
-
                 return Task.FromResult(collection);
             });
 
-            _clientSubstitute.GetEntries(Arg.Any<QueryBuilder<OtherTestClass>>(), Arg.Any<CancellationToken>())
-            .Returns(callInfo =>
-            {
-                var collection = new ContentfulCollection<OtherTestClass>
-                {
-                    Items = Enumerable.Empty<OtherTestClass>()
-                };
+        _clientSubstitute.GetEntries(Arg.Any<QueryBuilder<OtherTestClass>>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ContentfulCollection<OtherTestClass> { Items = new List<OtherTestClass>(), Errors = new List<ContentfulError>() }));
 
-                return Task.FromResult(collection);
-            });
-
-            _clientSubstitute.GetEntry<TestClass>(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+        _clientSubstitute.GetEntry<TestClass>(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns((CallInfo) =>
             {
                 string id = string.Empty;
-                string etag = string.Empty;
                 var matching = _substituteData.FirstOrDefault(test => test.Id == id);
-                if (matching == null)
-                    return Task.FromResult(new ContentfulResult<TestClass>());
-
-                return Task.FromResult(new ContentfulResult<TestClass>(etag, matching));
+                return Task.FromResult(matching == null ? new ContentfulResult<TestClass>() : new ContentfulResult<TestClass>("etag", matching));
             });
         }
 
         [Fact]
         public async Task Should_Call_Client_Method_When_Using_GetEntities()
         {
-            ContentfulRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
-
+            var repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
             var result = await repository.GetEntities<TestClass>();
-
             Assert.NotNull(result);
         }
 
         [Fact]
         public async Task Should_CallClientMethod_When_Using_GetEntityById()
         {
-            ContentfulRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
-
+            var repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
             var result = await repository.GetEntityById<TestClass>("testId");
-
             Assert.NotNull(result);
         }
 
         [Fact]
         public async Task GetEntities_Should_ReturnItems_When_ClassMatches()
         {
-            ContentfulRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
-
+            var repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
             var result = await repository.GetEntities<TestClass>();
-
             Assert.NotNull(result);
-            Assert.Equal(result, _substituteData);
+            Assert.Equal(_substituteData, result);
         }
-
 
         [Fact]
         public async Task GetEntities_Should_ReturnEmptyIEnumerable_When_NoDataFound()
         {
-            ContentfulRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
-
+            var repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
             var result = await repository.GetEntities<OtherTestClass>();
-
             Assert.NotNull(result);
             Assert.Empty(result);
         }
@@ -113,11 +97,8 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         public async Task GetEntityById_Should_FindMatchingItem_When_IdMatches()
         {
             var testId = "testId";
-
-            ContentfulRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
-
+            var repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
             var result = await repository.GetEntityById<TestClass>(testId);
-
             Assert.NotNull(result);
             Assert.Equal(result.Id, testId);
         }
@@ -125,26 +106,22 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         [Fact]
         public async Task GetEntityById_Should_ThrowException_When_IdIsNull()
         {
-            ContentfulRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
-
+            var repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
             await Assert.ThrowsAsync<ArgumentNullException>(() => repository.GetEntityById<TestClass>(null));
         }
 
         [Fact]
         public async Task GetEntityById_Should_ThrowException_When_IdIsEmpty()
         {
-            ContentfulRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
-
+            var repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
             await Assert.ThrowsAsync<ArgumentNullException>(() => repository.GetEntityById<TestClass>(""));
         }
 
         [Fact]
         public async Task Should_ReturnNull_When_IdNotFound()
         {
-            ContentfulRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
-
+            var repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
             var result = await repository.GetEntityById<TestClass>("not a real id");
-
             Assert.Null(result);
         }
 
@@ -152,9 +129,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         public async Task GetEntityById_Should_Throw_GetEntitiesIDException_When_DuplicateIds()
         {
             var testId = "duplicateId";
-
-            ContentfulRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
-
+            var repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
             await Assert.ThrowsAsync<GetEntitiesException>(() => repository.GetEntityById<TestClass>(testId));
         }
 
@@ -162,11 +137,9 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         public async Task GetEntityById_Should_Throw_GetEntitiesIDException_With_Correct_Exception_Message_When_DuplicateIds()
         {
             var testId = "duplicateId";
-
-            ContentfulRepository repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
-
-            var exceptionMessage = await Assert.ThrowsAsync<GetEntitiesException>(() => repository.GetEntityById<TestClass>(testId));
-            Assert.Equal("Found more than 1 entity with id duplicateId", exceptionMessage.Message);
+            var repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
+            var exception = await Assert.ThrowsAsync<GetEntitiesException>(() => repository.GetEntityById<TestClass>(testId));
+            Assert.Equal("Found more than 1 entity with id duplicateId", exception.Message);
         }
     }
 }
