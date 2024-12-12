@@ -12,6 +12,8 @@ on:
       - "src/**"
       - "tests/**"
       - ".github/workflows/code-pr-check.yml"
+      - ".github/actions/build-dotnet-app/action.yml"
+      - ".github/actions/run-unit-tests/action.yml"
 
 concurrency:
   group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"

@@ -52,6 +52,20 @@ runs:
         config: baseUrl=${{ inputs.url }}
         env: URL=${{ inputs.url }},DSi_Url=${{ inputs.dsi_url }},DSi_Email=${{ inputs.dsi_username }},DSi_Password=${{ inputs.dsi_password }},APP_ENVIRONMENT=${{ inputs.environment }},DSi_NoOrg_Email=${{ inputs.dsi_noorg_username }},DSi_NoOrg_Password=${{ inputs.dsi_noorg_password }}
 
+    - name: Merge test reports
+      shell: bash
+      working-directory: ./tests/Dfe.PlanTech.Web.E2ETests/
+      run: npm run report:merge
+
+    - name: Verify at least one test has run and passed
+      shell: bash
+      run: |
+        TEST_PASSES=$(cat ./tests/Dfe.PlanTech.Web.E2ETests/index.json | jq '.stats.passes')
+        if [ "$TEST_PASSES" -eq "0" ]; then
+          echo "Error: No passing tests have run"
+          exit 1
+        fi
+
     - name: Store screenshots on test failure
       uses: actions/upload-artifact@v4
       if: failure()
