@@ -1,4 +1,4 @@
-@* @using Newtonsoft.Json.Linq
+@using Newtonsoft.Json.Linq
 @{
     bool track = false;
     var ptCookiePreferences = Context.Request.Cookies["user_cookies_preferences"];
@@ -53,4 +53,4 @@
         YesBtn.addEventListener('click', ()=>onAction());
         NoBtn.addEventListener('click', ()=>onAction());
     </script>
-} *@
+}
