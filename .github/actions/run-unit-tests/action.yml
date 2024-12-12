@@ -14,6 +14,43 @@ runs:
       shell: bash
       run: dotnet test ${{ inputs.solution_filename }} --no-restore --verbosity normal --collect:"XPlat Code Coverage" --logger:"trx;LogFileName=test-results.trx" || true
 
+    - name: Debug 1
+      shell: bash
+      if: always()
+      run: |
+        echo "Current shell: $0"
+        bash --version
+
+    - name: Debug 2
+      shell: bash
+      if: always()
+      run: which xpath
+
+    - name: Debug 3
+      shell: bash
+      if: always()
+      run: |
+        find tests -name "*.trx" | while read file; do
+          echo "$file"
+        done
+
+    - name: Debug 4
+      shell: bash
+      if: always()
+      run: |
+        while read file; do
+          echo "$file"
+        done < <(find tests -name "*.trx")
+
+    - name: Debug 5
+      shell: bash
+      if: always()
+      run: |
+        while read file; do
+          count=$(xpath -q -e "//TestRun/ResultSummary/Counters/@total" "$file" 2>/dev/null)
+          echo "$file: $count tests executed"
+        done < <(find tests -name "*.trx")
+
     - name: Verify at least one test has run
       shell: bash
       run: |
