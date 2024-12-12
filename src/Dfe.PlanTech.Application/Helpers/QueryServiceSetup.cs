@@ -1,6 +1,7 @@
 using System.Reflection;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -26,6 +27,7 @@ public static class QueryServiceSetup
         }
 
         services.AddScoped<IGetPageQuery, GetPageQuery>();
+        services.AddScoped<IGetContentSupportPageQuery, GetContentSupportPageQuery>();
 
         return services;
     }
