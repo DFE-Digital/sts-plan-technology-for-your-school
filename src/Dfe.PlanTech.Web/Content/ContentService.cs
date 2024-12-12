@@ -1,5 +1,3 @@
-using System.Xml.Linq;
-using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
 using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
 using Dfe.PlanTech.Domain.Content.Queries;
 

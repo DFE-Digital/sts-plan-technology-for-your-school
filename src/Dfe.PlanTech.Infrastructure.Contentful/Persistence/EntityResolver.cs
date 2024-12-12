@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Contentful.Core.Configuration;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -36,7 +35,7 @@ public class EntityResolver(ILogger<EntityResolver> logger) : IContentTypeResolv
 
         if (Enum.TryParse(typeof(CustomComponentType), contentTypeId, true, out _) ||
             Enum.TryParse(typeof(RichTextNodeType), contentTypeId, true, out _))
-            {
+        {
             return typeof(Target);
         }
 
