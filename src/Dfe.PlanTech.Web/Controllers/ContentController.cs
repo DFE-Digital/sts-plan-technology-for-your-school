@@ -12,7 +12,7 @@ public class ContentController(
     ILogger<ContentController> logger) : Controller
 {
 
-    public const string ControllerName = "Content";    public const string ErrorActionName = "error";
+    public const string ControllerName = "Content"; public const string ErrorActionName = "error";
 
     [HttpGet("{slug}/{page?}")]
     public async Task<IActionResult> Index(string slug, string page = "", [FromQuery] List<string>? tags = null, CancellationToken cancellationToken = default)
