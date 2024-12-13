@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Domain.Content.Queries;
 public interface IGetContentSupportPageQuery
 {
     /// <summary>
-    /// Fetches content suppot page from <see chref="IContentRepository"/> by slug
+    /// Fetches content support page from <see chref="IContentRepository"/> by slug
     /// </summary>
     /// <param name="slug">Slug for the C&S Page</param>
     /// <returns>ContentSupportPage matching slug</returns>
