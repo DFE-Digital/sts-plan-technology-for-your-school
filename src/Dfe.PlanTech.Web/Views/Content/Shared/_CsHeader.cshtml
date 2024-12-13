@@ -1,6 +1,7 @@
+@using Dfe.PlanTech.Application.Constants
 <header role="banner">
     @{
-        var homeSlug = Context.User.Identity?.IsAuthenticated == true ? "/self-assessment" : "/";
+        var homeSlug = Context.User.Identity?.IsAuthenticated == true ? UrlConstants.SelfAssessmentPage : "/";
     }
     <partial name="CookiesBanner/_CookieBanner"/>
     <div class="dfe-header">

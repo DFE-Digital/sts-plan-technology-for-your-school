@@ -1,3 +1,4 @@
+@using Dfe.PlanTech.Application.Constants
 @model Dfe.PlanTech.Web.Models.CheckAnswersViewModel
 
 @section BeforeContent {
@@ -53,7 +54,7 @@
             {
                 <p class="govuk-error-message">
                     <span class="govuk-visually-hidden">Error:</span> @Model.ErrorMessage <a class="govuk-error-message"
-                        href="/self-assessment">return to the self-assessment page</a>
+                        href="@UrlConstants.SelfAssessmentPage">return to the self-assessment page</a>
                 </p>
             }
 
