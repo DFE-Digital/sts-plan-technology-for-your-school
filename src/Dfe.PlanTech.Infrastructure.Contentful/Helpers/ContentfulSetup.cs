@@ -36,20 +36,12 @@ public static class ContentfulSetup
 
         services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
         services.AddTransient<ILogger<Category>, Logger<Category>>();
-        services.AddScoped<IContentfulClient>((services) =>
-        {
-            var options = services.GetRequiredService<ContentfulOptions>();
-            var typedClientFactory = services.GetRequiredService<IHttpClientFactory>();
-            var httpClient = typedClientFactory.CreateClient("contentful");
-
-            return new ContentfulClient(httpClient, options);
-        });
+        services.AddScoped<IContentfulClient, ContentfulClient>();
         services.AddScoped<IContentRepository, ContentfulRepository>();
 
 
         services.SetupRichTextRenderer();
-        services.AddScoped<CustomDelegatingHandlerTokenRefresher>();
-        setupClient(services.AddHttpClient<ContentfulClient>("contentful").AddHttpMessageHandler<CustomDelegatingHandlerTokenRefresher>());
+        setupClient(services.AddHttpClient<ContentfulClient>("contentful"));
 
         return services;
     }
@@ -73,18 +65,4 @@ public static class ContentfulSetup
 
     private static Func<Type, bool> IsContentRenderer(Type contentRendererType)
         => type => type.IsClass && !type.IsAbstract && type.IsSubclassOf(contentRendererType);
-}
-
-public class CustomDelegatingHandlerTokenRefresher : DelegatingHandler
-{
-    public CustomDelegatingHandlerTokenRefresher()
-    {
-    }
-
-    protected override async Task<HttpResponseMessage> SendAsync(
-      HttpRequestMessage request, CancellationToken cancellationToken)
-    {
-        var result = await base.SendAsync(request, cancellationToken);
-        return result;
-    }
 }
