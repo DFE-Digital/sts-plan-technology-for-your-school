@@ -34,14 +34,13 @@ public static class ContentfulSetup
 
         services.AddSingleton(options);
 
-        services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
-        services.AddTransient<ILogger<Category>, Logger<Category>>();
+        services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();        
         services.AddScoped<IContentfulClient, ContentfulClient>();
         services.AddScoped<IContentRepository, ContentfulRepository>();
 
 
         services.SetupRichTextRenderer();
-        setupClient(services.AddHttpClient<ContentfulClient>("contentful"));
+        setupClient(services.AddHttpClient<ContentfulClient>());
 
         return services;
     }

@@ -261,13 +261,9 @@ public static class ProgramExtensions
             .Configure<SupportedAssetTypes>(app.Configuration.GetSection("cs:supportedAssetTypes"))
             .AddSingleton(sp => sp.GetRequiredService<IOptions<SupportedAssetTypes>>().Value);
 
-
-        app.Services.AddKeyedTransient<ICacheService<List<CsPage>>, CsPagesCacheService>(
-            ContentAndSupportServiceKey);
-        app.Services.AddKeyedTransient<IModelMapper, ModelMapper>(ContentAndSupportServiceKey);
-        app.Services
-            .AddKeyedTransient<IContentService, ContentService>(ContentAndSupportServiceKey);
-        app.Services.AddKeyedTransient<ILayoutService, LayoutService>(ContentAndSupportServiceKey);
+        app.Services.AddTransient<IModelMapper, ModelMapper>();
+        app.Services.AddTransient<IContentService, ContentService>();
+        app.Services.AddTransient<ILayoutService, LayoutService>();
 
         app.Services.Configure<CookiePolicyOptions>(options =>
         {

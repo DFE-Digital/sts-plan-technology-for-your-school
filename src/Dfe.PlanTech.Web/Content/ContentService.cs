@@ -8,9 +8,6 @@ public class ContentService : IContentService // This indicates that ContentServ
     private readonly IModelMapper _modelMapper;
 
     public ContentService(
-        [FromKeyedServices(ProgramExtensions.ContentAndSupportServiceKey)]
-        ICacheService<List<CsPage>> cache,
-        [FromKeyedServices(ProgramExtensions.ContentAndSupportServiceKey)]
         IModelMapper modelMapper,
         IGetContentSupportPageQuery getContentSupportPageQuery)
     {

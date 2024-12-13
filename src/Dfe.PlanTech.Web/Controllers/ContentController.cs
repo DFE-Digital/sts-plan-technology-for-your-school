@@ -7,14 +7,12 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("[controller]")]
 [AllowAnonymous]
 public class ContentController(
-    [FromKeyedServices(ProgramExtensions.ContentAndSupportServiceKey)]
     IContentService contentService,
-    [FromKeyedServices(ProgramExtensions.ContentAndSupportServiceKey)]
     ILayoutService layoutService,
-    ILogger<ContentController> logger)
-    : Controller
+    ILogger<ContentController> logger) : Controller
 {
-    public const string ErrorActionName = "error";
+
+    public const string ControllerName = "Content";    public const string ErrorActionName = "error";
 
     [HttpGet("{slug}/{page?}")]
     public async Task<IActionResult> Index(string slug, string page = "", [FromQuery] List<string>? tags = null, CancellationToken cancellationToken = default)

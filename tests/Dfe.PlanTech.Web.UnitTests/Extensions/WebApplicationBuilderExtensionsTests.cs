@@ -17,7 +17,6 @@ public class WebApplicationBuilderExtensionsTests
         var types = new[]
         {
             typeof(IContentService),
-            typeof(ICacheService<List<CsPage>>),
             typeof(IModelMapper),
             typeof(ILayoutService)
         };

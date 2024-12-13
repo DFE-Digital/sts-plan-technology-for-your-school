@@ -10,18 +10,16 @@ namespace Dfe.PlanTech.Web.UnitTests.Content
 {
     public class ContentServiceTests
     {
-        private readonly Mock<ICacheService<List<CsPage>>> _cacheMock;
         private readonly Mock<IModelMapper> _mapperMock;
         private readonly Mock<IGetContentSupportPageQuery> _getContentSupportPageQueryMock;
 
         public ContentServiceTests()
         {
-            _cacheMock = new Mock<ICacheService<List<CsPage>>>();
             _mapperMock = new Mock<IModelMapper>();
             _getContentSupportPageQueryMock = new Mock<IGetContentSupportPageQuery>();
         }
 
-        private ContentService GetService() => new(_cacheMock.Object, _mapperMock.Object, _getContentSupportPageQueryMock.Object);
+        private ContentService GetService() => new(_mapperMock.Object, _getContentSupportPageQueryMock.Object);
 
         [Fact]
         public async Task GetContent_Calls_Query_Once()
