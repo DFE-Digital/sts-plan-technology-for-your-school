@@ -76,6 +76,10 @@ describe("Check answers page", () => {
       });
   });
 
+  it("Should have a print button", () => {
+      cy.get("#print-page-button").should("exist");
+  });
+
   it("passes accessibility tests", () => {
     cy.runAxe();
   });
