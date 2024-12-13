@@ -1,14 +1,12 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Xunit;
 using NSubstitute.ExceptionExtensions;
-using Dfe.PlanTech.Domain.Persistence.Interfaces;
-using Dfe.PlanTech.Application.Exceptions;
 
 namespace Dfe.PlanTech.Application.UnitTests.Content.Queries;
 
@@ -18,7 +16,7 @@ public class GetContentSupportPageQueryTests
     private readonly ICmsCache _cache = Substitute.For<ICmsCache>();
     private readonly ILogger<GetContentSupportPageQuery> _logger = Substitute.For<ILogger<GetContentSupportPageQuery>>();
 
-	private readonly string _testSlug = "test-slug";
+    private readonly string _testSlug = "test-slug";
 
     private readonly ContentSupportPage _contentSupportPage = new ContentSupportPage
     {
@@ -63,7 +61,7 @@ public class GetContentSupportPageQueryTests
         Assert.Null(result);
     }
 
-	[Fact]
+    [Fact]
     public async Task Content_Support_Page_Not_Found_Exception_Is_Thrown_When_There_Is_An_Issue_Retrieving_Data()
     {
         _contentRepository.GetEntities<ContentSupportPage>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>())
