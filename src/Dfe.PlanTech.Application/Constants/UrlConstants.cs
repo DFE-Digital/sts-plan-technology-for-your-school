@@ -3,7 +3,7 @@ namespace Dfe.PlanTech.Application.Constants;
 public static class UrlConstants
 {
     public const string SelfAssessmentPage = "/self-assessment";
-    
+
     public const string ServerError = "/server-error";
 
     public const string Error = "/error";
