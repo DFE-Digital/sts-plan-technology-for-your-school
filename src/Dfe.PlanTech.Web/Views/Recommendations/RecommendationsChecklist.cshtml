@@ -21,17 +21,10 @@
             await Html.RenderPartialAsync("BackButton", Model);
         }
     </div>
-    <div class="noprint govuk-!-margin-bottom-6 govuk-!-margin-top-4 js-only">
-        <button class="govuk-link print-button govuk-!-font-size-16" id="recommendations-print-page">Print this page</button>
+    <div class="govuk-!-margin-bottom-6 govuk-!-margin-top-4">
+        @{
+            await Html.RenderPartialAsync("PrintButton", Model);
+        }
     </div>
     <partial name="RecommendationPrintContent" model="@Model.AllContent"/>
 </div>
-
-
-<script defer nonce="@Context.Items["nonce"]">
-    document.getElementById("recommendations-print-page").addEventListener("click", printPage);
-
-    function printPage() {
-        window.print();
-    }
-</script>
