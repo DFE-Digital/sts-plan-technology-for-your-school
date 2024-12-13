@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Http;
@@ -31,7 +32,7 @@ public class RobotsTxtMiddlewareTests
         var config = new RobotsConfiguration()
         {
             UserAgent = "example-user-agent",
-            DisallowedPaths = ["/", "2313", "/self-assessment"],
+            DisallowedPaths = ["/", "2313", UrlConstants.SelfAssessmentPage],
         };
 
         _options.Value.Returns(config);
