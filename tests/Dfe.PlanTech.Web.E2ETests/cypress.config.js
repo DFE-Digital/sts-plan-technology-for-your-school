@@ -20,6 +20,7 @@ module.exports = defineConfig({
     requestTimeout: 7000,
     responseTimeout: 38000,
     e2e: {
+        baseUrl: "https://localhost:8080",
         specPattern: [
             /**
              * For some reason the dynamic page validator would hang when trying to create a session.
