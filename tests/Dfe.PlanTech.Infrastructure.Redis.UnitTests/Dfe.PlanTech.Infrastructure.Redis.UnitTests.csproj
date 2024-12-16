@@ -27,8 +27,10 @@
     <Using Include="Xunit" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Dfe.PlanTech.Infrastructure.Redis\Dfe.PlanTech.Infrastructure.Redis.csproj" />
-    <ProjectReference Include="..\Dfe.PlanTech.UnitTests.Shared\Dfe.PlanTech.UnitTests.Shared.csproj" />
+    <ProjectReference
+      Include="..\..\src\Dfe.PlanTech.Infrastructure.Redis\Dfe.PlanTech.Infrastructure.Redis.csproj" />
+    <ProjectReference
+      Include="..\Dfe.PlanTech.UnitTests.Shared\Dfe.PlanTech.UnitTests.Shared.csproj" />
   </ItemGroup>
 
 </Project>

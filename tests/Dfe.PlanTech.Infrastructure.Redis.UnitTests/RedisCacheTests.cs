@@ -1,6 +1,4 @@
 using System.Text.Json;
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -8,113 +6,30 @@ using StackExchange.Redis;
 
 namespace Dfe.PlanTech.Infrastructure.Redis.UnitTests;
 
-public class RedisCacheTests
+public class RedisCacheTests : RedisCacheTestsBase
 {
     private readonly ILogger<RedisCache> _logger = Substitute.For<ILogger<RedisCache>>();
     private readonly IRedisConnectionManager _connectionManager = Substitute.For<IRedisConnectionManager>();
-    private readonly IDatabase _database = Substitute.For<IDatabase>();
+    private readonly IRedisDependencyManager _dependencyManager = Substitute.For<IRedisDependencyManager>();
     private readonly RedisCache _cache;
-    private const string key = "testKey";
-    private const string value = """{"this":"is json"}""";
-    private string appendedString = "";
 
-    private readonly Answer _firstAnswer;
-    private readonly Answer _secondAnswer;
-    private readonly Question _question;
-
-    private readonly List<string> _setMembers = ["one", "two", "hat"];
     public RedisCacheTests()
     {
         _cache = new RedisCache(
             connectionManager: _connectionManager,
-            logger: _logger
+            logger: _logger,
+            dependencyManager: _dependencyManager,
+            backgroundTaskQueue: BackgroundTaskQueue
         );
 
-        _connectionManager.GetDatabaseAsync(Arg.Any<int>()).Returns(_database);
-
-        _database.StringGetAsync(Arg.Any<RedisKey>(), Arg.Any<CommandFlags>()).Returns((callinfo) =>
-        {
-            var keyArg = callinfo.ArgAt<RedisKey>(0);
-
-            if (keyArg == key)
-            {
-                var redisValue = new RedisValue(value);
-
-                return Task.FromResult(redisValue);
-            }
-
-            return Task.FromResult(new RedisValue());
-        });
-
-        _database.StringSetAsync(Arg.Any<RedisKey>(), Arg.Any<RedisValue>(), Arg.Any<TimeSpan>(), Arg.Any<bool>(), Arg.Any<When>(), Arg.Any<CommandFlags>()).Returns((callinfo) =>
-        {
-            var valueArg = callinfo.ArgAt<RedisValue>(0);
-
-            return Task.FromResult(true);
-        });
-
-        _database.KeyDeleteAsync(Arg.Any<RedisKey>(), Arg.Any<CommandFlags>()).Returns(true);
-
-        _database.StringAppendAsync(Arg.Any<RedisKey>(), Arg.Any<RedisValue>(), Arg.Any<CommandFlags>())
-                    .Returns((callinfo) =>
-                    {
-                        var keyArg = callinfo.ArgAt<RedisKey>(0);
-
-                        if (keyArg != key)
-                        {
-                            return -1;
-                        }
-
-                        var valueArg = callinfo.ArgAt<RedisValue>(1);
-
-                        appendedString = $"{value}{valueArg}";
-
-                        return appendedString.Length;
-                    });
-
-        _database.SetMembersAsync(key, Arg.Any<CommandFlags>()).Returns(_setMembers.Select(member => new RedisValue(member)).ToArray());
-        _database.SetAddAsync(key, Arg.Any<RedisValue>(), Arg.Any<CommandFlags>()).Returns((callinfo) =>
-        {
-            var valueArg = callinfo.ArgAt<RedisValue>(1);
-
-            _setMembers.Add(valueArg!);
-
-            return true;
-        });
-
-        _database.SetRemoveAsync(key, Arg.Any<RedisValue>(), Arg.Any<CommandFlags>()).Returns((callinfo) =>
-        {
-            var valueArg = callinfo.ArgAt<RedisValue>(1);
-
-            return _setMembers.Remove(valueArg!);
-        });
-
-        _firstAnswer = new Answer()
-        {
-            Sys = new SystemDetails { Id = "answer-one-id" },
-            Maturity = "high",
-            Text = "answer-one-text",
-        };
-        _secondAnswer = new Answer()
-        {
-            Sys = new SystemDetails { Id = "answer-two-id" },
-            Maturity = "medium",
-            Text = "answer-two-text",
-        };
-        _question = new Question
-        {
-            Sys = new SystemDetails { Id = "question-one-id" },
-            Slug = "question-one-slug",
-            Text = "question-one-text",
-            Answers = [_firstAnswer, _secondAnswer]
-        };
+        _connectionManager.GetDatabaseAsync(Arg.Any<int>()).Returns(Database);
     }
 
     [Fact]
     public async Task GetOrCreateAsync_Succeeds_WithExistingKey()
     {
-        var result = await _cache.GetOrCreateAsync<dynamic>(key, () => throw new Exception("This should not be called"));
-        Assert.Equal(value, result);
+        var result = await _cache.GetOrCreateAsync<dynamic>(Key, () => throw new Exception("This should not be called"));
+        Assert.Equal(Value, result);
     }
 
     [Fact]
@@ -162,26 +77,26 @@ public class RedisCacheTests
         var serialised = JsonSerialiser.Deserialise<JsonElement>(otherValue);
         Task<JsonElement> action() => Task.FromResult(serialised);
 
-        _database.StringGetAsync(Arg.Any<RedisKey>(), Arg.Any<CommandFlags>()).ThrowsAsync((callinfo) =>
+        Database.StringGetAsync(Arg.Any<RedisKey>(), Arg.Any<CommandFlags>()).ThrowsAsync((callinfo) =>
                 {
                     throw new Exception("Error");
                 });
 
-        var result = await _cache.GetOrCreateAsync(key, action);
+        var result = await _cache.GetOrCreateAsync(Key, action);
         Assert.Equal(serialised, result);
     }
 
     [Fact]
     public async Task SetAsync_Succeeds()
     {
-        var result = await _cache.SetAsync(key, value);
-        Assert.Equal(key, result);
+        var result = await _cache.SetAsync(Key, Value);
+        Assert.Equal(Key, result);
     }
 
     [Fact]
     public async Task RemoveAsync_Succeeds()
     {
-        var result = await _cache.RemoveAsync(key);
+        var result = await _cache.RemoveAsync(Key);
         Assert.True(result);
     }
 
@@ -190,7 +105,7 @@ public class RedisCacheTests
     {
         await _cache.RemoveAsync("one", "two", "three");
         Assert.True(true);
-        await _database.ReceivedWithAnyArgs(3).KeyDeleteAsync(Arg.Any<RedisKey>());
+        await Database.ReceivedWithAnyArgs(3).KeyDeleteAsync(Arg.Any<RedisKey>());
     }
 
     [Fact]
@@ -198,24 +113,24 @@ public class RedisCacheTests
     {
         await _cache.RemoveAsync(1, "one", "two", "three");
         Assert.True(true);
-        await _database.ReceivedWithAnyArgs(3).KeyDeleteAsync(Arg.Any<RedisKey>());
+        await Database.ReceivedWithAnyArgs(3).KeyDeleteAsync(Arg.Any<RedisKey>());
     }
 
     [Fact]
     public async Task AppendAsync_Succeeds()
     {
         var item = "new text here";
-        await _cache.AppendAsync(key, item);
-        Assert.Equal(appendedString, $"{value}{item}");
+        await _cache.AppendAsync(Key, item);
+        Assert.Equal(appendedString, $"{Value}{item}");
     }
 
     [Fact]
     public async Task GetAsync_Succeeds_WithExistingKey()
     {
-        var result = await _cache.GetAsync<JsonElement>(key);
+        var result = await _cache.GetAsync<JsonElement>(Key);
 
         var serialised = result.Serialise();
-        Assert.Equal(value, serialised);
+        Assert.Equal(Value, serialised);
     }
 
     [Theory]
@@ -235,56 +150,48 @@ public class RedisCacheTests
     [Fact]
     public async Task GetSetMembersAsync_Succeeds()
     {
-        var result = await _cache.GetSetMembersAsync(key);
-        Assert.Equal(_setMembers, result);
+        var result = await _cache.GetSetMembersAsync(Key);
+        Assert.Equal(SetMembers, result);
     }
 
     [Fact]
     public async Task SetRemoveAsync_Succeeds()
     {
-        var item = _setMembers[0];
-        await _cache.SetRemoveAsync(key, item);
-        Assert.DoesNotContain(item, _setMembers);
+        var item = SetMembers[0];
+        await _cache.SetRemoveAsync(Key, item);
+        Assert.DoesNotContain(item, SetMembers);
     }
 
     [Fact]
     public async Task SetAddAsync_Succeeds()
     {
         var newItem = "newest item";
-        await _cache.SetAddAsync(key, newItem);
-        Assert.Contains(newItem, _setMembers);
+        await _cache.SetAddAsync(Key, newItem);
+        Assert.Contains(newItem, SetMembers);
     }
 
     [Fact]
     public async Task SetRemoveItemsAsync_Succeeds()
     {
         string[] items = ["one", "two", "three"];
-        await _cache.SetRemoveItemsAsync(key, items);
-        await _database.Received(1).SetRemoveAsync(key, Arg.Is<RedisValue[]>((value) => value.Length == items.Length && items.All(item => value.Any(redisValue => redisValue == item))));
-    }
-
-    [Fact]
-    public async Task RegisterDependencyAsync_StoresAllContentIds()
-    {
-        var batch = Substitute.For<IBatch>();
-        _database.CreateBatch().Returns(batch);
-        await _cache.RegisterDependenciesAsync(_database, key, _question);
-        await batch.Received(1).SetAddAsync(_cache.GetDependencyKey(_question.Sys.Id), key);
-        await batch.Received(1).SetAddAsync(_cache.GetDependencyKey(_firstAnswer.Sys.Id), key);
-        await batch.Received(1).SetAddAsync(_cache.GetDependencyKey(_secondAnswer.Sys.Id), key);
+        await _cache.SetRemoveItemsAsync(Key, items);
+        await Database.Received(1).SetRemoveAsync(Key, Arg.Is<RedisValue[]>((value) => value.Length == items.Length && items.All(item => value.Any(redisValue => redisValue == item))));
     }
 
     [Fact]
     public async Task InvalidateCacheAsync_RemovesAllDependencies()
     {
-        var firstAnswerKey = _cache.GetDependencyKey(_firstAnswer.Sys.Id);
+        var firstAnswerKey = _dependencyManager.GetDependencyKey(RedisCacheTestHelpers.FirstAnswer.Sys.Id);
         var keys = new List<string> { "one", "two", "three" };
         var dependencies = keys.Select(dep => new RedisValue(dep)).ToArray();
 
-        _database.SetMembersAsync(firstAnswerKey, Arg.Any<CommandFlags>()).Returns(dependencies);
-        await _cache.InvalidateCacheAsync(_firstAnswer.Sys.Id);
+        Database.SetMembersAsync(firstAnswerKey, Arg.Any<CommandFlags>()).Returns(dependencies);
+        await _cache.InvalidateCacheAsync(RedisCacheTestHelpers.FirstAnswer.Sys.Id);
 
-        await _database.Received(1).SetRemoveAsync(
+        Assert.NotNull(QueuedFunc);
+
+        await QueuedFunc(default);
+        await Database.Received(1).SetRemoveAsync(
             firstAnswerKey,
             Arg.Is<RedisValue[]>(arg => dependencies.All(dep => arg.Contains(dep))),
             Arg.Any<CommandFlags>());

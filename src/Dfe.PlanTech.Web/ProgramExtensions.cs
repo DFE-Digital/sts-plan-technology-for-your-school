@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Application.Background;
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Content.Queries;
@@ -12,6 +13,7 @@ using Dfe.PlanTech.Application.Submissions.Queries;
 using Dfe.PlanTech.Application.Users.Commands;
 using Dfe.PlanTech.Application.Users.Helper;
 using Dfe.PlanTech.Application.Users.Queries;
+using Dfe.PlanTech.Domain.Background;
 using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Interfaces;
@@ -29,6 +31,7 @@ using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.Redis;
 using Dfe.PlanTech.Web.Authorisation;
+using Dfe.PlanTech.Web.Background;
 using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Content;
 using Dfe.PlanTech.Web.Helpers;
@@ -279,6 +282,13 @@ public static class ProgramExtensions
         services.AddSingleton<ICmsCache, RedisCache>();
         services.AddSingleton<IRedisConnectionManager, RedisConnectionManager>();
         services.AddSingleton<IDistributedLockProvider, RedisLockProvider>();
+
+        services.AddSingleton<IRedisDependencyManager, RedisDependencyManager>();
+
+        services.AddOptions<BackgroundTaskQueueOptions>()
+                .Configure<IConfiguration>((settings, configuration) => configuration.GetSection("BackgroundTaskQueue").Bind(settings));
+        services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
+        services.AddHostedService<BackgroundTaskHostedService>();
 
         return services;
     }
