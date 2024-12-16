@@ -10,7 +10,7 @@ describe("Recommendation Checklist Page", () => {
     cy.loginWithEnv(url);
     cy.navigateToRecommendationPage();
     cy.get("a.govuk-link")
-        .contains("View a printable version of your school's recommendations")
+        .contains("View and print all recommendations")
         .then(($a) => {
           $a.attr('target', '_self')
         })

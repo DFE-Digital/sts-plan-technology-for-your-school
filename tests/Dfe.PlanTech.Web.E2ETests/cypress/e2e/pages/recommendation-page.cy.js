@@ -39,7 +39,7 @@ describe("Recommendation Page", () => {
 
   it("Should have a link to print open the page in printout format", () => {
       cy.get("a.govuk-link")
-          .contains("View a printable version of your school's recommendations")
+          .contains("View aand print all recommendations")
   })
 
   //Links
