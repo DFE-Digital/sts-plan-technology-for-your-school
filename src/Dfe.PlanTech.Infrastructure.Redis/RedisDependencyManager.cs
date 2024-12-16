@@ -25,7 +25,7 @@ public class RedisDependencyManager(IBackgroundTaskQueue backgroundTaskQueue) : 
     private async Task GetAndSetDependencies<T>(IDatabase database, string key, T value)
     {
         var batch = database.CreateBatch();
-        var tasks = GetDependencies(value).Select(dependency => batch.SetAddAsync(GetDependencyKey(dependency), key)).ToArray();
+        var tasks = GetDependencies(value).Select(dependency => batch.SetAddAsync(GetDependencyKey(dependency), key, CommandFlags.FireAndForget)).ToArray();
         batch.Execute();
         await Task.WhenAll(tasks);
     }
