@@ -16,20 +16,17 @@ public class GetNavigationQuery : ContentRetriever, IGetNavigationQuery
     public const string ExceptionMessageContentful = "Error getting navigation links from Contentful";
 
     private readonly ILogger<GetNavigationQuery> _logger;
-    private readonly ICmsCache _cache;
 
-    public GetNavigationQuery(ILogger<GetNavigationQuery> logger, IContentRepository repository, ICmsCache cache) : base(repository)
+    public GetNavigationQuery(ILogger<GetNavigationQuery> logger, IContentRepository repository) : base(repository)
     {
         _logger = logger;
-        _cache = cache;
     }
 
     public async Task<IEnumerable<INavigationLink>> GetNavigationLinks(CancellationToken cancellationToken = default)
     {
         try
         {
-            var navigationLinks = await _cache.GetOrCreateAsync("NavigationLinks", () => repository.GetEntities<NavigationLink>(cancellationToken)) ?? [];
-            return navigationLinks;
+            return await repository.GetEntities<NavigationLink>(cancellationToken);
         }
         catch (Exception ex)
         {
@@ -42,7 +39,7 @@ public class GetNavigationQuery : ContentRetriever, IGetNavigationQuery
     {
         try
         {
-            return await _cache.GetOrCreateAsync($"NavigationLink:{contentId}", () => repository.GetEntityById<NavigationLink?>(contentId, cancellationToken: cancellationToken));
+            return await repository.GetEntityById<NavigationLink?>(contentId, cancellationToken: cancellationToken);
         }
         catch (Exception ex)
         {

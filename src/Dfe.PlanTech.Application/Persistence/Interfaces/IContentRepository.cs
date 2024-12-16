@@ -18,16 +18,6 @@ public interface IContentRepository
     Task<TEntity?> GetEntityById<TEntity>(string id, int include = 2, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Get all entities of the specified type.
-    /// </summary>
-    /// <param name="entityTypeId"></param>
-    /// <param name="queries">Additional filtere</param>
-    /// <param name="cancellationToken"></param>
-    /// <typeparam name="TEntity"></typeparam>
-    /// <returns></returns>
-    Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IGetEntitiesOptions? options, CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// Get all entities of the specified type, using the name of the generic parameter's type as the entity type id (to lower case).
     /// E.g. if the TEntity is a class called "Category", then it uses "category"
     /// </summary>

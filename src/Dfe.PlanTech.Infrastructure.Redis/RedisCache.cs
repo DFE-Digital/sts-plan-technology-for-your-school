@@ -1,6 +1,8 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Background;
 using Dfe.PlanTech.Domain.Caching.Models;
+using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Retry;
@@ -56,7 +58,19 @@ public class RedisCache : ICmsCache
                 return await action();
             }
 
-            return await CreateAndCacheItemAsync(db, key, action, expiry, onCacheItemCreation);
+            var result = await CreateAndCacheItemAsync(db, key, action, expiry, onCacheItemCreation);
+
+            if (result is IEnumerable<ContentComponent> components)
+            {
+                foreach (var component in components)
+                {
+                    var dependencyKey = _dependencyManager.GetDependencyKey(component.Sys.Id);
+                    _logger.LogTrace("Setting {Key} as a dependency of {DependencyKey}", key, dependencyKey);
+                    await SetAddAsync(dependencyKey, key);
+                }
+            }
+
+            return result;
         }
         catch (RedisConnectionException redisException)
         {
@@ -253,16 +267,18 @@ public class RedisCache : ICmsCache
     }
 
     /// <inheritdoc/>
-    public Task InvalidateCacheAsync(string contentComponentId)
+    public Task InvalidateCacheAsync(string contentComponentId, string contentType)
     => _backgroundTaskService.QueueBackgroundWorkItemAsync(async (cancellationToken) =>
         {
             var key = _dependencyManager.GetDependencyKey(contentComponentId);
-            var dependencies = await GetSetMembersAsync(key);
+            var dependencies = (await GetSetMembersAsync(key)).ToList();
             foreach (var item in dependencies)
             {
                 await RemoveAsync(item);
             }
-
             await SetRemoveItemsAsync(key, dependencies);
+
+            // Invalidate collection of the content type if there is one
+            await RemoveAsync($"{contentType}s");
         });
 }

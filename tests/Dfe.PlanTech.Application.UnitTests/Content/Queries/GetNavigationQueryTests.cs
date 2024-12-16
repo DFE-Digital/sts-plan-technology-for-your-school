@@ -11,7 +11,6 @@ namespace Dfe.PlanTech.Application.UnitTests.Content.Queries;
 public class GetNavigationQueryTests
 {
     private readonly IContentRepository _contentRepository = Substitute.For<IContentRepository>();
-    private readonly ICmsCache _cache = Substitute.For<ICmsCache>();
 
     private readonly NavigationLink _contentfulLink = new NavigationLink
     {
@@ -20,28 +19,11 @@ public class GetNavigationQueryTests
     };
 
     private readonly IList<NavigationLink> _contentfulLinks;
-
     private readonly ILogger<GetNavigationQuery> _logger = Substitute.For<ILogger<GetNavigationQuery>>();
 
     public GetNavigationQueryTests()
     {
         _contentfulLinks = new List<NavigationLink> { _contentfulLink };
-
-        _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<IEnumerable<NavigationLink>?>>>())
-            .Returns(callInfo =>
-            {
-                var func = callInfo.ArgAt<Func<Task<IEnumerable<NavigationLink>?>>>(1);
-                return func();
-            });
-
-        _cache.GetOrCreateAsync<NavigationLink?>(
-            Arg.Any<string>(),
-            Arg.Any<Func<Task<NavigationLink?>>>())
-            .Returns(callInfo =>
-            {
-                var func = callInfo.ArgAt<Func<Task<NavigationLink?>>>(1);
-                return func();
-            });
     }
 
     [Fact]
@@ -49,7 +31,7 @@ public class GetNavigationQueryTests
     {
         _contentRepository.GetEntities<NavigationLink>(CancellationToken.None).Returns(_contentfulLinks);
 
-        GetNavigationQuery navQuery = new(_logger, _contentRepository, _cache);
+        GetNavigationQuery navQuery = new(_logger, _contentRepository);
 
         var result = await navQuery.GetNavigationLinks();
 
@@ -61,7 +43,7 @@ public class GetNavigationQueryTests
     {
         _contentRepository.GetEntities<NavigationLink>(CancellationToken.None).Throws(_ => new Exception("Contentful error"));
 
-        GetNavigationQuery navQuery = new(_logger, _contentRepository, _cache);
+        GetNavigationQuery navQuery = new(_logger, _contentRepository);
 
         var result = await navQuery.GetNavigationLinks();
 
@@ -75,7 +57,7 @@ public class GetNavigationQueryTests
     public async Task Should_Retrieve_Nav_Link_By_Id_When_Exists()
     {
         _contentRepository.GetEntityById<NavigationLink>(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(_contentfulLink);
-        var navQuery = new GetNavigationQuery(_logger, _contentRepository, _cache);
+        var navQuery = new GetNavigationQuery(_logger, _contentRepository);
         var result = await navQuery.GetLinkById("contentId");
 
         Assert.NotNull(result);
@@ -88,7 +70,7 @@ public class GetNavigationQueryTests
     {
         _contentRepository.GetEntityById<NavigationLink?>(Arg.Any<string>(), Arg.Any<int>(), cancellationToken: CancellationToken.None).Returns((NavigationLink?)null);
 
-        var navQuery = new GetNavigationQuery(_logger, _contentRepository, _cache);
+        var navQuery = new GetNavigationQuery(_logger, _contentRepository);
 
         var result = await navQuery.GetLinkById("NonExistentId");
 
