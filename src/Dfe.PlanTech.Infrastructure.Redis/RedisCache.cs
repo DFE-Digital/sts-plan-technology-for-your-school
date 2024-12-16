@@ -14,6 +14,7 @@ namespace Dfe.PlanTech.Infrastructure.Redis;
 /// </summary>
 public class RedisCache : ICmsCache
 {
+    private const string EmptyCollectionDependencyKey = "Missing";
     private readonly IRedisConnectionManager _connectionManager;
     private readonly AsyncRetryPolicy _retryPolicyAsync;
     private readonly ILogger<RedisCache> _logger;
@@ -61,14 +62,20 @@ public class RedisCache : ICmsCache
 
             if (result is IEnumerable<ContentComponent> components)
             {
-                foreach (var component in components)
+                var componentList = components.ToList();
+                if (componentList.Count > 0)
                 {
-                    var dependencyKey = _dependencyManager.GetDependencyKey(component.Sys.Id);
-                    _logger.LogTrace("Setting {Key} as a dependency of {DependencyKey}", key, dependencyKey);
-                    await SetAddAsync(dependencyKey, key);
+                    foreach (var component in componentList)
+                    {
+                        var dependencyKey = _dependencyManager.GetDependencyKey(component.Sys.Id);
+                        _logger.LogTrace("Setting {Key} as a dependency of {DependencyKey}", key, dependencyKey);
+                        await SetAddAsync(dependencyKey, key);
+                    }
+                    return result;
                 }
             }
-
+            _logger.LogTrace("Cache item with key: {Key} is empty", key);
+            await SetAddAsync(EmptyCollectionDependencyKey, key);
             return result;
         }
         catch (RedisConnectionException redisException)
@@ -270,14 +277,22 @@ public class RedisCache : ICmsCache
     => _backgroundTaskService.QueueBackgroundWorkItemAsync(async (cancellationToken) =>
         {
             var key = _dependencyManager.GetDependencyKey(contentComponentId);
-            var dependencies = (await GetSetMembersAsync(key)).ToList();
-            foreach (var item in dependencies)
-            {
-                await RemoveAsync(item);
-            }
-            await SetRemoveItemsAsync(key, dependencies);
+            await RemoveDependenciesAsync(key);
+
+            // Invalidate all empty collections
+            await RemoveDependenciesAsync(EmptyCollectionDependencyKey);
 
             // Invalidate collection of the content type if there is one
             await RemoveAsync($"{contentType}s");
         });
+
+    private async Task RemoveDependenciesAsync(string dependencyKey)
+    {
+        var dependencies = (await GetSetMembersAsync(dependencyKey)).ToList();
+        foreach (var item in dependencies)
+        {
+            await RemoveAsync(item);
+        }
+        await SetRemoveItemsAsync(dependencyKey, dependencies);
+    }
 }
