@@ -23,6 +23,11 @@ public class RedisCacheTests : RedisCacheTestsBase
         );
 
         _connectionManager.GetDatabaseAsync(Arg.Any<int>()).Returns(Database);
+        _dependencyManager.GetDependencyKey(Arg.Any<string>()).Returns(callinfo =>
+        {
+            var arg = callinfo.ArgAt<string>(0);
+            return $"Dependency:{arg}";
+        });
     }
 
     [Fact]
