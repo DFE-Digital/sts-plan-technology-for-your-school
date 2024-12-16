@@ -1,7 +1,6 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Background;
 using Dfe.PlanTech.Domain.Caching.Models;
-using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Retry;
