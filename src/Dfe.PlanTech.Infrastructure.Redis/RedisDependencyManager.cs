@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Domain.Background;
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Content.Models;
 using StackExchange.Redis;
 
 namespace Dfe.PlanTech.Infrastructure.Redis;
@@ -8,6 +9,8 @@ namespace Dfe.PlanTech.Infrastructure.Redis;
 /// <param name="backgroundTaskQueue">To add dependency set operations to a queue for background processing</param>
 public class RedisDependencyManager(IBackgroundTaskQueue backgroundTaskQueue) : IRedisDependencyManager
 {
+    public string EmptyCollectionDependencyKey => "Missing";
+
     /// <inheritdoc cref="IRedisDependencyManager"/>
     public Task RegisterDependenciesAsync<T>(IDatabase database, string key, T value, CancellationToken cancellationToken = default)
     => backgroundTaskQueue.QueueBackgroundWorkItemAsync((cancellationToken) => GetAndSetDependencies(database, key, value));
@@ -26,6 +29,23 @@ public class RedisDependencyManager(IBackgroundTaskQueue backgroundTaskQueue) : 
     {
         var batch = database.CreateBatch();
         var tasks = GetDependencies(value).Select(dependency => batch.SetAddAsync(GetDependencyKey(dependency), key, CommandFlags.FireAndForget)).ToArray();
+
+        if (value is IEnumerable<ContentComponent> components)
+        {
+            var componentList = components.ToList();
+            if (componentList.Count > 0)
+            {
+                foreach (var component in componentList)
+                {
+                    var dependencyKey = GetDependencyKey(component.Sys.Id);
+                    await batch.SetAddAsync(dependencyKey, key);
+                }
+            }
+            else
+            {
+                await batch.SetAddAsync(EmptyCollectionDependencyKey, key);
+            }
+        }
         batch.Execute();
         await Task.WhenAll(tasks);
     }

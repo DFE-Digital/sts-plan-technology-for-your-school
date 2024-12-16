@@ -8,6 +8,11 @@ namespace Dfe.PlanTech.Infrastructure.Redis;
 public interface IRedisDependencyManager
 {
     /// <summary>
+    /// Key to use for dependencies of a content fetch that returns nothing
+    /// </summary>
+    string EmptyCollectionDependencyKey { get; }
+
+    /// <summary>
     /// Find and set dependencies for a given <see cref="IContentComponent"/>
     /// </summary>
     /// <typeparam name="T">Type of the value to register as a dependency.</typeparam>
