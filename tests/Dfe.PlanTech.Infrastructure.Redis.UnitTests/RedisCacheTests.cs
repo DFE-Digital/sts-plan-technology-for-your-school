@@ -186,7 +186,7 @@ public class RedisCacheTests : RedisCacheTestsBase
         var dependencies = keys.Select(dep => new RedisValue(dep)).ToArray();
 
         Database.SetMembersAsync(firstAnswerKey, Arg.Any<CommandFlags>()).Returns(dependencies);
-        await _cache.InvalidateCacheAsync(RedisCacheTestHelpers.FirstAnswer.Sys.Id, "Answer");
+        await _cache.InvalidateCacheAsync(RedisCacheTestHelpers.FirstAnswer.Sys.Id, "answer");
 
         Assert.NotNull(QueuedFunc);
 
