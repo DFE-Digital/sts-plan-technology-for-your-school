@@ -38,7 +38,7 @@ describe("Recommendation Checklist Page", () => {
   });
 
   it("Should have a print button", () => {
-      cy.get("#recommendations-print-page").should("exist");
+      cy.get("#print-page-button").should("exist");
   });
 
   it("Should Have Back Button", () => {

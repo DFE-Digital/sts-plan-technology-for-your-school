@@ -1,11 +1,11 @@
 ﻿using Dfe.PlanTech.Application.Constants;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Types;
 using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Content;
-using Dfe.PlanTech.Web.Models.Content;
-using Dfe.PlanTech.Web.Models.Content.Mapped.Types;
 using FluentAssertions;
 using Xunit;
-using Hyperlink = Dfe.PlanTech.Web.Models.Content.Mapped.Standard.Hyperlink;
+using Hyperlink = Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Standard.Hyperlink;
 
 namespace Dfe.PlanTech.Web.UnitTests.Models.Content.Mapped.Standard;
 
