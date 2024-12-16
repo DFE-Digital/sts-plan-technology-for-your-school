@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
