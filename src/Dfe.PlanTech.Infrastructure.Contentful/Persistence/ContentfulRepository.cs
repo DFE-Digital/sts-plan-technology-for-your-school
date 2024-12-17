@@ -1,6 +1,5 @@
 using Contentful.Core;
 using Contentful.Core.Models;
-using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
@@ -17,18 +16,16 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 public class ContentfulRepository : IContentRepository
 {
     private readonly IContentfulClient _client;
-    private readonly ICmsCache _cache;
     private readonly ILogger<ContentfulRepository> _logger;
 
-    public ContentfulRepository(ILoggerFactory loggerFactory, IContentfulClient client, ICmsCache cache)
+    public ContentfulRepository(ILoggerFactory loggerFactory, IContentfulClient client)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
         _client.ContentTypeResolver = new EntityResolver(loggerFactory.CreateLogger<EntityResolver>());
-        _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         _logger = loggerFactory.CreateLogger<ContentfulRepository>();
     }
 
-    private async Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IGetEntitiesOptions? options, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IGetEntitiesOptions? options, CancellationToken cancellationToken = default)
     {
         var queryBuilder = QueryBuilders.BuildQueryBuilder<TEntity>(entityTypeId, options);
 
@@ -59,21 +56,10 @@ public class ContentfulRepository : IContentRepository
     }
 
     public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(CancellationToken cancellationToken = default)
-    {
-        var contentType = LowerCaseFirstLetter(typeof(TEntity).Name);
-        var key = $"{contentType}s";
-
-        return await _cache.GetOrCreateAsync(key, async () => await GetEntities<TEntity>(contentType, null, cancellationToken)) ?? [];
-    }
+    => await GetEntities<TEntity>(GetContentTypeName<TEntity>(), null, cancellationToken);
 
     public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default)
-    {
-        var contentType = LowerCaseFirstLetter(typeof(TEntity).Name);
-        var jsonOptions = options.SerializeToRedisKey();
-        var key = $"{contentType}{jsonOptions}";
-
-        return await _cache.GetOrCreateAsync(key, async () => await GetEntities<TEntity>(contentType, options, cancellationToken)) ?? [];
-    }
+        => await GetEntities<TEntity>(GetContentTypeName<TEntity>(), options, cancellationToken);
 
     public async Task<TEntity?> GetEntityById<TEntity>(string id, int include = 2, CancellationToken cancellationToken = default)
     {
@@ -100,13 +86,9 @@ public class ContentfulRepository : IContentRepository
         return entities.FirstOrDefault();
     }
 
-    private static string LowerCaseFirstLetter(string input)
+    private static string GetContentTypeName<TEntity>()
     {
-        if (input == "ContentSupportPage")
-            return input;
-
-        char[] array = input.ToCharArray();
-        array[0] = char.ToLower(array[0]);
-        return new string(array);
+        var name = typeof(TEntity).Name;
+        return name == "ContentSupportPage" ? name : name.FirstCharToLower();
     }
 }
