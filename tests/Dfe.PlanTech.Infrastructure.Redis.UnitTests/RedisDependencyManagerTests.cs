@@ -31,6 +31,21 @@ public class RedisDependencyManagerTests : RedisCacheTestsBase
     }
 
     [Fact]
+    public async Task RegisterDependencyAsync_StoresEmptyCollectionsUnderMissing()
+    {
+        var batch = Substitute.For<IBatch>();
+        Database.CreateBatch().Returns(batch);
+
+        await _dependencyManager.RegisterDependenciesAsync(Database, Key, RedisCacheTestHelpers.EmptyQuestionCollection);
+
+        Assert.NotNull(QueuedFunc);
+
+        await QueuedFunc(default);
+
+        await batch.Received(1).SetAddAsync(_dependencyManager.EmptyCollectionDependencyKey, Key, CommandFlags.FireAndForget);
+    }
+
+    [Fact]
     public void GetDependencies_ThrowsException_When_Value_NotIContentComponent()
     {
         var testValue = "this should throw an exception";

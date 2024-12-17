@@ -30,6 +30,7 @@ public class RedisDependencyManager(IBackgroundTaskQueue backgroundTaskQueue) : 
         var tasks = GetDependencies(value).Select(dependency => batch.SetAddAsync(GetDependencyKey(dependency), key, CommandFlags.FireAndForget)).ToArray();
         if (tasks.Length == 0)
         {
+            // If the value has no dependencies (is empty) it should be invalidated when new content comes in
             tasks = tasks.Append(batch.SetAddAsync(EmptyCollectionDependencyKey, key, CommandFlags.FireAndForget)).ToArray();
         }
         batch.Execute();
