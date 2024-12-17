@@ -29,22 +29,9 @@ public class RedisDependencyManager(IBackgroundTaskQueue backgroundTaskQueue) : 
     {
         var batch = database.CreateBatch();
         var tasks = GetDependencies(value).Select(dependency => batch.SetAddAsync(GetDependencyKey(dependency), key, CommandFlags.FireAndForget)).ToArray();
-
-        if (value is IEnumerable<ContentComponent> components)
+        if (tasks.Length == 0)
         {
-            var componentList = components.ToList();
-            if (componentList.Count > 0)
-            {
-                foreach (var component in componentList)
-                {
-                    var dependencyKey = GetDependencyKey(component.Sys.Id);
-                    await batch.SetAddAsync(dependencyKey, key);
-                }
-            }
-            else
-            {
-                await batch.SetAddAsync(EmptyCollectionDependencyKey, key);
-            }
+            tasks = tasks.Append(batch.SetAddAsync(EmptyCollectionDependencyKey, key, CommandFlags.FireAndForget)).ToArray();
         }
         batch.Execute();
         await Task.WhenAll(tasks);
