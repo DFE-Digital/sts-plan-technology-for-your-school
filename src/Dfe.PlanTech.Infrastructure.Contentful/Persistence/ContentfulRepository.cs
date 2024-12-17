@@ -7,7 +7,6 @@ using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 
@@ -70,8 +69,8 @@ public class ContentfulRepository : IContentRepository
     public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default)
     {
         var contentType = LowerCaseFirstLetter(typeof(TEntity).Name);
-        var jsonOptions = JsonConvert.SerializeObject(options);
-        var key = $"{contentType}_{jsonOptions}";
+        var jsonOptions = options.SerializeToRedisKey();
+        var key = $"{contentType}{jsonOptions}";
 
         return await _cache.GetOrCreateAsync(key, async () => await GetEntities<TEntity>(contentType, options, cancellationToken)) ?? [];
     }

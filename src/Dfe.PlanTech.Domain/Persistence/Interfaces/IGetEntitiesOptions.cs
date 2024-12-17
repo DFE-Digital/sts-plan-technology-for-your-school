@@ -19,4 +19,6 @@ public interface IGetEntitiesOptions
     /// If null, return all
     /// </remarks>
     public IEnumerable<string>? Select { get; set; }
+
+    public string SerializeToRedisKey();
 }
