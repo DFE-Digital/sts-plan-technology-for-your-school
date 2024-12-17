@@ -1,5 +1,6 @@
 using System.Text;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
+using Dfe.PlanTech.Infrastructure.Application.Models;
 
 namespace Dfe.PlanTech.Application.Persistence.Models;
 
@@ -31,15 +32,12 @@ public class GetEntitiesOptions : IGetEntitiesOptions
 
     public int Include { get; init; } = 2;
 
-    public string SerializeToRedisKey()
+    public string SerializeToRedisFormat()
     {
         var builder = new StringBuilder();
 
         if (Select != null && Select.Any())
-        {
-            builder.Append(":Select=");
-            builder.Append(string.Join(",", Select));
-        }
+            builder.Append($":Select=[{string.Join(",", Select)}]");
 
         if (Queries != null && Queries.Any())
         {
@@ -48,23 +46,13 @@ public class GetEntitiesOptions : IGetEntitiesOptions
             {
                 builder.Append(query.Field);
 
-                var valueProperty = query.GetType().GetProperty("Value");
-                var value = valueProperty?.GetValue(query);
+                if (query is ContentQueryEquals queryEquals)
+                    builder.Append($"={queryEquals.Value}");
+                else if (query is ContentQueryIncludes queryIncludes)
+                    builder.Append($"=[{string.Join(',', queryIncludes.Value)}]");
 
-                if (value is IEnumerable<string>)
-                {
-                    builder.Append("=[");
-                    builder.Append(string.Join(',', value));
-                    builder.Append(']');
-                }
-                else if (value != null)
-                {
-                    builder.Append('=');
-                    builder.Append(value);
-                }
                 builder.Append(',');
             }
-
             builder.Length--;
             builder.Append(']');
         }
