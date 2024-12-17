@@ -198,8 +198,9 @@ locals {
   #######
 
   dns = {
-    enable_dns   = var.primary_fqdn != null
-    primary_fqdn = var.primary_fqdn
-    subdomains   = var.subdomains
+    enable_dns          = var.primary_fqdn != null
+    resource_group_name = "${local.environment}dns"
+    primary_fqdn        = var.primary_fqdn
+    subdomains          = var.subdomains
   }
 }
