@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Domain.Background;
 using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
 using StackExchange.Redis;
 
 namespace Dfe.PlanTech.Infrastructure.Redis;
