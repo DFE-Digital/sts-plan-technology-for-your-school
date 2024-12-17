@@ -20,5 +20,5 @@ public interface IGetEntitiesOptions
     /// </remarks>
     public IEnumerable<string>? Select { get; set; }
 
-    public string SerializeToRedisKey();
+    public string SerializeToRedisFormat();
 }

@@ -31,7 +31,7 @@ public class CachedContentfulRepository : IContentRepository
     public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default)
     {
         var contentType = GetContentTypeName<TEntity>();
-        var jsonOptions = options.SerializeToRedisKey();
+        var jsonOptions = options.SerializeToRedisFormat();
         var key = $"{contentType}{jsonOptions}";
 
         return await _cache.GetOrCreateAsync(key, async () => await _contentRepository.GetEntities<TEntity>(options, cancellationToken)) ?? [];
