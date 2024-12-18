@@ -63,6 +63,17 @@ public class ContentfulRepository : IContentRepository
 
     public async Task<TEntity?> GetEntityById<TEntity>(string id, int include = 2, CancellationToken cancellationToken = default)
     {
+        var options = GetEntityByIdOptions(id, include);
+        var entities = (await GetEntities<TEntity>(options, cancellationToken)).ToList();
+
+        if (entities.Count > 1)
+            throw new GetEntitiesException($"Found more than 1 entity with id {id}");
+
+        return entities.FirstOrDefault();
+    }
+
+    public GetEntitiesOptions GetEntityByIdOptions(string id, int include = 2)
+    {
         if (string.IsNullOrEmpty(id))
             throw new ArgumentNullException(nameof(id));
 
@@ -70,20 +81,11 @@ public class ContentfulRepository : IContentRepository
         //option doesn't seem to have any effect there - it only seems to return the main parent entry
         //with links to children. This was proving rather useless, so I have used the "GetEntries" option here
         //instead.
-        var options = new GetEntitiesOptions(include, new[] {
+        return new GetEntitiesOptions(include, new[] {
             new ContentQueryEquals(){
                 Field = "sys.id",
                 Value = id
-        }});
-
-        var entities = (await GetEntities<TEntity>(options, cancellationToken)).ToList();
-
-        if (entities.Count > 1)
-        {
-            throw new GetEntitiesException($"Found more than 1 entity with id {id}");
-        }
-
-        return entities.FirstOrDefault();
+            }});
     }
 
     private static string GetContentTypeName<TEntity>()
