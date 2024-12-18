@@ -52,7 +52,7 @@ locals {
   az_use_azure_ad_auth_only     = var.az_tag_environment != "Dev"
   az_sql_sku                    = var.az_sql_sku
   az_sql_max_pool_size          = var.az_sql_max_pool_size
-  az_sql_max_size_gb            = local.az_sql_sku == "Basic" ? null : 512
+  az_sql_max_size_gb            = local.az_sql_sku == "Basic" ? null : 10
 
   az_sql_vnet = {
     dns_zone_name = "privatelink.database.windows.net"

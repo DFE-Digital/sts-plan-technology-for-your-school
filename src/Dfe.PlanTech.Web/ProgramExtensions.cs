@@ -1,5 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using Contentful.Core;
+using Dfe.PlanTech.Application.Background;
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Content.Queries;
@@ -13,10 +13,12 @@ using Dfe.PlanTech.Application.Submissions.Queries;
 using Dfe.PlanTech.Application.Users.Commands;
 using Dfe.PlanTech.Application.Users.Helper;
 using Dfe.PlanTech.Application.Users.Queries;
+using Dfe.PlanTech.Domain.Background;
 using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models.Options;
+using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Database;
@@ -29,11 +31,11 @@ using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.Redis;
 using Dfe.PlanTech.Web.Authorisation;
+using Dfe.PlanTech.Web.Background;
 using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Content;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
-using Dfe.PlanTech.Web.Models.Content.Mapped;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authorization;
@@ -150,6 +152,7 @@ public static class ProgramExtensions
         services.AddTransient<IGetEstablishmentIdQuery, GetEstablishmentIdQuery>();
         services.AddTransient<IGetLatestResponsesQuery, GetLatestResponsesQuery>();
         services.AddTransient<IGetNavigationQuery, GetNavigationQuery>();
+        services.AddTransient<IGetContentSupportPageQuery, GetContentSupportPageQuery>();
         services.AddTransient<IGetNextUnansweredQuestionQuery, GetNextUnansweredQuestionQuery>();
         services.AddTransient<IGetSectionQuery, GetSectionQuery>();
         services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
@@ -260,14 +263,9 @@ public static class ProgramExtensions
             .Configure<SupportedAssetTypes>(app.Configuration.GetSection("cs:supportedAssetTypes"))
             .AddSingleton(sp => sp.GetRequiredService<IOptions<SupportedAssetTypes>>().Value);
 
-        app.Services.SetupContentfulClient(app);
-
-        app.Services.AddKeyedTransient<ICacheService<List<CsPage>>, CsPagesCacheService>(
-            ContentAndSupportServiceKey);
-        app.Services.AddKeyedTransient<IModelMapper, ModelMapper>(ContentAndSupportServiceKey);
-        app.Services
-            .AddKeyedTransient<IContentService, ContentService>(ContentAndSupportServiceKey);
-        app.Services.AddKeyedTransient<ILayoutService, LayoutService>(ContentAndSupportServiceKey);
+        app.Services.AddTransient<IModelMapper, ModelMapper>();
+        app.Services.AddTransient<IContentService, ContentService>();
+        app.Services.AddTransient<ILayoutService, LayoutService>();
 
         app.Services.Configure<CookiePolicyOptions>(options =>
         {
@@ -277,33 +275,6 @@ public static class ProgramExtensions
         });
     }
 
-    public static void SetupContentfulClient(this IServiceCollection services,
-        WebApplicationBuilder app)
-    {
-        app.Services.Configure<Contentful.Core.Configuration.ContentfulOptions>(app.Configuration.GetSection("cs:contentful"))
-            .AddKeyedSingleton(ContentAndSupportServiceKey, (IServiceProvider sp) =>
-                sp.GetRequiredService<IOptions<Contentful.Core.Configuration.ContentfulOptions>>().Value);
-
-        services.AddKeyedScoped<IContentfulClient, ContentfulClient>(ContentAndSupportServiceKey,
-            (sp, _) =>
-            {
-                var contentfulOptions =
-                    sp.GetRequiredKeyedService<Func<IServiceProvider,
-                        Contentful.Core.Configuration.ContentfulOptions>>(
-                        ContentAndSupportServiceKey)(sp);
-                var httpClient = sp.GetRequiredService<HttpClient>();
-                return new ContentfulClient(httpClient, contentfulOptions);
-            });
-
-        if (app.Environment.EnvironmentName.Equals("e2e"))
-            services.AddKeyedScoped<IContentfulService, StubContentfulService>(
-                ContentAndSupportServiceKey);
-        else
-            services.AddKeyedScoped<IContentfulService, ContentfulService>(
-                ContentAndSupportServiceKey);
-
-        HttpClientPolicyExtensions.AddRetryPolicy(services.AddHttpClient<ContentfulClient>());
-    }
     public static IServiceCollection AddRedisServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton(
@@ -311,6 +282,13 @@ public static class ProgramExtensions
         services.AddSingleton<ICmsCache, RedisCache>();
         services.AddSingleton<IRedisConnectionManager, RedisConnectionManager>();
         services.AddSingleton<IDistributedLockProvider, RedisLockProvider>();
+
+        services.AddSingleton<IRedisDependencyManager, RedisDependencyManager>();
+
+        services.AddOptions<BackgroundTaskQueueOptions>()
+                .Configure<IConfiguration>((settings, configuration) => configuration.GetSection("BackgroundTaskQueue").Bind(settings));
+        services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
+        services.AddHostedService<BackgroundTaskHostedService>();
 
         return services;
     }
