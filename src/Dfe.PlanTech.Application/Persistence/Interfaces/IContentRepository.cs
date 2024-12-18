@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
 
 namespace Dfe.PlanTech.Application.Persistence.Interfaces;
@@ -16,6 +17,14 @@ public interface IContentRepository
     /// <typeparam name="TEntity"></typeparam>
     /// <returns></returns>
     Task<TEntity?> GetEntityById<TEntity>(string id, int include = 2, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get options to use for fetching an Entity by Id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="include"></param>
+    /// <returns></returns>
+    GetEntitiesOptions GetEntityByIdOptions(string id, int include = 2);
 
     /// <summary>
     /// Get all entities of the specified type, using the name of the generic parameter's type as the entity type id (to lower case).

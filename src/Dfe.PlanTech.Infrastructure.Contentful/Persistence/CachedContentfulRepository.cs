@@ -1,6 +1,8 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
+using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Persistence;
@@ -39,7 +41,18 @@ public class CachedContentfulRepository : IContentRepository
 
     public async Task<TEntity?> GetEntityById<TEntity>(string id, int include = 2, CancellationToken cancellationToken = default)
     {
-        return await _contentRepository.GetEntityById<TEntity>(id, include, cancellationToken);
+        var options = GetEntityByIdOptions(id, include);
+        var entities = (await GetEntities<TEntity>(options, cancellationToken)).ToList();
+
+        if (entities.Count > 1)
+            throw new GetEntitiesException($"Found more than 1 entity with id {id}");
+
+        return entities.FirstOrDefault();
+    }
+
+    public GetEntitiesOptions GetEntityByIdOptions(string id, int include = 2)
+    {
+        return _contentRepository.GetEntityByIdOptions(id, include);
     }
 
     private static string GetContentTypeName<TEntity>()
