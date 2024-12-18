@@ -77,10 +77,10 @@ public class GetEntitiesOptionsTests
 
     [Theory]
     [InlineData("Empty", ":Include=2")]
-    [InlineData("Select", ":Select=[field.intros,field.sys]:Include=2")]
+    [InlineData("Select", ":Include=2:Select=[field.intros,field.sys]")]
     [InlineData("Include", ":Include=4")]
-    [InlineData("Query", ":Queries=[slug=/,id=1234,toinclude=[value1,value2]]:Include=2")]
-    [InlineData("Combined", ":Select=[field.intros,field.sys]:Queries=[slug=/test]:Include=6")]
+    [InlineData("Query", ":Include=2:Queries=[slug=/,id=1234,toinclude=[value1,value2]]")]
+    [InlineData("Combined", ":Include=6:Select=[field.intros,field.sys]:Queries=[slug=/test]")]
     public void Should_Serialise_Options_Into_Suitable_Redis_Format(string testDataKey, string expectedValue)
     {
         var testData = _testData[testDataKey];
