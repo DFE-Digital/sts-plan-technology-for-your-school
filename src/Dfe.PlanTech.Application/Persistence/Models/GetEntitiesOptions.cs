@@ -36,6 +36,9 @@ public class GetEntitiesOptions : IGetEntitiesOptions
     {
         var builder = new StringBuilder();
 
+        builder.Append(":Include=");
+        builder.Append(Include);
+
         if (Select != null && Select.Any())
             builder.Append($":Select=[{string.Join(",", Select)}]");
 
@@ -56,10 +59,7 @@ public class GetEntitiesOptions : IGetEntitiesOptions
             builder.Length--;
             builder.Append(']');
         }
-
-        builder.Append(":Include=");
-        builder.Append(Include);
-
+        
         return builder.ToString();
     }
 }
