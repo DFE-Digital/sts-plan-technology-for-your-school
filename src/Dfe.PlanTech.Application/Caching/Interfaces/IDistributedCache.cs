@@ -80,7 +80,7 @@ public interface IDistributedCache
     /// <param name="key">The key of the set.</param>
     /// <param name="databaseId">The optional database identifier.</param>
     /// <returns>An array of set members.</returns>
-    Task<string[]> GetSetMembersAsync(string key, int databaseId = -1);
+    Task<IEnumerable<string>> GetSetMembersAsync(string key, int databaseId = -1);
 
     /// <summary>
     /// Removes an item from a set in the cache asynchronously.
@@ -96,5 +96,5 @@ public interface IDistributedCache
     /// <param name="key">The key of the set.</param>
     /// <param name="items">The items to remove.</param>
     /// <param name="databaseId">The optional database identifier.</param>
-    Task SetRemoveItemsAsync(string key, string[] items, int databaseId = -1);
+    Task SetRemoveItemsAsync(string key, IEnumerable<string> items, int databaseId = -1);
 }

@@ -7,18 +7,15 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("[controller]")]
 [AllowAnonymous]
 public class ContentController(
-    [FromKeyedServices(ProgramExtensions.ContentAndSupportServiceKey)]
     IContentService contentService,
-    [FromKeyedServices(ProgramExtensions.ContentAndSupportServiceKey)]
     ILayoutService layoutService,
-    ILogger<ContentController> logger)
-    : Controller
+    ILogger<ContentController> logger) : Controller
 {
-    public const string ErrorActionName = "error";
+
+    public const string ControllerName = "Content"; public const string ErrorActionName = "error";
 
     [HttpGet("{slug}/{page?}")]
-    public async Task<IActionResult> Index(string slug, string page = "", bool isPreview = false,
-        [FromQuery] List<string>? tags = null)
+    public async Task<IActionResult> Index(string slug, string page = "", [FromQuery] List<string>? tags = null, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
         {
@@ -37,7 +34,7 @@ public class ContentController(
 
         try
         {
-            var resp = await contentService.GetContent(slug, isPreview);
+            var resp = await contentService.GetContent(slug, cancellationToken);
             if (resp is null)
             {
                 logger.LogError("Failed to load content for C&S page {Slug}; no content received.",

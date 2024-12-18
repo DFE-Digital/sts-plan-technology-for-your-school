@@ -1,4 +1,5 @@
 using Contentful.Core;
+using Contentful.Core.Models;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
@@ -15,11 +16,13 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 public class ContentfulRepository : IContentRepository
 {
     private readonly IContentfulClient _client;
+    private readonly ILogger<ContentfulRepository> _logger;
 
     public ContentfulRepository(ILoggerFactory loggerFactory, IContentfulClient client)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
         _client.ContentTypeResolver = new EntityResolver(loggerFactory.CreateLogger<EntityResolver>());
+        _logger = loggerFactory.CreateLogger<ContentfulRepository>();
     }
 
     public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IGetEntitiesOptions? options, CancellationToken cancellationToken = default)
@@ -28,7 +31,28 @@ public class ContentfulRepository : IContentRepository
 
         var entries = await _client.GetEntries(queryBuilder, cancellationToken);
 
-        return entries ?? Enumerable.Empty<TEntity>();
+        ProcessContentfulErrors(entries);
+
+        return entries.Items ?? [];
+    }
+
+    private void ProcessContentfulErrors<TEntity>(ContentfulCollection<TEntity> entries)
+    {
+        if (entries.Errors.Any())
+        {
+            _logger.LogError("Error retrieving entities from Contentful:\n{Errors}", entries.Errors.Select(CreateErrorString));
+        }
+    }
+
+    private static string CreateErrorString(ContentfulError error)
+    {
+        var errorString = $"[{error.Details.Type}] {error.Details.Id}";
+        if (error.Details.Id == error.SystemProperties.Id)
+        {
+            return errorString;
+        }
+
+        return errorString + " " + error.SystemProperties.Id;
     }
 
     public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(CancellationToken cancellationToken = default)
@@ -62,5 +86,13 @@ public class ContentfulRepository : IContentRepository
         return entities.FirstOrDefault();
     }
 
-    private static string LowerCaseFirstLetter(string toLowerCase) => char.ToLower(toLowerCase[0]) + toLowerCase.Substring(1);
+    private static string LowerCaseFirstLetter(string input)
+    {
+        if (input == "ContentSupportPage")
+            return input;
+
+        char[] array = input.ToCharArray();
+        array[0] = char.ToLower(array[0]);
+        return new string(array);
+    }
 }
