@@ -59,7 +59,7 @@ public class GetEntitiesOptions : IGetEntitiesOptions
             builder.Length--;
             builder.Append(']');
         }
-        
+
         return builder.ToString();
     }
 }
