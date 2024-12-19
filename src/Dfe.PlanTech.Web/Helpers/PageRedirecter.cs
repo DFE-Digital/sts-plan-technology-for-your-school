@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -5,7 +6,7 @@ namespace Dfe.PlanTech.Web;
 
 public static class PageRedirecter
 {
-    public const string SelfAssessmentRoute = "/self-assessment";
+    public const string SelfAssessmentRoute = UrlConstants.SelfAssessmentPage;
 
     public static RedirectToActionResult RedirectToSelfAssessment(this Controller controller)
     => RedirectToPage(controller, SelfAssessmentRoute);
