@@ -75,13 +75,20 @@ jobs:
           echo "BACKUP_STORAGE_KEY=$backup_storage_key" >> $GITHUB_ENV
           echo "MANAGEMENT_TOKEN=$management_token" >> $GITHUB_ENV
 
-      - name: Install contentful-exporter
-        working-directory: ./contentful/export-processor
-        run: npm i
+#      - name: Install contentful-exporter
+#        working-directory: ./contentful/export-processor
+#        run: npm i
+#
+#      - name: Export contentful data
+#        working-directory: ./contentful/export-processor
+#        run: npm run export-all-only
 
-      - name: Export contentful data
+      - name: Debug step
         working-directory: ./contentful/export-processor
-        run: npm run export-all-only
+        run: |
+          mkdir -p output/sample
+          touch output/sample/example.json
+          ls -l output
 
       - name: Upload export to Azure storage container
         working-directory: ./contentful/export-processor
@@ -89,7 +96,11 @@ jobs:
           json_files=(output/**/*.json)
           backup="${json_files[0]}"
           account_name=$(echo "${az_resource_group_name}content" | sed 's/-//g')
-          az storage blob upload --account-name "$account_name" --account-key "$BACKUP_STORAGE_KEY" --container-name backups-container --file "$backup"
+          az storage blob upload \
+            --account-name "$account_name" \
+            --account-key "$BACKUP_STORAGE_KEY" \
+            --container-name backups-container \
+            --file "$backup"
 
       - name: Remove Azure Firewall Rules
         if: always()
