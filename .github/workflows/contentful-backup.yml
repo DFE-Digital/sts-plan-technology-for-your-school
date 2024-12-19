@@ -75,19 +75,18 @@ jobs:
           echo "BACKUP_STORAGE_KEY=$backup_storage_key" >> $GITHUB_ENV
           echo "MANAGEMENT_TOKEN=$management_token" >> $GITHUB_ENV
 
-#      - name: Install contentful-exporter
-#        working-directory: ./contentful/export-processor
-#        run: npm i
-#
-#      - name: Export contentful data
-#        working-directory: ./contentful/export-processor
-#        run: npm run export-all-only
+      - name: Install contentful-exporter
+        working-directory: ./contentful/export-processor
+        run: npm i
+
+      - name: Export contentful data
+        working-directory: ./contentful/export-processor
+        run: npm run export-all-only
 
       - name: Debug step
         working-directory: ./contentful/export-processor
         run: |
-          mkdir -p output/sample
-          touch output/sample/example.json
+          ls -l
           ls -l output
 
       - name: Upload export to Azure storage container
