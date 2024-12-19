@@ -21,4 +21,6 @@ public static partial class StringHelpers
 
     private static string ReplaceNonSlugCharacters(this string text, string replacement)
     => MatchNonAlphaNumericExceptHyphensPattern().Replace(text, replacement);
+
+    public static string FirstCharToLower(this string input) => char.ToLower(input[0]) + input[1..];
 }

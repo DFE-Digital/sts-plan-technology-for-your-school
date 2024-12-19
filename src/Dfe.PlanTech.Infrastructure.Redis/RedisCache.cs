@@ -253,16 +253,26 @@ public class RedisCache : ICmsCache
     }
 
     /// <inheritdoc/>
-    public Task InvalidateCacheAsync(string contentComponentId)
+    public Task InvalidateCacheAsync(string contentComponentId, string contentType)
     => _backgroundTaskService.QueueBackgroundWorkItemAsync(async (cancellationToken) =>
         {
             var key = _dependencyManager.GetDependencyKey(contentComponentId);
-            var dependencies = await GetSetMembersAsync(key);
-            foreach (var item in dependencies)
-            {
-                await RemoveAsync(item);
-            }
+            await RemoveDependenciesAsync(key);
 
-            await SetRemoveItemsAsync(key, dependencies);
+            // Invalidate all empty collections
+            await RemoveDependenciesAsync(_dependencyManager.EmptyCollectionDependencyKey);
+
+            // Invalidate collection of the content type if there is one
+            await RemoveAsync($"{contentType}s");
         });
+
+    private async Task RemoveDependenciesAsync(string dependencyKey)
+    {
+        var dependencies = (await GetSetMembersAsync(dependencyKey)).ToList();
+        foreach (var item in dependencies)
+        {
+            await RemoveAsync(item);
+        }
+        await SetRemoveItemsAsync(dependencyKey, dependencies);
+    }
 }

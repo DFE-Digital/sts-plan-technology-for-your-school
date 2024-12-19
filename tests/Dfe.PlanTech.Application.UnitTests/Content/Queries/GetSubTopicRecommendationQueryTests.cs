@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
@@ -23,7 +22,6 @@ public class GetSubTopicRecommendationQueryTests
 
     private readonly List<SubtopicRecommendation> _subtopicRecommendations = [];
     private readonly ILogger<GetSubTopicRecommendationQuery> _logger = Substitute.For<ILogger<GetSubTopicRecommendationQuery>>();
-    private readonly ICmsCache _cache = Substitute.For<ICmsCache>();
 
     public GetSubTopicRecommendationQueryTests()
     {
@@ -135,13 +133,7 @@ public class GetSubTopicRecommendationQueryTests
         _subtopicRecommendations.Add(_subtopicRecommendationOne);
         _subtopicRecommendations.Add(_subtopicRecommendationTwo);
 
-        _query = new(_repoSubstitute, _logger, _cache);
-        _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<IEnumerable<SubtopicRecommendation>?>>>())
-            .Returns(callInfo =>
-            {
-                var func = callInfo.ArgAt<Func<Task<IEnumerable<SubtopicRecommendation>?>>>(1);
-                return func();
-            });
+        _query = new(_repoSubstitute, _logger);
     }
 
     [Fact]
