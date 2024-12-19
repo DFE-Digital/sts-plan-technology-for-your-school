@@ -19,3 +19,43 @@ resource "null_resource" "upsert_contentful_webhook" {
     command = local.contentful_webhook_shell_command
   }
 }
+
+resource "azurerm_storage_account" "contentful_backup_storage" {
+  name                     = replace("${local.resource_prefix}content", "-", "")
+  resource_group_name      = local.resource_prefix
+  location                 = local.azure_location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+  tags                     = local.tags
+
+  blob_properties {
+    delete_retention_policy {
+      days = 30
+    }
+  }
+}
+
+resource "azurerm_storage_container" "backups_container" {
+  name                  = "backups-container"
+  storage_account_name  = azurerm_storage_account.contentful_backup_storage.name
+  container_access_type = "private"
+}
+
+resource "azurerm_storage_management_policy" "lifecycle_policy" {
+  storage_account_id = azurerm_storage_account.contentful_backup_storage.id
+
+  rule {
+    name    = "delete_after_30_days"
+    enabled = true
+
+    filters {
+      blob_types = ["blockBlob"]
+    }
+
+    actions {
+      base_blob {
+        delete_after_days_since_creation_greater_than = 30
+      }
+    }
+  }
+}
