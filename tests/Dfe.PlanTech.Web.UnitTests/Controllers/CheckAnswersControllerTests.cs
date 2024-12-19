@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Domain.Exceptions;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
@@ -115,7 +116,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.Equal(PagesController.GetPageByRouteAction, redirectToActionResult.ActionName);
             Assert.NotNull(redirectToActionResult.RouteValues);
             Assert.True(redirectToActionResult.RouteValues.ContainsKey("route"));
-            Assert.True(redirectToActionResult.RouteValues["route"] is string s && s == "/self-assessment");
+            Assert.True(redirectToActionResult.RouteValues["route"] is string s && s == UrlConstants.SelfAssessmentPage);
         }
 
         [Fact]

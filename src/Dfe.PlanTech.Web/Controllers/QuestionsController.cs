@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
@@ -70,7 +71,7 @@ public class QuestionsController : BaseController<QuestionsController>
                                                             CancellationToken cancellationToken = default)
     {
         if (!contentfulOptions.UsePreview)
-            return new RedirectResult("/self-assessment");
+            return new RedirectResult(UrlConstants.SelfAssessmentPage);
 
         var question = await _getEntityFromContentfulQuery.GetEntityById<Question>(questionId, cancellationToken) ??
                        throw new KeyNotFoundException($"Could not find question with Id {questionId}");
