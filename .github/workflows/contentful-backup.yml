@@ -88,7 +88,7 @@ jobs:
         run: |
           json_files=(output/**/*.json)
           backup="${json_files[0]}"
-          account_name="${{ env.az_resource_group_name }}content" | sed 's/-//g'
+          account_name=$(echo "${az_resource_group_name}content" | sed 's/-//g')
           az storage blob upload --account-name "$account_name" --account-key "$BACKUP_STORAGE_KEY" --container-name backups-container --file "$backup"
 
       - name: Remove Azure Firewall Rules
