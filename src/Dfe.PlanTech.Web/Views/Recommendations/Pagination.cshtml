@@ -5,12 +5,14 @@
     <govuk-pagination>
         @if (Model.Previous != null)
         {
-            <govuk-pagination-previous href="#@Model.Previous.SlugifiedLinkText" label-text="@Model.Previous.LinkText" />
+            <govuk-pagination-previous href="#@Model.Previous.SlugifiedLinkText" label-text="@Model.Previous.LinkText"
+                class="govuk-link--no-visited-state" />
         }
 
         @if (Model.Next != null)
         {
-            <govuk-pagination-next href="#@Model.Next.SlugifiedLinkText" label-text="@Model.Next.LinkText" />
+            <govuk-pagination-next href="#@Model.Next.SlugifiedLinkText" label-text="@Model.Next.LinkText"
+                class="govuk-link--no-visited-state" />
         }
     </govuk-pagination>
 </div>

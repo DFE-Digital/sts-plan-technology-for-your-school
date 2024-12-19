@@ -35,8 +35,8 @@ and the headers & chunks to have a shared parent for displaying based on anchor 
                         </div>
                         <div class="govuk-grid-column-three-quarters">
                             <partial name="Content" model="@headerWithContent" />
-                            <partial name="Print" model="@Model"/>
-                            <partial name="Pagination" model="@(Previous: previousContent, Next:nextContent)"/>
+                            <partial name="Print" model="@Model" />
+                            <partial name="Pagination" model="@(Previous: previousContent, Next:nextContent)" />
                         </div>
                     </div>
                 </div>
