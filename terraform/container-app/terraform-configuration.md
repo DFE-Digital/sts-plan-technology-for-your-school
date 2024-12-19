@@ -53,6 +53,10 @@ We use two external modules to create the majority of the resources required:
 
 | Name | Type |
 |------|------|
+| [azurerm_dns_cname_record.primary](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/dns_cname_record) | resource |
+| [azurerm_dns_ns_record.subdomains](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/dns_ns_record) | resource |
+| [azurerm_dns_zone.primary](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/dns_zone) | resource |
+| [azurerm_dns_zone.subdomains](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/dns_zone) | resource |
 | [azurerm_key_vault.vault](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault) | resource |
 | [azurerm_key_vault_access_policy.vault_access_policy_mi](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault_access_policy) | resource |
 | [azurerm_key_vault_access_policy.vault_access_policy_tf](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault_access_policy) | resource |
@@ -77,6 +81,7 @@ We use two external modules to create the majority of the resources required:
 | [azurerm_private_endpoint.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/private_endpoint) | resource |
 | [azurerm_private_endpoint.redis](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/private_endpoint) | resource |
 | [azurerm_redis_cache.redis](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/redis_cache) | resource |
+| [azurerm_resource_group.dns_zone](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/resource_group) | resource |
 | [azurerm_servicebus_namespace.service_bus](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/servicebus_namespace) | resource |
 | [azurerm_servicebus_queue.contentful_queue](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/servicebus_queue) | resource |
 | [azurerm_servicebus_queue_authorization_rule.azurefunction](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/servicebus_queue_authorization_rule) | resource |
@@ -126,6 +131,7 @@ We use two external modules to create the majority of the resources required:
 | <a name="input_key_size"></a> [key\_size](#input\_key\_size) | The size in bits of the key to be created. | `number` | `2048` | no |
 | <a name="input_key_type"></a> [key\_type](#input\_key\_type) | The JsonWebKeyType of the key to be created. | `string` | `"RSA"` | no |
 | <a name="input_msi_id"></a> [msi\_id](#input\_msi\_id) | The Managed Service Identity ID. If this value isn't null (the default), 'data.azurerm\_client\_config.current.object\_id' will be set to this value. | `string` | `null` | no |
+| <a name="input_primary_fqdn"></a> [primary\_fqdn](#input\_primary\_fqdn) | The fully qualified domain name for the primary dns zone | `string` | `null` | no |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | project name, used along with `environment` as a prefix for all resources | `string` | n/a | yes |
 | <a name="input_redis_capacity"></a> [redis\_capacity](#input\_redis\_capacity) | Redis cache capacity (0-6 for C and 1-5 for P) | `number` | `0` | no |
 | <a name="input_redis_family"></a> [redis\_family](#input\_redis\_family) | Redis cache family (C for basic/standard, P for premium) | `string` | `"C"` | no |
@@ -136,6 +142,7 @@ We use two external modules to create the majority of the resources required:
 | <a name="input_registry_username"></a> [registry\_username](#input\_registry\_username) | Container registry username | `string` | n/a | yes |
 | <a name="input_storage_account_expiration_period"></a> [storage\_account\_expiration\_period](#input\_storage\_account\_expiration\_period) | The SAS expiration period in format of DD.HH:MM:SS | `string` | `"00.01:00:00"` | no |
 | <a name="input_storage_account_public_access_enabled"></a> [storage\_account\_public\_access\_enabled](#input\_storage\_account\_public\_access\_enabled) | Enable public network access | `bool` | `false` | no |
+| <a name="input_subdomains"></a> [subdomains](#input\_subdomains) | A list of subdomains that can be associated with the primary domain | `set(string)` | `[]` | no |
 
 ## Outputs
 
