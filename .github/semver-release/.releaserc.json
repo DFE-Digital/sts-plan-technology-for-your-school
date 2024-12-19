@@ -1,16 +1,83 @@
 {
-  "plugins": [
-    "@semantic-release/commit-analyzer",
-    "@semantic-release/release-notes-generator",
-    [
-      "@semantic-release/github",
-      {
-        "successComment": false
-      }
+    "plugins": [
+        [
+            "@semantic-release/commit-analyzer",
+            {
+                "preset": "conventionalcommits",
+                "releaseRules": [
+                    { "breaking": true, "release": "major" },
+                    { "type": "breaking", "release": "major" },
+                    { "revert": true, "release": "patch" },
+                    { "type": "feat", "release": "minor" },
+                    { "type": "fix", "release": "patch" },
+                    { "type": "perf", "release": "patch" },
+                    { "emoji": ":racehorse:", "release": "patch" },
+                    { "emoji": ":bug:", "release": "patch" },
+                    { "emoji": ":penguin:", "release": "patch" },
+                    { "emoji": ":apple:", "release": "patch" },
+                    { "emoji": ":checkered_flag:", "release": "patch" },
+                    { "tag": "BUGFIX", "release": "patch" },
+                    { "tag": "FEATURE", "release": "minor" },
+                    { "tag": "SECURITY", "release": "patch" },
+                    { "tag": "Breaking", "release": "major" },
+                    { "tag": "Fix", "release": "patch" },
+                    { "tag": "Update", "release": "minor" },
+                    { "tag": "New", "release": "minor" },
+                    { "type": "FEAT", "release": "minor" },
+                    { "type": "FIX", "release": "patch" },
+                    { "type": "merge", "release": "patch" },
+                    { "type": "ticket", "release": "patch" },
+                    { "type": "ci", "release": "patch" },
+                    { "type": "iac", "release": "patch" },
+                    { "type": "build", "release": "patch" },
+                    { "message": "**", "release": "patch" }
+                ],
+                "parserOpts": {
+                    "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES"]
+                }
+            }
+        ],
+        [
+            "@semantic-release/release-notes-generator",
+            {
+                "preset": "conventionalcommits",
+                "presetConfig": {
+                    "noteKeywords": [
+                        "BREAKING CHANGE",
+                        "BREAKING CHANGES",
+                        "BREAKING"
+                    ],
+                    "types": [
+                        { "type": "breaking", "section": "Breaking changes" },
+                        { "type": "feat", "section": "Features" },
+                        { "type": "fix", "section": "Bug Fixes" },
+                        { "type": "style", "section": "Styling" },
+                        { "type": "refactor", "section": "Refactor" },
+                        { "type": "perf", "section": "Refactor" },
+                        { "type": "ticket", "section": "Completed Tickets" },
+                        { "type": "merge", "section": "Completed Tickets" },
+                        { "type": "ci", "section": "CI/CD" },
+                        { "type": "cicd", "section": "CI/CD" },
+                        { "type": "iac", "section": "IaC" },
+                        { "type": "chore", "hidden": true },
+                        { "type": "docs", "hidden": true },
+                        { "type": "test", "hidden": true }
+                    ]
+                },
+                "writerOpts": {
+                    "commitsSort": ["subject", "scope"]
+                }
+            }
+        ],
+        [
+            "@semantic-release/github",
+            {
+                "successComment": false
+            }
+        ]
+    ],
+    "branches": [
+        { "name": "main" },
+        { "name": "development", "prerelease": true }
     ]
-  ],
-  "branches": [
-    { "name": "main" },
-    { "name": "development", "prerelease": true }
-  ]
 }
