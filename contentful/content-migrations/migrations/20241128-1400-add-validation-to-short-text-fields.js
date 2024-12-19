@@ -1,5 +1,5 @@
 const freeTextFields = {
-    CSBodyText: ["title", "subTitle", "Slug"],
+    CSBodyText: ["title", "subtitle"],
     ContentSupportPage: ["Slug"],
     page: ["slug"],
     section: ["name"],
