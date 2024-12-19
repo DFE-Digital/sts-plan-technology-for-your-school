@@ -1,0 +1,16 @@
+@using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+@model (IHeaderWithContent? Previous, IHeaderWithContent? Next)
+
+<div>
+    <govuk-pagination>
+        @if (Model.Previous != null)
+        {
+            <govuk-pagination-previous href="#@Model.Previous.SlugifiedLinkText" label-text="@Model.Previous.LinkText" />
+        }
+
+        @if (Model.Next != null)
+        {
+            <govuk-pagination-next href="#@Model.Next.SlugifiedLinkText" label-text="@Model.Next.LinkText" />
+        }
+    </govuk-pagination>
+</div>
