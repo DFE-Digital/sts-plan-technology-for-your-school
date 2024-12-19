@@ -8,6 +8,7 @@ on:
       - "src/**"
       - "tests/Dfe.PlanTech.Web.E2ETests/**"
       - ".github/workflows/e2e-tests.yml"
+      - ".github/actions/run-e2e-tests/action.yml"
       - ".gitmodules"
 
 concurrency:
