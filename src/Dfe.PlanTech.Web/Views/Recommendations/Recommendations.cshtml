@@ -3,7 +3,9 @@
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model Dfe.PlanTech.Web.Models.RecommendationsViewModel
 
-@{ Layout = "_RecommendationsLayout"; }
+@{
+    Layout = "_RecommendationsLayout";
+}
 
 <!-- The page is rendered within the header section to allow for both a full width blue backdrop,
 and the headers & chunks to have a shared parent for displaying based on anchor tab -->
@@ -12,76 +14,33 @@ and the headers & chunks to have a shared parent for displaying based on anchor 
     <link rel="stylesheet" as="style" href="~/css/step-by-step.css">
 
     <div class="recommendation-content">
-        @{ var allContent = Model.AllContent.ToArray(); }
-        @for (var x = 0; x < allContent.Length; x++)
-        {
-            var headerWithContent = allContent[x];
-            var previousContent = x - 1 >= 0 ? allContent[x - 1] : null;
-            var nextContent = x + 1 < allContent.Length ? allContent[x + 1] : null;
+            @{
+                var allContent = Model.AllContent.ToArray();
+            }
+            @for (var x = 0; x < allContent.Length; x++)
+            {
+                var headerWithContent = allContent[x];
+                var previousContent = x - 1 >= 0 ? allContent[x - 1] : null;
+                var nextContent = x + 1 < allContent.Length ? allContent[x + 1] : null;
 
             <div class="recommendation-piece-container" id="@headerWithContent.SlugifiedLinkText">
-                <section class="dfe-page-header">
-                    <div class="govuk-width-container">
-                        <div class="govuk-grid-row">
-                            <div class="govuk-grid-column-two-thirds">
-                                <partial name="BetaHeader"/>
-                                <partial name="BackButton"/>
-                                <div class="dfe-page-header-inner">
-                                    <div class="recommendation-piece-header">
-                                        <h1 class="govuk-heading-xl">@headerWithContent.HeaderText</h1>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                <partial name="Header" model="@headerWithContent" />
                 <div class="govuk-width-container govuk-main-wrapper">
                     <div class="govuk-grid-row">
                         <div class="govuk-grid-column-one-quarter">
-                            @{
-                                ViewBag.VerticalNavigationSection = headerWithContent.SlugifiedLinkText;
-                            }
-                            <partial name="Components/VerticalNavigation/Default" model="@Model.AllContent"/>
+                                @{
+                                    ViewBag.VerticalNavigationSection = headerWithContent.SlugifiedLinkText;
+                                }
+                            <partial name="Components/VerticalNavigation/Default" model="@Model.AllContent" />
                         </div>
                         <div class="govuk-grid-column-three-quarters">
-                            <div class="govuk-section-break govuk-!-margin-top-0">
-                                <div class="recommendation-piece-content">
-                                    @foreach (var content in headerWithContent.Content)
-                                    {
-                                        await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-                                    }
-                                </div>
-                                @if (headerWithContent is RecommendationChunk chunk && chunk.CSLink != null)
-                                {
-                                    <div class="govuk-!-margin-top-3 govuk-!-margin-bottom-9">
-                                        <a class="govuk-body govuk-link govuk-!-font-weight-bold" href=@chunk.CSLink.Url>
-                                            @chunk.CSLink.LinkText
-                                        </a>
-                                    </div>
-                                }
-                            </div>
-                            <div class="govuk-!-margin-bottom-6 govuk-!-margin-top-6">
-                                <p class="govuk-body">
-                                    <a class="govuk-link" href="@Model.Slug/print">View a printable version of your school's recommendations</a>
-                                </p>
-                            </div>
-                            <div>
-                                <govuk-pagination>
-                                    @if (previousContent != null)
-                                    {
-                                        <govuk-pagination-previous href="#@previousContent.SlugifiedLinkText" label-text="@previousContent.LinkText"/>
-                                    }
-
-                                    @if (nextContent != null)
-                                    {
-                                        <govuk-pagination-next href="#@nextContent.SlugifiedLinkText" label-text="@nextContent.LinkText"/>
-                                    }
-                                </govuk-pagination>
-                            </div>
+                            <partial name="Content" model="@headerWithContent" />
+                            <partial name="Print" model="@Model" />
+                            <partial name="Pagination" model="@(Previous: previousContent, Next:nextContent)" />
                         </div>
                     </div>
                 </div>
             </div>
-        }
+            }
     </div>
 }
