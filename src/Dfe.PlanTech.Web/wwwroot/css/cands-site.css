@@ -96,16 +96,9 @@ video {
     line-height: 1.333;
 }
 
-.dfe-feedback-banner--content-questions {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-}
-
 .dfe-feedback-banner--content-question {
     display: flex;
-    align-items: center;
+    align-items: baseline;
 }
 
 .dfe-feedback-banner

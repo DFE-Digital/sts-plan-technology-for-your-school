@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Routing;
@@ -39,7 +40,7 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
     {
         if (!contentfulOptions.UsePreview)
         {
-            return new RedirectResult("/self-assessment");
+            return new RedirectResult(UrlConstants.SelfAssessmentPage);
         }
 
         if (string.IsNullOrEmpty(sectionSlug))

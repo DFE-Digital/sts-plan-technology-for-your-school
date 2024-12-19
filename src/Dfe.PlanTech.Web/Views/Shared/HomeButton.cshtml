@@ -1,6 +1,7 @@
-﻿@{
+﻿@using Dfe.PlanTech.Application.Constants
+@{
     var isAuthenticated = Context.User.Identity?.IsAuthenticated ?? false;
-    var href = isAuthenticated ? "/self-assessment" : "/";
+    var href = isAuthenticated ? UrlConstants.SelfAssessmentPage : "/";
 }
 
 @if (isAuthenticated)

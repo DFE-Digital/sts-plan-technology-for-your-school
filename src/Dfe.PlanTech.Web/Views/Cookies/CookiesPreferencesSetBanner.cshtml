@@ -1,3 +1,4 @@
+@using Dfe.PlanTech.Application.Constants
 @using Dfe.PlanTech.Domain.Cookie;
 
 @model Dfe.PlanTech.Web.Models.CookiesViewModel
@@ -21,7 +22,7 @@
                 
                 <a class="govuk-notification-banner__link"
                     id="notification-go-back-link"
-                    href="/self-assessment">Go back to the page you were looking at</a>.
+                    href="@UrlConstants.SelfAssessmentPage">Go back to the page you were looking at</a>.
             </p>
         </div>
     </div>

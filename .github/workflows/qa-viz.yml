@@ -4,14 +4,15 @@ name: QA Visualisation Workflow
 on:
   workflow_dispatch:
     inputs:
-      usepreview:
-        description: Include preview content
+      environment:
+        description: Which environment to run the QA visualiser on
         required: true
-        type: boolean
-        default: true
+        type: choice
+        options: ['Dev', 'Tst', 'Staging', 'Production']
+        default: 'Staging'
   workflow_call:
     inputs:
-      usepreview:
+      environment:
         type: string
         required: true
 
@@ -21,6 +22,8 @@ env:
 jobs:
   generate_images:
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    name: Generate visualisations for ${{ inputs.environment }}
     env:
       az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
       az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
@@ -64,7 +67,6 @@ jobs:
         shell: bash
         working-directory: ./build
         run: |
-          export Contentful__UsePreviewApi=${{ inputs.usepreview }}
           export ASPNETCORE_ENVIRONMENT=E2E
           export KeyVaultName=${{ env.az_keyvault_name }}
           export Kestrel__Endpoints__Https__Url=https://*:8081

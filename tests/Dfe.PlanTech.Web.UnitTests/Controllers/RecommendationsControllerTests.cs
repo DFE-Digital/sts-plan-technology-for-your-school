@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Routing;
@@ -72,7 +73,7 @@ public class RecommendationsControllerTests
 
         var redirectResult = result as RedirectResult;
         Assert.NotNull(redirectResult);
-        Assert.Equal("/self-assessment", redirectResult.Url);
+        Assert.Equal(UrlConstants.SelfAssessmentPage, redirectResult.Url);
     }
 
     [Theory]
