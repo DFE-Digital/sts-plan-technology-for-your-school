@@ -1,0 +1,94 @@
+name: Contentful Backup
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Which Contentful environment to backup
+        required: true
+        type: choice
+        options: [ 'Dev', 'Tst', 'Staging', 'Production' ]
+        default: 'Staging'
+
+jobs:
+  backup_content:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    name: Generate visualisations for ${{ inputs.environment }}
+    env:
+      az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
+      az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      az_keyvault_contentful_environment: contentful--environment
+      az_keyvault_contentful_space_id: contentful--spaceid
+      az_keyvault_contentful_delivery_token: contentful--deliveryapikey
+      az_keyvault_contentful_backup_storage_key: contentful--backupstoragekey
+      SQL_IP_NAME: "export-processor"
+      USE_PREVIEW: "true"
+      SAVE_FILE: "true"
+      OUTPUT_FILE_DIR: "./output"
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+
+      - name: Add Azure firewall rules
+        uses: ./.github/actions/azure-ip-whitelist
+        with:
+          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+          verb: "add"
+          az_keyvault_name: ${{ env.az_keyvault_name }}
+          az_ip_name: ${{ env.SQL_IP_NAME }}
+          az_resource_group: ${{ env.az_resource_group_name}}
+          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
+
+      - name: Get secrets
+        id: get-contentful-export-secrets
+        shell: bash
+        run: |
+          environment=$(az keyvault secret show --name ${{ inputs.az_keyvault_contentful_environment }} --vault-name ${{ inputs.az_keyvault_name }} --query value -o tsv)
+          space_id=$(az keyvault secret show --name ${{ inputs.az_keyvault_contentful_space_id }} --vault-name ${{ inputs.az_keyvault_name }} --query value -o tsv)
+          delivery_token=$(az keyvault secret show --name ${{ inputs.az_keyvault_contentful_delivery_token }} --vault-name ${{ inputs.az_keyvault_name }} --query value -o tsv)
+          backup_storage_key=$(az keyvault secret show --name ${{ inputs.az_keyvault_contentful_backup_storage_key }} --vault-name ${{ inputs.az_keyvault_name }} --query value -o tsv)
+          echo "::add-mask::$environment"
+          echo "::add-mask::$space_id"
+          echo "::add-mask::$delivery_token"
+          echo "::add-mask::$backup_storage_key"
+          echo "ENVIRONMENT=$environment" >> $GITHUB_OUTPUT
+          echo "SPACE_ID=$space_id" >> $GITHUB_OUTPUT
+          echo "DELIVERY_TOKEN=$delivery_token" >> $GITHUB_OUTPUT
+          echo "BACKUP_STORAGE_KEY=$backup_storage_key" >> $GITHUB_OUTPUT
+
+      - name: Install contentful-exporter
+        working-directory: ./contentful/export-processor
+        run: npm i
+
+      - name: Export contentful data
+        working-directory: ./contentful/export-processor
+        run: npm run export-all-only
+
+      - name: Upload export to Azure storage container
+        working-directory: ./contentful/export-processor
+        run: |
+          json_files=(output/**/*.json)
+          backup="${json_files[0]}"
+          account_name="${{ env.az_resource_group_name }}content" | sed 's/-//g'
+          az storage blob upload --account-name "$account_name" --account-key "$BACKUP_STORAGE_KEY" --container-name backups-container --file "$backup"
+
+      - name: Remove Azure Firewall Rules
+        if: always()
+        uses: ./.github/actions/azure-ip-whitelist
+        with:
+          ip_address: ${{ steps.what-is-my-ip.outputs.ip }}
+          verb: "remove"
+          az_keyvault_name: ${{ env.az_keyvault_name }}
+          az_ip_name: ${{ env.SQL_IP_NAME }}
+          az_resource_group: ${{ env.az_resource_group_name}}
+          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
