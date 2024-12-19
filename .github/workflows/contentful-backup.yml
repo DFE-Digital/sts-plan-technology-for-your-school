@@ -27,7 +27,7 @@ jobs:
       SQL_IP_NAME: export-processor
       USE_PREVIEW: true
       SAVE_FILE: true
-      OUTPUT_FILE_DIR: "./output"
+      OUTPUT_FILE_DIR: "./output/"
 
     steps:
       - name: Checkout Repository
