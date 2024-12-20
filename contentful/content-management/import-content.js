@@ -13,11 +13,13 @@ async function importContentfulData() {
 	  skipContentModel: process.env.SKIP_CONTENT_MODEL === 'true' ? true : false
   };
 
-  validateEnvironment()
+  await validateEnvironment();
 
   if (!fs.existsSync(options.contentFile)) {
     throw new Error(`File not found: ${options.contentFile}`);
   }
+
+  console.log("Attempting import with the following options:", options)
 
   try {
     await contentfulImport(options);
