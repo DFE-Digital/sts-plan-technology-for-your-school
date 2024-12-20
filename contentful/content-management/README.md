@@ -40,7 +40,23 @@ Required Environment variables
 `ENVIRONMENT` (environmentId default is 'master')
 `SKIP_CONTENT_MODEL` (optional, default is false)
 
-### Removing old content
+## Deleting all content
 
-You may wish to remove all content from an environment, before importing from a backup. This can be done with the
-[Contentful Data Clearer](../contentful-data-clearer/README.md)
+You may wish to remove all content from an environment, for example, before importing from a backup. 
+This can be done with the `delete-all-content` script, which will clear down the entire environment. 
+
+### Setup
+
+1. Copy `.env.example` and rename to `.env`
+2. Populate the required variables in the file
+3. Run the script via your terminal by running `node delete-all-content.js` to delete _all content types_
+
+_Note: If you want to just delete content for specific content type(s), add a variable called *CONTENT_TYPES_TO_DELETE* in your .env file which should contain a comma separated list of content types to delete_
+
+### Warnings
+
+There is absolutely no confirmation before deletion or anything like that. Make sure you use the right environment variables before running it!
+
+You don't want to accidentally delete everything somewhere else.
+
+Highly recommend backing up your data first!
