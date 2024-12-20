@@ -1,0 +1,1894 @@
+[
+    {
+        "sys": { "id": "header", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "⚙️ Component - Header",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "text",
+                "name": "Text",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "tag",
+                "name": "Tag",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [{ "in": ["H1", "H2", "H3"] }],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "size",
+                "name": "Size",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [
+                    { "in": ["Small", "Medium", "Large", "ExtraLarge"] }
+                ],
+                "disabled": false,
+                "omitted": false
+            }
+        ]
+    },
+    {
+        "sys": { "id": "textBody", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "⚙️ Component - Text Body",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "richText",
+                "name": "Rich Text",
+                "type": "RichText",
+                "localized": false,
+                "required": true,
+                "validations": [
+                    {
+                        "enabledMarks": ["bold"],
+                        "message": "Only bold marks are allowed"
+                    },
+                    {
+                        "enabledNodeTypes": [
+                            "ordered-list",
+                            "unordered-list",
+                            "hyperlink",
+                            "table",
+                            "heading-1",
+                            "heading-2",
+                            "heading-3",
+                            "heading-4",
+                            "heading-5",
+                            "heading-6"
+                        ],
+                        "message": "Only ordered list, unordered list, link to Url, table, heading 1, heading 2, heading 3, heading 4, heading 5, and heading 6 nodes are allowed"
+                    },
+                    { "nodes": {} }
+                ],
+                "disabled": false,
+                "omitted": false
+            }
+        ]
+    },
+    {
+        "sys": { "id": "title", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "⚙️ Component - Title",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "text",
+                "name": "Text",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            }
+        ]
+    },
+    {
+        "sys": { "id": "category", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "❓Questionnaire - Category",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "header",
+                "name": "Header",
+                "type": "Link",
+                "localized": false,
+                "required": true,
+                "validations": [{ "linkContentType": ["header"] }],
+                "disabled": false,
+                "omitted": false,
+                "linkType": "Entry"
+            },
+            {
+                "id": "content",
+                "name": "Content",
+                "type": "Array",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false,
+                "items": {
+                    "type": "Link",
+                    "validations": [{ "linkContentType": ["textBody"] }],
+                    "linkType": "Entry"
+                }
+            },
+            {
+                "id": "sections",
+                "name": "Sections",
+                "type": "Array",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false,
+                "items": {
+                    "type": "Link",
+                    "validations": [{ "linkContentType": ["section"] }],
+                    "linkType": "Entry"
+                }
+            }
+        ]
+    },
+    {
+        "sys": { "id": "componentDropDown", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "Component - Drop Down",
+        "description": "Drop down compontent.",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "title",
+                "name": "Title",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "content",
+                "name": "Content",
+                "type": "RichText",
+                "localized": false,
+                "required": true,
+                "validations": [
+                    {
+                        "enabledMarks": ["bold"],
+                        "message": "Only bold marks are allowed"
+                    },
+                    {
+                        "enabledNodeTypes": ["unordered-list", "ordered-list"],
+                        "message": "Only unordered list and ordered list nodes are allowed"
+                    },
+                    { "nodes": {} }
+                ],
+                "disabled": false,
+                "omitted": false
+            }
+        ]
+    },
+    {
+        "sys": { "id": "button", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "⚙️ Component - Button",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "value",
+                "name": "Value",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "isStartButton",
+                "name": "Is Start Button?",
+                "type": "Boolean",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            }
+        ]
+    },
+    {
+        "sys": { "id": "buttonWithLink", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "⚙️ Component - Button With Link",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "button",
+                "name": "Button",
+                "type": "Link",
+                "localized": false,
+                "required": true,
+                "validations": [{ "linkContentType": ["button"] }],
+                "disabled": false,
+                "omitted": false,
+                "linkType": "Entry"
+            },
+            {
+                "id": "href",
+                "name": "Href",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            }
+        ]
+    },
+    {
+        "sys": { "id": "question", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "❓Questionnaire - Question",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "text",
+                "name": "Text",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "helpText",
+                "name": "Help Text",
+                "type": "Symbol",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "answers",
+                "name": "Answers",
+                "type": "Array",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false,
+                "items": {
+                    "type": "Link",
+                    "validations": [{ "linkContentType": ["answer"] }],
+                    "linkType": "Entry"
+                }
+            },
+            {
+                "id": "slug",
+                "name": "Slug",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            }
+        ]
+    },
+    {
+        "sys": { "id": "answer", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "❓Questionnaire - Answer",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "text",
+                "name": "Text",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "nextQuestion",
+                "name": "Next Question",
+                "type": "Link",
+                "localized": false,
+                "required": false,
+                "validations": [{ "linkContentType": ["question"] }],
+                "disabled": false,
+                "omitted": false,
+                "linkType": "Entry"
+            },
+            {
+                "id": "maturity",
+                "name": "Maturity",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [{ "in": ["None", "Low", "Medium", "High"] }],
+                "disabled": false,
+                "omitted": false
+            }
+        ]
+    },
+    {
+        "sys": { "id": "dynamicContent", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "⚙️ Component - Dynamic Content",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "dynamicField",
+                "name": "Dynamic Field",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [{ "in": ["Section Title"] }],
+                "disabled": false,
+                "omitted": false
+            }
+        ]
+    },
+    {
+        "sys": { "id": "buttonWithEntryReference", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "⚙️ Component - Button With Entry Reference",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "button",
+                "name": "Button",
+                "type": "Link",
+                "localized": false,
+                "required": true,
+                "validations": [{ "linkContentType": ["button"] }],
+                "disabled": false,
+                "omitted": false,
+                "linkType": "Entry"
+            },
+            {
+                "id": "linkToEntry",
+                "name": "Link To Entry",
+                "type": "Link",
+                "localized": false,
+                "required": true,
+                "validations": [{ "linkContentType": ["page", "question"] }],
+                "disabled": false,
+                "omitted": false,
+                "linkType": "Entry"
+            }
+        ]
+    },
+    {
+        "sys": { "id": "page", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "📃 Page",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "InternalName",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "slug",
+                "name": "Slug",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "displayHomeButton",
+                "name": "Display home button",
+                "type": "Boolean",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "defaultValue": { "en-US": false },
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "displayBackButton",
+                "name": "Display back button",
+                "type": "Boolean",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "defaultValue": { "en-US": true },
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "displayOrganisationName",
+                "name": "Display Organisation Name",
+                "type": "Boolean",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "defaultValue": { "en-US": false },
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "displayTopicTitle",
+                "name": "Display topic title?",
+                "type": "Boolean",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "defaultValue": { "en-US": false },
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "beforeTitleContent",
+                "name": "Before Title Content",
+                "type": "Array",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false,
+                "items": {
+                    "type": "Link",
+                    "validations": [
+                        {
+                            "linkContentType": [
+                                "warningComponent",
+                                "notificationBanner"
+                            ]
+                        }
+                    ],
+                    "linkType": "Entry"
+                }
+            },
+            {
+                "id": "title",
+                "name": "Title",
+                "type": "Link",
+                "localized": false,
+                "required": false,
+                "validations": [{ "linkContentType": ["title"] }],
+                "disabled": false,
+                "omitted": false,
+                "linkType": "Entry"
+            },
+            {
+                "id": "content",
+                "name": "Content",
+                "type": "Array",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false,
+                "items": {
+                    "type": "Link",
+                    "validations": [
+                        {
+                            "linkContentType": [
+                                "textBody",
+                                "header",
+                                "category",
+                                "buttonWithLink",
+                                "componentDropDown",
+                                "dynamicContent",
+                                "buttonWithEntryReference",
+                                "insetText",
+                                "warningComponent",
+                                "notificationBanner"
+                            ]
+                        }
+                    ],
+                    "linkType": "Entry"
+                }
+            },
+            {
+                "id": "requiresAuthorisation",
+                "name": "Requires Authorisation",
+                "type": "Boolean",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "defaultValue": { "en-US": true },
+                "disabled": false,
+                "omitted": false
+            }
+        ]
+    },
+    {
+        "sys": { "id": "insetText", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "⚙️ Component - Inset Text",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "text",
+                "name": "Text",
+                "type": "Text",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            }
+        ]
+    },
+    {
+        "sys": { "id": "section", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "❓Questionnaire - Section",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "name",
+                "name": "Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "interstitialPage",
+                "name": "Interstitial Page",
+                "type": "Link",
+                "localized": false,
+                "required": true,
+                "validations": [{ "linkContentType": ["page"] }],
+                "disabled": false,
+                "omitted": false,
+                "linkType": "Entry"
+            },
+            {
+                "id": "questions",
+                "name": "Questions",
+                "type": "Array",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false,
+                "items": {
+                    "type": "Link",
+                    "validations": [{ "linkContentType": ["question"] }],
+                    "linkType": "Entry"
+                }
+            }
+        ]
+    },
+    {
+        "sys": { "id": "navigationLink", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "Navigation Link",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "displayText",
+                "name": "Display Text",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "href",
+                "name": "Href",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "openInNewTab",
+                "name": "Open in new tab",
+                "type": "Boolean",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            }
+        ]
+    },
+    {
+        "sys": { "id": "warningComponent", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "⚙️ Component - Warning",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "text",
+                "name": "Text",
+                "type": "Link",
+                "localized": false,
+                "required": true,
+                "validations": [{ "linkContentType": ["textBody"] }],
+                "disabled": false,
+                "omitted": false,
+                "linkType": "Entry"
+            }
+        ]
+    },
+    {
+        "sys": { "id": "recommendationChunk", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "⚙️ Recommendation Chunk",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "header",
+                "name": "Header",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [{ "unique": true }],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "content",
+                "name": "Content",
+                "type": "Array",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false,
+                "items": {
+                    "type": "Link",
+                    "validations": [
+                        { "linkContentType": ["textBody", "header"] }
+                    ],
+                    "linkType": "Entry"
+                }
+            },
+            {
+                "id": "answers",
+                "name": "Answers",
+                "type": "Array",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false,
+                "items": {
+                    "type": "Link",
+                    "validations": [{ "linkContentType": ["answer"] }],
+                    "linkType": "Entry"
+                }
+            },
+            {
+                "id": "csLink",
+                "name": "C&S Link",
+                "type": "Link",
+                "localized": false,
+                "required": false,
+                "validations": [{ "linkContentType": ["csLink"] }],
+                "disabled": false,
+                "omitted": false,
+                "linkType": "Entry"
+            }
+        ]
+    },
+    {
+        "sys": { "id": "recommendationSection", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "⚙️ Recommendation Section",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "answers",
+                "name": "Answers",
+                "type": "Array",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false,
+                "items": {
+                    "type": "Link",
+                    "validations": [{ "linkContentType": ["answer"] }],
+                    "linkType": "Entry"
+                }
+            },
+            {
+                "id": "chunks",
+                "name": "Chunks",
+                "type": "Array",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false,
+                "items": {
+                    "type": "Link",
+                    "validations": [
+                        { "linkContentType": ["recommendationChunk"] }
+                    ],
+                    "linkType": "Entry"
+                }
+            }
+        ]
+    },
+    {
+        "sys": { "id": "subtopicRecommendation", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "⚙️ Subtopic Recommendation",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "intros",
+                "name": "Intros",
+                "type": "Array",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false,
+                "items": {
+                    "type": "Link",
+                    "validations": [
+                        { "linkContentType": ["recommendationIntro"] }
+                    ],
+                    "linkType": "Entry"
+                }
+            },
+            {
+                "id": "section",
+                "name": "Section",
+                "type": "Link",
+                "localized": false,
+                "required": false,
+                "validations": [
+                    { "linkContentType": ["recommendationSection"] }
+                ],
+                "disabled": false,
+                "omitted": false,
+                "linkType": "Entry"
+            },
+            {
+                "id": "subtopic",
+                "name": "Subtopic",
+                "type": "Link",
+                "localized": false,
+                "required": false,
+                "validations": [{ "linkContentType": ["section"] }],
+                "disabled": false,
+                "omitted": false,
+                "linkType": "Entry"
+            }
+        ]
+    },
+    {
+        "sys": { "id": "recommendationIntro", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "⚙️ Recommendation Intro",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "slug",
+                "name": "Slug",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "header",
+                "name": "Header",
+                "type": "Link",
+                "localized": false,
+                "required": false,
+                "validations": [{ "linkContentType": ["header"] }],
+                "disabled": false,
+                "omitted": false,
+                "linkType": "Entry"
+            },
+            {
+                "id": "content",
+                "name": "Content",
+                "type": "Array",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false,
+                "items": {
+                    "type": "Link",
+                    "validations": [
+                        { "linkContentType": ["header", "textBody"] }
+                    ],
+                    "linkType": "Entry"
+                }
+            },
+            {
+                "id": "maturity",
+                "name": "Maturity",
+                "type": "Symbol",
+                "localized": false,
+                "required": false,
+                "validations": [{ "in": ["None", "Low", "Medium", "High"] }],
+                "disabled": false,
+                "omitted": false
+            }
+        ]
+    },
+    {
+        "sys": { "id": "csLink", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "C&S Link",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "url",
+                "name": "URL",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "linkText",
+                "name": "Link Text",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            }
+        ]
+    },
+    {
+        "sys": { "id": "recommendationPage", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "📃 Recommendation Page",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "displayName",
+                "name": "Display Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "maturity",
+                "name": "Maturity",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [{ "in": ["Low", "Medium", "High"] }],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "page",
+                "name": "Page",
+                "type": "Link",
+                "localized": false,
+                "required": true,
+                "validations": [{ "linkContentType": ["page"] }],
+                "disabled": false,
+                "omitted": false,
+                "linkType": "Entry"
+            }
+        ]
+    },
+    {
+        "sys": { "id": "pageRecommendation", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "📃 Page - Recommendation",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "title",
+                "name": "Title",
+                "type": "Link",
+                "localized": false,
+                "required": true,
+                "validations": [{ "linkContentType": ["title"] }],
+                "disabled": false,
+                "omitted": false,
+                "linkType": "Entry"
+            },
+            {
+                "id": "insetText",
+                "name": "Inset Text",
+                "type": "Link",
+                "localized": false,
+                "required": true,
+                "validations": [{ "linkContentType": ["insetText"] }],
+                "disabled": false,
+                "omitted": false,
+                "linkType": "Entry"
+            },
+            {
+                "id": "textBody",
+                "name": "Text Body",
+                "type": "Link",
+                "localized": false,
+                "required": true,
+                "validations": [{ "linkContentType": ["textBody"] }],
+                "disabled": false,
+                "omitted": false,
+                "linkType": "Entry"
+            },
+            {
+                "id": "header",
+                "name": "Header",
+                "type": "Array",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false,
+                "items": {
+                    "type": "Link",
+                    "validations": [{ "linkContentType": ["header"] }],
+                    "linkType": "Entry"
+                }
+            },
+            {
+                "id": "textBodyWithMaturity",
+                "name": "Text Body With Maturity",
+                "type": "Array",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false,
+                "items": {
+                    "type": "Link",
+                    "validations": [
+                        { "linkContentType": ["componentTextBodyWithMaturity"] }
+                    ],
+                    "linkType": "Entry"
+                }
+            },
+            {
+                "id": "content",
+                "name": "Content",
+                "type": "Array",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false,
+                "items": {
+                    "type": "Link",
+                    "validations": [
+                        {
+                            "linkContentType": [
+                                "header",
+                                "buttonWithLink",
+                                "componentTextBodyWithMaturity"
+                            ]
+                        }
+                    ],
+                    "linkType": "Entry"
+                }
+            }
+        ]
+    },
+    {
+        "sys": { "id": "componentTextBodyWithMaturity", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "⚙️ Component - Text Body With Maturity",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "textBody",
+                "name": "Text Body",
+                "type": "Link",
+                "localized": false,
+                "required": true,
+                "validations": [{ "linkContentType": ["textBody"] }],
+                "disabled": false,
+                "omitted": false,
+                "linkType": "Entry"
+            },
+            {
+                "id": "maturity",
+                "name": "Maturity",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [{ "in": ["None", "Low", "Medium", "High"] }],
+                "disabled": false,
+                "omitted": false
+            }
+        ]
+    },
+    {
+        "sys": { "id": "CSAccordion", "type": "ContentType" },
+        "displayField": "InternalName",
+        "name": "⚙️ Component - Accordion",
+        "description": "GDS Accordion component for Content Support",
+        "fields": [
+            {
+                "id": "InternalName",
+                "name": "InternalName",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "Content",
+                "name": "Content",
+                "type": "Array",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false,
+                "items": {
+                    "type": "Link",
+                    "validations": [
+                        { "linkContentType": ["AccordionSection"] }
+                    ],
+                    "linkType": "Entry"
+                }
+            }
+        ]
+    },
+    {
+        "sys": { "id": "Attachment", "type": "ContentType" },
+        "displayField": "InternalName",
+        "name": "⚙️ Component - Attachment",
+        "description": "Displays a link to download an attachment and metadata about the file",
+        "fields": [
+            {
+                "id": "InternalName",
+                "name": "InternalName",
+                "type": "Symbol",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "Title",
+                "name": "Title",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "Asset",
+                "name": "Asset",
+                "type": "Link",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false,
+                "linkType": "Asset"
+            }
+        ]
+    },
+    {
+        "sys": { "id": "csCard", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "⚙️ Component - Card",
+        "description": "Card component for Content Support",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "InternalName",
+                "type": "Symbol",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "title",
+                "name": "Title",
+                "type": "Symbol",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "description",
+                "name": "Description",
+                "type": "Symbol",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "meta",
+                "name": "Meta",
+                "type": "Symbol",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "image",
+                "name": "Image",
+                "type": "Link",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false,
+                "linkType": "Asset"
+            },
+            {
+                "id": "imageAlt",
+                "name": "ImageAlt",
+                "type": "Symbol",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "uri",
+                "name": "URI",
+                "type": "Symbol",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            }
+        ]
+    },
+    {
+        "sys": { "id": "ContentSupportPage", "type": "ContentType" },
+        "displayField": "InternalName",
+        "name": "ContentSupportPage",
+        "description": "A page for STS Content And Support",
+        "fields": [
+            {
+                "id": "InternalName",
+                "name": "InternalName",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "Slug",
+                "name": "Slug",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "Heading",
+                "name": "Heading",
+                "type": "Link",
+                "localized": false,
+                "required": false,
+                "validations": [{ "linkContentType": ["CSHeading"] }],
+                "disabled": false,
+                "omitted": false,
+                "linkType": "Entry"
+            },
+            {
+                "id": "Content",
+                "name": "Content",
+                "type": "Array",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false,
+                "items": {
+                    "type": "Link",
+                    "validations": [
+                        {
+                            "linkContentType": [
+                                "textBody",
+                                "header",
+                                "category",
+                                "buttonWithLink",
+                                "componentDropDown",
+                                "dynamicContent",
+                                "buttonWithEntryReference",
+                                "insetText",
+                                "warningComponent",
+                                "CSBodyText",
+                                "Attachment"
+                            ]
+                        }
+                    ],
+                    "linkType": "Entry"
+                }
+            },
+            {
+                "id": "IsSitemap",
+                "name": "Include in Sitemap",
+                "type": "Boolean",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "defaultValue": { "en-US": true },
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "hasBackToTop",
+                "name": "Has BackToTop",
+                "type": "Boolean",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "defaultValue": { "en-US": false },
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "hasCitation",
+                "name": "Has Citation",
+                "type": "Boolean",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "defaultValue": { "en-US": false },
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "showVerticalNavigation",
+                "name": "Show Vertical Navigation",
+                "type": "Boolean",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "defaultValue": { "en-US": false },
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "HasFeedbackBanner",
+                "name": "Has Feedback Banner",
+                "type": "Boolean",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "defaultValue": { "en-US": true },
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "hasPrint",
+                "name": "Has Print",
+                "type": "Boolean",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "defaultValue": { "en-US": false },
+                "disabled": false,
+                "omitted": false
+            }
+        ]
+    },
+    {
+        "sys": { "id": "csJumpLinkComponent", "type": "ContentType" },
+        "displayField": "componentName",
+        "name": "⚙️ Component - Jump Link",
+        "description": "Content Support jump link",
+        "fields": [
+            {
+                "id": "componentName",
+                "name": "Component Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "jumpIdentifier",
+                "name": "JumpIdentifier",
+                "type": "Symbol",
+                "localized": false,
+                "required": false,
+                "validations": [
+                    {
+                        "prohibitRegexp": {
+                            "pattern": "/^\\S+$/",
+                            "flags": null
+                        }
+                    }
+                ],
+                "disabled": false,
+                "omitted": false
+            }
+        ]
+    },
+    {
+        "sys": { "id": "CSHeading", "type": "ContentType" },
+        "displayField": "InternalName",
+        "name": "⚙️ Component - Hero",
+        "description": "Heading for ContentSupportPage",
+        "fields": [
+            {
+                "id": "InternalName",
+                "name": "InternalName",
+                "type": "Symbol",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "Title",
+                "name": "Title",
+                "type": "Symbol",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "Subtitle",
+                "name": "Subtitle",
+                "type": "Text",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            }
+        ]
+    },
+    {
+        "sys": { "id": "CSBodyText", "type": "ContentType" },
+        "displayField": "InternalName",
+        "name": "CSBodyText",
+        "description": "Body text for ContentSupportPage",
+        "fields": [
+            {
+                "id": "InternalName",
+                "name": "InternalName",
+                "type": "Symbol",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "RichText",
+                "name": "Rich Text",
+                "type": "RichText",
+                "localized": false,
+                "required": false,
+                "validations": [
+                    {
+                        "enabledMarks": ["bold", "italic", "underline"],
+                        "message": "Only bold, italic, and underline marks are allowed"
+                    },
+                    {
+                        "enabledNodeTypes": [
+                            "heading-2",
+                            "heading-3",
+                            "heading-4",
+                            "heading-5",
+                            "heading-6",
+                            "ordered-list",
+                            "unordered-list",
+                            "hr",
+                            "blockquote",
+                            "embedded-entry-block",
+                            "embedded-asset-block",
+                            "table",
+                            "hyperlink",
+                            "entry-hyperlink",
+                            "asset-hyperlink",
+                            "embedded-entry-inline"
+                        ],
+                        "message": "Only heading 2, heading 3, heading 4, heading 5, heading 6, ordered list, unordered list, horizontal rule, quote, block entry, asset, table, link to Url, link to entry, link to asset, and inline entry nodes are allowed"
+                    },
+                    { "nodes": {} }
+                ],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "title",
+                "name": "Title",
+                "type": "Symbol",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "subtitle",
+                "name": "Subtitle",
+                "type": "Symbol",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "defaultValue": {
+                    "en-US": "Subtitle that will be visible if vertical navigation is used "
+                },
+                "disabled": false,
+                "omitted": false
+            }
+        ]
+    },
+    {
+        "sys": { "id": "componentHero", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "⚙️ Component - Hero",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "InternalName",
+                "type": "Symbol",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "content",
+                "name": "Content",
+                "type": "Array",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false,
+                "items": {
+                    "type": "Link",
+                    "validations": [{ "linkContentType": ["csCard"] }],
+                    "linkType": "Entry"
+                }
+            }
+        ]
+    },
+    {
+        "sys": { "id": "GridContainer", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "⚙️ Component - GridContainer",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "InternalName",
+                "type": "Symbol",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "content",
+                "name": "Content",
+                "type": "Array",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false,
+                "items": {
+                    "type": "Link",
+                    "validations": [{ "linkContentType": ["csCard"] }],
+                    "linkType": "Entry"
+                }
+            }
+        ]
+    },
+    {
+        "sys": { "id": "AccordionSection", "type": "ContentType" },
+        "displayField": "InternalName",
+        "name": "⚙️ Component - Accordion Section",
+        "description": "Accordion section for use within an accordion container",
+        "fields": [
+            {
+                "id": "InternalName",
+                "name": "InternalName",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "Title",
+                "name": "Title",
+                "type": "Symbol",
+                "localized": false,
+                "required": true,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "SummaryLine",
+                "name": "SummaryLine",
+                "type": "Symbol",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "RichText",
+                "name": "Rich Text",
+                "type": "RichText",
+                "localized": false,
+                "required": false,
+                "validations": [
+                    {
+                        "enabledMarks": [
+                            "bold",
+                            "italic",
+                            "underline",
+                            "code",
+                            "superscript",
+                            "subscript"
+                        ],
+                        "message": "Only bold, italic, underline, code, superscript, and subscript marks are allowed"
+                    },
+                    {
+                        "enabledNodeTypes": [
+                            "heading-1",
+                            "heading-2",
+                            "heading-3",
+                            "heading-4",
+                            "heading-5",
+                            "heading-6",
+                            "ordered-list",
+                            "unordered-list",
+                            "hr",
+                            "blockquote",
+                            "embedded-entry-block",
+                            "embedded-asset-block",
+                            "table",
+                            "asset-hyperlink",
+                            "embedded-entry-inline",
+                            "entry-hyperlink",
+                            "hyperlink"
+                        ],
+                        "message": "Only heading 1, heading 2, heading 3, heading 4, heading 5, heading 6, ordered list, unordered list, horizontal rule, quote, block entry, asset, table, link to asset, inline entry, link to entry, and link to Url nodes are allowed"
+                    },
+                    { "nodes": {} }
+                ],
+                "disabled": false,
+                "omitted": false
+            }
+        ]
+    },
+    {
+        "sys": { "id": "notificationBanner", "type": "ContentType" },
+        "displayField": "internalName",
+        "name": "⚙️ Component - Notification Banner",
+        "description": "",
+        "fields": [
+            {
+                "id": "internalName",
+                "name": "Internal Name",
+                "type": "Symbol",
+                "localized": false,
+                "required": false,
+                "validations": [],
+                "disabled": false,
+                "omitted": false
+            },
+            {
+                "id": "text",
+                "name": "Text",
+                "type": "Link",
+                "localized": false,
+                "required": true,
+                "validations": [{ "linkContentType": ["textBody"] }],
+                "disabled": false,
+                "omitted": false,
+                "linkType": "Entry"
+            }
+        ]
+    }
+]
