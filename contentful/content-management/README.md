@@ -26,7 +26,6 @@ ____
 - importing content can be achieved using the `import-content` script, which will import content from a json file into a specified environment. The json file should be in the format of the `export-processor` export outputs
 - `import-content` uses the `contentful-import` npm package to do the importing
 
-
 ### Usage
 
 1. Setup `.env` (copy `.env.example` and setup fields as necessary)
@@ -40,3 +39,8 @@ Required Environment variables
 `MANAGEMENT_TOKEN`
 `ENVIRONMENT` (environmentId default is 'master')
 `SKIP_CONTENT_MODEL` (optional, default is false)
+
+### Removing old content
+
+You may wish to remove all content from an environment, before importing from a backup. This can be done with the
+[Contentful Data Clearer](../contentful-data-clearer/README.md)
