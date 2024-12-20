@@ -14,4 +14,8 @@ export class Question {
     this.slug = fields.slug;
     this.id = sys.id;
   }
+
+  get answerIds(){
+    return this.answers.map((answer) => answer.id);
+  }
 }

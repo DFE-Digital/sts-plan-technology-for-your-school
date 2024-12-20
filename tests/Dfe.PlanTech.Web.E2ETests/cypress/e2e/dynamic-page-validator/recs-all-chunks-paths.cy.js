@@ -11,9 +11,6 @@ describe("Remaining-answer paths", { testIsolation: false }, () => {
     });
 
     (dataMapper?.mappedSections ?? []).forEach((section) => {
-        section.getPathsForAllAnswers();
-        section.checkAllChunksTested();
-
         describe(`${section.name} recommendations`, { testIsolation: false }, () => {
 
             before(function () {
@@ -26,7 +23,7 @@ describe("Remaining-answer paths", { testIsolation: false }, () => {
                     });
             });
 
-            section.pathsForAllPossibleAnswers.forEach((userJourney, index) => {
+            section.pathInfo.pathsForAllPossibleAnswers.forEach((userJourney, index) => {
                 const { path, maturity } = userJourney
                 describe(`${section.name} should retrieve correct recommendations for additional path ${index + 1} of ${section.pathsForAllPossibleAnswers.length}`, () => {
                     minimalSectionValidationForRecommendations(section, [path], maturity)
