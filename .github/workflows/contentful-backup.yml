@@ -85,12 +85,6 @@ jobs:
         working-directory: ./contentful/export-processor
         run: npm run export-all-only
 
-      - name: Debug step
-        working-directory: ./contentful/export-processor
-        run: |
-          ls -l
-          ls -l output
-
       - name: Upload export to Azure storage container
         working-directory: ./contentful/export-processor
         run: |
