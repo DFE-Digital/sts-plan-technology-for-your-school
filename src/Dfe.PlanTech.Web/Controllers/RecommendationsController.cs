@@ -13,7 +13,10 @@ namespace Dfe.PlanTech.Web.Controllers;
 public class RecommendationsController(ILogger<RecommendationsController> logger)
     : BaseController<RecommendationsController>(logger)
 {
-    [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}", Name = "GetRecommendation")]
+    public const string ControllerName = "RecommendationsController";
+    public const string GetRecommendationAction = "GetRecommendation";
+
+    [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}", Name = GetRecommendationAction)]
     public async Task<IActionResult> GetRecommendation(string sectionSlug,
                                                        string recommendationSlug,
                                                        [FromServices] IGetRecommendationRouter getRecommendationValidator,
