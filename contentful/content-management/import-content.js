@@ -2,7 +2,8 @@ require('dotenv').config();
 
 const contentfulImport = require('contentful-import');
 const fs = require('fs');
-const validateEnvironment = require("./helpers/validate-environment");
+const getClient = require("./helpers/get-client");
+const deleteContentfulContent = require("./helpers/delete-all-content-and-content-types");
 
 async function importContentfulData() {
   const options = {
@@ -12,14 +13,18 @@ async function importContentfulData() {
     environmentId: process.env.ENVIRONMENT,
 	  skipContentModel: process.env.SKIP_CONTENT_MODEL === 'true' ? true : false
   };
-
-  await validateEnvironment();
+  const client = await getClient();
 
   if (!fs.existsSync(options.contentFile)) {
     throw new Error(`File not found: ${options.contentFile}`);
   }
 
-  console.log("Attempting import with the following options:", options)
+  if (process.env.DELETE_ALL_DATA == 'true') {
+    console.log(`Deleting all existing data from ${options.environmentId}`);
+    await deleteContentfulContent({ client: client });
+  }
+
+  console.log("Starting import with the following options:", options)
 
   try {
     await contentfulImport(options);

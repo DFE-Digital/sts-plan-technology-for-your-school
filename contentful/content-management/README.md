@@ -25,6 +25,9 @@ ____
 
 - importing content can be achieved using the `import-content` script, which will import content from a json file into a specified environment. The json file should be in the format of the `export-processor` export outputs
 - `import-content` uses the `contentful-import` npm package to do the importing
+- By default a content import will add to an environment and not remove unrelated data
+  - It will overwrite entries with the same id as one in the import file, and leave other entries alone
+  - To delete all existing data prior to import so that the environment exactly matches the import file, set `DELETE_ALL_DATA` to true in `.env`
 
 ### Usage
 
@@ -39,11 +42,12 @@ Required Environment variables
 `MANAGEMENT_TOKEN`
 `ENVIRONMENT` (environmentId default is 'master')
 `SKIP_CONTENT_MODEL` (optional, default is false)
+`DELETE_ALL_DATA` (optional, default is false)
 
 ## Deleting all content
 
 You may wish to remove all content from an environment, for example, before importing from a backup. 
-This can be done with the `delete-all-content` script, which will clear down the entire environment. 
+This is an environment variable option in the import process, or it can be run standalone with the `delete-all-content` script, which will clear down the entire environment. 
 
 ### Setup
 
