@@ -18,7 +18,7 @@ public class WebhookMessageProcessor(ICmsCache cache,
         {
             var payload = MapMessageToPayload(body);
 
-            await cache.InvalidateCacheAsync(payload.Sys.Id, payload.ContentType.FirstCharToUpper());
+            await cache.InvalidateCacheAsync(payload.Sys.Id, payload.ContentType);
             return new ServiceBusSuccessResult();
         }
         catch (Exception ex) when (ex is JsonException)
