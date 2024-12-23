@@ -67,13 +67,8 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
 
         return redirectOption switch
         {
-            RecommendationsController.GetRecommendationAction => RedirectToAction(
-                RecommendationsController.GetRecommendationAction,
-                RecommendationsController.ControllerName,
-                new {
-                    sectionSlug,
-                    recommendationSlug = await getRecommendationRouter.GetRecommendationSlugForSection(sectionSlug, cancellationToken)
-                }),
+            RecommendationsController.GetRecommendationAction => this.RedirectToRecommendation(sectionSlug,
+                await getRecommendationRouter.GetRecommendationSlugForSection(sectionSlug, cancellationToken)),
             UrlConstants.SelfAssessmentPage => this.RedirectToSelfAssessment(),
             _ => this.RedirectToCheckAnswers(sectionSlug)
         };

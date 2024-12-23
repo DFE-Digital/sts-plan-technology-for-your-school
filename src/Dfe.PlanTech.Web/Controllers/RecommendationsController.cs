@@ -13,7 +13,7 @@ namespace Dfe.PlanTech.Web.Controllers;
 public class RecommendationsController(ILogger<RecommendationsController> logger)
     : BaseController<RecommendationsController>(logger)
 {
-    public const string ControllerName = "RecommendationsController";
+    public const string ControllerName = "Recommendations";
     public const string GetRecommendationAction = "GetRecommendation";
 
     [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}", Name = GetRecommendationAction)]
