@@ -42,7 +42,7 @@ public class WebhookMessageProcessorTests
         var result = await _webhookMessageProcessor.ProcessMessage(subject, QuestionJsonBody, "message id", CancellationToken.None);
 
         Assert.IsType<ServiceBusSuccessResult>(result);
-        await _cache.Received(1).InvalidateCacheAsync(QuestionId, "Question");
+        await _cache.Received(1).InvalidateCacheAsync(QuestionId, "question");
     }
 
     [Fact]
