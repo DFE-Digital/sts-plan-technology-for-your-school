@@ -10,7 +10,7 @@ const completeFirstSubtopic = () => {
   return cy
     .navigateToCheckAnswersPage(selectedQuestionsWithAnswers)
     .then((res) => cy.wrap(res))
-    .then(() => cy.submitAnswers());
+    .then(() => cy.submitAnswersAndGoToSelfAssessment());
 }
 
 const navigateToCheckAnswersPage = (selectedQuestionsWithAnswers) => {
