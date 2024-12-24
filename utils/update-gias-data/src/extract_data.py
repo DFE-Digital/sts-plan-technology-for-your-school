@@ -16,6 +16,7 @@ def _extract_data(zip_path: Path) -> None:
 
 
 def _read_csv(path: Path, columns: dict[str, str]) -> pd.DataFrame:
+    """Read a csv file keeping all columns as strings and rename columns as per provided columns mapping"""
     df = pd.read_csv(
         path,
         encoding="latin1",

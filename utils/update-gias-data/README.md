@@ -3,10 +3,12 @@
 ## Overview 
 Establishment groups reside in the `dbo.establishmentGroup` table, which the `dbo.establishment` table maps to by foreign key.
 
-The data is updated daily and there is no API to retrieve it,
-so this python project uses playwright to retrieve the data,
-then pandas to parse it and update the SQL database with any changes.
+GIAS data is updated daily and there is no API to retrieve it,
+so this python project uses playwright to pull down the zip folder of groups and links,
+then uses pandas to parse it, and pyodbc to update the SQL database with any changes.
 It runs as part of our github actions on a daily schedule.
+
+Follows the guidance [in the Microsoft documentation](https://learn.microsoft.com/en-us/azure/azure-sql/database/azure-sql-python-quickstart?view=azuresql&tabs=windows%2Csql-inter#add-code-to-connect-to-azure-sql-database) for connecting to the database with pyodbc.
 
 ## Local setup
 
@@ -21,13 +23,13 @@ To run the data-updater locally:
    | CONNECTION_STRING | SQL Connection string for the plan-tech database | Keyvault value for `python--dbconnectionstring` |
 
 4. create a virtual environment and install dependencies:
-    ```bash
-    make setup
-    ```
+   ```bash
+   make setup
+   ```
 5. Fetch the GIAS data and update the database with
-    ```bash
-    make run
-    ```
+   ```bash
+   make run
+   ```
 
 ## Linting and formatting
 
@@ -49,6 +51,7 @@ For windows setup this would be:
    uv venv
    .venv/Scripts/activate
    uv sync
+   uv run playwright install --with-deps webkit
    ```
 2. Running the Project
    ```bash

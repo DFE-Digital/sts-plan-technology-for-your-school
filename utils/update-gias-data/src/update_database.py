@@ -13,9 +13,11 @@ load_dotenv()
 logger = getLogger(__name__)
 
 CONNECTION_STRING = os.getenv("CONNECTION_STRING")
+SQL_COPT_SS_ACCESS_TOKEN = 1256
 
 
 def _get_connection():
+    """Fetch a token for accessing the database and connect"""
     try:
         credential = identity.DefaultAzureCredential(
             exclude_interactive_browser_credential=True
@@ -26,7 +28,7 @@ def _get_connection():
             f"<I{len(token_bytes)}s", len(token_bytes), token_bytes
         )
         connection = pyodbc.connect(
-            CONNECTION_STRING, attrs_before={1256: token_struct}
+            CONNECTION_STRING, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct}
         )
         logger.info("Successfully connected to Microsoft Azure SQL Database")
         return connection
@@ -55,6 +57,7 @@ def _db_cursor():
 
 
 def _create_temp_groups(cursor: Cursor, groups: pd.DataFrame) -> None:
+    """Create temp table for holding establishment groups"""
     logger.info(
         "Creating #EstablishmentGroup staging table with %s records", len(groups)
     )
@@ -74,6 +77,7 @@ def _create_temp_groups(cursor: Cursor, groups: pd.DataFrame) -> None:
 
 
 def _create_temp_links(cursor: Cursor, links: pd.DataFrame) -> None:
+    """Create temp table for holding links between establishment groups and establishments"""
     logger.info("Creating #EstablishmentLink staging table with %s records", len(links))
     cursor.execute(
         "CREATE TABLE #EstablishmentLink(uid NVARCHAR(50), establishmentName NVARCHAR(200))"

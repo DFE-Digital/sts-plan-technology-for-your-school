@@ -9,3 +9,4 @@ setup:
 	uv venv
 	(source .venv/bin/activate)
 	uv sync
+	uv run playwright install --with-deps webkit
