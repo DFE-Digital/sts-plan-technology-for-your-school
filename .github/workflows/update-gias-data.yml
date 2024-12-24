@@ -14,7 +14,7 @@ on:
         default: 'Staging'
 
 jobs:
-  generate_images:
+  update_gias_data:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'Dev' }}
     name: Update GIAS data for ${{ inputs.environment || 'Dev' }}
@@ -72,6 +72,9 @@ jobs:
 
       - name: Install requirements
         run: uv sync
+
+      - name: Install playwright
+        run: uv run playwright install --with-deps webkit
 
       - name: Fetch data and update database
         run: uv run main.py
