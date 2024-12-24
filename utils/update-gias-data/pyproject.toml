@@ -1,0 +1,21 @@
+[project]
+name = "update-gias-data"
+version = "0.1.0"
+description = "Refreshes the GIAS data in the plan-tech database"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "azure-identity>=1.19.0",
+    "pandas>=2.2.3",
+    "playwright>=1.49.1",
+    "pyodbc>=5.2.0",
+    "python-dotenv>=1.0.1",
+]
+
+[tool.ruff.lint]
+extend-select = ["I"]
+
+[tool.uv]
+dev-dependencies = [
+    "ruff>=0.8.4",
+]
