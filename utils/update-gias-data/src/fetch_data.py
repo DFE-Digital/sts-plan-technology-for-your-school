@@ -9,7 +9,7 @@ logger = getLogger(__name__)
 
 def _fetch_gias_data(play: Playwright) -> None:
     """Use playwright to download the dynamically generated GIAS data file"""
-    browser = play.chromium.launch(headless=True)
+    browser = play.webkit.launch(headless=True)
     context = browser.new_context()
     page = context.new_page()
 
@@ -23,7 +23,7 @@ def _fetch_gias_data(play: Playwright) -> None:
     page.get_by_role("button", name="Results.zip").click()
 
     logger.info("Downloading results")
-    with page.expect_download() as download_info:
+    with page.expect_download(timeout=120000) as download_info:
         download = download_info.value
         download.save_as(DOWNLOAD_PATH / "extract.zip")
 
