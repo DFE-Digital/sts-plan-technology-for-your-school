@@ -1,0 +1,89 @@
+name: Update GIAS Data
+
+on:
+  pull_request:
+  schedule:
+    - cron: 0 0 * * *
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Which environment to update
+        required: true
+        type: choice
+        options: ['Dev', 'Tst', 'Staging', 'Production']
+        default: 'Staging'
+
+jobs:
+  generate_images:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'Dev' }}
+    name: Update GIAS data for ${{ inputs.environment || 'Dev' }}
+    defaults:
+      run:
+        working-directory: ./utils/update-gias-data
+    env:
+      az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
+      az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      az_keyvault_python_connection_string: python--dbconnectionstring
+      SQL_IP_NAME: gias-data-updater
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+
+      - name: Get workflow IP address
+        id: whats-my-ip
+        uses: ./.github/actions/whats-my-ip-address
+
+      - name: Add Azure firewall rules
+        uses: ./.github/actions/azure-ip-whitelist
+        with:
+          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+          verb: "add"
+          az_keyvault_name: ${{ env.az_keyvault_name }}
+          az_ip_name: ${{ env.SQL_IP_NAME }}
+          az_resource_group: ${{ env.az_resource_group_name}}
+          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
+
+      - name: Install Microsoft ODBC Driver
+        run: sudo ACCEPT_EULA=Y apt-get install msodbcsql18 mssql-tools18 -y
+
+      - name: Get connection string
+        id: get-connection-string
+        uses: ./.github/actions/azure-get-keyvault-secret
+        with:
+          az_keyvault_name: ${{ env.az_keyvault_name }}
+          az_keyvault_secret_name: ${{ env.az_keyvault_python_connection_string }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install requirements
+        run: uv sync
+
+      - name: Fetch data and update database
+        run: uv run main.py
+        env:
+          CONNECTION_STRING: ${{ steps.get-connection-string.outputs.secret_value }}
+
+      - name: Remove Azure firewall rules
+        uses: ./.github/actions/azure-ip-whitelist
+        with:
+          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+          verb: "remove"
+          az_keyvault_name: ${{ env.az_keyvault_name }}
+          az_ip_name: ${{ env.SQL_IP_NAME }}
+          az_resource_group: ${{ env.az_resource_group_name}}
+          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
