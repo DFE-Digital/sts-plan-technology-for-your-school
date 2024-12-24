@@ -10,6 +10,7 @@ logger = getLogger(__name__)
 def _fetch_gias_data(play: Playwright) -> None:
     """Use playwright to download the dynamically generated GIAS data file"""
     browser = play.webkit.launch(headless=True)
+
     context = browser.new_context()
     page = context.new_page()
 

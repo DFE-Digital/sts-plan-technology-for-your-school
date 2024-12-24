@@ -73,7 +73,7 @@ jobs:
       - name: Install requirements
         run: uv sync
 
-      - name: Install playwright
+      - name: Install playwright with webkit
         run: uv run playwright install --with-deps webkit
 
       - name: Fetch data and update database
