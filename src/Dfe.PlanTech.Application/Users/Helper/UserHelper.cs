@@ -54,6 +54,15 @@ public class UserHelper : IUser
         return Convert.ToInt16(establishmentId);
     }
 
+    public async Task<string?> GetEstablishmentGroupName()
+    {
+        var establishmentId = await GetEstablishmentId();
+
+        var establishmentGroup = await _getEstablishmentIdQuery.GetEstablishmentGroupName(establishmentId);
+
+        return establishmentGroup;
+    }
+
     public async Task<int> SetEstablishment()
     {
         var establishmentDto = GetOrganisationData();

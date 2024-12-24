@@ -26,5 +26,7 @@ public class Page : ContentComponent, IPageContent
 
     public string? OrganisationName { get; set; }
 
+    public string? EstablishmentGroupName { get; set; }
+
     public List<ContentComponent> Content { get; init; } = [];
 }

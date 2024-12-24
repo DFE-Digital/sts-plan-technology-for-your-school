@@ -31,6 +31,13 @@ public class PageViewModel
         var establishment = user.GetOrganisationData();
 
         Page.OrganisationName = establishment.OrgName;
+        Page.EstablishmentGroupName = establishment.Uid;
+    }
+
+    public async Task TryLoadEstablishmentGroupName(IUser user)
+    {
+        var group = await user.GetEstablishmentGroupName();
+        Page.EstablishmentGroupName = group;
     }
 
     public bool DisplayBlueBanner { get; set; }

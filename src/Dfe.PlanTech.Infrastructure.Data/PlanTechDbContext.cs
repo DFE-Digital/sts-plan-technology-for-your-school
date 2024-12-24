@@ -14,6 +14,7 @@ namespace Dfe.PlanTech.Infrastructure.Data;
 public class PlanTechDbContext : DbContext, IPlanTechDbContext
 {
     public DbSet<Establishment> Establishments { get; set; } = null!;
+    public DbSet<EstablishmentGroup> EstablishmentGroups { get; set; } = null!;
     public DbSet<Response> Responses { get; set; } = null!;
     public DbSet<ResponseAnswer> Answers { get; set; } = null!;
     public DbSet<ResponseQuestion> Questions { get; set; } = null!;
@@ -51,6 +52,12 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
             builder.HasKey(establishment => establishment.Id);
             builder.ToTable(tb => tb.HasTrigger("tr_establishment"));
             builder.Property(establishment => establishment.DateLastUpdated).HasColumnType("datetime").HasDefaultValue();
+        });
+
+        //Setup Establishment Group Table
+        modelBuilder.Entity<EstablishmentGroup>(builder =>
+        {
+            builder.HasKey(establishmentGroup => establishmentGroup.Id);
         });
 
         // Setup SignIn Table
@@ -129,6 +136,9 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public Task<User?> GetUserBy(Expression<Func<User, bool>> predicate) => Users.FirstOrDefaultAsync(predicate);
 
     public Task<Establishment?> GetEstablishmentBy(Expression<Func<Establishment, bool>> predicate) => Establishments.FirstOrDefaultAsync(predicate);
+
+    public Task<EstablishmentGroup?> GetEstablishmentGroupForEstablishment(Establishment establishment) =>
+        EstablishmentGroups.FirstOrDefaultAsync(group => group.Uid == establishment.GroupUid);
 
     public Task<int> CallStoredProcedureWithReturnInt(string sprocName, IEnumerable<object> parameters, CancellationToken cancellationToken = default)
      => Database.ExecuteSqlRawAsync(sprocName, parameters, cancellationToken: cancellationToken);

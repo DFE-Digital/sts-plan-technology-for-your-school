@@ -29,7 +29,7 @@ public class PagesController(
 
     [Authorize(Policy = PageModelAuthorisationPolicy.PolicyName)]
     [HttpGet("{route?}", Name = "GetPage")]
-    public IActionResult GetByRoute([ModelBinder(typeof(PageModelBinder))] Page? page, [FromServices] IUser user)
+    public async Task<IActionResult> GetByRoute([ModelBinder(typeof(PageModelBinder))] Page? page, [FromServices] IUser user)
     {
         if (page == null)
         {
@@ -38,6 +38,8 @@ public class PagesController(
         }
 
         var viewModel = new PageViewModel(page, this, user, Logger);
+        await viewModel.TryLoadEstablishmentGroupName(user);
+
         if (page.Sys.Id == errorPages.Value.InternalErrorPageId)
         {
             viewModel.DisplayBlueBanner = false;

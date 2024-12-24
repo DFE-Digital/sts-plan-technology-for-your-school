@@ -8,5 +8,7 @@ public interface IUser
 
     Task<int> GetEstablishmentId();
 
+    Task<string?> GetEstablishmentGroupName();
+
     EstablishmentDto GetOrganisationData();
 }

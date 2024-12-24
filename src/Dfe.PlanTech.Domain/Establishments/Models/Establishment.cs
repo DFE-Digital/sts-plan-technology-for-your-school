@@ -54,5 +54,7 @@ public class Establishment
     public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
     public DateTime? DateLastUpdated { get; set; }
+
+    public string? GroupUid { get; set; }
 }
 
