@@ -42,7 +42,7 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
 
         await _processor.StartProcessingAsync(stoppingToken);
 
-        stoppingToken.Register(() =>  StopProcessingAsync().GetAwaiter().GetResult());
+        stoppingToken.Register(() => StopProcessingAsync().GetAwaiter().GetResult());
     }
 
     /// <summary>
