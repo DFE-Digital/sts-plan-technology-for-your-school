@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Web.Controllers;
 [AllowAnonymous]
 public class ContentController(
     IContentService contentService,
-    ILayoutService layoutService,
+    // ILayoutService layoutService,
     ILogger<ContentController> logger) : Controller
 {
 
@@ -42,7 +42,7 @@ public class ContentController(
                 return RedirectToAction(PagesController.NotFoundPage, PagesController.ControllerName);
             }
 
-            resp = layoutService.GenerateLayout(resp, Request, page);
+            // resp = layoutService.GenerateLayout(resp, Request, page);
             ViewBag.tags = tags!;
 
             return View("CsIndex", resp);

@@ -1,4 +1,17 @@
-﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+﻿@model Dfe.PlanTech.Domain.Content.Models.ContentSupport.ContentSupportPage;
+
+<div class="govuk-grid-row">
+    <h1>C&S page</h1>
+</div>
+<div>
+    @foreach (var content in Model.Content)
+    {
+        await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+    }
+</div>
+
+
+@* @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.CsPage
 
 @{
@@ -64,4 +77,4 @@
             addPrintButtonEventListener();
         </script>
     }
-}
+} *@

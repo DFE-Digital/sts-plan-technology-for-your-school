@@ -28,11 +28,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Content
         {
             return new CsPage
             {
-                Heading = new CSHeading
-                {
-                    Title = HeadingTitle,
-                    Subtitle = HeadingSubtitle
-                },
                 Content = new()
                 {
                     new()

@@ -7,7 +7,6 @@ namespace Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
 public class CsPage : IContentSupportPage<CsContentItem>
 {
     public SystemDetails Sys { get; set; } = null!;
-    public CSHeading Heading { get; set; } = null!;
     public string Slug { get; set; } = null!;
     public bool IsSitemap { get; set; }
     public bool HasCitation { get; set; }

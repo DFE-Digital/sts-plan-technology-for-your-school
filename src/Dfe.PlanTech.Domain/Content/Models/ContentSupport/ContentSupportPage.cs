@@ -1,13 +1,10 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Content.Models.ContentSupport;
 
 [ExcludeFromCodeCoverage]
-public class ContentSupportPage : ContentBase, IContentSupportPage<CSBodyText>
+public class ContentSupportPage : Page
 {
-    public CSHeading Heading { get; init; } = null!;
-    public List<CSBodyText> Content { get; init; } = [];
     public bool IsSitemap { get; init; }
     public bool HasCitation { get; init; }
     public bool HasBackToTop { get; init; }

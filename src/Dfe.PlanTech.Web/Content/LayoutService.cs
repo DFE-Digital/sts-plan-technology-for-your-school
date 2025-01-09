@@ -1,79 +1,79 @@
-﻿using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
-using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
+﻿// using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
+// using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
 
-namespace Dfe.PlanTech.Web.Content;
+// namespace Dfe.PlanTech.Web.Content;
 
-public class LayoutService : ILayoutService
-{
-    public CsPage GenerateLayout(CsPage page, HttpRequest request, string pageSlug)
-    {
-        if (!page.ShowVerticalNavigation)
-            return page;
+// public class LayoutService : ILayoutService
+// {
+//     public CsPage GenerateLayout(CsPage page, HttpRequest request, string pageSlug)
+//     {
+//         if (!page.ShowVerticalNavigation)
+//             return page;
 
-        return new CsPage
-        {
-            Heading = GetHeading(page, pageSlug),
-            MenuItems = GenerateVerticalNavigation(page, request, pageSlug),
-            Content = GetVisiblePageList(page, pageSlug),
-            UpdatedAt = page.UpdatedAt,
-            CreatedAt = page.CreatedAt,
-            HasCitation = page.HasCitation,
-            HasBackToTop = page.HasBackToTop,
-            IsSitemap = page.IsSitemap,
-            ShowVerticalNavigation = page.ShowVerticalNavigation,
-            Slug = page.Slug
-        };
-    }
-
-
-    public CSHeading GetHeading(CsPage page, string pageSlug)
-    {
-        var selectedPage = page.Content.Find(o => o.Slug == pageSlug);
-
-        if (selectedPage is { UseParentHero: false })
-            return new CSHeading
-            {
-                Title = selectedPage.Title ?? string.Empty,
-                Subtitle = selectedPage.Subtitle ?? string.Empty
-            };
-
-        return page.Heading;
-    }
+//         return new CsPage
+//         {
+//             Heading = GetHeading(page, pageSlug),
+//             MenuItems = GenerateVerticalNavigation(page, request, pageSlug),
+//             Content = GetVisiblePageList(page, pageSlug),
+//             UpdatedAt = page.UpdatedAt,
+//             CreatedAt = page.CreatedAt,
+//             HasCitation = page.HasCitation,
+//             HasBackToTop = page.HasBackToTop,
+//             IsSitemap = page.IsSitemap,
+//             ShowVerticalNavigation = page.ShowVerticalNavigation,
+//             Slug = page.Slug
+//         };
+//     }
 
 
-    public List<PageLink> GenerateVerticalNavigation(CsPage page, HttpRequest request,
-        string pageSlug)
-    {
-        var baseUrl = GetNavigationUrl(request);
+//     public CSHeading GetHeading(CsPage page, string pageSlug)
+//     {
+//         var selectedPage = page.Content.Find(o => o.Slug == pageSlug);
 
-        var menuItems = page.Content.Select(o => new PageLink
-        {
-            Title = o.Title ?? "",
-            Subtitle = o.Subtitle ?? "",
-            Url = $"{baseUrl}/{o.Slug}",
-            IsActive = pageSlug == o.Slug
-        }).ToList();
+//         if (selectedPage is { UseParentHero: false })
+//             return new CSHeading
+//             {
+//                 Title = selectedPage.Title ?? string.Empty,
+//                 Subtitle = selectedPage.Subtitle ?? string.Empty
+//             };
 
-        if (string.IsNullOrEmpty(pageSlug) && menuItems.Count > 0)
-            menuItems[0].IsActive = true;
-
-        return menuItems;
-    }
+//         return page.Heading;
+//     }
 
 
-    public static List<CsContentItem> GetVisiblePageList(CsPage page, string pageSlug)
-    {
-        if (!string.IsNullOrEmpty(pageSlug))
-            return page.Content.Where(o => o.Slug == pageSlug).ToList();
+//     public List<PageLink> GenerateVerticalNavigation(CsPage page, HttpRequest request,
+//         string pageSlug)
+//     {
+//         var baseUrl = GetNavigationUrl(request);
+
+//         var menuItems = page.Content.Select(o => new PageLink
+//         {
+//             Title = o.Title ?? "",
+//             Subtitle = o.Subtitle ?? "",
+//             Url = $"{baseUrl}/{o.Slug}",
+//             IsActive = pageSlug == o.Slug
+//         }).ToList();
+
+//         if (string.IsNullOrEmpty(pageSlug) && menuItems.Count > 0)
+//             menuItems[0].IsActive = true;
+
+//         return menuItems;
+//     }
 
 
-        return page.Content.GetRange(0, 1);
-    }
+//     public static List<CsContentItem> GetVisiblePageList(CsPage page, string pageSlug)
+//     {
+//         if (!string.IsNullOrEmpty(pageSlug))
+//             return page.Content.Where(o => o.Slug == pageSlug).ToList();
 
 
-    public static string GetNavigationUrl(HttpRequest request)
-    {
-        var splitUrl = request.Path.ToString().Split("/");
-        return string.Join("/", splitUrl.Take(3));
-    }
-}
+//         return page.Content.GetRange(0, 1);
+//     }
+
+
+//     public static string GetNavigationUrl(HttpRequest request)
+//     {
+//         var splitUrl = request.Path.ToString().Split("/");
+//         return string.Join("/", splitUrl.Take(3));
+//     }
+// }

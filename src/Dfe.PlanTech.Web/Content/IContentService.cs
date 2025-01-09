@@ -1,8 +1,8 @@
-using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
 
 namespace Dfe.PlanTech.Web.Content;
 
 public interface IContentService
 {
-    Task<CsPage?> GetContent(string slug, CancellationToken cancellationToken = default);
+    Task<ContentSupportPage?> GetContent(string slug, CancellationToken cancellationToken = default);
 }
