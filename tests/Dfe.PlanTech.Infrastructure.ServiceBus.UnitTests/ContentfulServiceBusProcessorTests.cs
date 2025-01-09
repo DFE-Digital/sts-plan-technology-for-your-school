@@ -7,6 +7,7 @@ using Dfe.PlanTech.Infrastructure.ServiceBus.Retry;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 
@@ -21,6 +22,7 @@ public class ContentfulServiceBusProcessorTests
     private readonly ILogger<ContentfulServiceBusProcessor> _logger = Substitute.For<ILogger<ContentfulServiceBusProcessor>>();
     private readonly IWebhookToDbCommand _webhookToDbCommand = Substitute.For<IWebhookToDbCommand>();
     private readonly IServiceScopeFactory _serviceScopeFactory = Substitute.For<IServiceScopeFactory>();
+    private readonly IOptions<ServiceBusOptions> _options = Substitute.For<IOptions<ServiceBusOptions>>();
     private readonly IServiceBusResultProcessor _serviceBusResultProcessor;
     private readonly ContentfulServiceBusProcessor _contentfulServiceBusProcessor;
 
@@ -36,7 +38,19 @@ public class ContentfulServiceBusProcessorTests
 
         _serviceBusResultProcessor = Substitute.For<IServiceBusResultProcessor>();
         _processorFactory.CreateClient("contentfulprocessor").Returns(_serviceBusProcessor);
-        _contentfulServiceBusProcessor = new ContentfulServiceBusProcessor(_processorFactory, _serviceBusResultProcessor, _logger, _serviceScopeFactory);
+        _options.Value.Returns(new ServiceBusOptions() { EnableQueueReading = true });
+        _contentfulServiceBusProcessor = new ContentfulServiceBusProcessor(_processorFactory, _serviceBusResultProcessor, _logger, _serviceScopeFactory, _options);
+    }
+
+    [Fact]
+    public async Task EnableQueueReading_Should_PreventQueueProcessing_When_False()
+    {
+        _options.Value.Returns(new ServiceBusOptions() { EnableQueueReading = false });
+        var contentfulServiceBusProcessor = new ContentfulServiceBusProcessor(_processorFactory, _serviceBusResultProcessor, _logger, _serviceScopeFactory, _options);
+
+        await contentfulServiceBusProcessor.InvokeNonPublicAsyncMethod("ExecuteAsync", [CancellationToken.None]);
+
+        Assert.Empty(_serviceBusProcessor.ReceivedCalls());
     }
 
     [Fact]
