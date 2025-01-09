@@ -2,7 +2,6 @@
 using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
 using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Types;
 using Dfe.PlanTech.Web.Configuration;
-using Dfe.PlanTech.Web.Content;
 using FluentAssertions;
 using Xunit;
 using Hyperlink = Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Standard.Hyperlink;
