@@ -10,6 +10,7 @@ public interface ICmsCache : IDistributedCache
     /// Then removes the dependency array itself
     /// </summary>
     /// <param name="contentComponentId">Id of component to invalidate dependencies of</param>
+    /// <param name="contentType">Name of the content type of the component being invalidated</param>
     /// <returns></returns>
-    Task InvalidateCacheAsync(string contentComponentId);
+    Task InvalidateCacheAsync(string contentComponentId, string contentType);
 }

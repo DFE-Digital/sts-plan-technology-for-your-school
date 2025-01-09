@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Content.Interfaces;
@@ -11,14 +10,12 @@ using Microsoft.Extensions.Logging;
 namespace Dfe.PlanTech.Application.Content.Queries;
 
 public class GetSubTopicRecommendationQuery(IContentRepository repository,
-                                            ILogger<GetSubTopicRecommendationQuery> logger,
-                                            ICmsCache cache) : IGetSubTopicRecommendationQuery
+                                            ILogger<GetSubTopicRecommendationQuery> logger) : IGetSubTopicRecommendationQuery
 {
     public async Task<SubtopicRecommendation?> GetSubTopicRecommendation(string subtopicId, CancellationToken cancellationToken = default)
     {
         var options = CreateGetEntityOptions(subtopicId);
-        var subTopicRecommendations = await cache.GetOrCreateAsync($"SubtopicRecommendation:{subtopicId}",
-            () => repository.GetEntities<SubtopicRecommendation>(options, cancellationToken)) ?? [];
+        var subTopicRecommendations = await repository.GetEntities<SubtopicRecommendation>(options, cancellationToken);
 
         var subtopicRecommendation = subTopicRecommendations.FirstOrDefault();
 
@@ -35,8 +32,7 @@ public class GetSubTopicRecommendationQuery(IContentRepository repository,
         var options = CreateGetEntityOptions(subtopicId, 2);
         options.Select = ["fields.intros", "sys"];
 
-        var subtopicRecommendations = await cache.GetOrCreateAsync($"RecommendationViewDto:{subtopicId}",
-            () => repository.GetEntities<SubtopicRecommendation>(options, cancellationToken)) ?? [];
+        var subtopicRecommendations = await repository.GetEntities<SubtopicRecommendation>(options, cancellationToken);
 
         var subtopicRecommendation = subtopicRecommendations.FirstOrDefault();
 

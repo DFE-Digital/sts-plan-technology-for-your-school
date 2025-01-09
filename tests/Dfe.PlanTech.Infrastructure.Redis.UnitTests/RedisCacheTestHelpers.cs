@@ -28,4 +28,5 @@ public static class RedisCacheTestHelpers
     public static Answer FirstAnswer => _firstAnswer;
     public static Answer SecondAnswer => _secondAnswer;
     public static Question Question => _question;
+    public static List<Question> EmptyQuestionCollection => [];
 }
