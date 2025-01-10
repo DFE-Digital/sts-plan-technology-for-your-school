@@ -1,6 +1,8 @@
 using Contentful.Core.Configuration;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Types;
 using Dfe.PlanTech.Domain.Helpers;
 using Microsoft.Extensions.Logging;
 
@@ -31,8 +33,13 @@ public class EntityResolver(ILogger<EntityResolver> logger) : IContentTypeResolv
             return type;
         }
 
-        _logger.LogWarning("Could not find content type for ID {contentTypeId}", contentTypeId);
+        if (Enum.TryParse(typeof(CustomComponentType), contentTypeId, true, out _) ||
+            Enum.TryParse(typeof(RichTextNodeType), contentTypeId, true, out _))
+        {
+            return typeof(Target);
+        }
 
+        _logger.LogWarning("Could not find content type for ID {contentTypeId}", contentTypeId);
         return typeof(MissingComponent);
     }
 }

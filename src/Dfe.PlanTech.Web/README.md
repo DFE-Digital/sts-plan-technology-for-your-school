@@ -35,7 +35,7 @@ Uses ASP .NET Core MVC.
 ### NodeJS Packages Used
 
 | Name                                                             | Purpose                                            |
-|------------------------------------------------------------------|----------------------------------------------------|
+| ---------------------------------------------------------------- | -------------------------------------------------- |
 | [Gulp](https://gulpjs.com/)                                      | Compiling/minifying/combining/etc. SCSS + JS files |
 | [govuk-frontend](https://www.npmjs.com/package/govuk-frontend)   | Gov.UK SCSS                                        |
 | [dfe-frontend](https://www.npmjs.com/package/dfe-frontend)       | DFE SCSS overrides                                 |

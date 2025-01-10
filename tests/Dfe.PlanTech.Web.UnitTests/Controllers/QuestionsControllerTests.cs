@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -321,7 +322,7 @@ public class QuestionsControllerTests
 
         var redirectResult = result as RedirectResult;
         Assert.NotNull(redirectResult);
-        Assert.Equal("/self-assessment", redirectResult.Url);
+        Assert.Equal(UrlConstants.SelfAssessmentPage, redirectResult.Url);
     }
 
     [Fact]

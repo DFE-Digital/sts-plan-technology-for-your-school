@@ -1,10 +1,7 @@
 name: Mutations testing
 on:
-  push:
-    branches: ["development"]
-    paths:
-      - "src/**"
-      - "tests/**"
+  schedule:
+    - cron:  '0 23 * * *'
   workflow_dispatch:
     inputs:
       branch:
@@ -29,6 +26,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
         with:
+          ref: development
           fetch-depth: 2
 
       - name: Check for daily commits
@@ -64,6 +62,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: development
 
       - name: Download arifactt
         uses: actions/download-artifact@v4

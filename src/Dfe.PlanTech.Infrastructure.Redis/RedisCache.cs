@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Domain.Background;
 using Dfe.PlanTech.Domain.Caching.Models;
-using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Retry;
@@ -16,8 +16,10 @@ public class RedisCache : ICmsCache
     private readonly IRedisConnectionManager _connectionManager;
     private readonly AsyncRetryPolicy _retryPolicyAsync;
     private readonly ILogger<RedisCache> _logger;
+    private readonly IRedisDependencyManager _dependencyManager;
+    private readonly IBackgroundTaskQueue _backgroundTaskService;
 
-    public RedisCache(IRedisConnectionManager connectionManager, ILogger<RedisCache> logger)
+    public RedisCache(IRedisConnectionManager connectionManager, ILogger<RedisCache> logger, IRedisDependencyManager dependencyManager, IBackgroundTaskQueue backgroundTaskQueue)
     {
         _connectionManager = connectionManager;
         _logger = logger;
@@ -30,6 +32,8 @@ public class RedisCache : ICmsCache
             .OrInner<RedisException>();
 
         _retryPolicyAsync = retryPolicyBuilder.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(50));
+        _dependencyManager = dependencyManager;
+        _backgroundTaskService = backgroundTaskQueue;
     }
 
     /// <inheritdoc/>
@@ -66,7 +70,7 @@ public class RedisCache : ICmsCache
     {
         _logger.LogInformation("Setting cache item with key: {Key}", key);
         var database = await _connectionManager.GetDatabaseAsync(databaseId);
-        await RegisterDependenciesAsync(database, key, value);
+        await _dependencyManager.RegisterDependenciesAsync(database, key, value);
         return await SetAsync(database, key, value, expiry);
     }
 
@@ -121,10 +125,10 @@ public class RedisCache : ICmsCache
     }
 
     /// <inheritdoc/>
-    public async Task<string[]> GetSetMembersAsync(string key, int databaseId = -1)
+    public async Task<IEnumerable<string>> GetSetMembersAsync(string key, int databaseId = -1)
     {
         _logger.LogInformation("Getting set members for key: {Key}", key);
-        return await _retryPolicyAsync.ExecuteAsync(async () => (await (await _connectionManager.GetDatabaseAsync(databaseId)).SetMembersAsync(key)).Select(x => x.ToString()).ToArray());
+        return await _retryPolicyAsync.ExecuteAsync(async () => (await (await _connectionManager.GetDatabaseAsync(databaseId)).SetMembersAsync(key)).Select(x => x.ToString()));
     }
 
     /// <inheritdoc/>
@@ -135,11 +139,11 @@ public class RedisCache : ICmsCache
     }
 
     /// <inheritdoc/>
-    public async Task SetRemoveItemsAsync(string key, string[] items, int databaseId = -1)
+    public async Task SetRemoveItemsAsync(string key, IEnumerable<string> items, int databaseId = -1)
     {
         _logger.LogInformation("Removing multiple items from set with key: {Key}", key);
         var database = await _connectionManager.GetDatabaseAsync(databaseId);
-        await _retryPolicyAsync.ExecuteAsync(() => database.SetRemoveAsync(key, items.Select(x => (RedisValue)x).ToArray()));
+        await _retryPolicyAsync.ExecuteAsync(() => database.SetRemoveAsync(key, [.. items.Select(x => (RedisValue)x)]));
     }
 
     /// <inheritdoc/>
@@ -148,7 +152,7 @@ public class RedisCache : ICmsCache
         var redisValue = value as string ?? value.Serialise();
         _logger.LogInformation("Setting cache item with key: {Key} and value: {Value}", key, redisValue);
         await _retryPolicyAsync.ExecuteAsync(() => database.StringSetAsync(key, GZipRedisValueCompressor.Compress(redisValue), expiry));
-        await RegisterDependenciesAsync(database, key, value);
+        await _dependencyManager.RegisterDependenciesAsync(database, key, value, default);
         return key;
     }
 
@@ -213,80 +217,6 @@ public class RedisCache : ICmsCache
         return redisResult is T typed ? new CacheResult<T>(ExistedInCache: true, CacheValue: typed) : new CacheResult<T>(ExistedInCache: true, CacheValue: redisResult.Deserialise<T>());
     }
 
-    /// <inheritdoc/>
-    public async Task RegisterDependenciesAsync<T>(IDatabase database, string key, T value)
-    {
-        var dependencies = await GetDependenciesAsync(value);
-        var batch = database.CreateBatch();
-
-        var tasks = dependencies.Select(dependency => batch.SetAddAsync(GetDependencyKey(dependency), key)).ToArray();
-        batch.Execute();
-
-        await Task.WhenAll(tasks);
-    }
-
-
-    /// <inheritdoc/>
-    public async Task InvalidateCacheAsync(string contentComponentId)
-    {
-        var key = GetDependencyKey(contentComponentId);
-        var dependencies = await GetSetMembersAsync(key);
-        foreach (var item in dependencies)
-        {
-            await RemoveAsync(item);
-        }
-
-        await SetRemoveItemsAsync(key, dependencies);
-    }
-
-    /// <inheritdoc/>
-    private async Task<IEnumerable<string>> GetDependenciesAsync<T>(T value)
-    {
-        var result = new List<string>();
-
-        if (value is IEnumerable<ContentComponent> enumerable)
-        {
-            foreach (var item in enumerable)
-            {
-                var nestedDependencies = await GetDependenciesAsync(item);
-                result.AddRange(nestedDependencies);
-            }
-        }
-        else if (value is ContentComponent contentComponent)
-        {
-            var nestedDependencies = await GetContentDependenciesAsync(contentComponent);
-            result.AddRange(nestedDependencies);
-        }
-
-        return result;
-    }
-
-    /// <summary>
-    /// Uses reflection to check for any ContentIds within the component and register the parent as a dependency
-    /// </summary>
-    /// <param name="value"></param>
-    private async Task<IEnumerable<string>> GetContentDependenciesAsync(ContentComponent value)
-    {
-        // RichText is a sub-component that doesn't have SystemDetails, exit for such types
-        if (value.Sys is null)
-            return [];
-
-        // add the item itself as a dependency
-        var results = new List<string> { value.Sys.Id };
-
-        var properties = value.GetType().GetProperties();
-        foreach (var property in properties)
-        {
-            if (typeof(ContentComponent).IsAssignableFrom(property.PropertyType) || typeof(IEnumerable<ContentComponent>).IsAssignableFrom(property.PropertyType))
-            {
-                var nestedDependencies = await GetDependenciesAsync(property.GetValue(value));
-                results.AddRange(nestedDependencies);
-            }
-        }
-
-        return results;
-    }
-
     /// <summary>
     /// Creates a new cache item and stores it in the cache.
     /// </summary>
@@ -322,8 +252,27 @@ public class RedisCache : ICmsCache
         return result;
     }
 
-    public string GetDependencyKey(string contentComponentId)
+    /// <inheritdoc/>
+    public Task InvalidateCacheAsync(string contentComponentId, string contentType)
+    => _backgroundTaskService.QueueBackgroundWorkItemAsync(async (cancellationToken) =>
+        {
+            var key = _dependencyManager.GetDependencyKey(contentComponentId);
+            await RemoveDependenciesAsync(key);
+
+            // Invalidate all empty collections
+            await RemoveDependenciesAsync(_dependencyManager.EmptyCollectionDependencyKey);
+
+            // Invalidate collection of the content type if there is one
+            await RemoveAsync($"{contentType}s");
+        });
+
+    private async Task RemoveDependenciesAsync(string dependencyKey)
     {
-        return $"Dependency:{contentComponentId}";
+        var dependencies = (await GetSetMembersAsync(dependencyKey)).ToList();
+        foreach (var item in dependencies)
+        {
+            await RemoveAsync(item);
+        }
+        await SetRemoveItemsAsync(dependencyKey, dependencies);
     }
 }

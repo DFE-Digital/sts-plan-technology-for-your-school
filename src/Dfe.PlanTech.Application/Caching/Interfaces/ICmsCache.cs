@@ -9,14 +9,8 @@ public interface ICmsCache : IDistributedCache
     /// Iterates through all items in a dependency array and removes them from the cache
     /// Then removes the dependency array itself
     /// </summary>
-    /// <param name="contentComponentId">id of component to invalidate dependencies of</param>
+    /// <param name="contentComponentId">Id of component to invalidate dependencies of</param>
+    /// <param name="contentType">Name of the content type of the component being invalidated</param>
     /// <returns></returns>
-    Task InvalidateCacheAsync(string contentComponentId);
-
-    /// <summary>
-    /// Generates a redis key for a content component dependency
-    /// </summary>
-    /// <param name="contentComponentId"></param>
-    /// <returns></returns>
-    string GetDependencyKey(string contentComponentId);
+    Task InvalidateCacheAsync(string contentComponentId, string contentType);
 }
