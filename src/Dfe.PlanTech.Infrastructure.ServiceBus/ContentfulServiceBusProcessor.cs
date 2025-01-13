@@ -2,11 +2,13 @@ using System.Text;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.Application.Persistence.Commands;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
+using Dfe.PlanTech.Domain.ServiceBus.Models;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Results;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Infrastructure.ServiceBus;
 
@@ -20,7 +22,8 @@ namespace Dfe.PlanTech.Infrastructure.ServiceBus;
 public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcessor> processorFactory,
                                            IServiceBusResultProcessor resultProcessor,
                                            ILogger<ContentfulServiceBusProcessor> logger,
-                                           IServiceScopeFactory serviceScopeFactory) : BackgroundService
+                                           IServiceScopeFactory serviceScopeFactory,
+                                           IOptions<ServiceBusOptions> options) : BackgroundService
 {
     private readonly ServiceBusProcessor _processor = processorFactory.CreateClient("contentfulprocessor");
 
@@ -29,12 +32,17 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
     /// </summary>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        if (!options.Value.EnableQueueReading)
+        {
+            logger.LogInformation("{QueueReadingProperty} is set to disabling - not enabling processing queue reading", nameof(options.Value.EnableQueueReading));
+            return;
+        }
         _processor.ProcessMessageAsync += MessageHandler;
         _processor.ProcessErrorAsync += ErrorHandler;
 
         await _processor.StartProcessingAsync(stoppingToken);
 
-        stoppingToken.Register(async () => await StopProcessingAsync());
+        stoppingToken.Register(() => StopProcessingAsync().GetAwaiter().GetResult());
     }
 
     /// <summary>
