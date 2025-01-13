@@ -34,7 +34,8 @@ public static class ContentfulSetup
 
         services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
         services.AddScoped<IContentfulClient, ContentfulClient>();
-        services.AddScoped<IContentRepository, ContentfulRepository>();
+        services.AddKeyedScoped<IContentRepository, ContentfulRepository>("contentfulRepository");
+        services.AddScoped<IContentRepository, CachedContentfulRepository>();
 
 
         services.SetupRichTextRenderer();

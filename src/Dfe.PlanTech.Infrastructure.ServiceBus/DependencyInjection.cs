@@ -58,7 +58,7 @@ public static class DependencyInjection
         services.AddTransient<IQueueWriter, QueueWriter>();
         services.AddTransient<IWriteCmsWebhookToQueueCommand, WriteCmsWebhookToQueueCommand>();
 
-        services.AddSingleton(new ServiceBusOptions() { MessagesPerBatch = 10 });
+        services.Configure<ServiceBusOptions>(configuration.GetSection(nameof(ServiceBusOptions)));
         return services;
     }
 

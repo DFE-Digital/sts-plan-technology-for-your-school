@@ -98,9 +98,17 @@ describe("Check answers page", () => {
       });
   });
 
+  it("submits answers, and can go directly to the recommendation page", () => {
+    cy.url().then(url => {
+        let sectionSlug = url.split("/")[3];
+        cy.submitAnswersAndGoToRecommendation();
+        cy.url().should("contain", `${sectionSlug}/recommendation/`);
+    });
+  })
+
   //This needs to be last on this test run, so that the question-page tests have a clean slate to work from!
   it("submits answers, shows notification and preserves notification", () => {
-    cy.submitAnswers();
+    cy.submitAnswersAndGoToSelfAssessment();
 
     cy.get(".govuk-tag--yellow")
       .should("exist")

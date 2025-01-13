@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -13,20 +12,13 @@ public class GetEntityFromContentfulQueryTests
 {
     private readonly IContentRepository _contentRepository = Substitute.For<IContentRepository>();
     private readonly ILogger<GetEntityFromContentfulQuery> _logger = Substitute.For<ILogger<GetEntityFromContentfulQuery>>();
-    private readonly ICmsCache _cache = Substitute.For<ICmsCache>();
     private readonly GetEntityFromContentfulQuery _getEntityFromContentfulQuery;
 
     private readonly Question _firstQuestion = new() { Sys = new SystemDetails { Id = "question-1" } };
 
     public GetEntityFromContentfulQueryTests()
     {
-        _getEntityFromContentfulQuery = new GetEntityFromContentfulQuery(_logger, _contentRepository, _cache);
-        _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<Question?>>>())
-            .Returns(callInfo =>
-            {
-                var func = callInfo.ArgAt<Func<Task<Question?>>>(1);
-                return func();
-            });
+        _getEntityFromContentfulQuery = new GetEntityFromContentfulQuery(_logger, _contentRepository);
     }
 
 

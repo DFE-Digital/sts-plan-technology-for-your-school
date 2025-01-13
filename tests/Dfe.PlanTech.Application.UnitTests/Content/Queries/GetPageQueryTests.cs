@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
@@ -21,7 +20,6 @@ public class GetPageQueryTests
 
     private readonly IContentRepository _repoSubstitute = Substitute.For<IContentRepository>();
     private readonly ILogger<GetPageQuery> _logger = Substitute.For<ILogger<GetPageQuery>>();
-    private readonly ICmsCache _cache = Substitute.For<ICmsCache>();
 
     private readonly List<Page> _pages = new() {
         new Page(){
@@ -56,18 +54,6 @@ public class GetPageQueryTests
     public GetPageQueryTests()
     {
         SetupRepository();
-        _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<IEnumerable<Page>?>>>())
-            .Returns(callInfo =>
-            {
-                var func = callInfo.ArgAt<Func<Task<IEnumerable<Page>?>>>(1);
-                return func();
-            });
-        _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<Page?>>>())
-            .Returns(callInfo =>
-            {
-                var func = callInfo.ArgAt<Func<Task<Page?>>>(1);
-                return func();
-            });
     }
 
     private void SetupRepository()
@@ -98,7 +84,7 @@ public class GetPageQueryTests
     }
 
     private GetPageQuery CreateGetPageQuery()
-        => new(_cache, _repoSubstitute, _logger, new GetPageFromContentfulOptions() { Include = 4 });
+        => new(_repoSubstitute, _logger, new GetPageFromContentfulOptions() { Include = 4 });
 
 
     [Fact]
