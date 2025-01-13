@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -116,7 +117,7 @@ public class CheckAnswersRouterTests
 
         var route = redirectResult.RouteValues?["route"];
         Assert.NotNull(route);
-        Assert.Equal(PageRedirecter.SelfAssessmentRoute, route);
+        Assert.Equal(UrlConstants.SelfAssessmentPage, route);
     }
 
     [Fact]

@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Domain.Exceptions;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
@@ -41,7 +42,14 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
     }
 
     [HttpPost("ConfirmCheckAnswers")]
-    public async Task<IActionResult> ConfirmCheckAnswers(string sectionSlug, int submissionId, string sectionName, [FromServices] ICalculateMaturityCommand calculateMaturityCommand, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> ConfirmCheckAnswers(
+        string sectionSlug,
+        int submissionId,
+        string sectionName,
+        string redirectOption,
+        [FromServices] ICalculateMaturityCommand calculateMaturityCommand,
+        [FromServices] IGetRecommendationRouter getRecommendationRouter,
+        CancellationToken cancellationToken = default)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(submissionId);
         ArgumentNullException.ThrowIfNullOrEmpty(sectionName);
@@ -57,7 +65,12 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
             return this.RedirectToCheckAnswers(sectionSlug);
         }
 
-        TempData["SectionSlug"] = sectionSlug;
-        return this.RedirectToSelfAssessment();
+        return redirectOption switch
+        {
+            RecommendationsController.GetRecommendationAction => this.RedirectToRecommendation(sectionSlug,
+                await getRecommendationRouter.GetRecommendationSlugForSection(sectionSlug, cancellationToken)),
+            UrlConstants.SelfAssessmentPage => this.RedirectToSelfAssessment(),
+            _ => this.RedirectToCheckAnswers(sectionSlug)
+        };
     }
 }
