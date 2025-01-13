@@ -63,14 +63,14 @@ def _create_temp_groups(cursor: Cursor, groups: pd.DataFrame) -> None:
     )
     cursor.execute("""CREATE TABLE #EstablishmentGroup (
         uid NVARCHAR(50), 
-        groupName NVARCHAR(500), 
+        groupName NVARCHAR(200), 
         groupType NVARCHAR(200),
-        groupTypeCode NVARCHAR(50)
+        groupStatus NVARCHAR(200)
     )""")
     cursor.executemany(
-        "INSERT INTO #EstablishmentGroup (uid, groupName, groupType, groupTypeCode) VALUES(?, ?, ?, ?)",
+        "INSERT INTO #EstablishmentGroup (uid, groupName, groupType, groupStatus) VALUES(?, ?, ?, ?)",
         [
-            (row.uid, row.groupName, row.groupType, row.groupTypeCode)
+            (row.uid, row.groupName, row.groupType, row.groupStatus)
             for _, row in groups.iterrows()
         ],
     )
@@ -80,11 +80,11 @@ def _create_temp_links(cursor: Cursor, links: pd.DataFrame) -> None:
     """Create temp table for holding links between establishment groups and establishments"""
     logger.info("Creating #EstablishmentLink staging table with %s records", len(links))
     cursor.execute(
-        "CREATE TABLE #EstablishmentLink(uid NVARCHAR(50), establishmentName NVARCHAR(200))"
+        "CREATE TABLE #EstablishmentLink(groupUid NVARCHAR(50), establishmentName NVARCHAR(200), urn INT NOT NULL)"
     )
     cursor.executemany(
-        "INSERT INTO #EstablishmentLink (uid, establishmentName) VALUES(?, ?)",
-        [(row.uid, row.establishmentName) for _, row in links.iterrows()],
+        "INSERT INTO #EstablishmentLink (groupUid, establishmentName, urn) VALUES(?, ?, ?)",
+        [(row.groupUid, row.establishmentName, row.urn) for _, row in links.iterrows()],
     )
 
 
@@ -95,7 +95,7 @@ def update_database(groups: pd.DataFrame, links: pd.DataFrame):
         _create_temp_groups(cursor, groups)
         _create_temp_links(cursor, links)
         logger.info(
-            "Updating dbo.establishment and dbo.establishmentGroup with staging tables"
+            "Updating dbo.establishmentLink and dbo.establishmentGroup with staging tables"
         )
         cursor.execute("EXEC dbo.UpdateEstablishmentData")
         logger.info("Update complete")

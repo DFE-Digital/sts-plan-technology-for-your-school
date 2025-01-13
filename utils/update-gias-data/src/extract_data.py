@@ -34,7 +34,7 @@ def _parse_groups() -> pd.DataFrame:
         "Group UID": "uid",
         "Group Name": "groupName",
         "Group Type": "groupType",
-        "Group Type (code)": "groupTypeCode",
+        "Group Status": "groupStatus",
     }
     return _read_csv(DOWNLOAD_PATH / "groups.csv", columns)
 
@@ -42,8 +42,9 @@ def _parse_groups() -> pd.DataFrame:
 def _parse_links() -> pd.DataFrame:
     """Parse the links.csv file"""
     columns = {
-        "Group UID": "uid",
+        "Group UID": "groupUid",
         "EstablishmentName": "establishmentName",
+        "URN": "urn",
     }
     return _read_csv(DOWNLOAD_PATH / "links.csv", columns)
 
