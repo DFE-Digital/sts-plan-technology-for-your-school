@@ -12,6 +12,7 @@ public class RedisCacheTests : RedisCacheTestsBase
     private readonly IRedisConnectionManager _connectionManager = Substitute.For<IRedisConnectionManager>();
     private readonly IRedisDependencyManager _dependencyManager = Substitute.For<IRedisDependencyManager>();
     private readonly RedisCache _cache;
+    private readonly string _missingKey = "Missing";
 
     public RedisCacheTests()
     {
@@ -23,6 +24,12 @@ public class RedisCacheTests : RedisCacheTestsBase
         );
 
         _connectionManager.GetDatabaseAsync(Arg.Any<int>()).Returns(Database);
+        _dependencyManager.EmptyCollectionDependencyKey.Returns(_missingKey);
+        _dependencyManager.GetDependencyKey(Arg.Any<string>()).Returns(callinfo =>
+        {
+            var arg = callinfo.ArgAt<string>(0);
+            return $"Dependency:{arg}";
+        });
     }
 
     [Fact]
@@ -183,10 +190,13 @@ public class RedisCacheTests : RedisCacheTestsBase
     {
         var firstAnswerKey = _dependencyManager.GetDependencyKey(RedisCacheTestHelpers.FirstAnswer.Sys.Id);
         var keys = new List<string> { "one", "two", "three" };
+        var missingKeys = new List<string> { "four" };
         var dependencies = keys.Select(dep => new RedisValue(dep)).ToArray();
+        var missingDependencies = missingKeys.Select(dep => new RedisValue(dep)).ToArray();
 
         Database.SetMembersAsync(firstAnswerKey, Arg.Any<CommandFlags>()).Returns(dependencies);
-        await _cache.InvalidateCacheAsync(RedisCacheTestHelpers.FirstAnswer.Sys.Id);
+        Database.SetMembersAsync(_missingKey, Arg.Any<CommandFlags>()).Returns(missingDependencies);
+        await _cache.InvalidateCacheAsync(RedisCacheTestHelpers.FirstAnswer.Sys.Id, "answer");
 
         Assert.NotNull(QueuedFunc);
 
@@ -194,6 +204,15 @@ public class RedisCacheTests : RedisCacheTestsBase
         await Database.Received(1).SetRemoveAsync(
             firstAnswerKey,
             Arg.Is<RedisValue[]>(arg => dependencies.All(dep => arg.Contains(dep))),
+            Arg.Any<CommandFlags>());
+
+        await Database.Received(1).SetRemoveAsync(
+            _missingKey,
+            Arg.Is<RedisValue[]>(arg => missingDependencies.All(dep => arg.Contains(dep))),
+            Arg.Any<CommandFlags>());
+
+        await Database.Received(1).KeyDeleteAsync(
+            "answers",
             Arg.Any<CommandFlags>());
     }
 }

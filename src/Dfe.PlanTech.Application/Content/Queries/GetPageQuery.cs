@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
@@ -12,14 +11,12 @@ namespace Dfe.PlanTech.Application.Content.Queries;
 
 public class GetPageQuery : IGetPageQuery
 {
-    private readonly ICmsCache _cache;
     private readonly IContentRepository _repository;
     private readonly ILogger<GetPageQuery> _logger;
     private readonly GetPageFromContentfulOptions _options;
 
-    public GetPageQuery(ICmsCache cache, IContentRepository repository, ILogger<GetPageQuery> logger, GetPageFromContentfulOptions options)
+    public GetPageQuery(IContentRepository repository, ILogger<GetPageQuery> logger, GetPageFromContentfulOptions options)
     {
-        _cache = cache;
         _repository = repository;
         _logger = logger;
         _options = options;
@@ -52,8 +49,7 @@ public class GetPageQuery : IGetPageQuery
     {
         try
         {
-            return await _cache.GetOrCreateAsync($"Page:{pageId}", () =>
-                _repository.GetEntityById<Page?>(pageId, cancellationToken: cancellationToken));
+            return await _repository.GetEntityById<Page?>(pageId, cancellationToken: cancellationToken);
         }
         catch (Exception ex)
         {
@@ -67,7 +63,7 @@ public class GetPageQuery : IGetPageQuery
     {
         try
         {
-            var pages = await _cache.GetOrCreateAsync($"Page:{slug}", () => _repository.GetEntities<Page?>(options, cancellationToken)) ?? [];
+            var pages = await _repository.GetEntities<Page?>(options, cancellationToken);
 
             var page = pages.FirstOrDefault();
 

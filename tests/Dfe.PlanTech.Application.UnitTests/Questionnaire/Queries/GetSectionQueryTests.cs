@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
@@ -75,17 +74,6 @@ public class GetSectionQueryTests
     };
 
     private readonly Section[] _sections = new[] { FirstSection, SecondSection, ThirdSection };
-    private readonly ICmsCache _cache = Substitute.For<ICmsCache>();
-
-    public GetSectionQueryTests()
-    {
-        _cache.GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<IEnumerable<Section>?>>>())
-            .Returns(callInfo =>
-            {
-                var func = callInfo.ArgAt<Func<Task<IEnumerable<Section>?>>>(1);
-                return func();
-            });
-    }
 
     [Fact]
     public async Task GetSectionBySlug_Returns_Section_From_Repository()
@@ -108,7 +96,7 @@ public class GetSectionQueryTests
             return _sections.Where(section => section.InterstitialPage?.Slug == slugQuery.Value);
         });
 
-        var getSectionQuery = new GetSectionQuery(repository, _cache);
+        var getSectionQuery = new GetSectionQuery(repository);
         await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken);
 
         Assert.Equal(FirstSection.InterstitialPage.Slug, sectionSlug);
@@ -129,7 +117,7 @@ public class GetSectionQueryTests
             .When(repo => repo.GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), cancellationToken))
             .Throw(new Exception("Dummy Exception"));
 
-        var getSectionQuery = new GetSectionQuery(repository, _cache);
+        var getSectionQuery = new GetSectionQuery(repository);
 
         await Assert.ThrowsAsync<ContentfulDataUnavailableException>(
             async () => await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken)
@@ -144,7 +132,7 @@ public class GetSectionQueryTests
             .When(repo => repo.GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()))
             .Throw(new Exception("Dummy Exception"));
 
-        var getSectionQuery = new GetSectionQuery(repository, _cache);
+        var getSectionQuery = new GetSectionQuery(repository);
 
         await Assert.ThrowsAsync<ContentfulDataUnavailableException>(
             async () => await getSectionQuery.GetAllSections(CancellationToken.None)
@@ -158,7 +146,7 @@ public class GetSectionQueryTests
         repository.GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>())
             .Returns(_ => _sections);
 
-        var getSectionQuery = new GetSectionQuery(repository, _cache);
+        var getSectionQuery = new GetSectionQuery(repository);
         var sections = (await getSectionQuery.GetAllSections()).ToList();
         Assert.Equal(_sections.Length, sections.Count);
 
