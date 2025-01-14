@@ -14,6 +14,8 @@ namespace Dfe.PlanTech.Infrastructure.Data;
 public class PlanTechDbContext : DbContext, IPlanTechDbContext
 {
     public DbSet<Establishment> Establishments { get; set; } = null!;
+    public DbSet<EstablishmentGroup> EstablishmentGroups { get; set; } = null!;
+    public DbSet<EstablishmentLink> EstablishmentLinks { get; set; } = null!;
     public DbSet<Response> Responses { get; set; } = null!;
     public DbSet<ResponseAnswer> Answers { get; set; } = null!;
     public DbSet<ResponseQuestion> Questions { get; set; } = null!;
@@ -51,6 +53,20 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
             builder.HasKey(establishment => establishment.Id);
             builder.ToTable(tb => tb.HasTrigger("tr_establishment"));
             builder.Property(establishment => establishment.DateLastUpdated).HasColumnType("datetime").HasDefaultValue();
+        });
+
+        modelBuilder.Entity<EstablishmentGroup>(builder =>
+        {
+            builder.HasKey(group => group.Id);
+        });
+
+        modelBuilder.Entity<EstablishmentLink>(builder =>
+        {
+            builder.HasKey(link => link.Id);
+            builder.HasOne(link => link.Group)
+                .WithMany(group => group.EstablishmentLinks)
+                .HasForeignKey(link => link.GroupUid)
+                .IsRequired();
         });
 
         // Setup SignIn Table
@@ -129,6 +145,12 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public Task<User?> GetUserBy(Expression<Func<User, bool>> predicate) => Users.FirstOrDefaultAsync(predicate);
 
     public Task<Establishment?> GetEstablishmentBy(Expression<Func<Establishment, bool>> predicate) => Establishments.FirstOrDefaultAsync(predicate);
+
+    public Task<List<EstablishmentLink>> GetGroupEstablishmentsBy(Expression<Func<Establishment, bool>> predicate) =>
+        Establishments
+            .Where(predicate)
+            .Join(EstablishmentGroups, establishment => establishment.GroupUid, group => group.Uid, (establishment, group) => group)
+            .Join(EstablishmentLinks, group => group.Uid, link => link.GroupUid, (group, link) => link).ToListAsync();
 
     public Task<int> CallStoredProcedureWithReturnInt(string sprocName, IEnumerable<object> parameters, CancellationToken cancellationToken = default)
      => Database.ExecuteSqlRawAsync(sprocName, parameters, cancellationToken: cancellationToken);
