@@ -31,6 +31,9 @@ public class PageViewModel
         var establishment = user.GetOrganisationData();
 
         Page.OrganisationName = establishment.OrgName;
+
+        // TODO: POC Only - Remove
+        Page.GroupEstablishments = user.GetGroupEstablishments().Result;
     }
 
     public bool DisplayBlueBanner { get; set; }

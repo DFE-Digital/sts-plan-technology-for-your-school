@@ -22,6 +22,8 @@
         @if (Model.Page.DisplayOrganisationName)
         {
             <span class="govuk-caption-xl govuk-!-margin-top-5">@Model.Page.OrganisationName</span>
+            <!-- TODO: POC Only - Remove -->
+            <span class="govuk-caption-xl govuk-!-margin-top-5">Schools in MAT: @String.Join(", ", Model.Page.GroupEstablishments.Select(link => link.EstablishmentName))</span>
         }
 
         @if (Model.Page.Title != null)

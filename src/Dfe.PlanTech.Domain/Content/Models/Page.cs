@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Establishments.Models;
 
 namespace Dfe.PlanTech.Domain.Content.Models;
 
@@ -25,6 +26,9 @@ public class Page : ContentComponent, IPageContent
     public Title? Title { get; init; }
 
     public string? OrganisationName { get; set; }
+
+    // TODO: POC Only - Remove
+    public List<EstablishmentLink> GroupEstablishments { get; set; } = [];
 
     public List<ContentComponent> Content { get; init; } = [];
 }
