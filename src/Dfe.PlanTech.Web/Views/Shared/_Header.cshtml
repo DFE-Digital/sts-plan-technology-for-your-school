@@ -1,7 +1,8 @@
+@using Dfe.PlanTech.Application.Constants
 <header class="dfe-header" role="banner">
   <div class="govuk-width-container dfe-header__container">
     <div class="dfe-header__logo">
-      <a class="dfe-header__link dfe-header__link--service " href="/self-assessment" aria-label="DfE homepage">
+      <a class="dfe-header__link dfe-header__link--service " href="@UrlConstants.SelfAssessmentPage" aria-label="DfE homepage">
         <img src="/assets/images/dfe-logo.png" class="dfe-logo noprint" alt="DfE Homepage">
         <img src="/assets/images/dfe-logo-alt.png" class="dfe-logo-hover noprint" alt="DfE Homepage">
         <img src="/assets/images/dfe-logo-alt.png" class="dfe-logo print-only" alt="DfE Homepage">
@@ -20,7 +21,7 @@
     </div>
   </div>
   <div class="dfe-width-container dfe-header__service-name">
-    <a href="/self-assessment" class="dfe-header__link--service">Plan technology for your school</a>
+    <a href="@UrlConstants.SelfAssessmentPage" class="dfe-header__link--service">Plan technology for your school</a>
   </div>
 </header>
 

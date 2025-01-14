@@ -2,5 +2,8 @@ namespace Dfe.PlanTech.Domain.ServiceBus.Models;
 
 public record ServiceBusOptions
 {
-    public int MessagesPerBatch { get; init; } = 10;
+    /// <summary>
+    /// Enables reading + processing of messages from the Service Bus
+    /// </summary>
+    public bool EnableQueueReading { get; init; } = true;
 }

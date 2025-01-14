@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -367,7 +368,7 @@ public class GetRecommendationRouterTests
 
         var route = redirectResult.RouteValues?["route"];
         Assert.NotNull(route);
-        Assert.Equal(PageRedirecter.SelfAssessmentRoute, route);
+        Assert.Equal(UrlConstants.SelfAssessmentPage, route);
     }
 
     [Theory]
@@ -566,6 +567,20 @@ public class GetRecommendationRouterTests
     }
 
     [Theory]
+    [InlineData("Low", "low-slug")]
+    [InlineData("Medium", "medium-slug")]
+    [InlineData("High", "high-slug")]
+    public async Task GetRecommendationSlugForSection_Should_Return_MatchingSlugForMaturity(string maturity, string expectedSlug)
+    {
+        Assert.NotNull(_section.InterstitialPage);
+        Setup_Valid_Recommendation(maturity: maturity);
+
+        var result = await _router.GetRecommendationSlugForSection(_section.InterstitialPage.Slug, default);
+
+        Assert.Equal(result, expectedSlug);
+    }
+
+    [Theory]
     [InlineData("not a real maturity")]
     [InlineData("also not real")]
     [InlineData("")]
@@ -586,7 +601,7 @@ public class GetRecommendationRouterTests
         Assert.Equal(_subtopicRecommendation.Section.Chunks.Count, model.Chunks.Count);
     }
 
-    private void Setup_Valid_Recommendation(List<QuestionWithAnswer>? responses = null)
+    private void Setup_Valid_Recommendation(List<QuestionWithAnswer>? responses = null, string maturity = "High")
     {
         Assert.NotNull(_section.InterstitialPage);
         _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
@@ -596,7 +611,7 @@ public class GetRecommendationRouterTests
                 _submissionStatusProcessor.Section.Returns(_section);
                 _submissionStatusProcessor.SectionStatus.Returns(new SectionStatus()
                 {
-                    Maturity = "High"
+                    Maturity = maturity
                 });
             });
 

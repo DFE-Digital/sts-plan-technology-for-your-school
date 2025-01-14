@@ -72,6 +72,13 @@ public class GetRecommendationRouter : IGetRecommendationRouter
         return controller.View("~/Views/Recommendations/Recommendations.cshtml", viewModel);
     }
 
+    public async Task<string> GetRecommendationSlugForSection(string sectionSlug, CancellationToken cancellationToken)
+    {
+        await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken);
+        var (_, subTopicIntro, _) = await GetSubtopicRecommendation(cancellationToken);
+        return subTopicIntro.Slug;
+    }
+
     private async Task<(SubtopicRecommendation, RecommendationIntro, List<RecommendationChunk>, IEnumerable<QuestionWithAnswer>)> GetSubtopicRecommendation(CancellationToken cancellationToken)
     {
         if (_router.SectionStatus?.Maturity == null)
