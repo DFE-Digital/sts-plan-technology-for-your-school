@@ -11,6 +11,4 @@ public class EstablishmentGroup
     public string GroupType { get; set; }
 
     public string GroupStatus { get; set; }
-
-    public List<EstablishmentLink> EstablishmentLinks { get; set; } = new();
 }

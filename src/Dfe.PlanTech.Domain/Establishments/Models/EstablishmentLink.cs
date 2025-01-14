@@ -8,7 +8,5 @@ public class EstablishmentLink
 
     public string EstablishmentName { get; set; }
 
-    public string Urn { get; set; }
-
-    public EstablishmentGroup? Group { get; set; }
+    public int Urn { get; set; }
 }

@@ -63,10 +63,6 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
         modelBuilder.Entity<EstablishmentLink>(builder =>
         {
             builder.HasKey(link => link.Id);
-            builder.HasOne(link => link.Group)
-                .WithMany(group => group.EstablishmentLinks)
-                .HasForeignKey(link => link.GroupUid)
-                .IsRequired();
         });
 
         // Setup SignIn Table
