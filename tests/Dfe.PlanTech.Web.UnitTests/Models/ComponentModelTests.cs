@@ -1,5 +1,4 @@
 ﻿using Dfe.PlanTech.Domain.Submissions.Models;
-using Dfe.PlanTech.Web.Models;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Models
