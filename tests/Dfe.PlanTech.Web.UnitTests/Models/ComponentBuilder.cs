@@ -2,6 +2,8 @@
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
+using Dfe.PlanTech.Domain.Submissions.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace Dfe.PlanTech.Web.UnitTests.Models
 {
@@ -64,11 +66,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             }
         ];
 
-        public static RecommendationsViewModel BuildRecommendationViewModel()
+        public static RecommendationsViewModel BuildRecommendationViewModel(List<QuestionWithAnswer>? submission = null)
         => new()
         {
             Intro = BuildRecommendationIntro("intro"),
-            Chunks = [BuildRecommendationChunk("First", "Title one"), BuildRecommendationChunk("Second", "Title two"), BuildRecommendationChunk("Third", "Title three")]
+            Chunks = [BuildRecommendationChunk("First", "Title one"), BuildRecommendationChunk("Second", "Title two"), BuildRecommendationChunk("Third", "Title three")],
+            SubmissionResponses = submission ?? BuildSubmissionResponses()
         };
 
         public static RecommendationIntro BuildRecommendationIntro(string header) => new() { Header = new Header() { Text = header } };
@@ -97,6 +100,15 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
                     Text = "Answer"
                 }
             ];
+        }
+
+        public static IEnumerable<QuestionWithAnswer> BuildSubmissionResponses()
+        {
+            return new List<QuestionWithAnswer>
+            {
+                new QuestionWithAnswer { QuestionRef = "Question1", QuestionText = "Question 1", AnswerRef = "Answer1", AnswerText = "Answer 1", DateCreated = new DateTime() },
+                new QuestionWithAnswer { QuestionRef = "Question2", QuestionText = "Question 2", AnswerRef = "Answer2", AnswerText = "Answer 2", DateCreated = new DateTime() },
+            };
         }
 
         private static RichTextContent BuildRichContent()

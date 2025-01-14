@@ -458,6 +458,7 @@ public class GetRecommendationRouterTests
 
         Assert.NotNull(model);
         Assert.Equal(_subtopicRecommendation!.Intros[0], model.Intro);
+        Assert.NotNull(model.SubmissionResponses);
     }
 
     [Fact]
