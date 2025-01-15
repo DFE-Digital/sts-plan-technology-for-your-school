@@ -11,6 +11,7 @@ using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Models;
 using GovUk.Frontend.AspNetCore;
 using Microsoft.Extensions.Options;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +20,11 @@ builder.Services.AddResponseCompression(options =>
     options.EnableForHttps = true;
 });
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.MaxDepth = 128;
+    });
 
 if (!builder.Environment.IsDevelopment())
 {
@@ -93,7 +98,7 @@ app.UseExceptionHandler(exceptionHandlerApp =>
 });
 
 app.UseStaticFiles();
-
+app.UseResponseCompression();
 app.UseRouting();
 
 app.UseAuthentication();
