@@ -1,4 +1,5 @@
 @using Dfe.PlanTech.Application.Constants
+@using Dfe.PlanTech.Web.Controllers
 @model Dfe.PlanTech.Web.Models.CheckAnswersViewModel
 
 @section BeforeContent {
@@ -48,7 +49,9 @@
                     await Html.RenderPartialAsync("Components/PageComponentFactory", content);
                 }
             }
-            <govuk-button type="submit">Save and continue</govuk-button>
+
+            <govuk-button class="govuk-!-margin-right-5" type="submit" name="redirectOption" value="@RecommendationsController.GetRecommendationAction">Submit and view recommendations</govuk-button>
+            <govuk-button class="govuk-button--secondary" type="submit" name="redirectOption" value="@UrlConstants.SelfAssessmentPage">Submit and go to self-assessment topics</govuk-button>
 
             @if (Model.ErrorMessage != null)
             {

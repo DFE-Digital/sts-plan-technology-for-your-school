@@ -37,4 +37,12 @@ public interface IGetRecommendationRouter
                                                         string? maturity,
                                                         RecommendationsController controller,
                                                         CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Get the slug of the recommendation for a completed section by slug
+    /// </summary>
+    /// <param name="sectionSlug"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public Task<string> GetRecommendationSlugForSection(string sectionSlug, CancellationToken cancellationToken);
 }

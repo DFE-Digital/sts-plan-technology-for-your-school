@@ -6,10 +6,8 @@ namespace Dfe.PlanTech.Web;
 
 public static class PageRedirecter
 {
-    public const string SelfAssessmentRoute = UrlConstants.SelfAssessmentPage;
-
     public static RedirectToActionResult RedirectToSelfAssessment(this Controller controller)
-    => RedirectToPage(controller, SelfAssessmentRoute);
+    => RedirectToPage(controller, UrlConstants.SelfAssessmentPage);
 
     public static RedirectToActionResult RedirectToCheckAnswers(this Controller controller, string sectionSlug)
       => controller.RedirectToAction(CheckAnswersController.CheckAnswersAction, CheckAnswersController.ControllerName, new { sectionSlug });
@@ -19,5 +17,8 @@ public static class PageRedirecter
 
     private static RedirectToActionResult RedirectToPage(this Controller controller, string route)
     => controller.RedirectToAction(PagesController.GetPageByRouteAction, PagesController.ControllerName, new { route });
+
+    public static RedirectToActionResult RedirectToRecommendation(this Controller controller, string sectionSlug, string recommendationSlug)
+    => controller.RedirectToAction(RecommendationsController.GetRecommendationAction, RecommendationsController.ControllerName, new { sectionSlug, recommendationSlug });
 }
 
