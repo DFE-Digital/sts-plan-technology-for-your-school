@@ -75,7 +75,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     public async Task<string> GetRecommendationSlugForSection(string sectionSlug, CancellationToken cancellationToken)
     {
         await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken);
-        var (_, subTopicIntro, _) = await GetSubtopicRecommendation(cancellationToken);
+        var (_, subTopicIntro, _, _) = await GetSubtopicRecommendation(cancellationToken);
         return subTopicIntro.Slug;
     }
 
