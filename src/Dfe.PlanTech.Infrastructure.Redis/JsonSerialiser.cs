@@ -22,7 +22,8 @@ public static class JsonSerialiser
             new DefaultJsonTypeInfoResolver().WithAddedModifier(ContentComponentJsonExtensions.AddContentComponentPolymorphicInfo<IContentComponent>)
             .WithAddedModifier(ContentComponentJsonExtensions.AddContentComponentPolymorphicInfo<ContentComponent>)
             .WithAddedModifier(ContentComponentJsonExtensions.AddContentComponentPolymorphicInfo<ContentBase>),
-        ReferenceHandler = ReferenceHandler.Preserve
+        ReferenceHandler = ReferenceHandler.Preserve,
+        MaxDepth = 256
     };
 
     /// <summary>
