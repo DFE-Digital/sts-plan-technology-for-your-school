@@ -56,4 +56,8 @@ describe("Recommendation Checklist Page", () => {
       .should("have.attr", "href")
       .and("include", "/");
   });
+
+  it("passes accessibility tests", () => {
+    cy.runAxe();
+  });
 });
