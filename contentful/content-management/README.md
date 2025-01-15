@@ -4,13 +4,17 @@ Guidance for creating, updating and deleting content programatically from conten
 
 Unfortunately the contentful-migration api does not support deleting entries, so this is something that has to be done
 with the content management api instead. Migrations, where possible, should be done with contentful-migration.
-This can be used as a fallback
+This can be used as a fallback.
+
+The project is currently separate from the content-migrations project because the contentful-migration library doesn't execute changes when the script is run, instead, it outputs a plan for the migration which you can accept or reject (similar to terraform). The contentful-management library does execute changes immediately, so would run during plan creation rather than at the intended stage. To minimise the risk of developer error, these are kept apart.
 
 ## Setup
 
 1. Setup `.env` (copy `.env.example` and setup fields as necessary)
 2. cd into the `content-management` directory
 3. run `npm install`
+
+Note that the `contentful-management` library defaults to the `master` environment if there is a typo in the environment name. This is very undesirable so `validate-environment.js` will fetch all environments from contentful and ensure that `ENVIRONMENT` is one of them.
 
 ## Usage
 
