@@ -3,7 +3,7 @@ module.exports = function (migration, {makeRequest}) {
 
     targetContentType.createField('subtitle', {
         name: 'Subtitle',
-        type: 'Text',
+        type: 'Symbol',
         required: false,
         localized: false,
         validations: [],

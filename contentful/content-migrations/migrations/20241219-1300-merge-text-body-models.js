@@ -9,7 +9,6 @@ module.exports = function (migration) {
         from: ["InternalName", "RichText"],
 		to: ["internalName", "richText"],
         updateReferences: true,
-		// removeOldEntries: true,
         identityKey: function () {
             return uuidv4();
         },
