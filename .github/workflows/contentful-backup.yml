@@ -1,8 +1,7 @@
 name: Contentful Backup
 on:
-  pull_request:
   schedule:
-    - cron: 0 0 * * *
+    - cron: 0 0 * * 1
   workflow_dispatch:
     inputs:
       environment:
@@ -15,8 +14,8 @@ on:
 jobs:
   backup_content:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || 'Dev' }}
-    name: Backup content for ${{ inputs.environment || 'Dev' }}
+    environment: ${{ inputs.environment || 'Staging' }}
+    name: Backup content for ${{ inputs.environment || 'Staging' }}
     env:
       az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
       az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
