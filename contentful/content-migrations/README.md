@@ -24,11 +24,6 @@ Currently migrations are run manually, there will likely be a follow on piece to
 4. This will show you a plan for the migration about to happen, type `Y/N` to confirm
 5. Re-enable the webhook
 
-## Errors
-
-In the event of an error that causes the database to be updated with incorrect content,
-you can refresh the database from contentful using the [export-processor](../export-processor/README.md)
-
 ## References
 
 This follows the guidance in the contentful documentation on [scripting migrations](https://www.contentful.com/developers/docs/tutorials/cli/scripting-migrations/)
