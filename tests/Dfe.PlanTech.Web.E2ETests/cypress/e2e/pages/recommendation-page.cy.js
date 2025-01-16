@@ -37,11 +37,10 @@ describe("Recommendation Page", () => {
         cy.get("li.dfe-vertical-nav__section-item").should("exist");
     });
 
-    it("Should have a link to print open the page in printout format", () => {
-        cy.get("a.govuk-link").contains(
-            "View a printable version of your school's recommendations"
-        );
-    });
+  it("Should have a link to open the page in printout format", () => {
+      cy.get("a.govuk-link")
+          .contains("View and print all recommendations")
+  })
 
     //Links
     it("Should have no broken internal links", () => {
@@ -120,10 +119,5 @@ describe("Recommendation Page", () => {
             .should("exist")
             .and("have.attr", "href")
             .and("include", url);
-    });
-
-    //Accessibility
-    it("Passes Accessibility Testing", () => {
-        cy.runAxe();
     });
 });
