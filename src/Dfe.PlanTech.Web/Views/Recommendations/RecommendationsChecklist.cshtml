@@ -27,4 +27,25 @@
         }
     </div>
     <partial name="RecommendationPrintContent" model="@Model.AllContent"/>
+    <div class="govuk-grid-row" id="checkYourAnswers-page">
+        <div class="govuk-grid-column-two-thirds-from-desktop">
+            <h2 class="govuk-body-l">@Model.SectionName</h2>
+            <h1 class="govuk-body-xl">Your answers</h1>
+             <dl class="govuk-summary-list govuk-!-margin-bottom-9">
+                @foreach (var questionWithAnswer in Model.SubmissionResponses)
+                {
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key spacer">
+                            @questionWithAnswer.QuestionText
+                        </dt>
+                        <dd class="govuk-summary-list__value spacer">
+                            @questionWithAnswer.AnswerText
+                        </dd>
+                        <dd class="noprint govuk-summary-list__actions spacer">
+                        </dd>
+                    </div>
+                }
+            </dl>
+       </div>
+    </div>
 </div>

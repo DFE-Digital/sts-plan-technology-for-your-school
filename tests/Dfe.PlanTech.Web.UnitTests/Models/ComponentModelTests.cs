@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using Dfe.PlanTech.Domain.Submissions.Models;
+using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Models
 {
@@ -139,6 +140,26 @@ character
             {
                 Assert.Contains(chunk, allContent);
             }
+        }
+
+        [Fact]
+        public void Recommendation_View_Model_Should_Return_SubmissionResponses()
+        {
+            var submission = new List<QuestionWithAnswer>()
+            {
+                new QuestionWithAnswer { QuestionRef = "Q1", QuestionText = "First question", AnswerRef = "A1", AnswerText = "First answer", DateCreated = new DateTime() },
+                new QuestionWithAnswer { QuestionRef = "Q2", QuestionText = "Second question", AnswerRef = "A2", AnswerText = "Second answer", DateCreated = new DateTime() },
+                new QuestionWithAnswer { QuestionRef = "Q3", QuestionText = "Third question", AnswerRef = "A3", AnswerText = "Third answer", DateCreated = new DateTime() },
+                new QuestionWithAnswer { QuestionRef = "Q4", QuestionText = "Fourth question", AnswerRef = "A4", AnswerText = "Fourth answer", DateCreated = new DateTime() },
+            };
+
+            var recommendationViewModel = ComponentBuilder.BuildRecommendationViewModel(submission);
+
+            var responses = recommendationViewModel.SubmissionResponses.ToList();
+
+            Assert.Equal(4, responses.Count());
+            Assert.Contains(submission[3], responses);
+            Assert.Equal("Q1", responses[0].QuestionRef);
         }
     }
 }

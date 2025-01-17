@@ -19,7 +19,13 @@ export default function writeUserJourneyPaths({ dataMapper, outputDir, saveAllJo
   saveSubtopicPathsOverview(journeys, outputDir);
 }
 
-const mapJourneysToMinimalSectionInfo = (dataMapper, saveAllJourneys) => dataMapper.mappedSections.map(section => dataMapper.convertToMinimalSectionInfo(section, saveAllJourneys));
+/**
+ * 
+ * @param {DataMapper} dataMapper 
+ * @param {boolean} saveAllJourneys 
+ * @returns 
+ */
+const mapJourneysToMinimalSectionInfo = (dataMapper, saveAllJourneys) => dataMapper.mappedSections.map(section => section.toMinimalOutput(saveAllJourneys));
 
 const saveSubtopicPathsOverview = (journeys, outputDir) => {
   const combined = journeys.map(journey => ({

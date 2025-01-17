@@ -159,7 +159,7 @@
   border-top: 1px solid #b1b4b6;
 }
 
-#checkYourAnswers-page h3.govuk-body-l {
+#checkYourAnswers-page .govuk-body-l {
   color: grey;
   margin-bottom: 5px;
 }
@@ -167,4 +167,8 @@
 #checkYourAnswers-page .govuk-heading-xl {
   font-size: 2.5rem;
   margin-bottom: 25px;
+}
+
+div.recommendation-content > #checkYourAnswers-page {
+    padding-top: 20px !important;
 }
