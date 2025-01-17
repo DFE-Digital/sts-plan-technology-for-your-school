@@ -1,9 +1,11 @@
 export default class CSLink {
-  url;
-  linkText;
+    id;
+    url;
+    linkText;
 
-  constructor({ fields }) {
-    this.url = fields.url;
-    this.linkText = fields.linkText;
-  }
+    constructor({ fields, sys }) {
+        this.id = sys.id;
+        this.url = fields.url;
+        this.linkText = fields.linkText;
+    }
 }

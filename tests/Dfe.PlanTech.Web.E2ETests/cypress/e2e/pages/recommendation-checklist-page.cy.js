@@ -10,7 +10,7 @@ describe("Recommendation Checklist Page", () => {
     cy.loginWithEnv(url);
     cy.navigateToRecommendationPage();
     cy.get("a.govuk-link")
-        .contains("View a printable version of your school's recommendations")
+        .contains("View and print all recommendations")
         .then(($a) => {
           $a.attr('target', '_self')
         })
@@ -37,6 +37,15 @@ describe("Recommendation Checklist Page", () => {
     cy.get("#printed-date-time").contains("Date and time this document was printed");
   });
 
+  it("Should show answers to questions", () => {
+      cy.get("#checkYourAnswers-page").should("exist").within(() => {
+          cy.get("h1").contains("Your answers");
+          cy.get("div.govuk-summary-list__row").should("exist");
+          cy.get("dt.govuk-summary-list__key").should("exist");
+          cy.get("dd.govuk-summary-list__value").should("exist");
+      });
+   });
+
   it("Should have a print button", () => {
       cy.get("#print-page-button").should("exist");
   });
@@ -48,8 +57,7 @@ describe("Recommendation Checklist Page", () => {
       .and("include", "/");
   });
 
-  //Accessibility
-  it("Passes Accessibility Testing", () => {
+  it("passes accessibility tests", () => {
     cy.runAxe();
   });
 });

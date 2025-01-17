@@ -10,5 +10,5 @@ public class CategorySectionRecommendationDto
 
     public string? SectionSlug { get; init; }
 
-    public bool Viewed { get; init; }
+    public bool? Viewed { get; init; }
 }
