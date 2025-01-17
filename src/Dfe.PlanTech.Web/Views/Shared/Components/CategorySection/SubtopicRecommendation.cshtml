@@ -8,7 +8,7 @@
 }
 else if (Model.RecommendationSlug != null)
 {
-    if (!Model.Viewed)
+    if (Model.Viewed == false)
     {
         <task-list-tag colour="@TagColour.Yellow">New</task-list-tag>
     }
