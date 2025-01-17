@@ -8,7 +8,7 @@ Web application to help schools plan a technology roadmap
 
 ## Requirements
 
-- .Net 8.0 and any supported IDE for DEV running.
+- .Net 8.0 and any supported IDE for DEV running. 
 
 ## Running Locally
 
