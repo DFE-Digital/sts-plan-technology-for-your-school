@@ -1,14 +1,16 @@
 # Seeding Test Data
 
-This project contains the code to seed an empty plan tech database with mock content.
+This project contains the code to create an empty plan tech database with the correct schema.
 
-The database can then be used with the plan tech web app to run more complex and detailed end to end tests with cypress that rely on content being consistent.
+This can be used to run plan tech locally against a local database of your own for testing schema changes, and work that involves database updates.
 
 ## Overview
 
 The standard E2E tests that run against each environment are kept quite generic so that if content is changed, questions reordered, or topics added/removed, they continue to pass.
 
-The purpose of this project, seeding with realistic mock content, is to support writing more complex and detailed end to end tests that rely on content being consistent.
+The long term goal of this project, was to add realistic mock content, to support writing more complex and detailed end to end tests that rely on content being consistent.
+
+This project was created before the switch from storing content in SQL to caching content with Redis, so has become more useful as a locally running test database than its initial intention. 
 
 ## Requirements
 
@@ -17,10 +19,10 @@ The purpose of this project, seeding with realistic mock content, is to support 
 
 ## How to use
 
-To use this project to get a seeded database for testing you need to:
-1. setup a test database
-2. run the database upgrader against it to initialise it with the PlanTech schema
-3. run this project to populate the database with test data.
+To use this project to get a local plan-tech database you need to:
+1. Create a test database
+2. Run the database upgrader against it to initialise it with the PlanTech schema
+3. Run this project to populate the database with some required initial data.
 
 If you have docker installed, there is a bash script to do this, or you can run each step manually
 
@@ -35,14 +37,14 @@ Instead you can install `sql-cli` to your machine with
 npm install -g sql-cli
 ```
 
-Then run `./scripts/setup-arm.sh` from the project root and pass a server name and password as arguments. For example:
+Then run `./scripts/setup-sql-cli.sh` from the project root and pass a server name and password as arguments. For example:
 - Mac/Linux
     ```bash
-    ./scripts/setup.sh azuresqledge Pa5ssw0rd@G0esH3r3
+    ./scripts/setup-sql-cli.sh azuresqledge Pa5ssw0rd@G0esH3r3
     ```
 - Windows
     ```bash
-    sh scripts/setup.sh azuresqledge Pa5ssw0rd@G0esH3r3
+    sh scripts/setup-sql-cli.sh azuresqledge Pa5ssw0rd@G0esH3r3
     ```
 
 #### Standard Setup
@@ -77,7 +79,7 @@ If you don't have docker and have an MSSQL instance to use instead, you need to
 4. Run this project to populate the database with the test data
 
 
-### Using Plan Tech With Seeded Test Database
+### Using Plan Tech With Local Test Database
 
 After running the above to create a database with mock content, you can try it against plan tech by editing your dotnet secrets for `src/Dfe.PlanTech.Web`
 and changing your connection string to match the one set above.
@@ -88,6 +90,3 @@ Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=Pa5ssw
 ```
 
 and then run Plan Tech as normal.
-
-Any required content that has not been mocked, (e.g. at the moment, the index page) will fallback to Contentful to find it,
-so Plan tech continues to operate off dev content unless it has been replaced with a fixed test alternative.
