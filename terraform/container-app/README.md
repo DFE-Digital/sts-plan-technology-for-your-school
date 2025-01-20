@@ -89,7 +89,7 @@ Terraform needs to be initialised on your local machine before you can use it. T
 
 Run the following command to initialise Terraform.
 
-`terraform init -backend-config=backend.tfvars`
+`terraform init -backend-config=backend.tfvars -upgrade -reconfigure`
 
 ⚠️ tfvars files are ignored by git, but please ensure they do not get committed to the repo by accident ⚠️ 
 
@@ -111,15 +111,19 @@ To run the plan command, first rename the `terraform.tfvars.example` file to `te
 | az_sql_admin_userid_postfix               | User for the SQL server  (this will be prepended by the resource group name) |
 | az_app_kestrel_endpoint                   | Expected endpoint for the Kestrel server (e.g. "https://127.0.0.1:8080)      |
 
-Run the following command to execute the Plan commande: 
+Run the following command to execute the Plan command: 
 
 `terraform plan -var-file="terraform.tfvars"`
 
-### Terraform Plan
+**NB: Make sure that the image_tag field is set to the most recent container address - usually of the form `main...`. The current container can be found through Azure Portal -> Container Registries -> Services -> Repositories -> plan-tech-app**
+
+For the moment, if you get a 403 then give IP-specific access to the person deploying the change. (Permissions may be needed.)
+
+### Terraform Apply
 
 Use the apply command to apply the changes to the Azure environment.
 
-`terraform plan -var-file="terraform.tfvars"`
+`terraform apply -var-file="terraform.tfvars"`
 
 ### Terraform Validate
 
