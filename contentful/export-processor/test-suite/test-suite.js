@@ -263,12 +263,12 @@ export default class TestSuiteForSubTopic {
     }
 
     generateUseBackButton() {
-        const testScenario = `User uses back button to navigate back through questions to self assesment page`;
+        const testScenario = `User uses back button to navigate back through questions to self assessment page`;
         const testSteps = `1 - Navigate to the ${this.subtopicName} subtopic
     2 - Navigate through the interstitial page
     3 - Answer first question, save and continue
     4 - Use back button to return to first queston
-    5 - use back button again to return to self assesment page`;
+    5 - use back button again to return to self assessment page`;
         const expectedOutcome = `User returned to self - assessment page.${this.subtopicName} subtopic shows 'In progress'.`;
         return this.createRow(testScenario, testSteps, expectedOutcome);
     }
