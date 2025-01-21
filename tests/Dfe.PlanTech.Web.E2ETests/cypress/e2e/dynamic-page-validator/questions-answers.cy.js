@@ -22,7 +22,7 @@ describe("Sections and all-questions paths", { testIsolation: false }, () => {
                         }
                     });
             });
-            validateAndTestSections(section, section.minimumPathsToNavigateQuestions, dataMapper);
+            validateAndTestSections(section, section.pathInfo.minimumPathsToNavigateQuestions, dataMapper);
         });
     });
 });

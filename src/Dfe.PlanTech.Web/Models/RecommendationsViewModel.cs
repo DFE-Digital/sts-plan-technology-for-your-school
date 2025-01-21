@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Submissions.Models;
 
 namespace Dfe.PlanTech.Web.Models;
 
@@ -23,4 +24,5 @@ public class RecommendationsViewModel
             yield return chunk;
         }
     }
+    public IEnumerable<QuestionWithAnswer> SubmissionResponses { get; init; } = null!;
 }

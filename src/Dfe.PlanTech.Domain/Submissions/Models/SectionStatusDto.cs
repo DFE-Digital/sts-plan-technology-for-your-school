@@ -12,5 +12,5 @@ public class SectionStatusDto
 
     public DateTime DateUpdated { get; set; }
 
-    public bool Viewed { get; set; }
+    public bool? Viewed { get; set; }
 }
