@@ -122,10 +122,14 @@ export class UserJourney {
      */
     mapPathToOnlyQuestionAnswerTexts() {
         return this.path.map((pathPart) => {
-            return {
-                question: pathPart.question.text,
-                answer: pathPart.answer.text,
-            };
+            try {
+                return pathPart.toMinimalOutput();
+            } catch (e) {
+                return {
+                    question: pathPart.question.text,
+                    answer: pathPart.answer.text,
+                };
+            }
         });
     }
 
