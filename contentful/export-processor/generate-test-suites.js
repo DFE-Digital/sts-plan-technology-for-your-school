@@ -2,29 +2,41 @@ import "dotenv/config";
 import TestSuite from "#src/test-suite/test-suite";
 import writeTestSuites from "./test-suite/write-csvs.js";
 import StaticPageTests from "./test-suite/static-page-tests.js";
+import { log } from "./helpers/log.js";
 
 /**
  * @param {object} args
- * @param {DataMapper} args.dataMapper - created and initialised DataMapper
+ * @param {import("./data-mapper.js").default} args.dataMapper - created and initialised DataMapper
  * @param {string} args.outputDir - directory to write journey paths to
  */
 export default function generateTestSuites({ dataMapper, outputDir }) {
-  let index = 1;
-  const staticPageTests = new StaticPageTests();
+    let index = 1;
+    const staticPageTests = new StaticPageTests();
 
-  const testSuites = Object.values(dataMapper.mappedSections)
-    .filter(section => !!section)
-    .map((section) => {
-      const testSuite = new TestSuite({
-        subtopic: section,
-        testReferenceIndex: index,
-      });
+    log("Generating test suites");
 
-      index = testSuite.testReferenceIndex;
+    const testSuites = Object.values(dataMapper.mappedSections)
+        .filter((section) => !!section)
+        .map((section) => {
+            log(`Generating test suite for ${section.name}`);
 
-      return testSuite;
-    });
+            const testSuite = new TestSuite({
+                subtopic: section,
+                testReferenceIndex: index,
+            });
+            index = testSuite.testReferenceIndex;
 
-  testSuites.push(staticPageTests); 
-  writeTestSuites({ testSuites, outputDir });
+            log(`Test suite for ${section.name} generated`, {
+                addSeperator: true,
+            });
+
+            return testSuite;
+        });
+
+    log("Generated test suites");
+
+    testSuites.push(staticPageTests);
+    writeTestSuites({ testSuites, outputDir });
+
+    log("Wrote test suite CSVs", { addSeperator: true });
 }

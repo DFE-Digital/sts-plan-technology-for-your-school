@@ -3,43 +3,64 @@ import RecommendationChunk from "./recommendation-chunk.js";
 import ErrorLogger from "../errors/error-logger.js";
 
 export default class RecommendationSection {
-  answers;
-  chunks;
-  id;
+    /**
+     * @type {Answer[]}
+     */
+    answers;
 
-  constructor({ fields, sys }) {
-    this.id = sys.id;
+    /**
+     * @type {RecommendationChunk[]}
+     */
+    chunks;
 
-    this.answers = fields.answers?.map((answer) => new Answer(answer)) ?? [];
+    /**
+     * @type {string}
+     */
+    id;
 
-    this.chunks = fields.chunks?.map((chunk) => new RecommendationChunk(chunk)) ?? [];
-    this.logErrorIfMissingRelationships("chunks");
-  }
+    /**
+     *
+     * @param {{fields: Record<string, any>, sys: { id: string }}} param0
+     */
+    constructor({ fields, sys }) {
+        this.id = sys.id;
 
-  logErrorIfMissingRelationships(field) {
-    const matching = this[field];
-    if (!matching || matching.length == 0) {
-      ErrorLogger.addError({ id: this.id, contentType: "recommendationSection", message: `No ${field} found` });
+        this.answers =
+            fields.answers?.map((answer) => new Answer(answer)) ?? [];
+
+        this.chunks =
+            fields.chunks?.map((chunk) => new RecommendationChunk(chunk)) ?? [];
+
+        this.logErrorIfMissingRelationships("chunks");
     }
-  }
 
-  getChunksForPath(path) {
-      const answerIds = path.map(pathPart => pathPart.answer.id);
+    logErrorIfMissingRelationships(field) {
+        const matching = this[field];
+        if (!matching || matching.length == 0) {
+            ErrorLogger.addError({
+                id: this.id,
+                contentType: "recommendationSection",
+                message: `No ${field} found`,
+            });
+        }
+    }
 
-      const filteredChunks = this.chunks.filter(chunk =>
-          chunk.answers.some(answer => answerIds.includes(answer.id))
-      );
+    getChunksForPath(path) {
+        const answerIds = path.map((pathPart) => pathPart.answer.id);
 
-      const uniqueChunks = [];
-      const seen = new Set();
+        const filteredChunks = this.chunks.filter((chunk) =>
+            chunk.answers.some((answer) => answerIds.includes(answer.id))
+        );
 
-      for (const chunk of filteredChunks) {
-          const chunkStr = JSON.stringify(chunk);
-          if (!seen.has(chunkStr)) {
-              seen.add(chunkStr);
-              uniqueChunks.push(chunk);
-          }
-      }
-      return uniqueChunks;
-  }
+        const uniqueChunks = [];
+        const seen = new Set();
+
+        for (const chunk of filteredChunks) {
+            if (!seen.has(chunk.id)) {
+                seen.add(chunk.id);
+                uniqueChunks.push(chunk);
+            }
+        }
+        return uniqueChunks;
+    }
 }
