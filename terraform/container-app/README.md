@@ -124,7 +124,7 @@ Run the following command to execute the Plan command:
 
 **NB: Make sure that the image_tag field is set to the most recent container address - usually of the form `main...`. The current container can be found through Azure Portal -> Container Registries -> Services -> Repositories -> plan-tech-app**
 
-For the moment, if you get a 403 then give IP-specific access to the person deploying the change. (Permissions may be needed.)
+For the moment, if you get a 403 then give IP-specific access to the `plantechcosting` storage account for the relevant environment to the person deploying the change. (Permissions may be needed.)
 
 ### Terraform Apply
 
