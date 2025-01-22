@@ -3,12 +3,12 @@
  * This script finds all entries which link to deleted/removed content and removes those references.
  */
 
-const getClient = require("../helpers/get-client");
+import getClient from "../helpers/get-client.js";
 
-module.exports = async function () {
+export default async function () {
     const client = await getClient();
     await removeInvalidReferences(client);
-};
+}
 
 /**
  * Goes through all entries removing invalid links within them
@@ -17,13 +17,13 @@ module.exports = async function () {
  */
 async function removeInvalidReferences(client) {
     const contentTypes = await client.contentType.getMany();
-    const entryIds = await getAllValidEntryIds(client);
+    const entryIds = await getAllValidEntryIds({ client, contentTypes });
 
     for (const contentType of contentTypes.items) {
         await removeInvalidReferencesForContentType({
-            client: client,
+            client,
             validEntryIds: entryIds,
-            contentType: contentType.sys.id,
+            contentType,
         });
     }
 }
@@ -31,17 +31,17 @@ async function removeInvalidReferences(client) {
 /**
  * Finds all valid entryIds within contentful. This has to be split up by content type due to a max limit of 1000 items
  *
- * @param {ClientAPI} client - Contentful management client instance.
+ * @param {{client: ClientAPI, contentTypes: object}} params
  */
-async function getAllValidEntryIds(client) {
+async function getAllValidEntryIds({ client, contentTypes }) {
     console.log("Finding all valid entryIds");
-    const contentTypes = await client.contentType.getMany();
     const entryIds = new Set();
 
     for (const contentType of contentTypes.items) {
         const entries = await client.entry.getMany({
             query: { limit: 1000, content_type: contentType.sys.id },
         });
+        contentType.entries = entries;
         entries.items.map((entry) => entryIds.add(entry.sys.id));
     }
 
@@ -62,10 +62,8 @@ async function removeInvalidReferencesForContentType({
     validEntryIds,
     contentType,
 }) {
-    console.log(`Processing contentType: ${contentType}`);
-    const entries = await client.entry.getMany({
-        query: { limit: 1000, content_type: contentType },
-    });
+    console.log(`Processing contentType: ${contentType.sys.id}`);
+    const entries = contentType.entries;
     for (const entry of entries.items) {
         for (const [key, fieldValue] of Object.entries(entry.fields)) {
             for (const [locale, value] of Object.entries(fieldValue)) {
@@ -99,22 +97,23 @@ async function processField({
     locale,
     fieldKey,
     fieldValue,
-} = {}) {
+}) {
     if (Array.isArray(fieldValue)) {
         await removeMissingReferencesInArray({
-            client: client,
-            entry: entry,
-            validEntryIds: validEntryIds,
-            locale: locale,
-            fieldKey: fieldKey,
+            client,
+            entry,
+            validEntryIds,
+            locale,
+            fieldKey,
             fieldItems: fieldValue,
         });
-    } else if (fieldKey.sys?.type === "Link") {
+    } else if (fieldValue?.sys?.type === "Link") {
         await removeLinkIfMissing({
-            client: client,
-            entry: entry,
-            validEntryIds: validEntryIds,
-            fieldKey: fieldKey,
+            client,
+            entry,
+            validEntryIds,
+            fieldKey,
+            fieldValue,
         });
     }
 }
@@ -126,18 +125,20 @@ async function processField({
  * @param {object} params.entry - The Contentful entry object being processed.
  * @param {Set<string>} params.validEntryIds - All valid entry Ids.
  * @param {string} params.fieldKey - Key of the field in the entry.
+ * @param {any} params.fieldValue - Value of the field in the entry.
  */
 async function removeLinkIfMissing({
     client,
     entry,
     validEntryIds,
     fieldKey,
-} = {}) {
-    if (!validEntryIds.has(fieldKey.sys?.id)) {
+    fieldValue,
+}) {
+    if (!validEntryIds.has(fieldValue.sys?.id)) {
         console.log(
-            `Removing invalid link in entry "${entry.sys.id}" field "${fieldKey}" value "${fieldKey.sys.id}}".`
+            `Removing invalid link in entry "${entry.sys.id}" field "${fieldKey}" value "${fieldValue.sys.id}}".`
         );
-        delete entry.fields[fieldKey.sys?.id];
+        delete entry.fields[fieldKey];
         await client.entry.update(
             { entryId: entry.sys.id },
             {
@@ -165,7 +166,7 @@ async function removeMissingReferencesInArray({
     locale,
     fieldKey,
     fieldItems,
-} = {}) {
+}) {
     let updated = false;
     let validReferences = [];
     for (const reference of fieldItems) {
