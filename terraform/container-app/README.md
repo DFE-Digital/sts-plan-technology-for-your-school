@@ -77,6 +77,13 @@ export ARM_CLIENT_ID = <client_id>
 export ARM_CLIENT_SECRET = <client_secret>
 ```
 
+| Key                   | Location                                                      |
+| --------------------- |---------------------------------------------------------------|
+| ARM_TENANT_ID         | DfE Platform Identity Overview (same for all envs)            |
+| ARM_SUBSCRIPTION_ID   | Managed identities -> s190XXX -> Subscription ID              |
+| ARM_CLIENT_ID         | go to s190-XXX terraform overview, and use the application ID |
+| ARM_CLIENT_SECRET     | service-principal-secret from the tf-kv                       |
+
 And sign in to Azure using the Azure CLI, as the Terraform module uses this for part of the infrastructure deployoyment:
 
 ```
