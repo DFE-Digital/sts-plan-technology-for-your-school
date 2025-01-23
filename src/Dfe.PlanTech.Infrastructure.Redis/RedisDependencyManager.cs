@@ -28,8 +28,8 @@ public class RedisDependencyManager(IBackgroundTaskQueue backgroundTaskQueue) : 
     {
         var batch = database.CreateBatch();
         var tasks = GetDependencies(value).Distinct()
-                                                     .Select(dependency => batch.SetAddAsync(GetDependencyKey(dependency), key, CommandFlags.FireAndForget))
-                                                     .ToArray();
+            .Select(dependency => batch.SetAddAsync(GetDependencyKey(dependency), key, CommandFlags.FireAndForget))
+            .ToArray();
 
         if (tasks.Length == 0)
         {

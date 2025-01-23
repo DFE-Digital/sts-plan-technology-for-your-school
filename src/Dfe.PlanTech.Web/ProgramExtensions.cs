@@ -77,7 +77,7 @@ public static class ProgramExtensions
 
         services.AddSingleton((_) =>
         {
-            var configValue = configuration["CONTENTFUL_GET_ENTITY_INT"] ?? "4";
+            var configValue = configuration["CONTENTFUL_GET_ENTITY_INT"] ?? "3";
 
             if (!int.TryParse(configValue, out int include))
             {
