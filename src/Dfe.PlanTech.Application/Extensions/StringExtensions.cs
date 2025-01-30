@@ -16,7 +16,7 @@ public static class StringExtensions
         return $"{destination}{input.AsSpan(1)}";
     }
 
-    public static string? UseNonBreakingHyphenAndHtmlDecode(this string text)
+    public static string? UseNonBreakingHyphenAndHtmlDecode(this string? text)
     {
         if (string.IsNullOrEmpty(text))
         {
