@@ -11,7 +11,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Helpers
         [InlineData("This is-a-test", "This is‑a‑test")]
         [InlineData(null, null)]
         [InlineData("", "")]
-        public void CheckHyphensConvertedCorrectly(string inputText, string expectedText)
+        public void CheckHyphensConvertedCorrectly(string? inputText, string? expectedText)
         {
             var result = StringExtensions.UseNonBreakingHyphenAndHtmlDecode(inputText);
 
