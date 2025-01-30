@@ -16,28 +16,28 @@ import errorLogger from "#src/errors/error-logger";
 export class PathCalculator {
     /** @type {Question[]} Questions in the section */
     questions;
-    
+
     /** @type {UserJourney[]} All possible paths through the questions */
     paths;
-    
+
     /** @type {PathBuilder} Builds paths through questions */
     pathBuilder;
-    
+
     /** @type {SubtopicRecommendation} Recommendation for the section */
     recommendation;
-    
+
     /** @type {string} Unique identifier for the section */
     sectionId;
 
     /** @type {UserJourney[] | undefined} Cached sorted paths */
     _sortedPaths;
-    
+
     /** @type {UserJourney[] | undefined} Cached minimum paths to navigate questions */
     _minimumPathsToNavigateQuestions;
-    
+
     /** @type {Record<string, Path> | undefined} Cached minimum paths for recommendations */
     _minimumPathsForRecommendations;
-    
+
     /** @type {UserJourney[] | undefined} Cached paths for all possible answers */
     _pathsForAllPossibleAnswers;
 
@@ -124,8 +124,8 @@ export class PathCalculator {
     }
 
     /**
-     * 
-     * @param {Path} path 
+     *
+     * @param {Path} path
      * @returns {UserJourney}
      */
     pathToUserJourney(path) {
@@ -161,7 +161,11 @@ export class PathCalculator {
         if (sectionChunks.length !== uniqueTestedChunks.length) {
             sectionChunks
                 .filter((chunkId) => !uniqueTestedChunks.includes(chunkId))
-                .forEach((missingChunk) => this._addError(`Recommendation chunk ${missingChunk} not included in any test paths.`));
+                .forEach((missingChunk) =>
+                    this._addError(
+                        `Recommendation chunk ${missingChunk} not included in any test paths.`
+                    )
+                );
         }
     }
 
@@ -186,7 +190,9 @@ export class PathCalculator {
                     continue;
                 }
 
-                this._addError(`Could not find question with ID '${nextQuestionId}' for answer ${answer.text} ${answer.id} in ${question.text} ${question.id}`);
+                this._addError(
+                    `Could not find question with ID '${nextQuestionId}' for answer ${answer.text} ${answer.id} in ${question.text} ${question.id}`
+                );
                 answer.nextQuestion = null;
             }
         }
@@ -194,14 +200,13 @@ export class PathCalculator {
 
     /**
      * Adds message to error logger using the section's id.
-     * @param {string} message 
+     * @param {string} message
      */
-    _addError(message){
+    _addError(message) {
         errorLogger.addError({
             id: this.sectionId,
             contentType: "section",
-            message: message
+            message: message,
         });
-
     }
 }

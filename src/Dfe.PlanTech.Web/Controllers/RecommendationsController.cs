@@ -41,7 +41,7 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
                                                               [FromServices] IGetRecommendationRouter getRecommendationRouter,
                                                               CancellationToken cancellationToken)
     {
-        if (!contentfulOptions.UsePreview)
+        if (!contentfulOptions.UsePreviewApi)
         {
             return new RedirectResult(UrlConstants.SelfAssessmentPage);
         }

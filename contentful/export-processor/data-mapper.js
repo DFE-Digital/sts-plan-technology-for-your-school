@@ -1,6 +1,7 @@
 import ContentType from "./content-types/content-type.js";
 import SubtopicRecommendation from "./content-types/subtopic-recommendation.js";
 import ErrorLogger from "./errors/error-logger.js";
+import { log } from "#src/helpers/log";
 
 /**
  * @typedef {import("./content-types/section.js").Section} Section
@@ -20,7 +21,7 @@ export default class DataMapper {
 
     /**
      * Get the mapped sections
-     * @returns {IterableIterator<Section>} Iterator for mapped sections
+     * @returns {Section[]} Iterator for mapped sections
      */
     get mappedSections() {
         if (!this._alreadyMappedSections)
@@ -130,9 +131,18 @@ export default class DataMapper {
         }
 
         for (const [, subtopicRecommendation] of subtopicRecommendations) {
-            const mapped = new SubtopicRecommendation(subtopicRecommendation);
+            try {
+                const mapped = new SubtopicRecommendation(
+                    subtopicRecommendation
+                );
 
-            yield mapped.subtopic;
+                yield mapped.subtopic;
+            } catch (e) {
+                console.error(
+                    `Error trying to created SubtopicRecommendation: ${e}`,
+                    subtopicRecommendation
+                );
+            }
         }
     }
 

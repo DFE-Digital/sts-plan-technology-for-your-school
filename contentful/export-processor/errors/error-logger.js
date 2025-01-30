@@ -2,7 +2,7 @@ import ContentError from "./content-error.js";
 import fs from "fs";
 
 /**
- * @typedef {{id: string, contentType: string, message: string}} Error 
+ * @typedef {{id: string, contentType: string, message: string}} Error
  */
 
 class ErrorLogger {
@@ -10,8 +10,8 @@ class ErrorLogger {
     outputDir = "";
 
     /**
-     * 
-     * @param {Error} error 
+     *
+     * @param {Error} error
      */
     addError({ id, contentType, message }) {
         const error = new ContentError({ id, contentType, message });
@@ -22,6 +22,8 @@ class ErrorLogger {
     }
 
     writeErrorsToFile(filePath = "content-errors.md") {
+        console.log(`Writing errors to file ${filePath}`);
+
         const groupedByContentType = this.groupBy(this.errors, "contentType");
 
         const errors =
@@ -33,12 +35,13 @@ class ErrorLogger {
                 .join("\n\n");
 
         fs.writeFileSync(this.outputDir + filePath, errors);
+        console.log(`Wrote errors to file ${filePath}`);
     }
 
     /**
-     * 
-     * @param {string} contentType 
-     * @param {Error[]} errors 
+     *
+     * @param {string} contentType
+     * @param {Error[]} errors
      * @returns {string} Error messages for a particular content type formatted as string
      */
     errorMessagesForContentType(contentType, errors) {
@@ -73,6 +76,4 @@ const errorLogger = new ErrorLogger();
 
 export default errorLogger;
 
-export {
-    ErrorLogger as ErrorLoggerClass
-}
+export { ErrorLogger as ErrorLoggerClass };

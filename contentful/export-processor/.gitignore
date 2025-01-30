@@ -7,3 +7,4 @@ inserted-groups.json
 
 #Env variables
 .env
+.env.*

@@ -29,8 +29,8 @@ export class MinimumPathCalculator {
     sectionId;
 
     /**
-     * 
-     * @param {{ questions: Question[], paths: UserJourney[], sortedPaths: UserJourney[], sectionId: string}} params 
+     *
+     * @param {{ questions: Question[], paths: UserJourney[], sortedPaths: UserJourney[], sectionId: string}} params
      */
     constructor({ questions, paths, sortedPaths, sectionId }) {
         this.questions = questions;
@@ -80,16 +80,19 @@ export class MinimumPathCalculator {
 
             minimumPaths.push(path.path);
 
-            this.removeItemsFromArray(remainingQuestions, path.questionIdsAnswered);
+            this.removeItemsFromArray(
+                remainingQuestions,
+                path.questionIdsAnswered
+            );
         }
 
         return this.handleRemainingQuestions(remainingQuestions, minimumPaths);
     }
 
     /**
-     * 
-     * @param {string[]} remainingQuestions 
-     * @param {Path[]} minimumPaths 
+     *
+     * @param {string[]} remainingQuestions
+     * @param {Path[]} minimumPaths
      * @returns {Path[]}
      */
     handleRemainingQuestions(remainingQuestions, minimumPaths) {
@@ -105,9 +108,9 @@ export class MinimumPathCalculator {
     }
 
     /**
-     * 
-     * @param {string} questionId 
-     * @returns 
+     *
+     * @param {string} questionId
+     * @returns
      */
     getFirstPathContainingQuestion(questionId) {
         // Find the first path that contains the remaining question
