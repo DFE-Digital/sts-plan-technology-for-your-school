@@ -17,6 +17,7 @@
     },
     "dependencies": {
         "@types/node": "^22.10.5",
+        "contentful-management": "^11.45.1",
         "dotenv": "^16.4.7",
         "typescript": "^5.7.2"
     }
