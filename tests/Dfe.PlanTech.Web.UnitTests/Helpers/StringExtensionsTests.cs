@@ -4,6 +4,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Helpers
 {
     public class StringExtensionsTests
     {
+        // Just to be clear, the expectedText Hyphens are Non breaking Hyphens and inputText Hyphens are standard
         [Theory]
         [InlineData("Single test-", "Single test‑")]
         [InlineData("Single-test", "Single‑test")]
