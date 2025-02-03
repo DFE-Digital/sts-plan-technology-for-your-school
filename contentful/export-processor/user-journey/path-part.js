@@ -16,8 +16,15 @@ export default class PathPart {
      * @param {Question} params.question - The question in this path part
      * @param {Answer} params.answer - The answer selected for this question
      */
-    constructor({ question, answer }){
+    constructor({ question, answer }) {
         this.question = question;
         this.answer = answer;
+    }
+
+    toMinimalOutput() {
+        return {
+            question: this.question.text,
+            answer: this.answer.text,
+        };
     }
 }

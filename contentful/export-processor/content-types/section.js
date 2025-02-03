@@ -1,6 +1,7 @@
 import { Question } from "./question.js";
 import { PathCalculator } from "../user-journey/path-calculator.js";
 import { SectionStats } from "#src/user-journey/section-stats";
+import { UserJourney } from "#src/user-journey/user-journey";
 
 /**
  * @typedef {import("./subtopic-recommendation.js").SubtopicRecommendation} SubtopicRecommendation
@@ -13,7 +14,6 @@ import { SectionStats } from "#src/user-journey/section-stats";
 /**
  * @typedef {import("#src/user-journey/user-journey").UserJourneyMinimalOutput} UserJourneyMinimalOutput
  */
-
 
 /**
  * @typedef {import("#src/user-journey/user-journey").UserJourney} UserJourney
@@ -86,10 +86,22 @@ export class Section {
      * @returns {SectionMinimalOutput} Minimal section info
      */
     toMinimalOutput(writeAllPossiblePaths) {
-        return {
+        const recommendationPaths =
+            this.pathInfo.minimumPathsForRecommendations;
+
+        for (const [maturity, path] of Object.entries(recommendationPaths)) {
+            recommendationPaths[maturity] = path.map((part) =>
+                part.toMinimalOutput()
+            );
+        }
+
+        const result = {
             section: this.name,
             allPathsStats: this.stats.pathsPerMaturity,
-            minimumQuestionPaths: this.pathInfo.minimumPathsToNavigateQuestions,
+            minimumQuestionPaths:
+                this.pathInfo.minimumPathsToNavigateQuestions.map((path) =>
+                    path.map((part) => part.toMinimalOutput())
+                ),
             minimumRecommendationPaths:
                 this.pathInfo.minimumPathsForRecommendations,
             pathsForAnswers: this.pathInfo.pathsForAllPossibleAnswers.map(
@@ -99,6 +111,8 @@ export class Section {
                 ? this.pathInfo.paths.map((path) => path.toMinimalOutput())
                 : undefined,
         };
+
+        return result;
     }
 }
 

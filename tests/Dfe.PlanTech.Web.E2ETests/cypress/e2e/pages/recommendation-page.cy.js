@@ -115,7 +115,7 @@ describe("Recommendation Page", () => {
         cy.get(
             "nav.dfe-vertical-nav div.dfe-vertical-nav__back-button a.govuk-back-link"
         )
-            .contains("Go to self-assesment topics")
+            .contains("Go to self-assessment topics")
             .should("exist")
             .and("have.attr", "href")
             .and("include", url);
