@@ -25,11 +25,17 @@ public class DateTimeFormatterTests
     }
 
     [Theory]
-    [InlineData("2015/09/15", "15 Sept 2015")]
+    [InlineData("2015/09/15", "15 Sep 2015")]
     [InlineData("2020/01/09", "9 Jan 2020")]
     public void FormattedDateShort_Should_Display_Correctly(string inputDate, string expected)
     {
         var dateTime = DateTime.Parse(inputDate, new CultureInfo("en-GB"));
-        Assert.Equal(expected, DateTimeFormatter.FormattedDateShort(dateTime));
+
+        // TODO: This is a horrible hack to account for the fact that
+        // the ICU library updated "Sep" to "Sept" in version 68.
+        // Further information:
+        //  https://stackoverflow.com/questions/77430109/trouble-with-abbreviatedmonthnames
+        //  https://cldr.unicode.org/downloads/cldr-38
+        Assert.Equal(expected, DateTimeFormatter.FormattedDateShort(dateTime).Replace("Sept", "Sep"));
     }
 }
