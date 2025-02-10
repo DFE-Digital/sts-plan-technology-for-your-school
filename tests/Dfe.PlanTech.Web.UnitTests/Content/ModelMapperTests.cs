@@ -21,32 +21,6 @@ public class ModelMapperTests
     };
 
     [Fact]
-    public void MapToCsPages_Return_Correct_Amount()
-    {
-        var supportPages = new List<ContentSupportPage>
-        {
-            new()
-            {
-               SystemProperties = new SystemProperties()
-            },
-            new()
-            {
-                 SystemProperties = new SystemProperties()
-            },
-            new()
-            {
-                SystemProperties = new SystemProperties()
-            }
-        };
-
-        var sut = GetService();
-
-        var result = sut.MapToCsPages(supportPages);
-
-        result.Count.Should().Be(3);
-    }
-
-    [Fact]
     public void ConvertEntryToContentItem_IsRichText_Returns_RichTextContentItem()
     {
         var entry = new Entry

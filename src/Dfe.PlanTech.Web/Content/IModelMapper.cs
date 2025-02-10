@@ -7,8 +7,6 @@ namespace Dfe.PlanTech.Web.Content;
 
 public interface IModelMapper
 {
-    List<CsPage> MapToCsPages(IEnumerable<ContentSupportPage> incoming);
-    CsPage MapToCsPage(ContentSupportPage incoming);
     CsContentItem ConvertEntryToContentItem(Entry entry);
     RichTextContentItem? MapContent(ContentItem contentItem);
     RichTextNodeType ConvertToRichTextNodeType(string str);

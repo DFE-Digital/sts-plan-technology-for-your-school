@@ -12,11 +12,6 @@ namespace Dfe.PlanTech.Web.Content;
 
 public class ModelMapper(SupportedAssetTypes supportedAssetTypes) : IModelMapper
 {
-    public List<CsPage> MapToCsPages(IEnumerable<ContentSupportPage> incoming)
-    {
-        return incoming.Select(MapToCsPage).ToList();
-    }
-
     public CsContentItem ConvertEntryToContentItem(Entry entry)
     {
         var item = entry.RichText is not null
@@ -156,37 +151,12 @@ public class ModelMapper(SupportedAssetTypes supportedAssetTypes) : IModelMapper
         };
     }
 
-    public CsPage MapToCsPage(ContentSupportPage incoming)
-    {
-        var result = new CsPage
-        {
-            Heading = incoming.Heading,
-            Slug = incoming.Slug,
-            IsSitemap = incoming.IsSitemap,
-            HasCitation = incoming.HasCitation,
-            HasBackToTop = incoming.HasBackToTop,
-            HasFeedbackBanner = incoming.HasFeedbackBanner,
-            HasPrint = incoming.HasPrint,
-            Content = MapEntriesToContent(incoming.Content),
-            ShowVerticalNavigation = incoming.ShowVerticalNavigation,
-            CreatedAt = incoming.SystemProperties.CreatedAt,
-            UpdatedAt = incoming.SystemProperties.UpdatedAt,
-            Tags = FlattenMetadata(incoming.Metadata)
-        };
-        return result;
-    }
-
     private static List<string> FlattenMetadata(ContentfulMetadata item)
     {
         if (item is null)
             return [];
 
         return item.Tags.Select(o => o.Sys.Id).ToList();
-    }
-
-    private List<CsContentItem> MapEntriesToContent(List<CSBodyText> entries)
-    {
-        return entries.Select(ConvertEntryToContentItem).ToList();
     }
 
     public RichTextContentItem? MapRichTextContent(ContentItemBase? richText, Entry entry)

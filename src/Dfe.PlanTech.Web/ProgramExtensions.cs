@@ -264,7 +264,6 @@ public static class ProgramExtensions
             .AddSingleton(sp => sp.GetRequiredService<IOptions<SupportedAssetTypes>>().Value);
 
         app.Services.AddTransient<IModelMapper, ModelMapper>();
-        app.Services.AddTransient<IContentService, ContentService>();
         app.Services.AddTransient<ILayoutService, LayoutService>();
 
         app.Services.Configure<CookiePolicyOptions>(options =>
