@@ -15,8 +15,7 @@ public class WebApplicationBuilderExtensionsTests
 
         var types = new[]
         {
-            typeof(IModelMapper),
-            typeof(ILayoutService)
+            typeof(IModelMapper)
         };
         foreach (var type in types)
             builder.Services.Where(o => o.ServiceType == type).Should().ContainSingle();
