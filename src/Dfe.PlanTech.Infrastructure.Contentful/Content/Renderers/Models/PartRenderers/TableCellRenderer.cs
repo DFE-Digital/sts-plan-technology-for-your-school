@@ -20,15 +20,35 @@ public class TableCellRenderer : BaseRichTextContentPartRender
         if (stringBuilder.EndsWith(BeginningOfRowString))
         {
             stringBuilder.Append(HeaderOpeningTag);
-            stringBuilder.Append(content.Content[0].Content[0].Value);
+            AppendContent(stringBuilder, content.Content);
             stringBuilder.Append("</th>");
         }
         else
         {
             stringBuilder.Append(CellOpeningTag);
-            stringBuilder.Append(content.Content[0].Content[0].Value);
+            AppendContent(stringBuilder, content.Content);
             stringBuilder.Append("</td>");
         }
+
+        return stringBuilder;
+    }
+
+    private StringBuilder AppendContent(StringBuilder stringBuilder, List<RichTextContent> content)
+    {
+        if (content.Count == 0)
+        {
+            return stringBuilder;
+        }
+
+        for (int i=0; i < content.Count; i++)
+        {
+            stringBuilder.Append(content[i].Content[0].Value);
+
+            if (i < content.Count - 1)
+            {
+                stringBuilder.Append("<br /><br />");
+            }
+        };
 
         return stringBuilder;
     }
