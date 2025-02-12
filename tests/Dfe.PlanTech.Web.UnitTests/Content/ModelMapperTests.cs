@@ -6,7 +6,7 @@ using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Types;
 using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Content;
 using FluentAssertions;
-using Moq;
+using NSubstitute;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Content;
@@ -124,7 +124,7 @@ public class ModelMapperTests
     [Fact]
     public void Unknown_Returns_Unknown()
     {
-        var testValue = It.IsAny<string>();
+        var testValue = Arg.Any<string>();
 
         var sut = GetService();
         var result = sut.ConvertToRichTextNodeType(testValue);
