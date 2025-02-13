@@ -4,9 +4,9 @@ using Dfe.PlanTech.Web.Controllers;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Xunit;
 using NSubstitute;
 using NSubstitute.ReceivedExtensions;
+using Xunit;
 
 namespace Dfe.ContentSupport.Web.Tests.Controllers;
 

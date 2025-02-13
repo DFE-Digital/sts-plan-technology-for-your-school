@@ -3,8 +3,8 @@ using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
 using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Web.Content;
 using FluentAssertions;
-using Xunit;
 using NSubstitute;
+using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Content
 {
