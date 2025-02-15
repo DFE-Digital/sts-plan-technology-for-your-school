@@ -12,14 +12,14 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
 public class RichTextRenderer : IRichTextRenderer, IRichTextContentPartRendererCollection
 {
     private readonly ILogger<RichTextRenderer> _logger;
-    private readonly List<IRichTextContentPartRenderer> _renderers;
+    public IList<IRichTextContentPartRenderer> Renders { get; }
 
     public ILogger Logger => _logger;
 
     public RichTextRenderer(ILogger<RichTextRenderer> logger, IEnumerable<IRichTextContentPartRenderer> renderers)
     {
         _logger = logger;
-        _renderers = renderers.ToList();
+        Renders = renderers.ToList();
     }
 
     public string ToHtml(RichTextContent content)
@@ -48,5 +48,5 @@ public class RichTextRenderer : IRichTextRenderer, IRichTextContentPartRendererC
     }
 
     public IRichTextContentPartRenderer? GetRendererForContent(RichTextContent content)
-    => _renderers.FirstOrDefault(renderer => renderer.Accepts(content));
+    => Renders.FirstOrDefault(renderer => renderer.Accepts(content));
 }

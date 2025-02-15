@@ -1,3 +1,4 @@
+using Contentful.Core.Models;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Content.Models;
@@ -6,7 +7,7 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 /// Content for a 'RichText' field in Contentful
 /// </summary>
 /// <inheritdoc/>
-public class RichTextContent : ContentComponent, IRichTextContent<RichTextMark, RichTextContent, CustomData>
+public class RichTextContent : Entry<RichTextContent>, IContentComponent, IRichTextContent<RichTextMark, RichTextContent, CustomData>
 {
     public string Value { get; set; } = "";
 
@@ -17,4 +18,5 @@ public class RichTextContent : ContentComponent, IRichTextContent<RichTextMark, 
     public List<RichTextContent> Content { get; set; } = [];
 
     public CustomData? Data { get; set; }
+    public SystemDetails Sys { get; set; } = null!;
 }

@@ -7,6 +7,7 @@ namespace Dfe.PlanTech.Domain.Content.Interfaces;
 public interface IRichTextContentPartRendererCollection
 {
     public ILogger Logger { get; }
+    public IList<IRichTextContentPartRenderer> Renders { get; }
 
     /// <summary>
     /// Finds matching renderer for the given content, based on the content's node type
