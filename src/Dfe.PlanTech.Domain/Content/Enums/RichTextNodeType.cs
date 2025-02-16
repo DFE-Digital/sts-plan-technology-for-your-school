@@ -17,3 +17,11 @@ public enum RichTextNodeType
     Heading,
     EmbeddedEntryBlock,
 }
+
+public enum RichTextContentType
+{
+    CSAccordion,
+    Attachment,
+    csCard,
+    GridContainer
+}
