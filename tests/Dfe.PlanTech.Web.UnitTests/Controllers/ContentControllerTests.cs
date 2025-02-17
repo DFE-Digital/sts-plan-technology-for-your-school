@@ -79,7 +79,7 @@ public class ContentControllerTests
     {
         var slug = "slug";
 
-        _contentServiceMock.GetContent(Arg.Any<String>(), Arg.Any<CancellationToken>())
+        _contentServiceMock.GetContent(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(_ => Task.FromException<CsPage?>(new Exception("An exception occurred loading content")));
 
         var sut = GetController();
@@ -92,9 +92,9 @@ public class ContentControllerTests
         _loggerMock.Received(1).Log(
             LogLevel.Error,
             Arg.Any<EventId>(),
-            Arg.Is<Object>(o => o.ToString() != null && o.ToString()!.Equals($"Error loading C&S content page {slug}")),
+            Arg.Is<object>(o => o.ToString() != null && o.ToString()!.Equals($"Error loading C&S content page {slug}")),
             Arg.Any<Exception>(),
-            Arg.Any<Func<Object, Exception?, string>>()
+            Arg.Any<Func<object, Exception?, string>>()
         );
     }
 
