@@ -79,7 +79,7 @@ public class ContentControllerTests
     {
         var slug = "slug";
 
-        _contentServiceMock.GetContent(Arg.Any<String>(), Arg.Any<CancellationToken>()).Returns(Task.FromException(new Exception("An exception occurred loading content")));
+        _contentServiceMock.GetContent(Arg.Any<String>(), Arg.Any<CancellationToken>()).Returns(Task.FromException<CsPage?>(new Exception("An exception occurred loading content")));
 
         var sut = GetController();
 
