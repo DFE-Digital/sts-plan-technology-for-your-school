@@ -1,4 +1,6 @@
+using Contentful.Core.Models;
 using Dfe.PlanTech.Application.Persistence.Models;
+using Dfe.PlanTech.Domain.Common;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
 
 namespace Dfe.PlanTech.Application.Persistence.Interfaces;
@@ -35,6 +37,10 @@ public interface IContentRepository
     /// <typeparam name="TEntity"></typeparam>
     /// <returns></returns>
     Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(IGetEntitiesOptions? options, CancellationToken cancellationToken = default);
+
+    Task<int> GetEntitiesCount<TEntity>(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get entities without filtering

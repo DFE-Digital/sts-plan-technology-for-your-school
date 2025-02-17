@@ -1,6 +1,7 @@
 import logging
+import os
 
-from src.fetch_sections import fetch_sections
+from src.fetch_sections import fetch_sections, fetch_recommendation_chunks
 from src.generate_visualisations import process_sections
 
 logging.basicConfig(
@@ -10,8 +11,14 @@ logging.basicConfig(
 
 
 def main():
+    display_recommendations = os.getenv("DISPLAY_RECOMMENDATIONS", "false").lower() in ["true", "1"]
+    recommendation_map = []
+    
+    if display_recommendations:  
+        recommendation_map = fetch_recommendation_chunks()
+
     sections = fetch_sections()
-    process_sections(sections)
+    process_sections(sections, recommendation_map)
 
 
 if __name__ == "__main__":

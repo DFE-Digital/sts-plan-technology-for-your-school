@@ -22,6 +22,10 @@ public class CachedContentfulRepository : IContentRepository
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
     }
 
+    public async Task<int> GetEntitiesCount<TEntity>(CancellationToken cancellationToken = default)
+    {
+        return await _contentRepository.GetEntitiesCount<TEntity>(cancellationToken);
+    }
     public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(CancellationToken cancellationToken = default)
     {
         string contentType = GetContentTypeName<TEntity>();
@@ -37,6 +41,10 @@ public class CachedContentfulRepository : IContentRepository
         var key = $"{contentType}{jsonOptions}";
 
         return await _cache.GetOrCreateAsync(key, async () => await _contentRepository.GetEntities<TEntity>(options, cancellationToken)) ?? [];
+    }
+    public async Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(IGetEntitiesOptions? options, CancellationToken cancellationToken = default)
+    {
+        return await _contentRepository.GetPaginatedEntities<TEntity>(options, cancellationToken) ?? [];
     }
 
     public async Task<TEntity?> GetEntityById<TEntity>(string id, int include = 2, CancellationToken cancellationToken = default)

@@ -4,6 +4,8 @@ using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Helpers;
+using Dfe.PlanTech.Web.Models;
+using Dfe.PlanTech.Web.Models.QaVisualiser;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -42,5 +44,24 @@ public class CmsController(ILogger<CmsController> logger) : BaseController<CmsCo
     public async Task<IEnumerable<Section?>> GetSections([FromServices] GetSectionQuery getSectionQuery)
     {
         return await getSectionQuery.GetAllSections();
+    }
+
+    /// <summary>
+    /// Returns all recommendation chunks linked to answer Id's from the CMS, used by the qa-visualiser
+    /// </summary>
+    [HttpGet("chunks/{page}")]
+    [ValidateApiKey]
+    public async Task<IActionResult> GetChunks(int? page, [FromServices] GetRecommendationQuery getRecommendationQuery )
+    {
+        var pageNumber = page ?? 1;
+        var queryResult = await getRecommendationQuery.GetChunksByPage(pageNumber);
+
+        var resultModel = new PagedResultModel<ChunkAnswerResultModel>() { Page = pageNumber, Total = queryResult.Pagination.Total };
+
+        resultModel.Items = queryResult.Chunks
+            .SelectMany(c => c.Answers.Select(a => new { a.Sys, Header = c.Header }))
+            .Select(c => new ChunkAnswerResultModel { AnswerId = c.Sys.Id, RecommendationHeader = c.Header }).ToList();
+
+        return Ok(resultModel);
     }
 }
