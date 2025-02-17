@@ -124,7 +124,7 @@ public class ModelMapperTests
     [Fact]
     public void Unknown_Returns_Unknown()
     {
-        var testValue = Arg.Any<string>();
+        var testValue = "Any string value";
 
         var sut = GetService();
         var result = sut.ConvertToRichTextNodeType(testValue);
