@@ -20,6 +20,7 @@ public class AttachmentComponent
         {
             fileExtension = "xlsx";
         }
+
         stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print\">");
         stringBuilder.Append("<div class=\"attachment\">");
         stringBuilder.Append("<div class=\"attachment-thumbnail govuk-!-margin-right-8\">");
@@ -30,11 +31,13 @@ public class AttachmentComponent
         stringBuilder.Append("<h2 class=\"attachment-title\">");
         stringBuilder.Append($"<a href=\"{uri}\" aria-describedby=\"file-details\" class=\"govuk-link attachment-link\" download>{title}");
         stringBuilder.Append("</a></h2>");
+
         stringBuilder.Append("<p class=\"attachment-metadata\" id=\"file-details\">");
         stringBuilder.Append($"<span class=\"attachment-attribute\" aria-label=\"file type\">{fileExtension.ToUpper()}</span>,");
         stringBuilder.Append("<span class=\"attachment-attribute\" aria-label=\"file size\">");
         stringBuilder.Append($"{customComponent.Size / 1024} KB");
         stringBuilder.Append("</span></p>");
+
         if (customComponent.UpdatedAt.HasValue)
         {
             stringBuilder.Append("<p class=\"attachment-metadata\">");

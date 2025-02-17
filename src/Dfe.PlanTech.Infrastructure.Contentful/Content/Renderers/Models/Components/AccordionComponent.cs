@@ -20,12 +20,25 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.Compon
             var nestedContent = content?.Data?.Target?.Content ?? null;
             if (nestedContent != null && nestedContent.Any())
             {
+                stringBuilder.AppendLine($"<div class=\"govuk-accordion\" data-module=\"govuk-accordion\" id=\"accordion-{nestedContent[0].InternalName}\">");
                 foreach (var innerContent in nestedContent)
                 {
-                    RenderChildren(innerContent.RichText, stringBuilder);
-                    return stringBuilder;
+                    stringBuilder.Append("<div class=\"govuk-accordion__section\">");
+                    stringBuilder.Append("<div class=\"govuk-accordion__section-header\">");
+                    stringBuilder.Append("<h2 class=\"govuk-accordion__section-heading\">");
+                    stringBuilder.Append($"<span class=\"govuk-accordion__section-button\" id=\"{innerContent.InternalName}-heading\">");
+                    stringBuilder.Append(innerContent.Title);
+                    stringBuilder.Append("</span></h2>");
+                    stringBuilder.Append($"<div class=\"govuk-accordion__section-summary govuk-body\" id=\"{innerContent.InternalName}-summary\">");
+                    stringBuilder.Append(innerContent.SummaryLine);
+                    stringBuilder.Append("</div></div>");
+                    stringBuilder.Append($"<div id=\"{innerContent.InternalName}-content\" class=\"govuk-accordion__section-content\">");
 
+                    RenderChildren(innerContent.RichText, stringBuilder);
+
+                    stringBuilder.Append("</div></div>");
                 }
+                stringBuilder.Append("</div>");
             }
             return stringBuilder;
         }
@@ -42,11 +55,44 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.Compon
                     continue;
                 }
 
+                
                 renderer.AddHtml(subContent, this, stringBuilder);
+                
             }
         }
 
         public IRichTextContentPartRenderer? GetRendererForContent(RichTextContent content)
         => Renders.FirstOrDefault(renderer => renderer.Accepts(content));
+
+        //private CustomAccordion GenerateCustomAccordion(RichTextContent richTextContent)
+        //{
+        //    return new CustomAccordion
+        //    {
+        //        InternalName = richTextContent.InternalName,
+        //        Body = MapRichTextContent(target.RichText, target),
+        //        SummaryLine = target.SummaryLine,
+        //        Title = target.Title,
+        //        Accordions = target.Content.Select(GenerateCustomAccordion).ToList()
+        //    };
+        //}
+
+        //public RichTextContentItem? MapRichTextContent(RichTextContent? richText)
+        //{
+        //    if (richText is null)
+        //        return null;
+        //    var item =
+        //        new RichTextContentItem
+        //        {
+        //            InternalName = entry.InternalName,
+        //            Slug = entry.Slug,
+        //            Title = entry.Title,
+        //            Subtitle = entry.Subtitle,
+        //            UseParentHero = entry.UseParentHero,
+        //            NodeType = ConvertToRichTextNodeType(richText.NodeType),
+        //            Content = MapRichTextNodes(richText.Content),
+        //            Tags = FlattenMetadata(entry.Metadata)
+        //        };
+        //    return item;
+        //}
     }
 }
