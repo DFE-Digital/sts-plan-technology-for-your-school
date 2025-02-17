@@ -63,36 +63,5 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.Compon
 
         public IRichTextContentPartRenderer? GetRendererForContent(RichTextContent content)
         => Renders.FirstOrDefault(renderer => renderer.Accepts(content));
-
-        //private CustomAccordion GenerateCustomAccordion(RichTextContent richTextContent)
-        //{
-        //    return new CustomAccordion
-        //    {
-        //        InternalName = richTextContent.InternalName,
-        //        Body = MapRichTextContent(target.RichText, target),
-        //        SummaryLine = target.SummaryLine,
-        //        Title = target.Title,
-        //        Accordions = target.Content.Select(GenerateCustomAccordion).ToList()
-        //    };
-        //}
-
-        //public RichTextContentItem? MapRichTextContent(RichTextContent? richText)
-        //{
-        //    if (richText is null)
-        //        return null;
-        //    var item =
-        //        new RichTextContentItem
-        //        {
-        //            InternalName = entry.InternalName,
-        //            Slug = entry.Slug,
-        //            Title = entry.Title,
-        //            Subtitle = entry.Subtitle,
-        //            UseParentHero = entry.UseParentHero,
-        //            NodeType = ConvertToRichTextNodeType(richText.NodeType),
-        //            Content = MapRichTextNodes(richText.Content),
-        //            Tags = FlattenMetadata(entry.Metadata)
-        //        };
-        //    return item;
-        //}
     }
 }
