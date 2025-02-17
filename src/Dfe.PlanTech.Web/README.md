@@ -48,5 +48,5 @@ The collection of all secrets is stored in the Azure keyvault, which you can use
 
 ## Using a local Redis or Database instance
 
-- If you want to use a local instance of Redis, instructions are provided in the [Readme](../Dfe.PlanTech.Infrastructure.Redis/README.md))
-- If you want to use a local database, the [SeedTestData Readme](tests/Dfe.PlanTech.Web.SeedTestData/README.md) contains instructions on setting up a local test database, and changing the connection string to use it
+- If you want to use a local instance of Redis, instructions are provided in the [Readme](../Dfe.PlanTech.Infrastructure.Redis/README.md)
+- If you want to use a local database, the [SeedTestData Readme](../../tests/Dfe.PlanTech.Web.SeedTestData/README.md) contains instructions on setting up a local test database, and changing the connection string to use it
