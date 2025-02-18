@@ -214,7 +214,9 @@ public class RedisCache : ICmsCache
             return new CacheResult<T>(ExistedInCache: false);
         }
 
-        return redisResult is T typed ? new CacheResult<T>(ExistedInCache: true, CacheValue: typed) : new CacheResult<T>(ExistedInCache: true, CacheValue: redisResult.Deserialise<T>());
+        return redisResult is T typed
+            ? new CacheResult<T>(ExistedInCache: true, CacheValue: typed)
+            : new CacheResult<T>(ExistedInCache: true, CacheValue: redisResult.Deserialise<T>());
     }
 
     /// <summary>

@@ -1,10 +1,12 @@
-﻿using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
+﻿using Dfe.PlanTech.Application.Exceptions;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
 using Dfe.PlanTech.Web.Content;
 using Dfe.PlanTech.Web.Controllers;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using NSubstitute.ReceivedExtensions;
 using Xunit;
 
@@ -23,17 +25,16 @@ public class ContentControllerTests
     [Fact]
     public async Task Index_NoSlug_Returns_ErrorAction()
     {
-        var sut = GetController();
+        var controller = GetController();
 
-        var result = await sut.Index(string.Empty, "", null, default); // Provide all parameters explicitly
+        var index = async () => await controller.Index(string.Empty, "", null, default);
 
-        result.Should().BeOfType<RedirectToActionResult>();
-        (result as RedirectToActionResult)!.ActionName.Should().BeEquivalentTo(PagesController.NotFoundPage);
+        await Assert.ThrowsAsync<KeyNotFoundException>(index);
 
         _loggerMock.Received(1).Log(
             LogLevel.Error,
             Arg.Any<EventId>(),
-            Arg.Is<Object>(o => o.ToString() != null && o.ToString()!.StartsWith($"No slug received for C&S {nameof(ContentController)} {nameof(sut.Index)}")),
+            Arg.Is<Object>(o => o.ToString() != null && o.ToString()!.StartsWith($"No slug received for C&S {nameof(ContentController)} {nameof(controller.Index)}")),
             Arg.Any<Exception>(),
             Arg.Any<Func<Object, Exception?, string>>()
         );
@@ -43,10 +44,11 @@ public class ContentControllerTests
     public async Task Index_Calls_Service_GetContent()
     {
         const string dummySlug = "dummySlug";
-        var sut = GetController();
+        var controller = GetController();
 
-        await sut.Index(dummySlug, "", null, default);
+        var action = async () => await controller.Index(dummySlug, "", null, default);
 
+        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(action);
         await _contentServiceMock.Received(1).GetContent(dummySlug, default);
     }
 
@@ -57,13 +59,11 @@ public class ContentControllerTests
 
         _contentServiceMock.GetContent(Arg.Any<String>(), Arg.Any<CancellationToken>()).Returns((CsPage?)null);
 
-        var sut = GetController();
+        var controller = GetController();
 
-        var result = await sut.Index(slug, "", null, default);
+        var action = async () => await controller.Index(slug, "", null, default);
 
-        result.Should().BeOfType<RedirectToActionResult>();
-        (result as RedirectToActionResult)!.ActionName.Should().BeEquivalentTo(PagesController.NotFoundPage);
-
+        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(action);
 
         _loggerMock.Received(1).Log(
             LogLevel.Error,
@@ -82,9 +82,9 @@ public class ContentControllerTests
         _contentServiceMock.GetContent(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(_ => Task.FromException<CsPage?>(new Exception("An exception occurred loading content")));
 
-        var sut = GetController();
+        var controller = GetController();
 
-        var result = await sut.Index(slug, "", null, default);
+        var result = await controller.Index(slug, "", null, default);
 
         result.Should().BeOfType<RedirectToActionResult>();
         (result as RedirectToActionResult)!.ActionName.Should().BeEquivalentTo("error");
@@ -103,8 +103,8 @@ public class ContentControllerTests
     {
         _contentServiceMock.GetContent(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(new CsPage());
 
-        var sut = GetController();
-        var result = await sut.Index("slug1", "", null, default);
+        var controller = GetController();
+        var result = await controller.Index("slug1", "", null, default);
 
         result.Should().BeOfType<ViewResult>();
         (result as ViewResult)!.Model.Should().BeOfType<CsPage>();

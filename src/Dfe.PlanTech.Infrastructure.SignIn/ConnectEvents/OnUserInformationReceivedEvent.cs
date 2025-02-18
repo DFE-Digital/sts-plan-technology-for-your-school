@@ -52,9 +52,11 @@ public static class OnUserInformationReceivedEvent
         if (principal == null)
             return;
 
+        string establishmentId = (signin.EstablishmentId?.ToString()) ?? throw new ArgumentNullException(nameof(signin.EstablishmentId));
+
         ClaimsIdentity claimsIdentity = new(new[]{
             new Claim(ClaimConstants.DB_USER_ID, signin.UserId.ToString()),
-            new Claim(ClaimConstants.DB_ESTABLISHMENT_ID, signin.EstablishmentId.ToString())
+            new Claim(ClaimConstants.DB_ESTABLISHMENT_ID, establishmentId)
         });
 
         principal.AddIdentity(claimsIdentity);
