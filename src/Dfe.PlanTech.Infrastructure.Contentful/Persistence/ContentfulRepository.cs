@@ -33,6 +33,12 @@ public class ContentfulRepository : IContentRepository
 
         ProcessContentfulErrors(entries);
 
+        //var missingContent = false;
+        //if (missingContent)
+        //{
+        //    return [];
+        //}
+
         return entries.Items ?? [];
     }
 

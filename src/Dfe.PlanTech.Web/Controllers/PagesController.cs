@@ -29,12 +29,12 @@ public class PagesController(
 
     [Authorize(Policy = PageModelAuthorisationPolicy.PolicyName)]
     [HttpGet("{route?}", Name = "GetPage")]
-    public IActionResult GetByRoute([ModelBinder(typeof(PageModelBinder))] Page? page, [FromServices] IUser user)
+    public async Task<IActionResult> GetByRoute([ModelBinder(typeof(PageModelBinder))] Page? page, [FromServices] IUser user)
     {
         if (page == null)
         {
             logger.LogInformation("Could not find page at {Path}", Request.Path.Value);
-            return RedirectToAction(NotFoundPage);
+            return await NotFoundError();
         }
 
         var viewModel = new PageViewModel(page, this, user, Logger);

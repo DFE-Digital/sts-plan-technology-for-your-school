@@ -29,7 +29,7 @@ public class ContentController(
         {
             logger.LogError("No slug received for C&S {Controller} {Action}",
                 nameof(ContentController), nameof(Index));
-            return RedirectToAction(PagesController.NotFoundPage, PagesController.ControllerName);
+            throw new KeyNotFoundException($"No slug received for C&S {nameof(ContentController)} {nameof(Index)}");
         }
 
         try
@@ -39,7 +39,7 @@ public class ContentController(
             {
                 logger.LogError("Failed to load content for C&S page {Slug}; no content received.",
                     slug);
-                return RedirectToAction(PagesController.NotFoundPage, PagesController.ControllerName);
+                throw new KeyNotFoundException($"Failed to load content for C&S page {slug}; no content received.");
             }
 
             resp = layoutService.GenerateLayout(resp, Request, page);
