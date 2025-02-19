@@ -1,6 +1,4 @@
-using Contentful.Core.Models;
 using Dfe.PlanTech.Application.Persistence.Models;
-using Dfe.PlanTech.Domain.Common;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
 
 namespace Dfe.PlanTech.Application.Persistence.Interfaces;

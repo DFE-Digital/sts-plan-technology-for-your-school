@@ -51,7 +51,7 @@ public class CmsController(ILogger<CmsController> logger) : BaseController<CmsCo
     /// </summary>
     [HttpGet("chunks/{page}")]
     [ValidateApiKey]
-    public async Task<IActionResult> GetChunks(int? page, [FromServices] GetRecommendationQuery getRecommendationQuery )
+    public async Task<IActionResult> GetChunks(int? page, [FromServices] GetRecommendationQuery getRecommendationQuery)
     {
         var pageNumber = page ?? 1;
         var queryResult = await getRecommendationQuery.GetChunksByPage(pageNumber);
