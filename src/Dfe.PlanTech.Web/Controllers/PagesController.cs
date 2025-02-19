@@ -25,7 +25,6 @@ public class PagesController(
     private readonly ContactOptions _contactOptions = contactOptions.Value;
     public const string ControllerName = "Pages";
     public const string GetPageByRouteAction = nameof(GetByRoute);
-    public const string NotFoundPage = "NotFoundError";
 
     [Authorize(Policy = PageModelAuthorisationPolicy.PolicyName)]
     [HttpGet("{route?}", Name = "GetPage")]

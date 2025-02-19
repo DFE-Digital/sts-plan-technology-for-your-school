@@ -10,7 +10,6 @@ using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Web.Helpers
 {
-    [AttributeUsage(AttributeTargets.Class)]
     public class MaintainUrlOnKeyNotFoundAttribute : ExceptionFilterAttribute, IAsyncExceptionFilter
     {
         private readonly IGetNavigationQuery _getNavigationQuery;

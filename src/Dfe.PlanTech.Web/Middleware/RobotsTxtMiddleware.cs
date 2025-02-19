@@ -7,7 +7,7 @@ namespace Dfe.PlanTech.Web.Middleware;
 /// <summary>
 /// Middleware to handle /robots.txt path and generate the file
 /// </summary>
-public class RobotsTxtMiddleware(RequestDelegate _, IOptions<RobotsConfiguration> options)
+public class RobotsTxtMiddleware(IOptions<RobotsConfiguration> options)
 {
     private const string UserAgentKey = "User-agent";
     private const string DisallowKey = "Disallow";
@@ -17,7 +17,6 @@ public class RobotsTxtMiddleware(RequestDelegate _, IOptions<RobotsConfiguration
     {
         await CreateRobotsTxtResponse(context);
     }
-
 
     /// <summary>
     /// Generate and return Robots.txt

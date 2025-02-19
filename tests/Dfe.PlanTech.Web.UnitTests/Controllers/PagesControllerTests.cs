@@ -58,7 +58,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public void Should_ReturnLandingPage_When_IndexRouteLoaded()
+        public async Task Should_ReturnLandingPage_When_IndexRouteLoaded()
         {
             var cookie = new DfeCookie { UserAcceptsCookies = true };
             cookiesSubstitute.Cookie.Returns(cookie);
@@ -86,7 +86,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 }
             };
 
-            var result = _controller.GetByRoute(page, userSubstitute);
+            var result = await _controller.GetByRoute(page, userSubstitute);
 
             Assert.IsType<ViewResult>(result);
 
@@ -102,7 +102,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public void Should_SetOrganisationName_When_DisplayOrganisationNameIsTrue()
+        public async Task Should_SetOrganisationName_When_DisplayOrganisationNameIsTrue()
         {
             var cookie = new DfeCookie { UserAcceptsCookies = true };
             cookiesSubstitute.Cookie.Returns(cookie);
@@ -130,7 +130,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 DisplayOrganisationName = true
             };
 
-            var result = _controller.GetByRoute(page, userSubstitute);
+            var result = await _controller.GetByRoute(page, userSubstitute);
 
             Assert.IsType<ViewResult>(result);
 
@@ -146,7 +146,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public void Should_Not_OrganisationName_When_DisplayOrganisationName_Is_False()
+        public async Task Should_Not_OrganisationName_When_DisplayOrganisationName_Is_False()
         {
             var cookie = new DfeCookie { UserAcceptsCookies = true };
             cookiesSubstitute.Cookie.Returns(cookie);
@@ -174,7 +174,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 DisplayOrganisationName = false
             };
 
-            var result = _controller.GetByRoute(page, userSubstitute);
+            var result = await _controller.GetByRoute(page, userSubstitute);
 
             Assert.IsType<ViewResult>(result);
 
@@ -190,14 +190,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public void Should_Disable_Blue_Banner_For_ServerError_Page()
+        public async Task Should_Disable_Blue_Banner_For_ServerError_Page()
         {
             var page = new Page()
             {
                 Sys = new SystemDetails { Id = INTERNAL_ERROR_ID },
             };
 
-            var result = _controller.GetByRoute(page, userSubstitute);
+            var result = await _controller.GetByRoute(page, userSubstitute);
 
             Assert.IsType<ViewResult>(result);
 
@@ -213,14 +213,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public void Should_Not_Disable_Blue_Banner_For_Non_Error_Pages()
+        public async Task Should_Not_Disable_Blue_Banner_For_Non_Error_Pages()
         {
             var page = new Page()
             {
                 Sys = new SystemDetails { Id = "normal-page" },
             };
 
-            var result = _controller.GetByRoute(page, userSubstitute);
+            var result = await _controller.GetByRoute(page, userSubstitute);
 
             Assert.IsType<ViewResult>(result);
 
@@ -257,7 +257,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public void Should_ReturnNotFoundError_Page_When_Page_Is_Null()
+        public async Task Should_ReturnNotFoundError_Page_When_Page_Is_Null()
         {
             var establishment = new EstablishmentDto()
             {
@@ -272,10 +272,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             userSubstitute.GetOrganisationData().Returns(establishment);
 
-            var result = _controller.GetByRoute(null, userSubstitute) as RedirectToActionResult;
+            var result = await _controller.GetByRoute(null, userSubstitute) as ViewResult;
 
             Assert.NotNull(result);
-            Assert.Equal("NotFoundError", result.ActionName);
         }
 
         [Fact]

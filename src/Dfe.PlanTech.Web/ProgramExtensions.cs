@@ -247,7 +247,7 @@ public static class ProgramExtensions
         services.AddTransient<IGetNavigationQuery, GetNavigationQuery>();
         services.AddTransient<IGetPageQuery, GetPageQuery>();
 
-        services.AddTransient<IExceptionHandlerMiddleware, ServiceExceptionHandlerMiddleWare>();
+        services.AddTransient<IExceptionHandlerMiddleware, ServiceExceptionHandlerMiddleware>();
         services.AddTransient<IUserJourneyMissingContentExceptionHandler, UserJourneyMissingContentExceptionHandler>();
 
         return services;
