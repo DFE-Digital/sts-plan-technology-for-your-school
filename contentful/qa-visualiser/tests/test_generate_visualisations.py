@@ -1,14 +1,15 @@
 from unittest.mock import patch
-from src.generate_visualisations import create_questionnaire_flowchart
+
+from src.generate_visualisations import _wrap_text, create_questionnaire_flowchart
 from src.models import Section
-from src.generate_visualisations import _wrap_text 
+
 
 @patch("src.generate_visualisations.Digraph.node")
 @patch("src.generate_visualisations.Digraph.edge")
 def test_create_questionnaire_flowchart(mock_edge, mock_node, mock_sections):
     mock_recommendation_map = {
         "answer-1": ["Keep backups up-to-date"],
-        "answer-2": ["Ensure security protocols are followed"]
+        "answer-2": ["Ensure security protocols are followed"],
     }
 
     wrapped_recommendation_1 = _wrap_text("Keep backups up-to-date", 20)
@@ -23,17 +24,17 @@ def test_create_questionnaire_flowchart(mock_edge, mock_node, mock_sections):
         ("question-2", "Next Question"),
         ("ans_answer-1", "first answer"),
         ("ans_answer-2", "second answer"),
-        (rec_id_1, wrapped_recommendation_1), 
+        (rec_id_1, wrapped_recommendation_1),
         (rec_id_2, wrapped_recommendation_2),
-        ("question-2", "Missing Content"),  
+        ("question-2", "Missing Content"),
     }
     expected_edges = {
         ("question-1", "ans_answer-1"),
         ("question-1", "ans_answer-2"),
         ("ans_answer-1", "question-2"),
         ("ans_answer-2", "end"),
-        ("ans_answer-1", rec_id_1),  
-        ("ans_answer-2", rec_id_2), 
+        ("ans_answer-1", rec_id_1),
+        ("ans_answer-2", rec_id_2),
     }
 
     section = Section.model_validate(mock_sections[0])

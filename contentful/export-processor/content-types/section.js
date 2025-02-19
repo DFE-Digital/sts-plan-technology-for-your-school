@@ -2,6 +2,7 @@ import { Question } from "./question.js";
 import { PathCalculator } from "../user-journey/path-calculator.js";
 import { SectionStats } from "#src/user-journey/section-stats";
 import { UserJourney } from "#src/user-journey/user-journey";
+import PathPart from "#src/user-journey/path-part";
 
 /**
  * @typedef {import("./subtopic-recommendation.js").SubtopicRecommendation} SubtopicRecommendation
@@ -90,9 +91,12 @@ export class Section {
             this.pathInfo.minimumPathsForRecommendations;
 
         for (const [maturity, path] of Object.entries(recommendationPaths)) {
-            recommendationPaths[maturity] = path.map((part) =>
-                part.toMinimalOutput()
-            );
+            recommendationPaths[maturity] = path.map((part) => {
+                if (!(part instanceof PathPart)) {
+                    part = new PathPart(part)
+                }
+                return part.toMinimalOutput()
+            });
         }
 
         const result = {
