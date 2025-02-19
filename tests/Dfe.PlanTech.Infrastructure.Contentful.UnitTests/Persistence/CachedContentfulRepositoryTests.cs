@@ -63,6 +63,24 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         }
 
         [Fact]
+        public async Task Should_Not_Cache_GetPaginatedEntities()
+        {
+            var options = new GetEntitiesOptions(include: 3);
+            await _cachedContentRepository.GetPaginatedEntities<Question>(options);
+            await _cache.Received(0).GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<IEnumerable<Question>>>>());
+            await _contentRepository.Received(1).GetPaginatedEntities<Question>(options);
+        }
+
+        [Fact]
+        public async Task Should_Not_Cache_GetEntitiesCount()
+        {
+            var options = new GetEntitiesOptions(include: 3);
+            await _cachedContentRepository.GetEntitiesCount<Question>();
+            await _cache.Received(0).GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<int>>>());
+            await _contentRepository.Received(1).GetEntitiesCount<Question>();
+        }
+
+        [Fact]
         public async Task Should_Cache_GetEntityById()
         {
             var id = "test-id";

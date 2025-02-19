@@ -2,7 +2,9 @@ using System.Web;
 using Contentful.Core;
 using Contentful.Core.Models;
 using Contentful.Core.Search;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -109,6 +111,20 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
             var result = await repository.GetPaginatedEntities<OtherTestClass>(new GetEntitiesOptions());
             Assert.NotNull(result);
             Assert.Empty(result);
+        }
+
+        [Fact]
+        public async Task GetEntitiesCount_ReturnsCorrectCount()
+        {
+            var repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
+            var expectedCount = 42;
+
+            _clientSubstitute.GetEntries(Arg.Any<QueryBuilder<RecommendationChunk>>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(new ContentfulCollection<RecommendationChunk> { Items = new List<RecommendationChunk>() { new RecommendationChunk()}, Total = 42, Errors = new List<ContentfulError>() }));
+
+            var result = await repository.GetEntitiesCount<RecommendationChunk>();
+
+            Assert.Equal(expectedCount, result);
         }
 
         [Fact]
