@@ -28,7 +28,7 @@ public class ContentfulRepository : IContentRepository
 
     public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IGetEntitiesOptions? options, CancellationToken cancellationToken = default)
     {
-        var queryBuilder = QueryBuilders.BuildQueryBuilder<TEntity>(entityTypeId, options).Limit(options.Limit);
+        var queryBuilder = QueryBuilders.BuildQueryBuilder<TEntity>(entityTypeId, options);
 
         var entries = await _client.GetEntries(queryBuilder, cancellationToken);
 
@@ -37,11 +37,12 @@ public class ContentfulRepository : IContentRepository
         return entries.Items ?? [];
     }
 
-    public async Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(string entityTypeId, IGetEntitiesOptions? options, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(string entityTypeId, IGetEntitiesOptions options, CancellationToken cancellationToken = default)
     {
+        var limit = options?.Limit ?? 100;
         var queryBuilder = QueryBuilders.BuildQueryBuilder<TEntity>(entityTypeId, options)
-            .Limit(options.Limit)
-            .Skip((options.Page - 1) * options.Limit);
+            .Limit(limit)
+            .Skip((options!.Page - 1) * limit);
 
         var entries = await _client.GetEntries(queryBuilder, cancellationToken);
 

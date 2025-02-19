@@ -28,7 +28,7 @@ public class GetEntitiesOptions : IGetEntitiesOptions
 
     public int Page { get; init; } = 1;
 
-    public int Limit { get; init; } = 100;
+    public int? Limit { get; init; }
 
     public IEnumerable<string>? Select { get; set; }
 
