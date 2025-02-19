@@ -65,7 +65,6 @@ def fetch_recommendation_chunks() -> dict[str, list[str]]:
             data = response.json()
 
             items = data.get("items", [])
-            total = data.get("total", 0)
 
             if not items:
                 logger.info(f"No more items on page {page_number}. Stopping pagination.")
