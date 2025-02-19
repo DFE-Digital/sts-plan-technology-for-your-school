@@ -2,6 +2,7 @@ using System.Web;
 using Contentful.Core;
 using Contentful.Core.Models;
 using Contentful.Core.Search;
+using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -88,6 +89,24 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         {
             var repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
             var result = await repository.GetEntities<OtherTestClass>();
+            Assert.NotNull(result);
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public async Task GetPaginatedEntities_Should_ReturnItems_When_ClassMatches()
+        {
+            var repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
+            var result = await repository.GetPaginatedEntities<TestClass>(new GetEntitiesOptions());
+            Assert.NotNull(result);
+            Assert.Equal(_substituteData, result);
+        }
+
+        [Fact]
+        public async Task GetPaginatedEntities_Should_ReturnEmptyIEnumerable_When_NoDataFound()
+        {
+            var repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute);
+            var result = await repository.GetPaginatedEntities<OtherTestClass>(new GetEntitiesOptions());
             Assert.NotNull(result);
             Assert.Empty(result);
         }
