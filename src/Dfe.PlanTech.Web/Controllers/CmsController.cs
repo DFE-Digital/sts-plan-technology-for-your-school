@@ -56,11 +56,12 @@ public class CmsController(ILogger<CmsController> logger) : BaseController<CmsCo
         var pageNumber = page ?? 1;
         var queryResult = await getRecommendationQuery.GetChunksByPage(pageNumber);
 
-        var resultModel = new PagedResultModel<ChunkAnswerResultModel>() { Page = pageNumber, Total = queryResult.Pagination.Total };
-
-        resultModel.Items = queryResult.Chunks
-            .SelectMany(c => c.Answers.Select(a => new { a.Sys, Header = c.Header }))
-            .Select(c => new ChunkAnswerResultModel { AnswerId = c.Sys.Id, RecommendationHeader = c.Header }).ToList();
+        var resultModel = new PagedResultModel<ChunkAnswerResultModel> { Page = pageNumber, Total = queryResult.Pagination.Total,
+            Items = queryResult.Chunks
+                .SelectMany(c => c.Answers.Select(a => new { a.Sys,
+                    c.Header }))
+                .Select(c => new ChunkAnswerResultModel(c.Sys.Id, c.Header)).ToList()
+        };
 
         return Ok(resultModel);
     }

@@ -42,7 +42,7 @@ public class CachedContentfulRepository : IContentRepository
 
         return await _cache.GetOrCreateAsync(key, async () => await _contentRepository.GetEntities<TEntity>(options, cancellationToken)) ?? [];
     }
-    public async Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(IGetEntitiesOptions? options, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default)
     {
         return await _contentRepository.GetPaginatedEntities<TEntity>(options, cancellationToken) ?? [];
     }

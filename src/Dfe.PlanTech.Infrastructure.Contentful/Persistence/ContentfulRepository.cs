@@ -25,6 +25,12 @@ public class ContentfulRepository : IContentRepository
         _logger = loggerFactory.CreateLogger<ContentfulRepository>();
     }
 
+    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(CancellationToken cancellationToken = default)
+        => await GetEntities<TEntity>(GetContentTypeName<TEntity>(), null, cancellationToken);
+
+    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default)
+        => await GetEntities<TEntity>(GetContentTypeName<TEntity>(), options, cancellationToken);
+
     public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IGetEntitiesOptions? options, CancellationToken cancellationToken = default)
     {
         var queryBuilder = QueryBuilders.BuildQueryBuilder<TEntity>(entityTypeId, options);
@@ -79,12 +85,6 @@ public class ContentfulRepository : IContentRepository
         return entries.Total;
 
     }
-
-    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(CancellationToken cancellationToken = default)
-    => await GetEntities<TEntity>(GetContentTypeName<TEntity>(), null, cancellationToken);
-
-    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default)
-        => await GetEntities<TEntity>(GetContentTypeName<TEntity>(), options, cancellationToken);
 
     public async Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default)
         => await GetPaginatedEntities<TEntity>(GetContentTypeName<TEntity>(), options, cancellationToken);
