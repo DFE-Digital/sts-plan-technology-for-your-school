@@ -37,7 +37,9 @@ def _create_blank_digraph() -> Digraph:
     )
 
 
-def create_questionnaire_flowchart(section: Section, recommendation_map: dict[str, str]) -> Digraph:
+def create_questionnaire_flowchart(
+    section: Section, recommendation_map: dict[str, str]
+) -> Digraph:
     """Create a graph of all possible paths you can take through a section"""
     tree = _create_blank_digraph()
 
@@ -72,7 +74,14 @@ def create_questionnaire_flowchart(section: Section, recommendation_map: dict[st
             answer_id = answer.sys.id
             answer_node_id = f"ans_{answer_id}"
 
-            tree.node(answer_node_id, answer_text, shape="ellipse", style="filled", fillcolor="lightgrey:white", width="1.5")
+            tree.node(
+                answer_node_id,
+                answer_text,
+                shape="ellipse",
+                style="filled",
+                fillcolor="lightgrey:white",
+                width="1.5",
+            )
 
             tree.edge(current_question_id, answer_node_id)  # Connect question to answer
             if next_question := answer.next_question:
@@ -89,14 +98,25 @@ def create_questionnaire_flowchart(section: Section, recommendation_map: dict[st
             if answer.next_question:
                 next_question_id = answer.next_question.sys.id
 
-                tree.node(next_question_id, "Next Question", shape="diamond", style="filled", fillcolor="blue:white", width="2")
-                tree.edge(answer_node_id, next_question_id)  # Connect answer to next question
+                tree.node(
+                    next_question_id,
+                    "Next Question",
+                    shape="diamond",
+                    style="filled",
+                    fillcolor="blue:white",
+                    width="2",
+                )
+                tree.edge(
+                    answer_node_id, next_question_id
+                )  # Connect answer to next question
             else:
                 tree.edge(answer_node_id, "end")  # Connect answer to end
 
             # Ensure answer.sys.id exists and is in recommendation_map
             if answer_id in recommendation_map:
-                recommendations = recommendation_map[answer_id]  # Get list of recommendations
+                recommendations = recommendation_map[
+                    answer_id
+                ]  # Get list of recommendations
 
                 for recommendation_text in recommendations:
                     wrapped_text = _wrap_text(recommendation_text, 20)
@@ -112,14 +132,24 @@ def create_questionnaire_flowchart(section: Section, recommendation_map: dict[st
                             fillcolor="yellow:white",
                             width="2",
                         )
-                        created_recommendation_nodes[wrapped_text] = recommendation_node_id  # Store the node ID
+                        created_recommendation_nodes[wrapped_text] = (
+                            recommendation_node_id  # Store the node ID
+                        )
 
                     # Connect answer to existing recommendation node
-                    tree.edge(answer_node_id, created_recommendation_nodes[wrapped_text], label="", color="red")
+                    tree.edge(
+                        answer_node_id,
+                        created_recommendation_nodes[wrapped_text],
+                        label="",
+                        color="red",
+                    )
 
     return tree
 
-def process_sections(sections: list[Section], recommendation_map: dict[str, str]) -> None:
+
+def process_sections(
+    sections: list[Section], recommendation_map: dict[str, str]
+) -> None:
     """Generates a graph for each section and saves it to the visualisations folder by section name"""
     png_folder = Path("visualisations")
     png_folder.mkdir(exist_ok=True)

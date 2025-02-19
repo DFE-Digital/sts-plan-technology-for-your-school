@@ -40,12 +40,12 @@ def fetch_sections() -> list[Section]:
 
 def fetch_recommendation_chunks() -> dict[str, list[str]]:
     """
-    Fetches all RecommendationChunks from the chunks API in /api/cms 
+    Fetches all RecommendationChunks from the chunks API in /api/cms
     Returns a dictionary mapping answerId to RecommendationHeader.
     """
     token = os.getenv("PLANTECH_API_KEY")
     base_url = os.getenv("PLANTECH_API_URL")
-    
+
     total_items = []  # Store all results
     page_number = 1  # Start from the first page
 
@@ -67,27 +67,37 @@ def fetch_recommendation_chunks() -> dict[str, list[str]]:
             items = data.get("items", [])
 
             if not items:
-                logger.info(f"No more items on page {page_number}. Stopping pagination.")
-                break 
+                logger.info(
+                    f"No more items on page {page_number}. Stopping pagination."
+                )
+                break
 
             total_items.extend(items)
-            logger.info(f"Retrieved {len(items)} items from page {page_number}, total so far: {len(total_items)}")
+            logger.info(
+                f"Retrieved {len(items)} items from page {page_number}, total so far: {len(total_items)}"
+            )
 
-            page_number += 1  
+            page_number += 1
 
         recommendation_map = {}
 
         for item in total_items:
             answer_id = item.get("answerId")
-            recommendation_header = item.get("recommendationHeader")  # Ensure correct field name
+            recommendation_header = item.get(
+                "recommendationHeader"
+            )  # Ensure correct field name
 
             if answer_id and recommendation_header:
                 if answer_id not in recommendation_map:
                     recommendation_map[answer_id] = []  # Initialize as list
 
-                recommendation_map[answer_id].append(recommendation_header)  # Store multiple recommendations
+                recommendation_map[answer_id].append(
+                    recommendation_header
+                )  # Store multiple recommendations
 
-        logger.info(f"Successfully retrieved {len(recommendation_map)} unique answer mappings.")
+        logger.info(
+            f"Successfully retrieved {len(recommendation_map)} unique answer mappings."
+        )
         return recommendation_map
 
     except (RequestException, TypeError) as ex:
