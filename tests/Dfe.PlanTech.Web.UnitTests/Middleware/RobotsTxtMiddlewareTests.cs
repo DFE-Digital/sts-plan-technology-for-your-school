@@ -22,7 +22,8 @@ public class RobotsTxtMiddlewareTests
 
         _httpContext.Response.Returns(response);
 
-        _middleware = new RobotsTxtMiddleware(_options);
+        var next = (HttpContext hc) => Task.CompletedTask;
+        _middleware = new RobotsTxtMiddleware(new RequestDelegate(next), _options);
     }
 
     [Fact]

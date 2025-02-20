@@ -39,9 +39,6 @@ using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.ViewEngines;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
@@ -243,10 +240,7 @@ public static class ProgramExtensions
 
     public static IServiceCollection AddExceptionHandlingServices(this IServiceCollection services)
     {
-        services.AddTransient<IActionContextAccessor, ActionContextAccessor>();
-        services.AddTransient<IGetNavigationQuery, GetNavigationQuery>();
         services.AddTransient<IGetPageQuery, GetPageQuery>();
-
         services.AddTransient<IExceptionHandlerMiddleware, ServiceExceptionHandlerMiddleware>();
         services.AddTransient<IUserJourneyMissingContentExceptionHandler, UserJourneyMissingContentExceptionHandler>();
 
