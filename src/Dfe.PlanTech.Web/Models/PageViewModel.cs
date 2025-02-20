@@ -10,7 +10,8 @@ public class PageViewModel
 
     public PageViewModel(Page page, Controller controller, IUser user, ILogger logger, bool displayBlueBanner = true)
     {
-        controller.ViewData["Title"] = System.Net.WebUtility.HtmlDecode(page.Title?.Text) ??
+
+        controller.ViewData["Title"] = StringExtensions.UseNonBreakingHyphenAndHtmlDecode(page.Title?.Text) ??
                                        "Plan Technology For Your School";
         Page = page;
         DisplayBlueBanner = displayBlueBanner;

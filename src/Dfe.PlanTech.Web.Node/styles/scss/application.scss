@@ -1,6 +1,7 @@
 @import "../../node_modules/govuk-frontend/dist/govuk/all.scss";
 @import "../../node_modules/dfe-frontend/packages/dfefrontend.scss";
 
+@import "variables";
 @import "app-task-list";
 @import "aside";
 @import "card-component";
@@ -10,3 +11,4 @@
 @import "overrides";
 @import "printing";
 @import "vertical-navigation";
+@import "pagination";

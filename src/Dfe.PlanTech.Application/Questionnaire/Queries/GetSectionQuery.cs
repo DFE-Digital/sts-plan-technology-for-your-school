@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
@@ -12,11 +11,9 @@ namespace Dfe.PlanTech.Application.Questionnaire.Queries;
 public class GetSectionQuery : ContentRetriever, IGetSectionQuery
 {
     public const string SlugFieldPath = "fields.interstitialPage.fields.slug";
-    private readonly ICmsCache _cache;
 
-    public GetSectionQuery(IContentRepository repository, ICmsCache cache) : base(repository)
+    public GetSectionQuery(IContentRepository repository) : base(repository)
     {
-        _cache = cache;
     }
 
     public async Task<Section?> GetSectionBySlug(string sectionSlug, CancellationToken cancellationToken = default)
@@ -40,7 +37,7 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
 
         try
         {
-            var sections = await _cache.GetOrCreateAsync($"Section:{sectionSlug}", () => repository.GetEntities<Section>(options, cancellationToken)) ?? [];
+            var sections = await repository.GetEntities<Section>(options, cancellationToken);
             return sections.FirstOrDefault();
         }
         catch (Exception ex)
@@ -56,13 +53,9 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
     {
         try
         {
-            var sections = await _cache.GetOrCreateAsync("Sections", async () =>
-            {
-                var options = new GetEntitiesOptions(include: 3);
-                var sections = await repository.GetEntities<Section>(options, cancellationToken);
-                return sections.Select(MapSection);
-            }) ?? [];
-            return sections;
+            var options = new GetEntitiesOptions(include: 3);
+            var sections = await repository.GetEntities<Section>(options, cancellationToken);
+            return sections.Select(MapSection);
         }
         catch (Exception ex)
         {

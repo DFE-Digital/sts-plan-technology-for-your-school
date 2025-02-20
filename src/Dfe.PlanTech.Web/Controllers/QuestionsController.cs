@@ -70,7 +70,7 @@ public class QuestionsController : BaseController<QuestionsController>
                                                             [FromServices] ContentfulOptions contentfulOptions,
                                                             CancellationToken cancellationToken = default)
     {
-        if (!contentfulOptions.UsePreview)
+        if (!contentfulOptions.UsePreviewApi)
             return new RedirectResult(UrlConstants.SelfAssessmentPage);
 
         var question = await _getEntityFromContentfulQuery.GetEntityById<Question>(questionId, cancellationToken) ??

@@ -30,12 +30,3 @@
     <div class="js-only">This element will be hidden by default, but made visible via JS.</div>
     ```
   - The code that unhides these elements is located in [_BodyEnd.cshtml](src/Dfe.PlanTech.Web/Views/Shared/_BodyEnd.cshtml)
-
-## EF Query Conventions
-- We use a redis cache to cache contentful requests. This is setup in [Dfe.PlanTech.Infrastructure.Redis](/src/Dfe.PlanTech.Infrastructure.Redis/).
-- Any requests to contentful should use the `GetOrCreateAysnc` method from [Dfe.PlanTech.Infrastructure.Redis/RedisCache.cs](/src/Dfe.PlanTech.Infrastructure.Redis/RedisCache.cs) to cache the result
-  - For example
-    ```csharp
-    await _cache.GetOrCreateAsync($"Page:{slug}", () => _repository.GetEntities<Page?>(options, cancellationToken))
-    ```
-- More about contentful caching is explained in [contentful redis caching documentation](docs/cms/contentful-redis-caching.md)

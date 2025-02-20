@@ -3,6 +3,7 @@ using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
+using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -71,7 +72,14 @@ public class GetRecommendationRouter : IGetRecommendationRouter
         return controller.View("~/Views/Recommendations/Recommendations.cshtml", viewModel);
     }
 
-    private async Task<(SubtopicRecommendation, RecommendationIntro, List<RecommendationChunk>)> GetSubtopicRecommendation(CancellationToken cancellationToken)
+    public async Task<string> GetRecommendationSlugForSection(string sectionSlug, CancellationToken cancellationToken)
+    {
+        await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken);
+        var (_, subTopicIntro, _, _) = await GetSubtopicRecommendation(cancellationToken);
+        return subTopicIntro.Slug;
+    }
+
+    private async Task<(SubtopicRecommendation, RecommendationIntro, List<RecommendationChunk>, IEnumerable<QuestionWithAnswer>)> GetSubtopicRecommendation(CancellationToken cancellationToken)
     {
         if (_router.SectionStatus?.Maturity == null)
             throw new DatabaseException("Maturity is null, but shouldn't be for a completed section");
@@ -80,15 +88,15 @@ public class GetRecommendationRouter : IGetRecommendationRouter
             throw new DatabaseException("Section is null, but shouldn't be.");
 
         var submissionResponses = await _getLatestResponsesQuery.GetLatestResponses(await _router.User.GetEstablishmentId(), _router.Section.Sys.Id, true, cancellationToken) ?? throw new DatabaseException($"Could not find users answers for:  {_router.Section.Name}");
-        var onlyLatestResponses = _router.Section.GetOrderedResponsesForJourney(submissionResponses.Responses);
+        var latestResponses = _router.Section.GetOrderedResponsesForJourney(submissionResponses.Responses);
 
         var subTopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(_router.Section.Sys.Id, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {_router.Section.Name}");
 
         var subTopicIntro = subTopicRecommendation.GetRecommendationByMaturity(_router.SectionStatus.Maturity) ?? throw new ContentfulDataUnavailableException($"Could not find recommendation intro for maturity:  {_router.SectionStatus?.Maturity}");
 
-        var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(onlyLatestResponses.Select(answer => answer.AnswerRef));
+        var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Select(answer => answer.AnswerRef));
 
-        return (subTopicRecommendation, subTopicIntro, subTopicChunks);
+        return (subTopicRecommendation, subTopicIntro, subTopicChunks, latestResponses);
     }
 
     /// <summary>
@@ -96,7 +104,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     /// </summary>
     private async Task<RecommendationsViewModel> GetRecommendationViewModel(string recommendationSlug, CancellationToken cancellationToken)
     {
-        var (subTopicRecommendation, subTopicIntro, subTopicChunks) = await GetSubtopicRecommendation(cancellationToken);
+        var (subTopicRecommendation, subTopicIntro, subTopicChunks, latestResponses) = await GetSubtopicRecommendation(cancellationToken);
 
         return new RecommendationsViewModel()
         {
@@ -104,6 +112,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
             Intro = subTopicIntro,
             Chunks = subTopicChunks,
             Slug = recommendationSlug,
+            SubmissionResponses = latestResponses
         };
     }
 
