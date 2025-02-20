@@ -16,32 +16,37 @@ const createRowsFromSections = (sections) => {
     const getParentQuestionForAnswer = (section, answer) =>
         section.questions.find((q) => q.answers.some((a) => a.id == answer.id));
 
-    const getRowValuesForAnswer = (section, answer, chunk, link) => {
+    const getRowValuesForAnswer = (section, answer, chunk) => {
         const matchingQuestion = getParentQuestionForAnswer(section, answer);
+
+        const createLinkForRecommendation = (section) =>
+        `https://staging.plan-technology-for-your-school.education.gov.uk/${slugify(
+            section.name
+        )}/recommendation/preview/${section.recommendation.intros[0].maturity.toLowerCase()}#${chunk.header.toLowerCase().replace(/ /g, '-')}`;
 
         if (!matchingQuestion) {
             return;
         }
+
+        const link = createLinkForRecommendation(section);
+        const hyperlink = `=HYPERLINK(""${link}"",""Preview Link"")`;
 
         return [
             section.name,
             matchingQuestion.text,
             answer.text,
             chunk.header,
-            link,
+            hyperlink,
         ];
     };
 
-    const createLinkForRecommendation = (section) =>
-        `https://staging.plan-technology-for-your-school.education.gov.uk/${slugify(
-            section.name
-        )}/recommendation/preview/${section.recommendation.intros[0].maturity.toLowerCase()}`;
-
-    return sections.flatMap((section) => {
-        const link = createLinkForRecommendation(section);
-
+        return sections.flatMap((section) => {
+            if (!section || !section.name || !section.recommendation?.section?.chunks) {
+                return []; 
+            }    
+    
         const createRow = ({ answer, chunk }) =>
-            getRowValuesForAnswer(section, answer, chunk, link);
+            getRowValuesForAnswer(section, answer, chunk);
 
         return section.recommendation.section.chunks
             .flatMap((chunk) =>
@@ -63,7 +68,7 @@ const Csv = () => {
         "Staging (Preview) URL",
     ];
 
-    const joinRow = (columns) => columns.join("\t");
+    const joinRow = (columns) => columns.map(value => `"${value}"`).join(",");
 
     const create = (rows) => [[joinRow(csvHeaders)], ...rows].join("\n");
 
@@ -83,9 +88,13 @@ const main = async () => {
 
     const output = csv.create(rows);
 
-    writeFileSync("csv-test.csv", output);
+    const environment = process.env.ENV ?? process.env.ENVIRONMENT ?? "master";
+    const now = new Date().toISOString().replaceAll(":", "").replaceAll("-", "").replace("T", "").split(".")[0];
+    writeFileSync(`output/recommendations-export-${environment}-${now}.csv`, output);
 };
 
 main()
     .then(() => console.log("Done"))
     .catch(console.error);
+
+export default main;
