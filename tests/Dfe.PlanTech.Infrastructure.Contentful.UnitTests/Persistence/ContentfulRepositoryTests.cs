@@ -2,7 +2,6 @@ using System.Web;
 using Contentful.Core;
 using Contentful.Core.Models;
 using Contentful.Core.Search;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
@@ -120,7 +119,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
             var expectedCount = 42;
 
             _clientSubstitute.GetEntries(Arg.Any<QueryBuilder<RecommendationChunk>>(), Arg.Any<CancellationToken>())
-                .Returns(Task.FromResult(new ContentfulCollection<RecommendationChunk> { Items = new List<RecommendationChunk>() { new RecommendationChunk()}, Total = 42, Errors = new List<ContentfulError>() }));
+                .Returns(Task.FromResult(new ContentfulCollection<RecommendationChunk> { Items = new List<RecommendationChunk>() { new RecommendationChunk() }, Total = 42, Errors = new List<ContentfulError>() }));
 
             var result = await repository.GetEntitiesCount<RecommendationChunk>();
 
