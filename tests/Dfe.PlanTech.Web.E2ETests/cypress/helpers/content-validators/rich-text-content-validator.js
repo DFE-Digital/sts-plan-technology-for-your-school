@@ -70,6 +70,8 @@ function validateParagraph(content) {
 
     if (!anyMatches) {
       console.error(`Could not find match for content`, expectedHtml, content);
+      } else {
+          expect(anyMatches).to.exist;
     }
 
     expect(anyMatches).to.exist;
@@ -96,6 +98,9 @@ function buildExpectedHtml(content) {
     }
 
     if (child.nodeType == "hyperlink") {
+            if (!child.data.uri.includes("plan-technology-for-your-school") && !child.data.uri.includes("plantech-container-app-url")) {
+                html += " (opens in new tab)";
+            }
       html += `</a>`;
     }
   }
