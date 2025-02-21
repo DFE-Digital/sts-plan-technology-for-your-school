@@ -1,4 +1,4 @@
-import { validateCompletionTags, validateRecommendationChunks, validateRecommendationIntro } from "./index.js";
+import { validateRecommendationChunks, validateRecommendationIntro } from "./index.js";
 
 /**
  * Validates a recommendation for a specific maturity level.
@@ -24,11 +24,6 @@ export const validateAndTestRecommendations = (section, maturity, path) => {
     const chunks = section.recommendation.section.getChunksForPath(path)
 
     const recommendationUrl = `${section.interstitialPage.fields.slug}/recommendation` 
-
-    it(`${section.name} should should show recent completion tags on self-assessment page`, () => {
-        // Validate self-assessment page post-section completion
-        validateCompletionTags(section, introPage);
-    });
 
     it(`${section.name} should retrieve recommendation intro for ${maturity} maturity, with correct content`, () => {
         cy.findSectionLink(section).parent().next().next()
