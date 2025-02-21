@@ -14,7 +14,8 @@ describe("Remaining-answer paths", { testIsolation: false }, () => {
         describe(`${section.name} recommendations`, { testIsolation: false }, () => {
 
             before(function () {
-                cy.checkSectionStatus(section.name, selfAssessmentSlug)
+                const sectionSlug = section.interstitialPage.fields.slug;
+                cy.checkSectionStatus(section.name, sectionSlug, selfAssessmentSlug)
                     .then((inProgress) => {
                         if (inProgress) {
                             console.log(`Skipping tests for section: ${section.name} (status is 'in progress')`);

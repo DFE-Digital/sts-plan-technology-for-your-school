@@ -16,13 +16,14 @@ export const validateAndTestSections = (section, paths, dataMapper) => {
         it(`${section.name} should have interstitial page with correct content`, () => {
             cy.visit(`/${selfAssessmentSlug}`);
 
-            // Navigate through interstitial page
-            cy.get("div.govuk-summary-list__row > dt a").contains(section.name).click();
-            cy.url().should("include", section.interstitialPage.fields.slug);
+            const sectionSlug = section.interstitialPage.fields.slug;
+            cy.findSectionLink(section).click();
+                
+            cy.url().should("include", sectionSlug);
 
             // Validate interstititial page content
-            const interstitialPage = FindPageForSlug({ slug: section.interstitialPage.fields.slug, dataMapper });
-            ValidatePage(section.interstitialPage.fields.slug, interstitialPage);
+            const interstitialPage = FindPageForSlug({ slug: sectionSlug, dataMapper });
+            ValidatePage(sectionSlug, interstitialPage);
         });
 
         it(`${section.name} should have every question with correct content`, () => {

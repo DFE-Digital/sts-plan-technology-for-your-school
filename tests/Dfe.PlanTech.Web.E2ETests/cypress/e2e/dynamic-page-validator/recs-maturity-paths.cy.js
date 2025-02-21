@@ -16,10 +16,9 @@ describe("Recommendations", { testIsolation: false }, () => {
             () => {
                 // Establish section status using self-assessment page tag
                 before(function () {
-                    cy.checkSectionStatus(
-                        section.name,
-                        selfAssessmentSlug
-                    ).then((inProgress) => {
+                    const sectionSlug = section.interstitialPage.fields.slug;
+                    cy.checkSectionStatus(section.name, sectionSlug, selfAssessmentSlug)
+                        .then((inProgress) => {
                         if (inProgress) {
                             console.log(
                                 `Skipping tests for section: ${section.name} (status is 'in progress')`

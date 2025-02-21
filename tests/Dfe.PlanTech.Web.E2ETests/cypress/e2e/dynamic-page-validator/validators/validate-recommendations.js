@@ -31,12 +31,10 @@ export const validateAndTestRecommendations = (section, maturity, path) => {
     });
 
     it(`${section.name} should retrieve recommendation intro for ${maturity} maturity, with correct content`, () => {
-        cy.get("a.govuk-link")
-            .contains(section.name.trim())
-            .parent().next().next()
+        cy.findSectionLink(section).parent().next().next()
             .within(() => {
                 cy.get("a.govuk-button").contains("View recommendation").click();
-            })
+            });
         validateRecommendationIntro(introPage, recommendationUrl);
     });
 
