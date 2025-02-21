@@ -11,5 +11,5 @@ export const validateCheckAnswersPage = (path, section) => {
             .contains(CleanText(question.answer.text));
     }
 
-    cy.get("button.govuk-button").contains("Save and continue").click();
+    cy.get("button.govuk-button").contains("Submit and go to self-assessment topics").click();
 }
