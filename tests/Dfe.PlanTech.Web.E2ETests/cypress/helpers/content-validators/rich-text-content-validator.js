@@ -1,6 +1,7 @@
 import { parse } from "node-html-parser";
 import TableValidator from "./rich-text-validators/table-validator";
 import { CleanText } from "../text-helpers";
+import ValidateHeader from "./header-validator";
 
 const tableValidator = new TableValidator();
 
@@ -24,7 +25,25 @@ function validateByNodeType(content) {
     case "table": {
       tableValidator.validateTable(content);
       break;
-    }
+      }
+
+      case "heading-2": {
+          const tag = "h2";
+          const size = "large";
+          const text = content.content[0].value;
+          const nodeContent = { fields: { tag, size, text } };
+          ValidateHeader(nodeContent);
+          break;
+      }
+
+      case "heading-3": {
+          const tag = "h3";
+          const size = "medium";
+          const text = content.content[0].value;
+          const nodeContent = { fields: { tag, size, text } };
+          ValidateHeader(nodeContent);
+          break;
+      }
 
     case "unordered-list": {
       break;
@@ -73,8 +92,6 @@ function validateParagraph(content) {
       } else {
           expect(anyMatches).to.exist;
     }
-
-    expect(anyMatches).to.exist;
   });
 }
 
