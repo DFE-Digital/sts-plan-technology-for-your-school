@@ -10,6 +10,8 @@ import { validateRecommendationChunks, validateRecommendationIntro } from "./ind
 
 
 export const validateAndTestRecommendations = (section, maturity, path) => {
+    const sectionSlug = section.interstitialPage.fields.slug
+
     const introPage = section.recommendation.intros.find(
         (recommendation) => recommendation.maturity == maturity
     );
@@ -23,13 +25,9 @@ export const validateAndTestRecommendations = (section, maturity, path) => {
     // Get chunks for path
     const chunks = section.recommendation.section.getChunksForPath(path)
 
-    const recommendationUrl = `${section.interstitialPage.fields.slug}/recommendation` 
+    const recommendationUrl = `${sectionSlug}/recommendation` 
 
     it(`${section.name} should retrieve recommendation intro for ${maturity} maturity, with correct content`, () => {
-        cy.findSectionLink(section).parent().next().next()
-            .within(() => {
-                cy.get("a.govuk-button").contains("View recommendation").click();
-            });
         validateRecommendationIntro(introPage, recommendationUrl);
     });
 

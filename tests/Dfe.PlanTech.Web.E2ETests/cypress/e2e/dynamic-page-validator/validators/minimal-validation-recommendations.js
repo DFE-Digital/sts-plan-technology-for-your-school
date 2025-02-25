@@ -27,10 +27,8 @@ export const minimalSectionValidationForRecommendations = (section, paths, matur
 
             // Navigate through Check Answers page and return to self assessment page
             cy.url().should("include", `${sectionSlug}/check-answers`);
-            cy.get("button.govuk-button").contains("Save and continue").click();
-            cy.url().should("include", selfAssessmentSlug);
+            cy.get("button.govuk-button").contains("Submit and view recommendations").click();
         });
-
         // Validate recommendations
         validateAndTestRecommendations(section, maturity, path);
     }
