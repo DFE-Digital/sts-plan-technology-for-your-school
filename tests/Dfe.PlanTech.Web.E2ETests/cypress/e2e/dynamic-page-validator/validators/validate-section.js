@@ -13,10 +13,10 @@ export const validateAndTestSections = (section, paths, dataMapper) => {
 
     for (const path of paths) {
         it(`${section.name} should have interstitial page with correct content`, () => {
-            cy.visit(`/${selfAssessmentSlug}`);
+            cy.visit(`${selfAssessmentSlug}`);
 
             const sectionSlug = section.interstitialPage.fields.slug;
-            cy.findSectionLink(section).click();
+            cy.findSectionLink(section.name, sectionSlug).click();
                 
             cy.url().should("include", sectionSlug);
 

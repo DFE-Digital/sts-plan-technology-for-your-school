@@ -7,12 +7,14 @@ export const validateCompletionTags = (section) => {
     const lateTime = new Date(timePlusOneMinute);
     const earlyTime = new Date(timeMinusOneMinute)
 
+
+
     cy.get("a.govuk-link")
         .contains(section.name.trim())
         .should("have.attr", "href").and("include", `${section.name.trim().toLowerCase().replace(/ /g, "-")}`);
 
-    cy.get("a.govuk-link")
-        .contains(section.name.trim())
+    const sectionSlug = section.interstitialPage.fields.slug;
+    cy.findSectionLink(section.name, sectionSlug)
         .parent()
         .next()
         .within(() => {
@@ -22,8 +24,8 @@ export const validateCompletionTags = (section) => {
                 });
         })
 
-    cy.get("a.govuk-link")
-        .contains(section.name.trim())
+
+    cy.findSectionLink(section.name, sectionSlug)
         .parent().next().next()
         .within(() => {
             cy.get("strong.app-task-list__tag").should("include.text", "New").and("have.class", "govuk-tag--yellow");

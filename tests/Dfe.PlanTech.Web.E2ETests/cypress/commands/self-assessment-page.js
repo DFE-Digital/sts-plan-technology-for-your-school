@@ -12,7 +12,7 @@ export const clickFirstSection = () => {
  */
 
 export const findSectionLink = (sectionName, sectionSlug) => {
-    cy.get(`a.govuk-link[href*="${sectionSlug}"]`)
+    cy.get(`a.govuk-link[href="/${sectionSlug}"]`)
         .each(($el) => {
             const linkText = $el.text().trim();
             if (linkText === sectionName) {
