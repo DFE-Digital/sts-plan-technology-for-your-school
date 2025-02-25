@@ -5,7 +5,7 @@ export const validateRecommendationIntro = (introPage, recommendationUrl) => {
     
     cy.url().should("include", `${recommendationUrl}/${slug}`);
 
-    cy.get("h1.govuk-heading-xl").contains(header);
+    cy.get("h1.govuk-heading-xl").contains(header.fields.text);
 
     cy.get("h2.dfe-vertical-nav__theme").contains("Recommendations").should("exist");
 
