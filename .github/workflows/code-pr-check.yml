@@ -2,12 +2,12 @@ name: Code PR Check
 
 on:
   push:
-    branches: ["main", "development", "task/test-change-branch", "task/run-contentful-tests-on-pr"]
+    branches: ["main", "development"]
     paths:
       - "src/**"
       - "tests/**"
   pull_request:
-    branches: ["main", "development", "task/test-change-branch", "task/run-contentful-tests-on-pr"]
+    branches: ["main", "development"]
     paths:
       - "src/**"
       - "tests/**"
@@ -177,7 +177,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2  
+          fetch-depth: 2
 
       - name: Check if contentful files changed
         id: contentful-check
