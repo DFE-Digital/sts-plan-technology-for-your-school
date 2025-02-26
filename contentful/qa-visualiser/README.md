@@ -26,6 +26,7 @@ To run the qa-visualiser locally:
    |------------------|--------------------------------------------------------|----------------------------------------------------|
    | PLANTECH_API_KEY | The API key the cms controller uses for authentication | Keyvault value for `api--authentication--keyvalue` |
    | PLANTECH_API_URL | Base url of the cms controller                         | https://localhost:8080/api/cms                     |
+    | DISPLAY_RECOMMENDATIONS | Boolean option to display recommendation header text linked to the answer on the image                    | true/false             |
 
 4. create and activate a virtual environment with:
     ```bash
