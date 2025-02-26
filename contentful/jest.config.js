@@ -18,6 +18,7 @@ export default {
         "/changes/test-change.js$":
             "<rootDir>/tests/__mocks__/content-management/test-change.mock.js",
     },
+    reporters: ["default", "jest-junit"],
     testEnvironment: "node",
     preset: "ts-jest",
 };
