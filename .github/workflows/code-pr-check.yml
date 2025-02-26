@@ -176,37 +176,41 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  
 
       - name: Check if contentful files changed
         id: contentful-check
         run: |
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^contentful/'; then
+          git fetch origin ${{ github.base_ref }} --depth=1
+          if git diff --name-only HEAD^ HEAD | grep '^contentful/'; then
             echo "contentful_changes=true" >> $GITHUB_ENV
+            echo "::set-output name=changed::true"
           else
             echo "contentful_changes=false" >> $GITHUB_ENV
+            echo "::set-output name=changed::false"
           fi
 
       - name: Setup Node.js
-        if: env.contentful_changes == 'true'
+        if: steps.contentful-check.outputs.changed == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: "latest"
 
       - name: Install Dependencies
-        if: env.contentful_changes == 'true'
+        if: steps.contentful-check.outputs.changed == 'true'
         working-directory: ./contentful
         run: npm install
 
       - name: Run Jest Tests
-        if: env.contentful_changes == 'true'
+        if: steps.contentful-check.outputs.changed == 'true'
         working-directory: ./contentful/tests
         run: npm run test -- --ci --reporters=default --reporters=jest-junit
 
       - name: Test Report
-        if: env.contentful_changes == 'true' && (success() || failure())
+        if: steps.contentful-check.outputs.changed == 'true' && (success() || failure())
         uses: dorny/test-reporter@v1
         with:
           name: Contentful Jest Tests
           path: ./contentful/tests/junit.xml
           reporter: jest-junit
-
