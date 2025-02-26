@@ -212,5 +212,5 @@ jobs:
         uses: dorny/test-reporter@v1
         with:
           name: Contentful Jest Tests
-          path: ./contentful/tests/junit.xml
+          path: ./contentful/junit.xml
           reporter: jest-junit
