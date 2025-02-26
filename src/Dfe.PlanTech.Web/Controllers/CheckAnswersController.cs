@@ -19,7 +19,7 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
     public const string CheckAnswersPageSlug = "check-answers";
     public const string CheckAnswersViewName = "CheckAnswers";
 
-    public const string InlineRecommendationUnavailableErrorMessage = "Unable to save. Please try again. If this problem continues you can";
+    public const string InlineRecommendationUnavailableErrorMessage = "Unable to save. Please try again. If this problem continues you ca";
 
     [HttpGet("{sectionSlug}/check-answers")]
     public async Task<IActionResult> CheckAnswersPage(string sectionSlug,
