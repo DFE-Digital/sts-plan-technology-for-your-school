@@ -20,5 +20,7 @@ export default {
     },
     reporters: ["default", "jest-junit"],
     testEnvironment: "node",
-    preset: "ts-jest",
+    preset: "ts-jest",  
+    clearMocks: true,
+    collectCoverage: true,
 };
