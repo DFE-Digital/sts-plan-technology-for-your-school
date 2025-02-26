@@ -205,7 +205,7 @@ jobs:
       - name: Run Jest Tests
         if: steps.contentful-check.outputs.changed == 'true'
         working-directory: ./contentful/tests
-        run: npm npm test -- --ci --reporters=default --reporters=jest-junit
+        run: npm test -- --ci --reporters=default --reporters=jest-junit
 
       - name: Test Report
         if: steps.contentful-check.outputs.changed == 'true' && (success() || failure())
