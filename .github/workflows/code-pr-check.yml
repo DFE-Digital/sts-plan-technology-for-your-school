@@ -170,3 +170,33 @@ jobs:
           name: JEST Tests # Name of the check run which will be created
           path: ./tests/Dfe.PlanTech.Web.Node.UnitTests/junit.xml # Path to test results
           reporter: jest-junit # Format of test results
+
+    run-contentful-jest-tests:
+      name: Run Jest Tests for Contentful
+      runs-on: ubuntu-22.04
+      if: |
+        github.event_name == 'push' && contains(github.event.head_commit.modified, 'contentful/') ||
+        github.event_name == 'pull_request' && contains(join(github.event.pull_request.head.ref, ''), 'contentful')
+      steps:
+        - uses: actions/checkout@v4
+
+        - name: Setup Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: "latest"
+
+        - name: Install Dependencies
+          working-directory: ./contentful/
+          run: npm install
+
+        - name: Run Jest Tests
+          working-directory: ./contentful/tests
+          run: npm run test
+
+        - name: Test Report
+          uses: dorny/test-reporter@v1
+          if: success() || failure()  
+          with:
+            name: Contentful Jest Tests  
+            path: ./contentful/tests/junit.xml  
+            reporter: jest-junit 
