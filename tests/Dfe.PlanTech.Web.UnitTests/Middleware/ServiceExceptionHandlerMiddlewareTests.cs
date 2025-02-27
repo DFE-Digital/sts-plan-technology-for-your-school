@@ -1,6 +1,7 @@
 ﻿using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Establishments.Exceptions;
 using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Middleware;
@@ -9,7 +10,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using Xunit;
-using Dfe.PlanTech.Domain.Content.Models;
 
 namespace Dfe.PlanTech.Web.UnitTests.Middleware
 {
