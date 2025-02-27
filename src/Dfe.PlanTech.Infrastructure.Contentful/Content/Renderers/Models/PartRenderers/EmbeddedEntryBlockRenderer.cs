@@ -26,7 +26,7 @@ public class EmbeddedEntryBlockRenderer : BaseRichTextContentPartRender, IRichTe
                     var attachment = new AttachmentComponent();
                     return attachment.AddHtml(content, stringBuilder);
                 case "CSAccordion":
-                    var accordionComponent = new AccordionComponent();
+                    var accordionComponent = new AccordionComponent(Logger);
                     return accordionComponent.AddHtml(content, rendererCollection, stringBuilder);
                 default:
                     break;

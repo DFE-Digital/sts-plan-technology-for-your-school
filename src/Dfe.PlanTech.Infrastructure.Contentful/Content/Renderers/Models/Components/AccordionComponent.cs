@@ -9,8 +9,9 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.Compon
     {
         public ILogger Logger { get; }
         public IList<IRichTextContentPartRenderer> Renders { get; private set; }
-        public AccordionComponent()
+        public AccordionComponent(ILogger logger)
         {
+            Logger = logger;
         }
 
         public StringBuilder AddHtml(RichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
@@ -51,7 +52,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.Compon
 
                 if (renderer == null)
                 {
-                    //_logger.LogWarning("Could not find renderer for {subContent}", subContent);
+                    Logger.LogWarning("Could not find renderer for {subContent}", subContent);
                     continue;
                 }
 
