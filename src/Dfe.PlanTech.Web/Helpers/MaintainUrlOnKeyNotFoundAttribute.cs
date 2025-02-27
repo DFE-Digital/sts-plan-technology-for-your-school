@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Domain.Content.Interfaces;
+﻿using Dfe.PlanTech.Application.Exceptions;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.SignIns.Enums;
 using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Models;
@@ -28,9 +29,13 @@ namespace Dfe.PlanTech.Web.Helpers
         {
             var exception = context.Exception;
 
-            if (exception is KeyNotFoundException &&
-                !exception.Message.Contains(ClaimConstants.Organisation)
-            )
+            var isContentfulDataUnavailableException = exception is ContentfulDataUnavailableException;
+
+            var isKeyNotFoundException = exception is KeyNotFoundException;
+            var isNonOrganisationKeyNotFoundException = isKeyNotFoundException &&
+                !exception.Message.Contains(ClaimConstants.Organisation);
+
+            if (isContentfulDataUnavailableException || isNonOrganisationKeyNotFoundException)
             {
                 // Use the injected service to get the contact link.
                 var contactLink = await _getNavigationQuery.GetLinkById(_contactOptions.Value.LinkId);
