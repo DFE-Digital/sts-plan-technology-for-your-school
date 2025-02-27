@@ -36,6 +36,10 @@ public interface IContentRepository
     /// <returns></returns>
     Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default);
 
+    Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default);
+
+    Task<int> GetEntitiesCount<TEntity>(CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Get entities without filtering
     /// </summary>
