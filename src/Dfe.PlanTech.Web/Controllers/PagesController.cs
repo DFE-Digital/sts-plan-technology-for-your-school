@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Dfe.PlanTech.Application.Constants;
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
@@ -11,6 +12,7 @@ using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
@@ -33,7 +35,7 @@ public class PagesController(
         if (page == null)
         {
             logger.LogInformation("Could not find page at {Path}", Request.Path.Value);
-            return await NotFoundError();
+            throw new ContentfulDataUnavailableException($"Could not find page at {Request.Path.Value}");
         }
 
         var viewModel = new PageViewModel(page, this, user, Logger);
