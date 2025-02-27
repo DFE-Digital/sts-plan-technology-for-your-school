@@ -37,7 +37,7 @@ export const validateAndTestSections = (section, paths, dataMapper) => {
             cy.url().should("include", selfAssessmentSlug);
         });
 
-        it(`${section.name} should should show recent completion tags on self-assessment page`, () => {
+        it(`${section.name} should show recent completion tags on self-assessment page`, () => {
             // Validate self-assessment page post-section completion
             validateCompletionTags(section);
         });
