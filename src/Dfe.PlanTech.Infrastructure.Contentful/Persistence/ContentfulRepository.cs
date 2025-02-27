@@ -25,6 +25,12 @@ public class ContentfulRepository : IContentRepository
         _logger = loggerFactory.CreateLogger<ContentfulRepository>();
     }
 
+    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(CancellationToken cancellationToken = default)
+        => await GetEntities<TEntity>(GetContentTypeName<TEntity>(), null, cancellationToken);
+
+    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default)
+        => await GetEntities<TEntity>(GetContentTypeName<TEntity>(), options, cancellationToken);
+
     public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IGetEntitiesOptions? options, CancellationToken cancellationToken = default)
     {
         var queryBuilder = QueryBuilders.BuildQueryBuilder<TEntity>(entityTypeId, options);
@@ -34,6 +40,20 @@ public class ContentfulRepository : IContentRepository
         ProcessContentfulErrors(entries);
 
         return entries.Items ?? [];
+    }
+
+    public async Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(string entityTypeId, IGetEntitiesOptions options, CancellationToken cancellationToken = default)
+    {
+        var limit = options?.Limit ?? 100;
+        var queryBuilder = QueryBuilders.BuildQueryBuilder<TEntity>(entityTypeId, options)
+            .Limit(limit)
+            .Skip((options!.Page - 1) * limit);
+
+        var entries = await _client.GetEntries(queryBuilder, cancellationToken);
+
+        ProcessContentfulErrors(entries);
+
+        return entries.Items;
     }
 
     private void ProcessContentfulErrors<TEntity>(ContentfulCollection<TEntity> entries)
@@ -54,12 +74,20 @@ public class ContentfulRepository : IContentRepository
 
         return errorString + " " + error.SystemProperties.Id;
     }
+    public async Task<int> GetEntitiesCount<TEntity>(CancellationToken cancellationToken = default)
+    {
+        var queryBuilder = QueryBuilders.BuildQueryBuilder<TEntity>(GetContentTypeName<TEntity>(), null).Limit(0);
 
-    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(CancellationToken cancellationToken = default)
-    => await GetEntities<TEntity>(GetContentTypeName<TEntity>(), null, cancellationToken);
+        var entries = await _client.GetEntries(queryBuilder, cancellationToken);
 
-    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default)
-        => await GetEntities<TEntity>(GetContentTypeName<TEntity>(), options, cancellationToken);
+        ProcessContentfulErrors(entries);
+
+        return entries.Total;
+
+    }
+
+    public async Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default)
+        => await GetPaginatedEntities<TEntity>(GetContentTypeName<TEntity>(), options, cancellationToken);
 
     public async Task<TEntity?> GetEntityById<TEntity>(string id, int include = 2, CancellationToken cancellationToken = default)
     {
