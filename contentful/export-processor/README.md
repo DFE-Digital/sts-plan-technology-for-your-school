@@ -159,3 +159,17 @@ USE_PREVIEW
 SPACE_ID
 ENVIRONMENT
 FUNCTION_APP_URL
+
+
+## Recommendations Exporter
+
+[recommmendations_csv_outputter.js](/src/contentful/export-processor/recommendations_csv_outputter.js) exports data from Contentful (uses the exporter) and generates a .csv in the output directory with the recommendations attached to each answer and a link to view on staging:
+
+### Usage
+
+The recommendations exporter does not need any additional environment variables. It relies on the data-exporter so ensure you have those required environment variables.
+
+3. Run `npm run export-recommendations-csv` to run the script.
+
+You may need to add the following parameter infront of the script in package.json (--max-old-space-size=9000) [`"export-recommendations-csv": "node --max-old-space-size=9000 recommendations_csv_outputter.js"`]
+

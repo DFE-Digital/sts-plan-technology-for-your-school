@@ -16,7 +16,7 @@ The project is currently separate from the content-migrations project because th
 
 Note that the `contentful-management` library defaults to the `master` environment if there is a typo in the environment name. This is very undesirable so `validate-environment.js` will fetch all environments from contentful and ensure that `ENVIRONMENT` is one of them.
 
-## Usage
+### Usage
 
 1. Add your content update script following the convention of `YYYYMMDD-HHMM-description-of-crud-operation.js`
 2. run the update with
@@ -68,3 +68,9 @@ There is absolutely no confirmation before deletion or anything like that. Make 
 You don't want to accidentally delete everything somewhere else.
 
 Highly recommend backing up your data first!
+
+## Tests
+
+The test suite can be found in `../tests/tests/`. To run them, navigate to /contentful in the terminal and type `npm run test`.
+
+For details of how to run in debug mode, see the [README.md file](../tests/README.md) in `../tests/`.
