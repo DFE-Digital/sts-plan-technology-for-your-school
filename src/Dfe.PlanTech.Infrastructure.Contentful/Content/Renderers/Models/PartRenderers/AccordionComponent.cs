@@ -7,11 +7,12 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRe
 
 public class AccordionComponent : IRichTextContentPartRendererCollection
 {
-    public ILogger Logger { get; }
+    private readonly ILogger<AccordionComponent> _logger;
+    public ILogger Logger => _logger;
     public IReadOnlyList<IRichTextContentPartRenderer> Renders { get; private set; }
-    public AccordionComponent(ILogger logger)
+    public AccordionComponent(ILogger<AccordionComponent> logger)
     {
-        Logger = logger;
+        _logger = logger;
     }
 
     public StringBuilder AddHtml(RichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)

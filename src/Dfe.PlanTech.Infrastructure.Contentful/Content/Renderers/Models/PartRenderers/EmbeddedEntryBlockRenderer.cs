@@ -8,10 +8,14 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRe
 
 public class EmbeddedEntryBlockRenderer : BaseRichTextContentPartRender, IRichTextContentPartRendererCollection
 {
-    public ILogger Logger { get; }
+    private readonly ILogger<EmbeddedEntryBlockRenderer> _logger;
+    private readonly ILogger<AccordionComponent> _loggerAccordion;
+    public ILogger Logger => _logger;
     public IReadOnlyList<IRichTextContentPartRenderer> Renders { get; private set; }
-    public EmbeddedEntryBlockRenderer() : base(RichTextNodeType.EmbeddedEntryBlock)
+    public EmbeddedEntryBlockRenderer(ILoggerFactory loggerFactory, ILogger<EmbeddedEntryBlockRenderer> logger) : base(RichTextNodeType.EmbeddedEntryBlock)
     {
+        _logger = logger;
+        _loggerAccordion = loggerFactory.CreateLogger<AccordionComponent>();
     }
 
     public override StringBuilder AddHtml(RichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
@@ -25,7 +29,7 @@ public class EmbeddedEntryBlockRenderer : BaseRichTextContentPartRender, IRichTe
                     var attachment = new AttachmentComponent();
                     return attachment.AddHtml(content, stringBuilder);
                 case "CSAccordion":
-                    var accordionComponent = new AccordionComponent(Logger);
+                    var accordionComponent = new AccordionComponent(_loggerAccordion);
                     return accordionComponent.AddHtml(content, rendererCollection, stringBuilder);
                 default:
                     break;
@@ -43,7 +47,7 @@ public class EmbeddedEntryBlockRenderer : BaseRichTextContentPartRender, IRichTe
 
             if (renderer == null)
             {
-                //_logger.LogWarning("Could not find renderer for {subContent}", subContent);
+                _logger.LogWarning("Could not find renderer for {subContent}", subContent);
                 continue;
             }
 

@@ -35,7 +35,7 @@ public class AttachmentComponent
         stringBuilder.Append("<p class=\"attachment-metadata\" id=\"file-details\">");
         stringBuilder.Append($"<span class=\"attachment-attribute\" aria-label=\"file type\">{_fileExtension.ToUpper()}</span>,");
         stringBuilder.Append("<span class=\"attachment-attribute\" aria-label=\"file size\">");
-        stringBuilder.Append($"{_size / 1024} KB");
+        stringBuilder.Append($"{_size} KB");
         stringBuilder.Append("</span></p>");
 
         if (_updatedAt.HasValue)
@@ -55,7 +55,7 @@ public class AttachmentComponent
         var target = content?.Data?.Target;
         _InternalName = target?.InternalName;
         _ContentType = target?.Asset.File.ContentType;
-        _size = target?.Asset?.File?.Details?.Size;
+        _size = target?.Asset?.File?.Details?.Size / 1024;
         _title = target?.Title;
         _uri = target?.Asset.File.Url;
         _updatedAt = target?.Asset.SystemProperties.UpdatedAt;

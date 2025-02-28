@@ -7,6 +7,16 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
 
+public class EmbeddedEntryBlockTests
+{
+
+    [Fact]
+    public void Should_Accept_AccordionAndAttachments()
+    {
+
+    }
+}
+
 public class HyperlinkRendererTests
 {
     private const string NODE_TYPE = "hyperlink";
@@ -21,7 +31,7 @@ public class HyperlinkRendererTests
         {
             NodeType = NODE_TYPE,
             Value = linkText,
-            Data = new RichTextData()
+            Data = new RichTextContentSupportData()
             {
                 Uri = url
             }
@@ -63,9 +73,10 @@ public class HyperlinkRendererTests
         {
             NodeType = NODE_TYPE,
             Value = linkText,
-            Data = new RichTextData()
+            Data = new RichTextContentSupportData()
             {
-                Uri = url
+                Uri = url,
+                Target = new RichTextContentData(),
             }
         };
 
@@ -91,9 +102,10 @@ public class HyperlinkRendererTests
         {
             NodeType = NODE_TYPE,
             Value = linkText,
-            Data = new RichTextData()
+            Data = new RichTextContentSupportData()
             {
-                Uri = url
+                Uri = url,
+                Target = new RichTextContentData(),
             }
         };
 
@@ -142,9 +154,10 @@ public class HyperlinkRendererTests
         {
             NodeType = NODE_TYPE,
             Value = linkText,
-            Data = new RichTextData()
+            Data = new RichTextContentSupportData()
             {
-                Uri = url
+                Uri = url,
+                Target = new RichTextContentData(),
             }
         };
 
