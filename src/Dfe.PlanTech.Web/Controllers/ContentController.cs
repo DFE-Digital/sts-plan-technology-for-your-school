@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Web.Content;
+﻿using Dfe.PlanTech.Application.Exceptions;
+using Dfe.PlanTech.Web.Content;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,7 +41,7 @@ public class ContentController(
             {
                 logger.LogError("Failed to load content for C&S page {Slug}; no content received.",
                     slug);
-                throw new KeyNotFoundException($"Failed to load content for C&S page {slug}; no content received.");
+                throw new ContentfulDataUnavailableException($"Failed to load content for C&S page {slug}; no content received.");
             }
 
             resp = layoutService.GenerateLayout(resp, Request, page);
@@ -48,7 +49,7 @@ public class ContentController(
 
             return View("CsIndex", resp);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not ContentfulDataUnavailableException)
         {
             logger.LogError(ex, "Error loading C&S content page {Slug}", slug);
             return RedirectToAction(ErrorActionName, PagesController.ControllerName);

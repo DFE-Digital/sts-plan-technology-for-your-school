@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
+﻿using Dfe.PlanTech.Application.Exceptions;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
 using Dfe.PlanTech.Web.Content;
 using Dfe.PlanTech.Web.Controllers;
 using FluentAssertions;
@@ -44,8 +45,9 @@ public class ContentControllerTests
         const string dummySlug = "dummySlug";
         var controller = GetController();
 
-        await controller.Index(dummySlug, "", null, default);
+        var action = async () => await controller.Index(dummySlug, "", null, default);
 
+        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(action);
         await _contentServiceMock.Received(1).GetContent(dummySlug, default);
     }
 
@@ -58,10 +60,9 @@ public class ContentControllerTests
 
         var controller = GetController();
 
-        var result = await controller.Index(slug, "", null, default);
+        var action = async () => await controller.Index(slug, "", null, default);
 
-        result.Should().BeOfType<RedirectToActionResult>();
-        (result as RedirectToActionResult)!.ActionName.Should().BeEquivalentTo(ContentController.ErrorActionName);
+        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(action);
 
         _loggerMock.Received(1).Log(
             LogLevel.Error,

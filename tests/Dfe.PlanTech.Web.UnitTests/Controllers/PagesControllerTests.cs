@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Cookie;
@@ -272,9 +273,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             userSubstitute.GetOrganisationData().Returns(establishment);
 
-            var result = await _controller.GetByRoute(null, userSubstitute) as ViewResult;
+            var action = async () => await _controller.GetByRoute(null, userSubstitute);
 
-            Assert.NotNull(result);
+            await Assert.ThrowsAsync<ContentfulDataUnavailableException>(action);
         }
 
         [Fact]
