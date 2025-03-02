@@ -1,48 +1,48 @@
 ﻿using System.Text;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Custom;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 
 public class AttachmentComponent
 {
-    private string? _InternalName { get; set; }
-    private string? _ContentType { get; set; }
-    private string? _uri { get; set; }
-    private string? _title { get; set; }
-    private string? _fileExtension { get; set; }
-    private long? _size { get; set; }
-    private DateTime? _updatedAt { get; set; }
-
     public AttachmentComponent()
     {
     }
 
     public StringBuilder AddHtml(RichTextContent content, StringBuilder stringBuilder)
     {
-        populate(content);
+        var target = content?.Data?.Target;
+
+        if (target == null)
+        {
+            return stringBuilder;
+        }
+
+        var customAttachment = GenerateCustomAttachment(target);
 
         stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print\">");
         stringBuilder.Append("<div class=\"attachment\">");
         stringBuilder.Append("<div class=\"attachment-thumbnail govuk-!-margin-right-8\">");
         stringBuilder.Append("<a href=\"@Model.Uri\" download>");
-        stringBuilder.Append(GetImageTag());
+        stringBuilder.Append(GetImageTag(customAttachment.FileExtension));
         stringBuilder.Append("</a></div>");
         stringBuilder.Append("<div class=\"attachment-details\">");
         stringBuilder.Append("<h2 class=\"attachment-title\">");
-        stringBuilder.Append($"<a href=\"{_uri}\" aria-describedby=\"file-details\" class=\"govuk-link attachment-link\" download>{_title}");
+        stringBuilder.Append($"<a href=\"{customAttachment.Uri}\" aria-describedby=\"file-details\" class=\"govuk-link attachment-link\" download>{customAttachment.Title}");
         stringBuilder.Append("</a></h2>");
 
         stringBuilder.Append("<p class=\"attachment-metadata\" id=\"file-details\">");
-        stringBuilder.Append($"<span class=\"attachment-attribute\" aria-label=\"file type\">{_fileExtension.ToUpper()}</span>,");
+        stringBuilder.Append($"<span class=\"attachment-attribute\" aria-label=\"file type\">{customAttachment.FileExtension.ToUpper()}</span>,");
         stringBuilder.Append("<span class=\"attachment-attribute\" aria-label=\"file size\">");
-        stringBuilder.Append($"{_size} KB");
+        stringBuilder.Append($"{customAttachment.Size} KB");
         stringBuilder.Append("</span></p>");
 
-        if (_updatedAt.HasValue)
+        if (customAttachment.UpdatedAt.HasValue)
         {
             stringBuilder.Append("<p class=\"attachment-metadata\">");
             stringBuilder.Append("<span class=\"attachment-attribute\" aria-label=\"updated date\">Last updated");
-            stringBuilder.Append(_updatedAt.Value.ToString("d MMMM yyyy"));
+            stringBuilder.Append(customAttachment.UpdatedAt.Value.ToString("d MMMM yyyy"));
             stringBuilder.Append("</span></p>");
         }
         stringBuilder.Append("</div></div></div>");
@@ -50,26 +50,31 @@ public class AttachmentComponent
         return stringBuilder;
     }
 
-    private void populate(RichTextContent content)
+    private CustomAttachment GenerateCustomAttachment(RichTextContentData content)
     {
-        var target = content?.Data?.Target;
-        _InternalName = target?.InternalName;
-        _ContentType = target?.Asset.File.ContentType;
-        _size = target?.Asset?.File?.Details?.Size / 1024;
-        _title = target?.Title;
-        _uri = target?.Asset.File.Url;
-        _updatedAt = target?.Asset.SystemProperties.UpdatedAt;
-        _fileExtension = _ContentType?.Split('/')[^1].ToLower();
+        var contentType = content?.Asset.File.ContentType;
+        var fileExtension = contentType?.Split('/')[^1].ToLower();
 
-        if (_fileExtension == "vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        if (fileExtension == "vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         {
-            _fileExtension = "xlsx";
+            fileExtension = "xlsx";
         }
+
+        return new CustomAttachment
+        {
+            InternalName = content?.InternalName ?? string.Empty,
+            ContentType = contentType ?? string.Empty,
+            Size = content?.Asset?.File?.Details?.Size / 1024 ?? 0,
+            Title = content?.Title,
+            Uri = content?.Asset.File.Url ?? string.Empty,
+            UpdatedAt = content?.Asset.SystemProperties.UpdatedAt,
+            FileExtension = fileExtension ?? string.Empty,
+        };
     }
 
-    private string GetImageTag()
+    private string GetImageTag(string fileExtension)
     {
-        switch (_fileExtension)
+        switch (fileExtension)
         {
             case "pdf":
                 return "<img src=\"/assets/images/pdf-file-icon.svg\" alt=\"pdf file type\" >";

@@ -20,14 +20,12 @@ public class TableCellRenderer : BaseRichTextContentPartRender
         if (stringBuilder.EndsWith(BeginningOfRowString))
         {
             stringBuilder.Append(HeaderOpeningTag);
-            stringBuilder.Append(content.Content[0].Content[0].Value);
             AppendContent(stringBuilder, content.Content);
             stringBuilder.Append("</th>");
         }
         else
         {
             stringBuilder.Append(CellOpeningTag);
-            stringBuilder.Append(content.Content[0].Content[0].Value);
             AppendContent(stringBuilder, content.Content);
             stringBuilder.Append("</td>");
         }
