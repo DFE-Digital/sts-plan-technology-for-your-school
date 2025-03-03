@@ -144,8 +144,8 @@ public class EmbeddedEntryBlockTests
                             }
                         }
                     },
-                    Content = new List<RichTextContentData>()
-                    {
+                    Content =
+                    [
                         new()
                         {
                             InternalName = "Internal Name 1",
@@ -167,7 +167,7 @@ public class EmbeddedEntryBlockTests
                             SummaryLine = "Summary Line 3",
                             RichText = new RichTextContent(),
                         },
-                    }
+                    ]
                 }
             }
         };

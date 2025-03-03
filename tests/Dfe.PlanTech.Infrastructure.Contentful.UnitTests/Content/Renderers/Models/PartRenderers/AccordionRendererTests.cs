@@ -10,6 +10,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Mod
 public class AccordionRendererTests
 {
     private readonly ILogger<AccordionComponent> _logger = Substitute.For<ILogger<AccordionComponent>>();
+    
 
     [Fact]
     public void CheckNoContentReturnsEmptyStringBuilder()
@@ -45,8 +46,8 @@ public class AccordionRendererTests
             {
                 Target = new RichTextContentData()
                 {
-                    Content = new List<RichTextContentData>()
-                    {
+                    Content =
+                    [
                         new RichTextContentData()
                         {
                             InternalName = "Internal Name 1",
@@ -57,7 +58,7 @@ public class AccordionRendererTests
                                 Description = "This is just a description and has no render content"
                             }
                         },
-                    }
+                    ]
                 }
             }
         };
