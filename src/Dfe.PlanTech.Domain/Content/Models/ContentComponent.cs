@@ -7,14 +7,14 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 public abstract class ContentComponent : IContentComponent
 {
     public SystemDetails Sys { get; init; } = null!;
-    public new Fields Fields { get; set; } = null!;
-    public Asset Asset { get; set; } = null!;
-    public string SummaryLine { get; set; } = null!;
-    public string Description { get; set; } = null!;
-    public string Meta { get; set; } = null!;
-    public string ImageAlt { get; set; } = null!;
-    public string Uri { get; set; } = null!;
-    public Image Image { get; set; } = null!;
-    public List<Target> Content { get; set; } = [];
-    public new string Title { get; set; } = null!;
+    public new Fields Fields { get; init; } = null!;
+    public Asset Asset { get; init; } = null!;
+    public string SummaryLine { get; init; } = null!;
+    public string Description { get; init; } = null!;
+    public string Meta { get; init; } = null!;
+    public string ImageAlt { get; init; } = null!;
+    public string Uri { get; init; } = null!;
+    public Image Image { get; init; } = null!;
+    public List<Target> Content { get; init; } = [];
+    public new string Title { get; init; } = null!;
 }
