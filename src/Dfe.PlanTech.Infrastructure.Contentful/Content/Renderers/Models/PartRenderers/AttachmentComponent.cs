@@ -24,7 +24,7 @@ public class AttachmentComponent
         stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print\">");
         stringBuilder.Append("<div class=\"attachment\">");
         stringBuilder.Append("<div class=\"attachment-thumbnail govuk-!-margin-right-8\">");
-        stringBuilder.Append("<a href=\"@Model.Uri\" download>");
+        stringBuilder.Append($"<a href=\"{customAttachment.Uri}\" download>");
         stringBuilder.Append(GetImageTag(customAttachment.FileExtension));
         stringBuilder.Append("</a></div>");
         stringBuilder.Append("<div class=\"attachment-details\">");

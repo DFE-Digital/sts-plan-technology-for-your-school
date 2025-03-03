@@ -3,16 +3,12 @@ using Contentful.Core.Models;
 using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
 using ContentfulFile = Contentful.Core.Models.File;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
 
 public class AttachmentRendererTests
 {
-    private readonly ILogger<AttachmentComponent> _logger = Substitute.For<ILogger<AttachmentComponent>>();
-
     [Fact]
     public void CheckEmptyContentReturnsNewStringBuilder()
     {

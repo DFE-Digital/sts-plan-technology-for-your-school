@@ -21,19 +21,21 @@ public class EmbeddedEntryBlockRenderer : BaseRichTextContentPartRender, IRichTe
     public override StringBuilder AddHtml(RichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
         var richTextData = content?.Data?.Target ?? null;
-        if (richTextData != null)
+        if (richTextData == null)
         {
-            switch (richTextData.SystemProperties.ContentType?.SystemProperties.Id)
-            {
-                case "Attachment":
-                    var attachment = new AttachmentComponent();
-                    return attachment.AddHtml(content, stringBuilder);
-                case "CSAccordion":
-                    var accordionComponent = new AccordionComponent(_loggerAccordion);
-                    return accordionComponent.AddHtml(content, rendererCollection, stringBuilder);
-                default:
-                    break;
-            }
+            return stringBuilder;
+        }
+
+        switch (richTextData.SystemProperties.ContentType?.SystemProperties.Id)
+        {
+            case "Attachment":
+                var attachment = new AttachmentComponent();
+                return attachment.AddHtml(content, stringBuilder);
+            case "CSAccordion":
+                var accordionComponent = new AccordionComponent(_loggerAccordion);
+                return accordionComponent.AddHtml(content, rendererCollection, stringBuilder);
+            default:
+                break;
         }
 
         return stringBuilder;

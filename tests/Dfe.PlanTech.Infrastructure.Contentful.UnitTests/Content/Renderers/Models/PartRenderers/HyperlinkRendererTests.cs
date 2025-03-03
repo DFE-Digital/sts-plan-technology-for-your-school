@@ -7,16 +7,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
 
-public class EmbeddedEntryBlockTests
-{
-
-    [Fact]
-    public void Should_Accept_AccordionAndAttachments()
-    {
-
-    }
-}
-
 public class HyperlinkRendererTests
 {
     private const string NODE_TYPE = "hyperlink";
