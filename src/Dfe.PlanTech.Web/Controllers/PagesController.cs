@@ -29,7 +29,7 @@ public class PagesController(
 
     [Authorize(Policy = PageModelAuthorisationPolicy.PolicyName)]
     [HttpGet("{route?}", Name = "GetPage")]
-    public async Task<IActionResult> GetByRoute([ModelBinder(typeof(PageModelBinder))] Page? page, [FromServices] IUser user)
+    public IActionResult GetByRoute([ModelBinder(typeof(PageModelBinder))] Page? page, [FromServices] IUser user)
     {
         if (page == null)
         {
