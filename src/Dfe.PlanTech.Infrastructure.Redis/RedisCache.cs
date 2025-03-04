@@ -47,33 +47,22 @@ public class RedisCache : ICmsCache
             var db = await _connectionManager.GetDatabaseAsync(databaseId);
             var redisResult = await GetAsync<T>(db, key);
 
-            var existedInCache = redisResult.ExistedInCache == true && redisResult.CacheValue != null;
-            var hasContent = false;
-
-            if (existedInCache)
-            {
-                var resultType = redisResult.CacheValue!.GetType();
-
-                if (typeof(IEnumerable<IContentComponent>).IsAssignableFrom(resultType))
-                {
-                    var cacheValue = redisResult.CacheValue as IEnumerable<IContentComponent>;
-                    hasContent = cacheValue != null && cacheValue.Any();
-                }
-                else
-                {
-                    var cacheValue = redisResult.CacheValue as IContentComponent;
-                    hasContent = cacheValue != null;
-                }
-            }
-
-            if (existedInCache && hasContent)
-            {
-                _logger.LogTrace("Cache item with key: {Key} found", key);
-                return redisResult.CacheValue;
-            }
-            else if (redisResult.Errored)
+            if (redisResult.Errored)
             {
                 return await action();
+            }
+
+            if (redisResult.ExistedInCache == true && redisResult.CacheValue != null)
+            {
+                var hasContent = redisResult.CacheValue is IEnumerable<IContentComponent> cacheValue
+                    ? cacheValue.Any()
+                    : redisResult.CacheValue != null;
+
+                if (hasContent)
+                {
+                    _logger.LogTrace("Cache item with key: {Key} found", key);
+                    return redisResult.CacheValue;
+                }
             }
 
             return await CreateAndCacheItemAsync(db, key, action, expiry, onCacheItemCreation);
