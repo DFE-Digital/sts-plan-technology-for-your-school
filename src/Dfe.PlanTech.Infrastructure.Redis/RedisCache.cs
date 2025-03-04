@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Background;
 using Dfe.PlanTech.Domain.Caching.Models;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Retry;
@@ -46,7 +47,26 @@ public class RedisCache : ICmsCache
             var db = await _connectionManager.GetDatabaseAsync(databaseId);
             var redisResult = await GetAsync<T>(db, key);
 
-            if (redisResult.ExistedInCache == true)
+            var existedInCache = redisResult.ExistedInCache == true && redisResult.CacheValue != null;
+            var hasContent = false;
+
+            if (existedInCache)
+            {
+                var resultType = redisResult.CacheValue!.GetType();
+
+                if (typeof(IEnumerable<IContentComponent>).IsAssignableFrom(resultType))
+                {
+                    var cacheValue = redisResult.CacheValue as IEnumerable<IContentComponent>;
+                    hasContent = cacheValue != null && cacheValue.Any();
+                }
+                else
+                {
+                    var cacheValue = redisResult.CacheValue as IContentComponent;
+                    hasContent = cacheValue != null;
+                }
+            }
+
+            if (existedInCache && hasContent)
             {
                 _logger.LogTrace("Cache item with key: {Key} found", key);
                 return redisResult.CacheValue;
