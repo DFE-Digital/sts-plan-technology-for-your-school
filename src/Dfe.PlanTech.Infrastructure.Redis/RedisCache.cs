@@ -52,11 +52,13 @@ public class RedisCache : ICmsCache
                 return await action();
             }
 
-            if (redisResult.ExistedInCache == true && redisResult.CacheValue != null)
+            var cacheValueIsNull = redisResult.CacheValue?.Equals(default(T?)) ?? true;
+
+            if (redisResult.ExistedInCache == true && !cacheValueIsNull)
             {
                 var hasContent = redisResult.CacheValue is IEnumerable<IContentComponent> cacheValue
                     ? cacheValue.Any()
-                    : redisResult.CacheValue != null;
+                    : !cacheValueIsNull;
 
                 if (hasContent)
                 {
