@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Cookie;
@@ -272,10 +273,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             userSubstitute.GetOrganisationData().Returns(establishment);
 
-            var result = _controller.GetByRoute(null, userSubstitute) as RedirectToActionResult;
+            var action = () => _controller.GetByRoute(null, userSubstitute);
 
-            Assert.NotNull(result);
-            Assert.Equal("NotFoundError", result.ActionName);
+            Assert.Throws<ContentfulDataUnavailableException>(action);
         }
 
         [Fact]

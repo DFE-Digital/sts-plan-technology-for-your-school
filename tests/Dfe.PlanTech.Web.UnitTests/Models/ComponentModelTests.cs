@@ -80,7 +80,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         [InlineData("Y867as ()&ycj Cool Thing", "y867as-ycj-cool-thing")]
         [InlineData("Save a back-up...", "save-a-back-up")]
         [InlineData("This is a string with loads of spaces at the end        ", "this-is-a-string-with-loads-of-spaces-at-the-end")]
-        [InlineData("This is a string with loads of spaces at the end        and-this", "this-is-a-string-with-loads-of-spaces-at-the-end--------and-this")]
+        [InlineData("This is a string with loads of spaces at the end        and-this", "this-is-a-string-with-loads-of-spaces-at-the-end-and-this")]
         [InlineData(" spaces either side     ", "spaces-either-side")]
         [InlineData(@"Line
 separator
