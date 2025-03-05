@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Contentful.Core.Models;
+using Dfe.PlanTech.Domain.Constants;
 using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -83,7 +84,7 @@ public class EmbeddedEntryBlockTests
                         {
                             SystemProperties = new SystemProperties()
                             {
-                                Id = "Attachment",
+                                Id = ContentTypeId.Attachment,
                             }
                         }
                     },
@@ -140,7 +141,7 @@ public class EmbeddedEntryBlockTests
                         {
                             SystemProperties = new SystemProperties()
                             {
-                                Id = "CSAccordion",
+                                Id = ContentTypeId.Accordion,
                             }
                         }
                     },
