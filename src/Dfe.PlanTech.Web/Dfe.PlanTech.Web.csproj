@@ -12,6 +12,9 @@
         <Content Update="Properties\launchSettings.json">
             <CopyToPublishDirectory>Never</CopyToPublishDirectory>
         </Content>
+        <Content Update="Views\Shared\NotFoundError.cshtml">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Dfe.PlanTech.Application\Dfe.PlanTech.Application.csproj" />

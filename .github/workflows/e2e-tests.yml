@@ -105,6 +105,10 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Clear NuGet Cache
+        shell: bash
+        run: dotnet nuget locals all --clear
+
       - name: Install dependencies
         shell: bash
         run: dotnet restore ${{ env.PROJECT_PATH }}

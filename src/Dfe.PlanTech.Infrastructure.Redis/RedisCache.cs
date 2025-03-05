@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Background;
 using Dfe.PlanTech.Domain.Caching.Models;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Retry;
@@ -46,14 +47,24 @@ public class RedisCache : ICmsCache
             var db = await _connectionManager.GetDatabaseAsync(databaseId);
             var redisResult = await GetAsync<T>(db, key);
 
-            if (redisResult.ExistedInCache == true)
-            {
-                _logger.LogTrace("Cache item with key: {Key} found", key);
-                return redisResult.CacheValue;
-            }
-            else if (redisResult.Errored)
+            if (redisResult.Errored)
             {
                 return await action();
+            }
+
+            var cacheValueIsNull = redisResult.CacheValue?.Equals(default(T?)) ?? true;
+
+            if (redisResult.ExistedInCache == true && !cacheValueIsNull)
+            {
+                var hasContent = redisResult.CacheValue is IEnumerable<IContentComponent> cacheValue
+                    ? cacheValue.Any()
+                    : !cacheValueIsNull;
+
+                if (hasContent)
+                {
+                    _logger.LogTrace("Cache item with key: {Key} found", key);
+                    return redisResult.CacheValue;
+                }
             }
 
             return await CreateAndCacheItemAsync(db, key, action, expiry, onCacheItemCreation);
@@ -214,7 +225,9 @@ public class RedisCache : ICmsCache
             return new CacheResult<T>(ExistedInCache: false);
         }
 
-        return redisResult is T typed ? new CacheResult<T>(ExistedInCache: true, CacheValue: typed) : new CacheResult<T>(ExistedInCache: true, CacheValue: redisResult.Deserialise<T>());
+        return redisResult is T typed
+            ? new CacheResult<T>(ExistedInCache: true, CacheValue: typed)
+            : new CacheResult<T>(ExistedInCache: true, CacheValue: redisResult.Deserialise<T>());
     }
 
     /// <summary>

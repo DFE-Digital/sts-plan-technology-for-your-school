@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Web.Content;
+﻿using Dfe.PlanTech.Application.Exceptions;
+using Dfe.PlanTech.Web.Content;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,7 +13,8 @@ public class ContentController(
     ILogger<ContentController> logger) : Controller
 {
 
-    public const string ControllerName = "Content"; public const string ErrorActionName = "error";
+    public const string ControllerName = "Content";
+    public const string ErrorActionName = "error";
 
     [HttpGet("{slug}/{page?}")]
     public async Task<IActionResult> Index(string slug, string page = "", [FromQuery] List<string>? tags = null, CancellationToken cancellationToken = default)
@@ -29,7 +31,7 @@ public class ContentController(
         {
             logger.LogError("No slug received for C&S {Controller} {Action}",
                 nameof(ContentController), nameof(Index));
-            return RedirectToAction(PagesController.NotFoundPage, PagesController.ControllerName);
+            throw new KeyNotFoundException($"No slug received for C&S {nameof(ContentController)} {nameof(Index)}");
         }
 
         try
@@ -39,7 +41,7 @@ public class ContentController(
             {
                 logger.LogError("Failed to load content for C&S page {Slug}; no content received.",
                     slug);
-                return RedirectToAction(PagesController.NotFoundPage, PagesController.ControllerName);
+                throw new ContentfulDataUnavailableException($"Failed to load content for C&S page {slug}; no content received.");
             }
 
             resp = layoutService.GenerateLayout(resp, Request, page);
@@ -47,7 +49,7 @@ public class ContentController(
 
             return View("CsIndex", resp);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not ContentfulDataUnavailableException)
         {
             logger.LogError(ex, "Error loading C&S content page {Slug}", slug);
             return RedirectToAction(ErrorActionName, PagesController.ControllerName);

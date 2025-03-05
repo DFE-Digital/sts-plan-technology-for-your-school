@@ -8,5 +8,4 @@ public class ContentItem : ContentItemBase
 {
     public string Value { get; set; } = null!;
     public List<Mark> Marks { get; set; } = [];
-    public Data Data { get; set; } = null!;
 }
