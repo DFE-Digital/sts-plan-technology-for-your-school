@@ -9,7 +9,6 @@ namespace Dfe.PlanTech.Application.Users.Helper;
 
 public class UserHelper : IUser
 {
-    private const string ORG_CLAIM_TYPE = "organisation";
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ICreateEstablishmentCommand _createEstablishmentCommand;
     private readonly IGetUserIdQuery _getUserIdQuery;
@@ -65,8 +64,8 @@ public class UserHelper : IUser
 
     public EstablishmentDto GetOrganisationData()
     {
-        var orgDetails = _httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(x => x.Type.Contains(ORG_CLAIM_TYPE))?.Value ??
-                    throw new KeyNotFoundException($"Could not find {ORG_CLAIM_TYPE} claim type");
+        var orgDetails = _httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(x => x.Type.Contains(ClaimConstants.Organisation))?.Value ??
+                    throw new KeyNotFoundException($"Could not find {ClaimConstants.Organisation} claim type");
 
         var establishment = JsonSerializer.Deserialize<EstablishmentDto>(orgDetails);
         if (establishment == null || !establishment.IsValid)
