@@ -1,4 +1,4 @@
-import { selfAssessmentSlug } from "../helpers/index.js";
+import { selfAssessmentSlug, continueButtonText, submitToRecommendationsButtonText } from "../helpers/index.js";
 import { validateAndTestRecommendations, validateQuestionPages } from "./index.js";
 
 /**
@@ -20,14 +20,14 @@ export const minimalSectionValidationForRecommendations = (section, paths, matur
             // Navigate through interstitial page
             const sectionSlug = section.interstitialPage.fields.slug;
             cy.findSectionLink(section.name, sectionSlug).click();
-            cy.get("a.govuk-button.govuk-link").contains("Continue").click();
+            cy.get("a.govuk-button.govuk-link").contains(continueButtonText).click();
 
             // Conduct self assessment according to path
             validateQuestionPages(path, section)
 
             // Navigate through Check Answers page and return to self assessment page
             cy.url().should("include", `${sectionSlug}/check-answers`);
-            cy.get("button.govuk-button").contains("Submit and view recommendations").click();
+            cy.get("button.govuk-button").contains(submitToRecommendationsButtonText).click();
         });
         // Validate recommendations
         validateAndTestRecommendations(section, maturity, path);

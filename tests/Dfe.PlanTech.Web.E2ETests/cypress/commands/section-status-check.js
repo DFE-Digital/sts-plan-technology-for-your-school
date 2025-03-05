@@ -1,3 +1,5 @@
+import { inProgressText } from "../helpers/constants";
+
 /**
  * Click first section link on self-assessment page
  */
@@ -12,7 +14,7 @@ Cypress.Commands.add("checkSectionStatus", (sectionName, sectionSlug, selfAssess
         .within(() => {
             cy.get("strong.app-task-list__tag").invoke("text")
                 .then((text) => {
-                    inProgress = text.includes("in progress");
+                    inProgress = text.includes(inProgressText);
                 });
         })
         .then(() => {

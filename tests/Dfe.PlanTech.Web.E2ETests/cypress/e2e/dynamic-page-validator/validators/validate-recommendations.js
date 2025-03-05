@@ -1,3 +1,4 @@
+import { recommendationSlug } from "../helpers/index.js";
 import { validateRecommendationChunks, validateRecommendationIntro } from "./index.js";
 
 /**
@@ -25,7 +26,7 @@ export const validateAndTestRecommendations = (section, maturity, path) => {
     // Get chunks for path
     const chunks = section.recommendation.section.getChunksForPath(path)
 
-    const recommendationUrl = `${sectionSlug}/recommendation` 
+    const recommendationUrl = `${sectionSlug}${recommendationSlug}` 
 
     it(`${section.name} should retrieve recommendation intro for ${maturity} maturity, with correct content`, () => {
         validateRecommendationIntro(introPage, recommendationUrl);

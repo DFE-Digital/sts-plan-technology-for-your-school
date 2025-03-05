@@ -1,4 +1,4 @@
-import { CleanText, getSubmissionTimeText } from "../helpers/index.js";
+import { CleanText, getSubmissionTimeText, viewRecommendationButtonText, newTagText } from "../helpers/index.js";
 
 export const validateCompletionTags = (section) => {
     const time = new Date();
@@ -28,8 +28,8 @@ export const validateCompletionTags = (section) => {
     cy.findSectionLink(section.name, sectionSlug)
         .parent().next().next()
         .within(() => {
-            cy.get("strong.app-task-list__tag").should("include.text", "New").and("have.class", "govuk-tag--yellow");
-            cy.get("a.govuk-button").contains("View recommendation")
+            cy.get("strong.app-task-list__tag").should("include.text", newTagText).and("have.class", "govuk-tag--yellow");
+            cy.get("a.govuk-button").contains(viewRecommendationButtonText)
                 .should("have.attr", "href")
         })
 }

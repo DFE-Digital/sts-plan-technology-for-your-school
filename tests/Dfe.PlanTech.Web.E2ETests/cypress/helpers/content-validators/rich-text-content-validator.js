@@ -2,6 +2,7 @@ import { parse } from "node-html-parser";
 import TableValidator from "./rich-text-validators/table-validator";
 import { CleanText } from "../text-helpers";
 import ValidateHeader from "./header-validator";
+import { prodUri, containerUri, externalLinkSuffix } from "../constants";
 
 const tableValidator = new TableValidator();
 
@@ -115,8 +116,8 @@ function buildExpectedHtml(content) {
     }
 
     if (child.nodeType == "hyperlink") {
-            if (!child.data.uri.includes("plan-technology-for-your-school") && !child.data.uri.includes("plantech-container-app-url")) {
-                html += " (opens in new tab)";
+            if (!child.data.uri.includes(prodUri) && !child.data.uri.includes(containerUri)) {
+                html += externalLinkSuffix;
             }
       html += `</a>`;
     }

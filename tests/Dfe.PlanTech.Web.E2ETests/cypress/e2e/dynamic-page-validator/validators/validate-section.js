@@ -1,4 +1,4 @@
-import { FindPageForSlug, selfAssessmentSlug, ValidatePage } from "../helpers/index.js";
+import { continueButtonText, FindPageForSlug, selfAssessmentSlug, ValidatePage } from "../helpers/index.js";
 import { validateCompletionTags, validateQuestionPages, validateCheckAnswersPage, validateAnswersHintAndUrl } from "./index.js";
 
 /**
@@ -27,7 +27,7 @@ export const validateAndTestSections = (section, paths, dataMapper) => {
 
         it(`${section.name} should have every question with correct content`, () => {
             // Conduct self assessment according to path
-            cy.get("a.govuk-button.govuk-link").contains("Continue").click();
+            cy.get("a.govuk-button.govuk-link").contains(continueButtonText).click();
             validateQuestionPages(path, section, validateAnswersHintAndUrl);
         });
 

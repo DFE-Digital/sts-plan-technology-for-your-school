@@ -1,9 +1,9 @@
-import { ValidatePage } from "../helpers/index.js";
+import { ValidatePage, startPageName } from "../helpers/index.js";
 
 export const validateAndTestNonAuthorisedPages = (dataMapper) => {
     Array.from(dataMapper?.pages ?? [])
         .map(([, page]) => page)
-        .filter((page) => !page.fields.requiresAuthorisation && page.fields.internalName !== "Start page - page")
+        .filter((page) => !page.fields.requiresAuthorisation && page.fields.internalName !== startPageName)
         .forEach((page) => {
             it(
                 "Should have correct content on non-authorised pages. Testing " +

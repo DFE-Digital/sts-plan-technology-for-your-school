@@ -1,8 +1,8 @@
-import { CleanText } from "../helpers/index.js";
+import { CleanText, submitToSelfAssessmentButtonText, checkAnswersSlug } from "../helpers/index.js";
 
 export const validateCheckAnswersPage = (path, section) => {
 
-    cy.url().should("include", `${section.interstitialPage.fields.slug}/check-answers`);
+    cy.url().should("include", `${section.interstitialPage.fields.slug}${checkAnswersSlug}`);
 
     for (const question of path) {
         cy.get("div.govuk-summary-list__row dt.govuk-summary-list__key.spacer")
@@ -11,5 +11,5 @@ export const validateCheckAnswersPage = (path, section) => {
             .contains(CleanText(question.answer.text));
     }
 
-    cy.get("button.govuk-button").contains("Submit and go to self-assessment topics").click();
+    cy.get("button.govuk-button").contains(submitToSelfAssessmentButtonText).click();
 }

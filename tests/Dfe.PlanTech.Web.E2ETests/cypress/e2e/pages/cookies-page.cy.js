@@ -1,3 +1,6 @@
+import { cookiesSlug } from "../../helpers/page-slugs";
+import { backText, saveCookieSettings, cookiesLinkText } from "../../helpers/constants";
+
 describe("Cookies Page", () => {
   const url = "/";
 
@@ -6,9 +9,9 @@ describe("Cookies Page", () => {
     cy.get(
       "footer.govuk-footer ul.govuk-footer__inline-list a.govuk-footer__link"
     )
-      .contains("Cookies")
+      .contains(cookiesLinkText)
       .click();
-    cy.url().should("contain", "/cookies");
+    cy.url().should("contain", cookiesSlug);
     cy.injectAxe();
   });
 
@@ -17,7 +20,7 @@ describe("Cookies Page", () => {
   });
 
   it("Should Have Back Button", () => {
-    cy.get('a:contains("Back")')
+    cy.get(`a:contains(${backText})`)
       .should("exist")
       .should("have.attr", "href")
       .and("include", "/");
@@ -43,7 +46,7 @@ describe("Cookies Page", () => {
   it("Should accept cookies", () => {
     cy.get("form div.govuk-radios div.govuk-radios__item input").first().click();
 
-    cy.get("form button.govuk-button").contains("Save cookie settings").click();
+    cy.get("form button.govuk-button").contains(saveCookieSettings).click();
 
     cy.get("div.govuk-notification-banner__header").should("exist");
     cy.get("form div.govuk-radios div.govuk-radios__item input").eq(0).should("have.attr", "checked");
@@ -60,7 +63,7 @@ describe("Cookies Page", () => {
   it("Should reject cookies", () => {
     cy.get("form div.govuk-radios div.govuk-radios__item").eq(1).click();
 
-    cy.get("form button.govuk-button").contains("Save cookie settings").click();
+    cy.get("form button.govuk-button").contains(saveCookieSettings).click();
 
     cy.get("div.govuk-notification-banner__header").should("exist");
     cy.get("form div.govuk-radios div.govuk-radios__item input").eq(1).should("have.attr", "checked");
