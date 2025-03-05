@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Dfe.PlanTech.Domain.Constants;
 using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -28,10 +29,10 @@ public class EmbeddedEntryBlockRenderer : BaseRichTextContentPartRender, IRichTe
 
         switch (richTextData.SystemProperties.ContentType?.SystemProperties.Id)
         {
-            case "Attachment":
+            case ContentTypeId.Attachment:
                 var attachment = new AttachmentComponent();
                 return attachment.AddHtml(content, stringBuilder);
-            case "CSAccordion":
+            case ContentTypeId.Accordion:
                 var accordionComponent = new AccordionComponent(_loggerAccordion);
                 return accordionComponent.AddHtml(content, rendererCollection, stringBuilder);
             default:

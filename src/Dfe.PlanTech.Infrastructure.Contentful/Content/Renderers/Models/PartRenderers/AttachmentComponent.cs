@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Dfe.PlanTech.Domain.Constants;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Custom;
 
@@ -76,14 +77,14 @@ public class AttachmentComponent
     {
         switch (fileExtension)
         {
-            case "pdf":
+            case FileExtensions.PDF:
                 return "<img src=\"/assets/images/pdf-file-icon.svg\" alt=\"pdf file type\" >";
-            case "csv":
-            case "xls":
-            case "xlsx":
+            case FileExtensions.CSV:
+            case FileExtensions.XLS:
+            case FileExtensions.XLSX:
                 return "<img src=\"/assets/images/spreadsheet-file-icon.svg\" alt=\"spreadsheet file type\" />";
-            case "html":
-            case "htm":
+            case FileExtensions.HTML:
+            case FileExtensions.HTM:
                 return "<img src =\"/assets/images/html-file-icon.svg\" alt=\"html file type\">";
             default:
                 return "<img src =\"/assets/images/generic-file-icon.svg\" alt=\"generic file type\">";
