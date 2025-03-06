@@ -1,4 +1,4 @@
-import selfAssessmentSlug from "../../../helpers/page-slugs.js";
+import { selfAssessmentSlug } from "../../helpers/page-slugs";
 
 describe("Interstitial page", () => {
 
