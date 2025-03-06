@@ -11,5 +11,4 @@ public class ContentBase : Contentful.Core.Models.Entry<ContentBase>, IContentCo
     public string? Title { get; set; }
     public string? Subtitle { get; set; }
     public SystemDetails Sys { get; set; } = null!;
-    public Data Data { get; set; } = null!;
 }
