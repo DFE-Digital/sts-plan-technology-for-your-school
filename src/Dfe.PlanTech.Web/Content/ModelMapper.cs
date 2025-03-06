@@ -48,12 +48,6 @@ public class ModelMapper(SupportedAssetTypes supportedAssetTypes) : IModelMapper
 
         switch (nodeType)
         {
-            case RichTextNodeType.Text:
-                item = new CsText
-                {
-                    IsBold = contentItem.Marks.Exists(mark => mark.Type == "bold")
-                };
-                break;
             case RichTextNodeType.Hyperlink:
                 var uri = contentItem.Data.Uri.ToString();
                 item = new Hyperlink
