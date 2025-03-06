@@ -32,7 +32,6 @@ using Dfe.PlanTech.Infrastructure.Redis;
 using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Background;
 using Dfe.PlanTech.Web.Configuration;
-using Dfe.PlanTech.Web.Content;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Routing;
@@ -260,8 +259,6 @@ public static class ProgramExtensions
         app.Services
             .Configure<SupportedAssetTypes>(app.Configuration.GetSection("cs:supportedAssetTypes"))
             .AddSingleton(sp => sp.GetRequiredService<IOptions<SupportedAssetTypes>>().Value);
-
-        app.Services.AddTransient<IModelMapper, ModelMapper>();
 
         app.Services.Configure<CookiePolicyOptions>(options =>
         {

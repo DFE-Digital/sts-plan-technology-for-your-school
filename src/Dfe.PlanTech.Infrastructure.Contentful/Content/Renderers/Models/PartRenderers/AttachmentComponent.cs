@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using Dfe.PlanTech.Domain.Constants;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Custom;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 
