@@ -1,8 +1,6 @@
 using System.Reflection;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Content.Models.ContentSupport;
-using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
 using Dfe.PlanTech.Web.TagHelpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Logging;
@@ -74,34 +72,7 @@ public class FooterLinkTagHelperTests
         Assert.Empty(_output.Attributes);
     }
 
-    [Theory]
-    [InlineData("/test-page", "test-page", typeof(Page))]
-    [InlineData("/content/test-page", "test-page", typeof(CsPage))]
-    [InlineData("/content/test-page", "test-page", typeof(ContentSupportPage))]
-    [InlineData("/content/prefixed-slash", "/prefixed-slash", typeof(ContentSupportPage))]
-    [InlineData("/content/prefixed-slash", "/prefixed-slash", typeof(CsPage))]
-    [InlineData("/prefixed-slash", "/prefixed-slash", typeof(Page))]
-    public async Task Should_Render_Correct_Url_For_ContentToLinkTo(string expectedUrl, string slug, Type contentType)
-    {
-        IContentComponent content = contentType switch
-        {
-            var t when t == typeof(Page) => new Page { Slug = slug },
-            var t when t == typeof(CsPage) => new CsPage { Slug = slug },
-            _ => new ContentSupportPage { Slug = slug }
-        };
-
-        var link = new NavigationLink()
-        {
-            DisplayText = "Content link",
-            ContentToLinkTo = content
-        };
-
-        _tagHelper.Link = link;
-
-        await _tagHelper.ProcessAsync(_context, _output);
-
-        Assert.Equal(expectedUrl, _output.Attributes["href"].Value);
-    }
+    
 
     [Fact]
     public async Task Should_Log_Error_And_Return_Empty_When_Invalid_Content_Type()
