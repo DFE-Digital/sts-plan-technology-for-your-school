@@ -1,0 +1,16 @@
+@model IEnumerable<Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.PageLink>
+
+<div class="govuk-grid-column-one-quarter sticky">
+    <nav class="dfe-vertical-nav">
+        <div class="dfe-vertical-nav__section">
+            <ul class="dfe-vertical-nav__section">
+                @foreach (var menuItem in Model)
+                {
+                    <li class="dfe-vertical-nav__section-item">
+                        <a class="dfe-vertical-nav__link @(menuItem.IsActive ? "dfe-vertical-nav__section-item--current" : "")" href="@menuItem.Url">@(string.IsNullOrEmpty(menuItem.Subtitle) ? "" : $"{menuItem.Subtitle} : ") @menuItem.Title </a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </nav>
+</div>
