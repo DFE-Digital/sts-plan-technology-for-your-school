@@ -18,7 +18,6 @@ using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models.Options;
-using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Database;
@@ -152,7 +151,6 @@ public static class ProgramExtensions
         services.AddTransient<IGetEstablishmentIdQuery, GetEstablishmentIdQuery>();
         services.AddTransient<IGetLatestResponsesQuery, GetLatestResponsesQuery>();
         services.AddTransient<IGetNavigationQuery, GetNavigationQuery>();
-        services.AddTransient<IGetContentSupportPageQuery, GetContentSupportPageQuery>();
         services.AddTransient<IGetNextUnansweredQuestionQuery, GetNextUnansweredQuestionQuery>();
         services.AddTransient<IGetSectionQuery, GetSectionQuery>();
         services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();

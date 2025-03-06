@@ -61,16 +61,6 @@ public class ModelMapper(SupportedAssetTypes supportedAssetTypes) : IModelMapper
                     Uri = asset.File.Url
                 };
                 break;
-            case RichTextNodeType.EmbeddedEntry:
-                var target = contentItem.Data.Target;
-                internalName = target.InternalName;
-                item = new EmbeddedEntry
-                {
-                    JumpIdentifier = target.JumpIdentifier,
-                    RichText = MapRichTextContent(target.RichText, target),
-                    CustomComponent = GenerateCustomComponent(target)
-                };
-                break;
             case RichTextNodeType.Paragraph:
             case RichTextNodeType.UnorderedList:
             case RichTextNodeType.OrderedList:
@@ -100,21 +90,6 @@ public class ModelMapper(SupportedAssetTypes supportedAssetTypes) : IModelMapper
         item.InternalName = internalName;
         item.Tags = FlattenMetadata(contentItem.Metadata);
         return item;
-    }
-
-    public CustomComponent? GenerateCustomComponent(Target target)
-    {
-        var contentType = target.SystemProperties.ContentType?.SystemProperties.Id;
-        if (contentType is null)
-            return null;
-        return contentType switch
-        {
-            "CSAccordion" => GenerateCustomAccordion(target),
-            "Attachment" => GenerateCustomAttachment(target),
-            "csCard" => GenerateCustomCard(target),
-            "GridContainer" => GenerateCustomGridContainer(target),
-            _ => null
-        };
     }
 
     public RichTextNodeType ConvertToRichTextNodeType(string str)
@@ -153,11 +128,6 @@ public class ModelMapper(SupportedAssetTypes supportedAssetTypes) : IModelMapper
         return item.Tags.Select(o => o.Sys.Id).ToList();
     }
 
-    private List<CsContentItem> MapEntriesToContent(List<CSBodyText> entries)
-    {
-        return entries.Select(ConvertEntryToContentItem).ToList();
-    }
-
     public RichTextContentItem? MapRichTextContent(ContentItemBase? richText, Entry entry)
     {
         if (richText is null)
@@ -189,19 +159,6 @@ public class ModelMapper(SupportedAssetTypes supportedAssetTypes) : IModelMapper
         };
     }
 
-    private CustomAttachment GenerateCustomAttachment(Target target)
-    {
-        return new CustomAttachment
-        {
-            InternalName = target.InternalName,
-            ContentType = target.Asset.File.ContentType,
-            Size = target.Asset.File.Details.Size,
-            Title = target.Title,
-            Uri = target.Asset.File.Url,
-            UpdatedAt = target.Asset.SystemProperties.UpdatedAt
-        };
-    }
-
     private CustomCard GenerateCustomCard(Target target)
     {
         var card = new CustomCard
@@ -216,16 +173,6 @@ public class ModelMapper(SupportedAssetTypes supportedAssetTypes) : IModelMapper
         };
         return card;
     }
-
-    private CustomGridContainer GenerateCustomGridContainer(Target target)
-    {
-        return new CustomGridContainer
-        {
-            InternalName = target.InternalName,
-            Cards = target.Content.Select(GenerateCustomCard).ToList()
-        };
-    }
-
 
     public AssetContentType ConvertToAssetContentType(string str)
     {
