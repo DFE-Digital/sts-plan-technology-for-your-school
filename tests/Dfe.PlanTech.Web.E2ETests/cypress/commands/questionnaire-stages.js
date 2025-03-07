@@ -1,3 +1,5 @@
+import { submitToSelfAssessmentButtonText, submitToRecommendationsButtonText } from "../helpers/constants";
+
 const navigateToRecommendationPage = () => {
     cy.get('a[href*="/recommendation/"]').first().click();
 };
@@ -38,8 +40,8 @@ const navigateThroughQuestions = (selectedQuestionsWithAnswers) => {
     .then(() => cy.wrap(selectedQuestionsWithAnswers));
 };
 
-const submitAnswersAndGoToSelfAssessment = () => cy.get("button.govuk-button").contains("Submit and go to self-assessment topics").click();
-const submitAnswersAndGoToRecommendation = () => cy.get("button.govuk-button").contains("Submit and view recommendation").click();
+const submitAnswersAndGoToSelfAssessment = () => cy.get("button.govuk-button").contains(submitToSelfAssessmentButtonText).click();
+const submitAnswersAndGoToRecommendation = () => cy.get("button.govuk-button").contains(submitToRecommendationsButtonText).click();
 
 Cypress.Commands.add(
   "navigateToRecommendationPage",

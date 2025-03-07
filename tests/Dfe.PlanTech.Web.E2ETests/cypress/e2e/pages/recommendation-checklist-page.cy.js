@@ -1,21 +1,23 @@
+import { printAllRecommendationsText, printDateTime, backText, printRecommendationsAnswerHeader } from "../../helpers/constants";
+import { selfAssessmentSlug, printRecommendationsSlug } from "../../helpers/page-slugs"; 
+
 describe("Recommendation Checklist Page", () => {
-  const url = "/self-assessment";
 
   before(() => {
-    cy.loginWithEnv(url);
+    cy.loginWithEnv(selfAssessmentSlug);
     cy.completeFirstSubtopic();
   });
 
   beforeEach(() => {
-    cy.loginWithEnv(url);
+    cy.loginWithEnv(selfAssessmentSlug);
     cy.navigateToRecommendationPage();
     cy.get("a.govuk-link")
-        .contains("View and print all recommendations")
+        .contains(printAllRecommendationsText)
         .then(($a) => {
           $a.attr('target', '_self')
         })
         .click()
-    cy.url().should("contain", "print");
+    cy.url().should("contain", printRecommendationsSlug);
     cy.injectAxe();
   });
 
@@ -34,12 +36,12 @@ describe("Recommendation Checklist Page", () => {
   });
 
   it("Should have a banner showing printout time", () => {
-    cy.get("#printed-date-time").contains("Date and time this document was printed");
+    cy.get("#printed-date-time").contains(printDateTime);
   });
 
   it("Should show answers to questions", () => {
       cy.get("#checkYourAnswers-page").should("exist").within(() => {
-          cy.get("h1").contains("Your answers");
+          cy.get("h1").contains(printRecommendationsAnswerHeader);
           cy.get("div.govuk-summary-list__row").should("exist");
           cy.get("dt.govuk-summary-list__key").should("exist");
           cy.get("dd.govuk-summary-list__value").should("exist");
@@ -51,7 +53,7 @@ describe("Recommendation Checklist Page", () => {
   });
 
   it("Should Have Back Button", () => {
-    cy.get('a:contains("Back")')
+    cy.get(`a:contains(${backText})`)
       .should("exist")
       .should("have.attr", "href")
       .and("include", "/");
