@@ -7,12 +7,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 
-public class EmbeddedEntryBlockRenderer : BaseRichTextContentPartRender, IRichTextContentPartRendererCollection
+public class EmbeddedEntryBlockRenderer : BaseRichTextContentPartRender
 {
     private readonly ILogger<EmbeddedEntryBlockRenderer> _logger;
     private readonly ILogger<AccordionComponent> _loggerAccordion;
-    public ILogger Logger => _logger;
-    public IReadOnlyList<IRichTextContentPartRenderer> Renders { get; private set; }
     public EmbeddedEntryBlockRenderer(ILoggerFactory loggerFactory, ILogger<EmbeddedEntryBlockRenderer> logger) : base(RichTextNodeType.EmbeddedEntryBlock)
     {
         _logger = logger;
@@ -41,24 +39,4 @@ public class EmbeddedEntryBlockRenderer : BaseRichTextContentPartRender, IRichTe
 
         return stringBuilder;
     }
-
-    public void RenderChildren(RichTextContent content, StringBuilder stringBuilder)
-    {
-        foreach (var subContent in content.Content)
-        {
-            var renderer = GetRendererForContent(subContent);
-
-            if (renderer == null)
-            {
-                _logger.LogWarning("Could not find renderer for {subContent}", subContent);
-                continue;
-            }
-
-            renderer.AddHtml(subContent, this, stringBuilder);
-        }
-    }
-
-    public IRichTextContentPartRenderer? GetRendererForContent(RichTextContent content)
-    => Renders.FirstOrDefault(renderer => renderer.Accepts(content));
-
 }
