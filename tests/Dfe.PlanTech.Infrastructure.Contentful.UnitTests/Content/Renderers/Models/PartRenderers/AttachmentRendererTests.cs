@@ -89,7 +89,7 @@ public class AttachmentRendererTests
         stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print\">");
         stringBuilder.Append("<div class=\"attachment\">");
         stringBuilder.Append("<div class=\"attachment-thumbnail govuk-!-margin-right-8\">");
-        stringBuilder.Append("<a href=\"@Model.Uri\" download>");
+        stringBuilder.Append("<a href=\"test.com\" download>");
         stringBuilder.Append("<img src=\"/assets/images/spreadsheet-file-icon.svg\" alt=\"spreadsheet file type\" />");
         stringBuilder.Append("</a></div>");
         stringBuilder.Append("<div class=\"attachment-details\">");
@@ -118,7 +118,7 @@ public class AttachmentRendererTests
         stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print\">");
         stringBuilder.Append("<div class=\"attachment\">");
         stringBuilder.Append("<div class=\"attachment-thumbnail govuk-!-margin-right-8\">");
-        stringBuilder.Append("<a href=\"@Model.Uri\" download>");
+        stringBuilder.Append("<a href=\"test.com\" download>");
         stringBuilder.Append("<img src=\"/assets/images/pdf-file-icon.svg\" alt=\"pdf file type\" >");
         stringBuilder.Append("</a></div>");
         stringBuilder.Append("<div class=\"attachment-details\">");
@@ -148,7 +148,7 @@ public class AttachmentRendererTests
         stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print\">");
         stringBuilder.Append("<div class=\"attachment\">");
         stringBuilder.Append("<div class=\"attachment-thumbnail govuk-!-margin-right-8\">");
-        stringBuilder.Append("<a href=\"@Model.Uri\" download>");
+        stringBuilder.Append("<a href=\"test.com\" download>");
         stringBuilder.Append("<img src =\"/assets/images/html-file-icon.svg\" alt=\"html file type\">");
         stringBuilder.Append("</a></div>");
         stringBuilder.Append("<div class=\"attachment-details\">");
