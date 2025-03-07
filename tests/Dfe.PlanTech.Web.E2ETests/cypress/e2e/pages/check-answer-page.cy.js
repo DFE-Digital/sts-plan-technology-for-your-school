@@ -1,3 +1,6 @@
+import { changeAnswerText, newTagText } from "../../helpers/constants";
+import { checkAnswersSlug, recommendationSlug } from "../../helpers/page-slugs";
+
 let selectedQuestionsWithAnswers = [];
 let changeLinkHref;
 
@@ -14,7 +17,7 @@ describe("Check answers page", () => {
 
     cy.log(selectedQuestionsWithAnswers);
 
-    cy.url().should("contain", "check-answers");
+    cy.url().should("contain", checkAnswersSlug);
 
     cy.injectAxe();
   });
@@ -59,7 +62,7 @@ describe("Check answers page", () => {
           //Has "Change" me link with accessibility attributes
           cy.wrap(row)
             .find("a")
-            .contains("Change")
+            .contains(changeAnswerText)
             .and("contain", questionWithAnswer.question)
             .get('span[class="govuk-visually-hidden"]')
             .invoke("text")
@@ -67,7 +70,7 @@ describe("Check answers page", () => {
 
           cy.wrap(row)
             .find("a")
-            .contains("Change")
+            .contains(changeAnswerText)
             .and("have.attr", "title")
             .then((title) =>
               expect(title.trim()).to.equal(questionWithAnswer.question)
@@ -86,7 +89,7 @@ describe("Check answers page", () => {
 
   it("navigates to correct page when clicking change", () => {
     cy.get("a:nth-child(1)")
-      .contains("Change")
+      .contains(changeAnswerText)
       .invoke("attr", "href")
       .then((href) => {
         changeLinkHref = href;
@@ -102,7 +105,7 @@ describe("Check answers page", () => {
     cy.url().then(url => {
         let sectionSlug = url.split("/")[3];
         cy.submitAnswersAndGoToRecommendation();
-        cy.url().should("contain", `${sectionSlug}/recommendation/`);
+        cy.url().should("contain", `${sectionSlug}${recommendationSlug}/`);
     });
   })
 
@@ -112,12 +115,12 @@ describe("Check answers page", () => {
 
     cy.get(".govuk-tag--yellow")
       .should("exist")
-      .and("contain", "New");
+      .and("contain", newTagText);
 
     cy.reload();
 
     cy.get(".govuk-tag--yellow")
       .should("exist")
-      .and("contain", "New");
+      .and("contain", newTagText);
   });
 });

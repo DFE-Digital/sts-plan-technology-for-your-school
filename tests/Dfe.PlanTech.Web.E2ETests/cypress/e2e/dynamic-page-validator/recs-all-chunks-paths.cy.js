@@ -14,7 +14,8 @@ describe("Remaining-answer paths", { testIsolation: false }, () => {
         describe(`${section.name} recommendations`, { testIsolation: false }, () => {
 
             before(function () {
-                cy.checkSectionStatus(section.name, selfAssessmentSlug)
+                const sectionSlug = section.interstitialPage.fields.slug;
+                cy.checkSectionStatus(section.name, sectionSlug, selfAssessmentSlug)
                     .then((inProgress) => {
                         if (inProgress) {
                             console.log(`Skipping tests for section: ${section.name} (status is 'in progress')`);
@@ -25,7 +26,7 @@ describe("Remaining-answer paths", { testIsolation: false }, () => {
 
             section.pathInfo.pathsForAllPossibleAnswers.forEach((userJourney, index) => {
                 const { path, maturity } = userJourney
-                describe(`${section.name} should retrieve correct recommendations for additional path ${index + 1} of ${section.pathsForAllPossibleAnswers.length}`, () => {
+                describe(`${section.name} should retrieve correct recommendations for additional path ${index + 1} of ${section.pathInfo.pathsForAllPossibleAnswers.length}`, () => {
                     minimalSectionValidationForRecommendations(section, [path], maturity)
                 });
             });

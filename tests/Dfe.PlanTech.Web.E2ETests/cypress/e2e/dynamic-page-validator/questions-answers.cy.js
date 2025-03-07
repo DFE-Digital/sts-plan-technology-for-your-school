@@ -14,7 +14,8 @@ describe("Sections and all-questions paths", { testIsolation: false }, () => {
     (dataMapper?.mappedSections ?? []).forEach((section) => {
         describe(`${section.name} self-assessment and question pages`, () => {
             before(function () {
-                cy.checkSectionStatus(section.name, selfAssessmentSlug)
+                const sectionSlug = section.interstitialPage.fields.slug;
+                cy.checkSectionStatus(section.name, sectionSlug, selfAssessmentSlug)
                     .then((inProgress) => {
                         if (inProgress) {
                             console.log(`Skipping tests for section: ${section.name} (status is 'in progress')`);
