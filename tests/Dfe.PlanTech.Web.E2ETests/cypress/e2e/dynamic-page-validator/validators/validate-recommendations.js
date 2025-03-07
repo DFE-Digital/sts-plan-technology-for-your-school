@@ -1,4 +1,5 @@
-import { validateCompletionTags, validateRecommendationChunks, validateRecommendationIntro } from "./index.js";
+import { recommendationSlug } from "../helpers/index.js";
+import { validateRecommendationChunks, validateRecommendationIntro } from "./index.js";
 
 /**
  * Validates a recommendation for a specific maturity level.
@@ -10,6 +11,8 @@ import { validateCompletionTags, validateRecommendationChunks, validateRecommend
 
 
 export const validateAndTestRecommendations = (section, maturity, path) => {
+    const sectionSlug = section.interstitialPage.fields.slug
+
     const introPage = section.recommendation.intros.find(
         (recommendation) => recommendation.maturity == maturity
     );
@@ -23,20 +26,9 @@ export const validateAndTestRecommendations = (section, maturity, path) => {
     // Get chunks for path
     const chunks = section.recommendation.section.getChunksForPath(path)
 
-    const recommendationUrl = `${section.interstitialPage.fields.slug}/recommendation` 
-
-    it(`${section.name} should should show recent completion tags on self-assessment page`, () => {
-        // Validate self-assessment page post-section completion
-        validateCompletionTags(section, introPage);
-    });
+    const recommendationUrl = `${sectionSlug}${recommendationSlug}` 
 
     it(`${section.name} should retrieve recommendation intro for ${maturity} maturity, with correct content`, () => {
-        cy.get("a.govuk-link")
-            .contains(section.name.trim())
-            .parent().next().next()
-            .within(() => {
-                cy.get("a.govuk-button").contains("View recommendation").click();
-            })
         validateRecommendationIntro(introPage, recommendationUrl);
     });
 

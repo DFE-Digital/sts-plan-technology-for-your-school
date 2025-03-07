@@ -1,17 +1,19 @@
+import { selfAssessmentSlug, recommendationSlug } from "../../helpers/page-slugs";
+import { printAllRecommendationsText, paginationNext, paginationPrevious, recommendationsToSelfAssessmentText }  from "../../helpers/constants"
+
 describe("Recommendation Page", () => {
-    const url = "/self-assessment";
 
     before(() => {
-        cy.loginWithEnv(url);
+        cy.loginWithEnv(selfAssessmentSlug);
 
         cy.completeFirstSubtopic();
     });
 
     beforeEach(() => {
-        cy.loginWithEnv(url);
+        cy.loginWithEnv(selfAssessmentSlug);
         cy.navigateToRecommendationPage();
 
-        cy.url().should("contain", "recommendation");
+        cy.url().should("contain", recommendationSlug);
 
         cy.injectAxe();
     });
@@ -39,7 +41,7 @@ describe("Recommendation Page", () => {
 
   it("Should have a link to open the page in printout format", () => {
       cy.get("a.govuk-link")
-          .contains("View and print all recommendations")
+          .contains(printAllRecommendationsText)
   })
 
     //Links
@@ -84,7 +86,7 @@ describe("Recommendation Page", () => {
                 cy.wrap($element)
                     .find("span.govuk-pagination__link-title")
                     .should("exist")
-                    .and("contain", "Next");
+                    .and("contain", paginationNext);
 
                 cy.wrap($element).click();
             });
@@ -97,12 +99,12 @@ describe("Recommendation Page", () => {
                 cy.wrap($element)
                     .find("span.govuk-pagination__link-title")
                     .should("exist")
-                    .and("contain", "Next");
+                    .and("contain", paginationNext);
 
                 cy.wrap($element)
                     .find("span.govuk-pagination__link-title")
                     .should("exist")
-                    .and("contain", "Previous");
+                    .and("contain", paginationPrevious);
             });
     });
 
@@ -115,9 +117,9 @@ describe("Recommendation Page", () => {
         cy.get(
             "nav.dfe-vertical-nav div.dfe-vertical-nav__back-button a.govuk-back-link"
         )
-            .contains("Go to self-assessment topics")
+            .contains(recommendationsToSelfAssessmentText)
             .should("exist")
             .and("have.attr", "href")
-            .and("include", url);
+            .and("include", selfAssessmentSlug);
     });
 });
