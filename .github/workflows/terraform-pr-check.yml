@@ -40,7 +40,7 @@ env:
   TF_VAR_az_sql_admin_password: ${{secrets.AZ_SQL_ADMIN_PASSWORD}}
   TF_VAR_az_sql_azuread_admin_objectid: ${{ secrets.AZ_CLIENT_ID }}
   TF_VAR_registry_server: "s190d01plantech.azurecr.io"
-  TF_VAR_image_tag: "latest"
+  TF_VAR_image_tag: "development-bee6860823f4db57b0afa70d2f562df206ddba4c-Dev"
   TF_VAR_registry_username: ${{ github.repository_owner }}
   TF_VAR_registry_password: ${{ secrets.GITHUB_TOKEN }}
   TF_VAR_container_environment: "Dev"
