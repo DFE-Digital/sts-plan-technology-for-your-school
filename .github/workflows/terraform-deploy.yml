@@ -39,7 +39,7 @@ env:
   TF_VAR_az_sql_azuread_admin_objectid: ${{ secrets.AZ_CLIENT_ID }}
   TF_VAR_cdn_frontdoor_origin_host_header_override: ${{secrets.AZ_CDN_FRONTDOOR_ORIGIN_HOST_HEADER_OVERRIDE}}
   TF_VAR_az_sql_admin_userid_postfix: ${{secrets.AZ_SQL_ADMIN_USERID_POSTFIX}}
-  TF_VAR_registry_server: "ghcr.io/dfe-digital"
+  TF_VAR_registry_server: "s190d01plantech.azurecr.io"
   TF_VAR_image_tag: "latest"
   TF_VAR_registry_username: ${{ github.repository_owner }}
   TF_VAR_registry_password: ${{ secrets.GITHUB_TOKEN }}
