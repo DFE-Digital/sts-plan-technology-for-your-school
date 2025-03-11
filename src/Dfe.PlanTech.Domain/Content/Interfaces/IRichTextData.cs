@@ -1,4 +1,4 @@
-namespace Dfe.PlanTech.Domain.Content.Interfaces;
+﻿namespace Dfe.PlanTech.Domain.Content.Interfaces;
 
 /// <summary>
 /// Data for a RichText section
