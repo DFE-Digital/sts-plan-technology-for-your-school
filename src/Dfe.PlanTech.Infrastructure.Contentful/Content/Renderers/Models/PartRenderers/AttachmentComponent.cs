@@ -55,9 +55,9 @@ public class AttachmentComponent
         var contentType = content?.Asset.File.ContentType;
         var fileExtension = contentType?.Split('/')[^1].ToLower();
 
-        if (fileExtension == "vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        if (fileExtension == FileExtensions.XLSXSPREADSHEET)
         {
-            fileExtension = "xlsx";
+            fileExtension = FileExtensions.XLSX;
         }
 
         return new CustomAttachment
