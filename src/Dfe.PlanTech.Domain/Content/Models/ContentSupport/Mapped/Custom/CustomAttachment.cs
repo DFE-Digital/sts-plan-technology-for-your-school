@@ -15,4 +15,5 @@ public class CustomAttachment : CustomComponent
     public long Size { get; set; }
     public string Uri { get; set; } = null!;
     public DateTime? UpdatedAt { get; set; }
+    public string FileExtension { get; set; }
 }
