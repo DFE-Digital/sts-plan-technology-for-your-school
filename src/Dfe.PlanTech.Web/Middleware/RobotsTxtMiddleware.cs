@@ -18,7 +18,6 @@ public class RobotsTxtMiddleware(RequestDelegate _, IOptions<RobotsConfiguration
         await CreateRobotsTxtResponse(context);
     }
 
-
     /// <summary>
     /// Generate and return Robots.txt
     /// </summary>

@@ -1,3 +1,6 @@
+import { contactUsText, notFoundText } from "../../helpers/constants";
+
+
 describe("not found", () => {
     beforeEach(() => {
         cy.visit("/some-slug-that-doesnt-exist");
@@ -7,7 +10,7 @@ describe("not found", () => {
     it("should contain heading", () => {
         cy.get("h1.govuk-heading-xl")
             .should("exist")
-            .and("contain", "Page not found");
+            .and("contain", notFoundText);
     });
 
     it("should contain text bodies", () => {
@@ -17,6 +20,6 @@ describe("not found", () => {
     });
 
     it("should have contact us link", () => {
-        cy.get("a").should("exist").and("contain", "contact us");
+        cy.get("a").should("exist").and("contain", contactUsText);
     });
 });

@@ -6,7 +6,7 @@ function ValidateCategory({ fields}) {
 
   const headerTest = ValidateHeader(header);
 
-  const progressHeaderTest = headerTest.parent().next().contains("Progress");
+  const progressHeaderTest = headerTest.next().contains("Progress");
 
   const progressTest = progressHeaderTest
     .next("p")

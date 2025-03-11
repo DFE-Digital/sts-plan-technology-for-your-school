@@ -23,6 +23,18 @@ const pathToMinimalOutput = (path) => ({
 const pathsToMinimalOutput = (paths) =>
     paths.map((p) => pathToMinimalOutput(p.path));
 
+const minimumPathsToNavigateQuestions = [
+    [new PathPart({ question: { text: "minPathNavQ1" }, answer: { text: "minPathNavA1" } })],
+    [new PathPart({ question: { text: "minPathNavQ2" }, answer: { text: "minPathNavA2" } })],
+    [new PathPart({ question: { text: "minPathNavQ3" }, answer: { text: "minPathNavA3" } })],
+];
+
+const minimumPathsForRecommendations = {
+    "Low": [new PathPart({ question: { text: "recPathQLow" }, answer: { text: "recPathALow" } })],
+    "Medium": [new PathPart({ question: { text: "recPathQMedium" }, answer: { text: "recPathAMedium" } })],
+    "High": [new PathPart({ question: { text: "recPathQHigh" }, answer: { text: "recPathAHigh" } })],
+};
+
 const pathInfo = {
     paths: [
         createMockUserJourney([
@@ -32,8 +44,8 @@ const pathInfo = {
             },
         ]),
     ],
-    minimumPathsToNavigateQuestions: ["minPath1"],
-    minimumPathsForRecommendations: ["recPath1"],
+    minimumPathsToNavigateQuestions,
+    minimumPathsForRecommendations,
     pathsForAllPossibleAnswers: [
         createMockUserJourney([
             {
@@ -147,7 +159,9 @@ describe("Section", () => {
         expect(output).toEqual({
             section: mockFields.name,
             allPathsStats: stats,
-            minimumQuestionPaths: pathInfo.minimumPathsToNavigateQuestions,
+            minimumQuestionPaths: pathInfo.minimumPathsToNavigateQuestions.map((path) =>
+                path.map((part) => part.toMinimalOutput())
+            ),
             minimumRecommendationPaths: pathInfo.minimumPathsForRecommendations,
             pathsForAnswers: pathsToMinimalOutput(
                 pathInfo.pathsForAllPossibleAnswers
@@ -166,7 +180,9 @@ describe("Section", () => {
         expect(output).toEqual({
             section: mockFields.name,
             allPathsStats: stats,
-            minimumQuestionPaths: pathInfo.minimumPathsToNavigateQuestions,
+            minimumQuestionPaths: pathInfo.minimumPathsToNavigateQuestions.map((path) =>
+                path.map((part) => part.toMinimalOutput())
+            ),
             minimumRecommendationPaths: pathInfo.minimumPathsForRecommendations,
             pathsForAnswers: pathsToMinimalOutput(
                 pathInfo.pathsForAllPossibleAnswers

@@ -240,7 +240,8 @@ public static class ProgramExtensions
 
     public static IServiceCollection AddExceptionHandlingServices(this IServiceCollection services)
     {
-        services.AddTransient<IExceptionHandlerMiddleware, ServiceExceptionHandlerMiddleWare>();
+        services.AddTransient<IGetPageQuery, GetPageQuery>();
+        services.AddTransient<IExceptionHandlerMiddleware, ServiceExceptionHandlerMiddleware>();
         services.AddTransient<IUserJourneyMissingContentExceptionHandler, UserJourneyMissingContentExceptionHandler>();
 
         return services;

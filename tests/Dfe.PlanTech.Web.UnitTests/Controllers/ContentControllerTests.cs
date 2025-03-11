@@ -1,109 +1,109 @@
-﻿using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
+﻿using Dfe.PlanTech.Application.Exceptions;
+using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped;
 using Dfe.PlanTech.Web.Content;
 using Dfe.PlanTech.Web.Controllers;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Moq;
+using NSubstitute;
+using NSubstitute.ReceivedExtensions;
 using Xunit;
 
 namespace Dfe.ContentSupport.Web.Tests.Controllers;
 
 public class ContentControllerTests
 {
-    private readonly Mock<ILogger<ContentController>> _loggerMock = new();
-    private readonly Mock<IContentService> _contentServiceMock = new();
+    private readonly ILogger<ContentController> _loggerMock = Substitute.For<ILogger<ContentController>>();
+    private readonly IContentService _contentServiceMock = Substitute.For<IContentService>();
 
     private ContentController GetController()
     {
-        return new ContentController(_contentServiceMock.Object, new LayoutService(), _loggerMock.Object);
+        return new ContentController(_contentServiceMock, new LayoutService(), _loggerMock);
     }
 
     [Fact]
     public async Task Index_NoSlug_Returns_ErrorAction()
     {
-        var sut = GetController();
+        var controller = GetController();
 
-        var result = await sut.Index(string.Empty, "", null, default); // Provide all parameters explicitly
+        var index = async () => await controller.Index(string.Empty, "", null, default);
 
-        result.Should().BeOfType<RedirectToActionResult>();
-        (result as RedirectToActionResult)!.ActionName.Should().BeEquivalentTo(PagesController.NotFoundPage);
+        await Assert.ThrowsAsync<KeyNotFoundException>(index);
 
-        _loggerMock.Verify(
-            x => x.Log(
-                LogLevel.Error,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((o, t) => o.ToString() != null && o.ToString()!.StartsWith($"No slug received for C&S {nameof(ContentController)} {nameof(sut.Index)}")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            Times.Once);
+        _loggerMock.Received(1).Log(
+            LogLevel.Error,
+            Arg.Any<EventId>(),
+            Arg.Is<Object>(o => o.ToString() != null && o.ToString()!.StartsWith($"No slug received for C&S {nameof(ContentController)} {nameof(controller.Index)}")),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<Object, Exception?, string>>()
+        );
     }
 
     [Fact]
     public async Task Index_Calls_Service_GetContent()
     {
         const string dummySlug = "dummySlug";
-        var sut = GetController();
+        var controller = GetController();
 
-        await sut.Index(dummySlug, "", null, default);
+        var action = async () => await controller.Index(dummySlug, "", null, default);
 
-        _contentServiceMock.Verify(o => o.GetContent(dummySlug, default), Times.Once);
+        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(action);
+        await _contentServiceMock.Received(1).GetContent(dummySlug, default);
     }
 
     [Fact]
     public async Task Index_NullResponse_ReturnsErrorAction()
     {
         var slug = "slug";
-        _contentServiceMock.Setup(o => o.GetContent(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((CsPage?)null);
 
-        var sut = GetController();
+        _contentServiceMock.GetContent(Arg.Any<String>(), Arg.Any<CancellationToken>()).Returns((CsPage?)null);
 
-        var result = await sut.Index(slug, "", null, default);
+        var controller = GetController();
 
-        result.Should().BeOfType<RedirectToActionResult>();
-        (result as RedirectToActionResult)!.ActionName.Should().BeEquivalentTo(PagesController.NotFoundPage);
+        var action = async () => await controller.Index(slug, "", null, default);
 
-        _loggerMock.Verify(x => x.Log(
-        LogLevel.Error,
-        It.IsAny<EventId>(),
-        It.Is<It.IsAnyType>((o, t) => o.ToString() != null && o.ToString()!.Equals($"Failed to load content for C&S page {slug}; no content received.")),
-        It.IsAny<Exception>(),
-        It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-    Times.Once);
+        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(action);
+
+        _loggerMock.Received(1).Log(
+            LogLevel.Error,
+            Arg.Any<EventId>(),
+            Arg.Is<Object>(o => o.ToString() != null && o.ToString()!.Equals($"Failed to load content for C&S page {slug}; no content received.")),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<Object, Exception?, string>>()
+        );
     }
 
     [Fact]
     public async Task Index_ExceptionThrown_ReturnsErrorAction()
     {
         var slug = "slug";
-        _contentServiceMock.Setup(o => o.GetContent(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new Exception("An exception occurred loading content"));
 
-        var sut = GetController();
+        _contentServiceMock.GetContent(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(_ => Task.FromException<CsPage?>(new Exception("An exception occurred loading content")));
 
-        var result = await sut.Index(slug, "", null, default);
+        var controller = GetController();
+
+        var result = await controller.Index(slug, "", null, default);
 
         result.Should().BeOfType<RedirectToActionResult>();
         (result as RedirectToActionResult)!.ActionName.Should().BeEquivalentTo("error");
 
-        _loggerMock.Verify(x => x.Log(
-        LogLevel.Error,
-        It.IsAny<EventId>(),
-        It.Is<It.IsAnyType>((o, t) => o.ToString() != null && o.ToString()!.Equals($"Error loading C&S content page {slug}")),
-        It.IsAny<Exception>(),
-        It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-    Times.Once);
+        _loggerMock.Received(1).Log(
+            LogLevel.Error,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString() != null && o.ToString()!.Equals($"Error loading C&S content page {slug}")),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<object, Exception?, string>>()
+        );
     }
 
     [Fact]
     public async Task Index_WithSlug_Returns_View()
     {
-        _contentServiceMock.Setup(o => o.GetContent(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new CsPage());
+        _contentServiceMock.GetContent(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(new CsPage());
 
-        var sut = GetController();
-        var result = await sut.Index("slug1", "", null, default);
+        var controller = GetController();
+        var result = await controller.Index("slug1", "", null, default);
 
         result.Should().BeOfType<ViewResult>();
         (result as ViewResult)!.Model.Should().BeOfType<CsPage>();

@@ -20,7 +20,7 @@ runs:
 
     - name: Install XML tools
       shell: bash
-      run: sudo apt-get install -y libxml2-utils
+      run: sudo apt-get update && sudo apt-get install -y libxml2-utils
 
     - name: Verify at least one test has run
       shell: bash

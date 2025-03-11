@@ -8,3 +8,9 @@ export const FindPageForSlug = ({ slug, dataMapper }) => {
     }
     return null;
 }
+
+export const recommendationIntroFragment = "#overview";
+export const checkAnswersSlug = "/check-answers";
+export const recommendationSlug = "/recommendation";
+export const cookiesSlug = "/cookies";
+export const printRecommendationsSlug = "/print";
