@@ -1,3 +1,4 @@
+@using Dfe.PlanTech
 @model Dfe.PlanTech.Domain.Content.Models.Title;
 
-<h1 class="govuk-heading-xl">@System.Net.WebUtility.HtmlDecode(Model.Text)</h1>
+<h1 class="govuk-heading-xl">@StringExtensions.UseNonBreakingHyphenAndHtmlDecode(Model.Text)</h1>

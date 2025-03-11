@@ -1,24 +1,50 @@
 ﻿using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Exceptions;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Establishments.Exceptions;
 using Dfe.PlanTech.Domain.SignIns.Enums;
+using Dfe.PlanTech.Web.Configuration;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Web.Middleware;
 
-public class ServiceExceptionHandlerMiddleWare : IExceptionHandlerMiddleware
+public class ServiceExceptionHandlerMiddleware : IExceptionHandlerMiddleware
 {
-    public void ContextRedirect(string internalErrorSlug, HttpContext context)
+    private readonly IGetPageQuery _pageQuery;
+    private readonly ErrorPages _errorPages;
+
+    public ServiceExceptionHandlerMiddleware(
+        IOptions<ErrorPages> errorPagesOptions,
+        IGetPageQuery getPageQuery
+    )
+    {
+        _errorPages = errorPagesOptions.Value;
+        _pageQuery = getPageQuery;
+    }
+
+    public async Task HandleExceptionAsync(HttpContext context)
+    {
+        var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+        var exception = exceptionHandlerPathFeature?.Error;
+
+
+        var internalErrorPage = await _pageQuery.GetPageById(_errorPages.InternalErrorPageId);
+        var internalErrorSlug = internalErrorPage?.Slug ?? UrlConstants.Error;
+
+        ContextRedirect(internalErrorSlug, context);
+    }
+
+    private void ContextRedirect(string internalErrorSlug, HttpContext context)
     {
         var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
         var exception = exceptionHandlerPathFeature?.Error;
 
         string redirectUrl = GetRedirectUrlForException(internalErrorSlug, exception);
-
         context.Response.Redirect(redirectUrl);
     }
 
-    static string GetRedirectUrlForException(string internalErrorSlug, Exception? exception) =>
+    private static string GetRedirectUrlForException(string internalErrorSlug, Exception? exception) =>
         exception switch
         {
             null => internalErrorSlug,

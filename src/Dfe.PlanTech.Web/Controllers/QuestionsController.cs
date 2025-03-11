@@ -70,11 +70,11 @@ public class QuestionsController : BaseController<QuestionsController>
                                                             [FromServices] ContentfulOptions contentfulOptions,
                                                             CancellationToken cancellationToken = default)
     {
-        if (!contentfulOptions.UsePreview)
+        if (!contentfulOptions.UsePreviewApi)
             return new RedirectResult(UrlConstants.SelfAssessmentPage);
 
         var question = await _getEntityFromContentfulQuery.GetEntityById<Question>(questionId, cancellationToken) ??
-                       throw new KeyNotFoundException($"Could not find question with Id {questionId}");
+                       throw new ContentfulDataUnavailableException($"Could not find question with Id {questionId}");
 
         var viewModel = GenerateViewModel(null, question, null, null);
         return RenderView(viewModel);
@@ -198,9 +198,9 @@ public class QuestionsController : BaseController<QuestionsController>
 
     private async Task<Section> GetSectionBySlug(string sectionSlug, CancellationToken cancellationToken)
         => await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken) ??
-           throw new KeyNotFoundException($"Could not find section with slug {sectionSlug}");
+           throw new ContentfulDataUnavailableException($"Could not find section with slug {sectionSlug}");
 
     private static Question GetQuestionFromSection(Section section, string questionSlug)
         => section.Questions.Find(question => question.Slug == questionSlug) ??
-           throw new KeyNotFoundException($"Could not find question slug {questionSlug} under section {section.Name}");
+           throw new ContentfulDataUnavailableException($"Could not find question slug {questionSlug} under section {section.Name}");
 }

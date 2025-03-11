@@ -7,7 +7,7 @@ function ValidateHeader(content) {
   const expectedText = CleanText(content.fields.text);
 
   return cy
-    .get(`header-component ${tag}`)
+    .get(`${tag}`)
     .contains(expectedText.trim())
     .should("have.class", expectedClass);
 }

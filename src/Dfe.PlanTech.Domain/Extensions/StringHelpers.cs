@@ -4,8 +4,8 @@ namespace Dfe.PlanTech;
 
 public static partial class StringHelpers
 {
-    private const string MatchNonAlphanumericExceptHyphensRegexPattern = @"[^a-zA-Z0-9-]";
-    private const string MatchWhitespaceCharacters = @"\s";
+    private const string MatchNonAlphanumericExceptHyphensRegexPattern = @"[^a-zA-Z0-9-]+";
+    private const string MatchWhitespaceCharacters = @"\s+";
 
     [GeneratedRegex(MatchNonAlphanumericExceptHyphensRegexPattern)]
     private static partial Regex MatchNonAlphaNumericExceptHyphensPattern();

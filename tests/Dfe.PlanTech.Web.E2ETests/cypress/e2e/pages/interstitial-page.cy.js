@@ -1,7 +1,9 @@
+import { selfAssessmentSlug } from "../../helpers/page-slugs";
+
 describe("Interstitial page", () => {
 
   beforeEach(() => {
-    cy.loginWithEnv("/self-assessment");
+    cy.loginWithEnv(selfAssessmentSlug);
     cy.clickFirstSection();
 
     cy.injectAxe();
@@ -19,7 +21,7 @@ describe("Interstitial page", () => {
     cy.get("a.govuk-back-link").should("exist");
     cy.get("a.govuk-back-link")
         .should("have.attr", "href")
-        .and("include", "self-assessment");
+        .and("include", selfAssessmentSlug);
   });
 
   it("passes accessibility tests", () => {
