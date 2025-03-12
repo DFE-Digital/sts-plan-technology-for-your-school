@@ -23,24 +23,25 @@ and the headers & chunks to have a shared parent for displaying based on anchor 
                 var previousContent = x - 1 >= 0 ? allContent[x - 1] : null;
                 var nextContent = x + 1 < allContent.Length ? allContent[x + 1] : null;
 
-            <div class="recommendation-piece-container" id="@headerWithContent.SlugifiedLinkText">
-                <partial name="Header" model="@headerWithContent" />
-                <div class="govuk-width-container govuk-main-wrapper">
-                    <div class="govuk-grid-row">
-                        <div class="govuk-grid-column-one-quarter">
-                                @{
-                                    ViewBag.VerticalNavigationSection = headerWithContent.SlugifiedLinkText;
-                                }
-                            <partial name="Components/VerticalNavigation/Default" model="@Model.AllContent" />
-                        </div>
-                        <div class="govuk-grid-column-three-quarters">
-                            <partial name="Content" model="@headerWithContent" />
-                            <partial name="Print" model="@Model" />
-                            <partial name="Pagination" model="@(Previous: previousContent, Next:nextContent)" />
+                <div class="recommendation-piece-container" id="@headerWithContent.SlugifiedLinkText">
+                    <partial name="Header" model="@headerWithContent" />
+                    <div class="govuk-width-container govuk-main-wrapper">
+                        <div class="govuk-grid-row">
+                            <div class="govuk-grid-column-one-quarter">
+                                    @{
+                                        ViewBag.VerticalNavigationSection = headerWithContent.SlugifiedLinkText;
+                                    }
+                                <partial name="Components/VerticalNavigation/Default" model="@Model.AllContent" />
+                            </div>
+                            <div class="govuk-grid-column-three-quarters">
+                                <h2>@headerWithContent.LinkText</h2>
+                                <partial name="Content" model="@headerWithContent" />
+                                <partial name="Print" model="@Model" />
+                                <partial name="Pagination" model="@(Previous: previousContent, Next:nextContent)" />
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
             }
     </div>
 }
