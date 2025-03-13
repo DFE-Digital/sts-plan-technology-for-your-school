@@ -29,6 +29,10 @@ resource "azurerm_storage_account" "contentful_backup_storage" {
   tags                     = local.tags
 
   blob_properties {
+    container_delete_retention_policy {
+      days = 30
+    }
+
     delete_retention_policy {
       days = 30
     }
