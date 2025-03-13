@@ -91,7 +91,7 @@ jobs:
 
       - name: Set container app image_tag env variables
         run: |
-          az acr repository show-tags -n ${{ secrets.AZ_ACR_URL }} --repository plan-tech-app --top 1 --orderby time_desc |  jq '.[]'
+          IMAGE_TAG=$(az acr repository show-tags -n ${{ secrets.AZ_ACR_URL }} --repository plan-tech-app --top 1 --orderby time_desc |  jq '.[]')
           echo 'TF_VAR_image_tag="main-4c86236b4fde9813f1912ea64fd84e8a4c969f27-Dev"' >> $GITHUB_ENV
 
       - name: Set container app scaling env variables
