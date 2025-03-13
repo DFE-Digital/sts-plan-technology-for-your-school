@@ -36,3 +36,10 @@ resource "azurerm_storage_container" "blobforcost" {
   storage_account_name  = azurerm_storage_account.costing_storage.name
   container_access_type = "private"
 }
+
+resource "azurerm_storage_account_network_rules" "test" {
+  resource_group_name      = local.resource_group_name
+  storage_account_name  = azurerm_storage_account.costing_storage.name
+
+  default_action             = "Allow"
+}
