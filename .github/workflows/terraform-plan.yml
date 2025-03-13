@@ -82,14 +82,6 @@ jobs:
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
           az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
-      - name: Add Runner to KV Blobforcost SA
-        uses: azure/CLI@v1
-        with:
-          azcliversion: 2.45.0
-          inlineScript: |
-            az storage account update --name "s190d01plantechcosting" --default-action Allow
-            az storage account network-rule add --account-name s190d01plantechcosting --ip-address ${{ steps.whats-my-ip.outputs.ip }}
-
       - name: Add Runner to KV whitelist
         uses: azure/CLI@v1
         with:
