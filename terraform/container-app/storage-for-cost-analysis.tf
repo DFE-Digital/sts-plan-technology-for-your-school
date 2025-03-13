@@ -13,7 +13,6 @@ resource "azurerm_storage_account" "costing_storage" {
 
   network_rules {
     default_action = "Deny"
-    bypass         = ["AzureServices"]
   }
 
   blob_properties {
