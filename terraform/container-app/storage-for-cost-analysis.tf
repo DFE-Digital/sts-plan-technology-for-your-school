@@ -13,6 +13,7 @@ resource "azurerm_storage_account" "costing_storage" {
 
   network_rules {
     default_action             = "Allow"
+    ip_rules                   = ["127.0.0.1"]
   }
 
   blob_properties {
