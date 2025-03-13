@@ -89,9 +89,9 @@ jobs:
           inlineScript: |
             az keyvault network-rule add --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
-      - name: Set container app scaling env variables
+      - name: Set container app image_tag env variables
         run: |
-          echo 'TF_VAR_image_tag: "main-4c86236b4fde9813f1912ea64fd84e8a4c969f27-Dev"' >> $GITHUB_ENV
+          echo 'TF_VAR_image_tag="main-4c86236b4fde9813f1912ea64fd84e8a4c969f27-Dev"' >> $GITHUB_ENV
 
       - name: Set container app scaling env variables
         run: |
