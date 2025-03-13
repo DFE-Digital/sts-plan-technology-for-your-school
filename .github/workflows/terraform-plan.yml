@@ -87,6 +87,7 @@ jobs:
         with:
           azcliversion: 2.45.0
           inlineScript: |
+            az storage account update --name "s190d01plantechcosting" --default-action Allow
             az storage account network-rule add --account-name s190d01plantechcosting --ip-address ${{ steps.whats-my-ip.outputs.ip }}
 
       - name: Add Runner to KV whitelist
