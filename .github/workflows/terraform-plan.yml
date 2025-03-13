@@ -21,8 +21,7 @@ env:
   ARM_CLIENT_ID: ${{ secrets.AZ_CLIENT_ID }}
   ARM_CLIENT_SECRET: ${{ secrets.AZ_CLIENT_SECRET }}
 
-  AZ_KEYVAULT_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP	}}-kv # s190d01-plantech-kv
-  AZ_SA_COSTING_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}costing # s190d01plantechcosting 
+  AZ_KEYVAULT_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP	}}-kv
 
   TF_BACKEND_STORAGE_ACCOUNT_NAME: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
   TF_BACKEND_CONTAINER_NAME: ${{ secrets.TF_BACKEND_CONTAINER_NAME }}
@@ -40,10 +39,10 @@ env:
   TF_VAR_az_sql_azuread_admin_objectid: ${{ secrets.AZ_CLIENT_ID }}
   TF_VAR_cdn_frontdoor_origin_host_header_override: ${{secrets.AZ_CDN_FRONTDOOR_ORIGIN_HOST_HEADER_OVERRIDE}}
   TF_VAR_az_sql_admin_userid_postfix: ${{secrets.AZ_SQL_ADMIN_USERID_POSTFIX}}
-  TF_VAR_registry_server: ${{ secrets.AZ_ACR_URL }}
-  TF_VAR_registry_username: ${{ secrets.AZ_CLIENT_ID }}
-  TF_VAR_registry_password: ${{ secrets.AZ_CLIENT_SECRET }}
-  TF_VAR_image_tag: "main-4c86236b4fde9813f1912ea64fd84e8a4c969f27-Dev"
+  TF_VAR_registry_server: "s190d01plantech.azurecr.io"
+  TF_VAR_image_tag: "development-bee6860823f4db57b0afa70d2f562df206ddba4c-Dev"
+  TF_VAR_registry_username: ${{ github.repository_owner }}
+  TF_VAR_registry_password: ${{ secrets.GITHUB_TOKEN }}
 
   container_app_min_replicas: ${{secrets.CONTAINER_MIN_REPLICAS}}
   container_app_max_replicas: ${{secrets.CONTAINER_MAX_REPLICAS}}
@@ -81,13 +80,6 @@ jobs:
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
           az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
-
-      - name: Add Runner to KV Blobforcost SA
-        uses: azure/CLI@v1
-        with:
-          azcliversion: 2.45.0
-          inlineScript: |
-            az storage account network-rule add --account-name s190d01plantechcosting --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
       - name: Add Runner to KV whitelist
         uses: azure/CLI@v1
