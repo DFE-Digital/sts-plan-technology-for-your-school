@@ -12,8 +12,8 @@ resource "azurerm_storage_account" "costing_storage" {
   allow_nested_items_to_be_public = local.container_app_blob_storage_public_access_enabled
 
   network_rules {
-    default_action             = "Allow"
-    ip_rules                   = ["127.0.0.1"]
+    default_action = "Deny"
+    bypass         = ["AzureServices"]
   }
 
   blob_properties {
