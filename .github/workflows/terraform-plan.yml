@@ -74,6 +74,11 @@ jobs:
         id: whats-my-ip
         uses: ./.github/actions/whats-my-ip-address
 
+      - name: Set GitHub Runner IP to TF Var
+        shell: bash
+        run: |
+          echo "TF_VAR_github_ip=${{ steps.whats-my-ip.outputs.ip}}" >> $GITHUB_ENV
+
       - name: Login with AZ
         uses: ./.github/actions/azure-login
         with:
