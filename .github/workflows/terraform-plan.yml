@@ -99,7 +99,7 @@ jobs:
         with:
           azcliversion: 2.45.0
           inlineScript: |
-            az storage account network-rule add --account-name $SA_COSTING_NAME --ip-address ${{ steps.whats-my-ip.outputs.ip }}
+            az storage account network-rule add --account-name $SA_COSTING_NAME --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
       - name: Add Runner to KV whitelist
         uses: azure/CLI@v1
@@ -145,6 +145,14 @@ jobs:
       - name: Plan Terraform changes
         id: plan
         run: terraform plan
+
+      - name: Remove Runner to Blobforcost SA
+        uses: azure/CLI@v1
+        if: always()
+        with:
+          azcliversion: 2.45.0
+          inlineScript: |
+            az storage account network-rule remove --account-name $SA_COSTING_NAME --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
       - name: Remove Runner to KV whitelist
         uses: azure/CLI@v1
