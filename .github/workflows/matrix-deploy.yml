@@ -113,9 +113,7 @@ jobs:
               plan-terraform-for-dev-and-test,
               deploy-terraform-for-dev-and-test
             ]
-    if: |
-      needs.deploy-terraform-for-dev-and-test.result != 'skipped' ||
-      needs.deploy-terraform-for-dev-and-test.result != 'skipped'
+    if: always()
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repository
