@@ -104,20 +104,29 @@ jobs:
       environment: ${{ matrix.target }}
     secrets: inherit
 
-  # deploy-to-dev-and-test:
-  #   needs: [set-env, create-and-publish-image, check-for-terraform-changes]
-  #   name: Deployment to Dev & Test
-  #   strategy:
-  #     max-parallel: 1
-  #     fail-fast: true
-  #     matrix:
-  #       target: [Dev, Tst]
-  #   uses: ./.github/workflows/deploy-image.yml
-  #   with:
-  #     environment: ${{ matrix.target }}
-  #     branch: ${{ needs.set-env.outputs.branch }}
-  #     checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
-  #   secrets: inherit
+  deploy-to-dev-and-test:
+    needs: [set-env, create-and-publish-image, check-for-terraform-changes]
+    name: Deployment to Dev & Test
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 2
+          
+    # strategy:
+    #   max-parallel: 1
+    #   fail-fast: true
+    #   matrix:
+    #     # target: [Dev, Tst]
+    #     target: [Dev]
+    # uses: ./.github/workflows/deploy-image.yml
+    # with:
+    #   environment: ${{ matrix.target }}
+    #   branch: ${{ needs.set-env.outputs.branch }}
+    #   checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
+    # secrets: inherit
 
   # generate-subtopic-visualisations:
   #   needs: [set-env, deploy-to-dev-and-test]
