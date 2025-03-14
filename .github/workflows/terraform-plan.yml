@@ -93,8 +93,7 @@ jobs:
         with:
           azcliversion: 2.45.0
           inlineScript: |
-            echo ${{ env.AZ_KEYVAULT_NAME }}
-            az storage account network-rule add --account-name s190d01plantechcosting --ip-address ${{ steps.whats-my-ip.outputs.ip }}
+            az storage account network-rule add --account-name ${{ env.AZ_SA_COSTING_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }}
 
       - name: Add Runner to KV whitelist
         uses: azure/CLI@v1
