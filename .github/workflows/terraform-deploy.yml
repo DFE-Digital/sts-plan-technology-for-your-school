@@ -88,12 +88,18 @@ jobs:
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
           az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
+      - name: Replace in secret environment variable
+        run: |
+          AZ_SA_COSTING_NAME="${{ env.AZ_SA_COSTING_NAME }}"
+          SA_COSTING_NAME="${AZ_SA_COSTING_NAME//-/}"
+          echo "SA_COSTING_NAME=$SA_COSTING_NAME" >> $GITHUB_ENV
+
       - name: Add Runner to KV Blobforcost SA
         uses: azure/CLI@v1
         with:
           azcliversion: 2.45.0
           inlineScript: |
-            az storage account network-rule add --account-name s190d01plantechcosting --ip-address ${{ steps.whats-my-ip.outputs.ip }}
+            az storage account network-rule add --account-name $SA_COSTING_NAME --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
       - name: Add Runner to KV whitelist
         uses: azure/CLI@v1
@@ -139,6 +145,14 @@ jobs:
       - name: Apply Terraform changes
         id: apply
         run: terraform apply -auto-approve
+
+      - name: Remove Runner to Blobforcost SA
+        uses: azure/CLI@v1
+        if: always()
+        with:
+          azcliversion: 2.45.0
+          inlineScript: |
+            az storage account network-rule remove --account-name $SA_COSTING_NAME --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
       - name: Remove Runner to KV whitelist
         uses: azure/CLI@v1
