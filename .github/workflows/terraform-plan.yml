@@ -91,7 +91,7 @@ jobs:
       - name: Replace in secret environment variable
         run: |
           AZ_SA_COSTING_NAME="${{ env.AZ_SA_COSTING_NAME }}"
-          SA_COSTING_NAME="${SECRET//-/}"
+          SA_COSTING_NAME="${AZ_SA_COSTING_NAME//-/}"
           echo "SA_COSTING_NAME=$SA_COSTING_NAME" >> $GITHUB_ENV
 
       - name: Add Runner to KV Blobforcost SA
