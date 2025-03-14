@@ -105,6 +105,7 @@ jobs:
     secrets: inherit
 
   deploy-to-dev-and-test:
+    name: Deployment to Dev & Test
     needs: [
               set-env, 
               create-and-publish-image, 
@@ -112,7 +113,9 @@ jobs:
               plan-terraform-for-dev-and-test,
               deploy-terraform-for-dev-and-test
             ]
-    name: Deployment to Dev & Test
+    if: |
+      needs.deploy-terraform-for-dev-and-test.result != 'skipped' &&
+      needs.deploy-terraform-for-dev-and-test.result != 'skipped'
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repository
