@@ -105,7 +105,13 @@ jobs:
     secrets: inherit
 
   deploy-to-dev-and-test:
-    needs: [set-env, create-and-publish-image, check-for-terraform-changes]
+    needs: [
+              set-env, 
+              create-and-publish-image, 
+              check-for-terraform-changes, 
+              plan-terraform-for-dev-and-test,
+              deploy-terraform-for-dev-and-test
+            ]
     name: Deployment to Dev & Test
     runs-on: ubuntu-22.04
     steps:
@@ -114,7 +120,7 @@ jobs:
         with:
           ref: ${{ github.ref }}
           fetch-depth: 2
-          
+
     # strategy:
     #   max-parallel: 1
     #   fail-fast: true
