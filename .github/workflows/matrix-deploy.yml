@@ -81,7 +81,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        target: [Dev, Tst]
+        # target: [Dev, Tst]
+        target: [Dev]
     uses: ./.github/workflows/terraform-plan.yml
     with:
       environment: ${{ matrix.target }}
@@ -94,7 +95,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        target: [Dev, Tst]
+        # target: [Dev, Tst]
+        target: [Dev]
     uses: ./.github/workflows/terraform-deploy.yml
     with:
       environment: ${{ matrix.target }}
