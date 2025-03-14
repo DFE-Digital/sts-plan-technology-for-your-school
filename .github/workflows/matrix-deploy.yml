@@ -79,7 +79,7 @@ jobs:
   plan-terraform-for-dev-and-test:
     needs: check-for-terraform-changes
     name: Plan Terraform Infrastructure for Dev & Test
-    if: ${{ needs.check-for-terraform-changes.outputs.run_terraform_deploy == 'true' }}
+    # if: ${{ needs.check-for-terraform-changes.outputs.run_terraform_deploy == 'true' }}
     strategy:
       fail-fast: true
       matrix:
