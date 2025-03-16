@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using Dfe.PlanTech.Domain.Constants;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
@@ -17,9 +18,10 @@ public class RecommendationIntro : ContentComponent, IRecommendationIntro<Header
 
     public string HeaderText => Header.Text;
 
-    public string LinkText => "Overview";
+    public string LinkText => HeaderConstants.RecommendationLinkText;
 
     private string? _slugifiedLinkText;
 
     public string SlugifiedLinkText => _slugifiedLinkText ??= LinkText.Slugify();
+
 }

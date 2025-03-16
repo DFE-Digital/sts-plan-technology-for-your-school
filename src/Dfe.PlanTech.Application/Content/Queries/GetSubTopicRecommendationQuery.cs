@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
+using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -22,6 +23,10 @@ public class GetSubTopicRecommendationQuery(IContentRepository repository,
         if (subtopicRecommendation == null)
         {
             LogMissingRecommendationError(subtopicId);
+        }
+        else
+        {
+            subtopicRecommendation.Intros.ForEach(e => e.Header.OverrideHeaderParams(HeaderTag.H2, HeaderSize.Large));
         }
 
         return subtopicRecommendation;

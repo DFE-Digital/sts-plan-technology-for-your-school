@@ -11,7 +11,12 @@ public class Header : ContentComponent, IHeader
 {
     public string Text { get; init; } = null!;
 
-    public HeaderTag Tag { get; init; }
+    public HeaderTag Tag { get; set; }
+    public HeaderSize Size { get; set; }
 
-    public HeaderSize Size { get; init; }
+    public void OverrideHeaderParams(HeaderTag tag, HeaderSize size, string text = null)
+    {
+        Tag = tag;
+        Size = size;
+    }
 }
