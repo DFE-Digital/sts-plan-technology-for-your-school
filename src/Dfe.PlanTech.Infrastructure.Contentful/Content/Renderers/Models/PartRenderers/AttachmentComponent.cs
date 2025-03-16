@@ -21,7 +21,7 @@ public class AttachmentComponent
 
         var customAttachment = GenerateCustomAttachment(target);
 
-        stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print\">");
+        stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print govuk-body \">");
         stringBuilder.Append("<div class=\"attachment\">");
         stringBuilder.Append("<div class=\"attachment-thumbnail govuk-!-margin-right-8\">");
         stringBuilder.Append($"<a href=\"{customAttachment.Uri}\" download>");
