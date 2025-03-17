@@ -51,9 +51,6 @@ public static class UserClaimsExtensions
             return null;
         }
 
-        // TODO: POC Only - Remove (Simulate user org being part of a MAT)
-        organisation.Uid = "5452";
-
         return organisation;
     }
 

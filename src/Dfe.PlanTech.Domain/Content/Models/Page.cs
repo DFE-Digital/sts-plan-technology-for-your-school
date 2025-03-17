@@ -27,8 +27,5 @@ public class Page : ContentComponent, IPageContent
 
     public string? OrganisationName { get; set; }
 
-    // TODO: POC Only - Remove
-    public List<EstablishmentLink> GroupEstablishments { get; set; } = [];
-
     public List<ContentComponent> Content { get; init; } = [];
 }
