@@ -74,7 +74,7 @@ public class AccordionRendererTests
     {
         var stringBuilder = new StringBuilder();
         stringBuilder.AppendLine($"<div class=\"govuk-accordion\" data-module=\"govuk-accordion\" id=\"accordion-Internal Name 1\">");
-        stringBuilder.Append("<div class=\"govuk-accordion__section\">");
+        stringBuilder.Append("<div class=\"govuk-accordion__section govuk-body\">");
         stringBuilder.Append("<div class=\"govuk-accordion__section-header\">");
         stringBuilder.Append("<h2 class=\"govuk-accordion__section-heading\">");
         stringBuilder.Append("<span class=\"govuk-accordion__section-button\" id=\"Internal Name 1-heading\">");

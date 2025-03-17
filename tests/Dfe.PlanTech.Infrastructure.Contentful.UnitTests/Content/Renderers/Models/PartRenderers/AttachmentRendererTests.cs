@@ -86,7 +86,7 @@ public class AttachmentRendererTests
     private StringBuilder GetStandardStringBuilderOutput()
     {
         var stringBuilder = new StringBuilder();
-        stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print\">");
+        stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print govuk-body \">");
         stringBuilder.Append("<div class=\"attachment\">");
         stringBuilder.Append("<div class=\"attachment-thumbnail govuk-!-margin-right-8\">");
         stringBuilder.Append("<a href=\"test.com\" download>");
@@ -104,8 +104,7 @@ public class AttachmentRendererTests
         stringBuilder.Append("</span></p>");
 
         stringBuilder.Append("<p class=\"attachment-metadata\">");
-        stringBuilder.Append("<span class=\"attachment-attribute\" aria-label=\"updated date\">Last updated");
-        stringBuilder.Append("1 January 2025");
+        stringBuilder.Append("<span class=\"attachment-attribute\" aria-label=\"updated date\">Last updated 1 January 2025");
         stringBuilder.Append("</span></p>");
         
         stringBuilder.Append("</div></div></div>");
@@ -115,7 +114,7 @@ public class AttachmentRendererTests
     private StringBuilder GetPdfStringBuilderOutput()
     {
         var stringBuilder = new StringBuilder();
-        stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print\">");
+        stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print govuk-body \">");
         stringBuilder.Append("<div class=\"attachment\">");
         stringBuilder.Append("<div class=\"attachment-thumbnail govuk-!-margin-right-8\">");
         stringBuilder.Append("<a href=\"test.com\" download>");
@@ -133,8 +132,7 @@ public class AttachmentRendererTests
         stringBuilder.Append("</span></p>");
 
         stringBuilder.Append("<p class=\"attachment-metadata\">");
-        stringBuilder.Append("<span class=\"attachment-attribute\" aria-label=\"updated date\">Last updated");
-        stringBuilder.Append("1 January 2025");
+        stringBuilder.Append("<span class=\"attachment-attribute\" aria-label=\"updated date\">Last updated 1 January 2025");
         stringBuilder.Append("</span></p>");
 
         stringBuilder.Append("</div></div></div>");
@@ -145,7 +143,7 @@ public class AttachmentRendererTests
     private StringBuilder GetHtmlStringBuilderOutput()
     {
         var stringBuilder = new StringBuilder();
-        stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print\">");
+        stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print govuk-body \">");
         stringBuilder.Append("<div class=\"attachment\">");
         stringBuilder.Append("<div class=\"attachment-thumbnail govuk-!-margin-right-8\">");
         stringBuilder.Append("<a href=\"test.com\" download>");
@@ -163,8 +161,7 @@ public class AttachmentRendererTests
         stringBuilder.Append("</span></p>");
 
         stringBuilder.Append("<p class=\"attachment-metadata\">");
-        stringBuilder.Append("<span class=\"attachment-attribute\" aria-label=\"updated date\">Last updated");
-        stringBuilder.Append("1 January 2025");
+        stringBuilder.Append("<span class=\"attachment-attribute\" aria-label=\"updated date\">Last updated 1 January 2025");
         stringBuilder.Append("</span></p>");
 
         stringBuilder.Append("</div></div></div>");

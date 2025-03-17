@@ -41,7 +41,7 @@ public class AttachmentComponent
         if (customAttachment.UpdatedAt.HasValue)
         {
             stringBuilder.Append("<p class=\"attachment-metadata\">");
-            stringBuilder.Append("<span class=\"attachment-attribute\" aria-label=\"updated date\">Last updated");
+            stringBuilder.Append("<span class=\"attachment-attribute\" aria-label=\"updated date\">Last updated ");
             stringBuilder.Append(customAttachment.UpdatedAt.Value.ToString("d MMMM yyyy"));
             stringBuilder.Append("</span></p>");
         }
