@@ -92,6 +92,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseMiddleware<AuthorizationBypassMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 
