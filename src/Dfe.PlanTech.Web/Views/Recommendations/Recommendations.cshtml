@@ -24,7 +24,7 @@ and the headers & chunks to have a shared parent for displaying based on anchor 
                 var nextContent = x + 1 < allContent.Length ? allContent[x + 1] : null;
 
                 <div class="recommendation-piece-container" id="@headerWithContent.SlugifiedLinkText">
-                    <partial name="Header" model="@headerWithContent" />
+                <partial name="Header" model="@allContent[0]" />
                     <div class="govuk-width-container govuk-main-wrapper">
                         <div class="govuk-grid-row">
                             <div class="govuk-grid-column-one-quarter">
