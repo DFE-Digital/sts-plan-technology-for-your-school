@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Establishments.Models;
 
 namespace Dfe.PlanTech.Domain.Content.Models;
 
