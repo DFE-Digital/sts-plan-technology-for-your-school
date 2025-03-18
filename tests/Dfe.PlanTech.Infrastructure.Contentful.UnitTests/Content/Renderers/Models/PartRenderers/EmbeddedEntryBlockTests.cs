@@ -96,7 +96,7 @@ public class EmbeddedEntryBlockTests
     private StringBuilder GetGenericAttachmentStringBuilderOutput()
     {
         var stringBuilder = new StringBuilder();
-        stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print\">");
+        stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print govuk-body \">");
         stringBuilder.Append("<div class=\"attachment\">");
         stringBuilder.Append("<div class=\"attachment-thumbnail govuk-!-margin-right-8\">");
         stringBuilder.Append($"<a href=\"test.com\" download>");
@@ -114,8 +114,7 @@ public class EmbeddedEntryBlockTests
         stringBuilder.Append("</span></p>");
 
         stringBuilder.Append("<p class=\"attachment-metadata\">");
-        stringBuilder.Append("<span class=\"attachment-attribute\" aria-label=\"updated date\">Last updated");
-        stringBuilder.Append("1 January 2025");
+        stringBuilder.Append("<span class=\"attachment-attribute\" aria-label=\"updated date\">Last updated 1 January 2025");
         stringBuilder.Append("</span></p>");
 
         stringBuilder.Append("</div></div></div>");
@@ -178,7 +177,7 @@ public class EmbeddedEntryBlockTests
     {
         var stringBuilder = new StringBuilder();
         stringBuilder.AppendLine($"<div class=\"govuk-accordion\" data-module=\"govuk-accordion\" id=\"accordion-Internal Name 1\">");
-        stringBuilder.Append("<div class=\"govuk-accordion__section\">");
+        stringBuilder.Append("<div class=\"govuk-accordion__section govuk-body\">");
         stringBuilder.Append("<div class=\"govuk-accordion__section-header\">");
         stringBuilder.Append("<h2 class=\"govuk-accordion__section-heading\">");
         stringBuilder.Append("<span class=\"govuk-accordion__section-button\" id=\"Internal Name 1-heading\">");
@@ -190,7 +189,7 @@ public class EmbeddedEntryBlockTests
         stringBuilder.Append("<div id=\"Internal Name 1-content\" class=\"govuk-accordion__section-content\">");
         stringBuilder.Append("</div></div>");
 
-        stringBuilder.Append("<div class=\"govuk-accordion__section\">");
+        stringBuilder.Append("<div class=\"govuk-accordion__section govuk-body\">");
         stringBuilder.Append("<div class=\"govuk-accordion__section-header\">");
         stringBuilder.Append("<h2 class=\"govuk-accordion__section-heading\">");
         stringBuilder.Append("<span class=\"govuk-accordion__section-button\" id=\"Internal Name 2-heading\">");
@@ -202,7 +201,7 @@ public class EmbeddedEntryBlockTests
         stringBuilder.Append("<div id=\"Internal Name 2-content\" class=\"govuk-accordion__section-content\">");
         stringBuilder.Append("</div></div>");
 
-        stringBuilder.Append("<div class=\"govuk-accordion__section\">");
+        stringBuilder.Append("<div class=\"govuk-accordion__section govuk-body\">");
         stringBuilder.Append("<div class=\"govuk-accordion__section-header\">");
         stringBuilder.Append("<h2 class=\"govuk-accordion__section-heading\">");
         stringBuilder.Append("<span class=\"govuk-accordion__section-button\" id=\"Internal Name 3-heading\">");

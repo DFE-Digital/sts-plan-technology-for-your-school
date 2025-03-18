@@ -25,7 +25,7 @@ public class AccordionComponent : IRichTextContentPartRendererCollection
             stringBuilder.AppendLine($"<div class=\"govuk-accordion\" data-module=\"govuk-accordion\" id=\"accordion-{nestedContent[0].InternalName}\">");
             foreach (var innerContent in nestedContent)
             {
-                stringBuilder.Append("<div class=\"govuk-accordion__section\">");
+                stringBuilder.Append("<div class=\"govuk-accordion__section govuk-body\">");
                 stringBuilder.Append("<div class=\"govuk-accordion__section-header\">");
                 stringBuilder.Append("<h2 class=\"govuk-accordion__section-heading\">");
                 stringBuilder.Append($"<span class=\"govuk-accordion__section-button\" id=\"{innerContent.InternalName}-heading\">");

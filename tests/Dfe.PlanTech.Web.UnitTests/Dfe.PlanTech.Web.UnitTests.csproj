@@ -27,6 +27,13 @@
         </None>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Content\" />
+      <Folder Include="Extensions\" />
+      <Folder Include="Models\Content\Mapped\Custom\" />
+      <Folder Include="Models\Content\Mapped\Standard\" />
+    </ItemGroup>
+
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>

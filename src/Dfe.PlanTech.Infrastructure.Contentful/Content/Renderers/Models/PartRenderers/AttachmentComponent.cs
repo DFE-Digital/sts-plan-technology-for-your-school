@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using Dfe.PlanTech.Domain.Constants;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.Custom;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 
@@ -22,7 +21,7 @@ public class AttachmentComponent
 
         var customAttachment = GenerateCustomAttachment(target);
 
-        stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print\">");
+        stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print govuk-body \">");
         stringBuilder.Append("<div class=\"attachment\">");
         stringBuilder.Append("<div class=\"attachment-thumbnail govuk-!-margin-right-8\">");
         stringBuilder.Append($"<a href=\"{customAttachment.Uri}\" download>");
@@ -42,7 +41,7 @@ public class AttachmentComponent
         if (customAttachment.UpdatedAt.HasValue)
         {
             stringBuilder.Append("<p class=\"attachment-metadata\">");
-            stringBuilder.Append("<span class=\"attachment-attribute\" aria-label=\"updated date\">Last updated");
+            stringBuilder.Append("<span class=\"attachment-attribute\" aria-label=\"updated date\">Last updated ");
             stringBuilder.Append(customAttachment.UpdatedAt.Value.ToString("d MMMM yyyy"));
             stringBuilder.Append("</span></p>");
         }
