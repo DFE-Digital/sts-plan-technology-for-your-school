@@ -24,8 +24,8 @@ namespace Dfe.PlanTech.Web.Middleware
                 var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
                 {
                     new Claim(ClaimTypes.Name, "BypassedUser"), new Claim( ClaimConstants.Organisation, GetOrganisationJson()),
-                    new Claim(ClaimConstants.DB_USER_ID, "25"),
-                    new Claim(ClaimConstants.DB_ESTABLISHMENT_ID, "101")
+                    new Claim(ClaimConstants.DB_USER_ID, "70"),
+                    new Claim(ClaimConstants.DB_ESTABLISHMENT_ID, "16")
                 }, "BypassAuth"));
                 context.User = user;
             }
