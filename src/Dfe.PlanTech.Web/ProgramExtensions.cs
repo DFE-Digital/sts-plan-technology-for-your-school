@@ -223,6 +223,7 @@ public static class ProgramExtensions
         services.AddTransient<IGetRecommendationRouter, GetRecommendationRouter>();
         services.AddTransient<IGetQuestionBySlugRouter, GetQuestionBySlugRouter>();
         services.AddTransient<ICheckAnswersRouter, CheckAnswersRouter>();
+        services.AddTransient<IGroupsRouter, GroupsRouter>();
 
         services.AddTransient((_) => SectionCompleteStatusChecker.SectionComplete);
         services.AddTransient((_) => SectionNotStartedStatusChecker.SectionNotStarted);
