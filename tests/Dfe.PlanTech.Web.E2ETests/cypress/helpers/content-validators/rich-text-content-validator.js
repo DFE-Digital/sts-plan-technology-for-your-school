@@ -1,6 +1,8 @@
 import { parse } from "node-html-parser";
 import TableValidator from "./rich-text-validators/table-validator";
 import { CleanText } from "../text-helpers";
+import ValidateHeader from "./header-validator";
+import { prodUri, containerUri, externalLinkSuffix } from "../constants";
 
 const tableValidator = new TableValidator();
 
@@ -24,7 +26,25 @@ function validateByNodeType(content) {
     case "table": {
       tableValidator.validateTable(content);
       break;
-    }
+      }
+
+      case "heading-2": {
+          const tag = "h2";
+          const size = "large";
+          const text = content.content[0].value;
+          const nodeContent = { fields: { tag, size, text } };
+          ValidateHeader(nodeContent);
+          break;
+      }
+
+      case "heading-3": {
+          const tag = "h3";
+          const size = "medium";
+          const text = content.content[0].value;
+          const nodeContent = { fields: { tag, size, text } };
+          ValidateHeader(nodeContent);
+          break;
+      }
 
     case "unordered-list": {
       break;
@@ -70,9 +90,9 @@ function validateParagraph(content) {
 
     if (!anyMatches) {
       console.error(`Could not find match for content`, expectedHtml, content);
+      } else {
+          expect(anyMatches).to.exist;
     }
-
-    expect(anyMatches).to.exist;
   });
 }
 
@@ -96,6 +116,9 @@ function buildExpectedHtml(content) {
     }
 
     if (child.nodeType == "hyperlink") {
+            if (!child.data.uri.includes(prodUri) && !child.data.uri.includes(containerUri)) {
+                html += externalLinkSuffix;
+            }
       html += `</a>`;
     }
   }

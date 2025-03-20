@@ -13,6 +13,7 @@ public class RobotsTxtMiddlewareTests
     private IOptions<RobotsConfiguration> _options = Substitute.For<IOptions<RobotsConfiguration>>();
     private readonly RobotsTxtMiddleware _middleware;
     private readonly HttpContext _httpContext;
+
     public RobotsTxtMiddlewareTests()
     {
         _httpContext = Substitute.For<HttpContext>();
@@ -24,7 +25,6 @@ public class RobotsTxtMiddlewareTests
         var next = (HttpContext hc) => Task.CompletedTask;
         _middleware = new RobotsTxtMiddleware(new RequestDelegate(next), _options);
     }
-
 
     [Fact]
     public async Task Should_Create_Valid_File()

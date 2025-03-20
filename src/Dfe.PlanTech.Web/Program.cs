@@ -1,16 +1,14 @@
-using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Helpers;
-using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Infrastructure.ServiceBus;
 using Dfe.PlanTech.Infrastructure.SignIns;
 using Dfe.PlanTech.Web;
 using Dfe.PlanTech.Web.Configuration;
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Models;
 using GovUk.Frontend.AspNetCore;
-using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +17,12 @@ builder.Services.AddResponseCompression(options =>
     options.EnableForHttps = true;
 });
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<MaintainUrlOnKeyNotFoundAttribute>();
+
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.AddService<MaintainUrlOnKeyNotFoundAttribute>();
+});
 
 if (!builder.Environment.IsDevelopment())
 {
@@ -54,7 +57,6 @@ builder.AddContentAndSupportServices()
 builder.Services.AddSingleton<ISystemTime, SystemTime>();
 builder.Services.Configure<RobotsConfiguration>(builder.Configuration.GetSection("Robots"));
 
-
 var app = builder.Build();
 
 app.UseRobotsTxtMiddleware();
@@ -82,13 +84,7 @@ app.UseExceptionHandler(exceptionHandlerApp =>
     exceptionHandlerApp.Run(async context =>
     {
         var exceptionHandlerMiddleware = context.RequestServices.GetRequiredService<IExceptionHandlerMiddleware>();
-        var pageQuery = context.RequestServices.GetRequiredService<IGetPageQuery>();
-        var errorPages = context.RequestServices.GetRequiredService<IOptions<ErrorPages>>();
-
-        var internalErrorPage = await pageQuery.GetPageById(errorPages.Value.InternalErrorPageId);
-        var internalErrorSlug = internalErrorPage?.Slug ?? UrlConstants.Error;
-
-        exceptionHandlerMiddleware.ContextRedirect(internalErrorSlug, context);
+        await exceptionHandlerMiddleware.HandleExceptionAsync(context);
     });
 });
 
