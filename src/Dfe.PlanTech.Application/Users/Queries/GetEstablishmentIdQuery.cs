@@ -29,6 +29,6 @@ public class GetEstablishmentIdQuery : IGetEstablishmentIdQuery
 
     public async Task<List<EstablishmentLink>> GetGroupEstablishments(int establishmentId)
     {
-        return await _db.GetGroupEstablishmentsById(establishment => establishment.Id == establishmentId);
+        return await _db.GetGroupEstablishmentsBy(establishment => establishment.Id == establishmentId);
     }
 }
