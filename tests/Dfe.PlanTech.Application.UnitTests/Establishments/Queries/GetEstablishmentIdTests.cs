@@ -91,7 +91,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Queries
             // Arrange
             var query = new GetEstablishmentIdQuery(Db);
 
-            Db.GetGroupEstablishmentsById(Arg.Any<Expression<Func<Establishment, bool>>>())
+            Db.GetGroupEstablishmentsBy(Arg.Any<Expression<Func<Establishment, bool>>>())
                      .Returns(_establishmentLinks);
 
             // Act
