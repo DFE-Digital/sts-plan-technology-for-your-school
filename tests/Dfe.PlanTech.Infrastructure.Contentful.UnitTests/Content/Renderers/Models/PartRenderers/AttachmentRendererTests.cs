@@ -106,7 +106,7 @@ public class AttachmentRendererTests
         stringBuilder.Append("<p class=\"attachment-metadata\">");
         stringBuilder.Append("<span class=\"attachment-attribute\" aria-label=\"updated date\">Last updated 1 January 2025");
         stringBuilder.Append("</span></p>");
-        
+
         stringBuilder.Append("</div></div></div>");
 
         return stringBuilder;

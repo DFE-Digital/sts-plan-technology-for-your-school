@@ -10,7 +10,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Mod
 public class AccordionRendererTests
 {
     private readonly ILogger<AccordionComponent> _logger = Substitute.For<ILogger<AccordionComponent>>();
-    
+
 
     [Fact]
     public void CheckNoContentReturnsEmptyStringBuilder()
