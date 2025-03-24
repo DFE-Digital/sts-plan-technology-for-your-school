@@ -1,0 +1,20 @@
+﻿@using Dfe.PlanTech.Web.Controllers
+@model Dfe.PlanTech.Web.Models.GroupsSchoolDashboardViewModel
+
+@section DfePageHeaderInner {
+    <partial name="Components/PageComponentFactory" model="@Model.Title" />
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <p>@Model.SchoolName</p>
+        <p>@Model.SchoolId</p>
+        @if (Model.Content != null)
+        {
+            foreach (var content in Model.Content)
+            {
+                <partial name="Components/PageComponentFactory" model="content" />
+            }
+        }
+    </div>
+</div>

@@ -21,11 +21,11 @@ public interface IGroupsRouter
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     IActionResult GetSelectASchool(string groupName,
-                                         List<EstablishmentLink> schools,
-                                         Title title,
-                                         List<ContentComponent> content,
-                                         GroupsController controller,
-                                         CancellationToken cancellationToken);
+                                   List<EstablishmentLink> schools,
+                                   Title title,
+                                   List<ContentComponent> content,
+                                   GroupsController controller,
+                                   CancellationToken cancellationToken);
 
 
     /// <summary>
@@ -34,6 +34,10 @@ public interface IGroupsRouter
     /// <param name="controller"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    IActionResult GetSchoolDashboard(GroupsController controller,
-                                           CancellationToken cancellationToken);
+    IActionResult GetSchoolDashboard(string schoolId,
+                                     string schoolName,
+                                     string groupName,
+                                     List<ContentComponent> pageContent,
+                                     GroupsController controller,
+                                     CancellationToken cancellationToken);
 }
