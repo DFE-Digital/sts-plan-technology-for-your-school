@@ -186,7 +186,7 @@ public class UserHelperTests
         Assert.Equal(_groupEstablishments[1].Id, result[1].Id);
     }
 
-   [Fact]
+    [Fact]
     public async Task SetEstablishment_Creates_Establishment_And_Returns_Id()
     {
         var establishmentDto = new EstablishmentDto
