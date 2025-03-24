@@ -14,23 +14,20 @@
                 <partial name="Components/PageComponentFactory" model="content" />
             }
         }
-        <form asp-action="select-a-school" method="post">
-            <govuk-radios name="select-a-school">
-                <govuk-radios-fieldset>
-                    <govuk-radios-fieldset-legend is-page-heading="false" class="govuk-fieldset__legend--l">Select a school</govuk-radios-fieldset-legend>
 
-                    @{
-                        foreach (var school in @Model.GroupEstablishments)
-                        {
-                            var schoolId = school.Id;
-
-                            <govuk-radios-item value="@schoolId">@school.EstablishmentName</govuk-radios-item>
-                        }
-                    }
-                </govuk-radios-fieldset>
-            </govuk-radios>
-            <govuk-button class="govuk-!-margin-right-5" type="submit" value="@GroupsController.GetSchoolDashboardAction">Submit</govuk-button>
-        </form>
+        @{
+            foreach (var school in @Model.GroupEstablishments)
+            {
+                var schoolId = school.Id;
+                var schoolName = school.EstablishmentName;
+                <form asp-action="SelectSchool" method="post">
+                    <button type="submit" class="govuk-button school-button" value="@schoolId">@schoolName</button>
+                    <input type="hidden" name="schoolId" value="@schoolId" />
+                    <input type="hidden" name="schoolName" value="@schoolName" />
+                    <p>Submission count unavailable</p>
+                </form>
+            }
+        }
     </div>
 </div>
     
