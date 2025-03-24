@@ -11,11 +11,17 @@ namespace Dfe.PlanTech.Web.Routing
         private const string selectASchoolViewName = "~/Views/Groups/GroupsSelectSchool.cshtml";
         private const string schoolDashboardViewName = "~/Views/Groups/GroupsSchoolDashboard.cshtml";
 
-        public IActionResult GetSchoolDashboard(GroupsController controller, CancellationToken cancellationToken)
+        public IActionResult GetSchoolDashboard(string schoolId, string schoolName, string groupName, List<ContentComponent> content, GroupsController controller, CancellationToken cancellationToken)
         {
-            var groupsViewModel = new GroupsSelectorViewModel();
-
-            return PageRedirecter.RedirectToSelfAssessment(controller);
+            var dashboardViewModel = new GroupsSchoolDashboardViewModel()
+            {
+                SchoolName = schoolName,
+                SchoolId = schoolId,
+                GroupName = groupName,
+                Title = new Title() { Text = "Plan technology for your school" },
+                Content = content
+            };
+            return controller.View(schoolDashboardViewName, dashboardViewModel);
         }
 
         public IActionResult GetSelectASchool(string groupName, List<EstablishmentLink> schools, Title title, List<ContentComponent> content, GroupsController controller, CancellationToken cancellationToken)

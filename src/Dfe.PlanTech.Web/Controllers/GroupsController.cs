@@ -26,7 +26,7 @@ namespace Dfe.PlanTech.Web.Controllers
             _logger = logger;
             _groupsRouter = groupsRouter;
         }
-        
+
         [HttpGet("groups/select-a-school")]
         public async Task<IActionResult> GetSelectASchoolView([FromServices] IGetPageQuery getPageQuery, CancellationToken cancellationToken)
         {
@@ -40,8 +40,31 @@ namespace Dfe.PlanTech.Web.Controllers
             return _groupsRouter.GetSelectASchool(groupName, schools, title, content, this, cancellationToken);
         }
 
-        [HttpGet("groups/dashboard", Name = GetSchoolDashboardAction)]
-        public IActionResult GetSchoolDashboardView(CancellationToken cancellationToken) => _groupsRouter.GetSchoolDashboard(this, cancellationToken);
+        [HttpPost("groups/select-a-school")]
+        public IActionResult SelectSchool(string schoolId, string schoolName)
+        {
+            TempData["SelectedSchoolId"] = schoolId;
+            TempData["SelectedSchoolName"] = schoolName;
 
+            return RedirectToAction("GetSchoolDashboardView");
+        }
+
+        [HttpGet("groups/dashboard", Name = GetSchoolDashboardAction)]
+        public async Task<IActionResult> GetSchoolDashboardView([FromServices] IGetPageQuery getPageQuery, CancellationToken cancellationToken)
+        {
+            var schoolId = TempData["SelectedSchoolId"] as string;
+            var schoolName = TempData["SelectedSchoolName"] as string;
+            var groupName = _user.GetOrganisationData().OrgName;
+            var pageContent = await getPageQuery.GetPageBySlug(GroupsSchoolDashboardSlug, cancellationToken);
+            List<ContentComponent> content = pageContent?.Content ?? new List<ContentComponent>();
+
+            if (string.IsNullOrEmpty(schoolName))
+            {
+                // Handle the case where the values are null or empty
+                return RedirectToAction("GetSelectASchoolView");
+            }
+
+            return _groupsRouter.GetSchoolDashboard(schoolId, schoolName, groupName, content, this, cancellationToken);
+        }
     }
 }
