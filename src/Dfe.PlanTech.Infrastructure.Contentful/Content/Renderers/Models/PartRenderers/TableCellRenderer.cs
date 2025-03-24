@@ -48,7 +48,8 @@ public class TableCellRenderer : BaseRichTextContentPartRender
             {
                 stringBuilder.Append("<br /><br />");
             }
-        };
+        }
+        ;
 
         return stringBuilder;
     }
