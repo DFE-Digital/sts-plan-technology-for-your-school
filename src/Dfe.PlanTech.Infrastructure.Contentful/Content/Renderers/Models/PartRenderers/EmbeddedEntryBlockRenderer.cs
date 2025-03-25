@@ -27,6 +27,9 @@ public class EmbeddedEntryBlockRenderer : BaseRichTextContentPartRender
 
         switch (richTextData.SystemProperties.ContentType?.SystemProperties.Id)
         {
+            case ContentTypeId.Card:
+                var card = new CardComponent();
+                return card.AddHtml(content, stringBuilder);
             case ContentTypeId.Attachment:
                 var attachment = new AttachmentComponent();
                 return attachment.AddHtml(content, stringBuilder);
