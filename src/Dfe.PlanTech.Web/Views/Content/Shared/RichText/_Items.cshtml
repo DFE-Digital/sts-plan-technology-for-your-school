@@ -1,9 +1,0 @@
-﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
-@model Dfe.PlanTech.Domain.Content.Models.ContentSupport.Mapped.RichTextContentItem
-
-@if (!Model.HasContent){ return; }
-
-@foreach (var childNode in Model.Content)
-{
-    <partial name="Shared/RichText/_RichText" model="@childNode"/>
-}
