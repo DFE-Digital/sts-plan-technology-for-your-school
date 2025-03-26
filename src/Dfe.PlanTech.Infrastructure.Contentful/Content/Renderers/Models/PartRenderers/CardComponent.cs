@@ -1,11 +1,13 @@
 ﻿using System.Text;
+using Dfe.PlanTech.Domain.Content.Enums;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 
-public class CardComponent
+public class CardComponent : BaseRichTextContentPartRender
 {
-    public CardComponent()
+    public CardComponent() : base(RichTextNodeType.CsCard)
     {
 
     }
@@ -23,7 +25,7 @@ public class CardComponent
         };
     }
 
-    public StringBuilder AddHtml(RichTextContent content, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(RichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
         var target = content?.Data?.Target;
 

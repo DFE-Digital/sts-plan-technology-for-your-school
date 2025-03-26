@@ -29,7 +29,7 @@ public class EmbeddedEntryBlockRenderer : BaseRichTextContentPartRender
         {
             case ContentTypeId.Card:
                 var card = new CardComponent();
-                return card.AddHtml(content, stringBuilder);
+                return card.AddHtml(content, rendererCollection, stringBuilder);
             case ContentTypeId.Attachment:
                 var attachment = new AttachmentComponent();
                 return attachment.AddHtml(content, stringBuilder);
