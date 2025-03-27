@@ -52,6 +52,7 @@ public static class ContentfulSetup
 
         services.AddScoped<IRichTextRenderer, RichTextRenderer>();
         services.AddScoped<IRichTextContentPartRendererCollection, RichTextRenderer>();
+        services.AddScoped<ICardContainerContentPartRenderer, GridContainerRenderer>();
 
         foreach (var partRenderer in richTextPartRenderers)
         {
