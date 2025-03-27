@@ -68,6 +68,10 @@ variable "az_sql_max_pool_size" {
   default     = 100
 }
 
+variable "mssql_firewall_ipv4_allow_list" {
+  description = "A list of IPv4 Addresses that require remote access to the MSSQL Server"
+  type        = list(string)
+}
 #####################
 # Azure Redis Cache #
 #####################
