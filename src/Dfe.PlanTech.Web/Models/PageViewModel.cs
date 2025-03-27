@@ -32,6 +32,7 @@ public class PageViewModel
         var establishment = user.GetOrganisationData();
 
         Page.OrganisationName = establishment.OrgName;
+
     }
 
     public bool DisplayBlueBanner { get; set; }

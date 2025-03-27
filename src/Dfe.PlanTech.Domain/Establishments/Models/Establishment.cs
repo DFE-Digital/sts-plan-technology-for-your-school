@@ -51,6 +51,8 @@ public class Establishment
         }
     }
 
+    public string? GroupUid { get; set; }
+
     public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
     public DateTime? DateLastUpdated { get; set; }
