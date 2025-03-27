@@ -94,7 +94,8 @@ public class RecordUserSignInCommand : IRecordUserSignInCommand
             {
                 Name = recordUserSignInDto.Organisation.Type.Name
             },
-            OrgName = recordUserSignInDto.Organisation.Name
+            OrgName = recordUserSignInDto.Organisation.Name,
+            GroupUid = recordUserSignInDto.Organisation.Uid
         });
     }
 
