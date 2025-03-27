@@ -1,0 +1,1 @@
+mssql_firewall_ipv4_allow_list = [ "8.8.8.8", "1.1.1.1" ]
