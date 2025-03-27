@@ -86,3 +86,21 @@ button.govuk-button--white {
     display: none !important;
     visibility: hidden !important;
 }
+
+.school-button {
+    font-size: 24px;
+    background-color: #ffffff;
+    color: #1d70b8;
+    padding-left: 0px;
+    box-shadow: none !important;
+    text-decoration: underline 1px !important;
+    text-underline-offset: 4px;
+    font-weight: bold !important;
+    margin-bottom: 8px;
+}
+
+.school-button:hover {
+    color: #003078;
+    background-color: #ffffff;
+    text-decoration-thickness: 2px !important;
+}

@@ -13,5 +13,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         InsetText BuildInsetText();
         TextBody BuildTextBody();
         List<Section> BuildSections();
+        Page BuildPage();
     }
 }

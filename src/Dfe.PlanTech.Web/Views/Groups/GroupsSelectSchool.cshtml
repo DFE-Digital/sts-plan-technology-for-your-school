@@ -1,0 +1,33 @@
+﻿@using Dfe.PlanTech.Web.Controllers
+@model Dfe.PlanTech.Web.Models.GroupsSelectorViewModel
+
+@section DfePageHeaderInner {
+    <partial name="Components/PageComponentFactory" model="@Model.Title" />
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        @if (Model.Content != null)
+        {
+            foreach (var content in Model.Content)
+            {
+                <partial name="Components/PageComponentFactory" model="content" />
+            }
+        }
+
+        @{
+            foreach (var school in @Model.GroupEstablishments)
+            {
+                var schoolId = school.Id;
+                var schoolName = school.EstablishmentName;
+                <form asp-action="SelectSchool" method="post">
+                    <button type="submit" class="govuk-button school-button" value="@schoolId">@schoolName</button>
+                    <input type="hidden" name="schoolId" value="@schoolId" />
+                    <input type="hidden" name="schoolName" value="@schoolName" />
+                    <p>Submission count unavailable</p>
+                </form>
+            }
+        }
+    </div>
+</div>
+    
