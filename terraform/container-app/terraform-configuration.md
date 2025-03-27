@@ -138,7 +138,6 @@ We use two external modules to create the majority of the resources required:
 | <a name="input_registry_server"></a> [registry\_server](#input\_registry\_server) | Container registry server | `string` | n/a | yes |
 | <a name="input_registry_username"></a> [registry\_username](#input\_registry\_username) | Container registry username | `string` | n/a | yes |
 | <a name="input_storage_account_expiration_period"></a> [storage\_account\_expiration\_period](#input\_storage\_account\_expiration\_period) | The SAS expiration period in format of DD.HH:MM:SS | `string` | `"00.01:00:00"` | no |
-| <a name="input_storage_account_public_access_enabled"></a> [storage\_account\_public\_access\_enabled](#input\_storage\_account\_public\_access\_enabled) | Enable public network access | `bool` | `false` | no |
 
 ## Outputs
 
