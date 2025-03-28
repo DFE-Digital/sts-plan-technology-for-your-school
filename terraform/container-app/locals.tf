@@ -54,7 +54,7 @@ locals {
   az_sql_max_pool_size          = var.az_sql_max_pool_size
   az_sql_max_size_gb            = local.az_sql_sku == "Basic" ? null : 10
   
-  mssql_firewall_ipv4_allow_list = var.mssql_firewall_ipv4_allow_list
+  mssql_firewall_ipv4_allow_list = var.mssql_firewall_ipv4_allow_list[var.environment]
 
   az_sql_vnet = {
     dns_zone_name = "privatelink.database.windows.net"
