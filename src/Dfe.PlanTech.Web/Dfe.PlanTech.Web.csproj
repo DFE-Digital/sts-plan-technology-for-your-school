@@ -50,6 +50,10 @@
         <None Remove="Views\Recommendations\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Content\" />
+    </ItemGroup>
+
     <Target Name="BuildWebAssets" BeforeTargets="Build" Condition="'$(buildWebAssets)' == 'true'">
         <Exec Command="npm install" WorkingDirectory="../Dfe.PlanTech.Web.Node" />
         <Exec Command="npm run build" WorkingDirectory="../Dfe.PlanTech.Web.Node" />
