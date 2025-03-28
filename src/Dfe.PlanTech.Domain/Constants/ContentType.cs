@@ -4,5 +4,4 @@ public static class ContentTypeId
 {
     public const string Attachment = "Attachment";
     public const string Accordion = "CSAccordion";
-    public const string Card = "csCard";
 }
