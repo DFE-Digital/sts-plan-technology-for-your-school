@@ -62,12 +62,3 @@ module "main_hosting" {
   ###########
   storage_account_sas_expiration_period = local.storage_account_expiration_period
 }
-
-
-output "mssql_firewall_ipv4_allow_list" {
-  value = local.mssql_firewall_ipv4_allow_list
-}
-
-output "environment" {
-  value = local.environment
-}
