@@ -69,5 +69,5 @@ output "mssql_firewall_ipv4_allow_list" {
 }
 
 output "environment" {
-  value = 
+  value = var.environment
 }
