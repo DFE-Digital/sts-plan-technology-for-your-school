@@ -12,6 +12,10 @@
         <Content Update="Properties\launchSettings.json">
             <CopyToPublishDirectory>Never</CopyToPublishDirectory>
         </Content>
+        <Content Update="Views\Recommendations\SubHeading.cshtml">
+          <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+          <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        </Content>
         <Content Update="Views\Shared\NotFoundError.cshtml">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
