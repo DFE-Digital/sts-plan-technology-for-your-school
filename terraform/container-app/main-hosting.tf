@@ -65,5 +65,5 @@ module "main_hosting" {
 
 
 output "mssql_firewall_ipv4_allow_list" {
-  value = mssql_firewall_ipv4_allow_list
+  value = var.mssql_firewall_ipv4_allow_list
 }
