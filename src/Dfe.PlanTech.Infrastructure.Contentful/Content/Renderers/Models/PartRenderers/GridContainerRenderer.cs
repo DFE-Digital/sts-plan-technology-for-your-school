@@ -25,7 +25,7 @@ public class GridContainerRenderer : ICardContainerContentPartRenderer
         stringBuilder.Append("<div class=\"govuk-grid-column-two-thirds\">");
         stringBuilder.Append("<div class=\"dfe-grid-container\">");
 
-        foreach(var csCard in content)
+        foreach (var csCard in content)
         {
             _cardContentPartRenderer.AddHtml(csCard, stringBuilder);
         }
