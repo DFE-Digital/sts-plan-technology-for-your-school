@@ -21,7 +21,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Mod
             {
                 InternalName = "SecondCard",
                 Uri = "http://www.linktosecondcard.com",
-                Description = "Description of Second card"
+                Description = "Description of second card"
             };
         }
 
@@ -31,7 +31,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Mod
             {
                 InternalName = "ThirdCard",
                 Uri = "http://www.linktothirdcard.com",
-                Description = "Description of Third card"
+                Description = "Description of third card"
             };
         }
 
@@ -41,7 +41,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Mod
             {
                 InternalName = "FourthCard",
                 Uri = "http://www.linktoffourthcard.com",
-                Description = "Description of Fourth card"
+                Description = "Description of fourth card"
             };
         }
 
@@ -93,7 +93,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Mod
             stringBuilder.Append("<div class=\"dfe-card\">");
             stringBuilder.Append("<div class=\"dfe-card-container\">");
             stringBuilder.Append("<h3 class=\"govuk-heading-m\">");
-            stringBuilder.Append($"<a href=\"http://www.linktofourthcard.com\" class=\"govuk-link govuk-link--no-visited-state dfe-card-link--header\">FourthCard</a>");
+            stringBuilder.Append($"<a href=\"http://www.linktoffourthcard.com\" class=\"govuk-link govuk-link--no-visited-state dfe-card-link--header\">FourthCard</a>");
             stringBuilder.Append("</h3>");
             stringBuilder.Append($"<p class=\"govuk-body-s\">Description of fourth card</p>");
             stringBuilder.Append("</div></div>");

@@ -20,7 +20,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Mod
             var renderer = new CardComponent();
             var result = renderer.AddHtml(GetFirstCard(), new StringBuilder());
 
-            Assert.Equal(GetFirstCardView(), result);
+            Assert.Equal(GetFirstCardView().ToString(), result.ToString());
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Mod
             var renderer = new CardComponent();
             var result = renderer.AddHtml(GetSecondCard(), new StringBuilder());
 
-            Assert.Equal(GetSecondCardView(), result);
+            Assert.Equal(GetSecondCardView().ToString(), result.ToString());
         }
 
         [Fact]
@@ -38,7 +38,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Mod
             var renderer = new CardComponent();
             var result = renderer.AddHtml(GetThirdCard(), new StringBuilder());
 
-            Assert.Equal(GetThirdCardView(), result);
+            Assert.Equal(GetThirdCardView().ToString(), result.ToString());
         }
 
         [Fact]
@@ -47,7 +47,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Mod
             var renderer = new CardComponent();
             var result = renderer.AddHtml(GetFourthCard(), new StringBuilder());
 
-            Assert.Equal(GetFourthCardView(), result);
+            Assert.Equal(GetFourthCardView().ToString(), result.ToString());
         }
     }
 }
