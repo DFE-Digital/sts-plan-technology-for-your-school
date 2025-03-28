@@ -1,5 +1,6 @@
 mssql_firewall_ipv4_allow_list = {
     Dev = {
+        JAG = { start_ip_range = "86.27.237.79", end_ip_range = "86.27.237.79" }
         DFE_VPN_1 = { start_ip_range = "208.127.46.234", end_ip_range = "208.127.46.238" }
         DFE_VPN_2 = { start_ip_range = "208.127.46.242", end_ip_range = "208.127.46.254" }
         Drew_Home = { start_ip_range = "208.127.46.248" }
