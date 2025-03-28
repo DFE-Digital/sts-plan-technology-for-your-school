@@ -8,7 +8,6 @@ public class CardComponent : ICardContentPartRenderer
 {
     public CardComponent()
     {
-
     }
 
     public StringBuilder AddHtml(CsCard? cardComponent, StringBuilder stringBuilder)
