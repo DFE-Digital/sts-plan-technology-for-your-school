@@ -9,7 +9,7 @@ public class GridContainerTagHelper(ILogger<GridContainerTagHelper> logger, ICar
     private readonly ILogger<GridContainerTagHelper> _logger = logger;
     private readonly ICardContainerContentPartRenderer _cardContentPartRenderer = cardContentPartRenderer;
 
-    public List<CsCard>? Content { get; set; }
+    public IReadOnlyList<CsCard>? Content { get; set; }
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
