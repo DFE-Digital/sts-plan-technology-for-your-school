@@ -65,5 +65,6 @@ module "main_hosting" {
 
 
 output "mssql_firewall_ipv4_allow_list" {
-  value = var.mssql_firewall_ipv4_allow_list
+  value = lookup(var.mssql_firewall_ipv4_allow_list, var.environment, {})
+
 }
