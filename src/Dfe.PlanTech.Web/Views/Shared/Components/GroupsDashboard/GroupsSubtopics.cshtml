@@ -1,0 +1,32 @@
+﻿@using Dfe.PlanTech.Web.TagHelpers.TaskList
+@using GovUk.Frontend.AspNetCore.TagHelpers
+@using AnchorTagHelper = Microsoft.AspNetCore.Mvc.TagHelpers.AnchorTagHelper
+@model GroupsDashboardViewComponentViewModel
+
+<dl class="govuk-summary-list dfe-self-assessment-list">
+    @foreach (var groupsCategorySectionDtoItem in Model.GroupsCategorySectionDto)
+    {
+        <div class="govuk-summary-list__row">
+            @if (groupsCategorySectionDtoItem.Slug != null)
+            {
+                <dt class="govuk-summary-list__key govuk-!-font-weight-regular">
+                    <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@groupsCategorySectionDtoItem.Slug"
+                        class="govuk-link">
+                        @groupsCategorySectionDtoItem.Name
+                    </a>
+                </dt>
+                <dd class="govuk-summary-list__value govuk-!-text-align-left">
+                    <task-list-tag colour=@groupsCategorySectionDtoItem.Tag.Colour>
+                        @groupsCategorySectionDtoItem.Tag.Text
+                    </task-list-tag>
+                </dd>
+            }
+            else
+            {
+                <dt class="govuk-summary-list__key">
+                    <govuk-error-message>@groupsCategorySectionDtoItem.ErrorMessage</govuk-error-message>
+                </dt>
+            }
+        </div>
+    }
+</dl>

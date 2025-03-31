@@ -60,7 +60,6 @@ namespace Dfe.PlanTech.Web.Controllers
 
             if (string.IsNullOrEmpty(schoolName))
             {
-                // Handle the case where the values are null or empty
                 return RedirectToAction("GetSelectASchoolView");
             }
 

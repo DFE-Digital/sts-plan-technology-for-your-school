@@ -16,6 +16,8 @@
         <p>You are viewing @Model.SchoolName's status.</>
         @if (Model.Content != null)
         {
+            ViewData["PageSlug"] = Model.Slug;
+
             foreach (var content in Model.Content)
             {
                 <partial name="Components/PageComponentFactory" model="content" />

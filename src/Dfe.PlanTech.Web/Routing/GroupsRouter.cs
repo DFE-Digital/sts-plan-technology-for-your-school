@@ -19,7 +19,8 @@ namespace Dfe.PlanTech.Web.Routing
                 SchoolId = schoolId,
                 GroupName = groupName,
                 Title = new Title() { Text = "Plan technology for your school" },
-                Content = content
+                Content = content,
+                Slug = "dashboard"
             };
             return controller.View(schoolDashboardViewName, dashboardViewModel);
         }
