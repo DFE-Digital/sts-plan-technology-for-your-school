@@ -37,7 +37,7 @@ public class GroupsCategorySectionDto
         else if (retrievalError)
             Tag = new Tag("unable to retrieve status", TagColour.Red);
         else if (completed)
-            Tag = new Tag($"Completed {lastEdited}", TagColour.LightBlue);
+            Tag = new Tag($"Completed {lastEdited}", TagColour.Blue);
         else
             Tag = new Tag("not started", TagColour.Grey);
     }
