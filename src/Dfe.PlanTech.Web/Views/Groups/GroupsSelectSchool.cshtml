@@ -18,7 +18,7 @@
         @{
             foreach (var school in @Model.GroupEstablishments)
             {
-                var schoolId = school.Id;
+                var schoolId = school.Urn;
                 var schoolName = school.EstablishmentName;
                 <form asp-action="SelectSchool" method="post">
                     <button type="submit" class="govuk-button school-button" value="@schoolId">@schoolName</button>
