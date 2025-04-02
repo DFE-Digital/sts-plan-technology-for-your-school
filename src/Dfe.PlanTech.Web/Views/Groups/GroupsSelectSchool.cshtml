@@ -16,13 +16,14 @@
         }
 
         @{
+            <h2 class="govuk-heading-l">Select a school</h2>
             foreach (var school in @Model.GroupEstablishments)
             {
-                var schoolId = school.Id;
+                var schoolUrn = school.Urn;
                 var schoolName = school.EstablishmentName;
                 <form asp-action="SelectSchool" method="post">
-                    <button type="submit" class="govuk-button school-button" value="@schoolId">@schoolName</button>
-                    <input type="hidden" name="schoolId" value="@schoolId" />
+                    <button type="submit" class="govuk-button school-button" value="@schoolUrn">@schoolName</button>
+                    <input type="hidden" name="schoolUrn" value="@schoolUrn" />
                     <input type="hidden" name="schoolName" value="@schoolName" />
                     <p>Submission count unavailable</p>
                 </form>

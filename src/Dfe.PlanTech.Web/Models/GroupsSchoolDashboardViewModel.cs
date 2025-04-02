@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Web.Models
 
         public string? SchoolName { get; set; }
 
-        public string SchoolId { get; set; } = null!;
+        public int SchoolId { get; set; }
 
         public string GroupName { get; set; } = null!;
 
