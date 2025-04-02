@@ -44,9 +44,9 @@ env:
   TF_VAR_registry_username: ${{ secrets.AZ_CLIENT_ID }}
   TF_VAR_registry_password: ${{ secrets.AZ_CLIENT_SECRET }}
 
-  container_app_min_replicas: ${{secrets.CONTAINER_MIN_REPLICAS}}
-  container_app_max_replicas: ${{secrets.CONTAINER_MAX_REPLICAS}}
-  container_app_http_concurrency: ${{secrets.CONTAINER_HTTP_CONCURRENCY}}
+  container_app_min_replicas: ${{env.CONTAINER_MIN_REPLICAS}}
+  container_app_max_replicas: ${{env.CONTAINER_MAX_REPLICAS}}
+  container_app_http_concurrency: ${{env.CONTAINER_HTTP_CONCURRENCY}}
 
   container_environment: ${{ inputs.environment }}
 
