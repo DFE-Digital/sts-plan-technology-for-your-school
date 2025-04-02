@@ -14,12 +14,6 @@ mssql_firewall_ipv4_allow_list = {
         Ken = { start_ip_range = "149.13.184.32" }
     },
     Test = {},
-    Staging = {
-        dev_1 = { start_ip_range = "192.168.1.1", end_ip_range = "192.168.1.1" }
-        dev_2 = { start_ip_range = "192.168.1.2", end_ip_range = "192.168.1.2" }
-    },
-    Prod = {
-        dev_1 = { start_ip_range = "192.168.1.1", end_ip_range = "192.168.1.1" }
-        dev_2 = { start_ip_range = "192.168.1.2", end_ip_range = "192.168.1.2" }
-    },
+    Staging = {},
+    Prod = {},
 }
