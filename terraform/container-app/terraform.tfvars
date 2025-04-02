@@ -19,6 +19,6 @@ mssql_firewall_ipv4_allow_list = {
 }
 
 az_sql_sku = {
-    Staging = "S2"
+    Staging = "S2",
     Prod = "S2"
 }
