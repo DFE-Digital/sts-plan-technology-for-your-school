@@ -50,7 +50,7 @@ locals {
   az_sql_admin_password         = var.az_sql_admin_password
   az_sql_azuread_admin_objectid = var.az_sql_azuread_admin_objectid
   az_use_azure_ad_auth_only     = var.az_tag_environment != "Dev"
-  az_sql_sku                    = var.az_sql_sku
+  az_sql_sku                    = var.az_sql_sku[var.az_tag_environment]
   az_sql_max_pool_size          = var.az_sql_max_pool_size
   az_sql_max_size_gb            = local.az_sql_sku == "Basic" ? null : 10
   
