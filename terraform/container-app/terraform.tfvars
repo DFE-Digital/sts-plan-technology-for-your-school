@@ -19,6 +19,8 @@ mssql_firewall_ipv4_allow_list = {
 }
 
 az_sql_sku = {
+    Dev = "Basic",
+    Test = "Basic",
     Staging = "S2",
     Prod = "S2"
 }

@@ -58,8 +58,7 @@ variable "az_sql_admin_password" {
 
 variable "az_sql_sku" {
   description = "What SKU/plan to use for the SQL DB"
-  type        = string
-  default     = "Basic"
+  type        = type = map(string)
 }
 
 variable "az_sql_max_pool_size" {
