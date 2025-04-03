@@ -147,6 +147,9 @@ jobs:
       # - name: Terraform import
       #   id: import
       #   run: terraform import module.main_hosting.azurerm_mssql_server_extended_auditing_policy.default[0] /subscriptions/020c6d9f-bcd5-4aab-a512-431625e93225/resourceGroups/s190p02-plantech/providers/Microsoft.Sql/servers/s190p02-plantech/extendedAuditingSettings/Default
+      - name: Terraform unlock
+        id: unlock
+        run: terraform force-unlock 2f02b712-d477-360c-31be-405a08c9e42b
 
       - name: Terraform State
         id: state
