@@ -62,8 +62,8 @@ public class UserHelperTests
 
     private readonly List<EstablishmentLink> _groupEstablishments = new()
     {
-        new EstablishmentLink { Id = 1, GroupUid = "123", EstablishmentName = "First Establishment", Urn = 12345 },
-        new EstablishmentLink { Id = 2, GroupUid = "123", EstablishmentName = "Second Establishment", Urn = 67890 }
+        new EstablishmentLink { Id = 1, GroupUid = "123", EstablishmentName = "First Establishment", Urn = "12345" },
+        new EstablishmentLink { Id = 2, GroupUid = "123", EstablishmentName = "Second Establishment", Urn = "67890" }
     };
 
 

@@ -35,7 +35,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Queries
             Id = 1,
             GroupUid = "GroupUID123",
             EstablishmentName = "First Establishment",
-            Urn = 12345
+            Urn = "12345"
         };
 
         private static readonly EstablishmentLink SecondEstablishmentLink = new()
@@ -43,7 +43,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Queries
             Id = 2,
             GroupUid = "GroupUID456",
             EstablishmentName = "Second Establishment",
-            Urn = 67890
+            Urn = "67890"
         };
 
         public IPlanTechDbContext Db = Substitute.For<IPlanTechDbContext>();
