@@ -129,15 +129,17 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             };
         }
 
-        private static Page BuildPage(string? param = null)
-        => new()
+        public Page BuildPage()
         {
-            InternalName = "Internal Name",
-            Slug = "testing-page",
-            SectionTitle = "Section Title",
-            Title = BuildTitle(),
-            Content = []
-        };
+            return new Page()
+            {
+                InternalName = "Internal Name",
+                Slug = "testing-page",
+                SectionTitle = "Section Title",
+                Title = BuildTitle(),
+                Content = []
+            };
+        }
 
         private static Title BuildTitle(string text = "Testing Title")
         => new()
