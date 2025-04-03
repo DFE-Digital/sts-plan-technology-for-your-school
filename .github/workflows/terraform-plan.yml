@@ -86,6 +86,10 @@ jobs:
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
           az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
+      - name: get AZ account show
+        shell: bash
+        run: az account show
+
       - name: Replace in secret environment variable
         run: |
           AZ_SA_COSTING_NAME="${{ env.AZ_SA_COSTING_NAME }}"
