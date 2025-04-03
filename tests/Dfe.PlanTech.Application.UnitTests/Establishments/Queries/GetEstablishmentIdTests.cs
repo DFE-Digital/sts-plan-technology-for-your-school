@@ -30,6 +30,22 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Queries
             EstablishmentRef = "Ref-Three"
         };
 
+        private static readonly EstablishmentLink FirstEstablishmentLink = new()
+        {
+            Id = 1,
+            GroupUid = "GroupUID123",
+            EstablishmentName = "First Establishment",
+            Urn = "12345"
+        };
+
+        private static readonly EstablishmentLink SecondEstablishmentLink = new()
+        {
+            Id = 2,
+            GroupUid = "GroupUID456",
+            EstablishmentName = "Second Establishment",
+            Urn = "67890"
+        };
+
         public IPlanTechDbContext Db = Substitute.For<IPlanTechDbContext>();
 
         public GetEstablishmentIdQuery CreateStrut()
@@ -38,6 +54,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Queries
         }
 
         private readonly List<Establishment> _establishments = new() { FirstEstablishment, SecondEstablishment, ThirdEstablishment };
+        private readonly List<EstablishmentLink> _establishmentLinks = new() { FirstEstablishmentLink, SecondEstablishmentLink };
 
         [Theory]
         [InlineData(1)]
@@ -64,6 +81,27 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Queries
 
             //Assert
             Assert.Equal(expectedEstablishment.Id, result);
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        public async Task GetGroupEstablishmentsById_Returns_Correct_Establishment_Links(int establishmentId)
+        {
+            // Arrange
+            var query = new GetEstablishmentIdQuery(Db);
+
+            Db.GetGroupEstablishmentsById(Arg.Any<Expression<Func<Establishment, bool>>>())
+                     .Returns(_establishmentLinks);
+
+            // Act
+            var result = await query.GetGroupEstablishments(establishmentId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(_establishmentLinks.Count, result.Count);
+            Assert.Contains(_establishmentLinks, link => link.Id == establishmentId);
+            ;
         }
     }
 }

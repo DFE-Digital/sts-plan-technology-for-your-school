@@ -32,6 +32,8 @@ public interface IPlanTechDbContext
 
     Task<Establishment?> GetEstablishmentBy(Expression<Func<Establishment, bool>> predicate);
 
+    Task<List<EstablishmentLink>> GetGroupEstablishmentsById(Expression<Func<Establishment, bool>> predicate);
+
     Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default);
 
     Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default);
