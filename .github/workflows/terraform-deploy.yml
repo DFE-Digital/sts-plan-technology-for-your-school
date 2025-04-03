@@ -142,7 +142,7 @@ jobs:
 
       - name: Apply Terraform changes
         id: apply
-        run: terraform apply -auto-approve
+        run: TF_LOG=DEBUG terraform apply -auto-approve
 
       - name: Remove Runner to Blobforcost SA
         uses: azure/CLI@v1
