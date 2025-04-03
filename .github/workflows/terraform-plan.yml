@@ -142,7 +142,7 @@ jobs:
 
       - name: Terraform unlock
         id: unlock
-        run: terraform force-unlock 2f02b712-d477-360c-31be-405a08c9e42b
+        run: terraform force-unlock -force 2f02b712-d477-360c-31be-405a08c9e42b
 
       - name: Plan Terraform changes
         id: plan
