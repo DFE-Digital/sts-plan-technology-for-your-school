@@ -144,6 +144,10 @@ jobs:
         id: plan
         run: terraform plan
 
+      - name: Terraform State
+        id: plan
+        run: terraform state list
+
       - name: Remove Runner to Blobforcost SA
         uses: azure/CLI@v1
         if: always()
