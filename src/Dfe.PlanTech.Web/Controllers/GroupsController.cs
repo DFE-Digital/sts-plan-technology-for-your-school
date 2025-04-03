@@ -1,5 +1,6 @@
 ﻿using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Models;
@@ -20,13 +21,15 @@ namespace Dfe.PlanTech.Web.Controllers
         private readonly IUser _user;
         private readonly ILogger _logger;
         private readonly IGetEstablishmentIdQuery _getEstablishmentIdQuery;
+        private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
 
-        public GroupsController(ILogger<GroupsController> logger, IExceptionHandlerMiddleware exceptionHandler, IUser user, IGetEstablishmentIdQuery getEstablishmentIdQuery) : base(logger)
+        public GroupsController(ILogger<GroupsController> logger, IExceptionHandlerMiddleware exceptionHandler, IUser user, IGetEstablishmentIdQuery getEstablishmentIdQuery, IGetSubmissionStatusesQuery getSubmissionStatusesQuery) : base(logger)
         {
             _logger = logger;
             _exceptionHandler = exceptionHandler;
             _user = user;
             _getEstablishmentIdQuery = getEstablishmentIdQuery;
+            _getSubmissionStatusesQuery = getSubmissionStatusesQuery;
         }
 
         [HttpGet($"{GroupsSlug}/{GroupsSelectorPageSlug}")]

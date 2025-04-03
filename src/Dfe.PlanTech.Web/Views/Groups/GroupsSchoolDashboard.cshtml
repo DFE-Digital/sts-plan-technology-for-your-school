@@ -17,7 +17,7 @@
         @if (Model.Content != null)
         {
             ViewData["PageSlug"] = Model.Slug;
-            ViewData["SchoolId"] = Model.SchoolId;
+            ViewData["SchoolId"] = Model.SchoolId.ToString();
 
             foreach (var content in Model.Content)
             {
