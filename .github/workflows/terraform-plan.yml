@@ -146,8 +146,7 @@ jobs:
 
       - name: Terraform State
         id: state
-        run: terraform state list && \
-            terraform state show module.main_hosting.azurerm_mssql_server_extended_auditing_policy.default[0]
+        run: terraform state list && terraform state show module.main_hosting.azurerm_mssql_server_extended_auditing_policy.default[0]
 
       - name: Remove Runner to Blobforcost SA
         uses: azure/CLI@v1
