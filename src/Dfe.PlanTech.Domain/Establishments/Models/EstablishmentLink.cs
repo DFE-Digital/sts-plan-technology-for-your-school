@@ -8,5 +8,5 @@ public class EstablishmentLink
 
     public string EstablishmentName { get; set; } = null!;
 
-    public int Urn { get; set; }
+    public string Urn { get; set; } = null!;
 }

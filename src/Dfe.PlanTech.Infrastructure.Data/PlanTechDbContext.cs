@@ -142,7 +142,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
 
     public Task<Establishment?> GetEstablishmentBy(Expression<Func<Establishment, bool>> predicate) => Establishments.FirstOrDefaultAsync(predicate);
 
-    public Task<List<EstablishmentLink>> GetGroupEstablishmentsBy(Expression<Func<Establishment, bool>> predicate) =>
+    public Task<List<EstablishmentLink>> GetGroupEstablishmentsById(Expression<Func<Establishment, bool>> predicate) =>
         Establishments
             .Where(predicate)
             .Join(EstablishmentGroups, establishment => establishment.GroupUid, group => group.Uid, (establishment, group) => group)

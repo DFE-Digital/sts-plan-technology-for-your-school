@@ -12,13 +12,13 @@ namespace Dfe.PlanTech.Domain.UnitTests.Establishments.Models
                 Id = 1,
                 GroupUid = "1234",
                 EstablishmentName = "Test Establishment",
-                Urn = 12345
+                Urn = "12345"
             };
 
             Assert.Equal(1, establishmentLink.Id);
             Assert.Equal("1234", establishmentLink.GroupUid);
             Assert.Equal("Test Establishment", establishmentLink.EstablishmentName);
-            Assert.Equal(12345, establishmentLink.Urn);
+            Assert.Equal("12345", establishmentLink.Urn);
         }
     }
 }
