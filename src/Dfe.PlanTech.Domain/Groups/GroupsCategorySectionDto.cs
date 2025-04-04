@@ -30,9 +30,10 @@ public class GroupsCategorySectionDto
         Slug = slug;
         Name = name;
         Recommendation = recommendation;
-        var started = sectionStatus != null;
-        var completed = sectionStatus?.Completed == true;
+        var previouslyCompleted = sectionStatus?.LastCompletionDate != null;
+        var currentCompleted = sectionStatus?.Completed == true;
         var lastEdited = LastEditedDate(sectionStatus?.DateUpdated, systemTime);
+        var lastCompleted = LastEditedDate(sectionStatus?.LastCompletionDate, systemTime);
         if (string.IsNullOrWhiteSpace(slug))
         {
             ErrorMessage = $"{Name} unavailable";
@@ -40,8 +41,10 @@ public class GroupsCategorySectionDto
         }
         else if (retrievalError)
             Tag = new Tag("unable to retrieve status", TagColour.Red);
-        else if (completed)
+        else if (currentCompleted)
             Tag = new Tag($"Completed {lastEdited}", TagColour.Blue);
+        else if (previouslyCompleted)
+            Tag = new Tag($"Completed {lastCompleted}", TagColour.Blue);
         else
             Tag = new Tag("not started", TagColour.Grey);
     }
