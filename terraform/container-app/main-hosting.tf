@@ -68,4 +68,6 @@ module "main_hosting" {
   enable_network_watcher = false
   enable_network_watcher_traffic_analytics = false
 
+
+  launch_in_vnet = false
 }
