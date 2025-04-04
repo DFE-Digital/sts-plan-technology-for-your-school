@@ -61,4 +61,11 @@ module "main_hosting" {
   # Storage #
   ###########
   storage_account_sas_expiration_period = local.storage_account_expiration_period
+
+  ###################################
+  # Deploy an Azure Network Watcher #
+  ###################################
+  enable_network_watcher = true
+  network_watcher_flow_log_retention = 90 # Days
+
 }
