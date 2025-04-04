@@ -65,7 +65,7 @@ module "main_hosting" {
   ###################################
   # Deploy an Azure Network Watcher #
   ###################################
-  enable_network_watcher = true
-  network_watcher_flow_log_retention = 90 # Days
+  enable_network_watcher = false
+  # network_watcher_flow_log_retention = 90 # Days
 
 }
