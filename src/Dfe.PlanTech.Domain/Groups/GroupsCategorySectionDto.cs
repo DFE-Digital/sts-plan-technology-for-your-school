@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Domain.CategorySection;
 using Dfe.PlanTech.Domain.Constants;
 using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
@@ -17,19 +16,15 @@ public class GroupsCategorySectionDto
 
     public string? ErrorMessage { get; init; }
 
-    public CategorySectionRecommendationDto? Recommendation { get; init; }
-
     public GroupsCategorySectionDto(
         string? slug,
         string name,
         bool retrievalError,
         SectionStatusDto? sectionStatus,
-        CategorySectionRecommendationDto recommendation,
         ISystemTime systemTime)
     {
         Slug = slug;
         Name = name;
-        Recommendation = recommendation;
         var previouslyCompleted = sectionStatus?.LastCompletionDate != null;
         var currentCompleted = sectionStatus?.Completed == true;
         var lastEdited = LastEditedDate(sectionStatus?.DateUpdated, systemTime);

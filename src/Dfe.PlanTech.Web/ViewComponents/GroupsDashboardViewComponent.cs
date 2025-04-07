@@ -13,12 +13,10 @@ namespace Dfe.PlanTech.Web.ViewComponents;
 
 public class GroupsDashboardViewComponent(ILogger<GroupsDashboardViewComponent> logger,
         IGetSubmissionStatusesQuery query,
-        IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery,
         [FromServices] ISystemTime systemTime) : ViewComponent
 {
     private readonly ILogger<GroupsDashboardViewComponent> _logger = logger;
     private readonly IGetSubmissionStatusesQuery _query = query;
-    private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery = getSubTopicRecommendationQuery;
 
     public async Task<IViewComponentResult> InvokeAsync(Category category)
     {
@@ -64,7 +62,6 @@ public class GroupsDashboardViewComponent(ILogger<GroupsDashboardViewComponent> 
                 name: section.Name,
                 retrievalError: category.RetrievalError,
                 sectionStatus: sectionStatus,
-                recommendation: await GetCategorySectionRecommendationDto(section, sectionStatus),
                 systemTime: systemTime
             );
         }
@@ -86,42 +83,6 @@ public class GroupsDashboardViewComponent(ILogger<GroupsDashboardViewComponent> 
                              e.Message);
             category.RetrievalError = true;
             return category;
-        }
-    }
-
-    private async Task<CategorySectionRecommendationDto> GetCategorySectionRecommendationDto(ISectionComponent section, SectionStatusDto? sectionStatus)
-    {
-        if (string.IsNullOrEmpty(sectionStatus?.LastMaturity))
-            return new CategorySectionRecommendationDto();
-
-        try
-        {
-            var recommendation = await _getSubTopicRecommendationQuery.GetRecommendationsViewDto(section.Sys.Id, sectionStatus.LastMaturity);
-            if (recommendation == null)
-            {
-                return new CategorySectionRecommendationDto
-                {
-                    NoRecommendationFoundErrorMessage = $"Unable to retrieve {section.Name} recommendation"
-                };
-            }
-            return new CategorySectionRecommendationDto
-            {
-                RecommendationSlug = recommendation.RecommendationSlug,
-                RecommendationDisplayName = recommendation.DisplayName,
-                SectionSlug = section.InterstitialPage?.Slug,
-                Viewed = sectionStatus.Viewed
-            };
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e,
-                             "An exception has occurred while trying to retrieve the recommendation for Section {sectionName}, with the message {errMessage}",
-                             section.Name,
-                             e.Message);
-            return new CategorySectionRecommendationDto
-            {
-                NoRecommendationFoundErrorMessage = $"Unable to retrieve {section.Name} recommendation"
-            };
         }
     }
 }
