@@ -8,6 +8,7 @@ public class Category : ContentComponent, ICategoryComponent
 {
     public string InternalName { get; set; } = "";
     public Header Header { get; set; } = null!;
+    public List<ContentComponent> Content { get; set; } = null!;
     public List<Section> Sections { get; set; } = [];
     public IList<SectionStatusDto> SectionStatuses { get; set; } = [];
     public int Completed { get; set; }
