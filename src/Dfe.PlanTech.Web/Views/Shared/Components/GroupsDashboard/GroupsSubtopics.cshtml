@@ -4,13 +4,21 @@
 @model GroupsDashboardViewComponentViewModel
 
 <dl class="govuk-summary-list dfe-self-assessment-list">
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key govuk-!-font-weight-regular">
+            <span><strong>Topic recommendations</strong></span>
+        </dt>
+        <dd class="govuk-summary-list__value govuk-!-text-align-right">
+            <span><strong>Self-assessment status</strong></span>
+        </dd>
+    </div>
     @foreach (var groupsCategorySectionDtoItem in Model.GroupsCategorySectionDto)
     {
         <div class="govuk-summary-list__row">
             @if (groupsCategorySectionDtoItem.Slug != null)
             {
                 <dt class="govuk-summary-list__key govuk-!-font-weight-regular">
-                    <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@groupsCategorySectionDtoItem.Slug"
+                    <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="/self-assessment"
                         class="govuk-link">
                         @groupsCategorySectionDtoItem.Name
                     </a>
