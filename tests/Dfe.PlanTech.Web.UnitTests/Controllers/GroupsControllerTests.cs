@@ -1,5 +1,6 @@
 ﻿using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Establishments.Models;
+using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Middleware;
@@ -22,6 +23,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private readonly IGetPageQuery _getPageQuery;
         private readonly IComponentBuilder _componentBuilder;
         private readonly IGetEstablishmentIdQuery _getEstablishmentIdQuery;
+        private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
 
         public GroupsControllerTests()
         {
@@ -31,12 +33,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _getPageQuery = Substitute.For<IGetPageQuery>();
             _componentBuilder = Substitute.For<IComponentBuilder>();
             _getEstablishmentIdQuery = Substitute.For<IGetEstablishmentIdQuery>();
+            _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
         }
 
         [Fact]
         public async Task GetSelectASchoolView_Returns_Correct_View()
         {
-            var controller = new GroupsController(_logger, _exceptionHandler, _user, _getEstablishmentIdQuery);
+            var controller = new GroupsController(_logger, _exceptionHandler, _user, _getEstablishmentIdQuery, _getSubmissionStatusesQuery);
 
             var pageContent = _componentBuilder.BuildPage();
 
@@ -56,7 +59,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public void SelectSchool_Sets_TempData_And_Redirects()
         {
-            var controller = new GroupsController(_logger, _exceptionHandler, _user, _getEstablishmentIdQuery);
+            var controller = new GroupsController(_logger, _exceptionHandler, _user, _getEstablishmentIdQuery, _getSubmissionStatusesQuery);
             var tempData = new TempDataDictionary(new DefaultHttpContext(), Substitute.For<ITempDataProvider>());
             controller.TempData = tempData; 
 
@@ -74,7 +77,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task GetSchoolDashboardView_Returns_Correct_View()
         {
-            var controller = new GroupsController(_logger, _exceptionHandler, _user, _getEstablishmentIdQuery);
+            var controller = new GroupsController(_logger, _exceptionHandler, _user, _getEstablishmentIdQuery, _getSubmissionStatusesQuery);
             var tempData = new TempDataDictionary(new DefaultHttpContext(), Substitute.For<ITempDataProvider>());
             controller.TempData = tempData;
 
