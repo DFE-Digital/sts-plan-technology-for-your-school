@@ -74,7 +74,6 @@ namespace Dfe.PlanTech.Web.Controllers
             }
 
             var schoolId = await _getEstablishmentIdQuery.GetEstablishmentId(schoolUrn);
-
             var groupName = _user.GetOrganisationData().OrgName;
             var pageContent = await getPageQuery.GetPageBySlug(GroupsSchoolDashboardSlug, cancellationToken);
             List<ContentComponent> content = pageContent?.Content ?? new List<ContentComponent>();
@@ -88,6 +87,7 @@ namespace Dfe.PlanTech.Web.Controllers
                 Content = content,
                 Slug = GroupsSchoolDashboardSlug
             };
+            
             return View(schoolDashboardViewName, dashboardViewModel);
         }
     }

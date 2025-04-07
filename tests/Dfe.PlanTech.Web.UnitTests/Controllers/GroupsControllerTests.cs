@@ -70,7 +70,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("GetSchoolDashboardView", redirectResult.ActionName);
         }
-
+      
         [Fact]
         public async Task GetSchoolDashboardView_Returns_Correct_View()
         {
