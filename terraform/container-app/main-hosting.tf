@@ -68,7 +68,6 @@ module "main_hosting" {
   enable_network_watcher = false
   enable_network_watcher_traffic_analytics = false
 
-
 # Resource Group
   existing_resource_group    = "190d01-plantech"
   # Networking
