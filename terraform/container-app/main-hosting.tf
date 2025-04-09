@@ -1,7 +1,7 @@
 module "main_hosting" {
-  source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v1.18.0"
+  # source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v1.18.0"
+  source = "github.com/adimicoli-airelogic/terraform-azurerm-container-apps-hosting?ref=main"
 
-  ###########
   # General #
   ###########
   environment    = local.environment
