@@ -72,5 +72,5 @@ module "main_hosting" {
   existing_resource_group    = "190d01-plantech"
   # Networking
   launch_in_vnet = false
-  existing_virtual_network = "190d01-plantechdefault-vnet"
+  existing_virtual_network = "190d01-plantechdefault"
 }
