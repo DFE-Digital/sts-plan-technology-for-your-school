@@ -70,4 +70,5 @@ module "main_hosting" {
 
 
   launch_in_vnet = false
+  existing_virtual_network = "190d01-plantechdefault-vnet"
 }
