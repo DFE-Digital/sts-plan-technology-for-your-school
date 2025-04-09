@@ -69,6 +69,9 @@ module "main_hosting" {
   enable_network_watcher_traffic_analytics = false
 
 
+# Resource Group
+  existing_resource_group    = "190d01-plantech"
+  # Networking
   launch_in_vnet = false
   existing_virtual_network = "190d01-plantechdefault-vnet"
 }
