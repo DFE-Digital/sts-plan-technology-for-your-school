@@ -162,7 +162,7 @@ public static class ProgramExtensions
         services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
         services.AddTransient<IDeleteCurrentSubmissionCommand, DeleteCurrentSubmissionCommand>();
         services.AddTransient<IRecordGroupSelectionCommand, RecordGroupSelectionCommand>();
-        services.AddTransient<IGetGroupSelectionQuery, GetGroupSelectionQuery>(); 
+        services.AddTransient<IGetGroupSelectionQuery, GetGroupSelectionQuery>();
 
         return services;
     }

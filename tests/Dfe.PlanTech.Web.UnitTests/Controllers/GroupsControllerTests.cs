@@ -61,7 +61,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var controller = new GroupsController(_logger, _exceptionHandler, _user, _getEstablishmentIdQuery, _getSubmissionStatusesQuery);
             var tempData = new TempDataDictionary(new DefaultHttpContext(), Substitute.For<ITempDataProvider>());
-            controller.TempData = tempData; 
+            controller.TempData = tempData;
 
             var schoolUrn = "1";
             var schoolName = "School 1";
@@ -73,7 +73,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("GetSchoolDashboardView", redirectResult.ActionName);
         }
-      
+
         [Fact]
         public async Task GetSchoolDashboardView_Returns_Correct_View()
         {

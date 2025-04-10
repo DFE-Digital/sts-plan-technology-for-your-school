@@ -80,7 +80,7 @@ namespace Dfe.PlanTech.Web.Controllers
         public async Task<IActionResult> GetSchoolDashboardView([FromServices] IGetPageQuery getPageQuery, [FromServices] IGetGroupSelectionQuery getGroupSelectionQuery, CancellationToken cancellationToken)
         {
             var userId = await _user.GetCurrentUserId() ?? 0;
-            
+
             var userEstablishmentId = await _user.GetEstablishmentId();
             var latestSelection = await getGroupSelectionQuery.GetLatestSelectedGroupSchool(userId, userEstablishmentId, cancellationToken);
 
@@ -97,7 +97,7 @@ namespace Dfe.PlanTech.Web.Controllers
                 Content = content,
                 Slug = GroupsSchoolDashboardSlug
             };
-            
+
             return View(schoolDashboardViewName, dashboardViewModel);
         }
     }
