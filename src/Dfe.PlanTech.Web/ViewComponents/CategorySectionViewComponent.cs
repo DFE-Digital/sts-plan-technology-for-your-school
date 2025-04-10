@@ -76,7 +76,7 @@ public class CategorySectionViewComponent(
     {
         try
         {
-            category.SectionStatuses = await _query.GetSectionSubmissionStatuses(category.Sections, 0);
+            category.SectionStatuses = await _query.GetSectionSubmissionStatuses(category.Sections);
             category.Completed = category.SectionStatuses.Count(x => x.Completed);
             category.RetrievalError = false;
             return category;
