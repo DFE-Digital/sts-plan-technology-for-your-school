@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Domain.Constants;
 using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -23,34 +22,15 @@ public class GroupsCategorySectionDto
         SectionStatusDto? sectionStatus,
         ISystemTime systemTime)
     {
-        Slug = slug;
-        Name = name;
-        var previouslyCompleted = sectionStatus?.LastCompletionDate != null;
-        var currentCompleted = sectionStatus?.Completed == true;
-        var lastEdited = LastEditedDate(sectionStatus?.DateUpdated, systemTime);
-        var lastCompleted = LastEditedDate(sectionStatus?.LastCompletionDate, systemTime);
         if (string.IsNullOrWhiteSpace(slug))
         {
-            ErrorMessage = $"{Name} unavailable";
+            ErrorMessage = $"{name} unavailable";
             Tag = new Tag();
         }
-        else if (retrievalError)
-            Tag = new Tag("Unable to retrieve status", TagColour.Red);
-        else if (currentCompleted)
-            Tag = new Tag($"Completed {lastEdited}", TagColour.Blue);
-        else if (previouslyCompleted)
-            Tag = new Tag($"Completed {lastCompleted}", TagColour.Blue);
-        else
-            Tag = new Tag("Not started", TagColour.Grey);
-    }
+        var tag = SubmissionStatusHelpers.GetGroupsSubmissionStatusTag(retrievalError, sectionStatus, systemTime);
 
-    private static string? LastEditedDate(DateTime? date, ISystemTime systemTime)
-    {
-        if (date == null)
-            return null;
-        var localTime = TimeZoneHelpers.ToUkTime(date.Value);
-        return localTime.Date == systemTime.Today.Date
-            ? $"at {DateTimeFormatter.FormattedTime(localTime)}"
-            : $"on {DateTimeFormatter.FormattedDateShort(localTime)}";
+        Slug = slug;
+        Name = name;
+        Tag = tag;
     }
 }
