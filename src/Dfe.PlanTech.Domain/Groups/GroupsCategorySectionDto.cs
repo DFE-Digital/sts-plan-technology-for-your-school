@@ -35,13 +35,13 @@ public class GroupsCategorySectionDto
             Tag = new Tag();
         }
         else if (retrievalError)
-            Tag = new Tag("unable to retrieve status", TagColour.Red);
+            Tag = new Tag("Unable to retrieve status", TagColour.Red);
         else if (currentCompleted)
             Tag = new Tag($"Completed {lastEdited}", TagColour.Blue);
         else if (previouslyCompleted)
             Tag = new Tag($"Completed {lastCompleted}", TagColour.Blue);
         else
-            Tag = new Tag("not started", TagColour.Grey);
+            Tag = new Tag("Not started", TagColour.Grey);
     }
 
     private static string? LastEditedDate(DateTime? date, ISystemTime systemTime)

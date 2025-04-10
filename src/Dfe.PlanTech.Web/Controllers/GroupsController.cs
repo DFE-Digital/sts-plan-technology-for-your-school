@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Domain.Content.Interfaces;
+﻿using Dfe.PlanTech.Application.Constants;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Groups.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
@@ -11,9 +12,9 @@ namespace Dfe.PlanTech.Web.Controllers
 {
     public class GroupsController : BaseController<GroupsController>
     {
-        public const string GroupsSlug = "groups";
-        public const string GroupsSelectorPageSlug = "select-a-school";
-        public const string GroupsSchoolDashboardSlug = "dashboard";
+        public const string GroupsSlug = UrlConstants.GroupsSlug;
+        public const string GroupsSelectorPageSlug = UrlConstants.GroupsSelectionPageSlug;
+        public const string GroupsSchoolDashboardSlug = UrlConstants.GroupsDashboardSlug;
         public const string GetSchoolDashboardAction = "GetSchoolDashboard";
         private const string selectASchoolViewName = "~/Views/Groups/GroupsSelectSchool.cshtml";
         private const string schoolDashboardViewName = "~/Views/Groups/GroupsSchoolDashboard.cshtml";

@@ -1,3 +1,4 @@
+@using Dfe.PlanTech.Application.Constants
 @model Dfe.PlanTech.Domain.Questionnaire.Models.Category;
 
 @{
@@ -8,7 +9,7 @@
     var pageSlug = ViewData["PageSlug"] as string;
 }
 
-@if (pageSlug == "dashboard")
+@if (pageSlug == UrlConstants.GroupsDashboardSlug)
 {
     // Invoke GroupsDashboardViewComponent for Category content when the page slug is "dashboard"
     @await Component.InvokeAsync("GroupsDashboard", new { category = Model });
