@@ -177,7 +177,7 @@ variable "container_environment_variables" {
 ##################
 variable "cdn_create_custom_domain" {
   description = "A flag to create the A and TXT records for the container app as part of setting up the cdn"
-  type        = bool
+  type        = map(bool)
 }
 
 variable "cdn_frontdoor_host_add_response_headers" {
