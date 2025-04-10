@@ -14,7 +14,7 @@ on:
 jobs:
   backup_content:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || 'Staging' }}
+    environment: ${{ inputs.environment || 'StagingUnprotected' }}
     name: Backup content for ${{ inputs.environment || 'Staging' }}
     env:
       az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
