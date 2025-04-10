@@ -41,7 +41,7 @@ public class GroupsDashboardViewComponent(ILogger<GroupsDashboardViewComponent> 
         {
             Description = category.Content[0],
             GroupsCategorySectionDto = await GetGroupsCategorySectionDto(category).ToListAsync(),
-        }; 
+        };
     }
 
     private async IAsyncEnumerable<GroupsCategorySectionDto> GetGroupsCategorySectionDto(Category category)
