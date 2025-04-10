@@ -2,6 +2,7 @@ using System.Data;
 using System.Security.Authentication;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Groups.Interfaces;
+using Dfe.PlanTech.Domain.Groups.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Microsoft.Data.SqlClient;
 

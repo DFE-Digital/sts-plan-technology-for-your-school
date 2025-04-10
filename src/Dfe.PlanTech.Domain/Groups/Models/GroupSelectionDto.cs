@@ -1,4 +1,4 @@
-﻿namespace Dfe.PlanTech.Domain.Groups.Interfaces
+﻿namespace Dfe.PlanTech.Domain.Groups.Models
 {
     public class GroupSelectionDto
     {

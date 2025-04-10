@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Establishments.Models;
-using Dfe.PlanTech.Domain.Groups.Interfaces;
+using Dfe.PlanTech.Domain.Groups.Models;
 using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Models;
