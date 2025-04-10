@@ -1,18 +1,22 @@
 ﻿using Dfe.PlanTech.Domain.Groups;
+using Dfe.PlanTech.Domain.Groups.Interfaces;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
+using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewComponents;
 
 public class GroupsDashboardViewComponent(ILogger<GroupsDashboardViewComponent> logger,
-        IGetSubmissionStatusesQuery query,
+        IGetSubmissionStatusesQuery query, IGetGroupSelectionQuery getGroupSelectionQuery, IUser user,
         [FromServices] ISystemTime systemTime) : ViewComponent
 {
     private readonly ILogger<GroupsDashboardViewComponent> _logger = logger;
     private readonly IGetSubmissionStatusesQuery _query = query;
+    private readonly IGetGroupSelectionQuery _getGroupSelectionQuery = getGroupSelectionQuery;
+    private readonly IUser _user = user;
 
     public async Task<IViewComponentResult> InvokeAsync(Category category)
     {
@@ -32,19 +36,21 @@ public class GroupsDashboardViewComponent(ILogger<GroupsDashboardViewComponent> 
                 NoSectionsErrorRedirectUrl = "ServiceUnavailable"
             };
         }
-        var schoolIdData = ViewData["SchoolId"] as string;
-        int schoolId = Convert.ToInt32(schoolIdData);
 
-        category = await RetrieveSectionStatuses(category, schoolId);
+        var userId = await _user.GetCurrentUserId();
+        var userEstablishmentId = await _user.GetEstablishmentId();
+        var selectedSchool = await _getGroupSelectionQuery.GetLatestSelectedGroupSchool(userId.Value, userEstablishmentId);
+
+        category = await RetrieveSectionStatuses(category, selectedSchool.SelectedEstablishmentId);
 
         return new GroupsDashboardViewComponentViewModel
         {
             Description = category.Content[0],
-            GroupsCategorySectionDto = await GetGroupsCategorySectionDto(category).ToListAsync(),
+            GroupsCategorySectionDto = GetGroupsCategorySectionDto(category).ToList(),
         };
     }
 
-    private async IAsyncEnumerable<GroupsCategorySectionDto> GetGroupsCategorySectionDto(Category category)
+    private IEnumerable<GroupsCategorySectionDto> GetGroupsCategorySectionDto(Category category)
     {
         foreach (var section in category.Sections)
         {
@@ -58,8 +64,7 @@ public class GroupsDashboardViewComponent(ILogger<GroupsDashboardViewComponent> 
                 name: section.Name,
                 retrievalError: category.RetrievalError,
                 sectionStatus: sectionStatus,
-                systemTime: systemTime
-            );
+                systemTime: systemTime);
         }
     }
 
