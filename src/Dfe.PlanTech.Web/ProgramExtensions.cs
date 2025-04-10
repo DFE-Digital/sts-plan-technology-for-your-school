@@ -5,6 +5,7 @@ using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Cookie.Service;
 using Dfe.PlanTech.Application.Groups.Commands;
+using Dfe.PlanTech.Application.Groups.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Responses.Commands;
@@ -161,6 +162,7 @@ public static class ProgramExtensions
         services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
         services.AddTransient<IDeleteCurrentSubmissionCommand, DeleteCurrentSubmissionCommand>();
         services.AddTransient<IRecordGroupSelectionCommand, RecordGroupSelectionCommand>();
+        services.AddTransient<IGetGroupSelectionQuery, GetGroupSelectionQuery>(); 
 
         return services;
     }

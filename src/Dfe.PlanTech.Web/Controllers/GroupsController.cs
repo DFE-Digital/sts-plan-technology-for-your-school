@@ -1,5 +1,6 @@
 ﻿using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Groups.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Middleware;
@@ -54,34 +55,42 @@ namespace Dfe.PlanTech.Web.Controllers
         }
 
         [HttpPost($"{GroupsSlug}/{GroupsSelectorPageSlug}")]
-        public IActionResult SelectSchool(string schoolUrn, string schoolName)
+        public async Task<IActionResult> SelectSchool(string schoolUrn, string schoolName, [FromServices] IRecordGroupSelectionCommand recordGroupSelectionCommand, CancellationToken cancellationToken = default)
         {
-            TempData["SelectedSchoolUrn"] = schoolUrn;
-            TempData["SelectedSchoolName"] = schoolName;
+            var dto = new SubmitSelectionDto()
+            {
+                SelectedEstablishmentUrn = schoolUrn,
+                SelectedEstablishmentName = schoolName
+            };
+
+            try
+            {
+                await recordGroupSelectionCommand.RecordGroupSelection(dto, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+
+            }
 
             return RedirectToAction("GetSchoolDashboardView");
         }
 
         [HttpGet($"{GroupsSlug}/{GroupsSchoolDashboardSlug}", Name = GetSchoolDashboardAction)]
-        public async Task<IActionResult> GetSchoolDashboardView([FromServices] IGetPageQuery getPageQuery, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetSchoolDashboardView([FromServices] IGetPageQuery getPageQuery, [FromServices] IGetGroupSelectionQuery getGroupSelectionQuery, CancellationToken cancellationToken)
         {
-            string? schoolUrn = TempData["SelectedSchoolUrn"] as string;
-            string? schoolName = TempData["SelectedSchoolName"] as string;
+            var userId = await _user.GetCurrentUserId() ?? 0;
+            
+            var userEstablishmentId = await _user.GetEstablishmentId();
+            var latestSelection = await getGroupSelectionQuery.GetLatestSelectedGroupSchool(userId, userEstablishmentId, cancellationToken);
 
-            if (string.IsNullOrEmpty(schoolName) || string.IsNullOrEmpty(schoolUrn))
-            {
-                return RedirectToAction("GetSelectASchoolView");
-            }
-
-            var schoolId = await _getEstablishmentIdQuery.GetEstablishmentId(schoolUrn);
             var groupName = _user.GetOrganisationData().OrgName;
             var pageContent = await getPageQuery.GetPageBySlug(GroupsSchoolDashboardSlug, cancellationToken);
             List<ContentComponent> content = pageContent?.Content ?? new List<ContentComponent>();
 
             var dashboardViewModel = new GroupsSchoolDashboardViewModel()
             {
-                SchoolName = schoolName,
-                SchoolId = (int)schoolId,
+                SchoolName = latestSelection.SelectedEstablishmentName,
+                SchoolId = latestSelection.SelectedEstablishmentId,
                 GroupName = groupName,
                 Title = new Title() { Text = "Plan technology for your school" },
                 Content = content,

@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Dfe.PlanTech.Domain.Establishments.Models;
+using Dfe.PlanTech.Domain.Groups.Interfaces;
 using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Models;
@@ -33,6 +34,8 @@ public interface IPlanTechDbContext
     Task<Establishment?> GetEstablishmentBy(Expression<Func<Establishment, bool>> predicate);
 
     Task<List<EstablishmentLink>> GetGroupEstablishmentsBy(Expression<Func<Establishment, bool>> predicate);
+
+    public IQueryable<GroupReadActivity> GetGroupReadActivities { get; }
 
     Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default);
 
