@@ -11,9 +11,12 @@ namespace Dfe.PlanTech.Application.Submissions.Queries;
 public class GetSubmissionStatusesQuery(IPlanTechDbContext db, IUser userHelper) : IGetSubmissionStatusesQuery
 {
 
-    public async Task<List<SectionStatusDto>> GetSectionSubmissionStatuses(IEnumerable<Section> sections)
+    public async Task<List<SectionStatusDto>> GetSectionSubmissionStatuses(IEnumerable<Section> sections, int establishmentId = 0)
     {
-        int establishmentId = await userHelper.GetEstablishmentId();
+        if (establishmentId == 0)
+        {
+            establishmentId = await userHelper.GetEstablishmentId();
+        }
 
         var sectionIds = String.Join(',', sections.Select(section => section.Sys.Id));
 

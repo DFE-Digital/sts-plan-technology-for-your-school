@@ -2,17 +2,26 @@
 @model Dfe.PlanTech.Web.Models.GroupsSchoolDashboardViewModel
 
 @section DfePageHeaderInner {
+    <div class="school-ident">
+        <div class="school-ident-content">
+            <h2 class="govuk-heading-s school-ident-name">@Model.SchoolName</h2>
+            <a class="govuk-link" href="select-a-school">Change school</a>
+        </div>
+    </div>
     <partial name="Components/PageComponentFactory" model="@Model.Title" />
 }
 
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-        <p>@Model.SchoolName</p>
-        <p>@Model.SchoolId</p>
+        <p>You are viewing @Model.SchoolName's status.</>
         @if (Model.Content != null)
         {
+            ViewData["PageSlug"] = Model.Slug;
+            ViewData["SchoolId"] = Model.SchoolId.ToString();
+
             foreach (var content in Model.Content)
             {
+                <p class="govuk-!-margin-top-5"></p>
                 <partial name="Components/PageComponentFactory" model="content" />
             }
         }

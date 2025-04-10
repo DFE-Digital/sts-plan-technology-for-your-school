@@ -104,3 +104,23 @@ button.govuk-button--white {
     background-color: #ffffff;
     text-decoration-thickness: 2px !important;
 }
+
+.school-ident {
+    background-color: #ebf2f6;
+    padding: 20px 0;
+    margin-bottom: 0px;
+}
+
+.school-ident-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+}
+
+.school-ident-name {
+    display: inline-block !important;
+    padding-top: 0 !important;
+    margin: 0 10px 0 0;
+}

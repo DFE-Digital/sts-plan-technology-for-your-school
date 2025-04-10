@@ -4,4 +4,17 @@
     await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Header);
 }
 
-@await Component.InvokeAsync("CategorySection", new { category = Model })
+@{
+    var pageSlug = ViewData["PageSlug"] as string;
+}
+
+@if (pageSlug == "dashboard")
+{
+    // Invoke GroupsDashboardViewComponent for Category content when the page slug is "dashboard"
+    @await Component.InvokeAsync("GroupsDashboard", new { category = Model });
+}
+else
+{
+    // Default behavior
+    @await Component.InvokeAsync("CategorySection", new { category = Model });
+}

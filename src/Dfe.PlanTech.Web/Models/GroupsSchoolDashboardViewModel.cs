@@ -4,9 +4,11 @@ namespace Dfe.PlanTech.Web.Models
 {
     public class GroupsSchoolDashboardViewModel
     {
+        public string Slug { get; set; } = null!;
+
         public string? SchoolName { get; set; }
 
-        public string SchoolId { get; set; } = null!;
+        public int SchoolId { get; set; }
 
         public string GroupName { get; set; } = null!;
 
