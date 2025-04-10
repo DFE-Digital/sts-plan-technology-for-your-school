@@ -64,14 +64,7 @@ namespace Dfe.PlanTech.Web.Controllers
                 SelectedEstablishmentName = schoolName
             };
 
-            try
-            {
-                await recordGroupSelectionCommand.RecordGroupSelection(dto, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-
-            }
+            await recordGroupSelectionCommand.RecordGroupSelection(dto, cancellationToken);
 
             return RedirectToAction("GetSchoolDashboardView");
         }
