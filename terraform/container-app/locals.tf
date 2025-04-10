@@ -201,6 +201,6 @@ output "cdn_create_custom_domain" {
 }
 
 output "container_fqdn" {
-  value = lmodule.main_hosting.container_fqdn
+  value = module.main_hosting.container_fqdn
 }
 
