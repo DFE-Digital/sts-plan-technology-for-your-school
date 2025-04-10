@@ -24,3 +24,10 @@ az_sql_sku = {
     Staging = "S2",
     Prod = "S2"
 }
+
+cdn_create_custom_domain = {
+    Dev = false,
+    Test = false,
+    Staging = true,
+    Prod = true
+}
