@@ -199,3 +199,8 @@ locals {
 output "cdn_create_custom_domain" {
   value = local.cdn_create_custom_domain
 }
+
+output "container_fqdn" {
+  value = lmodule.main_hosting.container_fqdn
+}
+
