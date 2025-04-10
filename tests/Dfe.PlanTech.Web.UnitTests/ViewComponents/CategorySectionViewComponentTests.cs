@@ -401,7 +401,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public async Task Returns_ProgressRetrievalError_When_ProgressCanNotBeRetrieved()
         {
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(Arg.Any<IEnumerable<Section>>())
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(Arg.Any<IEnumerable<Section>>(), null)
                                         .ThrowsAsync(new Exception("Error occurred fection sections"));
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;

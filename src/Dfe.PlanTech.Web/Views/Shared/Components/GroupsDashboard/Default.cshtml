@@ -1,0 +1,10 @@
+﻿@model GroupsDashboardViewComponentViewModel
+
+<partial name="Components/PageComponentFactory" model="@Model.Description" />
+
+@if (Model.NoSectionsErrorRedirectUrl != null)
+{
+    Context.Response.Redirect(Url.Content(Model.NoSectionsErrorRedirectUrl));
+}
+
+<partial name="Components/GroupsDashboard/GroupsSubtopics" model="@Model" />
