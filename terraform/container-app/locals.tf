@@ -16,6 +16,7 @@ locals {
     "Environment"      = var.az_tag_environment,
     "Service Offering" = var.az_tag_product,
     "Product"          = var.az_tag_product
+    "Terraform"        = "true"
   }
 
   #################
@@ -194,3 +195,13 @@ locals {
   contentful_webhook_shell_command           = var.contentful_management_token != null && var.contentful_upsert_webhook == true ? "bash ./scripts/create-contentful-webhook.sh --env-id ${azurerm_key_vault_secret.vault_secret_contentful_environment.value} --env-name \"${var.container_environment}\" --management-token \"${var.contentful_management_token}\" --space-id ${azurerm_key_vault_secret.vault_secret_contentful_spaceid.value} --webhook-api-key \"${random_password.api_key_value.result}\" --webhook-name \"${local.contentful_webhook_name}\" --webhook-url ${local.contentful_webhook_url}" : "echo Not updating webhook"
   contentful_webhook_secret_timetolive_hours = 365 * 24
 }
+
+
+output "cdn_create_custom_domain" {
+  value = local.cdn_create_custom_domain
+}
+
+output "cdn_frontdoor_url_path_redirects" {
+  value = module.main_hosting.cdn_frontdoor_dns_records
+}
+
