@@ -201,6 +201,6 @@ output "cdn_create_custom_domain" {
 }
 
 output "cdn_frontdoor_url_path_redirects" {
-  value = var.cdn_frontdoor_url_path_redirects
+  value = module.main_hosting
 }
 
