@@ -1,14 +1,14 @@
 name: Contentful Backup
 on:
   schedule:
-    - cron: 0 * * * *
+    - cron: 0 0 * * 2
   workflow_dispatch:
     inputs:
       environment:
         description: Which Contentful environment to backup
         required: true
         type: choice
-        options: [ 'Dev', 'Tst', 'Staging', 'Production' ]
+        options: [ 'Dev', 'Tst', 'Staging', 'Production', 'StagingUnprotected', 'ProductionUnprotected' ]
         default: 'Staging'
 
 jobs:
