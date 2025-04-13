@@ -119,7 +119,7 @@ public class GroupsDashboardViewComponent(ILogger<GroupsDashboardViewComponent> 
             }
             return new CategorySectionRecommendationDto
             {
-                RecommendationSlug = recommendation.RecommendationSlug,
+                RecommendationSlug = "recommendations",
                 RecommendationDisplayName = recommendation.DisplayName,
                 SectionSlug = section.InterstitialPage?.Slug,
                 SectionName = section.Name,

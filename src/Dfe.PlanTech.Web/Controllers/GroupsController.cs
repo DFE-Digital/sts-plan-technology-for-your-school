@@ -5,7 +5,9 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Groups.Interfaces;
 using Dfe.PlanTech.Domain.Groups.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
+using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -101,6 +103,7 @@ namespace Dfe.PlanTech.Web.Controllers
             return View(schoolDashboardViewName, viewModel);
         }
 
+        [HttpGet("{GroupsSlug}/recommendations/{SectionSlug}")]
         public async Task<IActionResult> GetGroupsRecommendation(string sectionSlug, CancellationToken cancellationToken)
         {
             var latestSelection = await GetCurrentSelection(cancellationToken);
@@ -112,27 +115,61 @@ namespace Dfe.PlanTech.Web.Controllers
             var subTopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {section.Name}");
             var submissionResponses = await _getLatestResponsesQuery.GetLatestResponses(schoolId, section.Sys.Id, true, cancellationToken) ?? throw new DatabaseException($"Could not find users answers for:  {section.Name}");
             var latestResponses = section.GetOrderedResponsesForJourney(submissionResponses.Responses);
-            var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Select(answer => answer.AnswerRef));
 
             var customIntro = new GroupsCustomRecommendationIntro()
             {
                 HeaderText = "Overview",
                 IntroContent = "The recommendations are based on the following answers provided by the school when they completed the self-assessment.",
                 LinkText = "Overview",
+                SelectedEstablishmentName = schoolName,
                 Responses = latestResponses.ToList(),
             };
 
-            var viewModel = new GroupsRecommendationsViewModel()
+            var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Select(answer => answer.AnswerRef));
+
+            var viewModel = new GroupsRecommendationsViewModel
             {
                 SectionName = subTopicRecommendation.Subtopic.Name,
                 SelectedEstablishmentId = schoolId,
                 SelectedEstablishmentName = schoolName,
-                Slug = sectionSlug,
+                Slug = $"{sectionSlug}/recommendations",
                 Chunks = subTopicChunks,
                 GroupsCustomRecommendationIntro = customIntro,
                 SubmissionResponses = latestResponses
             };
             return View("~/Views/Groups/Recommendations.cshtml", viewModel);
+        }
+
+        public IActionResult GetRecommendationsPrintView(int schoolId, string schoolName, SubtopicRecommendation subtopicRecommendation, string sectionSlug, IEnumerable<QuestionWithAnswer> latestResponses)
+        {
+            var customIntro = new GroupsCustomRecommendationIntro()
+            {
+                HeaderText = "Overview",
+                IntroContent = "The recommendations are based on the following answers provided by the school when they completed the self-assessment.",
+                LinkText = "Overview",
+                SelectedEstablishmentName = schoolName,
+                Responses = latestResponses.ToList(),
+            };
+
+            if (subtopicRecommendation.Section == null)
+            {
+                return RedirectToAction(GetSchoolDashboardAction);
+            }
+
+            var subTopicChunks = subtopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Select(answer => answer.AnswerRef));
+
+            var viewModel = new GroupsRecommendationsViewModel
+            {
+                SectionName = subtopicRecommendation.Subtopic.Name,
+                SelectedEstablishmentId = schoolId,
+                SelectedEstablishmentName = schoolName,
+                Slug = $"{sectionSlug}/recommendations",
+                Chunks = subTopicChunks,
+                GroupsCustomRecommendationIntro = customIntro,
+                SubmissionResponses = latestResponses
+            };
+
+            return View("~/Views/Recommendations/RecommendationsChecklist.cshtml", viewModel);
         }
 
         [NonAction]

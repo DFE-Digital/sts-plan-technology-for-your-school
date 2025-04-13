@@ -11,6 +11,8 @@ public class GroupsCustomRecommendationIntro : IHeaderWithContent
 
     public string LinkText { get; init; } = null!;
 
+    public string SelectedEstablishmentName { get; init; } = null!;
+
     private string? _slugifiedLinkText;
 
     public string SlugifiedLinkText => _slugifiedLinkText ??= LinkText.Slugify();
