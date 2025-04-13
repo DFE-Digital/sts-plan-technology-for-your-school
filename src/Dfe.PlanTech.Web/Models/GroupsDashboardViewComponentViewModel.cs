@@ -10,4 +10,6 @@ public class GroupsDashboardViewComponentViewModel
     public IList<GroupsCategorySectionDto> GroupsCategorySectionDto { get; init; } = null!;
 
     public string? NoSectionsErrorRedirectUrl { get; set; }
+
+    public string? ProgressRetrievalErrorMessage { get; init; }
 }

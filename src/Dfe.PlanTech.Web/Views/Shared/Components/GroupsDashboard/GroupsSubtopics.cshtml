@@ -17,12 +17,16 @@
         <div class="govuk-summary-list__row">
             @if (groupsCategorySectionDtoItem.Slug != null)
             {
-                <dt class="govuk-summary-list__key govuk-!-font-weight-regular">
-                    <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="/self-assessment"
-                        class="govuk-link">
-                        @groupsCategorySectionDtoItem.Name
-                    </a>
-                </dt>
+                    @if (!string.IsNullOrEmpty(groupsCategorySectionDtoItem.RecommendationSlug))
+                    {
+                        <dt class="govuk-summary-list__key govuk-!-font-weight-regular">
+                            <partial name="Components/GroupsDashboard/GroupsSubtopicRecommendations" model="@groupsCategorySectionDtoItem.Recommendation" />
+                        </dt>
+                    }
+                    else
+                    {
+                        <dt class="govuk-summary-list__key govuk-!-font-weight-regular">@groupsCategorySectionDtoItem.Name</dt>
+                    }
                 <dd class="govuk-summary-list__value govuk-!-text-align-right" id="@groupsCategorySectionDtoItem.Name">
                     <task-list-tag colour=@groupsCategorySectionDtoItem.Tag.Colour>
                         @groupsCategorySectionDtoItem.Tag.Text
