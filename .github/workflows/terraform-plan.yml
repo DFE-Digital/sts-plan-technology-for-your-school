@@ -37,16 +37,16 @@ env:
   TF_VAR_az_tag_product: ${{ vars.AZ_TAG_PRODUCT }}
   TF_VAR_az_sql_azuread_admin_username: ${{ secrets.AZ_SERVICE_PRINCIPAL }}
   TF_VAR_az_sql_admin_password: ${{secrets.AZ_SQL_ADMIN_PASSWORD}}
-  TF_VAR_az_sql_azuread_admin_objectid: ${{ secrets.AZ_CLIENT_ID }}
+  TF_VAR_az_sql_azuread_admin_objectid: ${{ secrets.AZ_OBJECT_ID }}
   TF_VAR_cdn_frontdoor_origin_host_header_override: ${{secrets.AZ_CDN_FRONTDOOR_ORIGIN_HOST_HEADER_OVERRIDE}}
   TF_VAR_az_sql_admin_userid_postfix: ${{secrets.AZ_SQL_ADMIN_USERID_POSTFIX}}
   TF_VAR_registry_server: ${{ secrets.AZ_ACR_URL }}
   TF_VAR_registry_username: ${{ secrets.AZ_CLIENT_ID }}
   TF_VAR_registry_password: ${{ secrets.AZ_CLIENT_SECRET }}
   
-  container_app_min_replicas: ${{secrets.CONTAINER_MIN_REPLICAS}}
-  container_app_max_replicas: ${{secrets.CONTAINER_MAX_REPLICAS}}
-  container_app_http_concurrency: ${{secrets.CONTAINER_HTTP_CONCURRENCY}}
+  container_app_min_replicas: ${{vars.CONTAINER_MIN_REPLICAS}}
+  container_app_max_replicas: ${{vars.CONTAINER_MAX_REPLICAS}}
+  container_app_http_concurrency: ${{vars.CONTAINER_HTTP_CONCURRENCY}}
 
   container_environment: ${{ inputs.environment }}
 
@@ -143,6 +143,15 @@ jobs:
       - name: Plan Terraform changes
         id: plan
         run: terraform plan
+
+      # - name: Terraform import
+      #   id: import
+      #   run: terraform import module.main_hosting.azurerm_mssql_server_extended_auditing_policy.default[0] /subscriptions/020c6d9f-bcd5-4aab-a512-431625e93225/resourceGroups/s190p02-plantech/providers/Microsoft.Sql/servers/s190p02-plantech/extendedAuditingSettings/Default
+
+
+      - name: Terraform State
+        id: state
+        run: terraform state list && terraform state list module.main_hosting.azurerm_mssql_server_extended_auditing_policy.default[0]
 
       - name: Remove Runner to Blobforcost SA
         uses: azure/CLI@v1

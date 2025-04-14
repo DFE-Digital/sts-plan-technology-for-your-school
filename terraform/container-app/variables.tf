@@ -58,8 +58,7 @@ variable "az_sql_admin_password" {
 
 variable "az_sql_sku" {
   description = "What SKU/plan to use for the SQL DB"
-  type        = string
-  default     = "Basic"
+  type        = map(string)
 }
 
 variable "az_sql_max_pool_size" {
@@ -178,8 +177,7 @@ variable "container_environment_variables" {
 ##################
 variable "cdn_create_custom_domain" {
   description = "A flag to create the A and TXT records for the container app as part of setting up the cdn"
-  type        = bool
-  default     = false
+  type        = map(bool)
 }
 
 variable "cdn_frontdoor_host_add_response_headers" {

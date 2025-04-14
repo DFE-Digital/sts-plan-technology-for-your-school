@@ -15,9 +15,19 @@ mssql_firewall_ipv4_allow_list = {
     },
     Test = {},
     Staging = {},
-    Prod = {
-        dev_1 = { start_ip_range = "192.168.1.1", end_ip_range = "192.168.1.1" }
-        dev_2 = { start_ip_range = "192.168.1.2", end_ip_range = "192.168.1.2" }
-    },
+    Prod = {},
 }
 
+az_sql_sku = {
+    Dev = "Basic",
+    Test = "Basic",
+    Staging = "S2",
+    Prod = "S2"
+}
+
+cdn_create_custom_domain = {
+    Dev = false,
+    Test = false,
+    Staging = true,
+    Prod = true
+}
