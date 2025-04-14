@@ -103,7 +103,7 @@ public class GroupsDashboardViewComponent(ILogger<GroupsDashboardViewComponent> 
     }
 
     private async Task<CategorySectionRecommendationDto> GetCategorySectionRecommendationDto(ISectionComponent section, SectionStatusDto? sectionStatus)
-    { 
+    {
         if (string.IsNullOrEmpty(sectionStatus?.LastMaturity))
             return new CategorySectionRecommendationDto();
 
