@@ -105,5 +105,5 @@ app.MapControllerRoute(
     pattern: "{controller=Pages}/{action=GetByRoute}/{id?}",
     name: "default"
 );
-
+ 
 await app.RunAsync();
