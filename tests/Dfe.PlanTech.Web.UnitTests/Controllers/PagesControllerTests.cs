@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using System.Text.Json;
-using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -27,7 +26,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private const string INDEX_SLUG = "/";
         private const string INDEX_TITLE = "Index";
         private const string SELF_ASSESSMENT_SLUG = "self-assessment";
-        private const string SELECT_SCHOOL_SLUG = "groups/select-a-school";
+        private const string SELECT_SCHOOL_SLUG = "/groups/select-a-school";
         private const string INTERNAL_ERROR_ID = "InternalError";
         readonly ICookieService cookiesSubstitute = Substitute.For<ICookieService>();
         readonly IUser userSubstitute = Substitute.For<IUser>();
@@ -197,7 +196,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var page = new Page
             {
                 Sys = new SystemDetails { Id = "self-assessment-id" },
-                Slug = UrlConstants.SelfAssessmentPage.Replace("/", ""),
+                Slug = SELF_ASSESSMENT_SLUG,
                 Title = new Title
                 {
                     Text = "Self assessment"
@@ -208,7 +207,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var result = _controller.GetByRoute(page, userSubstitute);
 
             var redirectResult = Assert.IsType<RedirectResult>(result);
-            Assert.Equal(UrlConstants.SelectASchoolPage, redirectResult.Url);
+            Assert.Equal(SELECT_SCHOOL_SLUG, redirectResult.Url);
         }
 
         [Fact]
