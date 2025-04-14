@@ -38,7 +38,7 @@ public class PagesController(
             throw new ContentfulDataUnavailableException($"Could not find page at {Request.Path.Value}");
         }
 
-        var organisationClaim = User.FindFirst("organisation")?.Value;   
+        var organisationClaim = User.FindFirst("organisation")?.Value;
 
         if (!string.IsNullOrEmpty(organisationClaim))
         {
