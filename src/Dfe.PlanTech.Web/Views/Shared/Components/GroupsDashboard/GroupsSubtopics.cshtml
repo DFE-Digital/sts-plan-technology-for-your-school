@@ -3,42 +3,46 @@
 @using AnchorTagHelper = Microsoft.AspNetCore.Mvc.TagHelpers.AnchorTagHelper
 @model GroupsDashboardViewComponentViewModel
 
-<dl class="govuk-summary-list dfe-self-assessment-list">
-    <div class="govuk-summary-list__row">
-        <dt class="govuk-summary-list__key govuk-!-font-weight-regular">
-            <span><strong>Topic recommendations</strong></span>
-        </dt>
-        <dd class="govuk-summary-list__value govuk-!-text-align-right">
-            <span><strong>Self-assessment status</strong></span>
-        </dd>
-    </div>
+<ul class="govuk-task-list">
+    <li class="govuk-task-list__item groups-list-heading">
+
+        <div class="govuk-summary-list__row">
+            <div class="govuk-summary-list__key govuk-!-font-weight-regular">
+                <span><strong>Topic recommendations</strong></span>
+            </div>
+            <div class="govuk-summary-list__value govuk-!-text-align-right">
+                <span><strong>Self-assessment status</strong></span>
+            </div>
+        </div>
+    </li>
     @foreach (var groupsCategorySectionDtoItem in Model.GroupsCategorySectionDto)
     {
-        <div class="govuk-summary-list__row">
+        <li class="govuk-task-list__item govuk-task-list__item--with-link">
             @if (groupsCategorySectionDtoItem.Slug != null)
             {
                     @if (!string.IsNullOrEmpty(groupsCategorySectionDtoItem.RecommendationSlug))
                     {
-                        <dt class="govuk-summary-list__key govuk-!-font-weight-regular">
+                        <div class="govuk-summary-list__key govuk-!-font-weight-regular">
                             <partial name="Components/GroupsDashboard/GroupsSubtopicRecommendations" model="@groupsCategorySectionDtoItem.Recommendation" />
-                        </dt>
+                        </div>
                     }
                     else
                     {
-                        <dt class="govuk-summary-list__key govuk-!-font-weight-regular">@groupsCategorySectionDtoItem.Name</dt>
+                        <div class="govuk-summary-list__key govuk-!-font-weight-regular">@groupsCategorySectionDtoItem.Name</div>
                     }
-                <dd class="govuk-summary-list__value govuk-!-text-align-right" id="@groupsCategorySectionDtoItem.Name">
+                <div class="govuk-summary-list__value govuk-!-text-align-right groups-list-tag" id="@groupsCategorySectionDtoItem.Name">
                     <task-list-tag colour=@groupsCategorySectionDtoItem.Tag.Colour>
                         @groupsCategorySectionDtoItem.Tag.Text
                     </task-list-tag>
-                </dd>
+                </div>
             }
             else
             {
-                <dt class="govuk-summary-list__key">
+                <div class="govuk-summary-list__key">
                     <govuk-error-message>@groupsCategorySectionDtoItem.ErrorMessage</govuk-error-message>
-                </dt>
+                </div>
             }
-        </div>
+
+        </li>
     }
-</dl>
+</ul>

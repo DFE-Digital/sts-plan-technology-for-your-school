@@ -5,9 +5,7 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Groups.Interfaces;
 using Dfe.PlanTech.Domain.Groups.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
-using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -118,7 +116,7 @@ namespace Dfe.PlanTech.Web.Controllers
 
             var customIntro = new GroupsCustomRecommendationIntro()
             {
-                HeaderText = "Overview",
+                HeaderText = $"{section.Name} recommendations",
                 IntroContent = "The recommendations are based on the following answers provided by the school when they completed the self-assessment.",
                 LinkText = "Overview",
                 SelectedEstablishmentName = schoolName,
@@ -132,19 +130,30 @@ namespace Dfe.PlanTech.Web.Controllers
                 SectionName = subTopicRecommendation.Subtopic.Name,
                 SelectedEstablishmentId = schoolId,
                 SelectedEstablishmentName = schoolName,
-                Slug = $"{sectionSlug}/recommendations",
+                Slug = sectionSlug,
                 Chunks = subTopicChunks,
                 GroupsCustomRecommendationIntro = customIntro,
                 SubmissionResponses = latestResponses
             };
+
+            // Passes the school name to the Header
+            ViewData["SelectedEstablishmentName"] = viewModel.SelectedEstablishmentName;
+
             return View("~/Views/Groups/Recommendations.cshtml", viewModel);
         }
 
-        public IActionResult GetRecommendationsPrintView(int schoolId, string schoolName, SubtopicRecommendation subtopicRecommendation, string sectionSlug, IEnumerable<QuestionWithAnswer> latestResponses)
+        [HttpGet("groups/recommendations/{sectionSlug}/print", Name = "GetRecommendationsPrintView")]
+        public async Task<IActionResult> GetRecommendationsPrintView(int schoolId, string schoolName, string sectionSlug, CancellationToken cancellationToken)
         {
+
+            var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken);
+            var subtopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id, cancellationToken);
+            var submissionResponses = await _getLatestResponsesQuery.GetLatestResponses(schoolId, section.Sys.Id, true, cancellationToken);
+
+            var latestResponses = section.GetOrderedResponsesForJourney(submissionResponses.Responses);
             var customIntro = new GroupsCustomRecommendationIntro()
             {
-                HeaderText = "Overview",
+                HeaderText = $"{section.Name} recommendations",
                 IntroContent = "The recommendations are based on the following answers provided by the school when they completed the self-assessment.",
                 LinkText = "Overview",
                 SelectedEstablishmentName = schoolName,
@@ -169,7 +178,7 @@ namespace Dfe.PlanTech.Web.Controllers
                 SubmissionResponses = latestResponses
             };
 
-            return View("~/Views/Recommendations/RecommendationsChecklist.cshtml", viewModel);
+            return View("~/Views/Groups/RecommendationsChecklist.cshtml", viewModel);
         }
 
         [NonAction]

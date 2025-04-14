@@ -12,13 +12,6 @@ and the headers & chunks to have a shared parent for displaying based on anchor 
 
 @section Header {
     <link rel="stylesheet" as="style" href="~/css/step-by-step.css">
-    <div class="school-ident">
-        <div class="school-ident-content">
-            <h2 class="govuk-heading-s school-ident-name">@Model.SelectedEstablishmentName</h2>
-            <a class="govuk-link" href="select-a-school">Change school</a>
-            <h1 class="govuk-heading-xl">@Model.SectionName recommendations</h1>
-        </div>
-    </div>
     <div class="recommendation-content">
             @{
                 var allContent = Model.AllContent.ToArray();
@@ -30,6 +23,7 @@ and the headers & chunks to have a shared parent for displaying based on anchor 
                 var nextContent = x + 1 < allContent.Length ? allContent[x + 1] : null;
 
             <div class="recommendation-piece-container" id="@headerWithContent.SlugifiedLinkText">
+                <partial name="Header" model="@headerWithContent" />
                 <div class="govuk-width-container govuk-main-wrapper">
                     <div class="govuk-grid-row">
                         <div class="govuk-grid-column-one-quarter">
