@@ -102,12 +102,6 @@ app.MapControllerRoute(
 );
 
 app.MapControllerRoute(
-    name: "group-recommendations-print",
-    pattern: "groups/recommendations/{sectionSlug}/print",
-    defaults: new { controller = "Groups", action = "GetRecommendationsPrintView" }
-);
-
-app.MapControllerRoute(
     pattern: "{controller=Pages}/{action=GetByRoute}/{id?}",
     name: "default"
 );
