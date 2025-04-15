@@ -34,7 +34,7 @@ public class RecordGroupSelectionCommand : IRecordGroupSelectionCommand
         {
             UserId = userId,
             UserEstablishment = establishmentId,
-            SelectedEstablishmentId = (int)selectedEstablishmentId,
+            SelectedEstablishmentId = selectedEstablishmentId != null ? (int)selectedEstablishmentId : establishmentId,
             SelectedEstablishmentName = submitSelectionDto.SelectedEstablishmentName
         };
 
