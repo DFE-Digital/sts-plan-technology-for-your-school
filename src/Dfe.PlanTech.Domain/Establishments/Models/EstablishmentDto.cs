@@ -12,6 +12,8 @@ public class EstablishmentDto
 
     [JsonPropertyName("urn")] public string? Urn { get; set; }
 
+    [JsonPropertyName("groupUid")] public string? GroupUid { get; set; }
+
     [JsonPropertyName("type")]
     public EstablishmentTypeDto? Type { get; set; }
 
