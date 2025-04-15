@@ -4,6 +4,6 @@ namespace Dfe.PlanTech.Domain.Groups.Interfaces
     {
         public string SelectedEstablishmentUrn { get; set; } = null!;
 
-        public string? SelectedEstablishmentName { get; set; }
+        public string SelectedEstablishmentName { get; set; } = null!;
     }
 }
