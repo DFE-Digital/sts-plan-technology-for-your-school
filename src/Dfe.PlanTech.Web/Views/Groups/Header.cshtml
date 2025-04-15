@@ -1,0 +1,26 @@
+@model Dfe.PlanTech.Domain.Questionnaire.Interfaces.IHeaderWithContent
+
+<section class="dfe-page-header">
+    <div class="govuk-width-container">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <partial name="BetaHeader" />
+                @{
+                    var schoolName = ViewData["SelectedEstablishmentName"] as string;
+                }
+                <div class="school-ident">
+                    <div class="school-ident-content">
+                        <h2 class="govuk-heading-s school-ident-name">@schoolName</h2>
+                        <a class="govuk-link" href="/groups/select-a-school">Change school</a>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="recommendation-piece-header">
+                        <h1 class="govuk-heading-xl govuk-!-margin-top-8">@Model.HeaderText</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
