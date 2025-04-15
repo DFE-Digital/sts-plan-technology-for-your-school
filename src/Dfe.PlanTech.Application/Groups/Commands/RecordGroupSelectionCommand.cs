@@ -1,6 +1,8 @@
 using System.Data;
 using System.Security.Authentication;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Users.Commands;
+using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.Groups.Interfaces;
 using Dfe.PlanTech.Domain.Groups.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
@@ -13,12 +15,14 @@ public class RecordGroupSelectionCommand : IRecordGroupSelectionCommand
     private readonly IPlanTechDbContext _db;
     private readonly IUser _user;
     private readonly IGetEstablishmentIdQuery _getEstablishmentIdQuery;
+    private readonly ICreateEstablishmentCommand _createEstablishmentCommand;
 
-    public RecordGroupSelectionCommand(IPlanTechDbContext db, IUser user, IGetEstablishmentIdQuery getEstablishmentIdQuery)
+    public RecordGroupSelectionCommand(IPlanTechDbContext db, IUser user, IGetEstablishmentIdQuery getEstablishmentIdQuery, ICreateEstablishmentCommand createEstablishmentCommand)
     {
         _db = db;
         _user = user;
         _getEstablishmentIdQuery = getEstablishmentIdQuery;
+        _createEstablishmentCommand = createEstablishmentCommand;
     }
 
     public async Task<int> RecordGroupSelection(SubmitSelectionDto submitSelectionDto, CancellationToken cancellationToken = default)
@@ -30,11 +34,22 @@ public class RecordGroupSelectionCommand : IRecordGroupSelectionCommand
         int establishmentId = await _user.GetEstablishmentId();
         var selectedEstablishmentId = await _getEstablishmentIdQuery.GetEstablishmentId(submitSelectionDto.SelectedEstablishmentUrn);
 
+        if (selectedEstablishmentId is null)
+        {
+            var establishment = new EstablishmentDto()
+            {
+                OrgName = submitSelectionDto.SelectedEstablishmentName,
+                Urn = submitSelectionDto.SelectedEstablishmentUrn
+            };
+
+            selectedEstablishmentId = await _createEstablishmentCommand.CreateEstablishment(establishment);
+        }
+
         var dto = new GroupSelectionDto()
         {
             UserId = userId,
             UserEstablishment = establishmentId,
-            SelectedEstablishmentId = selectedEstablishmentId != null ? (int)selectedEstablishmentId : establishmentId,
+            SelectedEstablishmentId = (int)selectedEstablishmentId,
             SelectedEstablishmentName = submitSelectionDto.SelectedEstablishmentName
         };
 
