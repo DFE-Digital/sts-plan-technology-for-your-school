@@ -10,8 +10,9 @@ public interface ICategory
 
 }
 
-public interface ICategory<out THeader, TSection> : ICategory
+public interface ICategory<out THeader, TContentComponent, TSection> : ICategory
 where THeader : IHeader
+where TContentComponent : IContentComponent
 where TSection : ISection
 {
     public THeader Header { get; }
@@ -19,7 +20,7 @@ where TSection : ISection
     public List<TSection> Sections { get; }
 }
 
-public interface ICategoryComponent : ICategory<Header, Section>, IContentComponent
+public interface ICategoryComponent : ICategory<Header, ContentComponent, Section>, IContentComponent
 {
     public IList<SectionStatusDto> SectionStatuses { get; set; }
 
