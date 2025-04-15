@@ -111,6 +111,12 @@ button.govuk-button--white {
     margin-bottom: 0px;
 }
 
+.dfe-page-header-inner {
+    > .school-ident {
+        padding-top: 0px;
+    } 
+}
+
 .school-ident-content {
     max-width: 1200px;
     margin: 0 auto;
@@ -131,4 +137,20 @@ button.govuk-button--white {
 
 .groups-list-heading {
     border-top: none !important;
+}
+
+.groups-list-key {
+    width: auto !important;
+    white-space: nowrap;
+}
+
+.groups-recommendation-piece-header {
+    padding-top: 32px;
+    padding-bottom: 16px;
+}
+
+.groups-recommendation-piece-header {
+    > h1.govuk-heading-xl {
+        padding-top: 0px !important;
+    }
 }
