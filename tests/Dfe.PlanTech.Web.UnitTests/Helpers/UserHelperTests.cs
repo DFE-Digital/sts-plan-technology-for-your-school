@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.Json;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Helper;
 using Dfe.PlanTech.Domain.Establishments.Models;
@@ -15,6 +16,7 @@ public class UserHelperTests
     private const string SECOND_USER_REF = "OtherReference";
 
     private const string FIRST_ESTABLISHMENT_REF = "131";
+    private const string GROUP_ESTABLISHMENT_REF = "123";
 
     private readonly UserHelper _userHelper;
     private readonly IHttpContextAccessor _httpContextAccessorSubstitute;
@@ -37,12 +39,31 @@ public class UserHelperTests
     private readonly List<Establishment> _establishments = new(){
        new Establishment(){
         EstablishmentRef = FIRST_ESTABLISHMENT_REF,
-        Id = 1
+        Id = 1,
+        OrgName = "First Establishment"
        },
        new Establishment(){
-        EstablishmentRef = "Other reference",
-        Id = 2
-       }
+        EstablishmentRef = "232",
+        Id = 2,
+        OrgName = "Second Establishment"
+       },
+       new Establishment(){
+        EstablishmentRef = "333",
+        Id = 3,
+        OrgName = "Third Establishment"
+       },
+       new Establishment(){
+          EstablishmentRef = GROUP_ESTABLISHMENT_REF,
+          Id = 4,
+          GroupUid = "123",
+          OrgName = "Group Establishment",
+         }
+    };
+
+    private readonly List<EstablishmentLink> _groupEstablishments = new()
+    {
+        new EstablishmentLink { Id = 1, GroupUid = "123", EstablishmentName = "First Establishment", Urn = "12345" },
+        new EstablishmentLink { Id = 2, GroupUid = "123", EstablishmentName = "Second Establishment", Urn = "67890" }
     };
 
 
@@ -71,7 +92,6 @@ public class UserHelperTests
 
     private void SubstituteGetEstablishmentIdQuery()
     {
-        _getEstablishmentIdQuerySubstitute = Substitute.For<IGetEstablishmentIdQuery>();
         _getEstablishmentIdQuerySubstitute.GetEstablishmentId(Arg.Any<string>())
                                     .Returns((callInfo) =>
                                     {
@@ -81,6 +101,12 @@ public class UserHelperTests
                                                     .Select(establishment => establishment.Id)
                                                     .FirstOrDefault();
                                     });
+        _getEstablishmentIdQuerySubstitute.GetGroupEstablishments(Arg.Any<int>())
+       .Returns((callInfo) =>
+       {
+           var establishmentId = callInfo.ArgAt<int>(0);
+           return _groupEstablishments.Where(link => link.GroupUid == GROUP_ESTABLISHMENT_REF).ToList();
+       });
     }
 
     private void SubstituteGetUserIdQuery()
@@ -136,4 +162,58 @@ public class UserHelperTests
         await Assert.ThrowsAnyAsync<Exception>(() => userHelperWithMissingOrgData.GetEstablishmentId());
     }
 
+    [Fact]
+    public async Task GetGroupEstablishments_Returns_Group_Establishments()
+    {
+        var groupUser = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+        {
+            new Claim(ClaimTypes.Name, "groupTest"),
+            new Claim(ClaimTypes.NameIdentifier, "1"),
+            new Claim("organisation", "{\n  \"ukprn\" : \"123\",\n  \"groupUid\" : \"123\",\n \"type\" : {\n      \"name\" : \"Type name\"\n  },\n  \"name\" : \"Organisation name\"\n}"),
+        }, ""));
+
+        _httpContextAccessorSubstitute.HttpContext.Returns(new DefaultHttpContext() { User = groupUser });
+
+        var groupUserHelper = new UserHelper(_httpContextAccessorSubstitute, _planTechDbContextSubstitute, _createEstablishmentCommandSubstitute, _getUserIdQuerySubstitute, _getEstablishmentIdQuerySubstitute);
+
+        // Act
+        var result = await groupUserHelper.GetGroupEstablishments();
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(_groupEstablishments.Count, result.Count);
+        Assert.Equal(_groupEstablishments[0].Id, result[0].Id);
+        Assert.Equal(_groupEstablishments[1].Id, result[1].Id);
+    }
+
+    [Fact]
+    public async Task SetEstablishment_Creates_Establishment_And_Returns_Id()
+    {
+        var establishmentDto = new EstablishmentDto
+        {
+            Ukprn = "131",
+            OrgName = "Organisation name",
+            Type = new EstablishmentTypeDto { Name = "Type name" }
+        };
+
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+        {
+            new Claim(ClaimTypes.Name, "test"),
+            new Claim(ClaimTypes.NameIdentifier, "1"),
+            new Claim("organisation", JsonSerializer.Serialize(establishmentDto)),
+        }, ""));
+
+        _httpContextAccessorSubstitute.HttpContext.Returns(new DefaultHttpContext() { User = user });
+
+        _createEstablishmentCommandSubstitute.CreateEstablishment(Arg.Any<EstablishmentDto>())
+            .Returns(establishmentDto.Reference.GetHashCode());
+
+        var userHelper = new UserHelper(_httpContextAccessorSubstitute, _planTechDbContextSubstitute, _createEstablishmentCommandSubstitute, _getUserIdQuerySubstitute, _getEstablishmentIdQuerySubstitute);
+
+        var result = await userHelper.SetEstablishment();
+
+        Assert.IsType<int>(result);
+        Assert.Equal(establishmentDto.Reference.GetHashCode(), result);
+        await _createEstablishmentCommandSubstitute.Received(1).CreateEstablishment(Arg.Is<EstablishmentDto>(dto => dto.Reference == establishmentDto.Reference));
+    }
 }
