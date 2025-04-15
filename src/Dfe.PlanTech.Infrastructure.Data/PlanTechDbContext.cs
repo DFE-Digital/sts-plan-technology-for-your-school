@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Establishments.Models;
+using Dfe.PlanTech.Domain.Groups.Models;
 using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Models;
@@ -14,6 +15,8 @@ namespace Dfe.PlanTech.Infrastructure.Data;
 public class PlanTechDbContext : DbContext, IPlanTechDbContext
 {
     public DbSet<Establishment> Establishments { get; set; } = null!;
+    public DbSet<EstablishmentGroup> EstablishmentGroups { get; set; } = null!;
+    public DbSet<EstablishmentLink> EstablishmentLinks { get; set; } = null!;
     public DbSet<Response> Responses { get; set; } = null!;
     public DbSet<ResponseAnswer> Answers { get; set; } = null!;
     public DbSet<ResponseQuestion> Questions { get; set; } = null!;
@@ -21,6 +24,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public DbSet<SignIn> SignIn { get; set; } = null!;
     public DbSet<Submission> Submissions { get; set; } = null!;
     public DbSet<User> Users { get; set; } = null!;
+    public DbSet<GroupReadActivity> GroupReadActivities { get; set; }
 
     public PlanTechDbContext() { }
 
@@ -51,6 +55,16 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
             builder.HasKey(establishment => establishment.Id);
             builder.ToTable(tb => tb.HasTrigger("tr_establishment"));
             builder.Property(establishment => establishment.DateLastUpdated).HasColumnType("datetime").HasDefaultValue();
+        });
+
+        modelBuilder.Entity<EstablishmentGroup>(builder =>
+        {
+            builder.HasKey(group => group.Id);
+        });
+
+        modelBuilder.Entity<EstablishmentLink>(builder =>
+        {
+            builder.HasKey(link => link.Id);
         });
 
         // Setup SignIn Table
@@ -109,6 +123,27 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
         {
             builder.HasNoKey();
         });
+
+        modelBuilder.Entity<GroupReadActivity>(builder =>
+        {
+            builder.ToTable("groupReadActivity");
+
+            builder.HasKey(b => b.Id);
+
+            builder.Property(b => b.Id).HasColumnName("id");
+            builder.Property(b => b.UserId).HasColumnName("userId");
+            builder.Property(b => b.UserEstablishmentId).HasColumnName("establishmentId");
+            builder.Property(b => b.SelectedEstablishmentId).HasColumnName("selectedEstablishmentId");
+            builder.Property(b => b.SelectedEstablishmentName)
+                   .HasColumnName("selectedEstablishmentName")
+                   .HasColumnType("nvarchar(50)")
+                   .IsRequired();
+
+            builder.Property(b => b.DateSelected)
+                   .HasColumnName("dateSelected")
+                   .HasColumnType("datetime")
+                   .IsRequired();
+        });
     }
 
     public IQueryable<SectionStatusDto> GetSectionStatuses(string sectionIds, int establishmentId) => SectionStatusesSp.FromSqlInterpolated($"{DatabaseConstants.GetSectionStatuses} {sectionIds} , {establishmentId}");
@@ -129,6 +164,14 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public Task<User?> GetUserBy(Expression<Func<User, bool>> predicate) => Users.FirstOrDefaultAsync(predicate);
 
     public Task<Establishment?> GetEstablishmentBy(Expression<Func<Establishment, bool>> predicate) => Establishments.FirstOrDefaultAsync(predicate);
+
+    public Task<List<EstablishmentLink>> GetGroupEstablishmentsBy(Expression<Func<Establishment, bool>> predicate) =>
+        Establishments
+            .Where(predicate)
+            .Join(EstablishmentGroups, establishment => establishment.GroupUid, group => group.Uid, (establishment, group) => group)
+            .Join(EstablishmentLinks, group => group.Uid, link => link.GroupUid, (group, link) => link).ToListAsync();
+
+    public IQueryable<GroupReadActivity> GetGroupReadActivities => Set<GroupReadActivity>();
 
     public Task<int> CallStoredProcedureWithReturnInt(string sprocName, IEnumerable<object> parameters, CancellationToken cancellationToken = default)
      => Database.ExecuteSqlRawAsync(sprocName, parameters, cancellationToken: cancellationToken);

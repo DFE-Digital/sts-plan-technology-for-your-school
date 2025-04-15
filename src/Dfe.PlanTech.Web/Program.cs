@@ -96,8 +96,14 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
+    name: "group-recommendations",
+    pattern: "groups/recommendations/{sectionSlug}",
+    defaults: new { controller = "Groups", action = "GetGroupsRecommendation" }
+);
+
+app.MapControllerRoute(
     pattern: "{controller=Pages}/{action=GetByRoute}/{id?}",
     name: "default"
 );
-
+ 
 await app.RunAsync();
