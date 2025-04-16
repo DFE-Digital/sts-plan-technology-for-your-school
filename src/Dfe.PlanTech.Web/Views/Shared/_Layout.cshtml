@@ -1,60 +1,70 @@
 @using Dfe.PlanTech.Web.Helpers;
 
 @section Head {
-    <partial name="_Head"/>
-    @await RenderSectionAsync("Head", required: false)
+	<partial name="_Head" />
+	@await RenderSectionAsync("Head", required: false)
 }
 
 @{
-    Layout = "_GovUkPageTemplate";
+	Layout = "_GovUkPageTemplate";
 
-    if (ViewData["Title"] == null)
-    {
-        var routeData = Context.GetRouteData();
-        ViewData["Title"] = routeData.GetTitleForPage();
-    }
+	if (ViewData["Title"] == null)
+	{
+		var routeData = Context.GetRouteData();
+		ViewData["Title"] = routeData.GetTitleForPage();
+	}
 }
 
 @section Header {
-    <partial name="GoogleTagManager/_Body"/>
-    <partial name="CookiesBanner/_CookieBanner"/>
-    <partial name="_Header"/>
-    @await RenderSectionAsync("Header", required: false)
+	<partial name="GoogleTagManager/_Body" />
+	<partial name="CookiesBanner/_CookieBanner" />
+	<partial name="_Header" />
+	@await RenderSectionAsync("Header", required: false)
 
-    @if (IsSectionDefined("DfePageHeaderOuter") || IsSectionDefined("DfePageHeaderInner"))
-    {
-        <section class="dfe-page-header">
-            <div class="govuk-width-container">
-                <div class="govuk-grid-row">                   
-                    <partial name="BetaHeader"/>
-                    <div class="govuk-grid-column-two-thirds">
-                        @await RenderSectionAsync("DfePageHeaderOuter", required: false)
-                        <div class="dfe-page-header-inner">
-                            @await RenderSectionAsync("DfePageHeaderInner", required: false)
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    }
+	@if (IsSectionDefined("DfePageHeaderOuter") || IsSectionDefined("DfePageHeaderInner") || IsSectionDefined("DfePageHeaderInnerFullWidth"))
+	{
+		<section class="dfe-page-header">
+			<div class="govuk-width-container">
+				<div class="govuk-grid-row">
+					<partial name="BetaHeader" />
+					@await RenderSectionAsync("DfePageHeaderOuter", required: false)
+					@if (IsSectionDefined("DfePageHeaderInnerFullWidth"))
+					{
+						<div class="dfe-page-header-inner">
+							@await RenderSectionAsync("DfePageHeaderInnerFullWidth", required: false)
+						</div>
+					}
+					else if (IsSectionDefined("DfePageHeaderInner"))
+					{
+						<div class="govuk-grid-column-two-thirds">
+							<div class="dfe-page-header-inner">
+								@await RenderSectionAsync("DfePageHeaderInner", required: false)
+							</div>
+						</div>
+					}
+					
+				</div>
+			</div>
+		</section>
+	}
 }
 
 @section BeforeContent {
-    @if (!IsSectionDefined("DfePageHeaderOuter") && !IsSectionDefined("DfePageHeaderInner"))
-    {
-        <partial name="BetaHeader"/>
-    }
-    <partial name="_BeforeContent"/>
-    @await RenderSectionAsync("BeforeContent", required: false)
+	@if (!IsSectionDefined("DfePageHeaderOuter") && !IsSectionDefined("DfePageHeaderInner") && !IsSectionDefined("DfePageHeaderInnerFullWidth"))
+	{
+		<partial name="BetaHeader" />
+	}
+	<partial name="_BeforeContent" />
+	@await RenderSectionAsync("BeforeContent", required: false)
 }
 
 @RenderBody()
 
 @section Footer {
-    <partial name="_Footer"/>
+	<partial name="_Footer" />
 }
 
 @section BodyEnd {
-    <partial name="_BodyEnd"/>
-    @await RenderSectionAsync("BodyEnd", required: false)
+	<partial name="_BodyEnd" />
+	@await RenderSectionAsync("BodyEnd", required: false)
 }
