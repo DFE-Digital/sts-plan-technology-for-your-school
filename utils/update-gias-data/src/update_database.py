@@ -15,6 +15,32 @@ logger = getLogger(__name__)
 CONNECTION_STRING = os.getenv("CONNECTION_STRING")
 SQL_COPT_SS_ACCESS_TOKEN = 1256
 
+test_links = pd.DataFrame([
+    {
+        "groupUid": "99999",
+        "establishmentName": "DSI TEST Establishment (001) Community School (01)",
+        "urn": 2,
+    },
+    {
+        "groupUid": "99999",
+        "establishmentName": "DSI TEST Establishment (001) Miscellaneous (27)",
+        "urn": 18,
+    },
+    {
+        "groupUid": "99999",
+        "establishmentName": "DSI TEST Establishment (001) Foundation School (05",
+        "urn": 5,
+    },
+])
+
+test_groups = pd.DataFrame([
+    {
+        "uid": "99999",
+        "groupName": "DSI TEST Multi-Academy Trust (010)",
+        "groupType": "Multi-academy trust",
+        "groupStatus": "Open",
+    }
+])
 
 def _get_connection():
     """Fetch a token for accessing the database and connect"""
@@ -92,8 +118,11 @@ def update_database(groups: pd.DataFrame, links: pd.DataFrame):
     """Use a single transaction to update establishment groups and relationships, commit on success"""
     with _db_cursor() as cursor:
         cursor.fast_executemany = True
-        _create_temp_groups(cursor, groups)
-        _create_temp_links(cursor, links)
+        combined_establishment_links = pd.concat([links, test_links], ignore_index=True)
+        combined_establishment_groups = pd.concat([groups, test_groups], ignore_index=True)
+
+        _create_temp_groups(cursor, combined_establishment_groups)
+        _create_temp_links(cursor, combined_establishment_links)
         logger.info(
             "Updating dbo.establishmentLink and dbo.establishmentGroup with staging tables"
         )
