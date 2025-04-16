@@ -26,9 +26,8 @@
 		<section class="dfe-page-header">
 			<div class="govuk-width-container">
 				<div class="govuk-grid-row">
-					<partial name="BetaHeader" />
-					@await RenderSectionAsync("DfePageHeaderOuter", required: false)
-					@if (IsSectionDefined("DfePageHeaderInnerFullWidth"))
+                    <partial name="BetaHeader" />
+                    @if (IsSectionDefined("DfePageHeaderInnerFullWidth"))
 					{
 						<div class="dfe-page-header-inner">
 							@await RenderSectionAsync("DfePageHeaderInnerFullWidth", required: false)
@@ -36,13 +35,14 @@
 					}
 					else if (IsSectionDefined("DfePageHeaderInner"))
 					{
-						<div class="govuk-grid-column-two-thirds">
-							<div class="dfe-page-header-inner">
-								@await RenderSectionAsync("DfePageHeaderInner", required: false)
-							</div>
-						</div>
+                        <div class="govuk-grid-column-two-thirds">
+                            @await RenderSectionAsync("DfePageHeaderOuter", required: false)
+                            <div class="dfe-page-header-inner">
+                                @await RenderSectionAsync("DfePageHeaderInner", required: false)
+                            </div>
+                        </div>
 					}
-					
+
 				</div>
 			</div>
 		</section>
