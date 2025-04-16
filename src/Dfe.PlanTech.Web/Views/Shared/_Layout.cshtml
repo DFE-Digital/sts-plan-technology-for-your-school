@@ -25,9 +25,9 @@
     {
         <section class="dfe-page-header">
             <div class="govuk-width-container">
-                <div class="govuk-grid-row">
+                <div class="govuk-grid-row">                   
+                    <partial name="BetaHeader"/>
                     <div class="govuk-grid-column-two-thirds">
-                        <partial name="BetaHeader"/>
                         @await RenderSectionAsync("DfePageHeaderOuter", required: false)
                         <div class="dfe-page-header-inner">
                             @await RenderSectionAsync("DfePageHeaderInner", required: false)
