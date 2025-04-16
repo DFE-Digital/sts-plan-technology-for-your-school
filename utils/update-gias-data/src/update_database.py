@@ -118,7 +118,7 @@ def update_database(groups: pd.DataFrame, links: pd.DataFrame):
     """Use a single transaction to update establishment groups and relationships, commit on success"""
     with _db_cursor() as cursor:
         cursor.fast_executemany = True
-        combined_establishment_links = pd.concat([links, test_rows], ignore_index=True)
+        combined_establishment_links = pd.concat([links, test_links], ignore_index=True)
         combined_establishment_groups = pd.concat([groups, test_groups], ignore_index=True)
 
         _create_temp_groups(cursor, combined_establishment_groups)
