@@ -1,20 +1,20 @@
 name: Contentful Backup
 on:
   schedule:
-    - cron: 0 0 * * 1
+    - cron: 0 0 * * 2
   workflow_dispatch:
     inputs:
       environment:
         description: Which Contentful environment to backup
         required: true
         type: choice
-        options: [ 'Dev', 'Tst', 'Staging', 'Production' ]
+        options: [ 'Dev', 'Tst', 'Staging', 'Production', 'StagingUnprotected', 'ProductionUnprotected' ]
         default: 'Staging'
 
 jobs:
   backup_content:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || 'Staging' }}
+    environment: ${{ inputs.environment || 'StagingUnprotected' }}
     name: Backup content for ${{ inputs.environment || 'Staging' }}
     env:
       az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
