@@ -19,7 +19,7 @@ public class EmbeddedEntryBlockRenderer : BaseRichTextContentPartRender
 
     public override StringBuilder AddHtml(RichTextContent content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
-        var richTextData = content?.Data?.Target ?? null;
+        var richTextData = content.Data?.Target ?? null;
         if (richTextData == null)
         {
             return stringBuilder;

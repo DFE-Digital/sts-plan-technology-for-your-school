@@ -25,7 +25,7 @@ public class AttachmentComponent
         stringBuilder.Append("<div class=\"attachment\">");
         stringBuilder.Append("<div class=\"attachment-thumbnail govuk-!-margin-right-8\">");
         stringBuilder.Append($"<a href=\"{customAttachment.Uri}\" download>");
-        stringBuilder.Append(GetImageTag(customAttachment.FileExtension));
+        stringBuilder.Append(GetImageTag(customAttachment.FileExtension!));
         stringBuilder.Append("</a></div>");
         stringBuilder.Append("<div class=\"attachment-details\">");
         stringBuilder.Append("<h2 class=\"attachment-title\">");
@@ -33,7 +33,7 @@ public class AttachmentComponent
         stringBuilder.Append("</a></h2>");
 
         stringBuilder.Append("<p class=\"attachment-metadata\" id=\"file-details\">");
-        stringBuilder.Append($"<span class=\"attachment-attribute\" aria-label=\"file type\">{customAttachment.FileExtension.ToUpper()}</span>,");
+        stringBuilder.Append($"<span class=\"attachment-attribute\" aria-label=\"file type\">{customAttachment.FileExtension!.ToUpper()}</span>,");
         stringBuilder.Append("<span class=\"attachment-attribute\" aria-label=\"file size\">");
         stringBuilder.Append($"{customAttachment.Size} KB");
         stringBuilder.Append("</span></p>");

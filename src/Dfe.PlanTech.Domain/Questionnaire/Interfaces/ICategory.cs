@@ -5,12 +5,7 @@ using Dfe.PlanTech.Domain.Submissions.Models;
 
 namespace Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 
-public interface ICategory
-{
-
-}
-
-public interface ICategory<out THeader, TContentComponent, TSection> : ICategory
+public interface ICategory<out THeader, TContentComponent, TSection>
 where THeader : IHeader
 where TContentComponent : IContentComponent
 where TSection : ISection

@@ -108,10 +108,13 @@ namespace Dfe.PlanTech.Web.Controllers
             var schoolId = latestSelection.SelectedEstablishmentId;
             var schoolName = latestSelection.SelectedEstablishmentName;
 
-            var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken);
+            var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken)
+                ?? throw new ContentfulDataUnavailableException($"Could not find section for slug: {sectionSlug}");
 
-            var subTopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {section.Name}");
-            var submissionResponses = await _getLatestResponsesQuery.GetLatestResponses(schoolId, section.Sys.Id, true, cancellationToken) ?? throw new DatabaseException($"Could not find users answers for:  {section.Name}");
+            var subTopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id, cancellationToken)
+                ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for section: {section.Name}");
+            var submissionResponses = await _getLatestResponsesQuery.GetLatestResponses(schoolId, section.Sys.Id, true, cancellationToken)
+                ?? throw new DatabaseException($"Could not find users answers for section: {section.Name}");
             var latestResponses = section.GetOrderedResponsesForJourney(submissionResponses.Responses);
 
             var customIntro = new GroupsCustomRecommendationIntro()
@@ -145,10 +148,13 @@ namespace Dfe.PlanTech.Web.Controllers
         [HttpGet("groups/recommendations/{sectionSlug}/print", Name = "GetRecommendationsPrintView")]
         public async Task<IActionResult> GetRecommendationsPrintView(int schoolId, string schoolName, string sectionSlug, CancellationToken cancellationToken)
         {
+            var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken)
+                ?? throw new ContentfulDataUnavailableException($"Could not find section for slug: {sectionSlug}");
 
-            var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken);
-            var subtopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id, cancellationToken);
-            var submissionResponses = await _getLatestResponsesQuery.GetLatestResponses(schoolId, section.Sys.Id, true, cancellationToken);
+            var subtopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id, cancellationToken)
+                ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for section: {section.Name}");
+            var submissionResponses = await _getLatestResponsesQuery.GetLatestResponses(schoolId, section.Sys.Id, true, cancellationToken)
+                ?? throw new DatabaseException($"Could not get latest responses for school with ID {schoolId} in section: {section.Name}");
 
             var latestResponses = section.GetOrderedResponsesForJourney(submissionResponses.Responses);
             var customIntro = new GroupsCustomRecommendationIntro()
@@ -186,7 +192,8 @@ namespace Dfe.PlanTech.Web.Controllers
         {
             var userId = await _user.GetCurrentUserId();
             var userEstablishmentId = await _user.GetEstablishmentId();
-            var latestSelection = await _getGroupSelectionQuery.GetLatestSelectedGroupSchool(userId.Value, userEstablishmentId, cancellationToken);
+            var latestSelection = await _getGroupSelectionQuery.GetLatestSelectedGroupSchool(userId.Value, userEstablishmentId, cancellationToken)
+                ?? throw new DatabaseException($"Could not get latest selected group school for user with ID {userId.Value} in establishment: {userEstablishmentId}");
 
             return latestSelection;
         }

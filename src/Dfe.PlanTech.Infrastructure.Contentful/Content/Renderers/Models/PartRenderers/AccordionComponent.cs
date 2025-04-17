@@ -9,7 +9,7 @@ public class AccordionComponent : IRichTextContentPartRendererCollection
 {
     private readonly ILogger<AccordionComponent> _logger;
     public ILogger Logger => _logger;
-    public IReadOnlyList<IRichTextContentPartRenderer> Renders { get; private set; }
+    public IReadOnlyList<IRichTextContentPartRenderer> Renders { get; private set; } = new List<IRichTextContentPartRenderer>();
     public AccordionComponent(ILogger<AccordionComponent> logger)
     {
         _logger = logger;
