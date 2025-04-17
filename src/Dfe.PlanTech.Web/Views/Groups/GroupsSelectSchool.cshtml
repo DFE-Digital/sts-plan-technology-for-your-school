@@ -22,7 +22,7 @@
                 var schoolUrn = school.Urn;
                 var schoolName = school.EstablishmentName;
                 <form asp-action="SelectSchool" method="post">
-                    <button type="submit" class="govuk-button school-button" value="@schoolUrn">@schoolName</button>
+                    <button type="submit" class="govuk-button school-button govuk-!-text-align-left" value="@schoolUrn">@schoolName</button>
                     <input type="hidden" name="schoolUrn" value="@schoolUrn" />
                     <input type="hidden" name="schoolName" value="@schoolName" />
                     <p></p>
