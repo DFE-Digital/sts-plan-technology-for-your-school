@@ -16,4 +16,6 @@ public enum RichTextNodeType
     TableCell,
     Heading,
     EmbeddedEntryBlock,
+    GridContainer,
+    CsCard,
 }
