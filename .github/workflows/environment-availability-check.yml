@@ -1,6 +1,10 @@
 name: Check Environment Availability
 
 on:
+  push:
+    branches:
+      - feature/257388b-ping-environments
+
   schedule:
     - cron: '*/30 * * * *'  # every 30 minutes
   workflow_dispatch:
