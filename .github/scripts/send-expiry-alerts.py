@@ -9,7 +9,7 @@ NOTIFICATIONS_API_KEY = os.environ.get("NOTIFICATIONS_API_KEY")
 
 TEMPLATE_ID = "b408feda-d358-4fcc-92fe-b9cd1986e1d8"
 
-WARNING_DAYS = [30, 15, 7]
+WARNING_DAYS = [30, 14, 7, 1]
 TODAY = datetime.now(timezone.utc).date()
 
 def send_email(recipient_addresses, secret_expiry_details):
@@ -57,7 +57,7 @@ for secret in all_secrets:
 
 recipient_addresses = [
     "drew.morgan@education.gov.uk",
-    "gilaine.young@education.gov.uk"
+    "gilaine.young@education.gov.uk",
     "jag.nahl@education.gov.uk",
     "rian.thwaite@education.gov.uk"
 ]
