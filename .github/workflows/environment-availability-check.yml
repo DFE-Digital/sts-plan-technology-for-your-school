@@ -26,6 +26,11 @@ jobs:
             env_url: "https://plan-technology-for-your-school.education.gov.uk/information-asset-register"
 
     steps:
+      - name: Prepare empty failures list
+        run: |
+          mkdir -p tmp
+          echo "failures:" > tmp/env-check-failures.yml
+
       - name: Check ${{ matrix.env_name }} availability
         run: |
           echo "🌐 Pinging ${{ matrix.env_name }} (${{ matrix.env_url }})..."
@@ -33,7 +38,40 @@ jobs:
           
           if [[ "$status_code" -ne 200 ]]; then
             echo "❌ ${{ matrix.env_name }} returned status code $status_code"
+            echo "- name: ${{ matrix.env_name }}" >> tmp/env-check-failures.yml
+            echo "  url: ${{ matrix.env_url }}" >> tmp/env-check-failures.yml
+            echo "  status: $status_code" >> tmp/env-check-failures.yml
             exit 1
           fi
 
           echo "✅ ${{ matrix.env_name }} is up (HTTP $status_code)"
+
+      - name: Upload failure artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: env-check-failures-${{ matrix.env_name }}
+          path: tmp/env-check-failures.yml
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: ping-environments
+    if: always()
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all failure artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: env-check-failures-*
+          path: downloaded-failures
+
+      - name: Install Notify client
+        run: pip install notifications-python-client pyyaml
+
+      - name: Send environment down alert
+        env:
+          NOTIFICATIONS_API_KEY: ${{ secrets.NOTIFICATIONS_SERVICE_GOV_UK_API_KEY }}
+        run: python .github/scripts/notify-down-envs.py
