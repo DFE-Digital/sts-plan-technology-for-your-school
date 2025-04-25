@@ -1,16 +1,13 @@
 name: Check Environment Availability
 
 on:
-  push:
-    branches:
-      - feature/257388b-ping-environments
-
   schedule:
     - cron: '*/30 * * * *'  # every 30 minutes
   workflow_dispatch:
 
 jobs:
   ping-environments:
+    name: Ping environments
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -54,6 +51,7 @@ jobs:
           path: tmp/env-check-failures.yml
 
   notify:
+    name: Send email notifications
     runs-on: ubuntu-latest
     needs: ping-environments
     if: always()
