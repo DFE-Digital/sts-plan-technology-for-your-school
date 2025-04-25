@@ -1,0 +1,38 @@
+name: Check Environment Availability
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'  # every 30 minutes
+  workflow_dispatch:
+
+jobs:
+  ping-environments:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        env_name: [
+          Development, 
+          Test,
+          Staging,
+          Production
+        ]
+        env_url: [
+          https://s190d01-plantech-container-app-url-h4bte8b4d7cqgegp.z01.azurefd.net/information-asset-register,
+          https://s190t01-plantech-container-app-url-emh7dccjg7gjgeef.z01.azurefd.net/information-asset-register,
+          https://staging.plan-technology-for-your-school.education.gov.uk/information-asset-register,
+          https://plan-technology-for-your-school.education.gov.uk/information-asset-register
+        ]
+
+    steps:
+      - name: Check ${{ matrix.env_name }} availability
+        run: |
+          echo "🌐 Pinging ${{ matrix.env_name }} (${{ matrix.env_url }})..."
+          status_code=$(curl -s -o /dev/null -w "%{http_code}" "${{ matrix.env_url }}")
+          
+          if [[ "$status_code" -ne 200 ]]; then
+            echo "❌ ${{ matrix.env_name }} returned status code $status_code"
+            exit 1
+          fi
+
+          echo "✅ ${{ matrix.env_name }} is up (HTTP $status_code)"
