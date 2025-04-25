@@ -15,18 +15,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        env_name: [
-          Development, 
-          Test,
-          Staging,
-          Production
-        ]
-        env_url: [
-          "https://s190d01-plantech-container-app-url-h4bte8b4d7cqgegp.z01.azurefd.net/information-asset-register",
-          "https://s190t01-plantech-container-app-url-emh7dccjg7gjgeef.z01.azurefd.net/information-asset-register",
-          "https://staging.plan-technology-for-your-school.education.gov.uk/information-asset-register",
-          "https://plan-technology-for-your-school.education.gov.uk/information-asset-register"
-        ]
+        include:
+          - env_name: Development
+            env_url: "https://s190d01-plantech-container-app-url-h4bte8b4d7cqgegp.z01.azurefd.net/information-asset-register"
+          - env_name: Test
+            env_url: "https://s190t01-plantech-container-app-url-emh7dccjg7gjgeef.z01.azurefd.net/information-asset-register"
+          - env_name: Staging
+            env_url: "https://staging.plan-technology-for-your-school.education.gov.uk/information-asset-register"
+          - env_name: Production
+            env_url: "https://plan-technology-for-your-school.education.gov.uk/information-asset-register"
 
     steps:
       - name: Check ${{ matrix.env_name }} availability
