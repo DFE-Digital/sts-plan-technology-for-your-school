@@ -23,7 +23,7 @@ public class AttachmentRendererTests
     {
         var renderer = new AttachmentComponent();
         var content = GetContent();
-        content.Data.Target.Asset.File.ContentType = "pdf";
+        content.Data!.Target!.Asset.File.ContentType = "pdf";
 
         var result = renderer.AddHtml(content, new StringBuilder());
 
@@ -35,7 +35,7 @@ public class AttachmentRendererTests
     {
         var renderer = new AttachmentComponent();
         var content = GetContent();
-        content.Data.Target.Asset.File.ContentType = "html";
+        content.Data!.Target!.Asset.File.ContentType = "html";
 
         var result = renderer.AddHtml(content, new StringBuilder());
 
