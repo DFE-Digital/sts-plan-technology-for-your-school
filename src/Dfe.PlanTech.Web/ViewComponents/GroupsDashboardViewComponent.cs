@@ -1,6 +1,8 @@
-﻿using Dfe.PlanTech.Application.Constants;
+﻿using System.Reflection;
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Domain.CategorySection;
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Groups;
 using Dfe.PlanTech.Domain.Groups.Interfaces;
 using Dfe.PlanTech.Domain.Interfaces;
@@ -49,14 +51,16 @@ public class GroupsDashboardViewComponent(ILogger<GroupsDashboardViewComponent> 
 
         category = await RetrieveSectionStatuses(category, selectedSchool.SelectedEstablishmentId);
 
-        return new GroupsDashboardViewComponentViewModel
+        var model = new GroupsDashboardViewComponentViewModel
         {
-            Description = category.Content[0],
+            Description = category.Content is { Count: > 0 } content ? content.First() : new MissingComponent(),
             GroupsCategorySectionDto = await GetGroupsCategorySectionDto(category).ToListAsync(),
             ProgressRetrievalErrorMessage = category.RetrievalError
                 ? "Unable to retrieve progress, please refresh your browser."
                 : null
         };
+
+        return model;
     }
 
     private async IAsyncEnumerable<GroupsCategorySectionDto> GetGroupsCategorySectionDto(Category category)
