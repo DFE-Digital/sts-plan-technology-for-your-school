@@ -1,16 +1,15 @@
 using Dfe.PlanTech.Application.Groups.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Domain.Groups.Interfaces;
 using Dfe.PlanTech.Domain.Groups.Models;
 
 namespace Dfe.PlanTech.Application.UnitTests.Groups.Queries
 {
-    using Xunit;
-    using NSubstitute;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using System.Collections.Generic;
+    using NSubstitute;
+    using Xunit;
 
     public class GroupReadActivityServiceTests
     {
