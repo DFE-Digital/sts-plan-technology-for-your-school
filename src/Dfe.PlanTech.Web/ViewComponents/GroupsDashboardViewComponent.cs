@@ -54,7 +54,7 @@ public class GroupsDashboardViewComponent(ILogger<GroupsDashboardViewComponent> 
 
         return new GroupsDashboardViewComponentViewModel
         {
-            Description = category.Content is { Count: > 0 } content ? content.First() : new MissingComponent(),
+            Description = category.Content is { Count: > 0 } content ? content[0] : new MissingComponent(),
             GroupsCategorySectionDto = await GetGroupsCategorySectionDto(category).ToListAsync(),
             ProgressRetrievalErrorMessage = category.RetrievalError
                 ? "Unable to retrieve progress, please refresh your browser."

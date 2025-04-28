@@ -179,7 +179,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Groups.Queries
                     UserId = userId,
                     UserEstablishmentId = userEstablishmentId,
                     SelectedEstablishmentId = 400,
-                    SelectedEstablishmentName = null,
+                    SelectedEstablishmentName = "Establishment Name",
                     DateSelected = new DateTime(2024, 2, 1)
                 }
             }.AsQueryable();

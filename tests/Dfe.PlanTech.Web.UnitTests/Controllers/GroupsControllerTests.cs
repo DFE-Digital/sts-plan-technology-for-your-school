@@ -62,7 +62,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             _getGroupSelectionQuery
                 .GetLatestSelectedGroupSchool(1, 100, Arg.Any<CancellationToken>())
-                .Returns(Task.FromResult(selection));
+                .Returns(Task.FromResult<GroupReadActivityDto?>(selection));
 
             _getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())!
                 .Returns(Task.FromResult(new Page { Content = new List<ContentComponent>() }));

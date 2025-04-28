@@ -61,7 +61,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var result = await component.InvokeAsync(category);
 
             var viewResult = Assert.IsType<ViewViewComponentResult>(result);
-            var model = Assert.IsType<GroupsDashboardViewComponentViewModel>(viewResult.ViewData.Model);
+            var model = Assert.IsType<GroupsDashboardViewComponentViewModel>(viewResult?.ViewData?.Model);
             Assert.Equal("ServiceUnavailable", model.NoSectionsErrorRedirectUrl);
         }
 
@@ -126,7 +126,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var result = await component.InvokeAsync(category);
 
             var viewResult = Assert.IsType<ViewViewComponentResult>(result);
-            var model = Assert.IsType<GroupsDashboardViewComponentViewModel>(viewResult.ViewData.Model);
+            var model = Assert.IsType<GroupsDashboardViewComponentViewModel>(viewResult?.ViewData?.Model);
             Assert.IsType<MissingComponent>(model.Description);
         }
 
