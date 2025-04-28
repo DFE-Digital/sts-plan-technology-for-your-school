@@ -13,7 +13,8 @@ recipients = [
     "jag.nahl@education.gov.uk",
     "laura.steele@education.gov.uk"
     "rian.thwaite@education.gov.uk",
-    "sofia.costa@education.gov.uk"
+    "sofia.costa@education.gov.uk",
+    "technology.planning@education.gov.uk"
 ]
 
 def load_all_failures(directory="downloaded-failures"):
