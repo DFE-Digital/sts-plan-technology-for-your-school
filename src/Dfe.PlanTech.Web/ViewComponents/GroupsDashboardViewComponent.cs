@@ -52,7 +52,7 @@ public class GroupsDashboardViewComponent(ILogger<GroupsDashboardViewComponent> 
 
         category = await RetrieveSectionStatuses(category, selectedSchool.SelectedEstablishmentId);
 
-        var model = new GroupsDashboardViewComponentViewModel
+        return new GroupsDashboardViewComponentViewModel
         {
             Description = category.Content is { Count: > 0 } content ? content.First() : new MissingComponent(),
             GroupsCategorySectionDto = await GetGroupsCategorySectionDto(category).ToListAsync(),
@@ -60,8 +60,6 @@ public class GroupsDashboardViewComponent(ILogger<GroupsDashboardViewComponent> 
                 ? "Unable to retrieve progress, please refresh your browser."
                 : null
         };
-
-        return model;
     }
 
     private async IAsyncEnumerable<GroupsCategorySectionDto> GetGroupsCategorySectionDto(Category category)
