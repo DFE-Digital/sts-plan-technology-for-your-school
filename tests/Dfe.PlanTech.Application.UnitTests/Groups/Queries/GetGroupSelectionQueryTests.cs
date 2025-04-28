@@ -197,7 +197,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Groups.Queries
 
             Assert.NotNull(result);
             Assert.Equal(400, result.SelectedEstablishmentId);
-            Assert.Null(result.SelectedEstablishmentName);
+            Assert.Equal("Establishment Name", result.SelectedEstablishmentName);
         }
 
     }
