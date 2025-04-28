@@ -10,8 +10,10 @@ TEMPLATE_ID = "0a0921f4-db1f-4a9c-9791-af14411f8b54"
 recipients = [
     "drew.morgan@education.gov.uk",
     "gilaine.young@education.gov.uk",
+    "jag.nahl@education.gov.uk",
+    "laura.steele@education.gov.uk"
     "rian.thwaite@education.gov.uk",
-    "jag.nahl@education.gov.uk"
+    "sofia.costa@education.gov.uk"
 ]
 
 def load_all_failures(directory="downloaded-failures"):
