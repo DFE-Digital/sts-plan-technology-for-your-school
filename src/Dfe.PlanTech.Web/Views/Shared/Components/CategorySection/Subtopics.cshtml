@@ -1,35 +1,73 @@
+@using Dfe.PlanTech.Domain.CategorySection
 @using Dfe.PlanTech.Web.TagHelpers.TaskList
 @using GovUk.Frontend.AspNetCore.TagHelpers
 @using AnchorTagHelper = Microsoft.AspNetCore.Mvc.TagHelpers.AnchorTagHelper
 @model CategorySectionViewComponentViewModel
 
-<dl class="govuk-summary-list dfe-self-assessment-list">
+<dl class="dfe-grid-container govuk-!-width-two-thirds">
     @foreach (var categorySectionDtoItem in Model.CategorySectionDto)
     {
-        <div class="govuk-summary-list__row">
-            @if (categorySectionDtoItem.Slug != null)
-            {
-                <dt class="govuk-summary-list__key govuk-!-font-weight-regular">
-                    <a asp-controller="Pages" asp-action="GetByRoute" asp-route-route="@categorySectionDtoItem.Slug"
-                       class="govuk-link">
-                        @categorySectionDtoItem.Name
-                    </a>
-                </dt>
-                <dd class="govuk-summary-list__value govuk-!-text-align-left">
-                    <task-list-tag colour=@categorySectionDtoItem.Tag.Colour>
-                        @categorySectionDtoItem.Tag.Text
-                    </task-list-tag>
-                </dd>
-            }
-            else
-            {
-                <dt class="govuk-summary-list__key">
-                    <govuk-error-message>@categorySectionDtoItem.ErrorMessage</govuk-error-message>
-                </dt>
-            }
-            <dd class="govuk-summary-list__value govuk-!-text-align-right">
-                <partial name="Components/CategorySection/SubtopicRecommendation" model="@categorySectionDtoItem.Recommendation"/>
-            </dd>
+        <div class="dfe-card">
+            <div class="dfe-card-container">
+                @if (categorySectionDtoItem.Slug != null)
+                {
+                    string statusText = "Start Self-Assessment";
+                    string pagesController = "Pages";
+                    string action = "GetByRoute";
+                    string routeName = categorySectionDtoItem.Slug;
+                    string? sectionSlug = null;
+                    string? recommendationSlug = null;
+
+                    if (categorySectionDtoItem.ProgressStatus == SectionProgressStatus.StartedNeverCompleted)
+                    {
+                        statusText = "Continue Self-Assessment";
+                    }
+                    else if
+                    (categorySectionDtoItem.ProgressStatus == SectionProgressStatus.InProgress ||
+                     categorySectionDtoItem.ProgressStatus == SectionProgressStatus.CompletedStartedNew ||
+                     categorySectionDtoItem.ProgressStatus == SectionProgressStatus.Completed)
+                    {
+                        statusText = "View Recommendations";
+                        pagesController = string.Empty;
+                        action = string.Empty;
+                        routeName = string.Empty;
+
+                        if (categorySectionDtoItem.Recommendation != null)
+                        {
+                            sectionSlug = categorySectionDtoItem.Recommendation.SectionSlug;
+                            recommendationSlug = categorySectionDtoItem.Recommendation.RecommendationSlug;
+                        }
+                    }
+
+                    <h3 class="govuk-heading-m">
+                        @if (pagesController != "")
+                        {
+                            <a asp-controller="@pagesController" asp-action="@action" asp-route-route="@routeName"
+                               class="govuk-link govuk-link--no-visited-state dfe-card-link--header">
+                                @categorySectionDtoItem.Name
+                            </a>
+                        }
+                        else
+                        {
+                            @await Html.PartialAsync("Components/CategorySection/SubtopicRecommendation", (
+                                     categorySectionDtoItem.Name,
+                                     sectionSlug,
+                                     recommendationSlug,
+                                     categorySectionDtoItem.Recommendation?.NoRecommendationFoundErrorMessage
+                            ))
+                        }
+                    </h3>
+                    <p class="govuk-body-s">
+                        @statusText
+                    </p>
+                }
+                else
+                {
+                    <dt class="govuk-summary-list__key">
+                        <govuk-error-message>@categorySectionDtoItem.ErrorMessage</govuk-error-message>
+                    </dt>
+                }
+            </div>
         </div>
     }
 </dl>
