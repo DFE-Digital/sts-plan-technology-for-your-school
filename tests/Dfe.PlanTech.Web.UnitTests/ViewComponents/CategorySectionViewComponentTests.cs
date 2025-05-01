@@ -75,7 +75,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 {
                     Id = "Section1"
                 }
-            },           
+            }
         };
 
         private readonly SubtopicRecommendation? _subtopicTwo = new SubtopicRecommendation()
@@ -379,7 +379,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category.Completed = 0;
 
             _category.SectionStatuses.Add(new SectionStatusDto()
-            {               
+            {
                 SectionId = "Section1",
                 Completed = false,
                 DateUpdated = DateTime.Parse(utcTime)
