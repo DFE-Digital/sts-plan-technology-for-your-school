@@ -5,6 +5,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
+using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,11 +15,15 @@ public class CategorySectionViewComponent(
     ILogger<CategorySectionViewComponent> logger,
     IGetSubmissionStatusesQuery query,
     IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery,
-    [FromServices] ISystemTime systemTime) : ViewComponent
+    IGetNextUnansweredQuestionQuery getQuestionQuery,
+    IUser user,
+[FromServices] ISystemTime systemTime) : ViewComponent
 {
     private readonly ILogger<CategorySectionViewComponent> _logger = logger;
     private readonly IGetSubmissionStatusesQuery _query = query;
     private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery = getSubTopicRecommendationQuery;
+    private readonly IGetNextUnansweredQuestionQuery _getQuestionQuery = getQuestionQuery;
+    private readonly IUser _user = user;
 
     public async Task<IViewComponentResult> InvokeAsync(Category category)
     {
@@ -61,9 +66,13 @@ public class CategorySectionViewComponent(
             if (string.IsNullOrWhiteSpace(section.InterstitialPage?.Slug))
                 _logger.LogError("No Slug found for Subtopic with ID: {sectionId}/ name: {sectionName}", section.Sys.Id, section.Name);
 
+            var establishment = await _user.GetEstablishmentId();
+            var nextQuestion = await _getQuestionQuery.GetNextUnansweredQuestion(establishment, section);
+
             yield return new CategorySectionDto(
                 slug: section.InterstitialPage?.Slug,
                 name: section.Name,
+                questionSlug: nextQuestion?.Slug,
                 retrievalError: category.RetrievalError,
                 sectionStatus: sectionStatus,
                 recommendation: await GetCategorySectionRecommendationDto(section, sectionStatus),

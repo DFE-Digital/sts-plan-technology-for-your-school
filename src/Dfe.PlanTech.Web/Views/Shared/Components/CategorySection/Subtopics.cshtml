@@ -11,38 +11,52 @@
             <div class="dfe-card-container">
                 @if (categorySectionDtoItem.Slug != null)
                 {
-                    string statusText = "Start Self-Assessment";
-                    string pagesController = "Pages";
-                    string action = "GetByRoute";
-                    string routeName = categorySectionDtoItem.Slug;
+                    string statusText;
+                    string? controller = null;
+                    string? action = null;
+                    Dictionary<string, string>? routeValues = null;
                     string? sectionSlug = null;
                     string? recommendationSlug = null;
 
-                    if (categorySectionDtoItem.ProgressStatus == SectionProgressStatus.StartedNeverCompleted)
+                    switch (categorySectionDtoItem.ProgressStatus)
                     {
-                        statusText = "Continue Self-Assessment";
-                    }
-                    else if
-                    (categorySectionDtoItem.ProgressStatus == SectionProgressStatus.InProgress ||
-                     categorySectionDtoItem.ProgressStatus == SectionProgressStatus.CompletedStartedNew ||
-                     categorySectionDtoItem.ProgressStatus == SectionProgressStatus.Completed)
-                    {
-                        statusText = "View Recommendations";
-                        pagesController = string.Empty;
-                        action = string.Empty;
-                        routeName = string.Empty;
+                        case SectionProgressStatus.StartedNeverCompleted:
+                            statusText = "Continue self-assessment";
+                            controller = "Questions";
+                            action = "GetQuestionBySlug";
+                            routeValues = new Dictionary<string, string>
+                            {
+                                ["questionSlug"] = categorySectionDtoItem.QuestionSlug ?? string.Empty,
+                                ["sectionSlug"] = categorySectionDtoItem.Slug ?? string.Empty
+                            };
+                            break;
 
-                        if (categorySectionDtoItem.Recommendation != null)
-                        {
-                            sectionSlug = categorySectionDtoItem.Recommendation.SectionSlug;
-                            recommendationSlug = categorySectionDtoItem.Recommendation.RecommendationSlug;
-                        }
+                        case SectionProgressStatus.InProgress:
+                        case SectionProgressStatus.CompletedStartedNew:
+                        case SectionProgressStatus.Completed:
+                            statusText = "View recommendations";
+                            if (categorySectionDtoItem.Recommendation != null)
+                            {
+                                sectionSlug = categorySectionDtoItem.Recommendation.SectionSlug;
+                                recommendationSlug = categorySectionDtoItem.Recommendation.RecommendationSlug;
+                            }
+                            break;
+
+                        default:
+                            statusText = "Start self-assessment";
+                            controller = "Pages";
+                            action = "GetByRoute";
+                            routeValues = new Dictionary<string, string>
+                            {
+                                ["route"] = categorySectionDtoItem.Slug ?? string.Empty
+                            };
+                            break;
                     }
 
                     <h3 class="govuk-heading-m">
-                        @if (pagesController != "")
+                        @if (!string.IsNullOrEmpty(controller) && !string.IsNullOrEmpty(action))
                         {
-                            <a asp-controller="@pagesController" asp-action="@action" asp-route-route="@routeName"
+                            <a asp-controller="@controller" asp-action="@action" asp-all-route-data="@routeValues"
                                class="govuk-link govuk-link--no-visited-state dfe-card-link--header">
                                 @categorySectionDtoItem.Name
                             </a>
@@ -57,6 +71,7 @@
                             ))
                         }
                     </h3>
+
                     <p class="govuk-body-s">
                         @statusText
                     </p>

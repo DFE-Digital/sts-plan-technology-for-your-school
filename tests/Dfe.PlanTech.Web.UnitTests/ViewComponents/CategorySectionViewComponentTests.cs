@@ -6,6 +6,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
+using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.ViewComponents;
@@ -24,6 +25,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         private readonly CategorySectionViewComponent _categorySectionViewComponent;
         private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
         private readonly ISystemTime _systemTime;
+        private readonly IGetNextUnansweredQuestionQuery _getQuestionQuery;
+        private readonly IUser _user;
 
         private Category _category;
         private readonly Category _categoryTwo;
@@ -72,7 +75,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 {
                     Id = "Section1"
                 }
-            }
+            },           
         };
 
         private readonly SubtopicRecommendation? _subtopicTwo = new SubtopicRecommendation()
@@ -128,6 +131,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
             _loggerCategory = Substitute.For<ILogger<CategorySectionViewComponent>>();
             _getSubTopicRecommendationQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
+            _getQuestionQuery = Substitute.For<IGetNextUnansweredQuestionQuery>();
+            _user = Substitute.For<IUser>();
             _systemTime = Substitute.For<ISystemTime>();
 
             _subtopicRecommendations.Add(_subtopic);
@@ -167,6 +172,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 _loggerCategory,
                 _getSubmissionStatusesQuery,
                 _getSubTopicRecommendationQuery,
+                _getQuestionQuery,
+                _user,
                 _systemTime)
             {
                 ViewComponentContext = viewComponentContext
@@ -189,6 +196,14 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                         {
                             Slug = "section-1",
                         },
+                        Questions = [
+                            new()
+                            {
+                                Text = "",
+                                Answers = [],
+                                Slug = "test-question-slug-1"
+                            }
+                        ]
                     }
                 }
             }
@@ -204,9 +219,17 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                         InterstitialPage = new Page
                         {
                             Slug = "test-slug"
-                        }
-                    }
-                ]
+                        },
+                        Questions = [
+                            new()
+                            {
+                                Text = "",
+                                Answers = [],
+                                Slug = "test-question-slug-2"
+                            }
+                        ]
+                    },
+                ],              
             };
         }
 
@@ -356,13 +379,15 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category.Completed = 0;
 
             _category.SectionStatuses.Add(new SectionStatusDto()
-            {
+            {               
                 SectionId = "Section1",
                 Completed = false,
                 DateUpdated = DateTime.Parse(utcTime)
             });
 
             _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
+            _getQuestionQuery.GetNextUnansweredQuestion(0, _category.Sections[0], Arg.Any<CancellationToken>())
+                             .Returns(_category.Sections[0].Questions[0]);
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
 
@@ -390,6 +415,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.NotNull(categorySectionDto);
 
             Assert.Equal("section-1", categorySectionDto.Slug);
+            Assert.Equal("test-question-slug-1", categorySectionDto.QuestionSlug);
             Assert.Equal(SectionProgressStatus.StartedNeverCompleted, categorySectionDto.ProgressStatus);
             Assert.Null(categorySectionDto.ErrorMessage);
         }
