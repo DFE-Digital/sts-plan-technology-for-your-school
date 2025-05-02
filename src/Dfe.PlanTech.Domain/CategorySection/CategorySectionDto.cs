@@ -22,8 +22,6 @@ public class CategorySectionDto
 
     public string Name { get; init; }
 
-    public string? QuestionSlug { get; init; }
-
     public Tag Tag { get; init; } = new Tag();
 
     public string? ErrorMessage { get; init; }
@@ -35,7 +33,6 @@ public class CategorySectionDto
     public CategorySectionDto(
         string? slug,
         string name,
-        string? questionSlug,
         bool retrievalError,
         SectionStatusDto? sectionStatus,
         CategorySectionRecommendationDto recommendation,
@@ -43,7 +40,6 @@ public class CategorySectionDto
     {
         Slug = slug;
         Name = name;
-        QuestionSlug = questionSlug;
         Recommendation = recommendation;
         var started = sectionStatus != null;
         var completed = sectionStatus?.Completed == true;

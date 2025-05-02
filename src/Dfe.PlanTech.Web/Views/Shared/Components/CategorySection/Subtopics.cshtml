@@ -23,11 +23,10 @@
                         case SectionProgressStatus.StartedNeverCompleted:
                             statusText = "Continue self-assessment";
                             controller = "Questions";
-                            action = "GetQuestionBySlug";
+                            action = "GetNextUnansweredQuestion";
                             routeValues = new Dictionary<string, string>
-                            {
-                                ["questionSlug"] = categorySectionDtoItem.QuestionSlug ?? string.Empty,
-                                ["sectionSlug"] = categorySectionDtoItem.Slug ?? string.Empty
+                            {                             
+                                ["sectionSlug"] = $"{categorySectionDtoItem.Slug}" ?? string.Empty,
                             };
                             break;
 
