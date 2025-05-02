@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Domain.Helpers;
 
-public class SubmissionStatusHelpers
+public static class SubmissionStatusHelpers
 {
     public static Tag GetGroupsSubmissionStatusTag(bool retrievalError, SectionStatusDto? sectionStatus, ISystemTime systemTime)
     {

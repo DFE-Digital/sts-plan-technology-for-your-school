@@ -1,4 +1,5 @@
 ﻿using Dfe.PlanTech.Application.Constants;
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.CategorySection;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Groups;
@@ -46,7 +47,8 @@ public class GroupsDashboardViewComponent(ILogger<GroupsDashboardViewComponent> 
 
         var userId = await _user.GetCurrentUserId();
         var userEstablishmentId = await _user.GetEstablishmentId();
-        var selectedSchool = await _getGroupSelectionQuery.GetLatestSelectedGroupSchool(userId.Value, userEstablishmentId);
+        var selectedSchool = await _getGroupSelectionQuery.GetLatestSelectedGroupSchool(userId.Value, userEstablishmentId)
+            ?? throw new DatabaseException($"Could not get latest selected group school for user with ID {userId.Value} in establishment: {userEstablishmentId}");
 
         category = await SubmissionStatusHelpers.RetrieveSectionStatuses(category, _logger, _query, selectedSchool.SelectedEstablishmentId);
 
