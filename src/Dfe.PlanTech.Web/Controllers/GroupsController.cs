@@ -218,7 +218,7 @@ namespace Dfe.PlanTech.Web.Controllers
         }
 
         [NonAction]
-        public async Task<List<EstablishmentLink>> GetSchoolsWithSubmissionCounts (List<EstablishmentLink> schools, IEnumerable<Category> categories)
+        public async Task<List<EstablishmentLink>> GetSchoolsWithSubmissionCounts(List<EstablishmentLink> schools, IEnumerable<Category> categories)
         {
             foreach (var school in schools)
             {
