@@ -48,18 +48,28 @@ namespace Dfe.PlanTech.Web.Controllers
         public async Task<IActionResult> GetSelectASchoolView([FromServices] IGetPageQuery getPageQuery, CancellationToken cancellationToken)
         {
             var selectASchoolPageContent = await getPageQuery.GetPageBySlug(GroupsSelectorPageSlug, cancellationToken);
-
+            var dashboardContent = await getPageQuery.GetPageBySlug(GroupsSchoolDashboardSlug, cancellationToken);
             var schools = await _user.GetGroupEstablishments();
             var groupName = _user.GetOrganisationData().OrgName;
             var title = new Title() { Text = groupName };
             List<ContentComponent> content = selectASchoolPageContent?.Content ?? new List<ContentComponent>();
 
+            string totalSections = "";
+
+            if (dashboardContent != null)
+            {
+                totalSections = SubmissionStatusHelpers.GetTotalSections(dashboardContent);
+            }
             var viewModel = new GroupsSelectorViewModel()
             {
                 GroupName = groupName,
                 GroupEstablishments = schools,
                 Title = title,
-                Content = content
+                Content = content,
+                TotalSections = totalSections,
+                ProgressRetrievalErrorMessage = String.IsNullOrEmpty(totalSections)
+                    ? "Unable to retrieve progress"
+                    : null
             };
 
             return View(selectASchoolViewName, viewModel);

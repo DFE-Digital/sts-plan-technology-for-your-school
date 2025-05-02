@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Domain.Constants;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
@@ -50,5 +51,18 @@ public class SubmissionStatusHelpers
         return localTime.Date == systemTime.Today.Date
             ? $"at {DateTimeFormatter.FormattedTime(localTime)}"
             : $"on {DateTimeFormatter.FormattedDateShort(localTime)}";
+    }
+
+    public static string GetTotalSections(Page dashboardContent)
+    {
+        var sectionCount = 0;
+        var categories = dashboardContent.Content.OfType<Category>();
+
+        foreach (var category in categories)
+        {
+            sectionCount += category.Sections.Count;
+        }
+
+        return sectionCount.ToString();
     }
 }

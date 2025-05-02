@@ -14,5 +14,9 @@ namespace Dfe.PlanTech.Web.Models
         public List<ContentComponent> Content { get; init; } = null!;
 
         public string? ErrorMessage { get; set; }
+
+        public string? TotalSections { get; set; }
+
+        public string? ProgressRetrievalErrorMessage { get; init; }
     }
 }
