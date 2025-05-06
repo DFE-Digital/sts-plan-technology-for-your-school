@@ -21,10 +21,8 @@
                     @if (!string.IsNullOrEmpty(groupsCategorySectionDtoItem.RecommendationSlug))
                     {
                         <div class="govuk-task-list__name-and-hint">
-
                             <partial name="Components/GroupsDashboard/GroupsSubtopicRecommendations"
                                      model="@groupsCategorySectionDtoItem.Recommendation"/>
-
                         </div>
                     }
                     else
@@ -35,8 +33,6 @@
                             </a>
                         </div>
                     }
-
-
                     <div class="govuk-task-list__status">
                         <task-list-tag colour=@groupsCategorySectionDtoItem.Tag.Colour>
                             @groupsCategorySectionDtoItem.Tag.Text
