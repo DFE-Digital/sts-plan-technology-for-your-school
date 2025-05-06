@@ -4,106 +4,52 @@
 @model GroupsDashboardViewComponentViewModel
 
 <div class="dfe-mat-self-assessment-list">
-
-
-<ul class="govuk-task-list">
-<li class="govuk-task-list__item" >
-    <div class="govuk-task-list__name-and-hint">
-        <strong>Topic recommendations</strong>
-    </div>
-    <div class="govuk-task-list__status">
-        <strong>Self-assessment status</strong>
-    </div>
-</li>
-    @foreach (var groupsCategorySectionDtoItem in Model.GroupsCategorySectionDto)
-    {
-        <li class="govuk-task-list__item govuk-task-list__item--with-link">
-            @if (groupsCategorySectionDtoItem.Slug != null)
-            {
-
-                @if (!string.IsNullOrEmpty(groupsCategorySectionDtoItem.RecommendationSlug))
+    <ul class="govuk-task-list">
+        <li class="govuk-task-list__item">
+            <div class="govuk-task-list__name-and-hint">
+                <strong>Topic recommendations</strong>
+            </div>
+            <div class="govuk-task-list__status">
+                <strong>Self-assessment status</strong>
+            </div>
+        </li>
+        @foreach (var groupsCategorySectionDtoItem in Model.GroupsCategorySectionDto)
+        {
+            <li class="govuk-task-list__item govuk-task-list__item--with-link">
+                @if (groupsCategorySectionDtoItem.Slug != null)
                 {
-                    <div class="govuk-task-list__name-and-hint">
+                    @if (!string.IsNullOrEmpty(groupsCategorySectionDtoItem.RecommendationSlug))
+                    {
+                        <div class="govuk-task-list__name-and-hint">
 
-                            <partial name="Components/GroupsDashboard/GroupsSubtopicRecommendations" model="@groupsCategorySectionDtoItem.Recommendation"/>
+                            <partial name="Components/GroupsDashboard/GroupsSubtopicRecommendations"
+                                     model="@groupsCategorySectionDtoItem.Recommendation"/>
 
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="govuk-task-list__name-and-hint">
+                            <a class="govuk-task-list">
+                                @groupsCategorySectionDtoItem.Name
+                            </a>
+                        </div>
+                    }
+
+
+                    <div class="govuk-task-list__status">
+                        <task-list-tag colour=@groupsCategorySectionDtoItem.Tag.Colour>
+                            @groupsCategorySectionDtoItem.Tag.Text
+                        </task-list-tag>
                     </div>
                 }
                 else
                 {
-                    <div class="govuk-task-list__name-and-hint">
-                        <a class="govuk-task-list">
-                            @groupsCategorySectionDtoItem.Name
-                        </a>
+                    <div class="govuk-task-list__status">
+                        <govuk-error-message>@groupsCategorySectionDtoItem.ErrorMessage</govuk-error-message>
                     </div>
                 }
-
-
-                <div class="govuk-task-list__status">
-                    <task-list-tag colour=@groupsCategorySectionDtoItem.Tag.Colour>
-                        @groupsCategorySectionDtoItem.Tag.Text
-                    </task-list-tag>
-                </div>
-            }
-            else
-            {
-                <div class="govuk-task-list__status">
-                    <govuk-error-message>@groupsCategorySectionDtoItem.ErrorMessage</govuk-error-message>
-                </div>
-            }
-        </li>
-    }
-</ul>
+            </li>
+        }
+    </ul>
 </div>
-
-
-@* // <div class="govuk-summary-list"> *@
-@* //     <div class="govuk-summary-list__row"> *@
-@* //         <dt class="govuk-summary-list__key">Topic recommendations</dt> *@
-@* //         <dt class="govuk-summary-list__key govuk-!-text-align-right">Self-assessment status</dt> *@
-@* //     </div> *@
-
-    @* <ul class="govuk-task-list"> *@
-        @* <li class="govuk-task-list__item groups-list-heading"> *@
-        @* *@
-        @*     <div class="govuk-summary-list__row govuk-summary-list__row--no-border"> *@
-        @*         <div class="govuk-summary-list__key govuk-!-font-weight-regular"> *@
-        @*             <span><strong>Topic recommendations</strong></span> *@
-        @*         </div> *@
-        @*         <div class="govuk-summary-list__value govuk-!-text-align-right"> *@
-        @*             <span><strong>Self-assessment status</strong></span> *@
-        @*         </div> *@
-        @*     </div> *@
-        @* </li> *@
-        @* @foreach (var groupsCategorySectionDtoItem in Model.GroupsCategorySectionDto) *@
-        @* { *@
-        @*     <div class="govuk-summary-list__row"> *@
-        @* *@
-        @* *@
-        @*         @if (groupsCategorySectionDtoItem.Slug != null) *@
-        @*         { *@
-        @*             @if (!string.IsNullOrEmpty(groupsCategorySectionDtoItem.RecommendationSlug)) *@
-        @*             { *@
-        @*                 <dt class="govuk-summary-list__key govuk-!-font-weight-regular"><partial name="Components/GroupsDashboard/GroupsSubtopicRecommendations" model="@groupsCategorySectionDtoItem.Recommendation"/></dt> *@
-        @*             } *@
-        @*             else *@
-        @*             { *@
-        @*                 <dt class="govuk-summary-list__key govuk-!-font-weight-regular">@groupsCategorySectionDtoItem.Name</dt> *@
-        @*             } *@
-        @* *@
-        @*             <dd class="govuk-summary-list__value govuk-!-text-align-right" id="@groupsCategorySectionDtoItem.Name">   <task-list-tag colour=@groupsCategorySectionDtoItem.Tag.Colour> *@
-        @*                     @groupsCategorySectionDtoItem.Tag.Text *@
-        @*                 </task-list-tag></dd> *@
-        @*         } *@
-        @*         else *@
-        @*         { *@
-        @*             <div class="govuk-summary-list__key govuk-!-font-weight-regular"> *@
-        @*                 <govuk-error-message>@groupsCategorySectionDtoItem.ErrorMessage</govuk-error-message> *@
-        @*             </div> *@
-        @*         } *@
-        @*     // </div> *@
-        @* // } *@
-@*     $1$ </ul> #1# *@
-@* </div> *@
-@* *@
-@* *@
