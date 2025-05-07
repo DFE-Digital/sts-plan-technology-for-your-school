@@ -1,5 +1,9 @@
 @use "../../node_modules/dfe-frontend/packages/dfefrontend.scss";
 
+html {
+    font-family: GDS Transport, arial, sans-serif;
+}
+
 .logo {
     display: block;
     max-height: 32px;
