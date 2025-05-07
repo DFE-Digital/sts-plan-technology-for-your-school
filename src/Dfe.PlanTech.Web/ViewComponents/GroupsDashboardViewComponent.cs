@@ -2,6 +2,7 @@
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.CategorySection;
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Groups;
 using Dfe.PlanTech.Domain.Groups.Interfaces;
 using Dfe.PlanTech.Domain.Helpers;
@@ -54,7 +55,7 @@ public class GroupsDashboardViewComponent(ILogger<GroupsDashboardViewComponent> 
 
         return new GroupsDashboardViewComponentViewModel
         {
-            Description = category.Content[0],
+            Description = category.Content is { Count: > 0 } content ? content[0] : new MissingComponent(),
             GroupsCategorySectionDto = await GetGroupsCategorySectionDto(category).ToListAsync(),
             ProgressRetrievalErrorMessage = category.RetrievalError
                 ? "Unable to retrieve progress, please refresh your browser."

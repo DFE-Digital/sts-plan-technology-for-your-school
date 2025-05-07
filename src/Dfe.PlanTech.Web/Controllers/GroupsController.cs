@@ -81,6 +81,8 @@ namespace Dfe.PlanTech.Web.Controllers
                     : null
             };
 
+            ViewData["Title"] = "Select a school";
+
             return View(selectASchoolViewName, viewModel);
         }
 
@@ -116,6 +118,8 @@ namespace Dfe.PlanTech.Web.Controllers
                 Content = content,
                 Slug = GroupsSchoolDashboardSlug
             };
+
+            ViewData["Title"] = "Dashboard";
 
             return View(schoolDashboardViewName, viewModel);
         }
@@ -160,6 +164,7 @@ namespace Dfe.PlanTech.Web.Controllers
 
             // Passes the school name to the Header
             ViewData["SelectedEstablishmentName"] = viewModel.SelectedEstablishmentName;
+            ViewData["Title"] = viewModel.SectionName;
 
             return View("~/Views/Groups/Recommendations.cshtml", viewModel);
         }
@@ -202,6 +207,8 @@ namespace Dfe.PlanTech.Web.Controllers
                 GroupsCustomRecommendationIntro = customIntro,
                 SubmissionResponses = latestResponses
             };
+
+            ViewData["Title"] = viewModel.SectionName;
 
             return View("~/Views/Groups/RecommendationsChecklist.cshtml", viewModel);
         }
