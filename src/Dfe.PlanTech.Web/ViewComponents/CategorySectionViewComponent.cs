@@ -14,7 +14,7 @@ public class CategorySectionViewComponent(
     ILogger<CategorySectionViewComponent> logger,
     IGetSubmissionStatusesQuery query,
     IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery,
-    [FromServices] ISystemTime systemTime) : ViewComponent
+[FromServices] ISystemTime systemTime) : ViewComponent
 {
     private readonly ILogger<CategorySectionViewComponent> _logger = logger;
     private readonly IGetSubmissionStatusesQuery _query = query;

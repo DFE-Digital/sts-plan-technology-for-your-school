@@ -204,9 +204,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                         InterstitialPage = new Page
                         {
                             Slug = "test-slug"
-                        }
-                    }
-                ]
+                        },
+                    },
+                ],
             };
         }
 
