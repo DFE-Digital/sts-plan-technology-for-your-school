@@ -49,6 +49,31 @@ strong.govuk-tag {
     }
 }
 
+// MAT View Dashboard Topic List
+.dfe-mat-self-assessment-list {
+    .govuk-task-list__item {
+        height: 2.7rem;
+    }
+
+    .govuk-task-list__name-and-hint,
+    .govuk-task-list__status {
+        vertical-align: middle;
+    }
+
+    .govuk-tag {
+        white-space: nowrap;
+
+        @media (max-width: 350px) {
+            white-space: normal;
+        }
+    }
+
+    .govuk-task-list__item:first-child {
+        border-top: none;
+    }
+}
+
+
 .govuk-summary-list__key,
 .govuk-summary-list__value {
     vertical-align: middle;
@@ -113,7 +138,7 @@ button.govuk-button--white {
 .dfe-page-header-inner {
     > .school-ident {
         padding-top: 0px;
-    } 
+    }
 }
 
 .school-ident-content {
@@ -132,15 +157,6 @@ button.govuk-button--white {
 
 .groups-list-tag {
     padding-right: 0px !important;
-}
-
-.groups-list-heading {
-    border-top: none !important;
-}
-
-.groups-list-key {
-    width: auto !important;
-    white-space: nowrap;
 }
 
 .groups-recommendation-piece-header {
