@@ -73,15 +73,5 @@ public static class SubmissionStatusHelpers
         }
     }
 
-    public static string GetTotalSections(IEnumerable<Category> categories)
-    {
-        var sectionCount = 0;
-
-        foreach (var category in categories)
-        {
-            sectionCount += category.Sections.Count;
-        }
-
-        return sectionCount.ToString();
-    }
+    public static string GetTotalSections(IEnumerable<Category> categories) => categories.Sum(category => category.Sections.Count).ToString();
 }
