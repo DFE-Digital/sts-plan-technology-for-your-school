@@ -1,5 +1,5 @@
 name: Azure CLI Login
-description: Login to Azure using service principle
+description: Login to Azure using service principal
 
 inputs:
   az_tenant_id:
