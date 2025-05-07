@@ -206,7 +206,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                             Slug = "test-slug"
                         },
                     },
-                ],              
+                ],
             };
         }
 
