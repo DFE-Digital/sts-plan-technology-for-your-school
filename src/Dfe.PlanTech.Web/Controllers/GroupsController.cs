@@ -87,7 +87,7 @@ namespace Dfe.PlanTech.Web.Controllers
                 ProgressRetrievalErrorMessage = String.IsNullOrEmpty(totalSections)
                     ? "Unable to retrieve progress"
                     : null,
-                ContactLinkHref = contactLink?.Href
+                ContactLinkHref = contactLink?.Href 
             };
 
             ViewData["Title"] = "Select a school";
