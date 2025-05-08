@@ -10,8 +10,10 @@ using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
+using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Web.Controllers
 {
@@ -34,8 +36,10 @@ namespace Dfe.PlanTech.Web.Controllers
         private readonly IGetSectionQuery _getSectionQuery;
         private readonly IGetLatestResponsesQuery _getLatestResponsesQuery;
         private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
+        private readonly IOptions<ContactOptions> _contactOptions;
+        private readonly IGetNavigationQuery _getNavigationQuery;
 
-        public GroupsController(ILogger<GroupsController> logger, IUser user, IGetEstablishmentIdQuery getEstablishmentIdQuery, IGetSubmissionStatusesQuery getSubmissionStatusesQuery, IGetGroupSelectionQuery getGroupSelectionQuery, IGetSectionQuery getSectionQuery, IGetLatestResponsesQuery getLatestResponsesQuery, IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery) : base(logger)
+        public GroupsController(ILogger<GroupsController> logger, IUser user, IGetEstablishmentIdQuery getEstablishmentIdQuery, IGetSubmissionStatusesQuery getSubmissionStatusesQuery, IGetGroupSelectionQuery getGroupSelectionQuery, IGetSectionQuery getSectionQuery, IGetLatestResponsesQuery getLatestResponsesQuery, IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery, IOptions<ContactOptions> contactOptions, IGetNavigationQuery getNavigationQuery) : base(logger)
         {
             _logger = logger;
             _user = user;
@@ -45,6 +49,8 @@ namespace Dfe.PlanTech.Web.Controllers
             _getSectionQuery = getSectionQuery;
             _getLatestResponsesQuery = getLatestResponsesQuery;
             _getSubTopicRecommendationQuery = getSubTopicRecommendationQuery;
+            _contactOptions = contactOptions;
+            _getNavigationQuery = getNavigationQuery;
         }
 
         [HttpGet($"{GroupsSlug}/{GroupsSelectorPageSlug}")]
@@ -69,6 +75,8 @@ namespace Dfe.PlanTech.Web.Controllers
                 totalSections = SubmissionStatusHelpers.GetTotalSections(categories);
             }
 
+            var contactLink = await _getNavigationQuery.GetLinkById(_contactOptions.Value.LinkId);
+
             var viewModel = new GroupsSelectorViewModel()
             {
                 GroupName = groupName,
@@ -78,7 +86,8 @@ namespace Dfe.PlanTech.Web.Controllers
                 TotalSections = totalSections,
                 ProgressRetrievalErrorMessage = String.IsNullOrEmpty(totalSections)
                     ? "Unable to retrieve progress"
-                    : null
+                    : null,
+                ContactLinkHref = contactLink?.Href
             };
 
             ViewData["Title"] = "Select a school";

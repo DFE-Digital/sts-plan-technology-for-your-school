@@ -18,5 +18,7 @@ namespace Dfe.PlanTech.Web.Models
         public string? TotalSections { get; set; }
 
         public string? ProgressRetrievalErrorMessage { get; init; }
+
+        public string? ContactLinkHref {  get; set; }
     }
 }
