@@ -19,6 +19,6 @@ namespace Dfe.PlanTech.Web.Models
 
         public string? ProgressRetrievalErrorMessage { get; init; }
 
-        public string? ContactLinkHref {  get; set; }
+        public string? ContactLinkHref { get; set; }
     }
 }
