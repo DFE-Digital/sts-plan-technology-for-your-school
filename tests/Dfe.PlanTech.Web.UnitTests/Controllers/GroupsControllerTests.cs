@@ -6,10 +6,12 @@ using Dfe.PlanTech.Domain.Groups.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
+using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 using Xunit;
 
@@ -22,6 +24,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private readonly IGetPageQuery _getPageQuery;
         private readonly IGetSectionQuery _getSectionQuery;
         private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
+        private readonly IOptions<ContactOptions> _contactOptions;
+        private readonly IGetNavigationQuery _getNavigationQuery;
 
         private readonly GroupsController _controller;
 
@@ -33,6 +37,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _getPageQuery = Substitute.For<IGetPageQuery>();
             _getSectionQuery = Substitute.For<IGetSectionQuery>();
             _getSubTopicRecommendationQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
+            _getNavigationQuery = Substitute.For<IGetNavigationQuery>();
+            _contactOptions = Substitute.For<IOptions<ContactOptions>>();
 
             _controller = new GroupsController(
                 logger,
@@ -42,7 +48,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 _getGroupSelectionQuery,
                 Substitute.For<IGetSectionQuery>(),
                 Substitute.For<IGetLatestResponsesQuery>(),
-                Substitute.For<IGetSubTopicRecommendationQuery>()
+                Substitute.For<IGetSubTopicRecommendationQuery>(),
+                _contactOptions,
+                _getNavigationQuery
             );
         }
 
@@ -108,6 +116,18 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
                 .Returns(new Page { Content = new List<ContentComponent>() });
 
+            var contactLinkHref = "contactLinkHref";
+            var contactLink = Substitute.For<INavigationLink>();
+            contactLink.Href = contactLinkHref;
+
+            var options = new ContactOptions
+            {
+                LinkId = contactLinkHref
+            };
+
+            _contactOptions.Value.Returns(options);
+            _getNavigationQuery.GetLinkById(contactLinkHref).Returns(contactLink);
+
             var result = await _controller.GetSelectASchoolView(_getPageQuery, CancellationToken.None);
 
             var view = Assert.IsType<ViewResult>(result);
@@ -132,7 +152,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 getGroupSelectionQuery,
                 Substitute.For<IGetSectionQuery>(),
                 Substitute.For<IGetLatestResponsesQuery>(),
-                Substitute.For<IGetSubTopicRecommendationQuery>()
+                Substitute.For<IGetSubTopicRecommendationQuery>(),
+                Substitute.For<IOptions<ContactOptions>>(),
+                _getNavigationQuery
             );
 
             var cancellationToken = CancellationToken.None;
