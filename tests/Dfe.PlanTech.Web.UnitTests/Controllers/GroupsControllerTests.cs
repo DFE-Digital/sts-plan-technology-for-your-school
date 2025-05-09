@@ -37,8 +37,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _getPageQuery = Substitute.For<IGetPageQuery>();
             _getSectionQuery = Substitute.For<IGetSectionQuery>();
             _getSubTopicRecommendationQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
-            _getNavigationQuery = Substitute.For<IGetNavigationQuery>();
-            _contactOptions = Substitute.For<IOptions<ContactOptions>>();
 
             _controller = new GroupsController(
                 logger,
@@ -48,9 +46,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 _getGroupSelectionQuery,
                 Substitute.For<IGetSectionQuery>(),
                 Substitute.For<IGetLatestResponsesQuery>(),
-                Substitute.For<IGetSubTopicRecommendationQuery>(),
-                _contactOptions,
-                _getNavigationQuery
+                Substitute.For<IGetSubTopicRecommendationQuery>()
             );
         }
 
@@ -106,6 +102,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task GetSelectASchoolView_ReturnsViewWithCorrectModel()
         {
+            var getNavigationQuery = Substitute.For<IGetNavigationQuery>();
+            var contactOptions = Substitute.For<IOptions<ContactOptions>>();
             var mockSchools = new List<EstablishmentLink>
                 { new EstablishmentLink() { Urn = "123", EstablishmentName = "School A" } };
             var orgData = new EstablishmentDto { OrgName = "GroupName" };
@@ -125,10 +123,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 LinkId = contactLinkHref
             };
 
-            _contactOptions.Value.Returns(options);
-            _getNavigationQuery.GetLinkById(contactLinkHref).Returns(contactLink);
+            contactOptions.Value.Returns(options);
+            getNavigationQuery.GetLinkById(contactLinkHref).Returns(contactLink);
 
-            var result = await _controller.GetSelectASchoolView(_getPageQuery, CancellationToken.None);
+            var result = await _controller.GetSelectASchoolView(_getPageQuery, getNavigationQuery, contactOptions, CancellationToken.None);
 
             var view = Assert.IsType<ViewResult>(result);
             var viewModel = Assert.IsType<GroupsSelectorViewModel>(view.Model);
@@ -152,9 +150,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 getGroupSelectionQuery,
                 Substitute.For<IGetSectionQuery>(),
                 Substitute.For<IGetLatestResponsesQuery>(),
-                Substitute.For<IGetSubTopicRecommendationQuery>(),
-                Substitute.For<IOptions<ContactOptions>>(),
-                _getNavigationQuery
+                Substitute.For<IGetSubTopicRecommendationQuery>()
             );
 
             var cancellationToken = CancellationToken.None;

@@ -36,10 +36,8 @@ namespace Dfe.PlanTech.Web.Controllers
         private readonly IGetSectionQuery _getSectionQuery;
         private readonly IGetLatestResponsesQuery _getLatestResponsesQuery;
         private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
-        private readonly IOptions<ContactOptions> _contactOptions;
-        private readonly IGetNavigationQuery _getNavigationQuery;
 
-        public GroupsController(ILogger<GroupsController> logger, IUser user, IGetEstablishmentIdQuery getEstablishmentIdQuery, IGetSubmissionStatusesQuery getSubmissionStatusesQuery, IGetGroupSelectionQuery getGroupSelectionQuery, IGetSectionQuery getSectionQuery, IGetLatestResponsesQuery getLatestResponsesQuery, IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery, IOptions<ContactOptions> contactOptions, IGetNavigationQuery getNavigationQuery) : base(logger)
+        public GroupsController(ILogger<GroupsController> logger, IUser user, IGetEstablishmentIdQuery getEstablishmentIdQuery, IGetSubmissionStatusesQuery getSubmissionStatusesQuery, IGetGroupSelectionQuery getGroupSelectionQuery, IGetSectionQuery getSectionQuery, IGetLatestResponsesQuery getLatestResponsesQuery, IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery) : base(logger)
         {
             _logger = logger;
             _user = user;
@@ -49,12 +47,10 @@ namespace Dfe.PlanTech.Web.Controllers
             _getSectionQuery = getSectionQuery;
             _getLatestResponsesQuery = getLatestResponsesQuery;
             _getSubTopicRecommendationQuery = getSubTopicRecommendationQuery;
-            _contactOptions = contactOptions;
-            _getNavigationQuery = getNavigationQuery;
         }
 
         [HttpGet($"{GroupsSlug}/{GroupsSelectorPageSlug}")]
-        public async Task<IActionResult> GetSelectASchoolView([FromServices] IGetPageQuery getPageQuery, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetSelectASchoolView([FromServices] IGetPageQuery getPageQuery, [FromServices] IGetNavigationQuery getNavigationQuery, [FromServices] IOptions<ContactOptions> contactOptions, CancellationToken cancellationToken)
         {
             var selectASchoolPageContent = await getPageQuery.GetPageBySlug(GroupsSelectorPageSlug, cancellationToken);
             var dashboardContent = await getPageQuery.GetPageBySlug(GroupsSchoolDashboardSlug, cancellationToken);
@@ -75,7 +71,7 @@ namespace Dfe.PlanTech.Web.Controllers
                 totalSections = SubmissionStatusHelpers.GetTotalSections(categories);
             }
 
-            var contactLink = await _getNavigationQuery.GetLinkById(_contactOptions.Value.LinkId);
+            var contactLink = await getNavigationQuery.GetLinkById(contactOptions.Value.LinkId, cancellationToken);
 
             var viewModel = new GroupsSelectorViewModel()
             {
