@@ -10,8 +10,10 @@ using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
+using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Web.Controllers
 {
@@ -48,7 +50,7 @@ namespace Dfe.PlanTech.Web.Controllers
         }
 
         [HttpGet($"{GroupsSlug}/{GroupsSelectorPageSlug}")]
-        public async Task<IActionResult> GetSelectASchoolView([FromServices] IGetPageQuery getPageQuery, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetSelectASchoolView([FromServices] IGetPageQuery getPageQuery, [FromServices] IGetNavigationQuery getNavigationQuery, [FromServices] IOptions<ContactOptions> contactOptions, CancellationToken cancellationToken)
         {
             var selectASchoolPageContent = await getPageQuery.GetPageBySlug(GroupsSelectorPageSlug, cancellationToken);
             var dashboardContent = await getPageQuery.GetPageBySlug(GroupsSchoolDashboardSlug, cancellationToken);
@@ -69,6 +71,8 @@ namespace Dfe.PlanTech.Web.Controllers
                 totalSections = SubmissionStatusHelpers.GetTotalSections(categories);
             }
 
+            var contactLink = await getNavigationQuery.GetLinkById(contactOptions.Value.LinkId, cancellationToken);
+
             var viewModel = new GroupsSelectorViewModel()
             {
                 GroupName = groupName,
@@ -78,7 +82,8 @@ namespace Dfe.PlanTech.Web.Controllers
                 TotalSections = totalSections,
                 ProgressRetrievalErrorMessage = String.IsNullOrEmpty(totalSections)
                     ? "Unable to retrieve progress"
-                    : null
+                    : null,
+                ContactLinkHref = contactLink?.Href
             };
 
             ViewData["Title"] = "Select a school";
