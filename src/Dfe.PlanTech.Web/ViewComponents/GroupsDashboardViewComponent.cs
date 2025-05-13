@@ -1,8 +1,11 @@
 ﻿using Dfe.PlanTech.Application.Constants;
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.CategorySection;
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Groups;
 using Dfe.PlanTech.Domain.Groups.Interfaces;
+using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -45,13 +48,14 @@ public class GroupsDashboardViewComponent(ILogger<GroupsDashboardViewComponent> 
 
         var userId = await _user.GetCurrentUserId();
         var userEstablishmentId = await _user.GetEstablishmentId();
-        var selectedSchool = await _getGroupSelectionQuery.GetLatestSelectedGroupSchool(userId.Value, userEstablishmentId);
+        var selectedSchool = await _getGroupSelectionQuery.GetLatestSelectedGroupSchool(userId.Value, userEstablishmentId)
+            ?? throw new DatabaseException($"Could not get latest selected group school for user with ID {userId.Value} in establishment: {userEstablishmentId}");
 
-        category = await RetrieveSectionStatuses(category, selectedSchool.SelectedEstablishmentId);
+        category = await SubmissionStatusHelpers.RetrieveSectionStatuses(category, _logger, _query, selectedSchool.SelectedEstablishmentId);
 
         return new GroupsDashboardViewComponentViewModel
         {
-            Description = category.Content[0],
+            Description = category.Content is { Count: > 0 } content ? content[0] : new MissingComponent(),
             GroupsCategorySectionDto = await GetGroupsCategorySectionDto(category).ToListAsync(),
             ProgressRetrievalErrorMessage = category.RetrievalError
                 ? "Unable to retrieve progress, please refresh your browser."
@@ -80,25 +84,6 @@ public class GroupsDashboardViewComponent(ILogger<GroupsDashboardViewComponent> 
                 sectionStatus: sectionStatus,
                 recommendation: recommendation,
                 systemTime: systemTime);
-        }
-    }
-
-    public async Task<Category> RetrieveSectionStatuses(Category category, int schoolId)
-    {
-        try
-        {
-            category.SectionStatuses = await _query.GetSectionSubmissionStatuses(category.Sections, schoolId);
-            category.Completed = category.SectionStatuses.Count(x => x.Completed);
-            category.RetrievalError = false;
-            return category;
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e,
-                             "An exception has occurred while trying to retrieve section progress with the following message - {message}",
-                             e.Message);
-            category.RetrievalError = true;
-            return category;
         }
     }
 

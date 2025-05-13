@@ -9,5 +9,5 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 public class RichTextContentSupportData : IRichTextData
 {
     public string? Uri { get; init; }
-    public RichTextContentData Target { get; init; }
+    public RichTextContentData? Target { get; init; }
 }

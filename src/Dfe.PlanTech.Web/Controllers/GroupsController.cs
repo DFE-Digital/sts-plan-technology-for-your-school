@@ -2,13 +2,18 @@
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.Groups.Interfaces;
 using Dfe.PlanTech.Domain.Groups.Models;
+using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
+using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Web.Controllers
 {
@@ -45,22 +50,43 @@ namespace Dfe.PlanTech.Web.Controllers
         }
 
         [HttpGet($"{GroupsSlug}/{GroupsSelectorPageSlug}")]
-        public async Task<IActionResult> GetSelectASchoolView([FromServices] IGetPageQuery getPageQuery, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetSelectASchoolView([FromServices] IGetPageQuery getPageQuery, [FromServices] IGetNavigationQuery getNavigationQuery, [FromServices] IOptions<ContactOptions> contactOptions, CancellationToken cancellationToken)
         {
             var selectASchoolPageContent = await getPageQuery.GetPageBySlug(GroupsSelectorPageSlug, cancellationToken);
+            var dashboardContent = await getPageQuery.GetPageBySlug(GroupsSchoolDashboardSlug, cancellationToken);
+            var categories = dashboardContent.Content.OfType<Category>();
 
             var schools = await _user.GetGroupEstablishments();
+
+            var groupSchools = await GetSchoolsWithSubmissionCounts(schools, categories);
+
             var groupName = _user.GetOrganisationData().OrgName;
             var title = new Title() { Text = groupName };
             List<ContentComponent> content = selectASchoolPageContent?.Content ?? new List<ContentComponent>();
 
+            string totalSections = "";
+
+            if (categories != null)
+            {
+                totalSections = SubmissionStatusHelpers.GetTotalSections(categories);
+            }
+
+            var contactLink = await getNavigationQuery.GetLinkById(contactOptions.Value.LinkId, cancellationToken);
+
             var viewModel = new GroupsSelectorViewModel()
             {
                 GroupName = groupName,
-                GroupEstablishments = schools,
+                GroupEstablishments = groupSchools,
                 Title = title,
-                Content = content
+                Content = content,
+                TotalSections = totalSections,
+                ProgressRetrievalErrorMessage = String.IsNullOrEmpty(totalSections)
+                    ? "Unable to retrieve progress"
+                    : null,
+                ContactLinkHref = contactLink?.Href
             };
+
+            ViewData["Title"] = "Select a school";
 
             return View(selectASchoolViewName, viewModel);
         }
@@ -98,6 +124,8 @@ namespace Dfe.PlanTech.Web.Controllers
                 Slug = GroupsSchoolDashboardSlug
             };
 
+            ViewData["Title"] = "Dashboard";
+
             return View(schoolDashboardViewName, viewModel);
         }
 
@@ -108,10 +136,13 @@ namespace Dfe.PlanTech.Web.Controllers
             var schoolId = latestSelection.SelectedEstablishmentId;
             var schoolName = latestSelection.SelectedEstablishmentName;
 
-            var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken);
+            var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken)
+                ?? throw new ContentfulDataUnavailableException($"Could not find section for slug: {sectionSlug}");
 
-            var subTopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {section.Name}");
-            var submissionResponses = await _getLatestResponsesQuery.GetLatestResponses(schoolId, section.Sys.Id, true, cancellationToken) ?? throw new DatabaseException($"Could not find users answers for:  {section.Name}");
+            var subTopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id, cancellationToken)
+                ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for section: {section.Name}");
+            var submissionResponses = await _getLatestResponsesQuery.GetLatestResponses(schoolId, section.Sys.Id, true, cancellationToken)
+                ?? throw new DatabaseException($"Could not find users answers for section: {section.Name}");
             var latestResponses = section.GetOrderedResponsesForJourney(submissionResponses.Responses);
 
             var customIntro = new GroupsCustomRecommendationIntro()
@@ -138,6 +169,7 @@ namespace Dfe.PlanTech.Web.Controllers
 
             // Passes the school name to the Header
             ViewData["SelectedEstablishmentName"] = viewModel.SelectedEstablishmentName;
+            ViewData["Title"] = viewModel.SectionName;
 
             return View("~/Views/Groups/Recommendations.cshtml", viewModel);
         }
@@ -145,10 +177,13 @@ namespace Dfe.PlanTech.Web.Controllers
         [HttpGet("groups/recommendations/{sectionSlug}/print", Name = "GetRecommendationsPrintView")]
         public async Task<IActionResult> GetRecommendationsPrintView(int schoolId, string schoolName, string sectionSlug, CancellationToken cancellationToken)
         {
+            var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken)
+                ?? throw new ContentfulDataUnavailableException($"Could not find section for slug: {sectionSlug}");
 
-            var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken);
-            var subtopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id, cancellationToken);
-            var submissionResponses = await _getLatestResponsesQuery.GetLatestResponses(schoolId, section.Sys.Id, true, cancellationToken);
+            var subtopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id, cancellationToken)
+                ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for section: {section.Name}");
+            var submissionResponses = await _getLatestResponsesQuery.GetLatestResponses(schoolId, section.Sys.Id, true, cancellationToken)
+                ?? throw new DatabaseException($"Could not get latest responses for school with ID {schoolId} in section: {section.Name}");
 
             var latestResponses = section.GetOrderedResponsesForJourney(submissionResponses.Responses);
             var customIntro = new GroupsCustomRecommendationIntro()
@@ -178,6 +213,8 @@ namespace Dfe.PlanTech.Web.Controllers
                 SubmissionResponses = latestResponses
             };
 
+            ViewData["Title"] = viewModel.SectionName;
+
             return View("~/Views/Groups/RecommendationsChecklist.cshtml", viewModel);
         }
 
@@ -186,9 +223,27 @@ namespace Dfe.PlanTech.Web.Controllers
         {
             var userId = await _user.GetCurrentUserId();
             var userEstablishmentId = await _user.GetEstablishmentId();
-            var latestSelection = await _getGroupSelectionQuery.GetLatestSelectedGroupSchool(userId.Value, userEstablishmentId, cancellationToken);
+            var latestSelection = await _getGroupSelectionQuery.GetLatestSelectedGroupSchool(userId.Value, userEstablishmentId, cancellationToken)
+                ?? throw new DatabaseException($"Could not get latest selected group school for user with ID {userId.Value} in establishment: {userEstablishmentId}");
 
             return latestSelection;
+        }
+
+        [NonAction]
+        public async Task<List<EstablishmentLink>> GetSchoolsWithSubmissionCounts(List<EstablishmentLink> schools, IEnumerable<Category> categories)
+        {
+            foreach (var school in schools)
+            {
+                var establishmentId = await _getEstablishmentIdQuery.GetEstablishmentId(school.Urn);
+                var completedSectionsCount = 0;
+                foreach (var category in categories)
+                {
+                    var categoryWithStatus = await SubmissionStatusHelpers.RetrieveSectionStatuses(category, _logger, _getSubmissionStatusesQuery, establishmentId);
+                    completedSectionsCount += categoryWithStatus.Completed;
+                }
+                school.CompletedSectionsCount = completedSectionsCount;
+            }
+            return schools;
         }
     }
 }
