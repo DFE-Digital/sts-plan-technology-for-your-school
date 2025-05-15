@@ -1,4 +1,5 @@
 name: Flush the Redis Cache
+
 on:
   workflow_dispatch:
     inputs:
@@ -10,7 +11,7 @@ on:
         default: 'Staging'
 
 jobs:
-    flush-redis-cache:
+  flush-redis-cache:
     runs-on: ubuntu-22.04
     name: Flush Redis Cache on ${{ inputs.environment }}
     environment: ${{ inputs.environment }}
