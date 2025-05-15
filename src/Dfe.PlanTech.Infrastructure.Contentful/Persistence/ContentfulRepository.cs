@@ -1,11 +1,15 @@
 using Contentful.Core;
 using Contentful.Core.Models;
+using Contentful.Core.Search;
+using Dfe.PlanTech.Application.Options;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 
@@ -16,11 +20,15 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 public class ContentfulRepository : IContentRepository
 {
     private readonly IContentfulClient _client;
+    private readonly IHostEnvironment _hostEnvironment;
+    private readonly AutomatedTestingOptions _automatedTestingOptions;
     private readonly ILogger<ContentfulRepository> _logger;
 
-    public ContentfulRepository(ILoggerFactory loggerFactory, IContentfulClient client)
+    public ContentfulRepository(ILoggerFactory loggerFactory, IContentfulClient client, IHostEnvironment hostEnvironment, IOptions<AutomatedTestingOptions> automatedTestingOptions)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
+        _hostEnvironment = hostEnvironment;
+        _automatedTestingOptions = automatedTestingOptions.Value;
         _client.ContentTypeResolver = new EntityResolver(loggerFactory.CreateLogger<EntityResolver>());
         _logger = loggerFactory.CreateLogger<ContentfulRepository>();
     }
@@ -33,7 +41,7 @@ public class ContentfulRepository : IContentRepository
 
     public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IGetEntitiesOptions? options, CancellationToken cancellationToken = default)
     {
-        var queryBuilder = QueryBuilders.BuildQueryBuilder<TEntity>(entityTypeId, options);
+        var queryBuilder = BuildQueryBuilder<TEntity>(entityTypeId, options);
 
         var entries = await _client.GetEntries(queryBuilder, cancellationToken);
 
@@ -45,7 +53,7 @@ public class ContentfulRepository : IContentRepository
     public async Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(string entityTypeId, IGetEntitiesOptions options, CancellationToken cancellationToken = default)
     {
         var limit = options?.Limit ?? 100;
-        var queryBuilder = QueryBuilders.BuildQueryBuilder<TEntity>(entityTypeId, options)
+        var queryBuilder = BuildQueryBuilder<TEntity>(entityTypeId, options)
             .Limit(limit)
             .Skip((options!.Page - 1) * limit);
 
@@ -76,7 +84,7 @@ public class ContentfulRepository : IContentRepository
     }
     public async Task<int> GetEntitiesCount<TEntity>(CancellationToken cancellationToken = default)
     {
-        var queryBuilder = QueryBuilders.BuildQueryBuilder<TEntity>(GetContentTypeName<TEntity>(), null).Limit(0);
+        var queryBuilder = BuildQueryBuilder<TEntity>(GetContentTypeName<TEntity>(), null).Limit(0);
 
         var entries = await _client.GetEntries(queryBuilder, cancellationToken);
 
@@ -120,5 +128,20 @@ public class ContentfulRepository : IContentRepository
     {
         var name = typeof(TEntity).Name;
         return name == "ContentSupportPage" ? name : name.FirstCharToLower();
+    }
+
+    private QueryBuilder<TEntity> BuildQueryBuilder<TEntity>(string contentTypeId, IGetEntitiesOptions? options)
+    {
+        var queryBuilder = QueryBuilders.BuildQueryBuilder<TEntity>(contentTypeId, options);
+
+        var shouldExcludeTestingContent = _hostEnvironment.IsProduction() || (!_automatedTestingOptions.Contentful?.IncludeTaggedContent ?? false);
+
+        if (shouldExcludeTestingContent)
+        {
+            var tag = _automatedTestingOptions.Contentful?.Tag ?? null;
+            queryBuilder = queryBuilder.FieldExcludes("metadata.tags.sys.id", [tag]);
+        }
+
+         return queryBuilder;
     }
 }
