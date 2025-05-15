@@ -33,10 +33,13 @@ async function processCsv() {
             })
                 .then(response => {
                     const extracted = response.data['email'];
-                    results.push({ original: value, result: extracted });
+                    row.email = extracted;
+                    results.push(row);
                 })
                 .catch(error => {
-                    console.error(`API call failed for "${value}":`, error);
+                    console.error(`API call failed for "${value}":`, error.message);
+                    row.email = `Error: ${error.message}`;
+                    results.push(row);
                 });
 
             promises.push(promise);
