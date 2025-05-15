@@ -25,7 +25,7 @@ async function processCsv() {
     fs.createReadStream('data/inputs.csv')
         .pipe(csv())
         .on('data', (row) => {
-            const value = row['id'];
+            const value = row['dfeSignInRef'];
             const promise = axios.get(`${process.env.API_URL}/users/${value}/organisationservices`, {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -51,8 +51,15 @@ async function processCsv() {
 
             const parser = new Parser();
             const csvOutput = parser.parse(results);
-            fs.writeFileSync('output.csv', csvOutput);
-            console.log('CSV file successfully processed and saved as output.csv');
+
+
+            const now = new Date();
+            const dateStamp = now.toISOString().slice(0, 10).replace(/-/g, '');
+            const timeStamp = now.toTimeString().slice(0, 5).replace(/:/g, '');
+            const outputFileName = `outputs-${dateStamp}T${timeStamp}.csv`;
+
+            fs.writeFileSync(`data/${outputFileName}`, csvOutput);
+            console.log(`CSV file successfully processed and saved as ${outputFileName}`);
         });
 }
 
