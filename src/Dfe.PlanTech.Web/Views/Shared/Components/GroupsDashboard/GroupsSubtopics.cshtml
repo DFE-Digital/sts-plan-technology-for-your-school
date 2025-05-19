@@ -3,46 +3,49 @@
 @using AnchorTagHelper = Microsoft.AspNetCore.Mvc.TagHelpers.AnchorTagHelper
 @model GroupsDashboardViewComponentViewModel
 
-<ul class="govuk-task-list">
-    <li class="govuk-task-list__item groups-list-heading">
-
-        <div class="govuk-summary-list__row">
-            <div class="govuk-summary-list__key govuk-!-font-weight-regular">
-                <span><strong>Topic recommendations</strong></span>
+<div class="dfe-mat-self-assessment-list">
+    <ul class="govuk-task-list">
+        <li class="govuk-task-list__item">
+            <div class="govuk-task-list__name-and-hint">
+                <strong>Topic recommendations</strong>
             </div>
-            <div class="govuk-summary-list__value govuk-!-text-align-right">
-                <span><strong>Self-assessment status</strong></span>
+            <div class="govuk-task-list__status">
+                <strong>Self-assessment status</strong>
             </div>
-        </div>
-    </li>
-    @foreach (var groupsCategorySectionDtoItem in Model.GroupsCategorySectionDto)
-    {
-        <li class="govuk-task-list__item govuk-task-list__item--with-link">
-            @if (groupsCategorySectionDtoItem.Slug != null)
-            {
+        </li>
+        @foreach (var groupsCategorySectionDtoItem in Model.GroupsCategorySectionDto)
+        {
+            <li class="govuk-task-list__item govuk-task-list__item--with-link">
+                @if (groupsCategorySectionDtoItem.Slug != null)
+                {
                     @if (!string.IsNullOrEmpty(groupsCategorySectionDtoItem.RecommendationSlug))
                     {
-                        <div class="govuk-summary-list__key govuk-!-font-weight-regular groups-list-key">
-                            <partial name="Components/GroupsDashboard/GroupsSubtopicRecommendations" model="@groupsCategorySectionDtoItem.Recommendation" />
+                        <div class="govuk-task-list__name-and-hint">
+                            <partial name="Components/GroupsDashboard/GroupsSubtopicRecommendations"
+                                     model="@groupsCategorySectionDtoItem.Recommendation"/>
                         </div>
                     }
                     else
                     {
-                        <div class="govuk-summary-list__key govuk-!-font-weight-regular groups-list-key">@groupsCategorySectionDtoItem.Name</div>
+                        <div class="govuk-task-list__name-and-hint">
+                            <a class="govuk-task-list">
+                                @groupsCategorySectionDtoItem.Name
+                            </a>
+                        </div>
                     }
-                <div class="govuk-summary-list__value govuk-!-text-align-right groups-list-tag" id="@groupsCategorySectionDtoItem.Name">
-                    <task-list-tag colour=@groupsCategorySectionDtoItem.Tag.Colour>
-                        @groupsCategorySectionDtoItem.Tag.Text
-                    </task-list-tag>
-                </div>
-            }
-            else
-            {
-                <div class="govuk-summary-list__key">
-                    <govuk-error-message>@groupsCategorySectionDtoItem.ErrorMessage</govuk-error-message>
-                </div>
-            }
-
-        </li>
-    }
-</ul>
+                    <div class="govuk-task-list__status">
+                        <task-list-tag colour=@groupsCategorySectionDtoItem.Tag.Colour>
+                            @groupsCategorySectionDtoItem.Tag.Text
+                        </task-list-tag>
+                    </div>
+                }
+                else
+                {
+                    <div class="govuk-task-list__status">
+                        <govuk-error-message>@groupsCategorySectionDtoItem.ErrorMessage</govuk-error-message>
+                    </div>
+                }
+            </li>
+        }
+    </ul>
+</div>

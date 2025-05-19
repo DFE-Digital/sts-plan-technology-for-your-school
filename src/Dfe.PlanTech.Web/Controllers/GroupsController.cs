@@ -2,13 +2,18 @@
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.Groups.Interfaces;
 using Dfe.PlanTech.Domain.Groups.Models;
+using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
+using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Web.Controllers
 {
@@ -45,22 +50,43 @@ namespace Dfe.PlanTech.Web.Controllers
         }
 
         [HttpGet($"{GroupsSlug}/{GroupsSelectorPageSlug}")]
-        public async Task<IActionResult> GetSelectASchoolView([FromServices] IGetPageQuery getPageQuery, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetSelectASchoolView([FromServices] IGetPageQuery getPageQuery, [FromServices] IGetNavigationQuery getNavigationQuery, [FromServices] IOptions<ContactOptions> contactOptions, CancellationToken cancellationToken)
         {
             var selectASchoolPageContent = await getPageQuery.GetPageBySlug(GroupsSelectorPageSlug, cancellationToken);
+            var dashboardContent = await getPageQuery.GetPageBySlug(GroupsSchoolDashboardSlug, cancellationToken);
+            var categories = dashboardContent.Content.OfType<Category>();
 
             var schools = await _user.GetGroupEstablishments();
+
+            var groupSchools = await GetSchoolsWithSubmissionCounts(schools, categories);
+
             var groupName = _user.GetOrganisationData().OrgName;
             var title = new Title() { Text = groupName };
             List<ContentComponent> content = selectASchoolPageContent?.Content ?? new List<ContentComponent>();
 
+            string totalSections = "";
+
+            if (categories != null)
+            {
+                totalSections = SubmissionStatusHelpers.GetTotalSections(categories);
+            }
+
+            var contactLink = await getNavigationQuery.GetLinkById(contactOptions.Value.LinkId, cancellationToken);
+
             var viewModel = new GroupsSelectorViewModel()
             {
                 GroupName = groupName,
-                GroupEstablishments = schools,
+                GroupEstablishments = groupSchools,
                 Title = title,
-                Content = content
+                Content = content,
+                TotalSections = totalSections,
+                ProgressRetrievalErrorMessage = String.IsNullOrEmpty(totalSections)
+                    ? "Unable to retrieve progress"
+                    : null,
+                ContactLinkHref = contactLink?.Href
             };
+
+            ViewData["Title"] = "Select a school";
 
             return View(selectASchoolViewName, viewModel);
         }
@@ -97,6 +123,8 @@ namespace Dfe.PlanTech.Web.Controllers
                 Content = content,
                 Slug = GroupsSchoolDashboardSlug
             };
+
+            ViewData["Title"] = "Dashboard";
 
             return View(schoolDashboardViewName, viewModel);
         }
@@ -141,6 +169,7 @@ namespace Dfe.PlanTech.Web.Controllers
 
             // Passes the school name to the Header
             ViewData["SelectedEstablishmentName"] = viewModel.SelectedEstablishmentName;
+            ViewData["Title"] = viewModel.SectionName;
 
             return View("~/Views/Groups/Recommendations.cshtml", viewModel);
         }
@@ -184,6 +213,8 @@ namespace Dfe.PlanTech.Web.Controllers
                 SubmissionResponses = latestResponses
             };
 
+            ViewData["Title"] = viewModel.SectionName;
+
             return View("~/Views/Groups/RecommendationsChecklist.cshtml", viewModel);
         }
 
@@ -196,6 +227,31 @@ namespace Dfe.PlanTech.Web.Controllers
                 ?? throw new DatabaseException($"Could not get latest selected group school for user with ID {userId.Value} in establishment: {userEstablishmentId}");
 
             return latestSelection;
+        }
+
+        [NonAction]
+        public async Task<List<EstablishmentLink>> GetSchoolsWithSubmissionCounts(List<EstablishmentLink> schools, IEnumerable<Category> categories)
+        {
+            foreach (var school in schools)
+            {
+                var establishmentId = await _getEstablishmentIdQuery.GetEstablishmentId(school.Urn);
+                var completedSectionsCount = 0;
+                foreach (var category in categories)
+                {
+                    var categoryWithStatus = await SubmissionStatusHelpers.RetrieveSectionStatuses(category, _logger, _getSubmissionStatusesQuery, establishmentId);
+                    completedSectionsCount += categoryWithStatus.Completed;
+
+                    foreach (var sectionStatus in categoryWithStatus.SectionStatuses)
+                    {
+                        if (sectionStatus.Completed == false && sectionStatus.LastCompletionDate is not null)
+                        {
+                            completedSectionsCount++;
+                        }
+                    }
+                }
+                school.CompletedSectionsCount = completedSectionsCount;
+            }
+            return schools;
         }
     }
 }

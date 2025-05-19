@@ -25,10 +25,12 @@
                     <button type="submit" class="govuk-button school-button govuk-!-text-align-left" value="@schoolUrn">@schoolName</button>
                     <input type="hidden" name="schoolUrn" value="@schoolUrn" />
                     <input type="hidden" name="schoolName" value="@schoolName" />
-                    <p></p>
+                    <p>@school.CompletedSectionsCount out of @Model.TotalSections assessments completed</p>
                 </form>
             }
         }
+        <hr class="govuk-section-break govuk-section-break--m" />
+        <p class="govuk-body"><a href="@Model.ContactLinkHref" target="_blank" class="govuk-link">Contact us (opens in new tab)</a> if any school information is missing or incorrect.</p>
     </div>
 </div>
     

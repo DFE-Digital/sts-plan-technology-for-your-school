@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Domain.CategorySection;
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -39,7 +40,7 @@ public class CategorySectionViewComponent(
             };
         }
 
-        category = await RetrieveSectionStatuses(category);
+        category = await SubmissionStatusHelpers.RetrieveSectionStatuses(category, _logger, _query);
 
         return new CategorySectionViewComponentViewModel
         {
@@ -69,25 +70,6 @@ public class CategorySectionViewComponent(
                 recommendation: await GetCategorySectionRecommendationDto(section, sectionStatus),
                 systemTime
             );
-        }
-    }
-
-    public async Task<Category> RetrieveSectionStatuses(Category category)
-    {
-        try
-        {
-            category.SectionStatuses = await _query.GetSectionSubmissionStatuses(category.Sections);
-            category.Completed = category.SectionStatuses.Count(x => x.Completed);
-            category.RetrievalError = false;
-            return category;
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e,
-                             "An exception has occurred while trying to retrieve section progress with the following message - {message}",
-                             e.Message);
-            category.RetrievalError = true;
-            return category;
         }
     }
 
