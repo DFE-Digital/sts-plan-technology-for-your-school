@@ -1,7 +1,9 @@
 using Dfe.PlanTech.Domain.Constants;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Domain.Helpers;
 
@@ -51,4 +53,25 @@ public static class SubmissionStatusHelpers
             ? $"at {DateTimeFormatter.FormattedTime(localTime)}"
             : $"on {DateTimeFormatter.FormattedDateShort(localTime)}";
     }
+
+    public static async Task<Category> RetrieveSectionStatuses(Category category, ILogger logger, IGetSubmissionStatusesQuery query, int? schoolId = null)
+    {
+        try
+        {
+            category.SectionStatuses = await query.GetSectionSubmissionStatuses(category.Sections, schoolId);
+            category.Completed = category.SectionStatuses.Count(x => x.Completed);
+            category.RetrievalError = false;
+            return category;
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e,
+                             "An exception has occurred while trying to retrieve section progress with the following message - {message}",
+                             e.Message);
+            category.RetrievalError = true;
+            return category;
+        }
+    }
+
+    public static string GetTotalSections(IEnumerable<Category> categories) => categories.Sum(category => category.Sections.Count).ToString();
 }

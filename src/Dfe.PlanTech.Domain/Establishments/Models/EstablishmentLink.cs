@@ -1,4 +1,6 @@
-﻿namespace Dfe.PlanTech.Domain.Establishments.Models;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Dfe.PlanTech.Domain.Establishments.Models;
 
 public class EstablishmentLink
 {
@@ -9,4 +11,7 @@ public class EstablishmentLink
     public string EstablishmentName { get; set; } = null!;
 
     public string Urn { get; set; } = null!;
+
+    [NotMapped]
+    public int? CompletedSectionsCount { get; set; }
 }
