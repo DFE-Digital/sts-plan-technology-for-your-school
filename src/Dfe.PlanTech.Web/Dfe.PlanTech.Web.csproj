@@ -48,6 +48,7 @@
 
     <ItemGroup>
       <Folder Include="Content\" />
+      <Folder Include="Views\YSA\" />
     </ItemGroup>
 
     <Target Name="BuildWebAssets" BeforeTargets="Build" Condition="'$(buildWebAssets)' == 'true'">

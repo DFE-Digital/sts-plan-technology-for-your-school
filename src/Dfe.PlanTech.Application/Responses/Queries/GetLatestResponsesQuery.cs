@@ -78,4 +78,16 @@ public class GetLatestResponsesQuery(IPlanTechDbContext db) : IGetLatestResponse
         DateCreated = response.DateCreated
     };
 
+    public async Task<DateTime?> GetLatestCompletionDate(int establishmentId, string sectionId, bool completedSubmission, CancellationToken cancellationToken = default)
+    {
+        var latestCompletionDate = db.GetSubmissions
+        .Where(submission =>
+            submission.EstablishmentId == establishmentId &&
+            submission.SectionId == sectionId &&
+            submission.Completed == completedSubmission)
+        .OrderByDescending(submission => submission.DateCompleted)
+        .Select(submission => submission.DateCompleted);
+
+        return await db.FirstOrDefaultAsync(latestCompletionDate, cancellationToken);
+    }
 }

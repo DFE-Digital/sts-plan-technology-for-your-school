@@ -9,5 +9,7 @@ public interface IGetLatestResponsesQuery
 
     Task<SubmissionResponsesDto?> GetLatestResponses(int establishmentId, string sectionId, bool completedSubmission, CancellationToken cancellationToken = default);
 
+    Task<DateTime?> GetLatestCompletionDate(int establishmentId, string sectionId, bool completedSubmission, CancellationToken cancellationToken = default);
+
     Task ViewLatestSubmission(int establishmentId, string sectionId);
 }
