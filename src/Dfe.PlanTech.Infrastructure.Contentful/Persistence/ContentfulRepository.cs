@@ -134,7 +134,7 @@ public class ContentfulRepository : IContentRepository
     {
         var queryBuilder = QueryBuilders.BuildQueryBuilder<TEntity>(contentTypeId, options);
 
-        var shouldExcludeTestingContent = _hostEnvironment.IsProduction() || (!_automatedTestingOptions.Contentful?.IncludeTaggedContent ?? false);
+        var shouldExcludeTestingContent = _hostEnvironment.IsProduction() || (!_automatedTestingOptions?.Contentful!?.IncludeTaggedContent ?? false);
 
         if (shouldExcludeTestingContent)
         {
