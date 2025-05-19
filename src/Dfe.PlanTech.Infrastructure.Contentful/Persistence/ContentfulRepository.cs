@@ -142,6 +142,6 @@ public class ContentfulRepository : IContentRepository
             queryBuilder = queryBuilder.FieldExcludes("metadata.tags.sys.id", [tag]);
         }
 
-         return queryBuilder;
+        return queryBuilder;
     }
 }
