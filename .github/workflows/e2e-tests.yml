@@ -147,6 +147,8 @@ jobs:
           export DfeSignIn__FrontDoorUrl=https://localhost:8081
           export GTM__Id=gtm_id
           export GTM__SiteVerificationId=testing_site_verification_id
+          export AutomatedTesting__Contentful__Tag=e2e
+          export AutomatedTesting__Contentful__IncludeTaggedContent=true
           dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 &
 
       - name: Cypress tests
