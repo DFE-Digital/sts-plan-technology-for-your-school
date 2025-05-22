@@ -33,6 +33,6 @@ jobs:
         uses: azure/CLI@v1
         id: azure
         with:
-          azcliversion: 2.67.0
+          azcliversion: 2.73.0
           inlineScript: |
             az redis flush --name ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} --yes
