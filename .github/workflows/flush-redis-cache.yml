@@ -7,7 +7,7 @@ on:
         description: Which environment to flush the redis cache on?
         required: true
         type: choice
-        options: [ 'Dev', 'Tst', 'Staging']
+        options: [ 'Dev', 'Tst', 'Staging', 'Production']
         default: 'Staging'
 
 jobs:
