@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
@@ -86,15 +87,13 @@ public class GetRecommendationRouter : IGetRecommendationRouter
 
         if (_router.Section == null)
             throw new DatabaseException("Section is null, but shouldn't be.");
-
+      
         var submissionResponses = await _getLatestResponsesQuery.GetLatestResponses(await _router.User.GetEstablishmentId(), _router.Section.Sys.Id, true, cancellationToken) ?? throw new DatabaseException($"Could not find users answers for:  {_router.Section.Name}");
         var latestResponses = _router.Section.GetOrderedResponsesForJourney(submissionResponses.Responses);
 
         var subTopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(_router.Section.Sys.Id, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {_router.Section.Name}");
-
         var subTopicIntro = subTopicRecommendation.GetRecommendationByMaturity(_router.SectionStatus.Maturity) ?? throw new ContentfulDataUnavailableException($"Could not find recommendation intro for maturity:  {_router.SectionStatus?.Maturity}");
-
-        var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Select(answer => answer.AnswerRef));
+        var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Select(answer => answer.AnswerRef));    
 
         return (subTopicRecommendation, subTopicIntro, subTopicChunks, latestResponses);
     }
@@ -102,15 +101,33 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     /// <summary>
     /// Fetch the model for the recommendation page (if correct recommendation for section + maturity),
     /// </summary>
-    private async Task<RecommendationsViewModel> GetRecommendationViewModel(string recommendationSlug, CancellationToken cancellationToken)
+    private async Task<RecommendationsViewModel> GetRecommendationViewModel(string recommendationSlug, CancellationToken cancellationToken, bool showYSA = false)
     {
         var (subTopicRecommendation, subTopicIntro, subTopicChunks, latestResponses) = await GetSubtopicRecommendation(cancellationToken);
+
+        var YSAChunk = new RecommendationChunk();
+        var latestCompletionDate = new DateTime?();
+
+        if (showYSA)
+        {
+            YSAChunk = new()
+            {
+                Header = "Your self-assessment"
+            };
+
+            subTopicChunks.Add(YSAChunk);
+
+            latestCompletionDate = await _getLatestResponsesQuery.GetLatestCompletionDate(await _router.User.GetEstablishmentId(), _router.Section.Sys.Id, true);
+        }
 
         return new RecommendationsViewModel()
         {
             SectionName = subTopicRecommendation.Subtopic.Name,
             Intro = subTopicIntro,
             Chunks = subTopicChunks,
+            LatestCompletionDate = latestCompletionDate.HasValue
+                                ? DateTimeFormatter.FormattedDateShort(latestCompletionDate.Value)
+                                : null,
             Slug = recommendationSlug,
             SubmissionResponses = latestResponses
         };
@@ -121,7 +138,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     /// </summary>
     private async Task<IActionResult> HandleCompleteStatus(RecommendationsController controller, string recommendationSlug, CancellationToken cancellationToken)
     {
-        var viewModel = await GetRecommendationViewModel(recommendationSlug, cancellationToken);
+        var viewModel = await GetRecommendationViewModel(recommendationSlug, cancellationToken, true);
 
         var establishmentId = await _router.User.GetEstablishmentId();
         await _getLatestResponsesQuery.ViewLatestSubmission(establishmentId, _router.Section.Sys.Id);
