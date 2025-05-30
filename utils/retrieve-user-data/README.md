@@ -9,8 +9,8 @@ This project reads a CSV file containing a list of DfE Sign-In user ids, calls t
 - Reads a CSV file containing a `dfeSignInRef` column
 - Authenticates with the DSI Public API using JWT (HS256)
 - Makes asynchronous API calls for each `dfeSignInRef`
-- Extracts a field (`email`) from each response
-- Creates a timestamped `outputs-[dateTime].csv` file with the returned email appended to each row
+- Extracts fields (`email`, `familyName`, `givenName`, `organisations`) from each response and iterates through `organisations` to retrieve each organisation's name and type
+- Creates a timestamped `outputs-[dateTime].csv` file with the returned details appended to each row
 
 ---
 
