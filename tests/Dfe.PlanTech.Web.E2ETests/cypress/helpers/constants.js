@@ -27,7 +27,7 @@ export const recommendationsSidebarTitle = "Recommendations";
 export const recommendationIntroTitle = "Overview";
 export const paginationNext = "Next";
 export const paginationPrevious = "Previous";
-export const recommendationsToSelfAssessmentText = "Go to self-assessment topics";
+export const recommendationsToSelfAssessmentText = "Back";
 
 // Print recommendations
 export const printAllRecommendationsText = "View and print all recommendations";
