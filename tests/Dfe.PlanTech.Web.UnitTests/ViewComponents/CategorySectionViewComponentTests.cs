@@ -786,5 +786,40 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal(_subtopic.Intros[0].HeaderText, recommendation.RecommendationDisplayName);
             Assert.Null(recommendation.NoRecommendationFoundErrorMessage);
         }
+
+        [Fact]
+        public async Task Model_MissingDescription_ReturnsMissingComponent()
+        {
+            _category.Completed = 0;
+
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
+
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model;
+            Assert.NotNull(model);
+
+            var unboxed = model as CategorySectionViewComponentViewModel;
+            Assert.NotNull(unboxed);
+            Assert.IsType<MissingComponent>(unboxed.Description);
+
+        }
     }
 }
+// _user.GetCurrentUserId().Returns(1);
+// _user.GetEstablishmentId().Returns(10);
+// _groupSelectionQuery.GetLatestSelectedGroupSchool(1, 10)
+//     .Returns(new GroupReadActivityDto() { SelectedEstablishmentId = 20 });
+//
+// _submissionStatusesQuery.GetSectionSubmissionStatuses(Arg.Any<IEnumerable<Section>>(), 20)
+//     .Returns(new List<SectionStatusDto>());
+//
+// var component = CreateComponent();
+//
+// var result = await component.InvokeAsync(category);
+//
+// var viewResult = Assert.IsType<ViewViewComponentResult>(result);
+// var model = Assert.IsType<GroupsDashboardViewComponentViewModel>(viewResult?.ViewData?.Model);
