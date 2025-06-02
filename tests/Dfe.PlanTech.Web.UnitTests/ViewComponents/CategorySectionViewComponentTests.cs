@@ -809,17 +809,3 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         }
     }
 }
-// _user.GetCurrentUserId().Returns(1);
-// _user.GetEstablishmentId().Returns(10);
-// _groupSelectionQuery.GetLatestSelectedGroupSchool(1, 10)
-//     .Returns(new GroupReadActivityDto() { SelectedEstablishmentId = 20 });
-//
-// _submissionStatusesQuery.GetSectionSubmissionStatuses(Arg.Any<IEnumerable<Section>>(), 20)
-//     .Returns(new List<SectionStatusDto>());
-//
-// var component = CreateComponent();
-//
-// var result = await component.InvokeAsync(category);
-//
-// var viewResult = Assert.IsType<ViewViewComponentResult>(result);
-// var model = Assert.IsType<GroupsDashboardViewComponentViewModel>(viewResult?.ViewData?.Model);
