@@ -786,5 +786,26 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal(_subtopic.Intros[0].HeaderText, recommendation.RecommendationDisplayName);
             Assert.Null(recommendation.NoRecommendationFoundErrorMessage);
         }
+
+        [Fact]
+        public async Task Model_MissingDescription_ReturnsMissingComponent()
+        {
+            _category.Completed = 0;
+
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
+
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model;
+            Assert.NotNull(model);
+
+            var unboxed = model as CategorySectionViewComponentViewModel;
+            Assert.NotNull(unboxed);
+            Assert.IsType<MissingComponent>(unboxed.Description);
+
+        }
     }
 }

@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Domain.CategorySection;
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
@@ -44,6 +45,7 @@ public class CategorySectionViewComponent(
 
         return new CategorySectionViewComponentViewModel
         {
+            Description = category.Content is { Count: > 0 } content ? content[0] : new MissingComponent(),
             CompletedSectionCount = category.Completed,
             TotalSectionCount = category.Sections.Count,
             CategorySectionDto = await GetCategorySectionDto(category).ToListAsync(),
