@@ -35,7 +35,7 @@ jobs:
           echo "🌐 Pinging ${{ matrix.env_name }} (${{ matrix.env_url }})..."
           status_code=$(curl -s -o /dev/null -w "%{http_code}" "${{ matrix.env_url }}")
           
-          if [[ "$status_code" -ne 200 ]]; then
+          if [[ "$status_code" -ne 200 && "$status_code" -ne 302 ]]; then
             echo "❌ ${{ matrix.env_name }} returned status code $status_code"
             echo "- name: ${{ matrix.env_name }}" >> tmp/env-check-failures.yml
             echo "  url: ${{ matrix.env_url }}" >> tmp/env-check-failures.yml
