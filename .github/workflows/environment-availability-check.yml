@@ -2,7 +2,7 @@ name: Check Environment Availability
 
 on:
   schedule:
-    - cron: '*/30 * * * *'  # every 30 minutes
+    - cron: '*/15 * * * *'  # every 15 minutes
   workflow_dispatch:
 
 jobs:
@@ -21,6 +21,8 @@ jobs:
             env_url: "https://staging.plan-technology-for-your-school.education.gov.uk/information-asset-register"
           - env_name: Production
             env_url: "https://plan-technology-for-your-school.education.gov.uk/information-asset-register"
+          - env_name: DfE Sign In
+            env_url: "https://interactions.signin.education.gov.uk"
 
     steps:
       - name: Prepare empty failures list
