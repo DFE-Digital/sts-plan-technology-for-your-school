@@ -7,9 +7,6 @@
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <UserSecretsId>04e79986-156c-45e1-87d7-2f14405d0fe8</UserSecretsId>
     </PropertyGroup>
-    <PropertyGroup Condition="'$(BuildingInsideVisualStudio)' == 'true'">
-        <buildWebAssets>true</buildWebAssets>
-    </PropertyGroup>
 
     <ItemGroup>
         <Content Update="Properties\launchSettings.json">

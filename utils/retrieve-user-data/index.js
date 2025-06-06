@@ -26,14 +26,32 @@ async function processCsv() {
         .pipe(csv())
         .on('data', (row) => {
             const value = row['dfeSignInRef'];
-            const promise = axios.get(`${process.env.API_URL}/users/${value}/organisationservices`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
-                .then(response => {
-                    const extracted = response.data['email'];
-                    row.email = extracted;
+            const userDataEndpoint = `${process.env.API_URL}/users/${value}/organisationservices`;
+            const orgDataEndpoint = `${process.env.API_URL}/users/${value}/v2/organisations`;
+
+            const promise = Promise.all([
+                axios.get(userDataEndpoint, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }),
+                axios.get(orgDataEndpoint, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                })
+            ])
+                .then(([ userResponse, orgResponse ]) => {
+                    row.email = userResponse.data['email'];
+                    row.name = `${userResponse.data['givenName']} ${userResponse.data['familyName']}`;
+
+                    if (!orgResponse.data.length) {
+                        row.organisations = "No organisations listed for user";
+                    } else {
+                        const orgs = orgResponse.data.map(org => `${org.name} - ${org.GIASProviderType ?? 'Type unknown'}`)
+                        row.organisations = orgs.join(', ');
+                    }
+
                     results.push(row);
                 })
                 .catch(error => {
@@ -67,4 +85,3 @@ async function processCsv() {
 }
 
 processCsv();
-
