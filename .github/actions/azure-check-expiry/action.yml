@@ -39,7 +39,7 @@ runs:
     - name: Add Runner to KV whitelist
       uses: azure/CLI@v1
       with:
-        azcliversion: 2.45.0
+        azcliversion: 2.73.0
         inlineScript: |
           az keyvault network-rule add --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
@@ -54,6 +54,6 @@ runs:
       uses: azure/CLI@v1
       if: always()
       with:
-        azcliversion: 2.45.0
+        azcliversion: 2.73.0
         inlineScript: |
           az keyvault network-rule remove --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
