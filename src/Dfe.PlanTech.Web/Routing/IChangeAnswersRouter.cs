@@ -4,12 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 namespace Dfe.PlanTech.Web.Routing;
 
 /// <summary>
-/// Router for "Check Answers" page under <see cref="CheckAnswersController"/> 
+/// Router for "Change Answers" page under <see cref="ChangeAnswersController"/> 
 /// </summary>
-public interface ICheckAnswersRouter
+public interface IChangeAnswersRouter
 {
     /// <summary>
-    /// Gets current user journey status, then either returns Check Answers page (if appropriate), 
+    /// Gets current user journey status, then either returns Change Answers page (if appropriate), 
     /// or redirects to correct next part of user journey
     /// </summary>
     /// <param name="sectionSlug"></param>
@@ -19,7 +19,6 @@ public interface ICheckAnswersRouter
     /// <returns></returns>
     Task<IActionResult> ValidateRoute(string sectionSlug,
                                       string? errorMessage,
-                                      CheckAnswersController controller,
-                                      CancellationToken cancellationToken,
-                                      bool isChangeAnswersFlow = false);
+                                      ChangeAnswersController controller,
+                                      CancellationToken cancellationToken);
 }

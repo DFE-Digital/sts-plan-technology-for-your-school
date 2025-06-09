@@ -14,11 +14,11 @@ public interface ISubmissionStatusProcessor
 {
     public IGetLatestResponsesQuery GetResponsesQuery { get; }
     public IUser User { get; }
-    public SubmissionStatus Status { get; set; }
+    public Status Status { get; set; }
     public Question? NextQuestion { get; set; }
     public ISectionComponent Section { get; }
     public SectionStatus? SectionStatus { get; }
 
-    Task GetJourneyStatusForSection(string sectionSlug, CancellationToken cancellationToken);
-    Task GetJourneyStatusForSectionRecommendation(string sectionSlug, CancellationToken cancellationToken);
+    Task GetJourneyStatusForSection(string sectionSlug, CancellationToken cancellationToken, bool completed = false);
+    Task GetJourneyStatusForSectionRecommendation(string sectionSlug, CancellationToken cancellationToken, bool completed = false);
 }

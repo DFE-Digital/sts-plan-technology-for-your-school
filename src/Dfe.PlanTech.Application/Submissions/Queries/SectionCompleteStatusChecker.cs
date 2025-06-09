@@ -14,7 +14,7 @@ public static class SectionCompleteStatusChecker
         IsMatchingSubmissionStatusFunc = (userJourneyRouter) => userJourneyRouter?.SectionStatus?.Completed == true,
         ProcessSubmissionFunc = (userJourneyRouter, cancellationToken) =>
         {
-            userJourneyRouter.Status = SubmissionStatus.Completed;
+            userJourneyRouter.Status = Status.CompleteReviewed;
             userJourneyRouter.NextQuestion = userJourneyRouter.Section.Questions[0];
 
             return Task.CompletedTask;

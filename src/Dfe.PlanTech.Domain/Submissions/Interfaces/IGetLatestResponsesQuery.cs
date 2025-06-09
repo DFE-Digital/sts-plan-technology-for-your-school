@@ -11,5 +11,9 @@ public interface IGetLatestResponsesQuery
 
     Task<DateTime?> GetLatestCompletionDate(int establishmentId, string sectionId, bool completedSubmission, CancellationToken cancellationToken = default);
 
+    Task<Submission?> GetInProgressSubmission(int establishmentId, string sectionId, CancellationToken cancellationToken = default);
+
+    Task<Submission?> GetLatestCompletedSubmission(int establishmentId, string sectionId);
+
     Task ViewLatestSubmission(int establishmentId, string sectionId);
 }

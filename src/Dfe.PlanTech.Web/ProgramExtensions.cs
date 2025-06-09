@@ -147,6 +147,7 @@ public static class ProgramExtensions
         ConfigureCookies(services, configuration);
 
         services.AddTransient<ICalculateMaturityCommand, CalculateMaturityCommand>();
+        services.AddScoped<IMarkSubmissionAsReviewedCommand, MarkSubmissionAsReviewedCommand>();
         services.AddTransient<ICreateEstablishmentCommand, CreateEstablishmentCommand>();
         services.AddTransient<ICreateUserCommand, CreateUserCommand>();
         services.AddTransient<IGetEntityFromContentfulQuery, GetEntityFromContentfulQuery>();
@@ -163,6 +164,7 @@ public static class ProgramExtensions
         services.AddTransient<IDeleteCurrentSubmissionCommand, DeleteCurrentSubmissionCommand>();
         services.AddTransient<IRecordGroupSelectionCommand, RecordGroupSelectionCommand>();
         services.AddTransient<IGetGroupSelectionQuery, GetGroupSelectionQuery>();
+        services.AddTransient<ISubmissionCommand, SubmissionCommand>();
 
         return services;
     }
@@ -225,6 +227,7 @@ public static class ProgramExtensions
         services.AddTransient<IGetRecommendationRouter, GetRecommendationRouter>();
         services.AddTransient<IGetQuestionBySlugRouter, GetQuestionBySlugRouter>();
         services.AddTransient<ICheckAnswersRouter, CheckAnswersRouter>();
+        services.AddTransient<IChangeAnswersRouter, ChangeAnswersRouter>();
 
         services.AddTransient((_) => SectionCompleteStatusChecker.SectionComplete);
         services.AddTransient((_) => SectionNotStartedStatusChecker.SectionNotStarted);

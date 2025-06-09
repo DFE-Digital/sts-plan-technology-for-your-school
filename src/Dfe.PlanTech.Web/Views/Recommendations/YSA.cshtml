@@ -1,4 +1,6 @@
-﻿@model Dfe.PlanTech.Web.Models.RecommendationsViewModel
+﻿@using Dfe.PlanTech.Domain.Helpers
+@using Dfe.PlanTech.Web.Helpers
+@model Dfe.PlanTech.Web.Models.RecommendationsViewModel
 
 <div id="checkYourAnswers-page">
     <p>
@@ -6,18 +8,13 @@
         You can change your answers at any time.
     </p>
 
-@* leaving this static for now to update on the next ticket when we have scope of a newly in-progress submission after completion *@
-    <p>
-        Another self assessment was started on <strong>19 May 2025</strong>.
-        <a href="#">Continue this self-assessment</a>.
-    </p>
-  
     <h2 class="govuk-heading-l">@Model.SectionName</h2>
 
+    <hr class="govuk-section-break govuk-section-break--visible">
+
     <dl class="govuk-summary-list">
-        <hr class="govuk-section-break govuk-section-break--visible">
-            @foreach (var questionWithAnswer in Model.SubmissionResponses)
-            {
+        @foreach (var questionWithAnswer in Model.SubmissionResponses)
+        {
             <div class="govuk-summary-list__row">
                 <dt class="govuk-summary-list__key spacer govuk-!-margin-top-4">
                     @questionWithAnswer.QuestionText
@@ -25,11 +22,12 @@
                 <dd class="govuk-summary-list__value spacer govuk-!-margin-bottom-4">
                     @questionWithAnswer.AnswerText
                 </dd>
-             </div>
-            }
-        </dl>
+            </div>
+        }
+    </dl>
 
-    <a href="check-answers" role="button" draggable="false" class="govuk-button" data-module="govuk-button" data-govuk-button-init="">
+    <a href="/@Model.SectionName.Slugify()/change-answers" role="button" draggable="false"
+       class="govuk-button" data-module="govuk-button" data-govuk-button-init="">
         Change your answers
     </a>
 </div>

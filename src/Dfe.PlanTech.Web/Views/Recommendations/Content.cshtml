@@ -1,16 +1,30 @@
 @using Dfe.PlanTech.Domain.Questionnaire.Models
 @using GovUk.Frontend.AspNetCore.TagHelpers
 @using Microsoft.AspNetCore.Mvc.TagHelpers
-@model Dfe.PlanTech.Domain.Questionnaire.Interfaces.IHeaderWithContent
+@model Tuple<Dfe.PlanTech.Domain.Questionnaire.Interfaces.IHeaderWithContent, string?>
+
+@{
+    var header = Model.Item1;
+    var submissionDate = Model.Item2;
+}
 
 <div class="recommendation-piece-content">
-    @foreach (var content in Model.Content)
+    @foreach (var content in header.Content)
     {
+        @if (header.SlugifiedLinkText == "overview" && !string.IsNullOrEmpty(submissionDate))
+        {
+            <div class="govuk-inset-text">
+                <p>
+                    The self-assessment for broadband connection was completed on
+                    <strong>@submissionDate</strong>. You can change your answers at any time.
+                </p>
+            </div>
+        }
         <partial name="Components/PageComponentFactory" model="@content" />
     }
 </div>
 
-@if (Model is RecommendationChunk chunk && chunk.CSLink != null)
+@if (header is RecommendationChunk chunk && chunk.CSLink != null)
 {
     <div class="govuk-!-margin-top-3 govuk-!-margin-bottom-9">
         <a class="govuk-body govuk-link govuk-!-font-weight-bold" href=@chunk.CSLink.Url>@chunk.CSLink.LinkText</a>

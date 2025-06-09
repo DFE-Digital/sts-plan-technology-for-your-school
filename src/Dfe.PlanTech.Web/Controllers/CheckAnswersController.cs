@@ -23,8 +23,9 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
 
     [HttpGet("{sectionSlug}/check-answers")]
     public async Task<IActionResult> CheckAnswersPage(string sectionSlug,
+                                                      [FromQuery] bool isChangeAnswersFlow,
                                                       [FromServices] ICheckAnswersRouter checkAnswersValidator,
-                                                      [FromServices] IUserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler,
+                                                      [FromServices] IUserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler,                                                     
                                                       CancellationToken cancellationToken = default)
     {
         try
@@ -33,7 +34,7 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
 
             var errorMessage = TempData["ErrorMessage"]?.ToString();
 
-            return await checkAnswersValidator.ValidateRoute(sectionSlug, errorMessage, this, cancellationToken);
+            return await checkAnswersValidator.ValidateRoute(sectionSlug, errorMessage, this, cancellationToken, isChangeAnswersFlow);
         }
         catch (UserJourneyMissingContentException userJourneyException)
         {
@@ -47,8 +48,9 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
         int submissionId,
         string sectionName,
         string redirectOption,
-        [FromServices] ICalculateMaturityCommand calculateMaturityCommand,
+        [FromServices] ICalculateMaturityCommand calculateMaturityCommand,         
         [FromServices] IGetRecommendationRouter getRecommendationRouter,
+        [FromServices] IMarkSubmissionAsReviewedCommand markSubmissionAsReviewedCommand,
         CancellationToken cancellationToken = default)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(submissionId);
@@ -57,6 +59,7 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
         try
         {
             await calculateMaturityCommand.CalculateMaturityAsync(submissionId, cancellationToken);
+            await markSubmissionAsReviewedCommand.MarkSubmissionAsReviewed(submissionId, cancellationToken);
         }
         catch (Exception e)
         {
