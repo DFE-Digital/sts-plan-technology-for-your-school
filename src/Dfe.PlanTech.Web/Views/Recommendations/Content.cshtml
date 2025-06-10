@@ -1,21 +1,22 @@
 @using Dfe.PlanTech.Domain.Questionnaire.Models
 @using GovUk.Frontend.AspNetCore.TagHelpers
 @using Microsoft.AspNetCore.Mvc.TagHelpers
-@model Tuple<Dfe.PlanTech.Domain.Questionnaire.Interfaces.IHeaderWithContent, string?>
+@model Tuple<Dfe.PlanTech.Domain.Questionnaire.Interfaces.IHeaderWithContent, string?, string?>
 
 @{
     var header = Model.Item1;
     var submissionDate = Model.Item2;
+    var sectionName = Model.Item3;
 }
 
 <div class="recommendation-piece-content">
     @foreach (var content in header.Content)
     {
-        @if (header.SlugifiedLinkText == "overview" && !string.IsNullOrEmpty(submissionDate))
+        @if (header.SlugifiedLinkText == "overview" && !string.IsNullOrEmpty(submissionDate) && !string.IsNullOrEmpty(sectionName))
         {
             <div class="govuk-inset-text">
                 <p>
-                    The self-assessment for broadband connection was completed on
+                    The self-assessment for @sectionName.ToLower() was completed on
                     <strong>@submissionDate</strong>. You can change your answers at any time.
                 </p>
             </div>
