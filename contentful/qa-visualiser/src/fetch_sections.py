@@ -28,8 +28,16 @@ def fetch_sections() -> list[Section]:
                 "Authorization": f"Bearer {token}",
             },
         )
+
+        result = []
         logger.info("Validating retrieved sections")
-        return [Section.model_validate(item) for item in data.json()]
+        for i, item in data.json():
+            name = item.get("name", "<unnamed>")
+            logger.info(f"Validating section '{name}' (index [{i}])")
+            result.append(Section.model_validate(item))
+
+        return result
+        
     except RequestException as ex:
         logger.error(f"Error fetching sections: {ex}")
         raise ex
