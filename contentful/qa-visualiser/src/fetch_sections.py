@@ -37,7 +37,7 @@ def fetch_sections() -> list[Section]:
             result.append(Section.model_validate(item))
 
         return result
-        
+
     except RequestException as ex:
         logger.error(f"Error fetching sections: {ex}")
         raise ex
