@@ -97,30 +97,6 @@ public class CheckAnswersRouterTests
     }
 
     [Fact]
-    public async Task Should_Redirect_To_InterstitialPage_When_Status_Is_Completed()
-    {
-        var sectionSlug = "section-slug";
-
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, Arg.Any<CancellationToken>()))
-        .Do(processor =>
-        {
-            _submissionStatusProcessor.Status = SubmissionStatus.Completed;
-        });
-
-        var result = await _router.ValidateRoute(sectionSlug, null, _controller, default);
-
-        var redirectResult = result as RedirectToActionResult;
-
-        Assert.NotNull(redirectResult);
-        Assert.Equal(PagesController.ControllerName, redirectResult.ControllerName);
-        Assert.Equal(PagesController.GetPageByRouteAction, PagesController.GetPageByRouteAction);
-
-        var route = redirectResult.RouteValues?["route"];
-        Assert.NotNull(route);
-        Assert.Equal(UrlConstants.SelfAssessmentPage, route);
-    }
-
-    [Fact]
     public async Task Should_Redirect_To_NextQuestion_When_Status_InProgresss()
     {
         var sectionSlug = "section-slug";
@@ -133,7 +109,7 @@ public class CheckAnswersRouterTests
         _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, Arg.Any<CancellationToken>()))
         .Do(callInfo =>
         {
-            _submissionStatusProcessor.Status = SubmissionStatus.NextQuestion;
+            _submissionStatusProcessor.Status = Status.InProgress;
             _submissionStatusProcessor.NextQuestion = nextQuestion;
         });
 
@@ -162,7 +138,7 @@ public class CheckAnswersRouterTests
         _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, Arg.Any<CancellationToken>()))
                                   .Do(processor =>
                                   {
-                                      _submissionStatusProcessor.Status = SubmissionStatus.CheckAnswers;
+                                      _submissionStatusProcessor.Status = Status.CompleteNotReviewed;
                                       _submissionStatusProcessor.Section.Returns(_section);
                                   });
 
@@ -203,7 +179,7 @@ public class CheckAnswersRouterTests
         _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, Arg.Any<CancellationToken>()))
                                   .Do(processor =>
                                   {
-                                      _submissionStatusProcessor.Status = SubmissionStatus.CheckAnswers;
+                                      _submissionStatusProcessor.Status = Status.CompleteNotReviewed;
                                       _submissionStatusProcessor.Section.Returns(noneAnsweredSection);
                                   });
 
