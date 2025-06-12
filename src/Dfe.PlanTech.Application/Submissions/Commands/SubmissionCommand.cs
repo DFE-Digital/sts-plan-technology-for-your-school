@@ -16,7 +16,7 @@ namespace Dfe.PlanTech.Application.Submissions.Commands
         public async Task<Submission> CloneSubmission(Submission? existingSubmission, CancellationToken cancellationToken)
         {
             if (existingSubmission is null)
-                    throw new ArgumentNullException(nameof(existingSubmission), "Submission cannot be null");
+                throw new ArgumentNullException(nameof(existingSubmission), "Submission cannot be null");
 
             var newSubmission = new Submission
             {
@@ -51,7 +51,7 @@ namespace Dfe.PlanTech.Application.Submissions.Commands
             var submission = submissions.Find(submissionId);
 
             if (submission == null)
-                    throw new ArgumentNullException(nameof(submission));
+                throw new ArgumentNullException(nameof(submission));
 
             submission.Status = SubmissionStatus.Inaccessible.ToString();
 

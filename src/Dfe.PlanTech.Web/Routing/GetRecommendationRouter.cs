@@ -87,13 +87,13 @@ public class GetRecommendationRouter : IGetRecommendationRouter
 
         if (_router.Section == null)
             throw new DatabaseException("Section is null, but shouldn't be.");
-      
+
         var submissionResponses = await _getLatestResponsesQuery.GetLatestResponses(await _router.User.GetEstablishmentId(), _router.Section.Sys.Id, true, cancellationToken) ?? throw new DatabaseException($"Could not find users answers for:  {_router.Section.Name}");
         var latestResponses = _router.Section.GetOrderedResponsesForJourney(submissionResponses.Responses);
 
         var subTopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(_router.Section.Sys.Id, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {_router.Section.Name}");
         var subTopicIntro = subTopicRecommendation.GetRecommendationByMaturity(_router.SectionStatus.Maturity) ?? throw new ContentfulDataUnavailableException($"Could not find recommendation intro for maturity:  {_router.SectionStatus?.Maturity}");
-        var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Select(answer => answer.AnswerRef));    
+        var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Select(answer => answer.AnswerRef));
 
         return (subTopicRecommendation, subTopicIntro, subTopicChunks, latestResponses);
     }
