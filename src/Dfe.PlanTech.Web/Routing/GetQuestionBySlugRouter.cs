@@ -54,14 +54,14 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
 
         if (IsSlugForNextQuestion(questionSlug))
         {
-            var viewModel = controller.GenerateViewModel(sectionSlug, _router.NextQuestion!, _router.Section, null, isChangeAnswersFlow);
+            var viewModel = controller.GenerateViewModel(sectionSlug, _router.NextQuestion!, _router.Section, null);
             return controller.RenderView(viewModel);
         }
 
         if (SectionIsAtStart)
             return PageRedirecter.RedirectToInterstitialPage(controller, sectionSlug);
 
-        return await ProcessOtherStatuses(sectionSlug, questionSlug, controller, cancellationToken, isChangeAnswersFlow);
+        return await ProcessOtherStatuses(sectionSlug, questionSlug, controller, isChangeAnswersFlow, cancellationToken);
     }
 
     /// <summary>
@@ -82,11 +82,11 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     /// <param name="controller"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task<IActionResult> ProcessOtherStatuses(string sectionSlug, string questionSlug, QuestionsController controller, CancellationToken cancellationToken, bool isChangeAnswersFlow)
+    private async Task<IActionResult> ProcessOtherStatuses(string sectionSlug, string questionSlug, QuestionsController controller, bool isChangeAnswersFlow, CancellationToken cancellationToken)
     {
         var question = GetQuestionForSlug(questionSlug);
 
-        var responses = await GetLatestResponsesForSection(cancellationToken, isChangeAnswersFlow);
+        var responses = await GetLatestResponsesForSection(isChangeAnswersFlow, cancellationToken);
 
         if (responses is null)
         {
@@ -124,7 +124,7 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="DatabaseException">Thrown if no responses are found</exception>
-    private async Task<List<QuestionWithAnswer>> GetLatestResponsesForSection(CancellationToken cancellationToken, bool completed = false)
+    private async Task<List<QuestionWithAnswer>> GetLatestResponsesForSection(bool completed = false, CancellationToken cancellationToken = default)
     {
         var establishmentId = await _user.GetEstablishmentId();
 

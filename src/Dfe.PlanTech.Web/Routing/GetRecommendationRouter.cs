@@ -101,7 +101,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     /// <summary>
     /// Fetch the model for the recommendation page (if correct recommendation for section + maturity),
     /// </summary>
-    private async Task<RecommendationsViewModel> GetRecommendationViewModel(string recommendationSlug, CancellationToken cancellationToken, bool showYSA = false)
+    private async Task<RecommendationsViewModel> GetRecommendationViewModel(string recommendationSlug, bool showYSA = false, CancellationToken cancellationToken = default)
     {
         var (subTopicRecommendation, subTopicIntro, subTopicChunks, latestResponses) = await GetSubtopicRecommendation(cancellationToken);
 
@@ -139,7 +139,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     /// </summary>
     private async Task<IActionResult> HandleCompleteStatus(RecommendationsController controller, string recommendationSlug, CancellationToken cancellationToken)
     {
-        var viewModel = await GetRecommendationViewModel(recommendationSlug, cancellationToken, true);
+        var viewModel = await GetRecommendationViewModel(recommendationSlug, true, cancellationToken);
 
         var establishmentId = await _router.User.GetEstablishmentId();
         await _getLatestResponsesQuery.ViewLatestSubmission(establishmentId, _router.Section.Sys.Id);
@@ -152,7 +152,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     /// </summary>
     private async Task<IActionResult> HandleChecklist(RecommendationsController controller, string recommendationSlug, CancellationToken cancellationToken)
     {
-        var viewModel = await GetRecommendationViewModel(recommendationSlug, cancellationToken);
+        var viewModel = await GetRecommendationViewModel(recommendationSlug, cancellationToken: cancellationToken);
 
         return controller.View("~/Views/Recommendations/RecommendationsChecklist.cshtml", viewModel);
     }

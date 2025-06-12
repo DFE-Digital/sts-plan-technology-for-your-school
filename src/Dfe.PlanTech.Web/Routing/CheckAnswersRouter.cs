@@ -30,7 +30,7 @@ public class CheckAnswersRouter : ICheckAnswersRouter
         _router = router;
     }
 
-    public async Task<IActionResult> ValidateRoute(string sectionSlug, string? errorMessage, CheckAnswersController controller, CancellationToken cancellationToken, bool isChangeAnswersFlow = false)
+    public async Task<IActionResult> ValidateRoute(string sectionSlug, string? errorMessage, CheckAnswersController controller, bool isChangeAnswersFlow = false, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(sectionSlug))
             throw new ArgumentNullException(nameof(sectionSlug));

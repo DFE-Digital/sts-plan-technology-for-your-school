@@ -248,7 +248,7 @@ public class QuestionsControllerTests
         _controller.ModelState.AddModelError("submitAnswerDto.QuestionId", errorMessages[0]);
         _controller.ModelState.AddModelError("submitAnswerDto.QuestionText", errorMessages[1]);
 
-        var result = await _controller.SubmitAnswer(sectionSlug, questionSlug, submitAnswerDto, submitAnswerCommand, nextUnanswered, cancellationToken);
+        var result = await _controller.SubmitAnswer(sectionSlug, questionSlug, submitAnswerDto, submitAnswerCommand, nextUnanswered, cancellationToken: cancellationToken);
 
         var viewResult = Assert.IsType<ViewResult>(result);
         Assert.Equal("Question", viewResult.ViewName);
@@ -281,7 +281,7 @@ public class QuestionsControllerTests
           .When(x => x.SubmitAnswer(Arg.Any<SubmitAnswerDto>(), Arg.Any<CancellationToken>()))
           .Do(x => throw new Exception("A Dummy exception thrown by the test"));
 
-        var result = await _controller.SubmitAnswer(sectionSlug, questionSlug, submitAnswerDto, submitAnswerCommand, nextUnanswered, cancellationToken);
+        var result = await _controller.SubmitAnswer(sectionSlug, questionSlug, submitAnswerDto, submitAnswerCommand, nextUnanswered, cancellationToken: cancellationToken);
 
         var viewResult = Assert.IsType<ViewResult>(result);
         Assert.Equal("Question", viewResult.ViewName);
@@ -306,7 +306,7 @@ public class QuestionsControllerTests
         submitAnswerCommand.SubmitAnswer(submitAnswerDto, Arg.Any<CancellationToken>())
                           .Returns(1);
 
-        var result = await _controller.SubmitAnswer(SectionSlug, QuestionSlug, submitAnswerDto, submitAnswerCommand, nextUnanswered, cancellationToken);
+        var result = await _controller.SubmitAnswer(SectionSlug, QuestionSlug, submitAnswerDto, submitAnswerCommand, nextUnanswered, cancellationToken: cancellationToken);
 
         var redirectResult = result as RedirectToActionResult;
         Assert.NotNull(redirectResult);
