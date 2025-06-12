@@ -30,27 +30,27 @@ public class CheckAnswersRouter : ICheckAnswersRouter
         _router = router;
     }
 
-    public async Task<IActionResult> ValidateRoute(string sectionSlug, string? errorMessage, CheckAnswersController controller, CancellationToken cancellationToken, bool isChangeAnswersFlow = false)
+    public async Task<IActionResult> ValidateRoute(string sectionSlug, string? errorMessage, CheckAnswersController controller, bool isChangeAnswersFlow = false, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(sectionSlug))
             throw new ArgumentNullException(nameof(sectionSlug));
 
-        await _router.GetJourneyStatusForSection(sectionSlug, cancellationToken, isChangeAnswersFlow);
+        await _router.GetJourneyStatusForSection(sectionSlug, isChangeAnswersFlow, cancellationToken);
 
         return _router.Status switch
         {
             Status.CompleteNotReviewed => await ProcessCheckAnswers(sectionSlug, errorMessage, controller, cancellationToken),
-            Status.CompleteReviewed when isChangeAnswersFlow => await ProcessCheckAnswers(sectionSlug, errorMessage, controller, cancellationToken, isChangeAnswersFlow),
+            Status.CompleteReviewed when isChangeAnswersFlow => await ProcessCheckAnswers(sectionSlug, errorMessage, controller, cancellationToken),
             Status.NotStarted => PageRedirecter.RedirectToSelfAssessment(controller),
             _ => ProcessQuestionStatus(sectionSlug, controller),
         };
     }
 
-    private async Task<IActionResult> ProcessCheckAnswers(string sectionSlug, string? errorMessage, CheckAnswersController controller, CancellationToken cancellationToken, bool isChangeAnswersFlow = false)
+    private async Task<IActionResult> ProcessCheckAnswers(string sectionSlug, string? errorMessage, CheckAnswersController controller, CancellationToken cancellationToken)
     {
         var establishmentId = await _user.GetEstablishmentId();
 
-        var submissionResponsesDto = await _processSubmissionResponsesCommand.GetSubmissionResponsesDtoForSection(establishmentId, _router.Section, cancellationToken);
+        var submissionResponsesDto = await _processSubmissionResponsesCommand.GetSubmissionResponsesDtoForSection(establishmentId, _router.Section, cancellationToken: cancellationToken);
 
         if (submissionResponsesDto == null || submissionResponsesDto.Responses == null)
             throw new DatabaseException("Could not retrieve the answered question list");

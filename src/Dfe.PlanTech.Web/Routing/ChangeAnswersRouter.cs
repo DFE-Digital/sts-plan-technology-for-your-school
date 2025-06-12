@@ -46,7 +46,7 @@ namespace Dfe.PlanTech.Web.Routing
             if (string.IsNullOrEmpty(sectionSlug))
                 throw new ArgumentNullException(nameof(sectionSlug));
 
-            await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken, true);
+            await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, true, cancellationToken);
 
             switch (_router.Status)
             {
@@ -93,9 +93,9 @@ namespace Dfe.PlanTech.Web.Routing
             var establishmentId = await _user.GetEstablishmentId();
 
             var submissionResponsesDto = await _processSubmissionResponsesCommand
-                .GetSubmissionResponsesDtoForSection(establishmentId, _router.Section, cancellationToken, true);
+                .GetSubmissionResponsesDtoForSection(establishmentId, _router.Section, true, cancellationToken);
 
-            await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken, false);
+            await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, false, cancellationToken);
 
             if (submissionResponsesDto?.Responses == null)
                 throw new DatabaseException("Could not retrieve the answered question list");

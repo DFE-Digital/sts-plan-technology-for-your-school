@@ -34,7 +34,7 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
 
             var errorMessage = TempData["ErrorMessage"]?.ToString();
 
-            return await checkAnswersValidator.ValidateRoute(sectionSlug, errorMessage, this, cancellationToken, isChangeAnswersFlow);
+            return await checkAnswersValidator.ValidateRoute(sectionSlug, errorMessage, this, isChangeAnswersFlow, cancellationToken);
         }
         catch (UserJourneyMissingContentException userJourneyException)
         {

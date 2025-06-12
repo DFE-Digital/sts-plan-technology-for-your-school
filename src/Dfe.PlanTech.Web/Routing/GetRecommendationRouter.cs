@@ -38,13 +38,13 @@ public class GetRecommendationRouter : IGetRecommendationRouter
         if (string.IsNullOrEmpty(recommendationSlug))
             throw new ArgumentNullException(nameof(recommendationSlug));
 
-        await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken, true);
+        await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, true, cancellationToken);
 
         return _router.Status switch
         {
             Status.CompleteReviewed => checklist ?
-                await HandleChecklist(controller, recommendationSlug, cancellationToken) :
-                await HandleCompleteStatus(controller, recommendationSlug, cancellationToken),
+                await HandleChecklist(controller, sectionSlug, recommendationSlug, cancellationToken) :
+                await HandleCompleteStatus(controller, sectionSlug, recommendationSlug, cancellationToken),
             Status.CompleteNotReviewed => controller.RedirectToCheckAnswers(sectionSlug),
             Status.InProgress => HandleQuestionStatus(sectionSlug, controller),
             Status.NotStarted => PageRedirecter.RedirectToSelfAssessment(controller),
@@ -57,7 +57,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
                                                               RecommendationsController controller,
                                                               CancellationToken cancellationToken)
     {
-        await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken);
+        await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken: cancellationToken);
         var recommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(_router.Section.Sys.Id, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {_router.Section.Name}");
 
         var intro = recommendation.Intros.Find(intro => string.Equals(intro.Maturity, maturity, StringComparison.InvariantCultureIgnoreCase)) ?? recommendation.Intros[0];
@@ -75,7 +75,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
 
     public async Task<string> GetRecommendationSlugForSection(string sectionSlug, CancellationToken cancellationToken)
     {
-        await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken, true);
+        await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, true, cancellationToken);
         var (_, subTopicIntro, _, _) = await GetSubtopicRecommendation(cancellationToken);
         return subTopicIntro.Slug;
     }
@@ -101,7 +101,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     /// <summary>
     /// Fetch the model for the recommendation page (if correct recommendation for section + maturity),
     /// </summary>
-    private async Task<RecommendationsViewModel> GetRecommendationViewModel(string recommendationSlug, CancellationToken cancellationToken, bool showYSA = false)
+    private async Task<RecommendationsViewModel> GetRecommendationViewModel(string sectionSlug, string recommendationSlug, bool showYSA = false, CancellationToken cancellationToken = default)
     {
         var (subTopicRecommendation, subTopicIntro, subTopicChunks, latestResponses) = await GetSubtopicRecommendation(cancellationToken);
 
@@ -130,6 +130,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
                                 ? DateTimeFormatter.FormattedDateShort(latestCompletionDate.Value)
                                 : null,
             Slug = recommendationSlug,
+            SectionSlug = sectionSlug,
             SubmissionResponses = latestResponses,
         };
     }
@@ -137,9 +138,9 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     /// <summary>
     /// Render the recommendation page and mark the recommendation as viewed in the database
     /// </summary>
-    private async Task<IActionResult> HandleCompleteStatus(RecommendationsController controller, string recommendationSlug, CancellationToken cancellationToken)
+    private async Task<IActionResult> HandleCompleteStatus(RecommendationsController controller, string sectionSlug, string recommendationSlug, CancellationToken cancellationToken)
     {
-        var viewModel = await GetRecommendationViewModel(recommendationSlug, cancellationToken, true);
+        var viewModel = await GetRecommendationViewModel(sectionSlug, recommendationSlug, true, cancellationToken);
 
         var establishmentId = await _router.User.GetEstablishmentId();
         await _getLatestResponsesQuery.ViewLatestSubmission(establishmentId, _router.Section.Sys.Id);
@@ -150,9 +151,9 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     /// <summary>
     /// Render the share recommendations checklist page
     /// </summary>
-    private async Task<IActionResult> HandleChecklist(RecommendationsController controller, string recommendationSlug, CancellationToken cancellationToken)
+    private async Task<IActionResult> HandleChecklist(RecommendationsController controller, string sectionSlug, string recommendationSlug, CancellationToken cancellationToken)
     {
-        var viewModel = await GetRecommendationViewModel(recommendationSlug, cancellationToken);
+        var viewModel = await GetRecommendationViewModel(sectionSlug, recommendationSlug, cancellationToken: cancellationToken);
 
         return controller.View("~/Views/Recommendations/RecommendationsChecklist.cshtml", viewModel);
     }

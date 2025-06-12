@@ -155,7 +155,7 @@ public class GetQuestionBySlugRouterTests
         var nextQuestion = _section.Questions[0] ?? throw new InvalidOperationException("Next question cannot be null.");
 
         Assert.NotNull(_section.InterstitialPage);
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, cancellationToken: Arg.Any<CancellationToken>()))
                                   .Do(callinfo =>
                                   {
                                       _submissionStatusProcessor.NextQuestion = nextQuestion;
@@ -191,7 +191,7 @@ public class GetQuestionBySlugRouterTests
                          .Returns(_responses);
         Assert.NotNull(_section.InterstitialPage);
 
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, cancellationToken: Arg.Any<CancellationToken>()))
                                   .Do(callinfo =>
                                   {
                                       _submissionStatusProcessor.NextQuestion = secondQuestion;
@@ -229,7 +229,7 @@ public class GetQuestionBySlugRouterTests
                          .Returns(_responses);
         Assert.NotNull(_section.InterstitialPage);
 
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, cancellationToken: Arg.Any<CancellationToken>()))
                                   .Do(callinfo =>
                                   {
                                       _submissionStatusProcessor.NextQuestion = thirdQuestion;
@@ -270,7 +270,7 @@ public class GetQuestionBySlugRouterTests
 
         Assert.NotNull(_section.InterstitialPage);
 
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, cancellationToken: Arg.Any<CancellationToken>()))
                                   .Do(callinfo =>
                                   {
                                       _submissionStatusProcessor.Status = Status.CompleteNotReviewed;
@@ -296,7 +296,7 @@ public class GetQuestionBySlugRouterTests
     public async Task Should_Throw_Exception_When_Question_NoLonger_In_Section()
     {
         Assert.NotNull(_section.InterstitialPage);
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, cancellationToken: Arg.Any<CancellationToken>()))
                                     .Do(callinfo =>
                                     {
                                         _submissionStatusProcessor.Status = Status.CompleteNotReviewed;
@@ -313,7 +313,7 @@ public class GetQuestionBySlugRouterTests
     public async Task Should_Throw_Exception_When_No_Responses_Returned()
     {
         Assert.NotNull(_section.InterstitialPage);
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, cancellationToken: Arg.Any<CancellationToken>()))
                                 .Do(callinfo =>
                                 {
                                     _submissionStatusProcessor.Status = Status.CompleteNotReviewed;
@@ -335,7 +335,7 @@ public class GetQuestionBySlugRouterTests
         _getResponseQuery.GetLatestResponses(Arg.Any<int>(), _section.Sys.Id, false, Arg.Any<CancellationToken>())
                          .Returns(_responses);
 
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, cancellationToken: Arg.Any<CancellationToken>()))
                                   .Do(callinfo =>
                                   {
                                       _submissionStatusProcessor.Status = Status.CompleteNotReviewed;

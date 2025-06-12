@@ -19,6 +19,6 @@ public interface ISubmissionStatusProcessor
     public ISectionComponent Section { get; }
     public SectionStatus? SectionStatus { get; }
 
-    Task GetJourneyStatusForSection(string sectionSlug, CancellationToken cancellationToken, bool completed = false);
-    Task GetJourneyStatusForSectionRecommendation(string sectionSlug, CancellationToken cancellationToken, bool completed = false);
+    Task GetJourneyStatusForSection(string sectionSlug, bool completed = false, CancellationToken cancellationToken = default);
+    Task GetJourneyStatusForSectionRecommendation(string sectionSlug, bool completed = false, CancellationToken cancellationToken = default);
 }

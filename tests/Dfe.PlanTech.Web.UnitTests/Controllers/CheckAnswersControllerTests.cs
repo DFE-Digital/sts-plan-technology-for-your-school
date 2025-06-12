@@ -56,7 +56,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             await _checkAnswersController.CheckAnswersPage(_sectionSlug, false, _checkAnswersRouter,
                 _userJourneyMissingContentExceptionHandler, default);
             await _checkAnswersRouter.Received()
-                .ValidateRoute(_sectionSlug, null, _checkAnswersController, Arg.Any<CancellationToken>());
+                .ValidateRoute(_sectionSlug, null, _checkAnswersController, cancellationToken: Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -65,7 +65,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var exception = new UserJourneyMissingContentException("Exception thrown", new Section());
 
             _checkAnswersRouter.ValidateRoute(Arg.Any<string>(), Arg.Any<string>(), _checkAnswersController,
-                    Arg.Any<CancellationToken>()).Throws(exception);
+                    cancellationToken: Arg.Any<CancellationToken>()).Throws(exception);
 
             await _checkAnswersController.CheckAnswersPage(_sectionSlug, false, _checkAnswersRouter,
                _userJourneyMissingContentExceptionHandler, default);

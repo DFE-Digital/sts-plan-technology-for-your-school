@@ -140,8 +140,8 @@ public class QuestionsController : BaseController<QuestionsController>
         SubmitAnswerDto submitAnswerDto,
         [FromServices] ISubmitAnswerCommand submitAnswerCommand,
         [FromServices] IGetNextUnansweredQuestionQuery getQuestionQuery,
-        CancellationToken cancellationToken = default,
-        string? returnTo = "")
+        string? returnTo = "",
+        CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
         {
@@ -224,7 +224,7 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
     [NonAction]
-    public QuestionViewModel GenerateViewModel(string? sectionSlug, Question question, ISectionComponent? section, string? latestAnswerContentfulId, bool includeCompleted = false)
+    public QuestionViewModel GenerateViewModel(string? sectionSlug, Question question, ISectionComponent? section, string? latestAnswerContentfulId)
     {
         ViewData["Title"] = question.Text;
 
