@@ -3,6 +3,7 @@ using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Responses.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using NSubstitute;
 
@@ -114,7 +115,44 @@ public class GetLatestResponsesQueryTests
 
 
         _getLatestResponseListForSubmissionQuery = new GetLatestResponsesQuery(_planTechDbContextSubstitute);
+    }
 
+    [Fact]
+    public async Task GetInProgressSubmission_Should_Return_Null_When_No_Matching_Submission()
+    {
+        _planTechDbContextSubstitute.FirstOrDefaultAsync(Arg.Any<IQueryable<Submission>>(), Arg.Any<CancellationToken>())
+                                    .Returns((Submission?)null);
+
+        var result = await _getLatestResponseListForSubmissionQuery.GetInProgressSubmission(ESTABLISHMENT_ID, "non-existent-section");
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task GetInProgressSubmission_Should_Handle_Submission_With_No_Responses()
+    {
+        var submission = new Submission
+        {
+            Id = 1,
+            SectionName = "Section Test",
+            SectionId = "empty-section",
+            EstablishmentId = ESTABLISHMENT_ID,
+            Status = SubmissionStatus.InProgress.ToString(),
+            Deleted = false,
+            DateCreated = DateTime.UtcNow
+        };
+
+        _planTechDbContextSubstitute.FirstOrDefaultAsync(Arg.Any<IQueryable<Submission>>(), Arg.Any<CancellationToken>())
+                                    .Returns(submission);
+
+        _planTechDbContextSubstitute.ToListAsync(Arg.Any<IQueryable<Response>>(), Arg.Any<CancellationToken>())
+                                    .Returns(new List<Response>());
+
+        var result = await _getLatestResponseListForSubmissionQuery.GetInProgressSubmission(ESTABLISHMENT_ID, "empty-section");
+
+        Assert.NotNull(result);
+        Assert.NotNull(result.Responses);
+        Assert.Empty(result.Responses);
     }
 
     private IEnumerable<List<Submission>> GenerateSubmissions(Faker faker, Faker<Submission> submissionFaker)
