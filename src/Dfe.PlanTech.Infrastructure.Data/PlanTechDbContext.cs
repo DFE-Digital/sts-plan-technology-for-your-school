@@ -154,6 +154,7 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
 
     public void AddSignIn(SignIn signIn) => SignIn.Add(signIn);
 
+    public void AddSubmission(Submission submission) => Submissions.Add(submission);
 
     public IQueryable<Submission> GetSubmissions => Submissions;
 
@@ -182,4 +183,15 @@ public class PlanTechDbContext : DbContext, IPlanTechDbContext
     public Task<T?> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default) => queryable.FirstOrDefaultAsync(cancellationToken);
 
     public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default) => queryable.ToListAsync(cancellationToken);
+
+    public async Task<Submission?> GetSubmissionById(int submissionId, CancellationToken cancellationToken)
+    {
+        return await GetSubmissions
+                .Where(s => s.Id == submissionId)
+                .Include(s => s.Responses)
+                    .ThenInclude(r => r.Question)
+                .Include(s => s.Responses)
+                    .ThenInclude(r => r.Answer)
+                .FirstOrDefaultAsync(cancellationToken);
+    }
 }

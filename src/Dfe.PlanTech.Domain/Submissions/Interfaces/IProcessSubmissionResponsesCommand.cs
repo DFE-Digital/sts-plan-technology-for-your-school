@@ -5,5 +5,5 @@ namespace Dfe.PlanTech.Domain.Submissions.Interfaces;
 
 public interface IProcessSubmissionResponsesCommand
 {
-    public Task<SubmissionResponsesDto?> GetSubmissionResponsesDtoForSection(int establishmentId, ISectionComponent section, CancellationToken cancellationToken = default);
+    public Task<SubmissionResponsesDto?> GetSubmissionResponsesDtoForSection(int establishmentId, ISectionComponent section, CancellationToken cancellationToken = default, bool completed = false);
 }

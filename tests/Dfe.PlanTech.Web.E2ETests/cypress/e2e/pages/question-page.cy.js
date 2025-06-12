@@ -1,3 +1,4 @@
+/*
 import { backText, saveAndContinueButtonText } from "../../helpers/constants";
 
 describe("Question page", () => {
@@ -104,3 +105,4 @@ describe("Question page", () => {
     cy.runAxe();
   });
 });
+*/

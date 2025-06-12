@@ -1,0 +1,65 @@
+@using Dfe.PlanTech.Application.Constants
+@using Dfe.PlanTech.Web.Controllers
+@model Dfe.PlanTech.Web.Models.ChangeAnswersViewModel
+
+@section BeforeContent {
+    @{
+        await Html.RenderPartialAsync("BackButton");
+    }
+}
+
+<div class="govuk-grid-row" id="changeYourAnswers-page">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+        <h3 class="govuk-caption-xl">@Model.SectionName</h3>
+        <h1 class="govuk-heading-xl">Change your answers</h1>
+        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+        <dl class="govuk-summary-list govuk-!-margin-bottom-0">
+            @foreach (var questionWithAnswer in Model.SubmissionResponses.Responses)
+            {
+                var anchorLabel = $"your answer for {questionWithAnswer.QuestionText}";
+
+                <div class="govuk-!-margin-bottom-5">
+                    <div class="govuk-!-margin-bottom-1">
+                        <p class="govuk-!-font-weight-bold">@questionWithAnswer.QuestionText</p>
+                    </div>
+
+                    <div class="govuk-!-margin-bottom-5">
+                        <p class="govuk-body">@questionWithAnswer.AnswerText</p>
+                    </div>
+
+                    <div class="noprint govuk-!-margin-bottom-5">
+                        <a asp-controller="Questions" asp-action="GetQuestionBySlug"
+                           asp-route-questionSlug="@questionWithAnswer.QuestionSlug"
+                           asp-route-sectionSlug="@Model.SectionSlug"
+                           asp-route-returnTo="ChangeAnswers"
+                           title="@questionWithAnswer.QuestionText"
+                           class="govuk-link">
+                            Change <span class="govuk-visually-hidden">@anchorLabel</span>
+                        </a>
+                    </div>
+
+                    <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-top-4 govuk-!-margin-bottom-4" />
+                </div>
+            }
+        </dl>
+        <form asp-controller="CheckAnswers" asp-action="ConfirmCheckAnswers" method="post" class="noprint">
+            <input type="hidden" name="submissionId" value="@Model.SubmissionId"/>
+            <input type="hidden" name="sectionName" value="@Model.SectionName">
+            <input type="hidden" name="sectionSlug" value="@Model.SectionSlug">
+
+            <a href="@($"{UrlConstants.RecommendationsPage}/from-section/{Model.SectionSlug}")" role="button" draggable="false"
+               class="govuk-button govuk-button--secondary" data-module="govuk-button">
+                Back to recommendations
+            </a>
+
+            @if (Model.ErrorMessage != null)
+            {
+                <p class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span> @Model.ErrorMessage <a class="govuk-error-message"
+                        href="@UrlConstants.SelfAssessmentPage">Return to the self-assessment page</a>
+                </p>
+            }
+
+        </form>
+    </div>
+</div>

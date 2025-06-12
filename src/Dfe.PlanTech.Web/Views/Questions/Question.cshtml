@@ -13,6 +13,10 @@
     <input id="QuestionId" type="hidden" value=@Model.Question.Sys.Id name="QuestionId"/>
     <input id="SectionId" type="hidden" value="@Model.SectionId" name="SectionId"/>
     <input id="SectionName" type="hidden" value="@Model.SectionName" name="SectionName"/>
+    @if (!string.IsNullOrEmpty(ViewData["ReturnTo"]?.ToString()))
+    {
+        <input type="hidden" name="returnTo" value="@ViewData["ReturnTo"]" />
+    }
 
     <govuk-radios name="ChosenAnswerJson">
         <govuk-radios-fieldset>

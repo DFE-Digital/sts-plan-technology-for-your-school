@@ -12,6 +12,8 @@ public class RecommendationsViewModel
 
     public List<RecommendationChunk> Chunks { get; init; } = null!;
 
+    public string? LatestCompletionDate { get; init; } = null!;
+
     public IEnumerable<IHeaderWithContent> AllContent => GetAllContent();
 
     public string Slug { get; init; } = null!;

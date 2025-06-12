@@ -4,6 +4,7 @@ using Dfe.PlanTech.Domain.Groups.Models;
 using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Application.Persistence.Interfaces;
 
@@ -22,6 +23,12 @@ public interface IPlanTechDbContext
     public IQueryable<ResponseAnswer> GetAnswers { get; }
 
     public void AddEstablishment(Establishment establishment);
+
+    public void AddSubmission(Submission submission);
+
+    public DbSet<Submission> Submissions { get; }
+
+    Task<Submission?> GetSubmissionById(int submissionId, CancellationToken cancellationToken = default);
 
     public Task<int> SaveChangesAsync();
 

@@ -78,7 +78,7 @@ public class SubmissionStatusProcessorTests
         _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(Arg.Any<int>(), Arg.Any<Section>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
                                    .Returns(new SectionStatus());
 
-        await processor.GetJourneyStatusForSection(SectionSlug, default);
+        await processor.GetJourneyStatusForSection(SectionSlug, default, false);
 
         _failureStatusChecker.Received(1).IsMatchingSubmissionStatus(processor);
         await _failureStatusChecker.DidNotReceive().ProcessSubmission(processor, Arg.Any<CancellationToken>());
@@ -103,7 +103,7 @@ public class SubmissionStatusProcessorTests
         _getSubmissionStatusesQuery.GetSectionSubmissionStatusAsync(Arg.Any<int>(), Arg.Any<Section>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
                                    .Returns(new SectionStatus());
 
-        await Assert.ThrowsAnyAsync<InvalidDataException>(() => processor.GetJourneyStatusForSection(SectionSlug, default));
+        await Assert.ThrowsAnyAsync<InvalidDataException>(() => processor.GetJourneyStatusForSection(SectionSlug, default, false));
     }
 
     [Fact]
@@ -120,6 +120,6 @@ public class SubmissionStatusProcessorTests
         _getSectionQuery.GetSectionBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
                         .Returns(null as Section);
 
-        await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() => processor.GetJourneyStatusForSection("not matching section slug", default));
+        await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() => processor.GetJourneyStatusForSection("not matching section slug", default, false));
     }
 }

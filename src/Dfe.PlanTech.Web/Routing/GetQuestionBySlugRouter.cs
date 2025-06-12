@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
@@ -46,18 +47,21 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
         if (string.IsNullOrEmpty(questionSlug))
             throw new ArgumentNullException(nameof(questionSlug));
 
-        await _router.GetJourneyStatusForSection(sectionSlug, cancellationToken);
+        var returnTo = controller.TempData["ReturnTo"]?.ToString();
+        var isChangeAnswersFlow = returnTo == FlowConstants.ChangeAnswersFlow;
+
+        await _router.GetJourneyStatusForSection(sectionSlug, cancellationToken, false);
 
         if (IsSlugForNextQuestion(questionSlug))
         {
-            var viewModel = controller.GenerateViewModel(sectionSlug, _router.NextQuestion!, _router.Section, null);
+            var viewModel = controller.GenerateViewModel(sectionSlug, _router.NextQuestion!, _router.Section, null, isChangeAnswersFlow);
             return controller.RenderView(viewModel);
         }
 
         if (SectionIsAtStart)
             return PageRedirecter.RedirectToInterstitialPage(controller, sectionSlug);
 
-        return await ProcessOtherStatuses(sectionSlug, questionSlug, controller, cancellationToken);
+        return await ProcessOtherStatuses(sectionSlug, questionSlug, controller, cancellationToken, isChangeAnswersFlow);
     }
 
     /// <summary>
@@ -78,11 +82,17 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     /// <param name="controller"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task<IActionResult> ProcessOtherStatuses(string sectionSlug, string questionSlug, QuestionsController controller, CancellationToken cancellationToken)
+    private async Task<IActionResult> ProcessOtherStatuses(string sectionSlug, string questionSlug, QuestionsController controller, CancellationToken cancellationToken, bool isChangeAnswersFlow)
     {
         var question = GetQuestionForSlug(questionSlug);
 
-        var responses = await GetLatestResponsesForSection(cancellationToken);
+        var responses = await GetLatestResponsesForSection(cancellationToken, isChangeAnswersFlow);
+
+        if (responses is null)
+        {
+            throw new InvalidOperationException(
+                $"No responses were found for section '{_router.Section.Sys.Id}'");
+        }
 
         var isAttachedQuestion = IsQuestionAttached(responses, question);
 
@@ -114,11 +124,11 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="DatabaseException">Thrown if no responses are found</exception>
-    private async Task<List<QuestionWithAnswer>> GetLatestResponsesForSection(CancellationToken cancellationToken)
+    private async Task<List<QuestionWithAnswer>> GetLatestResponsesForSection(CancellationToken cancellationToken, bool completed = false)
     {
         var establishmentId = await _user.GetEstablishmentId();
 
-        var latestResponses = await _getResponseQuery.GetLatestResponses(establishmentId, _router.Section.Sys.Id, false, cancellationToken);
+        var latestResponses = await _getResponseQuery.GetLatestResponses(establishmentId, _router.Section.Sys.Id, completed, cancellationToken);
 
         if (latestResponses == null || latestResponses.Responses.Count == 0)
             throw new DatabaseException($"Could not find latest responses for '{_router.Section.Sys.Id}'");
@@ -162,15 +172,15 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     private IActionResult HandleNotAttachedQuestion(string sectionSlug, QuestionsController controller)
     => _router.Status switch
     {
-        SubmissionStatus.CheckAnswers => controller.RedirectToCheckAnswers(sectionSlug),
-        SubmissionStatus.NextQuestion => QuestionsController.RedirectToQuestionBySlug(sectionSlug, _router.NextQuestion?.Slug ?? throw new InvalidDataException("NextQuestion is null"), controller),
+        Status.CompleteNotReviewed => controller.RedirectToCheckAnswers(sectionSlug),
+        Status.InProgress => QuestionsController.RedirectToQuestionBySlug(sectionSlug, _router.NextQuestion?.Slug ?? throw new InvalidDataException("NextQuestion is null"), controller),
         _ => throw new InvalidDataException("Should not be here"),
     };
 
     /// <summary>
     /// Are we at the start of the section? I.e. "NotStarted" or "Completed"
     /// </summary>
-    private bool SectionIsAtStart => _router.Status == SubmissionStatus.NotStarted || _router.Status == SubmissionStatus.Completed;
+    private bool SectionIsAtStart => _router.Status == Status.NotStarted;
 
     /// <summary>
     /// Does this slug match the NextQuestion field in the <see cref="_router"/> 

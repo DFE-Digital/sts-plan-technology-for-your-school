@@ -18,6 +18,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
     {
         private readonly CheckAnswersController _checkAnswersController;
         private readonly ICalculateMaturityCommand _calculateMaturityCommand;
+        private readonly IMarkSubmissionAsReviewedCommand _markSubmissionAsReviewedCommand;
         private readonly ICheckAnswersRouter _checkAnswersRouter;
         private readonly IUserJourneyMissingContentExceptionHandler _userJourneyMissingContentExceptionHandler;
         private readonly IGetRecommendationRouter _getRecommendationRouter;
@@ -33,6 +34,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _userJourneyMissingContentExceptionHandler = Substitute.For<IUserJourneyMissingContentExceptionHandler>();
             _getRecommendationRouter = Substitute.For<IGetRecommendationRouter>();
             _getRecommendationRouter.GetRecommendationSlugForSection(_sectionSlug, Arg.Any<CancellationToken>()).Returns(_recommendationSlug);
+            _markSubmissionAsReviewedCommand = Substitute.For<IMarkSubmissionAsReviewedCommand>();
 
             _checkAnswersController = new CheckAnswersController(loggerSubstitute)
             {
@@ -45,13 +47,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [InlineData(null)]
         public async Task CheckAnswersPage_Should_ThrowException_When_SectionSlug_NullOrEmpty(string? section)
         {
-            await Assert.ThrowsAnyAsync<ArgumentException>(() => _checkAnswersController.CheckAnswersPage(section!, _checkAnswersRouter, _userJourneyMissingContentExceptionHandler, default));
+            await Assert.ThrowsAnyAsync<ArgumentException>(() => _checkAnswersController.CheckAnswersPage(section!, false, _checkAnswersRouter, _userJourneyMissingContentExceptionHandler, default));
         }
 
         [Fact]
         public async Task CheckAnswersPage_Should_Call_CheckAnswersRouter_When_Args_Valid()
         {
-            await _checkAnswersController.CheckAnswersPage(_sectionSlug, _checkAnswersRouter,
+            await _checkAnswersController.CheckAnswersPage(_sectionSlug, false, _checkAnswersRouter,
                 _userJourneyMissingContentExceptionHandler, default);
             await _checkAnswersRouter.Received()
                 .ValidateRoute(_sectionSlug, null, _checkAnswersController, Arg.Any<CancellationToken>());
@@ -65,7 +67,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _checkAnswersRouter.ValidateRoute(Arg.Any<string>(), Arg.Any<string>(), _checkAnswersController,
                     Arg.Any<CancellationToken>()).Throws(exception);
 
-            await _checkAnswersController.CheckAnswersPage(_sectionSlug, _checkAnswersRouter,
+            await _checkAnswersController.CheckAnswersPage(_sectionSlug, false, _checkAnswersRouter,
                _userJourneyMissingContentExceptionHandler, default);
 
             await _userJourneyMissingContentExceptionHandler.Received().Handle(_checkAnswersController, exception, Arg.Any<CancellationToken>());
@@ -77,7 +79,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [InlineData(-100)]
         public async Task ConfirmAnswers_Should_ThrowException_When_SubmissionId_OutOfRange(int submissionId)
         {
-            await Assert.ThrowsAnyAsync<ArgumentOutOfRangeException>(() => _checkAnswersController.ConfirmCheckAnswers(_sectionSlug, submissionId, "section name", _redirectOption, _calculateMaturityCommand, _getRecommendationRouter));
+            await Assert.ThrowsAnyAsync<ArgumentOutOfRangeException>(() => _checkAnswersController.ConfirmCheckAnswers(_sectionSlug, submissionId, "section name", _redirectOption, _calculateMaturityCommand, _getRecommendationRouter, _markSubmissionAsReviewedCommand));
         }
 
         [Theory]
@@ -85,7 +87,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [InlineData("")]
         public async Task ConfirmAnswers_Should_ThrowException_When_SectionName_NullOrEmpty(string? sectionName)
         {
-            await Assert.ThrowsAnyAsync<ArgumentException>(() => _checkAnswersController.ConfirmCheckAnswers(_sectionSlug, 1, sectionName!, _redirectOption, _calculateMaturityCommand, _getRecommendationRouter));
+            await Assert.ThrowsAnyAsync<ArgumentException>(() => _checkAnswersController.ConfirmCheckAnswers(_sectionSlug, 1, sectionName!, _redirectOption, _calculateMaturityCommand, _getRecommendationRouter, _markSubmissionAsReviewedCommand));
         }
 
         [Fact]
@@ -101,7 +103,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                                             return 2;
                                         });
 
-            var result = await _checkAnswersController.ConfirmCheckAnswers(_sectionSlug, submissionId, "section name", _redirectOption, _calculateMaturityCommand, _getRecommendationRouter);
+            var result = await _checkAnswersController.ConfirmCheckAnswers(_sectionSlug, submissionId, "section name", _redirectOption, _calculateMaturityCommand, _getRecommendationRouter, _markSubmissionAsReviewedCommand);
 
             Assert.Equal(submissionId, submissionIdResult);
         }
@@ -109,7 +111,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task ConfirmAnswers_Should_Redirect_To_SelfAssessmentPage()
         {
-            var result = await _checkAnswersController.ConfirmCheckAnswers(_sectionSlug, 1, "section name", _redirectOption, _calculateMaturityCommand, _getRecommendationRouter);
+            var result = await _checkAnswersController.ConfirmCheckAnswers(_sectionSlug, 1, "section name", _redirectOption, _calculateMaturityCommand, _getRecommendationRouter, _markSubmissionAsReviewedCommand);
 
             var redirectToActionResult = result as RedirectToActionResult;
             if (redirectToActionResult == null)
@@ -128,7 +130,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public async Task ConfirmAnswers_Should_Redirect_To_Recommendations()
         {
             var redirectOption = RecommendationsController.GetRecommendationAction;
-            var result = await _checkAnswersController.ConfirmCheckAnswers(_sectionSlug, 1, "section name", redirectOption, _calculateMaturityCommand, _getRecommendationRouter);
+            var result = await _checkAnswersController.ConfirmCheckAnswers(_sectionSlug, 1, "section name", redirectOption, _calculateMaturityCommand, _getRecommendationRouter, _markSubmissionAsReviewedCommand);
 
             var redirectToActionResult = result as RedirectToActionResult;
             if (redirectToActionResult == null)
@@ -151,7 +153,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _calculateMaturityCommand.CalculateMaturityAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
                 .Throws(new Exception());
 
-            var result = await _checkAnswersController.ConfirmCheckAnswers(_sectionSlug, 1, "section name", _redirectOption, _calculateMaturityCommand, _getRecommendationRouter);
+            var result = await _checkAnswersController.ConfirmCheckAnswers(_sectionSlug, 1, "section name", _redirectOption, _calculateMaturityCommand, _getRecommendationRouter, _markSubmissionAsReviewedCommand);
 
             var redirectToActionResult = result as RedirectToActionResult;
             if (redirectToActionResult == null)

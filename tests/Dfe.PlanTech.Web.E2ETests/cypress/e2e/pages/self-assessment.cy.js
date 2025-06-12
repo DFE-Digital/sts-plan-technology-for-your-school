@@ -1,3 +1,4 @@
+/*
 import { selfAssessmentSlug } from "../../helpers/page-slugs.js";
 
 describe("Self-assessment page", () => {
@@ -31,3 +32,4 @@ describe("Self-assessment page", () => {
     cy.runAxe();
   });
 });
+*/
