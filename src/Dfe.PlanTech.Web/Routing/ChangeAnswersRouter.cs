@@ -64,14 +64,14 @@ namespace Dfe.PlanTech.Web.Routing
 
                     if (inProgressSubmission != null)
                     {
-                        await _submissionCommand.DeleteSubmission(inProgressSubmission.Id, cancellationToken);                  
+                        await _submissionCommand.DeleteSubmission(inProgressSubmission.Id, cancellationToken);
                     }
 
                     var latestSubmission = await _submissionQuery.GetLatestCompletedSubmission(
                                                         establishmentId, sectionId);
 
                     var clonedSubmission = await _submissionCommand.CloneSubmission(
-                        latestSubmission, cancellationToken);               
+                        latestSubmission, cancellationToken);
 
                     return await ProcessChangeAnswers(sectionSlug, errorMessage, controller, cancellationToken);
                 }

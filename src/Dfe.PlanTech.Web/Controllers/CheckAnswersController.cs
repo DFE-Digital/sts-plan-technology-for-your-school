@@ -25,7 +25,7 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
     public async Task<IActionResult> CheckAnswersPage(string sectionSlug,
                                                       [FromQuery] bool isChangeAnswersFlow,
                                                       [FromServices] ICheckAnswersRouter checkAnswersValidator,
-                                                      [FromServices] IUserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler,                                                     
+                                                      [FromServices] IUserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler,
                                                       CancellationToken cancellationToken = default)
     {
         try
@@ -48,7 +48,7 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
         int submissionId,
         string sectionName,
         string redirectOption,
-        [FromServices] ICalculateMaturityCommand calculateMaturityCommand,         
+        [FromServices] ICalculateMaturityCommand calculateMaturityCommand,
         [FromServices] IGetRecommendationRouter getRecommendationRouter,
         [FromServices] IMarkSubmissionAsReviewedCommand markSubmissionAsReviewedCommand,
         CancellationToken cancellationToken = default)
